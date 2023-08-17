@@ -11,6 +11,12 @@
 [AuxVariables]
   [testvar]
   []
+  [testppdot]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [testppdiv]
+  []
 []
 
 [AuxKernels]
@@ -19,6 +25,18 @@
     variable = testvar
     function = testvar_fn
     execute_on = 'INITIAL'
+  []
+  [testppdot_auxkern]
+    type = TimeDerivativeAux
+    variable = testppdot
+    functor = testpp
+  []
+  [testppdiv_auxkern]
+    type = DivergenceAux
+    variable = testppdiv
+    u = testpp
+    v = testpp
+    w = testpp
   []
 []
 
@@ -70,6 +88,14 @@
     functor = testpp
     value_type = max
     execution_order_group = 1
+  []
+  [get_ppdiv]
+    type = ElementAverageValue
+    variable = testppdiv
+  []
+  [get_ppdot]
+    type = ElementAverageValue
+    variable = testppdot
   []
 []
 
