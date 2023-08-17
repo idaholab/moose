@@ -3608,32 +3608,25 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
+  std::vector<std::shared_ptr<UserObject>> uos;
+
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name);
 
-  UserObject * primary = nullptr;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (const auto tid : make_range(libMesh::n_threads()))
   {
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
         _factory.create<UserObject>(user_object_name, name, parameters, tid);
-    if (tid == 0)
-      primary = user_object.get();
-    else
-      user_object->setPrimaryThreadCopy(primary);
+    uos.push_back(user_object);
+
+    if (tid != 0)
+      user_object->setPrimaryThreadCopy(uos[0].get());
 
     // TODO: delete this line after apps have been updated to not call getUserObjects
     _all_user_objects.addObject(user_object, tid);
 
     theWarehouse().add(user_object);
-
-    // Add as a Functor if it is one
-    if (const auto functor = dynamic_cast<Moose::FunctorBase<Real> *>(user_object.get()))
-    {
-      this->addFunctor(name, *functor, tid);
-      if (_displaced_problem)
-        _displaced_problem->addFunctor(name, *functor, tid);
-    }
 
     // Attempt to create all the possible UserObject types
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
@@ -3658,9 +3651,25 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
         _reinit_displaced_neighbor = true;
     }
 
+    // These objects only require one thread
     if ((guo && !tguo) || muo)
       break;
   }
+
+  // Add as a Functor if it is one
+  // At the timing of adding this, this is only Postprocessors... but technically it
+  // should enable any UO that is a Real Functor to be used as one
+  // The ternary operator used in getting the functor is there because some UOs
+  // are threaded and some are not. When a UO is not threaded, we need to add
+  // the functor from thread 0 as the registered functor for all threads
+  for (const auto tid : make_range(libMesh::n_threads()))
+    if (const auto functor =
+            dynamic_cast<Moose::FunctorBase<Real> *>(uos.size() == 1 ? uos[0] : uos[tid]))
+    {
+      this->addFunctor(name, *functor, tid);
+      if (_displaced_problem)
+        _displaced_problem->addFunctor(name, *functor, tid);
+    }
 }
 
 const UserObject &
