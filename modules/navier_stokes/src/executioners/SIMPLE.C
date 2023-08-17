@@ -158,8 +158,8 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
     std::vector<numeric_index_type> indices;
     std::vector<Real> values;
     matrix.get_row(row_i, indices, values);
-    Real abs_sum = std::transform_reduce(
-        values.cbegin(), values.cend(), 0.0, std::plus{}, [](auto val) { return std::abs(val); });
+    Real abs_sum = std::accumulate(
+        values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
     Real abs_diagonal = std::abs(diff_diagonal(row_i));
     Real new_diagonal = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     diff_diagonal.set(row_i, new_diagonal);
@@ -197,7 +197,7 @@ SIMPLE::relaxRightHandSide(NumericVector<Number> & rhs,
   rhs.close();
 }
 
-PetscReal
+Real
 SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
                                    const SparseMatrix<Number> & mat,
                                    const NumericVector<Number> & rhs)
@@ -278,12 +278,12 @@ SIMPLE::solveMomentumPredictor()
 
   // We will use functions from the implicit system directly
   NonlinearImplicitSystem & momentum_system =
-      static_cast<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
+      libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
 
   // We need a linear solver
   // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
   PetscLinearSolver<Real> & momentum_solver =
-      static_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
   // We create a vector which can be used as a helper in different situations. We
   // need the ghosting here so we use current_local_solution
@@ -354,7 +354,7 @@ SIMPLE::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     NonlinearImplicitSystem & momentum_system =
-        static_cast<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
 
@@ -397,7 +397,7 @@ SIMPLE::solvePressureCorrector()
 
   // We will need some members from the implocot nonlinear system
   NonlinearImplicitSystem & pressure_system =
-      static_cast<NonlinearImplicitSystem &>(_pressure_system.system());
+      libMesh::cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -407,7 +407,7 @@ SIMPLE::solvePressureCorrector()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
-      static_cast<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side

@@ -113,7 +113,7 @@ INSFVRhieChowInterpolator::validParams()
 INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & params)
   : RhieChowInterpolatorBase(params),
     _vel(libMesh::n_threads()),
-    _a(_moose_mesh, _sub_ids, "a"),
+    _a(_moose_mesh, _sub_ids, "a", /*extrapolated_boundary*/ true),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),

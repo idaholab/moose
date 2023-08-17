@@ -64,7 +64,6 @@ pressure_tag = "pressure_grad"
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
-    linearize = true
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
@@ -86,7 +85,6 @@ pressure_tag = "pressure_grad"
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'y'
-    linearize = true
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion

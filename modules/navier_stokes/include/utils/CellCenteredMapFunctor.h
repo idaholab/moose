@@ -41,7 +41,7 @@ public:
    */
   CellCenteredMapFunctor(const MooseMesh & mesh,
                          const std::string & name,
-                         const bool extrapolated_boundary = true);
+                         const bool extrapolated_boundary);
 
   /**
    * Use this constructor if you want to potentially restrict this object to a specified set of
@@ -50,7 +50,7 @@ public:
   CellCenteredMapFunctor(const MooseMesh & mesh,
                          const std::set<SubdomainID> & sub_ids,
                          const std::string & name,
-                         const bool extrapolated_boundary = true);
+                         const bool extrapolated_boundary);
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,

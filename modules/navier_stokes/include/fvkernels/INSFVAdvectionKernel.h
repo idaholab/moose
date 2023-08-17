@@ -34,7 +34,4 @@ protected:
 
   /// The Rhie-Chow user object that provides us with the velocity
   const RhieChowInterpolatorBase & _rc_vel_provider;
-
-  /// Boolean to request the linearization of the advection.
-  const bool _linearize;
 };

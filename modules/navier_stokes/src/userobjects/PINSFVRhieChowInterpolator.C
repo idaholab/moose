@@ -41,7 +41,7 @@ PINSFVRhieChowInterpolator::validParams()
 PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & params)
   : INSFVRhieChowInterpolator(params),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _smoothed_eps(_moose_mesh, NS::smoothed_porosity),
+    _smoothed_eps(_moose_mesh, NS::smoothed_porosity, /*extrapolated_boundary*/ true),
     _epss(libMesh::n_threads(), nullptr),
     _smoothed_epss(libMesh::n_threads(), nullptr),
     _smoothing_layers(getParam<unsigned short>("smoothing_layers")),

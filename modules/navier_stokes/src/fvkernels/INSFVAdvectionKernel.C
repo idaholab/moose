@@ -20,8 +20,6 @@ INSFVAdvectionKernel::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params += Moose::FV::interpolationParameters();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
-  params.addParam<bool>(
-      "linearize", false, "Switch to toggle the linearization of the advection term.");
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
 
@@ -34,8 +32,7 @@ INSFVAdvectionKernel::validParams()
 
 INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   : FVFluxKernel(params),
-    _rc_vel_provider(getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object")),
-    _linearize(getParam<bool>("linearize"))
+    _rc_vel_provider(getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object"))
 {
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);

@@ -45,9 +45,9 @@ public:
    * @param mat The system matrix
    * @param rhs The system right hand side
    */
-  PetscReal computeNormalizationFactor(const NumericVector<Number> & solution,
-                                       const SparseMatrix<Number> & mat,
-                                       const NumericVector<Number> & rhs);
+  Real computeNormalizationFactor(const NumericVector<Number> & solution,
+                                  const SparseMatrix<Number> & mat,
+                                  const NumericVector<Number> & rhs);
 
 protected:
   /**
