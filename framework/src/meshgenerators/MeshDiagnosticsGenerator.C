@@ -11,6 +11,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/mesh_refinement.h"
 
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
@@ -315,17 +316,26 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_adaptivity_non_conformality != "NO_CHECK")
   {
+    unsigned int num_likely_AMR_created_nonconformality = 0;
     auto pl = mesh->sub_point_locator();
+    pl->set_close_to_point_tol(_non_conformality_tol);
+
     // loop on nodes, assumes a replicated mesh
     for (auto & node : mesh->node_ptr_range())
     {
-      pl->set_close_to_point_tol(_non_conformality_tol);
       // find all the elements around this node
+      std::set<const Elem *> elements_around;
+      (*pl)(*node, elements_around);
+      const auto num_close_elems = elements_around.size();
+      std::cout << "Detected " << num_close_elems << " elements close to node " << *node
+                << std::endl;
+
+      // Keep track of the refined elements and the coarse element
       std::set<const Elem *> elements;
-      (*pl)(*node, elements);
+      std::set<const Elem *> coarse_elements;
 
       // loop through the set of elements near this node
-      for (auto & elem : elements)
+      for (auto elem : elements_around)
       {
         // If the node is not part of this element's nodes, it is a
         // case of non-conformality
@@ -340,25 +350,248 @@ MeshDiagnosticsGenerator::generate()
           }
         }
         if (node_on_elem)
-          elements.erase(elem);
+          elements.insert(elem);
+        // Else, the node is not part of the element considered, so if the element had been part of
+        // an AMR-created non-conformality, this element is on the coarse side
+        if (!node_on_elem)
+          coarse_elements.insert(elem);
       }
-      if (elements.size() > 0)
+
+      // all the elements around contained the node as one of their nodes
+      if (elements.size() == elements_around.size())
+        continue;
+
+      // only one coarse element in front of refined elements. Whatever we're looking at is
+      // not the interface between coarse and refined elements
+      if (coarse_elements.size() > 1)
+        continue;
+
+      // Depending on the type of element, we already know the number of elements we expect
+      // to be part of this set of likely refined candidates for a given non-conformal node to
+      // examine. We can only decide if it was born out of AMR if it's the center node of the face
+      // of a coarse element near refined elements
+      auto elem_type = (*elements.begin())->type();
+      if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) && elements.size() != 4)
+        continue;
+      if ((elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9) && elements.size() != 2)
+        continue;
+      if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
+        continue;
+      if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 4)
+        continue;
+
+      if (elements.empty())
+        continue;
+
+      // There exists non-conformality, the node should have been a node of all the elements
+      // that are close enough to the node, and it is not
+
+      // For quads and hexes, there is one (quad) or four (hexes) sides that are tied to this node
+      // at the non-conformal interface between the refined elements and a coarse element
+      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
+          elem_type == HEX20 || elem_type == HEX27)
       {
-        for (auto & elem : elements())
+        auto elem = *elements.begin();
+        // Find which sides (of the elements) the node considered is part of
+        std::vector<Elem *> node_on_sides;
+        unsigned int side_inside_parent;
+        for (auto i : make_range(elem->n_sides()))
         {
-          for (auto i : make_range(elem->n_sides()))
+          auto side = elem->side_ptr(i);
+          std::vector<const Node *> other_nodes;
+          bool node_on_side = false;
+          for (const auto & elem_node : side->node_ref_range())
           {
-            auto side = elem->side_ptr(i);
-            std::vector<Point *> nodes;
-            for (auto & node : side->node_ref_range())
-              nodes.emplace_back(&node);
+            if (*node == elem_node)
+              node_on_side = true;
+            else
+              other_nodes.emplace_back(node);
+          }
+          // node is on the side, but is it the side that goes away from the coarse element
+          if (node_on_side)
+          {
+            // if all the other nodes on this side are in one of the other potentially refined
+            // elements, it's one of the side(s) (4 sides in a 3D hex for example) inside the
+            // parent
+            for (auto other_elem : elements)
             {
-              // if (*node ==)
+              bool all_other_nodes_on_shared_side = true;
+              for (const auto & other_node : other_nodes)
+                if (other_elem->get_node_index(other_node) == libMesh::invalid_uint)
+                  all_other_nodes_on_shared_side = false;
+
+              if (all_other_nodes_on_shared_side)
+                side_inside_parent = i;
             }
           }
         }
+
+        // Nodes of the tentative parent element
+        std::vector<const Node *> tentative_coarse_nodes;
+
+        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+        {
+          tentative_coarse_nodes.resize(4);
+          // Gather the other potential elements in the refined element:
+          // they are point neighbors of the node that is shared between all the elements flagged
+          // for the non-conformality
+          // Find shared node
+          auto interior_side = elem->side_ptr(side_inside_parent);
+          const Node * interior_node;
+          for (const auto & other_node : interior_side->node_ref_range())
+          {
+            if (other_node == *node)
+              continue;
+            bool in_all_node_neighbor_elements = true;
+            for (auto other_elem : elements)
+            {
+              if (other_elem->get_node_index(&other_node) == libMesh::invalid_uint)
+                in_all_node_neighbor_elements = false;
+            }
+            if (in_all_node_neighbor_elements)
+            {
+              interior_node = &other_node;
+              break;
+            }
+          }
+          // std::cout << "interior node at " << *interior_node << std::endl;
+
+          // Add point neighbors of interior node to list of potentially refined elements
+          elem->find_point_neighbors(*interior_node, elements);
+
+          // We'll need to order the coarse nodes based on the clock-wise order of the elements
+          // Define a frame in which to compute the angles of the elements centers
+          // angle 0 is node - interior node
+          auto start_clock = *node - *interior_node;
+          auto normal = (elem->vertex_average() - *interior_node).cross(start_clock);
+          start_clock /= start_clock.norm();
+          normal /= normal.norm();
+
+          std::vector<std::pair<unsigned int, Real>> elements_angles(elements.size());
+          unsigned int angle_i = 0;
+          for (const auto elem_around : elements)
+          {
+            auto vec = elem_around->vertex_average() - *interior_node;
+            vec /= vec.norm();
+            auto angle = atan2(vec.cross(start_clock) * normal, vec * start_clock);
+            elements_angles[angle_i] = std::make_pair(angle_i, angle);
+            angle_i++;
+          }
+
+          // sort by angle, so it goes around the interior node
+          std::sort(elements_angles.begin(),
+                    elements_angles.end(),
+                    [](auto & left, auto & right) { return left.second < right.second; });
+          std::vector<unsigned int> elements_order(4);
+          unsigned int order_i = 0;
+          for (const auto & angle_pair : elements_angles)
+          {
+            // std::cout << "Node " << angle_pair.first << " angle " << angle_pair.second << "
+            // order
+            // "
+            //           << order_i << std::endl;
+            elements_order[angle_pair.first] = order_i;
+            order_i++;
+          }
+
+          // The exterior nodes are the opposite nodes of the interior_node!
+          unsigned int neighbor_i = 0;
+          for (auto neighbor : elements)
+          {
+            const auto interior_node_number = neighbor->get_node_index(interior_node);
+            unsigned int opposite_node_index = (interior_node_number + 2) % 4;
+
+            // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
+            tentative_coarse_nodes[elements_order[neighbor_i++]] =
+                neighbor->node_ptr(opposite_node_index);
+          }
+        }
+
+        // Check the element types: if not all the same then it's not uniform AMR
+        for (auto elem : elements)
+          if (elem->type() != elem_type)
+            continue;
+
+        // std::cout << "Nodes to build the parent: " << tentative_coarse_nodes.size() <<
+        // std::endl;
+
+        // Check the number of coarse element nodes gathered
+        for (auto node : tentative_coarse_nodes)
+          if (node == nullptr)
+            continue;
+
+        // Form a parent, of the same type as the elements we are trying to combine!
+        std::unique_ptr<Elem> parent;
+        // TODO clone instead of hard setting type
+        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+          parent = std::make_unique<Quad4>();
+        if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) && elements.size() != 4)
+          parent = std::make_unique<Hex8>();
+        if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
+          parent = std::make_unique<Tri3>();
+        if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 4)
+          parent = std::make_unique<Tet4>();
+
+        // Set the nodes to the coarse element
+        for (auto i : index_range(tentative_coarse_nodes))
+        {
+          // std::cout << "Node around " << *tentative_coarse_nodes[i] << std::endl;
+          parent->set_node(i) = const_cast<Node *>(tentative_coarse_nodes[i]);
+        }
+
+        // Refine this parent
+        parent->set_refinement_flag(Elem::REFINE);
+
+        MeshRefinement mesh_refiner(*mesh);
+        parent->refine(mesh_refiner);
+        std::cout << "Child " << parent->n_children() << std::endl;
+
+        // Compare with the original set of elements
+        // We already know the child share the exterior node. If they share the same vertex
+        // average as the group of unrefined elements we will call this good enough for now
+        bool all_children_match = true;
+        for (auto & child : parent->child_ref_range())
+        {
+          bool found_child = false;
+          // std::cout << "Center of child " << child.vertex_average() << " " << std::endl;
+          for (auto & potential_children : elements)
+            if (MooseUtils::absoluteFuzzyEqual(child.vertex_average()(0),
+                                               potential_children->vertex_average()(0),
+                                               TOLERANCE) &&
+                MooseUtils::absoluteFuzzyEqual(child.vertex_average()(1),
+                                               potential_children->vertex_average()(1),
+                                               TOLERANCE) &&
+                MooseUtils::absoluteFuzzyEqual(
+                    child.vertex_average()(2), potential_children->vertex_average()(2), TOLERANCE))
+            {
+              found_child = true;
+              break;
+            }
+          if (!found_child)
+          {
+            all_children_match = false;
+            break;
+          }
+        }
+
+        if (all_children_match)
+        {
+          num_likely_AMR_created_nonconformality++;
+          if (num_likely_AMR_created_nonconformality < 10)
+            _console << "Detected non-conformality likely created by AMR near " << *node
+                     << std::endl;
+          else if (num_likely_AMR_created_nonconformality == 10)
+            _console << "Maximum log output reached, silencing output" << std::endl;
+        }
       }
     }
+
+    diagnosticsLog(
+        "Number of non-conformal nodes likely due to mesh refinement detected by heuristic: " +
+            Moose::stringify(num_likely_AMR_created_nonconformality),
+        _check_adaptivity_non_conformality,
+        num_likely_AMR_created_nonconformality);
+    pl->unset_close_to_point_tol();
   }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
