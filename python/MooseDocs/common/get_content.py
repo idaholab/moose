@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 # File extensions to consider when building the content tree
 FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.webm', '.ogv', '.mp4', '.m4v', \
             '.pdf', '.css', '.js', '.bib', '.woff', '.woff2', '.html', '.ico', 'md.template', \
-            'tar.gz')
+            'tar.gz', '.py')
 
 def _build_regex(pattern):
     """

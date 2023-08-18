@@ -7,11 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import subprocess
 import logging
 import mooseutils
 from ..common import exceptions
 from ..base import components, Extension, LatexRenderer
-from ..tree import tokens, html, latex
+from ..tree import tokens, html, latex, pages
 from . import command, floats
 
 LOG = logging.getLogger(__name__)
@@ -39,10 +40,26 @@ class MediaExtension(command.CommandExtension):
 
     def preRead(self, page):
         page['prefix'] = page[self.name].get('prefix', self.get('prefix'))
+        page['script_files'] = set() # storage for image file created by scripts, see ScriptCommand object
+
+    def preRender(self, page, ast, result):
+
+        # add a page to the local process translator for images created by scripts
+        for extra in page['script_files']:
+            plot_page = pages.File(extra[0], source=extra[1], base=self.translator.destination)
+            self.translator.addPage(plot_page)
+
+    def postWrite(self, page):
+
+        # write (i.e., copy ) the images created by scripts on the current process
+        for extra in page['script_files']:
+            plot_page = pages.File(extra[0], source=extra[1], base=self.translator.destination)
+            self.translator.renderer.write(plot_page)
 
     def extend(self, reader, renderer):
         self.requires(command, floats)
 
+        self.addCommand(reader, ScriptCommand())
         self.addCommand(reader, ImageCommand())
         self.addCommand(reader, VideoCommand())
 
@@ -89,6 +106,52 @@ class ImageCommand(command.CommandComponent):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True, **self.attributes(settings))
         img = Image(flt, src=info['subcommand'], dark=settings['dark_src'],
+                    tex=settings['latex_src'])
+        if flt is parent:
+            img.attributes.update(**self.attributes(settings))
+        return parent
+
+class ScriptCommand(ImageCommand):
+    COMMAND = 'media'
+    SUBCOMMAND = ('py')
+
+    @staticmethod
+    def defaultSettings():
+        settings = ImageCommand.defaultSettings()
+        settings['image_name'] = (None, "Name of image created by the Python plot script, defaults to the name of the script with .png extension")
+        settings.update(floats.caption_settings())
+        return settings
+
+    def createToken(self, parent, info, page, settings):
+        # Find the plot script
+        script_page = self.translator.findPage(info['subcommand'])
+        script_path = script_page.source
+        script_localname = script_page.local
+        script_absdir, script_name = os.path.split(script_path)
+        script_localdir, script_name = os.path.split(script_localname)
+
+        # Generate the plot
+        LOG.info("Executing plot script %s", script_path)
+        result = subprocess.run(["python", script_path], capture_output=True)
+        if result.returncode != 0:
+            msg = "Failed to execute python script: %s"
+            raise exceptions.MooseDocsException(msg, script_path)
+
+        # Currently the plot is assumed to reside in the same directory as the plot script.
+        plot_name = settings['image_name'] or os.path.basename(script_path).replace('.py', '.png')
+        plot_path = os.path.join(script_absdir, plot_name)
+        plot_localname = os.path.join(script_localdir, plot_name)
+
+        # Throw error if the expected plot does not exist
+        if not os.path.isfile(plot_path):
+            LOG.error("The plot script '%s' must generate the plot '%s'", script_localname, plot_localname)
+
+        # Add plot page information to the global page data for processing by the extension, see MediaExtension object
+        page['script_files'].add((plot_localname, plot_path))
+
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
+                                  bottom=True, **self.attributes(settings))
+        img = Image(flt, src=plot_name, dark=settings['dark_src'],
                     tex=settings['latex_src'])
         if flt is parent:
             img.attributes.update(**self.attributes(settings))

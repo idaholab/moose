@@ -28,7 +28,7 @@ CivetTestBadges = tokens.newToken('CivetTestBadges', prefix=None, tests=list())
 CivetTestReport = tokens.newToken('CivetTestReport', prefix=None, tests=list(), source=None)
 
 class CivetExtension(command.CommandExtension):
-    "Adds ability to include CIVET links."""
+    """Adds ability to include CIVET links."""
 
     @staticmethod
     def defaultConfig():
