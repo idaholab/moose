@@ -28,7 +28,7 @@ FunctionParserUtils<is_ad>::validParams()
 #endif
       "Enable just-in-time compilation of function expressions for faster evaluation");
   params.addParam<bool>(
-      "enable_ad_cache", true, "Enable cacheing of function derivatives for faster startup time");
+      "enable_ad_cache", true, "Enable caching of function derivatives for faster startup time");
   params.addParam<bool>(
       "enable_auto_optimize", true, "Enable automatic immediate optimization of derivatives");
   params.addParam<bool>(
@@ -108,20 +108,20 @@ FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string 
     case FailureMethod::nan_warning:
       mooseWarning("In ",
                    name,
-                   ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                   ": Parsed function evaluation encountered an error: ",
                    _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
       return _quiet_nan;
 
     case FailureMethod::error:
       mooseError("In ",
                  name,
-                 ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                 ": Parsed function evaluation encountered an error: ",
                  _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
 
     case FailureMethod::exception:
       mooseException("In ",
                      name,
-                     ": DerivativeParsedMaterial function evaluation encountered an error: ",
+                     ": Parsed function evaluation encountered an error: ",
                      _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code],
                      "\n Cutting timestep");
   }
