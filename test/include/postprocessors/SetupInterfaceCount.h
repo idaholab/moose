@@ -37,13 +37,13 @@ public:
   /**
    * Each setup methods simply increments a counter.
    */
-  virtual void initialSetup();
-  virtual void timestepSetup() { _counts.at("TIMESTEP")++; }
-  virtual void residualSetup() { _counts.at("LINEAR")++; }
-  virtual void jacobianSetup() { _counts.at("NONLINEAR")++; }
-  virtual void initialize();
-  virtual void finalize();
-  virtual void execute() { _execute++; }
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override { _counts.at("TIMESTEP")++; }
+  virtual void residualSetup() override { _counts.at("LINEAR")++; }
+  virtual void jacobianSetup() override { _counts.at("NONLINEAR")++; }
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override { _execute++; }
   ///@}
 
   ///@{
