@@ -112,26 +112,43 @@ protected:
   bool converged(const std::vector<Real> & momentum_residuals, const Real pressure_residual);
 
   FEProblemBase & _problem;
-  FEProblemSolve _feproblem_solve;
   Real _system_time;
   int & _time_step;
   Real & _time;
+
+  /// Boolean for easy check if an energy system shall be solved or not
+  const bool _has_energy_system;
+
+  /// Boolean for easy check if an passive scalar systems shall be solved or not
+  const bool _has_passive_scalar_systems;
 
   /// The names of the momentum systems. If only one provided we assume that the
   /// simulation is monolithic in terms of the momentum components.
   const std::vector<std::string> _momentum_system_names;
 
-  /// The number of the system(s) corresponding to the momentum equation(s)
+  /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
 
   /// The number of the system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
+
+  /// The number of the system corresponding to the energy equation
+  const unsigned int _energy_sys_number;
+
+  /// The number(s) of the system(s) corresponding to the passive scalar equation(s)
+  std::vector<unsigned int> _passive_scalar_system_numbers;
 
   /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
   std::vector<NonlinearSystemBase *> _momentum_systems;
 
   /// Reference to the nonlinear system corresponding to the pressure equation
   NonlinearSystemBase & _pressure_system;
+
+  /// Reference to the nonlinear system corresponding to the energy equation
+  NonlinearSystemBase * _energy_system;
+
+  /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
+  std::vector<NonlinearSystemBase *> _passive_scalar_systems;
 
   /// Pointer to the segregated RhieChow interpolation object
   INSFVRhieChowInterpolatorSegregated * _rc_uo;
@@ -153,11 +170,23 @@ private:
   /// The user-defined relaxation parameter for the pressure variable
   const Real _pressure_variable_relaxation;
 
+  /// The user-defined relaxation parameter for the energy equation
+  const Real _energy_equation_relaxation;
+
+  /// The user-defined relaxation parameter(s) for the passive scalar equation(s)
+  const std::vector<Real> _passive_scalar_equation_relaxation;
+
   /// The user-defined absolute tolerance for determining the convergence in momentum
   const Real _momentum_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in pressure
   const Real _pressure_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in energy
+  const Real _energy_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in passive scalars
+  const std::vector<Real> _passive_scalar_absolute_tolerance;
 
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;

@@ -27,16 +27,27 @@ InputParameters
 SIMPLE::validParams()
 {
   InputParameters params = Executioner::validParams();
-  params += FEProblemSolve::validParams();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
+
+  /*
+   * The names of the different systems in the segregated solver
+   */
   params.addRequiredParam<std::vector<std::string>>(
-      "momentum_systems", "The nonlinear system for the momentum equation");
+      "momentum_systems", "The nonlinear system(s) for the momentum equation(s).");
   params.addRequiredParam<NonlinearSystemName>("pressure_system",
-                                               "The nonlinear system for the pressure equation");
+                                               "The nonlinear system for the pressure equation.");
+  params.addRequiredParam<NonlinearSystemName>("energy_system",
+                                               "The nonlinear system for the energy equation.");
+  params.addRequiredParam<std::vector<std::string>>(
+      "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
   params.addParam<std::string>("pressure_gradient_tag",
-                               "non_pressure_momentum_kernels",
+                               "pressure_momentum_kernels",
                                "The name of the tags associated with the kernels in the momentum "
                                "equations which are not related to the pressure gradient.");
+
+  /*
+   * Relaxation parameters for the different system
+   */
   params.addRangeCheckedParam<Real>(
       "pressure_variable_relaxation",
       1.0,
@@ -47,16 +58,37 @@ SIMPLE::validParams()
       1.0,
       "0.0<momentum_equation_relaxation<=1.0",
       "The relaxation which should be used for the momentum equation.");
+  params.addRangeCheckedParam<Real>("energy_equation_relaxation",
+                                    1.0,
+                                    "0.0<energy_equation_relaxation<=1.0",
+                                    "The relaxation which should be used for the energy equation.");
+  params.addParam<std::vector<Real>>(
+      "passive_scalar_equation_relaxation",
+      std::vector<Real>(),
+      "The relaxation which should be used for the passive scalar equations.");
+
+  /*
+   * Iteration tolerances for the different equations
+   */
   params.addRangeCheckedParam<Real>(
       "momentum_absolute_tolerance",
       1e-5,
       "0.0<momentum_absolute_tolerance",
-      "The absolute tolerance on the residual of the momentum equation.");
+      "The absolute tolerance on the normalized residual of the momentum equation.");
   params.addRangeCheckedParam<Real>(
       "pressure_absolute_tolerance",
       1e-5,
       "0.0<pressure_absolute_tolerance",
-      "The absolute tolerance on ther residual of the pressure equation.");
+      "The absolute tolerance on the normalized residual of the pressure equation.");
+  params.addRangeCheckedParam<Real>(
+      "energy_absolute_tolerance",
+      1e-5,
+      "0.0<energy_absolute_tolerance",
+      "The absolute tolerance on the normalized residual of the energy equation.");
+  params.addParam<std::vector<Real>>(
+      "passive_scalar_absolute_tolerance",
+      std::vector<Real>(),
+      "The absolute tolerance(s) on the normalized residual(s) of the passive scalar equation(s).");
   params.addRangeCheckedParam<unsigned int>("num_iterations",
                                             1000,
                                             "0<num_iterations",
@@ -72,23 +104,33 @@ SIMPLE::validParams()
 SIMPLE::SIMPLE(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
-    _feproblem_solve(*this),
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
+    _has_energy_system(isParamValid("energy_system")),
+    _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
     _momentum_system_names(getParam<std::vector<std::string>>("momentum_systems")),
     _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
+    _energy_sys_number(_has_energy_system
+                           ? _problem.nlSysNum(getParam<NonlinearSystemName>("energy_system"))
+                           : libMesh::invalid_uint),
     _pressure_system(_problem.getNonlinearSystemBase(_pressure_sys_number)),
+    _energy_system(_has_energy_system ? &_problem.getNonlinearSystemBase(_energy_sys_number)
+                                      : nullptr),
     _pressure_tag_name(getParam<std::string>("pressure_gradient_tag")),
     _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name)),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
+    _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
+    _passive_scalar_equation_relaxation(
+        getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
+    _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
+    _passive_scalar_absolute_tolerance(
+        getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _print_fields(getParam<bool>("print_fields"))
 {
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
-
   if (_momentum_system_names.size() != 1 &&
       _momentum_system_names.size() != _problem.mesh().dimension())
     paramError("momentum_systems",
@@ -103,6 +145,30 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _momentum_systems.push_back(
         &_problem.getNonlinearSystemBase(_momentum_system_numbers[system_i]));
     _momentum_systems[system_i]->addVector(_pressure_tag_id, false, ParallelType::PARALLEL);
+  }
+
+  // We check for input errors with regards to the passive scalar equations. At the same time, we
+  // set up the corresponding system numbers
+  if (_has_passive_scalar_systems)
+  {
+    const auto passive_scalar_system_names =
+        getParam<std::vector<std::string>>("passive_scalar_systems");
+    if (passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
+      paramError("passive_scalar_equation_relaxation",
+                 "The number of equation relaxation parameters does not match the number of "
+                 "passive scalar equations!");
+    if (passive_scalar_system_names.size() != _passive_scalar_absolute_tolerance.size())
+      paramError("passive_scalar_absolute_tolerance",
+                 "The number of absolute tolerances does not match the number of "
+                 "passive scalar equations!");
+
+    for (auto system_i : index_range(passive_scalar_system_names))
+    {
+      _passive_scalar_system_numbers.push_back(
+          _problem.nlSysNum(passive_scalar_system_names[system_i]));
+      _passive_scalar_systems.push_back(
+          &_problem.getNonlinearSystemBase(_passive_scalar_system_numbers[system_i]));
+    }
   }
 
   _time = 0;
