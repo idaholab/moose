@@ -16,6 +16,8 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
+#include <optional>
+
 MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
   : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
@@ -374,12 +376,18 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
   auto num_states = storage.numStates();
   dataStore(stream, num_states, nullptr);
 
+  // Store the material property ID -> name map for mapping back
   const auto & registry = storage.getMaterialPropertyRegistry();
   std::vector<std::string> ids_to_names(registry.idsToNamesBegin(), registry.idsToNamesEnd());
   dataStore(stream, ids_to_names, nullptr);
 
+  // Store the stateful ID -> property ID map for mapping back
   dataStore(stream, storage._stateful_prop_id_to_prop_id, nullptr);
 
+  // Store the stateful id -> name map
+  dataStore(stream, storage._stateful_prop_names, nullptr);
+
+  // Store every property
   for (const auto state : storage.stateIndexRange())
   {
     std::size_t num_elems = storage.setProps(state).size();
@@ -425,6 +433,12 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
   decltype(storage.numStates()) num_states;
   dataLoad(stream, num_states, nullptr);
+  if (num_states != storage.numStates())
+    mooseError("Stateful material properties up to state ",
+               num_states,
+               " were stored in checkpoint/backup,\nbut state ",
+               storage.numStates(),
+               " is now the maximum state requested.\n\nThis mismatch is not currently supported.");
 
   std::vector<std::string> from_prop_ids_to_names;
   dataLoad(stream, from_prop_ids_to_names, nullptr);
@@ -432,9 +446,50 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   decltype(storage._stateful_prop_id_to_prop_id) from_stateful_prop_id_to_prop_id;
   dataLoad(stream, from_stateful_prop_id_to_prop_id, nullptr);
 
-  const unsigned int skip_id = std::numeric_limits<unsigned int>::max();
-  std::vector<unsigned int> to_stateful_ids(from_stateful_prop_id_to_prop_id.size(), skip_id);
+  decltype(storage._stateful_prop_names) from_stateful_prop_names;
+  dataLoad(stream, from_stateful_prop_names, nullptr);
 
+  {
+    const auto fill_names = [](const auto & from)
+    {
+      std::set<std::string> names;
+      for (const auto & id_name_pair : from)
+        names.insert(id_name_pair.second);
+      return names;
+    };
+
+    const auto from_names = fill_names(from_stateful_prop_names);
+    const auto to_names = fill_names(storage.statefulPropNames());
+
+    // This requirement currently comes from the fact that now when we do restart/recover,
+    // we do not call initStatefulQpProperties() anymore on each material. Which means that
+    // if you add more stateful properties, they would never be initialized. It seems like
+    // this capability (adding props) isn't currently used, so we're going to make it an
+    // error for now. There are plenty of ways around this, but the priority at the moment
+    // is enabling more flexible restart/recover, and this is one of the costs.
+    // TODO: check types
+    if (from_names != to_names)
+    {
+      std::stringstream err;
+      err << "There is a mismatch in the stateful material properties stored during "
+             "checkpoint/backup and declared in restart/recover.\n"
+          << "The current system requires that the stateful properties be equivalent.\n\n";
+      auto add_props = [&err](const auto & names)
+      {
+        for (const auto & name : names)
+          err << "  " << name << "\n";
+      };
+      err << "Stored stateful properties:\n";
+      add_props(from_names);
+      err << "\nDeclared stateful properties:\n";
+      add_props(to_names);
+      mooseError(err.str());
+    }
+  }
+
+  std::vector<std::optional<unsigned int>> to_stateful_ids(storage.statefulProps().size());
+
+  // Fill the mapping from previous ID to current stateful ID
   for (const auto from_stateful_id : index_range(from_stateful_prop_id_to_prop_id))
   {
     const auto from_prop_id = from_stateful_prop_id_to_prop_id[from_stateful_id];
@@ -442,26 +497,19 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
     mooseAssert(from_prop_id < from_prop_ids_to_names.size(), "Invalid ID map");
     const auto & from_name = from_prop_ids_to_names[from_prop_id];
 
-    // Material property with the same name does not exist
-    const auto to_prop_id = registry.queryID(from_name);
-    if (!to_prop_id)
-      mooseError("Not supported yet");
+    const auto to_prop_id = registry.getID(from_name);
 
     const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
                                         storage._stateful_prop_id_to_prop_id.end(),
-                                        *to_prop_id);
-    if (find_prop_id == storage._stateful_prop_id_to_prop_id.end())
-      mooseError("Not supported yet");
+                                        to_prop_id);
+    mooseAssert(find_prop_id != storage._stateful_prop_id_to_prop_id.end(), "Not found");
 
     const std::size_t to_stateful_id =
         std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
     to_stateful_ids[from_stateful_id] = to_stateful_id;
-    if (to_stateful_id != from_stateful_id)
-      mooseError("Not supported yet");
   }
 
-  mooseAssert(num_states == storage.numStates(), "Inconsistent max state");
-
+  // Load the properties
   for (const auto state : storage.stateIndexRange())
   {
     std::size_t num_elems;
@@ -493,11 +541,14 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
         for (const auto from_stateful_id : make_range(num_props))
         {
           const auto to_stateful_id = to_stateful_ids[from_stateful_id];
-          if (to_stateful_id == skip_id)
-            mooseError("nope");
-          // dataLoadSkip(stream);
-          else
-            dataLoadSkippable(stream, props[to_stateful_id], nullptr);
+          mooseAssert(to_stateful_id, "Skipping not supported");
+
+          // Eventually we should support skipping, and this will be how it's done
+          // if (!to_stateful_id)
+          //   dataLoadSkip(stream);
+          // else
+
+          dataLoadSkippable(stream, props[*to_stateful_id], nullptr);
         }
       }
     }
