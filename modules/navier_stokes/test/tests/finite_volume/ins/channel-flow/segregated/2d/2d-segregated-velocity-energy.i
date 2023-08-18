@@ -1,5 +1,8 @@
-mu = 0.002
+mu = 2.6
 rho = 1.0
+k = 5.0
+cp = 700
+alpha = 150
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
@@ -8,13 +11,11 @@ pressure_tag = "pressure_grad"
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
-    dim = 3
-    dx = '0.2'
-    dy = '0.2'
-    dz = '0.8'
+    dim = 2
+    dx = '0.3'
+    dy = '0.3'
     ix = '3'
     iy = '3'
-    iz = '12'
   []
 []
 
@@ -23,7 +24,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system w_system pressure_system'
+  nl_sys_names = 'u_system v_system pressure_system energy_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -31,30 +32,23 @@ pressure_tag = "pressure_grad"
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolatorSegregated
-    u = vel_x
-    v = vel_y
-    w = vel_z
+    u = u
+    v = v
     pressure = pressure
   []
 []
 
 [Variables]
-  [vel_x]
+  [u]
     type = INSFVVelocityVariable
-    initial_condition = 0.0
+    initial_condition = 0.5
     nl_sys = u_system
     two_term_boundary_expansion = false
   []
-  [vel_y]
+  [v]
     type = INSFVVelocityVariable
     initial_condition = 0.0
     nl_sys = v_system
-    two_term_boundary_expansion = false
-  []
-  [vel_z]
-    type = INSFVVelocityVariable
-    initial_condition = 0.5
-    nl_sys = w_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -63,12 +57,18 @@ pressure_tag = "pressure_grad"
     initial_condition = 0.2
     two_term_boundary_expansion = false
   []
+  [T_fluid]
+    type = INSFVEnergyVariable
+    initial_condition = 300
+    nl_sys = energy_system
+    two_term_boundary_expansion = false
+  []
 []
 
 [FVKernels]
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = vel_x
+    variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -76,20 +76,20 @@ pressure_tag = "pressure_grad"
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = vel_x
+    variable = u
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = vel_x
+    variable = u
     momentum_component = 'x'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = vel_y
+    variable = v
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -97,35 +97,14 @@ pressure_tag = "pressure_grad"
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = vel_y
+    variable = v
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = vel_y
+    variable = v
     momentum_component = 'y'
-    pressure = pressure
-    extra_vector_tags = ${pressure_tag}
-  []
-  [w_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_z
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [w_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_z
-    mu = ${mu}
-    momentum_component = 'z'
-  []
-  [w_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_z
-    momentum_component = 'z'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
@@ -141,56 +120,68 @@ pressure_tag = "pressure_grad"
     vector_field = "HbyA"
     force_boundary_execution = true
   []
+
+  [energy_advection]
+    type = INSFVEnergyAdvection
+    variable = T_fluid
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+  []
+  [energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T_fluid
+  []
+  [ambient_convection]
+    type = NSFVEnergyAmbientConvection
+    variable = T_fluid
+    T_ambient = 350
+    alpha = 'alpha'
+  []
 []
 
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
-    boundary = 'back'
-    variable = vel_x
-    function = '0'
+    boundary = 'left'
+    variable = u
+    function = '1.1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
-    boundary = 'back'
-    variable = vel_y
-    function = '0'
-  []
-  [inlet-w]
-    type = INSFVInletVelocityBC
-    boundary = 'back'
-    variable = vel_z
-    function = '1.1'
+    boundary = 'left'
+    variable = v
+    function = '0.0'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom '
-    variable = vel_x
+    boundary = 'top bottom'
+    variable = u
     function = 0.0
   []
   [walls-v]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom'
-    variable = vel_y
-    function = 0.0
-  []
-  [walls-w]
-    type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom'
-    variable = vel_z
+    boundary = 'top bottom'
+    variable = v
     function = 0.0
   []
   [outlet_p]
     type = INSFVOutletPressureBC
-    boundary = 'front'
+    boundary = 'right'
     variable = pressure
     function = 1.4
   []
   [zero-grad-pressure]
     type = FVFunctionNeumannBC
     variable = pressure
-    boundary = 'back left right top bottom'
+    boundary = 'top left bottom'
     function = 0.0
+  []
+  [inlet_t]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = T_fluid
+    value = 300
   []
 []
 
@@ -199,15 +190,31 @@ pressure_tag = "pressure_grad"
   # petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   # petsc_options_value = 'hypre boomeramg NONZERO'
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system w_system'
+  momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 60
+  energy_equation_relaxation = 0.9
+  num_iterations = 30
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
+  energy_absolute_tolerance = 1e-9
   print_fields = false
+[]
+
+[Materials]
+  [const_functor]
+    type = ADGenericFunctorMaterial
+    prop_names = 'cp alpha'
+    prop_values = '${cp} ${alpha}'
+  []
+  [ins_fv]
+    type = INSFVEnthalpyMaterial
+    rho = ${rho}
+    temperature = 'T_fluid'
+  []
 []
 
 [Outputs]

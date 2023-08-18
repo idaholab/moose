@@ -1,5 +1,8 @@
 mu = 0.002
 rho = 1.0
+k = 5.0
+cp = 700
+alpha = 150
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
@@ -23,7 +26,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system w_system pressure_system'
+  nl_sys_names = 'u_system v_system w_system pressure_system energy_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -61,6 +64,12 @@ pressure_tag = "pressure_grad"
     type = INSFVPressureVariable
     nl_sys = pressure_system
     initial_condition = 0.2
+    two_term_boundary_expansion = false
+  []
+  [T_fluid]
+    type = INSFVEnergyVariable
+    initial_condition = 300
+    nl_sys = energy_system
     two_term_boundary_expansion = false
   []
 []
@@ -141,6 +150,23 @@ pressure_tag = "pressure_grad"
     vector_field = "HbyA"
     force_boundary_execution = true
   []
+  [energy_advection]
+    type = INSFVEnergyAdvection
+    variable = T_fluid
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+  []
+  [energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T_fluid
+  []
+  [ambient_convection]
+    type = NSFVEnergyAmbientConvection
+    variable = T_fluid
+    T_ambient = 350
+    alpha = 'alpha'
+  []
 []
 
 [FVBCs]
@@ -192,6 +218,25 @@ pressure_tag = "pressure_grad"
     boundary = 'back left right top bottom'
     function = 0.0
   []
+  [inlet_t]
+    type = FVDirichletBC
+    boundary = 'back'
+    variable = T_fluid
+    value = 300
+  []
+[]
+
+[Materials]
+  [const_functor]
+    type = ADGenericFunctorMaterial
+    prop_names = 'cp alpha'
+    prop_values = '${cp} ${alpha}'
+  []
+  [ins_fv]
+    type = INSFVEnthalpyMaterial
+    rho = ${rho}
+    temperature = 'T_fluid'
+  []
 []
 
 [Executioner]
@@ -201,12 +246,15 @@ pressure_tag = "pressure_grad"
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
+  energy_equation_relaxation = 0.95
   num_iterations = 60
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
+  energy_absolute_tolerance = 1e-9
   print_fields = false
 []
 

@@ -608,8 +608,8 @@ SIMPLE::execute()
     {
       // We set the preconditioner type using this option.
       // TODO: We need a way to specify different perconditioners for different systems
-      Moose::PetscSupport::petscSetOptions(_problem);
-      Moose::setSolverDefaults(_problem);
+      // Moose::PetscSupport::petscSetOptions(_problem);
+      // Moose::setSolverDefaults(_problem);
 
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
@@ -653,7 +653,8 @@ SIMPLE::execute()
       for (auto system_i : index_range(_momentum_systems))
         _console << " Momentum equation:"
                  << (_momentum_systems.size() > 1
-                         ? std::string(" Component ") + std::to_string(system_i + 1)
+                         ? std::string(" Component ") + std::to_string(system_i + 1) +
+                               std::string(" ")
                          : std::string(" "))
                  << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
       _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
@@ -673,10 +674,10 @@ SIMPLE::execute()
       while (iteration_counter < _num_iterations &&
              !convergedPassiveScalars(passive_scalar_residuals))
       {
-        // We set the preconditioner type using this option.
-        // TODO: We need a way to specify different perconditioners for different systems
-        Moose::PetscSupport::petscSetOptions(_problem);
-        Moose::setSolverDefaults(_problem);
+        // // We set the preconditioner type using this option.
+        // // TODO: We need a way to specify different perconditioners for different systems
+        // Moose::PetscSupport::petscSetOptions(_problem);
+        // Moose::setSolverDefaults(_problem);
 
         // We clear the caches in the passive scalar variables
         for (auto system_i : index_range(_passive_scalar_systems))

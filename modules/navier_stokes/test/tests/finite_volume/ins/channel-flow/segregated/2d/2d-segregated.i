@@ -154,14 +154,8 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
-  petsc_options_value = 'hypre boomeramg NONZERO'
-  nl_max_its = 1
-  l_max_its = 400
-  l_abs_tol = 1e-8
-  l_tol = 1e-8
-  line_search = 'none'
+  # petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
+  # petsc_options_value = 'hypre boomeramg NONZERO'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'momentum_system'
   pressure_system = 'pressure_system'
