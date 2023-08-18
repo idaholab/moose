@@ -31,21 +31,21 @@ Postprocessor::Postprocessor(const MooseObject * moose_object)
   : OutputInterface(moose_object->parameters()),
     NonADFunctorInterface(moose_object),
     Moose::FunctorBase<Real>(moose_object->name()),
-    _pp_moose_object(*moose_object),
-    _pp_name(_pp_moose_object.name()),
-    _current_value(declareValue())
+    _pp_name(moose_object->name()),
+    _current_value(declareValue(*moose_object)),
+    _pp_moose_object(*moose_object)
 {
 }
 
 const PostprocessorValue &
-Postprocessor::declareValue()
+Postprocessor::declareValue(const MooseObject & moose_object)
 {
   auto & fe_problem =
-      *_pp_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+      *moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
 
   const PostprocessorReporterName r_name(_pp_name);
 
-  const bool is_thread_0 = _pp_moose_object.parameters().get<THREAD_ID>("_tid") == 0;
+  const bool is_thread_0 = moose_object.parameters().get<THREAD_ID>("_tid") == 0;
   mooseAssert(is_thread_0 ==
                   !fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
               "Postprocessor Reporter threaded value declaration mismatch");
@@ -55,7 +55,7 @@ Postprocessor::declareValue()
   if (is_thread_0)
     fe_problem.getReporterData(ReporterData::WriteKey())
         .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
-            r_name, REPORTER_MODE_UNSET, _pp_moose_object);
+            r_name, REPORTER_MODE_UNSET, moose_object);
 
   // At this point, thread 0 should have declared the value and getting it should be valid
   return fe_problem.getReporterData().getReporterValue<PostprocessorValue>(r_name);

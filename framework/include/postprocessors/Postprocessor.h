@@ -72,9 +72,6 @@ public:
   const std::string & PPName() const { return _pp_name; }
 
 protected:
-  /// MOOSE object
-  const MooseObject & _pp_moose_object;
-
   /// Post-processor name
   const std::string & _pp_name;
 
@@ -86,7 +83,7 @@ private:
    * Internal method to be used to declare the value and store it within _current_value in the
    * constructor.
    */
-  const PostprocessorValue & declareValue();
+  const PostprocessorValue & declareValue(const MooseObject & moose_object);
 
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
@@ -125,4 +122,7 @@ private:
    * Internal method for giving a one-time warning for calling an \c evaluateDot() method.
    */
   void evaluateDotWarning() const;
+
+  /// MOOSE object
+  const MooseObject & _pp_moose_object;
 };
