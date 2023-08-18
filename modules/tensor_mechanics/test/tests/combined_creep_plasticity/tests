@@ -1,7 +1,7 @@
 [Tests]
   issues = '#6873 #8651'
   design = 'source/materials/ComputeMultipleInelasticStress.md'
-  [./combined]
+  [combined]
     type = 'Exodiff'
     input = 'combined_creep_plasticity.i'
     exodiff = 'combined_creep_plasticity_out.e'
@@ -10,8 +10,8 @@
     valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem."
-  [../]
-  [./combined_start_time]
+  []
+  [combined_start_time]
     type = 'Exodiff'
     input = 'combined_creep_plasticity_start_time.i'
     exodiff = 'combined_creep_plasticity_start_time_out.e'
@@ -21,8 +21,8 @@
     valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem with a non-zero start time."
-  [../]
-  [./stress_prescribed]
+  []
+  [stress_prescribed]
     type = 'Exodiff'
     input = 'combined_stress_prescribed.i'
     exodiff = 'combined_stress_prescribed_out.e'
@@ -32,8 +32,8 @@
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 3D cube problem with a time-varying pressure
                    BC."
-  [../]
-  [./stress_relaxation]
+  []
+  [stress_relaxation]
     type = 'Exodiff'
     input = 'combined_stress_relaxation.i'
     exodiff = 'combined_stress_relaxation_out.e'
@@ -41,5 +41,15 @@
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 3D cube problem with a constant displacement
                    BC and stress relaxation."
-  [../]
+  []
+  [creepWithPlasticity]
+    type = 'Exodiff'
+    input = 'creepWithPlasticity.i'
+    exodiff = 'creepWithPlasticity_out.e'
+    abs_zero = 1e-09
+    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    valgrind = HEAVY
+    requirement = "MOOSE tensor mechanics module shall solve a combined creep
+                   and plasticity 1-d bar problem with the creep and plasticity models tightly coupled."
+  []
 []

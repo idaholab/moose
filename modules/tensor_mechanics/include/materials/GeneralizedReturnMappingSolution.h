@@ -99,7 +99,7 @@ protected:
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual void iterationFinalize(GenericReal<is_ad> /*scalar*/) {}
+  virtual void iterationFinalize(const GenericReal<is_ad> & /*scalar*/) {}
 
   /**
    * Output summary information for the convergence history of the model

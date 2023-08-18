@@ -56,6 +56,9 @@ IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effective_trial_stress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
+                                                                elasticity_tensor);
+
   computeYieldStress(elasticity_tensor);
 
   _effective_trial_stress = effective_trial_stress;

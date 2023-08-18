@@ -41,10 +41,6 @@ public:
   using RadialReturnStressUpdateTempl<is_ad>::_base_name;
   using RadialReturnStressUpdateTempl<is_ad>::_three_shear_modulus;
 
-protected:
-  virtual void initQpStatefulProperties() override;
-  virtual void propagateQpStatefulProperties() override;
-
   virtual void
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
                           const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
@@ -52,11 +48,20 @@ protected:
                                              const GenericReal<is_ad> & scalar) override;
   virtual GenericReal<is_ad> computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
                                                const GenericReal<is_ad> & scalar) override;
-  virtual void iterationFinalize(GenericReal<is_ad> scalar) override;
+
+  virtual void computeYieldStress(const GenericRankFourTensor<is_ad> & elasticity_tensor);
+
+  GenericReal<is_ad> yieldCondition() const { return _yield_condition; }
+
   virtual void
   computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
-  virtual void computeYieldStress(const GenericRankFourTensor<is_ad> & elasticity_tensor);
+protected:
+  virtual void initQpStatefulProperties() override;
+  virtual void propagateQpStatefulProperties() override;
+
+  virtual void iterationFinalize(const GenericReal<is_ad> & scalar) override;
+
   virtual GenericReal<is_ad> computeHardeningValue(const GenericReal<is_ad> & scalar);
   virtual GenericReal<is_ad> computeHardeningDerivative(const GenericReal<is_ad> & scalar);
 

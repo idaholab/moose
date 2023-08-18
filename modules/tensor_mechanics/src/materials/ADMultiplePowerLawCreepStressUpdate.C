@@ -78,8 +78,10 @@ ADMultiplePowerLawCreepStressUpdate::ADMultiplePowerLawCreepStressUpdate(
 
 void
 ADMultiplePowerLawCreepStressUpdate::computeStressInitialize(
-    const ADReal & effective_trial_stress, const ADRankFourTensor & /*elasticity_tensor*/)
+    const ADReal & effective_trial_stress, const ADRankFourTensor & elasticity_tensor)
 {
+  ADRadialReturnStressUpdate::computeStressInitialize(effective_trial_stress, elasticity_tensor);
+
   _stress_index = stressIndex(effective_trial_stress);
 
   if (_temperature)

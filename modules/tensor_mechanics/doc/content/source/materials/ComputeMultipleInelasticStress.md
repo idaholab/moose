@@ -156,7 +156,7 @@ In a purely elastic situation $H_{ijkl} = C_{ijkl}$ (the elasticity tensor), but
 the inelastic mapping of changes in the stress as a result of changes in the
 displacement variables is more complicated.
 In a plastic material model, the proposed values
-of displacements for the current time step where used to calculate a trial
+of displacements for the current time step were used to calculate a trial
 inadmissible stress, $\sigma_{trial}$, [eqn:trial_stress], that was brought back
 to the yield surface through a radial return algorithm. A slight change in the
 proposed displacement variables will produce a slightly different trial stress

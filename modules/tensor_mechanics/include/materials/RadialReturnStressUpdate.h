@@ -147,6 +147,29 @@ public:
     return _use_substepping != SubsteppingType::NONE;
   }
 
+  /// Current value of scalar inelastic strain
+  const GenericReal<is_ad> & effectiveInelasticStrainIncrement() const
+  {
+    return _effective_inelastic_strain_increment;
+  }
+
+  void updateEffectiveInelasticStrainIncrement(const GenericReal<is_ad> & eisi)
+  {
+    _effective_inelastic_strain_increment = eisi;
+  }
+
+  void updateEffectiveInelasticStrain(const GenericReal<is_ad> & increment)
+  {
+    _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + increment;
+  }
+
+  /**
+   * Calculate the tangent_operator.
+   */
+  void computeTangentOperator(Real effective_trial_stress,
+                              const RankTwoTensor & stress_new,
+                              RankFourTensor & tangent_operator);
+
 protected:
   virtual void initQpStatefulProperties() override;
 
@@ -165,10 +188,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
-  virtual void computeStressInitialize(const GenericReal<is_ad> & /*effective_trial_stress*/,
-                                       const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
-  {
-  }
+  virtual void computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
+                                       const GenericRankFourTensor<is_ad> & elasticity_tensor);
 
   /**
    * Calculate the derivative of the strain increment with respect to the updated stress.
@@ -192,12 +213,6 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
-  /**
-   * Calculate the tangent_operator.
-   */
-  void computeTangentOperator(Real /*effective_trial_stress*/,
-                              RankTwoTensor & /*stress_new*/,
-                              RankFourTensor & /*tangent_operator*/);
   /// 3 * shear modulus
   GenericReal<is_ad> _three_shear_modulus;
 
@@ -205,7 +220,7 @@ protected:
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
   /// Stores the scalar effective inelastic strain increment from Newton iteration
-  GenericReal<is_ad> _scalar_effective_inelastic_strain;
+  GenericReal<is_ad> _effective_inelastic_strain_increment;
 
   /**
    * Maximum allowable scalar inelastic strain increment, used to control the
@@ -253,3 +268,9 @@ protected:
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;
 typedef RadialReturnStressUpdateTempl<true> ADRadialReturnStressUpdate;
+
+template <>
+void
+RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_trial_stress,
+                                                             const RankTwoTensor & stress_new,
+                                                             RankFourTensor & tangent_operator);

@@ -85,8 +85,11 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  csv = true
+  file_base = 'csv_out'
+  [csv]
+    type = CSV
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [ICs]

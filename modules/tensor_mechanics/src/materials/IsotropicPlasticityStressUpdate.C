@@ -108,6 +108,9 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effective_trial_stress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
+                                                                elasticity_tensor);
+
   computeYieldStress(elasticity_tensor);
 
   _yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
@@ -149,7 +152,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeDerivative(
 
 template <bool is_ad>
 void
-IsotropicPlasticityStressUpdateTempl<is_ad>::iterationFinalize(GenericReal<is_ad> scalar)
+IsotropicPlasticityStressUpdateTempl<is_ad>::iterationFinalize(const GenericReal<is_ad> & scalar)
 {
   if (_yield_condition > 0.0)
     _hardening_variable[_qp] = computeHardeningValue(scalar);
