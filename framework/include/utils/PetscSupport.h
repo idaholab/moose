@@ -96,6 +96,24 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
+ * Populate flags in a given PetscOptions object using a vector of input arguments
+ * @param petsc_flags Container holding the flags of the petsc options
+ * @param petsc_options Data structure which handles petsc options within moose
+ */
+void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+
+/**
+ * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
+ * @param petsc_pair_options Option-value pairs of petsc settings
+ * @param mesh_dimension The mesh dimension, needed for multigrid settings
+ * @param petsc_options Data structure which handles petsc options within moose
+ */
+void
+processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+                  const unsigned int mesh_dimension,
+                  PetscOptions & petsc_options);
+
+/**
  * Returns the valid petsc line search options as a set of strings
  */
 std::set<std::string> getPetscValidLineSearches();

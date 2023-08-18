@@ -577,8 +577,18 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // solve
   Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
 
+  // First process the single petsc options/flags
+  processPetscFlags(petsc_options, po);
+
+  // Then process the option-value pairs
+  processPetscPairs(petsc_pair_options, fe_problem.mesh().dimension(), po);
+}
+
+void
+processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & po)
+{
   // Update the PETSc single flags
-  for (const auto & option : petsc_options)
+  for (const auto & option : petsc_flags)
   {
     /**
      * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is
@@ -612,7 +622,13 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     if (!po.flags.contains(option))
       po.flags.push_back(option);
   }
+}
 
+void
+processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+                  const unsigned int mesh_dimension,
+                  PetscOptions & po)
+{
   // the boolean in these pairs denote whether the user has specified any of the reason flags in the
   // input file
   std::array<std::pair<bool, std::string>, 2> reason_flags = {
@@ -737,14 +753,14 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 
   // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold
   // value. We will provide that for the user here if they haven't supplied it themselves.
-  if (boomeramg_found && !strong_threshold_found && fe_problem.mesh().dimension() == 3)
+  if (boomeramg_found && !strong_threshold_found && mesh_dimension == 3)
   {
     po.pairs.emplace_back("-pc_hypre_boomeramg_strong_threshold", "0.7");
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
 #if !PETSC_VERSION_LESS_THAN(3, 12, 0)
-  if (hmg_found && !hmg_strong_threshold_found && fe_problem.mesh().dimension() == 3)
+  if (hmg_found && !hmg_strong_threshold_found && mesh_dimension == 3)
   {
     po.pairs.emplace_back("-hmg_inner_pc_hypre_boomeramg_strong_threshold", "0.7");
     pc_description += "strong_threshold: 0.7 (auto)";
