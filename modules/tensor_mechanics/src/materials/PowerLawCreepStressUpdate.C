@@ -57,9 +57,12 @@ PowerLawCreepStressUpdateTempl<is_ad>::PowerLawCreepStressUpdateTempl(
 template <bool is_ad>
 void
 PowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
-    const GenericReal<is_ad> & /*effective_trial_stress*/,
-    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
+    const GenericReal<is_ad> & effective_trial_stress,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
+                                                                elasticity_tensor);
+
   if (_temperature)
     _exponential = std::exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
 

@@ -167,6 +167,18 @@
                   'Brannon, A. Sadeghirad, J. Guilkey, Verification tests in solid mechanics, '
                   'Engineering with Computers, Vol 31., p. 193-213.'
   []
+  [cp_affine_plasticity]
+    type = Exodiff
+    input = 'cp_affine_plasticity.i'
+    exodiff = 'cp_affine_plasticity_out.e'
+    custom_cmp = 'affine_plasticity.exodiff'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeCreepPlasticityStress.md'
+    requirement = 'The system shall calculate, with J2 isotropic plasticity, the transient stress '
+                  'eigenvalues with stationary eigenvectors verification test from K. Jamojjala, R. '
+                  'Brannon, A. Sadeghirad, J. Guilkey, Verification tests in solid mechanics, '
+                  'Engineering with Computers, Vol 31., p. 193-213. This shall be done with a '
+                  'coupled creep and plasticity model where the creep model is inactive.'
+  []
   [isotropic_plasticity_substepping_error]
     type = 'RunException'
     input = 'isotropic_plasticity_finite_strain.i'
