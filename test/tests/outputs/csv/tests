@@ -105,4 +105,25 @@
     requirement = "The system shall support CSV output to files on nonlinear iterations, generating unique filenames containing the time step and current nonlinear iteration number."
     issues = "#24705"
   []
+  [pp_scalar_execute_on_mismatch]
+    type = RunException
+    input = 'csv.i'
+    cli_args = 'Outputs/csv/execute_postprocessors_on=FINAL'
+    expect_err = "The parameters 'execute_postprocessors_on', 'execute_scalars_on', and 'execute_reporters_on' must be the same for CSV output"
+    requirement = "The system shall report an error if post-processors and scalar variables have different CSV output frequency."
+    issues = "#25211"
+  []
+  [pp_reporter_execute_on_mismatch]
+    type = RunException
+    input = 'csv.i'
+    cli_args = "
+      Reporters/reporter/type=ConstantReporter
+      Reporters/reporter/integer_names='value1'
+      Reporters/reporter/integer_values='5'
+      Outputs/csv/execute_scalars_on='NONE'
+      Outputs/csv/execute_reporters_on='FINAL'"
+    expect_err = "The parameters 'execute_postprocessors_on', 'execute_scalars_on', and 'execute_reporters_on' must be the same for CSV output"
+    requirement = "The system shall report an error if post-processors and reporters have different CSV output frequency."
+    issues = "#25211"
+  []
 []
