@@ -13,4 +13,16 @@
     exodiff = 2d-segregated-velocity_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D channel using the SIMPLE algorithm with separating the momentum components into different systems."
   []
+  [2d-segregated-energy]
+    type = 'Exodiff'
+    input = 2d-segregated-energy.i
+    exodiff = 2d-segregated-energy_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together with the energy equation in a 2D channel using the SIMPLE algorithm."
+  []
+  [2d-segregated-scalar]
+    type = 'Exodiff'
+    input = 2d-segregated-energy.i
+    exodiff = 2d-segregated-energy_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together with scalar transport equations in a 2D channel using the SIMPLE algorithm."
+  []
 []

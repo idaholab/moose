@@ -669,6 +669,8 @@ SIMPLE::execute()
     // which can be used to stabilize the equations
     if (_has_passive_scalar_systems)
     {
+      _console << " Passive Scalar Iteration " << iteration_counter << std::endl;
+
       iteration_counter = 0;
       std::vector<Real> passive_scalar_residuals(1.0, _passive_scalar_systems.size());
       while (iteration_counter < _num_iterations &&
@@ -692,10 +694,9 @@ SIMPLE::execute()
                                   *_passive_scalar_systems[system_i],
                                   _passive_scalar_equation_relaxation[system_i]);
 
-        _console << " Passive Scalar Iteration " << iteration_counter
-                 << " Initial residual norms:" << std::endl;
+        _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
         for (auto system_i : index_range(_passive_scalar_systems))
-          _console << _passive_scalar_systems[system_i]->name() << COLOR_GREEN
+          _console << _passive_scalar_systems[system_i]->name() << " " << COLOR_GREEN
                    << passive_scalar_residuals[system_i] << COLOR_DEFAULT << std::endl;
       }
     }
