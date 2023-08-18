@@ -267,7 +267,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
           params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
-          params.set<std::vector<subdomain_id_type>>("block_id") = {UINT16_MAX - 1};
+          params.set<std::vector<subdomain_id_type>>("block_id") = {(UINT16_MAX / 2) - 1};
 
           addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
         }
@@ -295,7 +295,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
               std::vector<MeshGeneratorName>{_inputs[0]};
           params.set<std::vector<subdomain_id_type>>("background_block_ids") =
-              std::vector<subdomain_id_type>{UINT16_MAX - 1};
+              std::vector<subdomain_id_type>{(UINT16_MAX / 2) - 1};
 
           addMeshSubgenerator(adaptive_mg_name, std::string(_empty_key), params);
         }
@@ -332,7 +332,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   {
     auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
 
-    params.set<std::vector<SubdomainName>>("block") = {std::to_string(UINT16_MAX - 1)};
+    params.set<std::vector<SubdomainName>>("block") = {std::to_string((UINT16_MAX / 2) - 1)};
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<BoundaryName>("new_boundary") = "outer_core";
 
@@ -651,7 +651,7 @@ CoreMeshGenerator::generate()
       // have a pin type id that matches one in the map. Infer peripheral index
       // from pin_type and region id from assembly_type_id, z_id, and peripheral_index
       dof_id_type assembly_type_id = elem->get_extra_integer(assembly_type_id_int);
-      unsigned int peripheral_idx = (UINT16_MAX - 1) - pin_type_id;
+      unsigned int peripheral_idx = ((UINT16_MAX / 2) - 1) - pin_type_id;
       bool is_background_region = peripheral_idx == 0;
       const auto elem_rid =
           (is_background_region ? _background_region_id_map[assembly_type_id][z_id]
