@@ -67,6 +67,7 @@ AppFactory::createShared(const std::string & app_type,
   const auto it = _name_to_build_info.find(app_type);
   if (it == _name_to_build_info.end())
     mooseError("Object '" + app_type + "' was not registered.");
+  auto & build_info = it->second;
 
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
   parameters.set<std::string>("_type") = app_type;
@@ -87,5 +88,18 @@ AppFactory::createShared(const std::string & app_type,
   command_line->addCommandLineOptionsFromParams(parameters);
   command_line->populateInputParams(parameters);
 
-  return _name_to_build_info[app_type]->build(parameters);
+  build_info->_app_creation_count++;
+
+  return build_info->build(parameters);
+}
+
+std::size_t
+AppFactory::createdAppCount(const std::string & app_type) const
+{
+  // Error if the application type is not located
+  const auto it = _name_to_build_info.find(app_type);
+  if (it == _name_to_build_info.end())
+    mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
+
+  return it->second->_app_creation_count;
 }

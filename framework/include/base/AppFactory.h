@@ -34,6 +34,8 @@ struct AppFactoryBuildInfoBase
   virtual MooseAppPtr build(const InputParameters & params) = 0;
   virtual InputParameters buildParameters() = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
+
+  std::size_t _app_creation_count = 0;
 };
 template <typename T>
 struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
@@ -107,6 +109,11 @@ public:
   {
     return _name_to_build_info.count(app_name);
   }
+
+  /**
+   * @returns the amount of times the AppFactory created the named App-type
+   */
+  std::size_t createdAppCount(const std::string & app_type) const;
 
   /**
    * Returns the map of object name to a function pointer for building said object's
