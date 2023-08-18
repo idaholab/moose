@@ -36,9 +36,9 @@ SIMPLE::validParams()
       "momentum_systems", "The nonlinear system(s) for the momentum equation(s).");
   params.addRequiredParam<NonlinearSystemName>("pressure_system",
                                                "The nonlinear system for the pressure equation.");
-  params.addRequiredParam<NonlinearSystemName>("energy_system",
-                                               "The nonlinear system for the energy equation.");
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addParam<NonlinearSystemName>("energy_system",
+                                       "The nonlinear system for the energy equation.");
+  params.addParam<std::vector<std::string>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
   params.addParam<std::string>("pressure_gradient_tag",
                                "pressure_momentum_kernels",
@@ -512,6 +512,71 @@ SIMPLE::solvePressureCorrector()
   return pressure_solver.get_initial_residual() / norm_factor;
 }
 
+Real
+SIMPLE::solveAdvectedSystem(const unsigned int system_num,
+                            NonlinearSystemBase & system,
+                            const Real relaxation_factor)
+{
+  _problem.setCurrentNonlinearSystem(system_num);
+
+  // We will need some members from the implicit nonlinear system
+  NonlinearImplicitSystem & ni_system =
+      libMesh::cast_ref<NonlinearImplicitSystem &>(system.system());
+
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(ni_system.current_local_solution);
+  NumericVector<Number> & solution = *(ni_system.solution);
+  SparseMatrix<Number> & mmat = *(ni_system.matrix);
+  NumericVector<Number> & rhs = *(ni_system.rhs);
+
+  // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
+  auto diff_diagonal = solution.zero_clone();
+
+  // Fetch the linear solver from the system
+  PetscLinearSolver<Real> & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
+
+  // We need a zero vector to be able to emulate the Ax=b system by evaluating the
+  // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
+  // so we correct it by multiplying it with (-1)
+  auto zero_solution = current_local_solution.zero_clone();
+  _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
+  rhs.scale(-1.0);
+
+  // Go and relax the system matrix and the right hand side
+  relaxMatrix(mmat, relaxation_factor, *diff_diagonal);
+  relaxRightHandSide(rhs, solution, *diff_diagonal);
+
+  if (_print_fields)
+  {
+    _console << system.name() << " system matrix" << std::endl;
+    mmat.print();
+  }
+
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+
+  // We need the non-preconditioned norm to be consistent with the norm factor
+  KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+
+  // Solve the system and update current local solution
+  linear_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+  ni_system.update();
+
+  if (_print_fields)
+  {
+    _console << " rhs when we solve " << system.name() << std::endl;
+    rhs.print();
+    _console << system.name() << " solution " << std::endl;
+    solution.print();
+    _console << " Norm factor " << norm_factor << std::endl;
+  }
+
+  system.setSolution(current_local_solution);
+
+  return linear_solver.get_initial_residual() / norm_factor;
+}
+
 void
 SIMPLE::execute()
 {
@@ -535,9 +600,11 @@ SIMPLE::execute()
     unsigned int iteration_counter = 0;
     std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
     Real pressure_residual = 1.0;
+    Real energy_residual = 1.0;
 
     // Loop until converged or hit the maximum allowed iteration number
-    while (iteration_counter < _num_iterations && !converged(momentum_residual, pressure_residual))
+    while (iteration_counter < _num_iterations &&
+           !convergedNavierStokes(momentum_residual, pressure_residual, energy_residual))
     {
       // We set the preconditioner type using this option.
       // TODO: We need a way to specify different perconditioners for different systems
@@ -548,6 +615,10 @@ SIMPLE::execute()
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
       _pressure_system.residualSetup();
+
+      // If we solve for energy, we clear the caches there too
+      if (_has_energy_system)
+        _energy_system->residualSetup();
 
       iteration_counter++;
 
@@ -569,6 +640,15 @@ SIMPLE::execute()
       // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
 
+      // If we have an energy equation, solve it here. We assume the material properties in the
+      // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
+      // outside of the velocity-pressure loop
+      if (_has_energy_system)
+        energy_residual =
+            solveAdvectedSystem(_energy_sys_number, *_energy_system, _energy_equation_relaxation);
+      else
+        energy_residual = 0.0;
+
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
         _console << " Momentum equation:"
@@ -578,6 +658,45 @@ SIMPLE::execute()
                  << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
       _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
                << std::endl;
+      if (_has_energy_system)
+        _console << " Energy equation: " << COLOR_GREEN << energy_residual << COLOR_DEFAULT
+                 << std::endl;
+    }
+
+    // Now we solve for the passive scalar equations, they should not influence the solution of the
+    // system above. The reason why we need more than one iterations is due to the matrix relaxation
+    // which can be used to stabilize the equations
+    if (_has_passive_scalar_systems)
+    {
+      iteration_counter = 0;
+      std::vector<Real> passive_scalar_residuals(1.0, _passive_scalar_systems.size());
+      while (iteration_counter < _num_iterations &&
+             !convergedPassiveScalars(passive_scalar_residuals))
+      {
+        // We set the preconditioner type using this option.
+        // TODO: We need a way to specify different perconditioners for different systems
+        Moose::PetscSupport::petscSetOptions(_problem);
+        Moose::setSolverDefaults(_problem);
+
+        // We clear the caches in the passive scalar variables
+        for (auto system_i : index_range(_passive_scalar_systems))
+          _passive_scalar_systems[system_i]->residualSetup();
+
+        iteration_counter++;
+
+        // Solve the momentum predictor step
+        for (auto system_i : index_range(_passive_scalar_systems))
+          passive_scalar_residuals[system_i] =
+              solveAdvectedSystem(_passive_scalar_system_numbers[system_i],
+                                  *_passive_scalar_systems[system_i],
+                                  _passive_scalar_equation_relaxation[system_i]);
+
+        _console << " Passive Scalar Iteration " << iteration_counter
+                 << " Initial residual norms:" << std::endl;
+        for (auto system_i : index_range(_passive_scalar_systems))
+          _console << _passive_scalar_systems[system_i]->name() << COLOR_GREEN
+                   << passive_scalar_residuals[system_i] << COLOR_DEFAULT << std::endl;
+      }
     }
   }
 
@@ -595,7 +714,9 @@ SIMPLE::execute()
 }
 
 bool
-SIMPLE::converged(const std::vector<Real> & momentum_residuals, const Real pressure_residual)
+SIMPLE::convergedNavierStokes(const std::vector<Real> & momentum_residuals,
+                              const Real pressure_residual,
+                              const Real energy_residual)
 {
   bool converged = true;
   for (const auto & residual : momentum_residuals)
@@ -605,5 +726,20 @@ SIMPLE::converged(const std::vector<Real> & momentum_residuals, const Real press
       return converged;
   }
   converged = converged && (pressure_residual < _pressure_absolute_tolerance);
+  converged = converged && (energy_residual < _energy_absolute_tolerance);
+  return converged;
+}
+
+bool
+SIMPLE::convergedPassiveScalars(const std::vector<Real> & passive_scalar_residuals)
+{
+  bool converged = true;
+  for (const auto system_i : index_range(passive_scalar_residuals))
+  {
+    converged = converged &&
+                (passive_scalar_residuals[system_i] < _passive_scalar_absolute_tolerance[system_i]);
+    if (!converged)
+      return converged;
+  }
   return converged;
 }

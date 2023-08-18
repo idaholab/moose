@@ -93,6 +93,13 @@ protected:
   /// @return The normalized residual norm of the pressure equation.
   Real solvePressureCorrector();
 
+  /// Solve the an equation which contains an advection term that depends
+  /// on the solution of the Navier-Stokes equations.
+  /// @return The normalized residual norm of the equation.
+  Real solveAdvectedSystem(const unsigned int system_num,
+                           NonlinearSystemBase & system,
+                           const Real relaxation_factor);
+
   /**
    * Relax the update on a solution field using the following approach:
    * $u = u_{old}+\lambda (u - u_{old})$
@@ -103,13 +110,22 @@ protected:
   void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
 
   /**
-   * Determine if the iterative process converged or not
+   * Determine if the iterative process on the Navier-Stokes equations converged or not
    * @param momentum_residual The normalized residuals for the momentum equation. This can either
    *                          be the residual of the monolithic momentum equation or a vector of
    *                          residuals for the direction-wise equations.
    * @param pressure_residual The normalized residual of the pressure equation.
+   * @param energy_residual The normalized residual of the energy equation.
    */
-  bool converged(const std::vector<Real> & momentum_residuals, const Real pressure_residual);
+  bool convergedNavierStokes(const std::vector<Real> & momentum_residuals,
+                             const Real pressure_residual,
+                             const Real energy_residual);
+
+  /**
+   * Determine if the iterative process on the passive scalar equations converged or not
+   * @param passive_scalar_residuals The normalized residual(s) of the passive scalar equation(s).
+   */
+  bool convergedPassiveScalars(const std::vector<Real> & passive_scalar_residuals);
 
   FEProblemBase & _problem;
   Real _system_time;
