@@ -5594,7 +5594,8 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
     _displaced_problem->clearAllDofIndices();
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+  Moose::PetscSupport::petscSetOptions(
+      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
 #else
   // Now this database will be the default
   // Each app should have only one database
@@ -5603,7 +5604,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(*this);
+    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
     _is_petsc_options_inserted = true;
   }
 #endif

@@ -135,7 +135,7 @@ stringify(const MffdType & t)
 }
 
 void
-setSolverOptions(SolverParams & solver_params)
+setSolverOptions(const SolverParams & solver_params)
 {
   // set PETSc options implied by a solve type
   switch (solver_params._type)
@@ -235,25 +235,22 @@ addPetscOptionsFromCommandline()
 }
 
 void
-petscSetOptions(FEProblemBase & problem)
+petscSetOptions(const PetscOptions & po, const SolverParams & solver_params)
 {
-  // Reference to the options stored in FEPRoblem
-  PetscOptions & petsc = problem.getPetscOptions();
-
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
   PetscOptionsClear();
 #else
   PetscOptionsClear(LIBMESH_PETSC_NULLPTR);
 #endif
 
-  setSolverOptions(problem.solverParams());
+  setSolverOptions(solver_params);
 
   // Add any additional options specified in the input file
-  for (const auto & flag : petsc.flags)
+  for (const auto & flag : po.flags)
     setSinglePetscOption(flag.rawName().c_str());
 
   // Add option pairs
-  for (auto & option : petsc.pairs)
+  for (auto & option : po.pairs)
     setSinglePetscOption(option.first, option.second);
 
   addPetscOptionsFromCommandline();

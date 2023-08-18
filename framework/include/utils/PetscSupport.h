@@ -13,6 +13,7 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
+#include "SolverParams.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
@@ -52,7 +53,7 @@ public:
 /**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
-void petscSetOptions(FEProblemBase & problem);
+void petscSetOptions(const PetscOptions & po, const SolverParams & solver_params);
 
 /**
  * Set the default options for a KSP
