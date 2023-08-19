@@ -38,14 +38,22 @@ class MaterialPropertyInterface;
 class PropertyValue
 {
 public:
-  PropertyValue(const unsigned int id) : _id(id) {}
+  /// The type for a material property ID
+  typedef unsigned int id_type;
+
+  PropertyValue(const id_type id) : _id(id) {}
 
   virtual ~PropertyValue(){};
+
+  /// The material property ID for an invalid property
+  /// We only have this because there are a few cases where folks want to instantiate their
+  /// own fake materials, and we should at least force them to be consistent
+  static constexpr id_type invalid_property_id = std::numeric_limits<id_type>::max() - 1;
 
   /**
    * @return The ID of the underlying material property
    */
-  unsigned int id() const { return _id; }
+  id_type id() const { return _id; }
 
   /**
    * String identifying the type of parameter stored.
@@ -91,7 +99,7 @@ public:
 
 protected:
   /// The material property ID
-  const unsigned int _id;
+  const id_type _id;
 };
 
 /**
@@ -104,7 +112,7 @@ class MaterialPropertyBase : public PropertyValue
 public:
   typedef MooseADWrapper<T, is_ad> value_type;
 
-  MaterialPropertyBase(const unsigned int id) : PropertyValue(id) {}
+  MaterialPropertyBase(const PropertyValue::id_type id) : PropertyValue(id) {}
 
   bool isAD() const override final { return is_ad; }
 
@@ -333,7 +341,7 @@ template <typename T>
 class MaterialProperty : public MaterialPropertyBase<T, false>
 {
 public:
-  MaterialProperty(const unsigned int id = std::numeric_limits<unsigned int>::max())
+  MaterialProperty(const PropertyValue::id_type id = PropertyValue::invalid_property_id)
     : MaterialPropertyBase<T, false>(id)
   {
   }
@@ -356,7 +364,7 @@ template <typename T>
 class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
-  ADMaterialProperty(const unsigned int id = std::numeric_limits<unsigned int>::max())
+  ADMaterialProperty(const PropertyValue::id_type id = PropertyValue::invalid_property_id)
     : MaterialPropertyBase<T, true>(id)
   {
   }

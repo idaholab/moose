@@ -66,9 +66,10 @@ public:
   static InputParameters validParams();
 
   /// The material property ID for a default (parsed from input) property
-  static constexpr unsigned int default_prop_id = std::numeric_limits<unsigned int>::max() - 1;
+  static constexpr PropertyValue::id_type default_property_id =
+      PropertyValue::invalid_property_id - 1;
   /// The material property ID for a zero property
-  static constexpr unsigned int zero_prop_id = std::numeric_limits<unsigned int>::max() - 2;
+  static constexpr PropertyValue::id_type zero_property_id = PropertyValue::invalid_property_id - 2;
 
   ///@{
   /**
@@ -601,7 +602,7 @@ MaterialPropertyInterface::defaultGenericMaterialProperty(const std::string & na
 
       const auto nqp = Moose::constMaxQpsPerElem;
       auto & property =
-          _default_properties.emplace_back(std::make_unique<prop_type>(default_prop_id));
+          _default_properties.emplace_back(std::make_unique<prop_type>(default_property_id));
       auto & T_property = static_cast<prop_type &>(*property);
 
       T_property.resize(nqp);
@@ -687,7 +688,7 @@ const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialProperty()
 {
   // static zero property storage
-  static GenericMaterialProperty<T, is_ad> zero(zero_prop_id);
+  static GenericMaterialProperty<T, is_ad> zero(zero_property_id);
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
