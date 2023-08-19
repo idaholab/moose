@@ -333,7 +333,10 @@ template <typename T>
 class MaterialProperty : public MaterialPropertyBase<T, false>
 {
 public:
-  MaterialProperty(const unsigned int id) : MaterialPropertyBase<T, false>(id) {}
+  MaterialProperty(const unsigned int id = std::numeric_limits<unsigned int>::max())
+    : MaterialPropertyBase<T, false>(id)
+  {
+  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -353,7 +356,10 @@ template <typename T>
 class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
-  ADMaterialProperty(const unsigned int id) : MaterialPropertyBase<T, true>(id) {}
+  ADMaterialProperty(const unsigned int id = std::numeric_limits<unsigned int>::max())
+    : MaterialPropertyBase<T, true>(id)
+  {
+  }
 
   using typename MaterialPropertyBase<T, true>::value_type;
 
