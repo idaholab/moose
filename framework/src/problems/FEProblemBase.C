@@ -1044,25 +1044,6 @@ FEProblemBase::initialSetup()
     }
   }
 
-<<<<<<< HEAD
-=======
-  if (_app.isRestarting() || _app.isRecovering())
-  {
-    // We may have just clobbered initial conditions that were explicitly set
-    // In a _restart_ scenario it is completely valid to specify new initial conditions
-    // for some of the variables which should override what's coming from the restart file
-    if (!_app.isRecovering())
-    {
-      TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-        _ics.initialSetup(tid);
-      _scalar_ics.sort();
-      projectSolution();
-    }
-  }
-
->>>>>>> cad6019c51 (WIP dependent restart)
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
   // has been restored
 
