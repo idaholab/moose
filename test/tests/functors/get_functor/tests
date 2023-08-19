@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#25012'
+  design = 'Functors/index.md'
+
+  [test]
+    type = CSVDiff
+    input = get_functor.i
+    csvdiff = get_functor_out.csv
+    allow_warnings = True # dot operator of PP functor will give warning
+    expect_out = 'The time derivative functor operator was called on this post-processor'
+    requirement = 'The system shall be able to use a variable, function, functor material property, and a post-processor in a functor parameter.'
+  []
+[]
