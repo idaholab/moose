@@ -47,7 +47,8 @@ class MediaExtension(command.CommandExtension):
         # add a page to the local process translator for images created by scripts
         for extra in page['script_files']:
             plot_page = pages.File(extra[0], source=extra[1], base=self.translator.destination)
-            self.translator.addPage(plot_page)
+            if self.translator.findPage(plot_page.local, throw_on_zero=False) is None:
+                self.translator.addPage(plot_page)
 
     def postWrite(self, page):
 
