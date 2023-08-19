@@ -77,8 +77,7 @@ public:
    * @param file_name The name of the file to read from
    * @restartable_data The data to be written
    */
-  void writeRestartableData(const std::string & file_name,
-                            RestartableDataMap & restartable_data);
+  void writeRestartableData(const std::string & file_name, RestartableDataMap & restartable_data);
 
   /**
    * Reads restartable data from a binary file.
