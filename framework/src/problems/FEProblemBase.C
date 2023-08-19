@@ -1008,15 +1008,27 @@ FEProblemBase::initialSetup()
     }
   }
 
-  if (_app.isRestarting() || _app.isRecovering())
+  // Restore for MultiApps (this app is a sub-app and has been given a Backup
+  // from the primary app)
+  //
+  // We would prefer that this is further up where the main app restore is, but
+  // currently the MultiApp recover doesn't use a more featureful system reload,
+  // and instead just saves and loads vectors directly. This isn't flexible and
+  // leads to lots of issues where we try to load into vectors that haven't been
+  // declared yet (because they happen between this call and the primary app
+  // load, in things like the system's initial setup). #24510 will unify the
+  // primary and multiapp loads by using a more flexible system load that will
+  // initialized vectors that haven't been declared yet if needed
+  if ((_app.isRestarting() || _app.isRecovering()) && _app.hasCachedBackup())
   {
-    if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
-                                // Backup
-      _app.restoreCachedBackup();
+    _app.restoreCachedBackup();
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
     // for some of the variables which should override what's coming from the restart file
+    //
+    // NOTE: we don't need to do this for the primary app because the primary app restore
+    // call is much further up and happens before ICs
     if (!_app.isRecovering())
     {
       TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
