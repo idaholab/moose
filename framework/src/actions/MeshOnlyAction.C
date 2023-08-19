@@ -200,8 +200,8 @@ MeshOnlyAction::act()
     // Write mesh metadata
     if (processor_id() == 0 && _app.hasRestartableDataMap(MooseApp::MESH_META_DATA))
     {
-      RestartableDataIO rdio(_app, nullptr);
-      const auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+      RestartableDataIO rdio(_app);
+      auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
       const auto & name = _app.getRestartableDataMapName(MooseApp::MESH_META_DATA);
       const std::string filename = mesh_file + "/meta_data" + name + rdio.getRestartableDataExt();
       rdio.writeRestartableData(filename, meta_data);
