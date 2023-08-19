@@ -86,7 +86,7 @@ else
 
   cd "${WASP_SRC_DIR}"/build
 
-  WASP_OPTIONS="-D CMAKE_INSTALL_PREFIX:STRING=${WASP_SRC_DIR}/install"
+  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_SRC_DIR}/install"
 
   source $SCRIPT_DIR/configure_wasp.sh
 

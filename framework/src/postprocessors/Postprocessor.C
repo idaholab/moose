@@ -30,27 +30,35 @@ Postprocessor::validParams()
 Postprocessor::Postprocessor(const MooseObject * moose_object)
   : OutputInterface(moose_object->parameters()),
     NonADFunctorInterface(moose_object),
-    _pp_name(moose_object->name())
+    Moose::FunctorBase<Real>(moose_object->name()),
+    _pp_name(moose_object->name()),
+    _current_value(declareValue(*moose_object)),
+    _pp_moose_object(*moose_object)
+{
+}
+
+const PostprocessorValue &
+Postprocessor::declareValue(const MooseObject & moose_object)
 {
   auto & fe_problem =
-      *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+      *moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
 
-  const PostprocessorReporterName r_name(moose_object->name());
+  const PostprocessorReporterName r_name(_pp_name);
+
+  const bool is_thread_0 = moose_object.parameters().get<THREAD_ID>("_tid") == 0;
+  mooseAssert(is_thread_0 ==
+                  !fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
+              "Postprocessor Reporter threaded value declaration mismatch");
 
   // Declare the Reporter value on thread 0 only; this lets us add error checking to
   // make sure that it really is added only once
-  if (moose_object->parameters().get<THREAD_ID>("_tid") == 0)
-  {
-    mooseAssert(!fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
-                "Postprocessor Reporter value is already declared");
-
+  if (is_thread_0)
     fe_problem.getReporterData(ReporterData::WriteKey())
         .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
-            r_name, REPORTER_MODE_UNSET, *moose_object);
-  }
-  else
-    mooseAssert(fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
-                "Postprocessor Reporter value is not declared");
+            r_name, REPORTER_MODE_UNSET, moose_object);
+
+  // At this point, thread 0 should have declared the value and getting it should be valid
+  return fe_problem.getReporterData().getReporterValue<PostprocessorValue>(r_name);
 }
 
 PostprocessorValue
@@ -63,4 +71,115 @@ PostprocessorValue
 Postprocessor::getValue() const
 {
   mooseError("getValue() (const or non-const) must be implemented.");
+}
+
+typename Postprocessor::ValueType
+Postprocessor::evaluate(const ElemArg & /*elem_arg*/, const Moose::StateArg & /*state*/) const
+{
+  return getCurrentValue();
+}
+
+typename Postprocessor::ValueType
+Postprocessor::evaluate(const FaceArg & /*face*/, const Moose::StateArg & /*state*/) const
+{
+  return getCurrentValue();
+}
+
+typename Postprocessor::ValueType
+Postprocessor::evaluate(const ElemQpArg & /*elem_qp*/, const Moose::StateArg & /*state*/) const
+{
+  return getCurrentValue();
+}
+
+typename Postprocessor::ValueType
+Postprocessor::evaluate(const ElemSideQpArg & /*elem_side_qp*/,
+                        const Moose::StateArg & /*state*/) const
+{
+  return getCurrentValue();
+}
+
+typename Postprocessor::ValueType
+Postprocessor::evaluate(const ElemPointArg & /*elem_point_arg*/,
+                        const Moose::StateArg & /*state*/) const
+{
+  return getCurrentValue();
+}
+
+typename Postprocessor::GradientType
+Postprocessor::evaluateGradient(const ElemArg & /*elem_arg*/,
+                                const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+typename Postprocessor::GradientType
+Postprocessor::evaluateGradient(const FaceArg & /*face*/, const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+typename Postprocessor::GradientType
+Postprocessor::evaluateGradient(const ElemQpArg & /*elem_qp*/,
+                                const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+typename Postprocessor::GradientType
+Postprocessor::evaluateGradient(const ElemSideQpArg & /*elem_side_qp*/,
+                                const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+typename Postprocessor::GradientType
+Postprocessor::evaluateGradient(const ElemPointArg & /*elem_point_arg*/,
+                                const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+typename Postprocessor::DotType
+Postprocessor::evaluateDot(const ElemArg & /*elem_arg*/, const Moose::StateArg & /*state*/) const
+{
+  evaluateDotWarning();
+  return 0;
+}
+
+typename Postprocessor::DotType
+Postprocessor::evaluateDot(const FaceArg & /*face*/, const Moose::StateArg & /*state*/) const
+{
+  evaluateDotWarning();
+  return 0;
+}
+
+typename Postprocessor::DotType
+Postprocessor::evaluateDot(const ElemQpArg & /*elem_qp*/, const Moose::StateArg & /*state*/) const
+{
+  evaluateDotWarning();
+  return 0;
+}
+
+typename Postprocessor::DotType
+Postprocessor::evaluateDot(const ElemSideQpArg & /*elem_side_qp*/,
+                           const Moose::StateArg & /*state*/) const
+{
+  evaluateDotWarning();
+  return 0;
+}
+
+typename Postprocessor::DotType
+Postprocessor::evaluateDot(const ElemPointArg & /*elem_point_arg*/,
+                           const Moose::StateArg & /*state*/) const
+{
+  evaluateDotWarning();
+  return 0;
+}
+
+void
+Postprocessor::evaluateDotWarning() const
+{
+  mooseDoOnce(_pp_moose_object.mooseWarning(
+      "The time derivative functor operator was called on this post-processor.\n\nA zero value "
+      "will always be returned, even if the post-processor value changes with time."));
 }

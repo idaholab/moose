@@ -652,10 +652,11 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 }
 
 void
-Parser::parse(const std::vector<std::string> & input_filenames, const std::string & input_text)
+Parser::parse(const std::vector<std::string> & input_filenames,
+              const std::optional<std::string> & input_text)
 {
   // Check that if the input_text string is provided, then there is only one filename to match
-  if (!input_text.empty() && input_filenames.size() != 1)
+  if (input_text.has_value() && input_filenames.size() != 1)
     mooseError("If 'input_text' is provided, then 'input_filenames' must hold only one filename");
 
   // Save the filename
@@ -677,9 +678,11 @@ Parser::parse(const std::vector<std::string> & input_filenames, const std::strin
 
   for (auto & input_filename : _input_filenames)
   {
-    // Parse the input text string if non-empty, otherwise read file from disk
-    std::string input(input_text);
-    if (input.empty())
+    // Parse the input text string if provided, otherwise read file from disk
+    std::string input;
+    if (input_text.has_value())
+      input = input_text.value();
+    else
     {
       MooseUtils::checkFileReadable(input_filename, true);
       std::ifstream f(input_filename);

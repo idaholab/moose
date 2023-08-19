@@ -345,23 +345,31 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
   std::string s = "String";
   if (cpp_type.find("std::vector") != std::string::npos ||
       cpp_type.find("libMesh::VectorValue") != std::string::npos ||
-      cpp_type.find("libMesh::TensorValue") != std::string::npos)
+      cpp_type.find("libMesh::TensorValue") != std::string::npos ||
+      cpp_type.find("Eigen::Matrix") != std::string::npos)
   {
     // Get the template type and use its basic type for the array type
     pcrecpp::RE r("^[^<]+<\\s*(.*)\\s*>$");
     std::string t;
     r.FullMatch(cpp_type, &t);
+
+    // Capture type just to the first comma for Eigen::Matrix<type,V,W,X,Y,Z>
+    if (cpp_type.find("Eigen::Matrix") != std::string::npos)
+      t = t.substr(0, t.find(","));
+
     s = "Array:" + basicCppType(t);
   }
   else if (cpp_type.find("MultiMooseEnum") != std::string::npos ||
            cpp_type.find("ExecFlagEnum") != std::string::npos ||
-           cpp_type.find("VectorPostprocessorName") != std::string::npos)
+           cpp_type.find("VectorPostprocessorName") != std::string::npos ||
+           cpp_type.find("std::map") != std::string::npos)
     s = "Array:String";
   else if (cpp_type.find("libMesh::Point") != std::string::npos)
     s = "Array:Real";
   else if (cpp_type == "int" || cpp_type == "unsigned int" || cpp_type == "short" ||
            cpp_type == "unsigned short" || cpp_type == "char" || cpp_type == "unsigned char" ||
-           cpp_type == "long" || cpp_type == "unsigned long")
+           cpp_type == "long" || cpp_type == "unsigned long" || cpp_type == "long long" ||
+           cpp_type == "unsigned long long")
     s = "Integer";
   else if (cpp_type == "double" || cpp_type == "float")
     s = "Real";

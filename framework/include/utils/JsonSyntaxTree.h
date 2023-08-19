@@ -86,7 +86,7 @@ protected:
 
   size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
 
-  std::string
+  static std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
   static std::vector<std::string> splitPath(const std::string & path);
   nlohmann::json & getJson(const std::string & parent, const std::string & path, bool is_type);
@@ -102,4 +102,7 @@ protected:
   std::map<std::string, std::pair<std::string, std::string>> _action_label_map;
   std::map<std::string, std::pair<std::string, std::string>> _object_label_map;
   ///@}
+
+  // Allow the MooseServer class to use protected static convenience methods
+  friend class MooseServer;
 };

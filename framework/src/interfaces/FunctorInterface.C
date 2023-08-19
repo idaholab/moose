@@ -31,7 +31,7 @@ FunctorInterface::deduceFunctorName(const std::string & name, const InputParamet
   {
     if (params.have_parameter<MooseFunctorName>(name))
       return params.get<MooseFunctorName>(name);
-    // variables, functor material properties, and functions are also functors
+    // variables, functor material properties, functions, and post-processors are also functors
     else if (params.have_parameter<MaterialPropertyName>(name))
       return params.get<MaterialPropertyName>(name);
     else if (params.have_parameter<VariableName>(name))
@@ -47,6 +47,8 @@ FunctorInterface::deduceFunctorName(const std::string & name, const InputParamet
       return params.get<NonlinearVariableName>(name);
     else if (params.have_parameter<FunctionName>(name))
       return params.get<FunctionName>(name);
+    else if (params.have_parameter<PostprocessorName>(name))
+      return params.get<PostprocessorName>(name);
     else
       mooseError("Invalid parameter type for retrieving a functor");
   }

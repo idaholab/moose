@@ -122,6 +122,11 @@ public:
   const auto & registeredObjects() const { return _name_to_object; }
 
   /**
+   * Returns a Boolean indicating whether an object type has been registered
+   */
+  bool isRegistered(const std::string & obj_name) const { return _name_to_object.count(obj_name); }
+
+  /**
    * Get a list of all constructed Moose Object types
    */
   std::vector<std::string> getConstructedObjects() const;

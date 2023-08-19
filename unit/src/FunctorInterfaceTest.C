@@ -61,6 +61,11 @@ TEST(FunctorInterfaceTest, deduceFunctorName)
   {
     auto params = base_params;
     params.set<PostprocessorName>("test") = "pp";
+    EXPECT_EQ(FunctorInterface::deduceFunctorName("test", params), "pp");
+  }
+  {
+    auto params = base_params;
+    params.set<std::string>("test") = "str";
     try
     {
       FunctorInterface::deduceFunctorName("test", params);
