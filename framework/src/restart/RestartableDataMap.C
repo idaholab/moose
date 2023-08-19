@@ -93,7 +93,6 @@ RestartableDataMap::sortedData()
   auto sorted_values = resolver.getSortedValuesSets();
   for (auto & values : sorted_values)
   {
-    std::cerr << values.size() << std::endl;
     std::sort(values.begin(),
               values.end(),
               [this](const auto & a, const auto & b)

@@ -289,8 +289,6 @@ RestartableDataIO::serializeRestartableData(RestartableDataMap & restartable_dat
     // Append data to the full block
     data_blk << data_stream.str();
 
-    std::cerr << "storing " << data->name() << " " << data->type() << std::endl;
-
     // Store name, size, type hash, and type in the header
     mooseAssert(data->name().size(), "Empty name");
     std::string name = data->name();
@@ -338,8 +336,6 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
 
   if (stream.tellg() == -1)
     mooseError("Failed to load RestartableData '", value.name(), "' of type '", value.type(), "'");
-
-  std::cerr << "loading " << value.name() << " " << value.type() << std::endl;
 
   if ((data_entry.position + (std::streampos)data_entry.size) != stream.tellg())
     mooseError("Size mismatch for loading RestartableData '",
