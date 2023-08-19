@@ -351,6 +351,15 @@ InputParameters::isParamRequired(const std::string & name_in) const
   return _params.count(name) > 0 && _params.at(name)._required;
 }
 
+void
+InputParameters::makeParamNotRequired(const std::string & name_in)
+{
+  const auto name = checkForRename(name_in);
+
+  if (_params.count(name))
+    _params[name]._required = false;
+}
+
 bool
 InputParameters::isParamValid(const std::string & name_in) const
 {

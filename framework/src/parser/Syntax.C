@@ -223,8 +223,23 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
 }
 
 std::string
-Syntax::isAssociated(const std::string & real_id, bool * is_parent) const
+Syntax::isAssociated(const std::string & real_id,
+                     bool * is_parent,
+                     const std::map<std::string, std::set<std::string>> & alt_map) const
 {
+  // if non-empty alt_map was provided then traverse its syntax instead of _syntax_to_actions
+  std::set<std::string> syntax_to_traverse;
+  if (!alt_map.empty())
+    std::transform(alt_map.begin(),
+                   alt_map.end(),
+                   std::inserter(syntax_to_traverse, syntax_to_traverse.end()),
+                   [](auto pair) { return pair.first; });
+  else
+    std::transform(_syntax_to_actions.begin(),
+                   _syntax_to_actions.end(),
+                   std::inserter(syntax_to_traverse, syntax_to_traverse.end()),
+                   [](auto pair) { return pair.first; });
+
   /**
    * This implementation assumes that wildcards can occur in the place of an entire token but not as
    * part of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
@@ -241,9 +256,9 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent) const
   MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (auto it = _syntax_to_actions.rbegin(); it != _syntax_to_actions.rend(); ++it)
+  for (auto it = syntax_to_traverse.rbegin(); it != syntax_to_traverse.rend(); ++it)
   {
-    std::string reg_id = it->first;
+    std::string reg_id = *it;
     if (reg_id == real_id)
     {
       *is_parent = false;

@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <optional>
 
 // Forward declarations
 class ActionWarehouse;
@@ -72,10 +73,11 @@ public:
   std::string getPrimaryFileName(bool stripLeadingPath = true) const;
 
   /**
-   * Parse an input file (or text string if non-empty) consisting of hit syntax and setup objects
+   * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void parse(const std::vector<std::string> & input_filenames, const std::string & input_text = "");
+  void parse(const std::vector<std::string> & input_filenames,
+             const std::optional<std::string> & input_text = std::nullopt);
 
   /**
    * This function attempts to extract values from the input file based on the contents of
