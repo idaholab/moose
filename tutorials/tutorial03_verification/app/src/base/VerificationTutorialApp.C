@@ -25,7 +25,7 @@ VerificationTutorialApp::~VerificationTutorialApp() {}
 void
 VerificationTutorialApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAll(f, af, syntax);
+  ModulesApp::registerAllObjects<VerificationTutorialApp>(f, af, syntax);
   Registry::registerObjectsTo(f, {"VerificationTutorialApp"});
   Registry::registerActionsTo(af, {"VerificationTutorialApp"});
 
