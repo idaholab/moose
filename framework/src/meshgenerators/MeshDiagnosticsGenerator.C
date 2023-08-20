@@ -357,6 +357,8 @@ MeshDiagnosticsGenerator::generate()
           coarse_elements.insert(elem);
       }
 
+      std::cout << elements.size() << elements_around.size() << coarse_elements.size() << std::endl;
+
       // all the elements around contained the node as one of their nodes
       if (elements.size() == elements_around.size())
         continue;
@@ -365,6 +367,8 @@ MeshDiagnosticsGenerator::generate()
       // not the interface between coarse and refined elements
       if (coarse_elements.size() > 1)
         continue;
+
+      std::cout << "here" << std::endl;
 
       // Depending on the type of element, we already know the number of elements we expect
       // to be part of this set of likely refined candidates for a given non-conformal node to
@@ -388,13 +392,13 @@ MeshDiagnosticsGenerator::generate()
 
       // For quads and hexes, there is one (quad) or four (hexes) sides that are tied to this node
       // at the non-conformal interface between the refined elements and a coarse element
+      unsigned int side_inside_parent;
       if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
           elem_type == HEX20 || elem_type == HEX27)
       {
         auto elem = *elements.begin();
         // Find which sides (of the elements) the node considered is part of
         std::vector<Elem *> node_on_sides;
-        unsigned int side_inside_parent;
         for (auto i : make_range(elem->n_sides()))
         {
           auto side = elem->side_ptr(i);
@@ -425,164 +429,203 @@ MeshDiagnosticsGenerator::generate()
             }
           }
         }
+      }
 
-        // Nodes of the tentative parent element
-        std::vector<const Node *> tentative_coarse_nodes;
+      // Nodes of the tentative parent element
+      std::vector<const Node *> tentative_coarse_nodes;
 
-        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+      {
+        auto elem = *elements.begin();
+        tentative_coarse_nodes.resize(4);
+        // Gather the other potential elements in the refined element:
+        // they are point neighbors of the node that is shared between all the elements flagged
+        // for the non-conformality
+        // Find shared node
+        auto interior_side = elem->side_ptr(side_inside_parent);
+        const Node * interior_node;
+        for (const auto & other_node : interior_side->node_ref_range())
         {
-          tentative_coarse_nodes.resize(4);
-          // Gather the other potential elements in the refined element:
-          // they are point neighbors of the node that is shared between all the elements flagged
-          // for the non-conformality
-          // Find shared node
-          auto interior_side = elem->side_ptr(side_inside_parent);
-          const Node * interior_node;
-          for (const auto & other_node : interior_side->node_ref_range())
-          {
-            if (other_node == *node)
-              continue;
-            bool in_all_node_neighbor_elements = true;
-            for (auto other_elem : elements)
-            {
-              if (other_elem->get_node_index(&other_node) == libMesh::invalid_uint)
-                in_all_node_neighbor_elements = false;
-            }
-            if (in_all_node_neighbor_elements)
-            {
-              interior_node = &other_node;
-              break;
-            }
-          }
-          // std::cout << "interior node at " << *interior_node << std::endl;
-
-          // Add point neighbors of interior node to list of potentially refined elements
-          elem->find_point_neighbors(*interior_node, elements);
-
-          // We'll need to order the coarse nodes based on the clock-wise order of the elements
-          // Define a frame in which to compute the angles of the elements centers
-          // angle 0 is node - interior node
-          auto start_clock = *node - *interior_node;
-          auto normal = (elem->vertex_average() - *interior_node).cross(start_clock);
-          start_clock /= start_clock.norm();
-          normal /= normal.norm();
-
-          std::vector<std::pair<unsigned int, Real>> elements_angles(elements.size());
-          unsigned int angle_i = 0;
-          for (const auto elem_around : elements)
-          {
-            auto vec = elem_around->vertex_average() - *interior_node;
-            vec /= vec.norm();
-            auto angle = atan2(vec.cross(start_clock) * normal, vec * start_clock);
-            elements_angles[angle_i] = std::make_pair(angle_i, angle);
-            angle_i++;
-          }
-
-          // sort by angle, so it goes around the interior node
-          std::sort(elements_angles.begin(),
-                    elements_angles.end(),
-                    [](auto & left, auto & right) { return left.second < right.second; });
-          std::vector<unsigned int> elements_order(4);
-          unsigned int order_i = 0;
-          for (const auto & angle_pair : elements_angles)
-          {
-            // std::cout << "Node " << angle_pair.first << " angle " << angle_pair.second << "
-            // order
-            // "
-            //           << order_i << std::endl;
-            elements_order[angle_pair.first] = order_i;
-            order_i++;
-          }
-
-          // The exterior nodes are the opposite nodes of the interior_node!
-          unsigned int neighbor_i = 0;
-          for (auto neighbor : elements)
-          {
-            const auto interior_node_number = neighbor->get_node_index(interior_node);
-            unsigned int opposite_node_index = (interior_node_number + 2) % 4;
-
-            // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
-            tentative_coarse_nodes[elements_order[neighbor_i++]] =
-                neighbor->node_ptr(opposite_node_index);
-          }
-        }
-
-        // Check the element types: if not all the same then it's not uniform AMR
-        for (auto elem : elements)
-          if (elem->type() != elem_type)
+          if (other_node == *node)
             continue;
-
-        // std::cout << "Nodes to build the parent: " << tentative_coarse_nodes.size() <<
-        // std::endl;
-
-        // Check the number of coarse element nodes gathered
-        for (auto node : tentative_coarse_nodes)
-          if (node == nullptr)
-            continue;
-
-        // Form a parent, of the same type as the elements we are trying to combine!
-        std::unique_ptr<Elem> parent;
-        // TODO clone instead of hard setting type
-        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
-          parent = std::make_unique<Quad4>();
-        if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) && elements.size() != 4)
-          parent = std::make_unique<Hex8>();
-        if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
-          parent = std::make_unique<Tri3>();
-        if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 4)
-          parent = std::make_unique<Tet4>();
-
-        // Set the nodes to the coarse element
-        for (auto i : index_range(tentative_coarse_nodes))
-        {
-          // std::cout << "Node around " << *tentative_coarse_nodes[i] << std::endl;
-          parent->set_node(i) = const_cast<Node *>(tentative_coarse_nodes[i]);
-        }
-
-        // Refine this parent
-        parent->set_refinement_flag(Elem::REFINE);
-
-        MeshRefinement mesh_refiner(*mesh);
-        parent->refine(mesh_refiner);
-        std::cout << "Child " << parent->n_children() << std::endl;
-
-        // Compare with the original set of elements
-        // We already know the child share the exterior node. If they share the same vertex
-        // average as the group of unrefined elements we will call this good enough for now
-        bool all_children_match = true;
-        for (auto & child : parent->child_ref_range())
-        {
-          bool found_child = false;
-          // std::cout << "Center of child " << child.vertex_average() << " " << std::endl;
-          for (auto & potential_children : elements)
-            if (MooseUtils::absoluteFuzzyEqual(child.vertex_average()(0),
-                                               potential_children->vertex_average()(0),
-                                               TOLERANCE) &&
-                MooseUtils::absoluteFuzzyEqual(child.vertex_average()(1),
-                                               potential_children->vertex_average()(1),
-                                               TOLERANCE) &&
-                MooseUtils::absoluteFuzzyEqual(
-                    child.vertex_average()(2), potential_children->vertex_average()(2), TOLERANCE))
-            {
-              found_child = true;
-              break;
-            }
-          if (!found_child)
+          bool in_all_node_neighbor_elements = true;
+          for (auto other_elem : elements)
           {
-            all_children_match = false;
+            if (other_elem->get_node_index(&other_node) == libMesh::invalid_uint)
+              in_all_node_neighbor_elements = false;
+          }
+          if (in_all_node_neighbor_elements)
+          {
+            interior_node = &other_node;
             break;
           }
         }
+        // std::cout << "interior node at " << *interior_node << std::endl;
 
-        if (all_children_match)
+        // Add point neighbors of interior node to list of potentially refined elements
+        elem->find_point_neighbors(*interior_node, elements);
+
+        // We'll need to order the coarse nodes based on the clock-wise order of the elements
+        // Define a frame in which to compute the angles of the elements centers
+        // angle 0 is node - interior node
+        auto start_clock = *node - *interior_node;
+        auto normal = (elem->vertex_average() - *interior_node).cross(start_clock);
+        start_clock /= start_clock.norm();
+        normal /= normal.norm();
+
+        std::vector<std::pair<unsigned int, Real>> elements_angles(elements.size());
+        unsigned int angle_i = 0;
+        for (const auto elem_around : elements)
         {
-          num_likely_AMR_created_nonconformality++;
-          if (num_likely_AMR_created_nonconformality < 10)
-            _console << "Detected non-conformality likely created by AMR near " << *node
-                     << std::endl;
-          else if (num_likely_AMR_created_nonconformality == 10)
-            _console << "Maximum log output reached, silencing output" << std::endl;
+          auto vec = elem_around->vertex_average() - *interior_node;
+          vec /= vec.norm();
+          auto angle = atan2(vec.cross(start_clock) * normal, vec * start_clock);
+          elements_angles[angle_i] = std::make_pair(angle_i, angle);
+          angle_i++;
         }
+
+        // sort by angle, so it goes around the interior node
+        std::sort(elements_angles.begin(),
+                  elements_angles.end(),
+                  [](auto & left, auto & right) { return left.second < right.second; });
+        std::vector<unsigned int> elements_order(4);
+        unsigned int order_i = 0;
+        for (const auto & angle_pair : elements_angles)
+        {
+          // std::cout << "Node " << angle_pair.first << " angle " << angle_pair.second << "
+          // order
+          // "
+          //           << order_i << std::endl;
+          elements_order[angle_pair.first] = order_i;
+          order_i++;
+        }
+
+        // The exterior nodes are the opposite nodes of the interior_node!
+        unsigned int neighbor_i = 0;
+        for (auto neighbor : elements)
+        {
+          const auto interior_node_number = neighbor->get_node_index(interior_node);
+          unsigned int opposite_node_index = (interior_node_number + 2) % 4;
+
+          // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
+          tentative_coarse_nodes[elements_order[neighbor_i++]] =
+              neighbor->node_ptr(opposite_node_index);
+        }
+      }
+      // For TRI elements, there is an element at the center
+      else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
+      // || elem_type == TET4 ||
+      //       elem_type == TET10 || elem_type == TET14)
+      {
+        std::cout << "Building here" << std::endl;
+        // Find the center element
+        // It's the only element that does not share a node with the coarse element
+        const auto coarse_element = *coarse_elements.begin();
+        const Elem * center_elem;
+        for (const auto refined_elem : elements)
+        {
+          bool shares_a_node_with_coarse = false;
+          for (const auto & other_node : refined_elem->node_ref_range())
+            for (const auto & coarse_node : coarse_element->node_ref_range())
+              if (other_node == coarse_node)
+              {
+                shares_a_node_with_coarse = true;
+                tentative_coarse_nodes.push_back(&other_node);
+              }
+          if (!shares_a_node_with_coarse)
+            center_elem = refined_elem;
+        }
+
+        // Get the final tentative new coarse element node, on the other side of the center
+        // element from the non-conformality
+        unsigned int center_side_opposite_node;
+        for (auto side_index : center_elem->side_index_range())
+          if (center_elem->side_ptr(side_index)->get_node_index(node) == libMesh::invalid_uint)
+            center_side_opposite_node = side_index;
+        const auto neighbor_on_other_side_of_opposite_center_side =
+            center_elem->neighbor_ptr(center_side_opposite_node);
+        elements.insert(neighbor_on_other_side_of_opposite_center_side);
+        for (const auto & tri_node :
+             neighbor_on_other_side_of_opposite_center_side->node_ref_range())
+          if (center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
+              libMesh::invalid_uint)
+            tentative_coarse_nodes.push_back(&tri_node);
+
+        mooseAssert(tentative_coarse_nodes.size() == 3,
+                    "We are forming a coarsened triangle element");
+      }
+
+      // Check the element types: if not all the same then it's not uniform AMR
+      for (auto elem : elements)
+        if (elem->type() != elem_type)
+          continue;
+
+      std::cout << "Nodes to build the parent: " << tentative_coarse_nodes.size() << std::endl;
+
+      // Check the number of coarse element nodes gathered
+      for (auto node : tentative_coarse_nodes)
+        if (node == nullptr)
+          continue;
+
+      // Form a parent, of the same type as the elements we are trying to combine!
+      std::unique_ptr<Elem> parent;
+      // TODO clone instead of hard setting type
+      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+        parent = std::make_unique<Quad4>();
+      if (elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27)
+        parent = std::make_unique<Hex8>();
+      if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
+        parent = std::make_unique<Tri3>();
+      if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
+        parent = std::make_unique<Tet4>();
+
+      // Set the nodes to the coarse element
+      for (auto i : index_range(tentative_coarse_nodes))
+      {
+        std::cout << "Node around " << *tentative_coarse_nodes[i] << std::endl;
+        parent->set_node(i) = const_cast<Node *>(tentative_coarse_nodes[i]);
+      }
+
+      // Refine this parent
+      parent->set_refinement_flag(Elem::REFINE);
+
+      MeshRefinement mesh_refiner(*mesh);
+      parent->refine(mesh_refiner);
+      std::cout << "Child " << parent->n_children() << std::endl;
+
+      // Compare with the original set of elements
+      // We already know the child share the exterior node. If they share the same vertex
+      // average as the group of unrefined elements we will call this good enough for now
+      bool all_children_match = true;
+      for (auto & child : parent->child_ref_range())
+      {
+        bool found_child = false;
+        std::cout << "Center of child " << child.vertex_average() << " " << std::endl;
+        for (auto & potential_children : elements)
+          if (MooseUtils::absoluteFuzzyEqual(
+                  child.vertex_average()(0), potential_children->vertex_average()(0), TOLERANCE) &&
+              MooseUtils::absoluteFuzzyEqual(
+                  child.vertex_average()(1), potential_children->vertex_average()(1), TOLERANCE) &&
+              MooseUtils::absoluteFuzzyEqual(
+                  child.vertex_average()(2), potential_children->vertex_average()(2), TOLERANCE))
+          {
+            found_child = true;
+            break;
+          }
+        if (!found_child)
+        {
+          all_children_match = false;
+          break;
+        }
+      }
+
+      if (all_children_match)
+      {
+        num_likely_AMR_created_nonconformality++;
+        if (num_likely_AMR_created_nonconformality < 10)
+          _console << "Detected non-conformality likely created by AMR near " << *node << std::endl;
+        else if (num_likely_AMR_created_nonconformality == 10)
+          _console << "Maximum log output reached, silencing output" << std::endl;
       }
     }
 
