@@ -341,14 +341,11 @@ MeshDiagnosticsGenerator::generate()
         // case of non-conformality
         bool node_on_elem = false;
 
-        for (auto & elem_node : elem->node_ref_range())
-        {
-          if (*node == elem_node)
-          {
-            node_on_elem = true;
-            break;
-          }
-        }
+        // non-vertex nodes are not cause for the kind of non-conformality we are looking for
+        if (elem->get_node_index(node) != libMesh::invalid_uint &&
+            elem->is_vertex(elem->get_node_index(node)))
+          node_on_elem = true;
+
         if (node_on_elem)
           elements.insert(elem);
         // Else, the node is not part of the element considered, so if the element had been part of
@@ -514,27 +511,35 @@ MeshDiagnosticsGenerator::generate()
       }
       // For TRI elements, there is an element at the center
       else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
-      // || elem_type == TET4 ||
-      //       elem_type == TET10 || elem_type == TET14)
       {
         std::cout << "Building here" << std::endl;
         // Find the center element
-        // It's the only element that does not share a node with the coarse element
-        const auto coarse_element = *coarse_elements.begin();
+        // It's the only element that shares a side with both of the other elements near the node
+        // considered
         const Elem * center_elem;
+        for (const auto refined_elem_1 : elements)
+        {
+          unsigned int num_neighbors = 0;
+          for (const auto refined_elem_2 : elements)
+          {
+            if (refined_elem_1 == refined_elem_2)
+              continue;
+            if (refined_elem_1->which_neighbor_am_i(refined_elem_2) != libMesh::invalid_uint)
+              num_neighbors++;
+          }
+          if (num_neighbors >= 2)
+            center_elem = refined_elem_1;
+        }
+        // Now get the tentative coarse element nodes
         for (const auto refined_elem : elements)
         {
-          bool shares_a_node_with_coarse = false;
+          if (refined_elem == center_elem)
+            continue;
           for (const auto & other_node : refined_elem->node_ref_range())
-            for (const auto & coarse_node : coarse_element->node_ref_range())
-              if (other_node == coarse_node)
-              {
-                shares_a_node_with_coarse = true;
-                tentative_coarse_nodes.push_back(&other_node);
-              }
-          if (!shares_a_node_with_coarse)
-            center_elem = refined_elem;
+            if (center_elem->get_node_index(&other_node) == libMesh::invalid_uint)
+              tentative_coarse_nodes.push_back(&other_node);
         }
+        std::cout << tentative_coarse_nodes.size() << std::endl;
 
         // Get the final tentative new coarse element node, on the other side of the center
         // element from the non-conformality
@@ -547,9 +552,12 @@ MeshDiagnosticsGenerator::generate()
         elements.insert(neighbor_on_other_side_of_opposite_center_side);
         for (const auto & tri_node :
              neighbor_on_other_side_of_opposite_center_side->node_ref_range())
-          if (center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
-              libMesh::invalid_uint)
+          if (neighbor_on_other_side_of_opposite_center_side->is_vertex(
+                  neighbor_on_other_side_of_opposite_center_side->get_node_index(&tri_node)) &&
+              center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
+                  libMesh::invalid_uint)
             tentative_coarse_nodes.push_back(&tri_node);
+        std::cout << tentative_coarse_nodes.size() << std::endl;
 
         mooseAssert(tentative_coarse_nodes.size() == 3,
                     "We are forming a coarsened triangle element");
