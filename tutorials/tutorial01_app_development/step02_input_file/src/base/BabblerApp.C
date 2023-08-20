@@ -25,7 +25,7 @@ BabblerApp::~BabblerApp() {}
 void
 BabblerApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAll(f, af, syntax);
+  ModulesApp::registerAllObjects<BabblerApp>(f, af, syntax);
   Registry::registerObjectsTo(f, {"BabblerApp"});
   Registry::registerActionsTo(af, {"BabblerApp"});
 

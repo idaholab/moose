@@ -25,7 +25,7 @@ MeshingTutorialApp::~MeshingTutorialApp() {}
 void
 MeshingTutorialApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAll(f, af, syntax);
+  ModulesApp::registerAllObjects<MeshingTutorialApp>(f, af, syntax);
   Registry::registerObjectsTo(f, {"MeshingTutorialApp"});
   Registry::registerActionsTo(af, {"MeshingTutorialApp"});
 
