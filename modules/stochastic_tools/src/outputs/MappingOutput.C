@@ -43,7 +43,7 @@ MappingOutput::output()
       const std::string filename =
           this->filename() + "_" + map_name + restartable_data_io.getRestartableDataExt();
 
-      const RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
+      RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
       restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }

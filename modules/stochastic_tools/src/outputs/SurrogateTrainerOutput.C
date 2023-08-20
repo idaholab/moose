@@ -45,8 +45,7 @@ SurrogateTrainerOutput::output()
       const std::string filename =
           this->filename() + "_" + surrogate_name + restartable_data_io.getRestartableDataExt();
 
-      const RestartableDataMap & meta_data =
-          _app.getRestartableDataMap(trainer.modelMetaDataName());
+      RestartableDataMap & meta_data = _app.getRestartableDataMap(trainer.modelMetaDataName());
       restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }
