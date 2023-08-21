@@ -22,7 +22,7 @@ MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & regi
   : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
   _material_data.reserve(libMesh::n_threads());
-  for (const auto & tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(libMesh::n_threads()))
     _material_data.emplace_back(*this, tid);
 }
 
