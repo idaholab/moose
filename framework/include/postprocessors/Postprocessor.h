@@ -71,6 +71,8 @@ public:
    */
   const std::string & PPName() const { return _pp_name; }
 
+  virtual bool hasBlocks(SubdomainID /* id */) const override { return true; }
+
 protected:
   /// Post-processor name
   const std::string & _pp_name;
