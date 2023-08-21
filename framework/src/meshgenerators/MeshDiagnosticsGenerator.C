@@ -354,7 +354,8 @@ MeshDiagnosticsGenerator::generate()
           coarse_elements.insert(elem);
       }
 
-      std::cout << elements.size() << elements_around.size() << coarse_elements.size() << std::endl;
+      std::cout << "all neighbors " << elements_around.size() << "; fine " << elements.size()
+                << " coarse " << coarse_elements.size() << std::endl;
 
       // all the elements around contained the node as one of their nodes
       if (elements.size() == elements_around.size())
@@ -362,10 +363,13 @@ MeshDiagnosticsGenerator::generate()
 
       // only one coarse element in front of refined elements. Whatever we're looking at is
       // not the interface between coarse and refined elements
-      if (coarse_elements.size() > 1)
+      if ((mesh->mesh_dimension() == 2 && coarse_elements.size() > 1) ||
+          (mesh->mesh_dimension() == 3 && coarse_elements.size() > 2))
         continue;
 
       std::cout << "here" << std::endl;
+      if (elements.empty())
+        continue;
 
       // Depending on the type of element, we already know the number of elements we expect
       // to be part of this set of likely refined candidates for a given non-conformal node to
@@ -378,10 +382,7 @@ MeshDiagnosticsGenerator::generate()
         continue;
       if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
         continue;
-      if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 4)
-        continue;
-
-      if (elements.empty())
+      if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 8)
         continue;
 
       // There exists non-conformality, the node should have been a node of all the elements
@@ -524,7 +525,7 @@ MeshDiagnosticsGenerator::generate()
           {
             if (refined_elem_1 == refined_elem_2)
               continue;
-            if (refined_elem_1->which_neighbor_am_i(refined_elem_2) != libMesh::invalid_uint)
+            if (refined_elem_1->has_neighbor(refined_elem_2))
               num_neighbors++;
           }
           if (num_neighbors >= 2)
@@ -562,6 +563,91 @@ MeshDiagnosticsGenerator::generate()
         mooseAssert(tentative_coarse_nodes.size() == 3,
                     "We are forming a coarsened triangle element");
       }
+      // For TET elements
+      else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
+      {
+        std::cout << "Building here" << std::endl;
+
+        // There are 4 tets on the tips of the coarsened tet and 4 tets inside
+        // let's identify all of them
+        std::set<const Elem *> tips_tets;
+        std::set<const Elem *> inside_tets;
+
+        // TODO
+        // There are two coarse elements on one side
+        // and 8 refined on the other. We need to split those 8 into two groups
+        // We only have 2 tips and 2 insides from each group here.
+        // Need to find the two other tips
+        // Need to find the two other insides
+
+        // tips tets have more neighbors within the neighbors of the node considered
+        unsigned int max_neighbors = 0;
+        std::vector<unsigned int> neighbors;
+        // neighbors.reserve(elements.size());
+        for (const auto & elem : elements)
+        {
+          unsigned int num_neighbors = 0;
+          for (const auto & other_elem : elements)
+            if (elem != other_elem && elem->has_neighbor(other_elem))
+              num_neighbors++;
+          if (num_neighbors > max_neighbors)
+            max_neighbors = num_neighbors;
+          neighbors.push_back(num_neighbors);
+        }
+        unsigned int i = 0;
+        for (const auto & elem : elements)
+          if (neighbors[i++] == max_neighbors)
+            tips_tets.insert(elem);
+          else
+            inside_tets.insert(elem);
+
+        // look at neighbors of what we have to get the rest
+        std::cout << elements.size() << "  : " << inside_tets.size() << " " << tips_tets.size()
+                  << std::endl;
+
+        // append the missing ones (inside the coarse element, away from the node considered) into
+        // the fine elements set for the check on "did it refine the same way"
+        for (const auto & elem : tips_tets)
+          elements.insert(elem);
+        for (const auto & elem : inside_tets)
+          elements.insert(elem);
+
+        // get the vertex of the coarse element from the tip tets
+        for (const auto & tip : tips_tets)
+        {
+          for (const auto & node : tip->node_ref_range())
+          {
+            bool outside = true;
+
+            const auto id = tip->get_node_index(&node);
+            if (!tip->is_vertex(id))
+              continue;
+            for (const auto & tet : inside_tets)
+              if (tet->get_node_index(&node) != libMesh::invalid_uint)
+              {
+                std::cout << "Node " << *dynamic_cast<const Point *>(&node) << " is inside "
+                          << std::endl;
+                outside = false;
+                if (outside)
+                {
+                  tentative_coarse_nodes.push_back(&node);
+                  break;
+                }
+              }
+          }
+        }
+        std::cout << tentative_coarse_nodes.size() << std::endl;
+        std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end());
+        tentative_coarse_nodes.erase(
+            std::unique(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end()),
+            tentative_coarse_nodes.end());
+        std::cout << tentative_coarse_nodes.size() << std::endl;
+
+        mooseAssert(tentative_coarse_nodes.size() == 4,
+                    "We are forming a coarsened tetrahedral element");
+      }
+      else
+        mooseError("Unsupported element type ", elem_type);
 
       // Check the element types: if not all the same then it's not uniform AMR
       for (auto elem : elements)
