@@ -25,7 +25,7 @@ FunctorNeumannBC::validParams()
       "coefficient", 1.0, "An optional functor coefficient to multiply the imposed functor");
   params.addParam<bool>("flux_is_inward",
                         true,
-                        "Set to true if the provided functor corresponds to the flux in the inward "
+                        "Set to true if a positive evaluation of the provided functor corresponds to a flux in the inward "
                         "direction; else the outward direction");
 
   return params;
@@ -35,7 +35,7 @@ FunctorNeumannBC::FunctorNeumannBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
     _functor(getFunctor<ADReal>("functor")),
     _coef(getFunctor<ADReal>("coefficient")),
-    _sign(getParam<bool>("flux_is_inward") ? 1.0 : -1.0)
+    _sign(getParam<bool>("flux_is_inward") ? -1.0 : 1.0)
 {
 }
 
@@ -43,6 +43,6 @@ ADReal
 FunctorNeumannBC::computeQpResidual()
 {
   const auto space_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
-  return -_sign * _coef(space_arg, Moose::currentState()) *
+  return _sign * _coef(space_arg, Moose::currentState()) *
          _functor(space_arg, Moose::currentState()) * _test[_i][_qp];
 }
