@@ -21,7 +21,7 @@
 
 // Type hash codes can't be relied on for older clang...
 // not sure why, and also don't care why
-#if defined(__clang__) && __clang_major__ >= 12
+#if defined(__clang__) && __clang_major__ < 12
 #define RESTARTABLE_SKIP_CHECK_HASH_CODE
 #endif
 
