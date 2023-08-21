@@ -7,7 +7,7 @@ reproduces a model outlined in [!cite](noble2007use). A simple Laplacian
 equation is used to model the displacement field. The incompressible
 Navier-Stokes equations are solved for mass, momentum, and energy. These
 equations are run on the displaced mesh such that a mesh convection term (see
-[INSADConvectedMesh.md]) must be added to correct the material
+[INSADMeshConvection.md]) must be added to correct the material
 velocity. Both SUPG and PSPG stabilizations are used in this input.
 
 This simulation is driven by the rotating laser spot, whose effect is introduced

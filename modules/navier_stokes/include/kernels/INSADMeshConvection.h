@@ -14,12 +14,12 @@
 /**
  * This calculates the time derivative for a coupled variable
  **/
-class INSADConvectedMesh : public ADVectorKernelValue
+class INSADMeshConvection : public ADVectorKernelValue
 {
 public:
   static InputParameters validParams();
 
-  INSADConvectedMesh(const InputParameters & parameters);
+  INSADMeshConvection(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

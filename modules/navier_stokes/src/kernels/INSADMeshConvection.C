@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADConvectedMesh.h"
+#include "INSADMeshConvection.h"
 #include "INSADObjectTracker.h"
 
-registerMooseObject("NavierStokesApp", INSADConvectedMesh);
+registerMooseObject("NavierStokesApp", INSADMeshConvection);
 
 InputParameters
-INSADConvectedMesh::validParams()
+INSADMeshConvection::validParams()
 {
   InputParameters params = ADVectorKernelValue::validParams();
   params.addClassDescription(
@@ -24,7 +24,7 @@ INSADConvectedMesh::validParams()
   return params;
 }
 
-INSADConvectedMesh::INSADConvectedMesh(const InputParameters & parameters)
+INSADMeshConvection::INSADMeshConvection(const InputParameters & parameters)
   : ADVectorKernelValue(parameters),
     _convected_mesh_strong_residual(
         getADMaterialProperty<RealVectorValue>("convected_mesh_strong_residual"))
@@ -59,7 +59,7 @@ INSADConvectedMesh::INSADConvectedMesh(const InputParameters & parameters)
 }
 
 ADRealVectorValue
-INSADConvectedMesh::precomputeQpResidual()
+INSADMeshConvection::precomputeQpResidual()
 {
   return _convected_mesh_strong_residual[_qp];
 }

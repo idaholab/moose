@@ -1,8 +1,8 @@
 # INSADMeshConvection
 
-!syntax description /Kernels/INSADConvectedMesh
+!syntax description /Kernels/INSADMeshConvection
 
-`INSADConvectedMesh` implements the corresponding weak form for the components of
+`INSADMeshConvection` implements the corresponding weak form for the components of
 the term:
 
 \begin{equation}
@@ -14,8 +14,8 @@ $\vec{u}$ is the fluid velocity. This term is essential for obtaining the
 correct convective derivative of the fluid in cases where the fluid mesh is
 dynamic, e.g. in simulations of fluid-structure interaction.
 
-!syntax parameters /Kernels/INSADConvectedMesh
+!syntax parameters /Kernels/INSADMeshConvection
 
-!syntax inputs /Kernels/INSADConvectedMesh
+!syntax inputs /Kernels/INSADMeshConvection
 
-!syntax children /Kernels/INSADConvectedMesh
+!syntax children /Kernels/INSADMeshConvection
