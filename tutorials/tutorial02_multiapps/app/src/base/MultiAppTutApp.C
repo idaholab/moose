@@ -8,6 +8,7 @@ InputParameters
 MultiAppTutApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
+  params.set<bool>("use_legacy_material_output") = false;
   return params;
 }
 
@@ -21,7 +22,7 @@ MultiAppTutApp::~MultiAppTutApp() {}
 void
 MultiAppTutApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ModulesApp::registerAll(f, af, s);
+  ModulesApp::registerAllObjects<MultiAppTutApp>(f, af, s);
   Registry::registerObjectsTo(f, {"MultiAppTutApp"});
   Registry::registerActionsTo(af, {"MultiAppTutApp"});
 
