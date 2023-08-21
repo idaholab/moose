@@ -87,6 +87,7 @@ function configure_petsc()
       # If an HDF5 download is requested, patch PETSc to properly configure it
       if [ "$HDF5_STR" == "--download-hdf5=1" ]; then
          echo "INFO: Patching PETSc to support HDF5 download and installation on ARM..."
+         HDF5_STR+=" --download-hdf5-configure-arguments=--enable-cxx"
          git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
          touch $PETSC_DIR/.patched
       else
