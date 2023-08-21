@@ -58,8 +58,82 @@
       input = 'non_planar_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
+      expect_out = 'Number of non-planar element sides detected: 1'
 
       detail = 'non-planar sides on elements,'
+    []
+  []
+
+  [amr_detection]
+    requirement = 'The system shall be able to recognize non-conformalities created by uniform mesh refinements for'
+    [quad]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'quadrilateral elements,'
+    []
+    [quad_second_order]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=QUAD9 --mesh-only'
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'quadrilateral elements of second order,'
+    []
+    [quad_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 --mesh-only'
+      # Detects one too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 3'
+
+      detail = 'quadrilateral elements refined twice near an unrefined quadrilateral element,'
+    []
+    [tri]
+      type = 'RunApp'
+      input = 'detect_amr_tri.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'triangle elements,'
+    []
+    [tri_second_order]
+      type = 'RunException'
+      input = 'detect_amr_tri.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TRI6 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'triangle elements of second order,'
+    []
+    [tri_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_tri.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/nx=4 Mesh/cut_one/ny=4 --mesh-only'
+      # Detects one too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 3'
+
+      detail = 'triangle elements refined twice near an unrefined triangle element,'
+    []
+  []
+
+  [amr_detection_avoid_false_positives]
+    requirement = 'The system shall be able to recognize that non-conformalities are not created by uniform mesh refinements in the case of'
+    [only_nx_refined]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 0'
+      cli_args = 'Mesh/cut_one/iy=1 --mesh-only'
+
+      detail = 'quadrilateral elements refined in only one direction,'
     []
   []
 []
