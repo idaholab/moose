@@ -276,7 +276,7 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
     {
       std::unique_ptr<PropertyValue> value =
           state_i == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)
-                       : _props[0][prop_id].clone();
+                       : _props[0][prop_id].clone(0);
       entry.setPointer(prop_id, std::move(value), {});
     }
   }

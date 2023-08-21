@@ -63,7 +63,7 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size = 0) const = 0;
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t) const = 0;
 
   virtual unsigned int size() const = 0;
 
@@ -180,7 +180,7 @@ public:
    * is an AD property. This is on purpose; whenever we need clones, it's for
    * older states in which we don't store derivatives beacuse it's too expensive.
    */
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size = 0) const override final;
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
