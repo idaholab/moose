@@ -801,6 +801,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidualInternal(
                                             ? _stress_function->value(_t, _q_point[_qp])
                                             : effective_trial_stress * _stress_ucf;
   GenericReal<is_ad> dtrial_stress_dscalar = 0.0;
+  if constexpr (!with_derivative)
+    libmesh_ignore(dtrial_stress_dscalar);
 
   // Update stress if strain is being applied, i.e. non-testing simulation
   if (this->_apply_strain)
@@ -831,6 +833,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidualInternal(
 
   GenericReal<is_ad> total_rom_effective_strain_inc = 0.0;
   GenericReal<is_ad> dtotal_rom_effective_strain_inc_dstress = 0.0;
+  if constexpr (!with_derivative)
+    libmesh_ignore(dtotal_rom_effective_strain_inc_dstress);
 
   // Run ROM if all values are within windows.
   for (unsigned int p = 0; p < _num_partitions; p++)
@@ -933,8 +937,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidualInternal(
   }
 
   _creep_rate[_qp] = total_rom_effective_strain_inc / _dt;
-  if constexpr (with_derivative)
-    _derivative = dtotal_rom_effective_strain_inc_dstress * dtrial_stress_dscalar - 1.0;
 
   if (!this->_apply_strain)
   {
@@ -944,6 +946,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidualInternal(
       _derivative = 1.0;
     return 0.0;
   }
+  else
+  {
+    if constexpr (with_derivative)
+      _derivative = dtotal_rom_effective_strain_inc_dstress * dtrial_stress_dscalar - 1.0;
+  }
+
   return total_rom_effective_strain_inc - scalar;
 }
 

@@ -60,12 +60,18 @@ protected:
                                              const GenericReal<is_ad> & scalar);
 
   virtual GenericReal<is_ad>
+  initialGuess(const GenericReal<is_ad> & effective_trial_stress) override
+  {
+    return _compute_derivative ? 0.0 : 0.1 * effective_trial_stress / this->_three_shear_modulus;
+  }
+
+  virtual GenericReal<is_ad>
   computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
                     const GenericReal<is_ad> & /*scalar*/) override
   {
     if (_compute_derivative)
       return _derivative;
-    mooseError("No derivative will be computed use the SECANT solve type");
+    mooseError("No derivative will be computed, use the SECANT solve type");
   }
 
   virtual void
