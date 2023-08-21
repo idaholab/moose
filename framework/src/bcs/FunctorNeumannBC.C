@@ -25,7 +25,8 @@ FunctorNeumannBC::validParams()
       "coefficient", 1.0, "An optional functor coefficient to multiply the imposed functor");
   params.addParam<bool>("flux_is_inward",
                         true,
-                        "Set to true if a positive evaluation of the provided functor corresponds to a flux in the inward "
+                        "Set to true if a positive evaluation of the provided functor corresponds "
+                        "to a flux in the inward "
                         "direction; else the outward direction");
 
   return params;
