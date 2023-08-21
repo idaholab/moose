@@ -166,7 +166,7 @@
                   Outputs/checkpoint=true
                   Outputs/file_base=restart_different_props'
       recover = false
-      detail = 'storing the named stateful material properties during checkpoint'
+      detail = 'storing the named stateful material properties during checkpoint, and'
     []
     [load]
       type = 'RunException'
@@ -180,7 +180,7 @@
       recover = false
       prereq = 'restart_different_props/store'
       expect_err = 'dummy_prop.*dummy_prop.*dummy_prop_2'
-      detail = 'loading the stateful material properties during recover and comparing to the declared stateful material properties'
+      detail = 'loading the stateful material properties during recover and comparing to the declared stateful material properties.'
     []
   []
 []
