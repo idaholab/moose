@@ -207,6 +207,10 @@ pressure_tag = "pressure_grad"
   num_iterations = 60
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
+  momentum_petsc_options_iname = '-pc_type'
+  momentum_petsc_options_value = 'lu'
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
+  pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
 []
 

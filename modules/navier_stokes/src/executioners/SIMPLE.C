@@ -68,6 +68,53 @@ SIMPLE::validParams()
       "The relaxation which should be used for the passive scalar equations.");
 
   /*
+   * Petsc options for every equations in the system
+   */
+  params.addParam<MultiMooseEnum>("momentum_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the momentum equation");
+  params.addParam<MultiMooseEnum>("momentum_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the momentum equation");
+  params.addParam<std::vector<std::string>>(
+      "momentum_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "momentum equation");
+
+  params.addParam<MultiMooseEnum>("pressure_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the pressure equation");
+  params.addParam<MultiMooseEnum>("pressure_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the pressure equation");
+  params.addParam<std::vector<std::string>>(
+      "pressure_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "pressure equation");
+
+  params.addParam<MultiMooseEnum>("energy_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the energy equation");
+  params.addParam<MultiMooseEnum>("energy_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the energy equation");
+  params.addParam<std::vector<std::string>>(
+      "energy_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "energy equation");
+
+  params.addParam<MultiMooseEnum>("passive_scalar_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the energy equation");
+  params.addParam<MultiMooseEnum>("passive_scalar_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the energy equation");
+  params.addParam<std::vector<std::string>>(
+      "passive_scalar_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "energy equation");
+
+  /*
    * Iteration tolerances for the different equations
    */
   params.addRangeCheckedParam<Real>(
@@ -170,6 +217,37 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
           &_problem.getNonlinearSystemBase(_passive_scalar_system_numbers[system_i]));
     }
   }
+
+  const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
+  const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "momentum_petsc_options_iname", "momentum_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(momentum_petsc_options, _momentum_petsc_options);
+  Moose::PetscSupport::processPetscPairs(
+      momentum_petsc_pair_options, _problem.mesh().dimension(), _momentum_petsc_options);
+
+  const auto & pressure_petsc_options = getParam<MultiMooseEnum>("pressure_petsc_options");
+  const auto & pressure_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "pressure_petsc_options_iname", "pressure_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(pressure_petsc_options, _pressure_petsc_options);
+  Moose::PetscSupport::processPetscPairs(
+      pressure_petsc_pair_options, _problem.mesh().dimension(), _pressure_petsc_options);
+
+  const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
+  const auto & energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "energy_petsc_options_iname", "energy_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(energy_petsc_options, _energy_petsc_options);
+  Moose::PetscSupport::processPetscPairs(
+      energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
+
+  const auto & passive_scalar_petsc_options =
+      getParam<MultiMooseEnum>("passive_scalar_petsc_options");
+  const auto & passive_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+      "passive_scalar_petsc_options_iname", "passive_scalar_petsc_options_value");
+  Moose::PetscSupport::processPetscFlags(passive_scalar_petsc_options,
+                                         _passive_scalar_petsc_options);
+  Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
+                                         _problem.mesh().dimension(),
+                                         _passive_scalar_petsc_options);
 
   _time = 0;
 }
@@ -594,6 +672,11 @@ SIMPLE::execute()
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
   _problem.updateActiveObjects();
 
+  // Dummy solver parameter file which is needed for switching petsc options
+  SolverParams solver_params;
+  solver_params._type = Moose::SolveType::ST_LINEAR;
+  solver_params._line_search = Moose::LineSearchType::LS_NONE;
+
   if (_problem.shouldSolve())
   {
     // Initialize the quantities which matter in terms of the iteration
@@ -606,11 +689,6 @@ SIMPLE::execute()
     while (iteration_counter < _num_iterations &&
            !convergedNavierStokes(momentum_residual, pressure_residual, energy_residual))
     {
-      // We set the preconditioner type using this option.
-      // TODO: We need a way to specify different perconditioners for different systems
-      // Moose::PetscSupport::petscSetOptions(_problem);
-      // Moose::setSolverDefaults(_problem);
-
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
@@ -622,11 +700,20 @@ SIMPLE::execute()
 
       iteration_counter++;
 
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver. In case of a segregated momentum
+      // solver, we assume that every velocity component uses the same preconditioner
+      Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
+
       // Solve the momentum predictor step
       momentum_residual = solveMomentumPredictor();
 
       // Compute the coupling fields between the momentum and pressure equations
       _rc_uo->computeHbyA(_print_fields);
+
+      // We set the preconditioner/controllable parameters for the pressure equations through petsc
+      // options. Linear tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
       // Solve the pressure corrector
       pressure_residual = solvePressureCorrector();
@@ -644,8 +731,13 @@ SIMPLE::execute()
       // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
       // outside of the velocity-pressure loop
       if (_has_energy_system)
+      {
+        // We set the preconditioner/controllable parameters through petsc options. Linear
+        // tolerances will be overridden within the solver.
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
         energy_residual =
             solveAdvectedSystem(_energy_sys_number, *_energy_system, _energy_equation_relaxation);
+      }
       else
         energy_residual = 0.0;
 
@@ -671,16 +763,15 @@ SIMPLE::execute()
     {
       _console << " Passive Scalar Iteration " << iteration_counter << std::endl;
 
+      // We set the options used by Petsc (preconditioners etc). We assume that every passive
+      // scalar equation uses the same options for now.
+      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
+
       iteration_counter = 0;
       std::vector<Real> passive_scalar_residuals(1.0, _passive_scalar_systems.size());
       while (iteration_counter < _num_iterations &&
              !convergedPassiveScalars(passive_scalar_residuals))
       {
-        // // We set the preconditioner type using this option.
-        // // TODO: We need a way to specify different perconditioners for different systems
-        // Moose::PetscSupport::petscSetOptions(_problem);
-        // Moose::setSolverDefaults(_problem);
-
         // We clear the caches in the passive scalar variables
         for (auto system_i : index_range(_passive_scalar_systems))
           _passive_scalar_systems[system_i]->residualSetup();

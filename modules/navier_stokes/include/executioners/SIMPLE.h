@@ -11,6 +11,8 @@
 
 #include "Executioner.h"
 #include "INSFVRhieChowInterpolatorSegregated.h"
+#include "PetscSupport.h"
+#include "SolverParams.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -209,4 +211,16 @@ private:
 
   /// Debug parameter which allows printing the coupling and solution vectors/matrices
   const bool _print_fields;
+
+  /// Options which hold the petsc settings for the momentum equation
+  Moose::PetscSupport::PetscOptions _momentum_petsc_options;
+
+  /// Options which hold the petsc settings for the pressure equation
+  Moose::PetscSupport::PetscOptions _pressure_petsc_options;
+
+  /// Options which hold the petsc settings for the energy equation
+  Moose::PetscSupport::PetscOptions _energy_petsc_options;
+
+  /// Options which hold the petsc settings for the passive scalar equation(s)
+  Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
 };
