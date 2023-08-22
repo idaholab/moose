@@ -1,5 +1,5 @@
 moose_petsc:
-  - moose-petsc 3.16.6 build_9
+  - moose-petsc 3.16.6 build_10
 
 moose_libmesh_vtk:
   - moose-libmesh-vtk 9.2.6 build_2
