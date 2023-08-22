@@ -282,11 +282,11 @@ ContactAction::ContactAction(const InputParameters & params)
 
     if (getParam<bool>("mortar_dynamics"))
       paramError("mortar_dynamics",
-                 "The penalty 'mortar' formulation does not support implicit dynamic simulations");
+                 "The 'mortar_penalty' formulation does not support implicit dynamic simulations");
 
     if (getParam<bool>("use_petrov_galerkin"))
       paramError("use_petrov_galerkin",
-                 "The penalty 'mortar' formulation does not support usage of the Petrov-Galerkin "
+                 "The 'mortar_penalty' formulation does not support usage of the Petrov-Galerkin "
                  "flag. The default (use_dual = true) behavior is such that contact tractions are "
                  "interpolated with dual bases whereas mortar or weighted contact quantities are "
                  "interpolated with Lagrange shape functions.");

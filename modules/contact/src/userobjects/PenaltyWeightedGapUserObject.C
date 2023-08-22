@@ -37,7 +37,6 @@ PenaltyWeightedGapUserObject::validParams()
       "the contacting boundary. This parameter is defaulted to 'true' in the contact action.");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
-      1e-5,
       "penetration_tolerance > 0",
       "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
   params.addCoupledVar(
@@ -54,7 +53,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     AugmentedLagrangeInterface(this),
     _penalty(getParam<Real>("penalty")),
     _penalty_multiplier(getParam<Real>("penalty_multiplier")),
-    _penetration_tolerance(getParam<Real>("penetration_tolerance")),
+    _penetration_tolerance(
+        isParamValid("penetration_tolerance") ? getParam<Real>("penetration_tolerance") : 0.0),
     _augmented_lagrange_problem(
         dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem)),
     _lagrangian_iteration_number(_augmented_lagrange_problem
@@ -75,6 +75,11 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
   check_type(*_disp_y_var, "disp_y");
   if (_has_disp_z)
     check_type(*_disp_z_var, "disp_z");
+
+  if (!_augmented_lagrange_problem == isParamValid("penetration_tolerance"))
+    paramError("penetration_tolerance",
+               "This parameter must be supplied if and only if an augmented Lagrange problem "
+               "object is used.");
 }
 
 const VariableTestValue &

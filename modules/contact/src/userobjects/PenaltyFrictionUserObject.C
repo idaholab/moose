@@ -35,7 +35,6 @@ PenaltyFrictionUserObject::validParams()
                                 "The friction coefficient ruling Coulomb friction equations.");
   params.addRangeCheckedParam<Real>(
       "slip_tolerance",
-      1e-5,
       "slip_tolerance > 0",
       "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
   params.addRangeCheckedParam<Real>(
@@ -67,21 +66,14 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
-    _slip_tolerance(getParam<Real>("slip_tolerance")),
+    _slip_tolerance(isParamValid("slip_tolerance") ? getParam<Real>("slip_tolerance") : 0.0),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction"))
 {
-  auto check_type = [this](const auto & var, const auto & var_name)
-  {
-    if (!var.isNodal())
-      paramError(var_name,
-                 "The displacement variables must have degrees of freedom exclusively on "
-                 "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
-  };
-  check_type(*_disp_x_var, "disp_x");
-  check_type(*_disp_y_var, "disp_y");
-  if (_has_disp_z)
-    check_type(*_disp_z_var, "disp_z");
+  if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
+    paramError("slip_tolerance",
+               "This parameter must be supplied if and only if an augmented Lagrange problem "
+               "object is used.");
 }
 
 const VariableTestValue &
@@ -131,9 +123,8 @@ PenaltyFrictionUserObject::timestepSetup()
     tangential_traction = {0.0, 0.0};
   }
 
-  // TODO call it delta_tangential_lm
-  for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
-    tangential_lm.setZero();
+  for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+    delta_tangential_lm.setZero();
 }
 
 void
@@ -342,14 +333,12 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
   {
     if (this->_communicator.rank() == 0)
     {
-      mooseInfoRepeated(
-          "Stick tolerance fails. Slip distance for sticking node ",
-          max_slip.second,
-          " is: ",
-          max_slip.first,
-          ", but slip tolerance is chosen to be ",
-          _slip_tolerance,
-          ". Relax the slip tolerance if there are too many augmented Lagrange iterations.");
+      mooseInfoRepeated("Stick tolerance fails. Slip distance for sticking node ",
+                        max_slip.second,
+                        " is: ",
+                        max_slip.first,
+                        ", but slip tolerance is chosen to be ",
+                        _slip_tolerance);
     }
     return false;
   }
