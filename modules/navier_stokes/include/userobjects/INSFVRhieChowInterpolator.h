@@ -226,6 +226,11 @@ private:
 
   /// Whether we want to pull all nonlocal 'a' coefficient data
   bool _pull_all_nonlocal;
+
+  const Real _cs;
+  const Real _cL;
+  const Moose::Functor<ADReal> & _rho;
+  const Moose::Functor<ADReal> & _mu;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const

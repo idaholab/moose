@@ -89,6 +89,10 @@ INSFVRhieChowInterpolator::validParams()
                                        "nl0",
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
+  params.addRequiredParam<Real>("characteristic_speed", "The characteristic speed");
+  params.addRequiredParam<Real>("characteristic_length", "The characteristic length");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "The viscosity");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
   return params;
 }
 
@@ -124,7 +128,11 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
     _a_data_provided(false),
-    _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
+    _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a")),
+    _cs(getParam<Real>("characteristic_speed")),
+    _cL(getParam<Real>("characteristic_length")),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _mu(getFunctor<ADReal>(NS::mu))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -663,11 +671,13 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face, time);
 
+  const auto coeff = Utility::pow<2>(fi.dCNMag()) / (fi.dCNMag() * _rho(face) * _cs + _mu(face));
+
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction
   // below.
   for (const auto i : make_range(_dim))
-    velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
+    velocity(i) -= coeff * face_eps * (grad_p(i) - unc_grad_p(i));
 
   return velocity;
 }
