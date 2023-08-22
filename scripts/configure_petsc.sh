@@ -102,7 +102,7 @@ function configure_petsc()
 
   # Add HDF5 configure arguments if we are allowing PETSc to build it
   if [[ "$HDF5_STR" == *'--download-hdf5=1'* ]]; then
-    HDF5_STR+=' --download-hdf5-configure-arguments=--enable-cxx'
+    HDF5_STR+=' --download-hdf5-configure-arguments=\"--enable-cxx\"'
   fi
 
   cd $PETSC_DIR
