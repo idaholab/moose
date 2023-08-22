@@ -42,7 +42,23 @@ protected:
                           dof_id_type global_ind,
                           Real & val) override;
 
-private:
+  /**
+   * This makes decisions whether to call the full model or not based on
+   * GP prediction and uncertainty.
+   *
+   * @return bool Whether a full order model evaluation is required
+   */
+  virtual bool facilitateDecision();
+
+  /**
+   * This sets up data for re-training the GP.
+   *
+   * @param inputs Matrix of inputs for the current step
+   * @param outputs Vector of outputs for the current step
+   */
+  virtual void setupData(const std::vector<std::vector<Real>> & inputs,
+                         const std::vector<Real> & outputs);
+
   /**
    * This evaluates the active learning acquisition function and returns bool
    * that indicates whether the GP model failed.
@@ -76,6 +92,11 @@ private:
   /// The learning function parameter
   const Real & _learning_function_parameter;
 
+  /// Store all the input vectors used for training
+  std::vector<std::vector<Real>> _inputs_batch;
+  /// Store all the outputs used for training
+  std::vector<Real> _outputs_batch;
+
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
   /// The GP evaluator object that permits re-evaluations
@@ -102,9 +123,4 @@ private:
   const std::vector<std::vector<Real>> & _inputs_global;
   /// Reference to global output data requested from base class
   const std::vector<Real> & _outputs_global;
-
-  /// Store all the input vectors used for training
-  std::vector<std::vector<Real>> _inputs_batch;
-  /// Store all the outputs used for training
-  std::vector<Real> _outputs_batch;
 };
