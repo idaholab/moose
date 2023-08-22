@@ -26,8 +26,7 @@ FunctorNeumannBC::validParams()
   params.addParam<bool>("flux_is_inward",
                         true,
                         "Set to true if a positive evaluation of the provided functor corresponds "
-                        "to a flux in the inward "
-                        "direction; else the outward direction");
+                        "to a flux in the inward direction; else the outward direction");
 
   return params;
 }

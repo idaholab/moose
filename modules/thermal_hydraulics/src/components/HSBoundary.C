@@ -82,10 +82,10 @@ HSBoundary::checkAllComponent2DBoundariesAreExternal() const
 bool
 HSBoundary::hasCommonComponent2DExternalBoundaryType() const
 {
-  if (_boundary.size() > 0)
+  if (!_boundary.empty())
   {
     const auto & comp2d = getComponentByName<Component2D>(_hs_name);
-    auto common_boundary_type = comp2d.getExternalBoundaryType(_boundary[0]);
+    const auto common_boundary_type = comp2d.getExternalBoundaryType(_boundary[0]);
     for (unsigned int i = 1; i < _boundary.size(); i++)
     {
       const auto boundary_type = comp2d.getExternalBoundaryType(_boundary[i]);

@@ -7,7 +7,7 @@
     input = mesh.i
     cli_args = '--mesh-only mesh.e'
     recover = False # No recover for --mesh-only
-    requirement = 'The system shall have correct input for the HSBoundaryExternalAppHeatFlux test mesh.'
+    requirement = 'The system shall be able to generate a mesh for testing a heat structure imposing a heat flux from an external application.'
   []
 
   [test]
@@ -16,11 +16,11 @@
     input = main.i
     csvdiff = 'main_out_sub0.csv'
     abs_zero = 1e-8
-    requirement = 'The system shall apply a heat flux from an external application.'
+    requirement = 'The system shall be able to apply a heat flux from an external application to a heat structure.'
   []
 
   [error_reporting]
-    requirement = 'The system shall report an error for HSBoundaryExternalAppHeatFlux if'
+    requirement = 'The system shall report an error for a heat structure boundary object imposing a heat flux from an external application if'
 
     [not_cylindrical]
       type = RunException
@@ -34,7 +34,7 @@
       input = sub.i
       cli_args = "Components/hs_boundary/boundary=hs:start"
       expect_err = "The boundaries in 'boundary' must be of an inner/outer type, not of a start/end type"
-      detail = 'the heat structure boundary is not of inner or outer type.'
+      detail = 'the heat structure boundary specified for the heat flux is not the inner or outer boundary.'
     []
   []
 []

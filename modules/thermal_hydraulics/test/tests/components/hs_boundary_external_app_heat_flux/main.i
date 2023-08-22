@@ -116,7 +116,7 @@ power = 1000.0
 
 [Transfers]
   [heat_flux_transfer]
-    type = MultiAppUserObjectTransfer
+    type = MultiAppGeneralFieldUserObjectTransfer
     to_multi_app = sub
     user_object = layered_average_heat_flux
     variable = q_ext
