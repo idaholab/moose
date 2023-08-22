@@ -26,6 +26,18 @@ MaterialPropertyInterface::validParams()
   return params;
 }
 
+namespace moose
+{
+namespace internal
+{
+bool
+boundaryRestricted(const std::set<BoundaryID> & boundary_ids)
+{
+  return !boundary_ids.empty() && BoundaryRestrictable::restricted(boundary_ids);
+}
+}
+}
+
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids)
@@ -36,13 +48,12 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
-    _mi_boundary_restricted(!boundary_ids.empty() &&
-                            BoundaryRestrictable::restricted(boundary_ids)),
-    _material_data_type(getMaterialDataType()),
+    _material_data_type(getMaterialDataType(boundary_ids)),
     _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
+    _mi_boundary_restricted(moose::internal::boundaryRestricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
@@ -197,11 +208,11 @@ MaterialPropertyInterface::resolveOptionalProperties()
 }
 
 Moose::MaterialDataType
-MaterialPropertyInterface::getMaterialDataType() const
+MaterialPropertyInterface::getMaterialDataType(const std::set<BoundaryID> & boundary_ids) const
 {
   if (_mi_params.isParamValid("_material_data_type"))
     return _mi_params.get<Moose::MaterialDataType>("_material_data_type");
-  if (_mi_boundary_restricted)
+  if (moose::internal::boundaryRestricted(boundary_ids))
     return Moose::BOUNDARY_MATERIAL_DATA;
   return Moose::BLOCK_MATERIAL_DATA;
 }

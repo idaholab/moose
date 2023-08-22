@@ -453,11 +453,6 @@ protected:
   /// Current threaded it
   const THREAD_ID _mi_tid;
 
-private:
-  /// BoundaryRestricted flag
-  const bool _mi_boundary_restricted;
-
-protected:
   /// The type of data
   const Moose::MaterialDataType _material_data_type;
 
@@ -538,7 +533,7 @@ private:
   /**
    * @returns The MaterialDataType given the interface's parameters
    */
-  Moose::MaterialDataType getMaterialDataType() const;
+  Moose::MaterialDataType getMaterialDataType(const std::set<BoundaryID> & boundary_ids) const;
 
   /*
    * A proxy method for _mi_feproblem.getMaxQps()
@@ -549,6 +544,9 @@ private:
    * A proxy method for _mi_feproblem.addConsumedPropertyName()
    */
   void addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name);
+
+  /// BoundaryRestricted flag
+  const bool _mi_boundary_restricted;
 
   /// Storage for the block ids created by BlockRestrictable
   const std::set<SubdomainID> & _mi_block_ids;
