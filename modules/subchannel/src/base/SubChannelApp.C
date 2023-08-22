@@ -30,6 +30,7 @@ const std::string SubChannelApp::PRESSURE_DROP = "DP";
 const std::string SubChannelApp::ENTHALPY = "h";
 const std::string SubChannelApp::TEMPERATURE = "T";
 const std::string SubChannelApp::PIN_TEMPERATURE = "Tpin";
+const std::string SubChannelApp::PIN_DIAMETER = "Dpin";
 const std::string SubChannelApp::DENSITY = "rho";
 const std::string SubChannelApp::VISCOSITY = "mu";
 const std::string SubChannelApp::WETTED_PERIMETER = "w_perim";
