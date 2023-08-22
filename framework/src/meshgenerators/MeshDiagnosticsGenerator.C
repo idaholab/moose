@@ -358,13 +358,10 @@ MeshDiagnosticsGenerator::generate()
                 << " coarse " << coarse_elements.size() << std::endl;
 
       // all the elements around contained the node as one of their nodes
+      // if the coarse and refined sides are not stitched together, this check can fail,
+      // as nodes that are physically near one element are not part of it because of the lack of
+      // stitching (overlapping nodes)
       if (elements.size() == elements_around.size())
-        continue;
-
-      // only one coarse element in front of refined elements. Whatever we're looking at is
-      // not the interface between coarse and refined elements
-      if ((mesh->mesh_dimension() == 2 && coarse_elements.size() > 1) ||
-          (mesh->mesh_dimension() == 3 && coarse_elements.size() > 2))
         continue;
 
       std::cout << "here" << std::endl;
@@ -383,6 +380,14 @@ MeshDiagnosticsGenerator::generate()
       if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
         continue;
       if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 8)
+        continue;
+
+      // only one coarse element in front of refined elements except for tets. Whatever we're
+      // looking at is not the interface between coarse and refined elements
+      // Tets are split on their edges (rather than the middle of a face) so there could be any
+      // number of coarse elements in front of the node non-conformality created by refinement
+      if (elem_type != TET4 && elem_type != TET10 && elem_type != TET14 &&
+          coarse_elements.size() > 1)
         continue;
 
       // There exists non-conformality, the node should have been a node of all the elements
@@ -513,7 +518,7 @@ MeshDiagnosticsGenerator::generate()
       // For TRI elements, there is an element at the center
       else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
       {
-        std::cout << "Building here" << std::endl;
+        std::cout << "Building a tri" << std::endl;
         // Find the center element
         // It's the only element that shares a side with both of the other elements near the node
         // considered
@@ -537,7 +542,8 @@ MeshDiagnosticsGenerator::generate()
           if (refined_elem == center_elem)
             continue;
           for (const auto & other_node : refined_elem->node_ref_range())
-            if (center_elem->get_node_index(&other_node) == libMesh::invalid_uint)
+            if (center_elem->get_node_index(&other_node) == libMesh::invalid_uint &&
+                refined_elem->is_vertex(refined_elem->get_node_index(&other_node)))
               tentative_coarse_nodes.push_back(&other_node);
         }
         std::cout << tentative_coarse_nodes.size() << std::endl;
@@ -563,50 +569,209 @@ MeshDiagnosticsGenerator::generate()
         mooseAssert(tentative_coarse_nodes.size() == 3,
                     "We are forming a coarsened triangle element");
       }
-      // For TET elements
+      // For TET elements, it's very different because the non-conformality does not happen inside
+      // of a face, but on an edge of one or more coarse elements
       else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
       {
-        std::cout << "Building here" << std::endl;
+        std::cout << "Building a tet" << std::endl;
 
         // There are 4 tets on the tips of the coarsened tet and 4 tets inside
         // let's identify all of them
         std::set<const Elem *> tips_tets;
         std::set<const Elem *> inside_tets;
 
-        // TODO
-        // There are two coarse elements on one side
-        // and 8 refined on the other. We need to split those 8 into two groups
-        // We only have 2 tips and 2 insides from each group here.
-        // Need to find the two other tips
-        // Need to find the two other insides
+        // pick a coarse element and work with its fine neighbors
+        const Elem * coarse_elem = nullptr;
+        std::set<const Elem *> fine_tets;
+        for (auto & coarse_one : coarse_elements)
+        {
+          for (const auto & elem : elements)
+            // for two levels of refinement across, this is not working
+            // we would need a "has_face_embedded_in_this_other_ones_face" routine
+            if (elem->has_neighbor(coarse_one))
+            {
+              fine_tets.insert(elem);
+              std::cout << "Tet " << elem->id() << std::endl;
+            }
 
-        // tips tets have more neighbors within the neighbors of the node considered
-        unsigned int max_neighbors = 0;
-        std::vector<unsigned int> neighbors;
-        // neighbors.reserve(elements.size());
+          if (fine_tets.size())
+          {
+            coarse_elem = coarse_one;
+            break;
+          }
+        }
+        // There's no coarse element neighbor to a group of finer tets, not AMR
+        if (!coarse_elem)
+          continue;
+        std::cout << "Found coarse neigh of " << coarse_elem->vertex_average() << " : "
+                  << fine_tets.size() << std::endl;
+
+        // There is one last point neighbor of the node that is sandwiched between two neighbors
         for (const auto & elem : elements)
         {
-          unsigned int num_neighbors = 0;
-          for (const auto & other_elem : elements)
-            if (elem != other_elem && elem->has_neighbor(other_elem))
-              num_neighbors++;
-          if (num_neighbors > max_neighbors)
-            max_neighbors = num_neighbors;
-          neighbors.push_back(num_neighbors);
+          int num_face_neighbors = 0;
+          for (const auto & tet : fine_tets)
+            if (tet->has_neighbor(elem))
+              num_face_neighbors++;
+          if (num_face_neighbors == 2)
+          {
+            fine_tets.insert(elem);
+            break;
+          }
         }
-        unsigned int i = 0;
-        for (const auto & elem : elements)
-          if (neighbors[i++] == max_neighbors)
-            tips_tets.insert(elem);
-          else
-            inside_tets.insert(elem);
+        std::cout << "Current status (final tet near initial node) " << fine_tets.size()
+                  << std::endl;
+        for (auto & elem : fine_tets)
+          std::cout << "Tet " << elem->id() << std::endl;
 
-        // look at neighbors of what we have to get the rest
-        std::cout << elements.size() << "  : " << inside_tets.size() << " " << tips_tets.size()
+        // There should be two other nodes with non-conformality near this coarse element
+        // Find both, as they will be nodes of the rest of the elements to add to the potential fine
+        // tet list. They are shared by two of the fine tets we have already found
+        std::set<const Node *> other_nodes;
+        for (const auto & tet_1 : fine_tets)
+        {
+          for (const auto & node_1 : tet_1->node_ref_range())
+          {
+            if (&node_1 == node)
+              continue;
+            if (!tet_1->is_vertex(tet_1->get_node_index(&node_1)))
+              continue;
+            for (const auto & tet_2 : fine_tets)
+            {
+              if (tet_2 == tet_1)
+                continue;
+              if (tet_2->get_node_index(&node_1) != libMesh::invalid_uint)
+                // check that it's near the coarse element as well
+                if (coarse_elem->close_to_point(node_1, 10 * _non_conformality_tol))
+                  other_nodes.insert(&node_1);
+            }
+          }
+        }
+        mooseAssert(other_nodes.size() == 2,
+                    "Should find only two extra non-conformal nodes near the coarse element");
+        std::cout << "Other non conf " << **other_nodes.begin() << std::endl;
+        std::cout << "Other non conf " << **other_nodes.rbegin() << std::endl;
+
+        // Now we can go towards this tip element next to two non-conformalities
+        for (const auto & tet_1 : fine_tets)
+        {
+          for (const auto & neighbor : tet_1->neighbor_ptr_range())
+            if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
+                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
+                neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
+                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
+              fine_tets.insert(neighbor);
+        }
+        // Now that the element next to the time is in the fine_tets, we can get the tip
+        for (const auto & tet_1 : fine_tets)
+        {
+          for (const auto & neighbor : tet_1->neighbor_ptr_range())
+            if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
+                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
+                neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
+                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
+              fine_tets.insert(neighbor);
+        }
+
+        std::cout << "Current status (adding the tip with the two new-non-conformal) "
+                  << fine_tets.size() << std::endl;
+        for (auto & elem : fine_tets)
+          std::cout << "Tet " << elem->id() << std::endl;
+
+        // Get the sandwiched tets between the tets we already found
+        for (const auto & tet_1 : fine_tets)
+          for (const auto & neighbor : tet_1->neighbor_ptr_range())
+            for (const auto & tet_2 : fine_tets)
+              if (tet_1 != tet_2 && tet_2->has_neighbor(neighbor) && neighbor != coarse_elem)
+                fine_tets.insert(neighbor);
+
+        std::cout << "Current status (adding neighbors) " << fine_tets.size() << std::endl;
+        for (auto & elem : fine_tets)
+          std::cout << "Tet " << elem->id() << std::endl;
+
+        // tips tests are the only ones to have a node that is shared by no other tet in the group
+        for (const auto & tet_1 : fine_tets)
+        {
+          unsigned int unshared_nodes = 0;
+          for (const auto & other_node : tet_1->node_ref_range())
+          {
+            if (!tet_1->is_vertex(tet_1->get_node_index(&other_node)))
+              continue;
+            bool node_shared = false;
+            for (const auto & tet_2 : fine_tets)
+              if (tet_2 != tet_1 && tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
+                node_shared = true;
+            if (!node_shared)
+              unshared_nodes++;
+          }
+          if (unshared_nodes == 1)
+            tips_tets.insert(tet_1);
+          else if (unshared_nodes == 0)
+            inside_tets.insert(tet_1);
+          else
+            mooseError("Did not expect a tet to have two unshared vertex nodes here");
+        }
+
+        std::cout << tips_tets.size() << " " << inside_tets.size() << std::endl;
+
+        // Finally grab the last tip of the tentative coarse tet. It shares:
+        // - 3 nodes with the other tips, only one with each
+        // - 1 face with only one tet of the fine tet group
+        // - it has a node that no other fine tet shares (the tip node)
+        for (const auto & tet : inside_tets)
+        {
+          for (const auto & neighbor : tet->neighbor_ptr_range())
+          {
+            // Check that it shares a face with no other potential fine tet
+            bool shared_with_another_tet = false;
+            for (const auto & tet_2 : fine_tets)
+            {
+              if (tet_2 == tet)
+                continue;
+              if (tet_2->has_neighbor(neighbor))
+                shared_with_another_tet = true;
+            }
+            if (shared_with_another_tet)
+              continue;
+
+            // Used to count the nodes shared with tip tets. Can only be 1 per tip tet
+            std::vector<const Node *> tip_nodes_shared;
+            unsigned int unshared_nodes = 0;
+            for (const auto & other_node : neighbor->node_ref_range())
+            {
+              if (!neighbor->is_vertex(neighbor->get_node_index(&other_node)))
+                continue;
+
+              // Check for being a node-neighbor of the 3 other tip tets
+              for (const auto & tip_tet : tips_tets)
+              {
+                if (neighbor == tip_tet)
+                  continue;
+
+                // we could break here but we want to check that no other tip shares that node
+                if (tip_tet->get_node_index(&other_node) != libMesh::invalid_uint)
+                  tip_nodes_shared.push_back(&other_node);
+              }
+              // Check for having a node shared with no other tet
+              bool node_shared = false;
+              for (const auto & tet_2 : fine_tets)
+                if (tet_2 != neighbor &&
+                    tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
+                  node_shared = true;
+              if (!node_shared)
+                unshared_nodes++;
+            }
+            if (tip_nodes_shared.size() == 3 && unshared_nodes == 1)
+              tips_tets.insert(neighbor);
+          }
+        }
+        std::cout << "After finding last tip : " << tips_tets.size() << " " << inside_tets.size()
                   << std::endl;
 
-        // append the missing ones (inside the coarse element, away from the node considered) into
-        // the fine elements set for the check on "did it refine the same way"
+        // append the missing fine tets (inside the coarse element, away from the node considered)
+        // into the fine elements set for the check on "did it refine the tentative coarse tet onto
+        // the same fine tets"
+        elements.clear();
         for (const auto & elem : tips_tets)
           elements.insert(elem);
         for (const auto & elem : inside_tets)
@@ -628,15 +793,17 @@ MeshDiagnosticsGenerator::generate()
                 std::cout << "Node " << *dynamic_cast<const Point *>(&node) << " is inside "
                           << std::endl;
                 outside = false;
-                if (outside)
-                {
-                  tentative_coarse_nodes.push_back(&node);
-                  break;
-                }
               }
+            if (outside)
+            {
+              tentative_coarse_nodes.push_back(&node);
+              // only one tip node per tip tet
+              break;
+            }
           }
         }
-        std::cout << tentative_coarse_nodes.size() << std::endl;
+
+        std::cout << "Found " << tentative_coarse_nodes.size() << " tip nodes " << std::endl;
         std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end());
         tentative_coarse_nodes.erase(
             std::unique(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end()),
@@ -680,20 +847,25 @@ MeshDiagnosticsGenerator::generate()
         parent->set_node(i) = const_cast<Node *>(tentative_coarse_nodes[i]);
       }
 
+      for (auto & elem : elements)
+        std::cout << "Center of " << elem->id() << " : " << elem->vertex_average() << std::endl;
+
       // Refine this parent
       parent->set_refinement_flag(Elem::REFINE);
-
       MeshRefinement mesh_refiner(*mesh);
       parent->refine(mesh_refiner);
+      const auto num_children = parent->n_children();
       std::cout << "Child " << parent->n_children() << std::endl;
 
       // Compare with the original set of elements
       // We already know the child share the exterior node. If they share the same vertex
       // average as the group of unrefined elements we will call this good enough for now
-      bool all_children_match = true;
+      // For tetradhedral elements we cannot rely on the children all matching as the choice in the
+      // diagonal selection can be made differently. We ll just say 4 matching children is good
+      // enough for the heuristic
+      unsigned int num_children_match = 0;
       for (auto & child : parent->child_ref_range())
       {
-        bool found_child = false;
         std::cout << "Center of child " << child.vertex_average() << " " << std::endl;
         for (auto & potential_children : elements)
           if (MooseUtils::absoluteFuzzyEqual(
@@ -703,21 +875,23 @@ MeshDiagnosticsGenerator::generate()
               MooseUtils::absoluteFuzzyEqual(
                   child.vertex_average()(2), potential_children->vertex_average()(2), TOLERANCE))
           {
-            found_child = true;
+            num_children_match++;
             break;
           }
-        if (!found_child)
-        {
-          all_children_match = false;
-          break;
-        }
       }
 
-      if (all_children_match)
+      if (num_children_match == num_children || (parent->type() == TET4 && num_children_match == 4))
       {
         num_likely_AMR_created_nonconformality++;
         if (num_likely_AMR_created_nonconformality < 10)
-          _console << "Detected non-conformality likely created by AMR near " << *node << std::endl;
+        {
+          _console << "Detected non-conformality likely created by AMR near" << *node
+                   << Moose::stringify(elem_type)
+                   << " elements that could be merged into a coarse element:" << std::endl;
+          for (const auto & elem : elements)
+            _console << elem->id() << " ";
+          _console << std::endl;
+        }
         else if (num_likely_AMR_created_nonconformality == 10)
           _console << "Maximum log output reached, silencing output" << std::endl;
       }
