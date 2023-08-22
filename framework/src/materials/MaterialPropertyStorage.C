@@ -403,12 +403,10 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
       std::size_t num_sides = side_map.size();
       dataStore(stream, num_sides, nullptr);
 
-      for (auto & side_props_pair : side_map)
+      for (auto & [side, props] : side_map)
       {
-        unsigned int side = side_props_pair.first;
         dataStore(stream, side, nullptr);
 
-        auto & props = side_props_pair.second;
         std::size_t num_props = props.size();
         dataStore(stream, num_props, nullptr);
         mooseAssert(num_props > 0, "No properties");
