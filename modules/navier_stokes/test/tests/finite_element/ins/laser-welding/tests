@@ -1,5 +1,5 @@
 [Tests]
-  design = 'insfv.md'
+  design = 'laser_welding.md'
   issues = '#24462'
   [3d]
     input = 3d.i

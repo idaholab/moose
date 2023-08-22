@@ -12,8 +12,8 @@
 #include "ADKernelValue.h"
 
 /**
- * This calculates the time derivative for a coupled variable
- **/
+ * Subtracts the mesh velocity from the convection term in the Navier-Stokes momentum equation
+ */
 class INSADMeshConvection : public ADVectorKernelValue
 {
 public:

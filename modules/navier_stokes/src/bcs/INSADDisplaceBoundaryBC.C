@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSADDisplaceBoundaryBC.h"
+#include "SystemBase.h"
+#include "ImplicitEuler.h"
 
 registerMooseObject("NavierStokesApp", INSADDisplaceBoundaryBC);
 
@@ -28,6 +30,10 @@ INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & paramet
     _u_old(_var.nodalValueOld()),
     _component(getParam<unsigned short>("component"))
 {
+  if (!dynamic_cast<ImplicitEuler *>(_sys.getTimeIntegrator()))
+    mooseError("This boundary condition hard-codes a displacement update with the form of an "
+               "implicit Euler discretization. Consequently please use the default time "
+               "integrator, ImplicitEuler.");
 }
 
 ADReal

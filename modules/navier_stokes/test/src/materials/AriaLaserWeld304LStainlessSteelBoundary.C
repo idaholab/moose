@@ -28,7 +28,7 @@ AriaLaserWeld304LStainlessSteelBoundary::validParams()
   params.addParam<Real>("Tb", 3000, "The boiling temperature");
   params.addParam<Real>("Tbound1", 0, "The first temperature bound");
   params.addParam<Real>("Tbound2", 170, "The second temperature bound");
-  params.addCoupledVar("temperature", 1., "The temperature");
+  params.addRequiredCoupledVar("temperature", "The temperature in K");
   params.addParam<MaterialPropertyName>("rc_pressure_name", "rc_pressure", "The recoil pressure");
   params.addParam<Real>(
       "alpha", -4.3e-4, "The derivative of the surface tension with respect to temperature");
@@ -38,23 +38,6 @@ AriaLaserWeld304LStainlessSteelBoundary::validParams()
       "surface_tension_name", "surface_tension", "The surface tension");
   params.addParam<MaterialPropertyName>(
       "grad_surface_tension_name", "grad_surface_tension", "The gradient of the surface tension");
-  params.addParam<int>("length_unit_exponent",
-                       0,
-                       "The exponent of the length unit. If working in milimeters for example, "
-                       "this number should be -3");
-  params.addParam<int>(
-      "temperature_unit_exponent",
-      0,
-      "The exponent of the temperature unit. If working in kili-Kelvin for example, "
-      "this number should be 3");
-  params.addParam<int>("mass_unit_exponent",
-                       0,
-                       "The exponent of the mass unit. If working in miligrams for example, "
-                       "this number should be -9");
-  params.addParam<int>("time_unit_exponent",
-                       0,
-                       "The exponent of the time unit. If working in micro-seconds for example, "
-                       "this number should be -6");
   return params;
 }
 
@@ -84,38 +67,23 @@ AriaLaserWeld304LStainlessSteelBoundary::AriaLaserWeld304LStainlessSteelBoundary
         getParam<MaterialPropertyName>("grad_surface_tension_name"))),
     _ad_normals(_assembly.adNormals()),
     _surface_term_gradient1(declareADProperty<RealVectorValue>("surface_term_gradient1")),
-    _surface_term_gradient2(declareADProperty<RealVectorValue>("surface_term_gradient2")),
-    _length_units_per_meter(1. / std::pow(10, getParam<int>("length_unit_exponent"))),
-    _temperature_units_per_kelvin(1. / std::pow(10, getParam<int>("temperature_unit_exponent"))),
-    _mass_units_per_kilogram(1. / std::pow(10, getParam<int>("mass_unit_exponent"))),
-    _time_units_per_second(1. / std::pow(10, getParam<int>("time_unit_exponent")))
+    _surface_term_gradient2(declareADProperty<RealVectorValue>("surface_term_gradient2"))
 {
 }
 
 void
 AriaLaserWeld304LStainlessSteelBoundary::computeQpProperties()
 {
-  auto && theta = _temperature[_qp] / _temperature_units_per_kelvin - _Tb;
+  const auto theta = _temperature[_qp] - _Tb;
   if (theta < _Tbound1)
     _rc_pressure[_qp] = 0;
   else if (theta < _Tbound2)
-    _rc_pressure[_qp] =
-        _mass_units_per_kilogram /
-        (_length_units_per_meter * _time_units_per_second * _time_units_per_second) *
-        (_ap0 + _ap1 * theta + _ap2 * theta * theta + _ap3 * theta * theta * theta);
+    _rc_pressure[_qp] = _ap0 + _ap1 * theta + _ap2 * theta * theta + _ap3 * theta * theta * theta;
   else
-    _rc_pressure[_qp] =
-        _mass_units_per_kilogram /
-        (_length_units_per_meter * _time_units_per_second * _time_units_per_second) *
-        (_bp0 + _bp1 * theta + _bp2 * theta * theta + _bp3 * theta * theta * theta);
+    _rc_pressure[_qp] = _bp0 + _bp1 * theta + _bp2 * theta * theta + _bp3 * theta * theta * theta;
 
-  _surface_tension[_qp] =
-      _sigma0 * _mass_units_per_kilogram / (_time_units_per_second * _time_units_per_second) +
-      _alpha * _mass_units_per_kilogram / (_time_units_per_second * _time_units_per_second) *
-          (_temperature[_qp] / _temperature_units_per_kelvin - _T0);
-  _grad_surface_tension[_qp] = _alpha * _mass_units_per_kilogram /
-                               (_time_units_per_second * _time_units_per_second) /
-                               _temperature_units_per_kelvin * _grad_temperature[_qp];
+  _surface_tension[_qp] = _sigma0 + _alpha * (_temperature[_qp] - _T0);
+  _grad_surface_tension[_qp] = _alpha * _grad_temperature[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];
   _surface_term_gradient2[_qp] = _ad_normals[_qp] * (_ad_normals[_qp] * _grad_surface_tension[_qp]);
 }

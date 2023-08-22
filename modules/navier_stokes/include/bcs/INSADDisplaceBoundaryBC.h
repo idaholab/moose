@@ -11,6 +11,10 @@
 
 #include "ADNodalBC.h"
 
+/**
+ * Increments the boundary displacement by the product of the surface velocity and the change in
+ * time through an implicit Euler disretization
+ */
 class INSADDisplaceBoundaryBC : public ADNodalBC
 {
 public:

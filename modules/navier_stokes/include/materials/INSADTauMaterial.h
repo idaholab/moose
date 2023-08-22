@@ -79,7 +79,7 @@ protected:
   /// they're currently not supported for vector FE types
   const FEBase * const & _scalar_lagrange_fe;
 
-  /// Containers to hold second derivatives of velocity with respect to velocities
+  /// Containers to hold the matrix of second spatial derivatives of velocity
   std::vector<ADRealTensorValue> _d2u;
   std::vector<ADRealTensorValue> _d2v;
   std::vector<ADRealTensorValue> _d2w;
@@ -194,6 +194,9 @@ INSADTauMaterialTempl<T>::computeHMax()
           continue;
         const auto sys_num = disp_sys_nums[i];
 
+        // Here we insert derivatives of the difference in nodal positions with respect to the
+        // displacement degrees of freedom. From above, diff = outer_node_position -
+        // inner_node_position
         diff(i).derivatives().insert(
             _current_elem->node_ref(n_outer).dof_number(sys_num, disp_num, 0)) = 1.;
         diff(i).derivatives().insert(
@@ -295,52 +298,26 @@ INSADTauMaterialTempl<T>::viscousTermRZ()
   //
   // Another note: libMesh implements grad(v) as dvi/dxj
 
-  if (_use_displaced_mesh)
-  {
-    ADReal r = _ad_q_point[_qp](_rz_radial_coord);
+  const auto r = _ad_q_point[_qp](_rz_radial_coord);
 
-    if (_viscous_form == "laplace")
-      _viscous_strong_residual[_qp] += ADRealVectorValue(
-          // u_r
-          // Additional term from vector Laplacian
-          _mu[_qp] * (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                      // Additional term from scalar Laplacian
-                      _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-          // u_z
-          // Additional term from scalar Laplacian
-          -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
-          0);
-    else
-      _viscous_strong_residual[_qp] +=
-          ADRealVectorValue(2. * _mu[_qp] *
-                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                            -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                            0);
-  }
+  if (_viscous_form == "laplace")
+    _viscous_strong_residual[_qp] +=
+        // u_r
+        // Additional term from vector Laplacian
+        ADRealVectorValue(_mu[_qp] * (_velocity[_qp](_rz_radial_coord) / (r * r) -
+                                      // Additional term from scalar Laplacian
+                                      _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+                          // u_z
+                          // Additional term from scalar Laplacian
+                          -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
+                          0);
   else
-  {
-    Real r = _q_point[_qp](_rz_radial_coord);
-    if (_viscous_form == "laplace")
-      _viscous_strong_residual[_qp] +=
-          // u_r
-          // Additional term from vector Laplacian
-          ADRealVectorValue(_mu[_qp] *
-                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                 // Additional term from scalar Laplacian
-                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                            // u_z
-                            // Additional term from scalar Laplacian
-                            -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
-                            0);
-    else
-      _viscous_strong_residual[_qp] +=
-          ADRealVectorValue(2. * _mu[_qp] *
-                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                            -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                            0);
-  }
+    _viscous_strong_residual[_qp] +=
+        ADRealVectorValue(2. * _mu[_qp] *
+                              (_velocity[_qp](_rz_radial_coord) / (r * r) -
+                               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+                          -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
+                          0);
 }
 
 template <typename T>

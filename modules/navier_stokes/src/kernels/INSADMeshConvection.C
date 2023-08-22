@@ -44,16 +44,15 @@ INSADMeshConvection::INSADMeshConvection(const InputParameters & parameters)
   {
     // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
     // don't need
-    auto & obj_tracker = const_cast<INSADObjectTracker &>(
-        _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+    auto & obj_tracker = _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker");
     for (const auto block_id : blockIDs())
     {
       obj_tracker.set("has_convected_mesh", true, block_id);
-      obj_tracker.set("disp_x", getParam<std::vector<VariableName>>("disp_x").front(), block_id);
+      obj_tracker.set("disp_x", coupledName("disp_x"), block_id);
       if (isParamValid("disp_y"))
-        obj_tracker.set("disp_y", getParam<std::vector<VariableName>>("disp_y").front(), block_id);
+        obj_tracker.set("disp_y", coupledName("disp_y"), block_id);
       if (isParamValid("disp_z"))
-        obj_tracker.set("disp_z", getParam<std::vector<VariableName>>("disp_z").front(), block_id);
+        obj_tracker.set("disp_z", coupledName("disp_z"), block_id);
     }
   }
 }

@@ -56,9 +56,4 @@ protected:
   const MooseArray<ADPoint> & _ad_normals;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient1;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient2;
-
-  const Real _length_units_per_meter;
-  const Real _temperature_units_per_kelvin;
-  const Real _mass_units_per_kilogram;
-  const Real _time_units_per_second;
 };
