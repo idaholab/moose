@@ -24,7 +24,7 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
-#include "RestartableDataIO.h"
+#include "RestartableDataReader.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -48,6 +48,7 @@ class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
+class Backup;
 
 namespace libMesh
 {
@@ -674,23 +675,26 @@ public:
   const DataNames & getRecoverableData() const { return _recoverable_data_names; }
 
   /**
-   * Create a Backup from the current App. A Backup contains all the data necessary to be able to
-   * restore the state of an App.
-   *
-   * This method should be overridden in external or MOOSE-wrapped applications.
+   * Backs up the application to the file \p filename.
    */
-  virtual std::shared_ptr<Backup> backup();
+  void backup(const std::string & filename);
+  /**
+   * Backs up the application memory in a Backup.
+   */
+  std::shared_ptr<Backup> backup();
+
+  /**
+   * Restore an application from the file \p filename.
+   */
+  void restore(const std::string & filename, const bool for_restart);
 
   /**
    * Restore a Backup. This sets the App's state.
    *
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart
    * data.
-   * @param clear Whether or not to clear the data after restoring
-   *
-   * This method should be overridden in external or MOOSE-wrapped applications.
    */
-  virtual void restore(bool for_restart = false, bool clear = false);
+  void restore(bool for_restart = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -911,25 +915,10 @@ public:
    *
    * These are MOOSE internal functions and should not be used otherwise.
    */
-  std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>::iterator
-  getRestartableDataMapBegin()
-  {
-    return _restartable_meta_data.begin();
-  }
+  auto getRestartableDataMapBegin() { return _restartable_meta_data.begin(); }
 
-  std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>::iterator
-  getRestartableDataMapEnd()
-  {
-    return _restartable_meta_data.end();
-  }
+  auto getRestartableDataMapEnd() { return _restartable_meta_data.end(); }
   ///@}
-
-  /**
-   * @returns The RestartableDataIO object used for backing up and restoring/restarting
-   *
-   * TODO: Try to remove not expose this
-   */
-  RestartableDataIO & restartableDataIO() { return _rdio; }
 
   /**
    * Whether this application should by default error on Jacobian nonzero reallocations. The
@@ -960,7 +949,7 @@ protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
-  bool hasCachedBackup() const { return _rdio.hasBackup(); }
+  bool hasCachedBackup() const { return _current_backup != nullptr; }
 
   /**
    * Helper method for dynamic loading of objects
@@ -1326,7 +1315,7 @@ private:
   /// The system that manages the MeshGenerators
   MeshGeneratorSystem _mesh_generator_system;
 
-  RestartableDataIO _rdio;
+  RestartableDataReader _rd_reader;
 
   /**
    * Execution flags for this App. Note: These are copied on purpose instead of maintaining a
@@ -1357,6 +1346,9 @@ private:
 
   /// Registration for interface objects
   std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>> _interface_registry;
+
+  /// The current backup object (if any)
+  std::shared_ptr<Backup> _current_backup;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

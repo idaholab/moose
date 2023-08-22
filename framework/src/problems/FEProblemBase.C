@@ -449,8 +449,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _bnd_mat_side_cache.resize(n_threads);
   _interface_mat_side_cache.resize(n_threads);
 
-  _restart_io = std::make_unique<RestartableDataIO>(_app);
-
   es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
   if (parameters.isParamSetByUser("coord_type"))
@@ -779,34 +777,17 @@ FEProblemBase::initialSetup()
           res_value.addDependency(*value);
     }
 
+    TIME_SECTION("restore", 3, "Restoring from backup");
+
     // We could have a cached backup when this app is a sub-app and has been given a Backup
     if (!_app.hasCachedBackup())
     {
-      TIME_SECTION("readRestartData", 3, "Reading Restart Data");
-
-      // Read the backup from file
       const std::string backup_file_name =
           _app.getRestartRecoverFileBase() + Checkpoint::restartSuffix(processor_id());
-      auto backup = std::make_shared<Backup>(backup_file_name);
-      try
-      {
-        std::ifstream backup_file;
-        backup_file.open(backup_file_name, std::ios::in | std::ios::binary);
-        dataLoad(backup_file, backup, nullptr);
-        backup_file.close();
-      }
-      catch (...)
-      {
-        mooseError("Error opening backup file: ", backup_file_name);
-      }
-
-      _app.setBackupObject(backup);
+      _app.restore(backup_file_name, _app.isRestarting());
     }
-
-    {
-      TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
-      _app.restore(_app.isRestarting(), /* clear = */ true);
-    }
+    else
+      _app.restore(_app.isRestarting());
 
     if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
         _neighbor_material_props.hasStatefulProperties())

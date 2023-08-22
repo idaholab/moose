@@ -54,7 +54,6 @@ class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
-class RestartableDataIO;
 class Assembly;
 class JacobianBlock;
 class Control;
@@ -2351,9 +2350,6 @@ protected:
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
 
-  /// Object responsible for restart (read/write)
-  std::unique_ptr<RestartableDataIO> _restart_io;
-
   /// true if the Jacobian is constant
   bool _const_jacobian;
 
@@ -2513,7 +2509,6 @@ private:
   friend class NonlinearSystemBase;
   friend class MooseEigenSystem;
   friend class Resurrector;
-  friend class RestartableDataIO;
   friend class Restartable;
   friend class DisplacedProblem;
 

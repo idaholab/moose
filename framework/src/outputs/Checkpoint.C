@@ -18,6 +18,7 @@
 #include "RestartableDataIO.h"
 #include "MooseMesh.h"
 #include "MeshMetaDataInterface.h"
+#include "RestartableDataWriter.h"
 
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
@@ -52,8 +53,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
     _is_autosave(getParam<AutosaveType>("is_autosave")),
     _num_files(getParam<unsigned int>("num_files")),
-    _suffix(getParam<std::string>("suffix")),
-    _restartable_data_io(_app)
+    _suffix(getParam<std::string>("suffix"))
 {
 }
 
@@ -162,17 +162,15 @@ Checkpoint::output()
       const std::string filename(current_file + fullMetaDataSuffix(suffix));
 
       curr_file_struct.restart_meta_data.emplace(filename);
-      _restartable_data_io.writeRestartableData(filename, meta_data);
+
+      RestartableDataWriter writer(_app, meta_data);
+      writer.write(filename);
     }
   }
 
   // Write out the backup
-  auto backup = _app.backup();
-  std::ofstream backup_file;
   const std::string backup_filename(curr_file_struct.restart);
-  backup_file.open(backup_filename, std::ios::out | std::ios::binary);
-  dataStore(backup_file, backup, nullptr);
-  backup_file.close();
+  _app.backup(backup_filename);
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);

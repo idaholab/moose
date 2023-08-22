@@ -12,7 +12,7 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "RestartableDataIO.h"
+#include "RestartableDataReader.h"
 #include "Checkpoint.h"
 
 #include "libmesh/exodusII_io.h"
@@ -126,16 +126,15 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
-      RestartableDataIO restartable(_app);
       const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
       if (MooseUtils::pathExists(metadata_file_name))
-      {
-        restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-        // get reference to mesh meta data (created by MooseApp)
-        auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
         if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
-          restartable.readRestartableData(metadata_file_name, meta_data, DataNames());
-      }
+        {
+          auto & data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+          RestartableDataReader reader(_app, data);
+          reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+          reader.restore(metadata_file_name, false);
+        }
 
       if (restarting)
       {

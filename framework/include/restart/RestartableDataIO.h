@@ -9,19 +9,13 @@
 
 #pragma once
 
-// MOOSE includes
-#include "DataIO.h"
-#include "RestartableData.h"
 #include "PerfGraphInterface.h"
-#include "Backup.h"
 
-// C++ includes
-#include <sstream>
-#include <string>
-#include <list>
-#include <typeinfo>
+#include "libmesh/parallel_object.h"
 
-// Forward declarations
+#include <vector>
+#include <variant>
+
 class RestartableDataMap;
 
 /**
@@ -29,129 +23,37 @@ class RestartableDataMap;
  *
  * It takes care of writing and reading the restart files.
  */
-class RestartableDataIO : public PerfGraphInterface
+class RestartableDataIO : public PerfGraphInterface, public libMesh::ParallelObject
 {
 public:
-  RestartableDataIO(MooseApp & moose_app);
+  RestartableDataIO(MooseApp & app, RestartableDataMap & data);
+  RestartableDataIO(MooseApp & app, std::vector<RestartableDataMap> & data);
 
   /**
-   * Sets the backup for use in restoreBackup and restoreData.
+   * @return The common extension for restartable data
    */
-  void setBackup(std::shared_ptr<Backup> backup);
-  /**
-   * @returns Whether or not a backup has been set via setBackup.
-   */
-  bool hasBackup() const { return _backup != nullptr; }
-  /**
-   * Clears the backup that has been set by setBackup.
-   */
-  void clearBackup();
-
-  /**
-   * Create a Backup for the current system.
-   */
-  std::shared_ptr<Backup> createBackup();
-
   static const std::string & getRestartableDataExt() { return RESTARTABLE_DATA_EXT; }
 
+protected:
   /**
-   * Restore a Backup for the current system.
+   * @return The restartable data for thread \p tid
    *
-   * Requires that a backup has been set via setBackup.
+   * This exists so that we can support threaded and non-threaded data in _data
    */
-  void restoreBackup(bool for_restart = false);
-
+  RestartableDataMap & currentData(const THREAD_ID tid);
   /**
-   * Restores the data with the name \p name on thread \p tid.
-   *
-   * Requires that a backup has been set via setBackup.
+   * @return The size of _data
    */
-  void restoreData(const std::string & name, const THREAD_ID tid);
+  std::size_t dataSize() const;
 
-  /**
-   * Writes restartable data into a binary file.
-   *
-   * This should only be used for the arbitrary restartable data maps (such as mesh meta data)
-   * The normal restart data is encaapsulated in the backup
-   *
-   * @param file_name The name of the file to read from
-   * @restartable_data The data to be written
-   */
-  void writeRestartableData(const std::string & file_name, RestartableDataMap & restartable_data);
+  /// The data we wish to act on
+  /// This is a variant so that we can act on threaded and non-threaded data
+  const std::variant<RestartableDataMap *, std::vector<RestartableDataMap> *> _data;
 
-  /**
-   * Reads restartable data from a binary file.
-   *
-   * This should only be used for the arbitrary restartable data maps (such as mesh meta data)
-   * The normal restart data is encaapsulated in the backup
-   *
-   * @param file_name The file name to read from
-   * @param restartable_data The data structure to read into
-   * @param filter_names The names of data to NOT read (used to filter out recover only variables
-   * during restart)
-   */
-  void readRestartableData(const std::string & file_name,
-                           RestartableDataMap & restartable_data,
-                           const DataNames & filter_names = {});
-
-  ///@{
-  /*
-   * Enable/Disable errors to allow meta data to be created/loaded on different number or
-   * processors
-   *
-   * See LoadSurrogateModelAction for use case
-   */
-  void setErrorOnLoadWithDifferentNumberOfProcessors(bool value)
-  {
-    _error_on_different_number_of_processors = value;
-  }
-
-  void setErrorOnLoadWithDifferentNumberOfThreads(bool value)
-  {
-    _error_on_different_number_of_threads = value;
-  }
-  ///@}
-
-private:
-  /**
-   * Reads the backup headers for the Backup on thread \p tid, and
-   * stores them into the data maps within the Backup for future use.
-   */
-  void readBackup(const THREAD_ID tid);
-
-  /**
-   * @returns The restartable data headers from the stream \p stream.
-   */
-  std::unordered_map<std::string, Backup::DataInfo>
-  readRestartableData(std::istream & stream, const std::string & filename = "") const;
-
-  /**
-   * Serializes the data into the stream object.
-   */
-  void serializeRestartableData(RestartableDataMap & restartable_data, std::ostream & stream);
-
-  /**
-   * Deserializes the data from the stream object.
-   */
-  void deserializeRestartableData(RestartableDataMap & restartable_data,
-                                  std::istream & stream,
-                                  std::unordered_map<std::string, Backup::DataInfo> & data_map,
-                                  const DataNames & filter_names);
-  void deserializeRestartableDataValue(RestartableDataValue & value,
-                                       Backup::DataInfo & data_entry,
-                                       std::istream & stream);
-
-  /// A reference to the MooseApp object for retrieving restartable data stores and filters
-  MooseApp & _moose_app;
-
-  /// The Backup object for use in restoration
-  std::shared_ptr<Backup> _backup;
-
+  /// The common extension for restartable data
   static const std::string RESTARTABLE_DATA_EXT;
+  /// The current version for the backup file
   static const unsigned int CURRENT_BACKUP_FILE_VERSION;
+  /// The type to used for comparing hash codes (sanity checking)
   typedef int COMPARE_HASH_CODE_TYPE;
-
-  /// Error check controls
-  bool _error_on_different_number_of_processors = true;
-  bool _error_on_different_number_of_threads = true;
 };

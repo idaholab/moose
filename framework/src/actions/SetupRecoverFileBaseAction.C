@@ -13,6 +13,7 @@
 #include "OutputWarehouse.h"
 #include "Checkpoint.h"
 #include "MooseObjectAction.h"
+#include "RestartableDataReader.h"
 
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_meta_data");
@@ -54,16 +55,18 @@ SetupRecoverFileBaseAction::act()
   {
     // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
     // generators have run.
-    RestartableDataIO restartable(_app);
     for (auto map_iter = _app.getRestartableDataMapBegin();
          map_iter != _app.getRestartableDataMapEnd();
          ++map_iter)
     {
-      RestartableDataMap & meta_data = map_iter->second.first;
       const std::string & suffix = map_iter->second.second;
-      std::string meta_suffix = Checkpoint::fullMetaDataSuffix(suffix);
-      if (MooseUtils::checkFileReadable(meta_suffix, false, false, false))
-        restartable.readRestartableData(meta_suffix, meta_data, DataNames());
+      const std::string filename = Checkpoint::fullMetaDataSuffix(suffix);
+      if (MooseUtils::checkFileReadable(filename, false, false, false))
+      {
+        RestartableDataMap & meta_data = map_iter->second.first;
+        RestartableDataReader reader(_app, meta_data);
+        reader.restore(filename, false);
+      }
     }
   }
 }

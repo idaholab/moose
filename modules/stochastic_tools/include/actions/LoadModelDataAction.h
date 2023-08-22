@@ -11,7 +11,7 @@
 
 #include "Action.h"
 #include "Attributes.h"
-#include "RestartableDataIO.h"
+#include "RestartableDataReader.h"
 #include "RestartableModelInterface.h"
 
 /**
@@ -65,22 +65,15 @@ template <typename T>
 void
 LoadModelDataAction<T>::load(const T & object)
 {
-  // File to load
-  const FileName & filename = object.getModelDataFileName();
-
   // Create the object that will load in data
-  RestartableDataIO data_io(_app);
-  data_io.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-  data_io.setErrorOnLoadWithDifferentNumberOfThreads(false);
-
-  // Get the data object that the loaded data will be applied
-  RestartableDataMap & meta_data = _app.getRestartableDataMap(object.modelMetaDataName());
+  RestartableDataReader reader(_app, _app.getRestartableDataMap(object.modelMetaDataName()));
+  reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
   // Read the supplied file
+  const FileName & filename = object.getModelDataFileName();
   try
   {
-    std::unordered_set<std::string> filter_names;
-    data_io.readRestartableData(filename, meta_data, filter_names);
+    reader.restore(filename, false);
   }
   catch (...)
   {

@@ -9,7 +9,7 @@
 
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
-#include "RestartableDataIO.h"
+#include "RestartableDataReader.h"
 #include "Checkpoint.h"
 
 #include "libmesh/replicated_mesh.h"
@@ -118,16 +118,13 @@ FileMeshGenerator::generate()
     mesh->allow_renumbering(_allow_renumbering);
     mesh->read(file_name);
 
-    // we also read declared mesh meta data here if there is meta data file
-    RestartableDataIO restartable(_app);
-    std::string metadata_file_name = file_name + Checkpoint::meshMetadataSuffix();
+    const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
     if (MooseUtils::pathExists(metadata_file_name))
     {
-      restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-      // get reference to mesh meta data (created by MooseApp)
-      auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+      RestartableDataReader reader(_app, _app.getRestartableDataMap(MooseApp::MESH_META_DATA));
+      reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
       if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
-        restartable.readRestartableData(metadata_file_name, meta_data, DataNames());
+        reader.restore(metadata_file_name, false);
     }
   }
 

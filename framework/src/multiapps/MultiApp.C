@@ -30,6 +30,7 @@
 #include "MultiAppTransfer.h"
 #include "Positions.h"
 #include "Transient.h"
+#include "Backup.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"

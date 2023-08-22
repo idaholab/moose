@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "FileOutput.h"
-#include "RestartableDataIO.h"
 
 #include <deque>
 
@@ -116,9 +115,6 @@ private:
 
   /// Directory suffix
   const std::string _suffix;
-
-  /// RestrableData input/output interface
-  RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;

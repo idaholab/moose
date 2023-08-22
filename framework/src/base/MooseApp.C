@@ -52,6 +52,8 @@
 #include "ExecFlagRegistry.h"
 #include "SolutionInvalidity.h"
 #include "MooseServer.h"
+#include "RestartableDataWriter.h"
+#include "Backup.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -396,7 +398,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
-    _rdio(*this),
+    _rd_reader(*this, _restartable_data),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
@@ -1189,28 +1191,54 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
   }
 }
 
+void
+MooseApp::backup(const std::string & filename)
+{
+  TIME_SECTION("backup", 2, "Backing Up Application to File");
+
+  RestartableDataWriter writer(*this, _restartable_data);
+  writer.write(filename);
+}
+
 std::shared_ptr<Backup>
 MooseApp::backup()
 {
   TIME_SECTION("backup", 2, "Backing Up Application");
 
-  mooseAssert(_executioner, "Executioner is nullptr");
+  auto backup = std::make_shared<Backup>();
+  RestartableDataWriter writer(*this, _restartable_data);
+  writer.write(*backup->data);
 
-  RestartableDataIO rdio(*this);
-  return rdio.createBackup();
+  return backup;
 }
 
 void
-MooseApp::restore(const bool for_restart, const bool clear)
+MooseApp::restore(const std::string & filename, const bool for_restart)
+{
+  TIME_SECTION("restore", 2, "Restoring Application from File");
+
+  const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
+
+  _rd_reader.clear();
+  _rd_reader.restore(filename, true, filter_names);
+}
+
+void
+MooseApp::restore(const bool for_restart)
 {
   TIME_SECTION("restore", 2, "Restoring Application");
 
-  mooseAssert(_executioner, "Executioner is nullptr");
+  const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  _rdio.restoreBackup(for_restart);
+  if (!hasCachedBackup())
+    mooseError("MooseApp::restore(): Cannot call without a cached backup");
 
-  if (clear)
-    _rdio.clearBackup();
+  _rd_reader.clear();
+
+  std::shared_ptr<std::istream> stream =
+      std::dynamic_pointer_cast<std::istream>(_current_backup->data);
+  _rd_reader.setInput(stream);
+  _rd_reader.restore(true, filter_names);
 }
 
 void
@@ -2066,7 +2094,7 @@ MooseApp::setRecover(bool value)
 void
 MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
 {
-  _rdio.setBackup(backup);
+  _current_backup = backup;
 }
 
 void
