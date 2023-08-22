@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FinEnhancementFactorFunctorMaterial.md'
+  issues = '#25275'
+  [test]
+    type = CSVDiff
+    input = 'fin_enhancement_factor.i'
+    csvdiff = 'fin_enhancement_factor_out.csv'
+    requirement = 'The system shall be able to compute a fin heat transfer enhancement factor functor material property.'
+  []
+[]
