@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ADNodalBC.h"
+#include "NodalBCBase.h"
 
 /**
  * Base class for automatic differentiation Dirichlet BCs
  */
-class ADDirichletBCBase : public ADNodalBC
+class ADDirichletBCBase : public NodalBCBase
 {
 public:
   ADDirichletBCBase(const InputParameters & parameters);
@@ -22,20 +22,13 @@ public:
   /**
    * Method to preset the nodal value if applicable
    */
-  void computeValue(NumericVector<Number> & current_solution);
+  virtual void computeValue(NumericVector<Number> & current_solution) = 0;
 
   static InputParameters validParams();
 
   bool preset() const { return _preset; }
 
 protected:
-  virtual ADReal computeQpResidual() override;
-
-  /**
-   * Compute the value of the Dirichlet BC at the current quadrature point
-   */
-  virtual ADReal computeQpValue() = 0;
-
   /// Whether or not the value is to be preset
   const bool _preset;
 };

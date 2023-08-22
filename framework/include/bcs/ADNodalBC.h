@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "NodalBCBase.h"
 #include "MooseVariableInterface.h"
+#include "NodalBCBase.h"
+#include "ADDirichletBCBase.h"
 
 /**
  * Base class for deriving any automatic differentiation boundary condition of a integrated type
  */
-template <typename T>
-class ADNodalBCTempl : public NodalBCBase, public MooseVariableInterface<T>
+template <typename T, typename Base>
+class ADNodalBCTempl : public Base, public MooseVariableInterface<T>
 {
 public:
   static InputParameters validParams();
@@ -24,6 +25,8 @@ public:
   ADNodalBCTempl(const InputParameters & parameters);
 
   const MooseVariableFE<T> & variable() const override { return _var; }
+
+  bool shouldSetComp(unsigned short i) const { return _set_components[i]; }
 
 protected:
   /**
@@ -45,6 +48,14 @@ protected:
 
   const std::array<bool, 3> _set_components;
 
+  using Base::_fe_problem;
+  using Base::_subproblem;
+  using Base::_sys;
+  using Base::_tid;
+  using Base::addJacobian;
+  using Base::addMooseVariableDependency;
+  using Base::setResidual;
+
 private:
   void computeResidual() override final;
   void computeJacobian() override final;
@@ -58,7 +69,6 @@ private:
   template <typename ADResidual>
   void addResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
 
-  using NodalBCBase::addJacobian;
   /**
    * process the Jacobian into the global data structures
    */
@@ -70,5 +80,11 @@ private:
   Assembly & _undisplaced_assembly;
 };
 
-using ADNodalBC = ADNodalBCTempl<Real>;
-using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue>;
+template <>
+InputParameters ADNodalBCTempl<RealVectorValue, NodalBCBase>::validParams();
+
+template <>
+InputParameters ADNodalBCTempl<RealVectorValue, ADDirichletBCBase>::validParams();
+
+using ADNodalBC = ADNodalBCTempl<Real, NodalBCBase>;
+using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue, NodalBCBase>;
