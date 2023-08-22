@@ -86,10 +86,9 @@ function configure_petsc()
     if [ -z "$patch_file" ]; then
       # If an HDF5 download is requested, patch PETSc to properly configure it
       if [ "$HDF5_STR" == "--download-hdf5=1" ]; then
-         echo "INFO: Patching PETSc to support HDF5 download and installation on ARM..."
-         HDF5_STR+=" --download-hdf5-configure-arguments=--enable-cxx"
-         git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
-         touch $PETSC_DIR/.patched
+        echo "INFO: Patching PETSc to support HDF5 download and installation on ARM..."
+        git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
+        touch $PETSC_DIR/.patched
       else
         echo "INFO: No ARM patches required, proceeding to PETSc configure..."
       fi
@@ -99,6 +98,11 @@ function configure_petsc()
     # Finally, be sure to set FFLAGS for mumps to use the proper arch, otherwise it will fail to
     # build correctly
     MUMPS_ARM_STR="FFLAGS="-march=armv8.3-a""
+  fi
+
+  # Add HDF5 configure arguments if we are allowing PETSc to build it
+  if [[ "$HDF5_STR" == *"--download-hdf5=1"* ]]; then
+    HDF5_STR+=" --download-hdf5-configure-arguments=--enable-cxx"
   fi
 
   cd $PETSC_DIR
