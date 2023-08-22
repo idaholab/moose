@@ -72,6 +72,9 @@ P_out = 2.0e5 # Pa
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [FluidProperties]

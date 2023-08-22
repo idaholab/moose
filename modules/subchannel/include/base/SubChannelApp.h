@@ -43,6 +43,8 @@ public:
   static const std::string TEMPERATURE;
   /// pin temperature
   static const std::string PIN_TEMPERATURE;
+  /// pin diameter
+  static const std::string PIN_DIAMETER;
   /// density
   static const std::string DENSITY;
   /// viscosity

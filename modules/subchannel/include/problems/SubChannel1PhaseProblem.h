@@ -194,6 +194,7 @@ protected:
   std::unique_ptr<SolutionHandle> _h_soln;
   std::unique_ptr<SolutionHandle> _T_soln;
   std::unique_ptr<SolutionHandle> _Tpin_soln;
+  std::unique_ptr<SolutionHandle> _Dpin_soln;
   std::unique_ptr<SolutionHandle> _rho_soln;
   std::unique_ptr<SolutionHandle> _mu_soln;
   std::unique_ptr<SolutionHandle> _S_flow_soln;
