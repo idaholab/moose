@@ -90,6 +90,9 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [FluidProperties]

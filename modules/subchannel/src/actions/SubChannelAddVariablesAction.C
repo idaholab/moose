@@ -50,6 +50,7 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::ENTHALPY,
                                         SubChannelApp::TEMPERATURE,
                                         SubChannelApp::PIN_TEMPERATURE,
+                                        SubChannelApp::PIN_DIAMETER,
                                         SubChannelApp::DUCT_TEMPERATURE,
                                         SubChannelApp::DENSITY,
                                         SubChannelApp::VISCOSITY};
