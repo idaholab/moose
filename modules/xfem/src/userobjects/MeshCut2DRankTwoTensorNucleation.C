@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MeshCutRankTwoTensorNucleation.h"
+#include "MeshCut2DRankTwoTensorNucleation.h"
 
 #include "libmesh/quadrature.h"
 #include "RankTwoTensor.h"
@@ -15,12 +15,12 @@
 #include "Assembly.h"
 #include <limits>
 
-registerMooseObject("XFEMApp", MeshCutRankTwoTensorNucleation);
+registerMooseObject("XFEMApp", MeshCut2DRankTwoTensorNucleation);
 
 InputParameters
-MeshCutRankTwoTensorNucleation::validParams()
+MeshCut2DRankTwoTensorNucleation::validParams()
 {
-  InputParameters params = MeshCutNucleationBase::validParams();
+  InputParameters params = MeshCut2DNucleationBase::validParams();
   params.addClassDescription(
       "Nucleate a crack in MeshCut2D UO based on a scalar extracted from a RankTwoTensor");
   params.addParam<MooseEnum>(
@@ -30,9 +30,8 @@ MeshCutRankTwoTensorNucleation::validParams()
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addRequiredCoupledVar(
       "nucleation_threshold",
-      "Cracks nucleation occurs when RankTwo scalar exceeds this threshold.");
+      "Threshold for the scalar quantity of the RankTwoTensor to nucleate new cracks");
   params.addRequiredParam<Real>("nucleation_length", "Nucleated crack length.");
-  // fixme why is this along y?
   params.addParam<Point>(
       "point1",
       Point(0, 0, 0),
@@ -44,8 +43,9 @@ MeshCutRankTwoTensorNucleation::validParams()
   return params;
 }
 
-MeshCutRankTwoTensorNucleation::MeshCutRankTwoTensorNucleation(const InputParameters & parameters)
-  : MeshCutNucleationBase(parameters),
+MeshCut2DRankTwoTensorNucleation::MeshCut2DRankTwoTensorNucleation(
+    const InputParameters & parameters)
+  : MeshCut2DNucleationBase(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>(getParam<std::string>("tensor"))),
     _nucleation_threshold(coupledValue("nucleation_threshold")),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
@@ -58,7 +58,7 @@ MeshCutRankTwoTensorNucleation::MeshCutRankTwoTensorNucleation(const InputParame
 }
 
 bool
-MeshCutRankTwoTensorNucleation::doesElementCrack(
+MeshCut2DRankTwoTensorNucleation::doesElementCrack(
     std::pair<RealVectorValue, RealVectorValue> & cutterElemNodes)
 {
   bool does_it_crack = false;
@@ -71,7 +71,7 @@ MeshCutRankTwoTensorNucleation::doesElementCrack(
   for (unsigned int qp = 0; qp < numqp; ++qp)
   {
     if (_nucleation_threshold[qp] <= 0.0)
-      mooseError("Threshold must be strictly positive in MeshCutRankTwoTensorNucleation");
+      mooseError("Threshold must be strictly positive in MeshCut2DRankTwoTensorNucleation");
     average_threshold += _JxW[qp] * _coord[qp] * _nucleation_threshold[qp];
     average_tensor += _JxW[qp] * _coord[qp] * _tensor[qp];
     average_point += _JxW[qp] * _coord[qp] * _q_point[qp];
@@ -80,7 +80,7 @@ MeshCutRankTwoTensorNucleation::doesElementCrack(
   Real tensor_quantity = RankTwoScalarTools::getQuantity(
       average_tensor, _scalar_type, _point1, _point2, average_point, point_dir);
   if (point_dir.absolute_fuzzy_equals(zero))
-    mooseError("Cutter element has zero length in MeshCutRankTwoTensorNucleation");
+    mooseError("Cutter element has zero length in MeshCut2DRankTwoTensorNucleation");
 
   if (tensor_quantity > average_threshold)
   {

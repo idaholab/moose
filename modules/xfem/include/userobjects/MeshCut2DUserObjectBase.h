@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeometricCutUserObject.h"
-class MeshCutNucleationBase;
+class MeshCut2DNucleationBase;
 /**
  * MeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
  * (2) Fills xfem cut element ojbects.
@@ -54,8 +54,8 @@ protected:
   /// The xfem cutter mesh
   std::unique_ptr<MeshBase> _cutter_mesh;
 
-  /// UO for nucleating cracks
-  const MeshCutNucleationBase * _nucleate_uo;
+  /// 2D UO for nucleating cracks
+  const MeshCut2DNucleationBase * _nucleate_uo;
 
   /// Indicator that shows if the cutting mesh is modified or not in this calculation step
   bool _is_mesh_modified;
@@ -94,7 +94,7 @@ protected:
 
 private:
   /**
-   * Remove nucleated elements that are too close too each other.  Lowest map key wins
+   * Remove nucleated cracks that are too close too each other.  Lowest map key wins
    * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
    * two nodes of nucleated crack
    * @param  nucleationRadius  exclusion distance between cracks
@@ -103,12 +103,12 @@ private:
       std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
       Real nucleationRadius);
   /**
-   * Remove nucleated elements that are too close to a pre-existing crack in the mesh.
+   * Remove nucleated cracks that are too close to a pre-existing crack in the mesh.
    * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
    * two nodes of nucleated crack
    * @param  nucleationRadius  exclusion distance between cracks
    */
-  void removeNucleatedCracksTooCloseToOtherCracks(
+  void removeNucleatedCracksTooCloseToExistingCracks(
       std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
       Real nucleationRadius);
 };

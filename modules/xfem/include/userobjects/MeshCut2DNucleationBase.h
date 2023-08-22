@@ -13,21 +13,30 @@
 
 class XFEM;
 
-class MeshCutNucleationBase : public ElementUserObject
+class MeshCut2DNucleationBase : public ElementUserObject
 {
 public:
   static InputParameters validParams();
 
-  MeshCutNucleationBase(const InputParameters & parameters);
+  MeshCut2DNucleationBase(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
+  /**
+   * Provide getter to MeshCut2DUserObjectBase for a map of nucleated cracks
+   * @return map with key for element id and value is a pair containing the node points for creating
+   * a nucleated element on the xfem cutter mesh.
+   */
   std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> getNucleatedElemsMap() const
   {
     return _nucleated_elems;
   }
+  /**
+   * Provide getter to MeshCut2DUserObjectBase for member data set in input
+   * @return nucleation radius member variable set from input file
+   */
   Real getNucleationRadius() const { return _nucleation_radius; }
 
 protected:
@@ -39,9 +48,15 @@ protected:
   virtual bool doesElementCrack(std::pair<RealVectorValue, RealVectorValue> & cutterElemNodes) = 0;
 
 private:
+  /// The FE solution mesh
   MooseMesh & _mesh;
+  // New cracks can only be nucleated if they are at least this far from another crack
   Real _nucleation_radius;
+  /// shared pointer to XFEM
   std::shared_ptr<XFEM> _xfem;
+  // Boundaries where cracks can nucleate
   std::vector<BoundaryID> _initiation_boundary_ids;
+  // map with key for element id and value is a pair containing the node points for creating a
+  // nucleated element on the xfem cutter mesh.
   std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> _nucleated_elems;
 };

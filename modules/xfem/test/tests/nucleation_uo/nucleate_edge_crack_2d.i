@@ -70,7 +70,7 @@
 
 [UserObjects]
   [nucleate]
-    type = MeshCutRankTwoTensorNucleation
+    type = MeshCut2DRankTwoTensorNucleation
     tensor = stress
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold

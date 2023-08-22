@@ -1,6 +1,6 @@
 [Tests]
   issues = '#24714'
-  design = 'MeshCutRankTwoTensorNucleation.md'
+  design = 'MeshCut2DRankTwoTensorNucleation.md'
   [nucleateCrack]
     type = CSVDiff
     input = nucleate_edge_crack_2d.i

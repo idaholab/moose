@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include "MeshCutNucleationBase.h"
+#include "MeshCut2DNucleationBase.h"
 #include "RankTwoTensorForward.h"
 
-class MeshCutRankTwoTensorNucleation : public MeshCutNucleationBase
+class MeshCut2DRankTwoTensorNucleation : public MeshCut2DNucleationBase
 {
 public:
   static InputParameters validParams();
 
-  MeshCutRankTwoTensorNucleation(const InputParameters & parameters);
-  virtual ~MeshCutRankTwoTensorNucleation() {}
+  MeshCut2DRankTwoTensorNucleation(const InputParameters & parameters);
+  virtual ~MeshCut2DRankTwoTensorNucleation() {}
 
 protected:
   /// The tensor from which the scalar quantity used as a nucleating criterion is extracted

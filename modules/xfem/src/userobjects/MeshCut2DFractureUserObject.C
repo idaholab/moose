@@ -73,7 +73,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
   if (k1.empty())
     return;
   if ((k1.size() != k2.size()) || (k1.size() != _original_and_current_front_node_ids.size()))
-    mooseError("KI and KII VPPs should have the same number of crack tips as the size.",
+    mooseError("KI and KII VPPs should have the same number of crack tips as CrackFrontDefinition.",
                "\n  k1 size = ",
                k1.size(),
                "\n  k2 size = ",

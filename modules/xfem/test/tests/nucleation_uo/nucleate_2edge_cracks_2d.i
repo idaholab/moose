@@ -56,7 +56,7 @@
 [UserObjects]
   #fixme, nucleate has to be before cut_mesh2 in the input file or cut_mesh2 can't finde the nucleate_uo
   [nucleate]
-    type = MeshCutRankTwoTensorNucleation
+    type = MeshCut2DRankTwoTensorNucleation
     tensor = stress
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold

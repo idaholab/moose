@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MeshCutNucleationBase.h"
+#include "MeshCut2DNucleationBase.h"
 #include "XFEMAppTypes.h"
 #include "XFEM.h"
 
@@ -17,7 +17,7 @@
 #include "libmesh/parallel.h"
 
 InputParameters
-MeshCutNucleationBase::validParams()
+MeshCut2DNucleationBase::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>(
@@ -33,29 +33,24 @@ MeshCutNucleationBase::validParams()
       "Nucleation UO needs to be completely executed before GeometricCutUserObject.");
   params.set<int>("execution_order_group") = -1;
 
-  // This needs to have the same execute_on flag as the GeometricCutUserObject
-  // fixme lynn maybe hte execute_on flag should be suppressed in both of them
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
   exec.addAvailableFlags(EXEC_XFEM_MARK);
-  params.setDocString("execute_on", exec.getDocString()); // fixme is this necessary
+  params.setDocString("execute_on", exec.getDocString());
   params.set<ExecFlagEnum>("execute_on") = EXEC_XFEM_MARK;
-  // params.registerBase("MeshCutNucleationBase"); // fixme do I need this?
   return params;
 }
 
-MeshCutNucleationBase::MeshCutNucleationBase(const InputParameters & parameters)
+MeshCut2DNucleationBase::MeshCut2DNucleationBase(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _nucleation_radius(getParam<Real>("nucleation_radius"))
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in MeshCutNucleationBase");
+    paramError("Problem casting _subproblem to FEProblemBase in MeshCut2DNucleationBase");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == nullptr)
-    mooseError("Problem casting to XFEM in MeshCutNucleationBase");
-  if (isNodal())
-    mooseError("MeshCutNucleationBase can only be run on an element variable");
+    paramError("Problem casting to XFEM in MeshCut2DNucleationBase");
 
   if (isParamValid("initiate_on_boundary"))
   {
@@ -66,16 +61,16 @@ MeshCutNucleationBase::MeshCutNucleationBase(const InputParameters & parameters)
 }
 
 void
-MeshCutNucleationBase::initialize()
+MeshCut2DNucleationBase::initialize()
 {
   _nucleated_elems.clear();
 }
 
 void
-MeshCutNucleationBase::execute()
+MeshCut2DNucleationBase::execute()
 {
   std::pair<RealVectorValue, RealVectorValue> cutterElemNodes;
-  bool isCut = _xfem->isElemCut(_current_elem);
+  bool is_cut = _xfem->isElemCut(_current_elem);
   if (_current_elem->processor_id() != processor_id())
     return;
 
@@ -87,21 +82,21 @@ MeshCutNucleationBase::execute()
   for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
     if (_mesh.isBoundaryElem(current_eid, _initiation_boundary_ids[i]))
       isOnBoundary = true;
-  // fixme lynn, only allowing one nucleation per element
-  if (!isCut && isOnBoundary && doesElementCrack(cutterElemNodes))
+  // This does not currently allow for nucleation in an element that is already cut
+  if (!is_cut && isOnBoundary && doesElementCrack(cutterElemNodes))
   {
     if (mit != _nucleated_elems.end())
     {
-      mooseError("ERROR: element ", current_eid, " already marked for crack growth.");
+      mooseError("ERROR: element ", current_eid, " already marked for crack nucleation.");
     }
     _nucleated_elems[current_eid] = cutterElemNodes;
   }
 }
 
 void
-MeshCutNucleationBase::threadJoin(const UserObject & y)
+MeshCut2DNucleationBase::threadJoin(const UserObject & y)
 {
-  const MeshCutNucleationBase & xmuo = dynamic_cast<const MeshCutNucleationBase &>(y);
+  const MeshCut2DNucleationBase & xmuo = dynamic_cast<const MeshCut2DNucleationBase &>(y);
 
   for (std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>>::const_iterator mit =
            xmuo._nucleated_elems.begin();
@@ -113,9 +108,8 @@ MeshCutNucleationBase::threadJoin(const UserObject & y)
 }
 
 void
-MeshCutNucleationBase::finalize()
+MeshCut2DNucleationBase::finalize()
 {
   _communicator.set_union(_nucleated_elems);
-  // fixme, I can't clear these because I want them to be available to the mesh cutter
-  //  _nucleated_elems.clear();
+  // _nucleated_elems is not cleared here because it needs to be available to the mesh cutter
 }

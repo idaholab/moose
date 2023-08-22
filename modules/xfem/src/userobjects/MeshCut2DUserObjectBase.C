@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCut2DUserObjectBase.h"
-#include "MeshCutNucleationBase.h"
+#include "MeshCut2DNucleationBase.h"
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"
@@ -32,8 +32,9 @@ MeshCut2DUserObjectBase::validParams()
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
   : GeometricCutUserObject(parameters, true),
     _mesh(_subproblem.mesh()),
-    _nucleate_uo(isParamValid("nucleate_uo") ? &getUserObject<MeshCutNucleationBase>("nucleate_uo")
-                                             : nullptr),
+    _nucleate_uo(isParamValid("nucleate_uo")
+                     ? &getUserObject<MeshCut2DNucleationBase>("nucleate_uo")
+                     : nullptr),
 
     _is_mesh_modified(false)
 {
@@ -331,24 +332,24 @@ MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
   {
     std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> nucleated_elems_map =
         _nucleate_uo->getNucleatedElemsMap();
-    Real nucleationRadius = _nucleate_uo->getNucleationRadius();
+    const Real nucleationRadius = _nucleate_uo->getNucleationRadius();
 
     removeNucleatedCracksTooCloseToEachOther(nucleated_elems_map, nucleationRadius);
-    removeNucleatedCracksTooCloseToOtherCracks(nucleated_elems_map, nucleationRadius);
+    removeNucleatedCracksTooCloseToExistingCracks(nucleated_elems_map, nucleationRadius);
 
     std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
     pl->enable_out_of_mesh_mode();
     for (const auto & elem_nodes : nucleated_elems_map)
     {
       std::pair<RealVectorValue, RealVectorValue> nodes = elem_nodes.second;
-      // add nucleated nodes
+      // add nodes for the elements that define the nucleated cracks
       Node * node_0 = Node::build(nodes.first, _cutter_mesh->n_nodes()).release();
       _cutter_mesh->add_node(node_0);
       dof_id_type node_id_0 = _cutter_mesh->n_nodes() - 1;
       Node * node_1 = Node::build(nodes.second, _cutter_mesh->n_nodes()).release();
       _cutter_mesh->add_node(node_1);
       dof_id_type node_id_1 = _cutter_mesh->n_nodes() - 1;
-      // add nucleated element
+      // add elements that define nucleated cracks
       std::vector<dof_id_type> elem;
       elem.push_back(node_id_0);
       elem.push_back(node_id_1);
@@ -377,7 +378,7 @@ MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
 void
 MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToEachOther(
     std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
-    Real nucleationRadius)
+    const Real nucleationRadius)
 {
   // remove nucleated elements that are too close too each other.  Lowest key wins
   for (auto it1 = nucleated_elems_map.begin(); it1 != nucleated_elems_map.end(); ++it1)
@@ -408,9 +409,9 @@ MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToEachOther(
 }
 
 void
-MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToOtherCracks(
+MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToExistingCracks(
     std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
-    Real nucleationRadius)
+    const Real nucleationRadius)
 {
   for (auto it = nucleated_elems_map.begin(); it != nucleated_elems_map.end();)
   {
