@@ -373,7 +373,7 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  auto num_states = storage.numStates();
+  const auto num_states = storage.numStates();
   dataStore(stream, num_states, nullptr);
 
   // Store the material property ID -> name map for mapping back
