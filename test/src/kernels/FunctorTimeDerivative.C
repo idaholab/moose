@@ -26,5 +26,6 @@ FunctorTimeDerivative::FunctorTimeDerivative(const InputParameters & parameters)
 ADReal
 FunctorTimeDerivative::precomputeQpResidual()
 {
-  return _var.dot(std::make_tuple(_current_elem, _qp, _qrule), Moose::currentState());
+  return _var.dot(Moose::ElemQpArg{_current_elem, _qp, _qrule, _q_point[_qp]},
+                  Moose::currentState());
 }

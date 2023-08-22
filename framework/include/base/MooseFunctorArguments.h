@@ -29,6 +29,11 @@ struct ElemArg
   bool correct_skewness;
 
   /**
+   * @returns The conceptual physical location of this data structure
+   */
+  Point getPoint() const { return elem->vertex_average(); }
+
+  /**
    * friend function that allows this structure to be used as keys in ordered containers like sets
    * and maps
    */
@@ -48,6 +53,11 @@ struct ElemPointArg
   const libMesh::Elem * elem;
   libMesh::Point point;
   bool correct_skewness;
+
+  /**
+   * @returns The conceptual physical location of this data structure
+   */
+  Point getPoint() const { return point; }
 
   /**
    * friend function that allows this structure to be used as keys in ordered containers like sets
@@ -96,6 +106,11 @@ public:
   const Elem * face_side;
 
   /**
+   * @returns The conceptual physical location of this data structure
+   */
+  Point getPoint() const { return fi->faceCentroid(); }
+
+  /**
    * Make a \p ElemArg from our data using the face information element
    */
   ElemArg makeElem() const { return {&fi->elem(), correct_skewness}; }
@@ -125,7 +140,25 @@ public:
  *   evaluation of the i-th point
  * - The quadrature rule that can be used to initialize the functor on the given element
  */
-using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
+struct ElemQpArg
+{
+  /// The element
+  const libMesh::Elem * elem;
+
+  /// The quadrature point index
+  unsigned int qp;
+
+  /// The quadrature rule
+  const QBase * qrule;
+
+  /// The physical location of the quadrature point
+  Point point;
+
+  /**
+   * @returns The conceptual physical location of this data structure
+   */
+  Point getPoint() const { return point; }
+};
 
 /**
  * Argument for requesting functor evaluation at quadrature point locations on an element side.
@@ -136,7 +169,28 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
  *   evaluation of the i-th point
  * - The quadrature rule that can be used to initialize the functor on the given element and side
  */
-using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
+struct ElemSideQpArg
+{
+  /// The element
+  const libMesh::Elem * elem;
+
+  /// The local side index
+  unsigned int side;
+
+  /// The quadrature point index
+  unsigned int qp;
+
+  /// The qudrature rule
+  const QBase * qrule;
+
+  /// The physical location of the quadrature point
+  Point point;
+
+  /**
+   * @returns The conceptual physical location of this data structure
+   */
+  Point getPoint() const { return point; }
+};
 
 /**
  * State argument for evaluating functors. The iteration type indicates whether you want to evaluate

@@ -58,7 +58,7 @@ FunctorElementalAuxTempl<is_ad>::computeValue()
   const auto state = determineState();
   if (_use_qp_arg)
   {
-    const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     return raw_value(_factor(qp_arg, state)) * raw_value(_functor(qp_arg, state));
   }
   else

@@ -21,9 +21,9 @@ namespace Moose
 {
 struct ElemArg;
 struct FaceArg;
-using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const libMesh::QBase *>;
-using ElemSideQpArg =
-    std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const libMesh::QBase *>;
+struct ElemQpArg;
+struct ElemSideQpArg;
+struct StateArg;
 template <typename T>
 class FunctorBase;
 class FunctorEnvelopeBase;

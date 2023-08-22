@@ -118,7 +118,7 @@ SideAdvectiveFluxIntegralTempl<is_ad>::computeQpIntegral()
   using MetaPhysicL::raw_value;
 
   const auto state = determineState();
-  const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, _qp, _qrule};
+  const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
   const auto vel_x = raw_value(_vel_x(side_arg, state));
   const auto vel_y = _vel_y ? raw_value((*_vel_y)(side_arg, state)) : 0;
   const auto vel_z = _vel_z ? raw_value((*_vel_z)(side_arg, state)) : 0;
