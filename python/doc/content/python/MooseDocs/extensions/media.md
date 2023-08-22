@@ -39,6 +39,63 @@ sustainable energy systems and unique national and homeland security capabilitie
                 id=image-settings
                 caption=Settings available for images when using the media command.
 
+## Images Generated On-the-fly with Plot Scripts id=using-plot-script
+
+There are some applications where an image may change very frequently, such as
+an image generated for regular assessment runs. In this case, it is undesirable
+to store a new image file in the application repository with each code version.
+Thus the media extension provides the ability to generate images on-the-fly by
+providing a python plot script name.
+
+[example-plot-script] gives an example of the python script capability, and
+[plot-script-listing] displays the plot script used in the example.
+
+!devel! example id=example-plot-script caption=Example of how to generate a plot on-the-fly from a python script.
+!media example_plot.py
+       id=example-plot
+       caption=Example plot.
+       style=width:50%;padding:20px;
+!devel-end!
+
+!listing example_plot.py id=plot-script-listing caption=Example plot script.
+
+!alert! note title=Specifying the image name.
+The image name may be specified with the key `image_name`, e.g.,
+
+```
+!media example_plot.py
+       image_name=some_plot.jpg
+       id=example-plot
+       caption=Example plot.
+       style=width:50%;padding:20px;
+```
+
+or if not provided, the image is assumed to have the same base name as the plot
+script, but with the `.png` extension instead of `.py`. In [example-plot-script],
+the plot script was named `example_plot.py`, and the `image_name` key was omitted,
+so the image name `example_plot.png` was assumed.
+!alert-end!
+
+!alert! warning title=Always change to the plot script's directory.
+Note the line
+
+```
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+```
+
+in the example plot script, which changes the directory to the plot script's
+directory. Otherwise, the plot script is not necessarily run from the directory
+containing it, in which case the relative path to the data (e.g., CSV) file would
+be incorrect, leading to a file-not-found error.
+!alert-end!
+
+[script-settings] lists the available settings for the media plot script command.
+
+!devel settings module=MooseDocs.extensions.media
+                object=ScriptCommand
+                id=script-settings
+                caption=Settings available for plot scripts when using the media command.
+
 ## Videos
 
 Locally stored or hosted videos can be displayed using the `!media` syntax. This works in the same
