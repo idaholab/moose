@@ -327,8 +327,6 @@ MeshDiagnosticsGenerator::generate()
       std::set<const Elem *> elements_around;
       (*pl)(*node, elements_around);
       const auto num_close_elems = elements_around.size();
-      std::cout << "Detected " << num_close_elems << " elements close to node " << *node
-                << std::endl;
 
       // Keep track of the refined elements and the coarse element
       std::set<const Elem *> elements;
@@ -354,9 +352,6 @@ MeshDiagnosticsGenerator::generate()
           coarse_elements.insert(elem);
       }
 
-      std::cout << "all neighbors " << elements_around.size() << "; fine " << elements.size()
-                << " coarse " << coarse_elements.size() << std::endl;
-
       // all the elements around contained the node as one of their nodes
       // if the coarse and refined sides are not stitched together, this check can fail,
       // as nodes that are physically near one element are not part of it because of the lack of
@@ -364,7 +359,6 @@ MeshDiagnosticsGenerator::generate()
       if (elements.size() == elements_around.size())
         continue;
 
-      std::cout << "here" << std::endl;
       if (elements.empty())
         continue;
 
@@ -481,7 +475,6 @@ MeshDiagnosticsGenerator::generate()
             const auto interior_node_number = neighbor->get_node_index(interior_node);
             unsigned int opposite_node_index = (interior_node_number + 2) % 4;
 
-            // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
             tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
           }
 
@@ -536,6 +529,7 @@ MeshDiagnosticsGenerator::generate()
               // and will lay on the side of the coarse neighbor
               if (!node_shared && coarse_side->close_to_point(coarse_node, TOLERANCE))
                 tentative_coarse_nodes[i++] = &coarse_node;
+              mooseAssert(i <= 5, "We went too far in this index");
             }
 
           // Need to order these nodes to form a valid quad / base of an hex
@@ -544,11 +538,6 @@ MeshDiagnosticsGenerator::generate()
           const auto start_circle = elem->vertex_average();
           reorderNodes(tentative_coarse_nodes, interior_node, &start_circle, axis);
           tentative_coarse_nodes.resize(8);
-
-          std::cout << "Found nodes" << std::endl;
-          for (auto & jaja : tentative_coarse_nodes)
-            if (jaja)
-              std::cout << jaja << " " << *dynamic_cast<const Point *>(jaja) << std::endl;
 
           // Use the neighbors of the fine elements that contain these nodes to get the vertex
           // nodes
@@ -562,13 +551,11 @@ MeshDiagnosticsGenerator::generate()
                 break;
               node_index++;
             }
-            std::cout << "Node indexed at " << node_index << std::endl;
 
             // Get the neighbor element that is part of the fine elements to coarsen together
             for (const auto & neighbor : elem->neighbor_ptr_range())
               if (all_elements.count(neighbor) && !elements.count(neighbor))
               {
-                std::cout << "Looking at " << neighbor << std::endl;
                 // Find the coarse node for the neighbor
                 const Node * coarse_elem_node;
                 for (const auto & fine_node : neighbor->node_ref_range())
@@ -588,13 +575,9 @@ MeshDiagnosticsGenerator::generate()
                 }
                 // Insert the coarse node at the right place
                 tentative_coarse_nodes[node_index + 4] = coarse_elem_node;
+                mooseAssert(node_index + 4 < tentative_coarse_nodes.size(), "Indexed too far");
               }
           }
-
-          std::cout << "Found nodes second" << std::endl;
-          for (auto & jaja : tentative_coarse_nodes)
-            if (jaja)
-              std::cout << jaja << " " << *dynamic_cast<const Point *>(jaja) << std::endl;
         }
 
         // No need to separate fine elements near the non-conformal node and away from it
@@ -604,7 +587,6 @@ MeshDiagnosticsGenerator::generate()
       // coarse triangle element
       else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
       {
-        std::cout << "Building a tri" << std::endl;
         // Find the center element
         // It's the only element that shares a side with both of the other elements near the node
         // considered
@@ -632,7 +614,6 @@ MeshDiagnosticsGenerator::generate()
                 refined_elem->is_vertex(refined_elem->get_node_index(&other_node)))
               tentative_coarse_nodes.push_back(&other_node);
         }
-        std::cout << tentative_coarse_nodes.size() << std::endl;
 
         // Get the final tentative new coarse element node, on the other side of the center
         // element from the non-conformality
@@ -650,7 +631,6 @@ MeshDiagnosticsGenerator::generate()
               center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
                   libMesh::invalid_uint)
             tentative_coarse_nodes.push_back(&tri_node);
-        std::cout << tentative_coarse_nodes.size() << std::endl;
 
         mooseAssert(tentative_coarse_nodes.size() == 3,
                     "We are forming a coarsened triangle element");
@@ -659,8 +639,6 @@ MeshDiagnosticsGenerator::generate()
       // of a face, but on an edge of one or more coarse elements
       else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
       {
-        std::cout << "Building a tet" << std::endl;
-
         // There are 4 tets on the tips of the coarsened tet and 4 tets inside
         // let's identify all of them
         std::set<const Elem *> tips_tets;
@@ -675,10 +653,7 @@ MeshDiagnosticsGenerator::generate()
             // for two levels of refinement across, this is not working
             // we would need a "has_face_embedded_in_this_other_ones_face" routine
             if (elem->has_neighbor(coarse_one))
-            {
               fine_tets.insert(elem);
-              std::cout << "Tet " << elem->id() << std::endl;
-            }
 
           if (fine_tets.size())
           {
@@ -689,8 +664,6 @@ MeshDiagnosticsGenerator::generate()
         // There's no coarse element neighbor to a group of finer tets, not AMR
         if (!coarse_elem)
           continue;
-        std::cout << "Found coarse neigh of " << coarse_elem->vertex_average() << " : "
-                  << fine_tets.size() << std::endl;
 
         // There is one last point neighbor of the node that is sandwiched between two neighbors
         for (const auto & elem : elements)
@@ -705,10 +678,6 @@ MeshDiagnosticsGenerator::generate()
             break;
           }
         }
-        std::cout << "Current status (final tet near initial node) " << fine_tets.size()
-                  << std::endl;
-        for (auto & elem : fine_tets)
-          std::cout << "Tet " << elem->id() << std::endl;
 
         // There should be two other nodes with non-conformality near this coarse element
         // Find both, as they will be nodes of the rest of the elements to add to the potential
@@ -735,8 +704,6 @@ MeshDiagnosticsGenerator::generate()
         }
         mooseAssert(other_nodes.size() == 2,
                     "Should find only two extra non-conformal nodes near the coarse element");
-        std::cout << "Other non conf " << **other_nodes.begin() << std::endl;
-        std::cout << "Other non conf " << **other_nodes.rbegin() << std::endl;
 
         // Now we can go towards this tip element next to two non-conformalities
         for (const auto & tet_1 : fine_tets)
@@ -759,21 +726,12 @@ MeshDiagnosticsGenerator::generate()
               fine_tets.insert(neighbor);
         }
 
-        std::cout << "Current status (adding the tip with the two new-non-conformal) "
-                  << fine_tets.size() << std::endl;
-        for (auto & elem : fine_tets)
-          std::cout << "Tet " << elem->id() << std::endl;
-
         // Get the sandwiched tets between the tets we already found
         for (const auto & tet_1 : fine_tets)
           for (const auto & neighbor : tet_1->neighbor_ptr_range())
             for (const auto & tet_2 : fine_tets)
               if (tet_1 != tet_2 && tet_2->has_neighbor(neighbor) && neighbor != coarse_elem)
                 fine_tets.insert(neighbor);
-
-        std::cout << "Current status (adding neighbors) " << fine_tets.size() << std::endl;
-        for (auto & elem : fine_tets)
-          std::cout << "Tet " << elem->id() << std::endl;
 
         // tips tests are the only ones to have a node that is shared by no other tet in the group
         for (const auto & tet_1 : fine_tets)
@@ -797,8 +755,6 @@ MeshDiagnosticsGenerator::generate()
           else
             mooseError("Did not expect a tet to have two unshared vertex nodes here");
         }
-
-        std::cout << tips_tets.size() << " " << inside_tets.size() << std::endl;
 
         // Finally grab the last tip of the tentative coarse tet. It shares:
         // - 3 nodes with the other tips, only one with each
@@ -851,8 +807,6 @@ MeshDiagnosticsGenerator::generate()
               tips_tets.insert(neighbor);
           }
         }
-        std::cout << "After finding last tip : " << tips_tets.size() << " " << inside_tets.size()
-                  << std::endl;
 
         // append the missing fine tets (inside the coarse element, away from the node considered)
         // into the fine elements set for the check on "did it refine the tentative coarse tet
@@ -875,11 +829,7 @@ MeshDiagnosticsGenerator::generate()
               continue;
             for (const auto & tet : inside_tets)
               if (tet->get_node_index(&node) != libMesh::invalid_uint)
-              {
-                std::cout << "Node " << *dynamic_cast<const Point *>(&node) << " is inside "
-                          << std::endl;
                 outside = false;
-              }
             if (outside)
             {
               tentative_coarse_nodes.push_back(&node);
@@ -889,12 +839,10 @@ MeshDiagnosticsGenerator::generate()
           }
         }
 
-        std::cout << "Found " << tentative_coarse_nodes.size() << " tip nodes " << std::endl;
         std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end());
         tentative_coarse_nodes.erase(
             std::unique(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end()),
             tentative_coarse_nodes.end());
-        std::cout << tentative_coarse_nodes.size() << std::endl;
 
         // The group of fine elements ended up having less or more than 4 tips, so it's clearly
         // not forming a coarse tetrahedral
@@ -914,11 +862,9 @@ MeshDiagnosticsGenerator::generate()
         if (elem->type() != elem_type)
           continue;
 
-      std::cout << "Nodes to build the parent: " << tentative_coarse_nodes.size() << std::endl;
-
       // Check the number of coarse element nodes gathered
-      for (auto node : tentative_coarse_nodes)
-        if (node == nullptr)
+      for (const auto & check_node : tentative_coarse_nodes)
+        if (check_node == nullptr)
           continue;
 
       // Form a parent, of the same type as the elements we are trying to combine!
@@ -935,20 +881,13 @@ MeshDiagnosticsGenerator::generate()
 
       // Set the nodes to the coarse element
       for (auto i : index_range(tentative_coarse_nodes))
-      {
-        std::cout << "Node around " << *tentative_coarse_nodes[i] << std::endl;
         parent->set_node(i) = const_cast<Node *>(tentative_coarse_nodes[i]);
-      }
-
-      for (auto & elem : elements)
-        std::cout << "Center of " << elem->id() << " : " << elem->vertex_average() << std::endl;
 
       // Refine this parent
       parent->set_refinement_flag(Elem::REFINE);
       MeshRefinement mesh_refiner(*mesh);
       parent->refine(mesh_refiner);
       const auto num_children = parent->n_children();
-      std::cout << "Child " << parent->n_children() << std::endl;
 
       // Compare with the original set of elements
       // We already know the child share the exterior node. If they share the same vertex
@@ -959,7 +898,6 @@ MeshDiagnosticsGenerator::generate()
       unsigned int num_children_match = 0;
       for (auto & child : parent->child_ref_range())
       {
-        std::cout << "Center of child " << child.vertex_average() << " " << std::endl;
         for (auto & potential_children : elements)
           if (MooseUtils::absoluteFuzzyEqual(
                   child.vertex_average()(0), potential_children->vertex_average()(0), TOLERANCE) &&
@@ -1033,15 +971,12 @@ MeshDiagnosticsGenerator::reorderNodes(std::vector<const Node *> & nodes,
   start_clock /= start_clock.norm();
   axis /= axis.norm();
 
-  std::cout << *origin << " " << *clock_start << " normal : " << axis << std::endl;
-
   std::vector<std::pair<unsigned int, Real>> nodes_angles(nodes.size());
   for (const auto & angle_i : index_range(nodes))
   {
     auto vec = *nodes[angle_i] - *origin;
     vec /= vec.norm();
     const auto angle = atan2(vec.cross(start_clock) * axis, vec * start_clock);
-    std::cout << vec.cross(start_clock) << " " << vec * start_clock << " " << angle << std::endl;
     nodes_angles[angle_i] = std::make_pair(angle_i, angle);
   }
 
@@ -1053,12 +988,7 @@ MeshDiagnosticsGenerator::reorderNodes(std::vector<const Node *> & nodes,
   // Re-sort the nodes based on their angle
   std::vector<const Node *> new_nodes(nodes.size());
   for (const auto & old_index : index_range(nodes))
-  {
-    _console << nodes_angles[old_index].first << " " << nodes_angles[old_index].second << std::endl;
     new_nodes[old_index] = nodes[nodes_angles[old_index].first];
-  }
   for (const auto & index : index_range(nodes))
     nodes[index] = new_nodes[index];
-  for (const auto & old_index : index_range(nodes))
-    std::cout << old_index << " " << *nodes[old_index] << std::endl;
 }
