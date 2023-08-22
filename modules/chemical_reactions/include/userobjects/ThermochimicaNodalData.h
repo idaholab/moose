@@ -74,7 +74,7 @@ protected:
   std::vector<unsigned int> _el_ids;
 
   // re-initialization data
-  const std::string _reinit;
+  const enum class ReinitializationType { NONE, TIME, NODE } _reinit;
 
   const std::vector<std::string> & _ph_names;
   const std::vector<std::string> & _element_potentials;
@@ -107,5 +107,5 @@ protected:
   std::vector<MooseVariable *> _el_ph;
 
   /// Mass unit for output species
-  std::string _output_mass_unit;
+  const enum class OutputMassUnit { MOLES, FRACTION } _output_mass_unit;
 };
