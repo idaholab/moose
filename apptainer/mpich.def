@@ -119,6 +119,18 @@ export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
 ${USE_MPI_SCRIPT}
 EOF
 
+    # Add PBS wrapper scripts
+    cat << 'EOF' > /usr/local/bin/qsub
+#!/bin/bash
+ssh -q ${PBS_HOST} "source /etc/profile; qsub $*"
+EOF
+    chmod 755 /usr/local/bin/qsub
+    cat << 'EOF' > /usr/local/bin/qstat
+#!/bin/bash
+ssh -q ${PBS_HOST} "source /etc/profile; qstat $*"
+EOF
+    chmod 755 /usr/local/bin/qstat
+
     # Clean Up
     rm -rf ${TEMP_LOC}
     dnf clean all

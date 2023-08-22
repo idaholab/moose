@@ -146,7 +146,8 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_POST_PRE_MAKEINSTALL is defined %}
     {{ SECTION_POST_PRE_MAKEINSTALL }}
 {%- endif %}
-    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
+    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} \
+    MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
 {%- if SECTION_POST_POST_MAKEINSTALL is defined %}
     {{ SECTION_POST_POST_MAKEINSTALL }}
 {%- endif %}
@@ -188,7 +189,7 @@ From: {{ APPTAINER_FROM }}
     BINARY_NAME={{ BINARY_NAME }}
 {%- endif %}
     METHOD={{ METHOD or "opt" }}
-    TEST_DIRS={{ TEST_DIRS or "tests" }}
+    TEST_DIRS='{{ TEST_DIRS or "tests" }}'
 
     # Temp location for copying and running in
     TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
