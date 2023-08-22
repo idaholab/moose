@@ -122,6 +122,24 @@
 
       detail = 'triangle elements refined twice near an unrefined triangle element,'
     []
+    [tet]
+      type = 'RunApp'
+      input = 'detect_amr_tet.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 8'
+
+      detail = 'tetrahedral elements,'
+    []
+    [tet_second_order]
+      type = 'RunException'
+      input = 'detect_amr_tet.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TET10 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 8'
+
+      detail = 'tetrahedral elements of second order,'
+    []
   []
 
   [amr_detection_avoid_false_positives]
