@@ -140,7 +140,7 @@ ActivateElementsUserObjectBase::finalize()
   initSolutions(elem_range, bnd_node_range);
 
   //  Initialize stateful material properties for the newly activated elements
-  _fe_problem.initElementStatefulProps(elem_range);
+  _fe_problem.initElementStatefulProps(elem_range, false);
 
   //  Clear the list
   _newly_activated_elem.clear();

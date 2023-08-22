@@ -13,6 +13,7 @@
 #include "HashMap.h"
 #include "MaterialProperty.h"
 #include "MaterialPropertyRegistry.h"
+#include "MaterialData.h"
 
 // Forward declarations
 class MaterialBase;
@@ -40,9 +41,6 @@ class MaterialPropertyStorage
 {
 public:
   MaterialPropertyStorage(MaterialPropertyRegistry & registry);
-
-  /// The max time state supported (2 = older)
-  static constexpr unsigned int max_state = 2;
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
@@ -75,7 +73,7 @@ public:
    * @param qrule The current quadrature rule
    * @param qrule_face The current face qrule
    * @param parent_material_props The place to pull parent material property values from
-   * @param child_material_data MaterialData object used for computing the data
+   * @param tid The thread ID
    * @param elem The parent element that was just refined
    * @param input_parent_side - the side of the parent for which material properties are prolonged
    * @param input_child - the number of the child
@@ -86,7 +84,7 @@ public:
                             const QBase & qrule,
                             const QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
-                            MaterialData & child_material_data,
+                            const THREAD_ID tid,
                             const Elem & elem,
                             const int input_parent_side,
                             const int input_child,
@@ -100,7 +98,7 @@ public:
    * @param coarsened_element_children - a pointer to a vector of coarsened element children
    * @param qrule The current quadrature rule
    * @param qrule_face The current face qrule
-   * @param material_data MaterialData object used for computing the data
+   * @param tid The thread ID
    * @param elem The parent element that was just refined
    * @param input_side Side of the element 'elem' (0 for volumetric material properties)
    */
@@ -108,23 +106,23 @@ public:
                              const std::vector<const Elem *> & coarsened_element_children,
                              const QBase & qrule,
                              const QBase & qrule_face,
-                             MaterialData & material_data,
+                             const THREAD_ID tid,
                              const Elem & elem,
                              int input_side = -1);
 
   /**
    * Initialize stateful material properties
-   * @param material_data MaterilData object used for computing the data
+   * @param tid The thread ID
    * @param mats Materials that will compute the initial values
    * @param n_qpoints Number of quadrature points
    * @param elem Element we are on
    * @param side Side of the element 'elem' (0 for volumetric material properties)
    */
-  void initStatefulProps(MaterialData & material_data,
+  void initStatefulProps(const THREAD_ID tid,
                          const std::vector<std::shared_ptr<MaterialBase>> & mats,
-                         unsigned int n_qpoints,
+                         const unsigned int n_qpoints,
                          const Elem & elem,
-                         unsigned int side = 0);
+                         const unsigned int side = 0);
 
   /**
    * Shift the material properties in time.
@@ -143,13 +141,13 @@ public:
    *          We can't currently check to ensure that they're on processor here because this isn't a
    * ParallelObject.
    *
-   * @param material_data MaterialData object to work with
+   * @param tid The thread ID
    * @param elem_to Element to copy data to
    * @param elem_from Element to copy data from
    * @param side Side number (elemental material properties have this equal to zero)
    * @param n_qpoints number of quadrature points to work with
    */
-  void copy(MaterialData & material_data,
+  void copy(const THREAD_ID tid,
             const Elem & elem_to,
             const Elem & elem_from,
             unsigned int side,
@@ -159,13 +157,13 @@ public:
    * Copy material properties from elem_from to elem_to.
    * Similar to the other method but using pointers to elements instead of references.
    *
-   * @param material_data MaterialData object to work with
+   * @param tid The thread ID
    * @param elem_to Pointer to the element to copy data to
    * @param elem_from Pointer to the element to copy data from
    * @param side Side number (elemental material properties have this equal to zero)
    * @param n_qpoints number of quadrature points to work with
    */
-  void copy(MaterialData & material_data,
+  void copy(const THREAD_ID tid,
             const Elem * elem_to,
             const Elem * elem_from,
             unsigned int side,
@@ -174,20 +172,20 @@ public:
   /**
    * Swap (shallow copy) material properties in MaterialData and MaterialPropertyStorage
    * Thread safe
-   * @param material_data MaterialData object to work with
+   * @param tid The thread id
    * @param elem Element id
    * @param side Side number (elemental material properties have this equal to zero)
    */
-  void swap(MaterialData & material_data, const Elem & elem, unsigned int side);
+  void swap(const THREAD_ID tid, const Elem & elem, unsigned int side);
 
   /**
    * Swap (shallow copy) material properties in MaterialPropertyStorage and MaterialDat
    * Thread safe
-   * @param material_data MaterialData object to work with
+   * @param tid The thread id
    * @param elem Element id
    * @param side Side number (elemental material properties have this equal to zero)
    */
-  void swapBack(MaterialData & material_data, const Elem & elem, unsigned int side);
+  void swapBack(const THREAD_ID tid, const Elem & elem, unsigned int side);
 
   /**
    * @return a Boolean indicating whether stateful properties exist on this material
@@ -274,11 +272,14 @@ public:
     return IntRange<unsigned int>(1, numStates());
   }
 
-protected:
-  using BuildPropertyValuePtr = PropertyValue * (*)();
+  /**
+   * @return The MaterialData for thread \p tid
+   */
+  MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
+protected:
   /// The actual storage
-  std::array<PropsType, max_state + 1> _storage;
+  std::array<PropsType, MaterialData::max_state + 1> _storage;
 
   /// Mapping from stateful property ID to property name
   std::unordered_map<unsigned int, std::string> _stateful_prop_names;
@@ -290,13 +291,10 @@ protected:
 private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
-  void initProps(MaterialData & material_data,
-                 const Elem * elem,
-                 unsigned int side,
-                 unsigned int n_qpoints);
+  void initProps(const THREAD_ID tid, const Elem * elem, unsigned int side, unsigned int n_qpoints);
 
   /// Initializes just one hashmap's entries
-  void initProps(MaterialData & material_data,
+  void initProps(const THREAD_ID tid,
                  const unsigned int state,
                  const Elem * elem,
                  unsigned int side,
@@ -340,6 +338,9 @@ private:
 
   /// Shared registry (across storage objects) for property names and IDs
   MaterialPropertyRegistry & _registry;
+
+  /// The threaded material data
+  std::vector<MaterialData> _material_data;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;

@@ -66,6 +66,8 @@ MaterialOutputAction::validParams()
 
 MaterialOutputAction::MaterialOutputAction(const InputParameters & params)
   : Action(params),
+    _block_material_data(nullptr),
+    _boundary_material_data(nullptr),
     _output_warehouse(_app.getOutputWarehouse()),
     _output_only_on_timestep_end(_app.parameters().get<bool>("use_legacy_material_output"))
 {
@@ -85,8 +87,8 @@ MaterialOutputAction::act()
 
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at
   // construction)
-  _block_material_data = _problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
-  _boundary_material_data = _problem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
+  _block_material_data = &_problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
+  _boundary_material_data = &_problem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all MaterialBase objects
   const auto & material_ptrs = _problem->getMaterialWarehouse().getObjects();

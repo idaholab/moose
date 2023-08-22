@@ -20,10 +20,10 @@ class AccumulateReporter : public GeneralReporter
 public:
   static InputParameters validParams();
   AccumulateReporter(const InputParameters & parameters);
-  virtual void initialSetup() override;
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
+  virtual void declareLateValues() override;
 
 protected:
   /**

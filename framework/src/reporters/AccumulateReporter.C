@@ -30,7 +30,7 @@ AccumulateReporter::AccumulateReporter(const InputParameters & parameters)
 }
 
 void
-AccumulateReporter::initialSetup()
+AccumulateReporter::declareLateValues()
 {
   const ReporterData & rdata = _fe_problem.getReporterData();
   for (const auto & rname : getParam<std::vector<ReporterName>>("reporters"))

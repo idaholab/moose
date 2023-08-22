@@ -28,6 +28,7 @@
 #include "FEProblem.h"
 #include "Assembly.h"
 #include "MooseUtils.h"
+#include "MaterialPropertyStorage.h"
 
 #include "libmesh/mesh_communication.h"
 #include "libmesh/partitioner.h"
@@ -1014,8 +1015,8 @@ XFEM::healMesh()
         }
 
         // remove the property storage of deleted element/side
-        (*_material_data)[0]->eraseProperty(elem2);
-        (*_bnd_material_data)[0]->eraseProperty(elem2);
+        _material_data[0]->eraseProperty(elem2);
+        _bnd_material_data[0]->eraseProperty(elem2);
 
         cutelems_to_delete.insert(elem2->unique_id());
         elem2->nullify_neighbors();
@@ -1385,10 +1386,10 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
     // TODO: Also need to copy neighbor material data
     if (parent_elem->processor_id() == _mesh->processor_id())
     {
-      if ((*_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
-        (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
+      if (_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
+        _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
 
-      if ((*_bnd_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
+      if (_bnd_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
         for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
         {
           _mesh->get_boundary_info().boundary_ids(parent_elem, side, parent_boundary_ids);
@@ -1396,7 +1397,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
           for (; it_bd != parent_boundary_ids.end(); ++it_bd)
           {
             if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
-              (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
+              _bnd_material_data[0]->copy(*libmesh_elem, *parent_elem, side);
           }
         }
 
@@ -1456,8 +1457,8 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
     }
 
     // remove the property storage of deleted element/side
-    (*_material_data)[0]->eraseProperty(elem_to_delete);
-    (*_bnd_material_data)[0]->eraseProperty(elem_to_delete);
+    _material_data[0]->eraseProperty(elem_to_delete);
+    _bnd_material_data[0]->eraseProperty(elem_to_delete);
 
     elem_to_delete->nullify_neighbors();
     _mesh->get_boundary_info().remove(elem_to_delete);
@@ -2187,8 +2188,8 @@ XFEM::storeMaterialPropertiesForElement(const Elem * parent_elem, const Elem * c
   _geom_cut_elems[child_elem]._parent_elem = parent_elem;
 
   // Locally store the element material properties
-  storeMaterialPropertiesForElementHelper(
-      child_elem, (*_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
+  storeMaterialPropertiesForElementHelper(child_elem,
+                                          _material_data[0]->getMaterialPropertyStorageForXFEM({}));
 
   // Locally store the boundary material properties
   // First check if any of the side need material properties
@@ -2205,7 +2206,7 @@ XFEM::storeMaterialPropertiesForElement(const Elem * parent_elem, const Elem * c
   // If boundary material properties are needed for this element, then store them.
   if (need_boundary_materials)
     storeMaterialPropertiesForElementHelper(
-        child_elem, (*_bnd_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
+        child_elem, _bnd_material_data[0]->getMaterialPropertyStorageForXFEM({}));
 }
 
 void
@@ -2243,10 +2244,9 @@ XFEM::loadMaterialPropertiesForElement(
   Xfem::CutElemInfo & cei = cached_cei[elem_from];
 
   // Load element material properties from cached properties
-  loadMaterialPropertiesForElementHelper(
-      elem,
-      cei._elem_material_properties,
-      (*_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
+  loadMaterialPropertiesForElementHelper(elem,
+                                         cei._elem_material_properties,
+                                         _material_data[0]->getMaterialPropertyStorageForXFEM({}));
 
   // Check if any of the element side need material properties
   bool need_boundary_materials = false;
@@ -2264,7 +2264,7 @@ XFEM::loadMaterialPropertiesForElement(
     loadMaterialPropertiesForElementHelper(
         elem,
         cei._bnd_material_properties,
-        (*_bnd_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
+        _bnd_material_data[0]->getMaterialPropertyStorageForXFEM({}));
 }
 
 CutSubdomainID

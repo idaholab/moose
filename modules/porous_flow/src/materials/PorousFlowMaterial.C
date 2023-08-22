@@ -8,7 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowMaterial.h"
+
+#include "MaterialPropertyStorage.h"
+
 #include "libmesh/quadrature.h"
+
 #include <limits>
 
 InputParameters
@@ -42,8 +46,8 @@ PorousFlowMaterial::initialSetup()
   if (!_nodal_material)
     return;
 
-  _material_data->onlyResizeIfSmaller(true);
-  auto & storage = _material_data->getMaterialPropertyStorage();
+  _material_data.onlyResizeIfSmaller(true);
+  auto & storage = _material_data.getMaterialPropertyStorage();
   if (!storage.hasStatefulProperties())
     return;
 
@@ -88,7 +92,7 @@ PorousFlowMaterial::computeNodalProperties()
   // To prevent this, we copy the last node value to the empty array positions.
   if (numnodes < _qrule->n_points())
   {
-    MaterialProperties & props = _material_data->props();
+    MaterialProperties & props = _material_data.props();
 
     // Copy from qp = _current_elem->n_nodes() - 1 to qp = _qrule->n_points() -1
     for (const auto & prop_id : _supplied_prop_ids)
@@ -132,19 +136,19 @@ PorousFlowMaterial::sizeNodalProperties()
    * call has the potential to clear material property evaluations done earlier in the material
    * dependency chain. So instead we selectively resize just our own properties and not everyone's
    */
-  // _material_data->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
+  // _material_data.resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
 
   const auto new_size = std::max(_current_elem->n_nodes(), _qrule->n_points());
-  auto & storage = _material_data->getMaterialPropertyStorage();
+  auto & storage = _material_data.getMaterialPropertyStorage();
 
-  auto & props = _material_data->props();
+  auto & props = _material_data.props();
   for (const auto prop_id : _supplied_prop_ids)
     props[prop_id].resize(new_size);
 
   for (const auto state : storage.statefulIndexRange())
     for (const auto prop_id : _supplied_old_prop_ids)
-      if (_material_data->props(state).hasValue(prop_id))
-        _material_data->props(state)[prop_id].resize(new_size);
+      if (_material_data.props(state).hasValue(prop_id))
+        _material_data.props(state)[prop_id].resize(new_size);
 }
 
 unsigned

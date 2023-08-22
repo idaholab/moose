@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "MaterialBase.h"
+#include "MaterialPropertyStorage.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "Executioner.h"

@@ -25,8 +25,6 @@ class ProjectMaterialProperties : public ThreadedElementLoop<ConstElemPointerRan
 public:
   ProjectMaterialProperties(bool refine,
                             FEProblemBase & fe_problem,
-                            std::vector<std::shared_ptr<MaterialData>> & material_data,
-                            std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                             MaterialPropertyStorage & material_props,
                             MaterialPropertyStorage & bnd_material_props,
                             std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly);
@@ -50,8 +48,6 @@ protected:
   /// Whether or not you are projecting refinements.  Set to false for coarsening.
   bool _refine;
   FEProblemBase & _fe_problem;
-  std::vector<std::shared_ptr<MaterialData>> & _material_data;
-  std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<std::vector<std::unique_ptr<Assembly>>> & _assembly;

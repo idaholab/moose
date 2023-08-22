@@ -12,9 +12,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
-class MaterialData;
-class MaterialPropertyInterface;
+#include "libmesh/simple_range.h"
+
 class MaterialPropertyStorage;
 
 /**
@@ -61,17 +62,28 @@ public:
   unsigned int getID(const std::string & name) const;
 
   /**
+   * @return The property ID for the property with the name \p name if a propery exists
+   * with the name, otherwise an empty optional
+   */
+  std::optional<unsigned int> queryID(const std::string & name) const;
+
+  /**
    * @return The property name for the property with the ID \p id
    */
   const std::string & getName(const unsigned int id) const;
 
   /**
-   * @return The mapping of material property name to material property ID
+   * @return A beginning iterator to the property ID to name map
    */
-  const std::unordered_map<std::string, unsigned int> & getNamesToIDs() const
-  {
-    return _name_to_id;
-  }
+  auto idsToNamesBegin() const { return _id_to_name.begin(); }
+  /**
+   * @return An end iterator to the property ID to name map
+   */
+  auto idsToNamesEnd() const { return _id_to_name.end(); }
+  /**
+   * @return An iterator range to the property ID to name map
+   */
+  auto idsToNamesRange() const { return libMesh::SimpleRange(idsToNamesBegin(), idsToNamesEnd()); }
 
 private:
   /// Map of material property name -> material property id

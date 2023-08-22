@@ -417,7 +417,7 @@ const GenericMaterialProperty<T, is_ad> &
 MaterialBase::getGenericZeroMaterialProperty()
 {
   // static zero property storage
-  static GenericMaterialProperty<T, is_ad> zero;
+  static GenericMaterialProperty<T, is_ad> zero(MaterialPropertyInterface::zero_property_id);
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)

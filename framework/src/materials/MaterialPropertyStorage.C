@@ -16,9 +16,14 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
+#include <optional>
+
 MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
   : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
+  _material_data.reserve(libMesh::n_threads());
+  for (const auto tid : make_range(libMesh::n_threads()))
+    _material_data.emplace_back(*this, tid);
 }
 
 void
@@ -65,7 +70,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     const QBase & qrule,
     const QBase & qrule_face,
     MaterialPropertyStorage & parent_material_props,
-    MaterialData & child_material_data,
+    const THREAD_ID tid,
     const Elem & elem,
     const int input_parent_side,
     const int input_child,
@@ -84,7 +89,7 @@ MaterialPropertyStorage::prolongStatefulProps(
   else
     n_qpoints = qrule_face.n_points();
 
-  child_material_data.resize(n_qpoints);
+  getMaterialData(tid).resize(n_qpoints);
 
   unsigned int n_children = elem.n_children();
 
@@ -116,7 +121,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
 
-    initProps(child_material_data, child_elem, child_side, n_qpoints);
+    initProps(tid, child_elem, child_side, n_qpoints);
 
     for (const auto state : stateIndexRange())
     {
@@ -135,7 +140,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     const std::vector<const Elem *> & coarsened_element_children,
     const QBase & qrule,
     const QBase & qrule_face,
-    MaterialData & material_data,
+    const THREAD_ID tid,
     const Elem & elem,
     int input_side)
 {
@@ -156,7 +161,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     n_qpoints = qrule_face.n_points();
   }
 
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   std::vector<MaterialProperties *> parent_props(numStates());
   for (const auto state : stateIndexRange())
@@ -183,24 +188,24 @@ MaterialPropertyStorage::restrictStatefulProps(
 }
 
 void
-MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
+MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
                                            const std::vector<std::shared_ptr<MaterialBase>> & mats,
-                                           unsigned int n_qpoints,
+                                           const unsigned int n_qpoints,
                                            const Elem & elem,
-                                           unsigned int side /* = 0*/)
+                                           const unsigned int side /* = 0*/)
 {
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
 
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   // copy from storage to material data
-  swap(material_data, elem, side);
+  swap(tid, elem, side);
   // run custom init on properties
   for (const auto & mat : mats)
     mat->initStatefulProperties(n_qpoints);
 
-  swapBack(material_data, elem, side);
+  swapBack(tid, elem, side);
 
   if (!hasStatefulProperties())
     return;
@@ -212,7 +217,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // getMaterialProperty[Old/Older] can potentially trigger a material to
   // become stateful that previously wasn't.  This needs to go after the
   // swapBack.
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   // Copy to older states as needed
   const auto & current_props = props(&elem, side, 0);
@@ -241,23 +246,23 @@ MaterialPropertyStorage::shift()
 }
 
 void
-MaterialPropertyStorage::copy(MaterialData & material_data,
+MaterialPropertyStorage::copy(const THREAD_ID tid,
                               const Elem & elem_to,
                               const Elem & elem_from,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  copy(material_data, &elem_to, &elem_from, side, n_qpoints);
+  copy(tid, &elem_to, &elem_from, side, n_qpoints);
 }
 
 void
-MaterialPropertyStorage::copy(MaterialData & material_data,
+MaterialPropertyStorage::copy(const THREAD_ID tid,
                               const Elem * elem_to,
                               const Elem * elem_from,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  initProps(material_data, elem_to, side, n_qpoints);
+  initProps(tid, elem_to, side, n_qpoints);
 
   for (const auto state : stateIndexRange())
   {
@@ -270,27 +275,26 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 }
 
 void
-MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
+MaterialPropertyStorage::swap(const THREAD_ID tid, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   for (const auto state : stateIndexRange())
     shallowSwapData(_stateful_prop_id_to_prop_id,
-                    material_data.props(state),
+                    getMaterialData(tid).props(state),
                     // Would be nice to make this setProps()
                     initAndSetProps(&elem, side, state));
 }
 
 void
-MaterialPropertyStorage::swapBack(MaterialData & material_data,
-                                  const Elem & elem,
-                                  unsigned int side)
+MaterialPropertyStorage::swapBack(const THREAD_ID tid, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   for (const auto state : stateIndexRange())
-    shallowSwapDataBack(
-        _stateful_prop_id_to_prop_id, setProps(&elem, side, state), material_data.props(state));
+    shallowSwapDataBack(_stateful_prop_id_to_prop_id,
+                        setProps(&elem, side, state),
+                        getMaterialData(tid).props(state));
 
   // Workaround for MOOSE difficulties in keeping materialless
   // elements (e.g. Lower D elements in Mortar code) materials
@@ -302,11 +306,11 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 unsigned int
 MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsigned int state)
 {
-  if (state > max_state)
+  if (state > MaterialData::max_state)
     mooseError("Material property state of ",
                state,
                " is not supported. Max state supported: ",
-               max_state);
+               MaterialData::max_state);
 
   // Increment state as needed
   if (maxState() < state)
@@ -327,22 +331,23 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
 }
 
 void
-MaterialPropertyStorage::initProps(MaterialData & material_data,
+MaterialPropertyStorage::initProps(const THREAD_ID tid,
                                    const Elem * elem,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
   for (const auto state : stateIndexRange())
-    this->initProps(material_data, state, elem, side, n_qpoints);
+    this->initProps(tid, state, elem, side, n_qpoints);
 }
 
 void
-MaterialPropertyStorage::initProps(MaterialData & material_data,
+MaterialPropertyStorage::initProps(const THREAD_ID tid,
                                    const unsigned int state,
                                    const Elem * elem,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
+  auto & material_data = getMaterialData(tid);
   material_data.resize(n_qpoints);
 
   auto & mat_props = initAndSetProps(elem, side, state);
@@ -361,30 +366,189 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
     {
       const auto prop_id = _stateful_prop_id_to_prop_id[i];
       mat_props.setPointer(i, material_data.props(0)[prop_id].clone(n_qpoints), {});
+      mooseAssert(mat_props[i].id() == prop_id, "Inconsistent id");
     }
 }
 
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  unsigned int max_state = storage.maxState();
-  dataStore(stream, max_state, context);
+  const auto num_states = storage.numStates();
+  dataStore(stream, num_states, nullptr);
 
+  // Store the material property ID -> name map for mapping back
+  const auto & registry = storage.getMaterialPropertyRegistry();
+  std::vector<std::string> ids_to_names(registry.idsToNamesBegin(), registry.idsToNamesEnd());
+  dataStore(stream, ids_to_names, nullptr);
+
+  // Store the stateful ID -> property ID map for mapping back
+  dataStore(stream, storage._stateful_prop_id_to_prop_id, nullptr);
+
+  // Store the stateful id -> name map
+  dataStore(stream, storage._stateful_prop_names, nullptr);
+
+  // Store every property
   for (const auto state : storage.stateIndexRange())
-    dataStore(stream, storage.setProps(state), context);
+  {
+    std::size_t num_elems = storage.setProps(state).size();
+    dataStore(stream, num_elems, nullptr);
+
+    for (auto & elem_side_map_pair : storage.setProps(state))
+    {
+      const Elem * elem = elem_side_map_pair.first;
+      mooseAssert(elem, "Null element");
+      dataStore(stream, elem, context);
+
+      auto & side_map = elem_side_map_pair.second;
+      std::size_t num_sides = side_map.size();
+      dataStore(stream, num_sides, nullptr);
+
+      for (auto & [side, props] : side_map)
+      {
+        dataStore(stream, side, nullptr);
+
+        std::size_t num_props = props.size();
+        dataStore(stream, num_props, nullptr);
+        mooseAssert(num_props > 0, "No properties");
+
+        std::size_t n_q_points = 0;
+        for (const auto & entry : props)
+          if (entry.size() > n_q_points)
+            n_q_points = entry.size();
+        dataStore(stream, n_q_points, nullptr);
+
+        for (auto & entry : props)
+          dataStoreSkippable(stream, entry, nullptr);
+      }
+    }
+  }
 }
 
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  unsigned int state_index;
-  dataLoad(stream, state_index, context);
-  if (state_index != storage.maxState())
-    mooseError("Inconsistent max state; stored max state = ",
-               state_index,
-               ", current max state = ",
-               storage.maxState());
+  const auto & registry = storage.getMaterialPropertyRegistry();
 
+  decltype(storage.numStates()) num_states;
+  dataLoad(stream, num_states, nullptr);
+  if (num_states != storage.numStates())
+    mooseError("Stateful material properties up to state ",
+               num_states,
+               " were stored in checkpoint/backup,\nbut state ",
+               storage.numStates(),
+               " is now the maximum state requested.\n\nThis mismatch is not currently supported.");
+
+  std::vector<std::string> from_prop_ids_to_names;
+  dataLoad(stream, from_prop_ids_to_names, nullptr);
+
+  decltype(storage._stateful_prop_id_to_prop_id) from_stateful_prop_id_to_prop_id;
+  dataLoad(stream, from_stateful_prop_id_to_prop_id, nullptr);
+
+  decltype(storage._stateful_prop_names) from_stateful_prop_names;
+  dataLoad(stream, from_stateful_prop_names, nullptr);
+
+  {
+    const auto fill_names = [](const auto & from)
+    {
+      std::set<std::string> names;
+      for (const auto & id_name_pair : from)
+        names.insert(id_name_pair.second);
+      return names;
+    };
+
+    const auto from_names = fill_names(from_stateful_prop_names);
+    const auto to_names = fill_names(storage.statefulPropNames());
+
+    // This requirement currently comes from the fact that now when we do restart/recover,
+    // we do not call initStatefulQpProperties() anymore on each material. Which means that
+    // if you add more stateful properties, they would never be initialized. It seems like
+    // this capability (adding props) isn't currently used, so we're going to make it an
+    // error for now. There are plenty of ways around this, but the priority at the moment
+    // is enabling more flexible restart/recover, and this is one of the costs.
+    // TODO: check types
+    if (from_names != to_names)
+    {
+      std::stringstream err;
+      err << "There is a mismatch in the stateful material properties stored during "
+             "checkpoint/backup and declared in restart/recover.\n"
+          << "The current system requires that the stateful properties be equivalent.\n\n";
+      auto add_props = [&err](const auto & names)
+      {
+        for (const auto & name : names)
+          err << "  " << name << "\n";
+      };
+      err << "Stored stateful properties:\n";
+      add_props(from_names);
+      err << "\nDeclared stateful properties:\n";
+      add_props(to_names);
+      mooseError(err.str());
+    }
+  }
+
+  std::vector<std::optional<unsigned int>> to_stateful_ids(storage.statefulProps().size());
+
+  // Fill the mapping from previous ID to current stateful ID
+  for (const auto from_stateful_id : index_range(from_stateful_prop_id_to_prop_id))
+  {
+    const auto from_prop_id = from_stateful_prop_id_to_prop_id[from_stateful_id];
+
+    mooseAssert(from_prop_id < from_prop_ids_to_names.size(), "Invalid ID map");
+    const auto & from_name = from_prop_ids_to_names[from_prop_id];
+
+    const auto to_prop_id = registry.getID(from_name);
+
+    const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
+                                        storage._stateful_prop_id_to_prop_id.end(),
+                                        to_prop_id);
+    mooseAssert(find_prop_id != storage._stateful_prop_id_to_prop_id.end(), "Not found");
+
+    const std::size_t to_stateful_id =
+        std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
+    to_stateful_ids[from_stateful_id] = to_stateful_id;
+  }
+
+  // Load the properties
   for (const auto state : storage.stateIndexRange())
-    dataLoad(stream, storage.setProps(state), context);
+  {
+    std::size_t num_elems;
+    dataLoad(stream, num_elems, nullptr);
+
+    for (std::size_t i_elem = 0; i_elem < num_elems; ++i_elem)
+    {
+      const Elem * elem;
+      dataLoad(stream, elem, context);
+      mooseAssert(elem, "Null element");
+
+      std::size_t num_sides;
+      dataLoad(stream, num_sides, nullptr);
+
+      for (std::size_t i_side = 0; i_side < num_sides; ++i_side)
+      {
+        unsigned int side;
+        dataLoad(stream, side, nullptr);
+
+        std::size_t num_props;
+        dataLoad(stream, num_props, nullptr);
+
+        std::size_t num_q_points;
+        dataLoad(stream, num_q_points, nullptr);
+
+        storage.initProps(0, state, elem, side, num_q_points);
+        auto & props = storage.setProps(elem, side, state);
+
+        for (const auto from_stateful_id : make_range(num_props))
+        {
+          const auto to_stateful_id = to_stateful_ids[from_stateful_id];
+          mooseAssert(to_stateful_id, "Skipping not supported");
+
+          // Eventually we should support skipping, and this will be how it's done
+          // if (!to_stateful_id)
+          //   dataLoadSkip(stream);
+          // else
+
+          dataLoadSkippable(stream, props[*to_stateful_id], nullptr);
+        }
+      }
+    }
+  }
 }
