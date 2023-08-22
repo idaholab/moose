@@ -94,6 +94,34 @@
 
       detail = 'quadrilateral elements refined twice near an unrefined quadrilateral element,'
     []
+    [hex]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'hexahedral elements,'
+    []
+    [hex_second_order]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=HEX20 --mesh-only'
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'hexahedral elements of second order,'
+    []
+    [hex_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 Mesh/cut_one/iz=4 --mesh-only'
+      # Detects too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 9'
+
+      detail = 'hexahedral elements refined twice near an unrefined quadrilateral element,'
+    []
     [tri]
       type = 'RunApp'
       input = 'detect_amr_tri.i'
