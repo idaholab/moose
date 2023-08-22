@@ -99,9 +99,9 @@ d8b61c7117f9eb62d2ffed085d132ca38da30f77: # 24092
   libmesh: 15eb45b
   moose: 149aab1
   wasp: df5c734
-ff686d5435863f1179d99f976359b44f17fc9bc7: # 24661
+6db85fba5c4509e6427b51ab5f43cb5ec4ef8c6c: # 24661
   mpich: e348872
-  petsc: a3d3331
-  libmesh: 8b94fb7
-  moose: 63758ae
+  petsc: c6bd511
+  libmesh: bf761e0
+  moose: c5782b9
   wasp: 8d59140
