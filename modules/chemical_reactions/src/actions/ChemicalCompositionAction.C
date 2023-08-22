@@ -64,7 +64,7 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
       "output_species", "List species for which concentration in the phases is needed");
-  MooseEnum mUnit_op("mole_fraction moles", "moles");
+  MooseEnum mUnit_op("moles mole_fraction", "moles");
   params.addParam<MooseEnum>(
       "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
   params.addParam<std::vector<std::string>>(
