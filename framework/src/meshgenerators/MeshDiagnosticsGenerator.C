@@ -373,9 +373,9 @@ MeshDiagnosticsGenerator::generate()
       // examine. We can only decide if it was born out of AMR if it's the center node of the face
       // of a coarse element near refined elements
       auto elem_type = (*elements.begin())->type();
-      if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) && elements.size() != 4)
-        continue;
       if ((elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9) && elements.size() != 2)
+        continue;
+      if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) && elements.size() != 4)
         continue;
       if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
         continue;
@@ -437,10 +437,10 @@ MeshDiagnosticsGenerator::generate()
       // Nodes of the tentative parent element
       std::vector<const Node *> tentative_coarse_nodes;
 
-      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
+          elem_type == HEX20 || elem_type == HEX27)
       {
         auto elem = *elements.begin();
-        tentative_coarse_nodes.resize(4);
         // Gather the other potential elements in the refined element:
         // they are point neighbors of the node that is shared between all the elements flagged
         // for the non-conformality
@@ -463,59 +463,145 @@ MeshDiagnosticsGenerator::generate()
             break;
           }
         }
-        // std::cout << "interior node at " << *interior_node << std::endl;
 
         // Add point neighbors of interior node to list of potentially refined elements
-        elem->find_point_neighbors(*interior_node, elements);
+        std::set<const Elem *> all_elements;
+        elem->find_point_neighbors(*interior_node, all_elements);
 
-        // We'll need to order the coarse nodes based on the clock-wise order of the elements
-        // Define a frame in which to compute the angles of the elements centers
-        // angle 0 is node - interior node
-        auto start_clock = *node - *interior_node;
-        auto normal = (elem->vertex_average() - *interior_node).cross(start_clock);
-        start_clock /= start_clock.norm();
-        normal /= normal.norm();
-
-        std::vector<std::pair<unsigned int, Real>> elements_angles(elements.size());
-        unsigned int angle_i = 0;
-        for (const auto elem_around : elements)
+        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
         {
-          auto vec = elem_around->vertex_average() - *interior_node;
-          vec /= vec.norm();
-          auto angle = atan2(vec.cross(start_clock) * normal, vec * start_clock);
-          elements_angles[angle_i] = std::make_pair(angle_i, angle);
-          angle_i++;
+          // We need to order the fine elements so when we get the coarse element nodes they form a
+          // non-twisted element
+          tentative_coarse_nodes.resize(4);
+
+          // The exterior nodes are the opposite nodes of the interior_node!
+          unsigned int neighbor_i = 0;
+          for (auto neighbor : all_elements)
+          {
+            const auto interior_node_number = neighbor->get_node_index(interior_node);
+            unsigned int opposite_node_index = (interior_node_number + 2) % 4;
+
+            // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
+            tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
+          }
+
+          // Re-order nodes so that they will form a decent quad
+          Point axis = (elem->vertex_average() - *interior_node).cross(*interior_node - *node);
+          reorderNodes(tentative_coarse_nodes, interior_node, node, axis);
+        }
+        else
+        {
+          // Get the coarse neighbor side to be able to recognize nodes that should become part of
+          // the coarse parent
+          const auto & coarse_elem = *coarse_elements.begin();
+          unsigned short coarse_side_i;
+          for (const auto & coarse_side_index : coarse_elem->side_index_range())
+          {
+            const auto coarse_side_ptr = coarse_elem->side_ptr(coarse_side_index);
+            // The side of interest is the side that contains the non-conformality
+            if (!coarse_side_ptr->close_to_point(*node, 10 * TOLERANCE))
+              continue;
+            else
+            {
+              coarse_side_i = coarse_side_index;
+              break;
+            }
+          }
+          const auto coarse_side = coarse_elem->side_ptr(coarse_side_i);
+
+          // We did not find the side of the coarse neighbor near the refined elements
+          // It could be that it's not planar and the fine elements nodes do not lie on it
+          // Try again at another node
+          if (!coarse_side)
+            continue;
+
+          // We cant directly use the coarse neighbor nodes
+          // - The user might be passing a disjoint mesh
+          // - There could two levels of refinement separating the coarse neighbor and its refined
+          // counterparts
+          // We use the fine element nodes
+          unsigned int i = 0;
+          tentative_coarse_nodes.resize(4);
+          for (const auto & elem_1 : elements)
+            for (const auto & coarse_node : elem_1->node_ref_range())
+            {
+              bool node_shared = false;
+              for (const auto & elem_2 : elements)
+              {
+                if (elem_2 != elem_1)
+                  if (elem_2->get_node_index(&coarse_node) != libMesh::invalid_uint)
+                    node_shared = true;
+              }
+              // A node for the coarse parent will appear in only one fine neighbor
+              // and will lay on the side of the coarse neighbor
+              if (!node_shared && coarse_side->close_to_point(coarse_node, TOLERANCE))
+                tentative_coarse_nodes[i++] = &coarse_node;
+            }
+
+          // Need to order these nodes to form a valid quad / base of an hex
+          // We go around the axis formed by the node and the interior node
+          Point axis = *interior_node - *node;
+          const auto start_circle = elem->vertex_average();
+          reorderNodes(tentative_coarse_nodes, interior_node, &start_circle, axis);
+          tentative_coarse_nodes.resize(8);
+
+          std::cout << "Found nodes" << std::endl;
+          for (auto & jaja : tentative_coarse_nodes)
+            if (jaja)
+              std::cout << jaja << " " << *dynamic_cast<const Point *>(jaja) << std::endl;
+
+          // Use the neighbors of the fine elements that contain these nodes to get the vertex
+          // nodes
+          for (const auto & elem : elements)
+          {
+            // Find the index of the coarse node for the starting element
+            unsigned int node_index = 0;
+            for (const auto & coarse_node : tentative_coarse_nodes)
+            {
+              if (elem->get_node_index(coarse_node) != libMesh::invalid_uint)
+                break;
+              node_index++;
+            }
+            std::cout << "Node indexed at " << node_index << std::endl;
+
+            // Get the neighbor element that is part of the fine elements to coarsen together
+            for (const auto & neighbor : elem->neighbor_ptr_range())
+              if (all_elements.count(neighbor) && !elements.count(neighbor))
+              {
+                std::cout << "Looking at " << neighbor << std::endl;
+                // Find the coarse node for the neighbor
+                const Node * coarse_elem_node;
+                for (const auto & fine_node : neighbor->node_ref_range())
+                {
+                  if (!neighbor->is_vertex(neighbor->get_node_index(&fine_node)))
+                    continue;
+                  bool node_shared = false;
+                  for (const auto & elem_2 : all_elements)
+                    if (elem_2 != neighbor &&
+                        elem_2->get_node_index(&fine_node) != libMesh::invalid_uint)
+                      node_shared = true;
+                  if (!node_shared)
+                  {
+                    coarse_elem_node = &fine_node;
+                    break;
+                  }
+                }
+                // Insert the coarse node at the right place
+                tentative_coarse_nodes[node_index + 4] = coarse_elem_node;
+              }
+          }
+
+          std::cout << "Found nodes second" << std::endl;
+          for (auto & jaja : tentative_coarse_nodes)
+            if (jaja)
+              std::cout << jaja << " " << *dynamic_cast<const Point *>(jaja) << std::endl;
         }
 
-        // sort by angle, so it goes around the interior node
-        std::sort(elements_angles.begin(),
-                  elements_angles.end(),
-                  [](auto & left, auto & right) { return left.second < right.second; });
-        std::vector<unsigned int> elements_order(4);
-        unsigned int order_i = 0;
-        for (const auto & angle_pair : elements_angles)
-        {
-          // std::cout << "Node " << angle_pair.first << " angle " << angle_pair.second << "
-          // order
-          // "
-          //           << order_i << std::endl;
-          elements_order[angle_pair.first] = order_i;
-          order_i++;
-        }
-
-        // The exterior nodes are the opposite nodes of the interior_node!
-        unsigned int neighbor_i = 0;
-        for (auto neighbor : elements)
-        {
-          const auto interior_node_number = neighbor->get_node_index(interior_node);
-          unsigned int opposite_node_index = (interior_node_number + 2) % 4;
-
-          // std::cout << *neighbor->node_ptr(opposite_node_index) << std::endl;
-          tentative_coarse_nodes[elements_order[neighbor_i++]] =
-              neighbor->node_ptr(opposite_node_index);
-        }
+        // No need to separate fine elements near the non-conformal node and away from it
+        elements = all_elements;
       }
-      // For TRI elements, there is an element at the center
+      // For TRI elements, we use the fine triangle element at the center of the potential
+      // coarse triangle element
       else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
       {
         std::cout << "Building a tri" << std::endl;
@@ -625,8 +711,8 @@ MeshDiagnosticsGenerator::generate()
           std::cout << "Tet " << elem->id() << std::endl;
 
         // There should be two other nodes with non-conformality near this coarse element
-        // Find both, as they will be nodes of the rest of the elements to add to the potential fine
-        // tet list. They are shared by two of the fine tets we have already found
+        // Find both, as they will be nodes of the rest of the elements to add to the potential
+        // fine tet list. They are shared by two of the fine tets we have already found
         std::set<const Node *> other_nodes;
         for (const auto & tet_1 : fine_tets)
         {
@@ -769,8 +855,8 @@ MeshDiagnosticsGenerator::generate()
                   << std::endl;
 
         // append the missing fine tets (inside the coarse element, away from the node considered)
-        // into the fine elements set for the check on "did it refine the tentative coarse tet onto
-        // the same fine tets"
+        // into the fine elements set for the check on "did it refine the tentative coarse tet
+        // onto the same fine tets"
         elements.clear();
         for (const auto & elem : tips_tets)
           elements.insert(elem);
@@ -810,13 +896,20 @@ MeshDiagnosticsGenerator::generate()
             tentative_coarse_nodes.end());
         std::cout << tentative_coarse_nodes.size() << std::endl;
 
-        mooseAssert(tentative_coarse_nodes.size() == 4,
-                    "We are forming a coarsened tetrahedral element");
+        // The group of fine elements ended up having less or more than 4 tips, so it's clearly
+        // not forming a coarse tetrahedral
+        if (tentative_coarse_nodes.size() != 4)
+          continue;
       }
       else
-        mooseError("Unsupported element type ", elem_type);
+      {
+        mooseInfo("Unsupported element type ",
+                  elem_type,
+                  ". Skipping detection for this node and all future nodes near only this "
+                  "element type");
+      }
 
-      // Check the element types: if not all the same then it's not uniform AMR
+      // Check the fine element types: if not all the same then it's not uniform AMR
       for (auto elem : elements)
         if (elem->type() != elem_type)
           continue;
@@ -860,9 +953,9 @@ MeshDiagnosticsGenerator::generate()
       // Compare with the original set of elements
       // We already know the child share the exterior node. If they share the same vertex
       // average as the group of unrefined elements we will call this good enough for now
-      // For tetradhedral elements we cannot rely on the children all matching as the choice in the
-      // diagonal selection can be made differently. We ll just say 4 matching children is good
-      // enough for the heuristic
+      // For tetradhedral elements we cannot rely on the children all matching as the choice in
+      // the diagonal selection can be made differently. We'll just say 4 matching children is
+      // good enough for the heuristic
       unsigned int num_children_match = 0;
       for (auto & child : parent->child_ref_range())
       {
@@ -910,7 +1003,7 @@ MeshDiagnosticsGenerator::generate()
 void
 MeshDiagnosticsGenerator::diagnosticsLog(std::string msg,
                                          const MooseEnum & log_level,
-                                         bool may_error)
+                                         bool may_error) const
 {
   mooseAssert(log_level != "NO_CHECK",
               "We should not be outputting logs if the check had been disabled");
@@ -922,4 +1015,50 @@ MeshDiagnosticsGenerator::diagnosticsLog(std::string msg,
     mooseError(msg);
   else
     mooseError("Should not reach here");
+}
+
+void
+MeshDiagnosticsGenerator::reorderNodes(std::vector<const Node *> & nodes,
+                                       const Point * origin,
+                                       const Point * clock_start,
+                                       Point & axis) const
+{
+  mooseAssert(axis.norm() != 0, "Invalid rotation axis when ordering nodes");
+  mooseAssert(origin != clock_start, "Invalid starting direction when ordering nodes");
+
+  // We'll need to order the coarse nodes based on the clock-wise order of the elements
+  // Define a frame in which to compute the angles of the fine elements centers
+  // angle 0 is the [interior node, non-conformal node] vertex
+  auto start_clock = *origin - *clock_start;
+  start_clock /= start_clock.norm();
+  axis /= axis.norm();
+
+  std::cout << *origin << " " << *clock_start << " normal : " << axis << std::endl;
+
+  std::vector<std::pair<unsigned int, Real>> nodes_angles(nodes.size());
+  for (const auto & angle_i : index_range(nodes))
+  {
+    auto vec = *nodes[angle_i] - *origin;
+    vec /= vec.norm();
+    const auto angle = atan2(vec.cross(start_clock) * axis, vec * start_clock);
+    std::cout << vec.cross(start_clock) << " " << vec * start_clock << " " << angle << std::endl;
+    nodes_angles[angle_i] = std::make_pair(angle_i, angle);
+  }
+
+  // sort by angle, so it goes around the interior node
+  std::sort(nodes_angles.begin(),
+            nodes_angles.end(),
+            [](auto & left, auto & right) { return left.second < right.second; });
+
+  // Re-sort the nodes based on their angle
+  std::vector<const Node *> new_nodes(nodes.size());
+  for (const auto & old_index : index_range(nodes))
+  {
+    _console << nodes_angles[old_index].first << " " << nodes_angles[old_index].second << std::endl;
+    new_nodes[old_index] = nodes[nodes_angles[old_index].first];
+  }
+  for (const auto & index : index_range(nodes))
+    nodes[index] = new_nodes[index];
+  for (const auto & old_index : index_range(nodes))
+    std::cout << old_index << " " << *nodes[old_index] << std::endl;
 }

@@ -37,7 +37,19 @@ private:
    * may_error is used to avoid erroring when the log is requested but there are no issues so it
    * should just say "0 problems" with an info message
    */
-  void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool may_error);
+  void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool may_error) const;
+
+  /**
+   * Utility routine to re-order a vector of nodes so that they form a valid quad
+   * @param nodes the vector containing the nodes to re-order
+   * @param origin the center of the clock (circle to align nodes around)
+   * @param clock_start the start of the clock
+   * @param axis the rotation axis
+   */
+  void reorderNodes(std::vector<const Node *> & nodes,
+                    const Point * origin,
+                    const Point * clock_start,
+                    Point & axis) const;
 
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
