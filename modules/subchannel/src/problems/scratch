@@ -1,0 +1,33 @@
+if (pin_mesh_exist)
+{
+  rod_area = 0.0;
+  for (auto i_pin : _mesh.getChannelPins(i))
+  {
+    auto * pin_node = _mesh.getPinNode(i_pin, nearestIndex);
+    rod_area += 0.25 * 0.25 * M_PI * _Dpin_soln(pin_node) * _Dpin_soln(pin_node);
+  }
+}
+
+Real standard_area, rod_area, additional_area;
+auto pitch = _mesh.getPitch();
+auto rod_diameter = _mesh.getRodDiameter();
+auto gap = _mesh.getGap();
+auto z_blockage = _mesh.getZBlockage();
+auto index_blockage = _mesh.getIndexBlockage();
+auto reduction_blockage = _mesh.getReductionBlockage();
+auto pin_mesh_exist = _mesh.pinMeshExist();
+auto i = _mesh.getSubchannelIndexFromPoint(p);
+auto subch_type = _mesh.getSubchannelType(i);
+auto _z_grid = _mesh.getZGrid();
+// find axial index from point p
+Real minDifference = std::abs(p(2) - _z_grid[0]);
+unsigned int nearestIndex = 0;
+for (unsigned int iz = 1; iz < _z_grid.size(); ++iz)
+{
+  Real difference = std::abs(p(2) - _z_grid[iz]);
+  if (difference < minDifference)
+  {
+    minDifference = difference;
+    nearestIndex = iz;
+  }
+}

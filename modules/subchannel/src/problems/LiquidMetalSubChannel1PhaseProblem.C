@@ -54,6 +54,22 @@ LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
   VecDestroy(&_hc_sweep_enthalpy_rhs);
 }
 
+void
+LiquidMetalSubChannel1PhaseProblem::initializeSolution()
+{
+  unsigned int last_node = _n_cells;
+  unsigned int first_node = 1;
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    {
+      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
+    }
+  }
+}
+
 Real
 LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
