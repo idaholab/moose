@@ -295,10 +295,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _mus.resize(libMesh::n_threads());
     for (const auto tid : make_range(libMesh::n_threads()))
     {
-      _rhos[tid] = &UserObject::_subproblem.getFunctor<ADReal>(
-          deduceFunctorName(NS::density), tid, name(), true);
-      _mus[tid] =
-          &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::mu), tid, name(), true);
+      _rhos[tid] = &getFunctor<ADReal>("density", tid);
+      _mus[tid] = &getFunctor<ADReal>("dynamic_viscosity", tid);
     }
   }
 }
