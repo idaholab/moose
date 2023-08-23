@@ -13,6 +13,14 @@
       expect_out = 'Number of non-conformal nodes: 3'
       detail = 'element overlapping,'
     []
+    [inconsistent_sidesets]
+      type = RunApp
+      input = 'consistent_domains.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Inconsistent orientation of sideset bad_one \(4\) with regards to subdomain pairs'
+      detail = 'inconsistently oriented sidesets between subdomains,'
+    []
     [overlap]
       type = 'RunApp'
       input = 'node_based_test.i'
