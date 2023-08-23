@@ -203,7 +203,7 @@ public:
 
 protected:
   /// Pointer to the MaterialData class for this object
-  std::shared_ptr<MaterialData> _blk_material_data;
+  const MaterialData * _blk_material_data;
 
   /**
    * A helper method to allow the Material object to specialize the behavior

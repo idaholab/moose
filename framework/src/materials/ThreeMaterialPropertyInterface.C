@@ -15,7 +15,6 @@
 InputParameters
 ThreeMaterialPropertyInterface::validParams()
 {
-
   // Objects inheriting from ThreeMaterialPropertyInterface rely on Boundary MaterialData
   InputParameters params = TwoMaterialPropertyInterface::validParams();
   // We want the properties returned by getMaterialProperty* to be the volumetric ones

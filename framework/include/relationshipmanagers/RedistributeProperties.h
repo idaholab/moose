@@ -57,10 +57,8 @@ public:
    * list of \p _materials data to redistribute each time our
    * underlying mesh is redistributed.
    */
-  void addMaterialPropertyStorage(std::vector<std::shared_ptr<MaterialData>> & mat_data,
-                                  MaterialPropertyStorage & mat_props);
+  void addMaterialPropertyStorage(MaterialPropertyStorage & mat_props);
 
 private:
-  std::vector<std::pair<std::vector<std::shared_ptr<MaterialData>> *, MaterialPropertyStorage *>>
-      _materials;
+  std::vector<MaterialPropertyStorage *> _materials;
 };

@@ -52,7 +52,7 @@ DGDiffusionDomainUserObject::DGDiffusionDomainUserObject(const InputParameters &
     _diff(getMaterialProperty<Real>("diff")),
     _diff_face(getGenericFaceMaterialProperty<Real, false>("diff")),
     _ad_diff_face(getGenericFaceMaterialProperty<Real, true>("ad_diff")),
-    _diff_face_by_name(getFaceMaterialPropertyByName<Real>(deducePropertyName("diff"))),
+    _diff_face_by_name(getFaceMaterialPropertyByName<Real>(getMaterialPropertyName("diff"))),
     _diff_neighbor(getNeighborMaterialProperty<Real>("diff")),
     _diff_face_old(getFaceMaterialPropertyOld<Real>("diff")),
     _diff_face_older(getFaceMaterialPropertyOlder<Real>("diff"))

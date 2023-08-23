@@ -84,14 +84,14 @@ INSADMaterial::subdomainSetup()
     // So we have to go through MaterialData here. We already performed the material property
     // requests through the MaterialPropertyInterface APIs in the INSAD kernels, so we should be
     // safe for dependencies
-    _boussinesq_alpha = &_material_data->getProperty<Real, true>(
+    _boussinesq_alpha = &_material_data.getProperty<Real, true>(
         _object_tracker->get<MaterialPropertyName>("alpha", _current_subdomain_id), 0, *this);
     _temperature =
         &_subproblem
              .getStandardVariable(
                  _tid, _object_tracker->get<std::string>("temperature", _current_subdomain_id))
              .adSln();
-    _ref_temp = &_material_data->getProperty<Real, false>(
+    _ref_temp = &_material_data.getProperty<Real, false>(
         _object_tracker->get<MaterialPropertyName>("ref_temp", _current_subdomain_id), 0, *this);
   }
   else

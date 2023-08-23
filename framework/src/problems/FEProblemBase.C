@@ -427,16 +427,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _vector_curl_zero.resize(n_threads);
   _uo_jacobian_moose_vars.resize(n_threads);
 
-  _material_data.resize(n_threads);
-  _bnd_material_data.resize(n_threads);
-  _neighbor_material_data.resize(n_threads);
-  for (unsigned int i = 0; i < n_threads; i++)
-  {
-    _material_data[i] = std::make_shared<MaterialData>(_material_props);
-    _bnd_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
-    _neighbor_material_data[i] = std::make_shared<MaterialData>(_neighbor_material_props);
-  }
-
   _active_elemental_moose_variables.resize(n_threads);
 
   _block_mat_side_cache.resize(n_threads);
@@ -779,13 +769,11 @@ FEProblemBase::initialSetup()
       _restart_io->readRestartableDataHeader(true);
       _restart_io->restartEquationSystemsObject();
 
-      /**
-       * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
-       * this now. Material Properties aren't sized properly at this point and fail across the
-       * board, there are a few other misc tests that fail too.
-       *
-       * _restart_io->readRestartableData();
-       */
+      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
+
+      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+          _neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
     }
   }
   else
@@ -928,19 +916,11 @@ FEProblemBase::initialSetup()
       }
     }
 
+    if (!_has_initialized_stateful)
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
-      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-      ComputeMaterialsObjectThread cmt(*this,
-                                       _material_data,
-                                       _bnd_material_data,
-                                       _neighbor_material_data,
-                                       _material_props,
-                                       _bnd_material_props,
-                                       _neighbor_material_props,
-                                       _assembly);
-      Threads::parallel_reduce(elem_range, cmt);
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
@@ -1028,21 +1008,27 @@ FEProblemBase::initialSetup()
     }
   }
 
-  if (_app.isRestarting() || _app.isRecovering())
+  // Restore for MultiApps (this app is a sub-app and has been given a Backup
+  // from the primary app)
+  //
+  // We would prefer that this is further up where the main app restore is, but
+  // currently the MultiApp recover doesn't use a more featureful system reload,
+  // and instead just saves and loads vectors directly. This isn't flexible and
+  // leads to lots of issues where we try to load into vectors that haven't been
+  // declared yet (because they happen between this call and the primary app
+  // load, in things like the system's initial setup). #24510 will unify the
+  // primary and multiapp loads by using a more flexible system load that will
+  // initialized vectors that haven't been declared yet if needed
+  if ((_app.isRestarting() || _app.isRecovering()) && _app.hasCachedBackup())
   {
-    if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
-                                // Backup
-      _app.restoreCachedBackup();
-    else
-    {
-      TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
-
-      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
-    }
+    _app.restoreCachedBackup();
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
     // for some of the variables which should override what's coming from the restart file
+    //
+    // NOTE: we don't need to do this for the primary app because the primary app restore
+    // call is much further up and happens before ICs
     if (!_app.isRecovering())
     {
       TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
@@ -1197,16 +1183,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this,
-                                     _material_data,
-                                     _bnd_material_data,
-                                     _neighbor_material_data,
-                                     _material_props,
-                                     _bnd_material_props,
-                                     _neighbor_material_props,
-                                     _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
+    initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
   }
 
   // Control Logic
@@ -3176,25 +3153,22 @@ FEProblemBase::getMaterial(std::string name,
   return material;
 }
 
-std::shared_ptr<MaterialData>
+MaterialData &
 FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
-  std::shared_ptr<MaterialData> output;
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:
-      output = _material_data[tid];
-      break;
+      return _material_props.getMaterialData(tid);
     case Moose::NEIGHBOR_MATERIAL_DATA:
-      output = _neighbor_material_data[tid];
-      break;
+      return _neighbor_material_props.getMaterialData(tid);
     case Moose::BOUNDARY_MATERIAL_DATA:
     case Moose::FACE_MATERIAL_DATA:
     case Moose::INTERFACE_MATERIAL_DATA:
-      output = _bnd_material_data[tid];
-      break;
+      return _bnd_material_props.getMaterialData(tid);
   }
-  return output;
+
+  mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
 }
 
 void
@@ -3362,17 +3336,19 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
   {
     auto && elem = _assembly[tid][0]->elem();
     unsigned int n_points = _assembly[tid][0]->qRule()->n_points();
-    _material_data[tid]->resize(n_points);
+
+    auto & material_data = _material_props.getMaterialData(tid);
+    material_data.resize(n_points);
 
     // Only swap if requested
     if (swap_stateful)
-      _material_data[tid]->swap(*elem);
+      material_data.swap(*elem);
 
     if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
-      _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
+      material_data.reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
-      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+      material_data.reinit(_materials.getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3388,19 +3364,20 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
     unsigned int side = _assembly[tid][0]->side();
     unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
 
-    _bnd_material_data[tid]->resize(n_points);
+    auto & bnd_material_data = _bnd_material_props.getMaterialData(tid);
+    bnd_material_data.resize(n_points);
 
-    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
-      _bnd_material_data[tid]->swap(*elem, side);
+    if (swap_stateful && !bnd_material_data.isSwapped())
+      bnd_material_data.swap(*elem, side);
 
     if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _bnd_material_data[tid]->reset(
+      bnd_material_data.reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
     if (reinit_mats)
-      _bnd_material_data[tid]->reinit(*reinit_mats);
+      bnd_material_data.reinit(*reinit_mats);
     else if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _bnd_material_data[tid]->reinit(
+      bnd_material_data.reinit(
           _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
@@ -3425,20 +3402,22 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
                                        << neighbor->subdomain_id() << " do not match.");
 
     unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
-    _neighbor_material_data[tid]->resize(n_points);
+
+    auto & neighbor_material_data = _neighbor_material_props.getMaterialData(tid);
+    neighbor_material_data.resize(n_points);
 
     // Only swap if requested
     if (swap_stateful)
-      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+      neighbor_material_data.swap(*neighbor, neighbor_side);
 
     if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reset(
+      neighbor_material_data.reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
     if (reinit_mats)
-      _neighbor_material_data[tid]->reinit(*reinit_mats);
+      neighbor_material_data.reinit(*reinit_mats);
     else if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reinit(
+      neighbor_material_data.reinit(
           _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
@@ -3454,19 +3433,20 @@ FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
     auto && elem = _assembly[tid][0]->elem();
     unsigned int side = _assembly[tid][0]->side();
     unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
-    _bnd_material_data[tid]->resize(n_points);
 
-    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
-      _bnd_material_data[tid]->swap(*elem, side);
+    auto & bnd_material_data = _bnd_material_props.getMaterialData(tid);
+    bnd_material_data.resize(n_points);
+
+    if (swap_stateful && !bnd_material_data.isSwapped())
+      bnd_material_data.swap(*elem, side);
 
     if (_discrete_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reset(
-          _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
+      bnd_material_data.reset(_discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
 
     if (reinit_mats)
-      _bnd_material_data[tid]->reinit(*reinit_mats);
+      bnd_material_data.reinit(*reinit_mats);
     else if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+      bnd_material_data.reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -3478,14 +3458,15 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
     const Elem * const & elem = _assembly[tid][0]->elem();
     unsigned int side = _assembly[tid][0]->side();
     unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
-    _bnd_material_data[tid]->resize(n_points);
 
-    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
-      _bnd_material_data[tid]->swap(*elem, side);
+    auto & bnd_material_data = _bnd_material_props.getMaterialData(tid);
+    bnd_material_data.resize(n_points);
+
+    if (swap_stateful && !bnd_material_data.isSwapped())
+      bnd_material_data.swap(*elem, side);
 
     if (_interface_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(
-          _interface_materials.getActiveBoundaryObjects(boundary_id, tid));
+      bnd_material_data.reinit(_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -3493,7 +3474,7 @@ void
 FEProblemBase::swapBackMaterials(THREAD_ID tid)
 {
   auto && elem = _assembly[tid][0]->elem();
-  _material_data[tid]->swapBack(*elem);
+  _material_props.getMaterialData(tid).swapBack(*elem);
 }
 
 void
@@ -3501,7 +3482,7 @@ FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 {
   auto && elem = _assembly[tid][0]->elem();
   unsigned int side = _assembly[tid][0]->side();
-  _bnd_material_data[tid]->swapBack(*elem, side);
+  _bnd_material_props.getMaterialData(tid).swapBack(*elem, side);
 }
 
 void
@@ -3530,7 +3511,7 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
       mooseError("neighbor is null in Assembly!");
   }
 
-  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
+  _neighbor_material_props.getMaterialData(tid).swapBack(*neighbor, neighbor_side);
 }
 
 void
@@ -5222,14 +5203,13 @@ FEProblemBase::addAnyRedistributers()
               "RedistributeProperties", redistributer_name, redistribute_params);
 
       if (_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_material_data, _material_props);
+        redistributer->addMaterialPropertyStorage(_material_props);
 
       if (_bnd_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_bnd_material_data, _bnd_material_props);
+        redistributer->addMaterialPropertyStorage(_bnd_material_props);
 
       if (_neighbor_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_neighbor_material_data,
-                                                  _neighbor_material_props);
+        redistributer->addMaterialPropertyStorage(_neighbor_material_props);
 
       mesh.getMesh().add_ghosting_functor(redistributer);
     };
@@ -6950,8 +6930,16 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
   _xfem->setMesh(&_mesh);
   if (_displaced_mesh)
     _xfem->setDisplacedMesh(_displaced_mesh);
-  _xfem->setMaterialData(&_material_data);
-  _xfem->setBoundaryMaterialData(&_bnd_material_data);
+
+  auto fill_data = [](auto & storage)
+  {
+    std::vector<MaterialData *> data(libMesh::n_threads());
+    for (const auto tid : make_range(libMesh::n_threads()))
+      data[tid] = &storage.getMaterialData(tid);
+    return data;
+  };
+  _xfem->setMaterialData(fill_data(_material_props));
+  _xfem->setBoundaryMaterialData(fill_data(_bnd_material_props));
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; ++i)
@@ -7062,13 +7050,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   {
     // Prolong properties onto newly refined elements' children
     {
-      ProjectMaterialProperties pmp(/* refine = */ true,
-                                    *this,
-                                    _material_data,
-                                    _bnd_material_data,
-                                    _material_props,
-                                    _bnd_material_props,
-                                    _assembly);
+      ProjectMaterialProperties pmp(
+          /* refine = */ true, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.refinedElementRange();
       Threads::parallel_reduce(range, pmp);
 
@@ -7085,13 +7068,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
     // Restrict properties onto newly coarsened elements
     {
-      ProjectMaterialProperties pmp(/* refine = */ false,
-                                    *this,
-                                    _material_data,
-                                    _bnd_material_data,
-                                    _material_props,
-                                    _bnd_material_props,
-                                    _assembly);
+      ProjectMaterialProperties pmp(
+          /* refine = */ false, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.coarsenedElementRange();
       Threads::parallel_reduce(range, pmp);
       for (const auto & elem : range)
@@ -7126,17 +7104,14 @@ FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 }
 
 void
-FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range)
+FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const bool threaded)
 {
-  ComputeMaterialsObjectThread cmt(*this,
-                                   _material_data,
-                                   _bnd_material_data,
-                                   _neighbor_material_data,
-                                   _material_props,
-                                   _bnd_material_props,
-                                   _neighbor_material_props,
-                                   _assembly);
-  cmt(elem_range, true);
+  ComputeMaterialsObjectThread cmt(
+      *this, _material_props, _bnd_material_props, _neighbor_material_props, _assembly);
+  if (threaded)
+    Threads::parallel_reduce(elem_range, cmt);
+  else
+    cmt(elem_range, true);
 }
 
 void
@@ -7987,26 +7962,7 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
                                   const unsigned int nqp,
                                   const THREAD_ID tid)
 {
-  switch (data_type)
-  {
-    case Moose::MaterialDataType::BLOCK_MATERIAL_DATA:
-      _material_data[tid]->resize(nqp);
-      break;
-
-    case Moose::MaterialDataType::BOUNDARY_MATERIAL_DATA:
-    case Moose::MaterialDataType::FACE_MATERIAL_DATA:
-    case Moose::MaterialDataType::INTERFACE_MATERIAL_DATA:
-      _bnd_material_data[tid]->resize(nqp);
-      break;
-
-    case Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA:
-      _neighbor_material_data[tid]->resize(nqp);
-      break;
-
-    default:
-      mooseError("Unrecognized material data type.");
-      break;
-  }
+  getMaterialData(data_type, tid).resize(nqp);
 }
 
 void

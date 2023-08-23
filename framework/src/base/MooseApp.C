@@ -632,6 +632,13 @@ MooseApp::~MooseApp()
   // Don't wait for implicit destruction of input parameter storage
   _input_parameter_warehouse.reset();
 
+  // This is dirty, but I don't know what else to do. Obviously, others
+  // have had similar problems if you look above. In specific, the
+  // dlclose below on macs is destructing some data that does not
+  // belong to it in garbage collection. So... don't even give
+  // dlclose an option
+  _restartable_data.clear();
+
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
   for (const auto & lib_pair : _lib_handles)

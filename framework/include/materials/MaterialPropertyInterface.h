@@ -65,6 +65,12 @@ public:
 
   static InputParameters validParams();
 
+  /// The material property ID for a default (parsed from input) property
+  static constexpr PropertyValue::id_type default_property_id =
+      PropertyValue::invalid_property_id - 1;
+  /// The material property ID for a zero property
+  static constexpr PropertyValue::id_type zero_property_id = PropertyValue::invalid_property_id - 2;
+
   ///@{
   /**
    * Retrieve reference to material property or one of it's old or older values.
@@ -79,7 +85,7 @@ public:
   const GenericMaterialProperty<T, is_ad> & getGenericMaterialProperty(const std::string & name,
                                                                        const unsigned int state = 0)
   {
-    return getGenericMaterialProperty<T, is_ad>(name, *_material_data, state);
+    return getGenericMaterialProperty<T, is_ad>(name, _material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name,
@@ -116,7 +122,7 @@ public:
   const GenericMaterialProperty<T, is_ad> &
   getGenericMaterialPropertyByName(const MaterialPropertyName & name, const unsigned int state = 0)
   {
-    return getGenericMaterialPropertyByName<T, is_ad>(name, *_material_data, state);
+    return getGenericMaterialPropertyByName<T, is_ad>(name, _material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name,
@@ -438,12 +444,6 @@ protected:
   /// The "complete" name of the object that this interface belongs for material property output
   const MooseObjectName _mi_moose_object_name;
 
-  /// The type of data
-  Moose::MaterialDataType _material_data_type;
-
-  /// Pointer to the material data class that stores properties
-  std::shared_ptr<MaterialData> _material_data;
-
   /// Reference to the FEProblemBase class
   FEProblemBase & _mi_feproblem;
 
@@ -452,6 +452,12 @@ protected:
 
   /// Current threaded it
   const THREAD_ID _mi_tid;
+
+  /// The type of data
+  const Moose::MaterialDataType _material_data_type;
+
+  /// The material data class that stores properties
+  MaterialData & _material_data;
 
   /**
    * A helper method for checking material properties
@@ -466,32 +472,34 @@ protected:
   void markMatPropRequested(const std::string &);
 
   /**
-   * Small helper to look up a material property name through the input parameter keys
+   * @return The name of the material property associated with name \p name.
+   *
+   * If \p name is the name of a material property parameter and the parameter is
+   * valid, this will return the value of said parameter. Otherwise, it will just
+   * return the name.
    */
-  std::string deducePropertyName(const std::string & name) const;
+  MaterialPropertyName getMaterialPropertyName(const std::string & name) const;
 
   /**
-   * Helper function to parse default material property values. This is implemented
-   * as a specialization for supported types and returns NULL in all other cases.
+   * @return The default material property with the name \p name, if any.
+   *
+   * "Default" properties are properties whose default values are set from within
+   * the name. That is, if we can cast \p name to a Real, _and_ the prop type is
+   * a Real or RealVectorValue, we'll return said value.
    */
-  template <typename T>
-  const MaterialProperty<T> * defaultMaterialProperty(const std::string & name);
-
-  /**
-   * Helper function to parse default material property values. This is implemented
-   * as a specialization for supported types and returns NULL in all other cases.
-   */
-  template <typename T>
-  const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
-
-  ///@{ generic default material property helper
+  ///@{
   template <typename T, bool is_ad>
-  const auto * defaultGenericMaterialProperty(const std::string & name)
+  const GenericMaterialProperty<T, is_ad> *
+  defaultGenericMaterialProperty(const std::string & name);
+  template <typename T>
+  const MaterialProperty<T> * defaultMaterialProperty(const std::string & name)
   {
-    if constexpr (is_ad)
-      return defaultADMaterialProperty<T>(name);
-    else
-      return defaultMaterialProperty<T>(name);
+    return defaultGenericMaterialProperty<T, false>(name);
+  }
+  template <typename T>
+  const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name)
+  {
+    return defaultGenericMaterialProperty<T, true>(name);
   }
   ///@}
 
@@ -513,15 +521,8 @@ protected:
    */
   bool _get_material_property_called;
 
-  /// Storage vector for MaterialProperty<Real> default objects
-  std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
-  /// Storage vector for ADMaterialProperty<Real> default objects
-  std::vector<std::unique_ptr<ADMaterialProperty<Real>>> _default_ad_real_properties;
-  /// Storage vector for MaterialProperty<RealVectorValue> default objects
-  std::vector<std::unique_ptr<MaterialProperty<RealVectorValue>>> _default_real_vector_properties;
-  /// Storage vector for ADMaterialProperty<RealVectorValue> default objects
-  std::vector<std::unique_ptr<ADMaterialProperty<RealVectorValue>>>
-      _default_ad_real_vector_properties;
+  /// Storage vector for default properties
+  std::vector<std::unique_ptr<PropertyValue>> _default_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
@@ -529,6 +530,11 @@ protected:
   const MaterialPropertyName _get_suffix;
 
 private:
+  /**
+   * @returns The MaterialDataType given the interface's parameters
+   */
+  Moose::MaterialDataType getMaterialDataType(const std::set<BoundaryID> & boundary_ids) const;
+
   /*
    * A proxy method for _mi_feproblem.getMaxQps()
    */
@@ -578,38 +584,35 @@ private:
   GenericOptionalMaterialProperty<T, is_ad> _value;
 };
 
-// General version for types that do not accept default values
-template <typename T>
-const MaterialProperty<T> *
-MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> *
+MaterialPropertyInterface::defaultGenericMaterialProperty(const std::string & name)
 {
-  return NULL;
+  if constexpr (std::is_same_v<T, Real> || std::is_same_v<T, RealVectorValue>)
+  {
+    std::istringstream ss(name);
+    Real real_value;
+
+    // check if the string parsed cleanly into a Real number
+    if (ss >> real_value && ss.eof())
+    {
+      using prop_type = GenericMaterialProperty<T, is_ad>;
+
+      const auto nqp = Moose::constMaxQpsPerElem;
+      auto & property =
+          _default_properties.emplace_back(std::make_unique<prop_type>(default_property_id));
+      auto & T_property = static_cast<prop_type &>(*property);
+
+      T_property.resize(nqp);
+      for (const auto qp : make_range(nqp))
+        T_property[qp] = real_value;
+
+      return &T_property;
+    }
+  }
+
+  return nullptr;
 }
-
-// General version for types that do not accept default values
-template <typename T>
-const ADMaterialProperty<T> *
-MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
-{
-  return NULL;
-}
-
-// Forward declare explicit specializations
-template <>
-const MaterialProperty<Real> *
-MaterialPropertyInterface::defaultMaterialProperty<Real>(const std::string & name);
-
-template <>
-const ADMaterialProperty<Real> *
-MaterialPropertyInterface::defaultADMaterialProperty<Real>(const std::string & name);
-
-template <>
-const MaterialProperty<RealVectorValue> *
-MaterialPropertyInterface::defaultMaterialProperty<RealVectorValue>(const std::string & name);
-
-template <>
-const ADMaterialProperty<RealVectorValue> *
-MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
 
 template <typename T>
 std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
@@ -628,11 +631,11 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
     return pair_type(nullptr, {});
 
   // Call first so that the ID gets registered
-  const auto & prop = _material_data->getProperty<T, false>(name, 0, _mi_moose_object);
+  const auto & prop = _material_data.getProperty<T, false>(name, 0, _mi_moose_object);
   auto blocks = getMaterialPropertyBlocks(name);
   auto prop_blocks_pair = pair_type(&prop, std::move(blocks));
 
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data.getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
   addConsumedPropertyName(_mi_moose_object_name, name);
@@ -645,7 +648,7 @@ bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return hasMaterialPropertyByName<T>(prop_name);
 }
 
@@ -656,14 +659,14 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
   const auto name = _get_suffix.empty()
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data->haveProperty<T>(name);
+  return _material_data.haveProperty<T>(name);
 }
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
 {
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
 }
 
@@ -675,20 +678,7 @@ MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::strin
   if (hasGenericMaterialPropertyByName<T, is_ad>(prop_name))
     return getGenericMaterialPropertyByName<T, is_ad>(prop_name);
 
-  // static zero property storage
-  static GenericMaterialProperty<T, is_ad> zero;
-
-  // resize to accomodate maximum number of qpoints
-  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = getMaxQps();
-  if (nqp > zero.size())
-    zero.resize(nqp);
-
-  // set values for all qpoints to zero
-  for (unsigned int qp = 0; qp < nqp; ++qp)
-    MathUtils::mooseSetToZero(zero[qp]);
-
-  return zero;
+  return getGenericZeroMaterialProperty<T, is_ad>();
 }
 
 template <typename T, bool is_ad>
@@ -696,7 +686,7 @@ const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialProperty()
 {
   // static zero property storage
-  static GenericMaterialProperty<T, is_ad> zero;
+  static GenericMaterialProperty<T, is_ad> zero(zero_property_id);
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
@@ -716,7 +706,7 @@ bool
 MaterialPropertyInterface::hasADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return hasADMaterialPropertyByName<T>(prop_name);
 }
 
@@ -727,7 +717,7 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
   const auto name = _get_suffix.empty()
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data->haveADProperty<T>(name);
+  return _material_data.haveADProperty<T>(name);
 }
 
 template <typename T, bool is_ad>
@@ -749,7 +739,7 @@ MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
                                                       const unsigned int state)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
 
   // Check if it's just a constant
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))

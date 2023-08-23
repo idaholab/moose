@@ -11,7 +11,6 @@
 
 #include "MaterialProperty.h"
 #include "Moose.h"
-#include "MaterialPropertyStorage.h"
 #include "MooseUtils.h"
 
 // libMesh
@@ -20,6 +19,7 @@
 #include <vector>
 #include <memory>
 
+class MaterialPropertyStorage;
 class MooseObject;
 class Material;
 class XFEM;
@@ -31,7 +31,10 @@ class XFEM;
 class MaterialData
 {
 public:
-  MaterialData(MaterialPropertyStorage & storage);
+  MaterialData(MaterialPropertyStorage & storage, const THREAD_ID tid);
+
+  /// The max time state supported (2 = older)
+  static constexpr unsigned int max_state = 2;
 
   /**
    * Resize the data to hold properties for n_qpoints quadrature points.
@@ -94,7 +97,7 @@ public:
   }
 
   /**
-   * Retreives a material property
+   * Retrieves a material property
    * @tparam T The type of the property
    * @tparam is_ad Whether or not the property is AD
    * @param prop_name The name of the property
@@ -110,7 +113,7 @@ public:
     return getPropertyHelper<T, is_ad, false>(prop_name, state, requestor);
   }
   /**
-   * Retreives a material property
+   * Declares a material property
    * @tparam T The type of the property
    * @tparam is_ad Whether or not the property is AD
    * @param prop_name The name of the property
@@ -156,16 +159,18 @@ public:
   MaterialPropertyStorage & getMaterialPropertyStorageForXFEM(const XFEMKey) { return _storage; }
 
   /**
+   * @return Whether or not a property exists with the name \p name
+   */
+  bool hasProperty(const std::string & prop_name) const;
+
+  /**
    * Wrapper for MaterialStorage::getPropertyId. Allows classes with a MaterialData object
    * (i.e. MaterialPropertyInterface) to access material property IDs.
    * @param prop_name The name of the material property
    *
    * @return An unsigned int corresponding to the property ID of the passed in prop_name
    */
-  unsigned int getPropertyId(const std::string & prop_name) const
-  {
-    return _storage.getMaterialPropertyRegistry().getID(prop_name);
-  }
+  unsigned int getPropertyId(const std::string & prop_name) const;
 
   /**
    * Set _resize_only_if_smaller to perform a non-destructive resize. Setting this
@@ -184,17 +189,22 @@ public:
    * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
    * stateful properties) hanging around in our data structures
    */
-  void eraseProperty(const Elem * elem) { _storage.eraseProperty(elem); };
+  void eraseProperty(const Elem * elem);
 
 private:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
 
+  /// The thread id
+  const THREAD_ID _tid;
+
   /// Number of quadrature points
   unsigned int _n_qpoints;
 
   /// The underlying property data
-  std::array<MaterialProperties, MaterialPropertyStorage::max_state + 1> _props;
+  std::array<MaterialProperties, max_state + 1> _props;
+
+  unsigned int addPropertyHelper(const std::string & prop_name, const unsigned int state);
 
   template <typename T, bool is_ad, bool declare>
   GenericMaterialProperty<T, is_ad> & getPropertyHelper(const std::string & prop_name,
@@ -202,12 +212,6 @@ private:
                                                         const MooseObject & requestor);
 
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
-
-  /**
-   * Calls resizeProps helper function for regular material properties
-   */
-  template <typename T, bool is_ad>
-  void resizeProps(unsigned int id);
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
@@ -235,7 +239,7 @@ template <typename T, bool is_ad>
 inline bool
 MaterialData::haveGenericProperty(const std::string & prop_name) const
 {
-  if (!_storage.hasProperty(prop_name))
+  if (!hasProperty(prop_name))
     return false;
 
   const auto prop_id = getPropertyId(prop_name);
@@ -245,28 +249,6 @@ MaterialData::haveGenericProperty(const std::string & prop_name) const
 
   const PropertyValue * const base_prop = props(0).queryValue(prop_id);
   return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(base_prop) != nullptr;
-}
-
-template <typename T, bool is_ad>
-void
-MaterialData::resizeProps(unsigned int id)
-{
-  const auto size = id + 1;
-  for (const auto state : index_range(_props))
-  {
-    auto & entry = props(state);
-    if (entry.size() < size)
-      entry.resize(size, {});
-    if (!entry.hasValue(id))
-    {
-      std::unique_ptr<PropertyValue> value;
-      if (is_ad && state == 0)
-        value = std::make_unique<ADMaterialProperty<T>>();
-      else
-        value = std::make_unique<MaterialProperty<T>>();
-      entry.setPointer(id, std::move(value), {});
-    }
-  }
 }
 
 template <typename T, bool is_ad, bool declare>
@@ -280,10 +262,30 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
   if constexpr (declare)
     mooseAssert(state == 0, "Cannot declare properties for states other than zero");
 
-  const auto prop_id = _storage.addProperty(prop_name, state);
-  resizeProps<T, is_ad>(prop_id);
+  // Register/get the ID of the property
+  const auto prop_id = addPropertyHelper(prop_name, state);
 
+  // Initialize the states that we need
+  const auto size = prop_id + 1;
+  for (const auto state_i : make_range(state + 1))
+  {
+    auto & entry = props(state_i);
+    if (entry.size() < size)
+      entry.resize(size, {});
+    if (!entry.hasValue(prop_id))
+    {
+      std::unique_ptr<PropertyValue> value =
+          state_i == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)
+                       : _props[0][prop_id].clone(0);
+      entry.setPointer(prop_id, std::move(value), {});
+    }
+  }
+
+  // Should be available now
   auto & base_prop = props(state)[prop_id];
+
+  // In the event that this property was already declared/requested, make sure
+  // that the types are consistent
   auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(&base_prop);
   if (!prop)
   {
@@ -299,8 +301,6 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
           << " property of type '" << base_prop.type() << "'.";
     mooseErrorHelper(requestor, error.str());
   }
-
-  prop->setName(prop_name);
 
   return *prop;
 }

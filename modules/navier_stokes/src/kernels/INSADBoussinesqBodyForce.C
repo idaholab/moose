@@ -41,6 +41,10 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+
+  const auto alpha_name = getMaterialPropertyName("alpha_name");
+  const auto ref_temp = getMaterialPropertyName("ref_temp");
+
   for (const auto block_id : blockIDs())
   {
     obj_tracker.set("has_boussinesq", true, block_id);
@@ -49,8 +53,8 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
     // order to ensure that material property dependency is recorded correctly (I don't think this
     // should actually matter for non-Material MaterialPropertyInterface classes, but might as well
     // be consistent)
-    obj_tracker.set("alpha", getADMaterialProperty<Real>("alpha_name").name(), block_id);
-    obj_tracker.set("ref_temp", getMaterialProperty<Real>("ref_temp").name(), block_id);
+    obj_tracker.set("alpha", alpha_name, block_id);
+    obj_tracker.set("ref_temp", ref_temp, block_id);
 
     obj_tracker.set("temperature", getVar("temperature", 0)->name(), block_id);
     obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"), block_id);

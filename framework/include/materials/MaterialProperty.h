@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include <typeinfo>
 
 #include "MooseADWrapper.h"
 #include "MooseArray.h"
@@ -37,7 +38,22 @@ class MaterialPropertyInterface;
 class PropertyValue
 {
 public:
+  /// The type for a material property ID
+  typedef unsigned int id_type;
+
+  PropertyValue(const id_type id) : _id(id) {}
+
   virtual ~PropertyValue(){};
+
+  /// The material property ID for an invalid property
+  /// We only have this because there are a few cases where folks want to instantiate their
+  /// own fake materials, and we should at least force them to be consistent
+  static constexpr id_type invalid_property_id = std::numeric_limits<id_type>::max() - 1;
+
+  /**
+   * @return The ID of the underlying material property
+   */
+  id_type id() const { return _id; }
 
   /**
    * String identifying the type of parameter stored.
@@ -47,14 +63,14 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const = 0;
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t) const = 0;
 
   virtual unsigned int size() const = 0;
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n) = 0;
+  virtual void resize(const std::size_t size) = 0;
 
   virtual void swap(PropertyValue & rhs) = 0;
 
@@ -75,6 +91,15 @@ public:
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
+
+  /**
+   * @return The type_info for the underlying stored type T
+   */
+  virtual const std::type_info & typeID() const = 0;
+
+protected:
+  /// The material property ID
+  const id_type _id;
 };
 
 /**
@@ -87,14 +112,9 @@ class MaterialPropertyBase : public PropertyValue
 public:
   typedef MooseADWrapper<T, is_ad> value_type;
 
-  /// Explicitly declare a public constructor because we made the copy constructor private
-  MaterialPropertyBase() : PropertyValue()
-  { /* */
-  }
+  MaterialPropertyBase(const PropertyValue::id_type id) : PropertyValue(id) {}
 
-  virtual ~MaterialPropertyBase() {}
-
-  bool isAD() const override { return is_ad; }
+  bool isAD() const override final { return is_ad; }
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -109,14 +129,14 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual const std::string & type() const override;
+  virtual const std::string & type() const override final;
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n) override;
+  virtual void resize(const std::size_t size) override final;
 
-  virtual unsigned int size() const override { return _value.size(); }
+  virtual unsigned int size() const override final { return _value.size(); }
 
   /**
    * Get element i out of the array as a writeable reference.
@@ -135,35 +155,32 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void
-  qpCopy(const unsigned int to_qp, const PropertyValue & rhs, const unsigned int from_qp) override;
+  virtual void qpCopy(const unsigned int to_qp,
+                      const PropertyValue & rhs,
+                      const unsigned int from_qp) override final;
 
   /**
    * Store the property into a binary stream
    */
-  virtual void store(std::ostream & stream) override;
+  virtual void store(std::ostream & stream) override final;
 
   /**
    * Load the property from a binary stream
    */
-  virtual void load(std::istream & stream) override;
+  virtual void load(std::istream & stream) override final;
 
-  void setName(const MaterialPropertyName & name_in)
-  {
-    mooseAssert(
-        _name.empty() || _name == name_in,
-        "We're trying to apply a new name to a material property. I don't think that makes sense.");
-    _name = name_in;
-  }
+  virtual void swap(PropertyValue & rhs) override final;
 
-  const MaterialPropertyName & name() const
-  {
-    if (_name.empty())
-      mooseError("Retrieving a material property name before it's set.");
-    return _name;
-  }
+  const std::type_info & typeID() const override final;
 
-  void swap(PropertyValue & rhs) override;
+  /**
+   * @return A clone of this property.
+   *
+   * Note that this will only ever return a non-AD clone, even if this property
+   * is an AD property. This is on purpose; whenever we need clones, it's for
+   * older states in which we don't store derivatives beacuse it's too expensive.
+   */
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -177,9 +194,6 @@ private:
   {
     mooseError("Material properties must be assigned to references (missing '&')");
   }
-
-  /// the name of this material property
-  MaterialPropertyName _name;
 
 protected:
   /// Stored parameter value.
@@ -234,9 +248,9 @@ MaterialPropertyBase<T, is_ad>::type() const
 
 template <typename T, bool is_ad>
 inline void
-MaterialPropertyBase<T, is_ad>::resize(int n)
+MaterialPropertyBase<T, is_ad>::resize(const std::size_t size)
 {
-  _value.template resize</*value_initalize=*/true>(n);
+  _value.template resize</*value_initalize=*/true>(size);
 }
 
 template <typename T, bool is_ad>
@@ -273,10 +287,14 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
 {
+  mooseAssert(this->id() == rhs.id(), "Inconsistent properties");
+  mooseAssert(this->typeID() == rhs.typeID(), "Inconsistent types");
+
   // If we're the same
   if (rhs.isAD() == is_ad)
   {
-    this->_value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(&rhs)->_value);
+    mooseAssert(dynamic_cast<decltype(this)>(&rhs), "Expected same type is not the same");
+    this->_value.swap(cast_ptr<decltype(this)>(&rhs)->_value);
     return;
   }
 
@@ -301,22 +319,31 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
     moose::internal::rawValueEqualityHelper(this->_value[qp], (*different_type_prop)[qp]);
 }
 
+template <typename T, bool is_ad>
+inline const std::type_info &
+MaterialPropertyBase<T, is_ad>::typeID() const
+{
+  static const auto & info = typeid(T);
+  return info;
+}
+
+template <typename T, bool is_ad>
+std::unique_ptr<PropertyValue>
+MaterialPropertyBase<T, is_ad>::clone(const std::size_t size) const
+{
+  auto prop = std::make_unique<MaterialProperty<T>>(this->id());
+  if (size)
+    prop->resize(size);
+  return prop;
+}
+
 template <typename T>
 class MaterialProperty : public MaterialPropertyBase<T, false>
 {
 public:
-  MaterialProperty() = default;
-
-  static std::unique_ptr<PropertyValue> cloneHelper(const std::size_t size)
+  MaterialProperty(const PropertyValue::id_type id = PropertyValue::invalid_property_id)
+    : MaterialPropertyBase<T, false>(id)
   {
-    std::unique_ptr<PropertyValue> value = std::make_unique<MaterialProperty<T>>();
-    value->resize(size);
-    return value;
-  }
-
-  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
-  {
-    return cloneHelper(size);
   }
 
 private:
@@ -337,14 +364,12 @@ template <typename T>
 class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
-  ADMaterialProperty() = default;
+  ADMaterialProperty(const PropertyValue::id_type id = PropertyValue::invalid_property_id)
+    : MaterialPropertyBase<T, true>(id)
+  {
+  }
 
   using typename MaterialPropertyBase<T, true>::value_type;
-
-  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
-  {
-    return MaterialProperty<T>::cloneHelper(size);
-  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -363,38 +388,37 @@ private:
 class MaterialData;
 class MaterialPropertyStorage;
 
-class MaterialPropertiesKey
-{
-  friend class MaterialData;
-  friend class MaterialPropertyStorage;
-
-  MaterialPropertiesKey() {}
-  MaterialPropertiesKey(const MaterialPropertiesKey &) {}
-};
-
 class MaterialProperties : public UniqueStorage<PropertyValue>
 {
 public:
+  class WriteKey
+  {
+    friend class MaterialData;
+    friend class MaterialPropertyStorage;
+    friend void dataLoad(std::istream &, MaterialPropertyStorage &, void *);
+
+    WriteKey() {}
+    WriteKey(const WriteKey &) {}
+  };
+
   /**
    * Resize items in this array, i.e. the number of values needed in PropertyValue array
    * @param n_qpoints The number of values needed to store (equals the the number of quadrature
    * points per mesh element)
    */
-  void resizeItems(const std::size_t n_qpoints, const MaterialPropertiesKey)
+  void resizeItems(const std::size_t n_qpoints, const WriteKey)
   {
     for (const auto i : index_range(*this))
-      if (hasValue(i))
-        (*this)[i].resize(n_qpoints);
+      if (auto value = queryValue(i))
+        value->resize(n_qpoints);
   }
 
-  void resize(const std::size_t size, const MaterialPropertiesKey)
+  void resize(const std::size_t size, const WriteKey)
   {
     UniqueStorage<PropertyValue>::resize(size);
   }
 
-  void setPointer(const std::size_t i,
-                  std::unique_ptr<PropertyValue> && ptr,
-                  const MaterialPropertiesKey)
+  void setPointer(const std::size_t i, std::unique_ptr<PropertyValue> && ptr, const WriteKey)
   {
     return UniqueStorage<PropertyValue>::setPointer(i, std::move(ptr));
   }

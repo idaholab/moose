@@ -26,6 +26,18 @@ MaterialPropertyInterface::validParams()
   return params;
 }
 
+namespace moose
+{
+namespace internal
+{
+bool
+boundaryRestricted(const std::set<BoundaryID> & boundary_ids)
+{
+  return !boundary_ids.empty() && BoundaryRestrictable::restricted(boundary_ids);
+}
+}
+}
+
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids)
@@ -36,156 +48,24 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
+    _material_data_type(getMaterialDataType(boundary_ids)),
+    _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
-    _mi_boundary_restricted(!boundary_ids.empty() &&
-                            BoundaryRestrictable::restricted(boundary_ids)),
+    _mi_boundary_restricted(moose::internal::boundaryRestricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
   moose_object->getMooseApp().registerInterfaceObject(*this);
-
-  // Set the MaterialDataType flag
-  if (_mi_params.isParamValid("_material_data_type"))
-    _material_data_type = _mi_params.get<Moose::MaterialDataType>("_material_data_type");
-
-  else if (_mi_boundary_restricted)
-    _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
-
-  else
-    _material_data_type = Moose::BLOCK_MATERIAL_DATA;
-
-  _material_data =
-      _mi_feproblem.getMaterialData(_material_data_type, _mi_params.get<THREAD_ID>("_tid"));
 }
 
-std::string
-MaterialPropertyInterface::deducePropertyName(const std::string & name) const
+MaterialPropertyName
+MaterialPropertyInterface::getMaterialPropertyName(const std::string & name) const
 {
   if (_mi_params.have_parameter<MaterialPropertyName>(name) && _mi_params.isParamValid(name))
     return _mi_params.get<MaterialPropertyName>(name);
-  else
-    return name;
-}
-
-template <>
-const MaterialProperty<Real> *
-MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_real_properties.emplace_back(std::make_unique<MaterialProperty<Real>>());
-    auto & default_property = _default_real_properties.back();
-
-    // resize to accommodate maximum number of qpoints
-    auto nqp = Moose::constMaxQpsPerElem;
-    default_property->resize(nqp);
-
-    // set values for all qpoints to the given default
-    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
-      (*default_property)[qp] = real_value;
-
-    // return the raw pointer inside the shared pointer
-    return default_property.get();
-  }
-
-  return nullptr;
-}
-
-template <>
-const ADMaterialProperty<Real> *
-MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_ad_real_properties.emplace_back(std::make_unique<ADMaterialProperty<Real>>());
-    auto & default_property = _default_ad_real_properties.back();
-
-    // resize to accommodate maximum number of qpoints
-    auto nqp = Moose::constMaxQpsPerElem;
-    default_property->resize(nqp);
-
-    // set values for all qpoints to the given default
-    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
-    {
-      // This sets the dual number member of the MooseADWrapper for Jacobian calculations
-      (*default_property)[qp] = real_value;
-      // This sets the value member of the MooseADWrapper for residual calculations
-      default_property->set()[qp].value() = real_value;
-    }
-
-    // return the raw pointer inside the shared pointer
-    return default_property.get();
-  }
-
-  return nullptr;
-}
-
-template <>
-const MaterialProperty<RealVectorValue> *
-MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_real_vector_properties.emplace_back(
-        std::make_unique<MaterialProperty<RealVectorValue>>());
-    auto & default_property = _default_real_vector_properties.back();
-
-    // resize to accomodate maximum number obf qpoints
-    auto nqp = Moose::constMaxQpsPerElem;
-    default_property->resize(nqp);
-
-    // set values for all qpoints to the given default
-    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
-      (*default_property)[qp] = real_value;
-
-    // return the raw pointer inside the shared pointer
-    return default_property.get();
-  }
-
-  return nullptr;
-}
-
-template <>
-const ADMaterialProperty<RealVectorValue> *
-MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_ad_real_vector_properties.emplace_back(
-        std::make_unique<ADMaterialProperty<RealVectorValue>>());
-    auto & default_property = _default_ad_real_vector_properties.back();
-
-    // resize to accomodate maximum number obf qpoints
-    auto nqp = Moose::constMaxQpsPerElem;
-    default_property->resize(nqp);
-
-    // set values for all qpoints to the given default
-    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
-      (*default_property)[qp] = real_value;
-
-    // return the raw pointer inside the shared pointer
-    return default_property.get();
-  }
-
-  return nullptr;
+  return name;
 }
 
 std::set<SubdomainID>
@@ -325,4 +205,14 @@ MaterialPropertyInterface::resolveOptionalProperties()
 {
   for (auto & proxy : _optional_property_proxies)
     proxy->resolve(*this);
+}
+
+Moose::MaterialDataType
+MaterialPropertyInterface::getMaterialDataType(const std::set<BoundaryID> & boundary_ids) const
+{
+  if (_mi_params.isParamValid("_material_data_type"))
+    return _mi_params.get<Moose::MaterialDataType>("_material_data_type");
+  if (moose::internal::boundaryRestricted(boundary_ids))
+    return Moose::BOUNDARY_MATERIAL_DATA;
+  return Moose::BLOCK_MATERIAL_DATA;
 }

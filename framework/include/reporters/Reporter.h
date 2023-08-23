@@ -60,6 +60,16 @@ public:
    */
   virtual bool shouldStore() const { return true; }
 
+  /**
+   * Method that can be overriden to declare "late" Reporter values.
+   *
+   * Values are considered "late" when they need to be declared after all
+   * other Reporters have been instantiated. This is called by the
+   * "declare_late_reporters" task, which should be called right after
+   * the "add_reporters" task.
+   */
+  virtual void declareLateValues() {}
+
 protected:
   ///@{
   /**

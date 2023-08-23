@@ -156,4 +156,31 @@
       detail = 'when using an AD material property using templated methods.'
     []
   []
+
+  [restart_different_props]
+    requirement = 'The system shall support reporting a reasonable error when there is a stateful material property mismatch during restore by'
+    [store]
+      type = 'RunApp'
+      input = 'stateful_reg.i'
+      cli_args = 'Outputs/exodus=false
+                  Outputs/checkpoint=true
+                  Outputs/file_base=restart_different_props'
+      recover = false
+      detail = 'storing the named stateful material properties during checkpoint, and'
+    []
+    [load]
+      type = 'RunException'
+      input = 'stateful_reg.i'
+      cli_args = 'Outputs/exodus=false
+                  Materials/matprop2/type=Stateful
+                  Materials/matprop2/property_name=dummy_prop_2
+                  Executioner/num_steps=2
+                  --recover restart_different_props_cp/0001'
+      delete_output_before_running = false
+      recover = false
+      prereq = 'restart_different_props/store'
+      expect_err = 'dummy_prop.*dummy_prop.*dummy_prop_2'
+      detail = 'loading the stateful material properties during recover and comparing to the declared stateful material properties.'
+    []
+  []
 []

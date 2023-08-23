@@ -218,8 +218,8 @@ public:
   virtual void resolveOptionalProperties() override;
 
 protected:
-  virtual const MaterialData & materialData() const override { return *_material_data; }
-  virtual MaterialData & materialData() override { return *_material_data; }
+  virtual const MaterialData & materialData() const override { return _material_data; }
+  virtual MaterialData & materialData() override { return _material_data; }
 
   virtual const QBase & qRule() const override { return *_qrule; }
 
@@ -260,7 +260,7 @@ const GenericMaterialProperty<T, is_ad> &
 Material::getGenericMaterialProperty(const std::string & name, const unsigned int state)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
 
   // Check if it's just a constant.
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))

@@ -38,7 +38,7 @@ public:
   const GenericMaterialProperty<T, is_ad> &
   getGenericNeighborMaterialProperty(const std::string & name, const unsigned int state = 0)
   {
-    return getGenericMaterialProperty<T, is_ad>(name, *_neighbor_material_data, state);
+    return getGenericMaterialProperty<T, is_ad>(name, _neighbor_material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name,
@@ -73,7 +73,7 @@ public:
   const GenericMaterialProperty<T, is_ad> &
   getGenericNeighborMaterialPropertyByName(const std::string & name, const unsigned int state = 0)
   {
-    return getGenericMaterialPropertyByName<T, is_ad>(name, *_neighbor_material_data, state);
+    return getGenericMaterialPropertyByName<T, is_ad>(name, _neighbor_material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & name,
@@ -89,5 +89,5 @@ public:
   ///@}
 
 protected:
-  std::shared_ptr<MaterialData> _neighbor_material_data;
+  MaterialData & _neighbor_material_data;
 };
