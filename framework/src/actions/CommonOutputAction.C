@@ -100,10 +100,12 @@ CommonOutputAction::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "hide",
+      {},
       "A list of the variables and postprocessors that should NOT be output to the Exodus "
       "file (may include Variables, ScalarVariables, and Postprocessor names).");
   params.addParam<std::vector<VariableName>>(
       "show",
+      {},
       "A list of the variables and postprocessors that should be output to the Exodus file "
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 

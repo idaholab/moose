@@ -69,12 +69,15 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   }
 
   // add postprocessors
-  auto pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
-  _pp.resize(pp_names.size());
-  for (unsigned int i = 0; i < pp_names.size(); ++i)
+  if (isParamValid("postprocessors"))
   {
-    variables += "," + pp_names[i];
-    _pp[i] = &getPostprocessorValueByName(pp_names[i]);
+    auto pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
+    _pp.resize(pp_names.size());
+    for (unsigned int i = 0; i < pp_names.size(); ++i)
+    {
+      variables += "," + pp_names[i];
+      _pp[i] = &getPostprocessorValueByName(pp_names[i]);
+    }
   }
 
   // base function object
@@ -84,9 +87,10 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  addFParserConstants(_func_F,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
+  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+    addFParserConstants(_func_F,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)

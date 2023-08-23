@@ -132,11 +132,9 @@ SetupMeshAction::SetupMeshAction(const InputParameters & params)
 void
 SetupMeshAction::setupMesh(MooseMesh * mesh)
 {
-  std::vector<BoundaryName> ghosted_boundaries =
-      getParam<std::vector<BoundaryName>>("ghosted_boundaries");
-
-  for (const auto & bnd_name : ghosted_boundaries)
-    mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
+  if (isParamValid("ghosted_boundaries"))
+    for (const auto & bnd_name : getParam<std::vector<BoundaryName>>("ghosted_boundaries"))
+      mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
 
   if (isParamValid("ghosted_boundaries_inflation"))
   {

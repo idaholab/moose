@@ -52,18 +52,6 @@ std::unique_ptr<MeshBase>
 ExtraNodesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  const auto coord = getParam<std::vector<std::vector<Real>>>("coord");
-  const auto nodes = getParam<std::vector<unsigned int>>("nodes");
-
-  // make sure the input is not empty
-  bool data_valid = false;
-  if (isParamValid("nodes") && nodes.size() != 0)
-    data_valid = true;
-  if (_pars.isParamValid("coord") && coord.size() != 0)
-    data_valid = true;
-
-  if (!data_valid)
-    mooseError("Node set can not be empty!");
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
@@ -74,15 +62,16 @@ ExtraNodesetGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // add nodes with their ids
-  for (const auto & node_id : nodes)
-  {
-    // Our mesh may be distributed and this node may not exist on this process
-    if (!mesh->query_node_ptr(node_id))
-      continue;
+  if (isParamValid("nodes"))
+    for (const auto & node_id : getParam<std::vector<unsigned int>>("nodes"))
+    {
+      // Our mesh may be distributed and this node may not exist on this process
+      if (!mesh->query_node_ptr(node_id))
+        continue;
 
-    for (const auto & boundary_id : boundary_ids)
-      boundary_info.add_node(node_id, boundary_id);
-  }
+      for (const auto & boundary_id : boundary_ids)
+        boundary_info.add_node(node_id, boundary_id);
+    }
 
   // add nodes with their coordinates
   const auto dim = mesh->mesh_dimension();
@@ -91,65 +80,67 @@ ExtraNodesetGenerator::generate()
   locator->enable_out_of_mesh_mode();
 
   const auto tolerance = getParam<Real>("tolerance");
-  for (const auto & c : coord)
-  {
-    Point p;
-    if (c.size() < dim)
-      paramError("coord",
-                 "Coordinate ",
-                 Moose::stringify(c),
-                 " does not have enough components for a ",
-                 dim,
-                 "D mesh.");
-
-    if (c.size() > 3)
-      paramError("coord",
-                 "Coordinate ",
-                 Moose::stringify(c),
-                 " has too many components. Did you maybe forget to separate multiple coordinates "
-                 "with a ';'?");
-
-    for (unsigned int j = 0; j < c.size(); ++j)
-      p(j) = c[j];
-
-    // locate candidate element
-    bool on_node = false;
-    bool found_elem = false;
-    const Elem * elem = (*locator)(p);
-    if (elem)
+  if (_pars.isParamValid("coord"))
+    for (const auto & c : getParam<std::vector<std::vector<Real>>>("coord"))
     {
-      found_elem = true;
-      for (unsigned int j = 0; j < elem->n_nodes(); ++j)
-      {
-        const Node * node = elem->node_ptr(j);
-        if (p.absolute_fuzzy_equals(*node, tolerance))
-        {
-          for (const auto & boundary_id : boundary_ids)
-            boundary_info.add_node(node, boundary_id);
+      Point p;
+      if (c.size() < dim)
+        paramError("coord",
+                   "Coordinate ",
+                   Moose::stringify(c),
+                   " does not have enough components for a ",
+                   dim,
+                   "D mesh.");
 
-          on_node = true;
-          break;
+      if (c.size() > 3)
+        paramError(
+            "coord",
+            "Coordinate ",
+            Moose::stringify(c),
+            " has too many components. Did you maybe forget to separate multiple coordinates "
+            "with a ';'?");
+
+      for (unsigned int j = 0; j < c.size(); ++j)
+        p(j) = c[j];
+
+      // locate candidate element
+      bool on_node = false;
+      bool found_elem = false;
+      const Elem * elem = (*locator)(p);
+      if (elem)
+      {
+        found_elem = true;
+        for (unsigned int j = 0; j < elem->n_nodes(); ++j)
+        {
+          const Node * node = elem->node_ptr(j);
+          if (p.absolute_fuzzy_equals(*node, tolerance))
+          {
+            for (const auto & boundary_id : boundary_ids)
+              boundary_info.add_node(node, boundary_id);
+
+            on_node = true;
+            break;
+          }
         }
       }
+
+      // If we are on a distributed mesh, then any particular processor
+      // may be unable to find any particular node, but *some* processor
+      // should have found it.
+      if (!mesh->is_replicated())
+      {
+        this->comm().max(found_elem);
+        this->comm().max(on_node);
+      }
+
+      if (!found_elem)
+        mooseError("Unable to locate the following point within the domain, please check its "
+                   "coordinates:\n",
+                   p);
+
+      if (!on_node)
+        mooseError("No node found at point:\n", p);
     }
-
-    // If we are on a distributed mesh, then any particular processor
-    // may be unable to find any particular node, but *some* processor
-    // should have found it.
-    if (!mesh->is_replicated())
-    {
-      this->comm().max(found_elem);
-      this->comm().max(on_node);
-    }
-
-    if (!found_elem)
-      mooseError(
-          "Unable to locate the following point within the domain, please check its coordinates:\n",
-          p);
-
-    if (!on_node)
-      mooseError("No node found at point:\n", p);
-  }
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];

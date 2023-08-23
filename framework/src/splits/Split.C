@@ -23,15 +23,17 @@ Split::validParams()
   InputParameters params = MooseObject::validParams();
   params.addClassDescription("Field split based preconditioner for nonlinear solver.");
   params.addParam<std::vector<NonlinearVariableName>>(
-      "vars", "Variables Split operates on (omitting this implies \"all variables\"");
+      "vars", {}, "Variables Split operates on (omitting this implies \"all variables\"");
   params.addParam<std::vector<SubdomainName>>(
-      "blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
+      "blocks", {}, "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
   params.addParam<std::vector<BoundaryName>>(
-      "sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
+      "sides", {}, "Sidesets Split operates on (omitting this implies \"no sidesets\"");
   params.addParam<std::vector<BoundaryName>>(
-      "unsides", "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
+      "unsides",
+      {},
+      "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
   params.addParam<std::vector<std::string>>(
-      "splitting", "The names of the splits (subsystems) in the decomposition of this split");
+      "splitting", {}, "The names of the splits (subsystems) in the decomposition of this split");
 
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
   params.addParam<MooseEnum>("splitting_type", SplittingTypeEnum, "Split decomposition type");

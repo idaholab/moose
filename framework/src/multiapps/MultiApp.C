@@ -151,12 +151,13 @@ MultiApp::validParams()
   // Resetting subapps
   params.addParam<std::vector<Real>>(
       "reset_time",
-      std::vector<Real>(),
+      {},
       "The time(s) at which to reset Apps given by the 'reset_apps' parameter.  "
       "Resetting an App means that it is destroyed and recreated, possibly "
       "modeling the insertion of 'new' material for that app.");
   params.addParam<std::vector<unsigned int>>(
       "reset_apps",
+      {},
       "The Apps that will be reset when 'reset_time' is hit.  These are the App "
       "'numbers' starting with 0 corresponding to the order of the App positions.  "
       "Resetting an App means that it is destroyed and recreated, possibly modeling "
@@ -170,14 +171,15 @@ MultiApp::validParams()
 
   params.addParam<std::vector<unsigned int>>(
       "move_apps",
+      {},
       "Apps, designated by their 'numbers' starting with 0 corresponding to the order "
       "of the App positions, to be moved at move_time to move_positions");
-  params.addParam<std::vector<Point>>("move_positions",
-                                      "The positions corresponding to each move_app.");
+  params.addParam<std::vector<Point>>(
+      "move_positions", {}, "The positions corresponding to each move_app.");
 
   params.addParam<std::vector<CLIArgString>>(
       "cli_args",
-      std::vector<CLIArgString>(),
+      {},
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -195,16 +197,16 @@ MultiApp::validParams()
                                     "Set between 0 and 2.");
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
-      std::vector<std::string>(),
+      {},
       "Use transformed_variables.",
       "List of subapp variables to relax during Multiapp coupling iterations");
   params.addParam<std::vector<std::string>>(
       "transformed_variables",
-      std::vector<std::string>(),
+      {},
       "List of subapp variables to use coupling algorithm on during Multiapp coupling iterations");
   params.addParam<std::vector<PostprocessorName>>(
       "transformed_postprocessors",
-      std::vector<PostprocessorName>(),
+      {},
       "List of subapp postprocessors to use coupling "
       "algorithm on during Multiapp coupling iterations");
   params.addParam<bool>("keep_solution_during_restore",

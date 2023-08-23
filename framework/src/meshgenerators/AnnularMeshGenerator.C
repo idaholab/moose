@@ -31,8 +31,8 @@ AnnularMeshGenerator::validParams()
       "rmin>=0.0",
       "Inner radius.  If rmin=0 then a disc mesh (with no central hole) will be created.");
   params.addRequiredParam<Real>("rmax", "Outer radius");
-  params.addParam<std::vector<Real>>("radial_positions",
-                                     "Directly prescribed positions of intermediate radial nodes");
+  params.addParam<std::vector<Real>>(
+      "radial_positions", {}, "Directly prescribed positions of intermediate radial nodes");
   params.addParam<bool>("equal_area",
                         false,
                         "Whether to select the radial discretization "

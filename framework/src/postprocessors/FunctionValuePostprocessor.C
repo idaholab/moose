@@ -58,9 +58,12 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
       _point[j] = &getPostprocessorValue("point", j);
   }
 
-  const auto & indirect_dependencies =
-      getParam<std::vector<PostprocessorName>>("indirect_dependencies");
-  _depend_uo.insert(indirect_dependencies.begin(), indirect_dependencies.end());
+  if (isParamValid("indirect_dependencies"))
+  {
+    const auto & indirect_dependencies =
+        getParam<std::vector<PostprocessorName>>("indirect_dependencies");
+    _depend_uo.insert(indirect_dependencies.begin(), indirect_dependencies.end());
+  }
 }
 
 void

@@ -170,15 +170,15 @@ AdaptivityAction::act()
 
     adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
-    const std::vector<std::string> & weight_names =
-        getParam<std::vector<std::string>>("weight_names");
-    const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
-
-    auto num_weight_names = weight_names.size();
-    auto num_weight_values = weight_values.size();
-
-    if (num_weight_names)
+    if (isParamValid("weight_names") && isParamValid("weight_values"))
     {
+      const std::vector<std::string> & weight_names =
+          getParam<std::vector<std::string>>("weight_names");
+      const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
+
+      auto num_weight_names = weight_names.size();
+      auto num_weight_values = weight_values.size();
+
       if (num_weight_names != num_weight_values)
         mooseError("Number of weight_names must be equal to number of weight_values in "
                    "Execution/Adaptivity");

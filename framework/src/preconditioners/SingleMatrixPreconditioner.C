@@ -65,29 +65,29 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
 
     // off-diagonal entries from the coupled_groups parameters
     const auto & all_vars = nl.getVariableNames();
-    auto groups = getParam<std::vector<NonlinearVariableName>>("coupled_groups");
-    for (const auto & group : groups)
-    {
-      std::vector<VariableName> vars;
-      MooseUtils::tokenize(group, vars, 1, ",");
-      try
+    if (isParamValid("coupled_groups"))
+      for (const auto & group : getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
       {
-        MooseUtils::expandAllMatches(all_vars, vars);
-      }
-      catch (std::invalid_argument const & e)
-      {
-        mooseError("No variable name match found for '", e.what(), "'.");
-      }
-
-      for (const auto j : index_range(vars))
-        for (unsigned int k = j + 1; k < vars.size(); ++k)
+        std::vector<VariableName> vars;
+        MooseUtils::tokenize(group, vars, 1, ",");
+        try
         {
-          const auto row = libmesh_system.variable_number(vars[j]);
-          const auto column = libmesh_system.variable_number(vars[k]);
-          (*cm)(row, column) = 1;
-          (*cm)(column, row) = 1;
+          MooseUtils::expandAllMatches(all_vars, vars);
         }
-    }
+        catch (std::invalid_argument const & e)
+        {
+          mooseError("No variable name match found for '", e.what(), "'.");
+        }
+
+        for (const auto j : index_range(vars))
+          for (unsigned int k = j + 1; k < vars.size(); ++k)
+          {
+            const auto row = libmesh_system.variable_number(vars[j]);
+            const auto column = libmesh_system.variable_number(vars[k]);
+            (*cm)(row, column) = 1;
+            (*cm)(column, row) = 1;
+          }
+      }
   }
   else
   {

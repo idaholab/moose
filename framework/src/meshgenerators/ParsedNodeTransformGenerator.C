@@ -52,9 +52,10 @@ ParsedNodeTransformGenerator::ParsedNodeTransformGenerator(const InputParameters
     setParserFeatureFlags(_functions[i]);
 
     // add the constant expressions
-    addFParserConstants(_functions[i],
-                        getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
+    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+      addFParserConstants(_functions[i],
+                          getParam<std::vector<std::string>>("constant_names"),
+                          getParam<std::vector<std::string>>("constant_expressions"));
 
     // parse function
     if (_functions[i]->Parse(getParam<ParsedFunctionExpression>(_func_name[i]), "x,y,z") >= 0)

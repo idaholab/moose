@@ -75,14 +75,14 @@ MultiAppDofCopyTransfer::initialSetup()
   // Convert block names to block IDs, fill with all blocks if unspecified
   if (_has_block_restrictions)
   {
-    const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
-    for (const auto & b : from_block_names)
-      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(from_problem->mesh().getMesh()),
-                                            b))
-        paramError("from_blocks", "The block '", b, "' was not found in the mesh");
-
-    if (from_block_names.size())
+    if (isParamValid("from_blocks"))
     {
+      const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
+      for (const auto & b : from_block_names)
+        if (!MooseMeshUtils::hasSubdomainName(
+                const_cast<MeshBase &>(from_problem->mesh().getMesh()), b))
+          paramError("from_blocks", "The block '", b, "' was not found in the mesh");
+
       if (from_problem)
       {
         const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
@@ -95,14 +95,14 @@ MultiAppDofCopyTransfer::initialSetup()
     else
       _from_blocks = from_problem->mesh().meshSubdomains();
 
-    const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
-    for (const auto & b : to_block_names)
-      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_problem->mesh().getMesh()),
-                                            b))
-        paramError("to_blocks", "The block '", b, "' was not found in the mesh");
-
-    if (to_block_names.size())
+    if (isParamValid("to_blocks"))
     {
+      const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+      for (const auto & b : to_block_names)
+        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_problem->mesh().getMesh()),
+                                              b))
+          paramError("to_blocks", "The block '", b, "' was not found in the mesh");
+
       if (to_problem)
       {
         const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);

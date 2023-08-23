@@ -763,16 +763,13 @@ public:
   /*
    * These methods are here to retrieve parameters for scalar and vector types respectively. We will
    * throw errors
-   * when returning most scalar types, but will allow retrieving empty vectors.
+   * when returning most scalar and vector types.
    */
   template <typename T>
-  static const T &
-  getParamHelper(const std::string & name, const InputParameters & pars, const T * the_type);
-
-  template <typename T>
-  static const std::vector<T> & getParamHelper(const std::string & name,
-                                               const InputParameters & pars,
-                                               const std::vector<T> * the_type);
+  static const T & getParamHelper(const std::string & name,
+                                  const InputParameters & pars,
+                                  const T * the_type,
+                                  const MooseObject * moose_object = nullptr);
   ///@}
 
   using Parameters::get;
@@ -1019,6 +1016,8 @@ private:
                                 const std::string & new_name,
                                 const std::string & docstring,
                                 const std::string & removal_date);
+
+  static void callMooseErrorHelper(const MooseObject & object, const std::string & error);
 
   struct Metadata
   {
@@ -1757,12 +1756,20 @@ template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name_in,
                                 const InputParameters & pars,
-                                const T *)
+                                const T *,
+                                const MooseObject * moose_object /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
 
   if (!pars.isParamValid(name))
-    mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
+  {
+    std::stringstream err;
+    err << "The parameter \"" << name << "\" is being retrieved before being set.";
+    if (moose_object)
+      callMooseErrorHelper(*moose_object, err.str());
+    else
+      mooseError(err.str());
+  }
 
   return pars.get<T>(name);
 }
@@ -1771,25 +1778,18 @@ InputParameters::getParamHelper(const std::string & name_in,
 // implementation, but the definition will be in InputParameters.C so
 // we won't need to bring in *MooseEnum header files here.
 template <>
-const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                                             const InputParameters & pars,
-                                                             const MooseEnum *);
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                           const InputParameters & pars,
+                                           const MooseEnum *,
+                                           const MooseObject * moose_object /* = nullptr */);
 
 template <>
-const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                                       const InputParameters & pars,
-                                                                       const MultiMooseEnum *);
-
-template <typename T>
-const std::vector<T> &
-InputParameters::getParamHelper(const std::string & name_in,
-                                const InputParameters & pars,
-                                const std::vector<T> *)
-{
-  const auto name = pars.checkForRename(name_in);
-
-  return pars.get<std::vector<T>>(name);
-}
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                const InputParameters & pars,
+                                                const MultiMooseEnum *,
+                                                const MooseObject * moose_object /* = nullptr */);
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>

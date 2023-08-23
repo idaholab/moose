@@ -68,16 +68,17 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
-    {
-      unsigned int row =
-          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
-              .number();
-      unsigned int column =
-          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
-              .number();
-      (*cm)(row, column) = 1;
-    }
+    if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
+      for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
+      {
+        unsigned int row =
+            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
+                .number();
+        unsigned int column =
+            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
+                .number();
+        (*cm)(row, column) = 1;
+      }
 
     // TODO: handle coupling entries between NL-vars and SCALAR-vars
   }

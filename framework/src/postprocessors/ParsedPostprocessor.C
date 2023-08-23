@@ -58,9 +58,10 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  addFParserConstants(_func_F,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
+  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+    addFParserConstants(_func_F,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   std::string function = getParam<std::string>("function");

@@ -46,7 +46,7 @@ AddPeriodicBCAction::validParams()
   params.addParam<std::vector<std::string>>("inv_transform_func",
                                             "Functions that specify the inverse transformation");
 
-  params.addParam<std::vector<VariableName>>("variable", "Variable for the periodic boundary");
+  params.addParam<std::vector<VariableName>>("variable", {}, "Variable for the periodic boundary");
   params.addClassDescription("Action that adds periodic boundary conditions");
   return params;
 }

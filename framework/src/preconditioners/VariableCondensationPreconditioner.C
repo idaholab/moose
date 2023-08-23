@@ -146,24 +146,25 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
 
     // off-diagonal entries from the off_diag_row and off_diag_column parameters
     std::vector<std::vector<unsigned int>> off_diag(_n_vars);
-    for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
-    {
-      const unsigned int row =
-          _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
-              .number();
-      const unsigned int column =
-          _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
-              .number();
-      (*cm)(row, column) = 1;
-    }
+    if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
+      for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
+      {
+        const unsigned int row =
+            _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
+                .number();
+        const unsigned int column =
+            _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
+                .number();
+        (*cm)(row, column) = 1;
+      }
 
     // off-diagonal entries from the coupled_groups parameters
-    std::vector<NonlinearVariableName> groups =
-        getParam<std::vector<NonlinearVariableName>>("coupled_groups");
-    for (const auto i : index_range(groups))
+    if (isParamValid("coupled_groups"))
+    for (const auto & coupled_group :
+         getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
     {
       std::vector<NonlinearVariableName> vars;
-      MooseUtils::tokenize<NonlinearVariableName>(groups[i], vars, 1, ",");
+      MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
       for (unsigned int j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {

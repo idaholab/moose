@@ -69,9 +69,10 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  addFParserConstants(_func_F,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
+  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+    addFParserConstants(_func_F,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)

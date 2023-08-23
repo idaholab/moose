@@ -61,20 +61,24 @@ AdvancedExtruderGenerator::validParams()
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "subdomain_swaps",
+      {},
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the subdomains for that elevation");
 
   params.addParam<std::vector<std::vector<boundary_id_type>>>(
       "boundary_swaps",
+      {},
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the boundaries for that elevation");
 
   params.addParam<std::vector<std::string>>(
       "elem_integer_names_to_swap",
+      {},
       "Array of element extra integer names that need to be swapped during extrusion.");
 
   params.addParam<std::vector<std::vector<std::vector<dof_id_type>>>>(
       "elem_integers_swaps",
+      {},
       "For each row, every two entries are interpreted as a pair of 'from' and 'to' to remap the "
       "element extra integer for that elevation. If multiple element extra integers need to be "
       "swapped, the enties are stacked based on the order provided in "

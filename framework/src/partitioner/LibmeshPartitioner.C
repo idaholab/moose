@@ -37,7 +37,7 @@ LibmeshPartitioner::validParams()
                              "Specifies the sort direction if using the centroid partitioner. "
                              "Available options: x, y, z, radial");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "blocks", "Block is seperated by ;, and partition mesh block by block. ");
+      "blocks", {}, "Block is seperated by ;, and partition mesh block by block. ");
   return params;
 }
 
@@ -149,17 +149,18 @@ LibmeshPartitioner::prepareBlocksForSubdomainPartitioner(
   subdomain_partitioner.chunks.clear();
 
   // Insert each chunk
-  for (const auto & group : _subdomain_blocks)
-  {
-    const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, group);
-    for (const auto id : subdomain_ids)
-      if (!mesh_subdomain_ids.count(id))
-        paramError("blocks", "The block ", id, " was not found on the mesh");
+  if (_subdomain_blocks.size() != 0)
+    for (const auto & group : _subdomain_blocks)
+    {
+      const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, group);
+      for (const auto id : subdomain_ids)
+        if (!mesh_subdomain_ids.count(id))
+          paramError("blocks", "The block ", id, " was not found on the mesh");
 
-    std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
+      std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
 
-    subdomain_partitioner.chunks.push_back(subdomain_ids_set);
-  }
+      subdomain_partitioner.chunks.push_back(subdomain_ids_set);
+    }
 }
 
 void

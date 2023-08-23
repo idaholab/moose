@@ -33,7 +33,7 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
                        "action)");
 
   // Advanced arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
-  params.addParam<std::vector<Real>>("prefactor", "Prefactor to multiply the sum term with.");
+  params.addParam<std::vector<Real>>("prefactor", {}, "Prefactor to multiply the sum term with.");
   params.addParam<Real>("constant", 0.0, "Constant to be added to the prefactor multiplied sum.");
 
   params.addParam<bool>("validate_coupling",
@@ -59,7 +59,9 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
     mooseError("Please supply at least one material to sum in DerivativeSumMaterial ", name());
 
   // get prefactor values if not 1.0
-  std::vector<Real> p = this->template getParam<std::vector<Real>>("prefactor");
+  std::vector<Real> p = this->isParamValid("prefactor")
+                            ? this->template getParam<std::vector<Real>>("prefactor")
+                            : std::vector<Real>{};
 
   // if prefactor is used we need the same number of prefactors as sum materials
   if (_num_materials == p.size())

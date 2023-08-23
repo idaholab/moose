@@ -18,9 +18,9 @@ GeometryBase::validParams()
   params.addClassDescription(
       "Snap refined nodes on a given boundary or block to a given geometry.");
   params.addParam<std::vector<BoundaryName>>(
-      "boundary", "List of boundaries whose nodes are snapped to a given geometry");
+      "boundary", {}, "List of boundaries whose nodes are snapped to a given geometry");
   params.addParam<std::vector<SubdomainName>>(
-      "block", "List of blocks whose nodes are snapped to a given geometry");
+      "block", {}, "List of blocks whose nodes are snapped to a given geometry");
   return params;
 }
 

@@ -47,7 +47,8 @@ MaterialDerivativeTestKernelBase<T>::MaterialDerivativeTestKernelBase(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _n_vars(_coupled_moose_vars.size()),
-    _derivative(getParam<std::vector<SymbolName>>("derivative")),
+    _derivative(isParamValid("derivative") ? getParam<std::vector<SymbolName>>("derivative")
+                                           : std::vector<SymbolName>{}),
     _p(this->template getMaterialPropertyDerivative<T>("material_property", _derivative)),
     _p_off_diag_derivatives(_n_vars),
     _p_diag_derivative(this->template getMaterialPropertyDerivative<T>(
@@ -71,6 +72,7 @@ MaterialDerivativeTestKernelBase<T>::validParams()
   params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
   params.addParam<std::vector<SymbolName>>(
       "derivative",
+      {},
       "Select derivative to test derivatives of (leave empty for checking "
       "derivatives of the original material property)");
   return params;

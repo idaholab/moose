@@ -530,3 +530,38 @@ TEST(InputParameters, transferParameters)
   EXPECT_EQ(p1.getDocString("od3a"), p2.getDocString("od3a"));
   EXPECT_EQ(p1.getDocString("od3b"), p2.getDocString("od3b"));
 }
+
+TEST(InputParameters, noDefaultValueError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("dummy_real", "a dummy real");
+  params.addParam<std::vector<Real>>("dummy_vector", "a dummy vector");
+
+  // Throw an error message when no default value is provided
+  try
+  {
+    params.getParamHelper<Real>("dummy_real", params, static_cast<Real *>(0));
+    FAIL() << "failed to get the parameter because the default value is missing";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("The parameter \"dummy_real\" is being retrieved before being set.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    params.getParamHelper<std::vector<Real>>(
+        "dummy_vector", params, static_cast<std::vector<Real> *>(0));
+    FAIL() << "failed to get the parameter because the default value is missing";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("The parameter \"dummy_vector\" is being retrieved before being set.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}

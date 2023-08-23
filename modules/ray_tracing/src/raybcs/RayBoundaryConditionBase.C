@@ -42,7 +42,7 @@ RayBoundaryConditionBase::RayBoundaryConditionBase(const InputParameters & param
     _current_bnd_id(_trace_ray.currentBoundaryID())
 {
   // Add dependencies
-  if (params.isParamSetByUser("depends_on"))
+  if (params.isParamSetByUser("depends_on") && isParamValid("depends_on"))
     for (const auto & name : getParam<std::vector<std::string>>("depends_on"))
       dependsOn(name);
 }

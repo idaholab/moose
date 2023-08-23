@@ -35,6 +35,7 @@ MultiAppUserObjectTransfer::validParams()
   InputParameters params = MultiAppConservativeTransfer::validParams();
   //  MultiAppUserObjectTransfer does not need source variable since it query values from user
   //  objects
+  params.set<std::vector<VariableName>>("source_variable") = std::vector<VariableName>{};
   params.suppressParameter<std::vector<VariableName>>("source_variable");
   params.addRequiredParam<UserObjectName>(
       "user_object",

@@ -188,7 +188,7 @@ FEProblemBase::validParams()
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
   params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
+      "block", {}, "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
   params.addDeprecatedParam<MultiMooseEnum>("coord_type",
@@ -500,35 +500,41 @@ void
 FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
-  auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
-  for (const auto nl_sys_num : index_range(vectors))
-    for (auto & vector : vectors[nl_sys_num])
-    {
-      auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
-    }
+  if (isParamValid("extra_tag_vectors"))
+  {
+    auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
+    for (const auto nl_sys_num : index_range(vectors))
+      for (auto & vector : vectors[nl_sys_num])
+      {
+        auto tag = addVectorTag(vector);
+        _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      }
+  }
 
   // add matrices and their tags
-  auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
+  if (isParamValid("extra_tag_matrices"))
+  {
+    auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto nl_sys_num : index_range(matrices))
     for (auto & matrix : matrices[nl_sys_num])
     {
       auto tag = addMatrixTag(matrix);
       _nl[nl_sys_num]->addMatrix(tag);
     }
+  }
 }
 
 void
 FEProblemBase::createTagSolutions()
 {
-  auto & vectors = getParam<std::vector<TagName>>("extra_tag_solutions");
-  for (auto & vector : vectors)
-  {
-    auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
-    for (auto & nl : _nl)
-      nl->addVector(tag, false, GHOSTED);
-    _aux->addVector(tag, false, GHOSTED);
-  }
+  if (isParamValid("extra_tag_solutions"))
+    for (auto & vector : getParam<std::vector<TagName>>("extra_tag_solutions"))
+    {
+      auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
+      for (auto & nl : _nl)
+        nl->addVector(tag, false, GHOSTED);
+      _aux->addVector(tag, false, GHOSTED);
+    }
 
   if (getParam<bool>("previous_nl_solution_required"))
   {
