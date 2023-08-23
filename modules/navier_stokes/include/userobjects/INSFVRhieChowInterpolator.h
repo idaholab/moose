@@ -189,6 +189,11 @@ private:
    */
   void fillARead();
 
+  /**
+   * Whether we need 'a' coefficient computation
+   */
+  bool needAComputation() const;
+
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 
@@ -227,10 +232,16 @@ private:
   /// Whether we want to pull all nonlocal 'a' coefficient data
   bool _pull_all_nonlocal;
 
+  /// Whether to approximately calculate the 'a' coefficients
+  const bool _approximate_as;
+  /// Characteristic speed
   const Real _cs;
-  const Real _cL;
-  const Moose::Functor<ADReal> & _rho;
-  const Moose::Functor<ADReal> & _mu;
+  /// num-threads sized container for density
+  std::vector<const Moose::Functor<ADReal> *> _rhos;
+  /// num-threads sized container for dynamic viscosity
+  std::vector<const Moose::Functor<ADReal> *> _mus;
+  /// Holder of the local approximate 'a' coefficient
+  ADReal _approx_a = 0;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
@@ -256,4 +267,11 @@ INSFVRhieChowInterpolator::pressure(const THREAD_ID tid) const
 {
   mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
   return *static_cast<INSFVPressureVariable *>(_ps[tid]);
+}
+
+inline bool
+INSFVRhieChowInterpolator::needAComputation() const
+{
+  return !_a_data_provided && !_approximate_as &&
+         _velocity_interp_method == Moose::FV::InterpMethod::RhieChow;
 }

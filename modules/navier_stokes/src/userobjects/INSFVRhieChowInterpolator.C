@@ -89,10 +89,16 @@ INSFVRhieChowInterpolator::validParams()
                                        "nl0",
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
-  params.addRequiredParam<Real>("characteristic_speed", "The characteristic speed");
-  params.addRequiredParam<Real>("characteristic_length", "The characteristic length");
-  params.addRequiredParam<MooseFunctorName>(NS::mu, "The viscosity");
-  params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
+  params.addParam<bool>(
+      "approximate_rhie_chow_coefficients",
+      false,
+      "Whether to compute an approximation of the Rhie-Chow coefficients. If this is true, then "
+      "the supplied characteristic speed, viscosity, and density will be used to compute the "
+      "Rhie-Chow coefficients instead of looping and computing the coefficients from the kernels "
+      "and boundary conditions.");
+  params.addParam<Real>("characteristic_speed", "The characteristic speed");
+  params.addParam<MooseFunctorName>(NS::mu, "The viscosity");
+  params.addParam<MooseFunctorName>(NS::density, "The density");
   return params;
 }
 
@@ -129,10 +135,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _example(0),
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a")),
-    _cs(getParam<Real>("characteristic_speed")),
-    _cL(getParam<Real>("characteristic_length")),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>(NS::mu))
+    _approximate_as(getParam<bool>("approximate_rhie_chow_coefficients")),
+    _cs(isParamValid("characteristic_speed") ? getParam<Real>("characteristic_speed") : 0)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -271,8 +275,32 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
   else if (velocity_interp_method == "rc")
     _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
 
-  if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
+  if (_velocity_interp_method != Moose::FV::InterpMethod::Average && !_approximate_as)
     fillARead();
+
+  if (_approximate_as)
+  {
+    auto check_approx_param = [this](const auto & param_name)
+    {
+      if (!isParamValid(param_name))
+        paramError(param_name,
+                   "If 'approximate_rhie_chow_coefficients' is true, then '",
+                   param_name,
+                   "' must be set");
+    };
+    check_approx_param("characteristic_speed");
+    check_approx_param(NS::density);
+    check_approx_param(NS::mu);
+    _rhos.resize(libMesh::n_threads());
+    _mus.resize(libMesh::n_threads());
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      _rhos[tid] = &UserObject::_subproblem.getFunctor<ADReal>(
+          deduceFunctorName(NS::density), tid, name(), true);
+      _mus[tid] =
+          &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::mu), tid, name(), true);
+    }
+  }
 }
 
 void
@@ -398,6 +426,9 @@ INSFVRhieChowInterpolator::meshChanged()
 void
 INSFVRhieChowInterpolator::initialize()
 {
+  if (!needAComputation())
+    return;
+
   // Reset map of coefficients to zero.
   // The keys should not have changed unless the mesh has changed
   for (const auto & pair : _a)
@@ -407,12 +438,23 @@ INSFVRhieChowInterpolator::initialize()
 void
 INSFVRhieChowInterpolator::execute()
 {
-  if (_a_data_provided)
-    return;
-
-  // If advecting with auxiliary variables, no need to try to run those kernels
   if (_sys.number() != _u->sys().number())
+  {
+    mooseAssert(!needAComputation(),
+                "The velocity variables are in the auxiliary system. In this case we will not run "
+                "kernels to compute a-coefficients. Consequently the a-coefficient data must be "
+                "provided, approximated, or we should be using an average velocity interpolation");
     return;
+  }
+
+  mooseAssert(!_a_data_provided,
+              "a-coefficient data should not be provided if the velocity variables are in the "
+              "nonlinear system and we are running kernels that compute said a-coefficients");
+  // One might think that we should do similar assertions for !_approximate_as and for
+  // (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow). However, even if we are not
+  // using the generated a-coefficient data in those cases, some kernels have been optimized to add
+  // their residuals into the global system during the generation of the a-coefficient data. Hence
+  // if we were to skip the kernel exeuction we would drop those residuals
 
   TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
 
@@ -445,8 +487,7 @@ INSFVRhieChowInterpolator::execute()
 void
 INSFVRhieChowInterpolator::finalize()
 {
-  if (_a_data_provided || this->n_processors() == 1 ||
-      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+  if (!needAComputation() || this->n_processors() == 1)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -524,8 +565,7 @@ INSFVRhieChowInterpolator::finalize()
 void
 INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 {
-  if (_a_data_provided || this->n_processors() == 1 ||
-      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+  if (!needAComputation() || this->n_processors() == 1)
     return;
 
   // Ghost a for the elements on the boundary
@@ -614,70 +654,82 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   mooseAssert(neighbor && this->hasBlocks(neighbor->subdomain_id()),
               "We should be on an internal face...");
 
-  // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
-  // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi, time);
-
-  // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
-  // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
-
-  const Point & elem_centroid = fi.elemCentroid();
-  const Point & neighbor_centroid = fi.neighborCentroid();
-  Real elem_volume = fi.elemVolume();
-  Real neighbor_volume = fi.neighborVolume();
-
-  // Now we need to perform the computations of D
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem), time);
-
-  mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
-                  UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
-              "Coordinate systems must be the same between the two elements");
-
-  Real coord;
-  coordTransformFactor(UserObject::_subproblem, elem->subdomain_id(), elem_centroid, coord);
-
-  elem_volume *= coord;
-
-  VectorValue<ADReal> elem_D = 0;
-  for (const auto i : make_range(_dim))
-  {
-    mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
-    elem_D(i) = elem_volume / elem_a(i);
-  }
-
-  VectorValue<ADReal> face_D;
-
-  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor), time);
-
-  coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
-  neighbor_volume *= coord;
-
-  VectorValue<ADReal> neighbor_D = 0;
-  for (const auto i : make_range(_dim))
-  {
-    mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
-    neighbor_D(i) = neighbor_volume / neighbor_a(i);
-  }
-
-  // We require this to ensure that the correct interpolation weights are used.
-  // This will change once the traditional weights are replaced by the weights
-  // that are used by the skewness-correction.
-  Moose::FV::InterpMethod coeff_interp_method = correct_skewness
-                                                    ? Moose::FV::InterpMethod::SkewCorrectedAverage
-                                                    : Moose::FV::InterpMethod::Average;
-  Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
-
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face, time);
 
-  const auto coeff = Utility::pow<2>(fi.dCNMag()) / (fi.dCNMag() * _cs * _rho(face) + _mu(face));
+  // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
+  // values on either side of the face
+  const auto & grad_p = p.adGradSln(fi, time);
 
-  // Perform the pressure correction. We don't use skewness-correction on the pressure since
-  // it only influences the averaged cell gradients which cancel out in the correction
-  // below.
-  for (const auto i : make_range(_dim))
-    velocity(i) -= coeff * face_eps * (grad_p(i) - unc_grad_p(i));
+  // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
+  // along a boundary face
+  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+  if (_approximate_as)
+  {
+    const auto coeff = Utility::pow<2>(fi.dCNMag()) /
+                       (fi.dCNMag() * _cs * (*_rhos[tid])(face, time) + (*_mus[tid])(face, time));
+
+    // Perform the pressure correction. We don't use skewness-correction on the pressure since
+    // it only influences the averaged cell gradients which cancel out in the correction
+    // below.
+    for (const auto i : make_range(_dim))
+      velocity(i) -= coeff * face_eps * (grad_p(i) - unc_grad_p(i));
+  }
+  else
+  {
+    const Point & elem_centroid = fi.elemCentroid();
+    const Point & neighbor_centroid = fi.neighborCentroid();
+    Real elem_volume = fi.elemVolume();
+    Real neighbor_volume = fi.neighborVolume();
+
+    // Now we need to perform the computations of D
+    const auto elem_a = (*_a_read[tid])(makeElemArg(elem), time);
+
+    mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
+                    UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
+                "Coordinate systems must be the same between the two elements");
+
+    Real coord;
+    coordTransformFactor(UserObject::_subproblem, elem->subdomain_id(), elem_centroid, coord);
+
+    elem_volume *= coord;
+
+    VectorValue<ADReal> elem_D = 0;
+    for (const auto i : make_range(_dim))
+    {
+      mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
+      elem_D(i) = elem_volume / elem_a(i);
+    }
+
+    VectorValue<ADReal> face_D;
+
+    const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor), time);
+
+    coordTransformFactor(
+        UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
+    neighbor_volume *= coord;
+
+    VectorValue<ADReal> neighbor_D = 0;
+    for (const auto i : make_range(_dim))
+    {
+      mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
+      neighbor_D(i) = neighbor_volume / neighbor_a(i);
+    }
+
+    // We require this to ensure that the correct interpolation weights are used.
+    // This will change once the traditional weights are replaced by the weights
+    // that are used by the skewness-correction.
+    Moose::FV::InterpMethod coeff_interp_method =
+        correct_skewness ? Moose::FV::InterpMethod::SkewCorrectedAverage
+                         : Moose::FV::InterpMethod::Average;
+    Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
+
+    // Perform the pressure correction. We don't use skewness-correction on the pressure since
+    // it only influences the averaged cell gradients which cancel out in the correction
+    // below.
+    for (const auto i : make_range(_dim))
+      velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
+  }
 
   return velocity;
 }
