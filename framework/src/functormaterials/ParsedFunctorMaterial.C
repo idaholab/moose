@@ -18,10 +18,8 @@ ParsedFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += FunctionParserUtils<is_ad>::validParams();
-
   params.addClassDescription(
       "Computes a functor material from a parsed expression of other functors.");
-
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "Expression to parse for the new functor material");
   params.addParam<std::vector<std::string>>("functor_names",
@@ -83,7 +81,7 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
 #if LIBMESH_DIM > 2
         _func_params[_n_functors + 2] = r_point(2);
 #endif
-        _func_params[_n_functors + LIBMESH_DIM] = _fe_problem.getTimeFromStateArg(t);
+        _func_params[_n_functors + Moose::dim] = _fe_problem.getTimeFromStateArg(t);
 
         // Evaluate the parsed function
         return evaluate(_parsed_function, _name);
@@ -124,7 +122,7 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
                _parsed_function->ErrorMsg());
 
   // Resize the values vector
-  _func_params.resize(_n_functors + LIBMESH_DIM + 1);
+  _func_params.resize(_n_functors + Moose::dim + 1);
 
   // Optimize the parsed function
   functionsOptimize(_parsed_function);

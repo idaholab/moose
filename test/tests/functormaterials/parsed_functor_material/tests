@@ -1,7 +1,6 @@
 [Tests]
   issues = '#24380'
   design = 'ParsedFunctorMaterial.md'
-
   [test]
     type = CSVDiff
     input = parsed_functor_material.i
