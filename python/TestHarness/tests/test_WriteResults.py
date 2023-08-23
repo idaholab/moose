@@ -66,3 +66,9 @@ class TestHarnessTester(TestHarnessTestCase):
                 and os.path.exists(os.path.join(self.output_dir, 'test_harness.csvdiff.DIFF.txt'))
                 and os.path.exists(os.path.join(self.output_dir, 'test_harness.exodiff.DIFF.txt'))):
            self.fail('Failed to create all output files --sep-files')
+
+    def testWriteJUnit(self):
+            """ Test writing to a JUnit XML file """
+            self.runTests('--no-color', '-i', 'always_ok', '--junit_output xmltest.xml', '--output-dir', self.output_dir)
+            if not (os.path.exists(os.path.join(self.output_dir, 'xmltest.xml')):
+                self.fail("JUnit XML not created")
