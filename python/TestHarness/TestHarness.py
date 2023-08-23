@@ -830,73 +830,75 @@ class TestHarness:
             self.options.results_file = os.path.join(self.options.output_dir, self.options.results_file)
 
         if self.options.results_storage:
-            try:
-                with open(self.options.results_file, 'w') as data_file:
-                    json.dump(self.options.results_storage, data_file, indent=2)
-            except UnicodeDecodeError:
-                print('\nERROR: Unable to write results due to unicode decode/encode error')
+            if self.options.results_file:
+                try:
+                    with open(self.options.results_file, 'w') as data_file:
+                        json.dump(self.options.results_storage, data_file, indent=2)
+                except UnicodeDecodeError:
+                    print('\nERROR: Unable to write results due to unicode decode/encode error')
 
-                # write to a plain file to aid in reproducing error
-                with open(self.options.results_file + '.unicode_error' , 'w') as f:
-                    f.write(self.options.results_storage)
+                    # write to a plain file to aid in reproducing error
+                    with open(self.options.results_file + '.unicode_error' , 'w') as f:
+                        f.write(self.options.results_storage)
 
-                sys.exit(1)
-            except IOError:
-                print('\nERROR: Unable to write results due to permissions')
-                sys.exit(1)
-        try:
+                    sys.exit(1)
+                except IOError:
+                    print('\nERROR: Unable to write results due to permissions')
+                    sys.exit(1)
+            
             if self.options.junit_output:
-                with open(self.options.junit_output, 'w') as data_file:
-                    from xml.etree.ElementTree import Element, SubElement, tostring, ElementTree
-                    from xml.dom import minidom
+                try:
+                    with open(self.options.junit_output, 'w') as data_file:
+                        from xml.etree.ElementTree import Element, SubElement, tostring, ElementTree
+                        from xml.dom import minidom
 
-                    results_dict = self.options.results_storage
-                    # Create the root element
-                    testsuites = Element('testsuites')
+                        results_dict = self.options.results_storage
+                        # Create the root element
+                        testsuites = Element('testsuites')
 
-                    # Iterate through each test suite
-                    for suite_name, tests in results_dict.items():
-                        # Ensure that we only process dictionary items
-                        if not isinstance(tests, dict):
-                            continue
+                        # Iterate through each test suite
+                        for suite_name, tests in results_dict.items():
+                            # Ensure that we only process dictionary items
+                            if not isinstance(tests, dict):
+                                continue
 
-                        testsuite = SubElement(testsuites, 'testsuite', name=suite_name, tests=str(len(tests)))
+                            testsuite = SubElement(testsuites, 'testsuite', name=suite_name, tests=str(len(tests)))
 
-                        # Iterate through each test case in the suite
-                        for test_name, test_data in tests.items():
-                            attributes = {
-                                'classname': test_data.get('NAME', ''),
-                                'name': test_data.get('LONG_NAME', ''),
-                                'time': str(test_data.get('TIMING', '0'))
-                            }
-                            testcase = SubElement(testsuite, 'testcase', **attributes)
+                            # Iterate through each test case in the suite
+                            for test_name, test_data in tests.items():
+                                attributes = {
+                                    'classname': test_data.get('NAME', ''),
+                                    'name': test_data.get('LONG_NAME', ''),
+                                    'time': str(test_data.get('TIMING', '0'))
+                                }
+                                testcase = SubElement(testsuite, 'testcase', **attributes)
 
-                            # If the test failed, add a failure sub-element
-                            if test_data.get('FAIL', False):
-                                failure = SubElement(testcase, 'failure', message=test_data.get('STATUS_MESSAGE', ''))
-                                failure.text = test_data.get('OUTPUT', '')
+                                # If the test failed, add a failure sub-element
+                                if test_data.get('FAIL', False):
+                                    failure = SubElement(testcase, 'failure', message=test_data.get('STATUS_MESSAGE', ''))
+                                    failure.text = test_data.get('OUTPUT', '')
 
-                    # Convert the ElementTree to a string
-                    rough_string = tostring(testsuites, 'utf-8')
+                        # Convert the ElementTree to a string
+                        rough_string = tostring(testsuites, 'utf-8')
 
-                    # Strip ANSI escape sequences from rough_string
-                    cleaned_string = re.sub(r'\x1b[^m]*m', '', rough_string.decode('utf-8'))
+                        # Strip ANSI escape sequences from rough_string
+                        cleaned_string = re.sub(r'\x1b[^m]*m', '', rough_string.decode('utf-8'))
 
-                    # parse the cleaned string with minidom
-                    reparsed = minidom.parseString(cleaned_string)
+                        # parse the cleaned string with minidom
+                        reparsed = minidom.parseString(cleaned_string)
 
-                    data_file.write(reparsed.toprettyxml(indent="  "))
-            except UnicodeDecodeError:
-                print('\nERROR: Unable to write JUnit XML due to unicode decode/encode error')
+                        data_file.write(reparsed.toprettyxml(indent="  "))
+                except UnicodeDecodeError:
+                    print('\nERROR: Unable to write JUnit XML due to unicode decode/encode error')
 
-                # write to a plain file to aid in reproducing error
-                with open(self.options.results_file + '.unicode_error' , 'w') as f:
-                    f.write(self.options.results_storage)
+                    # write to a plain file to aid in reproducing error
+                    with open(self.options.results_file + '.unicode_error' , 'w') as f:
+                        f.write(self.options.results_storage)
 
-                sys.exit(1)
-            except IOError:
-                print('\nERROR: Unable to write JUnit XMLdue to permissions')
-                sys.exit(1)
+                    sys.exit(1)
+                except IOError:
+                    print('\nERROR: Unable to write JUnit XMLdue to permissions')
+                    sys.exit(1)
         try:
             # Write one file, with verbose information (--file)
             if self.options.file:
@@ -1082,7 +1084,7 @@ class TestHarness:
         parser.add_argument('-C', '--test-root', nargs=1, metavar='dir', type=str, dest='spec_file', help='Tell the TestHarness to search for test spec files at this location.')
         parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
         parser.add_argument('--junit_output', nargs=1, action='store', dest='junit_output', help='Output test results to an XML at the specified directory')
-        
+
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
