@@ -51,6 +51,8 @@ private:
                     const Point * clock_start,
                     Point & axis) const;
 
+  /// whether to check that sidesets are consistently oriented using neighbor subdomains
+  const MooseEnum _check_sidesets_orientation;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// counter for the number of small elements

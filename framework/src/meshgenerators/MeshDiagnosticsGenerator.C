@@ -29,6 +29,11 @@ MeshDiagnosticsGenerator::validParams()
   MooseEnum chk_option("NO_CHECK INFO WARNING ERROR", "NO_CHECK");
 
   params.addParam<MooseEnum>(
+      "examine_sidesets_orientation",
+      chk_option,
+      "whether to check that sidesets are consistently oriented using neighbor subdomains. If a "
+      "sideset is inconsistently oriented within a subdomain, this will not be detected");
+  params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
   params.addParam<Real>("maximum_element_volumes", 1e16, "Maximum size for element volume");
@@ -54,6 +59,7 @@ MeshDiagnosticsGenerator::validParams()
 MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
+    _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -73,6 +79,11 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
+  if (_check_sidesets_orientation == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
+      _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
+      _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
+      _check_adaptivity_non_conformality == "NO_CHECK")
+    mooseError("You need to turn on at least one diagnostics. Did you misspell a parameter?");
 }
 
 std::unique_ptr<MeshBase>
@@ -87,6 +98,59 @@ MeshDiagnosticsGenerator::generate()
   // We prepare for use at the beginning to facilitate diagnosis
   // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
+
+  if (_check_sidesets_orientation != "NO_CHECK")
+  {
+    auto & boundary_info = mesh->get_boundary_info();
+    std::vector<dof_id_type> element_id_list;
+    std::vector<unsigned short int> side_list;
+    std::vector<boundary_id_type> bc_id_list;
+    boundary_info.build_side_list(element_id_list, side_list, bc_id_list);
+
+    for (const auto bid : boundary_info.get_boundary_ids())
+    {
+      // This check only looks at subdomains on both sides of the sideset
+      // it wont pick up if the sideset is changing orientations while inside of a subdomain
+      std::set<std::pair<subdomain_id_type, subdomain_id_type>> block_neighbors;
+      for (const auto index : index_range(element_id_list))
+      {
+        if (bc_id_list[index] != bid)
+          continue;
+        const auto elem_ptr = mesh->elem_ptr(element_id_list[index]);
+        if (elem_ptr->neighbor_ptr(side_list[index]))
+          block_neighbors.insert(std::make_pair(
+              elem_ptr->subdomain_id(), elem_ptr->neighbor_ptr(side_list[index])->subdomain_id()));
+      }
+
+      // Check that there is no flipped pair
+      std::set<std::pair<subdomain_id_type, subdomain_id_type>> flipped_pairs;
+      for (const auto & block_pair_1 : block_neighbors)
+        for (const auto & block_pair_2 : block_neighbors)
+          if (block_pair_1 != block_pair_2)
+            if (block_pair_1.first == block_pair_2.second &&
+                block_pair_1.second == block_pair_2.first)
+              flipped_pairs.insert(block_pair_1);
+
+      std::string message;
+      std::string sideset_full_name =
+          boundary_info.sideset_name(bid) + " (" + std::to_string(bid) + ")";
+      if (!flipped_pairs.empty())
+      {
+        std::string block_pairs_string = "";
+        for (const auto & pair : flipped_pairs)
+          block_pairs_string +=
+              " [" + mesh->subdomain_name(pair.first) + " (" + std::to_string(pair.first) + "), " +
+              mesh->subdomain_name(pair.second) + " (" + std::to_string(pair.second) + ")]";
+        message = "Inconsistent orientation of sideset " + sideset_full_name +
+                  " with regards to subdomain pairs" + block_pairs_string;
+      }
+      else
+        message = "Sideset " + sideset_full_name +
+                  " is consistently oriented with regards to the blocks it neighbors";
+
+      diagnosticsLog(message, _check_sidesets_orientation, flipped_pairs.size());
+    }
+  }
 
   if (_check_element_volumes != "NO_CHECK")
   {
@@ -326,7 +390,6 @@ MeshDiagnosticsGenerator::generate()
       // find all the elements around this node
       std::set<const Elem *> elements_around;
       (*pl)(*node, elements_around);
-      const auto num_close_elems = elements_around.size();
 
       // Keep track of the refined elements and the coarse element
       std::set<const Elem *> elements;
@@ -346,8 +409,8 @@ MeshDiagnosticsGenerator::generate()
 
         if (node_on_elem)
           elements.insert(elem);
-        // Else, the node is not part of the element considered, so if the element had been part of
-        // an AMR-created non-conformality, this element is on the coarse side
+        // Else, the node is not part of the element considered, so if the element had been part
+        // of an AMR-created non-conformality, this element is on the coarse side
         if (!node_on_elem)
           coarse_elements.insert(elem);
       }
@@ -464,8 +527,8 @@ MeshDiagnosticsGenerator::generate()
 
         if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
         {
-          // We need to order the fine elements so when we get the coarse element nodes they form a
-          // non-twisted element
+          // We need to order the fine elements so when we get the coarse element nodes they form
+          // a non-twisted element
           tentative_coarse_nodes.resize(4);
 
           // The exterior nodes are the opposite nodes of the interior_node!
