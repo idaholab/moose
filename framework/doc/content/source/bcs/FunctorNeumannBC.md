@@ -22,7 +22,8 @@ where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 function is well-defined for all relevant times and $\vec{x} \in
 \partial \Omega_N$. In this case, the parameters [!param](/BCs/FunctorNeumannBC/functor)
 and [!param](/BCs/FunctorNeumannBC/coefficient) are [functors](Functors/index.md),
-whose product represents the mathematical function $h(t,\vec{x})$,
+whose product represents the mathematical function $h(t,\vec{x})$
+(or $-h(t,\vec{x})$ if [!param](/BCs/FunctorNeumannBC/flux_is_inward) is set to `false`),
 and the user must define one or more sidesets corresponding to the boundary
 subset $\partial \Omega_N$ via the [!param](/BCs/FunctorNeumannBC/boundary) parameter.
 
