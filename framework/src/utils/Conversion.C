@@ -518,6 +518,12 @@ stringify(ElementType t)
 }
 
 std::string
+stringify(libMesh::ElemType t)
+{
+  return libMesh::Utility::enum_to_string(t);
+}
+
+std::string
 stringify(const std::string & s)
 {
   return s;

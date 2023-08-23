@@ -37,6 +37,9 @@ private:
   /// Toggles whether neighboring level one elements should be refined or not. Defaults to true.
   const bool _enable_neighbor_refinement;
 
+  /// maximum element size over which elements are refined
+  const Real _max_element_volume;
+
   /**
    * The actual function refining the blocks. This is done recursively in order
    * to minimize the number of refinement iterations to as little as possible.

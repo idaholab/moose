@@ -1,0 +1,37 @@
+{
+    "reporters": {
+        "mesh": {
+            "type": "MeshInfo",
+            "values": {
+                "subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo>>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh": {
+                "subdomains": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh": {
+                "subdomains": [
+                    {
+                        "id": 1,
+                        "name": "_TRI3"
+                    },
+                    {
+                        "id": 2,
+                        "name": "_QUAD4"
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

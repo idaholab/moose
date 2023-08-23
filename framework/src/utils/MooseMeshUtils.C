@@ -232,6 +232,14 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
   return id;
 }
 
+void
+changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdomain_id_type new_id)
+{
+  for (const auto & elem : mesh.element_ptr_range())
+    if (elem->subdomain_id() == old_id)
+      elem->subdomain_id() = new_id;
+}
+
 Point
 meshCentroidCalculator(const MeshBase & mesh)
 {
