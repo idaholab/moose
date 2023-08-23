@@ -180,37 +180,31 @@ RestartableDataReader::deserializeValue(RestartableDataValue & value,
   mooseAssert(_stream, "Not set");
   auto & stream = *_stream;
 
+  auto error = [&value](auto... args)
+  {
+    mooseError("While loading RestartableData '",
+               value.name(),
+               "' of type '",
+               value.type(),
+               "':\n\n",
+               args...);
+  };
+
   if (
 #ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
       header_entry.type_hash_code != value.typeId().hash_code() &&
 #endif
       header_entry.type != value.typeId().name())
-    mooseError("Type mismatch for loading RestartableData '",
-               value.name(),
-               "\n\nStored type: ",
-               header_entry.type,
-               "\nDeclared type: ",
-               value.typeId().name(),
-               "\nStored type hash code: ",
-               header_entry.type_hash_code,
-               "\nDeclared type hash code: ",
-               value.typeId().hash_code());
+    error("The stored type of '", header_entry.type, "' does not match");
 
   stream.seekg(header_entry.position);
   value.load(stream);
 
   if (stream.tellg() == -1)
-    mooseError("Failed to load RestartableData '", value.name(), "' of type '", value.type(), "'");
+    error("An error was encountered when reading from the stream");
 
   if ((header_entry.position + (std::streampos)header_entry.size) != stream.tellg())
-    mooseError("Size mismatch for loading RestartableData '",
-               value.name(),
-               "' of type '",
-               value.type(),
-               "'\n\nStored size: ",
-               header_entry.size,
-               "\nLoaded size: ",
-               stream.tellg() - header_entry.position);
+    error("The data read does not match the data stored");
 }
 
 void
