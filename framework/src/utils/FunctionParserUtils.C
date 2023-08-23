@@ -168,6 +168,28 @@ FunctionParserUtils<is_ad>::addFParserConstants(
   }
 }
 
+template <>
+void
+FunctionParserUtils<false>::functionsOptimize(SymFunctionPtr & parsed_function)
+{
+  // base function
+  if (!_disable_fpoptimizer)
+    parsed_function->Optimize();
+  if (_enable_jit && !parsed_function->JITCompile())
+    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+}
+
+template <>
+void
+FunctionParserUtils<true>::functionsOptimize(SymFunctionPtr & parsed_function)
+{
+  // base function
+  if (!_disable_fpoptimizer)
+    parsed_function->Optimize();
+  if (!_enable_jit || !parsed_function->JITCompile())
+    mooseError("AD parsed objects require JIT compilation to be enabled and working.");
+}
+
 // explicit instantiation
 template class FunctionParserUtils<false>;
 template class FunctionParserUtils<true>;

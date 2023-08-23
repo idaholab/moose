@@ -82,7 +82,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::functionsPostParse()
   }
 
   // optimize base function
-  ParsedMaterialHelper<is_ad>::functionsOptimize();
+  ParsedMaterialHelper<is_ad>::functionsOptimize(_func_F);
 
   // generate derivatives
   assembleDerivatives();

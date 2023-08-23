@@ -23,6 +23,7 @@
   using typename FunctionParserUtils<T>::SymFunctionPtr;                                           \
   using typename FunctionParserUtils<T>::FailureMethod;                                            \
   using FunctionParserUtils<T>::evaluate;                                                          \
+  using FunctionParserUtils<T>::functionsOptimize;                                                 \
   using FunctionParserUtils<T>::setParserFeatureFlags;                                             \
   using FunctionParserUtils<T>::addFParserConstants;                                               \
   using FunctionParserUtils<T>::_enable_jit;                                                       \
@@ -75,6 +76,9 @@ protected:
                            const std::vector<std::string> & constant_names,
                            const std::vector<std::string> & constant_expressions);
 
+  // run FPOptimizer on the parsed function
+  virtual void functionsOptimize(SymFunctionPtr & parsed_function);
+
   //@{ feature flags
   bool _enable_jit;
   bool _enable_ad_cache;
@@ -94,3 +98,9 @@ protected:
   /// Array to stage the parameters passed to the functions when calling Eval.
   std::vector<GenericReal<is_ad>> _func_params;
 };
+
+template <>
+void FunctionParserUtils<false>::functionsOptimize(SymFunctionPtr & parsed_function);
+
+template <>
+void FunctionParserUtils<true>::functionsOptimize(SymFunctionPtr & parsed_function);

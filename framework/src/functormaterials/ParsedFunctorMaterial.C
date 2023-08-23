@@ -126,7 +126,8 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
   // Resize the values vector
   _func_params.resize(_n_functors + LIBMESH_DIM + 1);
 
-  // TODO: Do the optimize stuff
+  // Optimize the parsed function
+  functionsOptimize(_parsed_function);
 }
 
 // TODO: Make this some common utility function: duplicated from Function::getTime
