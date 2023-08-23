@@ -157,15 +157,6 @@ if [ -z "$go_fast" ]; then
   mkdir -p $LIBMESH_BUILD_DIR
   cd $LIBMESH_BUILD_DIR
 
-  # This is a temprorary fix, see #15120
-  if [[ -n "$CPPFLAGS" ]]; then
-    export CPPFLAGS=${CPPFLAGS//-DNDEBUG/}
-    export CPPFLAGS=${CPPFLAGS//-O2/}
-  fi
-  if [[ -n "$CXXFLAGS" ]]; then
-    export CXXFLAGS=${CXXFLAGS//-O2/}
-  fi
-
   source $SCRIPT_DIR/configure_libmesh.sh
   SRC_DIR=${SCRIPT_DIR}/../libmesh configure_libmesh $DISABLE_TIMESTAMPS \
                                                      $VTK_OPTIONS \
