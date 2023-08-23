@@ -90,7 +90,7 @@
   []
 
   [data]
-    requirement = 'The sytem shall support the output of ray data when outputting rays in a mesh format using'
+    requirement = 'The system shall support the output of ray data when outputting rays in a mesh format using'
     design = 'RayTracingMeshOutput.md'
     [exodus]
       type = Exodiff

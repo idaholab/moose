@@ -1,7 +1,7 @@
 [Tests]
   design = '/stochastic_tools/index.md'
   issues = '#14933'
-  requirement = "The sytem shall use stochastic methods on a thermomechanics model to "
+  requirement = "The system shall use stochastic methods on a thermomechanics model to "
 
   [lhs_stats]
     type = JSONDiff
