@@ -29,6 +29,7 @@
                   'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
                   'KINC, when a single element is subjected to axial loading. Values are checked '
                   'against verified references '
+    installation_type = in_tree
   []
 
   [print_shear]
@@ -42,6 +43,7 @@
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external fields (not temperature) step increment affecting material behavior '
                   'and shear deformation '
+    installation_type = in_tree
   []
   [print_shear_reference]
     type = 'Exodiff'
@@ -81,6 +83,7 @@
     requirement = 'The Abaqus UMAT interface shall pass the correct values for STRAN, DSTRAN, TIME, '
                   'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
                   'KINC, when shear deformation (causing nontrivial rotation kinematics) is present. '
+    installation_type = in_tree
   []
   [print_shear_defgrad]
     type = 'RunApp'
@@ -98,6 +101,7 @@
     requirement = 'The Abaqus UMAT interface shall pass the correct values for the deformation '
                   'gradient DFGRD1 and the rotation increment DROT, accounting for the fact, that '
                   'the calling C++ code is row majorand the called Fortran code is column major.'
+    installation_type = in_tree
   []
   [print_shear_defgrad_deformed]
     type = 'RunApp'
@@ -129,5 +133,6 @@
                   'shear deformation is present and large deformation kinematics is true, which '
                   'captures variables or properties that may rely on the displaced mesh, such as '
                   'COORDS and CELENT.'
+    installation_type = in_tree
   []
 []

@@ -9,6 +9,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [2D_continuous_porosity]
     type = PythonUnitTest
@@ -27,6 +28,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [pressure-corrected-action]
     type = PythonUnitTest
@@ -36,6 +38,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [pressure-corrected-jac]
     type = 'PetscJacobianTester'

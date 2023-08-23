@@ -22,6 +22,7 @@
     type = RunApp
     input = 'rgmb_abtr/rgmb_abtr.i'
     cli_args= '--mesh-only --error-deprecated'
+    installation_type = in_tree
   []
 
   [rgmb_lfr_assembly]
@@ -29,5 +30,6 @@
     type = RunApp
     input = 'rgmb_lfr/rgmb_lfr_assembly.i'
     cli_args= '--mesh-only --error-deprecated'
+    installation_type = in_tree
   []
 []

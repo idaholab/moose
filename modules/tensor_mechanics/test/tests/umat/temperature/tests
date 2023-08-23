@@ -12,6 +12,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for finite strain elastic material models and '
                   'temperature dependence'
+    installation_type = in_tree
   []
   [elastic_temperature_reference]
     type = 'Exodiff'
@@ -32,6 +33,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for finite strain elastic material models and '
                   'temperature dependence, include the temperature step increment'
+    installation_type = in_tree
   []
   [elastic_dtemperature_reference]
     type = 'Exodiff'

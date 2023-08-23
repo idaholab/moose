@@ -11,6 +11,7 @@
     group = 'dynamic_loading'
     recover = false # See #5207
     requirement = "The system shall be able to dynamically load a multiapp from a dynamic library."
+    installation_type = in_tree
   []
 
   [dynamic_load_w_name]

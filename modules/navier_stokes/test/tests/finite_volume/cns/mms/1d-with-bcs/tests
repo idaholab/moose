@@ -7,6 +7,7 @@
     requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations with added artificial diffusion using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
     method = "!dbg"
+    installation_type = in_tree
     design = 'CNSFVHLLCBase.md'
   []
   [1d-porous-hllc]
@@ -18,6 +19,7 @@
       test_case = Test1DPorousHLLC
       required_python_packages = 'pandas matplotlib'
       method = "!dbg"
+      installation_type = in_tree
       detail = 'constant porosity'
     []
     [varying]
@@ -26,6 +28,7 @@
       test_case = Test1DVaryingEpsPorousHLLC
       required_python_packages = 'pandas matplotlib'
       method = "!dbg"
+      installation_type = in_tree
       detail = 'varying porosity'
     []
   []
@@ -39,6 +42,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [upwind]
       type = PythonUnitTest
@@ -47,6 +51,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [vanLeer]
       type = PythonUnitTest
@@ -55,6 +60,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
   []
   [conserved_basic_kurganov_tadmor]
@@ -67,6 +73,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [upwind]
       type = PythonUnitTest
@@ -75,6 +82,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [vanLeer]
       type = PythonUnitTest
@@ -83,6 +91,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
   []
   [primitive_basic_kurganov_tadmor_varying_porosity_function]
@@ -95,6 +104,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [upwind]
       type = PythonUnitTest
@@ -103,6 +113,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [vanLeer]
       type = PythonUnitTest
@@ -111,6 +122,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
   []
   [primitive_basic_knp_varying_porosity_function]
@@ -123,6 +135,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [upwind]
       type = PythonUnitTest
@@ -131,6 +144,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [vanLeer]
       type = PythonUnitTest
@@ -139,6 +153,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using linear interpolation of cell center values to faces with Van-Leer limiting and display at least second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
   []
   [mixed_basic_kurganov_tadmor_varying_porosity_function]
@@ -151,6 +166,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using central differencing to interpolate cell center values to faces and display second order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
     [upwind]
       type = PythonUnitTest
@@ -159,6 +175,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'when using directional upwinding to interpolate cell center values to faces and display first order convergence'
       method = "!dbg"
+      installation_type = in_tree
     []
   []
   [sources_give_hllc_problems_irregular]
@@ -206,6 +223,7 @@
     test_case = PWCNSFV
     required_python_packages = 'pandas matplotlib'
     method = "!dbg"
+    installation_type = in_tree
     requirement = 'The system shall demonstrate first order convergence rates for pressure and superficial velocity when using an upwind interpolation for advected quantities in a weakly compressible formulation of the mass and momentum Euler equations.'
     issues = '#18215'
     design = 'PINSFVMomentumAdvection.md'

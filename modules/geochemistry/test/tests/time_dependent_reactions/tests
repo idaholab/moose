@@ -1,6 +1,7 @@
 [Tests]
   [./except1]
     type = RunException
+    installation_type = in_tree
     input = except1.i
     expect_err = 'source_species_names: must have the same size as source_species_rates'
     requirement = 'An error will be thrown if each source species is not provided with exactly onerate'
@@ -9,6 +10,7 @@
   [../]
   [./except2]
     type = RunException
+    installation_type = in_tree
     input = except2.i
     expect_err = 'source_species_names:
     The name badname does not appear in the basis, equilibrium or kinetic species list'
@@ -19,6 +21,7 @@
   [../]
   [./except3]
     type = RunException
+    installation_type = in_tree
     input = except3.i
     expect_err = 'The species NaCl is not in the basis, so cannot have its activity or fugacity constraint removed'
     requirement = 'An error will be thrown if a species whose activity constraint is to be removed is not in the basis'
@@ -27,6 +30,7 @@
   [../]
   [./except4]
     type = RunException
+    installation_type = in_tree
     input = except4.i
     expect_err = 'remove_fixed_activity_name:
     The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
@@ -36,6 +40,7 @@
   [../]
   [./except5]
     type = RunException
+    installation_type = in_tree
     input = except5.i
     expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
     requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
@@ -44,6 +49,7 @@
   [../]
   [./except6]
     type = RunException
+    installation_type = in_tree
     input = except6.i
     expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
     requirement = 'An error will be thrown if the number of species whose activity values are controlled is not equal to the number of activity values provided'
@@ -52,6 +58,7 @@
   [../]
   [./add_feldspar]
     type = CSVDiff
+    installation_type = in_tree
     input = 'add_feldspar.i'
     csvdiff = 'add_feldspar_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions that involve adding reactants"
@@ -60,6 +67,7 @@
   [../]
   [./calcite_dumping_dump]
     type = CSVDiff
+    installation_type = in_tree
     input = 'calcite_dumping.i'
     csvdiff = 'calcite_dumping_dump.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
@@ -68,6 +76,7 @@
   [../]
   [./calcite_no_dumping]
     type = CSVDiff
+    installation_type = in_tree
     input = 'calcite_dumping.i'
     cli_args = 'TimeDependentReactionSolver/mode=0 Outputs/file_base=calcite_dumping_no_dump'
     prereq = 'calcite_dumping_dump'
@@ -78,6 +87,7 @@
   [../]
   [./changing_fugacity_calcite]
     type = CSVDiff
+    installation_type = in_tree
     input = 'changing_fugacity_calcite.i'
     csvdiff = 'changing_fugacity_calcite_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where gas fugacity is changed over time"
@@ -86,6 +96,7 @@
   [../]
   [./changing_pH_ferric_hydroxide]
     type = CSVDiff
+    installation_type = in_tree
     input = 'changing_pH_ferric_hydroxide.i'
     csvdiff = 'changing_pH_ferric_hydroxide_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where pH is changed over time"
@@ -94,6 +105,7 @@
   [../]
   [./cooling]
     type = CSVDiff
+    installation_type = in_tree
     input = 'cooling.i'
     csvdiff = 'cooling_out.csv'
     requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
@@ -102,6 +114,7 @@
   [../]
   [./dissolution_pyrite_1]
     type = CSVDiff
+    installation_type = in_tree
     input = 'dissolution_pyrite_1.i'
     csvdiff = 'dissolution_pyrite_1_out.csv'
     requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
@@ -110,6 +123,7 @@
   [../]
   [./dissolution_pyrite_2]
     type = CSVDiff
+    installation_type = in_tree
     input = 'dissolution_pyrite_2.i'
     csvdiff = 'dissolution_pyrite_2_out.csv'
     match_literal = true
@@ -119,6 +133,7 @@
   [../]
   [./mixing_seawater_step1]
     type = RunApp
+    installation_type = in_tree
     input = 'mixing_seawater_step1.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.036kg
@@ -178,6 +193,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./mixing_seawater_step2]
     type = CSVDiff
+    installation_type = in_tree
     input = 'mixing_seawater_step2.i'
     csvdiff = 'mixing_seawater_step2_out.csv'
     rel_err = 1.4E-5
@@ -187,6 +203,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./mixing]
     type = CSVDiff
+    installation_type = in_tree
     input = 'mixing.i'
     csvdiff = 'mixing_out.csv'
     heavy = true
@@ -196,6 +213,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./seawater_evaporation_flow_through]
     type = CSVDiff
+    installation_type = in_tree
     input = 'seawater_evaporation_flow_through.i'
     csvdiff = 'seawater_evaporation_flow_through_out.csv'
     requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
@@ -204,6 +222,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./seawater_evaporation_no_flow_through]
     type = CSVDiff
+    installation_type = in_tree
     input = 'seawater_evaporation_no_flow_through.i'
     csvdiff = 'seawater_evaporation_no_flow_through_out.csv'
     requirement = "The geochemistry module shall be able to progressively remove reactants"
@@ -212,6 +231,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./simple]
     type = 'CSVDiff'
+    installation_type = in_tree
     input = 'simple.i'
     csvdiff = 'simple_out.csv'
     rel_err = 1.0E-5
@@ -221,6 +241,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./simple_no_action]
     type = 'CSVDiff'
+    installation_type = in_tree
     input = 'simple_no_action.i'
     csvdiff = 'simple_out.csv'
     prereq = 'simple'
@@ -231,6 +252,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./flushing_equilibrium_at70degC]
     type = CSVDiff
+    installation_type = in_tree
     input = 'flushing_equilibrium_at70degC.i'
     csvdiff = 'flushing_equilibrium_at70degC_out.csv'
     requirement = "The geochemistry module shall be able to find equilibrium concentrations of species that are later provided with kinetic laws"
@@ -239,6 +261,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./flushing]
     type = CSVDiff
+    installation_type = in_tree
     input = 'flushing.i'
     csvdiff = 'flushing_out.csv'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"

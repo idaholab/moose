@@ -8,6 +8,7 @@
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations in a 1D channel using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
     method = '!dbg'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [rc-no-diffusion]
     type = PythonUnitTest
@@ -16,6 +17,7 @@
     requirement = 'The system shall be able to solve the incompressible porous flow Euler equations in a 1D channel using a Rhie-Chow interpolation scheme for velocity and upwind interpolation for advected quantities and produce first order convergence for pressure and 1.5 order for velocity.'
     method = '!dbg'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [rc-no-diffusion-strong-bc]
     type = PythonUnitTest
@@ -24,6 +26,7 @@
     requirement = 'The system shall be able to solve the incompressible porous flow Euler equations in a 1D channel using a Rhie-Chow interpolation scheme for velocity and upwind interpolation for advected quantities and produce first order convergence for pressure and 1.5 order for velocity with using flux boundary conditions for both variables.'
     method = '!dbg'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [rc-2d]
     type = PythonUnitTest

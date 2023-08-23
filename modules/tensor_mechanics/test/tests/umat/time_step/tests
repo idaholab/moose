@@ -11,5 +11,6 @@
                   'the user to control the time step increment within the UMAT routine and combine '
                   'it with MOOSE native time step controls, including cutback and growth factors, '
                   'and soft terminations.'
+    installation_type = in_tree
   []
 []

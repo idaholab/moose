@@ -9,6 +9,7 @@
                   "vector values from face fluxes with a second order convergence."
     method = '!dbg'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
     min_parallel = 2
   []
 []

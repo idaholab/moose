@@ -7,6 +7,7 @@
     max_parallel = 1
     requirement = 'We shall be able to reproduce linear elastic stress results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeLinearElasticStress.md'
+    installation_type = in_tree
   [../]
   [./linear_elastic_material-jac]
     type = 'PetscJacobianTester'
@@ -43,6 +44,7 @@
     exodiff = 'applied_strain_out.e'
     requirement = 'We shall be able to reproduce eigenstrain results of the hand-coded simulation using automatic differentiation.'
     design = 'ComputeEigenstrain.md'
+    installation_type = in_tree
   [../]
   [./applied_strain-jac]
     type = 'PetscJacobianTester'
@@ -62,6 +64,7 @@
     max_parallel = 1
     requirement = 'We shall be able to reproduce small strain with specified tensors results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeLinearElasticStress.md'
+    installation_type = in_tree
   [../]
   [./tensor-jac]
     type = 'PetscJacobianTester'
@@ -80,6 +83,7 @@
     exodiff = 'thermal_expansion_out.e'
     requirement = 'We shall be able to reproduce thermal eigenstrain results of the hand-coded simulation using automatic differentiation.'
     design = 'ComputeEigenstrain.md'
+    installation_type = in_tree
   [../]
   [./thermal_expansion-jac]
     type = 'PetscJacobianTester'

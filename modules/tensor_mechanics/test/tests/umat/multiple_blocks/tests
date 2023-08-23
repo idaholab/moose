@@ -10,6 +10,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using the same interface plug-in.'
+    installation_type = in_tree
   []
   [multiple_blocks_two_materials]
     type = 'Exodiff'
@@ -20,6 +21,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins.'
+    installation_type = in_tree
   []
   [multiple_blocks_two_materials_parallel]
     type = 'Exodiff'
@@ -30,6 +32,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins in multi processor runs.'
+    installation_type = in_tree
   []
   [rve_multimaterial_umat]
     type = 'Exodiff'
@@ -43,6 +46,7 @@
     method = opt
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously using the UMAT interface.'
+    installation_type = in_tree
   []
   [rve_multimaterial_moose]
     type = 'Exodiff'

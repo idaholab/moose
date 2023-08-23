@@ -5,6 +5,7 @@
     exodiff = 'plane_strain_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    installation_type = in_tree
   []
   [generalized_plane_strain]
     type = 'Exodiff'
@@ -12,5 +13,6 @@
     exodiff = 'generalized_plane_strain_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    installation_type = in_tree
   []
 []

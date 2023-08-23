@@ -8,6 +8,7 @@
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [2d-average]
     type = PythonUnitTest
@@ -16,6 +17,7 @@
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
   [2d-rc]
     type = PythonUnitTest

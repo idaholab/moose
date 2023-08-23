@@ -9,5 +9,6 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
   []
 []

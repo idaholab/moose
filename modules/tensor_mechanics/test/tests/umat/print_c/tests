@@ -29,6 +29,7 @@
                   'STRAN, DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, '
                   'DFGRD1, NOEL, NPT, and KINC, when a single element is subjected to axial loading. '
                   'Values are checked against verified references '
+    installation_type = in_tree
   []
   [print_compare_c]
     type = 'Exodiff'
@@ -37,6 +38,7 @@
     exodiff = 'print_compare_c_out.e'
     requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Generation of reference results.'
+    installation_type = in_tree
   []
   [print_compare_f]
     type = 'Exodiff'
@@ -45,6 +47,7 @@
     exodiff = 'print_compare_c_out.e'
     requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Verification.'
+    installation_type = in_tree
   []
   [print_eigen]
     type = 'RunApp'
@@ -53,5 +56,6 @@
     expect_out = 'Eigenvalues 0 769.231\nEigenvalues 1 2500\nEigenvalues 2 769.231\nEigenvalues 3 '
                  '384.615\nEigenvalues 4 384.615\nEigenvalues 5 384.615\n'
     requirement = 'The system shall allow for the correct use of Eigen matrices in C UMAT functions.'
+    installation_type = in_tree
   []
 []
