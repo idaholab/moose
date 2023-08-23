@@ -31,13 +31,6 @@ protected:
    */
   void buildParsedFunction();
 
-  // TODO: This function was duplicated from Function::getTime. Should it go
-  // into a common place like FunctorInterface?
-  /**
-   * @return The time associated with the requested \p state
-   */
-  Real getTime(const Moose::StateArg & state) const;
-
   /// Expression to parse for the new functor material
   const std::string & _expression;
 

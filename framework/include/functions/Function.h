@@ -146,11 +146,6 @@ private:
   using typename Moose::FunctorBase<Real>::GradientType;
   using typename Moose::FunctorBase<Real>::DotType;
 
-  /**
-   * @return the time associated with the requested \p state
-   */
-  Real getTime(const Moose::StateArg & state) const;
-
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;

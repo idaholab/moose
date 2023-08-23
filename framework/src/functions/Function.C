@@ -111,32 +111,11 @@ Function::average() const
   return 0;
 }
 
-Real
-Function::getTime(const Moose::StateArg & state) const
-{
-  if (state.iteration_type != Moose::SolutionIterationType::Time)
-    // If we are any iteration type other than time (e.g. nonlinear), then temporally we are still
-    // in the present time
-    return _ti_feproblem.time();
-
-  switch (state.state)
-  {
-    case 0:
-      return _ti_feproblem.time();
-
-    case 1:
-      return _ti_feproblem.timeOld();
-
-    default:
-      mooseError("unhandled state ", state.state, " in Function::getTime");
-  }
-}
-
 template <typename R>
 typename Function::ValueType
 Function::evaluateHelper(const R & r, const Moose::StateArg & state) const
 {
-  return value(getTime(state), r.getPoint());
+  return value(_ti_feproblem.getTimeFromStateArg(state), r.getPoint());
 }
 
 typename Function::ValueType
@@ -163,10 +142,10 @@ Function::evaluate(const FaceArg & face, const Moose::StateArg & state) const
     auto offset = offset_tolerance * face.fi->normal();
     if (face.face_side == face.fi->elemPtr())
       offset *= -1;
-    return value(getTime(state), face.getPoint() + offset);
+    return value(_ti_feproblem.getTimeFromStateArg(state), face.getPoint() + offset);
   }
   else
-    return value(getTime(state), face.getPoint());
+    return value(_ti_feproblem.getTimeFromStateArg(state), face.getPoint());
 }
 
 typename Function::ValueType
@@ -191,7 +170,7 @@ template <typename R>
 typename Function::GradientType
 Function::evaluateGradientHelper(const R & r, const Moose::StateArg & state) const
 {
-  return gradient(getTime(state), r.getPoint());
+  return gradient(_ti_feproblem.getTimeFromStateArg(state), r.getPoint());
 }
 
 typename Function::GradientType
@@ -228,7 +207,7 @@ template <typename R>
 typename Function::DotType
 Function::evaluateDotHelper(const R & r, const Moose::StateArg & state) const
 {
-  return timeDerivative(getTime(state), r.getPoint());
+  return timeDerivative(_ti_feproblem.getTimeFromStateArg(state), r.getPoint());
 }
 
 typename Function::DotType

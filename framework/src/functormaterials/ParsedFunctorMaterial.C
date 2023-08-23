@@ -83,7 +83,7 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
 #if LIBMESH_DIM > 2
         _func_params[_n_functors + 2] = r_point(2);
 #endif
-        _func_params[_n_functors + LIBMESH_DIM] = getTime(t);
+        _func_params[_n_functors + LIBMESH_DIM] = _fe_problem.getTimeFromStateArg(t);
 
         // Evaluate the parsed function
         return evaluate(_parsed_function, _name);
@@ -128,29 +128,6 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
 
   // Optimize the parsed function
   functionsOptimize(_parsed_function);
-}
-
-// TODO: Make this some common utility function: duplicated from Function::getTime
-template <bool is_ad>
-Real
-ParsedFunctorMaterialTempl<is_ad>::getTime(const Moose::StateArg & state) const
-{
-  if (state.iteration_type != Moose::SolutionIterationType::Time)
-    // If we are any iteration type other than time (e.g. nonlinear), then temporally we are still
-    // in the present time
-    return miProblem().time();
-
-  switch (state.state)
-  {
-    case 0:
-      return miProblem().time();
-
-    case 1:
-      return miProblem().timeOld();
-
-    default:
-      mooseError("Unhandled state ", state.state, " in ParsedFunctorMaterial::getTime");
-  }
 }
 
 template class ParsedFunctorMaterialTempl<false>;

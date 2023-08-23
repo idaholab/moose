@@ -43,6 +43,6 @@ ADReal
 FunctorNeumannBC::computeQpResidual()
 {
   const Moose::ElemSideQpArg space_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
-  return _sign * _coef(space_arg, Moose::currentState()) * _functor(space_arg, Moose::currentState()) *
-         _test[_i][_qp];
+  return _sign * _coef(space_arg, Moose::currentState()) *
+         _functor(space_arg, Moose::currentState()) * _test[_i][_qp];
 }
