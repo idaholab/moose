@@ -77,9 +77,7 @@ function configure_petsc()
     echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
   fi
 
-  # If manually building PETSc on Apple Silicon (arm64), several adjustments need to be made to
-  # properly configure PETSc for this platform
-  MUMPS_ARM_STR=""
+  # If manually building PETSc with HDF5 on Apple Silicon (arm64), a patch needs to be performed
   if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
     echo 'INFO: Apple Silicon detected, checking to see if PETSc ARM patches need to be applied...'
     # First check to see if patch marker file exists in PETSC_DIR due to a previous build. If not,
@@ -97,9 +95,6 @@ function configure_petsc()
     elif [ ! -z "$patch_file" ]; then
       echo 'INFO: Applicable ARM patches already applied, proceeding to PETSc configure...'
     fi
-    # Finally, be sure to set FFLAGS for mumps to use the proper arch, otherwise it will fail to
-    # build correctly
-    MUMPS_ARM_STR='FFLAGS=-march=armv8.3-a'
   fi
 
   cd $PETSC_DIR
@@ -125,7 +120,6 @@ function configure_petsc()
       $HDF5_FORTRAN_STR \
       $HDF5_CONFIGURE_STR \
       $MAKE_NP_STR \
-      $MUMPS_ARM_STR \
       "$@"
 
   return $?
