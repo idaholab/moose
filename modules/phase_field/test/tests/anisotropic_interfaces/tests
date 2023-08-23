@@ -11,4 +11,12 @@
     custom_cmp = 'adkobayashi.exodiff'
     valgrind = HEAVY
   [../]
+  [./anisotropic_material_action]
+    type = 'Exodiff'
+    input = 'anisotropic_material_action.i'
+    exodiff = 'anisotropic_material_action_out.e'
+    issue = '#25273'
+    design = '/AnisotropyInterfaceMaterialAction.md'
+    requirement = 'The system shall provide N(N-1) number of InterfaceOrientationMultiphaseMaterial'
+  [../]
 []
