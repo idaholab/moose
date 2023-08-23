@@ -14,8 +14,10 @@
 
 [Functions]
   [fn1]
-    type = ConstantFunction
-    value = 5
+    type = ParsedFunction
+    # The max value on elements should be:
+    # 2 * 3 + 0.5 * 4.5 + 7.5 - 4 = 11.75
+    expression = '2 * x + 0.5 * y + z - t'
   []
   [fn2]
     type = ConstantFunction
@@ -35,7 +37,7 @@
 
 [Postprocessors]
   # The value should be:
-  # 5 * 3^2 + 2 + pi + e + 4 + 3 + 4.5 + 7.5 = 71.85987448204884
+  # 11.75 * 3^2 + 2 + pi + e + 4 + 3 + 4.5 + 7.5 = 132.60987448204884
   [get_prop1]
     type = ElementExtremeFunctorValue
     functor = prop1

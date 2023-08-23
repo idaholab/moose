@@ -74,13 +74,8 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
 
         // Store the space and time values
         const auto r_point = r.getPoint();
-        _func_params[_n_functors] = r_point(0);
-#if LIBMESH_DIM > 1
-        _func_params[_n_functors + 1] = r_point(1);
-#endif
-#if LIBMESH_DIM > 2
-        _func_params[_n_functors + 2] = r_point(2);
-#endif
+        for (const auto i : make_range(Moose::dim))
+          _func_params[_n_functors + i] = r_point(i);
         _func_params[_n_functors + Moose::dim] = _fe_problem.getTimeFromStateArg(t);
 
         // Evaluate the parsed function
@@ -103,23 +98,20 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
   // Collect the symbols corresponding to the _func_params values
   std::vector<std::string> symbols(_functor_symbols);
   std::string symbols_str = Moose::stringify(symbols);
-  symbols_str += ",x";
-#if LIBMESH_DIM > 1
-  symbols_str += ",y";
-#endif
-#if LIBMESH_DIM > 2
-  symbols_str += ",z";
-#endif
-  symbols_str += ",t";
+  if (Moose::dim == 3)
+    symbols_str += "x,y,z";
+  else
+    mooseError("ParsedFunctorMaterial assumes the dimension is always equal to 3.");
+  symbols_str += ",t"
 
-  // Parse the expression
-  if (_parsed_function->Parse(_expression, symbols_str) >= 0)
-    mooseError("The expression\n'",
-               _expression,
-               "'\nwith symbols\n'",
-               symbols_str,
-               "'\ncould not be parsed:\n",
-               _parsed_function->ErrorMsg());
+      // Parse the expression
+      if (_parsed_function->Parse(_expression, symbols_str) >= 0)
+          mooseError("The expression\n'",
+                     _expression,
+                     "'\nwith symbols\n'",
+                     symbols_str,
+                     "'\ncould not be parsed:\n",
+                     _parsed_function->ErrorMsg());
 
   // Resize the values vector
   _func_params.resize(_n_functors + Moose::dim + 1);
