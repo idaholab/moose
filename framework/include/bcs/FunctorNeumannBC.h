@@ -28,4 +28,6 @@ protected:
   const Moose::Functor<ADReal> & _functor;
   /// Coefficient
   const Moose::Functor<ADReal> & _coef;
+  /// Sign to apply to flux
+  const Real _sign;
 };

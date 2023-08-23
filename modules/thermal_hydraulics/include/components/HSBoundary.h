@@ -10,6 +10,7 @@
 #pragma once
 
 #include "BoundaryBase.h"
+#include "Component2D.h"
 
 /**
  * Base class for heat structure boundary components
@@ -22,6 +23,35 @@ public:
   virtual void check() const override;
 
 protected:
+  /**
+   * Returns true if all of the boundaries are external.
+   *
+   * This method should only be called if the heat structure is known to be 2D.
+   */
+  bool allComponent2DBoundariesAreExternal() const;
+
+  /**
+   * Logs an error if any boundary is not external.
+   *
+   * This method should only be called if the heat structure is known to be 2D.
+   */
+  void checkAllComponent2DBoundariesAreExternal() const;
+
+  /**
+   * Returns true if all of the boundaries have the same external boundary type.
+   *
+   * This method should only be called if the heat structure is known to be 2D.
+   */
+  bool hasCommonComponent2DExternalBoundaryType() const;
+
+  /**
+   * Gets the common external boundary type.
+   *
+   * This method should only be called if the heat structure is known to be 2D,
+   * and it is known that there is a common type.
+   */
+  Component2D::ExternalBoundaryType getCommonComponent2DExternalBoundaryType() const;
+
   /// Boundary names for which the boundary component applies
   const std::vector<BoundaryName> & _boundary;
 

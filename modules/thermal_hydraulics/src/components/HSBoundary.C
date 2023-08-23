@@ -61,3 +61,51 @@ HSBoundary::check() const
     }
   }
 }
+
+bool
+HSBoundary::allComponent2DBoundariesAreExternal() const
+{
+  const auto & comp2d = getComponentByName<Component2D>(_hs_name);
+  for (const auto & boundary : _boundary)
+    if (!comp2d.hasExternalBoundary(boundary))
+      return false;
+  return true;
+}
+
+void
+HSBoundary::checkAllComponent2DBoundariesAreExternal() const
+{
+  if (!allComponent2DBoundariesAreExternal())
+    logError("The boundaries given in 'boundary' must all be external.");
+}
+
+bool
+HSBoundary::hasCommonComponent2DExternalBoundaryType() const
+{
+  if (!_boundary.empty())
+  {
+    const auto & comp2d = getComponentByName<Component2D>(_hs_name);
+    const auto common_boundary_type = comp2d.getExternalBoundaryType(_boundary[0]);
+    for (unsigned int i = 1; i < _boundary.size(); i++)
+    {
+      const auto boundary_type = comp2d.getExternalBoundaryType(_boundary[i]);
+      if (boundary_type != common_boundary_type)
+        return false;
+    }
+    return true;
+  }
+  mooseError("No boundaries were supplied in 'boundary'.");
+}
+
+Component2D::ExternalBoundaryType
+HSBoundary::getCommonComponent2DExternalBoundaryType() const
+{
+  if (hasCommonComponent2DExternalBoundaryType())
+  {
+    const auto & comp2d = getComponentByName<Component2D>(_hs_name);
+    return comp2d.getExternalBoundaryType(_boundary[0]);
+  }
+  else
+    mooseError(
+        "The boundaries supplied in 'boundary' do not have a common external boundary type.");
+}
