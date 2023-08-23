@@ -154,6 +154,8 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_element_volumes != "NO_CHECK")
   {
+    _num_tiny_elems = 0;
+    _num_big_elems = 0;
     // loop elements within the mesh (assumes replicated)
     for (auto & elem : mesh->active_element_ptr_range())
     {
@@ -199,7 +201,7 @@ MeshDiagnosticsGenerator::generate()
       {
         types.insert(elem->type());
       }
-      std::string elem_type_names;
+      std::string elem_type_names = "";
       for (auto & elem_type : types)
         elem_type_names += " " + Moose::stringify(elem_type);
 
@@ -215,6 +217,7 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_element_overlap != "NO_CHECK")
   {
+    _num_elem_overlaps = 0;
     auto pl = mesh->sub_point_locator();
     // loop on nodes, assumed replicated mesh
     for (auto & node : mesh->node_ptr_range())
@@ -338,6 +341,7 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_non_conformal_mesh != "NO_CHECK")
   {
+    _num_nonconformal_nodes = 0;
     auto pl = mesh->sub_point_locator();
     // loop on nodes, assumes a replicated mesh
     for (auto & node : mesh->node_ptr_range())
