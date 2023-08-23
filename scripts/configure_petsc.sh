@@ -49,7 +49,7 @@ function configure_petsc()
   fi
 
   # If not found using a variable, look at a few common library locations
-  HDF5_PATHS=/usr/lib/hdf5:/usr/local/hdf5:/usr/share/hdf5:/usr/local/hdf5/share:$HOME/.local
+  HDF5_PATHS=/usr/lib/hdf5:/usr/local/hdf5:/usr/share/hdf5:/usr/local/hdf5/share:/opt/hdf5:$HOME/.local
   if [ -z "$HDF5_STR" ]; then
     # Set path delimiter
     IFS=:
@@ -67,33 +67,14 @@ function configure_petsc()
     unset IFS
   fi
 
-  # If HDF5 is not found locally, download it via PETSc
-  HDF5_FORTRAN_STR=''
-  HDF5_CONFIGURE_STR=''
+  # If HDF5 is not found locally, download it via PETSc and patch if on Apple Silicon
   if [ -z "$HDF5_STR" ]; then
-    HDF5_STR='--download-hdf5=1'
-    HDF5_FORTRAN_STR='--download-hdf5-fortran-bindings=0'
-    HDF5_CONFIGURE_STR='--download-hdf5-configure-arguments="--with-zlib"'
+    HDF5_STR='--download-hdf5=1 --with-hdf5-fortran-bindings=0 --download-hdf5-configure-arguments="--with-zlib"'
     echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
-  fi
-
-  # If manually building PETSc with HDF5 on Apple Silicon (arm64), a patch needs to be performed
-  if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
-    echo 'INFO: Apple Silicon detected, checking to see if PETSc ARM patches need to be applied...'
-    # First check to see if patch marker file exists in PETSC_DIR due to a previous build. If not,
-    # perform patch and create patch marker file. If so, skip patch and report.
-    patch_file=$(find "$PETSC_DIR" -name '.patched' -print -quit 2>/dev/null)
-    if [ -z "$patch_file" ]; then
-      # If an HDF5 download is requested, patch PETSc to properly configure it
-      if [ "$HDF5_STR" == '--download-hdf5=1' ]; then
-        echo 'INFO: Patching PETSc to support HDF5 download and installation on ARM...'
-        git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
-        touch $PETSC_DIR/.patched
-      else
-        echo "INFO: No ARM patches required, proceeding to PETSc configure..."
-      fi
-    elif [ ! -z "$patch_file" ]; then
-      echo 'INFO: Applicable ARM patches already applied, proceeding to PETSc configure...'
+    if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
+      echo 'INFO: Patching PETSc to support HDF5 download and installation on Apple Silicon...'
+      PATCH_DIR=$PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
+      git apply $PATCH_DIR 2>/dev/null || (git apply $PATCH_DIR -R --check && echo 'INFO: Apple Silicon HDF5 patch already applied.')
     fi
   fi
 
@@ -117,8 +98,6 @@ function configure_petsc()
       --download-strumpack=1 \
       --download-superlu_dist=1 \
       $HDF5_STR \
-      $HDF5_FORTRAN_STR \
-      $HDF5_CONFIGURE_STR \
       $MAKE_NP_STR \
       "$@"
 
