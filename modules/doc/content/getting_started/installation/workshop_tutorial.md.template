@@ -23,7 +23,7 @@ mkdir -p ~/projects/examples
 cd ~/projects/examples
 moose --copy-inputs {{TUTORIAL}}
   <output trimmed>
-Directory successfully copied into ./combined/{{TUTORIAL}}/
+Directory successfully copied into ./moose/{{TUTORIAL}}/
 ```
 
 !alert! note title=Directory successfully copied into...
@@ -36,7 +36,7 @@ With the {{TUTORIAL}}'s examples and inputs copied, move into the {{TUTORIAL}} d
 instruct `moose` to run the tests:
 
 ```bash
-cd combined/{{TUTORIAL}}
+cd ./moose/{{TUTORIAL}}
 moose --run -j 6
 ```
 
