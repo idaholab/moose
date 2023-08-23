@@ -17,9 +17,7 @@ InputParameters
 FinEfficiencyFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-
   params.addClassDescription("Computes fin efficiency.");
-
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient functor [W/(m^2-K)]");
   params.addRequiredParam<MooseFunctorName>("thermal_conductivity",
@@ -31,7 +29,6 @@ FinEfficiencyFunctorMaterialTempl<is_ad>::validParams()
   params.addParam<MooseFunctorName>("fin_efficiency_name",
                                     "fin_efficiency",
                                     "Name to give the fin efficiency functor material property");
-
   return params;
 }
 

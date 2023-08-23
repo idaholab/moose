@@ -17,9 +17,7 @@ InputParameters
 FinEnhancementFactorFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-
   params.addClassDescription("Computes a heat transfer enhancement factor for fins.");
-
   params.addRequiredParam<MooseFunctorName>("fin_efficiency", "Fin efficiency functor");
   params.addRequiredParam<MooseFunctorName>(
       "fin_area_fraction",
@@ -31,7 +29,6 @@ FinEnhancementFactorFunctorMaterialTempl<is_ad>::validParams()
       "fin_enhancement_factor_name",
       "fin_enhancement_factor",
       "Name to give the fin enhancement factor functor material property");
-
   return params;
 }
 

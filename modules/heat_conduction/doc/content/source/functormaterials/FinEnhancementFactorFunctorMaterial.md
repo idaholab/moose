@@ -1,7 +1,7 @@
 # FinEnhancementFactorFunctorMaterial
 
 This [functor material](/FunctorMaterials/index.md) computes the enhancement
-factor $\zeta$ to a convective heat transfer condition due to extended surfaces such as fins.
+factor $\zeta$ for a convective heat transfer condition due to extended surfaces such as fins.
 
 ## Formulation
 
@@ -37,7 +37,7 @@ where $A_{f,\text{single}}$ is the surface area of the fin.
 
 The total surface efficiency $\eta_t$ characterizes the performance of an array
 of fins on a surface, not just a single fin, as $\eta_f$ does, and is defined
-as the ratio of the total heat transfer rate $Q$ at the entire surface to the
+as the ratio of the total heat transfer rate $Q$ of the entire surface to the
 theoretical maximum heat transfer rate $Q_{\text{max}}$ [!citep](incropera2002):
 
 !equation id=total_efficiency
