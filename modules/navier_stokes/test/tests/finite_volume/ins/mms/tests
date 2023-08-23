@@ -12,4 +12,13 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
+  [rc-approx]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestApproximateRC
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using an approximate Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
+  []
 []
