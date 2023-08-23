@@ -108,14 +108,12 @@ INSFVRhieChowInterpolator::validParams()
       "a_v",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 1. It represents the on-diagonal "
-      "coefficients for the 'y' component velocity, solved "
-      "via the Navier-Stokes equations.");
+      "coefficients for the 'y' component velocity, solved via the Navier-Stokes equations.");
   params.addParam<MooseFunctorName>(
       "a_w",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
-      "coefficients for the 'z' component velocity, solved "
-      "via the Navier-Stokes equations.");
+      "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
   params.addParam<MooseFunctorName>("dynamic_viscosity", "The viscosity");
   params.addParam<MooseFunctorName>("density", "The density");
   return params;
@@ -413,10 +411,9 @@ INSFVRhieChowInterpolator::initialSetup()
     }
 
     if (var_objects.size() == 0 && !_a_data_provided)
-      mooseError(
-          "No INSFVKernels detected for the velocity variables. "
-          "If you are trying to use auxiliary variables for advection, please specify the a_u/v/w "
-          "coefficients. If not, please specify INSFVKernels for the momentum equations.");
+      mooseError("No INSFVKernels detected for the velocity variables. If you are trying to use "
+                 "auxiliary variables for advection, please specify the a_u/v/w coefficients. If "
+                 "not, please specify INSFVKernels for the momentum equations.");
   }
 }
 
@@ -469,9 +466,9 @@ INSFVRhieChowInterpolator::execute()
               "nonlinear system and we are running kernels that compute said a-coefficients");
   // One might think that we should do similar assertions for !_approximate_as and for
   // (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow). However, even if we are not
-  // using the generated a-coefficient data in those cases, some kernels have been optimized to add
-  // their residuals into the global system during the generation of the a-coefficient data. Hence
-  // if we were to skip the kernel exeuction we would drop those residuals
+  // using the generated a-coefficient data in those cases, some kernels have been optimized to
+  // add their residuals into the global system during the generation of the a-coefficient data.
+  // Hence if we were to skip the kernel execution we would drop those residuals
 
   TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
 
