@@ -1,6 +1,7 @@
 [Tests]
   [./except1]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except1.i
     expect_err = 'Na does not appear in the model\'s geochemical system either as a basis or equilibrium or kinetic species, but you requested an Aux involving it'
@@ -10,6 +11,7 @@
   [../]
   [./except2a]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=free_mg'
@@ -20,6 +22,7 @@
   [../]
   [./except2b]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=free_cm3'
@@ -30,6 +33,7 @@
   [../]
   [./except2c]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=surface_charge'
@@ -40,6 +44,7 @@
   [../]
   [./except2d]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=surface_potential'
@@ -50,6 +55,7 @@
   [../]
   [./except2g]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=moles_dumped'
@@ -60,6 +66,7 @@
   [../]
   [./except2e]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=kinetic_moles'
@@ -70,6 +77,7 @@
   [../]
   [./except2f]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=kinetic_additions'
@@ -80,6 +88,7 @@
   [../]
   [./except3a]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except3.i
     cli_args = 'AuxKernels/error/quantity=molal'
@@ -90,6 +99,7 @@
   [../]
   [./except3b]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except3.i
     cli_args = 'AuxKernels/error/quantity=mg_per_kg'
@@ -100,6 +110,7 @@
   [../]
   [./except4a]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except4.i
     cli_args = 'AuxKernels/error/quantity=surface_charge'
@@ -110,6 +121,7 @@
   [../]
   [./except4b]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except4.i
     cli_args = 'AuxKernels/error/quantity=surface_potential'
@@ -120,6 +132,7 @@
   [../]
   [./except5a]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     cli_args = 'AuxKernels/error/quantity=molal'
@@ -130,6 +143,7 @@
   [../]
   [./except5b]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     cli_args = 'AuxKernels/error/quantity=mg_per_kg'
@@ -140,6 +154,7 @@
   [../]
   [./except5c]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     cli_args = 'AuxKernels/error/quantity=neglog10a'
@@ -150,6 +165,7 @@
   [../]
   [./except5d]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     cli_args = 'AuxKernels/error/quantity=activity'
@@ -160,6 +176,7 @@
   [../]
   [./except5e]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     cli_args = 'AuxKernels/error/quantity=bulk_moles'
@@ -170,6 +187,7 @@
   [../]
   [./surface_charge]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'surface_charge.i'
     csvdiff = 'surface_charge_out.csv'
@@ -180,6 +198,7 @@
   [../]
   [./surface_potential]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'surface_potential.i'
     csvdiff = 'surface_potential_out.csv'
@@ -190,6 +209,7 @@
   [../]
   [./free_cm3]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'free_cm3.i'
     csvdiff = 'free_cm3_out.csv'
@@ -199,6 +219,7 @@
   [../]
   [./free_mg]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'free_mg.i'
     csvdiff = 'free_mg_out.csv'
@@ -208,6 +229,7 @@
   [../]
   [./molal]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'molal.i'
     csvdiff = 'molal_out.csv'
@@ -217,6 +239,7 @@
   [../]
   [./mg_per_kg]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'mg_per_kg.i'
     csvdiff = 'mg_per_kg_out.csv'
@@ -226,6 +249,7 @@
   [../]
   [./neglog10a]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'neglog10a.i'
     csvdiff = 'neglog10a_out.csv'
@@ -235,6 +259,7 @@
   [../]
   [./activity]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'activity.i'
     csvdiff = 'activity_out.csv'
@@ -244,6 +269,7 @@
   [../]
   [./bulk_moles]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'bulk_moles.i'
     csvdiff = 'bulk_moles_out.csv'
@@ -253,6 +279,7 @@
   [../]
   [./temperature]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'temperature.i'
     csvdiff = 'temperature_out.csv'
@@ -262,6 +289,7 @@
   [../]
   [./kinetic_moles]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'kinetic_moles.i'
     csvdiff = 'kinetic_moles_out.csv'
@@ -271,6 +299,7 @@
   [../]
   [./kinetic_free_mg]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'kinetic_moles.i'
     cli_args = 'AuxKernels/the_aux/quantity=free_mg Outputs/file_base=kinetic_free_mg_out Postprocessors/value_from_action/variable="free_mg_Fe(OH)3(ppd)"'
@@ -281,6 +310,7 @@
   [../]
   [./kinetic_free_cm3]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'kinetic_moles.i'
     cli_args = 'AuxKernels/the_aux/quantity=free_cm3 Outputs/file_base=kinetic_free_cm3_out Postprocessors/value_from_action/variable="free_cm3_Fe(OH)3(ppd)"'
@@ -291,6 +321,7 @@
   [../]
   [./kinetic_rate]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'kinetic_rate.i'
     csvdiff = 'kinetic_rate_out.csv'

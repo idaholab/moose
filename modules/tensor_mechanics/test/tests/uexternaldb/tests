@@ -12,6 +12,7 @@
       cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
       expect_out = 'UEXTERNALDB           0 '
       detail = 'beginning of the simulation.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [timestep_begin]
@@ -22,6 +23,7 @@
       cli_args = 'UserObjects/uexternaldb/execute_on=TIMESTEP_BEGIN'
       expect_out = 'UEXTERNALDB           1 '
       detail = 'beginning of each MOOSE time step.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [timestep_end]
@@ -32,6 +34,7 @@
       cli_args = 'UserObjects/uexternaldb/execute_on=TIMESTEP_END'
       expect_out = 'UEXTERNALDB           2 '
       detail = 'end of each MOOSE time step.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [final]
@@ -42,6 +45,7 @@
       cli_args = 'UserObjects/uexternaldb/execute_on=FINAL'
       expect_out = 'UEXTERNALDB           3 '
       detail = 'end of the simulation.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
   []
@@ -54,6 +58,7 @@
     expect_out = 'Loading step is           1'
     requirement = 'The Abaqus UEXTERNALDB interface shall interface with a general user object to '
                   'obtain the proper loading step and pass it to the user routine.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -66,6 +71,7 @@
     expect_out = 'getoutdir           1 \. '
     requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
                   'simulation output directory.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -78,6 +84,7 @@
     expect_out = 'getjobname          17 utility_functions '
     requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
                   'simulation job name.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -93,6 +100,7 @@
       expect_out = '\*\* Abaqus Info \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'info level.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [warning]
@@ -105,6 +113,7 @@
       expect_out = '\*\* Abaqus Warning \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'warning level.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [non_fatal]
@@ -117,6 +126,7 @@
       expect_out = '\*\* Abaqus Non-fatal Error \*\*\nInline message 1 2 0.100000 0.200000 0.300000 '
                    'ONE      TWO     !'
       detail = 'non-fatal error level.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [error]
@@ -129,6 +139,7 @@
       expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
                    '   !'
       detail = 'fatal error level.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
   []
@@ -144,6 +155,7 @@
       max_threads = 1
       expect_out = 'sum = 1000.'
       detail = 'supporting single threaded execution.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [two_threads]
@@ -155,6 +167,7 @@
       max_threads = 2
       expect_out = 'sum = 2000.'
       detail = 'supporting at least 2 threads.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [four_threads]
@@ -166,6 +179,7 @@
       max_threads = 4
       expect_out = 'sum = 4000.'
       detail = 'supporting at least 4 threads.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
   []
@@ -180,6 +194,7 @@
       valgrind = 'NONE'
       expect_out = '3lop 40.5 1950'
       detail = 'supporting single threaded execution.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [two_threads]
@@ -191,6 +206,7 @@
       max_threads = 2
       expect_out = '3lop 40.5 1950'
       detail = 'supporting two threaded execution.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
     [four_threads]
@@ -202,6 +218,7 @@
       max_threads = 4
       expect_out = '3lop 40.5 1950'
       detail = 'supporting four threaded execution.'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
   []

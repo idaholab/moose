@@ -1,6 +1,7 @@
 [Tests]
   [./except1]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except1.i
     expect_err = 'source_species_names: must have the same size as source_species_rates'
@@ -11,6 +12,7 @@
   [../]
   [./except2]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
     expect_err = 'source_species_names:
@@ -22,6 +24,7 @@
   [../]
   [./except3]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except3.i
     expect_err = 'The species OH- is not in the basis, so cannot have its activity or fugacity constraint removed'
@@ -32,6 +35,7 @@
   [../]
   [./except4]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except4.i
     expect_err = 'The species H+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
@@ -42,6 +46,7 @@
   [../]
   [./except5]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except5.i
     expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
@@ -52,6 +57,7 @@
   [../]
   [./except6]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except6.i
     expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
@@ -62,6 +68,7 @@
   [../]
   [./spatial_1]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_1.i
     csvdiff = spatial_1_out_pH_0002.csv
@@ -71,6 +78,7 @@
   [../]    
   [./spatial_1_console]
     type = RunApp
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_1_console.i
     max_parallel = 1
@@ -82,6 +90,7 @@
   [../]    
   [./spatial_1_console_MPI]
     type = RunApp
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_1_console.i
     min_parallel = 2
@@ -95,6 +104,7 @@
   [../]    
   [./spatial_2]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_2.i
     csvdiff = spatial_2_out_pH_0002.csv
@@ -104,6 +114,7 @@
   [../]    
   [./spatial_3]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_3.i
     csvdiff = spatial_3_out.csv
@@ -113,6 +124,7 @@
   [../]    
   [./spatial_4]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_4.i
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
@@ -122,6 +134,7 @@
   [../]    
   [./spatial_4_threads]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_4.i
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
@@ -133,6 +146,7 @@
   [../]    
   [./spatial_4_mpi]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_4.i
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
@@ -144,6 +158,7 @@
   [../]
   [./spatial_4_threads_mpi]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_4.i
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
@@ -156,6 +171,7 @@
   [../]    
   [./spatial_5]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_5.i
     csvdiff = 'spatial_5_out_bulk_Cl_0001.csv spatial_5_out_bulk_Cl_0002.csv'
@@ -165,6 +181,7 @@
   [../]    
   [./spatial_6]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_6.i
     csvdiff = 'spatial_6_out_temperature_0001.csv spatial_6_out_temperature_0002.csv'
@@ -174,6 +191,7 @@
   [../]    
   [./spatial_7_no_adaptive]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/adaptive_timestepping=false'
@@ -184,6 +202,7 @@
   [../]    
   [./spatial_7_dt_min]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/dt_min=1'
@@ -194,6 +213,7 @@
   [../]    
   [./spatial_7]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_7.i
     csvdiff = 'spatial_7_out_temperature_0001.csv spatial_7_out_temperature_0002.csv'
@@ -203,6 +223,7 @@
   [../]    
   [./spatial_8]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = spatial_8.i
     csvdiff = 'spatial_8_out_bulk_Cl_0001.csv'

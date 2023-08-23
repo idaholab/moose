@@ -9,6 +9,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 []

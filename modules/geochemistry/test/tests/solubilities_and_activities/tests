@@ -1,6 +1,7 @@
 [Tests]
   [./gypsum_solubility]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'gypsum_solubility.i'
     csvdiff = 'gypsum_solubility_out.csv'
@@ -10,6 +11,7 @@
   [../]
   [./sebkhat_el_melah]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = 'sebkhat_el_melah.i'
     expect_out = 'Minerals:

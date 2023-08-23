@@ -10,6 +10,7 @@
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for stateful properties'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -21,6 +22,7 @@
     cli_args = 'Modules/TensorMechanics/Master/all/strain=SMALL'
     valgrind = 'NONE'
     requirement = 'The system shall raise an error if a UMAT that requires incremental quantities is being used with a total strain formulation'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -34,6 +36,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'Fortran77 as constitutive models, with support for finite strain elastic material '
                   'models'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -47,6 +50,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'Fortran77 as constitutive models, with support for small strain elastic material '
                   'models'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 
@@ -60,6 +64,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'C/C++ as constitutive models, with support for finite strain elastic material '
                   'models'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [elastic_reference]
@@ -90,6 +95,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for incremental strain elastic material models'
     issues = '#18843'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
 []

@@ -9,6 +9,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [2D_continuous_porosity]
@@ -28,6 +29,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [pressure-corrected-action]
@@ -38,6 +40,7 @@
     method = '!dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [pressure-corrected-jac]

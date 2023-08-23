@@ -10,6 +10,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using the same interface plug-in.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [multiple_blocks_two_materials]
@@ -21,6 +22,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [multiple_blocks_two_materials_parallel]
@@ -32,6 +34,7 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins in multi processor runs.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [rve_multimaterial_umat]
@@ -46,6 +49,7 @@
     method = opt
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously using the UMAT interface.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
   [rve_multimaterial_moose]
