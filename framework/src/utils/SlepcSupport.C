@@ -491,7 +491,8 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
 void
 slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 {
-  Moose::PetscSupport::petscSetOptions(eigen_problem);
+  Moose::PetscSupport::petscSetOptions(eigen_problem.getPetscOptions(),
+                                       eigen_problem.solverParams());
   // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
   // can be overriden
   setSlepcEigenSolverTolerances(eigen_problem, params);
