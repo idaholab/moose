@@ -75,14 +75,13 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
           _func_params[i] = (*_functors[i])(r, t);
 
         // Store the space and time values
-        // TODO: find some way to extract x,y,z from r. getPoint(r) does not exist yet.
-        // const auto r_point = getPoint(r);
-        _func_params[_n_functors] = 0;
+        const auto r_point = r.getPoint();
+        _func_params[_n_functors] = r_point(0);
 #if LIBMESH_DIM > 1
-        _func_params[_n_functors + 1] = 0;
+        _func_params[_n_functors + 1] = r_point(1);
 #endif
 #if LIBMESH_DIM > 2
-        _func_params[_n_functors + 2] = 0;
+        _func_params[_n_functors + 2] = r_point(2);
 #endif
         _func_params[_n_functors + LIBMESH_DIM] = getTime(t);
 

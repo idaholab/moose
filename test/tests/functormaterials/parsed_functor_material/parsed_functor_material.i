@@ -35,11 +35,12 @@
 
 [Postprocessors]
   # The value should be:
-  # 5 + 3^2 + 2 + pi + e + 4 + 3 + 4.5 + 7.5 = 40.85987448204884
+  # 5 * 3^2 + 2 + pi + e + 4 + 3 + 4.5 + 7.5 = 71.85987448204884
   [get_prop1]
     type = ElementExtremeFunctorValue
     functor = prop1
     value_type = max
+    execute_on = 'INITIAL'
   []
 []
 
@@ -54,4 +55,5 @@
 
 [Outputs]
   csv = true
+  execute_on = 'INITIAL'
 []
