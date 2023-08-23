@@ -50,6 +50,17 @@ class INSFVRhieChowInterpolator : public GeneralUserObject,
                                   public ADFunctorInterface
 {
 public:
+  /**
+   * Parameters of this object that should be added to the NSFV action that are unique to this
+   * object
+   */
+  static InputParameters uniqueParams();
+
+  /**
+   * @returns A list of the parameters that are common between this object and the NSFV action
+   */
+  static std::vector<std::string> listOfCommonParams();
+
   static InputParameters validParams();
   INSFVRhieChowInterpolator(const InputParameters & params);
 

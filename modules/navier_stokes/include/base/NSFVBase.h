@@ -14,6 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "NSFVUtils.h"
+#include "INSFVRhieChowInterpolator.h"
 
 /**
  * Base class for setting up Navier-Stokes finite volume simulations
@@ -447,6 +448,11 @@ InputParameters
 NSFVBase<BaseType>::validParams()
 {
   InputParameters params = BaseType::validParams();
+
+  /**
+   * Add params relevant to the Rhie-Chow user object
+   */
+  params += INSFVRhieChowInterpolator::uniqueParams();
 
   /**
    * General parameters used to set up the simulation.
@@ -1418,6 +1424,7 @@ NSFVBase<BaseType>::addRhieChowUserObjects()
             ? parameters().template get<unsigned short>("porosity_smoothing_layers")
             : 0;
     params.template set<unsigned short>("smoothing_layers") = smoothing_layers;
+    params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
     getProblem().addUserObject(
         "PINSFVRhieChowInterpolator", prefix() + "pins_rhie_chow_interpolator", params);
   }
@@ -1438,6 +1445,7 @@ NSFVBase<BaseType>::addRhieChowUserObjects()
       params.template set<MooseFunctorName>("a_w") = "az";
     }
 
+    params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
     getProblem().addUserObject(
         "INSFVRhieChowInterpolator", prefix() + "ins_rhie_chow_interpolator", params);
   }

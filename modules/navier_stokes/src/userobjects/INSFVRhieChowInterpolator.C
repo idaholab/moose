@@ -37,11 +37,48 @@ using namespace libMesh;
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolator);
 
 InputParameters
+INSFVRhieChowInterpolator::uniqueParams()
+{
+  auto params = emptyInputParameters();
+  params.addParam<bool>(
+      "pull_all_nonlocal_a",
+      false,
+      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
+      "means elements that we have access to (this may not be all the elements in the mesh if the "
+      "mesh is distributed) but that we do not own.");
+  params.addParam<NonlinearSystemName>("mass_momentum_system",
+                                       "nl0",
+                                       "The nonlinear system in which the monolithic momentum and "
+                                       "continuity equations are located.");
+  params.addParam<bool>(
+      "approximate_rhie_chow_coefficients",
+      false,
+      "Whether to compute an approximation of the Rhie-Chow coefficients. If this is true, then "
+      "the supplied characteristic speed, viscosity, and density will be used to compute the "
+      "Rhie-Chow coefficients instead of looping and computing the coefficients from the kernels "
+      "and boundary conditions.");
+  params.addParam<Real>("characteristic_speed", "The characteristic speed");
+  return params;
+}
+
+std::vector<std::string>
+INSFVRhieChowInterpolator::listOfCommonParams()
+{
+  return {"pull_all_nonlocal_a",
+          "mass_momentum_system",
+          "approximate_rhie_chow_coefficients",
+          "characteristic_speed",
+          "density",
+          "dynamic_viscosity"};
+}
+
+InputParameters
 INSFVRhieChowInterpolator::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params += TaggingInterface::validParams();
   params += BlockRestrictable::validParams();
+  params += INSFVRhieChowInterpolator::uniqueParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
@@ -79,26 +116,8 @@ INSFVRhieChowInterpolator::validParams()
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
-  params.addParam<bool>(
-      "pull_all_nonlocal_a",
-      false,
-      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
-      "means elements that we have access to (this may not be all the elements in the mesh if the "
-      "mesh is distributed) but that we do not own.");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
-  params.addParam<bool>(
-      "approximate_rhie_chow_coefficients",
-      false,
-      "Whether to compute an approximation of the Rhie-Chow coefficients. If this is true, then "
-      "the supplied characteristic speed, viscosity, and density will be used to compute the "
-      "Rhie-Chow coefficients instead of looping and computing the coefficients from the kernels "
-      "and boundary conditions.");
-  params.addParam<Real>("characteristic_speed", "The characteristic speed");
-  params.addParam<MooseFunctorName>(NS::mu, "The viscosity");
-  params.addParam<MooseFunctorName>(NS::density, "The density");
+  params.addParam<MooseFunctorName>("dynamic_viscosity", "The viscosity");
+  params.addParam<MooseFunctorName>("density", "The density");
   return params;
 }
 
@@ -289,8 +308,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
                    "' must be set");
     };
     check_approx_param("characteristic_speed");
-    check_approx_param(NS::density);
-    check_approx_param(NS::mu);
+    check_approx_param("density");
+    check_approx_param("dynamic_viscosity");
     _rhos.resize(libMesh::n_threads());
     _mus.resize(libMesh::n_threads());
     for (const auto tid : make_range(libMesh::n_threads()))
