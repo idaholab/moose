@@ -29,6 +29,7 @@ public:
   virtual ~LiquidMetalSubChannel1PhaseProblem();
 
 protected:
+  virtual void initializeSolution() override;
   /**
    * Computes the axial friction factor for the sodium coolant and
    * for each subchannel.

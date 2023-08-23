@@ -107,8 +107,8 @@ protected:
 
   /// Computes implicit solve using PetSc
   virtual PetscErrorCode implicitPetscSolve(int iblock);
-  /// Function to initialize the solution fields
-  virtual void initializeSolution();
+  /// Function to initialize the solution & geometry fields
+  virtual void initializeSolution() = 0;
 
   /// Functions that computes the interpolation scheme given the Peclet number
   virtual PetscScalar computeInterpolationCoefficients(const std::string interp_type,

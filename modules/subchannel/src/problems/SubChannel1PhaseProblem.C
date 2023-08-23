@@ -2597,22 +2597,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   return ierr;
 }
 
-void
-SubChannel1PhaseProblem::initializeSolution()
-{
-  unsigned int last_node = _n_cells;
-  unsigned int first_node = 1;
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-  {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
-    }
-  }
-}
-
 double
 SubChannel1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
 {
