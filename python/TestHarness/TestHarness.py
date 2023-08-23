@@ -845,7 +845,7 @@ class TestHarness:
                 except IOError:
                     print('\nERROR: Unable to write results due to permissions')
                     sys.exit(1)
-            
+
             if self.options.junit_output:
                 try:
                     with open(self.options.junit_output, 'w') as data_file:
