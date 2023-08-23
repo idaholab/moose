@@ -99,7 +99,7 @@ function configure_petsc()
 
   cd $PETSC_DIR
   python3 ./configure --with-64-bit-indices \
-      --with-cxx-dialect=C++11 \
+      --with-cxx-dialect=C++17 \
       --with-debugging=no \
       --with-fortran-bindings=0 \
       --with-mpi=1 \
