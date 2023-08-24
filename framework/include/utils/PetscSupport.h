@@ -13,6 +13,7 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
+#include "SolverParams.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
@@ -52,7 +53,7 @@ public:
 /**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
-void petscSetOptions(FEProblemBase & problem);
+void petscSetOptions(const PetscOptions & po, const SolverParams & solver_params);
 
 /**
  * Set the default options for a KSP
@@ -94,6 +95,24 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
  * Stores the PETSc options supplied from the InputParameters with MOOSE
  */
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
+
+/**
+ * Populate flags in a given PetscOptions object using a vector of input arguments
+ * @param petsc_flags Container holding the flags of the petsc options
+ * @param petsc_options Data structure which handles petsc options within moose
+ */
+void processPetscFlags(const MultiMooseEnum & petsc_flags, PetscOptions & petsc_options);
+
+/**
+ * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
+ * @param petsc_pair_options Option-value pairs of petsc settings
+ * @param mesh_dimension The mesh dimension, needed for multigrid settings
+ * @param petsc_options Data structure which handles petsc options within moose
+ */
+void
+processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
+                  const unsigned int mesh_dimension,
+                  PetscOptions & petsc_options);
 
 /**
  * Returns the valid petsc line search options as a set of strings
