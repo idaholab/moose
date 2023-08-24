@@ -1,6 +1,8 @@
 [Tests]
   [./morro]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'morro.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1kg
@@ -43,6 +45,8 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
   [../]
   [./morro_disequilibrium]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'morro_disequilibrium.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1kg
@@ -87,6 +91,8 @@ e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3074V
   [../]
   [./microbial]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'microbial.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.003kg

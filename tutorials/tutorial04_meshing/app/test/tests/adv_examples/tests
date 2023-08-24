@@ -36,6 +36,7 @@
     type = RunApp
     input = 'oversize.i'
     cli_args= '--mesh-only --error-deprecated'
+    installation_type = in_tree
   []
 
   [pcg_xyd]

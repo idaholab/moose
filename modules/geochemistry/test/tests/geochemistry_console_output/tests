@@ -1,6 +1,8 @@
 [Tests]
   [./console]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'console.i'
     expect_out = 'Total mass = 1.0005269kg (including kinetic species and free minerals)'
     match_literal = true

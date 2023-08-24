@@ -29,6 +29,7 @@
     type = RunApp
     input = 'depletion_id.i'
     cli_args= '--mesh-only --error-deprecated'
+    installation_type = in_tree
   []
 
   [reporting_id_vpp]
@@ -43,6 +44,7 @@
     type = RunApp
     input = 'alternative_pattern_reporting_id.i'
     cli_args= '--mesh-only --error-deprecated'
+    installation_type = in_tree
   []
 
   [common_geo]

@@ -169,6 +169,8 @@
       cli_args = 'Materials/rom_stress_prediction/model=gold/3tile_json_export.json'
       detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file relative to the input.'
       petsc_version = '>=3.9.0'
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
+      installation_type = in_tree
     []
 
     [3tile_json_export]
@@ -179,6 +181,8 @@
       petsc_version = '>=3.9.0'
       cli_args = 'Materials/rom_stress_prediction/export_model=3tile_json_export.json'
       allow_test_objects = true
+      # skip test if test is being run out-of-tree. Issue Ref: #25279
+      installation_type = in_tree
     []
   []
   [ADrom]

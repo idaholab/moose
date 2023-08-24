@@ -34,7 +34,7 @@ In generally, Sawtooth may have a more up-to-date version.
 Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
 Example input files are also available while this module is loaded.
 
-!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=reactor_tutorial
+!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=heat_conduction
 
 ## View Results
 

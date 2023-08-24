@@ -1,6 +1,8 @@
 [Tests]
   [./gypsum_solubility]
     type = 'CSVDiff'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'gypsum_solubility.i'
     csvdiff = 'gypsum_solubility_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore solubilities'
@@ -9,6 +11,8 @@
   [../]
   [./sebkhat_el_melah]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'sebkhat_el_melah.i'
     expect_out = 'Minerals:
 Halite = 1*Cl- + 1*Na+;  log10K = 1.593;  SI = -0.9384

@@ -1,6 +1,8 @@
 [Tests]
   [./invalid_swap]
     type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = invalid_swap.i
     expect_err = 'Matrix is not invertible, which signals an invalid basis swap'
     requirement = 'The geochemistry interrogator will throw an error for an invalid swap'
@@ -9,6 +11,8 @@
   [../]
   [./gypsum]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'gypsum.i'
     expect_out = 'Not enough activites known to compute equilibrium temperature for reaction
   Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.451
@@ -20,6 +24,8 @@ Gypsum.  T = 43.6625degC'
   [../]
   [./hematite]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'hematite.i'
     expect_out = '(A_H+)^-4 (A_O2(aq))^0.5 = 10^3.068'
     match_literal = true
@@ -29,6 +35,8 @@ Gypsum.  T = 43.6625degC'
   [../]
   [./muscovite]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'muscovite.i'
     expect_out = '(A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
 (A_K+)^1 (A_H+)^-1 = 10^3.421'
@@ -39,6 +47,8 @@ Gypsum.  T = 43.6625degC'
   [../]
   [./muscovite2]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'muscovite2.i'
     expect_out = '(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
 (A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_H+)^-10 = 10^26.56
@@ -54,6 +64,8 @@ Gypsum.  T = 43.6625degC'
   [../]
   [./pyrite]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'pyrite.i'
     expect_out = 'Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
 Pyrite = -3.5*H2O + 1*Fe(OH)3(ppd) + 2*SO4-- + 4*H+ - 3.75*O2(aq)  .  log10(K) = 221
@@ -67,6 +79,8 @@ Pyrite = -1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12
   [../]
   [./clinoptilolite]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'clinoptilolite.i'
     expect_out = 'Clinoptil-Ca = 12*H2O + 1*Ca++ + 2*Al+++ + 10*SiO2(aq) - 8*H+  .  log10(K) = -9.12
 Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*SiO2(aq) - 1.333*H+ - 0.6667*K+  .  log10(K) = -18.83
@@ -79,6 +93,8 @@ Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.
   [../]
   [./clinoptilolite2]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'clinoptilolite2.i'
     expect_out = '(A_Ca++)^1 (A_Al+++)^2 (A_SiO2(aq))^10 (A_H+)^-8 = 10^-13.51
 (A_Ca++)^-1 (A_SiO2(aq))^7 (A_H+)^2 = 10^-27.22
