@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FinEfficiencyFunctorMaterial.md'
+  issues = '#25275'
+  [test]
+    type = CSVDiff
+    input = 'fin_efficiency.i'
+    csvdiff = 'fin_efficiency_out.csv'
+    requirement = 'The system shall be able to compute a fin efficiency functor material property.'
+  []
+[]
