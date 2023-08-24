@@ -102,16 +102,16 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
     symbols_str += "x,y,z";
   else
     mooseError("ParsedFunctorMaterial assumes the dimension is always equal to 3.");
-  symbols_str += ",t"
+  symbols_str += ",t";
 
-      // Parse the expression
-      if (_parsed_function->Parse(_expression, symbols_str) >= 0)
-          mooseError("The expression\n'",
-                     _expression,
-                     "'\nwith symbols\n'",
-                     symbols_str,
-                     "'\ncould not be parsed:\n",
-                     _parsed_function->ErrorMsg());
+  // Parse the expression
+  if (_parsed_function->Parse(_expression, symbols_str) >= 0)
+    mooseError("The expression\n'",
+               _expression,
+               "'\nwith symbols\n'",
+               symbols_str,
+               "'\ncould not be parsed:\n",
+               _parsed_function->ErrorMsg());
 
   // Resize the values vector
   _func_params.resize(_n_functors + Moose::dim + 1);
