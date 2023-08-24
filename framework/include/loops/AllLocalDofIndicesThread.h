@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
+#include "SubProblem.h"
 
 #include "libmesh/elem_range.h"
 #include "libmesh/parallel_object.h"
@@ -30,7 +31,7 @@ class FEProblemBase;
 class AllLocalDofIndicesThread : public ParallelObject
 {
 public:
-  AllLocalDofIndicesThread(FEProblemBase & problem,
+  AllLocalDofIndicesThread(SubProblem & problem,
                            std::vector<std::string> vars,
                            bool include_semilocal = false);
   // Splitting Constructor
@@ -45,7 +46,7 @@ public:
   void dofIndicesSetUnion();
 
 protected:
-  FEProblemBase & _problem;
+  SubProblem & _problem;
   System * _sys;
   std::vector<unsigned int> _var_numbers;
 

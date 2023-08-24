@@ -301,10 +301,6 @@ public:
    */
   void constraintJacobians(bool displaced);
 
-  /// set all the global dof indices for a nonlinear variable
-  void setVariableGlobalDoFs(const std::string & var_name);
-  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
-
   /**
    * Computes multiple (tag associated) Jacobian matricese
    */
@@ -919,8 +915,6 @@ protected:
   bool _has_nodalbc_diag_save_in;
 
   void getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> & dofs);
-
-  std::vector<dof_id_type> _var_all_dof_indices;
 
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;

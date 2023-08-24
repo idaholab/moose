@@ -804,6 +804,10 @@ public:
    */
   void removeVector(TagID tag_id);
 
+  /// set all the global dof indices for a nonlinear variable
+  void setVariableGlobalDoFs(const std::string & var_name);
+  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
+
   /**
    * Adds a matrix with a given tag
    *
@@ -966,6 +970,9 @@ protected:
 
   /// Whether or not the solution states have been initialized
   bool _solution_states_initialized;
+
+  /// Container for the dof indices of a given variable
+  std::vector<dof_id_type> _var_all_dof_indices;
 
 private:
   /**
