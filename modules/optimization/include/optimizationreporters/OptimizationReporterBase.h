@@ -108,5 +108,4 @@ private:
   friend class OptimizationReporterTest;
   /// private method for testing optimizationData with test src
   virtual void setSimulationValuesForTesting(std::vector<Real> & /*data*/){};
-  virtual void setICsandBounds() = 0;
 };

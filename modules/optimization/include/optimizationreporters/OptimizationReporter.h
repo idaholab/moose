@@ -17,9 +17,6 @@
  */
 class OptimizationReporter : public OptimizationReporterBase
 {
-private:
-  /// Data helper for generating objective value.
-  OptimizationDataHelper _opt_data;
 
 public:
   static InputParameters validParams();
@@ -30,6 +27,10 @@ public:
   virtual Real computeObjective() override;
   virtual void setMisfitToSimulatedValues() override;
 
+protected:
+  /// Data helper for generating objective value.
+  OptimizationDataHelper _opt_data;
+
   /// measurement values
   std::vector<Real> & _measurement_values;
   /// simulated values at measurement xyzt
@@ -38,6 +39,6 @@ public:
   std::vector<Real> & _misfit_values;
 
 private:
-  virtual void setICsandBounds() override;
+  void setICsandBounds();
   virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };

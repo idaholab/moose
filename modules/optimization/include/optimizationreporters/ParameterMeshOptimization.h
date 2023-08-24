@@ -48,6 +48,5 @@ private:
                               Real constantDataFromInput,
                               const std::string & meshVarName,
                               unsigned int ntimes) const;
-  virtual void setICsandBounds() override{};
   virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };
