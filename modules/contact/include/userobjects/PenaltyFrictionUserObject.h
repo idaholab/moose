@@ -9,19 +9,24 @@
 
 #pragma once
 
+#include "PenaltyWeightedGapUserObject.h"
 #include "WeightedVelocitiesUserObject.h"
+#include "AugmentedLagrangeInterface.h"
+#include "TwoVector.h"
 
 /**
- * User object that computes tangential pressures due to friction using a penalty approach
+ * User object that computes tangential pressures due to friction using a penalty approach,
+ * following J.C. Simo, T.A. Laursen, An augmented lagrangian treatment of contact problems
+ * involving friction, https://doi.org/10.1016/0045-7949(92)90540-G.
  */
-class PenaltyFrictionUserObject : public WeightedVelocitiesUserObject
+class PenaltyFrictionUserObject : virtual public PenaltyWeightedGapUserObject,
+                                  virtual public WeightedVelocitiesUserObject
 {
 public:
   static InputParameters validParams();
 
   PenaltyFrictionUserObject(const InputParameters & parameters);
 
-  virtual const ADVariableValue & contactPressure() const override;
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
@@ -30,14 +35,17 @@ public:
   virtual void reinit() override;
   virtual void timestepSetup() override;
 
-  virtual Real getNormalContactPressure(const Node * const node) const override;
-
   virtual Real getFrictionalContactPressure(const Node * const node,
                                             const unsigned int component) const override;
   virtual Real getAccumulatedSlip(const Node * const node,
                                   const unsigned int component) const override;
   virtual Real getTangentialVelocity(const Node * const node,
                                      const unsigned int component) const override;
+  virtual Real getDeltaTangentialLagrangeMultiplier(const Node * const node,
+                                                    const unsigned int component) const override;
+
+  virtual bool isAugmentedLagrangianConverged() override;
+  virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -49,36 +57,31 @@ protected:
   /// The penalty factor for the frictional constraints
   const Real _penalty_friction;
 
+  /// Acceptable slip distance for augmented Lagrange convergence
+  const Real _slip_tolerance;
+
   /// The friction coefficient
   const Real _friction_coefficient;
 
-  /// Map from degree of freedom to old weighted gap
-  std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
+  /// Map from degree of freedom to current and old accumulated slip
+  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip;
 
-  /// Map from degree of freedom to old physical (not weighted) tangential velocity
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_real_tangential_velocity;
-
-  /// Map from degree of freedom to accumulated slip
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_accumulated_slip;
-
-  /// Map from degree of freedom to old accumulated slip
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_accumulated_slip;
-
-  /// Map from degree of freedom to normal pressure
-  std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
-
-  /// Map from degree of freedom to old normal pressure
-  std::unordered_map<const DofObject *, Real> _dof_to_old_normal_pressure;
-
-  /// Map from degree of freedom to both frictional (tangential) pressure direction
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_frictional_pressure;
-
-  /// The normal contact pressure on the mortar segument quadrature points
-  ADVariableValue _contact_force;
+  /// Map from degree of freedom to current and old tangential traction
+  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
+      _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_force_one;
 
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_force_two;
+
+  /// Map from degree of freedom to augmented lagrange multiplier
+  std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
+
+  /// Map from degree of freedom to local friction penalty value
+  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
+
+  /// Penalty growth factor for augmented Lagrange
+  const Real _penalty_multiplier_friction;
 };

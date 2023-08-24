@@ -132,7 +132,7 @@
     type = PenaltyMortarUserObjectAux
     variable = real_weighted_gap
     user_object = friction_uo
-    contact_quantity = weighted_gap
+    contact_quantity = normal_gap
   []
   [stress_xx]
     type = RankTwoAux
@@ -309,8 +309,9 @@
     disp_y = disp_y
     friction_coefficient = 0.1 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 5e5
+    penalty = 1e5
     penalty_friction = 1e4
+    use_physical_gap = true
   []
 []
 

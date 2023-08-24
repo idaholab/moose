@@ -12,7 +12,16 @@
 #include "AuxKernel.h"
 #include "MooseEnum.h"
 
+#include <functional>
+#include <map>
+#include <tuple>
+#include <string>
+
+class UserObject;
 class WeightedGapUserObject;
+class PenaltyWeightedGapUserObject;
+class WeightedVelocitiesUserObject;
+class PenaltyFrictionUserObject;
 
 /**
  * Auxiliary kernel to output mortar penalty contact quantities of interest
@@ -39,7 +48,11 @@ protected:
     ACCUMULATED_SLIP_TWO,
     FRICTIONAL_PRESSURE_TWO,
     TANGENTIAL_VELOCITY_TWO,
-    WEIGHTED_GAP
+    NORMAL_GAP,
+    NORMAL_LM,
+    DELTA_TANGENTIAL_LM_ONE,
+    DELTA_TANGENTIAL_LM_TWO,
+    ACTIVE_SET
   };
 
   virtual Real computeValue() override;
@@ -48,5 +61,22 @@ protected:
   const ContactQuantityEnum _contact_quantity;
 
   /// The user object inputted by the user to obtain the contact quantities
-  const WeightedGapUserObject * _user_object;
+  const UserObject & _user_object;
+
+  ///@{ Cast pointers to specific UOs
+  const WeightedGapUserObject * _wguo;
+  const PenaltyWeightedGapUserObject * _pwguo;
+  const WeightedVelocitiesUserObject * _wvuo;
+  const PenaltyFrictionUserObject * _pfuo;
+  ///@}
+
+  /// Definition of the output quantities and
+  std::map<ContactQuantityEnum, std::tuple<std::string, const void *, std::function<Real(void)>>>
+      _outputs;
+
+  /// if true computeValue only performs error checking (used in constructor)
+  bool _check_only;
+
+  /// available contact quantities
+  static const MooseEnum _contact_quantities;
 };

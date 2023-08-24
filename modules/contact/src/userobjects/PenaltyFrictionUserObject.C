@@ -14,6 +14,9 @@
 #include "MooseUtils.h"
 #include "MathUtils.h"
 #include "MortarContactUtils.h"
+#include "ADReal.h"
+
+#include <Eigen/Core>
 
 registerMooseObject("ContactApp", PenaltyFrictionUserObject);
 
@@ -21,47 +24,62 @@ InputParameters
 PenaltyFrictionUserObject::validParams()
 {
   InputParameters params = WeightedVelocitiesUserObject::validParams();
+  params += PenaltyWeightedGapUserObject::validParams();
+
   params.addClassDescription(
       "Computes the mortar frictional contact force via a penalty approach.");
-  params.addRequiredParam<Real>("penalty", "The penalty factor for normal interaction.");
   params.addParam<Real>("penalty_friction",
                         "The penalty factor for frictional interaction. If not provide, the normal "
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
+  params.addRangeCheckedParam<Real>(
+      "slip_tolerance",
+      "slip_tolerance > 0",
+      "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier_friction",
+      5.0,
+      "penalty_multiplier_friction > 0",
+      "The penalty growth factor between augmented Lagrange "
+      "iterations for penalizing relative slip distance if the node is under stick conditions.");
   return params;
 }
 
 PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & parameters)
-  : WeightedVelocitiesUserObject(parameters),
+  /*
+   * We are using virtual inheritance to avoid the "Diamond inheritance" problem. This means that
+   * that we have to construct WeightedGapUserObject explicitly as it will_not_ be constructed in
+   * the intermediate base classes PenaltyWeightedGapUserObject and WeightedVelocitiesUserObject.
+   * Virtual inheritance ensures that only one instance of WeightedGapUserObject is included in this
+   * class. The inheritance diagram is as follows:
+   *
+   * WeightedGapUserObject         <-----   PenaltyWeightedGapUserObject
+   *          ^                                         ^
+   *          |                                         |
+   * WeightedVelocitiesUserObject  <-----   PenaltyFrictionUserObject
+   *
+   */
+  : WeightedGapUserObject(parameters),
+    PenaltyWeightedGapUserObject(parameters),
+    WeightedVelocitiesUserObject(parameters),
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
-    _friction_coefficient(getParam<Real>("friction_coefficient"))
+    _slip_tolerance(isParamValid("slip_tolerance") ? getParam<Real>("slip_tolerance") : 0.0),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction"))
 {
-  auto check_type = [this](const auto & var, const auto & var_name)
-  {
-    if (!var.isNodal())
-      paramError(var_name,
-                 "The displacement variables must have degrees of freedom exclusively on "
-                 "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
-  };
-  check_type(*_disp_x_var, "disp_x");
-  check_type(*_disp_y_var, "disp_y");
-  if (_has_disp_z)
-    check_type(*_disp_z_var, "disp_z");
+  if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
+    paramError("slip_tolerance",
+               "This parameter must be supplied if and only if an augmented Lagrange problem "
+               "object is used.");
 }
 
 const VariableTestValue &
 PenaltyFrictionUserObject::test() const
 {
-  return _disp_x_var->phiLower();
-}
-
-const ADVariableValue &
-PenaltyFrictionUserObject::contactPressure() const
-{
-  return _contact_force;
+  return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
 }
 
 const ADVariableValue &
@@ -79,61 +97,55 @@ PenaltyFrictionUserObject::contactTangentialPressureDirTwo() const
 void
 PenaltyFrictionUserObject::timestepSetup()
 {
-  WeightedVelocitiesUserObject::timestepSetup();
+  // these functions do not call WeightedGapUserObject::timestepSetup to avoid double initialization
+  WeightedVelocitiesUserObject::selfTimestepSetup();
+  PenaltyWeightedGapUserObject::selfTimestepSetup();
 
-  _dof_to_old_weighted_gap.clear();
-  _dof_to_old_real_tangential_velocity.clear();
-  _dof_to_old_accumulated_slip.clear();
-  _dof_to_old_normal_pressure.clear();
+  // instead we call it explicitly here
+  WeightedGapUserObject::timestepSetup();
 
-  for (auto & map_pr : _dof_to_weighted_gap)
-    _dof_to_old_weighted_gap.emplace(map_pr.first, std::move(map_pr.second.first));
-
-  for (auto & map_pr : _dof_to_real_tangential_velocity)
-    _dof_to_old_real_tangential_velocity.emplace(map_pr);
-
-  for (auto & map_pr : _dof_to_normal_pressure)
-    _dof_to_old_normal_pressure.emplace(map_pr.first, MetaPhysicL::raw_value(map_pr.second));
-
+  // save off accumulated slip from the last timestep
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
-    if (libmesh_map_find(_dof_to_old_normal_pressure, map_pr.first) >
-        TOLERANCE * TOLERANCE) // Only if it had normal pressure. Otherwise, restart count
-      _dof_to_old_accumulated_slip.emplace(map_pr);
-    else
-      _dof_to_old_accumulated_slip[map_pr.first] = {0.0, 0.0};
+    auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
+    old_accumulated_slip = accumulated_slip;
   }
+
+  for (auto & dof_lp : _dof_to_local_penalty_friction)
+    dof_lp.second = _penalty_friction;
+
+  // save off tangential traction from the last timestep
+  for (auto & map_pr : _dof_to_tangential_traction)
+  {
+    auto & [tangential_traction, old_tangential_traction] = map_pr.second;
+    old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                               MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {0.0, 0.0};
+  }
+
+  for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+    delta_tangential_lm.setZero();
 }
 
 void
 PenaltyFrictionUserObject::initialize()
 {
-  WeightedVelocitiesUserObject::initialize();
+  // these functions do not call WeightedGapUserObject::initialize to avoid double initialization
+  WeightedVelocitiesUserObject::selfInitialize();
+  PenaltyWeightedGapUserObject::selfInitialize();
 
-  _dof_to_normal_pressure.clear();
-  _dof_to_accumulated_slip.clear();
-  _dof_to_frictional_pressure.clear();
-}
-
-Real
-PenaltyFrictionUserObject::getNormalContactPressure(const Node * const node) const
-{
-  const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
-
-  if (it != _dof_to_normal_pressure.end())
-    return MetaPhysicL::raw_value(it->second);
-  else
-    return 0.0;
+  // instead we call it explicitly here
+  WeightedGapUserObject::initialize();
 }
 
 Real
 PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
                                                         const unsigned int component) const
 {
-  const auto it = _dof_to_frictional_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_tangential_traction.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_frictional_pressure.end())
-    return MetaPhysicL::raw_value(it->second[component]);
+  if (it != _dof_to_tangential_traction.end())
+    return MetaPhysicL::raw_value(it->second.first(component));
   else
     return 0.0;
 }
@@ -145,7 +157,7 @@ PenaltyFrictionUserObject::getAccumulatedSlip(const Node * const node,
   const auto it = _dof_to_accumulated_slip.find(_subproblem.mesh().nodePtr(node->id()));
 
   if (it != _dof_to_accumulated_slip.end())
-    return MetaPhysicL::raw_value(it->second[component]);
+    return MetaPhysicL::raw_value(it->second.first(component));
   else
     return 0.0;
 }
@@ -154,10 +166,22 @@ Real
 PenaltyFrictionUserObject::getTangentialVelocity(const Node * const node,
                                                  const unsigned int component) const
 {
-
   const auto it = _dof_to_real_tangential_velocity.find(_subproblem.mesh().nodePtr(node->id()));
 
   if (it != _dof_to_real_tangential_velocity.end())
+    return MetaPhysicL::raw_value(it->second[component]);
+  else
+    return 0.0;
+}
+
+Real
+PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * const node,
+                                                                const unsigned int component) const
+{
+  const auto it =
+      _dof_to_frictional_lagrange_multipliers.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_frictional_lagrange_multipliers.end())
     return MetaPhysicL::raw_value(it->second[component]);
   else
     return 0.0;
@@ -167,156 +191,86 @@ void
 PenaltyFrictionUserObject::reinit()
 {
   // Normal contact pressure with penalty
-  _contact_force.resize(_qrule_msm->n_points());
-  for (const auto qp : make_range(_qrule_msm->n_points()))
-    _contact_force[qp] = 0;
+  PenaltyWeightedGapUserObject::reinit();
 
-  for (const auto i : make_range(_test->size()))
+  // Reset frictional pressure
+  _frictional_contact_force_one.resize(_qrule_msm->n_points());
+  _frictional_contact_force_two.resize(_qrule_msm->n_points()); // 3D
+  for (const auto qp : make_range(_qrule_msm->n_points()))
   {
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-    const auto & weighted_gap =
-        libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(node)).first;
-    const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
-    const auto & test_i = (*_test)[i];
-    for (const auto qp : make_range(_qrule_msm->n_points()))
-    {
-      _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
-      _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
-          _penalty * weighted_gap_for_calc;
-    }
+    _frictional_contact_force_one[qp] = 0.0;
+    _frictional_contact_force_two[qp] = 0.0;
   }
 
-  // Frictional pressure (2D)
-  _frictional_contact_force_one.resize(_qrule_msm->n_points());
-  for (const auto qp : make_range(_qrule_msm->n_points()))
-    _frictional_contact_force_one[qp] = 0;
+  // zero vector
+  const static TwoVector zero{0.0, 0.0};
 
-  // Frictional pressure (3D only)
-  _frictional_contact_force_two.resize(_qrule_msm->n_points());
-  for (const auto qp : make_range(_qrule_msm->n_points()))
-    _frictional_contact_force_two[qp] = 0;
-
+  // iterate over nodes
   for (const auto i : make_range(_test->size()))
   {
+    // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    const auto & slip_vel_one =
-        libmesh_map_find(_dof_to_real_tangential_velocity, static_cast<const DofObject *>(node))[0];
-    const auto & slip_vel_two =
-        libmesh_map_find(_dof_to_real_tangential_velocity, static_cast<const DofObject *>(node))[1];
+    const auto penalty_friction = findValue(
+        _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
 
-    // Get accumulated slip in both directions
-    ADReal slip_direction_one(0.0);
-    ADReal slip_direction_two(0.0);
+    // utilized quantities
+    const auto & normal_pressure = _dof_to_normal_pressure[node];
 
-    if (_dof_to_old_accumulated_slip.size() > 0)
+    // map the tangential traction and accumulated slip
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node];
+    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
+
+    Real normal_lm = -1;
+    if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
+      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+
+    // Keep active set fixed from second Uzawa loop
+    if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
     {
-      slip_direction_one = _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][0];
+      using namespace std;
 
-      if (_has_disp_z)
-        slip_direction_two = _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][1];
-    }
-    // Get current accumulated slip in both directions
-    if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
-    {
-      _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][0] =
-          slip_direction_one + std::abs(slip_vel_one) * _fe_problem.dt();
-      if (_has_disp_z)
-        _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][1] =
-            slip_direction_two + std::abs(slip_vel_two) * _fe_problem.dt();
+      const auto & real_tangential_velocity =
+          libmesh_map_find(_dof_to_real_tangential_velocity, node);
+      const ADTwoVector slip_distance = {real_tangential_velocity[0] * _dt,
+                                         real_tangential_velocity[1] * _dt};
+
+      // frictional lagrange multiplier (delta lambda^(k)_T)
+      const auto & tangential_lm =
+          _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : zero;
+
+      // tangential trial traction (Simo 3.12)
+      ADTwoVector tangential_trial_traction =
+          old_tangential_traction + tangential_lm + penalty_friction * slip_distance;
+
+      // Nonlinearity below
+      ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
+      ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
+      tangential_traction = tangential_trial_traction;
+
+      // Simo considers this a 'return mapping'; we are just capping friction to the Coulomb limit.
+      if (phi_trial > 0.0)
+        // Simo 3.13/3.14 (the penalty formulation has an error in the paper)
+        tangential_traction -=
+            phi_trial * tangential_trial_traction / tangential_trial_traction_norm;
+
+      // track accumulated slip for output purposes
+      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
     }
     else
-      _dof_to_accumulated_slip[static_cast<const DofObject *>(node)] = {0.0, 0.0};
-    // End of preparing current accumulated slip
-
-    // Get sign of relative velocity for both directions
-    ADReal sign_one = 0.0;
-    ADReal sign_two = 0.0;
-
-    if (std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]) >
-        TOLERANCE * TOLERANCE)
-      sign_one = MathUtils::sign(
-          _dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]);
-
-    if (_has_disp_z &&
-        std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]) >
-            TOLERANCE * TOLERANCE)
-      sign_two = MathUtils::sign(
-          _dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]);
-
-    // Only accumulate nodal frictional pressure if normal contact pressure is nonzero.
-    if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
     {
-      _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0] =
-          sign_one * _penalty_friction *
-          _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][0];
-
-      if (_has_disp_z)
-        _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1] =
-            sign_two * _penalty_friction *
-
-            _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][1];
+      // reset slip and clear traction
+      accumulated_slip.setZero();
+      tangential_traction.setZero();
     }
-  }
 
-  // Build a nodal frictional force for consistency (otherwise interpolation breaks Coulomb
-  // conditions)
-  for (const auto i : make_range(_test->size()))
-  {
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-
-    // Only do check if normal pressure is nonzero.
-    if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
-    {
-      auto & frictional_nodal_pressure_one =
-          _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0];
-      auto & frictional_nodal_pressure_two =
-          _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1];
-
-      if (!_has_disp_z &&
-          std::abs(frictional_nodal_pressure_one) >
-              _friction_coefficient *
-                  _dof_to_normal_pressure[static_cast<const DofObject *>(node)] &&
-          std::abs(frictional_nodal_pressure_one) > TOLERANCE * TOLERANCE)
-      {
-        ADReal sign = MathUtils::sign(frictional_nodal_pressure_one);
-        frictional_nodal_pressure_one =
-            sign * _friction_coefficient *
-            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
-      }
-      else if (_has_disp_z &&
-               std::sqrt(frictional_nodal_pressure_one * frictional_nodal_pressure_one +
-                         frictional_nodal_pressure_two * frictional_nodal_pressure_two) >
-                   _friction_coefficient *
-                       _dof_to_normal_pressure[static_cast<const DofObject *>(node)])
-      {
-        const auto current_friction_length =
-            std::sqrt(frictional_nodal_pressure_one * frictional_nodal_pressure_one +
-                      frictional_nodal_pressure_two * frictional_nodal_pressure_two);
-        frictional_nodal_pressure_one =
-            frictional_nodal_pressure_one / current_friction_length * _friction_coefficient *
-            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
-        frictional_nodal_pressure_two =
-            frictional_nodal_pressure_two / current_friction_length * _friction_coefficient *
-            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
-      }
-    }
-  }
-
-  // Now that we have consistent nodal frictional values, create an interpolated frictional
-  // pressure variable.
-  for (const auto i : make_range(_test->size()))
-  {
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-    const auto & frictional_nodal_pressure_one =
-        _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0];
-    const auto & frictional_nodal_pressure_two =
-        _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1];
+    // Now that we have consistent nodal frictional values, create an interpolated frictional
+    // pressure variable.
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
-      _frictional_contact_force_one[qp] += test_i[qp] * frictional_nodal_pressure_one;
-      _frictional_contact_force_two[qp] += test_i[qp] * frictional_nodal_pressure_two;
+      _frictional_contact_force_one[qp] += test_i[qp] * tangential_traction(0);
+      _frictional_contact_force_two[qp] += test_i[qp] * tangential_traction(1);
     }
   }
 }
@@ -325,12 +279,114 @@ void
 PenaltyFrictionUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
+  PenaltyWeightedGapUserObject::selfFinalize();
+}
 
-  // If the constraint is performed by the owner, then we don't need any data sent back; the owner
-  // will take care of it. But if the constraint is not performed by the owner and we might have to
-  // do some of the constraining ourselves, then we need data sent back to us
-  const bool send_data_back = !constrainedByOwner();
+bool
+PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
+{
+  std::pair<Real, dof_id_type> max_slip{0.0, 0};
 
-  Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_accumulated_slip, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+  for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
+  {
+    const auto & tangential_traction = traction_pair.first;
+    auto normal_pressure = _dof_to_normal_pressure[dof_object];
+
+    // We may not find a node in the map because AL machinery gets called at different system
+    // configurations. That is, we may want to find a key from a node that computed a zero traction
+    // on the verge of not projecting. Since, when we computed the velocity, the system was at a
+    // slightly different configuration, that node may not a computed physical weighted velocity.
+    // This doesn't seem an issue at all as non-projecting nodes should be a corner case not
+    // affecting the physics.
+    TwoVector slip_velocity = {0.0, 0.0};
+    if (_dof_to_real_tangential_velocity.find(dof_object) != _dof_to_real_tangential_velocity.end())
+    {
+      const auto & real_tangential_velocity =
+          libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+      slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
+                       MetaPhysicL::raw_value(real_tangential_velocity[1])};
+    }
+
+    // Check slip/stick
+    if (_friction_coefficient * normal_pressure < tangential_traction.norm() * (1 + TOLERANCE))
+    {
+      // If it's slipping, any slip distance is physical.
+    }
+    else if (slip_velocity.norm() * _dt > _slip_tolerance && normal_pressure > TOLERANCE)
+    {
+      const auto new_slip =
+          std::make_pair<Real, dof_id_type>(slip_velocity.norm() * _dt, dof_object->id());
+      if (new_slip > max_slip)
+        max_slip = new_slip;
+    }
+  }
+
+  // Communicate max_slip here where all ranks get to
+  this->_communicator.max(max_slip);
+
+  // Check normal contact convergence now, to make sure all ranks get here
+  if (!PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged())
+    return false;
+
+  // Did we observe any above tolerance slip anywhere?
+  if (max_slip.first > _slip_tolerance)
+  {
+    if (this->_communicator.rank() == 0)
+    {
+      mooseInfoRepeated("Stick tolerance fails. Slip distance for sticking node ",
+                        max_slip.second,
+                        " is: ",
+                        max_slip.first,
+                        ", but slip tolerance is chosen to be ",
+                        _slip_tolerance);
+    }
+    return false;
+  }
+
+  return true;
+}
+
+void
+PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
+{
+  PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
+
+  for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+  {
+    auto & penalty_friction = _dof_to_local_penalty_friction[dof_object];
+    if (penalty_friction == 0.0)
+      penalty_friction = _penalty_friction;
+
+    // normal quantities
+    const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, dof_object);
+
+    // tangential quantities
+    const auto & real_tangential_velocity =
+        libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+    const TwoVector slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
+                                     MetaPhysicL::raw_value(real_tangential_velocity[1])};
+
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[dof_object];
+
+    const TwoVector tangential_trial_traction =
+        old_tangential_traction + tangential_lm + penalty_friction * slip_velocity * _dt;
+    const Real tangential_trial_traction_norm = tangential_trial_traction.norm();
+
+    // Augment
+    if (tangential_trial_traction_norm * (1 + TOLERANCE) <=
+        std::abs(_friction_coefficient * normal_lm))
+    {
+      tangential_lm += penalty_friction * slip_velocity * _dt;
+    }
+    else
+    {
+      tangential_lm = -tangential_trial_traction / tangential_trial_traction_norm *
+                          penalty_friction * normal_lm -
+                      old_tangential_traction;
+    }
+    // Update penalty.
+    // TODO: Include a more "consistent" adaptation of penalty values
+    if (_lagrangian_iteration_number > 1 && _lagrangian_iteration_number < 6)
+      penalty_friction *= _penalty_multiplier_friction;
+  }
 }

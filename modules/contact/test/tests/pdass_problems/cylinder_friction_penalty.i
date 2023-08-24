@@ -127,7 +127,7 @@
     type = PenaltyMortarUserObjectAux
     variable = weighted_gap
     user_object = friction_uo
-    contact_quantity = weighted_gap
+    contact_quantity = normal_gap
   []
   [stress_xx]
     type = RankTwoAux

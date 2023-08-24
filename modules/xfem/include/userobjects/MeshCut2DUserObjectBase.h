@@ -61,7 +61,7 @@ protected:
    * This vector of pairs orders crack tips to make the order used in this class the same as those
    * for the fracture integrals vectorpostProcessorsin created by CrackFrontDefinition.
    * The original crack front node ids found in the cutter mesh are put in pair.first and the
-   * assosciated current crack front node id that grew from teh original crack front node id is in
+   * assosciated current crack front node id that grew from the original crack front node id is in
    * pair.second.  This vector is sorted on pair.first which makes the ordering of this vector the
    * same as that used in the CrackFrontDefinition
    */

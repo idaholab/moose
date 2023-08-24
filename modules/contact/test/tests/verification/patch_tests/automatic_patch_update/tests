@@ -28,6 +28,8 @@
                  "again."
     prereq = sliding_blocks
     min_parallel = 2
+    # max parallel set to avoid not running into error for more procs
+    max_parallel = 2
     mesh_mode = REPLICATED
     requirement = "The system shall enforce that the nearest neighbor
                    node is "

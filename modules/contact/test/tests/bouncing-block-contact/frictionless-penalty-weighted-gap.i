@@ -50,7 +50,8 @@ offset = 1e-2
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
-    penalty = 5e1
+    penalty = 1e0
+    use_physical_gap = true
   []
 []
 
@@ -123,7 +124,7 @@ offset = 1e-2
   line_search = 'none'
   snesmf_reuse_base = true
   abort_on_solve_fail = true
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-13
 []
 
 [Debug]
@@ -142,7 +143,6 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative'
   [num_nl]
     type = NumNonlinearIterations
   []

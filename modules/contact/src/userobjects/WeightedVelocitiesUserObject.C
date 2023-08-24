@@ -54,12 +54,6 @@ WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters
 }
 
 void
-WeightedVelocitiesUserObject::initialSetup()
-{
-  WeightedGapUserObject::initialSetup();
-}
-
-void
 WeightedVelocitiesUserObject::computeQpProperties()
 {
   // Compute the value of _qp_gap
@@ -133,13 +127,18 @@ WeightedVelocitiesUserObject::computeQpIProperties()
 }
 
 void
+WeightedVelocitiesUserObject::selfInitialize()
+{
+  _dof_to_weighted_tangential_velocity.clear();
+  _dof_to_real_tangential_velocity.clear();
+}
+
+void
 WeightedVelocitiesUserObject::initialize()
 {
   // Clear weighted gaps
   WeightedGapUserObject::initialize();
-
-  _dof_to_weighted_tangential_velocity.clear();
-  _dof_to_real_tangential_velocity.clear();
+  selfInitialize();
 }
 
 void
@@ -159,15 +158,4 @@ WeightedVelocitiesUserObject::finalize()
                                                 send_data_back);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_real_tangential_velocity, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-}
-
-void
-WeightedVelocitiesUserObject::execute()
-{
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-  {
-    computeQpProperties();
-    for (_i = 0; _i < _test->size(); ++_i)
-      computeQpIProperties();
-  }
 }

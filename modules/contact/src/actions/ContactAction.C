@@ -16,6 +16,7 @@
 #include "MortarConstraintBase.h"
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
+#include "AugmentedLagrangianContactProblem.h"
 
 #include "NanoflannMeshAdaptor.h"
 #include "PointListAdaptor.h"
@@ -101,10 +102,18 @@ ContactAction::validParams()
       1e8,
       "The penalty factor to apply in mortar penalty frictional constraints.  It is applied to the "
       "tangential accumulated slip to build the frictional force");
-  params.addParam<Real>("penalty_multiplier",
-                        1.0,
-                        "The growth factor for the penalty applied at the end of each augmented "
-                        "Lagrange update iteration");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier",
+      1.0,
+      "penalty_multiplier > 0",
+      "The growth factor for the penalty applied at the end of each augmented "
+      "Lagrange update iteration");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier_friction",
+      1.0,
+      "penalty_multiplier_friction > 0",
+      "The penalty growth factor between augmented Lagrange "
+      "iterations for penalizing relative slip distance if the node is under stick conditions.");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,
@@ -133,7 +142,6 @@ ContactAction::validParams()
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
                         "The tolerance of the incremental slip for augmented Lagrangian method.");
-
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<Real>(
@@ -263,12 +271,25 @@ ContactAction::ContactAction(const InputParameters & params)
 
   if (_formulation == ContactFormulation::MORTAR_PENALTY)
   {
+    // Use dual basis functions for contact traction interpolation
+    if (isParamValid("use_dual"))
+      _use_dual = getParam<bool>("use_dual");
+    else
+      _use_dual = true;
+
     if (_model == ContactModel::GLUED)
-      paramError("model", "The penalty 'mortar' formulation does not support glued contact");
+      paramError("model", "The 'mortar_penalty' formulation does not support glued contact");
 
     if (getParam<bool>("mortar_dynamics"))
       paramError("mortar_dynamics",
-                 "The penalty 'mortar' formulation does not support implicit dynamic simulations");
+                 "The 'mortar_penalty' formulation does not support implicit dynamic simulations");
+
+    if (getParam<bool>("use_petrov_galerkin"))
+      paramError("use_petrov_galerkin",
+                 "The 'mortar_penalty' formulation does not support usage of the Petrov-Galerkin "
+                 "flag. The default (use_dual = true) behavior is such that contact tractions are "
+                 "interpolated with dual bases whereas mortar or weighted contact quantities are "
+                 "interpolated with Lagrange shape functions.");
   }
 
   if (_formulation == ContactFormulation::MORTAR)
@@ -299,7 +320,8 @@ ContactAction::ContactAction(const InputParameters & params)
           "correct_edge_dropping",
           "The 'correct_edge_dropping' option can only be used with the 'mortar' formulation "
           "(weighted)");
-    else if (params.isParamSetByUser("use_dual"))
+    else if (params.isParamSetByUser("use_dual") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
       paramError("use_dual",
                  "The 'use_dual' option can only be used with the 'mortar' formulation");
     else if (params.isParamSetByUser("c_normal"))
@@ -663,65 +685,93 @@ ContactAction::addMortarContact()
     }
   }
 
+  // Add the lagrange multiplier on the secondary subdomain.
+  const auto addLagrangeMultiplier =
+      [this, &secondary_subdomain_name, &displacements](const std::string & variable_name,
+                                                        const Real scaling_factor,
+                                                        const bool add_aux_lm,
+                                                        const bool penalty_traction) //
+  {
+    InputParameters params = _factory.getValidParams("MooseVariableBase");
+
+    // Allow the user to select "weighted" constraints and standard bases (use_dual = false) or
+    // "legacy" constraints and dual bases (use_dual = true). Unless it's for testing purposes,
+    // this combination isn't recommended
+    if (!add_aux_lm || penalty_traction)
+      params.set<bool>("use_dual") = _use_dual;
+
+    mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
+                "Displacement variable is missing");
+    const auto primal_type =
+        _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
+
+    const int lm_order = primal_type.order.get_order();
+
+    if (primal_type.family == LAGRANGE)
+    {
+      params.set<MooseEnum>("family") = Utility::enum_to_string<FEFamily>(primal_type.family);
+      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{lm_order});
+    }
+    else
+      mooseError("Invalid bases for mortar contact.");
+
+    params.set<std::vector<SubdomainName>>("block") = {secondary_subdomain_name};
+    if (!(add_aux_lm || penalty_traction))
+      params.set<std::vector<Real>>("scaling") = {scaling_factor};
+
+    auto fe_type = AddVariableAction::feType(params);
+    auto var_type = AddVariableAction::variableType(fe_type);
+    if (add_aux_lm || penalty_traction)
+      _problem->addAuxVariable(var_type, variable_name, params);
+    else
+      _problem->addVariable(var_type, variable_name, params);
+  };
+
   if (_current_task == "add_mortar_variable" && _formulation == ContactFormulation::MORTAR)
   {
-    // Add the lagrange multiplier on the secondary subdomain.
-    const auto addLagrangeMultiplier =
-        [this, &secondary_subdomain_name, &displacements](
-            const std::string & variable_name, const Real scaling_factor, const bool add_aux_lm) //
-    {
-      InputParameters params = _factory.getValidParams("MooseVariableBase");
-
-      // Allow the user to select "weighted" constraints and standard bases (use_dual = false) or
-      // "legacy" constraints and dual bases (use_dual = true). Unless it's for testing purposes,
-      // this combination isn't recommended
-      if (!add_aux_lm)
-        params.set<bool>("use_dual") = _use_dual;
-
-      mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
-                  "Displacement variable is missing");
-      const auto primal_type =
-          _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
-
-      const int lm_order = primal_type.order.get_order();
-
-      if (primal_type.family == LAGRANGE)
-      {
-        params.set<MooseEnum>("family") = Utility::enum_to_string<FEFamily>(primal_type.family);
-        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{lm_order});
-      }
-      else
-        mooseError("Invalid bases for mortar contact.");
-
-      params.set<std::vector<SubdomainName>>("block") = {secondary_subdomain_name};
-      if (!add_aux_lm)
-        params.set<std::vector<Real>>("scaling") = {scaling_factor};
-      auto fe_type = AddVariableAction::feType(params);
-      auto var_type = AddVariableAction::variableType(fe_type);
-      if (add_aux_lm)
-        _problem->addAuxVariable(var_type, variable_name, params);
-      else
-        _problem->addVariable(var_type, variable_name, params);
-    };
-
     addLagrangeMultiplier(
-        normal_lagrange_multiplier_name, getParam<Real>("normal_lm_scaling"), false);
+        normal_lagrange_multiplier_name, getParam<Real>("normal_lm_scaling"), false, false);
 
     if (_model == ContactModel::COULOMB)
     {
-      addLagrangeMultiplier(
-          tangential_lagrange_multiplier_name, getParam<Real>("tangential_lm_scaling"), false);
+      addLagrangeMultiplier(tangential_lagrange_multiplier_name,
+                            getParam<Real>("tangential_lm_scaling"),
+                            false,
+                            false);
       if (ndisp > 2)
-        addLagrangeMultiplier(
-            tangential_lagrange_multiplier_3d_name, getParam<Real>("tangential_lm_scaling"), false);
+        addLagrangeMultiplier(tangential_lagrange_multiplier_3d_name,
+                              getParam<Real>("tangential_lm_scaling"),
+                              false,
+                              false);
     }
 
     if (getParam<bool>("use_petrov_galerkin"))
-      addLagrangeMultiplier(auxiliary_lagrange_multiplier_name, 1.0, true);
+      addLagrangeMultiplier(auxiliary_lagrange_multiplier_name, 1.0, true, false);
+  }
+  else if (_current_task == "add_mortar_variable" &&
+           _formulation == ContactFormulation::MORTAR_PENALTY)
+  {
+    if (_use_dual)
+      addLagrangeMultiplier(auxiliary_lagrange_multiplier_name, 1.0, false, true);
   }
 
   if (_current_task == "add_user_object")
   {
+    // check if the correct problem class is selected if AL parameters are provided
+    if (_formulation == ContactFormulation::MORTAR_PENALTY &&
+        !dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get()))
+    {
+      const std::vector<std::string> params = {"penalty_multiplier",
+                                               "penalty_multiplier_friction",
+                                               "al_penetration_tolerance",
+                                               "al_incremental_slip_tolerance",
+                                               "al_frictional_force_tolerance"};
+      for (const auto & param : params)
+        if (parameters().isParamSetByUser(param))
+          paramError(param,
+                     "Augmented Lagrange parameter was specified, but the selected problem type "
+                     "does not support Augmented Lagrange iterations.");
+    }
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
@@ -787,6 +837,18 @@ ContactAction::addMortarContact()
       var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       var_params.set<Real>("penalty") = getParam<Real>("penalty");
+
+      if (isParamValid("al_penetration_tolerance"))
+        var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
+      if (isParamValid("penalty_multiplier"))
+        var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
+      // In the contact action, we force the physical value of the normal gap, which also normalizes
+      // the penalty factor with the "area" around the node
+      var_params.set<bool>("use_physical_gap") = true;
+
+      if (_use_dual)
+        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+
       if (ndisp > 2)
         var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
       var_params.set<bool>("use_displaced_mesh") = true;
@@ -813,6 +875,23 @@ ContactAction::addMortarContact()
       var_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
       var_params.set<Real>("penalty") = getParam<Real>("penalty");
       var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
+      if (isParamValid("al_penetration_tolerance"))
+        var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
+
+      if (isParamValid("penalty_multiplier"))
+        var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
+      if (isParamValid("penalty_multiplier_friction"))
+        var_params.set<Real>("penalty_multiplier_friction") =
+            getParam<Real>("penalty_multiplier_friction");
+
+      if (isParamValid("al_incremental_slip_tolerance"))
+        var_params.set<Real>("slip_tolerance") = getParam<Real>("al_incremental_slip_tolerance");
+      // In the contact action, we force the physical value of the normal gap, which also normalizes
+      // the penalty factor with the "area" around the node
+      var_params.set<bool>("use_physical_gap") = true;
+
+      if (_use_dual)
+        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       _problem->addUserObject(
           "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), var_params);
@@ -1372,9 +1451,48 @@ ContactAction::getProximityMethod()
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  return MooseEnum(
+  auto formulations = MooseEnum(
       "ranfs kinematic penalty augmented_lagrange tangential_penalty mortar mortar_penalty",
       "kinematic");
+
+  formulations.addDocumentation(
+      "ranfs",
+      "Reduced Active Nonlinear Function Set scheme for node-on-face contact. Provides exact "
+      "enforcement without Lagrange multipliers or penalty terms.");
+  formulations.addDocumentation(
+      "kinematic",
+      "Kinematic contact constraint enforcement transfers the internal forces at secondary nodes "
+      "to the corresponding primary face for node-on-face contact. Provides exact "
+      "enforcement without Lagrange multipliers or penalty terms.");
+  formulations.addDocumentation(
+      "penalty",
+      "Node-on-face penalty based contact constraint enforcement. Interpenetration is penalized. "
+      "Enforcement depends on the penalty magnitude. High penalties can introduce ill conditioning "
+      "of the system.");
+  formulations.addDocumentation("augmented_lagrange",
+                                "Node-on-face augmented Lagrange penalty based contact constraint "
+                                "enforcement. Interpenetration is enforced up to a user specified "
+                                "tolerance, ill-conditioning is generally avoided. Requires an "
+                                "Augmented Lagrange Problem class to be used in the simulation.");
+  formulations.addDocumentation(
+      "tangential_penalty",
+      "Node-on-face penalty based frictional contact constraint enforcement. Interpenetration and "
+      "slip distance for sticking nodes are penalized. Enforcement depends on the penalty "
+      "magnitudes. High penalties can introduce ill conditioning of the system.");
+  formulations.addDocumentation(
+      "mortar",
+      "Mortar based contact constraint enforcement using Lagrange multipliers. Provides exact "
+      "enforcement and a variationally consistent formulation. Lagrange multipliers introduce a "
+      "saddle point character in the system matrix which can have a negative impact on scalability "
+      "with iterative solvers");
+  formulations.addDocumentation(
+      "mortar_penalty",
+      "Mortar and penalty based contact constraint enforcement. When using an Augmented Lagrange "
+      "Problem class this provides normal (and tangential) contact constratint enforced up to a "
+      "user specified tolerances. Without AL the enforcement depends on the penalty magnitudes. "
+      "High penalties can introduce ill conditioning of the system.");
+
+  return formulations;
 }
 
 MooseEnum

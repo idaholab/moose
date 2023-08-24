@@ -18,7 +18,7 @@
     input = 'frictionless-mortar-3d.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '100'
+    min_ad_size = '150'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
@@ -28,7 +28,7 @@
     input = 'frictionless-mortar-3d-friction.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '100'
+    min_ad_size = '150'
     mesh_mode = 'REPLICATED'
     requirement = 'Contact module shall solve a three-dimensional frictional problem with Cartesian Lagrange multipliers.'
   []

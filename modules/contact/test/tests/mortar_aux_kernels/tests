@@ -187,7 +187,7 @@
     input = 'pressure-aux-frictionless-3d.i'
     csvdiff = 'pressure-aux-frictionless-3d_out_normal_lm_0003.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '100'
+    min_ad_size = '150'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to  produce the correct normal contact pressure '
                   'value in 3D for frictionless mortar contact when using an auxiliary kernel.'
@@ -207,7 +207,7 @@
     input = 'pressure-aux-friction-3d.i'
     csvdiff = 'pressure-aux-friction-3d_out_tangent2_lm_0003.csv'
     abs_zero = 1.0e-4
-    min_ad_size = '100'
+    min_ad_size = '150'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value in 3D for frictional mortar contact when using an auxiliary kernel.'
