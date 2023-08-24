@@ -74,9 +74,10 @@ class RunApp(Tester):
         being made, and thus this method can be brittle (see pbs_template for influential
         environment variables being set/made use of).
         """
+        # Assume Stage 1
         command = False
         # Stage 2: in container and trying to run an MPI process on a binary
-        if os.getenv('MOOSE_STAGE') == 'loopback':
+        if str(os.getenv('MOOSE_STAGE')) == '2':
             source = ''
             if options.queue_source_command:
                 source = f'source {options.queue_source_command}; '
