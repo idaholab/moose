@@ -66,7 +66,7 @@ MeshRepairGenerator::generate()
     auto pl = mesh->sub_point_locator();
     std::unordered_set<dof_id_type> nodes_removed;
     // loop on nodes
-    for (auto & node : mesh->local_node_ptr_range())
+    for (auto & node : mesh->node_ptr_range())
     {
       // this node has already been removed
       if (nodes_removed.count(node->id()))
@@ -120,7 +120,13 @@ MeshRepairGenerator::generate()
       }
     }
     _console << "Number of overlapping nodes which got merged: " << _num_fixed_nodes << std::endl;
-    mesh->remove_orphaned_nodes();
+    if (mesh->allow_renumbering())
+      mesh->renumber_nodes_and_elements();
+    else
+    {
+      mesh->remove_orphaned_nodes();
+      mesh->update_parallel_id_counts();
+    }
   }
 
   // Flip orientation of elements to keep positive volumes
