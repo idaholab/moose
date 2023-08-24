@@ -6,5 +6,7 @@
     requirement = 'The system shall be able to simulate the field result of an incoming wave reflected on a biased surface and properly absorb the reflected wave in a boundary condition.'
     design = 'EMRobinBC.md'
     issues = '#21098'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []
