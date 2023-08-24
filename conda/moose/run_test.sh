@@ -28,6 +28,10 @@ PLACEHOLDER='tests'
 if [[ $(uname) == Darwin ]]; then
     PLACEHOLDER=''
 fi
+
+# Do not halt on the first failed test. We want a log of all of them
+set +e
+
 for ACTUAL in ${ACTUALS[@]}; do
     printf "Working on ${ACTUAL}...\n"
     combined-opt --copy-inputs ${ACTUAL}
