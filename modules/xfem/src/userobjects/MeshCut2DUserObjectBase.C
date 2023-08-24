@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCut2DUserObjectBase.h"
+#include "MeshCut2DNucleationBase.h"
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"
@@ -23,12 +24,19 @@ MeshCut2DUserObjectBase::validParams()
   params.addRequiredParam<MeshFileName>(
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
+  params.addParam<UserObjectName>("nucleate_uo", "The MeshCutNucleation UO for nucleating cracks.");
   params.addClassDescription("Creates a UserObject base class for a mesh cutter in 2D problems");
   return params;
 }
 
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters, true), _mesh(_subproblem.mesh())
+  : GeometricCutUserObject(parameters, true),
+    _mesh(_subproblem.mesh()),
+    _nucleate_uo(isParamValid("nucleate_uo")
+                     ? &getUserObject<MeshCut2DNucleationBase>("nucleate_uo")
+                     : nullptr),
+
+    _is_mesh_modified(false)
 {
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
@@ -267,12 +275,6 @@ MeshCut2DUserObjectBase::findOriginalCrackFrontNodes()
   }
   std::sort(_original_and_current_front_node_ids.begin(),
             _original_and_current_front_node_ids.end());
-
-  mooseAssert(!_original_and_current_front_node_ids.empty(),
-              "MeshCut2DFractureUserObject::findOriginalCrackFrontNodes() should never be called "
-              "more than once.  This fills the _original_and_current_front_node_ids data "
-              "structure and the order in this data structure must match the node order used to "
-              "set-up the CrackFrontDefinition.");
 }
 
 void
@@ -314,9 +316,141 @@ MeshCut2DUserObjectBase::growFront()
         new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
       }
       _cutter_mesh->add_elem(new_elem);
-      // now update active boundary to new front node ids
+      // now push to the end of _original_and_current_front_node_ids for tracking and fracture
+      // integrals
       _original_and_current_front_node_ids[i].second = new_front_node_id;
+      _is_mesh_modified = true;
     }
   }
   _cutter_mesh->prepare_for_use();
+}
+
+void
+MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
+{
+  if (_nucleate_uo)
+  {
+    std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> nucleated_elems_map =
+        _nucleate_uo->getNucleatedElemsMap();
+    const Real nucleationRadius = _nucleate_uo->getNucleationRadius();
+
+    removeNucleatedCracksTooCloseToEachOther(nucleated_elems_map, nucleationRadius);
+    removeNucleatedCracksTooCloseToExistingCracks(nucleated_elems_map, nucleationRadius);
+
+    std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+    pl->enable_out_of_mesh_mode();
+    for (const auto & elem_nodes : nucleated_elems_map)
+    {
+      std::pair<RealVectorValue, RealVectorValue> nodes = elem_nodes.second;
+      // add nodes for the elements that define the nucleated cracks
+      Node * node_0 = Node::build(nodes.first, _cutter_mesh->n_nodes()).release();
+      _cutter_mesh->add_node(node_0);
+      dof_id_type node_id_0 = _cutter_mesh->n_nodes() - 1;
+      Node * node_1 = Node::build(nodes.second, _cutter_mesh->n_nodes()).release();
+      _cutter_mesh->add_node(node_1);
+      dof_id_type node_id_1 = _cutter_mesh->n_nodes() - 1;
+      // add elements that define nucleated cracks
+      std::vector<dof_id_type> elem;
+      elem.push_back(node_id_0);
+      elem.push_back(node_id_1);
+      Elem * new_elem = Elem::build(EDGE2).release();
+      for (unsigned int i = 0; i < new_elem->n_nodes(); ++i)
+      {
+        mooseAssert(_cutter_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
+        new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
+      }
+      _cutter_mesh->add_elem(new_elem);
+      // now add the nucleated nodes to the crack id data struct
+      Point & point_0 = *node_0;
+      const Elem * crack_front_elem_0 = (*pl)(point_0);
+      if (crack_front_elem_0 != NULL)
+        _original_and_current_front_node_ids.push_back(std::make_pair(node_id_0, node_id_0));
+      Point & point_1 = *node_1;
+      const Elem * crack_front_elem_1 = (*pl)(point_1);
+      if (crack_front_elem_1 != NULL)
+        _original_and_current_front_node_ids.push_back(std::make_pair(node_id_1, node_id_1));
+      _is_mesh_modified = true;
+    }
+    _cutter_mesh->prepare_for_use();
+  }
+}
+
+void
+MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToEachOther(
+    std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+    const Real nucleationRadius)
+{
+  // remove nucleated elements that are too close too each other.  Lowest key wins
+  for (auto it1 = nucleated_elems_map.begin(); it1 != nucleated_elems_map.end(); ++it1)
+  {
+    std::pair<RealVectorValue, RealVectorValue> nodes = it1->second;
+    Point p2 = nodes.first;
+    Point p1 = nodes.second;
+    Point p = p1 + (p2 - p1) / 2;
+    for (auto it2 = nucleated_elems_map.begin(); it2 != nucleated_elems_map.end();)
+    {
+      if (it1 == it2)
+      {
+        ++it2;
+        continue;
+      }
+
+      nodes = it2->second;
+      p2 = nodes.first;
+      p1 = nodes.second;
+      Point q = p1 + (p2 - p1) / 2;
+      Point pq = q - p;
+      if (pq.norm() <= nucleationRadius)
+        it2 = nucleated_elems_map.erase(it2);
+      else
+        ++it2;
+    }
+  }
+}
+
+void
+MeshCut2DUserObjectBase::removeNucleatedCracksTooCloseToExistingCracks(
+    std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+    const Real nucleationRadius)
+{
+  for (auto it = nucleated_elems_map.begin(); it != nucleated_elems_map.end();)
+  {
+    std::pair<RealVectorValue, RealVectorValue> nodes = it->second;
+    Point p2 = nodes.first;
+    Point p1 = nodes.second;
+    Point p = p1 + (p2 - p1) / 2;
+    bool removeNucleatedElem = false;
+    for (const auto & cutter_elem :
+         as_range(_cutter_mesh->active_elements_begin(), _cutter_mesh->active_elements_end()))
+    {
+      const Node * const * cutter_elem_nodes = cutter_elem->get_nodes();
+      Point m = *cutter_elem_nodes[1] - *cutter_elem_nodes[0];
+      Real t = m * (p - *cutter_elem_nodes[0]) / m.norm_sq();
+      Real d = std::numeric_limits<Real>::max();
+      if (t <= 0)
+      {
+        Point j = p - *cutter_elem_nodes[0];
+        d = j.norm();
+      }
+      else if (t >= 0)
+      {
+        Point j = p - *cutter_elem_nodes[1];
+        d = j.norm();
+      }
+      else
+      {
+        Point j = p - (*cutter_elem_nodes[0] + t * m);
+        d = j.norm();
+      }
+      if (d <= nucleationRadius)
+      {
+        removeNucleatedElem = true;
+        break;
+      }
+    }
+    if (removeNucleatedElem)
+      it = nucleated_elems_map.erase(it);
+    else
+      ++it;
+  }
 }

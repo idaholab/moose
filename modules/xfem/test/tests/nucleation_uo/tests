@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#24714'
+  design = 'MeshCut2DRankTwoTensorNucleation.md'
+  [nucleateCrack]
+    type = CSVDiff
+    input = nucleate_edge_crack_2d.i
+    csvdiff = 'nucleate_edge_crack_2d_out_II_KI_1_0004.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall nucleate and grow cracks based on a nucleation threshold given by an auxvariable.'
+  []
+  [filterNucleation]
+    type = CSVDiff
+    input = nucleate_AllEdgeCracks.i
+    csvdiff = 'nucleate_AllEdgeCracks_out_II_KI_1_0005.csv nucleate_AllEdgeCracks_out_II_KI_1_0003.csv'
+    rel_err = 0.1    
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall not nucleate cracks within a nucleation_radius of other cracks.'
+  []
+[]

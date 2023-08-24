@@ -362,9 +362,6 @@ CrackFrontDefinition::initialize()
   // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
   {
-    // TODO: For crack nucleation, should call a new method on the _crack_front_points_provider to
-    // get the number of crack front points IF the crack_front_points_provider's initialSetup has
-    // been called.  This also needs to be address in line 304
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     _crack_plane_normals =
@@ -816,7 +813,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     _tangent_directions.reserve(num_crack_front_points);
     _crack_directions.reserve(num_crack_front_points);
 
-    for (std::size_t i = 0; i < getNumCrackFrontPoints(); ++i)
+    for (std::size_t i = 0; i < num_crack_front_points; ++i)
     {
       RealVectorValue tangent_direction;
       RealVectorValue crack_direction;
