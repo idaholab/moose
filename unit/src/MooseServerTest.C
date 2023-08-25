@@ -171,6 +171,37 @@ protected:
     }
   }
 
+  // traverse locations and make formatted list for easy testing and viewing
+  void format_locations(const wasp::DataArray & locations_array,
+                        std::ostringstream & locations_stream) const
+  {
+    std::size_t locations_size = locations_array.size();
+
+    for (std::size_t i = 0; i < locations_size; i++)
+    {
+      std::stringstream location_errors;
+      std::string location_uri;
+      int location_start_line;
+      int location_start_character;
+      int location_end_line;
+      int location_end_character;
+
+      EXPECT_TRUE(wasp::lsp::dissectLocationObject(*(locations_array.at(i).to_object()),
+                                                   location_errors,
+                                                   location_uri,
+                                                   location_start_line,
+                                                   location_start_character,
+                                                   location_end_line,
+                                                   location_end_character));
+
+      locations_stream << "document_uri: \"" << location_uri << "\""
+                       << "    definition_start: [" << location_start_line << "."
+                       << location_start_character << "]    definition_end: [" << location_end_line
+                       << "." << location_end_character << "]"
+                       << "\n";
+    }
+  }
+
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
@@ -746,10 +777,10 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
   []
 []
 [AuxVariables]
-  [disp_x]
-  []
-  [disp_y]
-  []
+   [disp_x][]
+      [disp_x][]
+  [disp_y][]
+    [disp_x][]
 []
 [BCs]
   [all]
@@ -893,7 +924,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 {
   // completion test parameters - at document root level outside of all blocks
 
-  int request_id = 4;
+  int request_id = 5;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 42;
   int character = 0;
@@ -999,7 +1030,7 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 {
   // completion test parameters - on active parameter value in Variables block
 
-  int request_id = 4;
+  int request_id = 6;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 9;
   int character = 12;
@@ -1059,7 +1090,7 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
 {
   // completion test parameters - on boolean value of solve param from Problem
 
-  int request_id = 4;
+  int request_id = 7;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 33;
   int character = 10;
@@ -1119,7 +1150,7 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 {
   // completion test parameters - on error_level enum in Terminator UserObject
 
-  int request_id = 4;
+  int request_id = 8;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 39;
   int character = 18;
@@ -1181,7 +1212,7 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 {
   // completion test parameters - on type parameter value in Executioner block
 
-  int request_id = 4;
+  int request_id = 9;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 30;
   int character = 9;
@@ -1244,7 +1275,7 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
   // completion test parameters - on displacements parameter value in VacuumBC
 
-  int request_id = 4;
+  int request_id = 10;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 26;
   int character = 21;
@@ -1304,12 +1335,12 @@ label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27]
 
 TEST_F(MooseServerTest, DocumentDefinitionRequest)
 {
-  // definition test parameters
+  // definition test parameters - on AuxVariables defined displacements disp_x
 
-  int request_id = 5;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 0;
-  int character = 0;
+  int request_id = 11;
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int line = 26;
+  int character = 21;
 
   // build definition request with the test parameters
 
@@ -1317,7 +1348,7 @@ TEST_F(MooseServerTest, DocumentDefinitionRequest)
   std::stringstream definition_errors;
 
   EXPECT_TRUE(wasp::lsp::buildDefinitionRequest(
-      definition_request, definition_errors, request_id, document_uri, line, character));
+      definition_request, definition_errors, request_id, doc_uri, line, character));
 
   EXPECT_TRUE(definition_errors.str().empty());
 
@@ -1329,14 +1360,41 @@ TEST_F(MooseServerTest, DocumentDefinitionRequest)
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 
-  // definition response will be checked when capability is implemented
+  // check the dissected values of the moose_server definition response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray locations_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectLocationsResponse(
+      definition_response, response_errors, response_id, locations_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(3u, locations_array.size());
+
+  std::ostringstream locations_actual;
+
+  format_locations(locations_array, locations_actual);
+
+  // expected locations with zero-based lines and columns
+
+  std::string locations_expect = R"INPUT(
+document_uri: "file:///test/input/path"    definition_start: [16.4]    definition_end: [16.10]
+document_uri: "file:///test/input/path"    definition_start: [17.7]    definition_end: [17.13]
+document_uri: "file:///test/input/path"    definition_start: [19.5]    definition_end: [19.11]
+)INPUT";
+
+  EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
 
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // references test parameters
 
-  int request_id = 6;
+  int request_id = 12;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 0;
   int character = 0;
@@ -1372,7 +1430,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 {
   // formatting test parameters
 
-  int request_id = 7;
+  int request_id = 13;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int tab_size = 4;
   int insert_spaces = true;
@@ -1426,7 +1484,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 8;
+  int request_id = 14;
 
   // build shutdown request with the test parameters
 

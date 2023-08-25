@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include <functional>
 
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app), _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this))
@@ -721,13 +722,149 @@ MooseServer::getEnumsAndDocs(MooseEnumType & moose_enum_param,
 }
 
 bool
-MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & /* definitionLocations */,
-                                               int /* line */,
-                                               int /* character */)
+MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocations,
+                                               int line,
+                                               int character)
+{
+  // return without any definition locations added when parser root is null
+  if (!_check_app || !_check_app->parser()._root ||
+      _check_app->parser()._root->getNodeView().is_null())
+    return true;
+
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // return without any definition locations added when node not value type
+  if (request_context.type() != wasp::VALUE)
+    return true;
+
+  // get object context and value of type parameter for request if provided
+  wasp::HITNodeView object_context = request_context;
+  while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  const std::string & object_path = object_context.path();
+  wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+
+  // set used to gather all parameters valid from object context of request
+  InputParameters valid_params = emptyInputParameters();
+
+  // set used to gather MooseObjectAction tasks to verify object parameters
+  std::set<std::string> obj_act_tasks;
+
+  // get set of global parameters, action parameters, and object parameters
+  getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
+
+  // set used to gather nodes with locations used by custom sort comparator
+  std::set<wasp::HITNodeView,
+           std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>>
+      location_nodes(
+          [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
+          { return (l.line() < r.line() || (l.line() == r.line() && l.column() < r.column())); });
+
+  // get value string from input and name of parameter node parent of value
+  std::string val_string = request_context.last_as_string();
+  std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
+
+  // gather all lookup path nodes matching value if parameter name is valid
+  for (const auto & valid_params_iter : valid_params)
+  {
+    if (valid_params_iter.first == param_name)
+    {
+      // get cpp type and prepare string for use as key finding input paths
+      std::string dirty_type = valid_params.type(param_name);
+      std::string clean_type = MooseUtils::prettyCppType(dirty_type);
+      pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+      // get set of nodes from associated path lookups matching input value
+      getAllLocationNodes(location_nodes, clean_type, val_string);
+      break;
+    }
+  }
+
+  // add parameter declarator to set if none were gathered by input lookups
+  if (location_nodes.empty() && request_context.has_parent() &&
+      request_context.parent().child_count_by_name("decl"))
+    location_nodes.insert(request_context.parent().first_child_by_name("decl"));
+
+  // add locations to definition list using lookups or parameter declarator
+  return addLocationsToList(definitionLocations, location_nodes);
+}
+
+void
+MooseServer::getAllLocationNodes(
+    std::set<wasp::HITNodeView,
+             std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
+        location_nodes,
+    const std::string & clean_type,
+    const std::string & val_string)
+{
+  Syntax & syntax = _check_app->syntax();
+
+  // build map from parameter types to input lookup paths and save to reuse
+  if (_type_to_input_paths.empty())
+  {
+    for (const auto & associated_types_iter : syntax.getAssociatedTypes())
+    {
+      const std::string & type = associated_types_iter.second;
+      const std::string & path = associated_types_iter.first;
+      _type_to_input_paths[type].insert(path);
+    }
+  }
+
+  // find set of input lookup paths that are associated with parameter type
+  const auto & input_path_iter = _type_to_input_paths.find(clean_type);
+
+  // return without any definition locations added when no paths associated
+  if (input_path_iter == _type_to_input_paths.end())
+    return;
+
+  // get root node from input to use in input lookups with associated paths
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+
+  // walk over all syntax paths that are associated with parameter type
+  for (const auto & input_path : input_path_iter->second)
+  {
+    // use wasp siren to gather all nodes from current lookup path in input
+    wasp::SIRENInterpreter<> selector;
+    if (!selector.parseString(input_path))
+      continue;
+    wasp::SIRENResultSet<wasp::HITNodeView> results;
+    std::size_t count = selector.evaluate(view_root, results);
+
+    // walk over results and add nodes that have name matching value to set
+    for (std::size_t i = 0; i < count; i++)
+      if (results.adapted(i).type() == wasp::OBJECT && results.adapted(i).name() == val_string &&
+          results.adapted(i).child_count_by_name("decl"))
+        location_nodes.insert(results.adapted(i).first_child_by_name("decl"));
+  }
+}
+
+bool
+MooseServer::addLocationsToList(
+    wasp::DataArray & definitionLocations,
+    const std::set<wasp::HITNodeView,
+                   std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
+        location_nodes)
 {
   bool pass = true;
 
-  // TODO - hook up this capability by adding server specific logic here
+  // walk over set of nodes with locations to add and build definition list
+  for (const auto & location_nodes_iter : location_nodes)
+  {
+    // add zero based line and column range of each node to definition list
+    definitionLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = definitionLocations.back().to_object();
+    pass &= wasp::lsp::buildLocationObject(*location,
+                                           errors,
+                                           document_path,
+                                           location_nodes_iter.line() - 1,
+                                           location_nodes_iter.column() - 1,
+                                           location_nodes_iter.last_line() - 1,
+                                           location_nodes_iter.last_column());
+  }
 
   return pass;
 }

@@ -125,6 +125,7 @@ private:
    * @param existing_params - set of parameters already existing in input
    * @param request_line - line in input where autocomplete was requested
    * @param request_char - char in input where autocomplete was requested
+   * @return - true if filling of completion items completed successfully
    */
   bool addParametersToList(wasp::DataArray & completionItems,
                            const InputParameters & valid_params,
@@ -186,6 +187,31 @@ private:
    */
   bool
   gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocations, int line, int character);
+
+  /**
+   * Get set of nodes from associated path lookups matching value string.
+   * @param location_nodes - set to fill with lookup nodes matching value
+   * @param clean_type - cpp type string used for key finding input paths
+   * @param val_string - specified value used for gathering input lookups
+   */
+  void getAllLocationNodes(
+      std::set<wasp::HITNodeView,
+               std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
+          location_nodes,
+      const std::string & clean_type,
+      const std::string & val_string);
+
+  /**
+   * Add locations of lookups or parameter declarator to definition list.
+   * @param definitionLocations - data array of locations objects to fill
+   * @param location_nodes - set of nodes that have locations to be added
+   * @return - true if filling of location objects completed successfully
+   */
+  bool addLocationsToList(
+      wasp::DataArray & definitionLocations,
+      const std::set<wasp::HITNodeView,
+                     std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
+          location_nodes);
 
   /**
    * Gather references locations - specific to this server implemention.
