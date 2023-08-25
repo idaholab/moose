@@ -74,7 +74,8 @@ RestartableDataReader::readHeader(std::istream & stream) const
     error("Loaded mismatching backup version\n\n",
           "Current version: ",
           CURRENT_BACKUP_FILE_VERSION,
-          "\nLoaded version: " + this_file_version);
+          "\nLoaded version: ",
+          this_file_version);
 
   // Type id for a basic type
   std::size_t this_compare_hash_code;
