@@ -190,4 +190,21 @@
       detail = 'quadrilateral elements refined in only one direction,'
     []
   []
+  [errors]
+    requirement = 'The system shall error if'
+    [no_diag]
+      type = RunException
+      input = all_at_once.i
+      expect_err = 'You need to turn on at least one diagnostics'
+      cli_args = "Mesh/diag/examine_element_overlap=NO_CHECK
+                  Mesh/diag/examine_element_types=NO_CHECK
+                  Mesh/diag/examine_element_volumes=NO_CHECK
+                  Mesh/diag/examine_non_conformality=NO_CHECK
+                  Mesh/diag/examine_nonplanar_sides=NO_CHECK
+                  Mesh/diag/examine_sidesets_orientation=NO_CHECK
+                  Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
+                  Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
+      detail = 'a diagnostics object is created but no diagnostics are requested.'
+    []
+  []
 []
