@@ -13,6 +13,7 @@
 #include "SetupInterface.h"
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
+#include "Backup.h"
 
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
@@ -24,7 +25,7 @@ class FEProblemBase;
 class FEProblem;
 class Executioner;
 class MooseApp;
-class Backup;
+struct Backup;
 class MultiAppTransfer;
 class MultiAppCoordTransform;
 class Positions;

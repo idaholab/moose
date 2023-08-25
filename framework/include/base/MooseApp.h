@@ -42,14 +42,12 @@
 class Executioner;
 class Executor;
 class NullExecutor;
-class Backup;
 class FEProblemBase;
 class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
-class Backup;
 
 namespace libMesh
 {
