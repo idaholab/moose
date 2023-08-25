@@ -25,6 +25,7 @@
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
 #include "RestartableDataReader.h"
+#include "Backup.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -681,10 +682,14 @@ public:
   /**
    * Backs up the application memory in a Backup.
    */
-  std::shared_ptr<Backup> backup();
+  std::unique_ptr<Backup> backup();
 
   /**
    * Restore an application from the file \p filename.
+   *
+   * You must call finalizeRestore() after this in order to finalize the restoration.
+   * The restore process is kept open in order to restore additional data after
+   * the initial restore (that is, the restoration of data that has already been declared).
    */
   void restore(const std::string & filename, const bool for_restart);
 
@@ -693,8 +698,21 @@ public:
    *
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart
    * data.
+   *
+   * You must call finalizeRestore() after this in order to finalize the restoration.
+   * The restore process is kept open in order to restore additional data after
+   * the initial restore (that is, the restoration of data that has already been declared).
    */
-  void restore(bool for_restart = false);
+  void restore(const bool for_restart);
+
+  /**
+   * Finalizes (closes) the restoration process done in restore().
+   *
+   * This releases access to the stream in which the restore was loaded from and
+   * makes it no longer possible to restore additional data.
+   */
+
+  void finalizeRestore(const bool retain_backup);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -886,7 +904,19 @@ public:
    *
    * @param backup The Backup holding the data for the app.
    */
-  void setBackupObject(std::shared_ptr<Backup> backup);
+  void setBackupObject(std::unique_ptr<Backup> backup);
+
+  /**
+   * Whether or not this MooseApp has cached a Backup to use for restart / recovery
+   */
+  bool hasBackupObject() const { return _current_backup != nullptr; }
+
+  /**
+   * @return The underlying cached backup object.
+   *
+   * This will error if a backup is not available (check with hasBackupObject())
+   */
+  const Backup & getBackupObject() const;
 
   /**
    * Whether to enable automatic scaling by default
@@ -946,11 +976,6 @@ public:
   static void addAppParam(InputParameters & params);
 
 protected:
-  /**
-   * Whether or not this MooseApp has cached a Backup to use for restart / recovery
-   */
-  bool hasCachedBackup() const { return _current_backup != nullptr; }
-
   /**
    * Helper method for dynamic loading of objects
    */
@@ -1348,7 +1373,7 @@ private:
   std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>> _interface_registry;
 
   /// The current backup object (if any)
-  std::shared_ptr<Backup> _current_backup;
+  std::unique_ptr<Backup> _current_backup;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

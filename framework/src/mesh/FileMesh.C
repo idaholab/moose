@@ -133,7 +133,8 @@ FileMesh::buildMesh()
           auto & data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
           RestartableDataReader reader(_app, data);
           reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-          reader.restore(metadata_file_name, false);
+          reader.setInput(metadata_file_name);
+          reader.restore();
         }
 
       if (restarting)

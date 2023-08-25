@@ -17,8 +17,8 @@
  */
 struct Backup
 {
-  std::shared_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
+  std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
 };
 
-void dataStore(std::ostream & stream, Backup *& backup, void * context);
-void dataLoad(std::istream & stream, Backup *& backup, void * context);
+void dataStore(std::ostream & stream, Backup & backup, void * context);
+void dataLoad(std::istream & stream, Backup & backup, void * context);

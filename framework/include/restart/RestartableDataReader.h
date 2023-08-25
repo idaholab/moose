@@ -11,8 +11,12 @@
 
 #include "RestartableDataIO.h"
 
+#include "InputStream.h"
+
+#include <sstream>
+
 /**
- * Reader for restartable data.
+ * Reader for restartable data written by the RestartableDataWriter.
  */
 class RestartableDataReader : public RestartableDataIO
 {
@@ -23,35 +27,35 @@ public:
   /**
    * Sets the input stream for reading to \p stream.
    */
-  void setInput(std::shared_ptr<std::istream> stream);
+  void setInput(std::unique_ptr<std::stringstream> stream);
+  /**
+   * Sets the input stream for reading to the file with path \p filename.
+   */
+  void setInput(const std::string & filename);
 
   /**
-   * Clears the contents of the reader (stream and cached header)
+   * @return Whether or not this reader is currently restoring
    */
-  void clear();
+  bool isRestoring() const { return _input != nullptr; }
+
+  /**
+   * Clears the contents of the reader (input and cached header)
+   *
+   * This returns ownership of the resulting input in the event that
+   * it should be retained
+   */
+  std::unique_ptr<InputStream> clear();
 
   /**
    * Restores the restartable data. The input must be set via setInput() first.
    *
-   * @param retain Whether or not to retain the data. This is useful for restoring
-   * specific pieces of data at a later point after the initial restore.
+   * A handle to the input is still kept after this restore is called! In order to
+   * remove that handle, you must call clear()!
+   *
    * @param filter_names A list of data names to only restore. If not provided,
    * restores all.
    */
-  void restore(const bool retain, const DataNames & filter_names = {});
-  /**
-   * Restores the restartable data via the file at \p file_name.
-   *
-   * The underlying file will be managed and kept open if \p retain == true
-   *
-   * @param file_name The filename
-   * @param retain Whether or not to retain the data. This is useful for restoring
-   * specific pieces of data at a later point after the initial restore.
-   * @param filter_names A list of data names to only restore. If not provided,
-   * restores all.
-   */
-  void
-  restore(const std::string & file_name, const bool retain, const DataNames & filter_names = {});
+  void restore(const DataNames & filter_names = {});
 
   ///@{
   /*
@@ -83,21 +87,21 @@ private:
   };
 
   /**
-   * Internal method for reading the header and storing it into _header
+   * Internal method for reading the header (stored by RestartableDataWriter)
    */
-  void readHeader();
+  std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
+  readHeader(std::istream & stream) const;
 
   /**
    * Internal methods for deserializing data
    */
   ///@{
-  void deserialize(const THREAD_ID tid, const DataNames & filter_names);
-  void deserializeValue(RestartableDataValue & value,
-                        const RestartableDataReader::HeaderEntry & data_entry);
+  void deserializeValue(std::istream & stream,
+                        RestartableDataValue & value,
+                        const RestartableDataReader::HeaderEntry & header_entry);
   ///@}
 
-  /// The stream to read from
-  std::shared_ptr<std::istream> _stream;
+  std::unique_ptr<InputStream> _input;
 
   /// The loaded headers from the restart
   std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>> _header;

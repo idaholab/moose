@@ -12,15 +12,15 @@
 #include "DataIO.h"
 
 void
-dataStore(std::ostream & stream, Backup *& backup, void * context)
+dataStore(std::ostream & stream, Backup & backup, void * context)
 {
-  mooseAssert(backup->data, "Not set");
-  dataStore(stream, *backup->data, context);
+  mooseAssert(backup.data, "Not set");
+  dataStore(stream, *backup.data, context);
 }
 
 void
-dataLoad(std::istream & stream, Backup *& backup, void * context)
+dataLoad(std::istream & stream, Backup & backup, void * context)
 {
-  mooseAssert(backup->data, "Not set");
-  dataLoad(stream, *backup->data, context);
+  mooseAssert(backup.data, "Not set");
+  dataLoad(stream, *backup.data, context);
 }

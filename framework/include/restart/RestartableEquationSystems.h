@@ -38,12 +38,18 @@ public:
    */
   struct VectorHeader
   {
+    bool operator==(const VectorHeader & other) const
+    {
+      return name == other.name && variable_offset == other.variable_offset &&
+             vector == other.vector;
+    }
+
     /// The name of the stored vector
     std::string name;
-    /// The stored vector (only valid when _storing_, not when loading)
-    const libMesh::NumericVector<libMesh::Number> * vec = nullptr;
-    /// The to vector (only valid when _loading_, not when storing)
-    libMesh::NumericVector<libMesh::Number> * to_vec = nullptr;
+    /// The position of each variable for this vector (relative to the start of the data)
+    std::map<std::string, std::size_t> variable_offset;
+    /// The underlying vector (only valid during store, not used in load)
+    const libMesh::NumericVector<libMesh::Number> * vector = nullptr;
   };
 
   /**
@@ -51,14 +57,20 @@ public:
    */
   struct VariableHeader
   {
+    bool operator==(const VariableHeader & other) const
+    {
+      return name == other.name && type == other.type && size == other.size &&
+             variable == other.variable;
+    }
+
     /// The name of the stored variable
     std::string name;
     /// The type of the stored variable
     libMesh::FEType type;
-    /// The stored variable (only valid when _storing_, not when loading)
-    const libMesh::Variable * var = nullptr;
-    /// The to variable (only valid when _loading_, not when storing)
-    const libMesh::Variable * to_var = nullptr;
+    /// The size of this variable's data
+    std::size_t size = 0;
+    /// The underlying variable (only valid during store, not used in load)
+    const libMesh::Variable * variable = nullptr;
   };
 
   /**
@@ -66,18 +78,22 @@ public:
    */
   struct SystemHeader
   {
+    bool operator==(const SystemHeader & other) const
+    {
+      return name == other.name && type == other.type && variables == other.variables &&
+             vectors == other.vectors;
+    }
+
     /// The name of the stored system
     std::string name;
     /// The type of the stored system
     std::string type;
-    /// The stored system (only valid when _storing_, not when loading)
-    const libMesh::System * sys = nullptr;
-    /// The to system (only valid when _loading_, not when storing)
-    libMesh::System * to_sys = nullptr;
     /// The stored variables in the system
     std::map<std::string, RestartableEquationSystems::VariableHeader> variables;
     /// The stored vectors in the system
-    std::vector<RestartableEquationSystems::VectorHeader> vectors;
+    std::map<std::string, RestartableEquationSystems::VectorHeader> vectors;
+    /// Special name for a vector that is the system solution vector
+    static const std::string system_solution_name;
   };
 
   /**
@@ -85,8 +101,12 @@ public:
    */
   struct EquationSystemsHeader
   {
+    bool operator==(const EquationSystemsHeader & other) const { return systems == other.systems; }
+
     /// The stored systems in the equation systems
     std::map<std::string, RestartableEquationSystems::SystemHeader> systems;
+    /// The total size of data for this EquationSystems
+    std::size_t data_size = 0;
   };
 
   /**
@@ -108,16 +128,32 @@ public:
 
 private:
   /// Internal method for building the header struct
-  EquationSystemsHeader buildHeader() const;
+  EquationSystemsHeader
+  buildHeader(const std::vector<const libMesh::DofObject *> & ordered_objects) const;
 
   /// Internal method for ordering the DofObjects by ID (elems and the nodes)
   std::vector<const libMesh::DofObject *> orderDofObjects() const;
+
+  void restore(const SystemHeader & from_sys_header,
+               const VectorHeader & from_vec_header,
+               const VariableHeader & from_var_header,
+               const libMesh::System & to_sys,
+               libMesh::NumericVector<libMesh::Number> & to_vec,
+               const libMesh::Variable & to_var,
+               std::istream & stream);
 
   /// The underlying EquationSystems
   libMesh::EquationSystems _es;
 
   /// Whether or not to skip the loading of additional (non-solution) vectors
   const bool _skip_additional_vectors;
+
+  /// The starting position for the vector data in the input stream
+  std::size_t _loaded_stream_data_begin;
+  /// The object ordering for this data
+  std::vector<const libMesh::DofObject *> _loaded_ordered_objects;
+  /// The loaded header
+  EquationSystemsHeader _loaded_header;
 };
 
 void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);

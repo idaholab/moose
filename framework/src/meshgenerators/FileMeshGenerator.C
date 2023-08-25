@@ -120,12 +120,13 @@ FileMeshGenerator::generate()
 
     const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
     if (MooseUtils::pathExists(metadata_file_name))
-    {
-      RestartableDataReader reader(_app, _app.getRestartableDataMap(MooseApp::MESH_META_DATA));
-      reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
       if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
-        reader.restore(metadata_file_name, false);
-    }
+      {
+        RestartableDataReader reader(_app, _app.getRestartableDataMap(MooseApp::MESH_META_DATA));
+        reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+        reader.setInput(metadata_file_name);
+        reader.restore();
+      }
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

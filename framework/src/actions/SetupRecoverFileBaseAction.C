@@ -65,7 +65,8 @@ SetupRecoverFileBaseAction::act()
       {
         RestartableDataMap & meta_data = map_iter->second.first;
         RestartableDataReader reader(_app, meta_data);
-        reader.restore(filename, false);
+        reader.setInput(filename);
+        reader.restore();
       }
     }
   }

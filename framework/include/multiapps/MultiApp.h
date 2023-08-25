@@ -94,8 +94,11 @@ LocalRankConfig rankConfig(processor_id_type rank,
 
 /**
  * Helper class for holding Sub-app backups
+ *
+ * This is an empty struct that simply triggers the storage and load of
+ * the backups
  */
-class SubAppBackups : public std::vector<std::shared_ptr<Backup>>
+struct SubAppBackups
 {
 };
 
@@ -380,6 +383,13 @@ public:
    */
   void setAppOutputFileBase();
 
+  /**
+   * Sets the Backup for app \p i to \p backup.
+   *
+   * Used in the dataLoad of the SubAppBackups
+   */
+  void setAppBackup(const std::size_t i, std::unique_ptr<Backup> backup);
+
 protected:
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const { return _cli_args; }
@@ -579,9 +589,6 @@ protected:
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
-
-  /// Backups for each local App
-  SubAppBackups & _backups;
 
   /// CommandLine arguments
   const std::vector<std::string> & _cli_args;

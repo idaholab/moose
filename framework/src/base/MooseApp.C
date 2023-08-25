@@ -53,7 +53,7 @@
 #include "SolutionInvalidity.h"
 #include "MooseServer.h"
 #include "RestartableDataWriter.h"
-#include "Backup.h"
+#include "StringInputStream.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -1200,13 +1200,14 @@ MooseApp::backup(const std::string & filename)
   writer.write(filename);
 }
 
-std::shared_ptr<Backup>
+std::unique_ptr<Backup>
 MooseApp::backup()
 {
   TIME_SECTION("backup", 2, "Backing Up Application");
 
-  auto backup = std::make_shared<Backup>();
   RestartableDataWriter writer(*this, _restartable_data);
+
+  auto backup = std::make_unique<Backup>();
   writer.write(*backup->data);
 
   return backup;
@@ -1219,8 +1220,8 @@ MooseApp::restore(const std::string & filename, const bool for_restart)
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  _rd_reader.clear();
-  _rd_reader.restore(filename, true, filter_names);
+  _rd_reader.setInput(filename);
+  _rd_reader.restore(filter_names);
 }
 
 void
@@ -1230,15 +1231,34 @@ MooseApp::restore(const bool for_restart)
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  if (!hasCachedBackup())
+  if (!hasBackupObject())
     mooseError("MooseApp::restore(): Cannot call without a cached backup");
 
-  _rd_reader.clear();
+  auto data = std::move(_current_backup->data);
+  _current_backup.reset();
 
-  std::shared_ptr<std::istream> stream =
-      std::dynamic_pointer_cast<std::istream>(_current_backup->data);
-  _rd_reader.setInput(stream);
-  _rd_reader.restore(true, filter_names);
+  _rd_reader.setInput(std::move(data));
+  _rd_reader.restore(filter_names);
+}
+
+void
+MooseApp::finalizeRestore(const bool retain_backup)
+{
+  if (!_rd_reader.isRestoring())
+    mooseError("MooseApp::finalizeRestore(): Not currently restoring");
+
+  // This gives us access to the underlying stream so that we can return it if needed
+  std::unique_ptr<InputStream> input = _rd_reader.clear();
+
+  // If we're asked to retain the backup, we will get the underlying stringstream
+  // and put it back in the current backup
+  if (retain_backup)
+    if (auto string_input = dynamic_cast<StringInputStream *>(input.get()))
+    {
+      auto sstream = string_input->release();
+      _current_backup = std::make_unique<Backup>();
+      _current_backup->data = std::move(sstream);
+    }
 }
 
 void
@@ -2092,9 +2112,17 @@ MooseApp::setRecover(bool value)
 }
 
 void
-MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
+MooseApp::setBackupObject(std::unique_ptr<Backup> backup)
 {
-  _current_backup = backup;
+  _current_backup = std::move(backup);
+}
+
+const Backup &
+MooseApp::getBackupObject() const
+{
+  if (!hasBackupObject())
+    mooseError("MooseApp::getBackupObject(): The application does not have a stored backup");
+  return *_current_backup;
 }
 
 void

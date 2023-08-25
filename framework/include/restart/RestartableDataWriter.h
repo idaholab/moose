@@ -12,7 +12,7 @@
 #include "RestartableDataIO.h"
 
 /**
- * Writer for restartable data.
+ * Writer for restartable data, to be read by the RestartableDataReader.
  */
 class RestartableDataWriter : public RestartableDataIO
 {

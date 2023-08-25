@@ -73,7 +73,8 @@ LoadModelDataAction<T>::load(const T & object)
   const FileName & filename = object.getModelDataFileName();
   try
   {
-    reader.restore(filename, false);
+    reader.setInput(filename);
+    reader.restore();
   }
   catch (...)
   {

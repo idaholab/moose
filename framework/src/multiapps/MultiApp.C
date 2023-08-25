@@ -276,7 +276,6 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _move_positions(getParam<std::vector<Point>>("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
@@ -286,6 +285,11 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _restore_timer(registerTimedSection("restore", 3, "Restoring MultiApp")),
     _reset_timer(registerTimedSection("resetApp", 3, "Resetting MultiApp"))
 {
+  // We don't store a reference to this guy because we only rely on what it does during
+  // load and store; the actual backups are stored on the apps themselves. The load and
+  // store here fills appropriately into the apps
+  declareRestartableDataWithContext<SubAppBackups>("backups", this);
+
   if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
       parameters.isParamValid("cli_args_files"))
     paramError("cli_args",
@@ -324,9 +328,6 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
   _total_num_apps = num_apps;
   _rank_config = config;
   buildComm();
-  _backups.reserve(_my_num_apps);
-  for (unsigned int i = 0; i < _my_num_apps; i++)
-    _backups.emplace_back(std::make_shared<Backup>());
 
   _has_bounding_box.resize(_my_num_apps, false);
   _reset_happened.resize(_reset_times.size(), false);
@@ -728,8 +729,8 @@ MultiApp::backup()
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
-    _backups[i] = _apps[i]->backup();
-    _apps[i]->setBackupObject(_backups[i]);
+    auto backup = _apps[i]->backup();
+    _apps[i]->setBackupObject(std::move(backup));
   }
 
   if (_fe_problem.verboseMultiApps())
@@ -772,7 +773,10 @@ MultiApp::restore(bool force)
       _console << "Restoring MultiApp ... ";
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
-      _apps[i]->restore();
+    {
+      _apps[i]->restore(false);
+      _apps[i]->finalizeRestore(true);
+    }
 
     if (_fe_problem.verboseMultiApps())
       _console << name() << std::endl;
@@ -1111,13 +1115,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());
 
-  // This means we have a backup of this app that we need to give to it
-  // Note: This won't do the restoration immediately.  The Backup
-  // will be cached by the MooseApp object so that it can be used
-  // during FEProblemBase::initialSetup() during initialSetup()
-  if (_app.isRestarting() || _app.isRecovering())
-    app->setBackupObject(_backups[i]);
-
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
   if (_output_in_position && _run_in_position)
@@ -1368,25 +1365,47 @@ MultiApp::position(unsigned int app) const
 }
 
 void
-dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
+dataStore(std::ostream & stream, SubAppBackups &, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
   mooseAssert(multi_app, "Not set");
 
   multi_app->backup();
 
-  for (const auto i : index_range(backups))
-    dataStore(stream, backups[i], context);
+  unsigned int num_apps = multi_app->numLocalApps();
+  dataStore(stream, num_apps, nullptr);
+
+  for (const auto i : make_range(multi_app->numLocalApps()))
+  {
+    auto app = multi_app->localApp(i);
+    bool has_backup = app != nullptr && app->hasBackupObject();
+    dataStore(stream, has_backup, nullptr);
+    if (has_backup)
+      dataStore(stream, const_cast<Backup &>(app->getBackupObject()), nullptr);
+  }
 }
 
 void
-dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
+dataLoad(std::istream & stream, SubAppBackups &, void * context)
 {
   MultiApp * multi_app = static_cast<MultiApp *>(context);
   mooseAssert(multi_app, "Not set");
 
-  for (const auto i : index_range(backups))
-    dataLoad(stream, backups[i], context);
+  unsigned int num_apps;
+  dataLoad(stream, num_apps, nullptr);
+  mooseAssert(num_apps == multi_app->numLocalApps(), "App count mismatch");
+
+  for (const auto i : make_range(num_apps))
+  {
+    bool has_backup = false;
+    dataLoad(stream, has_backup, nullptr);
+    if (has_backup)
+    {
+      auto backup = std::make_unique<Backup>();
+      dataLoad(stream, *backup, nullptr);
+      multi_app->localApp(i)->setBackupObject(std::move(backup));
+    }
+  }
 
   multi_app->restore();
 }

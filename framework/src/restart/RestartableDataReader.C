@@ -9,6 +9,9 @@
 
 #include "RestartableDataReader.h"
 
+#include "StringInputStream.h"
+#include "FileInputStream.h"
+
 #include <fstream>
 
 // Type hash codes can't be relied on for older clang...
@@ -28,28 +31,30 @@ RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<Restart
 }
 
 void
-RestartableDataReader::setInput(std::shared_ptr<std::istream> stream)
+RestartableDataReader::setInput(std::unique_ptr<std::stringstream> stream)
 {
-  mooseAssert(stream, "Invalid stream");
-  mooseAssert(!_stream, "Already set");
-  _stream = stream;
+  mooseAssert(!_input, "Input already set");
+  _input = std::make_unique<StringInputStream>(std::move(stream));
 }
 
 void
+RestartableDataReader::setInput(const std::string & filename)
+{
+  mooseAssert(!_input, "Input already set");
+  _input = std::make_unique<FileInputStream>(filename);
+}
+
+std::unique_ptr<InputStream>
 RestartableDataReader::clear()
 {
-  _stream.reset();
   _header.clear();
+  return std::move(_input);
 }
 
-void
-RestartableDataReader::readHeader()
+std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
+RestartableDataReader::readHeader(std::istream & stream) const
 {
-  mooseAssert(_header.empty(), "Header exists");
-  _header.clear();
-
-  mooseAssert(_stream, "Not set");
-  auto & stream = *_stream;
+  std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>> header;
 
   stream.seekg(0);
 
@@ -100,7 +105,7 @@ RestartableDataReader::readHeader()
           "\nLoaded threads: ",
           this_num_data);
 
-  _header.resize(dataSize());
+  header.resize(dataSize());
 
   // Size of data for each thread
   std::vector<std::size_t> tid_n_data(dataSize());
@@ -126,8 +131,8 @@ RestartableDataReader::readHeader()
       dataLoad(stream, name, nullptr);
       mooseAssert(name.size(), "Empty name");
 
-      mooseAssert(!_header[tid].count(name), "Data '" + name + "' is already inserted");
-      auto & entry = _header[tid][name];
+      mooseAssert(!header[tid].count(name), "Data '" + name + "' is already inserted");
+      auto & entry = header[tid][name];
 
       dataLoad(stream, entry.size, nullptr);
       dataLoad(stream, entry.type_hash_code, nullptr);
@@ -139,47 +144,56 @@ RestartableDataReader::readHeader()
   }
 
   stream.seekg(0);
+
+  return header;
 }
 
 void
-RestartableDataReader::restore(const bool retain, const DataNames & filter_names /* = {} */)
+RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
 {
-  mooseAssert(_stream, "Not set");
+  if (!_input)
+    mooseError("RestartableDataReader::restore(): Cannot restore because an input was not set");
+  if (_header.size())
+    mooseError(
+        "RestartableDataReader::restore(): Cannot restore because old data exists; call clear()");
 
-  readHeader();
+  // This gives us ownership of a new input stream
+  auto stream_ptr = _input->get();
+  auto & stream = *stream_ptr;
+
+  _header = readHeader(stream);
 
   for (const auto tid : index_range(_header))
-    deserialize(tid, filter_names);
+  {
+    auto & data = currentData(tid);
+    const auto & header = _header[tid];
 
-  if (!retain)
-    clear();
+    // TODO: Think about what to do with missing data
+
+    // Load the data in the order that it was requested
+    for (auto & value : data.sortedData())
+    {
+      const auto & name = value->name();
+
+      auto find_header = header.find(name);
+      if (find_header == header.end())
+        continue;
+
+      auto & header_entry = find_header->second;
+
+      // Only restore values if we're either recovering or the data isn't filtered out
+      const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
+      if (!is_data_in_filter)
+        deserializeValue(stream, *value, header_entry);
+    }
+  }
 }
 
 void
-RestartableDataReader::restore(const std::string & file_name,
-                               const bool retain,
-                               const DataNames & filter_names /* = {} */)
-{
-  mooseAssert(_header.empty(), "Data exists");
-
-  std::shared_ptr<std::istream> stream = std::make_unique<std::ifstream>();
-  setInput(stream);
-
-  auto in = static_cast<std::ifstream *>(stream.get());
-  in->open(file_name.c_str(), std::ios::in | std::ios::binary);
-  if (in->fail())
-    mooseError("RestartableDataReader::restore(): Unable to open file '", file_name, "'");
-
-  restore(retain, filter_names);
-}
-
-void
-RestartableDataReader::deserializeValue(RestartableDataValue & value,
+RestartableDataReader::deserializeValue(std::istream & stream,
+                                        RestartableDataValue & value,
                                         const RestartableDataReader::HeaderEntry & header_entry)
 {
-  mooseAssert(_stream, "Not set");
-  auto & stream = *_stream;
-
   auto error = [&value](auto... args)
   {
     mooseError("While loading RestartableData '",
@@ -205,32 +219,4 @@ RestartableDataReader::deserializeValue(RestartableDataValue & value,
 
   if ((header_entry.position + (std::streampos)header_entry.size) != stream.tellg())
     error("The data read does not match the data stored");
-}
-
-void
-RestartableDataReader::deserialize(const THREAD_ID tid, const DataNames & filter_names)
-{
-  mooseAssert(_stream, "Not set");
-
-  auto & data = currentData(tid);
-  const auto & header = _header[tid];
-
-  // TODO: Think about what to do with missing data
-
-  // Load the data in the order that it was requested
-  for (auto & value : data.sortedData())
-  {
-    const auto & name = value->name();
-
-    auto find_header = header.find(name);
-    if (find_header == header.end())
-      continue;
-
-    auto & header_entry = find_header->second;
-
-    // Only restore values if we're either recovering or the data isn't filtered out
-    const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
-    if (!is_data_in_filter)
-      deserializeValue(*value, header_entry);
-  }
 }
