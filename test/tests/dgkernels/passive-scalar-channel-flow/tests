@@ -1,6 +1,6 @@
 [Tests]
   issues = '#24055'
-  design = 'ADConservativeAdvection.md ADDGConvection.md ADConservativeAdvectionBC.md MatDiffusion.md DGDiffusion.md DGFunctionDiffusionDirichletBC.md VectorFromVariableComponentsMaterial.md'
+  design = 'ADConservativeAdvection.md ADDGConvection.md ADConservativeAdvectionBC.md MatDiffusion.md DGDiffusion.md DGFunctionDiffusionDirichletBC.md'
   [test]
     type = Exodiff
     input = test.i

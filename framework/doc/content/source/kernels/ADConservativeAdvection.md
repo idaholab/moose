@@ -10,7 +10,7 @@ The `ADConservativeAdvection` kernel implements the same advection term as
   propagation of derivatives for automatic differentiation
 - No upwinding option is currently implemented. In that vein this object may be
   best used within a discontinuous Galerkin scheme with [ADDGConvection.md].
-- A [!param](/Kernels/ADConservativeAdvection/advected_quantity) paramter is
+- A [!param](/Kernels/ADConservativeAdvection/advected_quantity) parameter is
   available which allows for advecting different quantities than the `variable`
   this object is acting upon
 

@@ -16,7 +16,8 @@ ADDGConvection::validParams()
 {
   InputParameters params = ADDGKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("velocity", "Velocity vector");
-  params.addClassDescription("DG for convection");
+  params.addClassDescription(
+      "Adds internal face advection flux contributions for discontinuous Galerkin discretizations");
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");

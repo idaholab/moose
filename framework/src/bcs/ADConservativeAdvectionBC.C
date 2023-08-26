@@ -22,7 +22,9 @@ ADConservativeAdvectionBC::validParams()
       "to be determined implicitly (e.g. we don't have a Dirichlet condition)");
   params.addParam<FunctionName>("velocity_function",
                                 "Function describing the values of velocity on the boundary.");
-  params.addClassDescription("DG for convection");
+  params.addClassDescription(
+      "Boundary condition for advection when it is integrated by parts. Supports Dirichlet "
+      "(inlet-like) and implicit (outlet-like) conditions.");
   params.addParam<MaterialPropertyName>("advected_quantity",
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
