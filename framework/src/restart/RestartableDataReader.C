@@ -118,12 +118,11 @@ RestartableDataReader::readHeader(std::istream & stream) const
   std::size_t n_header_data = 0;
   dataLoad(stream, n_header_data, nullptr);
 
-  // Load for each thread
+  // The position of the current data that we're loading (skips the headers)
+  std::size_t current_data_position = static_cast<std::size_t>(stream.tellg()) + n_header_data;
+
+  // Load the data header for each thread
   for (const auto tid : make_range(dataSize()))
-  {
-    // Data header
-    auto current_data_position = stream.tellg();
-    current_data_position += n_header_data;
     for (const auto i : make_range(tid_n_data[tid]))
     {
       std::ignore = i;
@@ -142,7 +141,6 @@ RestartableDataReader::readHeader(std::istream & stream) const
 
       current_data_position += entry.size;
     }
-  }
 
   stream.seekg(0);
 
