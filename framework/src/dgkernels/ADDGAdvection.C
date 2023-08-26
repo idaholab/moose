@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADDGConvection.h"
+#include "ADDGAdvection.h"
 
-registerMooseObject("MooseApp", ADDGConvection);
+registerMooseObject("MooseApp", ADDGAdvection);
 
 InputParameters
-ADDGConvection::validParams()
+ADDGAdvection::validParams()
 {
   InputParameters params = ADDGKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("velocity", "Velocity vector");
@@ -24,7 +24,7 @@ ADDGConvection::validParams()
   return params;
 }
 
-ADDGConvection::ADDGConvection(const InputParameters & parameters)
+ADDGAdvection::ADDGAdvection(const InputParameters & parameters)
   : ADDGKernel(parameters),
     _velocity(getADMaterialProperty<RealVectorValue>("velocity")),
     _velocity_neighbor(getNeighborADMaterialProperty<RealVectorValue>("velocity")),
@@ -38,7 +38,7 @@ ADDGConvection::ADDGConvection(const InputParameters & parameters)
 }
 
 ADReal
-ADDGConvection::computeQpResidual(Moose::DGResidualType type)
+ADDGAdvection::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = 0;
 

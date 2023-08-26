@@ -15,12 +15,12 @@
  * Adds residual/Jacobian contributions for a convection term from internal faces for a
  * discontinuous Galerkin formulation
  */
-class ADDGConvection : public ADDGKernel
+class ADDGAdvection : public ADDGKernel
 {
 public:
   static InputParameters validParams();
 
-  ADDGConvection(const InputParameters & parameters);
+  ADDGAdvection(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;

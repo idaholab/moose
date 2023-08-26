@@ -32,7 +32,7 @@
 
 [DGKernels]
   [convection]
-    type = ADDGConvection
+    type = ADDGAdvection
     variable = u
     velocity = 'velocity'
   []

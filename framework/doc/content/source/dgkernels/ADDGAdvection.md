@@ -1,17 +1,17 @@
-# ADDGConvection
+# ADDGAdvection
 
-!syntax description /DGKernels/ADDGConvection
+!syntax description /DGKernels/ADDGAdvection
 
 This is the automatic differentiation analog of [DGConvection.md] but with a
 couple distinctions:
 
-- The [!param](/DGKernels/ADDGConvection/velocity) parameter is a material
+- The [!param](/DGKernels/ADDGAdvection/velocity) parameter is a material
   property instead of a constant. This allows this object's use in a
   simulation where the velocity is being solved for
   and/or changing spatially. Additionally, the use of a material property as
   opposed to a coupled variable allows more straightforward
   propagation of derivatives for automatic differentiation.
-- A [!param](/DGKernels/ADDGConvection/advected_quantity) paramter is
+- A [!param](/DGKernels/ADDGAdvection/advected_quantity) paramter is
   available which allows for advecting different quantities than the `variable`
   this object is acting upon
 
@@ -24,8 +24,8 @@ and bottom boundaries of the domain.
 
 !listing test/tests/dgkernels/passive-scalar-channel-flow/test.i block=DGKernels
 
-!syntax parameters /DGKernels/ADDGConvection
+!syntax parameters /DGKernels/ADDGAdvection
 
-!syntax inputs /DGKernels/ADDGConvection
+!syntax inputs /DGKernels/ADDGAdvection
 
-!syntax children /DGKernels/ADDGConvection
+!syntax children /DGKernels/ADDGAdvection
