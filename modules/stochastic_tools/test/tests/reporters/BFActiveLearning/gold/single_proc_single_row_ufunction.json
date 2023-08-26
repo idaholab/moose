@@ -1,7 +1,7 @@
 {
     "reporters": {
         "conditional": {
-            "type": "BFActiveLearningGPDecision",
+            "type": "BiFidelityActiveLearningGPDecision",
             "values": {
                 "flag_sample": {
                     "type": "std::vector<bool>"
@@ -265,13 +265,13 @@
         {
             "conditional": {
                 "flag_sample": [
-                    true
+                    false
                 ],
                 "gp_mean": [
-                    -10.176805712024748
+                    0.0
                 ],
                 "gp_std": [
-                    22.687874940560842
+                    0.0
                 ],
                 "inputs": [
                     [
@@ -281,7 +281,7 @@
                     ]
                 ],
                 "lf_corrected": [
-                    315.15065753566415
+                    0.0
                 ],
                 "need_sample": [
                     true
@@ -310,26 +310,26 @@
                     false
                 ],
                 "gp_mean": [
-                    3.199786461894716
+                    0.0
                 ],
                 "gp_std": [
-                    0.0038455951690982647
+                    0.0
                 ],
                 "inputs": [
                     [
-                        10.780112795199855,
-                        11320.001550249475,
-                        322.5631202711744
+                        15.875901480845355,
+                        8711.567397237377,
+                        262.72939129915284
                     ]
                 ],
                 "lf_corrected": [
-                    328.5272497095836
+                    0.0
                 ],
                 "need_sample": [
-                    false
+                    true
                 ],
                 "reporter_transfer:avg:value": [
-                    328.5272497095836
+                    265.8459966006429
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -337,7 +337,7 @@
             },
             "constant": {
                 "reporter_transfer_lf:avg:value": [
-                    325.3274632476889
+                    264.1739203673674
                 ],
                 "reporter_transfer_lf:converged": [
                     true
@@ -349,13 +349,13 @@
         {
             "conditional": {
                 "flag_sample": [
-                    true
+                    false
                 ],
                 "gp_mean": [
-                    25.46934993033228
+                    0.0
                 ],
                 "gp_std": [
-                    16.02420427855793
+                    0.0
                 ],
                 "inputs": [
                     [
@@ -365,7 +365,7 @@
                     ]
                 ],
                 "lf_corrected": [
-                    367.78328330810365
+                    0.0
                 ],
                 "need_sample": [
                     true
@@ -394,26 +394,26 @@
                     false
                 ],
                 "gp_mean": [
-                    2.1909981952472384
+                    -24.302474931128057
                 ],
                 "gp_std": [
-                    0.0035115666538681066
+                    28.25779528580924
                 ],
                 "inputs": [
                     [
-                        10.295299898771203,
-                        7402.57479591254,
-                        340.4211008872761
+                        14.91057354179136,
+                        8128.063575970402,
+                        287.8223536979797
                     ]
                 ],
                 "lf_corrected": [
-                    344.5049315730186
+                    264.95490923728096
                 ],
                 "need_sample": [
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    344.5049315730186
+                    264.95490923728096
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -421,7 +421,7 @@
             },
             "constant": {
                 "reporter_transfer_lf:avg:value": [
-                    342.3139333777714
+                    289.25738416840903
                 ],
                 "reporter_transfer_lf:converged": [
                     true
@@ -436,10 +436,10 @@
                     false
                 ],
                 "gp_mean": [
-                    3.725543739497811
+                    -52.810915250888165
                 ],
                 "gp_std": [
-                    26.200055684891467
+                    31.541283245675892
                 ],
                 "inputs": [
                     [
@@ -449,13 +449,13 @@
                     ]
                 ],
                 "lf_corrected": [
-                    257.3721993879067
+                    200.8357403975207
                 ],
                 "need_sample": [
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    257.3721993879067
+                    200.8357403975207
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -478,10 +478,10 @@
                     true
                 ],
                 "gp_mean": [
-                    3.08734183398614
+                    11.75113036935955
                 ],
                 "gp_std": [
-                    23.862939080243844
+                    35.63816669738317
                 ],
                 "inputs": [
                     [
@@ -491,7 +491,7 @@
                     ]
                 ],
                 "lf_corrected": [
-                    315.3991835660571
+                    324.0629721014305
                 ],
                 "need_sample": [
                     true
@@ -513,174 +513,6 @@
             },
             "time": 10.0,
             "time_step": 10
-        },
-        {
-            "conditional": {
-                "flag_sample": [
-                    false
-                ],
-                "gp_mean": [
-                    5.180795794090304
-                ],
-                "gp_std": [
-                    0.0032581573109576804
-                ],
-                "inputs": [
-                    [
-                        6.721579022212303,
-                        11427.983801809452,
-                        307.83608279827945
-                    ]
-                ],
-                "lf_corrected": [
-                    317.4926375261613
-                ],
-                "need_sample": [
-                    false
-                ],
-                "reporter_transfer:avg:value": [
-                    317.4926375261613
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "constant": {
-                "reporter_transfer_lf:avg:value": [
-                    312.31184173207095
-                ],
-                "reporter_transfer_lf:converged": [
-                    true
-                ]
-            },
-            "time": 11.0,
-            "time_step": 11
-        },
-        {
-            "conditional": {
-                "flag_sample": [
-                    true
-                ],
-                "gp_mean": [
-                    -0.5182086587713526
-                ],
-                "gp_std": [
-                    22.393609038311872
-                ],
-                "inputs": [
-                    [
-                        15.855587697923195,
-                        7231.226794239039,
-                        333.5084941751971
-                    ]
-                ],
-                "lf_corrected": [
-                    334.19088463003726
-                ],
-                "need_sample": [
-                    true
-                ],
-                "reporter_transfer:avg:value": [
-                    336.0988148880471
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "constant": {
-                "reporter_transfer_lf:avg:value": [
-                    334.7090932888086
-                ],
-                "reporter_transfer_lf:converged": [
-                    true
-                ]
-            },
-            "time": 12.0,
-            "time_step": 12
-        },
-        {
-            "conditional": {
-                "flag_sample": [
-                    false
-                ],
-                "gp_mean": [
-                    1.3897215768968139
-                ],
-                "gp_std": [
-                    0.0030477290338153926
-                ],
-                "inputs": [
-                    [
-                        15.855587697923195,
-                        7231.226794239039,
-                        333.5084941751971
-                    ]
-                ],
-                "lf_corrected": [
-                    336.09881486570544
-                ],
-                "need_sample": [
-                    false
-                ],
-                "reporter_transfer:avg:value": [
-                    336.09881486570544
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "constant": {
-                "reporter_transfer_lf:avg:value": [
-                    334.7090932888086
-                ],
-                "reporter_transfer_lf:converged": [
-                    true
-                ]
-            },
-            "time": 13.0,
-            "time_step": 13
-        },
-        {
-            "conditional": {
-                "flag_sample": [
-                    true
-                ],
-                "gp_mean": [
-                    25.202755253329723
-                ],
-                "gp_std": [
-                    14.336083215119851
-                ],
-                "inputs": [
-                    [
-                        18.592499903899302,
-                        9363.019505479466,
-                        313.3162361271599
-                    ]
-                ],
-                "lf_corrected": [
-                    339.8446973248928
-                ],
-                "need_sample": [
-                    true
-                ],
-                "reporter_transfer:avg:value": [
-                    316.1764732524406
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "constant": {
-                "reporter_transfer_lf:avg:value": [
-                    314.6419420715631
-                ],
-                "reporter_transfer_lf:converged": [
-                    true
-                ]
-            },
-            "time": 14.0,
-            "time_step": 14
         }
     ]
 }

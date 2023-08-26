@@ -53,7 +53,6 @@
     to_multi_app = sub
     sampler = mc
     parameters = 'Materials/conductivity/prop_values Kernels/source/value BCs/right/value'
-    to_control = 'stochastic'
     check_multiapp_execute_on = false
   []
   [sub_lf]
@@ -61,7 +60,6 @@
     to_multi_app = sub_lf
     sampler = mc
     parameters = 'Materials/conductivity/prop_values Kernels/source/value BCs/right/value'
-    to_control = 'stochastic'
     check_multiapp_execute_on = false
   []
   [reporter_transfer_lf]
@@ -85,7 +83,7 @@
     type = StochasticReporter
   []
   [conditional]
-    type = BFActiveLearningGPDecision
+    type = BiFidelityActiveLearningGPDecision
     sampler = mc
     parallel_type = ROOT
     execute_on = 'timestep_begin'
@@ -93,7 +91,7 @@
     inputs = 'inputs'
     gp_mean = 'gp_mean'
     gp_std = 'gp_std'
-    n_train = 5
+    n_train = 8
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
     learning_function='Ufunction'

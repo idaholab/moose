@@ -8,16 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BiFidelityActiveLearningGPDecision.h"
+#include "Sampler.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           BiFidelityActiveLearningGPDecision,
-                           "BFActiveLearningGPDecision");
+registerMooseObject("StochasticToolsApp", BiFidelityActiveLearningGPDecision);
 
 InputParameters
 BiFidelityActiveLearningGPDecision::validParams()
 {
   InputParameters params = ActiveLearningGPDecision::validParams();
   params.addClassDescription("Perform active learning decision making in bi-fidelity modeling.");
+  params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   params.addRequiredParam<ReporterName>("outputs_lf",
                                         "Value of the LF model output from the SubApp.");
   params.addParam<ReporterValueName>("lf_corrected", "lf_corrected", "GP-corrected LF prediciton.");
@@ -27,13 +27,12 @@ BiFidelityActiveLearningGPDecision::validParams()
 BiFidelityActiveLearningGPDecision::BiFidelityActiveLearningGPDecision(
     const InputParameters & parameters)
   : ActiveLearningGPDecision(parameters),
+    _sampler(getSampler("sampler")),
     _outputs_lf(getReporterValue<std::vector<Real>>("outputs_lf", REPORTER_MODE_DISTRIBUTED)),
     _lf_corrected(declareValue<std::vector<Real>>("lf_corrected",
-                                                  std::vector<Real>(sampler().getNumberOfRows())))
+                                                  std::vector<Real>(sampler().getNumberOfRows()))),
+    _local_comm(_sampler.getLocalComm())
 {
-  // Create communicator that only has processors with rows
-  _communicator.split(
-      sampler().getNumberOfLocalRows() > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
 }
 
 bool
@@ -58,7 +57,7 @@ BiFidelityActiveLearningGPDecision::preNeedSample()
   _outputs_lf_batch = _outputs_lf;
   _local_comm.allgather(_outputs_lf_batch);
   // Accumulate inputs and outputs if we previously decided we needed a sample
-  if (_step > 1 && _decision)
+  if (_t_step > 1 && _decision)
   {
     std::vector<Real> differences(_outputs_global.size());
     for (dof_id_type i = 0; i < _outputs_global.size(); ++i)
@@ -68,7 +67,7 @@ BiFidelityActiveLearningGPDecision::preNeedSample()
     setupData(_inputs, differences);
 
     // Retrain if we are outside the training phase
-    if (_step >= _n_train)
+    if (_t_step >= _n_train)
       _al_gp.reTrain(_inputs_batch, _outputs_batch);
   }
 
@@ -76,7 +75,7 @@ BiFidelityActiveLearningGPDecision::preNeedSample()
   _inputs = _inputs_global;
 
   // Evaluate GP and decide if we need more data if outside training phase
-  if (_step >= _n_train)
+  if (_t_step >= _n_train)
     _decision = facilitateDecision();
 }
 

@@ -75,22 +75,6 @@ protected:
    */
   bool learningFunction(const Real & gp_mean, const Real & gp_std) const;
 
-  /**
-   * This sets up data for re-training the GP.
-   *
-   * @param inputs Matrix of inputs for the current step
-   * @param outputs Vector of outputs for the current step
-   */
-  void setupData(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs);
-
-  /**
-   * This makes decisions whether to call the full model or not based on
-   * GP prediction and uncertainty.
-   *
-   * @return bool Whether a full order model evaluation is required
-   */
-  bool facilitateDecision();
-
   /// The learning function for active learning
   const MooseEnum & _learning_function;
   /// The learning function threshold

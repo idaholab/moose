@@ -54,6 +54,9 @@ protected:
   virtual bool facilitateDecision() override;
 
 private:
+  /// The sampler
+  Sampler & _sampler;
+
   /// Store all the outputs used for training from the LF model
   const std::vector<Real> & _outputs_lf;
 
@@ -64,5 +67,5 @@ private:
   std::vector<Real> & _lf_corrected;
 
   /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
+  libMesh::Parallel::Communicator & _local_comm;
 };
