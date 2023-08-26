@@ -9,6 +9,8 @@
 
 #include "StringInputStream.h"
 
+#include "MooseError.h"
+
 StringInputStream::StringInputStream(std::unique_ptr<std::stringstream> stream)
   : InputStream(), _stream(std::move(stream))
 {

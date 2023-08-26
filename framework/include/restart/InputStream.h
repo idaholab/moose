@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <istream>
+#include <vector>
 
 /**
  * Helper class that hands out input streams to an underlying, managed

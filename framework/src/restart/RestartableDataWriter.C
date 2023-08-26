@@ -11,6 +11,9 @@
 
 #include <fstream>
 
+#include "DataIO.h"
+#include "RestartableDataMap.h"
+
 RestartableDataWriter::RestartableDataWriter(MooseApp & app, RestartableDataMap & data)
   : RestartableDataIO(app, data)
 {

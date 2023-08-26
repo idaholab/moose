@@ -9,15 +9,7 @@
 
 #include "RestartableDataIO.h"
 
-#include "RestartableDataMap.h"
 #include "MooseApp.h"
-#include "DataIO.h"
-#include "MooseUtils.h"
-
-#include <stdio.h>
-#include <fstream>
-#include <sstream>
-#include <typeinfo>
 
 const std::string RestartableDataIO::RESTARTABLE_DATA_EXT = ".rd";
 const unsigned int RestartableDataIO::CURRENT_BACKUP_FILE_VERSION = 3;

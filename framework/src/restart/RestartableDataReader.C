@@ -11,6 +11,7 @@
 
 #include "StringInputStream.h"
 #include "FileInputStream.h"
+#include "RestartableDataMap.h"
 
 #include <fstream>
 

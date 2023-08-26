@@ -11,6 +11,7 @@
 
 #include "RestartableDataIO.h"
 
+#include "RestartableData.h"
 #include "InputStream.h"
 
 #include <sstream>
