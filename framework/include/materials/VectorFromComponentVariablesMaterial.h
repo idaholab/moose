@@ -15,12 +15,12 @@
  * Computes a vector material property from coupled variables
  */
 template <bool is_ad>
-class VectorFromVariableComponentsMaterialTempl : public Material
+class VectorFromComponentVariablesMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  VectorFromVariableComponentsMaterialTempl(const InputParameters & parameters);
+  VectorFromComponentVariablesMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -35,5 +35,5 @@ protected:
   const GenericVariableValue<is_ad> & _w;
 };
 
-typedef VectorFromVariableComponentsMaterialTempl<false> VectorFromVariableComponentsMaterial;
-typedef VectorFromVariableComponentsMaterialTempl<true> ADVectorFromVariableComponentsMaterial;
+typedef VectorFromComponentVariablesMaterialTempl<false> VectorFromComponentVariablesMaterial;
+typedef VectorFromComponentVariablesMaterialTempl<true> ADVectorFromComponentVariablesMaterial;

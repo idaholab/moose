@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorFromVariableComponentsMaterial.h"
+#include "VectorFromComponentVariablesMaterial.h"
 
-registerMooseObject("MooseApp", VectorFromVariableComponentsMaterial);
-registerMooseObject("MooseApp", ADVectorFromVariableComponentsMaterial);
+registerMooseObject("MooseApp", VectorFromComponentVariablesMaterial);
+registerMooseObject("MooseApp", ADVectorFromComponentVariablesMaterial);
 
 template <bool is_ad>
 InputParameters
-VectorFromVariableComponentsMaterialTempl<is_ad>::validParams()
+VectorFromComponentVariablesMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Computes a vector material property from coupled variables");
@@ -27,7 +27,7 @@ VectorFromVariableComponentsMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-VectorFromVariableComponentsMaterialTempl<is_ad>::VectorFromVariableComponentsMaterialTempl(
+VectorFromComponentVariablesMaterialTempl<is_ad>::VectorFromComponentVariablesMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _vector(declareGenericProperty<RealVectorValue, is_ad>("vector_prop_name")),
@@ -39,10 +39,10 @@ VectorFromVariableComponentsMaterialTempl<is_ad>::VectorFromVariableComponentsMa
 
 template <bool is_ad>
 void
-VectorFromVariableComponentsMaterialTempl<is_ad>::computeQpProperties()
+VectorFromComponentVariablesMaterialTempl<is_ad>::computeQpProperties()
 {
   _vector[_qp] = GenericRealVectorValue<is_ad>{_u[_qp], _v[_qp], _w[_qp]};
 }
 
-template class VectorFromVariableComponentsMaterialTempl<false>;
-template class VectorFromVariableComponentsMaterialTempl<true>;
+template class VectorFromComponentVariablesMaterialTempl<false>;
+template class VectorFromComponentVariablesMaterialTempl<true>;

@@ -1,8 +1,8 @@
-# VectorFromVariableComponentsMaterial
+# VectorFromComponentVariablesMaterial
 
 ## Description
 
-`VectorFromVariableComponentsMaterial` computes a vector material property with
+`VectorFromComponentVariablesMaterial` computes a vector material property with
 name specified by the `vector_prop_name` parameter from coupled variable
 components. The x-component is computed through the `u` coupled
 variable. Optional coupled variables `v` and `w` compute the y- and z-components
@@ -17,8 +17,8 @@ be constructed.
 
 !listing test/tests/dgkernels/passive-scalar-channel-flow/test.i block=Materials
 
-!syntax parameters /Materials/VectorFromVariableComponentsMaterial
+!syntax parameters /Materials/VectorFromComponentVariablesMaterial
 
-!syntax inputs /Materials/VectorFromVariableComponentsMaterial
+!syntax inputs /Materials/VectorFromComponentVariablesMaterial
 
-!syntax children /Materials/VectorFromVariableComponentsMaterial
+!syntax children /Materials/VectorFromComponentVariablesMaterial

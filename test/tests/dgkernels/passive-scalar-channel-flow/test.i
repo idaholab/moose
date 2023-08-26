@@ -79,7 +79,7 @@
 
 [Materials]
   [vel]
-    type = ADVectorFromVariableComponentsMaterial
+    type = ADVectorFromComponentVariablesMaterial
     vector_prop_name = 'velocity'
     u = 1
     v = 0
