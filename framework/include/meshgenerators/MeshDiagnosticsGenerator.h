@@ -79,7 +79,8 @@ private:
   const Real _non_conformality_tol;
   /// counter for the number of non-conformal elements
   unsigned int _num_nonconformal_nodes;
-
   /// whether to check for the adaptivity of non-conformal meshes
   const MooseEnum _check_adaptivity_non_conformality;
+  /// whether to check for negative jacobians in the domain
+  const MooseEnum _check_local_jacobian;
 };

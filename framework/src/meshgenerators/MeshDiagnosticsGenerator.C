@@ -12,6 +12,7 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_refinement.h"
+#include "libmesh/fe.h"
 
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
@@ -53,6 +54,9 @@ MeshDiagnosticsGenerator::validParams()
       "search_for_adaptivity_nonconformality",
       chk_option,
       "whether to check for non-conformality arising from adaptive mesh refinement");
+  params.addParam<MooseEnum>("check_local_jacobian",
+                             chk_option,
+                             "whether to check the local Jacobian for negative values");
   return params;
 }
 
@@ -68,7 +72,9 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
-    _check_adaptivity_non_conformality(getParam<MooseEnum>("search_for_adaptivity_nonconformality"))
+    _check_adaptivity_non_conformality(
+        getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
+    _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian"))
 {
   // Check that no secondary parameters have been passed with the main check disabled
   if ((isParamSetByUser("minimum_element_volumes") ||
@@ -82,7 +88,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (_check_sidesets_orientation == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
-      _check_adaptivity_non_conformality == "NO_CHECK")
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostics. Did you misspell a parameter?");
 }
 
@@ -91,9 +97,9 @@ MeshDiagnosticsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Most of the checks assume we use a replicated mesh
-  if (!mesh->is_replicated())
-    mooseError("Only replicated meshes are supported");
+  // Most of the checks assume we have the full mesh
+  if (!mesh->is_serial())
+    mooseError("Only serialized meshes are supported");
 
   // We prepare for use at the beginning to facilitate diagnosis
   // This deliberately does not trust the mesh to know whether it's already prepared or not
@@ -945,6 +951,8 @@ MeshDiagnosticsGenerator::generate()
         parent = std::make_unique<Tri3>();
       if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
         parent = std::make_unique<Tet4>();
+      else
+        continue;
 
       // Set the nodes to the coarse element
       for (auto i : index_range(tentative_coarse_nodes))
@@ -1001,6 +1009,99 @@ MeshDiagnosticsGenerator::generate()
         _check_adaptivity_non_conformality,
         num_likely_AMR_created_nonconformality);
     pl->unset_close_to_point_tol();
+  }
+
+  if (_check_local_jacobian != "NO_CHECK")
+  {
+    unsigned int num_negative_elem_qp_jacobians = 0;
+    // Check elements (assumes serialized mesh)
+    for (const auto & elem : mesh->element_ptr_range())
+    {
+      // Get a high-ish order quadrature
+      QGauss qrule(mesh->mesh_dimension(), FOURTH);
+
+      // Use the default element order
+      // We would error if going above what the element can't support
+      FEType fe_type(elem->default_order(), libMesh::LAGRANGE);
+
+      // Initialize a basic Lagrangian shape function everywhere
+      std::unique_ptr<FEBase> fe_elem;
+      if (mesh->mesh_dimension() == 1)
+        fe_elem = std::make_unique<FELagrange<1>>(fe_type);
+      if (mesh->mesh_dimension() == 2)
+        fe_elem = std::make_unique<FELagrange<2>>(fe_type);
+      else
+        fe_elem = std::make_unique<FELagrange<3>>(fe_type);
+
+      fe_elem->attach_quadrature_rule(&qrule);
+      try
+      {
+        fe_elem->reinit(elem);
+      }
+      catch (libMesh::LogicError & e)
+      {
+        num_negative_elem_qp_jacobians++;
+        const auto msg = std::string(e.what());
+        if (num_negative_elem_qp_jacobians < 10 &&
+            msg.find("negative Jacobian") != std::string::npos)
+          _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
+        else if (num_negative_elem_qp_jacobians == 10)
+          _console << "Maximum log output reached, silencing output" << std::endl;
+        else if (msg.find("negative Jacobian") == std::string::npos)
+          _console << e.what() << std::endl;
+      }
+    }
+    diagnosticsLog("Number of negative Jacobians on element Gauss-4th quadrature points: " +
+                       Moose::stringify(num_negative_elem_qp_jacobians),
+                   _check_local_jacobian,
+                   num_negative_elem_qp_jacobians);
+
+    unsigned int num_negative_side_qp_jacobians = 0;
+    // Check element sides
+    for (const auto & elem : mesh->element_ptr_range())
+    {
+      for (const auto & side : elem->side_index_range())
+      {
+        // Get a high-ish order side quadrature
+        QGauss qrule(mesh->mesh_dimension() - 1, FOURTH);
+
+        // Use the default element order
+        // We would error if going above what the element can't support
+        FEType fe_type(elem->default_side_order(), libMesh::LAGRANGE);
+
+        // Initialize a basic Lagrangian shape function everywhere
+        std::unique_ptr<FEBase> fe_side;
+        if (mesh->mesh_dimension() == 1)
+          fe_side = std::make_unique<FELagrange<1>>(fe_type);
+        if (mesh->mesh_dimension() == 2)
+          fe_side = std::make_unique<FELagrange<2>>(fe_type);
+        else
+          fe_side = std::make_unique<FELagrange<3>>(fe_type);
+
+        fe_side->attach_quadrature_rule(&qrule);
+        try
+        {
+          fe_side->reinit(elem, side);
+        }
+        catch (libMesh::LogicError & e)
+        {
+          num_negative_side_qp_jacobians++;
+          const auto msg = std::string(e.what());
+          if (num_negative_side_qp_jacobians < 10 &&
+              msg.find("negative Jacobian") != std::string::npos)
+            _console << "Negative Jacobian found in side " << side << " of element\n"
+                     << elem->get_info() << std::endl;
+          else if (num_negative_side_qp_jacobians == 10)
+            _console << "Maximum log output reached, silencing output" << std::endl;
+          else if (msg.find("negative Jacobian") == std::string::npos)
+            _console << e.what() << std::endl;
+        }
+      }
+    }
+    diagnosticsLog("Number of negative Jacobians at element side quadrature points: " +
+                       Moose::stringify(num_negative_side_qp_jacobians),
+                   _check_local_jacobian,
+                   num_negative_side_qp_jacobians);
   }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
