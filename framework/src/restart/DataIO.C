@@ -185,13 +185,6 @@ dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
 
 template <>
 void
-dataStore(std::ostream & stream, std::stringstream *& s, void * context)
-{
-  dataStore(stream, *s, context);
-}
-
-template <>
-void
 dataStore(std::ostream & stream, RealEigenVector & v, void * context)
 {
   unsigned int m = v.size();
@@ -479,13 +472,6 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   // Clear the stringstream before loading new data into it.
   s.str(std::string());
   s.write(s_s.get(), s_size);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, std::stringstream *& s, void * context)
-{
-  dataLoad(stream, *s, context);
 }
 
 template <>

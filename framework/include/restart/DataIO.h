@@ -360,8 +360,6 @@ void dataStore(std::ostream & stream, Node *& n, void * context);
 template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
-void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
-template <>
 void dataStore(std::ostream & stream, DualReal & dn, void * context);
 template <>
 void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
@@ -657,8 +655,6 @@ template <>
 void dataLoad(std::istream & stream, Node *& e, void * context);
 template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
-template <>
-void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
 template <>
 void dataLoad(std::istream & stream, DualReal & dn, void * context);
 template <>
