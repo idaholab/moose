@@ -839,7 +839,7 @@ getLatestCheckpointFilePrefix(const std::list<std::string> & checkpoint_files)
 
   // Error if nothing was located
   if (max_file_num == -1)
-    mooseError("No checkpint file found!");
+    mooseError("No checkpoint file found!");
 
   return max_prefix;
 }
