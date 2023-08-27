@@ -70,6 +70,13 @@
 
       detail = 'non-planar sides on elements,'
     []
+    [negative_jacobian]
+      type = RunApp
+      input = jacobian_test.i
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of elements with a negative Jacobian: 1'
+    []
   []
 
   [amr_detection]
