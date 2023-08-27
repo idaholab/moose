@@ -446,7 +446,8 @@ MeshDiagnosticsGenerator::generate()
         continue;
       if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) && elements.size() != 3)
         continue;
-      if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) && elements.size() != 8)
+      if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
+          (elements.size() % 4 == 0))
         continue;
 
       // only one coarse element in front of refined elements except for tets. Whatever we're
@@ -459,6 +460,9 @@ MeshDiagnosticsGenerator::generate()
 
       // There exists non-conformality, the node should have been a node of all the elements
       // that are close enough to the node, and it is not
+
+      // Nodes of the tentative parent element
+      std::vector<const Node *> tentative_coarse_nodes;
 
       // For quads and hexes, there is one (quad) or four (hexes) sides that are tied to this node
       // at the non-conformal interface between the refined elements and a coarse element
@@ -499,14 +503,7 @@ MeshDiagnosticsGenerator::generate()
             }
           }
         }
-      }
 
-      // Nodes of the tentative parent element
-      std::vector<const Node *> tentative_coarse_nodes;
-
-      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
-          elem_type == HEX20 || elem_type == HEX27)
-      {
         auto elem = *elements.begin();
         // Gather the other potential elements in the refined element:
         // they are point neighbors of the node that is shared between all the elements flagged
@@ -1051,7 +1048,7 @@ MeshDiagnosticsGenerator::generate()
           _console << e.what() << std::endl;
       }
     }
-    diagnosticsLog("Number of negative Jacobians on element Gauss-4th quadrature points: " +
+    diagnosticsLog("Number of elements with a negative Jacobian: " +
                        Moose::stringify(num_negative_elem_qp_jacobians),
                    _check_local_jacobian,
                    num_negative_elem_qp_jacobians);
@@ -1098,7 +1095,7 @@ MeshDiagnosticsGenerator::generate()
         }
       }
     }
-    diagnosticsLog("Number of negative Jacobians at element side quadrature points: " +
+    diagnosticsLog("Number of element sides with negative Jacobians: " +
                        Moose::stringify(num_negative_side_qp_jacobians),
                    _check_local_jacobian,
                    num_negative_side_qp_jacobians);
