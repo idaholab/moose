@@ -71,6 +71,7 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
+  using FieldVariablePhiDivergence = typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
   using FieldVariablePhiGradient =
       typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
   using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;
@@ -565,6 +566,7 @@ public:
 
   bool computingSecond() const override final { return false; }
   bool computingCurl() const override final { return false; }
+  bool computingDiv() const override final { return false; }
   bool usesSecondPhiNeighbor() const override final { return false; }
 
   const FieldVariablePhiValue & phi() const override final { return _phi; }
@@ -576,6 +578,10 @@ public:
   const FieldVariablePhiValue & curlPhi() const override final
   {
     mooseError("We don't currently implement curl for FV");
+  }
+  const FieldVariablePhiDivergence & divPhi() const override final
+  {
+    mooseError("We don't currently implement divergence for FV");
   }
 
   const FieldVariablePhiValue & phiFace() const override final { return _phi_face; }
