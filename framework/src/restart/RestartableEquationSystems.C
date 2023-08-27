@@ -76,6 +76,7 @@ RestartableEquationSystems::buildHeader(
     auto & sys_vec_header = sys_header.vectors[SystemHeader::system_solution_name];
     sys_vec_header.name = SystemHeader::system_solution_name;
     sys_vec_header.vector = sys.solution.get();
+    sys_vec_header.type = sys_vec_header.vector->type();
     for (const auto vec_num : make_range(sys.n_vectors()))
     {
       mooseAssert(_es.comm().verify("sys_" + sys.name() + "_vec_" + sys.vector_name(vec_num)),
@@ -85,6 +86,7 @@ RestartableEquationSystems::buildHeader(
       auto & vec_header = sys_header.vectors[name];
       vec_header.name = sys.vector_name(vec_num);
       vec_header.vector = &sys.get_vector(vec_header.name);
+      vec_header.type = vec_header.vector->type();
     }
 
     // System in this EquationSystems
@@ -260,8 +262,15 @@ RestartableEquationSystems::load(std::istream & stream)
 
       const auto & vec_header = vec_name_header_pair.second;
       const bool is_solution = vec_header.name == SystemHeader::system_solution_name;
-      if (!is_solution && (_skip_additional_vectors || !sys.have_vector(vec_header.name)))
-        continue;
+      if (!is_solution)
+      {
+        if (_skip_additional_vectors)
+          continue;
+        // TODO: Maybe only add these vectors on recover?
+        if (!sys.have_vector(vec_header.name))
+          sys.add_vector(vec_header.name, false, vec_header.type);
+      }
+
       auto & vec = is_solution ? *sys.solution : sys.get_vector(vec_header.name);
 
       for (const auto & var_name_header_pair : sys_header.variables)
@@ -425,11 +434,13 @@ void
 dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *)
 {
   dataStore(stream, header.name, nullptr);
+  dataStore(stream, header.type, nullptr);
   dataStore(stream, header.variable_offset, nullptr);
 }
 void
 dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *)
 {
   dataLoad(stream, header.name, nullptr);
+  dataLoad(stream, header.type, nullptr);
   dataLoad(stream, header.variable_offset, nullptr);
 }

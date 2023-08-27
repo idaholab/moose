@@ -46,6 +46,8 @@ public:
 
     /// The name of the stored vector
     std::string name;
+    /// The type of the stored vector
+    libMesh::ParallelType type;
     /// The position of each variable for this vector (relative to the start of the data)
     std::map<std::string, std::size_t> variable_offset;
     /// The underlying vector (only valid during store, not used in load)
