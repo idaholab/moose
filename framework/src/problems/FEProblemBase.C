@@ -460,8 +460,17 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (isParamValid("restart_file_base"))
   {
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
-    restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
-    setRestartFile(restart_file_base);
+
+    // This check reverts to old behavior of providing "restart_file_base=" to mean
+    // don't restart... BISON currently relies on this. It could probably be removed.
+    // The new MooseUtils::convertLatestCheckpoint will error out if a checkpoint file
+    // is not found, which I think makes sense. Which means, without this, if you
+    // set "restart_file_base=", you'll get a "No checkpoint file found" error
+    if (restart_file_base.size())
+    {
+      restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
+      setRestartFile(restart_file_base);
+    }
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
