@@ -60,7 +60,8 @@ SetupRecoverFileBaseAction::act()
          ++map_iter)
     {
       const std::string & suffix = map_iter->second.second;
-      const std::string filename = Checkpoint::fullMetaDataSuffix(suffix);
+      const std::string filename =
+          _app.getRestartRecoverFileBase() + Checkpoint::fullMetaDataSuffix(suffix);
       if (MooseUtils::checkFileReadable(filename, false, false, false))
       {
         RestartableDataMap & meta_data = map_iter->second.first;
