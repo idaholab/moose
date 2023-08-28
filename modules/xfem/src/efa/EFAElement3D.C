@@ -21,6 +21,8 @@
 #include "EFAError.h"
 #include "XFEMFuncs.h"
 
+#include "libmesh/int_range.h"
+
 EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int n_faces)
   : EFAElement(eid, n_nodes),
     _num_faces(n_faces),
@@ -487,6 +489,7 @@ void
 EFAElement3D::setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & inverse_connectivity_map)
 {
   findGeneralNeighbors(inverse_connectivity_map);
+  std::vector<std::pair<unsigned int, unsigned int>> common_ids;
   for (unsigned int eit2 = 0; eit2 < _general_neighbors.size(); ++eit2)
   {
     EFAElement3D * neigh_elem = dynamic_cast<EFAElement3D *>(_general_neighbors[eit2]);
@@ -494,8 +497,7 @@ EFAElement3D::setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & inver
       EFAError("neighbor_elem is not of EFAelement3D type");
 
     const auto & common_face_id = getCommonFaceID(neigh_elem);
-    std::vector<unsigned int> face_ids, edge_ids;
-    if (common_face_id.empty() && getCommonEdgeID(neigh_elem, face_ids, edge_ids) &&
+    if (common_face_id.empty() && getCommonEdgeID(neigh_elem, common_ids) &&
         !overlaysElement(neigh_elem))
     {
       bool is_edge_neighbor = false;
@@ -513,12 +515,8 @@ EFAElement3D::setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & inver
         is_edge_neighbor = true;
 
       if (is_edge_neighbor)
-        for (unsigned int i = 0; i < face_ids.size(); ++i)
-        {
-          unsigned int face_id = face_ids[i];
-          unsigned int edge_id = edge_ids[i];
+        for (const auto & [face_id, edge_id] : common_ids)
           _face_edge_neighbors[face_id][edge_id].push_back(neigh_elem);
-        }
     }
 
     if (common_face_id.size() == 1 && !overlaysElement(neigh_elem))
@@ -1522,36 +1520,36 @@ EFAElement3D::getCommonFaceID(const EFAElement3D * other_elem) const
 
 bool
 EFAElement3D::getCommonEdgeID(const EFAElement3D * other_elem,
-                              std::vector<unsigned int> & face_id,
-                              std::vector<unsigned int> & edge_id) const
+                              std::vector<std::pair<unsigned int, unsigned int>> & common_ids) const
 {
-  bool has_common_edge = false;
-  bool move_to_next_edge = false;
-  face_id.clear();
-  edge_id.clear();
-  for (unsigned int i = 0; i < _num_faces; ++i)
-    for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+  // all edges of the other element
+  std::set<std::pair<EFANode *, EFANode *>> other_edges;
+  for (const auto k : index_range(other_elem->_faces))
+  {
+    const auto & face = *other_elem->_faces[k];
+    for (const auto l : make_range(other_elem->_faces[k]->numEdges()))
     {
-      move_to_next_edge = false;
-      for (unsigned int k = 0; k < other_elem->_num_faces; ++k)
-      {
-        for (unsigned int l = 0; l < other_elem->_faces[k]->numEdges(); ++l)
-          if ((_faces[i]->getEdge(j)->equivalent(*(other_elem->_faces[k]->getEdge(l)))) &&
-              !(_faces[i]->equivalent(other_elem->_faces[k])))
-          {
-            face_id.push_back(i);
-            edge_id.push_back(j);
-            move_to_next_edge = true;
-            has_common_edge = true;
-            break;
-          }
+      const auto & edge = *face.getEdge(l);
+      other_edges.insert(edge.getSortedNodes());
+    }
+  }
 
-        if (move_to_next_edge)
-          break;
-      }
+  // loop over all edges of this element
+  common_ids.clear();
+  for (const auto i : index_range(_faces))
+    for (const auto j : make_range(_faces[i]->numEdges()))
+    {
+      const auto & edge = *_faces[i]->getEdge(j);
+      const auto edge_nodes = edge.getSortedNodes();
+
+      // is this edge contained in the other element?
+      if (edge.isEmbeddedPermanent() || other_edges.count(edge_nodes) == 0)
+        continue;
+
+      common_ids.emplace_back(i, j);
     }
 
-  return has_common_edge;
+  return common_ids.size() > 0;
 }
 
 unsigned int

@@ -343,6 +343,7 @@ XFEM::buildEFAMesh()
     std::vector<unsigned int> quad;
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       quad.push_back(elem->node_id(i));
+
     if (_mesh->mesh_dimension() == 2)
       _efa_mesh.add2DElement(quad, elem->id());
     else if (_mesh->mesh_dimension() == 3)

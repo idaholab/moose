@@ -105,8 +105,7 @@ public:
   unsigned int getFaceID(EFAFace * face) const;
   std::vector<unsigned int> getCommonFaceID(const EFAElement3D * other_elem) const;
   bool getCommonEdgeID(const EFAElement3D * other_elem,
-                       std::vector<unsigned int> & face_id,
-                       std::vector<unsigned int> & edge_id) const;
+                       std::vector<std::pair<unsigned int, unsigned int>> & common_ids) const;
   unsigned int getNeighborFaceNodeID(unsigned int face_id,
                                      unsigned int node_id,
                                      EFAElement3D * neighbor_elem) const;

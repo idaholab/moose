@@ -51,8 +51,8 @@ EFAElement::getNode(unsigned int node_id) const
 bool
 EFAElement::containsNode(EFANode * node) const
 {
-  for (unsigned int i = 0; i < _nodes.size(); ++i)
-    if (_nodes[i] == node)
+  for (const auto element_node : _nodes)
+    if (element_node == node)
       return true;
   return false;
 }

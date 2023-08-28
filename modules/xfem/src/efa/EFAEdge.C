@@ -37,20 +37,22 @@ EFAEdge::~EFAEdge() // do not delete edge node - they will be deleted
 bool
 EFAEdge::equivalent(const EFAEdge & other) const
 {
-  bool isEqual = false;
-  if (other._edge_node1 == _edge_node1 && other._edge_node2 == _edge_node2)
-    isEqual = true;
-  else if (other._edge_node2 == _edge_node1 && other._edge_node1 == _edge_node2)
-    isEqual = true;
-
-  // For cut along the edge case
-  if (isEqual)
+  if (getSortedNodes() == other.getSortedNodes())
   {
-    if (_edge_node1->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT &&
-        _edge_node2->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
-      isEqual = false;
+    // For cut along the edge case
+    if (isEmbeddedPermanent())
+      return false;
+    return true;
   }
-  return isEqual;
+
+  return false;
+}
+
+bool
+EFAEdge::isEmbeddedPermanent() const
+{
+  return _edge_node1->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT &&
+         _edge_node2->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
 }
 
 bool

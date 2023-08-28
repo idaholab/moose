@@ -99,7 +99,7 @@ ElementFragmentAlgorithm::add2DElements(std::vector<std::vector<unsigned int>> &
 }
 
 EFAElement *
-ElementFragmentAlgorithm::add2DElement(std::vector<unsigned int> quad, unsigned int id)
+ElementFragmentAlgorithm::add2DElement(const std::vector<unsigned int> & quad, unsigned int id)
 {
   unsigned int num_nodes = quad.size();
 
@@ -130,7 +130,7 @@ ElementFragmentAlgorithm::add2DElement(std::vector<unsigned int> quad, unsigned 
 }
 
 EFAElement *
-ElementFragmentAlgorithm::add3DElement(std::vector<unsigned int> quad, unsigned int id)
+ElementFragmentAlgorithm::add3DElement(const std::vector<unsigned int> & quad, unsigned int id)
 {
   unsigned int num_nodes = quad.size();
   unsigned int num_faces = 0;
@@ -200,12 +200,8 @@ void
 ElementFragmentAlgorithm::initCrackTipTopology()
 {
   _crack_tip_elements.clear(); // re-build CrackTipElements!
-  std::map<unsigned int, EFAElement *>::iterator eit;
-  for (eit = _elements.begin(); eit != _elements.end(); ++eit)
-  {
-    EFAElement * curr_elem = eit->second;
-    curr_elem->initCrackTip(_crack_tip_elements); // CrackTipElements changed here
-  }
+  for (auto pair : _elements)
+    pair.second->initCrackTip(_crack_tip_elements); // CrackTipElements changed here
 }
 
 void
@@ -214,7 +210,7 @@ ElementFragmentAlgorithm::addElemEdgeIntersection(unsigned int elemid,
                                                   double position)
 {
   // this method is called when we are marking cut edges
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addEdgeIntersection");
 
@@ -228,7 +224,7 @@ void
 ElementFragmentAlgorithm::addElemNodeIntersection(unsigned int elemid, unsigned int nodeid)
 {
   // this method is called when we are marking cut nodes
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addElemNodeIntersection");
 
@@ -247,7 +243,7 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid,
                                                   double position)
 {
   // N.B. this method must be called after addEdgeIntersection
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addFragEdgeIntersection");
 
@@ -260,11 +256,11 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid,
 void
 ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
                                                   unsigned int faceid,
-                                                  std::vector<unsigned int> edgeid,
-                                                  std::vector<double> position)
+                                                  const std::vector<unsigned int> & edgeid,
+                                                  const std::vector<double> & position)
 {
   // this method is called when we are marking cut edges
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addEdgeIntersection");
 
@@ -278,10 +274,11 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
 }
 
 void
-ElementFragmentAlgorithm::addFragFaceIntersection(unsigned int /*ElemID*/,
-                                                  unsigned int /*FragFaceID*/,
-                                                  std::vector<unsigned int> /*FragFaceEdgeID*/,
-                                                  std::vector<double> /*position*/)
+ElementFragmentAlgorithm::addFragFaceIntersection(
+    unsigned int /*ElemID*/,
+    unsigned int /*FragFaceID*/,
+    const std::vector<unsigned int> & /*FragFaceEdgeID*/,
+    const std::vector<double> & /*position*/)
 {
   // TODO: need to finish this for 3D problems
 }
@@ -614,12 +611,17 @@ void
 ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
 {
   // Collect all parent nodes that will be isolated
-  std::map<EFANode *, std::vector<EFANode *>> isolate_parent_to_child;
+  std::map<EFANode *, EFANode *> isolate_parent_to_child;
   for (unsigned int i = 0; i < _new_nodes.size(); ++i)
   {
     EFANode * parent_node = _new_nodes[i]->parent();
     if (!parent_node)
       EFAError("a new permanent node must have a parent node!");
+
+    auto it = isolate_parent_to_child.lower_bound(parent_node);
+    if (it != isolate_parent_to_child.end() && it->first == parent_node)
+      continue;
+
     bool isParentNodeInNewElem = false;
     for (unsigned int j = 0; j < _child_elements.size(); ++j)
     {
@@ -630,21 +632,17 @@ ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
       }
     }
     if (!isParentNodeInNewElem)
-      isolate_parent_to_child[parent_node].push_back(_new_nodes[i]);
+      isolate_parent_to_child.emplace_hint(it, parent_node, _new_nodes[i]);
   }
 
   // For each isolated parent node, pick one of its child new node
   // Then, switch that child with its parent for all new elems
-  std::map<EFANode *, std::vector<EFANode *>>::iterator mit;
-  for (mit = isolate_parent_to_child.begin(); mit != isolate_parent_to_child.end(); ++mit)
+  for (const auto [parent_node, child_node] : isolate_parent_to_child)
   {
-    EFANode * parent_node = mit->first;
-    EFANode * child_node = (mit->second)[0]; // need to discard it and swap it back to its parent
     for (unsigned int i = 0; i < _child_elements.size(); ++i)
-    {
       if (_child_elements[i]->containsNode(child_node))
         _child_elements[i]->switchNode(parent_node, child_node, true);
-    }
+
     _new_nodes.erase(std::remove(_new_nodes.begin(), _new_nodes.end(), child_node),
                      _new_nodes.end());
     Efa::deleteFromMap(_permanent_nodes, child_node);

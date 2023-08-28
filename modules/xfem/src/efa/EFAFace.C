@@ -250,18 +250,6 @@ EFAFace::createNodes()
   }
 }
 
-unsigned int
-EFAFace::numEdges() const
-{
-  return _edges.size();
-}
-
-EFAEdge *
-EFAFace::getEdge(unsigned int edge_id) const
-{
-  return _edges[edge_id];
-}
-
 void
 EFAFace::setEdge(unsigned int edge_id, EFAEdge * new_edge)
 {
@@ -366,25 +354,8 @@ EFAFace::isTriOrQuad() const
 bool
 EFAFace::equivalent(const EFAFace * other_face) const
 {
-  // bail out early if the number of face nodes is not equal
-  if (_num_nodes != other_face->_num_nodes)
-    return false;
-
-  // counter number of equal nodes
-  unsigned int counter = 0;
-
-  for (unsigned int i = 0; i < _num_nodes; ++i)
-    for (unsigned int j = 0; j < other_face->_num_nodes; ++j)
-      if (_nodes[i] == other_face->_nodes[j])
-      {
-        counter += 1;
-        break;
-      }
-
-  if (counter == _num_nodes)
-    return true;
-
-  return false;
+  return std::is_permutation(
+      _nodes.begin(), _nodes.end(), other_face->_nodes.begin(), other_face->_nodes.end());
 }
 
 bool
