@@ -168,6 +168,7 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
 
   // Moose::out<<"Generic dataStore"<<std::endl;
   stream.write((char *)&v, sizeof(v));
+  mooseAssert(!stream.bad(), "Failed to store");
 }
 
 template <typename T>
@@ -473,8 +474,7 @@ inline void
 dataLoad(std::istream & stream, T & v, void * /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
-  if (stream.tellg() == -1)
-    mooseError("dataLoad() failed to load");
+  mooseAssert(!stream.bad(), "Failed to load");
 }
 
 template <typename T>
