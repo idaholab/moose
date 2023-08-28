@@ -7,5 +7,7 @@
     requirement = 'The system shall be capable of modeling the Helmholtz equation for scalar complex field variables, where real/imaginary coupling occurs for both the diffusion and reaction terms and coefficient values vary spatially.'
     design = 'FunctionDiffusion.md ADMatReaction.md ADMatCoupledForce.md'
     issues = '#13744'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

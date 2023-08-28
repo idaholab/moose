@@ -14,6 +14,8 @@
     max_threads = 1
     valgrind = none
     recover = false
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [Newton]
     detail = " matrix free hessian and Newton algorithm"
@@ -25,5 +27,7 @@
     cli_args = "Executioner/tao_solver=taonls"
     max_threads = 1
     recover = false
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []
