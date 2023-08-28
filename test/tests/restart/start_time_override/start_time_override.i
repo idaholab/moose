@@ -7,7 +7,6 @@
 
 [Problem]
   restart_file_base = transient_out_cp/LATEST
-  skip_additional_restart_data = true
 []
 
 [Variables]

@@ -31,7 +31,7 @@ class MeshBase;
 class RestartableEquationSystems
 {
 public:
-  RestartableEquationSystems(libMesh::MeshBase & mesh, const bool skip_additional_vectors);
+  RestartableEquationSystems(libMesh::MeshBase & mesh);
 
   /**
    * Represents a stored variable in restart
@@ -128,6 +128,18 @@ public:
   const libMesh::EquationSystems & es() const { return _es; }
   ///@}
 
+  /**
+   * Sets whether or not all vectors are to be loaded.
+   *
+   * By default, this is true. This means that all vectors
+   * that do not currently exist in the system will be added
+   * and loaded.
+   *
+   * Typically, we would want this to be false in the case
+   * of restart.
+   */
+  void setLoadAllVectors(const bool load_all_vectors) { _load_all_vectors = load_all_vectors; }
+
 private:
   /// Internal method for building the header struct
   EquationSystemsHeader
@@ -147,9 +159,8 @@ private:
   /// The underlying EquationSystems
   libMesh::EquationSystems _es;
 
-  /// Whether or not to skip the loading of additional (non-solution) vectors
-  const bool _skip_additional_vectors;
-
+  /// Whether or not to load _all_ of the vectors, including ones that haven't been added yet
+  bool _load_all_vectors;
   /// The starting position for the vector data in the input stream
   std::size_t _loaded_stream_data_begin;
   /// The object ordering for this data

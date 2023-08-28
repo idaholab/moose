@@ -1,7 +1,6 @@
 [Problem]
   restart_file_base = parent_ss_checkpoint_cp/LATEST
   force_restart = true
-  skip_additional_restart_data = true
 
   # The auxiliary field has an initial condition
   allow_initial_conditions_with_restart = true

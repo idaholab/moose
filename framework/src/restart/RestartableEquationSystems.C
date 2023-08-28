@@ -19,9 +19,8 @@
 const std::string RestartableEquationSystems::SystemHeader::system_solution_name =
     "SYSTEM_SOLUTION";
 
-RestartableEquationSystems::RestartableEquationSystems(libMesh::MeshBase & mesh,
-                                                       const bool skip_additional_vectors)
-  : _es(mesh), _skip_additional_vectors(skip_additional_vectors)
+RestartableEquationSystems::RestartableEquationSystems(libMesh::MeshBase & mesh)
+  : _es(mesh), _load_all_vectors(true)
 {
 }
 
@@ -262,13 +261,13 @@ RestartableEquationSystems::load(std::istream & stream)
 
       const auto & vec_header = vec_name_header_pair.second;
       const bool is_solution = vec_header.name == SystemHeader::system_solution_name;
-      if (!is_solution)
+
+      if (!is_solution && !sys.have_vector(vec_header.name))
       {
-        if (_skip_additional_vectors)
-          continue;
-        // TODO: Maybe only add these vectors on recover?
-        if (!sys.have_vector(vec_header.name))
+        if (_load_all_vectors)
           sys.add_vector(vec_header.name, false, vec_header.type);
+        else
+          continue;
       }
 
       auto & vec = is_solution ? *sys.solution : sys.get_vector(vec_header.name);

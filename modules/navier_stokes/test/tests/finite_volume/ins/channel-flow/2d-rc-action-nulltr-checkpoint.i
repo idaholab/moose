@@ -10,7 +10,6 @@ rho = 1.1
   material_coverage_check = false
   restart_file_base = 2d-rc-action_restart_cp/LATEST
   force_restart = true
-  skip_additional_restart_data = true # to be able to restart from a Steady solution
 []
 
 [Modules]
