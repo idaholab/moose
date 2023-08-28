@@ -13,7 +13,8 @@
 
 /**
  * Generates a triangulation in the XY plane, based on an input mesh
- * defining the outer boundary and an optional set of input meshes
+ * defining the outer boundary (as well as explicitly required
+ * interior Steiner points) and an optional set of input meshes
  * defining inner hole boundaries.
  */
 class XYDelaunayGenerator : public MeshGenerator
