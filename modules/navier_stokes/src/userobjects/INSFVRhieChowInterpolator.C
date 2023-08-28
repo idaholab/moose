@@ -684,14 +684,39 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
   if (_approximate_as)
   {
-    const auto coeff = Utility::pow<2>(fi.dCNMag()) /
-                       (fi.dCNMag() * _cs * (*_rhos[tid])(face, time) + (*_mus[tid])(face, time));
+    // Recall from Moukalled that D = V / a. And a represents the coefficients multiplying the
+    // velocity components--including volume integration--in a linearized casting of the momentum
+    // equations. So both numerator (V) and denominator (a) contain units of volume. We can imagine
+    // dividing both numerator and denominator by volume then, and so D should have the inverse of
+    // the units matching the linearized coefficient matrix of the *strong form* (not volume
+    // integrated) of the momentum equations, e.g. if we consider the advection term:
+    //
+    // \nabla \cdot \rho uu
+    //
+    // then D should have the inverse of the units correponding to
+    //
+    // \nabla \cdot \rho u
+    //
+    // and similarly the inverse of the units of
+    //
+    // \nabla \cdot \mu \nabla
+    //
+    // So:
+    //
+    // 1/(1/L * rho * speed + 1/L * mu * 1/L)
+    //
+    // Multiplying both numerator and denominator by L^2 yields what we see
+    // below:
+    //
+    // L^2/(L * rho * speed + mu)
+    const auto face_D = Utility::pow<2>(fi.dCNMag()) /
+                        (fi.dCNMag() * _cs * (*_rhos[tid])(face, time) + (*_mus[tid])(face, time));
 
     // Perform the pressure correction. We don't use skewness-correction on the pressure since
     // it only influences the averaged cell gradients which cancel out in the correction
     // below.
     for (const auto i : make_range(_dim))
-      velocity(i) -= coeff * face_eps * (grad_p(i) - unc_grad_p(i));
+      velocity(i) -= face_D * face_eps * (grad_p(i) - unc_grad_p(i));
   }
   else
   {
