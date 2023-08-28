@@ -467,9 +467,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     {
       restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
       setRestartFile(restart_file_base);
-
-      // If we're restarting, only load the vectors that have already been added
-      _req.set().setLoadAllVectors(false);
     }
   }
 
@@ -777,7 +774,10 @@ FEProblemBase::initialSetup()
 
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
   {
-    // Let the EquationSystems load depend on everything lse so that it comes last
+    // Only load all of the vectors if we're recovering
+    _req.set().setLoadAllVectors(!_app.isRecovering());
+
+    // Let the EquationSystems load depend on everything else so that it comes last
     {
       auto & restartable_data = _app.getRestartableData()[0];
       auto & res_value = restartable_data.data(restartableName(equation_systems_restartable_name));
