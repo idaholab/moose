@@ -10,8 +10,27 @@
 #pragma once
 
 #include "ReferenceResidualProblem.h"
+#include "FEProblem.h"
 #include "NodeFaceConstraint.h"
 #include "MechanicalContactConstraint.h"
+
+class AugmentedLagrangianContactProblemInterface
+{
+public:
+  static InputParameters validParams();
+  AugmentedLagrangianContactProblemInterface(const InputParameters & params);
+  virtual const unsigned int & getLagrangianIterationNumber() const
+  {
+    return _lagrangian_iteration_number;
+  }
+
+protected:
+  /// maximum mumber of augmented lagrange iterations
+  const unsigned int _maximum_number_lagrangian_iterations;
+
+  /// current augmented lagrange iteration number
+  unsigned int _lagrangian_iteration_number;
+};
 
 /**
  * Class to manage nested solution for augmented Lagrange contact.
@@ -19,13 +38,15 @@
  * repeating the solution until convergence has been achieved, checking for convergence, and
  * updating the Lagrangian multipliers.
  */
-class AugmentedLagrangianContactProblem : public ReferenceResidualProblem
+template <class T>
+class AugmentedLagrangianContactProblemTempl : public T,
+                                               public AugmentedLagrangianContactProblemInterface
 {
 public:
   static InputParameters validParams();
 
-  AugmentedLagrangianContactProblem(const InputParameters & params);
-  virtual ~AugmentedLagrangianContactProblem() {}
+  AugmentedLagrangianContactProblemTempl(const InputParameters & params);
+  virtual ~AugmentedLagrangianContactProblemTempl() {}
 
   virtual void timestepSetup() override;
 
@@ -44,12 +65,16 @@ public:
                             const Real ref_resid,
                             const Real div_threshold) override;
 
-  const unsigned int & getLagrangianIterationNumber() const { return _lagrangian_iteration_number; }
-
-private:
-  /// maximum mumber of augmented lagrange iterations
-  const unsigned int _maximum_number_lagrangian_iterations;
-
-  /// current augmented lagrange iteration number
-  unsigned int _lagrangian_iteration_number;
+protected:
+  using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
+  using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
+  using FEProblem::_console;
+  using FEProblem::currentNonlinearSystem;
+  using FEProblem::geomSearchData;
+  using FEProblem::getDisplacedProblem;
+  using FEProblem::theWarehouse;
 };
+
+typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>
+    AugmentedLagrangianContactProblem;
+typedef AugmentedLagrangianContactProblemTempl<FEProblem> AugmentedLagrangianContactFEProblem;

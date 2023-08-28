@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeometricCutUserObject.h"
-
+class MeshCut2DNucleationBase;
 /**
  * MeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
  * (2) Fills xfem cut element ojbects.
@@ -54,14 +54,17 @@ protected:
   /// The xfem cutter mesh
   std::unique_ptr<MeshBase> _cutter_mesh;
 
-  /// bool to specify if _cutter_mesh has been modified by crack growth
-  bool wasCutterMeshModified() const { return !_active_front_node_growth_vectors.empty(); }
+  /// 2D UO for nucleating cracks
+  const MeshCut2DNucleationBase * _nucleate_uo;
+
+  /// Indicator that shows if the cutting mesh is modified or not in this calculation step
+  bool _is_mesh_modified;
 
   /**
    * This vector of pairs orders crack tips to make the order used in this class the same as those
    * for the fracture integrals vectorpostProcessorsin created by CrackFrontDefinition.
    * The original crack front node ids found in the cutter mesh are put in pair.first and the
-   * assosciated current crack front node id that grew from teh original crack front node id is in
+   * assosciated current crack front node id that grew from the original crack front node id is in
    * pair.second.  This vector is sorted on pair.first which makes the ordering of this vector the
    * same as that used in the CrackFrontDefinition
    */
@@ -76,11 +79,36 @@ protected:
   virtual void findActiveBoundaryGrowth() = 0;
 
   /**
-    Find the original crack front nodes in the cutter mesh and use to populate
-    _original_and_current_front_node_ids.
+   * Find the original crack front nodes in the cutter mesh and use to populate
+   * _original_and_current_front_node_ids.
    */
   void findOriginalCrackFrontNodes();
 
   /// grow the cutter mesh
   void growFront();
+
+  /**
+   * Calls into MeshCutNucleation UO to add cracks.
+   */
+  void addNucleatedCracksToMesh();
+
+private:
+  /**
+   * Remove nucleated cracks that are too close too each other.  Lowest map key wins
+   * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
+   * two nodes of nucleated crack
+   * @param  nucleationRadius  exclusion distance between cracks
+   */
+  void removeNucleatedCracksTooCloseToEachOther(
+      std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+      Real nucleationRadius);
+  /**
+   * Remove nucleated cracks that are too close to a pre-existing crack in the mesh.
+   * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
+   * two nodes of nucleated crack
+   * @param  nucleationRadius  exclusion distance between cracks
+   */
+  void removeNucleatedCracksTooCloseToExistingCracks(
+      std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+      Real nucleationRadius);
 };

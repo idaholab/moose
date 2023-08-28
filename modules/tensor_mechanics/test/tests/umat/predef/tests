@@ -11,6 +11,8 @@
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) affecting material behavior '
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [predef_reference]
     type = 'Exodiff'
@@ -33,6 +35,8 @@
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) step increment affecting material behavior '
     rel_err = 5.0e-5
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [dpredef_reference]
     type = 'Exodiff'
@@ -55,6 +59,8 @@
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external fields (not temperature) affecting material behavior '
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [predef_multiple_reference]
     type = 'Exodiff'
@@ -76,6 +82,8 @@
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external material properties affecting material behavior '
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [predef_multiple_reference_mat]
     type = 'Exodiff'

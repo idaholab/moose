@@ -119,7 +119,7 @@
     type = PenaltyMortarUserObjectAux
     variable = real_weighted_gap
     user_object = penalty_friction_object_contact_block
-    contact_quantity = weighted_gap
+    contact_quantity = normal_gap
   []
   [stress_xx]
     type = RankTwoAux
@@ -166,8 +166,9 @@
     friction_coefficient = 0.1
     model = coulomb
     formulation = mortar_penalty
-    penalty = 5e5
+    penalty = 1e5
     penalty_friction = 1e4
+    use_dual = false
   []
 []
 

@@ -102,7 +102,7 @@
                   'constraint using nodal-attached geometry'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    min_ad_size = 100
+    min_ad_size = 150
     method = 'opt'
   []
   [frictional-mortar-3d-dynamics-light]

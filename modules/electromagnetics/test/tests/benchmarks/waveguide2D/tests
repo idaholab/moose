@@ -7,6 +7,8 @@
     design = 'ADMatReaction.md EMRobinBC.md benchmarks/WaveguideTransmission.md'
     verification = 'benchmarks/WaveguideTransmission.md'
     issues = '#21098'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [absorbing_error]
     type = 'RunException'

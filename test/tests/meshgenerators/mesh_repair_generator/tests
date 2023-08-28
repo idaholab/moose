@@ -1,0 +1,25 @@
+[Tests]
+  design = 'MeshRepairGenerator.md'
+  issues = '#25107'
+  [node_overlap]
+    type = JSONDiff
+    input = overlapping_fix_test.i
+    jsondiff = overlapping_fix_test_json.json
+    requirement = 'The system shall be able to merge overlapping nodes.'
+    mesh_mode = 'replicated'
+  []
+  [element_flip]
+    type = CSVDiff
+    input = flip_element.i
+    csvdiff = flip_element_out.csv
+    requirement = 'The system shall be able to flip the orientation of negative-volume elements.'
+    mesh_mode = 'replicated'
+  []
+  [separate_element_types]
+    type = JSONDiff
+    input = mixed_elements.i
+    jsondiff = mixed_elements_json.json
+    requirement = "The system shall be able to split blocks across their element's type."
+    mesh_mode = 'replicated'
+  []
+[]

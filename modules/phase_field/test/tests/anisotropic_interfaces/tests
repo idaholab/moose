@@ -10,5 +10,7 @@
     exodiff = 'adkobayashi_out.e'
     custom_cmp = 'adkobayashi.exodiff'
     valgrind = HEAVY
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   [../]
 []

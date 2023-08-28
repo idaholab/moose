@@ -47,9 +47,19 @@ public:
 
   /**
    * @param node Node pointer
-   * @return The normal contact pressure at the node
+   * @return The normal gap at the node
    */
-  virtual Real getNormalWeightedGap(const Node * const /*node*/) const;
+  virtual Real getNormalGap(const Node * const /*node*/) const;
+
+  /**
+   * Compute physical gap from integration gap quantity
+   */
+  Real physicalGap(const std::pair<ADReal, Real> & gap) const
+  {
+    return MetaPhysicL::raw_value(gap.first) / gap.second;
+  }
+
+  ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
 
   /**
    * @param node Node pointer
@@ -106,6 +116,19 @@ protected:
    * will be enforced in a distributed way (like in a penalty method)
    */
   virtual bool constrainedByOwner() const = 0;
+
+  /**
+   * Find a value in a map or return a default if the key doesn't exist
+   */
+  template <typename K, typename V>
+  V
+  findValue(const std::unordered_map<K, V> & map, const K & key, const V & default_value = 0) const
+  {
+    const auto it = map.find(key);
+    if (it == map.end())
+      return default_value;
+    return it->second;
+  }
 
   /// The base finite element problem
   FEProblemBase & _fe_problem;

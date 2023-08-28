@@ -1,0 +1,115 @@
+[Tests]
+  issues = '#24349'
+  [aux_errors]
+    design = PenaltyMortarUserObjectAux.md
+    requirement = 'The aux kernel shall throw an error if the supplied user object dies not support computing the property'
+
+    [normal_pressure]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=normal_pressure'
+      detail = 'normal_pressure'
+      expect_err = "The 'NORMAL_PRESSURE' quantity is only provided by a 'PenaltyWeightedGapUserObject' or "
+                   "derived object\."
+    []
+
+    [accumulated_slip_one]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=accumulated_slip_one'
+      detail = 'accumulated_slip_one'
+      expect_err = "The 'ACCUMULATED_SLIP_ONE' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [tangential_pressure_one]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=tangential_pressure_one'
+      detail = 'tangential_pressure_one'
+      expect_err = "The 'TANGENTIAL_PRESSURE_ONE' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [tangential_velocity_one]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=tangential_velocity_one'
+      detail = 'tangential_velocity_one'
+      expect_err = "The 'TANGENTIAL_VELOCITY_ONE' quantity is only provided by a "
+                   "'WeightedVelocitiesUserObject' or derived object\."
+    []
+
+    [accumulated_slip_two]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=accumulated_slip_two'
+      detail = 'accumulated_slip_two'
+      expect_err = "The 'ACCUMULATED_SLIP_TWO' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [tangential_pressure_two]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=tangential_pressure_two'
+      detail = 'tangential_pressure_two'
+      expect_err = "The 'TANGENTIAL_PRESSURE_TWO' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [tangential_velocity_two]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=tangential_velocity_two'
+      detail = 'tangential_velocity_two'
+      expect_err = "The 'TANGENTIAL_VELOCITY_TWO' quantity is only provided by a "
+                   "'WeightedVelocitiesUserObject' or derived object\."
+    []
+
+    [normal_gap]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=normal_gap'
+      detail = 'normal_gap'
+      expect_err = "The 'NORMAL_GAP' quantity is only provided by a 'WeightedGapUserObject' or "
+                   "derived object\."
+    []
+
+    [normal_lm]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=normal_lm'
+      detail = 'normal_lm'
+      expect_err = "The 'NORMAL_LM' quantity is only provided by a 'PenaltyWeightedGapUserObject' or "
+                   "derived object\."
+    []
+
+    [delta_tangential_lm_one]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=delta_tangential_lm_one'
+      detail = 'delta_tangential_lm_one'
+      expect_err = "The 'DELTA_TANGENTIAL_LM_ONE' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [delta_tangential_lm_two]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=delta_tangential_lm_two'
+      detail = 'delta_tangential_lm_two'
+      expect_err = "The 'DELTA_TANGENTIAL_LM_TWO' quantity is only provided by a "
+                   "'PenaltyFrictionUserObject' or derived object\."
+    []
+
+    [active_set]
+      type = RunException
+      input = aux_errors.i
+      cli_args = 'AuxKernels/gap/contact_quantity=active_set'
+      detail = 'active_set'
+      expect_err = "The 'ACTIVE_SET' quantity is only provided by a 'PenaltyWeightedGapUserObject' or "
+                   "derived object\."
+    []
+  []
+[]

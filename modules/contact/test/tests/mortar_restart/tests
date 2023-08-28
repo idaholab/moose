@@ -25,5 +25,7 @@
     prereq = 'frictional_bouncing_block_action_restart_1'
     valgrind = 'heavy'
     method = '!dbg'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

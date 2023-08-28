@@ -5,6 +5,8 @@
     exodiff = 'plane_strain_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [generalized_plane_strain]
     type = 'Exodiff'
@@ -12,5 +14,7 @@
     exodiff = 'generalized_plane_strain_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

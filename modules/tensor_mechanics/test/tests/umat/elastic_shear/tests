@@ -11,6 +11,8 @@
     requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
                   'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
                   'Reference computation with fine time stepping.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [elastic_shear]
     type = 'Exodiff'
@@ -22,5 +24,7 @@
     requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
                   'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
                   'Comparison with coarse time stepping.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

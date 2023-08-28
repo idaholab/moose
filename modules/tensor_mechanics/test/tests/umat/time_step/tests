@@ -11,5 +11,7 @@
                   'the user to control the time step increment within the UMAT routine and combine '
                   'it with MOOSE native time step controls, including cutback and growth factors, '
                   'and soft terminations.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

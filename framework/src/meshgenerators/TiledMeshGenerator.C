@@ -67,7 +67,7 @@ TiledMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> initial_mesh = std::move(_input);
   if (!initial_mesh->is_replicated())
-    mooseError("SmoothMeshGenerator is not implemented for distributed meshes");
+    mooseError("This MeshGenerator is not implemented for distributed meshes");
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(initial_mesh);
 
   // Getting the x,y,z widths

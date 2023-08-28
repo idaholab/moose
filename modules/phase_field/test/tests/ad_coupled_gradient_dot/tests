@@ -9,5 +9,7 @@
     requirement = 'The phase field module shall be able to compute the gradient of the rate of the '
                   'variable using automatic differentiation.'
     valgrind = HEAVY
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []

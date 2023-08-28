@@ -13,7 +13,10 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+
 #include "libmesh/quadrature.h"
+
+#include <limits>
 
 InputParameters
 WeightedGapUserObject::validParams()
@@ -152,13 +155,13 @@ WeightedGapUserObject::execute()
 }
 
 Real
-WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
+WeightedGapUserObject::getNormalGap(const Node * const node) const
 {
   const auto it = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
 
   // We are returning the physical weighted gap for analysis purposes
   if (it != _dof_to_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second.first / it->second.second);
+    return physicalGap(it->second);
   else
     return 0.0;
 }

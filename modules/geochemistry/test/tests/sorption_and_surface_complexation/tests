@@ -1,6 +1,8 @@
 [Tests]
   [./selenate]
     type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'selenate.i'
     csvdiff = 'selenate_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the Langmuir model'
@@ -9,6 +11,8 @@
   [../]
   [./ferric_hydroxide]
     type = 'RunApp'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
     input = 'ferric_hydroxide.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.004kg

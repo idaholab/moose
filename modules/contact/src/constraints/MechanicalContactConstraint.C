@@ -153,7 +153,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
     _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
-    _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
+    _augmented_lagrange_problem(
+        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem)),
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations)

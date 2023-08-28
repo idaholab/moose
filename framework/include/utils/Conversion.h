@@ -16,6 +16,7 @@
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/enum_fe_family.h"
+#include "libmesh/enum_elem_type.h"
 
 // Forward declarations
 class MultiMooseEnum;
@@ -124,6 +125,9 @@ std::string stringify(SolutionIterationType t);
 
 /// Convert ElementType into string
 std::string stringify(ElementType t);
+
+/// Convert the libmesh ElemType into string
+std::string stringify(libMesh::ElemType t);
 
 /// Add pair stringify to support maps
 template <typename T, typename U>

@@ -18,7 +18,44 @@ obtained this way is directly applied on the contacting surfaces by
 contact pressure computed by this object serves a purpose analogous to a Lagrange
 multiplier when exact enforcement is used
  (see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)). This object is set up automatically
-when using the contact action [ContactAction](/ContactAction.md).
+when using the [ContactAction](/ContactAction.md).
+
+This object is built from within the contact action when the formulation `MORTAR_PENALTY` and
+the model `FRICTIONLESS` is selected. The action sets the `use_physical_gap` parameter to true,
+which allows the user to select a normal contact penalty parameter on the order of the
+stiffness of the materials into contact. Also, to ensure solution stability, dual bases
+(i.e. `use_dual = true`) are employed by default to interpolate the contact traction
+when using the contact action.
+
+An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
+tolerance. That tolerance parameter is the normal gap distance (distance to exact enforcement if in contact)
+for normal contact. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,
+taking the necessary nonlinear iterations and updates "fixed" Lagrange multipliers in an outer loop. This
+process repeats until the contact-related tolerances are met. The "fixed" Lagrange multipliers represent
+accumulated normal tractions over the AL iterations (see [!citep](wriggers2006computational)),
+threby gradually fulfilling the contact constraints.
+Usage of AL with this mortar constraint allows for, simultaneously 1. Having a consistent contact formulation,
+2. Enforcement of the contact constraint to a user-prescribed tolerance (analogous to Lagrange multiplier
+enforcement, see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)), and 3. Keeps
+the system's condition number as if mechanical contact is not present; as long as the initial penalty coefficients are
+selected to be on the order of the material stiffnesses.
+
+!alert tip title=Augmented Lagrange with mortar contact
+For the reasons stated above, it is recommended to use an AL approach with the mortar penalty objects.
+
+Example of usage:
+
+!listing modules/contact/test/tests/pdass_problems/cylinder_friction_penalty_normal_al.i block=UserObjects/friction_uo
+
+which can be combined with an augmented Lagrange problem:
+
+!listing modules/contact/test/tests/pdass_problems/cylinder_friction_penalty_normal_al.i block=Problem
+
+See below an example of solver options with iterative preconditioners (e.g. algebraic multigrid) in a mortar
+mechanical contact problem. This solver selection can enable the simulation of very large contact mechanics problems with the more memory efficient iterative procedures:
+
+!listing modules/contact/test/tests/pdass_problems/cylinder_friction_penalty_frictional_al_action_amg.i block=Executioner
+
 
 !syntax parameters /UserObjects/PenaltyWeightedGapUserObject
 

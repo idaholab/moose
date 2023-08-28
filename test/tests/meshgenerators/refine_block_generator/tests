@@ -11,7 +11,15 @@
       exodiff = 'test_single_in.e'
       cli_args = '--mesh-only'
       recover = false
-      detail = 'a single block within a multi-domain mesh'
+      detail = 'a single block within a multi-domain mesh,'
+    []
+    [max_size]
+      type = 'Exodiff'
+      input = 'test_single.i'
+      exodiff = 'test_single_in.e'
+      cli_args = 'Mesh/refine/refinement=0 Mesh/refine/max_element_volume=0.5 --mesh-only'
+      recover = false
+      detail = 'a single block within a multi-domain mesh by requesting a maximum element size,'
     []
     [multiple_block]
       type = 'Exodiff'
@@ -19,7 +27,7 @@
       exodiff = 'test_multi_in.e'
       recover = false
       cli_args = "--mesh-only"
-      detail = 'multiple blocks within a multi-domain mesh'
+      detail = 'multiple blocks within a multi-domain mesh,'
     []
     [neighbor_refinement]
       type = 'Exodiff'
@@ -27,7 +35,7 @@
       exodiff = 'test_neighbor_in.e'
       cli_args = "Mesh/refine/enable_neighbor_refinement=true --mesh-only test_neighbor_in.e"
       recover = false
-      detail = 'multiple blocks within a multi-domain mesh, with neighbor refinement enabled'
+      detail = 'and multiple blocks within a multi-domain mesh, with neighbor refinement enabled.'
     []
   []
 

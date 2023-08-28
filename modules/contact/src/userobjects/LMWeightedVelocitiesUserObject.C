@@ -38,7 +38,8 @@ LMWeightedVelocitiesUserObject::validParams()
 }
 
 LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParameters & parameters)
-  : WeightedVelocitiesUserObject(parameters),
+  : WeightedGapUserObject(parameters),
+    WeightedVelocitiesUserObject(parameters),
     _lm_normal_var(getVar("lm_variable_normal", 0)),
     _lm_variable_tangential_one(getVar("lm_variable_tangential_one", 0)),
     _lm_variable_tangential_two(isParamValid("lm_variable_tangential_two")
