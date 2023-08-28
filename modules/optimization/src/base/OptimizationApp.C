@@ -44,7 +44,6 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntaxTask(
       "AddOptimizationReporterAction", "OptimizationReporter", "add_optimization_reporter");
   registerMooseObjectTask("add_optimization_reporter", OptimizationReporterBase, false);
-  appendMooseObjectTask("add_optimization_reporter", Reporter);
   addTaskDependency("add_optimization_reporter", "add_reporter");
 
   // General Optimization action

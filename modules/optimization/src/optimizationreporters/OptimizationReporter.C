@@ -16,8 +16,7 @@ registerMooseObject("OptimizationApp", OptimizationReporter);
 InputParameters
 OptimizationReporter::validParams()
 {
-  InputParameters params = OptimizationReporterBase::validParams();
-  params += OptimizationDataHelper::validParams();
+  InputParameters params = OptimizationDataTempl<OptimizationReporterBase>::validParams();
   params.addClassDescription("Computes objective function, gradient and contains reporters for "
                              "communicating between optimizeSolve and subapps");
   params.addRequiredParam<std::vector<dof_id_type>>(
@@ -42,11 +41,7 @@ OptimizationReporter::validParams()
 }
 
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
-  : OptimizationReporterBase(parameters),
-    _opt_data(parameters),
-    _measurement_values(_opt_data.getMeasurementValues()),
-    _simulation_values(_opt_data.getSimValues()),
-    _misfit_values(_opt_data.getMisfitValues())
+  : OptimizationDataTempl<OptimizationReporterBase>(parameters)
 {
   setICsandBounds();
 }
@@ -74,12 +69,6 @@ OptimizationReporter::setICsandBounds()
                            initial_conditions.begin() + stride + _nvalues[i]);
     stride += _nvalues[i];
   }
-}
-
-void
-OptimizationReporter::execute()
-{
-  _opt_data.computeMisfit();
 }
 
 Real

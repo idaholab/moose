@@ -19,8 +19,7 @@ registerMooseObject("OptimizationApp", ParameterMeshOptimization);
 InputParameters
 ParameterMeshOptimization::validParams()
 {
-  InputParameters params = OptimizationReporterBase::validParams();
-  params += OptimizationDataHelper::validParams();
+  InputParameters params = OptimizationDataTempl<OptimizationReporterBase>::validParams();
 
   params.addClassDescription(
       "Computes objective function, gradient and contains reporters for communicating between "
@@ -76,13 +75,8 @@ ParameterMeshOptimization::validParams()
 }
 
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
-  : OptimizationReporterBase(parameters),
-    _opt_data(parameters),
-    _measurement_values(_opt_data.getMeasurementValues()),
-    _simulation_values(_opt_data.getSimValues()),
-    _misfit_values(_opt_data.getMisfitValues())
+  : OptimizationDataTempl<OptimizationReporterBase>(parameters)
 {
-
   _nvalues.resize(_nparams, 0);
   // Fill the mesh information
   const auto & meshes = getParam<std::vector<FileName>>("parameter_meshes");
@@ -264,11 +258,11 @@ ParameterMeshOptimization::parseData(const std::vector<unsigned int> & exodus_ti
   return parsedData;
 }
 
-void
-ParameterMeshOptimization::execute()
-{
-  _opt_data.computeMisfit();
-}
+// void
+// ParameterMeshOptimization::execute()
+// {
+//   computeMisfit();
+// }
 
 Real
 ParameterMeshOptimization::computeObjective()

@@ -28,9 +28,9 @@ public:
   static InputParameters validParams();
   OptimizationReporterBase(const InputParameters & parameters);
 
-  void initialize() override final {}
-  void execute() override {}
-  void finalize() override final {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual void finalize() override {}
   /**
    * Function to compute objective.
    * This is the last function called in objective routine

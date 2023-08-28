@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "OptimizationDataHelper.h"
+#include "OptimizationData.h"
 #include "OptimizationReporterBase.h"
 
 class ParameterMesh;
@@ -17,26 +17,14 @@ class ParameterMesh;
 /**
  * Mesh-based parameter optimization
  */
-class ParameterMeshOptimization : public OptimizationReporterBase
+class ParameterMeshOptimization : public OptimizationDataTempl<OptimizationReporterBase>
 {
-private:
-  /// Data helper for generating objective value.
-  OptimizationDataHelper _opt_data;
 
 public:
   static InputParameters validParams();
   ParameterMeshOptimization(const InputParameters & parameters);
 
-  void execute() override;
-
   virtual Real computeObjective() override;
-
-  /// measurement values
-  std::vector<Real> & _measurement_values;
-  /// simulated values at measurement xyzt
-  std::vector<Real> & _simulation_values;
-  /// difference between simulation and measurement values at measurement xyzt
-  std::vector<Real> & _misfit_values;
 
 private:
   /**
