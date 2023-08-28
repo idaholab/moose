@@ -178,7 +178,7 @@ SerializedSolutionTransfer::transferInParallel(FEProblemBase & app_problem,
 
       if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
         _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
-  }
+    }
   }
 }
 

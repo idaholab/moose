@@ -13,6 +13,10 @@
 [AuxVariables]
   [v_pod]
   []
+  [v_aux]
+  []
+  [v_aux_pod]
+  []
 []
 
 [Kernels]
@@ -25,6 +29,23 @@
     type = BodyForce
     variable = v
     value = 1.0
+  []
+[]
+
+[AuxKernels]
+  [func_aux]
+    type = FunctionAux
+    variable = v_aux
+    function = v_aux_func
+  []
+[]
+
+[Functions]
+  [v_aux_func]
+    type = ParsedFunction
+    expression = 'S * x + D'
+    symbol_names = 'S D'
+    symbol_values = '2 5'
   []
 []
 
@@ -62,18 +83,22 @@
   [im]
     type = InverseMapping
     mapping = pod
-    surrogate = polyreg
-    variable_to_fill = "v_pod"
-    variable_to_reconstruct = "v"
+    surrogate = "polyreg_v polyreg_v_aux"
+    variable_to_fill = "v_pod v_aux_pod"
+    variable_to_reconstruct = "v v_aux"
     parameters = '2 5'
     execute_on = TIMESTEP_END
   []
 []
 
 [Surrogates]
-  [polyreg]
+  [polyreg_v]
     type = PolynomialRegressionSurrogate
-    filename = "create_mapping_main_rom_polyreg.rd"
+    filename = "create_mapping_main_rom_polyreg_v.rd"
+  []
+  [polyreg_v_aux]
+    type = PolynomialRegressionSurrogate
+    filename = "create_mapping_main_rom_polyreg_v_aux.rd"
   []
 []
 
@@ -86,15 +111,26 @@
 []
 
 [Postprocessors]
-  [error]
+  [error_v]
     type = ElementL2Difference
     variable = v
     other_variable = v_pod
     execute_on = FINAL
+    outputs = csv_errors
+  []
+  [error_v_aux]
+    type = ElementL2Difference
+    variable = v_aux
+    other_variable = v_aux_pod
+    execute_on = FINAL
+    outputs = csv_errors
   []
 []
 
 [Outputs]
   exodus = true
   execute_on = 'FINAL'
+  [csv_errors]
+    type = CSV
+  []
 []

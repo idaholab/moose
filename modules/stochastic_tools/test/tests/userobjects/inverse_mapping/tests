@@ -6,7 +6,7 @@
     requirement = 'The system shall be able to create a surrogate model for the solution coordinates in the latent space.'
     type = CheckFiles
     input = create_mapping_main.i
-    check_files = 'create_mapping_main_rom_polyreg.rd/data create_mapping_main_mapping_pod_mapping.rd/data'
+    check_files = 'create_mapping_main_rom_polyreg.rd/data create_mapping_main_rom_polyreg_v_aux.rd/data create_mapping_main_mapping_pod_mapping.rd/data'
     min_parallel = 2
     max_parallel = 2
     petsc_version = ">=3.14"
@@ -14,14 +14,13 @@
   [inverse_map]
     requirement = 'The system should be able to reconstruct a full solution field for a given variable based on '
     [with_surrogate]
-      # Note: the reconstructed solution with 2 POD modes and a linear regression should be exact.
       detail = 'coordinates determined by a surrogate model.'
       type = Exodiff
       input = inverse_map.i
       cli_args = "Outputs/file_base='with_surrogate'"
       exodiff = 'with_surrogate.e'
-      min_parallel=2
-      max_parallel=2
+      min_parallel = 2
+      max_parallel = 2
       prereq = create_surrogate
       petsc_version = ">=3.14"
     []
@@ -31,8 +30,24 @@
       input = inverse_map.i
       cli_args = "Outputs/file_base='with_manual' UserObjects/im/surrogate=''"
       exodiff = 'with_manual.e'
-      min_parallel=2
-      max_parallel=2
+      min_parallel = 2
+      max_parallel = 2
+      prereq = create_surrogate
+      petsc_version = ">=3.14"
+    []
+  []
+  [inverse_map_verification]
+    requirement = "The system shall be bale to reconstruct linearly parameterized functions exactly "
+                  "with a few spatial modes using"
+    [with_polyreg_csv]
+      # Note: the reconstructed solution with 2 POD modes and a linear regression should be exact.
+      detail = 'polynomial regression surrogates for the expansion coefficients.'
+      type = CSVDiff
+      input = inverse_map.i
+      cli_args = "Outputs/file_base='with_surrogate'"
+      csvdiff = 'with_surrogate.csv'
+      min_parallel = 2
+      max_parallel = 2
       prereq = create_surrogate
       petsc_version = ">=3.14"
     []

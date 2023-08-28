@@ -1,3 +1,6 @@
+S = 10
+D = 10
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -7,6 +10,11 @@
 
 [Variables]
   [v]
+  []
+[]
+
+[AuxVariables]
+  [v_aux]
   []
 []
 
@@ -20,6 +28,23 @@
     type = BodyForce
     variable = v
     value = 1.0
+  []
+[]
+
+[AuxKernels]
+  [func_aux]
+    type = FunctionAux
+    variable = v_aux
+    function = v_aux_func
+  []
+[]
+
+[Functions]
+  [v_aux_func]
+    type = ParsedFunction
+    expression = 'S * x + D'
+    symbol_names = 'S D'
+    symbol_values = '${S} ${D}'
   []
 []
 
@@ -63,5 +88,10 @@
   [solution_storage]
     type = SolutionContainer
     execute_on = 'FINAL'
+  []
+  [solution_storage_aux]
+    type = SolutionContainer
+    execute_on = 'FINAL'
+    system = aux
   []
 []

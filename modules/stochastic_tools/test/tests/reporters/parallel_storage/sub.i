@@ -1,3 +1,6 @@
+S = 10
+D = 10
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
