@@ -46,10 +46,12 @@ INSFVRhieChowInterpolator::uniqueParams()
       "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
       "means elements that we have access to (this may not be all the elements in the mesh if the "
       "mesh is distributed) but that we do not own.");
+  params.addParamNamesToGroup("pull_all_nonlocal_a", "Parallel Execution Tuning");
   params.addParam<NonlinearSystemName>("mass_momentum_system",
                                        "nl0",
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
+  params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
   params.addParam<bool>(
       "approximate_rhie_chow_coefficients",
       false,
@@ -58,6 +60,8 @@ INSFVRhieChowInterpolator::uniqueParams()
       "Rhie-Chow coefficients instead of looping and computing the coefficients from the kernels "
       "and boundary conditions.");
   params.addParam<Real>("characteristic_speed", "The characteristic speed");
+  params.addParamNamesToGroup("approximate_rhie_chow_coefficients characteristic_speed",
+                              "Numerical scheme");
   return params;
 }
 
