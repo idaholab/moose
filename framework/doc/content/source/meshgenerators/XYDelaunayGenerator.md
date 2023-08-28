@@ -4,7 +4,7 @@
 
 An input mesh will be used to define the outer boundary of the
 generated output mesh, as well as to specify any Steiner points
-interior to that boundary which much be included in as output mesh
+interior to that boundary which must be included in as output mesh
 vertices.  Additional interior vertices can be automatically generated
 by specifying a desired triangle area (either as a constant or as a
 function of triangle center location).  Additional interior boundary
