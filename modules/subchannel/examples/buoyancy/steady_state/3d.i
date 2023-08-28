@@ -34,6 +34,8 @@
   []
   [Tpin]
   []
+  [Dpin]
+  []
   [rho]
   []
   [mu]
@@ -56,6 +58,4 @@
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

@@ -94,9 +94,8 @@ height = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeAuxPin
+    type = RZQPrimeAuxPin
     diffusivity = 'thermal_conductivity'
-    rod_diameter = ${fparse rod_diameter}
     variable = q_prime_pin
     diffusion_variable = temperature
     component = normal

@@ -110,6 +110,9 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
   [q_prime_duct]
     block = duct
   []
@@ -163,6 +166,12 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = ${fuel_pin_diameter}
   []
 
   [P_ic]
