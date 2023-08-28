@@ -56,7 +56,7 @@ protected:
    * default functors if the user passed an integer or real in the input file
    * @param name The name of the functor to retrieve. This should match the functor parameter name,
    * \emph not the actual name of the functor created in the input file
-   * @param tid The thread ID used to retrieve the functor from the this interface's subproblem
+   * @param tid The thread ID used to retrieve the functor from this interface's subproblem
    * @return The functor
    */
   template <typename T>
