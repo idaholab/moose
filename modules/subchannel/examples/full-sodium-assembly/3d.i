@@ -59,6 +59,9 @@
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [Problem]
@@ -71,6 +74,4 @@
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

@@ -50,9 +50,71 @@ LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
 void
 LiquidWaterSubChannel1PhaseProblem::initializeSolution()
 {
-  unsigned int last_node = _n_cells;
-  unsigned int first_node = 1;
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
+  if (pin_mesh_exist)
+  {
+    Real standard_area, additional_area, wetted_perimeter;
+    auto pitch = _subchannel_mesh.getPitch();
+    auto gap = _subchannel_mesh.getGap();
+    auto z_blockage = _subchannel_mesh.getZBlockage();
+    auto index_blockage = _subchannel_mesh.getIndexBlockage();
+    auto reduction_blockage = _subchannel_mesh.getReductionBlockage();
+    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+    {
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        auto Z = _z_grid[iz];
+        Real rod_area = 0.0;
+        Real rod_perimeter = 0.0;
+        for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+        {
+          auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+          rod_area += 0.25 * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
+          rod_perimeter += 0.25 * M_PI * (*_Dpin_soln)(pin_node);
+        }
+
+        if (subch_type == EChannelType::CORNER)
+        {
+          standard_area = 0.25 * pitch * pitch;
+          additional_area = pitch * gap + gap * gap;
+          wetted_perimeter = rod_perimeter + pitch + 2 * gap;
+        }
+        else if (subch_type == EChannelType::EDGE)
+        {
+          standard_area = 0.5 * pitch * pitch;
+          additional_area = pitch * gap;
+          wetted_perimeter = rod_perimeter + pitch;
+        }
+        else
+        {
+          standard_area = pitch * pitch;
+          additional_area = 0.0;
+          wetted_perimeter = rod_perimeter;
+        }
+
+        /// Calculate subchannel area
+        auto subchannel_area = standard_area + additional_area - rod_area;
+
+        /// Apply area reduction on subchannels affected by blockage
+        auto index = 0;
+        for (const auto & i_blockage : index_blockage)
+        {
+          if (i_ch == i_blockage && (Z >= z_blockage.front() && Z <= z_blockage.back()))
+          {
+            subchannel_area *= reduction_blockage[index];
+          }
+          index++;
+        }
+
+        _S_flow_soln->set(node, subchannel_area);
+        _w_perim_soln->set(node, wetted_perimeter);
+      }
+    }
+  }
+
+  for (unsigned int iz = 1; iz < _n_cells + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {

@@ -49,6 +49,9 @@ P_out = 101325 # Pa
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
   [rho]
     block = sub_channel
   []
@@ -110,6 +113,12 @@ P_out = 101325 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.012065
   []
 
   [P_ic]

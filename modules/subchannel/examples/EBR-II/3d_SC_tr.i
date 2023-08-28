@@ -75,6 +75,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [Problem]
@@ -90,6 +93,4 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   start_time = -1.0
   dt = 100.0
   end_time = 900.0
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
