@@ -38,7 +38,7 @@ should be disallowed so that the boundary nodes in the newly
 triangulated mesh still precisely match the boundary nodes in the hole
 mesh.
 
-Interior vertices can be adjusted after mesh generation, to produce a
+Interior vertices can be adjusted after mesh generation using the [!param](/Mesh/XYDelaunayGenerator/smooth_triangulation) parameter, to produce a
 more "smooth" mesh, but currently the only mesh smoother option is a
 simple Laplacian smoother; this can have unwanted side-effects on
 meshes with concave boundaries or poor nodal valences, and so it is
