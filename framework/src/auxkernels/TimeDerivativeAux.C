@@ -50,7 +50,7 @@ TimeDerivativeAux::computeValue()
 {
   if (_use_qp_arg)
   {
-    const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     return _factor(qp_arg, determineState()) * _functor.dot(qp_arg, determineState());
   }
   else

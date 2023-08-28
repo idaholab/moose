@@ -129,8 +129,8 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   const auto face_arg =
       Moose::FaceArg{&all_fi[0], Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
   const auto elem_arg = ElemArg{all_fi[0].elemPtr(), false};
-  const auto elem_qp_arg = std::make_tuple(all_fi[0].elemPtr(), 0, &qrule);
-  const auto elem_side_qp_arg = std::make_tuple(all_fi[0].elemPtr(), 0, 0, &qrule);
+  const auto elem_qp_arg = ElemQpArg({all_fi[0].elemPtr(), 0, &qrule, Point(0)});
+  const auto elem_side_qp_arg = ElemSideQpArg({all_fi[0].elemPtr(), 0, 0, &qrule, Point(0)});
   const auto elem_point_arg = ElemPointArg({all_fi[0].elemPtr(), Point(0), false});
 
   test_gradient(elem_arg);

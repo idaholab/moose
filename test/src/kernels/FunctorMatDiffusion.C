@@ -31,9 +31,9 @@ template <bool is_ad>
 ADReal
 FunctorMatDiffusionTempl<is_ad>::computeQpResidual()
 {
-  return _diff(std::make_tuple(_current_elem, _qp, _qrule), Moose::currentState()) *
-         _grad_test[_i][_qp] *
-         _var.gradient(std::make_tuple(_current_elem, _qp, _qrule), Moose::currentState());
+  const Moose::ElemQpArg r = {_current_elem, _qp, _qrule, _q_point[_qp]};
+  return _diff(r, Moose::currentState()) * _grad_test[_i][_qp] *
+         _var.gradient(r, Moose::currentState());
 }
 
 template class FunctorMatDiffusionTempl<false>;

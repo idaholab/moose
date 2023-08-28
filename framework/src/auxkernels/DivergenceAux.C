@@ -47,7 +47,7 @@ DivergenceAuxTempl<is_ad>::computeValue()
   Real divergence = 0;
   if (_use_qp_arg)
   {
-    const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     divergence += raw_value(_u.gradient(qp_arg, state)(0));
     if (_v)
       divergence += raw_value(_v->gradient(qp_arg, state)(1));

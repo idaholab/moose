@@ -201,33 +201,11 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::functionsPostParse()
 {
-  functionsOptimize();
+  functionsOptimize(_func_F);
 
   // force a value update to get the property at least once and register it for the dependencies
   for (auto & mpd : _mat_prop_descriptors)
     mpd.value();
-}
-
-template <>
-void
-ParsedMaterialHelper<false>::functionsOptimize()
-{
-  // base function
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-  if (_enable_jit && !_func_F->JITCompile())
-    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
-}
-
-template <>
-void
-ParsedMaterialHelper<true>::functionsOptimize()
-{
-  // base function
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-  if (!_enable_jit || !_func_F->JITCompile())
-    mooseError("ADParsedMaterials require JIT compilation to be enabled and working.");
 }
 
 template <bool is_ad>

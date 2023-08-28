@@ -147,7 +147,7 @@ VolumetricFlowRate::computeQpIntegral()
            _normals[_qp];
   else if (_advected_mat_prop_supplied)
     return MetaPhysicL::raw_value(_advected_material_property(
-               std::make_tuple(_current_elem, _qp, _qrule), determineState())) *
+               Moose::ElemQpArg{_current_elem, _qp, _qrule, _q_point[_qp]}, determineState())) *
            RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
   else
     return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

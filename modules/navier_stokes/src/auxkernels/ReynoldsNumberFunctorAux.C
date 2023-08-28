@@ -48,7 +48,7 @@ ReynoldsNumberFunctorAux::computeValue()
 
   if (_use_qp_arg)
   {
-    const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     return _current_elem->hmax() * raw_value(_rho(qp_arg, state)) *
            raw_value(_speed(qp_arg, state)) / raw_value(_mu(qp_arg, state));
   }

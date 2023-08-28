@@ -719,7 +719,7 @@ typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
                                               const StateArg & state) const
 {
-  return adGradSln(std::get<0>(qp_arg), state, false);
+  return adGradSln(qp_arg.elem, state, false);
 }
 
 template <typename OutputType>

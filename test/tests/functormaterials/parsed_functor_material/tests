@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#24380'
+  design = 'ParsedFunctorMaterial.md'
+  [test]
+    type = CSVDiff
+    input = parsed_functor_material.i
+    csvdiff = parsed_functor_material_out.csv
+    requirement = 'The system shall be able to parse an expression of functors to compute a functor material property.'
+  []
+[]

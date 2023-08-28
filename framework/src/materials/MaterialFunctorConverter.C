@@ -83,7 +83,8 @@ MaterialFunctorConverterTempl<T>::computeQpProperties()
   const auto state = Moose::currentState();
   if (_bnd)
   {
-    const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, qp_used, _qrule};
+    const Moose::ElemSideQpArg side_arg = {
+        _current_elem, _current_side, qp_used, _qrule, _q_point[_qp]};
     for (const auto i : index_range(_ad_props_out))
       (*_ad_props_out[i])[_qp] = (*_functors_in[i])(side_arg, state);
 
@@ -94,7 +95,7 @@ MaterialFunctorConverterTempl<T>::computeQpProperties()
   {
     const Elem * elem = _neighbor ? _current_elem->neighbor_ptr(_current_side) : _current_elem;
     mooseAssert(elem, "We should have an element");
-    const Moose::ElemQpArg elem_arg = {elem, qp_used, _qrule};
+    const Moose::ElemQpArg elem_arg = {elem, qp_used, _qrule, _q_point[_qp]};
     for (const auto i : index_range(_ad_props_out))
       (*_ad_props_out[i])[_qp] = (*_functors_in[i])(elem_arg, state);
 

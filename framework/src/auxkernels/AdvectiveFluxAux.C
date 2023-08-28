@@ -62,7 +62,8 @@ AdvectiveFluxAux::computeValue()
 {
   using MetaPhysicL::raw_value;
 
-  const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, _qp, _qrule};
+  const Moose::ElemSideQpArg side_arg = {
+      _current_elem, _current_side, _qp, _qrule, isNodal() ? Point(*_current_node) : _q_point[_qp]};
   const auto state = determineState();
   Real vel_x, vel_y, vel_z = 0;
 
