@@ -68,8 +68,4 @@ private:
   std::map<std::string, std::vector<Real> *> _weight_names_weights_map;
   /// helper to check data sizes
   void errorCheckDataSize();
-  /// Reference to the FEProblemBase for this helper object
-  FEProblemBase & _fe_problem;
-  /// Thread ID of this helper object
-  const THREAD_ID _tid;
 };

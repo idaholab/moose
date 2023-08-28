@@ -74,9 +74,7 @@ OptimizationDataTempl<T>::OptimizationDataTempl(const InputParameters & paramete
     _simulation_values(this->template declareValueByName<std::vector<Real>>(
         "simulation_values", REPORTER_MODE_REPLICATED)),
     _misfit_values(this->template declareValueByName<std::vector<Real>>("misfit_values",
-                                                                        REPORTER_MODE_REPLICATED)),
-    _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _tid(parameters.get<THREAD_ID>("_tid"))
+                                                                        REPORTER_MODE_REPLICATED))
 {
   // read in data
   if (this->isParamValid("measurement_file") && this->isParamValid("measurement_points"))
@@ -94,8 +92,8 @@ OptimizationDataTempl<T>::OptimizationDataTempl(const InputParameters & paramete
     std::vector<VariableName> var_names(
         this->template getParam<std::vector<VariableName>>("variable"));
     for (const auto & name : var_names)
-      _var_vec.push_back(&_fe_problem.getVariable(
-          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
+      _var_vec.push_back(&this->_fe_problem.getVariable(
+          this->_tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
   }
   if (this->isParamValid("variable_weight_names"))
   {
