@@ -11,6 +11,16 @@
     required_python_packages = 'pandas matplotlib'
     heavy = true
   []
+  [vortex-skewness-corrected-approximate-rc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSkewCorrectedApproximateRC
+    method = '!dbg'
+    min_parallel = 8
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes, using an approximated Rhie-Chow scheme and skewness-correction, Dirichlet boundary conditions for the velocity, and demonstrate second order convergence for the velocity and first order convergence for pressure.'
+    required_python_packages = 'pandas matplotlib'
+    heavy = true
+  []
   [vortex-skewness-corrected-action]
     type = PythonUnitTest
     input = test.py
