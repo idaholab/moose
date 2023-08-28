@@ -215,16 +215,6 @@ SerializedSolutionTransfer::transferToSubAppRoot(FEProblemBase & app_problem,
 SystemBase &
 SerializedSolutionTransfer::getSystem(FEProblemBase & app_problem, const VariableName & vname)
 {
-  for (const auto nl_index : make_range(app_problem.numNonlinearSystems()))
-    if (app_problem.getNonlinearSystemBase(nl_index).hasVariable(vname))
-      return app_problem.getNonlinearSystemBase(nl_index);
-
-  if (app_problem.systemBaseAuxiliary().hasVariable(vname))
-    return app_problem.systemBaseAuxiliary();
-  else
-    mooseError("Variable ",
-               vname,
-               "Should be in either a derived class of NonlinearSystem or the AuxiliarySystem!");
-
-  return app_problem.systemBaseAuxiliary();
+  auto & variable = app_problem.getVariable(_tid, vname);
+  return variable.sys();
 }

@@ -110,13 +110,15 @@ InverseMapping::initialSetup()
 void
 InverseMapping::execute()
 {
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
-
-  // We create a temporary solution vector that will store the reconstructed solution.
-  std::unique_ptr<NumericVector<Number>> temporary_vector = nl.solution().zero_clone();
-
   for (auto var_i : index_range(_var_names_to_reconstruct))
   {
+    MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
+    MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
+
+    // We create a temporary solution vector that will store the reconstructed solution.
+    std::unique_ptr<NumericVector<Number>> temporary_vector =
+        var_to_reconstruct->sys().solution().zero_clone();
+
     std::vector<Real> reduced_coefficients;
     if (_surrogate_models.size())
       _surrogate_models[var_i]->evaluate(_input_parameters, reduced_coefficients);
@@ -129,17 +131,14 @@ InverseMapping::execute()
     _mapping->inverse_map(
         _var_names_to_reconstruct[var_i], reduced_coefficients, reconstructed_solution);
 
-    MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
-    const MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
-
     // We set the global DoF indices of the requested variable. The underlying assumption here is
     // that we are reconstructing the solution in an application which has the same ordering in the
     // extracted `dofs` vector as the one which was used to serialize the solution vectors in
     // `SerializedSolutionTransfer`.
-    nl.setVariableGlobalDoFs(_var_names_to_reconstruct[var_i]);
+    var_to_reconstruct->sys().setVariableGlobalDoFs(_var_names_to_reconstruct[var_i]);
 
     // Get the DoF indices
-    const auto & dofs = nl.getVariableGlobalDoFs();
+    const auto & dofs = var_to_reconstruct->sys().getVariableGlobalDoFs();
 
     // Get the dof map to be able to determine the local dofs easily
     const auto & dof_map = var_to_reconstruct->sys().system().get_dof_map();

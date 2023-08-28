@@ -19,8 +19,8 @@
     type = MonteCarlo
     num_rows = 4
     distributions = 'S_dist D_dist'
-    execute_on = initial
     min_procs_per_row = 2
+    execute_on = PRE_MULTIAPP_SETUP
   []
 []
 
@@ -29,7 +29,7 @@
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
-    mode = batch-restore
+    mode = batch-reset
     min_procs_per_app = 2
   []
 []
@@ -49,6 +49,24 @@
     solution_container = solution_storage
     variables = 'u v'
     serialize_on_root = false
+  []
+  [solution_transfer_aux]
+    type = SerializedSolutionTransfer
+    parallel_storage = parallel_storage
+    from_multi_app = worker
+    sampler = sample
+    solution_container = solution_storage_aux
+    variables = 'u_aux'
+    serialize_on_root = false
+  []
+[]
+
+[Controls]
+  [cmd_line]
+    type = MultiAppSamplerControl
+    multi_app = worker
+    sampler = sample
+    param_names = 'S D'
   []
 []
 

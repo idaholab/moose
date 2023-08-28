@@ -12,6 +12,11 @@
   []
 []
 
+[AuxVariables]
+  [u_aux]
+  []
+[]
+
 [Kernels]
   [diffusion_u]
     type = MatDiffusion
@@ -32,6 +37,23 @@
     type = BodyForce
     variable = v
     value = 1.0
+  []
+[]
+
+[AuxKernels]
+  [func_aux]
+    type = FunctionAux
+    variable = u_aux
+    function = u_aux_func
+  []
+[]
+
+[Functions]
+  [u_aux_func]
+    type = ParsedFunction
+    expression = 'S * pow(x, D/10)'
+    symbol_names = 'S D'
+    symbol_values = '${S} ${D}'
   []
 []
 
@@ -92,5 +114,10 @@
   [solution_storage]
     type = SolutionContainer
     execute_on = 'FINAL'
+  []
+  [solution_storage_aux]
+    type = SolutionContainer
+    execute_on = 'FINAL'
+    system = aux
   []
 []
