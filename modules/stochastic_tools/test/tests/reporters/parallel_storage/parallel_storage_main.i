@@ -73,7 +73,7 @@
 [Reporters]
   [parallel_storage]
     type = ParallelSolutionStorage
-    variables = 'u v'
+    variables = 'u v u_aux'
     outputs = out
   []
 []

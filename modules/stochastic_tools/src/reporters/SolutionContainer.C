@@ -22,9 +22,9 @@ SolutionContainer::validParams()
   MooseEnum system_type("nonlinear aux", "nonlinear");
   params.addParam<MooseEnum>(
       "system", system_type, "The system whose solution should be collected.");
-  params.addParam<unsigned int>(
-      "nonlinear_system_number",
-      0,
+  params.addParam<NonlinearSystemName>(
+      "nonlinear_system_name",
+      "nl0",
       "Option to select which nonlinear system's solution shall be stored.");
   return params;
 }
@@ -35,7 +35,8 @@ SolutionContainer::SolutionContainer(const InputParameters & parameters)
         declareRestartableData<std::vector<std::unique_ptr<NumericVector<Number>>>>(
             "accumulated_solution")),
     _system_type(getParam<MooseEnum>("system")),
-    _nonlinear_system_number(getParam<unsigned int>("nonlinear_system_number"))
+    _nonlinear_system_number(
+        _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {
 }
 

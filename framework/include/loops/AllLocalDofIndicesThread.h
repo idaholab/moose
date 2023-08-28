@@ -11,7 +11,6 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
-#include "SubProblem.h"
 
 #include "libmesh/elem_range.h"
 #include "libmesh/parallel_object.h"
@@ -22,7 +21,7 @@ namespace libMesh
 class System;
 class DofMap;
 }
-class FEProblemBase;
+class SubProblem;
 
 /**
  * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed

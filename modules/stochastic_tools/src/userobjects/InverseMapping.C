@@ -110,14 +110,23 @@ InverseMapping::initialSetup()
 void
 InverseMapping::execute()
 {
+  // First, we build a map of temporary vectors foe easier access in the variable loop below
+  _temporary_solutions.clear();
+  for (auto var_i : index_range(_var_names_to_reconstruct))
+  {
+    MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
+    if (!_temporary_solutions.count(var_to_reconstruct->sys().number()))
+      _temporary_solutions[var_to_reconstruct->sys().number()] =
+          var_to_reconstruct->sys().solution().zero_clone();
+  }
+
   for (auto var_i : index_range(_var_names_to_reconstruct))
   {
     MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
     MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
 
-    // We create a temporary solution vector that will store the reconstructed solution.
-    std::unique_ptr<NumericVector<Number>> temporary_vector =
-        var_to_reconstruct->sys().solution().zero_clone();
+    // We fetch the temporary vector which is used for the reconstruction.
+    auto & temporary_vector = _temporary_solutions[var_to_reconstruct->sys().number()];
 
     std::vector<Real> reduced_coefficients;
     if (_surrogate_models.size())

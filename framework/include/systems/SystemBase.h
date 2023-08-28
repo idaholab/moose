@@ -804,8 +804,12 @@ public:
    */
   void removeVector(TagID tag_id);
 
-  /// set all the global dof indices for a nonlinear variable
+  /// set all the global dof indices for a variable
+  ///  @param var_name The name of the variable
   void setVariableGlobalDoFs(const std::string & var_name);
+
+  /// Get the global dof indices of a variable, this needs to be called
+  /// after the indices have been set by `setVariableGlobalDoFs`
   const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
 
   /**
