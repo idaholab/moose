@@ -162,8 +162,8 @@ INSADMaterial::subdomainSetup()
   else
     _disp_x_dot = _disp_y_dot = _disp_z_dot = nullptr;
 
-  _viscous_form = static_cast<std::string>(
-      _object_tracker->get<MooseEnum>("viscous_form", _current_subdomain_id));
+  _viscous_form = static_cast<NS::ViscousForm>(
+      int(_object_tracker->get<MooseEnum>("viscous_form", _current_subdomain_id)));
 
   if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force", _current_subdomain_id)))
   {

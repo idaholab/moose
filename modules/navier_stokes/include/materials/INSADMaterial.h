@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "NSEnums.h"
 
 class INSADObjectTracker;
 
@@ -108,7 +109,7 @@ protected:
   const MaterialProperty<Real> * _ref_temp;
 
   /// The viscous form of the equations. This is either "laplace" or "traction"
-  std::string _viscous_form;
+  NS::ViscousForm _viscous_form;
 
   /// The gravity vector
   RealVectorValue _gravity_vector;

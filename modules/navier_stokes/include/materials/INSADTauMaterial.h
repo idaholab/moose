@@ -46,7 +46,7 @@ protected:
   void computeHMax();
 
   /**
-   * Compute the viscuous strong residual
+   * Compute the viscous strong residual
    */
   void computeViscousStrongResidual();
 
@@ -272,7 +272,7 @@ INSADTauMaterialTempl<T>::computeViscousStrongResidual()
         _mesh.dimension() >= 2 ? -_mu[_qp] * _d2v[_qp].tr() : ADReal(0);
     _viscous_strong_residual[_qp](2) =
         _mesh.dimension() == 3 ? -_mu[_qp] * _d2w[_qp].tr() : ADReal(0);
-    if (_viscous_form == "traction")
+    if (_viscous_form == NS::ViscousForm::Traction)
     {
       _viscous_strong_residual[_qp] -= _mu[_qp] * _d2u[_qp].row(0);
       if (_mesh.dimension() >= 2)
@@ -300,7 +300,7 @@ INSADTauMaterialTempl<T>::viscousTermRZ()
 
   const auto r = _ad_q_point[_qp](_rz_radial_coord);
 
-  if (_viscous_form == "laplace")
+  if (_viscous_form == NS::ViscousForm::Laplace)
     _viscous_strong_residual[_qp] +=
         // u_r
         // Additional term from vector Laplacian
