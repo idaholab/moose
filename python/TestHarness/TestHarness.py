@@ -250,6 +250,7 @@ class TestHarness:
 
         checks = {}
         checks['platform'] = util.getPlatforms()
+        checks['machine'] = util.getMachine()
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
         checks['registered_apps'] = None # This gets extracted on demand

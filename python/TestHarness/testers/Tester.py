@@ -49,6 +49,7 @@ class Tester(MooseObject):
 
         # Test Filters
         params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
+        params.addParam('machine',       ['ALL'], "A list of micro architectures for which this test will run on. ('ALL', 'X86_64', 'ARM64')")
         params.addParam('compiler',      ['ALL'], "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')")
         params.addParam('petsc_version', ['ALL'], "A list of petsc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('petsc_version_release', ['ALL'], "A test that runs against PETSc master if FALSE ('ALL', 'TRUE', 'FALSE')")
@@ -559,7 +560,7 @@ class Tester(MooseObject):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
+        local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
                         'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
                         'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
                         'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',

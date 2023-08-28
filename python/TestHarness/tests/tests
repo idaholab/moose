@@ -281,4 +281,10 @@
     requirement = "The system shall skip tests not capable of being run depending on binary installation type"
     issues = '#24195'
   []
+  [test_machine_type]
+    type = PythonUnitTest
+    input = test_MachineType.py
+    requirement = "The system shall skip tests not capable of being run depending on micro architecture"
+    issues = '#25317'
+  []
 []
