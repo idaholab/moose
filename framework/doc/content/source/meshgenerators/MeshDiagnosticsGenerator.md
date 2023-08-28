@@ -14,8 +14,8 @@ other visualization software may be leveraged for further diagnostics of mesh is
 Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_element_volumes) parameter.
 
 A minimum and a maximum element volume can be specified to the `MeshDiagnosticsGenerator` using
-the [!param](/Mesh/MeshDiagnosticsGenerator/minimum_element_volume) and the
-[!param](/Mesh/MeshDiagnosticsGenerator/maximum_element_volume) parameters.
+the [!param](/Mesh/MeshDiagnosticsGenerator/minimum_element_volumes) and the
+[!param](/Mesh/MeshDiagnosticsGenerator/maximum_element_volumes) parameters.
 This diagnostics is mostly used to detect zero or negative volume elements, from distorted meshes.
 
 !alert note title=How to fix large elements
@@ -24,7 +24,7 @@ Large elements may be sub-divided using the [RefineBlockGenerator.md] with for e
 
 !alert note title=How to fix negative volume elements
 Negative volume elements can be flipped using a [MeshRepairGenerator.md] with the
-[!param](/Mesh/MeshRepairGenerator/fix_element_orientation) parameter. This will flip them, making the volume
+[!param](/Mesh/MeshRepairGenerator/fix_elements_orientation) parameter. This will flip them, making the volume
 positive, though it may not fix the Jacobian everywhere.
 
 ## Side planarity check
@@ -44,11 +44,11 @@ multiple element types.
 
 !alert note title=How to fix subdomains with mixed element types
 Subdomains with mixed element types can be split by element type using a [MeshRepairGenerator.md] with the
-[!param](/Mesh/MeshDiagnosticsGenerator/separate_blocks_by_element_types) parameter.
+[!param](/Mesh/MeshRepairGenerator/separate_blocks_by_element_types) parameter.
 
 ## Sideset orientation check
 
-Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_sideset_orientation) parameter.
+Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_sidesets_orientation) parameter.
 
 Sidesets are oriented. They are represented in MOOSE by a list of elements and sides. Along the boundary,
 the orientation of these sides should in general be consistent. If it is not, the normal of the sideset is

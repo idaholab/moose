@@ -1,6 +1,6 @@
 [Tests]
-  issues = ''
-  design = 'meshgenerators/MeshDiagnostics.md'
+  issues = '#25278'
+  design = 'meshgenerators/MeshDiagnosticsGenerator.md'
 
   [generate]
     requirement = 'The system shall be able to diagnostize potential issues in a mesh, such as'
@@ -75,7 +75,8 @@
       input = jacobian_test.i
       cli_args = '--mesh-only'
       mesh_mode = replicated
-      expect_out = 'Number of elements with a negative Jacobian: 1'
+      expect_out = '(Number of elements with a negative Jacobian: 1|Number of element sides with negative Jacobians: 2)'
+      detail = 'elements with negative Jacobians'
     []
   []
 
