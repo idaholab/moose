@@ -41,6 +41,7 @@ public:
   unsigned int numNodes() const;
   void setNode(unsigned int node_id, EFANode * node);
   EFANode * getNode(unsigned int node_id) const;
+  const std::vector<EFANode *> & getNodes() const { return _nodes; }
   bool containsNode(EFANode * node) const;
   void printNodes(std::ostream & ostream) const;
   EFANode * createLocalNodeFromGlobalNode(const EFANode * global_node) const;

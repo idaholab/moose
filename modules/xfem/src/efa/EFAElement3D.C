@@ -400,7 +400,7 @@ EFAElement3D::getMasterInfo(EFANode * node,
   }
 
   if (!masters_found)
-    EFAError("In EFAelement3D::getMaterInfo, cannot find the given EFAnode");
+    EFAError("In EFAelement3D::getMasterInfo, cannot find the given EFANode");
 }
 
 unsigned int

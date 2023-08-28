@@ -435,16 +435,11 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
     childElem->connectNeighbors(
         _permanent_nodes, _temp_nodes, _inverse_connectivity, mergeUncutVirtualEdges);
     childElem->updateFragmentNode();
-  } // loop over child elements
-
-  std::vector<EFAElement *>::iterator vit;
-  for (vit = _child_elements.begin(); vit != _child_elements.end();)
-  {
-    if (*vit == nullptr)
-      vit = _child_elements.erase(vit);
-    else
-      ++vit;
   }
+
+  // remove all deleted children
+  _child_elements.erase(std::remove(_child_elements.begin(), _child_elements.end(), nullptr),
+                        _child_elements.end());
 }
 
 void
@@ -610,6 +605,14 @@ ElementFragmentAlgorithm::getElemIdByNodes(unsigned int * node_id)
 void
 ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
 {
+  // compile a set of all child element nodes
+  std::set<EFANode *> child_nodes;
+  for (const auto & child_element : _child_elements)
+  {
+    const auto & nodes = child_element->getNodes();
+    child_nodes.insert(nodes.begin(), nodes.end());
+  }
+
   // Collect all parent nodes that will be isolated
   std::map<EFANode *, EFANode *> isolate_parent_to_child;
   for (unsigned int i = 0; i < _new_nodes.size(); ++i)
@@ -622,16 +625,7 @@ ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
     if (it != isolate_parent_to_child.end() && it->first == parent_node)
       continue;
 
-    bool isParentNodeInNewElem = false;
-    for (unsigned int j = 0; j < _child_elements.size(); ++j)
-    {
-      if (_child_elements[j]->containsNode(parent_node))
-      {
-        isParentNodeInNewElem = true;
-        break;
-      }
-    }
-    if (!isParentNodeInNewElem)
+    if (child_nodes.count(parent_node) == 0)
       isolate_parent_to_child.emplace_hint(it, parent_node, _new_nodes[i]);
   }
 
