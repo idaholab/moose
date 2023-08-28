@@ -71,6 +71,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
   const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
+  const auto vdotn = _normal * v_face;
 
   if (onBoundary(fi))
   {
@@ -81,7 +82,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto eps_face = epsilon()(ssf, state);
     const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
-    const auto coeff = _normal * v_face * rho_face / eps_face;
+    const auto coeff = vdotn * rho_face / eps_face;
 
     if (sided_elem == &fi.elem())
     {
@@ -127,8 +128,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       // neighbor side:
       // rho * v_superficial / eps_neigh * v_superficial = rho * v_interstitial_neigh *
       // v_superficial
-      const auto elem_coeff = _normal * v_face * rho_face / eps_elem_face;
-      const auto neighbor_coeff = _normal * v_face * rho_face / eps_neighbor_face;
+      const auto elem_coeff = vdotn * rho_face / eps_elem_face;
+      const auto neighbor_coeff = vdotn * rho_face / eps_neighbor_face;
       _ae = elem_coeff * d_var_elem_face_d_elem_dof;
       _elem_residual = elem_coeff * var_elem_face;
       _an = -neighbor_coeff * d_var_neighbor_face_d_neighbor_dof;
@@ -148,9 +149,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       const auto var_elem = advected.first / rho_elem * eps_elem,
                  var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-      _ae = _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
+      _ae = vdotn * rho_elem / eps_elem * interp_coeffs.first;
       // Minus sign because we apply a minus sign to the residual in computeResidual
-      _an = -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
+      _an = -vdotn * rho_neighbor / eps_neighbor * interp_coeffs.second;
 
       _elem_residual = _ae * var_elem - _an * var_neighbor;
       _neighbor_residual = -_elem_residual;
