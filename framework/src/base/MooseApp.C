@@ -1192,12 +1192,12 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
 }
 
 void
-MooseApp::backup(const std::string & filename)
+MooseApp::backup(const RestartableDataIO::RestartableFilenames & filenames)
 {
   TIME_SECTION("backup", 2, "Backing Up Application to File");
 
   RestartableDataWriter writer(*this, _restartable_data);
-  writer.write(filename);
+  writer.write(filenames);
 }
 
 std::unique_ptr<Backup>
@@ -1208,19 +1208,19 @@ MooseApp::backup()
   RestartableDataWriter writer(*this, _restartable_data);
 
   auto backup = std::make_unique<Backup>();
-  writer.write(*backup->data);
+  writer.write(*backup->header, *backup->data);
 
   return backup;
 }
 
 void
-MooseApp::restore(const std::string & filename, const bool for_restart)
+MooseApp::restore(const RestartableDataIO::RestartableFilenames & filenames, const bool for_restart)
 {
   TIME_SECTION("restore", 2, "Restoring Application from File");
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  _rd_reader.setInput(filename);
+  _rd_reader.setInput(filenames);
   _rd_reader.restore(filter_names);
 }
 
@@ -1234,10 +1234,15 @@ MooseApp::restore(const bool for_restart)
   if (!hasBackupObject())
     mooseError("MooseApp::restore(): Cannot call without a cached backup");
 
+  auto header = std::move(_current_backup->header);
+  mooseAssert(header, "Header not available");
+
   auto data = std::move(_current_backup->data);
+  mooseAssert(data, "Data not available");
+
   _current_backup.reset();
 
-  _rd_reader.setInput(std::move(data));
+  _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
 }
 
@@ -1247,17 +1252,26 @@ MooseApp::finalizeRestore(const bool retain_backup)
   if (!_rd_reader.isRestoring())
     mooseError("MooseApp::finalizeRestore(): Not currently restoring");
 
-  // This gives us access to the underlying stream so that we can return it if needed
-  std::unique_ptr<InputStream> input = _rd_reader.clear();
+  // This gives us access to the underlying streams so that we can return it if needed
+  auto input_streams = _rd_reader.clear();
 
   // If we're asked to retain the backup, we will get the underlying stringstream
   // and put it back in the current backup
   if (retain_backup)
-    if (auto string_input = dynamic_cast<StringInputStream *>(input.get()))
+    if (auto header_string_input = dynamic_cast<StringInputStream *>(input_streams.header.get()))
     {
-      auto sstream = string_input->release();
+      auto data_string_input = dynamic_cast<StringInputStream *>(input_streams.data.get());
+      mooseAssert(data_string_input, "Should also be a string input");
+
+      auto header_sstream = header_string_input->release();
+      mooseAssert(header_sstream, "Header not available");
+
+      auto data_sstream = data_string_input->release();
+      mooseAssert(data_sstream, "Data not available");
+
       _current_backup = std::make_unique<Backup>();
-      _current_backup->data = std::move(sstream);
+      _current_backup->header = std::move(header_sstream);
+      _current_backup->data = std::move(data_sstream);
     }
 }
 
@@ -1819,6 +1833,56 @@ MooseApp::getRestartableMetaData(const std::string & name,
 }
 
 void
+MooseApp::possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
+                                          const std::string & file_base)
+{
+  const auto & map_name = getRestartableDataMapName(name);
+  const auto filenames = metaDataFilenames(file_base, map_name);
+  if (RestartableDataReader::isAvailable(filenames))
+  {
+    RestartableDataReader reader(*this, getRestartableDataMap(name));
+    reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+    reader.setInput(filenames);
+    reader.restore();
+  }
+}
+
+void
+MooseApp::loadRestartableMetaData(const std::string & file_base)
+{
+  for (const auto & name_map_pair : _restartable_meta_data)
+    possiblyLoadRestartableMetaData(name_map_pair.first, file_base);
+}
+
+RestartableDataIO::RestartableFilenames
+MooseApp::writeRestartableMetaData(const RestartableDataMapName & name,
+                                   const std::string & file_base)
+{
+  if (processor_id() != 0)
+    mooseError("MooseApp::writeRestartableMetaData(): Should only run on processor 0");
+
+  const auto & map_name = getRestartableDataMapName(name);
+  const auto filenames = metaDataFilenames(file_base, map_name);
+
+  RestartableDataWriter writer(*this, getRestartableDataMap(name));
+  writer.write(filenames);
+
+  return filenames;
+}
+
+std::vector<RestartableDataIO::RestartableFilenames>
+MooseApp::writeRestartableMetaData(const std::string & file_base)
+{
+  std::vector<RestartableDataIO::RestartableFilenames> filenames;
+
+  if (processor_id() == 0)
+    for (const auto & name_map_pair : _restartable_meta_data)
+      filenames.push_back(writeRestartableMetaData(name_map_pair.first, file_base));
+
+  return filenames;
+}
+
+void
 MooseApp::dynamicAppRegistration(const std::string & app_name,
                                  std::string library_path,
                                  const std::string & library_name,
@@ -2131,6 +2195,17 @@ MooseApp::setBackupObject(std::unique_ptr<Backup> backup)
   _current_backup = std::move(backup);
 }
 
+bool
+MooseApp::hasBackupObject() const
+{
+  if (!_current_backup)
+    return false;
+
+  mooseAssert(_current_backup->header, "Null header");
+  mooseAssert(_current_backup->data, "Null data");
+  return true;
+}
+
 const Backup &
 MooseApp::getBackupObject() const
 {
@@ -2285,6 +2360,26 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 
   // Inform the caller whether the object was added or not
   return add;
+}
+
+const std::string &
+MooseApp::checkpointSuffix()
+{
+  static const std::string suffix = "-mesh.cpr";
+  return suffix;
+}
+
+RestartableDataIO::RestartableFilenames
+MooseApp::metaDataFilenames(const std::string & file_base, const std::string & map_suffix)
+{
+  return RestartableDataIO::RestartableFilenames(file_base + "/meta_data" + map_suffix);
+}
+
+RestartableDataIO::RestartableFilenames
+MooseApp::restartFilenames(const std::string & file_base) const
+{
+  return RestartableDataIO::RestartableFilenames(file_base + "-restart-" +
+                                                 std::to_string(processor_id()));
 }
 
 bool

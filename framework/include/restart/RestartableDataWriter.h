@@ -21,11 +21,12 @@ public:
   RestartableDataWriter(MooseApp & app, std::vector<RestartableDataMap> & data);
 
   /**
-   * Writes the restartable data to the output stream \p stream
+   * Writes the restartable data to header stream \p header_stream
+   * and data stream \p data_stream
    */
-  void write(std::ostream & stream);
+  void write(std::ostream & header_stream, std::ostream & data_stream);
   /**
-   * Writes the restartable data to the file at \p file_name
+   * Writes the restartable data to the files in \p filenames
    */
-  void write(const std::string & file_name);
+  void write(const RestartableFilenames & filenames);
 };

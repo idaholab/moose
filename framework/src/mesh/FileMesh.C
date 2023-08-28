@@ -12,8 +12,6 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "RestartableDataReader.h"
-#include "Checkpoint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_tools.h"
@@ -103,7 +101,7 @@ FileMesh::buildMesh()
       _file_name =
           MooseUtils::pathExists(_file_name)
               ? std::string(_file_name)
-              : (MooseUtils::convertLatestCheckpoint(_file_name) + Checkpoint::meshSuffix());
+              : (MooseUtils::convertLatestCheckpoint(_file_name) + _app.checkpointSuffix());
 
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
@@ -126,16 +124,7 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
-      const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
-      if (MooseUtils::pathExists(metadata_file_name))
-        if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
-        {
-          auto & data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-          RestartableDataReader reader(_app, data);
-          reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-          reader.setInput(metadata_file_name);
-          reader.restore();
-        }
+      _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
 
       if (restarting)
       {

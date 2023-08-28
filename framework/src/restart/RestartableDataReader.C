@@ -12,6 +12,7 @@
 #include "StringInputStream.h"
 #include "FileInputStream.h"
 #include "RestartableDataMap.h"
+#include "MooseUtils.h"
 
 #include <fstream>
 
@@ -22,34 +23,41 @@
 #endif
 
 RestartableDataReader::RestartableDataReader(MooseApp & app, RestartableDataMap & data)
-  : RestartableDataIO(app, data)
+  : RestartableDataIO(app, data), _error_on_different_number_of_processors(true)
 {
 }
 
 RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data)
-  : RestartableDataIO(app, data)
+  : RestartableDataIO(app, data), _error_on_different_number_of_processors(true)
 {
 }
 
 void
-RestartableDataReader::setInput(std::unique_ptr<std::stringstream> stream)
+RestartableDataReader::setInput(std::unique_ptr<std::stringstream> header_stream,
+                                std::unique_ptr<std::stringstream> data_stream)
 {
-  mooseAssert(!_input, "Input already set");
-  _input = std::make_unique<StringInputStream>(std::move(stream));
+  mooseAssert(!_streams.header, "Header input already set");
+  mooseAssert(!_streams.data, "Data stream already set");
+  _streams.header = std::make_unique<StringInputStream>(std::move(header_stream));
+  _streams.data = std::make_unique<StringInputStream>(std::move(data_stream));
 }
 
 void
-RestartableDataReader::setInput(const std::string & filename)
+RestartableDataReader::setInput(const RestartableFilenames & filenames)
 {
-  mooseAssert(!_input, "Input already set");
-  _input = std::make_unique<FileInputStream>(filename);
+  mooseAssert(!_streams.header, "Header input already set");
+  mooseAssert(!_streams.data, "Data stream already set");
+  _streams.header = std::make_unique<FileInputStream>(filenames.header());
+  _streams.data = std::make_unique<FileInputStream>(filenames.data());
 }
 
-std::unique_ptr<InputStream>
+RestartableDataReader::InputStreams
 RestartableDataReader::clear()
 {
   _header.clear();
-  return std::move(_input);
+  InputStreams streams;
+  std::swap(_streams, streams);
+  return streams;
 }
 
 std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
@@ -114,13 +122,8 @@ RestartableDataReader::readHeader(std::istream & stream) const
   for (const auto tid : make_range(dataSize()))
     dataLoad(stream, tid_n_data[tid], nullptr);
 
-  // Data header block size; we store/load this so that we know the positions
-  // of the data at the time of the loop below
-  std::size_t n_header_data = 0;
-  dataLoad(stream, n_header_data, nullptr);
-
-  // The position of the current data that we're loading (skips the headers)
-  std::size_t current_data_position = static_cast<std::size_t>(stream.tellg()) + n_header_data;
+  // The position of the current data that we're loading
+  std::size_t current_data_position = 0;
 
   // Load the data header for each thread
   for (const auto tid : make_range(dataSize()))
@@ -151,17 +154,20 @@ RestartableDataReader::readHeader(std::istream & stream) const
 void
 RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
 {
-  if (!_input)
+  if (!_streams.header || !_streams.data)
     mooseError("RestartableDataReader::restore(): Cannot restore because an input was not set");
   if (_header.size())
     mooseError(
         "RestartableDataReader::restore(): Cannot restore because old data exists; call clear()");
 
-  // This gives us ownership of a new input stream
-  auto stream_ptr = _input->get();
-  auto & stream = *stream_ptr;
+  // Read the header
+  {
+    auto header_stream_ptr = _streams.header->get();
+    _header = readHeader(*header_stream_ptr);
+  }
 
-  _header = readHeader(stream);
+  auto data_stream_ptr = _streams.data->get();
+  auto & data_stream = *data_stream_ptr;
 
   for (const auto tid : index_range(_header))
   {
@@ -184,7 +190,7 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
       // Only restore values if we're either recovering or the data isn't filtered out
       const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
       if (!is_data_in_filter)
-        deserializeValue(stream, *value, header_entry);
+        deserializeValue(data_stream, *value, header_entry);
     }
   }
 }
@@ -219,4 +225,31 @@ RestartableDataReader::deserializeValue(std::istream & stream,
 
   if ((header_entry.position + (std::streampos)header_entry.size) != stream.tellg())
     error("The data read does not match the data stored");
+}
+
+bool
+RestartableDataReader::isAvailable(const RestartableFilenames & filenames)
+{
+  const auto available = [](const auto & filename)
+  { return MooseUtils::pathExists(filename) && MooseUtils::checkFileReadable(filename); };
+
+  const bool header_available = available(filenames.header());
+  const bool data_available = available(filenames.data());
+
+  if (header_available != data_available)
+    mooseError("The restart ",
+               header_available ? "header" : "data",
+               " is available but the corresponding ",
+               header_available ? "data" : "header",
+               " is not available\n\n",
+               "Header (",
+               header_available ? "available" : "missing",
+               "): ",
+               filenames.header(),
+               "Data (",
+               data_available ? "available" : "missing",
+               "): ",
+               filenames.data());
+
+  return header_available && data_available;
 }

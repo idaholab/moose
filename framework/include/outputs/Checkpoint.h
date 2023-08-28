@@ -14,6 +14,8 @@
 
 #include <deque>
 
+#include "RestartableDataIO.h"
+
 /**
  * Shortcut for determining what type of autosave this checkpoint is.
  * NONE: Not an autosave checkpoint
@@ -38,10 +40,10 @@ struct CheckpointFileNames
   std::string checkpoint;
 
   /// Filename for restartable data
-  std::string restart;
+  RestartableDataIO::RestartableFilenames restart;
 
-  /// Filename for mesh meta data
-  std::set<std::string> restart_meta_data;
+  /// Filenames for mesh meta data
+  std::vector<RestartableDataIO::RestartableFilenames> restart_meta_data;
 };
 
 /**
@@ -80,19 +82,6 @@ public:
 
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(AutosaveType flag) { _is_autosave = flag; }
-
-  /// The file suffix for the checkpoint mesh
-  static std::string meshSuffix();
-  /// The file suffix for meta data
-  static std::string metaDataSuffix(const std::string & suffix);
-  /// The full (includes meshSuffix()) file suffix for meta data
-  static std::string fullMetaDataSuffix(const std::string & suffix);
-  /// The file suffix for the mesh meta data
-  static std::string meshMetadataSuffix();
-  /// The full (includes meshSuffix()) file suffix for mesh meta data
-  static std::string fullMeshMetadataSuffix();
-  /// The file suffix for restartable data for the given process
-  static std::string restartSuffix(const processor_id_type pid);
 
 protected:
   /**

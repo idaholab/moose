@@ -12,8 +12,6 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
-#include "RestartableDataWriter.h"
-#include "Checkpoint.h"
 
 #include "libmesh/checkpoint_io.h"
 
@@ -96,16 +94,9 @@ SplitMeshAction::act()
     cp->write(fname);
   }
 
-  if (processor_id() == 0)
+  if (processor_id() == 0 && _app.getRestartableDataMap(MooseApp::MESH_META_DATA).size())
   {
-    auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-    if (!meta_data.empty())
-    {
-      const std::string filename = fname + Checkpoint::meshMetadataSuffix();
-      Moose::out << "Meta data are written into " << filename << "." << std::endl;
-
-      RestartableDataWriter writer(_app, meta_data);
-      writer.write(filename);
-    }
+    const auto filenames = _app.writeRestartableMetaData(MooseApp::MESH_META_DATA, fname);
+    Moose::out << "Meta data are written into " << filenames.data() << "." << std::endl;
   }
 }

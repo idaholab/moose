@@ -17,6 +17,7 @@
  */
 struct Backup
 {
+  std::unique_ptr<std::stringstream> header = std::make_unique<std::stringstream>();
   std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
 };
 

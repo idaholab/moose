@@ -791,9 +791,8 @@ FEProblemBase::initialSetup()
     // We could have a cached backup when this app is a sub-app and has been given a Backup
     if (!_app.hasBackupObject())
     {
-      const std::string backup_file_name =
-          _app.getRestartRecoverFileBase() + Checkpoint::restartSuffix(processor_id());
-      _app.restore(backup_file_name, _app.isRestarting());
+      const auto filenames = _app.restartFilenames(_app.getRestartRecoverFileBase());
+      _app.restore(filenames, _app.isRestarting());
     }
     else
       _app.restore(_app.isRestarting());

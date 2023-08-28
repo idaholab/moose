@@ -55,20 +55,6 @@ SetupRecoverFileBaseAction::act()
   {
     // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
     // generators have run.
-    for (auto map_iter = _app.getRestartableDataMapBegin();
-         map_iter != _app.getRestartableDataMapEnd();
-         ++map_iter)
-    {
-      const std::string & suffix = map_iter->second.second;
-      const std::string filename =
-          _app.getRestartRecoverFileBase() + Checkpoint::fullMetaDataSuffix(suffix);
-      if (MooseUtils::checkFileReadable(filename, false, false, false))
-      {
-        RestartableDataMap & meta_data = map_iter->second.first;
-        RestartableDataReader reader(_app, meta_data);
-        reader.setInput(filename);
-        reader.restore();
-      }
-    }
+    _app.loadRestartableMetaData(_app.getRestartRecoverFileBase() + _app.checkpointSuffix());
   }
 }

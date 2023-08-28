@@ -132,11 +132,11 @@ void
 Checkpoint::output()
 {
   // Create the output directory
-  std::string cp_dir = directory();
+  const auto cp_dir = directory();
   Utility::mkdir(cp_dir.c_str());
 
   // Create the output filename
-  std::string current_file = filename();
+  const auto current_file = filename();
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();
@@ -145,8 +145,8 @@ Checkpoint::output()
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
 
-  curr_file_struct.checkpoint = current_file + meshSuffix();
-  curr_file_struct.restart = current_file + restartSuffix(processor_id());
+  curr_file_struct.checkpoint = current_file + _app.checkpointSuffix();
+  curr_file_struct.restart = _app.restartFilenames(current_file);
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -154,23 +154,13 @@ Checkpoint::output()
   // Write out meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
-    for (auto & map_pair :
-         libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
-    {
-      RestartableDataMap & meta_data = map_pair.second.first;
-      const std::string & suffix = map_pair.second.second;
-      const std::string filename(current_file + fullMetaDataSuffix(suffix));
-
-      curr_file_struct.restart_meta_data.emplace(filename);
-
-      RestartableDataWriter writer(_app, meta_data);
-      writer.write(filename);
-    }
+    const auto filenames = _app.writeRestartableMetaData(curr_file_struct.checkpoint);
+    curr_file_struct.restart_meta_data.insert(
+        curr_file_struct.restart_meta_data.begin(), filenames.begin(), filenames.end());
   }
 
   // Write out the backup
-  const std::string backup_filename(curr_file_struct.restart);
-  _app.backup(backup_filename);
+  _app.backup(curr_file_struct.restart);
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -182,6 +172,19 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
   // Update the list of stored files
   _file_names.push_back(file_struct);
 
+  auto remove_filenames = [this](const RestartableDataIO::RestartableFilenames & filenames)
+  {
+    const auto remove_file = [this](const std::string & filename)
+    {
+      int ret = remove(filename.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '", filename, "':\n", std::strerror(ret));
+    };
+
+    remove_file(filenames.header());
+    remove_file(filenames.data());
+  };
+
   // Remove un-wanted files
   if (_file_names.size() > _num_files)
   {
@@ -191,15 +194,12 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Remove these filenames from the list
     _file_names.pop_front();
 
-    // Get proc information
-    processor_id_type proc_id = processor_id();
-
     // Delete meta data and checkpoint files
-    if (proc_id == 0)
+    if (processor_id() == 0)
     {
       // Delete meta data files
-      for (const auto & file_name : delete_files.restart_meta_data)
-        remove(file_name.c_str());
+      for (const auto & filenames : delete_files.restart_meta_data)
+        remove_filenames(filenames);
 
       // This file may not exist so don't worry about checking for success
       CheckpointIO::cleanup(delete_files.checkpoint,
@@ -207,47 +207,6 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     }
 
     // Delete restartable data
-    {
-      int ret = remove(delete_files.restart.c_str());
-      if (ret != 0)
-        mooseWarning(
-            "Error during the deletion of file '", delete_files.restart, "': ", std::strerror(ret));
-    }
+    remove_filenames(delete_files.restart);
   }
-}
-
-std::string
-Checkpoint::meshSuffix()
-{
-  return "-mesh.cpr";
-}
-
-std::string
-Checkpoint::metaDataSuffix(const std::string & suffix)
-{
-  return "/meta_data" + suffix + RestartableDataIO::getRestartableDataExt();
-}
-
-std::string
-Checkpoint::fullMetaDataSuffix(const std::string & suffix)
-{
-  return meshSuffix() + "/meta_data" + suffix + RestartableDataIO::getRestartableDataExt();
-}
-
-std::string
-Checkpoint::meshMetadataSuffix()
-{
-  return metaDataSuffix("_" + MooseApp::MESH_META_DATA_SUFFIX);
-}
-
-std::string
-Checkpoint::fullMeshMetadataSuffix()
-{
-  return fullMetaDataSuffix("_" + MooseApp::MESH_META_DATA_SUFFIX);
-}
-
-std::string
-Checkpoint::restartSuffix(const processor_id_type pid)
-{
-  return "-restart-" + std::to_string(pid) + RestartableDataIO::getRestartableDataExt();
 }

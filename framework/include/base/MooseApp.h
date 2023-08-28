@@ -644,6 +644,31 @@ public:
                                                 THREAD_ID tid);
 
   /**
+   * Loads the restartable meta data for \p name if it is available with the file base \p file_base
+   */
+  void possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
+                                       const std::string & file_base);
+  /**
+   * Loads all available restartable meta data if it is available with the file base \p file_base
+   */
+  void loadRestartableMetaData(const std::string & file_base);
+
+  /**
+   * Writes the restartable meta data for \p name with a file base of \p file_base
+   *
+   * @return The file names that were written
+   */
+  RestartableDataIO::RestartableFilenames
+  writeRestartableMetaData(const RestartableDataMapName & name, const std::string & file_base);
+  /**
+   * Writes all available restartable meta data with a file base of \p file_base
+   *
+   * @return The file names that were written
+   */
+  std::vector<RestartableDataIO::RestartableFilenames>
+  writeRestartableMetaData(const std::string & file_base);
+
+  /**
    * Return reference to the restartable data object
    * @return A reference to the restartable data object
    */
@@ -685,22 +710,22 @@ public:
   const DataNames & getRecoverableData() const { return _recoverable_data_names; }
 
   /**
-   * Backs up the application to the file \p filename.
+   * Backs up the application to \p filenames
    */
-  void backup(const std::string & filename);
+  void backup(const RestartableDataIO::RestartableFilenames & filenames);
   /**
    * Backs up the application memory in a Backup.
    */
   std::unique_ptr<Backup> backup();
 
   /**
-   * Restore an application from the file \p filename.
+   * Restore an application from \p filenames
    *
    * You must call finalizeRestore() after this in order to finalize the restoration.
    * The restore process is kept open in order to restore additional data after
    * the initial restore (that is, the restoration of data that has already been declared).
    */
-  void restore(const std::string & filename, const bool for_restart);
+  void restore(const RestartableDataIO::RestartableFilenames & filenames, const bool for_restart);
 
   /**
    * Restore a Backup. This sets the App's state.
@@ -861,6 +886,14 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+  /// The file suffix for the checkpoint mesh
+  static const std::string & checkpointSuffix();
+  /// The file suffix for meta data (header and data)
+  static RestartableDataIO::RestartableFilenames metaDataFilenames(const std::string & file_base,
+                                                                   const std::string & map_suffix);
+  /// The file suffix for restartable data
+  RestartableDataIO::RestartableFilenames restartFilenames(const std::string & file_base) const;
+
 private:
   /**
    * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
@@ -918,7 +951,7 @@ public:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
-  bool hasBackupObject() const { return _current_backup != nullptr; }
+  bool hasBackupObject() const;
 
   /**
    * @return The underlying cached backup object.

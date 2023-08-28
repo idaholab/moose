@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 
 const std::string RestartableDataIO::RESTARTABLE_DATA_EXT = ".rd";
+const std::string RestartableDataIO::RESTARTABLE_HEADER_EXT = ".rdh";
 const unsigned int RestartableDataIO::CURRENT_BACKUP_FILE_VERSION = 3;
 
 RestartableDataIO::RestartableDataIO(MooseApp & app, RestartableDataMap & data)

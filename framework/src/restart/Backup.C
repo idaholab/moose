@@ -14,13 +14,19 @@
 void
 dataStore(std::ostream & stream, Backup & backup, void * context)
 {
+  mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
+
+  dataStore(stream, *backup.header, context);
   dataStore(stream, *backup.data, context);
 }
 
 void
 dataLoad(std::istream & stream, Backup & backup, void * context)
 {
+  mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
+
+  dataLoad(stream, *backup.header, context);
   dataLoad(stream, *backup.data, context);
 }

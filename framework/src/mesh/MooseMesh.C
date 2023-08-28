@@ -21,7 +21,6 @@
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
 #include "MooseAppCoordTransform.h"
-#include "Checkpoint.h"
 
 #include <utility>
 
@@ -2525,7 +2524,7 @@ MooseMesh::init()
     // sub-apps need to just build their mesh like normal
     {
       TIME_SECTION("readRecoveredMesh", 2);
-      getMesh().read(_app.getRestartRecoverFileBase() + Checkpoint::meshSuffix());
+      getMesh().read(_app.getRestartRecoverFileBase() + MooseApp::checkpointSuffix());
     }
 
     getMesh().allow_renumbering(allow_renumbering_later);

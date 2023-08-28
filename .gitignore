@@ -180,6 +180,7 @@ framework/contrib/asio/
 
 # Restartable Data
 *.rd
+*.rdh
 *.rd-*
 
 # Checkpoint Files

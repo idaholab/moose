@@ -33,6 +33,22 @@ public:
    * @return The common extension for restartable data
    */
   static const std::string & getRestartableDataExt() { return RESTARTABLE_DATA_EXT; }
+  /**
+   * @return The common extension for restartable headers
+   */
+  static const std::string & getRestartableHeaderExt() { return RESTARTABLE_HEADER_EXT; }
+
+  /**
+   * Helper struct that represents the filenames pertaining to restart output
+   */
+  struct RestartableFilenames
+  {
+    RestartableFilenames() : prefix("UNSET") {}
+    RestartableFilenames(const std::string & prefix) : prefix(prefix) {}
+    std::string prefix;
+    std::string header() const { return prefix + getRestartableHeaderExt(); };
+    std::string data() const { return prefix + getRestartableDataExt(); };
+  };
 
 protected:
   /**
@@ -52,6 +68,8 @@ protected:
 
   /// The common extension for restartable data
   static const std::string RESTARTABLE_DATA_EXT;
+  /// The common extension for restartable headers
+  static const std::string RESTARTABLE_HEADER_EXT;
   /// The current version for the backup file
   static const unsigned int CURRENT_BACKUP_FILE_VERSION;
   /// The type to used for comparing hash codes (sanity checking)

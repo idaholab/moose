@@ -9,8 +9,6 @@
 
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
-#include "RestartableDataReader.h"
-#include "Checkpoint.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -112,21 +110,14 @@ FileMeshGenerator::generate()
     const std::string file_name =
         MooseUtils::pathExists(_file_name)
             ? std::string(_file_name)
-            : (MooseUtils::convertLatestCheckpoint(_file_name) + Checkpoint::meshSuffix());
+            : (MooseUtils::convertLatestCheckpoint(_file_name) + _app.checkpointSuffix());
 
     mesh->skip_partitioning(_skip_partitioning);
     mesh->allow_renumbering(_allow_renumbering);
     mesh->read(file_name);
 
-    const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
-    if (MooseUtils::pathExists(metadata_file_name))
-      if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
-      {
-        RestartableDataReader reader(_app, _app.getRestartableDataMap(MooseApp::MESH_META_DATA));
-        reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-        reader.setInput(metadata_file_name);
-        reader.restore();
-      }
+    // Load the meta data if it is available
+    _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

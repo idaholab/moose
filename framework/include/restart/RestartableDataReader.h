@@ -26,26 +26,38 @@ public:
   RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data);
 
   /**
-   * Sets the input stream for reading to \p stream.
+   * Structure that contains the input streams for the reader.
+   * One for the header and one for the data.
    */
-  void setInput(std::unique_ptr<std::stringstream> stream);
+  struct InputStreams
+  {
+    std::unique_ptr<InputStream> header;
+    std::unique_ptr<InputStream> data;
+  };
+
   /**
-   * Sets the input stream for reading to the file with path \p filename.
+   * Sets the input stream for reading from the stringstreams \p header_stream
+   * and \p data_stream for the header and data, respectively.
    */
-  void setInput(const std::string & filename);
+  void setInput(std::unique_ptr<std::stringstream> header_stream,
+                std::unique_ptr<std::stringstream> data_stream);
+  /**
+   * Sets the input stream for reading to the file with paths \p filenames.
+   */
+  void setInput(const RestartableFilenames & filenames);
 
   /**
    * @return Whether or not this reader is currently restoring
    */
-  bool isRestoring() const { return _input != nullptr; }
+  bool isRestoring() const { return _streams.data != nullptr; }
 
   /**
-   * Clears the contents of the reader (input and cached header)
+   * Clears the contents of the reader (header stream, data stream, header)
    *
    * This returns ownership of the resulting input in the event that
    * it should be retained
    */
-  std::unique_ptr<InputStream> clear();
+  InputStreams clear();
 
   /**
    * Restores the restartable data. The input must be set via setInput() first.
@@ -71,6 +83,14 @@ public:
   }
   ///@}
 
+  /**
+   * @return Whether or not the given restore filenames are available for reading
+   *
+   * Will error if the header is available and the data is not, or if the data is
+   * and the header is not.
+   */
+  static bool isAvailable(const RestartableFilenames & filenames);
+
 private:
   /**
    * Struct that describes data in the header
@@ -91,7 +111,7 @@ private:
    * Internal method for reading the header (stored by RestartableDataWriter)
    */
   std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
-  readHeader(std::istream & stream) const;
+  readHeader(std::istream & header_stream) const;
 
   /**
    * Internal methods for deserializing data
@@ -102,11 +122,12 @@ private:
                         const RestartableDataReader::HeaderEntry & header_entry);
   ///@}
 
-  std::unique_ptr<InputStream> _input;
+  /// The inputs for reading
+  InputStreams _streams;
 
   /// The loaded headers from the restart
   std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>> _header;
 
   /// Whether or not to error with a different number of processors
-  bool _error_on_different_number_of_processors = true;
+  bool _error_on_different_number_of_processors;
 };
