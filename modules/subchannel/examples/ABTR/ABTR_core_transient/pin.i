@@ -106,9 +106,8 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeAuxPin
+    type = RZQPrimeAuxPin
     diffusivity = 'thermal_conductivity'
-    rod_diameter = ${fparse fuel_pin_diameter}
     variable = q_prime_pin
     diffusion_variable = temperature
     component = normal

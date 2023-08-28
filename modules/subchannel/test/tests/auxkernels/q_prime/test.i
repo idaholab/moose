@@ -12,6 +12,8 @@ heated_length = 1.0
     ymax = 1.0 # heated length
     ny = 10 # number of axial cells
   []
+  coord_type = RZ
+  rz_coord_axis = Y
 []
 
 [Variables]
@@ -30,9 +32,8 @@ heated_length = 1.0
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeAuxPin
+    type = RZQPrimeAuxPin
     diffusivity = 'thermal_conductivity'
-    rod_diameter = ${fparse rod_diameter}
     variable = q_prime
     diffusion_variable = temperature
     component = normal
@@ -84,11 +85,6 @@ heated_length = 1.0
     direction = y
     execute_on = 'TIMESTEP_END'
   []
-[]
-
-[Problem]
-  coord_type = RZ
-  rz_coord_axis = Y
 []
 
 [Executioner]

@@ -89,6 +89,9 @@ n_rings = 9
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [Problem]
@@ -100,7 +103,5 @@ n_rings = 9
 []
 
 [Executioner]
-  type = Transient
-  end_time = 10
-  dt = 1
+  type = Steady
 []

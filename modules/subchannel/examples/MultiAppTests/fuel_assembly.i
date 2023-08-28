@@ -108,6 +108,9 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
   [rho]
     block = subchannel
   []
@@ -184,6 +187,12 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = ${fuel_pin_diameter}
   []
 
   [P_ic]

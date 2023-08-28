@@ -12,26 +12,25 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QPrimeAuxPin.h"
+#include "RZQPrimeAuxPin.h"
 
-registerMooseObject("MooseApp", QPrimeAuxPin);
+registerMooseObject("MooseApp", RZQPrimeAuxPin);
 
 InputParameters
-QPrimeAuxPin::validParams()
+RZQPrimeAuxPin ::validParams()
 {
   InputParameters params = DiffusionFluxAux::validParams();
-  params.addClassDescription("Axial heat rate on pin surface");
-  params.addRequiredParam<Real>("rod_diameter", "[m]");
+  params.addClassDescription(
+      "Axial heat rate on pin surface for a 2D-RZ axi-symmetric fuel pin model");
   return params;
 }
 
-QPrimeAuxPin::QPrimeAuxPin(const InputParameters & parameters)
-  : DiffusionFluxAux(parameters), _rod_diameter(getParam<Real>("rod_diameter"))
+RZQPrimeAuxPin ::RZQPrimeAuxPin(const InputParameters & parameters) : DiffusionFluxAux(parameters)
 {
 }
 
 Real
-QPrimeAuxPin::computeValue()
+RZQPrimeAuxPin ::computeValue()
 {
-  return DiffusionFluxAux::computeValue() * M_PI * _rod_diameter;
+  return DiffusionFluxAux::computeValue() * M_PI * 2.0 * abs(_q_point[_qp](0));
 }

@@ -6,7 +6,7 @@
 T_in = 630
 P_out = 758423 # Pa
 reactor_power = 250e6 #WTh
-fuel_assemblies_per_power_unit = ${fparse 2}
+fuel_assemblies_per_power_unit = ${fparse 4}
 fuel_pins_per_assembly = 217
 pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
 mass_flux_in = ${fparse 2786} # kg/(m2.s)
@@ -33,7 +33,7 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 orifice_plate_height = ${fparse 5*scale_factor}
 duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
 duct_inside = ${fparse duct_outside - 2 * duct_thickness}
-###################################################
+
 
 [TriSubChannelMesh]
   [subchannel]
@@ -108,6 +108,9 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
   [rho]
     block = subchannel
   []
@@ -150,7 +153,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-5
+  P_tol = 1.0e-3
   T_tol = 1.0e-3
   implicit = false
   segregated = true
@@ -183,6 +186,12 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = ${fuel_pin_diameter}
   []
 
   [P_ic]
@@ -271,7 +280,10 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  start_time = 0.0
+  end_time = 10
+  dt = 1
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   fixed_point_max_its = 30
@@ -285,31 +297,41 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 [MultiApps]
   # Multiapp to pin heat conduction module
   [pin_map]
-    type = FullSolveMultiApp
-    input_files = pin.i # seperate file for multiapps due to radial power profile
+    type = TransientMultiApp
+    input_files = 'pin.i' # seperate file for multiapps due to radial power profile
     execute_on = 'timestep_end'
-    positions = '0  0   0'
+    positions_file = "rod_positions.i"
     bounding_box_padding = '0 0 0.01'
+    output_in_position = true
+  []
+
+  # Multiapp to pin heat conduction module
+  [hot_pin_map]
+    type = TransientMultiApp
+    input_files = 'hot_pin.i' # seperate file for multiapps due to radial power profile
+    execute_on = 'timestep_end'
+    positions = '0 0 0'
+    bounding_box_padding = '0 0 0.01'
+    output_in_position = true
   []
 
   # Multiapp to duct heat conduction module
   [duct_map]
-    type = FullSolveMultiApp
-    input_files = wrapper.i # seperate file for duct heat conduction
+    type = TransientMultiApp
+    input_files = 'wrapper.i' # seperate file for duct heat conduction
     execute_on = 'timestep_end'
     positions = '0   0   0'
-    bounding_box_padding = '0.0 0.0 0.01'
+    bounding_box_padding = '1.0 1.0 0.01'
   []
 
   [viz]
-    type = FullSolveMultiApp
+    type = TransientMultiApp
     input_files = "3d.i"
-    execute_on = "final"
+    execute_on = "timestep_end"
   []
 []
 
 [Transfers]
-
   [Tpin] # send pin surface temperature to bison,
     type = MultiAppInterpolationTransfer
     to_multi_app = pin_map
@@ -319,6 +341,19 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
     type = MultiAppInterpolationTransfer
     from_multi_app = pin_map
+    source_variable = q_prime_pin
+    variable = q_prime
+  []
+
+  [hot_Tpin] # send pin surface temperature to bison,
+    type = MultiAppInterpolationTransfer
+    to_multi_app = hot_pin_map
+    source_variable = Tpin
+    variable = Pin_surface_temperature
+  []
+  [hot_q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+    type = MultiAppInterpolationTransfer
+    from_multi_app = hot_pin_map
     source_variable = q_prime_pin
     variable = q_prime
   []

@@ -2907,8 +2907,8 @@ SubChannel1PhaseProblem::externalSolve()
           auto Pr = (*_mu_soln)(node)*cp / k;
           auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
           auto hw = Nu * k / Dh_i;
-          sumTemp += (*_q_prime_soln)(pin_node) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
-                     (*_T_soln)(node);
+          sumTemp +=
+              (*_q_prime_soln)(pin_node) / ((*_Dpin_soln)(pin_node)*M_PI * hw) + (*_T_soln)(node);
           rod_counter += 1.0;
         }
         _Tpin_soln->set(pin_node, sumTemp / rod_counter);

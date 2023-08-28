@@ -89,6 +89,9 @@ n_rings = 9
   [Tpin]
     block = fuel_pins
   []
+  [Dpin]
+    block = fuel_pins
+  []
 []
 
 [Problem]
@@ -101,6 +104,4 @@ n_rings = 9
 
 [Executioner]
   type = Transient
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

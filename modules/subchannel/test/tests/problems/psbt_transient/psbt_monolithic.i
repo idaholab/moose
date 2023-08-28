@@ -28,44 +28,47 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-[]
+# [AuxVariables]
+#   [mdot]
+#     block = sub_channel
+#   []
+#   [SumWij]
+#     block = sub_channel
+#   []
+#   [P]
+#     block = sub_channel
+#   []
+#   [DP]
+#     block = sub_channel
+#   []
+#   [h]
+#     block = sub_channel
+#   []
+#   [T]
+#     block = sub_channel
+#   []
+#   [Tpin]
+#     block = fuel_pins
+#   []
+#   [Dpin]
+#     block = fuel_pins
+#   []
+#   [rho]
+#     block = sub_channel
+#   []
+#   [mu]
+#     block = sub_channel
+#   []
+#   [S]
+#     block = sub_channel
+#   []
+#   [w_perim]
+#     block = sub_channel
+#   []
+#   [q_prime]
+#     block = fuel_pins
+#   []
+# []
 
 [FluidProperties]
   [water]
@@ -109,6 +112,12 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.00950
   []
 
   [P_ic]

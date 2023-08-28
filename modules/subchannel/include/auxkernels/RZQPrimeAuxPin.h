@@ -17,18 +17,14 @@
 #include "DiffusionFluxAux.h"
 
 /**
- * Computes linear heat rate
+ * Computes linear heat rate in a 2D-RZ model of a fuel pin
  */
-class QPrimeAuxPin : public DiffusionFluxAux
+class RZQPrimeAuxPin : public DiffusionFluxAux
 {
 public:
   static InputParameters validParams();
 
-  QPrimeAuxPin(const InputParameters & parameters);
+  RZQPrimeAuxPin(const InputParameters & parameters);
 
   virtual Real computeValue() override;
-
-protected:
-  /// rod diameter
-  const Real & _rod_diameter;
 };

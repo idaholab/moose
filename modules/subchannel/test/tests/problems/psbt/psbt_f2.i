@@ -2,6 +2,7 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
+rod_diameter = 0.00950
 
 [QuadSubChannelMesh]
   [sub_channel]
@@ -10,7 +11,7 @@ P_out = 4.923e6 # Pa
     ny = 6
     n_cells = 3
     pitch = 0.0126
-    rod_diameter = 0.00950
+    rod_diameter = ${rod_diameter}
     gap = 0.00095 # the half gap between sub-channel assemblies
     heated_length = 1.0
     spacer_z = '0.0'
@@ -48,6 +49,9 @@ P_out = 4.923e6 # Pa
     block = sub_channel
   []
   [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
     block = fuel_pins
   []
   [rho]
@@ -109,6 +113,12 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = ${rod_diameter}
   []
 
   [P_ic]

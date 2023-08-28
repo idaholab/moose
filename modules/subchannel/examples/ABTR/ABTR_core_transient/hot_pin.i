@@ -78,8 +78,7 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 [Functions]
   [volumetric_heat_rate]
     type = ParsedFunction
-    value = 'if(z>l1 & z<l2, power, 0.0)'
-    #'(pi/2)*sin(pi*z/L)'
+    value = 'if(z>l1 & z<l2, 10*power*sin(t*pi/10) + power, 0.0)'
     vars = 'l1 l2 power'
     vals = '${length_entry_fuel} ${fparse length_entry_fuel+length_heated_fuel} ${pin_power}'
   []
@@ -103,9 +102,8 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeAuxPin
+    type = RZQPrimeAuxPin
     diffusivity = 'thermal_conductivity'
-    rod_diameter = ${fparse fuel_pin_diameter}
     variable = q_prime_pin
     diffusion_variable = temperature
     component = normal
@@ -124,13 +122,22 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
     variable = temperature
     function = volumetric_heat_rate
   []
+  [time_derivative]
+    type = HeatConductionTimeDerivative
+    variable = temperature
+  []
 []
 
 [Materials]
   [heat_conductor]
     type = HeatConductionMaterial
-    thermal_conductivity = 1.0
+    thermal_conductivity = 45.0
     block = fuel_pin
+  []
+  [density]
+    type = GenericConstantMaterial
+    prop_names = 'density'
+    prop_values = 8000.0
   []
 []
 
@@ -192,10 +199,14 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
+  end_time = 10
+  dt = 1
+  nl_abs_tol = 1e-8
+  nl_max_its = 15
 
   [Quadrature]
     order = FIFTH
