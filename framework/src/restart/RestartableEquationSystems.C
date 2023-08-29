@@ -278,9 +278,10 @@ RestartableEquationSystems::load(std::istream & stream)
         if (!sys.has_variable(var_header.name))
           continue;
         const auto & var = sys.variable(sys.variable_number(var_header.name));
+        if (var.type() != var_header.type)
+          continue;
 
         restore(sys_header, vec_header, var_header, sys, vec, var, stream);
-
         modified_vec = true;
       }
 
