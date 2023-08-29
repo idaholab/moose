@@ -82,6 +82,7 @@ RestartableDataWriter::write(const std::filesystem::path & folder_base)
   const auto header_file = restartableHeaderFile(folder_base);
   const auto data_file = restartableDataFile(folder_base);
 
+  // Make the folder if it doesn't exist
   const auto dir = header_file.parent_path();
   mooseAssert(dir == data_file.parent_path(), "Inconsistent directories");
   if (!std::filesystem::exists(dir))
@@ -94,8 +95,11 @@ RestartableDataWriter::write(const std::filesystem::path & folder_base)
                  err.message());
   }
 
+  // We want to keep track of the paths that we create so that we can
+  // return them for file management later (primarily removing old checkpoints)
   std::vector<std::filesystem::path> paths;
 
+  // Helper for opening a stream for use
   auto open = [&paths](const std::filesystem::path & filename)
   {
     std::ofstream stream;
@@ -107,6 +111,7 @@ RestartableDataWriter::write(const std::filesystem::path & folder_base)
     return stream;
   };
 
+  // Open and write
   auto header_stream = open(header_file);
   auto data_stream = open(data_file);
   write(header_stream, data_stream);
