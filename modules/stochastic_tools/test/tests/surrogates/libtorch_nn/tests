@@ -65,7 +65,7 @@
     input = evaluate.i
     allow_test_objects = true
     csvdiff = 'evaluate_standardized_results_0002.csv'
-    cli_args = "Surrogates/surr/filename='standardized_train.rd/data' "
+    cli_args = "Surrogates/surr/filename='standardized_train.rd' "
                "Outputs/file_base=evaluate_standardized"
     prereq = train-standardized
     libtorch = true
