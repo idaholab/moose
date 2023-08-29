@@ -980,7 +980,6 @@ GrainTracker::remapGrains()
     /**
      * Loop over each grain and see if any grains represented by the same variable are "touching"
      */
-    bool any_grains_remapped = false;
     bool grains_remapped;
 
     std::set<unsigned int> notify_ids;
@@ -1058,7 +1057,6 @@ GrainTracker::remapGrains()
           }
         }
       }
-      any_grains_remapped |= grains_remapped;
     } while (grains_remapped);
 
     if (!notify_ids.empty())
@@ -1674,12 +1672,11 @@ GrainTracker::communicateHaloMap()
       }
 
       // Build up the counts vector for MPI scatter
-      std::size_t global_count = 0;
       for (const auto & vector_ref : root_halo_ids)
       {
         std::copy(vector_ref.begin(), vector_ref.end(), std::back_inserter(halo_ids_all));
         counts[counter] = vector_ref.size();
-        global_count += counts[counter++];
+        counter++;
       }
     }
 

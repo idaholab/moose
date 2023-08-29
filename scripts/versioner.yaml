@@ -9,6 +9,7 @@ packages:
       - apptainer/mpich.def
       - conda/mpich/meta.yaml
       - conda/mpich/conda_build_config.yaml
+      - conda/mpich/build.sh
     apptainer:
   petsc:
     dependencies:
@@ -20,6 +21,7 @@ packages:
       - apptainer/petsc.def
       - conda/petsc/meta.yaml
       - conda/petsc/conda_build_config.yaml
+      - conda/petsc/build.sh
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
   libmesh:
@@ -32,15 +34,18 @@ packages:
       - apptainer/libmesh.def
       - conda/libmesh/meta.yaml
       - conda/libmesh/conda_build_config.yaml
+      - conda/libmesh/build.sh
       - scripts/configure_libmesh.sh
       - scripts/update_and_rebuild_libmesh.sh
       - conda/libmesh-vtk/meta.yaml
       - conda/libmesh-vtk/conda_build_config.yaml
+      - conda/libmesh-vtk/build.sh
   wasp:
     influential:
       - framework/contrib/wasp
       - conda/wasp/meta.yaml
       - conda/wasp/conda_build_config.yaml
+      - conda/wasp/build.sh
   moose:
     dependencies:
       - libmesh
@@ -54,6 +59,7 @@ packages:
       - conda/test-tools/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
+      - conda/moose/build.sh
   app:
     dependencies:
       - moose

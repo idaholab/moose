@@ -17,7 +17,7 @@
 function configure_petsc()
 {
   if [ -z "$PETSC_DIR" ]; then
-    echo "PETSC_DIR is not set for configure_petsc"
+    echo 'PETSC_DIR is not set for configure_petsc'
     exit 1
   fi
   if [ ! -d "$PETSC_DIR" ]; then
@@ -26,14 +26,14 @@ function configure_petsc()
   fi
 
   # Use --with-make-np if MOOSE_JOBS is given
-  MAKE_NP_STR=""
+  MAKE_NP_STR=''
   if [ ! -z "$MOOSE_JOBS" ]; then
     MAKE_NP_STR="--with-make-np=$MOOSE_JOBS"
   fi
 
   # Check to see if HDF5 exists using environment variables and expected locations.
   # If it does, use it.
-  echo "INFO: Checking for HDF5..."
+  echo 'INFO: Checking for HDF5...'
 
   # Prioritize user-set environment variables HDF5_DIR, HDF5DIR, and HDF5_ROOT,
   # with the first taking the greatest priority
@@ -58,8 +58,8 @@ function configure_petsc()
       loc=$(find "$p" -name 'hdf5.h' -print -quit 2>/dev/null)
       if [ ! -z "$loc" ]; then
         echo "INFO: HDF5 header location was found at: $loc"
-        echo "INFO: Using this HDF5 installation to configure and build PETSc."
-        echo "INFO: If another HDF5 is desired, please set HDF5_DIR and re-run this script."
+        echo 'INFO: Using this HDF5 installation to configure and build PETSc.'
+        echo 'INFO: If another HDF5 is desired, please set HDF5_DIR and re-run this script.'
         HDF5_STR="--with-hdf5-dir=$loc/../../"
         break
       fi
@@ -68,45 +68,45 @@ function configure_petsc()
   fi
 
   # If HDF5 is not found locally, download it via PETSc
-  HDF5_FORTRAN_STR=""
+  HDF5_FORTRAN_STR=''
   if [ -z "$HDF5_STR" ]; then
-    HDF5_STR="--download-hdf5=1"
-    HDF5_FORTRAN_STR="--download-hdf5-fortran-bindings=0"
-    echo "INFO: HDF5 library not detected, opting to download via PETSc..."
+    HDF5_STR='--download-hdf5=1'
+    HDF5_FORTRAN_STR='--download-hdf5-fortran-bindings=0'
+    echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
   fi
 
   # If manually building PETSc on Apple Silicon (arm64), several adjustments need to be made to
   # properly configure PETSc for this platform
   MUMPS_ARM_STR=""
-  if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]] && [[ $PETSC_ARCH == arch-moose ]]; then
-    echo "INFO: Apple Silicon detected, checking to see if PETSc ARM patches need to be applied..."
+  if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    echo 'INFO: Apple Silicon detected, checking to see if PETSc ARM patches need to be applied...'
     # First check to see if patch marker file exists in PETSC_DIR due to a previous build. If not,
     # perform patch and create patch marker file. If so, skip patch and report.
     patch_file=$(find "$PETSC_DIR" -name '.patched' -print -quit 2>/dev/null)
     if [ -z "$patch_file" ]; then
       # If an HDF5 download is requested, patch PETSc to properly configure it
-      if [ "$HDF5_STR" == "--download-hdf5=1" ]; then
-         echo "INFO: Patching PETSc to support HDF5 download and installation on ARM..."
-         git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
-         touch $PETSC_DIR/.patched
+      if [ "$HDF5_STR" == '--download-hdf5=1' ]; then
+        echo 'INFO: Patching PETSc to support HDF5 download and installation on ARM...'
+        git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
+        touch $PETSC_DIR/.patched
       else
         echo "INFO: No ARM patches required, proceeding to PETSc configure..."
       fi
     elif [ ! -z "$patch_file" ]; then
-      echo "INFO: Applicable ARM patches already applied, proceeding to PETSc configure..."
+      echo 'INFO: Applicable ARM patches already applied, proceeding to PETSc configure...'
     fi
     # Finally, be sure to set FFLAGS for mumps to use the proper arch, otherwise it will fail to
     # build correctly
-    MUMPS_ARM_STR="FFLAGS="-march=armv8.3-a""
+    MUMPS_ARM_STR='FFLAGS=-march=armv8.3-a'
   fi
 
   cd $PETSC_DIR
   python3 ./configure --download-hypre=1 \
       --with-shared-libraries=1 \
-      "$HDF5_STR" \
-      "$HDF5_FORTRAN_STR" \
-      "$MAKE_NP_STR" \
-      "$MUMPS_ARM_STR" \
+      $HDF5_STR \
+      $HDF5_FORTRAN_STR \
+      $MAKE_NP_STR \
+      $MUMPS_ARM_STR \
       --with-debugging=no \
       --download-fblaslapack=1 \
       --download-metis=1 \

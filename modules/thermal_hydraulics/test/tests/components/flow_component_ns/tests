@@ -17,6 +17,7 @@
     abs_zero = 5e-6
     prereq = 'generate_mesh'
     method = "!dbg"
+    installation_type = in_tree
     max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
     valgrind = HEAVY
     requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component.'

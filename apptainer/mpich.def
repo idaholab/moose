@@ -84,7 +84,11 @@ EOF
 
     # Create a pretty prompt (ensure last item sourced)
     cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
-PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
+if [ -n "${CUSTOM_PROMPT}" ]; then
+    PS1=${CUSTOM_PROMPT}
+else
+    PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
+fi
 EOF
 
     # We need git lfs

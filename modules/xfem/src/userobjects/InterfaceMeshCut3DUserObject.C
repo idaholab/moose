@@ -47,8 +47,6 @@ InterfaceMeshCut3DUserObject::calculateNormals()
       Point normal_at_node(0.0);
       const Node & node = elem->node_ref(i);
 
-      Real angle_sum = 0.0;
-
       for (const auto & node_neigh_elem_id : _node_to_elem_map[node.id()])
       {
         const Elem & node_neigh_elem = _cutter_mesh->elem_ref(node_neigh_elem_id);
@@ -66,7 +64,6 @@ InterfaceMeshCut3DUserObject::calculateNormals()
         Real lenSq2 = line_2 * line_2;
         Real angle = std::acos(dot / std::sqrt(lenSq1 * lenSq2));
         normal_at_node += normal_at_node_j * angle;
-        angle_sum += angle;
       }
       normal[1 + i] = normal_at_node;
     }

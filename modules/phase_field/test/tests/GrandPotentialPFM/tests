@@ -61,6 +61,7 @@
     exodiff = 'SinteringBase_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
+    installation_type = in_tree
     requirement = 'The system shall provide a Grand Potential based sintering model'
   []
   [SinteringParabolic]

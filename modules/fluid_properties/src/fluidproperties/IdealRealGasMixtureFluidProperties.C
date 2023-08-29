@@ -762,7 +762,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
                                                Real & dp_dv,
                                                std::vector<Real> & dp_dx) const
 {
-  Real p_primary, dp_dT_primary, dp_dv_primary, dp_dx_primary, dxi_dx_primary;
+  Real p_primary, dp_dT_primary, dp_dv_primary;
   Real p_sec, dp_dT_sec, dxj_dxi;
   std::vector<Real> dp_dv_sec;
 
@@ -774,7 +774,6 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
   p = p_primary;
   dp_dT = dp_dT_primary;
   dp_dv = dp_dv_primary / x_primary;
-  dp_dx_primary = -dp_dv_primary * v / (x_primary * x_primary);
 
   // get the partial pressures and their derivatives first
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
@@ -784,8 +783,6 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
     p += p_sec;
     dp_dT += dp_dT_sec;
     dp_dv += dp_dv_sec[i] / x[i];
-    dxi_dx_primary = -x[i] / (1. - x_primary);
-    dp_dx_primary += -dp_dv_sec[i] * v / (x[i] * x[i]) * dxi_dx_primary;
   }
 
   // get the composition dependent derivatives of the secondary vapors
@@ -824,7 +821,7 @@ IdealRealGasMixtureFluidProperties::e_from_T_v(Real T,
                                                Real & de_dv,
                                                std::vector<Real> & de_dx) const
 {
-  Real e_primary, de_dT_primary, de_dv_primary, de_dx_primary, dxi_dx_primary;
+  Real e_primary, de_dT_primary, de_dv_primary;
   Real de_dT_sec, dxj_dxi, dx_primary_dxi;
   std::vector<Real> e_sec, de_dv_sec;
 
@@ -837,7 +834,6 @@ IdealRealGasMixtureFluidProperties::e_from_T_v(Real T,
   e = x_primary * e_primary;
   de_dT = x_primary * de_dT_primary;
   de_dv = de_dv_primary;
-  de_dx_primary = e_primary - x_primary * de_dv_primary * v / (x_primary * x_primary);
 
   // get the partial pressures and their derivatives first
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
@@ -847,9 +843,6 @@ IdealRealGasMixtureFluidProperties::e_from_T_v(Real T,
     e += x[i] * e_sec[i];
     de_dT += x[i] * de_dT_sec;
     de_dv += de_dv_sec[i];
-    dxi_dx_primary = -x[i] / (1. - x_primary);
-    de_dx_primary +=
-        dxi_dx_primary * e_sec[i] - x[i] * de_dv_sec[i] * v / (x[i] * x[i]) * dxi_dx_primary;
   }
 
   // get the composition dependent derivatives of the secondary vapors
@@ -1077,18 +1070,16 @@ IdealRealGasMixtureFluidProperties::xs_prim_from_p_T(Real p,
       Real M_star = 1. / sum;
       v_secondary = R_molar * T / (M_star * pp_sat_secondary);
       int it = 0;
-      double f = 1., df_dvs, pp_sec, p_sec, dp_dT_sec, dp_dv_sec, dp_dT, dp_dv;
+      double f = 1., df_dvs, pp_sec, p_sec, dp_dT_sec, dp_dv_sec, dp_dv;
       double tol_p = 1.e-8;
       while (std::fabs(f / pp_sat_secondary) > tol_p)
       {
         pp_sec = 0.;
-        dp_dT = 0.;
         dp_dv = 0.;
         for (unsigned int i = 0; i < _n_secondary_vapors; i++)
         {
           _fp_secondary[i]->p_from_T_v(T, v_secondary / x_sec[i], p_sec, dp_dT_sec, dp_dv_sec);
           pp_sec += p_sec;
-          dp_dT += dp_dT_sec;
           dp_dv += dp_dv_sec / x_sec[i];
         }
         f = pp_sec - pp_sat_secondary;
