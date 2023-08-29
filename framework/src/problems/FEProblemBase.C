@@ -774,7 +774,7 @@ FEProblemBase::initialSetup()
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
   {
     // Only load all of the vectors if we're recovering
-    _req.set().setLoadAllVectors(!_app.isRecovering());
+    _req.set().setLoadAllVectors(_app.isRecovering());
 
     // Let the EquationSystems load depend on everything else so that it comes last
     {
