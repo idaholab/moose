@@ -50,10 +50,8 @@ class Test2DApproximateRC(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
         df1 = run_spatial('2d-rc.i', 8, "--error", "--error-unused",
-                          "UserObjects/rc/density=${rho}",
-                          "UserObjects/rc/dynamic_viscosity=${mu}",
-                          "UserObjects/rc/characteristic_speed=1",
-                          "UserObjects/rc/approximate_rhie_chow_coefficients=true",
+                          "FVKernels/u_advection/characteristic_speed=1",
+                          "FVKernels/v_advection/characteristic_speed=1",
                           y_pp=labels, mpi=16)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')

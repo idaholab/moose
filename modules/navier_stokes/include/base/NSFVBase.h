@@ -15,6 +15,7 @@
 #include "AuxiliarySystem.h"
 #include "NSFVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "INSFVMomentumAdvection.h"
 
 /**
  * Base class for setting up Navier-Stokes finite volume simulations
@@ -450,9 +451,10 @@ NSFVBase<BaseType>::validParams()
   InputParameters params = BaseType::validParams();
 
   /**
-   * Add params relevant to the Rhie-Chow user object
+   * Add params relevant to the objects we may add
    */
   params += INSFVRhieChowInterpolator::uniqueParams();
+  params += INSFVMomentumAdvection::uniqueParams();
 
   /**
    * General parameters used to set up the simulation.
@@ -1666,6 +1668,7 @@ NSFVBase<BaseType>::addINSMomentumAdvectionKernels()
   params.template set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   if (_porous_medium_treatment)
     params.template set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  params.applySpecificParameters(parameters(), INSFVMomentumAdvection::listOfCommonParams());
 
   for (unsigned int d = 0; d < _dim; ++d)
   {

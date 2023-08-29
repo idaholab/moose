@@ -22,6 +22,18 @@ class INSFVMomentumAdvection : public INSFVAdvectionKernel, public INSFVMomentum
 public:
   static InputParameters validParams();
   INSFVMomentumAdvection(const InputParameters & params);
+
+  /**
+   * Parameters of this object that should be added to the NSFV action that are unique to this
+   * object
+   */
+  static InputParameters uniqueParams();
+
+  /**
+   * @returns A list of the parameters that are common between this object and the NSFV action
+   */
+  static std::vector<std::string> listOfCommonParams();
+
   void gatherRCData(const Elem &) override final {}
   void gatherRCData(const FaceInfo & fi) override final;
   void initialSetup() override;
@@ -45,6 +57,12 @@ protected:
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+
+  /// Whether to approximately calculate the 'a' coefficients
+  const bool _approximate_as;
+
+  /// Characteristic speed
+  const Real _cs;
 
   /// Our local momentum functor
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADReal>> _rho_u;

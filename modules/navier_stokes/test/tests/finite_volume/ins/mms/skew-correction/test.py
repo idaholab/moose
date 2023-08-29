@@ -33,10 +33,8 @@ class TestVortexSkewCorrectedApproximateRC(unittest.TestCase):
         pressure_labels = ['L2p']
         labels = velocity_labels + pressure_labels
         df1 = run_spatial('skewed-vortex.i', 6, "--error", "--error-unused",
-                          "UserObjects/rc/density=${rho}",
-                          "UserObjects/rc/dynamic_viscosity=${mu}",
-                          "UserObjects/rc/characteristic_speed=1",
-                          "UserObjects/rc/approximate_rhie_chow_coefficients=true",
+                          "FVKernels/u_advection/characteristic_speed=1",
+                          "FVKernels/v_advection/characteristic_speed=1",
                           y_pp=labels, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')

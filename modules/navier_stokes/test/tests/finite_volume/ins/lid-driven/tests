@@ -16,7 +16,7 @@
   [exo-approximate-rc-action]
     type = 'Exodiff'
     input = 'lid-driven-action.i'
-    cli_args = 'Modules/NavierStokesFV/approximate_rhie_chow_coefficients=true Modules/NavierStokesFV/characteristic_speed=1 Outputs/file_base=lid-driven-action-approx-rc'
+    cli_args = 'Modules/NavierStokesFV/characteristic_speed=1 Outputs/file_base=lid-driven-action-approx-rc'
     exodiff = 'lid-driven-action-approx-rc.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action with an approximate computation of the Rhie-Chow coefficients.'
   []
