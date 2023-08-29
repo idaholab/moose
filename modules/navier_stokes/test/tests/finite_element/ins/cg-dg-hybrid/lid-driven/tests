@@ -8,6 +8,7 @@
       input = hybrid-cg-dg.i
       exodiff = hybrid-cg-dg_out.e
       detail = 'accurate results, and'
+      installation_type = 'in_tree' # uses JIT
     []
     [hybrid-jac]
       type = PetscJacobianTester
@@ -17,6 +18,7 @@
       detail = 'a perfect Jacobian.'
       difference_tol = 1e0
       ratio_tol = 1e-7
+      installation_type = 'in_tree' # uses JIT
     []
   []
 []
