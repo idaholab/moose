@@ -58,6 +58,12 @@ else
 endif
 endif
 
+# Give us that sweet std::filesystem (not needed on mac)
+# Hopefully this can go in libMesh one day
+ifneq ($(shell uname -s),Darwin)
+	libmesh_LDFLAGS += -lstdc++fs
+endif
+
 # Google Test relies on static construction of objects in test
 # compilation units to register those tests, but with some Linux
 # distributions (Ubuntu 21.04 for me; others in
@@ -147,12 +153,6 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
-
-# Give us that sweet std::filesystem (not needed on mac)
-# Hopefully this can go in libMesh one day
-ifeq (,$(findstring darwin,$(libmesh_HOST)))
-	libmesh_LDFLAGS += -lstdc++fs
-endif
 
 #
 # Static Analysis
