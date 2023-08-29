@@ -9,6 +9,8 @@
 
 #include "DoubleWellPotential.h"
 
+registerMooseObject("PhaseFieldApp",DoubleWellPotential);
+
 InputParameters
 DoubleWellPotential::validParams()
 {

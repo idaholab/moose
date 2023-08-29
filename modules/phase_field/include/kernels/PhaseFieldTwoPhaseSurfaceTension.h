@@ -20,8 +20,8 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  const ADVariableValue & _psi;
-  const ADVariableGradient & _grad_phi;
+  const ADVariableValue & _auxpf;
+  const ADVariableGradient & _grad_pf;
   const Real & _coeff;
 
 };

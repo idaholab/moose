@@ -15,16 +15,16 @@ InputParameters
 PhaseFieldTwoPhaseSurfaceTension::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
-  params.addRequiredCoupledVar("psi", "Auxillary variable in phase field formulation");
-  params.addRequiredCoupledVar("phi", "phase field variable");
+  params.addRequiredCoupledVar("auxpf", "Auxillary variable in phase field formulation");
+  params.addRequiredCoupledVar("pf", "phase field variable");
   params.addRequiredParam<Real>("coeff", "prefactor relating chemical potential and psi");
   return params;
 }
 
 PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(const InputParameters & parameters)
   : ADVectorKernelValue(parameters),
-    _psi(adCoupledValue("psi")),
-    _grad_phi(adCoupledGradient("phi")),
+    _auxpf(adCoupledValue("auxpf")),
+    _grad_pf(adCoupledGradient("pf")),
     _coeff(getParam<Real>("coeff"))
 {
 }
@@ -32,5 +32,6 @@ PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(const InputPa
 ADRealVectorValue
 PhaseFieldTwoPhaseSurfaceTension::precomputeQpResidual()
 {
-  return _coeff*_psi[_qp]*_grad_phi[_qp];
+  return -_coeff*_auxpf[_qp]*_grad_pf[_qp];
 }
+ 
