@@ -26,10 +26,15 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
+  /// reference to coupled variable, phi here
+  const ADVariableValue & _pf; 
+  /// Interface width
+  const Real & _epsilon;
   /// Mixing energy density
   const Real & _lambda;
   /// Surface tension coefficient
   const Real & _sigma;
   /// Contact angle of the fluid with the wall boundary in Radians
   const Real & _contactangle;
+
 };
