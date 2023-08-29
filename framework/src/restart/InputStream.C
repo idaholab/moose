@@ -20,10 +20,10 @@ InputStream::~InputStream()
 void
 InputStream::addSharedStream(std::weak_ptr<std::istream> stream) const
 {
-  for (const auto i : index_range(_shared_streams))
-    if (!_shared_streams[i].lock())
+  for (auto & entry : _shared_streams)
+    if (!entry.lock())
     {
-      _shared_streams[i] = stream;
+      entry = stream;
       return;
     }
   _shared_streams.push_back(stream);
