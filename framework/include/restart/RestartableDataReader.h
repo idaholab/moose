@@ -117,7 +117,7 @@ private:
    * Internal methods for deserializing data
    */
   ///@{
-  void deserializeValue(std::istream & stream,
+  void deserializeValue(InputStream & data_input,
                         RestartableDataValue & value,
                         const RestartableDataReader::HeaderEntry & header_entry);
   ///@}

@@ -177,9 +177,6 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
   // Read the header
   _header = readHeader(*_streams.header);
 
-  auto data_stream_ptr = _streams.data->get();
-  auto & data_stream = *data_stream_ptr;
-
   for (const auto tid : index_range(_header))
   {
     auto & data = currentData(tid);
@@ -201,24 +198,30 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
       // Only restore values if we're either recovering or the data isn't filtered out
       const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
       if (!is_data_in_filter)
-        deserializeValue(data_stream, *value, header_entry);
+        deserializeValue(*_streams.data, *value, header_entry);
     }
   }
 }
 
 void
-RestartableDataReader::deserializeValue(std::istream & stream,
+RestartableDataReader::deserializeValue(InputStream & data_input,
                                         RestartableDataValue & value,
                                         const RestartableDataReader::HeaderEntry & header_entry)
 {
   auto error = [&value](auto... args)
   {
-    mooseError("While loading RestartableData '",
-               value.name(),
-               "' of type '",
-               value.type(),
-               "':\n\n",
-               args...);
+    std::stringstream err;
+    err << "While loading restartable data\n";
+    err << "  From: ";
+    const auto filename = data_input.getFilename();
+    if (filename)
+      err << std::filesystem::absolute(filename.parent_path());
+    else
+      err << "memory";
+    err << "\n  Data name: " << value.name();
+    err << "\n  Data type: " << value.type();
+    err << "\n\n";
+    mooseError(err.str(), args...);
   };
 
   if (
@@ -227,6 +230,9 @@ RestartableDataReader::deserializeValue(std::istream & stream,
 #endif
       header_entry.type != value.typeId().name())
     error("The stored type of '", header_entry.type, "' does not match");
+
+  auto stream_ptr = data_input.get();
+  auto & stream = *stream_ptr;
 
   stream.seekg(header_entry.position);
   value.load(stream);
