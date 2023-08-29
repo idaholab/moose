@@ -33,16 +33,29 @@ def make_extension(**kwargs):
     return TaggingExtension(**kwargs)
 
 class TaggingExtension(command.CommandExtension):
+
+    @staticmethod
+    def defaultConfig():
+        config = command.CommandExtension.defaultConfig()
+        config['allowed_keys'] = ([],
+                                  "List of tag keys allowed in documentation pages. If empty, all " \
+                                  "keys allowed.")
+        return config
+
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, TaggingCommand())
+
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self._database={'data':[]}
-        self._allowed_keys=['application','simulation_tool','other','simulation_type','dynamics']
+        self._allowed_keys = self['allowed_keys']
+        LOG.info(self._allowed_keys)
+
     @property
     def database(self):
         return self._database
+
     @property
     def allowed_keys(self):
         return self._allowed_keys
