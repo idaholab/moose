@@ -1923,7 +1923,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   if (dyn_lib_it == _lib_handles.end())
   {
     // Assemble the actual filename using the base path of the *.la file and the dl_lib_filename
-    const auto dl_lib_full_path = dir + '/' + dl_lib_filename;
+    const auto dl_lib_full_path = dir / dl_lib_filename;
 
     MooseUtils::checkFileReadable(dl_lib_full_path, false, /*throw_on_unreadable=*/true);
 
