@@ -81,7 +81,7 @@ class TaggingCommand(command.CommandComponent):
         goodkeys=[]
         for pair in EntryKeyValDict:
             if pair[0] not in self.extension.allowed_keys:
-                msg = "Not an Allowed Key; not adding 'key' to dictionary: "
+                msg = "Not an Allowed Key; not adding the following 'key' to the dictionary: "
                 msg += pair[0]
                 LOG.warning(msg)
             else:
@@ -90,7 +90,7 @@ class TaggingCommand(command.CommandComponent):
         PageData= {'name':name, "path":mpath, "key_vals":dict(goodkeys)}
 
         if len(self.extension.database['data'])>0 and PageData['name'] in self.extension.database['data'][0]['name']:
-            msg = "Tag already exists; not adding 'name' to dictionary: "
+            msg = "Tag already exists; not adding the following 'name' to dictionary: "
             msg += PageData['name']
             LOG.warning(msg)
         else:
