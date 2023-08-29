@@ -120,7 +120,8 @@ PenaltyFrictionUserObject::timestepSetup()
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
-    tangential_traction = {0.0, 0.0};
+    tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                           MetaPhysicL::raw_value(tangential_traction(1))};
   }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)

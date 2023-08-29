@@ -178,10 +178,6 @@ PenaltyWeightedGapUserObject::reinit()
 void
 PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
-  // clear the LMs
-  for (auto & dof_lm : _dof_to_lagrange_multiplier)
-    dof_lm.second = 0.0;
-
   // reset penalty
   for (auto & dof_lp : _dof_to_local_penalty)
     dof_lp.second = _penalty;
