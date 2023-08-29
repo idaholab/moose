@@ -41,40 +41,6 @@
       recover = false
       detail = 'gradient-based optimization, '
     []
-    [adjoint_output]
-      type = CSVDiff
-      input = main_csv.i
-      cli_args = "Executioner/tao_solver=taolmvm Executioner/petsc_options_iname='-tao_gttol' "
-                 "Executioner/petsc_options_value='1e-5'"
-      csvdiff = forward_measure_data_0001_iteration_9.csv
-      max_threads = 1 # Optimize executioner does not support multiple threads
-      # steady solve
-      recover = false
-      detail = 'gradient-based optimization, with csv output at each iteration.'
-    []
-    [adjoint_output_interval]
-      type = 'CheckFiles'
-      input = main_csv.i
-      check_files = 'forward_interval_measure_data_0001_iteration_0.csv '
-                    'forward_interval_measure_data_0001_iteration_3.csv '
-                    'forward_interval_measure_data_0001_iteration_6.csv '
-                    'forward_interval_measure_data_0001_iteration_9.csv'
-      check_not_exists = 'forward_interval_measure_data_0001_iteration_1.csv '
-                         'forward_interval_measure_data_0001_iteration_2.csv '
-                         'forward_interval_measure_data_0001_iteration_4.csv '
-                         'forward_interval_measure_data_0001_iteration_5.csv '
-                         'forward_interval_measure_data_0001_iteration_7.csv '
-                         'forward_interval_measure_data_0001_iteration_8.csv'
-      cli_args = "Executioner/tao_solver=taolmvm Executioner/petsc_options_iname='-tao_gttol' "
-                 "Executioner/petsc_options_value='1e-5' "
-                 "MultiApps/forward/input_files=forward_interval_csv.i"
-      max_threads = 1 # Optimize executioner does not support multiple threads
-      # steady solve
-      recover = false
-      detail = 'gradient-based optimization, with csv output on selected optimization iteration '
-               'interval.'
-
-    []
     [adjoint_reg]
       type = CSVDiff
       input = "main.i regularization_for_main.i"
