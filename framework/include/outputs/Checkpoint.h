@@ -13,6 +13,7 @@
 #include "FileOutput.h"
 
 #include <deque>
+#include <filesystem>
 
 /**
  * Shortcut for determining what type of autosave this checkpoint is.
