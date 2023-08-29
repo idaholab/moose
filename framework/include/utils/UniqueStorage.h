@@ -143,6 +143,15 @@ protected:
   }
 
   /**
+   * Adds the given object in \p ptr to the storage.
+   */
+  T & addPointer(std::unique_ptr<T> && ptr)
+  {
+    mooseAssert(ptr, "Null object");
+    return *_values.emplace_back(std::move(ptr));
+  }
+
+  /**
    * Resizes the underlying vector.
    *
    * This is the only method that allows for modification of

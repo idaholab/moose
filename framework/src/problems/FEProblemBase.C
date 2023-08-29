@@ -776,15 +776,6 @@ FEProblemBase::initialSetup()
     // Only load all of the vectors if we're recovering
     _req.set().setLoadAllVectors(_app.isRecovering());
 
-    // Let the EquationSystems load depend on everything else so that it comes last
-    {
-      auto & restartable_data = _app.getRestartableData()[0];
-      auto & res_value = restartable_data.data(restartableName(equation_systems_restartable_name));
-      for (auto & value : restartable_data)
-        if (value.get() != &res_value)
-          res_value.addDependency(*value);
-    }
-
     TIME_SECTION("restore", 3, "Restoring from backup");
 
     // We could have a cached backup when this app is a sub-app and has been given a Backup

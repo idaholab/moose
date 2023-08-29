@@ -38,18 +38,6 @@ public:
   virtual ~RestartableDataValue() = default;
 
   /**
-   * Comparator for RestartableDataValue that sorts by name
-   */
-  struct Comparator
-  {
-    bool operator()(const RestartableDataValue * const & a,
-                    const RestartableDataValue * const & b) const
-    {
-      return a->name() < b->name();
-    }
-  };
-
-  /**
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
@@ -84,13 +72,6 @@ public:
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 
-  const std::set<const RestartableDataValue *, Comparator> & dependencies() const
-  {
-    return _dependencies;
-  }
-
-  void addDependency(const RestartableDataValue & value);
-
 protected:
   /// The full (unique) name of this particular piece of data.
   const std::string _name;
@@ -101,8 +82,6 @@ protected:
 private:
   /// Whether or not this data has been declared (true) or only retreived (false)
   bool _declared;
-
-  std::set<const RestartableDataValue *, Comparator> _dependencies;
 };
 
 /**

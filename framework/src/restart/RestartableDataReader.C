@@ -185,9 +185,9 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
     // TODO: Think about what to do with missing data
 
     // Load the data in the order that it was requested
-    for (auto & value : data.sortedData())
+    for (auto & value : data)
     {
-      const auto & name = value->name();
+      const auto & name = value.name();
 
       auto find_header = header.find(name);
       if (find_header == header.end())
@@ -198,7 +198,7 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
       // Only restore values if we're either recovering or the data isn't filtered out
       const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
       if (!is_data_in_filter)
-        deserializeValue(*_streams.data, *value, header_entry);
+        deserializeValue(*_streams.data, value, header_entry);
     }
   }
 }

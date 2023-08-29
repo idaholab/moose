@@ -2720,8 +2720,8 @@ MooseApp::checkMetaDataIntegrity() const
     std::vector<std::string> not_declared;
 
     for (const auto & data : meta_data)
-      if (!data->declared())
-        not_declared.push_back(data->name());
+      if (!data.declared())
+        not_declared.push_back(data.name());
 
     if (!not_declared.empty())
     {

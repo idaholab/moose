@@ -20,9 +20,3 @@ RestartableDataValue::setDeclared()
   mooseAssert(!_declared, "Already declared");
   _declared = true;
 }
-
-void
-RestartableDataValue::addDependency(const RestartableDataValue & value)
-{
-  _dependencies.insert(&value);
-}

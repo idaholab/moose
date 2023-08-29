@@ -11,6 +11,8 @@
 
 #include "RestartableData.h"
 
+#include "UniqueStorage.h"
+
 // C++ includes
 #include <memory>
 #include <vector>
@@ -22,6 +24,25 @@
 class RestartableDataMap
 {
 public:
+  /**
+   * Protected storage for restartable data.
+   */
+  class Data : public UniqueStorage<RestartableDataValue>
+  {
+  public:
+    class WriteKey
+    {
+      friend class RestartableDataMap;
+      WriteKey() {}
+      WriteKey(const WriteKey &) {}
+    };
+
+    RestartableDataValue & addPointer(std::unique_ptr<RestartableDataValue> && ptr, const WriteKey)
+    {
+      return UniqueStorage<RestartableDataValue>::addPointer(std::move(ptr));
+    }
+  };
+
   RestartableDataMap();
 
   /**
@@ -66,11 +87,9 @@ public:
    */
   auto empty() const { return _data.empty(); }
 
-  std::vector<RestartableDataValue *> sortedData();
-
 private:
   /// The registered data
-  std::vector<std::unique_ptr<RestartableDataValue>> _data;
+  RestartableDataMap::Data _data;
   /// Mapping from data name -> index in \p _data for quick indexing
   std::unordered_map<std::string, std::size_t> _name_to_data_index;
 };

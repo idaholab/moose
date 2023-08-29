@@ -20,12 +20,12 @@ RestartableDataMap::addData(std::unique_ptr<RestartableDataValue> data)
   mooseAssert(!hasData(data->name()), "Name is already added");
 
   const auto & name = data->name();
-  _data.emplace_back(std::move(data));
+  auto & inserted_data = _data.addPointer(std::move(data), {});
   _name_to_data_index.emplace(name, _data.size() - 1);
 
   mooseAssert(hasData(name), "Doesn't have data");
 
-  return *_data.back();
+  return inserted_data;
 }
 
 const RestartableDataValue *
@@ -35,7 +35,7 @@ RestartableDataMap::findData(const std::string & name) const
 
 #ifndef NDEBUG
   auto find_it = std::find_if(
-      _data.begin(), _data.end(), [&name](const auto & data) { return data->name() == name; });
+      _data.begin(), _data.end(), [&name](const auto & data) { return data.name() == name; });
 #endif
 
   if (find_index == _name_to_data_index.end())
@@ -48,11 +48,10 @@ RestartableDataMap::findData(const std::string & name) const
   mooseAssert(index == (std::size_t)std::distance(_data.begin(), find_it), "Inconsistent map");
   mooseAssert(_data.size() > index, "Invalid index");
 
-  auto & data_unique_ptr = _data.at(index);
-  mooseAssert(data_unique_ptr, "Null data");
-  mooseAssert(data_unique_ptr->name() == name, "Inconsistent name");
+  auto & data = _data[index];
+  mooseAssert(data.name() == name, "Inconsistent name");
 
-  return data_unique_ptr.get();
+  return &data;
 }
 
 RestartableDataValue *
@@ -75,34 +74,4 @@ bool
 RestartableDataMap::hasData(const std::string & name) const
 {
   return findData(name) != nullptr;
-}
-
-std::vector<RestartableDataValue *>
-RestartableDataMap::sortedData()
-{
-  DependencyResolver<RestartableDataValue *, RestartableDataValue::Comparator> resolver;
-  std::vector<RestartableDataValue *> sorted_data;
-
-  for (const auto & value : _data)
-  {
-    resolver.addItem(value.get());
-    for (auto & dep_value : value->dependencies())
-      resolver.addEdge(&data(dep_value->name()), value.get());
-  }
-
-  auto sorted_values = resolver.getSortedValuesSets();
-  for (auto & values : sorted_values)
-  {
-    std::sort(values.begin(),
-              values.end(),
-              [this](const auto & a, const auto & b)
-              {
-                mooseAssert(a, "Invalid object");
-                mooseAssert(b, "Invalid object");
-                return _name_to_data_index.at(a->name()) < _name_to_data_index.at(b->name());
-              });
-    sorted_data.insert(sorted_data.end(), values.begin(), values.end());
-  }
-
-  return sorted_data;
 }

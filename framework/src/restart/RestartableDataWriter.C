@@ -57,18 +57,18 @@ RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_s
 
   // Write out the RestartableData header, and store the actual data separately
   for (const auto tid : make_range(dataSize()))
-    for (const auto & data : currentData(tid).sortedData())
+    for (auto & data : currentData(tid))
     {
       // Store the data
       const std::size_t data_start_position = static_cast<std::size_t>(data_stream.tellp());
-      data->store(data_stream);
+      data.store(data_stream);
       std::size_t data_size = static_cast<std::size_t>(data_stream.tellp()) - data_start_position;
 
       // Store name, size, type hash, and type in the header
-      mooseAssert(data->name().size(), "Empty name");
-      std::string name = data->name();
-      std::string type = data->typeId().name();
-      std::size_t type_hash_code = data->typeId().hash_code();
+      mooseAssert(data.name().size(), "Empty name");
+      std::string name = data.name();
+      std::string type = data.typeId().name();
+      std::size_t type_hash_code = data.typeId().hash_code();
       dataStore(header_stream, name, nullptr);
       dataStore(header_stream, data_size, nullptr);
       dataStore(header_stream, type_hash_code, nullptr);
