@@ -110,8 +110,8 @@
 
 [Outputs]
   console = false
-  file_base = 'forward'
+  file_base = 'forward_interval'
   csv = true
   execute_on = 'TIMESTEP_END'
-  interval = 1
+  interval = 3
 []

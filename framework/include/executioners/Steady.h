@@ -62,6 +62,19 @@ public:
     _output_iteration_number = iteration_number;
   }
 
+  /**
+   * Set whether we are solving an optimization problem via OptimizeSolve.
+   */
+  virtual void setOptimizationFlag(const bool is_optimize_solve)
+  {
+    _is_optimize_solve = is_optimize_solve;
+  }
+
+  /**
+   * Get whether we are solving an optimization problem via OptimizeSolve.
+   */
+  virtual bool getOptimizationFlag() { return _is_optimize_solve; }
+
 protected:
   FEProblemBase & _problem;
 
@@ -76,4 +89,5 @@ protected:
 
 private:
   bool _last_solve_converged;
+  bool _is_optimize_solve;
 };

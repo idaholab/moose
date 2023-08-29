@@ -165,6 +165,11 @@ protected:
    */
   virtual bool onInterval();
 
+  /**
+   * Get the time step or optimization (module) iteration number for interval output.
+   */
+  virtual int getTimeStep();
+
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
 

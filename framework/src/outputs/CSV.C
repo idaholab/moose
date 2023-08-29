@@ -174,23 +174,15 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
       file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
                 << std::right << _linear_iter;
     }
-    if (true)
-    {
-      std::string append = "";
-      bool is_optimization_run = false;
 
-      // This enables exodus per-iteration output.
-      if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
+    // These lines enable CSV per-optimization iteration output (Optimization module)
+    if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
+      if (steady->getOptimizationFlag() && _current_execute_flag == EXEC_TIMESTEP_END)
       {
-        append = "iteration_" + Moose::stringify(steady->getIterationNumberOutput());
-        is_optimization_run = true;
-        Moose::out << "Moose iteration output is: " << steady->getIterationNumberOutput() << "\n";
+        std::string append = "iteration_" + Moose::stringify(steady->getIterationNumberOutput());
         file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
                   << std::right << append;
       }
-
-      Moose::out << "Execution flags Lynn: " << _current_execute_flag << "\n";
-    }
   }
 
   file_name << ".csv";

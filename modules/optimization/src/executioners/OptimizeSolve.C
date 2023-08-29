@@ -53,6 +53,15 @@ bool
 OptimizeSolve::solve()
 {
   TIME_SECTION("optimizeSolve", 1, "Optimization Solve");
+
+  // Let executioner know we are solving an optimization problem (can't do it on object
+  // construction).
+  for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
+  {
+    if (auto steady = dynamic_cast<Steady *>(sub_app->getExecutioner(0)))
+      steady->setOptimizationFlag(true);
+  }
+
   // Initial solve
   _inner_solve->solve();
 
