@@ -61,29 +61,43 @@ RestartableDataReader::clear()
 }
 
 std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
-RestartableDataReader::readHeader(std::istream & stream) const
+RestartableDataReader::readHeader(InputStream & header_input) const
 {
   std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>> header;
 
+  auto stream_ptr = header_input.get();
+  auto & stream = *stream_ptr;
+
   stream.seekg(0);
 
-  const auto error = [](auto... args)
-  { mooseError("RestartableDataReader::readHeader(): ", args...); };
+  const auto error = [&header_input](auto... args)
+  {
+    std::stringstream err_prefix;
+    err_prefix << "While reading restartable data in ";
+    const auto filename = header_input.getFilename();
+    if (filename)
+      err_prefix << std::filesystem::absolute(filename->parent_path());
+    else
+      err_prefix << "memory";
+    err_prefix << ":\n\n";
+
+    mooseError(err_prefix.str(), args...);
+  };
 
   // ID
   char this_id[2];
   stream.read(this_id, 2);
   if (this_id[0] != 'R' || this_id[1] != 'D')
-    error("Loaded backup is invalid or corrupted (unexpected header)");
+    error("The data is invalid or corrupted (unexpected header)");
 
   // File version
   std::remove_const<decltype(CURRENT_BACKUP_FILE_VERSION)>::type this_file_version;
   dataLoad(stream, this_file_version, nullptr);
   if (this_file_version != CURRENT_BACKUP_FILE_VERSION)
-    error("Loaded mismatching backup version\n\n",
-          "Current version: ",
+    error("There is a mismatch in the backup version\n\n",
+          "Current backup version: ",
           CURRENT_BACKUP_FILE_VERSION,
-          "\nLoaded version: ",
+          "\nLoaded backup version: ",
           this_file_version);
 
   // Type id for a basic type
@@ -91,7 +105,7 @@ RestartableDataReader::readHeader(std::istream & stream) const
   dataLoad(stream, this_compare_hash_code, nullptr);
 #ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
   if (this_compare_hash_code != typeid(COMPARE_HASH_CODE_TYPE).hash_code())
-    error("Loaded backup is not compatible\n\nThe hash code check for a basic type (",
+    error("The backup is not compatible\n\nThe hash code check for a basic type (",
           MooseUtils::prettyCppType<COMPARE_HASH_CODE_TYPE>(),
           ") failed.\nIt is likely that this backup was stored with a different architecture or "
           "operating system");
@@ -101,16 +115,16 @@ RestartableDataReader::readHeader(std::istream & stream) const
   decltype(n_processors()) this_n_procs = 0;
   dataLoad(stream, this_n_procs, nullptr);
   if (_error_on_different_number_of_processors && this_n_procs != n_processors())
-    error("Mismatching number of MPI ranks in backup\n\nCurrent ranks: ",
+    error("The number of MPI ranks is not consistent\n\nCurrent MPI ranks: ",
           n_processors(),
-          "\nLoaded ranks: ",
+          "\nLoaded MPI ranks: ",
           this_n_procs);
 
   // Number of data
   decltype(dataSize()) this_num_data = 0;
   dataLoad(stream, this_num_data, nullptr);
   if (this_num_data != dataSize())
-    error("Mismatching number of threads in backup\n\nCurrent threads: ",
+    error("The number of threads is not consistent\n\nCurrent threads: ",
           dataSize(),
           "\nLoaded threads: ",
           this_num_data);
@@ -161,10 +175,7 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
         "RestartableDataReader::restore(): Cannot restore because old data exists; call clear()");
 
   // Read the header
-  {
-    auto header_stream_ptr = _streams.header->get();
-    _header = readHeader(*header_stream_ptr);
-  }
+  _header = readHeader(*_streams.header);
 
   auto data_stream_ptr = _streams.data->get();
   auto & data_stream = *data_stream_ptr;

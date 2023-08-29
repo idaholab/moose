@@ -12,6 +12,8 @@
 #include <memory>
 #include <istream>
 #include <vector>
+#include <filesystem>
+#include <optional>
 
 /**
  * Helper class that hands out input streams to an underlying, managed
@@ -38,6 +40,11 @@ public:
    * only use count being the one sstored in _shared_streams)
    */
   bool inUse() const;
+
+  /**
+   * Gets the underlying filename, if any
+   */
+  virtual std::optional<std::filesystem::path> getFilename() const;
 
 protected:
   /**

@@ -23,12 +23,9 @@ public:
 
   virtual std::shared_ptr<std::istream> get() const override final;
 
-  /**
-   * @return The name of the managed file
-   */
-  const std::string & filename() const { return _filename; }
+  virtual std::optional<std::filesystem::path> getFilename() const override final;
 
 protected:
   /// The name of the file
-  const std::string _filename;
+  const std::filesystem::path _filename;
 };

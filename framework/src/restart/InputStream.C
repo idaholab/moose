@@ -31,3 +31,9 @@ InputStream::inUse() const
       return true;
   return false;
 }
+
+std::optional<std::filesystem::path>
+InputStream::getFilename() const
+{
+  return {};
+}

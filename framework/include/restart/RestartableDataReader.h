@@ -111,7 +111,7 @@ private:
    * Internal method for reading the header (stored by RestartableDataWriter)
    */
   std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
-  readHeader(std::istream & header_stream) const;
+  readHeader(InputStream & header_input) const;
 
   /**
    * Internal methods for deserializing data

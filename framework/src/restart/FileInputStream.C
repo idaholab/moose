@@ -24,9 +24,15 @@ FileInputStream::get() const
   addSharedStream(stream);
 
   auto & in = *static_cast<std::ifstream *>(stream.get());
-  in.open(filename().c_str(), std::ios::in | std::ios::binary);
+  in.open(_filename.c_str(), std::ios::in | std::ios::binary);
   if (in.fail())
-    mooseError("Unable to open file '", filename(), "'");
+    mooseError("Unable to open file ", std::filesystem::absolute(_filename));
 
   return stream;
+}
+
+std::optional<std::filesystem::path>
+FileInputStream::getFilename() const
+{
+  return _filename;
 }
