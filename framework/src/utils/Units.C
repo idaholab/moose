@@ -90,6 +90,12 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
       {{MooseUnits::BaseUnit::KILOGRAM, 1},
        {MooseUnits::BaseUnit::METER, 2},
        {MooseUnits::BaseUnit::SECOND, -2}}}}, // Joule
+    {"cal",
+     {4.184,
+      0,
+      {{MooseUnits::BaseUnit::KILOGRAM, 1},
+       {MooseUnits::BaseUnit::METER, 2},
+       {MooseUnits::BaseUnit::SECOND, -2}}}}, // Calorie
     {"W",
      {1,
       0,
