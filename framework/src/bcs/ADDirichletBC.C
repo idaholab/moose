@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", ADDirichletBC);
 InputParameters
 ADDirichletBC::validParams()
 {
-  InputParameters params = ADDirichletBCBase::validParams();
+  InputParameters params = ADDirichletBCBaseTempl<Real>::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -23,7 +23,7 @@ ADDirichletBC::validParams()
 }
 
 ADDirichletBC::ADDirichletBC(const InputParameters & parameters)
-  : ADDirichletBCBase(parameters), _value(getParam<Real>("value"))
+  : ADDirichletBCBaseTempl<Real>(parameters), _value(getParam<Real>("value"))
 {
 }
 

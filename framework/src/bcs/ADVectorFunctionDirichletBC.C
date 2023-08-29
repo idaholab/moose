@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 InputParameters
 ADVectorFunctionDirichletBC::validParams()
 {
-  InputParameters params = ADVectorNodalBC::validParams();
+  InputParameters params = ADDirichletBCBaseTempl<RealVectorValue>::validParams();
   params.addClassDescription(
       "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "components are calculated with functions.");
@@ -29,7 +29,7 @@ ADVectorFunctionDirichletBC::validParams()
 }
 
 ADVectorFunctionDirichletBC::ADVectorFunctionDirichletBC(const InputParameters & parameters)
-  : ADVectorNodalBC(parameters),
+  : ADDirichletBCBaseTempl<RealVectorValue>(parameters),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _function_x(getFunction("function_x")),
     _function_y(getFunction("function_y")),
@@ -44,7 +44,7 @@ ADVectorFunctionDirichletBC::ADVectorFunctionDirichletBC(const InputParameters &
 }
 
 ADRealVectorValue
-ADVectorFunctionDirichletBC::computeQpResidual()
+ADVectorFunctionDirichletBC::computeQpValue()
 {
   if (_function)
     _values = _function->vectorValue(_t, *_current_node);
@@ -52,6 +52,5 @@ ADVectorFunctionDirichletBC::computeQpResidual()
     _values = RealVectorValue(_function_x.value(_t, *_current_node),
                               _function_y.value(_t, *_current_node),
                               _function_z.value(_t, *_current_node));
-
-  return _u - _values;
+  return _values;
 }

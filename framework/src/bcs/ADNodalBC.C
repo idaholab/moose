@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADNodalBC.h"
+#include "NodalBCBase.h"
+#include "ADDirichletBCBase.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -18,16 +20,16 @@
 
 #include "libmesh/quadrature.h"
 
-template <typename T>
+template <typename T, typename Base>
 InputParameters
-ADNodalBCTempl<T>::validParams()
+ADNodalBCTempl<T, Base>::validParams()
 {
-  return NodalBCBase::validParams();
+  return Base::validParams();
 }
 
 template <>
 InputParameters
-ADNodalBCTempl<RealVectorValue>::validParams()
+ADNodalBCTempl<RealVectorValue, NodalBCBase>::validParams()
 {
   InputParameters params = NodalBCBase::validParams();
   // The below parameters are useful for vector Nodal BCs
@@ -37,9 +39,21 @@ ADNodalBCTempl<RealVectorValue>::validParams()
   return params;
 }
 
-template <typename T>
-ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
-  : NodalBCBase(parameters),
+template <>
+InputParameters
+ADNodalBCTempl<RealVectorValue, ADDirichletBCBase>::validParams()
+{
+  InputParameters params = ADDirichletBCBase::validParams();
+  // The below parameters are useful for vector Nodal BCs
+  params.addParam<bool>("set_x_comp", true, "Whether to set the x-component of the variable");
+  params.addParam<bool>("set_y_comp", true, "Whether to set the y-component of the variable");
+  params.addParam<bool>("set_z_comp", true, "Whether to set the z-component of the variable");
+  return params;
+}
+
+template <typename T, typename Base>
+ADNodalBCTempl<T, Base>::ADNodalBCTempl(const InputParameters & parameters)
+  : Base(parameters),
     MooseVariableInterface<T>(this,
                               true,
                               "variable",
@@ -50,9 +64,12 @@ ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
     _current_node(_var.node()),
     _u(_var.adNodalValue()),
     _set_components(
-        {std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_x_comp") : true,
-         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_y_comp") : true,
-         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_z_comp") : true}),
+        {std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_x_comp")
+                                                 : true,
+         std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_y_comp")
+                                                 : true,
+         std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_z_comp")
+                                                 : true}),
     _undisplaced_assembly(_fe_problem.assembly(_tid, _sys.number()))
 {
   _subproblem.haveADObjects(true);
@@ -75,11 +92,11 @@ conversionHelper(const libMesh::VectorValue<ADReal> & value, const unsigned int 
 }
 }
 
-template <typename T>
+template <typename T, typename Base>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::addResidual(const ADResidual & residual,
-                               const std::vector<dof_id_type> & dof_indices)
+ADNodalBCTempl<T, Base>::addResidual(const ADResidual & residual,
+                                     const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
@@ -89,11 +106,11 @@ ADNodalBCTempl<T>::addResidual(const ADResidual & residual,
       setResidual(_sys, raw_value(conversionHelper(residual, i)), dof_indices[i]);
 }
 
-template <typename T>
+template <typename T, typename Base>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::addJacobian(const ADResidual & residual,
-                               const std::vector<dof_id_type> & dof_indices)
+ADNodalBCTempl<T, Base>::addJacobian(const ADResidual & residual,
+                                     const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
@@ -108,9 +125,9 @@ ADNodalBCTempl<T>::addJacobian(const ADResidual & residual,
                   /*scaling_factor=*/1);
 }
 
-template <typename T>
+template <typename T, typename Base>
 void
-ADNodalBCTempl<T>::computeResidual()
+ADNodalBCTempl<T, Base>::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
   if (dof_indices.empty())
@@ -121,9 +138,9 @@ ADNodalBCTempl<T>::computeResidual()
   addResidual(residual, dof_indices);
 }
 
-template <typename T>
+template <typename T, typename Base>
 void
-ADNodalBCTempl<T>::computeJacobian()
+ADNodalBCTempl<T, Base>::computeJacobian()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
   if (dof_indices.empty())
@@ -134,9 +151,9 @@ ADNodalBCTempl<T>::computeJacobian()
   addJacobian(residual, dof_indices);
 }
 
-template <typename T>
+template <typename T, typename Base>
 void
-ADNodalBCTempl<T>::computeResidualAndJacobian()
+ADNodalBCTempl<T, Base>::computeResidualAndJacobian()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
   if (dof_indices.empty())
@@ -148,21 +165,23 @@ ADNodalBCTempl<T>::computeResidualAndJacobian()
   addJacobian(residual, dof_indices);
 }
 
-template <typename T>
+template <typename T, typename Base>
 void
-ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
+ADNodalBCTempl<T, Base>::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   // Only need to do this once because AD does all the derivatives at once
   if (jvar_num == _var.number())
     computeJacobian();
 }
 
-template <typename T>
+template <typename T, typename Base>
 void
-ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int)
+ADNodalBCTempl<T, Base>::computeOffDiagJacobianScalar(unsigned int)
 {
   // scalar coupling will have been included in the all-at-once handling in computeOffDiagJacobian
 }
 
-template class ADNodalBCTempl<Real>;
-template class ADNodalBCTempl<RealVectorValue>;
+template class ADNodalBCTempl<Real, NodalBCBase>;
+template class ADNodalBCTempl<RealVectorValue, NodalBCBase>;
+template class ADNodalBCTempl<Real, ADDirichletBCBase>;
+template class ADNodalBCTempl<RealVectorValue, ADDirichletBCBase>;

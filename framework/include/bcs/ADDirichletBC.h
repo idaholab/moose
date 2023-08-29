@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ADDirichletBCBase.h"
+#include "ADDirichletBCBaseTempl.h"
 
 /**
  * Boundary condition of a Dirichlet type
  *
  * Sets the values of a nodal variable at nodes
  */
-class ADDirichletBC : public ADDirichletBCBase
+class ADDirichletBC : public ADDirichletBCBaseTempl<Real>
 {
 public:
   static InputParameters validParams();
