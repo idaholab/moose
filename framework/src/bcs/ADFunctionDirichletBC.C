@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", ADFunctionDirichletBC);
 InputParameters
 ADFunctionDirichletBC::validParams()
 {
-  InputParameters params = ADDirichletBCBase::validParams();
+  InputParameters params = ADDirichletBCBaseTempl<Real>::validParams();
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
                              "is calculated by a function.");
   params.addParam<FunctionName>("function", 0, "The function describing the Dirichlet condition");
@@ -25,7 +25,7 @@ ADFunctionDirichletBC::validParams()
 }
 
 ADFunctionDirichletBC::ADFunctionDirichletBC(const InputParameters & parameters)
-  : ADDirichletBCBase(parameters), _function(getFunction("function"))
+  : ADDirichletBCBaseTempl<Real>(parameters), _function(getFunction("function"))
 {
 }
 
