@@ -208,18 +208,18 @@ RestartableDataReader::deserializeValue(InputStream & data_input,
                                         RestartableDataValue & value,
                                         const RestartableDataReader::HeaderEntry & header_entry)
 {
-  auto error = [&value](auto... args)
+  auto error = [&data_input, &value](auto... args)
   {
     std::stringstream err;
-    err << "While loading restartable data\n";
-    err << "  From: ";
+    err << "While loading restartable data\n\n";
+    err << "From: ";
     const auto filename = data_input.getFilename();
     if (filename)
-      err << std::filesystem::absolute(filename.parent_path());
+      err << std::filesystem::absolute(filename->parent_path());
     else
       err << "memory";
-    err << "\n  Data name: " << value.name();
-    err << "\n  Data type: " << value.type();
+    err << "\nData name: " << value.name();
+    err << "\nData type: " << value.type();
     err << "\n\n";
     mooseError(err.str(), args...);
   };

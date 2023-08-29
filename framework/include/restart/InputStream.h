@@ -53,9 +53,9 @@ protected:
    *
    * Should be called in the overridden get() by derived classes.
    */
-  void addSharedStream(std::shared_ptr<std::istream> stream) const;
+  void addSharedStream(const std::weak_ptr<std::istream> stream) const;
 
 private:
   /// The streams that have been handed out by get()
-  mutable std::vector<std::shared_ptr<std::istream>> _shared_streams;
+  mutable std::vector<std::weak_ptr<std::istream>> _shared_streams;
 };

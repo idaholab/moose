@@ -18,16 +18,22 @@ InputStream::~InputStream()
 }
 
 void
-InputStream::addSharedStream(std::shared_ptr<std::istream> stream) const
+InputStream::addSharedStream(std::weak_ptr<std::istream> stream) const
 {
+  for (const auto i : index_range(_shared_streams))
+    if (!_shared_streams[i].lock())
+    {
+      _shared_streams[i] = stream;
+      return;
+    }
   _shared_streams.push_back(stream);
 }
 
 bool
 InputStream::inUse() const
 {
-  for (const auto & stream : _shared_streams)
-    if (stream.use_count() > 1)
+  for (auto & stream : _shared_streams)
+    if (stream.lock())
       return true;
   return false;
 }
