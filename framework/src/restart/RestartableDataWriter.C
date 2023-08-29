@@ -111,5 +111,10 @@ RestartableDataWriter::write(const std::filesystem::path & folder_base)
   auto data_stream = open(data_file);
   write(header_stream, data_stream);
 
+  // Update the folder's modified time to now for consistency
+  // (this used in checking for the latest checkpoint)
+  const auto data_write_time = std::filesystem::last_write_time(header_file);
+  std::filesystem::last_write_time(dir, data_write_time);
+
   return paths;
 }
