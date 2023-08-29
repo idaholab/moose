@@ -96,7 +96,7 @@ simulation match and the variables and stateful data should be loaded from the p
 ```text
 [Mesh]
   # Serial number should match corresponding Executioner parameter
-  file = out_cp/0010_mesh.cpr
+  file = out_cp/0010-mesh.cpr
   # This method of restart is only supported on serial meshes
   distribution = serial
 []
