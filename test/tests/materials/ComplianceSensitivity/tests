@@ -1,31 +1,41 @@
 [Tests]
-    issues = '#1'
-    [2d_mbb]
-      type = 'CSVDiff'
-      input = '2d_mbb.i'
-      csvdiff = '2d_mbb_out.csv'
-      requirement = 'The system shall be able to compute the compliance sensitivty correctly for a 2D topology optimization problem.'
-      heavy = true
-    []
-    [3d_mbb]
-      type = 'CSVDiff'
-      input = '3d_mbb.i'
-      csvdiff = '3d_mbb_out.csv'
-      requirement = 'The system shall be able to compute the compliance sensitivty correctly for a 3D topology optimization problem.'
-      heavy = true
-    []
-    [2d_mbb_pde]
-      type = 'CSVDiff'
-      input = '2d_mbb_pde.i'
-      csvdiff = '2d_mbb_pde_out.csv'
-      requirement = 'The system shall be able to compute the compliance sensitivty correctly for a 2D topology optimization problem with a PDE filter.'
-      heavy = true
-    []
-    [2d_mbb_pde_amr]
-      type = 'CSVDiff'
-      input = '2d_mbb_pde_amr.i'
-      csvdiff = '2d_mbb_pde_amr_out.csv'
-      requirement = 'The system shall be able to compute the compliance sensitivty correctly for a 2D topology optimization problem with AMR.'
-      heavy = true
-    []
+  issues = '#1'
+  requirement = 'The system shall be able to compute the compliance sensitivty correctly for a '
+  [2d_mbb]
+    type = 'CSVDiff'
+    input = '2d_mbb.i'
+    csvdiff = '2d_mbb_out.csv'
+    detail = '2D topology optimization problem.'
+    heavy = true
   []
+  [3d_mbb]
+    type = 'CSVDiff'
+    min_parallel = 4
+    input = '3d_mbb.i'
+    csvdiff = '3d_mbb_out.csv'
+    detail = '3D topology optimization problem.'
+    heavy = true
+  []
+  [2d_mbb_pde]
+    type = 'CSVDiff'
+    input = '2d_mbb_pde.i'
+    csvdiff = '2d_mbb_pde_out.csv'
+    detail = '2D topology optimization problem with a PDE filter.'
+    heavy = true
+  []
+  [2d_mbb_pde_amr]
+    type = 'CSVDiff'
+    input = '2d_mbb_pde_amr.i'
+    csvdiff = '2d_mbb_pde_amr_out.csv'
+    detail = '2D topology optimization problem with AMR.'
+    heavy = true
+  []
+  [2d_mbb_cs2]
+    issues = '#3'
+    type = 'CSVDiff'
+    input = '2d_mbb_ComplianceSensitivity2.i'
+    csvdiff = '2d_mbb_ComplianceSensitivity2_out.csv'
+    rel_err = 1e-1
+    detail = '2D topology optimization problem using a derivativeParsedMaterial.'
+  []
+[]

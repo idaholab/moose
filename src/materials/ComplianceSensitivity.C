@@ -45,7 +45,6 @@ ComplianceSensitivity::computeQpProperties()
   Real compliance = _strain_energy_density[_qp];
 
   // Compute the derivative of the compliance with respect to the design density
-  // _power-2 because StrainEnergyDensity needed to be divided by the _design_density
   Real derivative =
       -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 1) * compliance;
 
