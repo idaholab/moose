@@ -44,6 +44,7 @@
     valgrind = 'none'
     required_python_packages = 'pandas matplotlib'
     max_time = 600
+    installation_type = in_tree
   []
   [plane-poiseuille-rc]
     type = PythonUnitTest
