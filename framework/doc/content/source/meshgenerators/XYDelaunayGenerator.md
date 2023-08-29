@@ -11,11 +11,19 @@ function of triangle center location).  Additional interior boundary
 "holes" can be generated from inputs from other specified "holes" mesh
 generators.
 
-Input meshes can define a ring of boundary segments either by
-including edge elements for each segment, or including face elements
-whose external edges are to be treated as segments.  For the outer
-boundary mesh, a subset of edges or faces can be examined instead of
-the entire mesh.
+Each input mesh, as specified in the
+[!param](/Mesh/XYDelaunayGenerator/boundary) parameter and optionally
+in the [!param](/Mesh/XYDelaunayGenerator/holes) parameter,
+can define a ring of boundary segments either by including edge
+elements for each segment or by including face elements whose external
+edges are to be treated as segments.  For the outer
+[!param](/Mesh/XYDelaunayGenerator/boundary)
+mesh, a subset of edges or faces can be examined instead of
+the entire mesh, using the
+[!param](/Mesh/XYDelaunayGenerator/input_subdomain_names) parameter to
+list edge element subdomains or the
+[!param](/Mesh/XYDelaunayGenerator/input_boundary_names) parameter to
+list face boundaries.
 
 If multiple boundary rings exist in a mesh, only the ring enclosing
 the rest of the mesh is considered to be "the" boundary.  Input meshes
@@ -29,7 +37,10 @@ interest.  For meshes with interior nodes that should not be
 considered required, a user can first use a
 [LowerDBlockFromSidesetGenerator.md] to generate the desired boundary
 ring and a [BlockDeletionGenerator.md] on that to remove everything
-except the desired boundary edges.
+except the desired boundary edges.  Setting
+[!param](/Mesh/BlockDeletionGenerator/delete_exteriors) to
+false is necessary in this workflow to prevent the new edge elements
+from being deleted along with their interior-parent elements.
 
 Using stitching options, meshes used as "holes" can subsequently be
 stitched into those portions of the output mesh.  For this use case
