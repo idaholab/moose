@@ -2,10 +2,10 @@
 
 !syntax description /UserObjects/ADHeatFluxFromHeatStructure3EqnUserObject
 
-The heat flux is computed as:
+The heat flux $q$ is computed as:
 
 !equation
-H_{wall} (T_{wall} - T)
+q = H_{wall} (T_{wall} - T)
 
 where $H_{wall}$ is the wall heat transfer coefficient, $T_{wall}$ is the wall temperature on the
 heat structure side, and $T$ is the fluid temperature.

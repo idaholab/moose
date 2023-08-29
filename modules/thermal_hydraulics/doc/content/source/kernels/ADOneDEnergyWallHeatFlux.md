@@ -8,7 +8,7 @@ The heat flux contribution to the residual $R_i$ for the weak form is computed a
 R_i = (\psi_i, -q_{wall} P_{hf}) \quad \forall \psi_i,
 \end{equation}
 
-where $\psi_i$ are the test functions, $q_{wall}$ is the local heat flux, and $P_{hf}$ the
+where $\psi_i$ are the test functions, $q_{wall}$ is the local heat flux, and $P_{hf}$ is the
 heated perimeter.
 
 !alert note
