@@ -70,7 +70,7 @@ LoadModelDataAction<T>::load(const T & object)
   reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
   // Read the supplied file
-  const FileName & filename = object.getModelDataFileName();
+  const std::string filename = object.getModelDataFileName();
   try
   {
     reader.setInput(filename);

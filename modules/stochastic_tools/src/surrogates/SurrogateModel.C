@@ -10,7 +10,6 @@
 #include "SurrogateModel.h"
 #include "SurrogateTrainer.h"
 #include "Sampler.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 
 InputParameters

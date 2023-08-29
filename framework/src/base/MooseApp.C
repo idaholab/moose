@@ -31,7 +31,6 @@
 #include "MooseObjectAction.h"
 #include "InputParameterWarehouse.h"
 #include "SystemInfo.h"
-#include "RestartableDataIO.h"
 #include "MooseMesh.h"
 #include "FileOutput.h"
 #include "ConsoleUtils.h"
@@ -1191,13 +1190,13 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
   }
 }
 
-void
-MooseApp::backup(const RestartableDataIO::RestartableFilenames & filenames)
+std::vector<std::filesystem::path>
+MooseApp::backup(const std::filesystem::path & folder_base)
 {
   TIME_SECTION("backup", 2, "Backing Up Application to File");
 
   RestartableDataWriter writer(*this, _restartable_data);
-  writer.write(filenames);
+  return writer.write(folder_base);
 }
 
 std::unique_ptr<Backup>
@@ -1214,13 +1213,13 @@ MooseApp::backup()
 }
 
 void
-MooseApp::restore(const RestartableDataIO::RestartableFilenames & filenames, const bool for_restart)
+MooseApp::restore(const std::filesystem::path & folder_base, const bool for_restart)
 {
   TIME_SECTION("restore", 2, "Restoring Application from File");
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  _rd_reader.setInput(filenames);
+  _rd_reader.setInput(folder_base);
   _rd_reader.restore(filter_names);
 }
 
@@ -1700,8 +1699,7 @@ std::list<std::string>
 MooseApp::getCheckpointFiles() const
 {
   auto checkpoint_dirs = getCheckpointDirectories();
-
-  return MooseUtils::getFilesInDirs(checkpoint_dirs);
+  return MooseUtils::getFilesInDirs(checkpoint_dirs, false);
 }
 
 void
@@ -1834,52 +1832,53 @@ MooseApp::getRestartableMetaData(const std::string & name,
 
 void
 MooseApp::possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
-                                          const std::string & file_base)
+                                          const std::filesystem::path & folder_base)
 {
   const auto & map_name = getRestartableDataMapName(name);
-  const auto filenames = metaDataFilenames(file_base, map_name);
-  if (RestartableDataReader::isAvailable(filenames))
+  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
+  if (RestartableDataReader::isAvailable(meta_data_folder_base))
   {
     RestartableDataReader reader(*this, getRestartableDataMap(name));
     reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-    reader.setInput(filenames);
+    reader.setInput(meta_data_folder_base);
     reader.restore();
   }
 }
 
 void
-MooseApp::loadRestartableMetaData(const std::string & file_base)
+MooseApp::loadRestartableMetaData(const std::filesystem::path & folder_base)
 {
   for (const auto & name_map_pair : _restartable_meta_data)
-    possiblyLoadRestartableMetaData(name_map_pair.first, file_base);
+    possiblyLoadRestartableMetaData(name_map_pair.first, folder_base);
 }
 
-RestartableDataIO::RestartableFilenames
+std::vector<std::filesystem::path>
 MooseApp::writeRestartableMetaData(const RestartableDataMapName & name,
-                                   const std::string & file_base)
+                                   const std::filesystem::path & folder_base)
 {
   if (processor_id() != 0)
     mooseError("MooseApp::writeRestartableMetaData(): Should only run on processor 0");
 
   const auto & map_name = getRestartableDataMapName(name);
-  const auto filenames = metaDataFilenames(file_base, map_name);
+  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
 
   RestartableDataWriter writer(*this, getRestartableDataMap(name));
-  writer.write(filenames);
-
-  return filenames;
+  return writer.write(meta_data_folder_base);
 }
 
-std::vector<RestartableDataIO::RestartableFilenames>
-MooseApp::writeRestartableMetaData(const std::string & file_base)
+std::vector<std::filesystem::path>
+MooseApp::writeRestartableMetaData(const std::filesystem::path & folder_base)
 {
-  std::vector<RestartableDataIO::RestartableFilenames> filenames;
+  std::vector<std::filesystem::path> paths;
 
   if (processor_id() == 0)
     for (const auto & name_map_pair : _restartable_meta_data)
-      filenames.push_back(writeRestartableMetaData(name_map_pair.first, file_base));
+    {
+      const auto map_paths = writeRestartableMetaData(name_map_pair.first, folder_base);
+      paths.insert(paths.end(), map_paths.begin(), map_paths.end());
+    }
 
-  return filenames;
+  return paths;
 }
 
 void
@@ -2369,17 +2368,20 @@ MooseApp::checkpointSuffix()
   return suffix;
 }
 
-RestartableDataIO::RestartableFilenames
-MooseApp::metaDataFilenames(const std::string & file_base, const std::string & map_suffix)
+std::filesystem::path
+MooseApp::metaDataFolderBase(const std::filesystem::path & folder_base,
+                             const std::string & map_suffix)
 {
-  return RestartableDataIO::RestartableFilenames(file_base + "/meta_data" + map_suffix);
+  return RestartableDataIO::restartableDataFolder(folder_base /
+                                                  std::filesystem::path("meta_data" + map_suffix));
 }
 
-RestartableDataIO::RestartableFilenames
-MooseApp::restartFilenames(const std::string & file_base) const
+std::filesystem::path
+MooseApp::restartFolderBase(const std::filesystem::path & folder_base) const
 {
-  return RestartableDataIO::RestartableFilenames(file_base + "-restart-" +
-                                                 std::to_string(processor_id()));
+  auto folder = folder_base;
+  folder += "-restart-" + std::to_string(processor_id());
+  return RestartableDataIO::restartableDataFolder(folder);
 }
 
 bool

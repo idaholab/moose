@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-const std::string RestartableDataIO::RESTARTABLE_DATA_EXT = ".rd";
-const std::string RestartableDataIO::RESTARTABLE_HEADER_EXT = ".rdh";
 const unsigned int RestartableDataIO::CURRENT_BACKUP_FILE_VERSION = 3;
 
 RestartableDataIO::RestartableDataIO(MooseApp & app, RestartableDataMap & data)
@@ -45,4 +43,45 @@ RestartableDataIO::dataSize() const
   return std::holds_alternative<RestartableDataMap *>(_data)
              ? 1
              : std::get<std::vector<RestartableDataMap> *>(_data)->size();
+}
+
+const std::string &
+RestartableDataIO::getRestartableExt()
+{
+  static const std::string ext = ".rd";
+  return ext;
+}
+
+const std::string &
+RestartableDataIO::restartableDataFile()
+{
+  static const std::string file = "data";
+  return file;
+}
+
+const std::string &
+RestartableDataIO::restartableHeaderFile()
+{
+  static const std::string file = "header";
+  return file;
+}
+
+std::filesystem::path
+RestartableDataIO::restartableDataFolder(const std::filesystem::path & folder_base)
+{
+  auto folder = folder_base;
+  folder += getRestartableExt();
+  return folder;
+}
+
+std::filesystem::path
+RestartableDataIO::restartableDataFile(const std::filesystem::path & folder_base)
+{
+  return folder_base / restartableDataFile();
+}
+
+std::filesystem::path
+RestartableDataIO::restartableHeaderFile(const std::filesystem::path & folder_base)
+{
+  return folder_base / restartableHeaderFile();
 }

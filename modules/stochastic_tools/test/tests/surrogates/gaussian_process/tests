@@ -7,7 +7,7 @@
     [GP_training]
       type = CheckFiles
       input = GP_squared_exponential_training.i
-      check_files = 'gauss_process_training_GP_avg_trainer.rd'
+      check_files = 'gauss_process_training_GP_avg_trainer.rd/data'
       allow_test_objects = true
       detail = 'training a Gaussian process model and '
     []

@@ -37,8 +37,8 @@ MappingOutput::output()
     for (const auto & map_name : _mappings)
     {
       const VariableMappingBase & map = getMappingByName(map_name);
-      const std::string filename =
-          this->filename() + "_" + map_name + RestartableDataIO::getRestartableDataExt();
+      const auto filename =
+          RestartableDataIO::restartableDataFolder(this->filename() + "_" + map_name);
       RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
 
       RestartableDataWriter writer(_app, meta_data);

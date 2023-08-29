@@ -10,6 +10,7 @@
 #include "RestartableDataWriter.h"
 
 #include <fstream>
+#include <system_error>
 
 #include "DataIO.h"
 #include "RestartableDataMap.h"
@@ -75,19 +76,40 @@ RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_s
     }
 }
 
-void
-RestartableDataWriter::write(const RestartableFilenames & filenames)
+std::vector<std::filesystem::path>
+RestartableDataWriter::write(const std::filesystem::path & folder_base)
 {
-  auto open = [](const std::string & filename)
+  const auto header_file = restartableHeaderFile(folder_base);
+  const auto data_file = restartableDataFile(folder_base);
+
+  const auto dir = header_file.parent_path();
+  mooseAssert(dir == data_file.parent_path(), "Inconsistent directories");
+  if (!std::filesystem::exists(dir))
+  {
+    std::error_code err;
+    if (!std::filesystem::create_directory(dir, err))
+      mooseError("Unable to create restart directory\n",
+                 std::filesystem::absolute(dir),
+                 "\n\n",
+                 err.message());
+  }
+
+  std::vector<std::filesystem::path> paths;
+
+  auto open = [&paths](const std::filesystem::path & filename)
   {
     std::ofstream stream;
     stream.open(filename.c_str(), std::ios::out | std::ios::binary);
     if (!stream.is_open())
-      mooseError("RestartableDataWriter::write(): Unable to open file '", filename, "'");
+      mooseError(
+          "Unable to open restart file ", std::filesystem::absolute(filename), " for writing");
+    paths.push_back(filename);
     return stream;
   };
 
-  auto header_stream = open(filenames.header());
-  auto data_stream = open(filenames.data());
+  auto header_stream = open(header_file);
+  auto data_stream = open(data_file);
   write(header_stream, data_stream);
+
+  return paths;
 }

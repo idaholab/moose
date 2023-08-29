@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <variant>
+#include <filesystem>
 
 class RestartableDataMap;
 
@@ -30,25 +31,36 @@ public:
   RestartableDataIO(MooseApp & app, std::vector<RestartableDataMap> & data);
 
   /**
-   * @return The common extension for restartable data
+   * @return The common extension for restartable data folders
    */
-  static const std::string & getRestartableDataExt() { return RESTARTABLE_DATA_EXT; }
+  static const std::string & getRestartableExt();
   /**
-   * @return The common extension for restartable headers
+   * @return The filename for the restartable data
    */
-  static const std::string & getRestartableHeaderExt() { return RESTARTABLE_HEADER_EXT; }
+  static const std::string & restartableDataFile();
+  /**
+   * @return The filename for the restartable header
+   */
+  static const std::string & restartableHeaderFile();
 
   /**
-   * Helper struct that represents the filenames pertaining to restart output
+   *  @return The path to the restartable data folder with base \p folder_base
+   *
+   * This just appends .rd
    */
-  struct RestartableFilenames
-  {
-    RestartableFilenames() : prefix("UNSET") {}
-    RestartableFilenames(const std::string & prefix) : prefix(prefix) {}
-    std::string prefix;
-    std::string header() const { return prefix + getRestartableHeaderExt(); };
-    std::string data() const { return prefix + getRestartableDataExt(); };
-  };
+  static std::filesystem::path restartableDataFolder(const std::filesystem::path & folder_base);
+  /**
+   * @return The path to the restartable data file with base \p folder_base
+   *
+   * Does not append .rd to the folder base
+   */
+  static std::filesystem::path restartableDataFile(const std::filesystem::path & folder_base);
+  /**
+   * @return The path to the restartable header file with base \p folder_base
+   *
+   * Does not append .rd to the folder base
+   */
+  static std::filesystem::path restartableHeaderFile(const std::filesystem::path & folder_base);
 
 protected:
   /**
@@ -66,10 +78,6 @@ protected:
   /// This is a variant so that we can act on threaded and non-threaded data
   const std::variant<RestartableDataMap *, std::vector<RestartableDataMap> *> _data;
 
-  /// The common extension for restartable data
-  static const std::string RESTARTABLE_DATA_EXT;
-  /// The common extension for restartable headers
-  static const std::string RESTARTABLE_HEADER_EXT;
   /// The current version for the backup file
   static const unsigned int CURRENT_BACKUP_FILE_VERSION;
   /// The type to used for comparing hash codes (sanity checking)

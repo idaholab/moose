@@ -15,6 +15,8 @@
 #include "AddOutputAction.h"
 #include "RestartableDataWriter.h"
 
+#include <filesystem>
+
 #include "libmesh/exodusII_io.h"
 #include "libmesh/exodusII_io_helper.h"
 #include "libmesh/checkpoint_io.h"
@@ -198,15 +200,11 @@ MeshOnlyAction::act()
     io.write(mesh_file);
 
     // Write mesh metadata
-    if (processor_id() == 0 && _app.hasRestartableDataMap(MooseApp::MESH_META_DATA))
+    if (processor_id() == 0)
     {
-      const auto & name = _app.getRestartableDataMapName(MooseApp::MESH_META_DATA);
-      const std::string filename =
-          mesh_file + "/meta_data" + name + RestartableDataIO::getRestartableDataExt();
-
-      auto & data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-      RestartableDataWriter writer(_app, data);
-      writer.write(filename);
+      const auto filenames = _app.writeRestartableMetaData(MooseApp::MESH_META_DATA, mesh_file);
+      Moose::out << "Mesh meta data written into "
+                 << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
     }
   }
   else

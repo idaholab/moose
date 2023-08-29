@@ -11,7 +11,6 @@
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
-#include "RestartableDataIO.h"
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
@@ -790,10 +789,7 @@ FEProblemBase::initialSetup()
 
     // We could have a cached backup when this app is a sub-app and has been given a Backup
     if (!_app.hasBackupObject())
-    {
-      const auto filenames = _app.restartFilenames(_app.getRestartRecoverFileBase());
-      _app.restore(filenames, _app.isRestarting());
-    }
+      _app.restore(_app.restartFolderBase(_app.getRestartRecoverFileBase()), _app.isRestarting());
     else
       _app.restore(_app.isRestarting());
 

@@ -8,7 +8,7 @@
     [train]
       type = CheckFiles
       input = trainer.i
-      check_files = 'trainer_out_pod_rb.rd'
+      check_files = 'trainer_out_pod_rb.rd/data'
       allow_test_objects = true
       detail = 'training using known 3D data, '
       max_parallel = 3 # We need fewer processors than samples

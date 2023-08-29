@@ -26,7 +26,7 @@ public:
    */
   void write(std::ostream & header_stream, std::ostream & data_stream);
   /**
-   * Writes the restartable data to the files in \p filenames
+   * Writes the restartable data to the folder with base \p folder_base
    */
-  void write(const RestartableFilenames & filenames);
+  std::vector<std::filesystem::path> write(const std::filesystem::path & folder_base);
 };

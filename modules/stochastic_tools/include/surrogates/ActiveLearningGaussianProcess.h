@@ -16,7 +16,6 @@
 #include "StochasticToolsApp.h"
 #include "LoadSurrogateDataAction.h"
 
-#include "RestartableDataIO.h"
 #include "SurrogateModelInterface.h"
 #include "SurrogateTrainer.h"
 #include "MooseRandom.h"

@@ -10,12 +10,13 @@
 // C POSIX includes
 #include <sys/stat.h>
 
+#include <system_error>
+
 // Moose includes
 #include "Checkpoint.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MaterialPropertyStorage.h"
-#include "RestartableDataIO.h"
 #include "MooseMesh.h"
 #include "MeshMetaDataInterface.h"
 #include "RestartableDataWriter.h"
@@ -146,7 +147,6 @@ Checkpoint::output()
   CheckpointFileNames curr_file_struct;
 
   curr_file_struct.checkpoint = current_file + _app.checkpointSuffix();
-  curr_file_struct.restart = _app.restartFilenames(current_file);
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -154,13 +154,13 @@ Checkpoint::output()
   // Write out meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
-    const auto filenames = _app.writeRestartableMetaData(curr_file_struct.checkpoint);
-    curr_file_struct.restart_meta_data.insert(
-        curr_file_struct.restart_meta_data.begin(), filenames.begin(), filenames.end());
+    const auto paths = _app.writeRestartableMetaData(curr_file_struct.checkpoint);
+    curr_file_struct.restart.insert(curr_file_struct.restart.begin(), paths.begin(), paths.end());
   }
 
   // Write out the backup
-  _app.backup(curr_file_struct.restart);
+  const auto paths = _app.backup(_app.restartFolderBase(current_file));
+  curr_file_struct.restart.insert(curr_file_struct.restart.begin(), paths.begin(), paths.end());
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -172,17 +172,24 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
   // Update the list of stored files
   _file_names.push_back(file_struct);
 
-  auto remove_filenames = [this](const RestartableDataIO::RestartableFilenames & filenames)
+  // Remove the file and the corresponding directory if it's empty
+  const auto remove_file = [this](const std::filesystem::path & path)
   {
-    const auto remove_file = [this](const std::string & filename)
-    {
-      int ret = remove(filename.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", filename, "':\n", std::strerror(ret));
-    };
+    std::error_code err;
 
-    remove_file(filenames.header());
-    remove_file(filenames.data());
+    if (!std::filesystem::remove(path, err))
+      mooseWarning("Error during the deletion of checkpoint file\n",
+                   std::filesystem::absolute(path),
+                   "\n\n",
+                   err.message());
+
+    const auto dir = path.parent_path();
+    if (std::filesystem::is_empty(dir))
+      if (!std::filesystem::remove(dir, err))
+        mooseError("Error during the deletion of checkpoint directory\n",
+                   std::filesystem::absolute(dir),
+                   "\n\n",
+                   err.message());
   };
 
   // Remove un-wanted files
@@ -194,19 +201,14 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Remove these filenames from the list
     _file_names.pop_front();
 
-    // Delete meta data and checkpoint files
-    if (processor_id() == 0)
-    {
-      // Delete meta data files
-      for (const auto & filenames : delete_files.restart_meta_data)
-        remove_filenames(filenames);
+    // Delete restartable data
+    for (const auto & path : delete_files.restart)
+      remove_file(path);
 
-      // This file may not exist so don't worry about checking for success
+    // Delete checkpoint files
+    // This file may not exist so don't worry about checking for success
+    if (processor_id() == 0)
       CheckpointIO::cleanup(delete_files.checkpoint,
                             _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
-    }
-
-    // Delete restartable data
-    remove_filenames(delete_files.restart);
   }
 }

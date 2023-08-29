@@ -43,12 +43,12 @@ RestartableDataReader::setInput(std::unique_ptr<std::stringstream> header_stream
 }
 
 void
-RestartableDataReader::setInput(const RestartableFilenames & filenames)
+RestartableDataReader::setInput(const std::filesystem::path & folder_base)
 {
   mooseAssert(!_streams.header, "Header input already set");
   mooseAssert(!_streams.data, "Data stream already set");
-  _streams.header = std::make_unique<FileInputStream>(filenames.header());
-  _streams.data = std::make_unique<FileInputStream>(filenames.data());
+  _streams.header = std::make_unique<FileInputStream>(restartableHeaderFile(folder_base));
+  _streams.data = std::make_unique<FileInputStream>(restartableDataFile(folder_base));
 }
 
 RestartableDataReader::InputStreams
@@ -228,13 +228,16 @@ RestartableDataReader::deserializeValue(std::istream & stream,
 }
 
 bool
-RestartableDataReader::isAvailable(const RestartableFilenames & filenames)
+RestartableDataReader::isAvailable(const std::filesystem::path & folder_base)
 {
+  const auto header_path = restartableDataFile(folder_base);
+  const auto data_path = restartableDataFile(folder_base);
+
   const auto available = [](const auto & filename)
   { return MooseUtils::pathExists(filename) && MooseUtils::checkFileReadable(filename); };
 
-  const bool header_available = available(filenames.header());
-  const bool data_available = available(filenames.data());
+  const bool header_available = available(header_path);
+  const bool data_available = available(data_path);
 
   if (header_available != data_available)
     mooseError("The restart ",
@@ -245,11 +248,11 @@ RestartableDataReader::isAvailable(const RestartableFilenames & filenames)
                "Header (",
                header_available ? "available" : "missing",
                "): ",
-               filenames.header(),
-               "Data (",
+               std::filesystem::absolute(header_path),
+               "\nData (",
                data_available ? "available" : "missing",
                "): ",
-               filenames.data());
+               std::filesystem::absolute(header_path));
 
   return header_available && data_available;
 }

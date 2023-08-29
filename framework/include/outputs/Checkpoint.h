@@ -14,8 +14,6 @@
 
 #include <deque>
 
-#include "RestartableDataIO.h"
-
 /**
  * Shortcut for determining what type of autosave this checkpoint is.
  * NONE: Not an autosave checkpoint
@@ -39,11 +37,8 @@ struct CheckpointFileNames
   /// Filename for CheckpointIO file (the mesh)
   std::string checkpoint;
 
-  /// Filename for restartable data
-  RestartableDataIO::RestartableFilenames restart;
-
-  /// Filenames for mesh meta data
-  std::vector<RestartableDataIO::RestartableFilenames> restart_meta_data;
+  /// Filenames for restartable data
+  std::vector<std::filesystem::path> restart;
 };
 
 /**

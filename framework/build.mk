@@ -148,6 +148,10 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
+# Give us that sweet std::filesystem
+# Hopefully this can go in libMesh one day
+libmesh_LDFLAGS += -lstdc++fs
+
 #
 # Static Analysis
 #

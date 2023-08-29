@@ -6,7 +6,7 @@
     requirement = 'The system shall be able to create a surrogate model for the solution coordinates in the latent space.'
     type = CheckFiles
     input = create_mapping_main.i
-    check_files = 'create_mapping_main_rom_polyreg.rd create_mapping_main_mapping_pod_mapping.rd'
+    check_files = 'create_mapping_main_rom_polyreg.rd/data create_mapping_main_mapping_pod_mapping.rd/data'
     min_parallel = 2
     max_parallel = 2
     petsc_version = ">=3.14"

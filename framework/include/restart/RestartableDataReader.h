@@ -42,9 +42,9 @@ public:
   void setInput(std::unique_ptr<std::stringstream> header_stream,
                 std::unique_ptr<std::stringstream> data_stream);
   /**
-   * Sets the input stream for reading to the file with paths \p filenames.
+   * Sets the input stream for reading to the file with the folder base \p folder_base
    */
-  void setInput(const RestartableFilenames & filenames);
+  void setInput(const std::filesystem::path & folder_base);
 
   /**
    * @return Whether or not this reader is currently restoring
@@ -84,12 +84,12 @@ public:
   ///@}
 
   /**
-   * @return Whether or not the given restore filenames are available for reading
+   * @return Whether or not restartable data is available in the folder \p folder_base
    *
    * Will error if the header is available and the data is not, or if the data is
    * and the header is not.
    */
-  static bool isAvailable(const RestartableFilenames & filenames);
+  static bool isAvailable(const std::filesystem::path & folder_base);
 
 private:
   /**

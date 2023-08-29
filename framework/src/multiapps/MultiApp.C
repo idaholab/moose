@@ -19,7 +19,6 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "OutputWarehouse.h"
-#include "RestartableDataIO.h"
 #include "SetupInterface.h"
 #include "UserObject.h"
 #include "CommandLine.h"

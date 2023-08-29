@@ -37,6 +37,7 @@
 #include <set>
 #include <unordered_set>
 #include <typeindex>
+#include <filesystem>
 
 // Forward declarations
 class Executioner;
@@ -644,29 +645,32 @@ public:
                                                 THREAD_ID tid);
 
   /**
-   * Loads the restartable meta data for \p name if it is available with the file base \p file_base
+   * Loads the restartable meta data for \p name if it is available with the folder base \p
+   * folder_base
    */
   void possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
-                                       const std::string & file_base);
+                                       const std::filesystem::path & folder_base);
   /**
-   * Loads all available restartable meta data if it is available with the file base \p file_base
+   * Loads all available restartable meta data if it is available with the folder base \p
+   * folder_base
    */
-  void loadRestartableMetaData(const std::string & file_base);
+  void loadRestartableMetaData(const std::filesystem::path & folder_base);
 
   /**
-   * Writes the restartable meta data for \p name with a file base of \p file_base
+   * Writes the restartable meta data for \p name with a folder base of \p folder_base
    *
-   * @return The file names that were written
+   * @return The files that were written
    */
-  RestartableDataIO::RestartableFilenames
-  writeRestartableMetaData(const RestartableDataMapName & name, const std::string & file_base);
+  std::vector<std::filesystem::path>
+  writeRestartableMetaData(const RestartableDataMapName & name,
+                           const std::filesystem::path & folder_base);
   /**
    * Writes all available restartable meta data with a file base of \p file_base
    *
-   * @return The file names that were written
+   * @return The files that were written
    */
-  std::vector<RestartableDataIO::RestartableFilenames>
-  writeRestartableMetaData(const std::string & file_base);
+  std::vector<std::filesystem::path>
+  writeRestartableMetaData(const std::filesystem::path & folder_base);
 
   /**
    * Return reference to the restartable data object
@@ -710,22 +714,22 @@ public:
   const DataNames & getRecoverableData() const { return _recoverable_data_names; }
 
   /**
-   * Backs up the application to \p filenames
+   * Backs up the application to the folder \p folder_base
    */
-  void backup(const RestartableDataIO::RestartableFilenames & filenames);
+  std::vector<std::filesystem::path> backup(const std::filesystem::path & folder_base);
   /**
    * Backs up the application memory in a Backup.
    */
   std::unique_ptr<Backup> backup();
 
   /**
-   * Restore an application from \p filenames
+   * Restore an application from the folder \p folder_base
    *
    * You must call finalizeRestore() after this in order to finalize the restoration.
    * The restore process is kept open in order to restore additional data after
    * the initial restore (that is, the restoration of data that has already been declared).
    */
-  void restore(const RestartableDataIO::RestartableFilenames & filenames, const bool for_restart);
+  void restore(const std::filesystem::path & folder_base, const bool for_restart);
 
   /**
    * Restore a Backup. This sets the App's state.
@@ -889,10 +893,10 @@ public:
   /// The file suffix for the checkpoint mesh
   static const std::string & checkpointSuffix();
   /// The file suffix for meta data (header and data)
-  static RestartableDataIO::RestartableFilenames metaDataFilenames(const std::string & file_base,
-                                                                   const std::string & map_suffix);
+  static std::filesystem::path metaDataFolderBase(const std::filesystem::path & folder_base,
+                                                  const std::string & map_suffix);
   /// The file suffix for restartable data
-  RestartableDataIO::RestartableFilenames restartFilenames(const std::string & file_base) const;
+  std::filesystem::path restartFolderBase(const std::filesystem::path & folder_base) const;
 
 private:
   /**

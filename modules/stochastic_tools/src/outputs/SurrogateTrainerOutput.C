@@ -39,8 +39,8 @@ SurrogateTrainerOutput::output()
     for (const auto & surrogate_name : _trainers)
     {
       const SurrogateTrainerBase & trainer = getSurrogateTrainerByName(surrogate_name);
-      const std::string filename =
-          this->filename() + "_" + surrogate_name + RestartableDataIO::getRestartableDataExt();
+      const auto filename =
+          RestartableDataIO::restartableDataFolder(this->filename() + "_" + surrogate_name);
       RestartableDataMap & meta_data = _app.getRestartableDataMap(trainer.modelMetaDataName());
 
       RestartableDataWriter writer(_app, meta_data);

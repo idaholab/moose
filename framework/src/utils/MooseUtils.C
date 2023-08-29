@@ -19,6 +19,7 @@
 #include "MortarConstraintBase.h"
 #include "MortarNodalAuxKernel.h"
 #include "ExecFlagRegistry.h"
+#include "RestartableDataReader.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/elem.h"
@@ -769,12 +770,12 @@ listDir(const std::string path, bool files_only)
 }
 
 std::list<std::string>
-getFilesInDirs(const std::list<std::string> & directory_list)
+getFilesInDirs(const std::list<std::string> & directory_list, const bool files_only /* = true */)
 {
   std::list<std::string> files;
 
   for (const auto & dir_name : directory_list)
-    files.splice(files.end(), listDir(dir_name, true));
+    files.splice(files.end(), listDir(dir_name, files_only));
 
   return files;
 }
@@ -831,6 +832,10 @@ getLatestCheckpointFilePrefix(const std::list<std::string> & checkpoint_files)
 
     if (file_num > max_file_num)
     {
+      // Need both the header and the data
+      if (!RestartableDataReader::isAvailable(res_file))
+        continue;
+
       max_file_num = file_num;
       max_file = res_file;
       max_prefix = file_prefix;

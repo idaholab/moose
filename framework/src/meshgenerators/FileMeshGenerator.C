@@ -117,7 +117,7 @@ FileMeshGenerator::generate()
     mesh->read(file_name);
 
     // Load the meta data if it is available
-    _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
+    _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)_file_name);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

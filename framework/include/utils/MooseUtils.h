@@ -704,8 +704,10 @@ bool pathIsDirectory(const std::string & path);
  * the routine. The names returned will be the paths to the files relative to the current
  * directory.
  * @param directory_list The list of directories to retrieve files from.
+ * @param file_only Whether or not to list only files
  */
-std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list);
+std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list,
+                                      const bool files_only = true);
 
 /**
  * Returns the most recent checkpoint prefix (the four numbers at the begining)

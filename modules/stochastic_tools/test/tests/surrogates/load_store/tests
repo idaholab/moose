@@ -7,7 +7,7 @@
     [train]
       type = CheckFiles
       input = train.i
-      check_files = 'train_out_poly_chaos.rd'
+      check_files = 'train_out_poly_chaos.rd/data'
       allow_test_objects = true
 
       detail = "trained with replicated stochastic data and"
@@ -25,7 +25,7 @@
       type = CheckFiles
       input = train.i
       cli_args = Reporters/storage/parallel_type=DISTRIBUTED
-      check_files = 'train_out_poly_chaos.rd'
+      check_files = 'train_out_poly_chaos.rd/data'
       prereq = surrogate/evaluate
       allow_test_objects = true
 
@@ -44,7 +44,7 @@
       type = CheckFiles
       input = train.i
       cli_args = Reporters/storage/parallel_type=DISTRIBUTED
-      check_files = 'train_out_poly_chaos.rd'
+      check_files = 'train_out_poly_chaos.rd/data'
       prereq = surrogate/evaluate_distributed
       allow_test_objects = true
       min_parallel = 3
