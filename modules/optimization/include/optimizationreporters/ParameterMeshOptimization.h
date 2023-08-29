@@ -9,17 +9,22 @@
 
 #pragma once
 
+#include "OptimizationData.h"
 #include "OptimizationReporterBase.h"
+
 class ParameterMesh;
 
 /**
  * Mesh-based parameter optimization
  */
-class ParameterMeshOptimization : public OptimizationReporterBase
+class ParameterMeshOptimization : public OptimizationDataTempl<OptimizationReporterBase>
 {
+
 public:
   static InputParameters validParams();
   ParameterMeshOptimization(const InputParameters & parameters);
+
+  virtual Real computeObjective() override;
 
 private:
   /**
@@ -31,4 +36,5 @@ private:
                               Real constantDataFromInput,
                               const std::string & meshVarName,
                               unsigned int ntimes) const;
+  virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };
