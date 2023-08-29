@@ -123,14 +123,14 @@ void
 MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
                                                   const StateArg & state) const
 {
-  mooseAssert(this->hasBlocks(std::get<0>(elem_qp)->subdomain_id()),
+  mooseAssert(this->hasBlocks(elem_qp.elem->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
-  const Elem * const elem = std::get<0>(elem_qp);
+  const Elem * const elem = elem_qp.elem;
   if (elem != _current_elem_qp_functor_elem)
   {
     _current_elem_qp_functor_elem = elem;
-    const QBase * const qrule_template = std::get<2>(elem_qp);
+    const QBase * const qrule_template = elem_qp.qrule;
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
@@ -165,7 +165,7 @@ typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
   evaluateOnElement(elem_qp, state);
-  const auto qp = std::get<1>(elem_qp);
+  const auto qp = elem_qp.qp;
   mooseAssert(qp < _current_elem_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
   return _current_elem_qp_functor_sln[qp];
@@ -177,7 +177,7 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
                                                  const StateArg & state) const
 {
   evaluateOnElement(elem_qp, state);
-  const auto qp = std::get<1>(elem_qp);
+  const auto qp = elem_qp.qp;
   mooseAssert(qp < _current_elem_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
   return _current_elem_qp_functor_gradient[qp];
@@ -191,7 +191,7 @@ MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const Sta
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
   evaluateOnElement(elem_qp, state);
-  const auto qp = std::get<1>(elem_qp);
+  const auto qp = elem_qp.qp;
   mooseAssert(qp < _current_elem_qp_functor_dot.size(),
               "The requested " << qp << " is outside our dot size");
   return _current_elem_qp_functor_dot[qp];
@@ -202,16 +202,16 @@ void
 MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
                                                       const StateArg & state) const
 {
-  mooseAssert(this->hasBlocks(std::get<0>(elem_side_qp)->subdomain_id()),
+  mooseAssert(this->hasBlocks(elem_side_qp.elem->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
-  const Elem * const elem = std::get<0>(elem_side_qp);
-  const auto side = std::get<1>(elem_side_qp);
+  const Elem * const elem = elem_side_qp.elem;
+  const auto side = elem_side_qp.side;
   if (elem != _current_elem_side_qp_functor_elem_side.first ||
       side != _current_elem_side_qp_functor_elem_side.second)
   {
     _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);
-    const QBase * const qrule_template = std::get<3>(elem_side_qp);
+    const QBase * const qrule_template = elem_side_qp.qrule;
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
@@ -248,7 +248,7 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
                                          const StateArg & state) const
 {
   evaluateOnElementSide(elem_side_qp, state);
-  const auto qp = std::get<2>(elem_side_qp);
+  const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
   return _current_elem_side_qp_functor_sln[qp];
@@ -260,7 +260,7 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side
                                                  const StateArg & state) const
 {
   evaluateOnElementSide(elem_side_qp, state);
-  const auto qp = std::get<2>(elem_side_qp);
+  const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
   return _current_elem_side_qp_functor_gradient[qp];
@@ -275,7 +275,7 @@ MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
   evaluateOnElementSide(elem_side_qp, state);
-  const auto qp = std::get<2>(elem_side_qp);
+  const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
               "The requested " << qp << " is outside our dot size");
   return _current_elem_side_qp_functor_dot[qp];

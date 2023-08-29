@@ -50,6 +50,7 @@
   [../]
 
   [./nemesis_hide]
+    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = 'Exodiff'
     input = nemesis_hide.i
     min_parallel = 2

@@ -503,6 +503,10 @@ public:
   virtual int & timeStep() const { return _t_step; }
   virtual Real & dt() const { return _dt; }
   virtual Real & dtOld() const { return _dt_old; }
+  /**
+   * Returns the time associated with the requested \p state
+   */
+  Real getTimeFromStateArg(const Moose::StateArg & state) const;
 
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() const override { return _transient; }

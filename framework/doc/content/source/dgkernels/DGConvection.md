@@ -12,7 +12,7 @@ More information about the discontinuous Galerkin method may be found in the
 ## Example input syntax
 
 In this example, a field `u` is advected from a boundary condition on its left to the right boundary
-with a `1 0 0` velocity using the `ADDGConvection`, the version of this kernel with automatic differentiation.
+with a `1 0 0` velocity using [ADDGAdvection.md], the version of this kernel with automatic differentiation.
 
 !listing test/tests/dgkernels/ad_dg_convection/ad_dg_convection.i block=DGKernels
 

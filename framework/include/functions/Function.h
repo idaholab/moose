@@ -146,16 +146,14 @@ private:
   using typename Moose::FunctorBase<Real>::GradientType;
   using typename Moose::FunctorBase<Real>::DotType;
 
-  /**
-   * @return the time associated with the requested \p state
-   */
-  Real getTime(const Moose::StateArg & state) const;
-
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
   using ElemPointArg = Moose::ElemPointArg;
+
+  template <typename R>
+  ValueType evaluateHelper(const R & r, const Moose::StateArg & state) const;
 
   ValueType evaluate(const ElemArg & elem, const Moose::StateArg & state) const override final;
   ValueType evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
@@ -164,6 +162,9 @@ private:
                      const Moose::StateArg & state) const override final;
   ValueType evaluate(const ElemPointArg & elem_point,
                      const Moose::StateArg & state) const override final;
+
+  template <typename R>
+  GradientType evaluateGradientHelper(const R & r, const Moose::StateArg & state) const;
 
   GradientType evaluateGradient(const ElemArg & elem,
                                 const Moose::StateArg & state) const override final;
@@ -176,6 +177,8 @@ private:
   GradientType evaluateGradient(const ElemPointArg & elem_point,
                                 const Moose::StateArg & state) const override final;
 
+  template <typename R>
+  DotType evaluateDotHelper(const R & r, const Moose::StateArg & state) const;
   DotType evaluateDot(const ElemArg & elem, const Moose::StateArg & state) const override final;
   DotType evaluateDot(const FaceArg & face, const Moose::StateArg & state) const override final;
   DotType evaluateDot(const ElemQpArg & qp, const Moose::StateArg & state) const override final;
@@ -183,35 +186,6 @@ private:
                       const Moose::StateArg & state) const override final;
   DotType evaluateDot(const ElemPointArg & elem_point,
                       const Moose::StateArg & state) const override final;
-
-  /**
-   * Compute \p _current_elem_qp_functor_xyz if we are on a new element
-   */
-  void determineElemXYZ(const ElemQpArg & elem_qp) const;
-
-  /**
-   * Compute \p _current_elem_side_qp_functor_xyz if we are on a new element and side pair
-   */
-  void determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const;
-
-  /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
-  /// call evaluate on the same element, but just with a different quadrature point, we can return
-  /// previously computed results indexed at the different qp)
-  mutable const Elem * _current_elem_qp_functor_elem = nullptr;
-
-  /// The location of the quadrature points in physical space for the
-  /// \p _current_elem_qp_functor_elem
-  mutable std::vector<Point> _current_elem_qp_functor_xyz;
-
-  /// Keep track of the current elem-side-qp functor element-side pair in order to enable local
-  /// caching (e.g. if we call evaluate on the same element and side, but just with a different
-  /// quadrature point, we can return previously computed results indexed at the different qp)
-  mutable std::pair<const Elem *, unsigned int> _current_elem_side_qp_functor_elem_side{
-      nullptr, libMesh::invalid_uint};
-
-  /// The location of the quadrature points in physical space for the
-  /// \p _current_elem_side_qp_functor_elem_side
-  mutable std::vector<Point> _current_elem_side_qp_functor_xyz;
 };
 
 template <typename U>

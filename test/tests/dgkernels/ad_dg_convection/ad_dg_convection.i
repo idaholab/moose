@@ -21,9 +21,9 @@
 
 [DGKernels]
   [convection]
-    type = ADDGConvection
+    type = ADDGAdvection
     variable = u
-    velocity = '1 0 0'
+    velocity = velocity
   []
 []
 
@@ -34,6 +34,14 @@
     penalty = 1e6
     boundary = 'left'
     variable = u
+  []
+[]
+
+[Materials]
+  [vel]
+    type = ADGenericConstantVectorMaterial
+    prop_names = 'velocity'
+    prop_values = '1 0 0'
   []
 []
 

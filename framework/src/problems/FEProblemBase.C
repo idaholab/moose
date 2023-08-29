@@ -5826,6 +5826,27 @@ FEProblemBase::onTimestepEnd()
 {
 }
 
+Real
+FEProblemBase::getTimeFromStateArg(const Moose::StateArg & state) const
+{
+  if (state.iteration_type != Moose::SolutionIterationType::Time)
+    // If we are any iteration type other than time (e.g. nonlinear), then temporally we are still
+    // in the present time
+    return time();
+
+  switch (state.state)
+  {
+    case 0:
+      return time();
+
+    case 1:
+      return timeOld();
+
+    default:
+      mooseError("Unhandled state ", state.state, " in FEProblemBase::getTimeFromStateArg");
+  }
+}
+
 void
 FEProblemBase::addTimeIntegrator(const std::string & type,
                                  const std::string & name,

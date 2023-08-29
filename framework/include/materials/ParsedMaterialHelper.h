@@ -23,7 +23,6 @@
   using typename ParsedMaterialHelper<T>::MatPropDescriptorList;                                   \
   using ParsedMaterialHelper<T>::functionParse;                                                    \
   using ParsedMaterialHelper<T>::functionsPostParse;                                               \
-  using ParsedMaterialHelper<T>::functionsOptimize;                                                \
   using ParsedMaterialHelper<T>::_func_F;                                                          \
   using ParsedMaterialHelper<T>::_symbol_names;                                                    \
   using ParsedMaterialHelper<T>::_mat_prop_descriptors;                                            \
@@ -79,9 +78,6 @@ protected:
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
 
-  // run FPOptimizer on the parsed function
-  virtual void functionsOptimize();
-
   /// The undiffed free energy function parser object.
   SymFunctionPtr _func_F;
 
@@ -115,9 +111,3 @@ protected:
   /// This is true by default, but can be disabled to make non-existing properties default to zero
   const bool _error_on_missing_material_properties;
 };
-
-template <>
-void ParsedMaterialHelper<false>::functionsOptimize();
-
-template <>
-void ParsedMaterialHelper<true>::functionsOptimize();

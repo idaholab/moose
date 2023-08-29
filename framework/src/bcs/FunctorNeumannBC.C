@@ -42,7 +42,7 @@ FunctorNeumannBC::FunctorNeumannBC(const InputParameters & parameters)
 ADReal
 FunctorNeumannBC::computeQpResidual()
 {
-  const auto space_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
+  const Moose::ElemSideQpArg space_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
   return _sign * _coef(space_arg, Moose::currentState()) *
          _functor(space_arg, Moose::currentState()) * _test[_i][_qp];
 }

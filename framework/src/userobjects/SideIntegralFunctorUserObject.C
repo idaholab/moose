@@ -28,6 +28,6 @@ SideIntegralFunctorUserObject::SideIntegralFunctorUserObject(const InputParamete
 Real
 SideIntegralFunctorUserObject::computeQpIntegral()
 {
-  Moose::ElemSideQpArg elem_side_qp = {_current_elem, _current_side, _qp, _qrule};
+  Moose::ElemSideQpArg elem_side_qp = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
   return _functor(elem_side_qp, determineState());
 }

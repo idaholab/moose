@@ -94,7 +94,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   fe->reinit(elem);
-  auto elem_qp = std::make_tuple(elem, 0, &qrule);
+  auto elem_qp = Moose::ElemQpArg({elem, 0, &qrule, xyz[0]});
   f_traditional = f.value(0, xyz[0]);
   f_functor = f_wrapped(elem_qp, Moose::currentState());
   gradient_traditional = f.gradient(0, xyz[0]);
@@ -107,7 +107,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   QGauss qrule_face(elem->dim() - 1, fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule_face);
   fe->reinit(elem, side);
-  auto elem_side_qp = std::make_tuple(elem, side, 0, &qrule_face);
+  auto elem_side_qp = Moose::ElemSideQpArg({elem, side, 0, &qrule_face, xyz[0]});
   f_traditional = f.value(0, xyz[0]);
   f_functor = f_wrapped(elem_side_qp, Moose::currentState());
   gradient_traditional = f.gradient(0, xyz[0]);

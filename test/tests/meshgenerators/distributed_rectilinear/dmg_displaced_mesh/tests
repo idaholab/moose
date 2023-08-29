@@ -36,6 +36,7 @@
                   "conditions on a distributed generated displaced mesh"
 
     [adaptivity_nemesis]
+      skip = 'Nemesis issue, libMesh/libmesh#3601'
       type = 'Exodiff'
       input = 'pbc_adaptivity.i'
       exodiff = 'pbc_adaptivity_out.e.4.0 pbc_adaptivity_out.e.4.1 pbc_adaptivity_out.e.4.2 '

@@ -382,6 +382,11 @@ def getPlatforms():
         platforms.add(raw_uname[0].upper())
     return platforms
 
+def getMachine():
+    machine = set(['ALL'])
+    machine.add(platform.machine().upper())
+    return machine
+
 def runExecutable(libmesh_dir, location, bin, args):
     # Installed location of libmesh executable
     libmesh_installed   = libmesh_dir + '/' + location + '/' + bin

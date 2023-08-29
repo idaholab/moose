@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#24055'
+  design = 'ADConservativeAdvection.md ADDGAdvection.md ADConservativeAdvectionBC.md MatDiffusion.md DGDiffusion.md DGFunctionDiffusionDirichletBC.md'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be ablve to solve an advection-diffusion problem discretized with discontinuous Galerkin, using some hand-coded Jacobians and automatic differentiation Jacobians.'
+  []
+[]

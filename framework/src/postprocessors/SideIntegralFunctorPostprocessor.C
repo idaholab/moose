@@ -85,7 +85,7 @@ template <bool is_ad>
 Real
 SideIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
 {
-  Moose::ElemSideQpArg elem_side_qp = {_current_elem, _current_side, _qp, _qrule};
+  Moose::ElemSideQpArg elem_side_qp = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
   return computeLocalContribution(elem_side_qp);
 }
 

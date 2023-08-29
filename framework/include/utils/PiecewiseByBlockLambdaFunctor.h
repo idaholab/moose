@@ -252,7 +252,7 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemQpArg & elem_qp,
                                            const Moose::StateArg & time) const
 {
-  const auto sub_id = std::get<0>(elem_qp)->subdomain_id();
+  const auto sub_id = elem_qp.elem->subdomain_id();
   auto it = _elem_qp_functor.find(sub_id);
   if (it == _elem_qp_functor.end())
     subdomainErrorMessage(sub_id);
@@ -265,7 +265,7 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_side_qp,
                                            const Moose::StateArg & time) const
 {
-  const auto sub_id = std::get<0>(elem_side_qp)->subdomain_id();
+  const auto sub_id = elem_side_qp.elem->subdomain_id();
   auto it = _elem_side_qp_functor.find(sub_id);
   if (it == _elem_side_qp_functor.end())
     subdomainErrorMessage(sub_id);

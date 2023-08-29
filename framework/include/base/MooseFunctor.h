@@ -467,15 +467,15 @@ FunctorBase<T>::operator()(const ElemQpArg & elem_qp, const StateArg & state) co
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_qp, state);
 
-  const auto elem_id = std::get<0>(elem_qp)->id();
+  const auto elem_id = elem_qp.elem->id();
   if (elem_id != _current_qp_map_key)
   {
     _current_qp_map_key = elem_id;
     _current_qp_map_value = &_qp_to_value[elem_id];
   }
   auto & qp_data = *_current_qp_map_value;
-  const auto qp = std::get<1>(elem_qp);
-  const auto * const qrule = std::get<2>(elem_qp);
+  const auto qp = elem_qp.qp;
+  const auto * const qrule = elem_qp.qrule;
   mooseAssert(qrule, "qrule must be non-null");
 
   return queryQpCache(qp, *qrule, qp_data, elem_qp, state);
@@ -488,7 +488,7 @@ FunctorBase<T>::operator()(const ElemSideQpArg & elem_side_qp, const StateArg & 
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_side_qp, state);
 
-  const Elem * const elem = std::get<0>(elem_side_qp);
+  const Elem * const elem = elem_side_qp.elem;
   mooseAssert(elem, "elem must be non-null");
   const auto elem_id = elem->id();
   if (elem_id != _current_side_qp_map_key)
@@ -497,9 +497,9 @@ FunctorBase<T>::operator()(const ElemSideQpArg & elem_side_qp, const StateArg & 
     _current_side_qp_map_value = &_side_qp_to_value[elem_id];
   }
   auto & side_qp_data = *_current_side_qp_map_value;
-  const auto side = std::get<1>(elem_side_qp);
-  const auto qp = std::get<2>(elem_side_qp);
-  const auto * const qrule = std::get<3>(elem_side_qp);
+  const auto side = elem_side_qp.side;
+  const auto qp = elem_side_qp.qp;
+  const auto * const qrule = elem_side_qp.qrule;
   mooseAssert(qrule, "qrule must be non-null");
 
   // Check and see whether we even have sized for this side
