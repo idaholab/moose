@@ -5,32 +5,32 @@ from ..tree import tokens
 from ..common import __init__
 from . import command
 
-"""     This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
-        Arb spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.  Ex: !tagger name    k1:v1  ka:va thing1:thing2 is okay, but not
-        !tagger  name.
+"""
+This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string
+that represents the markdown file that is associated with an arbitrary list of key:value pairs. Arbitrary
+spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.
+Ex: '!tagger name    k1:v1  ka:va thing1:thing2' is okay, but not '!tagger  name'.
 
-        Tagger checks that all linked moose pages are unique and will not allow duplicate namess in the dictionary.  Duplicate key value pairs are allowed.
+Tagger checks that all linked moose pages are unique and will not allow duplicate names in the
+dictionary.  Duplicate key value pairs are allowed.
 
-        Example Tagger command in *.md:
-        !tagger geochem keyg:valg keychem:valuechem
+Example Tagger command in *.md:
+!tagger geochem keyg:valg keychem:valuechem
 
-        Example Output TagDictionary:
-        {"data":
-        [{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
-        {"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
-        {"name": "index2", "path": "moose/modules/doc/content/index2.md", "key_vals": {"key1": "val1", "keya": "val", "thing1": "thing2"}},
-        {"name": "geochem", "path": "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", "key_vals": {"keyg": "valg", "keychem": "valuechem"}},
-        {"name": "vortex", "path": "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", "key_vals": {"keyvor": "valvor", "key": "val", "key1": "val1"}}]
-        }  """
+Example Output TagDictionary:
+{"data":
+[{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
+{"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
+{"name": "index2", "path": "moose/modules/doc/content/index2.md", "key_vals": {"key1": "val1", "keya": "val", "thing1": "thing2"}},
+{"name": "geochem", "path": "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", "key_vals": {"keyg": "valg", "keychem": "valuechem"}},
+{"name": "vortex", "path": "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", "key_vals": {"keyvor": "valvor", "key": "val", "key1": "val1"}}]
+}
+"""
 
 LOG = logging.getLogger(__name__)
 
-def make_extension(**kwargs):  #reqired extension
+def make_extension(**kwargs):
     return TaggingExtension(**kwargs)
-
-TaggingToken = tokens.newToken('TaggingToken', brand='')
-TaggingTitle = tokens.newToken('TaggingTitle', brand='', prefix=True, center=False, icon=True, icon_name=None)
-TaggingContent = tokens.newToken('TaggingContent')
 
 class TaggingExtension(command.CommandExtension):
     def extend(self, reader, renderer):
