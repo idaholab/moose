@@ -160,6 +160,17 @@ public:
   void addParam(const std::string & name, const std::string & doc_string);
   ///@}
 
+  /**
+   * Enable support for initializer lists as default arguments for container type.
+   */
+  template <typename T>
+  void addParam(const std::string & name,
+                const std::initializer_list<typename T::value_type> & value,
+                const std::string & doc_string)
+  {
+    addParam<T>(name, T{value}, doc_string);
+  }
+
   ///@{
   // BEGIN RANGE CHECKED PARAMETER METHODS
   /**

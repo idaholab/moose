@@ -50,9 +50,11 @@ SetupMeshAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block_name", "Names of the block id/name pairs (must correspond with \"block_id\"");
 
-  params.addParam<std::vector<BoundaryID>>("boundary_id", "IDs of the boundary id/name pairs");
+  params.addParam<std::vector<BoundaryID>>("boundary_id", {}, "IDs of the boundary id/name pairs");
   params.addParam<std::vector<BoundaryName>>(
-      "boundary_name", "Names of the boundary id/name pairs (must correspond with \"boundary_id\"");
+      "boundary_name",
+      {},
+      "Names of the boundary id/name pairs (must correspond with \"boundary_id\"");
 
   params.addParam<bool>("construct_side_list_from_node_list",
                         false,
@@ -72,8 +74,8 @@ SetupMeshAction::validParams()
       "Create the displaced mesh if the 'displacements' "
       "parameter is set. If this is 'false', a displaced mesh will not be created, "
       "regardless of whether 'displacements' is set.");
-  params.addParam<std::vector<BoundaryName>>("ghosted_boundaries",
-                                             "Boundaries to be ghosted if using Nemesis");
+  params.addParam<std::vector<BoundaryName>>(
+      "ghosted_boundaries", {}, "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real>>("ghosted_boundaries_inflation",
                                      "If you are using ghosted boundaries you will want to set "
                                      "this value to a vector of amounts to inflate the bounding "
