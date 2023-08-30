@@ -24,7 +24,6 @@ public:
 protected:
   MaterialProperty<Real> & _sensitivity;
   const VariableValue & _design_density;
-  const int _power;
-  const Real _E;
-  const Real _Emin;
+  const MaterialPropertyName _design_density_name;
+  const MaterialProperty<Real> & _dEdp;
 };

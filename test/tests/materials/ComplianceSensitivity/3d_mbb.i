@@ -169,7 +169,7 @@ power = 3
     type = ComputeLinearElasticStress
   []
   [dc]
-    type = ComplianceSensitivity2
+    type = ComplianceSensitivity
     design_density = mat_den
     youngs_modulus = E_phys
     incremental = false
