@@ -30,25 +30,19 @@ CostSensitivity::CostSensitivity(const InputParameters & parameters)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _sensitivity(declareProperty<Real>(_base_name + "sensitivity")),
     _design_density(coupledValue("design_density")),
-    _power(getParam<int>("power")),
-    _E(getParam<Real>("E")),
-    _Emin(getParam<Real>("Emin"))
+    _design_density_name(coupledName("design_density", 0)),
+    _dcostdrho(getMaterialPropertyDerivativeByName<Real>(getParam<MaterialPropertyName>("cost"),
+                                                         _design_density_name)),
+    _cost(getMaterialPropertyByName<Real>(getParam<MaterialPropertyName>("cost")))
 {
 }
 
 void
 CostSensitivity::computeQpProperties()
 {
+  _sensitivity[_qp] = _current_elem->volume() * _cost[_qp] +
+                      _current_elem->volume() * _design_density[_qp] * _dcostdrho[_qp];
 
-  // Compute the derivative of the compliance with respect to the design density
-  // _power-2 because StrainEnergyDensity needed to be divided by the _design_density
-  Real derivative = -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 1) * 1.0;
-
-  // This makes the sensitivity mesh size independent
-  _sensitivity[_qp] = derivative;
-
-  _design_density[_qp];
-  _current_elem->volume();
-
-  // C_e (rho_e) = A_c rho^{1/p} + B_c; A_c = (C_i - C_{i+1})/(rho_i^{1/p} - rho_{i+1}^{1/p}); B_c = C_i - A_c rho_i^{1/p}
+  // C_e (rho_e) = A_c rho^{1/p} + B_c; A_c = (C_i - C_{i+1})/(rho_i^{1/p} - rho_{i+1}^{1/p}); B_c =
+  // C_i - A_c rho_i^{1/p}
 }
