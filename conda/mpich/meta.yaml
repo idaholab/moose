@@ -1,14 +1,12 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   petsc/
-#   libmesh-vtk/
-#   libmesh/
-#   template/
-#   moose/
-#   moose-dev/
+#   petsc/*
+#   libmesh-vtk/*
+#   peacock/*
 #
+# As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 8 %}
+{% set build = 9 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
@@ -29,35 +27,32 @@ build:
 
 requirements:
   build:
-    - {{ base_mpich }}
-    - {{ base_mpicc }}
-    - {{ base_mpicxx }}
-    - {{ base_mpifort }}
-    - {{ moose_libgfortran }}
-    - {{ moose_libgfortran5 }}
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
     - {{ moose_hdf5 }}
-    - {{ moose_ld64 }}          # [osx]
-    - make
-    - libtool
-    - autoconf
-    - automake 1.16.1
-    - m4
-  host: []
+    - {{ moose_krb5 }}
+    - {{ moose_icu }}
+    - {{ moose_libclang }}
+    - {{ moose_libclang13 }}
+    - {{ moose_clangcc }}       # [osx]
+    - {{ moose_clangxx }}       # [osx]
   run:
-    - {{ base_mpich }}
-    - {{ base_mpicc }}
-    - {{ base_mpicxx }}
-    - {{ base_mpifort }}
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
     - {{ moose_libgfortran }}
     - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
+    - {{ moose_krb5 }}
+    - {{ moose_icu }}
     - {{ moose_ld64 }}          # [osx]
-    - cmake
-    - make
-    - libtool
-    - autoconf
-    - automake 1.16.1
-    - m4
+    - {{ moose_libclang }}      # [osx]
+    - {{ moose_libclang13 }}    # [osx]
+    - {{ moose_clangcc }}       # [osx]
+    - {{ moose_clangxx }}       # [osx]
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
@@ -67,6 +62,13 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
+    - cmake
+    - make
+    - libtool
+    - autoconf
+    - automake 1.16.5
+    - m4
+    - zfp 0.5.5
     - mpi 1.0 mpich
   # Python min/max constraints
   run_constrained:

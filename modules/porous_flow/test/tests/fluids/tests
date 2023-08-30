@@ -139,6 +139,7 @@
     csvdiff = 'simple_fluid_yr_MPa_C_out.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
+    installation_type = in_tree
     requirement = "The system shall be able to use equations of state from the FluidProperties module for a single-component fluid and specify the time unit in years, the pressure unit in MPa and the temperature unit in Celsius, and this functionality shall be available through the PorousFlowActions."
     issues = "#13154 #16841"
     design = 'PorousFlowSingleComponentFluid.md PorousFlowFullySaturated.md'

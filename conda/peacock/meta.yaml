@@ -1,5 +1,10 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
 {% set build = 0 %}
-{% set version = "2022.12.05" %}
+{% set version = "2023.08.17" %}
 
 package:
   name: moose-peacock
@@ -10,27 +15,26 @@ source:
 
 build:
   number: {{ build }}
-  pin_depends: strict
 
 requirements:
-  build:
-    - {{ moose_python }}
-    - setuptools
   run:
-    - {{ moose_pyqt }}
-    - {{ moose_qt }}
-    - {{ moose_matplotlib }}
-    - {{ moose_vtk }}
-    - pandas
+    - {{ moose_mpich }}
     - python
-    - setuptools
+    - trame <=2.5.0
+    - pyaml
+    - numpy
+    - paraview
+    - pandas
+    - pyqt
+  # Python min/max constraints
+  run_constrained:
+    - python <{{3.11}}
 
 test:
   imports:
     - PyQt5
-    - matplotlib
     - pandas
-    - vtk
+    - matplotlib
 
 about:
   home: https://mooseframework.org/

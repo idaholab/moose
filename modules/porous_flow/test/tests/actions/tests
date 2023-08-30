@@ -183,6 +183,7 @@
     type = 'CSVDiff'
     input = multiblock.i
     threading = '!pthreads'
+    installation_type = in_tree
     csvdiff = 'multiblock_out.csv'
     requirement = "PorousFlow shall be able to be block-restricted, specifically so that a model's physics is governed by PorousFlow only on part of the mesh"
     issues = '#20260'

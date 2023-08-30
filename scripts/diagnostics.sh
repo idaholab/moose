@@ -57,7 +57,7 @@ diagnose_root() {
 }
 
 diagnose_environment() {
-    write_to_stdout "\nENVIRONMENT:\n`env`"
+    write_to_stdout "\nENVIRONMENT:\n`env | sort`"
 }
 
 diagnose_cpus() {

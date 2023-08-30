@@ -51,6 +51,7 @@
     input = 'theis_nonisothermal.i'
     csvdiff = "theis_nonisothermal_out.csv"
     threading = '!pthreads'
+    installation_type = in_tree
     requirement = 'The system shall evolve a gas phase as a gas component is added in a nonisothermal water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818 #10167'
@@ -109,6 +110,7 @@
     input = 'theis_brineco2_nonisothermal.i'
     csvdiff = "theis_brineco2_nonisothermal_out.csv"
     threading = '!pthreads'
+    installation_type = in_tree
     requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase in a nonisothermal model.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #10167'

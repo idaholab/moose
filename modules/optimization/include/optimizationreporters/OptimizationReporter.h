@@ -9,17 +9,24 @@
 
 #pragma once
 
+#include "OptimizationData.h"
 #include "OptimizationReporterBase.h"
 
 /**
  * Computes gradient and contains reporters for communicating between optimizeSolve and subapps
  */
-class OptimizationReporter : public OptimizationReporterBase
+class OptimizationReporter : public OptimizationDataTempl<OptimizationReporterBase>
 {
+
 public:
   static InputParameters validParams();
   OptimizationReporter(const InputParameters & parameters);
 
+  virtual Real computeObjective() override;
+  virtual void setMisfitToSimulatedValues() override;
+
+protected:
 private:
-  std::vector<Real> fillParamsVector(std::string type, Real default_value) const;
+  void setICsandBounds();
+  virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };

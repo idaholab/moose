@@ -1,9 +1,10 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   template/
-#   moose/
-#   moose-dev/
-{% set build = 1 %}
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2023.07.26" %}
 {% set vtk_friendly_version = "9.2" %}
@@ -26,13 +27,11 @@ build:
 
 requirements:
   build:
-    - {{ moose_mpich }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - libpng
   run:
-    - {{ moose_mpich }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
     - pkg-config

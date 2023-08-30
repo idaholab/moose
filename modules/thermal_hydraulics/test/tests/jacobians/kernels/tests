@@ -34,6 +34,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    installation_type = in_tree
   []
   [one_d_energy_wall_heating]
     type = 'PetscJacobianTester'

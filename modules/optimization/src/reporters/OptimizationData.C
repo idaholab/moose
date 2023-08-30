@@ -7,20 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "GeneralReporter.h"
 #include "OptimizationData.h"
-#include "DelimitedFileReader.h"
-#include "SystemBase.h"
 
 registerMooseObject("OptimizationApp", OptimizationData);
 
+template <typename T>
 InputParameters
-OptimizationData::validParams()
+OptimizationDataTempl<T>::validParams()
 {
-  InputParameters params = GeneralReporter::validParams();
+  InputParameters params = T::validParams();
 
   params.addClassDescription(
       "Reporter to hold measurement and simulation data for optimization problems");
-
   params.addParam<std::vector<Real>>(
       "measurement_values",
       "Measurement values collected from locations given by measurement_points");
@@ -59,44 +58,47 @@ OptimizationData::validParams()
   return params;
 }
 
-OptimizationData::OptimizationData(const InputParameters & parameters)
-  : GeneralReporter(parameters),
-    _measurement_xcoord(
-        declareValueByName<std::vector<Real>>("measurement_xcoord", REPORTER_MODE_REPLICATED)),
-    _measurement_ycoord(
-        declareValueByName<std::vector<Real>>("measurement_ycoord", REPORTER_MODE_REPLICATED)),
-    _measurement_zcoord(
-        declareValueByName<std::vector<Real>>("measurement_zcoord", REPORTER_MODE_REPLICATED)),
-    _measurement_time(
-        declareValueByName<std::vector<Real>>("measurement_time", REPORTER_MODE_REPLICATED)),
-    _measurement_values(
-        declareValueByName<std::vector<Real>>("measurement_values", REPORTER_MODE_REPLICATED)),
-    _simulation_values(
-        declareValueByName<std::vector<Real>>("simulation_values", REPORTER_MODE_REPLICATED)),
-    _misfit_values(declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED))
+template <typename T>
+OptimizationDataTempl<T>::OptimizationDataTempl(const InputParameters & parameters)
+  : T(parameters),
+    _measurement_xcoord(this->template declareValueByName<std::vector<Real>>(
+        "measurement_xcoord", REPORTER_MODE_REPLICATED)),
+    _measurement_ycoord(this->template declareValueByName<std::vector<Real>>(
+        "measurement_ycoord", REPORTER_MODE_REPLICATED)),
+    _measurement_zcoord(this->template declareValueByName<std::vector<Real>>(
+        "measurement_zcoord", REPORTER_MODE_REPLICATED)),
+    _measurement_time(this->template declareValueByName<std::vector<Real>>(
+        "measurement_time", REPORTER_MODE_REPLICATED)),
+    _measurement_values(this->template declareValueByName<std::vector<Real>>(
+        "measurement_values", REPORTER_MODE_REPLICATED)),
+    _simulation_values(this->template declareValueByName<std::vector<Real>>(
+        "simulation_values", REPORTER_MODE_REPLICATED)),
+    _misfit_values(this->template declareValueByName<std::vector<Real>>("misfit_values",
+                                                                        REPORTER_MODE_REPLICATED))
 {
   // read in data
-  if (isParamValid("measurement_file") && isParamValid("measurement_points"))
+  if (this->isParamValid("measurement_file") && this->isParamValid("measurement_points"))
     mooseError("Input file can only define a single input for measurement data. Use only "
                "measurement_file or measurement_points, but never both");
-  else if (isParamValid("measurement_file"))
+  else if (this->isParamValid("measurement_file"))
     readMeasurementsFromFile();
-  else if (isParamValid("measurement_points"))
+  else if (this->isParamValid("measurement_points"))
     readMeasurementsFromInput();
 
   _misfit_values.resize(_measurement_values.size());
 
-  if (isParamValid("variable"))
+  if (this->isParamValid("variable"))
   {
-    std::vector<VariableName> var_names(getParam<std::vector<VariableName>>("variable"));
+    std::vector<VariableName> var_names(
+        this->template getParam<std::vector<VariableName>>("variable"));
     for (const auto & name : var_names)
-      _var_vec.push_back(&_fe_problem.getVariable(
-          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
+      _var_vec.push_back(&this->_fe_problem.getVariable(
+          this->_tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
   }
-  if (isParamValid("variable_weight_names"))
+  if (this->isParamValid("variable_weight_names"))
   {
     std::vector<std::string> weight_names(
-        getParam<std::vector<std::string>>("variable_weight_names"));
+        this->template getParam<std::vector<std::string>>("variable_weight_names"));
     for (const auto & name : weight_names)
     {
       if (_weight_names_weights_map.count(name) == 1)
@@ -108,21 +110,30 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
         // default is to create a new weight reporter and fill it with 1's
         // these will be overwritten by a reporter transfer.
         _variable_weights.push_back(
-            &declareValueByName<std::vector<Real>>(name, REPORTER_MODE_REPLICATED));
+            &this->template declareValueByName<std::vector<Real>>(name, REPORTER_MODE_REPLICATED));
         _variable_weights.back()->assign(_measurement_xcoord.size(), 1);
       }
     }
   }
-  if (isParamValid("variable") && isParamValid("variable_weight_names") &&
+  if (this->isParamValid("variable") && this->isParamValid("variable_weight_names") &&
       _variable_weights.size() != _var_vec.size())
   {
-    paramError("variable_weight_names",
-               "The same number of names must be in both 'variable_weight_names' and 'variable'.");
+    this->paramError(
+        "variable_weight_names",
+        "The same number of names must be in both 'variable_weight_names' and 'variable'.");
   }
 }
 
+template <typename T>
 void
-OptimizationData::execute()
+OptimizationDataTempl<T>::execute()
+{
+  computeMisfit();
+}
+
+template <typename T>
+void
+OptimizationDataTempl<T>::computeMisfit()
 {
   if (_var_vec.empty())
     return;
@@ -147,7 +158,7 @@ OptimizationData::execute()
                                   : (*_variable_weights[var_index]));
     for (const auto & i : make_range(nvals))
     {
-      if (MooseUtils::absoluteFuzzyEqual(_t, _measurement_time[i]))
+      if (MooseUtils::absoluteFuzzyEqual(this->_t, _measurement_time[i]))
       {
         const Point point(_measurement_xcoord[i], _measurement_ycoord[i], _measurement_zcoord[i]);
         const Real val = sys.point_value(vnum, point, false);
@@ -159,16 +170,17 @@ OptimizationData::execute()
   }
 }
 
+template <typename T>
 void
-OptimizationData::readMeasurementsFromFile()
+OptimizationDataTempl<T>::readMeasurementsFromFile()
 {
-  std::string xName = getParam<std::string>("file_xcoord");
-  std::string yName = getParam<std::string>("file_ycoord");
-  std::string zName = getParam<std::string>("file_zcoord");
-  std::string tName = getParam<std::string>("file_time");
-  std::string valueName = getParam<std::string>("file_value");
+  std::string xName = this->template getParam<std::string>("file_xcoord");
+  std::string yName = this->template getParam<std::string>("file_ycoord");
+  std::string zName = this->template getParam<std::string>("file_zcoord");
+  std::string tName = this->template getParam<std::string>("file_time");
+  std::string valueName = this->template getParam<std::string>("file_value");
   std::vector<std::string> weightNames =
-      getParam<std::vector<std::string>>("file_variable_weights");
+      this->template getParam<std::vector<std::string>>("file_variable_weights");
 
   bool found_x = false;
   bool found_y = false;
@@ -176,7 +188,7 @@ OptimizationData::readMeasurementsFromFile()
   bool found_t = false;
   bool found_value = false;
 
-  MooseUtils::DelimitedFileReader reader(getParam<FileName>("measurement_file"));
+  MooseUtils::DelimitedFileReader reader(this->template getParam<FileName>("measurement_file"));
   reader.read();
 
   auto const & names = reader.getNames();
@@ -187,7 +199,7 @@ OptimizationData::readMeasurementsFromFile()
   {
     // make sure all data columns have the same length
     if (data[i].size() != rows)
-      paramError("file", "Mismatching column lengths in file");
+      this->paramError("file", "Mismatching column lengths in file");
 
     if (names[i] == xName)
     {
@@ -216,23 +228,27 @@ OptimizationData::readMeasurementsFromFile()
     }
     else if (std::find(weightNames.begin(), weightNames.end(), names[i]) != weightNames.end())
     {
-      _weight_names_weights_map.emplace(
-          names[i], &(declareValueByName<std::vector<Real>>(names[i], REPORTER_MODE_REPLICATED)));
+      _weight_names_weights_map.emplace(names[i],
+                                        &(this->template declareValueByName<std::vector<Real>>(
+                                            names[i], REPORTER_MODE_REPLICATED)));
       _weight_names_weights_map[names[i]]->assign(data[i].begin(), data[i].end());
     }
   }
 
   // check if all required columns were found
   if (!found_x)
-    paramError("measurement_file", "Column with name '", xName, "' missing from measurement file");
+    this->paramError(
+        "measurement_file", "Column with name '", xName, "' missing from measurement file");
   if (!found_y)
-    paramError("measurement_file", "Column with name '", yName, "' missing from measurement file");
+    this->paramError(
+        "measurement_file", "Column with name '", yName, "' missing from measurement file");
   if (!found_z)
-    paramError("measurement_file", "Column with name '", zName, "' missing from measurement file");
+    this->paramError(
+        "measurement_file", "Column with name '", zName, "' missing from measurement file");
   if (!found_t)
     _measurement_time.assign(rows, 0);
   if (!found_value)
-    paramError(
+    this->paramError(
         "measurement_file", "Column with name '", valueName, "' missing from measurement file");
   if (_weight_names_weights_map.size() != weightNames.size())
   {
@@ -242,40 +258,44 @@ OptimizationData::readMeasurementsFromFile()
     out += "\n   file_variable_weights names: ";
     for (const auto & name : weightNames)
       out += " " + name;
-    paramError("measurement_file",
-               "Not all of the file_variable_weights names were found in the measurement_file.",
-               out);
+    this->paramError(
+        "measurement_file",
+        "Not all of the file_variable_weights names were found in the measurement_file.",
+        out);
   }
 }
 
+template <typename T>
 void
-OptimizationData::readMeasurementsFromInput()
+OptimizationDataTempl<T>::readMeasurementsFromInput()
 {
-  if (isParamValid("file_variable_weights"))
-    paramError("measurement_values",
-               "file_variable_weights cannot be used with measurement data read from the input "
-               "file, use measure_file input instead.");
+  if (this->isParamValid("file_variable_weights"))
+    this->paramError(
+        "measurement_values",
+        "file_variable_weights cannot be used with measurement data read from the input "
+        "file, use measure_file input instead.");
 
-  for (const auto & p : getParam<std::vector<Point>>("measurement_points"))
+  for (const auto & p : this->template getParam<std::vector<Point>>("measurement_points"))
   {
     _measurement_xcoord.push_back(p(0));
     _measurement_ycoord.push_back(p(1));
     _measurement_zcoord.push_back(p(2));
   }
 
-  if (isParamValid("measurement_times"))
-    _measurement_time = getParam<std::vector<Real>>("measurement_times");
+  if (this->isParamValid("measurement_times"))
+    _measurement_time = this->template getParam<std::vector<Real>>("measurement_times");
   else
     _measurement_time.assign(_measurement_xcoord.size(), 0.0);
 
-  if (isParamValid("measurement_values"))
-    _measurement_values = getParam<std::vector<Real>>("measurement_values");
+  if (this->isParamValid("measurement_values"))
+    _measurement_values = this->template getParam<std::vector<Real>>("measurement_values");
   else
-    paramError("measurement_values", "Input file must contain measurement points and values");
+    this->paramError("measurement_values", "Input file must contain measurement points and values");
 }
 
+template <typename T>
 void
-OptimizationData::errorCheckDataSize()
+OptimizationDataTempl<T>::errorCheckDataSize()
 {
   const std::size_t nvals = _measurement_values.size();
   std::string msg = "";
@@ -294,3 +314,6 @@ OptimizationData::errorCheckDataSize()
                std::to_string(nvals),
                ").");
 }
+
+template class OptimizationDataTempl<GeneralReporter>;
+template class OptimizationDataTempl<OptimizationReporterBase>;

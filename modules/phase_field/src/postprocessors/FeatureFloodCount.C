@@ -2213,14 +2213,9 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   }
 
   out << "\nBBoxes:";
-  Real volume = 0;
   for (const auto & bbox : feature._bboxes)
   {
     out << "\nMax: " << bbox.max() << " Min: " << bbox.min();
-    volume += (bbox.max()(0) - bbox.min()(0)) * (bbox.max()(1) - bbox.min()(1)) *
-              (MooseUtils::absoluteFuzzyEqual(bbox.max()(2), bbox.min()(2))
-                   ? 1
-                   : bbox.max()(2) - bbox.min()(2));
   }
 
   out << "\nStatus: ";

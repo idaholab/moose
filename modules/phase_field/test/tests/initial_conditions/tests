@@ -261,6 +261,7 @@
       type = Exodiff
       input = ClosePackIC.i
       exodiff = ClosePackIC_out.e
+      installation_type = in_tree
 
       detail = 'in 2D, and'
     []

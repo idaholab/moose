@@ -1,5 +1,11 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose/conda_build_config.yaml
+#   template/conda_build_config.yaml
+#
+# As well as any directions pertaining to modifying those files.
 {% set build = 0 %}
-{% set version = "2023.07.26" %}
+{% set version = "2023.08.29" %}
 {% set strbuild = "build_" + build|string %}
 
 package:
@@ -19,6 +25,7 @@ requirements:
     - {{ moose_tools }}
     - {{ moose_libmesh }}
     - {{ moose_wasp }}
+    - {{ moose_peacock }}
 
 about:
   home: https://mooseframework.org/
