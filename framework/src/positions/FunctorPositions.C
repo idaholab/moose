@@ -35,7 +35,7 @@ FunctorPositions::FunctorPositions(const InputParameters & parameters)
   : Positions(parameters), NonADFunctorInterface(this)
 
 {
-  const auto functor_names = getParam<std::vector<MooseFunctorName>>("positions_functors");
+  const auto & functor_names = getParam<std::vector<MooseFunctorName>>("positions_functors");
 
   // Check input sizes
   if (functor_names.size() % 3 != 0)
@@ -55,20 +55,21 @@ void
 FunctorPositions::initialize()
 {
   clearPositions();
-  _positions.resize(_pos_functors.size() / 3);
+  const auto n_positions = _pos_functors.size() / 3;
+  _positions.resize(n_positions);
 
   // Use the mesh center as a global argument for now
   _fe_problem.mesh().errorIfDistributedMesh(type());
   // Locate the origin on the mesh
-  Point p(0, 0, 0);
+  const Point p(0, 0, 0);
   auto pl = _fe_problem.mesh().getMesh().sub_point_locator();
-  auto * elem = (*pl)(p);
+  auto * const elem = (*pl)(p);
   if (!elem)
     mooseError("Origin point not in local mesh, cannot evaluate the functor there");
-  Moose::ElemArg elem_origin = makeElemArg(elem);
+  const Moose::ElemPointArg elem_origin = {elem, p, false};
   const auto t = determineState();
 
-  for (auto i : make_range(_pos_functors.size() / 3))
+  for (auto i : make_range(n_positions))
     _positions[i] = {(*_pos_functors[3 * i])(elem_origin, t),
                      (*_pos_functors[3 * i + 1])(elem_origin, t),
                      (*_pos_functors[3 * i + 2])(elem_origin, t)};
