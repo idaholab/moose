@@ -273,16 +273,20 @@ MeshDiagnosticsGenerator::checkElementOverlap(const std::unique_ptr<MeshBase> & 
         if (!elem->contains_point(*node))
           continue;
 
+        // not overlapping inside the element if part of its nodes
         bool found = false;
         for (auto & elem_node : elem->node_ref_range())
-        {
           if (*node == elem_node)
           {
             found = true;
             break;
           }
-        }
-        if (!found)
+        // not overlapping inside the element if right on its side
+        bool on_a_side = false;
+        for (const auto & elem_side_index : elem->side_index_range())
+          if (elem->side_ptr(elem_side_index)->contains_point(*node, _non_conformality_tol))
+            on_a_side = true;
+        if (!found && !on_a_side)
         {
           num_elem_overlaps++;
           if (num_elem_overlaps < _num_outputs)
@@ -1085,21 +1089,28 @@ void
 MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const
 {
   unsigned int num_negative_elem_qp_jacobians = 0;
+  // Get a high-ish order quadrature
+  auto qrule_dimension = mesh->mesh_dimension();
+  QGauss qrule(qrule_dimension, FIFTH);
+
+  // Use a constant monomial
+  const FEType fe_type(CONSTANT, libMesh::MONOMIAL);
+
   // Check elements (assumes serialized mesh)
   for (const auto & elem : mesh->element_ptr_range())
   {
-    // Get a high-ish order quadrature
-    QGauss qrule(mesh->mesh_dimension(), FOURTH);
-
-    // Use the default element order
-    // We would error if going above what the element can't support
-    const FEType fe_type(elem->default_order(), libMesh::LAGRANGE);
+    // Handle mixed-dimensional meshes
+    if (qrule_dimension != elem->dim())
+    {
+      qrule_dimension = elem->dim();
+      qrule = QGauss(qrule_dimension, FIFTH);
+    }
 
     // Initialize a basic Lagrangian shape function everywhere
     std::unique_ptr<FEBase> fe_elem;
-    if (mesh->mesh_dimension() == 1)
+    if (elem->dim() == 1)
       fe_elem = std::make_unique<FELagrange<1>>(fe_type);
-    if (mesh->mesh_dimension() == 2)
+    if (elem->dim() == 2)
       fe_elem = std::make_unique<FELagrange<2>>(fe_type);
     else
       fe_elem = std::make_unique<FELagrange<3>>(fe_type);
@@ -1128,23 +1139,27 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
                  num_negative_elem_qp_jacobians);
 
   unsigned int num_negative_side_qp_jacobians = 0;
+  // Get a high-ish order side quadrature
+  auto qrule_side_dimension = mesh->mesh_dimension() - 1;
+  QGauss qrule_side(qrule_side_dimension, FIFTH);
+
   // Check element sides
   for (const auto & elem : mesh->element_ptr_range())
   {
+    // Handle mixed-dimensional meshes
+    if (qrule_side_dimension != elem->dim() - 1)
+    {
+      qrule_side_dimension = elem->dim() - 1;
+      qrule_side = QGauss(qrule_side_dimension, FIFTH);
+    }
+
     for (const auto & side : elem->side_index_range())
     {
-      // Get a high-ish order side quadrature
-      QGauss qrule(mesh->mesh_dimension() - 1, FOURTH);
-
-      // Use the default element order
-      // We would error if going above what the element can't support
-      const FEType fe_type(elem->default_side_order(), libMesh::LAGRANGE);
-
       // Initialize a basic Lagrangian shape function everywhere
       std::unique_ptr<FEBase> fe_side;
-      if (mesh->mesh_dimension() == 1)
+      if (elem->dim() == 1)
         fe_side = std::make_unique<FELagrange<1>>(fe_type);
-      if (mesh->mesh_dimension() == 2)
+      if (elem->dim() == 2)
         fe_side = std::make_unique<FELagrange<2>>(fe_type);
       else
         fe_side = std::make_unique<FELagrange<3>>(fe_type);
