@@ -112,30 +112,32 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
             "ratio value, P/D=1.0. It can be set using the PoD parameter in the corresponding "
             "FlowChannel1Phase component"));
       }
-      if (flow_channel.getHeatTransferGeometry() == 0)
+      if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
       {
         mooseError("The Cheng-Todreas correlation was made to be used in rod bundles, your "
                    "geometry type is "
                    "PIPE, please change heat_transfer_geom to ROD_BUNDLE or HEX_ROD_BUNDLE, or "
                    "choose a correlation valid for PIPES");
       }
-      else if (flow_channel.getHeatTransferGeometry() == 1)
+      else if (flow_channel.getHeatTransferGeometry() ==
+               FlowChannelBase::EConvHeatTransGeom::ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "SQUARE";
       }
-      else if (flow_channel.getHeatTransferGeometry() == 2)
+      else if (flow_channel.getHeatTransferGeometry() ==
+               FlowChannelBase::EConvHeatTransGeom::HEX_ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "HEXAGONAL";
       }
-      if (flow_channel.getPipeLocation() == 0)
+      if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::INTERIOR)
       {
         params.set<MooseEnum>("subchannel_type") = "INTERIOR";
       }
-      else if (flow_channel.getPipeLocation() == 1)
+      else if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::EDGE)
       {
         params.set<MooseEnum>("subchannel_type") = "EDGE";
       }
-      else if (flow_channel.getPipeLocation() == 2)
+      else if (flow_channel.getPipeLocation() == FlowChannelBase::EPipeLocation::CORNER)
       {
         params.set<MooseEnum>("subchannel_type") = "CORNER";
       }
@@ -148,11 +150,6 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
   }
 }
 
-void
-Closures1PhaseTHM::addMooseObjectsHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                               const FlowChannelBase & /*flow_channel*/)
-{
-}
 void
 Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, unsigned int i) const
 {
@@ -206,17 +203,19 @@ Closures1PhaseTHM::addWallHTCMaterial(const FlowChannel1Phase & flow_channel, un
             "FlowChannel1Phase component"));
       }
 
-      if (flow_channel.getHeatTransferGeometry() == 0)
+      if (flow_channel.getHeatTransferGeometry() == FlowChannelBase::EConvHeatTransGeom::PIPE)
       {
         mooseError("Weiman's correlation was made to be used in rod bundles, your geometry type is "
                    "PIPE, please change heat_transfer_geom to ROD_BUNDLE or HEX_ROD_BUNDLE, or "
                    "choose a correlation valid for PIPES");
       }
-      else if (flow_channel.getHeatTransferGeometry() == 1)
+      else if (flow_channel.getHeatTransferGeometry() ==
+               FlowChannelBase::EConvHeatTransGeom::ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "SQUARE";
       }
-      else if (flow_channel.getHeatTransferGeometry() == 2)
+      else if (flow_channel.getHeatTransferGeometry() ==
+               FlowChannelBase::EConvHeatTransGeom::HEX_ROD_BUNDLE)
       {
         params.set<MooseEnum>("bundle_array") = "TRIANGULAR";
       }

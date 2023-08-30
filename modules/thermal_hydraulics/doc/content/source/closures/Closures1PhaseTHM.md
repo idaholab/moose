@@ -5,7 +5,7 @@
 The closures added are:
 
 - a wall friction factor for the pressure drop,
-- a wall heat transfer coefficient for heat heat transfer.
+- a wall heat transfer coefficient for heat transfer.
 
 The user can choose between a range of correlations for the heat transfer coefficient and friction factor that covers  pipes to rod-bundles. The following correlations for the heat transfer coefficient are available:
 
