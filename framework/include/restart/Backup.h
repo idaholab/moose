@@ -23,3 +23,5 @@ struct Backup
 
 void dataStore(std::ostream & stream, Backup & backup, void * context);
 void dataLoad(std::istream & stream, Backup & backup, void * context);
+void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context);
+void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context);

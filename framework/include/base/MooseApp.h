@@ -712,7 +712,11 @@ public:
   std::unique_ptr<Backup> backup();
 
   /**
-   * Restore an application from the folder \p folder_base
+   * Restore an application from file
+
+   * @param folder_base The backup folder base
+   * @param for_restart Whether this restoration is explicitly for the first restoration of restart
+   * data
    *
    * You must call finalizeRestore() after this in order to finalize the restoration.
    * The restore process is kept open in order to restore additional data after
@@ -721,25 +725,42 @@ public:
   void restore(const std::filesystem::path & folder_base, const bool for_restart);
 
   /**
-   * Restore a Backup. This sets the App's state.
+   * Restore an application from the backup \p backup
    *
+   * @param backup The backup
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart
-   * data.
+   * data
    *
    * You must call finalizeRestore() after this in order to finalize the restoration.
    * The restore process is kept open in order to restore additional data after
    * the initial restore (that is, the restoration of data that has already been declared).
    */
-  void restore(const bool for_restart);
+  void restore(std::unique_ptr<Backup> backup, const bool for_restart);
+
+  /**
+   * Restores from a "initial" backup, that is, one set in _initial_backup.
+   *
+   * @param for_restart Whether this restoration is explicitly for the first restoration of restart
+   * data
+   *
+   * This is only used for restoration of multiapp subapps, which have been given
+   * a Backup from their parent on initialization. Said Backup is passed to this app
+   * via the "_initial_backup" private input parameter.
+   *
+   * See restore() for more information
+   */
+  void restoreFromInitialBackup(const bool for_restart);
 
   /**
    * Finalizes (closes) the restoration process done in restore().
    *
-   * This releases access to the stream in which the restore was loaded from and
-   * makes it no longer possible to restore additional data.
+   * @return The underlying Backup that was used to do the restoration (if any, will be null when
+   * backed up from file); can be ignored to destruct it
+   *
+   * This releases access to the stream in which the restore was loaded from
+   * and makes it no longer possible to restore additional data.
    */
-
-  void finalizeRestore(const bool retain_backup);
+  std::unique_ptr<Backup> finalizeRestore();
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -933,25 +954,14 @@ public:
   const ExecFlagEnum & getExecuteOnEnum() const { return _execute_flags; }
 
   /**
-   * Method for setting the backup object to be restored at a later time. This method is called
-   * during simulation restart or recover before the application is completely setup. The backup
-   * object set here, will be restored when needed by a call to restore().
+   * @return Whether or not this app currently has an "initial" backup
    *
-   * @param backup The Backup holding the data for the app.
+   * See _initial_backup and restoreFromInitialBackup() for more info.
    */
-  void setBackupObject(std::unique_ptr<Backup> backup);
-
-  /**
-   * Whether or not this MooseApp has cached a Backup to use for restart / recovery
-   */
-  bool hasBackupObject() const;
-
-  /**
-   * @return The underlying cached backup object.
-   *
-   * This will error if a backup is not available (check with hasBackupObject())
-   */
-  const Backup & getBackupObject() const;
+  bool hasInitialBackup() const
+  {
+    return _initial_backup != nullptr && *_initial_backup != nullptr;
+  }
 
   /**
    * Whether to enable automatic scaling by default
@@ -1407,8 +1417,11 @@ private:
   /// Registration for interface objects
   std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>> _interface_registry;
 
-  /// The current backup object (if any)
-  std::unique_ptr<Backup> _current_backup;
+  /// The backup for use in initial setup; this will get set from the _initial_backup
+  /// input parameter that typically gets set from a MultiApp that has a backup
+  /// This is a pointer to a pointer because at the time of construction of the app,
+  /// the backup will not be filled yet.
+  std::unique_ptr<Backup> * const _initial_backup;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

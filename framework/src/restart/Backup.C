@@ -30,3 +30,24 @@ dataLoad(std::istream & stream, Backup & backup, void * context)
   dataLoad(stream, *backup.header, context);
   dataLoad(stream, *backup.data, context);
 }
+
+void
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context)
+{
+  bool has_value = backup != nullptr;
+  dataStore(stream, has_value, nullptr);
+  if (has_value)
+    dataStore(stream, *backup, context);
+}
+
+void
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context)
+{
+  bool has_value;
+  dataLoad(stream, has_value, nullptr);
+  if (has_value)
+  {
+    backup = std::make_unique<Backup>();
+    dataLoad(stream, *backup, context);
+  }
+}

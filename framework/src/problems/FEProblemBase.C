@@ -779,10 +779,10 @@ FEProblemBase::initialSetup()
     TIME_SECTION("restore", 3, "Restoring from backup");
 
     // We could have a cached backup when this app is a sub-app and has been given a Backup
-    if (!_app.hasBackupObject())
+    if (!_app.hasInitialBackup())
       _app.restore(_app.restartFolderBase(_app.getRestartRecoverFileBase()), _app.isRestarting());
     else
-      _app.restore(_app.isRestarting());
+      _app.restoreFromInitialBackup(_app.isRestarting());
 
     if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
         _neighbor_material_props.hasStatefulProperties())
@@ -1199,7 +1199,7 @@ FEProblemBase::initialSetup()
 
   // We do this late to allow objects to get late restartable data
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
-    _app.finalizeRestore(false);
+    _app.finalizeRestore();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
 }

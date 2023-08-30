@@ -332,6 +332,7 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
+  params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -400,7 +401,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _rd_reader(*this, _restartable_data),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),
-    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 {
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
@@ -1224,29 +1226,34 @@ MooseApp::restore(const std::filesystem::path & folder_base, const bool for_rest
 }
 
 void
-MooseApp::restore(const bool for_restart)
+MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 {
   TIME_SECTION("restore", 2, "Restoring Application");
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  if (!hasBackupObject())
-    mooseError("MooseApp::restore(): Cannot call without a cached backup");
+  if (!backup)
+    mooseError("MooseApp::resore(): Provided backup is not initialized");
 
-  auto header = std::move(_current_backup->header);
+  auto header = std::move(backup->header);
   mooseAssert(header, "Header not available");
 
-  auto data = std::move(_current_backup->data);
+  auto data = std::move(backup->data);
   mooseAssert(data, "Data not available");
-
-  _current_backup.reset();
 
   _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
 }
 
 void
-MooseApp::finalizeRestore(const bool retain_backup)
+MooseApp::restoreFromInitialBackup(const bool for_restart)
+{
+  mooseAssert(hasInitialBackup(), "Missing initial backup");
+  restore(std::move(*_initial_backup), for_restart);
+}
+
+std::unique_ptr<Backup>
+MooseApp::finalizeRestore()
 {
   if (!_rd_reader.isRestoring())
     mooseError("MooseApp::finalizeRestore(): Not currently restoring");
@@ -1254,24 +1261,27 @@ MooseApp::finalizeRestore(const bool retain_backup)
   // This gives us access to the underlying streams so that we can return it if needed
   auto input_streams = _rd_reader.clear();
 
-  // If we're asked to retain the backup, we will get the underlying stringstream
-  // and put it back in the current backup
-  if (retain_backup)
-    if (auto header_string_input = dynamic_cast<StringInputStream *>(input_streams.header.get()))
-    {
-      auto data_string_input = dynamic_cast<StringInputStream *>(input_streams.data.get());
-      mooseAssert(data_string_input, "Should also be a string input");
+  std::unique_ptr<Backup> backup;
 
-      auto header_sstream = header_string_input->release();
-      mooseAssert(header_sstream, "Header not available");
+  // Give them back a backup if this restore started from a Backup, in which case
+  // the two streams in the Backup are formed into StringInputStreams
+  if (auto header_string_input = dynamic_cast<StringInputStream *>(input_streams.header.get()))
+  {
+    auto data_string_input = dynamic_cast<StringInputStream *>(input_streams.data.get());
+    mooseAssert(data_string_input, "Should also be a string input");
 
-      auto data_sstream = data_string_input->release();
-      mooseAssert(data_sstream, "Data not available");
+    auto header_sstream = header_string_input->release();
+    mooseAssert(header_sstream, "Header not available");
 
-      _current_backup = std::make_unique<Backup>();
-      _current_backup->header = std::move(header_sstream);
-      _current_backup->data = std::move(data_sstream);
-    }
+    auto data_sstream = data_string_input->release();
+    mooseAssert(data_sstream, "Data not available");
+
+    backup = std::make_unique<Backup>();
+    backup->header = std::move(header_sstream);
+    backup->data = std::move(data_sstream);
+  }
+
+  return backup;
 }
 
 void
@@ -2172,31 +2182,6 @@ void
 MooseApp::setRecover(bool value)
 {
   _recover = value;
-}
-
-void
-MooseApp::setBackupObject(std::unique_ptr<Backup> backup)
-{
-  _current_backup = std::move(backup);
-}
-
-bool
-MooseApp::hasBackupObject() const
-{
-  if (!_current_backup)
-    return false;
-
-  mooseAssert(_current_backup->header, "Null header");
-  mooseAssert(_current_backup->data, "Null data");
-  return true;
-}
-
-const Backup &
-MooseApp::getBackupObject() const
-{
-  if (!hasBackupObject())
-    mooseError("MooseApp::getBackupObject(): The application does not have a stored backup");
-  return *_current_backup;
 }
 
 void

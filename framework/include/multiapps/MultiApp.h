@@ -96,10 +96,9 @@ LocalRankConfig rankConfig(processor_id_type rank,
 /**
  * Helper class for holding Sub-app backups
  *
- * This is an empty struct that simply triggers the storage and load of
- * the backups
+ * Stores the backups and also triggers a backup on store and restore on load
  */
-struct SubAppBackups
+class SubAppBackups : public std::vector<std::unique_ptr<Backup>>
 {
 };
 
@@ -384,13 +383,6 @@ public:
    */
   void setAppOutputFileBase();
 
-  /**
-   * Sets the Backup for app \p i to \p backup.
-   *
-   * Used in the dataLoad of the SubAppBackups
-   */
-  void setAppBackup(const std::size_t i, std::unique_ptr<Backup> backup);
-
 protected:
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const { return _cli_args; }
@@ -611,6 +603,9 @@ protected:
 
   /// Whether to run the child apps with their meshes transformed with the coordinate transforms
   const bool _run_in_position;
+
+  /// The cached subapp backups (passed from the parent app)
+  SubAppBackups & _sub_app_backups;
 
   /// Timers
   const PerfID _solve_step_timer;
