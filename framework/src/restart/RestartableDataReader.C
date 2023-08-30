@@ -322,8 +322,8 @@ RestartableDataReader::requireRestoring() const
   if (!_is_restoring)
     mooseError(
         "The RestartableDataReader is not available for querying as it is not currently restoring");
-  mooseAssert(streams.header, "Header not available");
-  mooseAssert(streams.data, "Data not available");
+  mooseAssert(_streams.header, "Header not available");
+  mooseAssert(_streams.data, "Data not available");
 }
 
 bool
