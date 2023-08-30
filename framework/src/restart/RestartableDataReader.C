@@ -280,8 +280,13 @@ RestartableDataReader::deserializeValue(
   if (stream.tellg() == -1)
     error("An error was encountered when reading from the stream");
 
-  if ((header_entry.position + (std::streampos)header_entry.size) != stream.tellg())
-    error("The data read does not match the data stored");
+  const std::size_t loaded_size = stream.tellg() - header_entry.position;
+  if (loaded_size != header_entry.size)
+    error("The data read does not match the data stored\n\n",
+          "Stored size: ",
+          header_entry.size,
+          "\nLoaded size: ",
+          loaded_size);
 
   value.setRestored(true, {});
 }
