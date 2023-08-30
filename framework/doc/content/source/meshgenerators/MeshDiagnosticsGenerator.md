@@ -3,7 +3,7 @@
 !syntax description /Mesh/MeshDiagnosticsGenerator
 
 !alert note
-This mesh generator currently will only accept serialized / replicated meshes.
+This mesh generator currently will only accept serialized meshes.  This is most easily accomplished by leaving the mesh type set to `replicated`.
 Some of the diagnostics would work as well for distributed meshes, contributions are welcome.
 
 The diagnostics implemented are presented below. The filters and visualization capabilities in Paraview or
@@ -16,7 +16,7 @@ Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_elem
 A minimum and a maximum element volume can be specified to the `MeshDiagnosticsGenerator` using
 the [!param](/Mesh/MeshDiagnosticsGenerator/minimum_element_volumes) and the
 [!param](/Mesh/MeshDiagnosticsGenerator/maximum_element_volumes) parameters.
-This diagnostics is mostly used to detect zero or negative volume elements, from distorted meshes.
+These diagnostics are mostly used to detect zero or negative volume elements, from distorted meshes.
 
 !alert note title=How to fix large elements
 Large elements may be sub-divided using the [RefineBlockGenerator.md] with for example a
@@ -98,14 +98,14 @@ they can be merged together using a [MeshRepairGenerator.md].
 
 Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/search_for_adaptivity_nonconformality) parameter.
 
-In the special case of meshes where uniform h-refinement was performed, the `MeshDiagnosticsGenerator` can detect
+In the special case of meshes where isotropic adaptive h-refinement was performed, the `MeshDiagnosticsGenerator` can detect
 at the interface between coarse and fine elements that the fine elements could be combined into a coarse element.
-The coarse element, if it were refined with MOOSE uniform h-adaptivity, would be refined into the same fine elements as
+The coarse element, if it were refined with MOOSE h-adaptivity, would be refined into the same fine elements as
 originally present in the mesh.
 
-This check will only detect uniform mesh refinement for triangle and quadrilateral 2D elements and, tetrahedral and hexahedral 3D
+This check will only detect mesh refinement for triangle and quadrilateral 2D elements and, tetrahedral and hexahedral 3D
 elements. For tetrahedrals, because the refinement pattern depends on the selection of a diagonal inside the coarse element,
-the check only consider the `tip` fine elements on the four vertex of the coarse element.
+the check only considers the `tip` fine elements on the four vertex of the coarse element.
 
 !alert note
 This check is a heuristic. It will only detect adaptive *uniform* mesh refinement and it will only detect it

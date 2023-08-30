@@ -62,6 +62,10 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("check_local_jacobian",
                              chk_option,
                              "whether to check the local Jacobian for negative values");
+  params.addParam<unsigned int>(
+      "log_length_limit",
+      10,
+      "How many problematic element/nodes/sides/etc are explicitly reported on by each check");
   return params;
 }
 
@@ -79,7 +83,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
-    _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian"))
+    _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
+    _num_outputs(getParam<unsigned int>("log_length_limit"))
 {
   // Check that no secondary parameters have been passed with the main check disabled
   if ((isParamSetByUser("minimum_element_volumes") ||
@@ -94,7 +99,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
-    mooseError("You need to turn on at least one diagnostics. Did you misspell a parameter?");
+    mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
 std::unique_ptr<MeshBase>
@@ -170,19 +175,17 @@ MeshDiagnosticsGenerator::generate()
     {
       if (elem->volume() <= _min_volume)
       {
-        if (num_tiny_elems < 10)
-          _console << "Element too small detected with centroid : " << elem->true_centroid()
-                   << std::endl;
-        else if (num_tiny_elems == 10)
+        if (num_tiny_elems < _num_outputs)
+          _console << "Element too small detected : " << elem->get_info() << std::endl;
+        else if (num_tiny_elems == _num_outputs)
           _console << "Maximum output reached, log is silenced" << std::endl;
         num_tiny_elems++;
       }
       if (elem->volume() >= _max_volume)
       {
-        if (num_big_elems < 10)
-          _console << "Element too large detected with centroid : " << elem->true_centroid()
-                   << std::endl;
-        else if (num_big_elems == 10)
+        if (num_big_elems < _num_outputs)
+          _console << "Element too large detected : " << elem->get_info() << std::endl;
+        else if (num_big_elems == _num_outputs)
           _console << "Maximum output reached, log is silenced" << std::endl;
         num_big_elems++;
       }
@@ -250,9 +253,9 @@ MeshDiagnosticsGenerator::generate()
         if (!found)
         {
           num_elem_overlaps++;
-          if (num_elem_overlaps < 10)
+          if (num_elem_overlaps < _num_outputs)
             _console << "Element overlap detected at : " << *node << std::endl;
-          else if (num_elem_overlaps == 10)
+          else if (num_elem_overlaps == _num_outputs)
             _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
@@ -274,10 +277,9 @@ MeshDiagnosticsGenerator::generate()
       if (overlaps.size() > 1)
       {
         num_elem_overlaps++;
-        if (num_elem_overlaps < 10)
-          _console << "Element overlap detected at a centroid : " << elem->vertex_average()
-                   << std::endl;
-        else if (num_elem_overlaps == 10)
+        if (num_elem_overlaps < _num_outputs)
+          _console << "Element overlap detected with element : " << elem->get_info() << std::endl;
+        else if (num_elem_overlaps == _num_outputs)
           _console << "Maximum output reached, log is silenced" << std::endl;
       }
     }
@@ -333,10 +335,10 @@ MeshDiagnosticsGenerator::generate()
         if (found_non_planar)
         {
           sides_non_planar++;
-          if (sides_non_planar < 10)
-            _console << "Nonplanar side detected at :" << elem->side_ptr(i)->vertex_average()
-                     << std::endl;
-          else if (sides_non_planar == 10)
+          if (sides_non_planar < _num_outputs)
+            _console << "Nonplanar side detected for side " << i
+                     << " of element :" << elem->get_info() << std::endl;
+          else if (sides_non_planar == _num_outputs)
             _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
@@ -378,9 +380,9 @@ MeshDiagnosticsGenerator::generate()
         if (!found_conformal)
         {
           num_nonconformal_nodes++;
-          if (num_nonconformal_nodes < 10)
+          if (num_nonconformal_nodes < _num_outputs)
             _console << "Non-conformality detected at  : " << *node << std::endl;
-          else if (num_nonconformal_nodes == 10)
+          else if (num_nonconformal_nodes == _num_outputs)
             _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
@@ -1023,7 +1025,7 @@ MeshDiagnosticsGenerator::generate()
            num_children_match == 4))
       {
         num_likely_AMR_created_nonconformality++;
-        if (num_likely_AMR_created_nonconformality < 10)
+        if (num_likely_AMR_created_nonconformality < _num_outputs)
         {
           _console << "Detected non-conformality likely created by AMR near" << *node
                    << Moose::stringify(elem_type)
@@ -1032,7 +1034,7 @@ MeshDiagnosticsGenerator::generate()
             _console << elem->id() << " ";
           _console << std::endl;
         }
-        else if (num_likely_AMR_created_nonconformality == 10)
+        else if (num_likely_AMR_created_nonconformality == _num_outputs)
           _console << "Maximum log output reached, silencing output" << std::endl;
       }
     }
@@ -1076,10 +1078,10 @@ MeshDiagnosticsGenerator::generate()
       {
         num_negative_elem_qp_jacobians++;
         const auto msg = std::string(e.what());
-        if (num_negative_elem_qp_jacobians < 10 &&
+        if (num_negative_elem_qp_jacobians < _num_outputs &&
             msg.find("negative Jacobian") != std::string::npos)
           _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
-        else if (num_negative_elem_qp_jacobians == 10)
+        else if (num_negative_elem_qp_jacobians == _num_outputs)
           _console << "Maximum log output reached, silencing output" << std::endl;
         else if (msg.find("negative Jacobian") == std::string::npos)
           _console << e.what() << std::endl;
@@ -1119,15 +1121,17 @@ MeshDiagnosticsGenerator::generate()
         }
         catch (libMesh::LogicError & e)
         {
-          num_negative_side_qp_jacobians++;
           const auto msg = std::string(e.what());
-          if (num_negative_side_qp_jacobians < 10 &&
-              msg.find("negative Jacobian") != std::string::npos)
-            _console << "Negative Jacobian found in side " << side << " of element\n"
-                     << elem->get_info() << std::endl;
-          else if (num_negative_side_qp_jacobians == 10)
-            _console << "Maximum log output reached, silencing output" << std::endl;
-          else if (msg.find("negative Jacobian") == std::string::npos)
+          if (msg.find("negative Jacobian") != std::string::npos)
+          {
+            num_negative_side_qp_jacobians++;
+            if (num_negative_side_qp_jacobians < _num_outputs)
+              _console << "Negative Jacobian found in side " << side << " of element\n"
+                       << elem->get_info() << std::endl;
+            else if (num_negative_side_qp_jacobians == _num_outputs)
+              _console << "Maximum log output reached, silencing output" << std::endl;
+          }
+          else
             _console << e.what() << std::endl;
         }
       }
