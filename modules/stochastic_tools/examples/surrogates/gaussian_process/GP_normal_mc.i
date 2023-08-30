@@ -81,7 +81,6 @@
     tuning_max = ' 100  100'
     iter_adam = 200
     learning_rate_adam = 0.005
-    show_optimization_details = true
   []
 []
 
