@@ -991,7 +991,10 @@ dataStoreSkippable(std::ostream & stream, T & v, void * context)
   std::stringstream data_stream;
   dataStore(data_stream, v, context);
 
-  std::size_t data_stream_size = static_cast<std::size_t>(data_stream.tellp());
+  // We have an extra std::size_t value because the store of
+  // std::stringstream also stores the size
+  std::size_t data_stream_size =
+      static_cast<std::size_t>(data_stream.tellp()) + sizeof(std::size_t);
   dataStore(stream, data_stream_size, nullptr);
 
   dataStore(stream, data_stream, nullptr);
