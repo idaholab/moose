@@ -265,6 +265,9 @@ MeshGenerator::generateInternal()
   // output the current mesh block to file
   if (getParam<bool>("output"))
   {
+    if (!mesh->is_prepared())
+      mesh->prepare_for_use();
+
     if (!getParam<bool>("nemesis"))
     {
       ExodusII_IO exio(*mesh);

@@ -34,7 +34,7 @@
 [BCs]
   [./Periodic]
     [./all]
-      auto_direction = 'x'
+      auto_direction = 'x y'
     [../]
   [../]
 []

@@ -33,21 +33,41 @@ PolycrystalHex::PolycrystalHex(const InputParameters & parameters)
     _x_offset(getParam<Real>("x_offset")),
     _perturbation_percent(getParam<Real>("perturbation_percent"))
 {
+  if (_columnar_3D == false && _dim == 3)
+    mooseError(
+        "PolycrystalHex is supported on 2D domains or 3D domains with the columnar_3D option");
+  if (_grain_num % 2 != 0)
+    mooseError("PolycrystalHex requires an even square number for 2D or columnar 3D");
+
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
 
 void
 PolycrystalHex::precomputeGrainStructure()
 {
-  const unsigned int root = MathUtils::round(std::pow(_grain_num, 1.0 / _dim));
+  unsigned int d = _dim;
+
+  if (_columnar_3D && _dim == 3)
+    d -= 1;
+
+  // check if periodic boundary condition is set
+  for (unsigned int j = 0; j < d; ++j)
+  {
+    for (unsigned int i = 0; i < _vars.size(); ++i)
+      if (!_mesh.isTranslatedPeriodic(_vars[i]->number(), j))
+        mooseError("PolycrystalHex works only with periodic BCs");
+  }
+
+  const unsigned int root = MathUtils::round(std::pow(_grain_num, 1.0 / d));
 
   // integer power the rounded root and check if we recover the grain number
   unsigned int grain_pow = root;
-  for (unsigned int i = 1; i < _dim; ++i)
+  for (unsigned int i = 1; i < d; ++i)
     grain_pow *= root;
 
   if (_grain_num != grain_pow)
-    mooseError("PolycrystalHex requires a square or cubic number depending on the mesh dimension");
+    mooseError(
+        "PolycrystalHex requires a square number for 2D or columnar 3D and a cubic number for 3D");
 
   // Set up domain bounds with mesh tools
   for (const auto i : make_range(Moose::dim))
@@ -67,8 +87,9 @@ PolycrystalHex::precomputeGrainStructure()
   // Assign the relative center points positions, defining the grains according to a hexagonal
   // pattern
   unsigned int count = 0;
-  for (unsigned int k = 0; k < (_dim == 3 ? root : 1); ++k)
-    for (unsigned int j = 0; j < (_dim >= 2 ? root : 1); ++j)
+
+  for (unsigned int k = 0; k < (d == 3 ? root : 1); ++k)
+    for (unsigned int j = 0; j < (d >= 2 ? root : 1); ++j)
       for (unsigned int i = 0; i < root; ++i)
       {
         // set x-coordinate
@@ -99,6 +120,9 @@ PolycrystalHex::precomputeGrainStructure()
         _centerpoints[grain](i) = _top_right(i);
       if (_centerpoints[grain](i) < _bottom_left(i))
         _centerpoints[grain](i) = _bottom_left(i);
+
+      if (_columnar_3D && _dim == 3)
+        _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
     }
 
   buildSearchTree();
