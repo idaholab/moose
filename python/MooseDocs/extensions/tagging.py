@@ -91,13 +91,14 @@ class TaggingExtension(command.CommandExtension):
 
         replace_str = ""
         for iter in self.getAttributeItems():
-            tag_dict_str=str(iter[1])
-            key_list_regex=self._allowed_keys+['data','name', 'path', 'key_vals']
-            for entry in key_list_regex:
-                regex_replace=f"'{entry}':"
-                tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
-            tag_dict_str=re.sub("\s","", tag_dict_str)
-            replace_str += tag_dict_str + ","
+            if bool(re.search('tagger_', iter[0])):
+                tag_dict_str=str(iter[1])
+                key_list_regex=self._allowed_keys+['data','name', 'path', 'key_vals']
+                for entry in key_list_regex:
+                    regex_replace=f"'{entry}':"
+                    tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
+                tag_dict_str=re.sub("\s","", tag_dict_str)
+                replace_str += tag_dict_str + ","
 
         """
         Find and replace 'data:' dict structure within supplied javascript file
@@ -155,6 +156,7 @@ class TaggingCommand(command.CommandComponent):
             msg += name
             LOG.warning(msg)
         else:
-            self.extension.set_tag_data(name, page_data)
+            tag_id_name = "tagger_" + name
+            self.extension.set_tag_data(tag_id_name, page_data)
 
         return parent
