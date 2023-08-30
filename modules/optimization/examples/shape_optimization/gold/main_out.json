@@ -1,0 +1,83 @@
+{
+    "app_name": "main",
+    "current_time": "Wed Aug 30 08:35:42 2023",
+    "executable": "/Users/nezdmn/projects/trout_inputs/trout-opt",
+    "executable_time": "Tue Aug 29 14:39:14 2023",
+    "libmesh_version": "",
+    "moose_version": "git commit be41254d43 on 2023-06-26",
+    "petsc_version": "3.16.6",
+    "reporters": {
+        "OptimizationReporter": {
+            "type": "GeneralOptimization",
+            "values": {
+                "grad_radii": {
+                    "type": "std::vector<double>"
+                },
+                "grad_volume_constraint": {
+                    "type": "std::vector<double>"
+                },
+                "max_temp": {
+                    "type": "double"
+                },
+                "num_radii": {
+                    "type": "int"
+                },
+                "radii": {
+                    "type": "std::vector<double>"
+                },
+                "volume_constraint": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.16.2",
+    "time_steps": [
+        {
+            "OptimizationReporter": {
+                "grad_radii": [
+                    0.0,
+                    0.0
+                ],
+                "grad_volume_constraint": [
+                    -37.69911184307752,
+                    62.83185307179586
+                ],
+                "max_temp": 470.99023854685436,
+                "num_radii": 2,
+                "radii": [
+                    0.0,
+                    0.0
+                ],
+                "volume_constraint": [
+                    0.7391033949401447
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "OptimizationReporter": {
+                "grad_radii": [
+                    0.0,
+                    0.0
+                ],
+                "grad_volume_constraint": [
+                    -7.533200877578601,
+                    50.73524461167519
+                ],
+                "max_temp": 160.34786850878925,
+                "num_radii": 2,
+                "radii": [
+                    -4.801053843029162,
+                    -1.9252350310754454
+                ],
+                "volume_constraint": [
+                    -9.960378974938067e-07
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

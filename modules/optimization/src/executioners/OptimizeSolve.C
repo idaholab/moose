@@ -14,8 +14,9 @@
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
+#include <cstddef>
 #include <petsctao.h>
-
+#include "PetscSupport.h"
 InputParameters
 OptimizeSolve::validParams()
 {
@@ -77,9 +78,6 @@ OptimizeSolve::taoSolve()
   // Initialize tao object
   ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
-  Tao subsolver;
-  ierr = TaoCreate(_my_comm.get(), &subsolver);
-  CHKERRQ(ierr);
 
   TaoSetMonitor(_tao, monitor, this, nullptr);
 
@@ -134,11 +132,6 @@ OptimizeSolve::taoSolve()
       break;
     case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD:
       ierr = TaoSetType(_tao, TAOALMM);
-      CHKERRQ(ierr);
-      ierr = TaoSetType(subsolver, TAOBQNKTR);
-      CHKERRQ(ierr);
-      // set sub solver
-      ierr = TaoALMMSetSubsolver(_tao, subsolver);
       break;
 
     default:
@@ -232,6 +225,7 @@ OptimizeSolve::taoSolve()
     CHKERRQ(ierr);
     ierr = MatSetUp(_gradient_i);
     CHKERRQ(ierr);
+
     if (_obj_function->getNumEqCons())
     { // Set the Equality Constraints
       ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
@@ -242,6 +236,7 @@ OptimizeSolve::taoSolve()
           _tao, _gradient_e, _gradient_e, equalityGradientFunctionWrapper, this);
       CHKERRQ(ierr);
     }
+
     if (_obj_function->getNumInEqCons())
     { // Set the Inequality constraints
       ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
@@ -271,9 +266,6 @@ OptimizeSolve::taoSolve()
   }
 
   ierr = TaoDestroy(&_tao);
-  CHKERRQ(ierr);
-
-  ierr = TaoDestroy(&subsolver);
   CHKERRQ(ierr);
 
   ierr = MatDestroy(&_hessian);
