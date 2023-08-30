@@ -1,20 +1,18 @@
 # ADHeatFlux3EqnBC
 
-!alert construction title=Undocumented Class
-The ADHeatFlux3EqnBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ADHeatFlux3EqnBC
 
-## Overview
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the ADHeatFlux3EqnBC object.
+\begin{equation}
+R_i = (\psi_i, -S q_{wall} P_{hf}) \quad \forall \psi_i,
+\end{equation}
+where $\psi_i$ are the test functions and $q_{wall}$ is the local heat flux, $S$ a scaling factor
+and $P_{hf}$ the heated perimeter.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADHeatFlux3EqnBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by the
+[HeatTransferFromHeatStructure1Phase.md] on the heat structure boundary.
 
 !syntax parameters /BCs/ADHeatFlux3EqnBC
 

@@ -18,8 +18,8 @@ ADHSHeatFluxRZBC::validParams()
   InputParameters params = ADHSHeatFluxBC::validParams();
   params += RZSymmetry::validParams();
 
-  params.addClassDescription(
-      "Applies a specified heat flux to the side of a cylindrical heat structure");
+  params.addClassDescription("Applies a specified heat flux to the side of a cylindrical heat "
+                             "structure in XY coordinates");
 
   return params;
 }

@@ -1,20 +1,20 @@
 # ConvectionHeatTransferBC
 
-!alert construction title=Undocumented Class
-The ConvectionHeatTransferBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ConvectionHeatTransferBC
 
-## Overview
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the ConvectionHeatTransferBC object.
+\begin{equation}
+R_i = (\psi_i, h_{ambient}(t, \vec{x}) (T - T_{ambient}(t, \vec{x}) ) ) \quad \forall \psi_i,
+\end{equation}
 
-## Example Input File Syntax
+where $\psi_i$ are the test functions, $h_{ambient}$ the ambient convection heat transfer coefficient, $T$ the temperature nonlinear
+variable, $T_{ambient}$ the ambient temperature.
 
-!! Describe and include an example of how to use the ConvectionHeatTransferBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADConvectionHeatTransferBC.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /BCs/ConvectionHeatTransferBC
 

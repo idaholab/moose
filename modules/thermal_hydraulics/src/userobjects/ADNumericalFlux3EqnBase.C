@@ -13,6 +13,9 @@ InputParameters
 ADNumericalFlux3EqnBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription(
+      "Base class for retrieving numerical fluxes in the the three-equation model");
+
   return params;
 }
 

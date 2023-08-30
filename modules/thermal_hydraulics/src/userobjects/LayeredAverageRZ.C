@@ -18,6 +18,8 @@ LayeredAverageRZ::validParams()
   params += RZSymmetry::validParams();
   params.addRequiredParam<Real>("length",
                                 "The length of the block in the direction given by 'axis_dir'.");
+  params.addClassDescription(
+      "Computes layered averages of variable for RZ components in a XY coordinate system");
   return params;
 }
 

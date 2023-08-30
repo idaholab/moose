@@ -20,7 +20,7 @@ HeatStructure2DRadiationCouplerRZ::validParams()
   InputParameters params = HeatStructure2DCouplerBase::validParams();
 
   params.addRequiredParam<Real>("primary_emissivity", "Emissivity for the primary side");
-  params.addRequiredParam<Real>("secondary_emissivity", "Emissivity for the primary side");
+  params.addRequiredParam<Real>("secondary_emissivity", "Emissivity for the secondary side");
   params.addParam<Real>("stefan_boltzmann_constant",
                         HeatConduction::Constants::sigma,
                         "Stefan Boltzmann constant [W/(m^2-K^4)]. This constant is provided as a "

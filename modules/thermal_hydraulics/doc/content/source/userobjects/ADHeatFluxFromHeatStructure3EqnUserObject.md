@@ -1,20 +1,18 @@
 # ADHeatFluxFromHeatStructure3EqnUserObject
 
-!alert construction title=Undocumented Class
-The ADHeatFluxFromHeatStructure3EqnUserObject has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /UserObjects/ADHeatFluxFromHeatStructure3EqnUserObject
 
-## Overview
+The heat flux $q$ is computed as:
 
-!! Replace these lines with information regarding the ADHeatFluxFromHeatStructure3EqnUserObject object.
+!equation
+q = H_{wall} (T_{wall} - T)
 
-## Example Input File Syntax
+where $H_{wall}$ is the wall heat transfer coefficient, $T_{wall}$ is the wall temperature on the
+heat structure side, and $T$ is the fluid temperature.
 
-!! Describe and include an example of how to use the ADHeatFluxFromHeatStructure3EqnUserObject object.
+!alert note
+This user object is created automatically by the [HeatTransferFromHeatStructure1Phase.md]
+component, users do not need to add it to an input file.
 
 !syntax parameters /UserObjects/ADHeatFluxFromHeatStructure3EqnUserObject
 

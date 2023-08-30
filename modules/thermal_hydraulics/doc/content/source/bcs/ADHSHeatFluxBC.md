@@ -1,20 +1,19 @@
 # ADHSHeatFluxBC
 
-!alert construction title=Undocumented Class
-The ADHSHeatFluxBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ADHSHeatFluxBC
 
-## Overview
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the ADHSHeatFluxBC object.
+\begin{equation}
+R_i = (\psi_i, - S_{pp} S_{fn}(t, \vec{x}) F(t, \vec{x})) \quad \forall \psi_i,
+\end{equation}
 
-## Example Input File Syntax
+where $\psi_i$ are the test functions, $S_{pp}$ a postprocessor scaling factor, $S_{fn}$ a scaling
+function, $F(t, \vec{x})$ a function providing the heat flux.
 
-!! Describe and include an example of how to use the ADHSHeatFluxBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by the
+[HSBoundaryHeatFlux.md] boundary heat structure.
 
 !syntax parameters /BCs/ADHSHeatFluxBC
 

@@ -22,7 +22,7 @@ InputParameters
 THMMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
-  // we do not allow renumbering, becuase we generate our meshes
+  // we do not allow renumbering, because we generate our meshes
   params.set<bool>("allow_renumbering") = false;
   return params;
 }

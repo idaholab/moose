@@ -23,6 +23,7 @@ HeatFluxBaseBC::validParams()
   params.addRequiredParam<unsigned int>("n_unit", "Number of units of heat structure");
   params.addRequiredParam<bool>("hs_coord_system_is_cylindrical",
                                 "Is the heat structure coordinate system cylindrical?");
+  params.addClassDescription("Base class for heat flux boundary conditions");
   return params;
 }
 

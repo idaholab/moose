@@ -13,6 +13,7 @@ InputParameters
 ADBoundaryFluxBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Base class for computing boundary fluxes");
   return params;
 }
 

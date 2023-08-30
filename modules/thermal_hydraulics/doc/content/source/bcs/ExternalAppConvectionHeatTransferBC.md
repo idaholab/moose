@@ -1,20 +1,22 @@
 # ExternalAppConvectionHeatTransferBC
 
-!alert construction title=Undocumented Class
-The ExternalAppConvectionHeatTransferBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ExternalAppConvectionHeatTransferBC
 
-## Overview
+The contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the ExternalAppConvectionHeatTransferBC object.
+\begin{equation}
+R_i = (\psi_i, S_{pp} S_{fn}(t, \vec{x}) h_{ext} (T - T_{ext}) ) \quad \forall \psi_i,
+\end{equation}
 
-## Example Input File Syntax
+where $\psi_i$ are the test functions, $S_{pp}$ a postprocessor scaling factor, $S_{fn}$ a scaling
+function, $h_{ext}$ is the heat transfer coefficient variable provided by the external application,
+$T$ is the temperature variable on the heat structure, and $T_{ext}$ the temperature variable provided by the
+external application
 
-!! Describe and include an example of how to use the ExternalAppConvectionHeatTransferBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADExternalAppConvectionHeatTransferBC.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /BCs/ExternalAppConvectionHeatTransferBC
 

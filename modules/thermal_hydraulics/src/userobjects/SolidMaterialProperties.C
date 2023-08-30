@@ -15,6 +15,8 @@ InputParameters
 SolidMaterialProperties::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription(
+      "User object to compute solid material properties using functions of temperature");
   params.addRequiredParam<FunctionName>("k", "Thermal conductivity [W/(m-K)]");
   params.addDeprecatedParam<FunctionName>(
       "Cp",

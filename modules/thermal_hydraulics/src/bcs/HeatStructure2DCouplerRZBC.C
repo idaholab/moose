@@ -17,8 +17,8 @@ HeatStructure2DCouplerRZBC::validParams()
   InputParameters params = HeatStructure2DCouplerBC::validParams();
   params += RZSymmetry::validParams();
 
-  params.addClassDescription(
-      "Applies BC for HeatStructure2DCoupler for cylindrical heat structure");
+  params.addClassDescription("Applies BC for HeatStructure2DCoupler for cylindrical heat structure "
+                             "in a XY coordinate system");
 
   return params;
 }

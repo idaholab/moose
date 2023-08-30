@@ -18,7 +18,7 @@ HSCoupler2D3DBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
 
   params.addRequiredParam<UserObjectName>("hs_coupler_2d3d_uo", "The HSCoupler2D3D user object");
-  params.addClassDescription("Adds heat flux terms for HSCoupler2D3D");
+  params.addClassDescription("Adds boundary heat flux terms for HSCoupler2D3D");
 
   return params;
 }
