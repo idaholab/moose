@@ -29,6 +29,23 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
 private:
+  /// Routine to check sideset orientation near subdomains
+  void checkSidesetsOrientation(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check the element volumes
+  void checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check the element types in each subdomain
+  void checkElementTypes(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check whether elements overlap in the mesh
+  void checkElementOverlap(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check whether there are non-planar sides in the mesh
+  void checkNonPlanarSides(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check whether a mesh presents non-conformality
+  void checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check whether a mesh presents non-conformality born from adaptivity
+  void checkNonConformalMeshFromAdaptivity(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check whether the Jacobians (elem and side) are not negative
+  void checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const;
+
   /**
    * Utility routine to output the final diagnostics level in the desired mode
    * @param msg the message to output
@@ -73,4 +90,6 @@ private:
   const MooseEnum _check_adaptivity_non_conformality;
   /// whether to check for negative jacobians in the domain
   const MooseEnum _check_local_jacobian;
+  /// number of logs to output at most for each check
+  const unsigned int _num_outputs;
 };

@@ -116,116 +116,148 @@ MeshDiagnosticsGenerator::generate()
   mesh->prepare_for_use();
 
   if (_check_sidesets_orientation != "NO_CHECK")
-  {
-    auto & boundary_info = mesh->get_boundary_info();
-    auto side_tuples = boundary_info.build_side_list();
-
-    for (const auto bid : boundary_info.get_boundary_ids())
-    {
-      // This check only looks at subdomains on both sides of the sideset
-      // it wont pick up if the sideset is changing orientations while inside of a subdomain
-      std::set<std::pair<subdomain_id_type, subdomain_id_type>> block_neighbors;
-      for (const auto index : index_range(side_tuples))
-      {
-        if (std::get<2>(side_tuples[index]) != bid)
-          continue;
-        const auto elem_ptr = mesh->elem_ptr(std::get<0>(side_tuples[index]));
-        if (elem_ptr->neighbor_ptr(std::get<1>(side_tuples[index])))
-          block_neighbors.insert(std::make_pair(
-              elem_ptr->subdomain_id(),
-              elem_ptr->neighbor_ptr(std::get<1>(side_tuples[index]))->subdomain_id()));
-      }
-
-      // Check that there is no flipped pair
-      std::set<std::pair<subdomain_id_type, subdomain_id_type>> flipped_pairs;
-      for (const auto & block_pair_1 : block_neighbors)
-        for (const auto & block_pair_2 : block_neighbors)
-          if (block_pair_1 != block_pair_2)
-            if (block_pair_1.first == block_pair_2.second &&
-                block_pair_1.second == block_pair_2.first)
-              flipped_pairs.insert(block_pair_1);
-
-      std::string message;
-      const std::string sideset_full_name =
-          boundary_info.sideset_name(bid) + " (" + std::to_string(bid) + ")";
-      if (!flipped_pairs.empty())
-      {
-        std::string block_pairs_string = "";
-        for (const auto & pair : flipped_pairs)
-          block_pairs_string +=
-              " [" + mesh->subdomain_name(pair.first) + " (" + std::to_string(pair.first) + "), " +
-              mesh->subdomain_name(pair.second) + " (" + std::to_string(pair.second) + ")]";
-        message = "Inconsistent orientation of sideset " + sideset_full_name +
-                  " with regards to subdomain pairs" + block_pairs_string;
-      }
-      else
-        message = "Sideset " + sideset_full_name +
-                  " is consistently oriented with regards to the blocks it neighbors";
-
-      diagnosticsLog(message, _check_sidesets_orientation, flipped_pairs.size());
-    }
-  }
+    checkSidesetsOrientation(mesh);
 
   if (_check_element_volumes != "NO_CHECK")
-  {
-    unsigned int num_tiny_elems = 0;
-    unsigned int num_big_elems = 0;
-    // loop elements within the mesh (assumes replicated)
-    for (auto & elem : mesh->active_element_ptr_range())
-    {
-      if (elem->volume() <= _min_volume)
-      {
-        if (num_tiny_elems < _num_outputs)
-          _console << "Element too small detected : " << elem->get_info() << std::endl;
-        else if (num_tiny_elems == _num_outputs)
-          _console << "Maximum output reached, log is silenced" << std::endl;
-        num_tiny_elems++;
-      }
-      if (elem->volume() >= _max_volume)
-      {
-        if (num_big_elems < _num_outputs)
-          _console << "Element too large detected : " << elem->get_info() << std::endl;
-        else if (num_big_elems == _num_outputs)
-          _console << "Maximum output reached, log is silenced" << std::endl;
-        num_big_elems++;
-      }
-    }
-    diagnosticsLog("Number of elements below prescribed volume : " + std::to_string(num_tiny_elems),
-                   _check_element_volumes,
-                   num_tiny_elems);
-    diagnosticsLog("Number of elements above prescribed volume : " + std::to_string(num_big_elems),
-                   _check_element_volumes,
-                   num_big_elems);
-  }
+    checkElementVolumes(mesh);
 
   if (_check_element_types != "NO_CHECK")
-  {
-    std::set<subdomain_id_type> ids;
-    mesh->subdomain_ids(ids);
-    // loop on sub-domain
-    for (auto & id : ids)
-    {
-      // ElemType defines an enum for geometric element types
-      std::set<ElemType> types;
-      // loop on elements within this sub-domain
-      for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
-        types.insert(elem->type());
-
-      std::string elem_type_names = "";
-      for (auto & elem_type : types)
-        elem_type_names += " " + Moose::stringify(elem_type);
-
-      _console << "Element type in subdomain " + mesh->subdomain_name(id) + " (" +
-                      std::to_string(id) + ") :" + elem_type_names
-               << std::endl;
-      if (types.size() > 1)
-        diagnosticsLog("Two different element types in subdomain " + std::to_string(id),
-                       _check_element_types,
-                       true);
-    }
-  }
+    checkElementTypes(mesh);
 
   if (_check_element_overlap != "NO_CHECK")
+    checkElementOverlap(mesh);
+
+  if (_check_non_planar_sides != "NO_CHECK")
+    checkNonPlanarSides(mesh);
+
+  if (_check_non_conformal_mesh != "NO_CHECK")
+    checkNonConformalMesh(mesh);
+
+  if (_check_adaptivity_non_conformality != "NO_CHECK")
+    checkNonConformalMeshFromAdaptivity(mesh);
+
+  if (_check_local_jacobian != "NO_CHECK")
+    checkLocalJacobians(mesh);
+
+  return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBase> & mesh) const
+{
+  auto & boundary_info = mesh->get_boundary_info();
+  auto side_tuples = boundary_info.build_side_list();
+
+  for (const auto bid : boundary_info.get_boundary_ids())
+  {
+    // This check only looks at subdomains on both sides of the sideset
+    // it wont pick up if the sideset is changing orientations while inside of a subdomain
+    std::set<std::pair<subdomain_id_type, subdomain_id_type>> block_neighbors;
+    for (const auto index : index_range(side_tuples))
+    {
+      if (std::get<2>(side_tuples[index]) != bid)
+        continue;
+      const auto elem_ptr = mesh->elem_ptr(std::get<0>(side_tuples[index]));
+      if (elem_ptr->neighbor_ptr(std::get<1>(side_tuples[index])))
+        block_neighbors.insert(std::make_pair(
+            elem_ptr->subdomain_id(),
+            elem_ptr->neighbor_ptr(std::get<1>(side_tuples[index]))->subdomain_id()));
+    }
+
+    // Check that there is no flipped pair
+    std::set<std::pair<subdomain_id_type, subdomain_id_type>> flipped_pairs;
+    for (const auto & block_pair_1 : block_neighbors)
+      for (const auto & block_pair_2 : block_neighbors)
+        if (block_pair_1 != block_pair_2)
+          if (block_pair_1.first == block_pair_2.second &&
+              block_pair_1.second == block_pair_2.first)
+            flipped_pairs.insert(block_pair_1);
+
+    std::string message;
+    const std::string sideset_full_name =
+        boundary_info.sideset_name(bid) + " (" + std::to_string(bid) + ")";
+    if (!flipped_pairs.empty())
+    {
+      std::string block_pairs_string = "";
+      for (const auto & pair : flipped_pairs)
+        block_pairs_string +=
+            " [" + mesh->subdomain_name(pair.first) + " (" + std::to_string(pair.first) + "), " +
+            mesh->subdomain_name(pair.second) + " (" + std::to_string(pair.second) + ")]";
+      message = "Inconsistent orientation of sideset " + sideset_full_name +
+                " with regards to subdomain pairs" + block_pairs_string;
+    }
+    else
+      message = "Sideset " + sideset_full_name +
+                " is consistently oriented with regards to the blocks it neighbors";
+
+    diagnosticsLog(message, _check_sidesets_orientation, flipped_pairs.size());
+  }
+}
+
+void
+MeshDiagnosticsGenerator::checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_tiny_elems = 0;
+  unsigned int num_big_elems = 0;
+  // loop elements within the mesh (assumes replicated)
+  for (auto & elem : mesh->active_element_ptr_range())
+  {
+    if (elem->volume() <= _min_volume)
+    {
+      if (num_tiny_elems < _num_outputs)
+        _console << "Element too small detected : " << elem->get_info() << std::endl;
+      else if (num_tiny_elems == _num_outputs)
+        _console << "Maximum output reached, log is silenced" << std::endl;
+      num_tiny_elems++;
+    }
+    if (elem->volume() >= _max_volume)
+    {
+      if (num_big_elems < _num_outputs)
+        _console << "Element too large detected : " << elem->get_info() << std::endl;
+      else if (num_big_elems == _num_outputs)
+        _console << "Maximum output reached, log is silenced" << std::endl;
+      num_big_elems++;
+    }
+  }
+  diagnosticsLog("Number of elements below prescribed volume : " + std::to_string(num_tiny_elems),
+                 _check_element_volumes,
+                 num_tiny_elems);
+  diagnosticsLog("Number of elements above prescribed volume : " + std::to_string(num_big_elems),
+                 _check_element_volumes,
+                 num_big_elems);
+}
+
+void
+MeshDiagnosticsGenerator::checkElementTypes(const std::unique_ptr<MeshBase> & mesh) const
+{
+  std::set<subdomain_id_type> ids;
+  mesh->subdomain_ids(ids);
+  // loop on sub-domain
+  for (auto & id : ids)
+  {
+    // ElemType defines an enum for geometric element types
+    std::set<ElemType> types;
+    // loop on elements within this sub-domain
+    for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
+      types.insert(elem->type());
+
+    std::string elem_type_names = "";
+    for (auto & elem_type : types)
+      elem_type_names += " " + Moose::stringify(elem_type);
+
+    _console << "Element type in subdomain " + mesh->subdomain_name(id) + " (" +
+                    std::to_string(id) + ") :" + elem_type_names
+             << std::endl;
+    if (types.size() > 1)
+      diagnosticsLog("Two different element types in subdomain " + std::to_string(id),
+                     _check_element_types,
+                     true);
+  }
+}
+
+void
+MeshDiagnosticsGenerator::checkElementOverlap(const std::unique_ptr<MeshBase> & mesh) const
+{
   {
     unsigned int num_elem_overlaps = 0;
     auto pl = mesh->sub_point_locator();
@@ -288,860 +320,861 @@ MeshDiagnosticsGenerator::generate()
                    _check_element_overlap,
                    num_elem_overlaps);
   }
+}
 
-  if (_check_non_planar_sides != "NO_CHECK")
+void
+MeshDiagnosticsGenerator::checkNonPlanarSides(const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int sides_non_planar = 0;
+  // loop on all elements in mesh: assumes a replicated mesh
+  for (auto & elem : mesh->active_element_ptr_range())
   {
-    unsigned int sides_non_planar = 0;
-    // loop on all elements in mesh: assumes a replicated mesh
-    for (auto & elem : mesh->active_element_ptr_range())
+    for (auto i : make_range(elem->n_sides()))
     {
+      auto side = elem->side_ptr(i);
+      std::vector<const Point *> nodes;
+      for (auto & node : side->node_ref_range())
+        nodes.emplace_back(&node);
+
+      if (nodes.size() <= 3)
+        continue;
+      // First vector of the base
+      const RealVectorValue v1 = *nodes[0] - *nodes[1];
+
+      // Find another node so that we can form a basis. It should just be node 0, 1, 2
+      // to form two independent vectors, but degenerate elements can make them aligned
+      bool aligned = true;
+      unsigned int third_node_index = 2;
+      RealVectorValue v2;
+      while (aligned && third_node_index < nodes.size())
+      {
+        v2 = *nodes[0] - *nodes[third_node_index++];
+        aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
+      }
+
+      // Degenerate element, could not find a third node that is not aligned
+      if (aligned)
+        continue;
+
+      bool found_non_planar = false;
+
+      for (auto node_offset : make_range(nodes.size() - 3))
+      {
+        RealVectorValue v3 = *nodes[0] - *nodes[node_offset + 3];
+        bool planar = MooseUtils::absoluteFuzzyEqual(v2.cross(v1) * v3, 0);
+        if (!planar)
+          found_non_planar = true;
+      }
+
+      if (found_non_planar)
+      {
+        sides_non_planar++;
+        if (sides_non_planar < _num_outputs)
+          _console << "Nonplanar side detected for side " << i
+                   << " of element :" << elem->get_info() << std::endl;
+        else if (sides_non_planar == _num_outputs)
+          _console << "Maximum output reached, log is silenced" << std::endl;
+      }
+    }
+  }
+  diagnosticsLog("Number of non-planar element sides detected: " +
+                     Moose::stringify(sides_non_planar),
+                 _check_non_planar_sides,
+                 sides_non_planar);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_nonconformal_nodes = 0;
+  auto pl = mesh->sub_point_locator();
+  pl->set_close_to_point_tol(_non_conformality_tol);
+
+  // loop on nodes, assumes a replicated mesh
+  for (auto & node : mesh->node_ptr_range())
+  {
+    // find all the elements around this node
+    std::set<const Elem *> elements;
+    (*pl)(*node, elements);
+
+    // loop through the set of elements near this node
+    for (auto & elem : elements)
+    {
+      // If the node is not part of this element's nodes, it is a
+      // case of non-conformality
+      bool found_conformal = false;
+
+      for (auto & elem_node : elem->node_ref_range())
+      {
+        if (*node == elem_node)
+        {
+          found_conformal = true;
+          break;
+        }
+      }
+      if (!found_conformal)
+      {
+        num_nonconformal_nodes++;
+        if (num_nonconformal_nodes < _num_outputs)
+          _console << "Non-conformality detected at  : " << *node << std::endl;
+        else if (num_nonconformal_nodes == _num_outputs)
+          _console << "Maximum output reached, log is silenced" << std::endl;
+      }
+    }
+  }
+  diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(num_nonconformal_nodes),
+                 _check_non_conformal_mesh,
+                 num_nonconformal_nodes);
+  pl->unset_close_to_point_tol();
+}
+
+void
+MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
+    const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_likely_AMR_created_nonconformality = 0;
+  auto pl = mesh->sub_point_locator();
+  pl->set_close_to_point_tol(_non_conformality_tol);
+
+  // loop on nodes, assumes a replicated mesh
+  for (auto & node : mesh->node_ptr_range())
+  {
+    // find all the elements around this node
+    std::set<const Elem *> elements_around;
+    (*pl)(*node, elements_around);
+
+    // Keep track of the refined elements and the coarse element
+    std::set<const Elem *> fine_elements;
+    std::set<const Elem *> coarse_elements;
+
+    // loop through the set of elements near this node
+    for (auto elem : elements_around)
+    {
+      // If the node is not part of this element's nodes, it is a
+      // case of non-conformality
+      bool node_on_elem = false;
+
+      // non-vertex nodes are not cause for the kind of non-conformality we are looking for
+      if (elem->get_node_index(node) != libMesh::invalid_uint &&
+          elem->is_vertex(elem->get_node_index(node)))
+        node_on_elem = true;
+
+      if (node_on_elem)
+        fine_elements.insert(elem);
+      // Else, the node is not part of the element considered, so if the element had been part
+      // of an AMR-created non-conformality, this element is on the coarse side
+      if (!node_on_elem)
+        coarse_elements.insert(elem);
+    }
+
+    // all the elements around contained the node as one of their nodes
+    // if the coarse and refined sides are not stitched together, this check can fail,
+    // as nodes that are physically near one element are not part of it because of the lack of
+    // stitching (overlapping nodes)
+    if (fine_elements.size() == elements_around.size())
+      continue;
+
+    if (fine_elements.empty())
+      continue;
+
+    // Depending on the type of element, we already know the number of elements we expect
+    // to be part of this set of likely refined candidates for a given non-conformal node to
+    // examine. We can only decide if it was born out of AMR if it's the center node of the face
+    // of a coarse element near refined elements
+    const auto elem_type = (*fine_elements.begin())->type();
+    if ((elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9) &&
+        fine_elements.size() != 2)
+      continue;
+    else if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) &&
+             fine_elements.size() != 4)
+      continue;
+    else if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) &&
+             fine_elements.size() != 3)
+      continue;
+    else if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
+             (fine_elements.size() % 4 != 0))
+      continue;
+
+    // only one coarse element in front of refined elements except for tets. Whatever we're
+    // looking at is not the interface between coarse and refined elements
+    // Tets are split on their edges (rather than the middle of a face) so there could be any
+    // number of coarse elements in front of the node non-conformality created by refinement
+    if (elem_type != TET4 && elem_type != TET10 && elem_type != TET14 && coarse_elements.size() > 1)
+      continue;
+
+    // There exists non-conformality, the node should have been a node of all the elements
+    // that are close enough to the node, and it is not
+
+    // Nodes of the tentative parent element
+    std::vector<const Node *> tentative_coarse_nodes;
+
+    // For quads and hexes, there is one (quad) or four (hexes) sides that are tied to this node
+    // at the non-conformal interface between the refined elements and a coarse element
+    if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
+        elem_type == HEX20 || elem_type == HEX27)
+    {
+      const auto elem = *fine_elements.begin();
+
+      // Find which sides (of the elements) the node considered is part of
+      std::vector<Elem *> node_on_sides;
+      unsigned int side_inside_parent = std::numeric_limits<unsigned int>::max();
       for (auto i : make_range(elem->n_sides()))
       {
-        auto side = elem->side_ptr(i);
-        std::vector<const Point *> nodes;
-        for (auto & node : side->node_ref_range())
-          nodes.emplace_back(&node);
-
-        if (nodes.size() <= 3)
-          continue;
-        // First vector of the base
-        const RealVectorValue v1 = *nodes[0] - *nodes[1];
-
-        // Find another node so that we can form a basis. It should just be node 0, 1, 2
-        // to form two independent vectors, but degenerate elements can make them aligned
-        bool aligned = true;
-        unsigned int third_node_index = 2;
-        RealVectorValue v2;
-        while (aligned && third_node_index < nodes.size())
-        {
-          v2 = *nodes[0] - *nodes[third_node_index++];
-          aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
-        }
-
-        // Degenerate element, could not find a third node that is not aligned
-        if (aligned)
-          continue;
-
-        bool found_non_planar = false;
-
-        for (auto node_offset : make_range(nodes.size() - 3))
-        {
-          RealVectorValue v3 = *nodes[0] - *nodes[node_offset + 3];
-          bool planar = MooseUtils::absoluteFuzzyEqual(v2.cross(v1) * v3, 0);
-          if (!planar)
-            found_non_planar = true;
-        }
-
-        if (found_non_planar)
-        {
-          sides_non_planar++;
-          if (sides_non_planar < _num_outputs)
-            _console << "Nonplanar side detected for side " << i
-                     << " of element :" << elem->get_info() << std::endl;
-          else if (sides_non_planar == _num_outputs)
-            _console << "Maximum output reached, log is silenced" << std::endl;
-        }
-      }
-    }
-    diagnosticsLog("Number of non-planar element sides detected: " +
-                       Moose::stringify(sides_non_planar),
-                   _check_non_planar_sides,
-                   sides_non_planar);
-  }
-
-  if (_check_non_conformal_mesh != "NO_CHECK")
-  {
-    unsigned int num_nonconformal_nodes = 0;
-    auto pl = mesh->sub_point_locator();
-    pl->set_close_to_point_tol(_non_conformality_tol);
-
-    // loop on nodes, assumes a replicated mesh
-    for (auto & node : mesh->node_ptr_range())
-    {
-      // find all the elements around this node
-      std::set<const Elem *> elements;
-      (*pl)(*node, elements);
-
-      // loop through the set of elements near this node
-      for (auto & elem : elements)
-      {
-        // If the node is not part of this element's nodes, it is a
-        // case of non-conformality
-        bool found_conformal = false;
-
-        for (auto & elem_node : elem->node_ref_range())
+        const auto side = elem->side_ptr(i);
+        std::vector<const Node *> other_nodes_on_side;
+        bool node_on_side = false;
+        for (const auto & elem_node : side->node_ref_range())
         {
           if (*node == elem_node)
+            node_on_side = true;
+          else
+            other_nodes_on_side.emplace_back(&elem_node);
+        }
+        // node is on the side, but is it the side that goes away from the coarse element?
+        if (node_on_side)
+        {
+          // if all the other nodes on this side are in one of the other potentially refined
+          // elements, it's one of the side(s) (4 sides in a 3D hex for example) inside the
+          // parent
+          bool all_side_nodes_are_shared = true;
+          for (const auto & other_node : other_nodes_on_side)
           {
-            found_conformal = true;
+            bool shared_with_a_fine_elem = false;
+            for (const auto & other_elem : fine_elements)
+              if (other_elem != elem &&
+                  other_elem->get_node_index(other_node) != libMesh::invalid_uint)
+                shared_with_a_fine_elem = true;
+
+            if (!shared_with_a_fine_elem)
+              all_side_nodes_are_shared = false;
+          }
+          if (all_side_nodes_are_shared)
+          {
+            side_inside_parent = i;
+            // We stop examining sides, it does not matter which side we pick inside the parent
             break;
           }
         }
-        if (!found_conformal)
-        {
-          num_nonconformal_nodes++;
-          if (num_nonconformal_nodes < _num_outputs)
-            _console << "Non-conformality detected at  : " << *node << std::endl;
-          else if (num_nonconformal_nodes == _num_outputs)
-            _console << "Maximum output reached, log is silenced" << std::endl;
-        }
       }
-    }
-    diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(num_nonconformal_nodes),
-                   _check_non_conformal_mesh,
-                   num_nonconformal_nodes);
-    pl->unset_close_to_point_tol();
-  }
+      if (side_inside_parent == std::numeric_limits<unsigned int>::max())
+        continue;
 
-  if (_check_adaptivity_non_conformality != "NO_CHECK")
-  {
-    unsigned int num_likely_AMR_created_nonconformality = 0;
-    auto pl = mesh->sub_point_locator();
-    pl->set_close_to_point_tol(_non_conformality_tol);
-
-    // loop on nodes, assumes a replicated mesh
-    for (auto & node : mesh->node_ptr_range())
-    {
-      // find all the elements around this node
-      std::set<const Elem *> elements_around;
-      (*pl)(*node, elements_around);
-
-      // Keep track of the refined elements and the coarse element
-      std::set<const Elem *> fine_elements;
-      std::set<const Elem *> coarse_elements;
-
-      // loop through the set of elements near this node
-      for (auto elem : elements_around)
+      // Gather the other potential elements in the refined element:
+      // they are point neighbors of the node that is shared between all the elements flagged
+      // for the non-conformality
+      // Find shared node
+      const auto interior_side = elem->side_ptr(side_inside_parent);
+      const Node * interior_node = nullptr;
+      for (const auto & other_node : interior_side->node_ref_range())
       {
-        // If the node is not part of this element's nodes, it is a
-        // case of non-conformality
-        bool node_on_elem = false;
-
-        // non-vertex nodes are not cause for the kind of non-conformality we are looking for
-        if (elem->get_node_index(node) != libMesh::invalid_uint &&
-            elem->is_vertex(elem->get_node_index(node)))
-          node_on_elem = true;
-
-        if (node_on_elem)
-          fine_elements.insert(elem);
-        // Else, the node is not part of the element considered, so if the element had been part
-        // of an AMR-created non-conformality, this element is on the coarse side
-        if (!node_on_elem)
-          coarse_elements.insert(elem);
-      }
-
-      // all the elements around contained the node as one of their nodes
-      // if the coarse and refined sides are not stitched together, this check can fail,
-      // as nodes that are physically near one element are not part of it because of the lack of
-      // stitching (overlapping nodes)
-      if (fine_elements.size() == elements_around.size())
-        continue;
-
-      if (fine_elements.empty())
-        continue;
-
-      // Depending on the type of element, we already know the number of elements we expect
-      // to be part of this set of likely refined candidates for a given non-conformal node to
-      // examine. We can only decide if it was born out of AMR if it's the center node of the face
-      // of a coarse element near refined elements
-      const auto elem_type = (*fine_elements.begin())->type();
-      if ((elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9) &&
-          fine_elements.size() != 2)
-        continue;
-      else if ((elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27) &&
-               fine_elements.size() != 4)
-        continue;
-      else if ((elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7) &&
-               fine_elements.size() != 3)
-        continue;
-      else if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
-               (fine_elements.size() % 4 != 0))
-        continue;
-
-      // only one coarse element in front of refined elements except for tets. Whatever we're
-      // looking at is not the interface between coarse and refined elements
-      // Tets are split on their edges (rather than the middle of a face) so there could be any
-      // number of coarse elements in front of the node non-conformality created by refinement
-      if (elem_type != TET4 && elem_type != TET10 && elem_type != TET14 &&
-          coarse_elements.size() > 1)
-        continue;
-
-      // There exists non-conformality, the node should have been a node of all the elements
-      // that are close enough to the node, and it is not
-
-      // Nodes of the tentative parent element
-      std::vector<const Node *> tentative_coarse_nodes;
-
-      // For quads and hexes, there is one (quad) or four (hexes) sides that are tied to this node
-      // at the non-conformal interface between the refined elements and a coarse element
-      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9 || elem_type == HEX8 ||
-          elem_type == HEX20 || elem_type == HEX27)
-      {
-        const auto elem = *fine_elements.begin();
-
-        // Find which sides (of the elements) the node considered is part of
-        std::vector<Elem *> node_on_sides;
-        unsigned int side_inside_parent = std::numeric_limits<unsigned int>::max();
-        for (auto i : make_range(elem->n_sides()))
-        {
-          const auto side = elem->side_ptr(i);
-          std::vector<const Node *> other_nodes_on_side;
-          bool node_on_side = false;
-          for (const auto & elem_node : side->node_ref_range())
-          {
-            if (*node == elem_node)
-              node_on_side = true;
-            else
-              other_nodes_on_side.emplace_back(&elem_node);
-          }
-          // node is on the side, but is it the side that goes away from the coarse element?
-          if (node_on_side)
-          {
-            // if all the other nodes on this side are in one of the other potentially refined
-            // elements, it's one of the side(s) (4 sides in a 3D hex for example) inside the
-            // parent
-            bool all_side_nodes_are_shared = true;
-            for (const auto & other_node : other_nodes_on_side)
-            {
-              bool shared_with_a_fine_elem = false;
-              for (const auto & other_elem : fine_elements)
-                if (other_elem != elem &&
-                    other_elem->get_node_index(other_node) != libMesh::invalid_uint)
-                  shared_with_a_fine_elem = true;
-
-              if (!shared_with_a_fine_elem)
-                all_side_nodes_are_shared = false;
-            }
-            if (all_side_nodes_are_shared)
-            {
-              side_inside_parent = i;
-              // We stop examining sides, it does not matter which side we pick inside the parent
-              break;
-            }
-          }
-        }
-        if (side_inside_parent == std::numeric_limits<unsigned int>::max())
+        if (other_node == *node)
           continue;
-
-        // Gather the other potential elements in the refined element:
-        // they are point neighbors of the node that is shared between all the elements flagged
-        // for the non-conformality
-        // Find shared node
-        const auto interior_side = elem->side_ptr(side_inside_parent);
-        const Node * interior_node = nullptr;
-        for (const auto & other_node : interior_side->node_ref_range())
+        bool in_all_node_neighbor_elements = true;
+        for (auto other_elem : fine_elements)
         {
-          if (other_node == *node)
+          if (other_elem->get_node_index(&other_node) == libMesh::invalid_uint)
+            in_all_node_neighbor_elements = false;
+        }
+        if (in_all_node_neighbor_elements)
+        {
+          interior_node = &other_node;
+          break;
+        }
+      }
+      // Did not find interior node. Probably not AMR
+      if (!interior_node)
+        continue;
+
+      // Add point neighbors of interior node to list of potentially refined elements
+      std::set<const Elem *> all_elements;
+      elem->find_point_neighbors(*interior_node, all_elements);
+
+      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+      {
+        // We need to order the fine elements so when we get the coarse element nodes they form
+        // a non-twisted element
+        tentative_coarse_nodes.resize(4);
+
+        // The exterior nodes are the opposite nodes of the interior_node!
+        unsigned int neighbor_i = 0;
+        for (auto neighbor : all_elements)
+        {
+          const auto interior_node_number = neighbor->get_node_index(interior_node);
+          unsigned int opposite_node_index = (interior_node_number + 2) % 4;
+
+          tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
+        }
+
+        // Re-order nodes so that they will form a decent quad
+        Point axis = (elem->vertex_average() - *interior_node).cross(*interior_node - *node);
+        reorderNodes(tentative_coarse_nodes, interior_node, node, axis);
+      }
+      // For hexes we first look at the fine-neighbors of the non-conformality
+      // then the fine elements neighbors of the center 'node' of the potential parent
+      else
+      {
+        // Get the coarse neighbor side to be able to recognize nodes that should become part of
+        // the coarse parent
+        const auto & coarse_elem = *coarse_elements.begin();
+        unsigned short coarse_side_i = 0;
+        for (const auto & coarse_side_index : coarse_elem->side_index_range())
+        {
+          const auto coarse_side_ptr = coarse_elem->side_ptr(coarse_side_index);
+          // The side of interest is the side that contains the non-conformality
+          if (!coarse_side_ptr->close_to_point(*node, 10 * _non_conformality_tol))
             continue;
-          bool in_all_node_neighbor_elements = true;
-          for (auto other_elem : fine_elements)
+          else
           {
-            if (other_elem->get_node_index(&other_node) == libMesh::invalid_uint)
-              in_all_node_neighbor_elements = false;
-          }
-          if (in_all_node_neighbor_elements)
-          {
-            interior_node = &other_node;
+            coarse_side_i = coarse_side_index;
             break;
           }
         }
-        // Did not find interior node. Probably not AMR
-        if (!interior_node)
+        const auto coarse_side = coarse_elem->side_ptr(coarse_side_i);
+
+        // We did not find the side of the coarse neighbor near the refined elements
+        // It could be that it's not planar and the fine elements nodes do not lie on it
+        // Try again at another node
+        if (!coarse_side)
           continue;
 
-        // Add point neighbors of interior node to list of potentially refined elements
-        std::set<const Elem *> all_elements;
-        elem->find_point_neighbors(*interior_node, all_elements);
-
-        if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
-        {
-          // We need to order the fine elements so when we get the coarse element nodes they form
-          // a non-twisted element
-          tentative_coarse_nodes.resize(4);
-
-          // The exterior nodes are the opposite nodes of the interior_node!
-          unsigned int neighbor_i = 0;
-          for (auto neighbor : all_elements)
+        // We cant directly use the coarse neighbor nodes
+        // - The user might be passing a disjoint mesh
+        // - There could two levels of refinement separating the coarse neighbor and its refined
+        // counterparts
+        // We use the fine element nodes
+        unsigned int i = 0;
+        tentative_coarse_nodes.resize(4);
+        for (const auto & elem_1 : fine_elements)
+          for (const auto & coarse_node : elem_1->node_ref_range())
           {
-            const auto interior_node_number = neighbor->get_node_index(interior_node);
-            unsigned int opposite_node_index = (interior_node_number + 2) % 4;
-
-            tentative_coarse_nodes[neighbor_i++] = neighbor->node_ptr(opposite_node_index);
-          }
-
-          // Re-order nodes so that they will form a decent quad
-          Point axis = (elem->vertex_average() - *interior_node).cross(*interior_node - *node);
-          reorderNodes(tentative_coarse_nodes, interior_node, node, axis);
-        }
-        // For hexes we first look at the fine-neighbors of the non-conformality
-        // then the fine elements neighbors of the center 'node' of the potential parent
-        else
-        {
-          // Get the coarse neighbor side to be able to recognize nodes that should become part of
-          // the coarse parent
-          const auto & coarse_elem = *coarse_elements.begin();
-          unsigned short coarse_side_i = 0;
-          for (const auto & coarse_side_index : coarse_elem->side_index_range())
-          {
-            const auto coarse_side_ptr = coarse_elem->side_ptr(coarse_side_index);
-            // The side of interest is the side that contains the non-conformality
-            if (!coarse_side_ptr->close_to_point(*node, 10 * _non_conformality_tol))
-              continue;
-            else
+            bool node_shared = false;
+            for (const auto & elem_2 : fine_elements)
             {
-              coarse_side_i = coarse_side_index;
-              break;
+              if (elem_2 != elem_1)
+                if (elem_2->get_node_index(&coarse_node) != libMesh::invalid_uint)
+                  node_shared = true;
             }
+            // A node for the coarse parent will appear in only one fine neighbor
+            // and will lay on the side of the coarse neighbor
+            if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol))
+              tentative_coarse_nodes[i++] = &coarse_node;
+            mooseAssert(i <= 5, "We went too far in this index");
           }
-          const auto coarse_side = coarse_elem->side_ptr(coarse_side_i);
 
-          // We did not find the side of the coarse neighbor near the refined elements
-          // It could be that it's not planar and the fine elements nodes do not lie on it
-          // Try again at another node
-          if (!coarse_side)
-            continue;
+        // Need to order these nodes to form a valid quad / base of an hex
+        // We go around the axis formed by the node and the interior node
+        Point axis = *interior_node - *node;
+        const auto start_circle = elem->vertex_average();
+        reorderNodes(tentative_coarse_nodes, interior_node, &start_circle, axis);
+        tentative_coarse_nodes.resize(8);
 
-          // We cant directly use the coarse neighbor nodes
-          // - The user might be passing a disjoint mesh
-          // - There could two levels of refinement separating the coarse neighbor and its refined
-          // counterparts
-          // We use the fine element nodes
-          unsigned int i = 0;
-          tentative_coarse_nodes.resize(4);
-          for (const auto & elem_1 : fine_elements)
-            for (const auto & coarse_node : elem_1->node_ref_range())
-            {
-              bool node_shared = false;
-              for (const auto & elem_2 : fine_elements)
-              {
-                if (elem_2 != elem_1)
-                  if (elem_2->get_node_index(&coarse_node) != libMesh::invalid_uint)
-                    node_shared = true;
-              }
-              // A node for the coarse parent will appear in only one fine neighbor
-              // and will lay on the side of the coarse neighbor
-              if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol))
-                tentative_coarse_nodes[i++] = &coarse_node;
-              mooseAssert(i <= 5, "We went too far in this index");
-            }
-
-          // Need to order these nodes to form a valid quad / base of an hex
-          // We go around the axis formed by the node and the interior node
-          Point axis = *interior_node - *node;
-          const auto start_circle = elem->vertex_average();
-          reorderNodes(tentative_coarse_nodes, interior_node, &start_circle, axis);
-          tentative_coarse_nodes.resize(8);
-
-          // Use the neighbors of the fine elements that contain these nodes to get the vertex
-          // nodes
-          for (const auto & elem : fine_elements)
-          {
-            // Find the index of the coarse node for the starting element
-            unsigned int node_index = 0;
-            for (const auto & coarse_node : tentative_coarse_nodes)
-            {
-              if (elem->get_node_index(coarse_node) != libMesh::invalid_uint)
-                break;
-              node_index++;
-            }
-
-            // Get the neighbor element that is part of the fine elements to coarsen together
-            for (const auto & neighbor : elem->neighbor_ptr_range())
-              if (all_elements.count(neighbor) && !fine_elements.count(neighbor))
-              {
-                // Find the coarse node for the neighbor
-                const Node * coarse_elem_node = nullptr;
-                for (const auto & fine_node : neighbor->node_ref_range())
-                {
-                  if (!neighbor->is_vertex(neighbor->get_node_index(&fine_node)))
-                    continue;
-                  bool node_shared = false;
-                  for (const auto & elem_2 : all_elements)
-                    if (elem_2 != neighbor &&
-                        elem_2->get_node_index(&fine_node) != libMesh::invalid_uint)
-                      node_shared = true;
-                  if (!node_shared)
-                  {
-                    coarse_elem_node = &fine_node;
-                    break;
-                  }
-                }
-                // Insert the coarse node at the right place
-                tentative_coarse_nodes[node_index + 4] = coarse_elem_node;
-                mooseAssert(node_index + 4 < tentative_coarse_nodes.size(), "Indexed too far");
-                mooseAssert(coarse_elem_node, "Did not find last coarse element node");
-              }
-          }
-        }
-
-        // No need to separate fine elements near the non-conformal node and away from it
-        fine_elements = all_elements;
-      }
-      // For TRI elements, we use the fine triangle element at the center of the potential
-      // coarse triangle element
-      else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
-      {
-        // Find the center element
-        // It's the only element that shares a side with both of the other elements near the node
-        // considered
-        const Elem * center_elem = nullptr;
-        for (const auto refined_elem_1 : fine_elements)
-        {
-          unsigned int num_neighbors = 0;
-          for (const auto refined_elem_2 : fine_elements)
-          {
-            if (refined_elem_1 == refined_elem_2)
-              continue;
-            if (refined_elem_1->has_neighbor(refined_elem_2))
-              num_neighbors++;
-          }
-          if (num_neighbors >= 2)
-            center_elem = refined_elem_1;
-        }
-        // Did not find the center fine element, probably not AMR
-        if (!center_elem)
-          continue;
-        // Now get the tentative coarse element nodes
-        for (const auto refined_elem : fine_elements)
-        {
-          if (refined_elem == center_elem)
-            continue;
-          for (const auto & other_node : refined_elem->node_ref_range())
-            if (center_elem->get_node_index(&other_node) == libMesh::invalid_uint &&
-                refined_elem->is_vertex(refined_elem->get_node_index(&other_node)))
-              tentative_coarse_nodes.push_back(&other_node);
-        }
-
-        // Get the final tentative new coarse element node, on the other side of the center
-        // element from the non-conformality
-        unsigned int center_side_opposite_node = std::numeric_limits<unsigned int>::max();
-        for (auto side_index : center_elem->side_index_range())
-          if (center_elem->side_ptr(side_index)->get_node_index(node) == libMesh::invalid_uint)
-            center_side_opposite_node = side_index;
-        const auto neighbor_on_other_side_of_opposite_center_side =
-            center_elem->neighbor_ptr(center_side_opposite_node);
-        fine_elements.insert(neighbor_on_other_side_of_opposite_center_side);
-        for (const auto & tri_node :
-             neighbor_on_other_side_of_opposite_center_side->node_ref_range())
-          if (neighbor_on_other_side_of_opposite_center_side->is_vertex(
-                  neighbor_on_other_side_of_opposite_center_side->get_node_index(&tri_node)) &&
-              center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
-                  libMesh::invalid_uint)
-            tentative_coarse_nodes.push_back(&tri_node);
-
-        mooseAssert(center_side_opposite_node != std::numeric_limits<unsigned int>::max(),
-                    "Did not find the side opposite the non-conformality");
-        mooseAssert(tentative_coarse_nodes.size() == 3,
-                    "We are forming a coarsened triangle element");
-      }
-      // For TET elements, it's very different because the non-conformality does not happen inside
-      // of a face, but on an edge of one or more coarse elements
-      else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
-      {
-        // There are 4 tets on the tips of the coarsened tet and 4 tets inside
-        // let's identify all of them
-        std::set<const Elem *> tips_tets;
-        std::set<const Elem *> inside_tets;
-
-        // pick a coarse element and work with its fine neighbors
-        const Elem * coarse_elem = nullptr;
-        std::set<const Elem *> fine_tets;
-        for (auto & coarse_one : coarse_elements)
-        {
-          for (const auto & elem : fine_elements)
-            // for two levels of refinement across, this is not working
-            // we would need a "has_face_embedded_in_this_other_ones_face" routine
-            if (elem->has_neighbor(coarse_one))
-              fine_tets.insert(elem);
-
-          if (fine_tets.size())
-          {
-            coarse_elem = coarse_one;
-            break;
-          }
-        }
-        // There's no coarse element neighbor to a group of finer tets, not AMR
-        if (!coarse_elem)
-          continue;
-
-        // There is one last point neighbor of the node that is sandwiched between two neighbors
+        // Use the neighbors of the fine elements that contain these nodes to get the vertex
+        // nodes
         for (const auto & elem : fine_elements)
         {
-          int num_face_neighbors = 0;
-          for (const auto & tet : fine_tets)
-            if (tet->has_neighbor(elem))
-              num_face_neighbors++;
-          if (num_face_neighbors == 2)
+          // Find the index of the coarse node for the starting element
+          unsigned int node_index = 0;
+          for (const auto & coarse_node : tentative_coarse_nodes)
           {
-            fine_tets.insert(elem);
-            break;
+            if (elem->get_node_index(coarse_node) != libMesh::invalid_uint)
+              break;
+            node_index++;
           }
-        }
 
-        // There should be two other nodes with non-conformality near this coarse element
-        // Find both, as they will be nodes of the rest of the elements to add to the potential
-        // fine tet list. They are shared by two of the fine tets we have already found
-        std::set<const Node *> other_nodes;
-        for (const auto & tet_1 : fine_tets)
-        {
-          for (const auto & node_1 : tet_1->node_ref_range())
-          {
-            if (&node_1 == node)
-              continue;
-            if (!tet_1->is_vertex(tet_1->get_node_index(&node_1)))
-              continue;
-            for (const auto & tet_2 : fine_tets)
+          // Get the neighbor element that is part of the fine elements to coarsen together
+          for (const auto & neighbor : elem->neighbor_ptr_range())
+            if (all_elements.count(neighbor) && !fine_elements.count(neighbor))
             {
-              if (tet_2 == tet_1)
-                continue;
-              if (tet_2->get_node_index(&node_1) != libMesh::invalid_uint)
-                // check that it's near the coarse element as well
-                if (coarse_elem->close_to_point(node_1, 10 * _non_conformality_tol))
-                  other_nodes.insert(&node_1);
+              // Find the coarse node for the neighbor
+              const Node * coarse_elem_node = nullptr;
+              for (const auto & fine_node : neighbor->node_ref_range())
+              {
+                if (!neighbor->is_vertex(neighbor->get_node_index(&fine_node)))
+                  continue;
+                bool node_shared = false;
+                for (const auto & elem_2 : all_elements)
+                  if (elem_2 != neighbor &&
+                      elem_2->get_node_index(&fine_node) != libMesh::invalid_uint)
+                    node_shared = true;
+                if (!node_shared)
+                {
+                  coarse_elem_node = &fine_node;
+                  break;
+                }
+              }
+              // Insert the coarse node at the right place
+              tentative_coarse_nodes[node_index + 4] = coarse_elem_node;
+              mooseAssert(node_index + 4 < tentative_coarse_nodes.size(), "Indexed too far");
+              mooseAssert(coarse_elem_node, "Did not find last coarse element node");
             }
+        }
+      }
+
+      // No need to separate fine elements near the non-conformal node and away from it
+      fine_elements = all_elements;
+    }
+    // For TRI elements, we use the fine triangle element at the center of the potential
+    // coarse triangle element
+    else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
+    {
+      // Find the center element
+      // It's the only element that shares a side with both of the other elements near the node
+      // considered
+      const Elem * center_elem = nullptr;
+      for (const auto refined_elem_1 : fine_elements)
+      {
+        unsigned int num_neighbors = 0;
+        for (const auto refined_elem_2 : fine_elements)
+        {
+          if (refined_elem_1 == refined_elem_2)
+            continue;
+          if (refined_elem_1->has_neighbor(refined_elem_2))
+            num_neighbors++;
+        }
+        if (num_neighbors >= 2)
+          center_elem = refined_elem_1;
+      }
+      // Did not find the center fine element, probably not AMR
+      if (!center_elem)
+        continue;
+      // Now get the tentative coarse element nodes
+      for (const auto refined_elem : fine_elements)
+      {
+        if (refined_elem == center_elem)
+          continue;
+        for (const auto & other_node : refined_elem->node_ref_range())
+          if (center_elem->get_node_index(&other_node) == libMesh::invalid_uint &&
+              refined_elem->is_vertex(refined_elem->get_node_index(&other_node)))
+            tentative_coarse_nodes.push_back(&other_node);
+      }
+
+      // Get the final tentative new coarse element node, on the other side of the center
+      // element from the non-conformality
+      unsigned int center_side_opposite_node = std::numeric_limits<unsigned int>::max();
+      for (auto side_index : center_elem->side_index_range())
+        if (center_elem->side_ptr(side_index)->get_node_index(node) == libMesh::invalid_uint)
+          center_side_opposite_node = side_index;
+      const auto neighbor_on_other_side_of_opposite_center_side =
+          center_elem->neighbor_ptr(center_side_opposite_node);
+      fine_elements.insert(neighbor_on_other_side_of_opposite_center_side);
+      for (const auto & tri_node : neighbor_on_other_side_of_opposite_center_side->node_ref_range())
+        if (neighbor_on_other_side_of_opposite_center_side->is_vertex(
+                neighbor_on_other_side_of_opposite_center_side->get_node_index(&tri_node)) &&
+            center_elem->side_ptr(center_side_opposite_node)->get_node_index(&tri_node) ==
+                libMesh::invalid_uint)
+          tentative_coarse_nodes.push_back(&tri_node);
+
+      mooseAssert(center_side_opposite_node != std::numeric_limits<unsigned int>::max(),
+                  "Did not find the side opposite the non-conformality");
+      mooseAssert(tentative_coarse_nodes.size() == 3,
+                  "We are forming a coarsened triangle element");
+    }
+    // For TET elements, it's very different because the non-conformality does not happen inside
+    // of a face, but on an edge of one or more coarse elements
+    else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
+    {
+      // There are 4 tets on the tips of the coarsened tet and 4 tets inside
+      // let's identify all of them
+      std::set<const Elem *> tips_tets;
+      std::set<const Elem *> inside_tets;
+
+      // pick a coarse element and work with its fine neighbors
+      const Elem * coarse_elem = nullptr;
+      std::set<const Elem *> fine_tets;
+      for (auto & coarse_one : coarse_elements)
+      {
+        for (const auto & elem : fine_elements)
+          // for two levels of refinement across, this is not working
+          // we would need a "has_face_embedded_in_this_other_ones_face" routine
+          if (elem->has_neighbor(coarse_one))
+            fine_tets.insert(elem);
+
+        if (fine_tets.size())
+        {
+          coarse_elem = coarse_one;
+          break;
+        }
+      }
+      // There's no coarse element neighbor to a group of finer tets, not AMR
+      if (!coarse_elem)
+        continue;
+
+      // There is one last point neighbor of the node that is sandwiched between two neighbors
+      for (const auto & elem : fine_elements)
+      {
+        int num_face_neighbors = 0;
+        for (const auto & tet : fine_tets)
+          if (tet->has_neighbor(elem))
+            num_face_neighbors++;
+        if (num_face_neighbors == 2)
+        {
+          fine_tets.insert(elem);
+          break;
+        }
+      }
+
+      // There should be two other nodes with non-conformality near this coarse element
+      // Find both, as they will be nodes of the rest of the elements to add to the potential
+      // fine tet list. They are shared by two of the fine tets we have already found
+      std::set<const Node *> other_nodes;
+      for (const auto & tet_1 : fine_tets)
+      {
+        for (const auto & node_1 : tet_1->node_ref_range())
+        {
+          if (&node_1 == node)
+            continue;
+          if (!tet_1->is_vertex(tet_1->get_node_index(&node_1)))
+            continue;
+          for (const auto & tet_2 : fine_tets)
+          {
+            if (tet_2 == tet_1)
+              continue;
+            if (tet_2->get_node_index(&node_1) != libMesh::invalid_uint)
+              // check that it's near the coarse element as well
+              if (coarse_elem->close_to_point(node_1, 10 * _non_conformality_tol))
+                other_nodes.insert(&node_1);
           }
         }
-        mooseAssert(other_nodes.size() == 2,
-                    "Should find only two extra non-conformal nodes near the coarse element");
+      }
+      mooseAssert(other_nodes.size() == 2,
+                  "Should find only two extra non-conformal nodes near the coarse element");
 
-        // Now we can go towards this tip element next to two non-conformalities
-        for (const auto & tet_1 : fine_tets)
-        {
-          for (const auto & neighbor : tet_1->neighbor_ptr_range())
-            if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
-                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
-                neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
-                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
+      // Now we can go towards this tip element next to two non-conformalities
+      for (const auto & tet_1 : fine_tets)
+      {
+        for (const auto & neighbor : tet_1->neighbor_ptr_range())
+          if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
+              neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
+              neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
+              neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
+            fine_tets.insert(neighbor);
+      }
+      // Now that the element next to the time is in the fine_tets, we can get the tip
+      for (const auto & tet_1 : fine_tets)
+      {
+        for (const auto & neighbor : tet_1->neighbor_ptr_range())
+          if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
+              neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
+              neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
+              neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
+            fine_tets.insert(neighbor);
+      }
+
+      // Get the sandwiched tets between the tets we already found
+      for (const auto & tet_1 : fine_tets)
+        for (const auto & neighbor : tet_1->neighbor_ptr_range())
+          for (const auto & tet_2 : fine_tets)
+            if (tet_1 != tet_2 && tet_2->has_neighbor(neighbor) && neighbor != coarse_elem)
               fine_tets.insert(neighbor);
-        }
-        // Now that the element next to the time is in the fine_tets, we can get the tip
-        for (const auto & tet_1 : fine_tets)
-        {
-          for (const auto & neighbor : tet_1->neighbor_ptr_range())
-            if (neighbor->get_node_index(*other_nodes.begin()) != libMesh::invalid_uint &&
-                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.begin())) &&
-                neighbor->get_node_index(*other_nodes.rbegin()) != libMesh::invalid_uint &&
-                neighbor->is_vertex(neighbor->get_node_index(*other_nodes.rbegin())))
-              fine_tets.insert(neighbor);
-        }
 
-        // Get the sandwiched tets between the tets we already found
-        for (const auto & tet_1 : fine_tets)
-          for (const auto & neighbor : tet_1->neighbor_ptr_range())
-            for (const auto & tet_2 : fine_tets)
-              if (tet_1 != tet_2 && tet_2->has_neighbor(neighbor) && neighbor != coarse_elem)
-                fine_tets.insert(neighbor);
-
-        // tips tests are the only ones to have a node that is shared by no other tet in the group
-        for (const auto & tet_1 : fine_tets)
+      // tips tests are the only ones to have a node that is shared by no other tet in the group
+      for (const auto & tet_1 : fine_tets)
+      {
+        unsigned int unshared_nodes = 0;
+        for (const auto & other_node : tet_1->node_ref_range())
         {
-          unsigned int unshared_nodes = 0;
-          for (const auto & other_node : tet_1->node_ref_range())
+          if (!tet_1->is_vertex(tet_1->get_node_index(&other_node)))
+            continue;
+          bool node_shared = false;
+          for (const auto & tet_2 : fine_tets)
+            if (tet_2 != tet_1 && tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
+              node_shared = true;
+          if (!node_shared)
+            unshared_nodes++;
+        }
+        if (unshared_nodes == 1)
+          tips_tets.insert(tet_1);
+        else if (unshared_nodes == 0)
+          inside_tets.insert(tet_1);
+        else
+          mooseError("Did not expect a tet to have two unshared vertex nodes here");
+      }
+
+      // Finally grab the last tip of the tentative coarse tet. It shares:
+      // - 3 nodes with the other tips, only one with each
+      // - 1 face with only one tet of the fine tet group
+      // - it has a node that no other fine tet shares (the tip node)
+      for (const auto & tet : inside_tets)
+      {
+        for (const auto & neighbor : tet->neighbor_ptr_range())
+        {
+          // Check that it shares a face with no other potential fine tet
+          bool shared_with_another_tet = false;
+          for (const auto & tet_2 : fine_tets)
           {
-            if (!tet_1->is_vertex(tet_1->get_node_index(&other_node)))
+            if (tet_2 == tet)
               continue;
+            if (tet_2->has_neighbor(neighbor))
+              shared_with_another_tet = true;
+          }
+          if (shared_with_another_tet)
+            continue;
+
+          // Used to count the nodes shared with tip tets. Can only be 1 per tip tet
+          std::vector<const Node *> tip_nodes_shared;
+          unsigned int unshared_nodes = 0;
+          for (const auto & other_node : neighbor->node_ref_range())
+          {
+            if (!neighbor->is_vertex(neighbor->get_node_index(&other_node)))
+              continue;
+
+            // Check for being a node-neighbor of the 3 other tip tets
+            for (const auto & tip_tet : tips_tets)
+            {
+              if (neighbor == tip_tet)
+                continue;
+
+              // we could break here but we want to check that no other tip shares that node
+              if (tip_tet->get_node_index(&other_node) != libMesh::invalid_uint)
+                tip_nodes_shared.push_back(&other_node);
+            }
+            // Check for having a node shared with no other tet
             bool node_shared = false;
             for (const auto & tet_2 : fine_tets)
-              if (tet_2 != tet_1 && tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
+              if (tet_2 != neighbor && tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
                 node_shared = true;
             if (!node_shared)
               unshared_nodes++;
           }
-          if (unshared_nodes == 1)
-            tips_tets.insert(tet_1);
-          else if (unshared_nodes == 0)
-            inside_tets.insert(tet_1);
-          else
-            mooseError("Did not expect a tet to have two unshared vertex nodes here");
+          if (tip_nodes_shared.size() == 3 && unshared_nodes == 1)
+            tips_tets.insert(neighbor);
         }
-
-        // Finally grab the last tip of the tentative coarse tet. It shares:
-        // - 3 nodes with the other tips, only one with each
-        // - 1 face with only one tet of the fine tet group
-        // - it has a node that no other fine tet shares (the tip node)
-        for (const auto & tet : inside_tets)
-        {
-          for (const auto & neighbor : tet->neighbor_ptr_range())
-          {
-            // Check that it shares a face with no other potential fine tet
-            bool shared_with_another_tet = false;
-            for (const auto & tet_2 : fine_tets)
-            {
-              if (tet_2 == tet)
-                continue;
-              if (tet_2->has_neighbor(neighbor))
-                shared_with_another_tet = true;
-            }
-            if (shared_with_another_tet)
-              continue;
-
-            // Used to count the nodes shared with tip tets. Can only be 1 per tip tet
-            std::vector<const Node *> tip_nodes_shared;
-            unsigned int unshared_nodes = 0;
-            for (const auto & other_node : neighbor->node_ref_range())
-            {
-              if (!neighbor->is_vertex(neighbor->get_node_index(&other_node)))
-                continue;
-
-              // Check for being a node-neighbor of the 3 other tip tets
-              for (const auto & tip_tet : tips_tets)
-              {
-                if (neighbor == tip_tet)
-                  continue;
-
-                // we could break here but we want to check that no other tip shares that node
-                if (tip_tet->get_node_index(&other_node) != libMesh::invalid_uint)
-                  tip_nodes_shared.push_back(&other_node);
-              }
-              // Check for having a node shared with no other tet
-              bool node_shared = false;
-              for (const auto & tet_2 : fine_tets)
-                if (tet_2 != neighbor &&
-                    tet_2->get_node_index(&other_node) != libMesh::invalid_uint)
-                  node_shared = true;
-              if (!node_shared)
-                unshared_nodes++;
-            }
-            if (tip_nodes_shared.size() == 3 && unshared_nodes == 1)
-              tips_tets.insert(neighbor);
-          }
-        }
-
-        // append the missing fine tets (inside the coarse element, away from the node considered)
-        // into the fine elements set for the check on "did it refine the tentative coarse tet
-        // onto the same fine tets"
-        fine_elements.clear();
-        for (const auto & elem : tips_tets)
-          fine_elements.insert(elem);
-        for (const auto & elem : inside_tets)
-          fine_elements.insert(elem);
-
-        // get the vertex of the coarse element from the tip tets
-        for (const auto & tip : tips_tets)
-        {
-          for (const auto & node : tip->node_ref_range())
-          {
-            bool outside = true;
-
-            const auto id = tip->get_node_index(&node);
-            if (!tip->is_vertex(id))
-              continue;
-            for (const auto & tet : inside_tets)
-              if (tet->get_node_index(&node) != libMesh::invalid_uint)
-                outside = false;
-            if (outside)
-            {
-              tentative_coarse_nodes.push_back(&node);
-              // only one tip node per tip tet
-              break;
-            }
-          }
-        }
-
-        std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end());
-        tentative_coarse_nodes.erase(
-            std::unique(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end()),
-            tentative_coarse_nodes.end());
-
-        // The group of fine elements ended up having less or more than 4 tips, so it's clearly
-        // not forming a coarse tetrahedral
-        if (tentative_coarse_nodes.size() != 4)
-          continue;
-      }
-      else
-      {
-        mooseInfo("Unsupported element type ",
-                  elem_type,
-                  ". Skipping detection for this node and all future nodes near only this "
-                  "element type");
       }
 
-      // Check the fine element types: if not all the same then it's not uniform AMR
-      for (auto elem : fine_elements)
-        if (elem->type() != elem_type)
-          continue;
+      // append the missing fine tets (inside the coarse element, away from the node considered)
+      // into the fine elements set for the check on "did it refine the tentative coarse tet
+      // onto the same fine tets"
+      fine_elements.clear();
+      for (const auto & elem : tips_tets)
+        fine_elements.insert(elem);
+      for (const auto & elem : inside_tets)
+        fine_elements.insert(elem);
 
-      // Check the number of coarse element nodes gathered
-      for (const auto & check_node : tentative_coarse_nodes)
-        if (check_node == nullptr)
-          continue;
-
-      // Form a parent, of the same type as the elements we are trying to combine!
-      std::unique_ptr<Elem> parent;
-      if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
-        parent = std::make_unique<Quad4>();
-      else if (elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27)
-        parent = std::make_unique<Hex8>();
-      else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
-        parent = std::make_unique<Tri3>();
-      else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
-        parent = std::make_unique<Tet4>();
-      else
-        continue;
-
-      // We have to make a copy because adding the new parent element to the mesh
-      // will modify the mesh for the analysis of the next nodes
-      // Make a copy of the mesh, add this element
-      auto mesh_copy = mesh->clone();
-      auto parent_ptr = mesh_copy->add_elem(parent.release());
-      MeshRefinement mesh_refiner(*mesh_copy);
-
-      // Set the nodes to the coarse element
-      for (auto i : index_range(tentative_coarse_nodes))
-        parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
-
-      // Refine this parent
-      parent_ptr->set_refinement_flag(Elem::REFINE);
-      parent_ptr->refine(mesh_refiner);
-      const auto num_children = parent_ptr->n_children();
-
-      // Compare with the original set of elements
-      // We already know the child share the exterior node. If they share the same vertex
-      // average as the group of unrefined elements we will call this good enough for now
-      // For tetrahedral elements we cannot rely on the children all matching as the choice in
-      // the diagonal selection can be made differently. We'll just say 4 matching children is
-      // good enough for the heuristic
-      unsigned int num_children_match = 0;
-      for (const auto & child : parent_ptr->child_ref_range())
+      // get the vertex of the coarse element from the tip tets
+      for (const auto & tip : tips_tets)
       {
-        for (const auto & potential_children : fine_elements)
-          if (MooseUtils::absoluteFuzzyEqual(child.vertex_average()(0),
-                                             potential_children->vertex_average()(0),
-                                             _non_conformality_tol) &&
-              MooseUtils::absoluteFuzzyEqual(child.vertex_average()(1),
-                                             potential_children->vertex_average()(1),
-                                             _non_conformality_tol) &&
-              MooseUtils::absoluteFuzzyEqual(child.vertex_average()(2),
-                                             potential_children->vertex_average()(2),
-                                             _non_conformality_tol))
+        for (const auto & node : tip->node_ref_range())
+        {
+          bool outside = true;
+
+          const auto id = tip->get_node_index(&node);
+          if (!tip->is_vertex(id))
+            continue;
+          for (const auto & tet : inside_tets)
+            if (tet->get_node_index(&node) != libMesh::invalid_uint)
+              outside = false;
+          if (outside)
           {
-            num_children_match++;
+            tentative_coarse_nodes.push_back(&node);
+            // only one tip node per tip tet
             break;
           }
+        }
       }
 
-      if (num_children_match == num_children ||
-          ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
-           num_children_match == 4))
-      {
-        num_likely_AMR_created_nonconformality++;
-        if (num_likely_AMR_created_nonconformality < _num_outputs)
-        {
-          _console << "Detected non-conformality likely created by AMR near" << *node
-                   << Moose::stringify(elem_type)
-                   << " elements that could be merged into a coarse element:" << std::endl;
-          for (const auto & elem : fine_elements)
-            _console << elem->id() << " ";
-          _console << std::endl;
-        }
-        else if (num_likely_AMR_created_nonconformality == _num_outputs)
-          _console << "Maximum log output reached, silencing output" << std::endl;
-      }
+      std::sort(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end());
+      tentative_coarse_nodes.erase(
+          std::unique(tentative_coarse_nodes.begin(), tentative_coarse_nodes.end()),
+          tentative_coarse_nodes.end());
+
+      // The group of fine elements ended up having less or more than 4 tips, so it's clearly
+      // not forming a coarse tetrahedral
+      if (tentative_coarse_nodes.size() != 4)
+        continue;
+    }
+    else
+    {
+      mooseInfo("Unsupported element type ",
+                elem_type,
+                ". Skipping detection for this node and all future nodes near only this "
+                "element type");
     }
 
-    diagnosticsLog(
-        "Number of non-conformal nodes likely due to mesh refinement detected by heuristic: " +
-            Moose::stringify(num_likely_AMR_created_nonconformality),
-        _check_adaptivity_non_conformality,
-        num_likely_AMR_created_nonconformality);
-    pl->unset_close_to_point_tol();
+    // Check the fine element types: if not all the same then it's not uniform AMR
+    for (auto elem : fine_elements)
+      if (elem->type() != elem_type)
+        continue;
+
+    // Check the number of coarse element nodes gathered
+    for (const auto & check_node : tentative_coarse_nodes)
+      if (check_node == nullptr)
+        continue;
+
+    // Form a parent, of the same type as the elements we are trying to combine!
+    std::unique_ptr<Elem> parent;
+    if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+      parent = std::make_unique<Quad4>();
+    else if (elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27)
+      parent = std::make_unique<Hex8>();
+    else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
+      parent = std::make_unique<Tri3>();
+    else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
+      parent = std::make_unique<Tet4>();
+    else
+      continue;
+
+    // We have to make a copy because adding the new parent element to the mesh
+    // will modify the mesh for the analysis of the next nodes
+    // Make a copy of the mesh, add this element
+    auto mesh_copy = mesh->clone();
+    auto parent_ptr = mesh_copy->add_elem(parent.release());
+    MeshRefinement mesh_refiner(*mesh_copy);
+
+    // Set the nodes to the coarse element
+    for (auto i : index_range(tentative_coarse_nodes))
+      parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
+
+    // Refine this parent
+    parent_ptr->set_refinement_flag(Elem::REFINE);
+    parent_ptr->refine(mesh_refiner);
+    const auto num_children = parent_ptr->n_children();
+
+    // Compare with the original set of elements
+    // We already know the child share the exterior node. If they share the same vertex
+    // average as the group of unrefined elements we will call this good enough for now
+    // For tetrahedral elements we cannot rely on the children all matching as the choice in
+    // the diagonal selection can be made differently. We'll just say 4 matching children is
+    // good enough for the heuristic
+    unsigned int num_children_match = 0;
+    for (const auto & child : parent_ptr->child_ref_range())
+    {
+      for (const auto & potential_children : fine_elements)
+        if (MooseUtils::absoluteFuzzyEqual(child.vertex_average()(0),
+                                           potential_children->vertex_average()(0),
+                                           _non_conformality_tol) &&
+            MooseUtils::absoluteFuzzyEqual(child.vertex_average()(1),
+                                           potential_children->vertex_average()(1),
+                                           _non_conformality_tol) &&
+            MooseUtils::absoluteFuzzyEqual(child.vertex_average()(2),
+                                           potential_children->vertex_average()(2),
+                                           _non_conformality_tol))
+        {
+          num_children_match++;
+          break;
+        }
+    }
+
+    if (num_children_match == num_children ||
+        ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
+         num_children_match == 4))
+    {
+      num_likely_AMR_created_nonconformality++;
+      if (num_likely_AMR_created_nonconformality < _num_outputs)
+      {
+        _console << "Detected non-conformality likely created by AMR near" << *node
+                 << Moose::stringify(elem_type)
+                 << " elements that could be merged into a coarse element:" << std::endl;
+        for (const auto & elem : fine_elements)
+          _console << elem->id() << " ";
+        _console << std::endl;
+      }
+      else if (num_likely_AMR_created_nonconformality == _num_outputs)
+        _console << "Maximum log output reached, silencing output" << std::endl;
+    }
   }
 
-  if (_check_local_jacobian != "NO_CHECK")
+  diagnosticsLog(
+      "Number of non-conformal nodes likely due to mesh refinement detected by heuristic: " +
+          Moose::stringify(num_likely_AMR_created_nonconformality),
+      _check_adaptivity_non_conformality,
+      num_likely_AMR_created_nonconformality);
+  pl->unset_close_to_point_tol();
+}
+
+void
+MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_negative_elem_qp_jacobians = 0;
+  // Check elements (assumes serialized mesh)
+  for (const auto & elem : mesh->element_ptr_range())
   {
-    unsigned int num_negative_elem_qp_jacobians = 0;
-    // Check elements (assumes serialized mesh)
-    for (const auto & elem : mesh->element_ptr_range())
+    // Get a high-ish order quadrature
+    QGauss qrule(mesh->mesh_dimension(), FOURTH);
+
+    // Use the default element order
+    // We would error if going above what the element can't support
+    const FEType fe_type(elem->default_order(), libMesh::LAGRANGE);
+
+    // Initialize a basic Lagrangian shape function everywhere
+    std::unique_ptr<FEBase> fe_elem;
+    if (mesh->mesh_dimension() == 1)
+      fe_elem = std::make_unique<FELagrange<1>>(fe_type);
+    if (mesh->mesh_dimension() == 2)
+      fe_elem = std::make_unique<FELagrange<2>>(fe_type);
+    else
+      fe_elem = std::make_unique<FELagrange<3>>(fe_type);
+
+    fe_elem->attach_quadrature_rule(&qrule);
+    try
     {
-      // Get a high-ish order quadrature
-      QGauss qrule(mesh->mesh_dimension(), FOURTH);
+      fe_elem->reinit(elem);
+    }
+    catch (libMesh::LogicError & e)
+    {
+      num_negative_elem_qp_jacobians++;
+      const auto msg = std::string(e.what());
+      if (num_negative_elem_qp_jacobians < _num_outputs &&
+          msg.find("negative Jacobian") != std::string::npos)
+        _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
+      else if (num_negative_elem_qp_jacobians == _num_outputs)
+        _console << "Maximum log output reached, silencing output" << std::endl;
+      else if (msg.find("negative Jacobian") == std::string::npos)
+        _console << e.what() << std::endl;
+    }
+  }
+  diagnosticsLog("Number of elements with a negative Jacobian: " +
+                     Moose::stringify(num_negative_elem_qp_jacobians),
+                 _check_local_jacobian,
+                 num_negative_elem_qp_jacobians);
+
+  unsigned int num_negative_side_qp_jacobians = 0;
+  // Check element sides
+  for (const auto & elem : mesh->element_ptr_range())
+  {
+    for (const auto & side : elem->side_index_range())
+    {
+      // Get a high-ish order side quadrature
+      QGauss qrule(mesh->mesh_dimension() - 1, FOURTH);
 
       // Use the default element order
       // We would error if going above what the element can't support
-      const FEType fe_type(elem->default_order(), libMesh::LAGRANGE);
+      const FEType fe_type(elem->default_side_order(), libMesh::LAGRANGE);
 
       // Initialize a basic Lagrangian shape function everywhere
-      std::unique_ptr<FEBase> fe_elem;
+      std::unique_ptr<FEBase> fe_side;
       if (mesh->mesh_dimension() == 1)
-        fe_elem = std::make_unique<FELagrange<1>>(fe_type);
+        fe_side = std::make_unique<FELagrange<1>>(fe_type);
       if (mesh->mesh_dimension() == 2)
-        fe_elem = std::make_unique<FELagrange<2>>(fe_type);
+        fe_side = std::make_unique<FELagrange<2>>(fe_type);
       else
-        fe_elem = std::make_unique<FELagrange<3>>(fe_type);
+        fe_side = std::make_unique<FELagrange<3>>(fe_type);
 
-      fe_elem->attach_quadrature_rule(&qrule);
+      fe_side->attach_quadrature_rule(&qrule);
       try
       {
-        fe_elem->reinit(elem);
+        fe_side->reinit(elem, side);
       }
       catch (libMesh::LogicError & e)
       {
-        num_negative_elem_qp_jacobians++;
         const auto msg = std::string(e.what());
-        if (num_negative_elem_qp_jacobians < _num_outputs &&
-            msg.find("negative Jacobian") != std::string::npos)
-          _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
-        else if (num_negative_elem_qp_jacobians == _num_outputs)
-          _console << "Maximum log output reached, silencing output" << std::endl;
-        else if (msg.find("negative Jacobian") == std::string::npos)
+        if (msg.find("negative Jacobian") != std::string::npos)
+        {
+          num_negative_side_qp_jacobians++;
+          if (num_negative_side_qp_jacobians < _num_outputs)
+            _console << "Negative Jacobian found in side " << side << " of element\n"
+                     << elem->get_info() << std::endl;
+          else if (num_negative_side_qp_jacobians == _num_outputs)
+            _console << "Maximum log output reached, silencing output" << std::endl;
+        }
+        else
           _console << e.what() << std::endl;
       }
     }
-    diagnosticsLog("Number of elements with a negative Jacobian: " +
-                       Moose::stringify(num_negative_elem_qp_jacobians),
-                   _check_local_jacobian,
-                   num_negative_elem_qp_jacobians);
-
-    unsigned int num_negative_side_qp_jacobians = 0;
-    // Check element sides
-    for (const auto & elem : mesh->element_ptr_range())
-    {
-      for (const auto & side : elem->side_index_range())
-      {
-        // Get a high-ish order side quadrature
-        QGauss qrule(mesh->mesh_dimension() - 1, FOURTH);
-
-        // Use the default element order
-        // We would error if going above what the element can't support
-        const FEType fe_type(elem->default_side_order(), libMesh::LAGRANGE);
-
-        // Initialize a basic Lagrangian shape function everywhere
-        std::unique_ptr<FEBase> fe_side;
-        if (mesh->mesh_dimension() == 1)
-          fe_side = std::make_unique<FELagrange<1>>(fe_type);
-        if (mesh->mesh_dimension() == 2)
-          fe_side = std::make_unique<FELagrange<2>>(fe_type);
-        else
-          fe_side = std::make_unique<FELagrange<3>>(fe_type);
-
-        fe_side->attach_quadrature_rule(&qrule);
-        try
-        {
-          fe_side->reinit(elem, side);
-        }
-        catch (libMesh::LogicError & e)
-        {
-          const auto msg = std::string(e.what());
-          if (msg.find("negative Jacobian") != std::string::npos)
-          {
-            num_negative_side_qp_jacobians++;
-            if (num_negative_side_qp_jacobians < _num_outputs)
-              _console << "Negative Jacobian found in side " << side << " of element\n"
-                       << elem->get_info() << std::endl;
-            else if (num_negative_side_qp_jacobians == _num_outputs)
-              _console << "Maximum log output reached, silencing output" << std::endl;
-          }
-          else
-            _console << e.what() << std::endl;
-        }
-      }
-    }
-    diagnosticsLog("Number of element sides with negative Jacobians: " +
-                       Moose::stringify(num_negative_side_qp_jacobians),
-                   _check_local_jacobian,
-                   num_negative_side_qp_jacobians);
   }
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  diagnosticsLog("Number of element sides with negative Jacobians: " +
+                     Moose::stringify(num_negative_side_qp_jacobians),
+                 _check_local_jacobian,
+                 num_negative_side_qp_jacobians);
 }
 
 void
