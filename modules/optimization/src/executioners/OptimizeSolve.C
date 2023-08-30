@@ -59,7 +59,7 @@ OptimizeSolve::solve()
   for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
   {
     if (auto steady = dynamic_cast<Steady *>(sub_app->getExecutioner(0)))
-      steady->setOptimizationFlag(true);
+      steady->setIterationOutputFlag(true);
   }
 
   // Initial solve

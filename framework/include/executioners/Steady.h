@@ -65,21 +65,21 @@ public:
   }
 
   /**
-   * Set whether we are solving an optimization problem via OptimizeSolve.
+   * Set whether we are solving with outer iterations (e.g. optimization).
    *
-   * @param is_optimize_solve Whether the system is performing optimization.
+   * @param is_outer_iteration_solve Whether the solution process contains outer iterations.
    */
-  virtual void setOptimizationFlag(const bool is_optimize_solve)
+  virtual void setIterationOutputFlag(const bool is_outer_iteration_solve)
   {
-    _is_optimize_solve = is_optimize_solve;
+    _is_outer_iteration_solve = is_outer_iteration_solve;
   }
 
   /**
-   * Get whether we are solving an optimization problem via OptimizeSolve.
+   * Get whether we are solving with outer iterations (e.g. optimization).
    *
-   * @return Whether the solution process is an optimization scheme.
+   * @return Whether the solution process contains outer iterations.
    */
-  virtual bool getOptimizationFlag() const { return _is_optimize_solve; }
+  virtual bool getIterationOutputFlag() const { return _is_outer_iteration_solve; }
 
 protected:
   FEProblemBase & _problem;
@@ -96,6 +96,6 @@ protected:
 private:
   bool _last_solve_converged;
 
-  /// Whether we are solving an optimization problem
-  bool _is_optimize_solve;
+  /// Whether we are solving an outer-iteration problem (e.g. optimization).
+  bool _is_outer_iteration_solve;
 };

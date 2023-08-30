@@ -177,7 +177,7 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
 
     // These lines enable CSV per-optimization iteration output (Optimization module)
     if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
-      if (steady->getOptimizationFlag() && _current_execute_flag == EXEC_TIMESTEP_END)
+      if (steady->getIterationOutputFlag() && _current_execute_flag == EXEC_TIMESTEP_END)
       {
         std::string append = "iteration_" + Moose::stringify(steady->getIterationNumberOutput());
         file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')

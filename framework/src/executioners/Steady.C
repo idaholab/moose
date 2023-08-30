@@ -36,7 +36,7 @@ Steady::Steady(const InputParameters & parameters)
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
     _output_iteration_number(0),
-    _is_optimize_solve(false)
+    _is_outer_iteration_solve(false)
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 

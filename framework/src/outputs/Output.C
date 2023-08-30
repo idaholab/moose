@@ -274,7 +274,7 @@ Output::getTimeStep()
 {
   if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
   {
-    if (steady->getOptimizationFlag())
+    if (steady->getIterationOutputFlag())
       return steady->getIterationNumberOutput();
     else
       return _t_step;
