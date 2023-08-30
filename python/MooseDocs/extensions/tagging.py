@@ -150,7 +150,8 @@ class TaggingCommand(command.CommandComponent):
         page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
         if self.extension.get_tag_data(name):
-            msg = "Tag already exists; not adding the following 'name' to dictionary: "
+            msg = page.name
+            msg += ": Tag page identifier already exists; not adding the following 'name' to dictionary: "
             msg += name
             LOG.warning(msg)
         else:
