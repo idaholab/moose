@@ -135,7 +135,7 @@ XFEMAction::act()
 {
 
   std::shared_ptr<XFEMInterface> xfem_interface = _problem->getXFEM();
-  if (xfem_interface == NULL)
+  if (xfem_interface == nullptr)
   {
     const auto & params = _app.getInputParameterWarehouse().getInputParameters();
     InputParameters & pars(*(params.find(uniqueActionName())->second.get()));
@@ -146,7 +146,7 @@ XFEMAction::act()
   }
 
   std::shared_ptr<XFEM> xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(xfem_interface);
-  if (xfem == NULL)
+  if (xfem == nullptr)
     mooseError("dynamic cast of xfem object failed");
 
   if (_current_task == "setup_xfem")

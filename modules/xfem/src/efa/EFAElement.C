@@ -16,8 +16,8 @@
 EFAElement::EFAElement(unsigned int eid, unsigned int n_nodes)
   : _id(eid),
     _num_nodes(n_nodes),
-    _nodes(_num_nodes, NULL),
-    _parent(NULL),
+    _nodes(_num_nodes, nullptr),
+    _parent(nullptr),
     _crack_tip_split_element(false)
 {
 }
@@ -51,8 +51,8 @@ EFAElement::getNode(unsigned int node_id) const
 bool
 EFAElement::containsNode(EFANode * node) const
 {
-  for (unsigned int i = 0; i < _nodes.size(); ++i)
-    if (_nodes[i] == node)
+  for (const auto element_node : _nodes)
+    if (element_node == node)
       return true;
   return false;
 }
@@ -75,7 +75,7 @@ EFAElement::createLocalNodeFromGlobalNode(const EFANode * global_node) const
       global_node->category() != EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
     EFAError("In createLocalNodeFromGlobalNode node is not global");
 
-  EFANode * new_local_node = NULL;
+  EFANode * new_local_node = nullptr;
   unsigned int inode = 0;
   for (; inode < _nodes.size(); ++inode)
   {
@@ -200,19 +200,21 @@ EFAElement::addChild(EFAElement * child)
 void
 EFAElement::clearParentAndChildren()
 {
-  _parent = NULL;
+  _parent = nullptr;
   _children.clear();
 }
 
 void
-EFAElement::findGeneralNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity)
+EFAElement::findGeneralNeighbors(
+    const std::map<EFANode *, std::set<EFAElement *>> & inverse_connectivity)
 {
   _general_neighbors.clear();
   std::set<EFAElement *> patch_elements;
   for (unsigned int inode = 0; inode < _num_nodes; ++inode)
   {
-    std::set<EFAElement *> this_node_connected_elems = InverseConnectivity[_nodes[inode]];
-    patch_elements.insert(this_node_connected_elems.begin(), this_node_connected_elems.end());
+    auto it = inverse_connectivity.find(_nodes[inode]);
+    if (it != inverse_connectivity.end())
+      patch_elements.insert(it->second.begin(), it->second.end());
   }
 
   std::set<EFAElement *>::iterator eit2;
@@ -276,7 +278,7 @@ EFAElement::mergeNodes(EFANode *& childNode,
           }
           childNode = childOfNeighborNode;
         }
-        else if (childNode->parent() != NULL &&
+        else if (childNode->parent() != nullptr &&
                  childNode->parent() == childOfNeighborNode->parent())
         {
           // merge into childNode if both nodes are child permanent

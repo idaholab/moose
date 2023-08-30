@@ -35,28 +35,28 @@ ElementFragmentAlgorithm::~ElementFragmentAlgorithm()
   for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   for (mit = _embedded_nodes.begin(); mit != _embedded_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   for (mit = _embedded_permanent_nodes.begin(); mit != _embedded_permanent_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   for (mit = _temp_nodes.begin(); mit != _temp_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
   {
     delete eit->second;
-    eit->second = NULL;
+    eit->second = nullptr;
   }
 }
 
@@ -80,7 +80,7 @@ ElementFragmentAlgorithm::add2DElements(std::vector<std::vector<unsigned int>> &
 
     for (unsigned int j = 0; j < num_nodes; ++j)
     {
-      EFANode * currNode = NULL;
+      EFANode * currNode = nullptr;
       std::map<unsigned int, EFANode *>::iterator mit = _permanent_nodes.find(quads[i][j]);
       if (mit == _permanent_nodes.end())
       {
@@ -99,7 +99,7 @@ ElementFragmentAlgorithm::add2DElements(std::vector<std::vector<unsigned int>> &
 }
 
 EFAElement *
-ElementFragmentAlgorithm::add2DElement(std::vector<unsigned int> quad, unsigned int id)
+ElementFragmentAlgorithm::add2DElement(const std::vector<unsigned int> & quad, unsigned int id)
 {
   unsigned int num_nodes = quad.size();
 
@@ -112,7 +112,7 @@ ElementFragmentAlgorithm::add2DElement(std::vector<unsigned int> quad, unsigned 
 
   for (unsigned int j = 0; j < num_nodes; ++j)
   {
-    EFANode * currNode = NULL;
+    EFANode * currNode = nullptr;
     std::map<unsigned int, EFANode *>::iterator mit = _permanent_nodes.find(quad[j]);
     if (mit == _permanent_nodes.end())
     {
@@ -130,7 +130,7 @@ ElementFragmentAlgorithm::add2DElement(std::vector<unsigned int> quad, unsigned 
 }
 
 EFAElement *
-ElementFragmentAlgorithm::add3DElement(std::vector<unsigned int> quad, unsigned int id)
+ElementFragmentAlgorithm::add3DElement(const std::vector<unsigned int> & quad, unsigned int id)
 {
   unsigned int num_nodes = quad.size();
   unsigned int num_faces = 0;
@@ -156,7 +156,7 @@ ElementFragmentAlgorithm::add3DElement(std::vector<unsigned int> quad, unsigned 
 
   for (unsigned int j = 0; j < num_nodes; ++j)
   {
-    EFANode * currNode = NULL;
+    EFANode * currNode = nullptr;
     std::map<unsigned int, EFANode *>::iterator mit = _permanent_nodes.find(quad[j]);
     if (mit == _permanent_nodes.end())
     {
@@ -200,12 +200,8 @@ void
 ElementFragmentAlgorithm::initCrackTipTopology()
 {
   _crack_tip_elements.clear(); // re-build CrackTipElements!
-  std::map<unsigned int, EFAElement *>::iterator eit;
-  for (eit = _elements.begin(); eit != _elements.end(); ++eit)
-  {
-    EFAElement * curr_elem = eit->second;
-    curr_elem->initCrackTip(_crack_tip_elements); // CrackTipElements changed here
-  }
+  for (auto pair : _elements)
+    pair.second->initCrackTip(_crack_tip_elements); // CrackTipElements changed here
 }
 
 void
@@ -214,21 +210,21 @@ ElementFragmentAlgorithm::addElemEdgeIntersection(unsigned int elemid,
                                                   double position)
 {
   // this method is called when we are marking cut edges
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addEdgeIntersection");
 
   EFAElement2D * curr_elem = dynamic_cast<EFAElement2D *>(eit->second);
   if (!curr_elem)
     EFAError("addElemEdgeIntersection: elem ", elemid, " is not of type EFAelement2D");
-  curr_elem->addEdgeCut(edgeid, position, NULL, _embedded_nodes, true);
+  curr_elem->addEdgeCut(edgeid, position, nullptr, _embedded_nodes, true);
 }
 
 void
 ElementFragmentAlgorithm::addElemNodeIntersection(unsigned int elemid, unsigned int nodeid)
 {
   // this method is called when we are marking cut nodes
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addElemNodeIntersection");
 
@@ -238,7 +234,7 @@ ElementFragmentAlgorithm::addElemNodeIntersection(unsigned int elemid, unsigned 
 
   // Only add cut node when the curr_elem does not have any fragment
   if (curr_elem->numFragments() == 0)
-    curr_elem->addNodeCut(nodeid, NULL, _permanent_nodes, _embedded_permanent_nodes);
+    curr_elem->addNodeCut(nodeid, nullptr, _permanent_nodes, _embedded_permanent_nodes);
 }
 
 bool
@@ -247,7 +243,7 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid,
                                                   double position)
 {
   // N.B. this method must be called after addEdgeIntersection
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addFragEdgeIntersection");
 
@@ -260,11 +256,11 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid,
 void
 ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
                                                   unsigned int faceid,
-                                                  std::vector<unsigned int> edgeid,
-                                                  std::vector<double> position)
+                                                  const std::vector<unsigned int> & edgeid,
+                                                  const std::vector<double> & position)
 {
   // this method is called when we are marking cut edges
-  std::map<unsigned int, EFAElement *>::iterator eit = _elements.find(elemid);
+  auto eit = _elements.find(elemid);
   if (eit == _elements.end())
     EFAError("Could not find element with id: ", elemid, " in addEdgeIntersection");
 
@@ -273,15 +269,16 @@ ElementFragmentAlgorithm::addElemFaceIntersection(unsigned int elemid,
     EFAError("addElemEdgeIntersection: elem ", elemid, " is not of type EFAelement2D");
 
   // add cuts to two face edges at the same time
-  curr_elem->addFaceEdgeCut(faceid, edgeid[0], position[0], NULL, _embedded_nodes, true, true);
-  curr_elem->addFaceEdgeCut(faceid, edgeid[1], position[1], NULL, _embedded_nodes, true, true);
+  curr_elem->addFaceEdgeCut(faceid, edgeid[0], position[0], nullptr, _embedded_nodes, true, true);
+  curr_elem->addFaceEdgeCut(faceid, edgeid[1], position[1], nullptr, _embedded_nodes, true, true);
 }
 
 void
-ElementFragmentAlgorithm::addFragFaceIntersection(unsigned int /*ElemID*/,
-                                                  unsigned int /*FragFaceID*/,
-                                                  std::vector<unsigned int> /*FragFaceEdgeID*/,
-                                                  std::vector<double> /*position*/)
+ElementFragmentAlgorithm::addFragFaceIntersection(
+    unsigned int /*ElemID*/,
+    unsigned int /*FragFaceID*/,
+    const std::vector<unsigned int> & /*FragFaceEdgeID*/,
+    const std::vector<double> & /*position*/)
 {
   // TODO: need to finish this for 3D problems
 }
@@ -308,7 +305,6 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
   _new_nodes.clear();
   _child_elements.clear();
   _parent_elements.clear();
-  //  _merged_edge_map.clear();
 
   unsigned int first_new_node_id = Efa::getNewID(_permanent_nodes);
 
@@ -317,12 +313,10 @@ ElementFragmentAlgorithm::updateTopology(bool mergeUncutVirtualEdges)
   sanityCheck();
   updateCrackTipElements();
 
-  std::map<unsigned int, EFANode *>::iterator mit;
-  for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit)
-  {
-    if (mit->first >= first_new_node_id)
-      _new_nodes.push_back(mit->second);
-  }
+  for (const auto & [id, node] : _permanent_nodes)
+    if (id >= first_new_node_id)
+      _new_nodes.push_back(node);
+
   clearPotentialIsolatedNodes(); // _new_nodes and _permanent_nodes may change here
 }
 
@@ -339,21 +333,21 @@ ElementFragmentAlgorithm::reset()
   for (mit = _permanent_nodes.begin(); mit != _permanent_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   _permanent_nodes.clear();
 
   for (mit = _temp_nodes.begin(); mit != _temp_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   _temp_nodes.clear();
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
   {
     delete eit->second;
-    eit->second = NULL;
+    eit->second = nullptr;
   }
   _elements.clear();
 }
@@ -390,7 +384,7 @@ ElementFragmentAlgorithm::clearAncestry()
   for (mit = _temp_nodes.begin(); mit != _temp_nodes.end(); ++mit)
   {
     delete mit->second;
-    mit->second = NULL;
+    mit->second = nullptr;
   }
   _temp_nodes.clear();
 
@@ -441,16 +435,11 @@ ElementFragmentAlgorithm::connectFragments(bool mergeUncutVirtualEdges)
     childElem->connectNeighbors(
         _permanent_nodes, _temp_nodes, _inverse_connectivity, mergeUncutVirtualEdges);
     childElem->updateFragmentNode();
-  } // loop over child elements
-
-  std::vector<EFAElement *>::iterator vit;
-  for (vit = _child_elements.begin(); vit != _child_elements.end();)
-  {
-    if (*vit == NULL)
-      vit = _child_elements.erase(vit);
-    else
-      ++vit;
   }
+
+  // remove all deleted children
+  _child_elements.erase(std::remove(_child_elements.begin(), _child_elements.end(), nullptr),
+                        _child_elements.end());
 }
 
 void
@@ -616,38 +605,38 @@ ElementFragmentAlgorithm::getElemIdByNodes(unsigned int * node_id)
 void
 ElementFragmentAlgorithm::clearPotentialIsolatedNodes()
 {
+  // compile a set of all child element nodes
+  std::set<EFANode *> child_nodes;
+  for (const auto & child_element : _child_elements)
+  {
+    const auto & nodes = child_element->getNodes();
+    child_nodes.insert(nodes.begin(), nodes.end());
+  }
+
   // Collect all parent nodes that will be isolated
-  std::map<EFANode *, std::vector<EFANode *>> isolate_parent_to_child;
+  std::map<EFANode *, EFANode *> isolate_parent_to_child;
   for (unsigned int i = 0; i < _new_nodes.size(); ++i)
   {
     EFANode * parent_node = _new_nodes[i]->parent();
     if (!parent_node)
       EFAError("a new permanent node must have a parent node!");
-    bool isParentNodeInNewElem = false;
-    for (unsigned int j = 0; j < _child_elements.size(); ++j)
-    {
-      if (_child_elements[j]->containsNode(parent_node))
-      {
-        isParentNodeInNewElem = true;
-        break;
-      }
-    }
-    if (!isParentNodeInNewElem)
-      isolate_parent_to_child[parent_node].push_back(_new_nodes[i]);
+
+    auto it = isolate_parent_to_child.lower_bound(parent_node);
+    if (it != isolate_parent_to_child.end() && it->first == parent_node)
+      continue;
+
+    if (child_nodes.count(parent_node) == 0)
+      isolate_parent_to_child.emplace_hint(it, parent_node, _new_nodes[i]);
   }
 
   // For each isolated parent node, pick one of its child new node
   // Then, switch that child with its parent for all new elems
-  std::map<EFANode *, std::vector<EFANode *>>::iterator mit;
-  for (mit = isolate_parent_to_child.begin(); mit != isolate_parent_to_child.end(); ++mit)
+  for (const auto [parent_node, child_node] : isolate_parent_to_child)
   {
-    EFANode * parent_node = mit->first;
-    EFANode * child_node = (mit->second)[0]; // need to discard it and swap it back to its parent
     for (unsigned int i = 0; i < _child_elements.size(); ++i)
-    {
       if (_child_elements[i]->containsNode(child_node))
         _child_elements[i]->switchNode(parent_node, child_node, true);
-    }
+
     _new_nodes.erase(std::remove(_new_nodes.begin(), _new_nodes.end(), child_node),
                      _new_nodes.end());
     Efa::deleteFromMap(_permanent_nodes, child_node);

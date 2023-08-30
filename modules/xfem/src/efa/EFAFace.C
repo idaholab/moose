@@ -18,18 +18,18 @@
 
 EFAFace::EFAFace(unsigned int n_nodes, unsigned int num_interior_face_nodes)
   : _num_nodes(n_nodes),
-    _nodes(_num_nodes, NULL),
+    _nodes(_num_nodes, nullptr),
     _num_edges(_num_nodes),
-    _edges(_num_edges, NULL),
-    _face_interior_nodes(num_interior_face_nodes, NULL)
+    _edges(_num_edges, nullptr),
+    _face_interior_nodes(num_interior_face_nodes, nullptr)
 {
 }
 
 EFAFace::EFAFace(const EFAFace & other_face)
   : _num_nodes(other_face._num_nodes),
-    _nodes(_num_nodes, NULL),
+    _nodes(_num_nodes, nullptr),
     _num_edges(_num_nodes),
-    _edges(_num_edges, NULL)
+    _edges(_num_edges, nullptr)
 {
   for (unsigned int k = 0; k < other_face._num_nodes; ++k)
   {
@@ -42,9 +42,9 @@ EFAFace::EFAFace(const EFAFace & other_face)
 
 EFAFace::EFAFace(const EFAFragment2D * frag)
   : _num_nodes(frag->numEdges()),
-    _nodes(_num_nodes, NULL),
+    _nodes(_num_nodes, nullptr),
     _num_edges(_num_nodes),
-    _edges(_num_edges, NULL)
+    _edges(_num_edges, nullptr)
 {
   for (unsigned int k = 0; k < frag->numEdges(); ++k)
   {
@@ -64,7 +64,7 @@ EFAFace::~EFAFace()
     if (_edges[i])
     {
       delete _edges[i];
-      _edges[i] = NULL;
+      _edges[i] = nullptr;
     }
   }
   for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
@@ -72,7 +72,7 @@ EFAFace::~EFAFace()
     if (_interior_nodes[i])
     {
       delete _interior_nodes[i];
-      _interior_nodes[i] = NULL;
+      _interior_nodes[i] = nullptr;
     }
   }
 }
@@ -243,23 +243,11 @@ EFAFace::createNodes()
 {
   for (unsigned int i = 0; i < _edges.size(); ++i)
   {
-    if (_edges[i] != NULL)
+    if (_edges[i] != nullptr)
       _nodes[i] = _edges[i]->getNode(0);
     else
       EFAError("in EFAface::createNodes() _edges[i] does not exist");
   }
-}
-
-unsigned int
-EFAFace::numEdges() const
-{
-  return _edges.size();
-}
-
-EFAEdge *
-EFAFace::getEdge(unsigned int edge_id) const
-{
-  return _edges[edge_id];
 }
 
 void
@@ -274,7 +262,7 @@ EFAFace::createEdges()
   for (unsigned int i = 0; i < _num_nodes; ++i)
   {
     unsigned int i_plus1(i < (_num_nodes - 1) ? i + 1 : 0);
-    if (_nodes[i] != NULL && _nodes[i_plus1] != NULL)
+    if (_nodes[i] != nullptr && _nodes[i_plus1] != nullptr)
     {
       EFAEdge * new_edge = new EFAEdge(_nodes[i], _nodes[i_plus1]);
       _edges[i] = new_edge;
@@ -317,7 +305,7 @@ EFAFace::combineTwoEdges(unsigned int edge_id1, unsigned int edge_id2)
     // update face memeber variables
     _num_edges -= 1;
     _num_nodes -= 1;
-    _nodes.resize(_num_nodes, NULL);
+    _nodes.resize(_num_nodes, nullptr);
     for (unsigned int k = 0; k < _num_edges; ++k)
       _nodes[k] = _edges[k]->getNode(0);
   }
@@ -328,7 +316,7 @@ EFAFace::combineTwoEdges(unsigned int edge_id1, unsigned int edge_id2)
 void
 EFAFace::sortEdges()
 {
-  std::vector<EFAEdge *> ordered_edges(_num_edges, NULL);
+  std::vector<EFAEdge *> ordered_edges(_num_edges, nullptr);
   ordered_edges[0] = _edges[0];
   for (unsigned int i = 1; i < _num_edges; ++i)
   {
@@ -366,51 +354,22 @@ EFAFace::isTriOrQuad() const
 bool
 EFAFace::equivalent(const EFAFace * other_face) const
 {
-  unsigned int counter = 0; // counter number of equal nodes
-  bool overlap = false;
-  if (_num_nodes == other_face->_num_nodes)
-  {
-    for (unsigned int i = 0; i < _num_nodes; ++i)
-    {
-      for (unsigned int j = 0; j < other_face->_num_nodes; ++j)
-      {
-        if (_nodes[i] == other_face->_nodes[j])
-        {
-          counter += 1;
-          break;
-        }
-      } // j
-    }   // i
-    if (counter == _num_nodes)
-      overlap = true;
-  }
-  return overlap;
+  return std::is_permutation(
+      _nodes.begin(), _nodes.end(), other_face->_nodes.begin(), other_face->_nodes.end());
 }
 
 bool
 EFAFace::containsNode(const EFANode * node) const
 {
-  bool contains = false;
   for (unsigned int i = 0; i < _num_edges; ++i)
-  {
     if (_edges[i]->containsNode(node))
-    {
-      contains = true;
-      break;
-    }
-  }
-  if (!contains)
-  {
-    for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
-    {
-      if (_interior_nodes[i]->getNode() == node)
-      {
-        contains = true;
-        break;
-      }
-    }
-  }
-  return contains;
+      return true;
+
+  for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
+    if (_interior_nodes[i]->getNode() == node)
+      return true;
+
+  return false;
 }
 
 bool
@@ -468,7 +427,7 @@ EFAFace::split() const
   if (getNumCuts() > 0)
   {
     // construct a fragment from this face
-    EFAFragment2D * frag_tmp = new EFAFragment2D(NULL, this);
+    EFAFragment2D * frag_tmp = new EFAFragment2D(nullptr, this);
     std::vector<EFAFragment2D *> new_frags_tmp = frag_tmp->split();
 
     // copy new_frags to new_faces
@@ -490,7 +449,7 @@ EFAFace *
 EFAFace::combineWithFace(const EFAFace * other_face) const
 {
   // combine this face with another adjacent face
-  EFAFace * new_face = NULL;
+  EFAFace * new_face = nullptr;
   if (isAdjacent(other_face))
   {
     unsigned int this_common_edge_id = adjacentCommonEdge(other_face);
@@ -500,7 +459,7 @@ EFAFace::combineWithFace(const EFAFace * other_face) const
 
     unsigned int other_common_edge_id = other_face->adjacentCommonEdge(this);
     unsigned int new_n_nodes = _num_edges + other_face->_num_edges - 4;
-    EFAFragment2D * new_frag = new EFAFragment2D(NULL, false, NULL); // temp fragment
+    EFAFragment2D * new_frag = new EFAFragment2D(nullptr, false, nullptr); // temp fragment
 
     unsigned int this_edge_id0(this_common_edge_id > 0 ? this_common_edge_id - 1
                                                        : _num_edges - 1); // common_nodes[0]

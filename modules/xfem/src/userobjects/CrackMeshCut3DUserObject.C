@@ -62,12 +62,12 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     _n_step_growth(getParam<unsigned int>("n_step_growth")),
     _is_mesh_modified(false),
     _func_x(parameters.isParamValid("growth_direction_x") ? &getFunction("growth_direction_x")
-                                                          : NULL),
+                                                          : nullptr),
     _func_y(parameters.isParamValid("growth_direction_y") ? &getFunction("growth_direction_y")
-                                                          : NULL),
+                                                          : nullptr),
     _func_z(parameters.isParamValid("growth_direction_z") ? &getFunction("growth_direction_z")
-                                                          : NULL),
-    _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : NULL)
+                                                          : nullptr),
+    _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : nullptr)
 {
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
@@ -79,13 +79,13 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     _size_control = getParam<Real>("size_control");
 
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
-        (_func_x == NULL || _func_y == NULL || _func_z == NULL))
+        (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
 
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == NULL)
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
       mooseError("function is not specified for the function method that defines growth rate");
 
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == NULL)
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
       mooseError("function with a variable is not specified for the fatigue method that defines "
                  "growth rate");
 
@@ -664,7 +664,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
     Point & this_point = *this_node;
 
     const Elem * elem = (*pl)(this_point);
-    if (elem == NULL)
+    if (elem == nullptr)
       _inactive_boundary_pos.push_back(j);
   }
 
@@ -937,10 +937,10 @@ CrackMeshCut3DUserObject::findFrontIntersection()
       std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
       pl->enable_out_of_mesh_mode();
       const Elem * elem = (*pl)(p1);
-      if (elem == NULL)
+      if (elem == nullptr)
         do_inter1 = 0;
       elem = (*pl)(p4);
-      if (elem == NULL)
+      if (elem == nullptr)
         do_inter2 = 0;
 
       for (const auto & belem : range)

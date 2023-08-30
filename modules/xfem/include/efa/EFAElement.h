@@ -41,6 +41,7 @@ public:
   unsigned int numNodes() const;
   void setNode(unsigned int node_id, EFANode * node);
   EFANode * getNode(unsigned int node_id) const;
+  const std::vector<EFANode *> & getNodes() const { return _nodes; }
   bool containsNode(EFANode * node) const;
   void printNodes(std::ostream & ostream) const;
   EFANode * createLocalNodeFromGlobalNode(const EFANode * global_node) const;
@@ -59,7 +60,8 @@ public:
   unsigned int numChildren() const;
   void addChild(EFAElement * child);
   void clearParentAndChildren();
-  void findGeneralNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity);
+  void
+  findGeneralNeighbors(const std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity);
   EFAElement * getGeneralNeighbor(unsigned int index) const;
   unsigned int numGeneralNeighbors() const;
 

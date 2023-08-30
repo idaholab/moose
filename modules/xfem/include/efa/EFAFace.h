@@ -46,8 +46,8 @@ public:
   unsigned int numInteriorNodes() const;
   void createNodes();
 
-  unsigned int numEdges() const;
-  EFAEdge * getEdge(unsigned int edge_id) const;
+  unsigned int numEdges() const { return _edges.size(); }
+  EFAEdge * getEdge(unsigned int edge_id) const { return _edges[edge_id]; }
   void setEdge(unsigned int edge_id, EFAEdge * new_edge);
   void createEdges();
   void combineTwoEdges(unsigned int edge_id1, unsigned int edge_id2);

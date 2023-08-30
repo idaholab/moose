@@ -29,7 +29,14 @@ private:
   std::vector<double> _intersection_x;
 
 public:
+  std::pair<EFANode *, EFANode *> getSortedNodes() const
+  {
+    return {std::min(_edge_node1, _edge_node2), std::max(_edge_node1, _edge_node2)};
+  }
+
   bool equivalent(const EFAEdge & other) const;
+  bool isEmbeddedPermanent() const;
+
   bool isPartialOverlap(const EFAEdge & other) const;
   bool containsEdge(const EFAEdge & other) const;
   bool getNodeMasters(EFANode * node,
