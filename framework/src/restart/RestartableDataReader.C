@@ -180,7 +180,7 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
   _is_restoring = true;
 
   // Set everything as not restored
-  for (const auto tid : index_range(_header))
+  for (const auto tid : make_range(dataSize()))
     for (auto & value : currentData(tid))
       value.setRestored(false, {});
 
@@ -250,7 +250,7 @@ RestartableDataReader::deserializeValue(
     RestartableDataValue & value,
     const RestartableDataReader::HeaderEntry & header_entry) const
 {
-  mooseAssert(!value.restored(), "Should not be restored");
+  mooseAssert(!value.restored(), value.name() + " is already restored");
 
   auto error = [&data_input, &value](auto... args)
   {
