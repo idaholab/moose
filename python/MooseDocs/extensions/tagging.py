@@ -19,6 +19,9 @@ that represents the markdown file that is associated with an arbitrary list of k
 spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.
 Ex: '!tagger name    k1:v1  ka:va thing1:thing2' is okay, but not '!tagger  name'.
 
+ALERT: The tagging extension is experimental! If documentation tagging features are desired, please
+request assistance from the MOOSE Framework development team.
+
 Tagger checks that all linked moose pages are unique and will not allow duplicate names in the
 dictionary.  Duplicate key value pairs are allowed.
 
@@ -67,6 +70,11 @@ class TaggingExtension(command.CommandExtension):
             LOG.warning(msg)
             self.setActive(False)
 
+        if self['active'] is True:
+            LOG.warning("The tagging extension is experimental! If documentation tagging features " \
+                        "are desired, please request assistance from the MOOSE Framework development " \
+                        "team.")
+
     def postExecute(self):
         """
         At completion of execute process, collect and process all data attributes. Then, insert into
@@ -106,9 +114,6 @@ class TaggingExtension(command.CommandExtension):
 
     def set_tag_data(self, *args):
         return self.setAttribute(*args)
-
-    def get_tag_iter(self):
-        return self.getAttributeItems()
 
     @property
     def allowed_keys(self):
