@@ -25,10 +25,6 @@
   []
   [tricrystal_2]
   []
-  [PolycrystalVariables]
-    var_name_base = 'coloring_'
-    op_num = 8
-  []
   [random_0]
   []
   [random_1]
@@ -75,12 +71,6 @@
       var_name_base = 'tricrystal_'
       op_num = 3
     []
-    [PolycrystalColoringIC]
-      block = '0'
-      polycrystal_ic_uo = hex_ic
-      var_name_base = 'coloring_'
-      op_num = 8
-    []
     [PolycrystalRandomIC]
       block = '0'
       var_name_base = 'random_'
@@ -107,13 +97,6 @@
     rand_seed = 10
     int_width = 0
     var_name_base = 'voronoi_'
-    op_num = 8
-    grain_num = 4
-  []
-  [hex_ic]
-    type = PolycrystalHex
-    coloring_algorithm = bt
-    var_name_base = 'coloring_'
     op_num = 8
     grain_num = 4
   []
