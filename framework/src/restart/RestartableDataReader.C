@@ -179,10 +179,10 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
 
   _is_restoring = true;
 
-  // Set everything as not restored
+  // Set everything as not loaded
   for (const auto tid : make_range(dataSize()))
     for (auto & value : currentData(tid))
-      value.setRestored(false, {});
+      value.setNotLoaded({});
 
   // Read the header
   _header = readHeader(*_streams.header);
@@ -250,7 +250,7 @@ RestartableDataReader::deserializeValue(
     RestartableDataValue & value,
     const RestartableDataReader::HeaderEntry & header_entry) const
 {
-  mooseAssert(!value.restored(), value.name() + " is already restored");
+  mooseAssert(!value.loaded(), value.name() + " is already loaded");
 
   auto error = [&data_input, &value](auto... args)
   {
@@ -287,8 +287,6 @@ RestartableDataReader::deserializeValue(
           header_entry.size,
           "\nLoaded size: ",
           loaded_size);
-
-  value.setRestored(true, {});
 }
 
 bool

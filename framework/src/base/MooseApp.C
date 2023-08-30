@@ -1782,7 +1782,7 @@ MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
     stored_data = &data_map.addData(std::move(data));
 
   if (!read_only)
-    stored_data->setDeclared();
+    stored_data->setDeclared({});
 
   return *stored_data;
 }

@@ -28,6 +28,11 @@ RestartableDataWriter::RestartableDataWriter(MooseApp & app, std::vector<Restart
 void
 RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_stream)
 {
+  // Set everything as not stored
+  for (const auto tid : make_range(dataSize()))
+    for (auto & value : currentData(tid))
+      value.setNotStored({});
+
   // Header
   char id[] = {'R', 'D'};
   header_stream.write(id, 2);

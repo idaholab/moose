@@ -63,9 +63,23 @@ TEST_F(RestartableDataIOTest, readWrite)
       rdm.addData(std::move(rdv));
     }
 
+    // Shouldn't be stored or loaded
+    for (const auto & val : rdm)
+    {
+      EXPECT_FALSE(val.stored());
+      EXPECT_FALSE(val.loaded());
+    }
+
     // And write
     RestartableDataWriter writer(*_app, rdm);
     writer.write(*header_stream, *data_stream);
+
+    // Should be stored and not loaded
+    for (const auto & val : rdm)
+    {
+      EXPECT_TRUE(val.stored());
+      EXPECT_FALSE(val.loaded());
+    }
   }
 
   // Declare some of the values
@@ -75,6 +89,8 @@ TEST_F(RestartableDataIOTest, readWrite)
     {
       std::unique_ptr<RestartableDataValue> rdv =
           std::make_unique<RestartableData<unsigned int>>(name, nullptr, 0);
+      EXPECT_FALSE(rdv->stored());
+      EXPECT_FALSE(rdv->loaded());
       rdm.addData(std::move(rdv));
     }
 
@@ -97,7 +113,8 @@ TEST_F(RestartableDataIOTest, readWrite)
       auto rdv_uint = dynamic_cast<const RestartableData<unsigned int> *>(&rdv);
       EXPECT_TRUE(rdv_uint != nullptr);
       EXPECT_EQ(rdv_uint->get(), info.value);
-      EXPECT_TRUE(rdv.restored());
+      EXPECT_FALSE(rdv.stored());
+      EXPECT_TRUE(rdv.loaded());
 
       try
       {

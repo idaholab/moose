@@ -20,6 +20,8 @@
 #include <unordered_map>
 
 class RestartableDataReader;
+class RestartableDataWriter;
+class MooseApp;
 
 /**
  * Abstract definition of a RestartableData value.
@@ -66,6 +68,16 @@ public:
   bool hasContext() const { return _context != nullptr; }
 
   /**
+   * Helper that protects access to setDeclared() to only MooseApp
+   */
+  class SetDeclaredKey
+  {
+    friend class MooseApp;
+    SetDeclaredKey() {}
+    SetDeclaredKey(const SetDeclaredKey &) {}
+  };
+
+  /**
    * Whether or not this data has been declared
    */
   bool declared() const { return _declared; }
@@ -73,32 +85,73 @@ public:
   /**
    * Sets that this restartable value has been declared
    */
-  void setDeclared();
+  void setDeclared(const SetDeclaredKey);
 
   /**
-   * Whether or not this data has been restored
+   * Whether or not this data has been loaded
+   *
+   * This is typically reset on a call to
+   * RestartableDataReader::restore()
    */
-  bool restored() const { return _restored; }
+  bool loaded() const { return _loaded; }
 
   /**
-   * Helper that protects access to setRestored() to only RestartableDataReader
+   * Helper that protects access to setNotLoaded() to only RestartableDataReader
    */
-  class WriteRestoredKey
+  class SetNotLoadedKey
   {
     friend class RestartableDataReader;
-
-    WriteRestoredKey() {}
-    WriteRestoredKey(const WriteRestoredKey &) {}
+    SetNotLoadedKey() {}
+    SetNotLoadedKey(const SetNotLoadedKey &) {}
   };
 
   /**
-   * Sets the restored state of this value to \p restored
+   * Sets that this restartable value has been loaded
    */
-  void setRestored(const bool restored, const WriteRestoredKey);
+  void setNotLoaded(const SetNotLoadedKey) { _loaded = false; }
 
-  // save/restore in a file
-  virtual void store(std::ostream & stream) = 0;
-  virtual void load(std::istream & stream) = 0;
+  /**
+   * Whether or not this data has been loaded
+   *
+   * This is typically reset on a call to
+   * RestartableDataWriter::write()
+   */
+  bool stored() const { return _stored; }
+
+  /**
+   * Helper that protects access to setNotStored() to only RestartableDataWriter
+   */
+  class SetNotStoredKey
+  {
+    friend class RestartableDataWriter;
+    SetNotStoredKey() {}
+    SetNotStoredKey(const SetNotStoredKey &) {}
+  };
+
+  /**
+   * Sets that this restartable value has been loaded
+   */
+  void setNotStored(const SetNotStoredKey) { _stored = false; }
+
+  /**
+   * Stores the value into the stream \p stream and sets it as stored
+   */
+  void store(std::ostream & stream);
+  /**
+   * Loads the value from the stream \p stream and sets it as loaded
+   */
+  void load(std::istream & stream);
+
+  /**
+   * Internal method that stores the value into the stream \p stream
+   * in the specialized class.
+   */
+  virtual void storeInternal(std::ostream & stream) = 0;
+  /**
+   * Internal method that loads the value from the stream \p stream
+   * in the specialized class.
+   */
+  virtual void loadInternal(std::istream & stream) = 0;
 
 protected:
   /// The full (unique) name of this particular piece of data.
@@ -111,8 +164,11 @@ private:
   /// Whether or not this data has been declared (true) or only retreived (false)
   bool _declared;
 
-  /// Whether or not this has value has been restored
-  bool _restored;
+  /// Whether or not this has value has been loaded
+  bool _loaded;
+
+  /// Whether or not this has value has been stored
+  bool _stored;
 };
 
 /**
@@ -161,12 +217,12 @@ public:
   /**
    * Store the RestartableData into a binary stream
    */
-  virtual void store(std::ostream & stream) override;
+  virtual void storeInternal(std::ostream & stream) override;
 
   /**
    * Load the RestartableData from a binary stream
    */
-  virtual void load(std::istream & stream) override;
+  virtual void loadInternal(std::istream & stream) override;
 
 private:
   /// Stored value.
@@ -208,14 +264,14 @@ RestartableData<T>::type() const
 
 template <typename T>
 inline void
-RestartableData<T>::store(std::ostream & stream)
+RestartableData<T>::storeInternal(std::ostream & stream)
 {
   storeHelper(stream, set(), _context);
 }
 
 template <typename T>
 inline void
-RestartableData<T>::load(std::istream & stream)
+RestartableData<T>::loadInternal(std::istream & stream)
 {
   loadHelper(stream, set(), _context);
 }
