@@ -7,16 +7,16 @@ power = 2
 []
 
 [Mesh]
-    [MeshGenerator]
-        type = GeneratedMeshGenerator
-        dim = 2
-        nx = 150
-        ny = 50
-        xmin = 0
-        xmax = 30
-        ymin = 0
-        ymax = 10
-      []
+  [MeshGenerator]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 150
+    ny = 50
+    xmin = 0
+    xmax = 30
+    ymin = 0
+    ymax = 10
+  []
   [node]
     type = ExtraNodesetGenerator
     input = MeshGenerator
@@ -150,11 +150,11 @@ power = 2
     args = 'Emin mat_den power E0'
   []
   [E_phys]
-    type = CoupledValueFunctionMaterial
+    type = DerivativeParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    function = 'x + (y ^ z) * (t-x)'
-    prop_name = E_phys
-    v = 'Emin mat_den power E0'
+    expression = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    coupled_variables = 'mat_den'
+    property_name = E_phys
   []
   [poissons_ratio]
     type = GenericConstantMaterial
@@ -165,12 +165,9 @@ power = 2
     type = ComputeLinearElasticStress
   []
   [dc]
-    # need to creat new material that is the derivatve
-    type = ComplianceSensitivity
+    type = ComplianceSensitivity2
     design_density = mat_den
-    E = ${E0}
-    Emin = ${Emin}
-    power = ${power}
+    youngs_modulus = E_phys
     incremental = false
   []
 []
@@ -221,7 +218,6 @@ power = 2
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
-
 
 [Controls]
   [first_period]

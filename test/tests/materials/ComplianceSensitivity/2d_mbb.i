@@ -90,15 +90,13 @@ power = 2
     poissons_ratio = poissons_ratio
     args = 'mat_den'
   []
-
   [E_phys]
-    type = ParsedMaterial
+    type = DerivativeParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    function = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    expression = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
     coupled_variables = 'mat_den'
     property_name = E_phys
   []
-
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
@@ -108,11 +106,10 @@ power = 2
     type = ComputeLinearElasticStress
   []
   [dc]
-    type = ComplianceSensitivity
+    type = ComplianceSensitivity2
     design_density = mat_den
-    E = ${E0}
-    Emin = ${Emin}
-    power = ${power}
+    youngs_modulus = E_phys
+    incremental = false
   []
 []
 

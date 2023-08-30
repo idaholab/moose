@@ -97,7 +97,6 @@ power = 2
     coupled_variables = 'mat_den'
     property_name = E_phys
   []
-
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
