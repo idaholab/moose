@@ -56,6 +56,8 @@ public:
    * Set a general iteration number for the purpose of outputting, useful in the presence of a
    * nested solve This output iteration number may be set by the parent app for a sub-app, e.g.
    * OptimizeSolve.
+   *
+   * @param iteration_number The iteration number.
    */
   virtual void setIterationNumberOutput(unsigned int iteration_number)
   {
@@ -64,6 +66,8 @@ public:
 
   /**
    * Set whether we are solving an optimization problem via OptimizeSolve.
+   *
+   * @param is_optimize_solve Whether the system is performing optimization.
    */
   virtual void setOptimizationFlag(const bool is_optimize_solve)
   {
@@ -72,8 +76,10 @@ public:
 
   /**
    * Get whether we are solving an optimization problem via OptimizeSolve.
+   *
+   * @return Whether the solution process is an optimization scheme.
    */
-  virtual bool getOptimizationFlag() { return _is_optimize_solve; }
+  virtual bool getOptimizationFlag() const { return _is_optimize_solve; }
 
 protected:
   FEProblemBase & _problem;
@@ -89,5 +95,7 @@ protected:
 
 private:
   bool _last_solve_converged;
+
+  /// Whether we are solving an optimization problem
   bool _is_optimize_solve;
 };
