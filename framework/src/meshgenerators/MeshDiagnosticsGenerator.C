@@ -198,6 +198,7 @@ void
 MeshDiagnosticsGenerator::checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const
 {
   unsigned int num_tiny_elems = 0;
+  unsigned int num_negative_elems = 0;
   unsigned int num_big_elems = 0;
   // loop elements within the mesh (assumes replicated)
   for (auto & elem : mesh->active_element_ptr_range())
@@ -205,7 +206,8 @@ MeshDiagnosticsGenerator::checkElementVolumes(const std::unique_ptr<MeshBase> & 
     if (elem->volume() <= _min_volume)
     {
       if (num_tiny_elems < _num_outputs)
-        _console << "Element too small detected : " << elem->get_info() << std::endl;
+        _console << "Element with volume below threshold detected : \n"
+                 << elem->get_info() << std::endl;
       else if (num_tiny_elems == _num_outputs)
         _console << "Maximum output reached, log is silenced" << std::endl;
       num_tiny_elems++;
@@ -213,16 +215,22 @@ MeshDiagnosticsGenerator::checkElementVolumes(const std::unique_ptr<MeshBase> & 
     if (elem->volume() >= _max_volume)
     {
       if (num_big_elems < _num_outputs)
-        _console << "Element too large detected : " << elem->get_info() << std::endl;
+        _console << "Element with volume above threshold detected : \n"
+                 << elem->get_info() << std::endl;
       else if (num_big_elems == _num_outputs)
         _console << "Maximum output reached, log is silenced" << std::endl;
       num_big_elems++;
     }
   }
-  diagnosticsLog("Number of elements below prescribed volume : " + std::to_string(num_tiny_elems),
+  diagnosticsLog("Number of elements below prescribed minimum volume : " +
+                     std::to_string(num_tiny_elems),
                  _check_element_volumes,
                  num_tiny_elems);
-  diagnosticsLog("Number of elements above prescribed volume : " + std::to_string(num_big_elems),
+  diagnosticsLog("Number of elements with negative volume : " + std::to_string(num_negative_elems),
+                 _check_element_volumes,
+                 num_negative_elems);
+  diagnosticsLog("Number of elements above prescribed maximum volume : " +
+                     std::to_string(num_big_elems),
                  _check_element_volumes,
                  num_big_elems);
 }
@@ -440,6 +448,12 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
   auto pl = mesh->sub_point_locator();
   pl->set_close_to_point_tol(_non_conformality_tol);
 
+  // We have to make a copy because adding the new parent element to the mesh
+  // will modify the mesh for the analysis of the next nodes
+  // Make a copy of the mesh, add this element
+  auto mesh_copy = mesh->clone();
+  MeshRefinement mesh_refiner(*mesh_copy);
+
   // loop on nodes, assumes a replicated mesh
   for (auto & node : mesh->node_ptr_range())
   {
@@ -636,7 +650,6 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
         const auto coarse_side = coarse_elem->side_ptr(coarse_side_i);
 
         // We did not find the side of the coarse neighbor near the refined elements
-        // It could be that it's not planar and the fine elements nodes do not lie on it
         // Try again at another node
         if (!coarse_side)
           continue;
@@ -992,6 +1005,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
                 elem_type,
                 ". Skipping detection for this node and all future nodes near only this "
                 "element type");
+      continue;
     }
 
     // Check the fine element types: if not all the same then it's not uniform AMR
@@ -1004,25 +1018,9 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
       if (check_node == nullptr)
         continue;
 
-    // Form a parent, of the same type as the elements we are trying to combine!
-    std::unique_ptr<Elem> parent;
-    if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
-      parent = std::make_unique<Quad4>();
-    else if (elem_type == HEX8 || elem_type == HEX20 || elem_type == HEX27)
-      parent = std::make_unique<Hex8>();
-    else if (elem_type == TRI3 || elem_type == TRI6 || elem_type == TRI7)
-      parent = std::make_unique<Tri3>();
-    else if (elem_type == TET4 || elem_type == TET10 || elem_type == TET14)
-      parent = std::make_unique<Tet4>();
-    else
-      continue;
-
-    // We have to make a copy because adding the new parent element to the mesh
-    // will modify the mesh for the analysis of the next nodes
-    // Make a copy of the mesh, add this element
-    auto mesh_copy = mesh->clone();
+    // Form a parent, of a low order type as we only have the extreme vertex nodes
+    std::unique_ptr<Elem> parent = Elem::build(Elem::first_order_equivalent_type(elem_type));
     auto parent_ptr = mesh_copy->add_elem(parent.release());
-    MeshRefinement mesh_refiner(*mesh_copy);
 
     // Set the nodes to the coarse element
     for (auto i : index_range(tentative_coarse_nodes))
@@ -1096,26 +1094,40 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   // Use a constant monomial
   const FEType fe_type(CONSTANT, libMesh::MONOMIAL);
 
+  // Initialize a basic constant monomial shape function everywhere
+  std::unique_ptr<FEBase> fe_elem;
+  if (mesh->mesh_dimension() == 1)
+    fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+  if (mesh->mesh_dimension() == 2)
+    fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+  else
+    fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+
+  fe_elem->get_JxW();
+  fe_elem->attach_quadrature_rule(&qrule);
+
   // Check elements (assumes serialized mesh)
   for (const auto & elem : mesh->element_ptr_range())
   {
     // Handle mixed-dimensional meshes
     if (qrule_dimension != elem->dim())
     {
+      // Re-initialize a quadrature
       qrule_dimension = elem->dim();
       qrule = QGauss(qrule_dimension, FIFTH);
+
+      // Re-initialize a monomial FE
+      if (elem->dim() == 1)
+        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+      if (elem->dim() == 2)
+        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+      else
+        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+
+      fe_elem->get_JxW();
+      fe_elem->attach_quadrature_rule(&qrule);
     }
 
-    // Initialize a basic Lagrangian shape function everywhere
-    std::unique_ptr<FEBase> fe_elem;
-    if (elem->dim() == 1)
-      fe_elem = std::make_unique<FELagrange<1>>(fe_type);
-    if (elem->dim() == 2)
-      fe_elem = std::make_unique<FELagrange<2>>(fe_type);
-    else
-      fe_elem = std::make_unique<FELagrange<3>>(fe_type);
-
-    fe_elem->attach_quadrature_rule(&qrule);
     try
     {
       fe_elem->reinit(elem);
@@ -1124,12 +1136,14 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     {
       num_negative_elem_qp_jacobians++;
       const auto msg = std::string(e.what());
-      if (num_negative_elem_qp_jacobians < _num_outputs &&
-          msg.find("negative Jacobian") != std::string::npos)
-        _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
-      else if (num_negative_elem_qp_jacobians == _num_outputs)
-        _console << "Maximum log output reached, silencing output" << std::endl;
-      else if (msg.find("negative Jacobian") == std::string::npos)
+      if (msg.find("negative Jacobian") != std::string::npos)
+      {
+        if (num_negative_elem_qp_jacobians < _num_outputs)
+          _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
+        else if (num_negative_elem_qp_jacobians == _num_outputs)
+          _console << "Maximum log output reached, silencing output" << std::endl;
+      }
+      else
         _console << e.what() << std::endl;
     }
   }
@@ -1143,31 +1157,35 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   auto qrule_side_dimension = mesh->mesh_dimension() - 1;
   QGauss qrule_side(qrule_side_dimension, FIFTH);
 
+  // Use the side quadrature now
+  fe_elem->attach_quadrature_rule(&qrule_side);
+
   // Check element sides
   for (const auto & elem : mesh->element_ptr_range())
   {
     // Handle mixed-dimensional meshes
-    if (qrule_side_dimension != elem->dim() - 1)
+    if (int(qrule_side_dimension) != elem->dim() - 1)
     {
       qrule_side_dimension = elem->dim() - 1;
       qrule_side = QGauss(qrule_side_dimension, FIFTH);
+
+      // Re-initialize a side FE
+      if (elem->dim() == 1)
+        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+      if (elem->dim() == 2)
+        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+      else
+        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+
+      fe_elem->get_JxW();
+      fe_elem->attach_quadrature_rule(&qrule_side);
     }
 
     for (const auto & side : elem->side_index_range())
     {
-      // Initialize a basic Lagrangian shape function everywhere
-      std::unique_ptr<FEBase> fe_side;
-      if (elem->dim() == 1)
-        fe_side = std::make_unique<FELagrange<1>>(fe_type);
-      if (elem->dim() == 2)
-        fe_side = std::make_unique<FELagrange<2>>(fe_type);
-      else
-        fe_side = std::make_unique<FELagrange<3>>(fe_type);
-
-      fe_side->attach_quadrature_rule(&qrule);
       try
       {
-        fe_side->reinit(elem, side);
+        fe_elem->reinit(elem, side);
       }
       catch (libMesh::LogicError & e)
       {

@@ -50,7 +50,7 @@
       input = 'max_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-      expect_err = 'Number of elements above prescribed volume : 1'
+      expect_err = 'Number of elements above prescribed maximum volume : 1'
       detail = 'elements above a certain volume,'
     []
     [min_size]
@@ -58,7 +58,7 @@
       input = 'min_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-      expect_err = 'Number of elements below prescribed volume : 1'
+      expect_err = 'Number of elements below prescribed minimum volume : 1'
       detail = 'elements below a certain volume,'
     []
     [non_planar]
@@ -203,7 +203,7 @@
     [no_diag]
       type = RunException
       input = all_at_once.i
-      expect_err = 'You need to turn on at least one diagnostics'
+      expect_err = 'You need to turn on at least one diagnostic'
       cli_args = "Mesh/diag/examine_element_overlap=NO_CHECK
                   Mesh/diag/examine_element_types=NO_CHECK
                   Mesh/diag/examine_element_volumes=NO_CHECK

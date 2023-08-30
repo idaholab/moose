@@ -112,14 +112,18 @@ This check is a heuristic. It will only detect adaptive *uniform* mesh refinemen
 near interfaces between coarse and fine elements. If the entire mesh is refined the same number of times for each
 element, it will not be detected.
 
+!alert note
+This check may report false positives on some immersed meshes and slit meshes because it will detect non-conformal nodes
+and will try to examine if the elements next to these nodes can be grouped to form coarser elements.
+
 ## Elements and sides local Jacobian check
 
 The local Jacobian is checked for positivity for every element and sides. Negative Jacobians are a common issue
 with a poor, usually externally generated, mesh.
 
 !alert note
-A Lagrange finite element family of the default order for each element is used for this check, along with a fourth-order
-Gauss quadrature. If you intend to use another finite element family,
+A fifth-order Gauss quadrature is used for this check. If you intend to use another quadrature, for example a higher
+order to integrate more accurately high order finite element variables,
 feel free to modify the generator for your needs.
 
 ## Example input syntax: all diagnostics turned on
