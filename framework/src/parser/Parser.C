@@ -152,6 +152,18 @@ UnitsConversionEvaler::eval(hit::Field * n,
   std::stringstream ss;
   ss << std::setprecision(17) << to_unit.convert(num, from_unit);
 
+#ifndef NDEBUG
+  mooseInfoRepeated(n->filename() + ':' + Moose::stringify(n->line()) + ':' +
+                        Moose::stringify(n->column()) + ": Unit conversion ",
+                    num,
+                    ' ',
+                    argv[1],
+                    " -> ",
+                    ss.str(),
+                    ' ',
+                    argv[3]);
+#endif
+
   // change kind only (not val)
   n->setVal(n->val(), hit::Field::Kind::Float);
   return ss.str();
