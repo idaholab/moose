@@ -32,7 +32,8 @@ XYDelaunayGenerator::validParams()
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
 
   params.addRequiredParam<MeshGeneratorName>(
-      "boundary", "The input MeshGenerator that defines the output mesh outer boundary.");
+      "boundary",
+      "The input MeshGenerator defining the output outer boundary and required Steiner points.");
   params.addParam<std::vector<BoundaryName>>(
       "input_boundary_names", "2D-input-mesh boundaries defining the output mesh outer boundary");
   params.addParam<std::vector<SubdomainName>>(
