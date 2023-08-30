@@ -11,6 +11,7 @@
 import unittest
 import logging
 from MooseDocs import common, base
+from MooseDocs.common import exceptions
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, tagging
 logging.basicConfig()
@@ -18,8 +19,14 @@ logging.basicConfig()
 class TestTagging(MooseDocsTestCase):
     EXTENSIONS = [core, command, tagging]
 
-    # test all subcommands simultaneously - each with a unique message
-    BRANDS = ['pageName', 'Page_Name', 'Page_5', 'pagecddf_with!7']
+    def setupExtension(self, ext):
+        if ext == tagging:
+            return dict(allowed_keys=['application', 'foo', 'simulation_type', 'fiscal_year'], js_file=['tagging.js'])
+
+    def setupContent(self):
+        config = [dict(root_dir='python/MooseDocs/test/content', content=['js/tagging.js'])]
+        return common.get_content(config, '.md')
+
     # ICONS = ['report', 'warning', 'comment', 'school']
     MESSAGE = [['k:v ', '  strange:6', 'my_key:val!'],
             ['k:v ', '  strange:6', 'my_key:val!'],
