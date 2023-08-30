@@ -192,12 +192,14 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
   // We dare not sort these based on address!
   DependencyResolver<MeshGenerator *, MeshGenerator::Comparator> resolver;
 
-  std::vector<std::string> save_in_generators;
-
-  // Hold all the mesh generators marked to be saved
+  // The mesh generators that must be called
+  // This is needed to mark the generators that could be cut due to a
+  // final generator being set, but should still be called because they're
+  // either being saved in memory or as output
+  std::vector<std::string> required_generators;
   for (const auto & it : _mesh_generators)
-    if (it.second->hasSaveMesh())
-      save_in_generators.push_back(it.second->name());
+    if (it.second->hasSaveMesh() || it.second->hasOutput())
+      required_generators.push_back(it.second->name());
 
   // The mesh generator tree should have all the mesh generators that
   // The final generator depends on and all the mesh generators
@@ -208,17 +210,19 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
     MeshGenerator * mg = it.second.get();
 
     // The mesh generator has to meet one of the following conditions:
-    // 1. the final mesh generator is not set at this point
-    // 2. this mesh generator is the final one
-    // 3. this mesh generator need to be saved
-    // 4. the final mesh generator is set and is a child
-    // 5. this mesh generator need to be saved and is a child
-    if (_final_generator_name.empty() || mg->name() == _final_generator_name || mg->hasSaveMesh() ||
+    // Final mesh generator is not set, so we build the whole tree
+    if (_final_generator_name.empty() ||
+        // This mesh generator is the final generator
+        mg->name() == _final_generator_name ||
+        // This needs to be saved or output
+        mg->hasSaveMesh() || mg->hasOutput() ||
+        // Final mesh generator set and is a child of this generator
         (_final_generator_name.size() && mg->isChildMeshGenerator(_final_generator_name, false)) ||
-        std::find_if(save_in_generators.begin(),
-                     save_in_generators.end(),
-                     [&mg](const auto & name)
-                     { return mg->isChildMeshGenerator(name, false); }) != save_in_generators.end())
+        // This is a dependency of a generator that needs to be saved or output
+        std::find_if(required_generators.begin(),
+                     required_generators.end(),
+                     [&mg](const auto & name) { return mg->isChildMeshGenerator(name, false); }) !=
+            required_generators.end())
     {
       resolver.addItem(mg);
       for (const auto & dep_mg : mg->getParentMeshGenerators())
