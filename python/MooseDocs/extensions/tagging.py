@@ -1,7 +1,15 @@
-# Writing an extension from scratch
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import os, re
 import logging
-from ..tree import tokens
+from ..tree import pages
 from ..common import __init__
 from . import command
 
@@ -17,7 +25,7 @@ dictionary.  Duplicate key value pairs are allowed.
 Example Tagger command in *.md:
 !tagger geochem keyg:valg keychem:valuechem
 
-Example Output TagDictionary:
+Example output tag dictionary:
 {"data":
 [{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
 {"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
@@ -40,6 +48,10 @@ class TaggingExtension(command.CommandExtension):
         config['allowed_keys'] = ([],
                                   "List of tag keys allowed in documentation pages. If empty, all " \
                                   "keys allowed.")
+        config['js_file'] = (None,
+                             "Javascript file used for filtering / search page.")
+        # Disable by default
+        config['active'] = (False, config['active'][1])
         return config
 
     def extend(self, reader, renderer):
@@ -48,13 +60,55 @@ class TaggingExtension(command.CommandExtension):
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
-        self._database={'data':[]}
         self._allowed_keys = self['allowed_keys']
-        LOG.info(self._allowed_keys)
 
-    @property
-    def database(self):
-        return self._database
+        if self['js_file'] is None:
+            msg = "No javascript file identified. The tagging extension will be disabled."
+            LOG.warning(msg)
+            self.setActive(False)
+
+    def postExecute(self):
+        """
+        At completion of execute process, collect and process all data attributes. Then, insert into
+        the supplied javascript file.
+        """
+        js_filename = self['js_file']
+        js_page = self.translator.findPage(js_filename, throw_on_zero=False)
+        js_path=js_page.source
+        if js_page is None:
+            msg = "Javascript file listed in config.yml ("
+            msg += js_filename
+            msg += ") not found. Please ensure that file is located in content directories."
+            LOG.error(msg)
+
+        replace_str = ""
+        for iter in self.getAttributeItems():
+            tag_dict_str=str(iter[1])
+            key_list_regex=self._allowed_keys+['data','name', 'path', 'key_vals']
+            for entry in key_list_regex:
+                regex_replace=f"'{entry}':"
+                tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
+            tag_dict_str=re.sub("\s","", tag_dict_str)
+            replace_str += tag_dict_str + ","
+
+        """
+        Find and replace 'data:' dict structure within supplied javascript file
+        """
+        with open(js_path,'r') as f:
+            content=f.readlines()
+        content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
+        with open(js_path, 'w') as f:
+            f.writelines(content)
+            f.close()
+
+    def get_tag_data(self, *args):
+        return self.getAttribute(*args)
+
+    def set_tag_data(self, *args):
+        return self.setAttribute(*args)
+
+    def get_tag_iter(self):
+        return self.getAttributeItems()
 
     @property
     def allowed_keys(self):
@@ -73,44 +127,28 @@ class TaggingCommand(command.CommandComponent):
         name=info[2]
         keylist=info[3].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
-        EntryKeyValDict=[]
+        entry_key_values=[]
         for keys in keylist:
             key_vals=keys.split(':')
-            EntryKeyValDict.append([key_vals[0],key_vals[1]])
+            entry_key_values.append([key_vals[0],key_vals[1]])
 
-        goodkeys=[]
-        for pair in EntryKeyValDict:
+        good_keys=[]
+        for pair in entry_key_values:
             if pair[0] not in self.extension.allowed_keys:
-                msg = "Not an Allowed Key; not adding the following 'key' to the dictionary: "
+                msg = page.name
+                msg += ": Provided 'key' not in allowed_keys (see config.yml); not adding the following to the database: "
                 msg += pair[0]
                 LOG.warning(msg)
             else:
-                goodkeys.append([pair[0], pair[1]])
+                good_keys.append([pair[0], pair[1]])
 
-        PageData= {'name':name, "path":mpath, "key_vals":dict(goodkeys)}
+        page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
-        if len(self.extension.database['data'])>0 and PageData['name'] in self.extension.database['data'][0]['name']:
+        if self.extension.get_tag_data(name):
             msg = "Tag already exists; not adding the following 'name' to dictionary: "
-            msg += PageData['name']
+            msg += name
             LOG.warning(msg)
         else:
-            self.extension.database['data'].append(PageData)
+            self.extension.set_tag_data(name, page_data)
 
-        tag_dict_str=str(self.extension.database)
-        key_list_regex=self.extension.allowed_keys+['data','name', 'path', 'key_vals']
-        for i in range(len(key_list_regex)):
-            regex_replace=f"'{key_list_regex[i]}':"
-            tag_dict_str=re.sub(regex_replace,key_list_regex[i]+':', tag_dict_str)
-        tag_dict_str=re.sub("\s","", tag_dict_str)
-
-        # regex to replace any old dict of this format: \{data: \[{.+}}]}
-        #my path to Derek's static file: /Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js
-        static_path='/Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js'
-        with open(static_path,'r') as f:
-            content=f.readlines()
-        content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(tag_dict_str), content[-1])
-        with open(static_path, 'w') as f:
-            f.writelines(content)
-            f.close()
-
-        return(info)
+        return parent
