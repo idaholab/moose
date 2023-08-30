@@ -150,7 +150,12 @@ public:
   /**
    * Return whether or not to save the current mesh
    */
-  bool hasSaveMesh();
+  bool hasSaveMesh() const;
+
+  /**
+   * @return Whether or not to output this mesh generator separately (output parameter is set)
+   */
+  bool hasOutput() const;
 
   /**
    * Return the name of the saved mesh

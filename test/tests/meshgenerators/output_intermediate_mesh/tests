@@ -1,17 +1,18 @@
 [Tests]
-  [intermediate_mesh_output]
   design = 'MeshGenerator.md'
-  issues = '#23486'
-  requirement = 'The system shall support the file output of intermediate generated meshes in'
+  issues = '#23486 #25354'
+
+  [intermediate_mesh_output]
+    requirement = 'The system shall support the file output of intermediate generated meshes in'
 
     [exodus]
-        type = 'Exodiff'
-        input = 'output_intermediate_mesh.i'
-        exodiff = 'left_in.e'
-        cli_args = "--mesh-only"
-        recover = false
+      type = 'Exodiff'
+      input = 'output_intermediate_mesh.i'
+      exodiff = 'left_in.e'
+      cli_args = "--mesh-only"
+      recover = false
 
-        detail = "the exodus file format"
+      detail = "the exodus file format"
     []
     [nemesis]
       skip = 'Nemesis issue, libMesh/libmesh#3601'
@@ -22,7 +23,18 @@
       recover = false
       min_parallel = 2
       max_parallel = 2
+
       detail = "the nemesis file format"
     []
+  []
+
+  [intermediate_with_final]
+    type = 'Exodiff'
+    input = 'intermediate_with_final.i'
+    exodiff = 'intermediate_with_final_in.e also_output_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = 'The system shall support the file output of intermediate generated meshes with a final generator defined that is not a dependency of the intermediate meshes'
   []
 []
