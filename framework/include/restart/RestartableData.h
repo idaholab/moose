@@ -19,6 +19,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+class RestartableDataReader;
+
 /**
  * Abstract definition of a RestartableData value.
  */
@@ -59,6 +61,11 @@ public:
   void * context() { return _context; }
 
   /**
+   * @return Whether or not the data has context set.
+   */
+  bool hasContext() const { return _context != nullptr; }
+
+  /**
    * Whether or not this data has been declared
    */
   bool declared() const { return _declared; }
@@ -67,6 +74,27 @@ public:
    * Sets that this restartable value has been declared
    */
   void setDeclared();
+
+  /**
+   * Whether or not this data has been restored
+   */
+  bool restored() const { return _restored; }
+
+  /**
+   * Helper that protects access to setRestored() to only RestartableDataReader
+   */
+  class WriteRestoredKey
+  {
+    friend class RestartableDataReader;
+
+    WriteRestoredKey() {}
+    WriteRestoredKey(const WriteRestoredKey &) {}
+  };
+
+  /**
+   * Sets the restored state of this value to \p restored
+   */
+  void setRestored(const bool restored, const WriteRestoredKey);
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
@@ -82,6 +110,9 @@ protected:
 private:
   /// Whether or not this data has been declared (true) or only retreived (false)
   bool _declared;
+
+  /// Whether or not this has value has been restored
+  bool _restored;
 };
 
 /**

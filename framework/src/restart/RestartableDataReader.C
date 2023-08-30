@@ -23,12 +23,16 @@
 #endif
 
 RestartableDataReader::RestartableDataReader(MooseApp & app, RestartableDataMap & data)
-  : RestartableDataIO(app, data), _error_on_different_number_of_processors(true)
+  : RestartableDataIO(app, data),
+    _is_restoring(false),
+    _error_on_different_number_of_processors(true)
 {
 }
 
 RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data)
-  : RestartableDataIO(app, data), _error_on_different_number_of_processors(true)
+  : RestartableDataIO(app, data),
+    _is_restoring(false),
+    _error_on_different_number_of_processors(true)
 {
 }
 
@@ -54,6 +58,7 @@ RestartableDataReader::setInput(const std::filesystem::path & folder_base)
 RestartableDataReader::InputStreams
 RestartableDataReader::clear()
 {
+  _is_restoring = false;
   _header.clear();
   InputStreams streams;
   std::swap(_streams, streams);
@@ -155,6 +160,7 @@ RestartableDataReader::readHeader(InputStream & header_input) const
       dataLoad(stream, entry.size, nullptr);
       dataLoad(stream, entry.type_hash_code, nullptr);
       dataLoad(stream, entry.type, nullptr);
+      dataLoad(stream, entry.has_context, nullptr);
       entry.position = current_data_position;
 
       current_data_position += entry.size;
@@ -170,9 +176,13 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
 {
   if (!_streams.header || !_streams.data)
     mooseError("RestartableDataReader::restore(): Cannot restore because an input was not set");
-  if (_header.size())
-    mooseError(
-        "RestartableDataReader::restore(): Cannot restore because old data exists; call clear()");
+
+  _is_restoring = true;
+
+  // Set everything as not restored
+  for (const auto tid : index_range(_header))
+    for (auto & value : currentData(tid))
+      value.setRestored(false, {});
 
   // Read the header
   _header = readHeader(*_streams.header);
@@ -183,7 +193,6 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
     const auto & header = _header[tid];
 
     // TODO: Think about what to do with missing data
-
     // Load the data in the order that it was requested
     for (auto & value : data)
     {
@@ -203,11 +212,46 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
   }
 }
 
-void
-RestartableDataReader::deserializeValue(InputStream & data_input,
-                                        RestartableDataValue & value,
-                                        const RestartableDataReader::HeaderEntry & header_entry)
+bool
+RestartableDataReader::hasData(const std::string & data_name,
+                               const std::type_info & type,
+                               const THREAD_ID tid) const
 {
+  if (const auto header = queryHeader(data_name, tid))
+    return isSameType(*header, type);
+  return false;
+}
+
+const RestartableDataReader::HeaderEntry *
+RestartableDataReader::queryHeader(const std::string & data_name, const THREAD_ID tid) const
+{
+  requireRestoring();
+  const auto it = _header[tid].find(data_name);
+  if (it == _header[tid].end())
+    return nullptr;
+  return &it->second;
+}
+
+const RestartableDataReader::HeaderEntry &
+RestartableDataReader::getHeader(const std::string & data_name, const THREAD_ID tid) const
+{
+  const auto header = queryHeader(data_name, tid);
+  if (!header)
+    mooseError(
+        "RestartableDataReader::getHeader(): Failed to find a header entry for data with name '",
+        data_name,
+        "'");
+  return *header;
+}
+
+void
+RestartableDataReader::deserializeValue(
+    InputStream & data_input,
+    RestartableDataValue & value,
+    const RestartableDataReader::HeaderEntry & header_entry) const
+{
+  mooseAssert(!value.restored(), "Should not be restored");
+
   auto error = [&data_input, &value](auto... args)
   {
     std::stringstream err;
@@ -224,11 +268,7 @@ RestartableDataReader::deserializeValue(InputStream & data_input,
     mooseError(err.str(), args...);
   };
 
-  if (
-#ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
-      header_entry.type_hash_code != value.typeId().hash_code() &&
-#endif
-      header_entry.type != value.typeId().name())
+  if (!isSameType(header_entry, value.typeId()))
     error("The stored type of '", header_entry.type, "' does not match");
 
   auto stream_ptr = data_input.get();
@@ -242,6 +282,8 @@ RestartableDataReader::deserializeValue(InputStream & data_input,
 
   if ((header_entry.position + (std::streampos)header_entry.size) != stream.tellg())
     error("The data read does not match the data stored");
+
+  value.setRestored(true, {});
 }
 
 bool
@@ -272,4 +314,42 @@ RestartableDataReader::isAvailable(const std::filesystem::path & folder_base)
                std::filesystem::absolute(header_path));
 
   return header_available && data_available;
+}
+
+void
+RestartableDataReader::requireRestoring() const
+{
+  if (!_is_restoring)
+    mooseError(
+        "The RestartableDataReader is not available for querying as it is not currently restoring");
+  mooseAssert(streams.header, "Header not available");
+  mooseAssert(streams.data, "Data not available");
+}
+
+bool
+RestartableDataReader::isSameType(const RestartableDataReader::HeaderEntry & header_entry,
+                                  const std::type_info & type) const
+{
+#ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
+  if (header_entry.type_hash_code == type.hash_code())
+    return true;
+#endif
+  return header_entry.type == type.name();
+}
+
+RestartableDataValue &
+RestartableDataReader::restoreData(const std::string & data_name,
+                                   std::unique_ptr<RestartableDataValue> value,
+                                   const THREAD_ID tid)
+{
+  auto & data_map = currentData(tid);
+  if (data_map.hasData(data_name))
+    mooseError("RestartableDataReader::restoreData(): Cannot declare restartable data '",
+               data_name,
+               "' because it has already been declared");
+
+  const auto & header = getHeader(data_name, tid);
+  auto & added_value = currentData(tid).addData(std::move(value));
+  deserializeValue(*_streams.data, added_value, header);
+  return added_value;
 }

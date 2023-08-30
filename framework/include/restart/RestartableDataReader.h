@@ -15,6 +15,7 @@
 #include "InputStream.h"
 
 #include <sstream>
+#include <utility>
 
 /**
  * Reader for restartable data written by the RestartableDataWriter.
@@ -70,6 +71,27 @@ public:
    */
   void restore(const DataNames & filter_names = {});
 
+  /**
+   * Restores the data with name \p data_name of type T.
+   *
+   * This is used to restore data that was never declared in the restart,
+   * but was stored in the backup. You cannot call this if the data has
+   * already been declared or restored.
+   *
+   * Requires that restore() is called first to load the headers.
+   *
+   * @param data_name The name of the data
+   * @param tid The thread
+   * @param context The data context (if any)
+   * @param args Arguments to forward to the constructor of the object
+   * @return The restored data
+   */
+  template <typename T, typename... Args>
+  T & restoreData(const std::string & data_name,
+                  const THREAD_ID tid = 0,
+                  void * const context = nullptr,
+                  Args &&... args);
+
   ///@{
   /*
    * Enable/Disable errors to allow meta data to be created/loaded on different number or
@@ -91,6 +113,18 @@ public:
    */
   static bool isAvailable(const std::filesystem::path & folder_base);
 
+  /**
+   * @return Whether or not data exists in the headers with the name
+   * \p data_name with type T on thread \p tid
+   *
+   * Requires that restore() is called first to load the headers.
+   */
+  template <typename T>
+  bool hasData(const std::string & data_name, const THREAD_ID tid = 0) const
+  {
+    return hasData(data_name, typeid(T), tid);
+  }
+
 private:
   /**
    * Struct that describes data in the header
@@ -105,29 +139,88 @@ private:
     std::size_t type_hash_code;
     /// The type for this data
     std::string type;
+    /// Whether or not this data had context
+    bool has_context;
   };
+
+  /**
+   * @return Whether or not data exists in the headers with the name
+   * \p data_name with type \p type on thread \p tid
+   *
+   * Requires that restore() is called first to load the headers.
+   */
+  bool
+  hasData(const std::string & data_name, const std::type_info & type, const THREAD_ID tid) const;
 
   /**
    * Internal method for reading the header (stored by RestartableDataWriter)
    */
-  std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>>
+  std::vector<std::unordered_map<std::string, HeaderEntry>>
   readHeader(InputStream & header_input) const;
 
   /**
-   * Internal methods for deserializing data
+   * Internal method for deserializing (restoring from backup into a value)
    */
-  ///@{
   void deserializeValue(InputStream & data_input,
                         RestartableDataValue & value,
-                        const RestartableDataReader::HeaderEntry & header_entry);
-  ///@}
+                        const HeaderEntry & header_entry) const;
 
+  /**
+   * Checks whether or not we're currently restoring and errors if not
+   */
+  void requireRestoring() const;
+
+  /**
+   * @return The header entry for the data with name \p data_name on thread \p tid
+   * if it exists, and nullptr otherwise.
+   *
+   * Requires that restore() is called first to load the headers.
+   */
+  const HeaderEntry * queryHeader(const std::string & data_name, const THREAD_ID tid) const;
+  /**
+   * @return The header entry for the data with name \p data_name on thread \p tid.
+   *
+   * Requires that restore() is called first to load the headers.
+   */
+  const HeaderEntry & getHeader(const std::string & data_name, const THREAD_ID tid) const;
+
+  /**
+   * @returns Whether or not the type \p type is the same as the type in \p header_entry
+   *
+   * We need this because this check depends on whether or not we do a string comparison
+   */
+  bool isSameType(const HeaderEntry & header_entry, const std::type_info & type) const;
+
+  /**
+   * Internal method for restoring a new data value
+   */
+  RestartableDataValue & restoreData(const std::string & data_name,
+                                     std::unique_ptr<RestartableDataValue> value,
+                                     const THREAD_ID tid);
   /// The inputs for reading
   InputStreams _streams;
 
   /// The loaded headers from the restart
-  std::vector<std::unordered_map<std::string, RestartableDataReader::HeaderEntry>> _header;
+  std::vector<std::unordered_map<std::string, HeaderEntry>> _header;
+
+  /// Whether or not we're currently restoring
+  bool _is_restoring;
 
   /// Whether or not to error with a different number of processors
   bool _error_on_different_number_of_processors;
 };
+
+template <typename T, typename... Args>
+T &
+RestartableDataReader::restoreData(const std::string & data_name,
+                                   const THREAD_ID tid /* = 0 */,
+                                   void * const context /* = nullptr */,
+                                   Args &&... args)
+{
+  std::unique_ptr<RestartableDataValue> T_data =
+      std::make_unique<RestartableData<T>>(data_name, context, std::forward<Args>(args)...);
+  auto & value = restoreData(data_name, std::move(T_data), tid);
+  auto T_value = dynamic_cast<RestartableData<T> *>(&value);
+  mooseAssert(T_value, "Bad cast");
+  return T_value->set();
+}

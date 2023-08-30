@@ -10,7 +10,7 @@
 #include "RestartableData.h"
 
 RestartableDataValue::RestartableDataValue(const std::string & name, void * const context)
-  : _name(name), _context(context), _declared(false)
+  : _name(name), _context(context), _declared(false), _restored(false)
 {
 }
 
@@ -19,4 +19,10 @@ RestartableDataValue::setDeclared()
 {
   mooseAssert(!_declared, "Already declared");
   _declared = true;
+}
+
+void
+RestartableDataValue::setRestored(const bool restored, const WriteRestoredKey)
+{
+  _restored = restored;
 }

@@ -69,10 +69,12 @@ RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_s
       std::string name = data.name();
       std::string type = data.typeId().name();
       std::size_t type_hash_code = data.typeId().hash_code();
+      bool has_context = data.hasContext();
       dataStore(header_stream, name, nullptr);
       dataStore(header_stream, data_size, nullptr);
       dataStore(header_stream, type_hash_code, nullptr);
       dataStore(header_stream, type, nullptr);
+      dataStore(header_stream, has_context, nullptr);
     }
 }
 
