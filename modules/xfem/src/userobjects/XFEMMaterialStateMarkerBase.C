@@ -32,7 +32,7 @@ XFEMMaterialStateMarkerBase::XFEMMaterialStateMarkerBase(const InputParameters &
     _secondary_cracks(getParam<bool>("secondary_cracks"))
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
-  if (fe_problem == NULL)
+  if (fe_problem == nullptr)
     mooseError("Problem casting _subproblem to FEProblemBase in XFEMMaterialStateMarkerBase");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == nullptr)

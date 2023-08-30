@@ -23,7 +23,7 @@ public:
     N_CATEGORY_LOCAL_INDEX
   };
 
-  EFANode(unsigned int nid, N_CATEGORY ncat, EFANode * nparent = NULL);
+  EFANode(unsigned int nid, N_CATEGORY ncat, EFANode * nparent = nullptr);
 
 private:
   N_CATEGORY _category;

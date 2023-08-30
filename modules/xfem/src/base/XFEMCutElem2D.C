@@ -134,7 +134,7 @@ XFEMCutElem2D::getCutPlaneOrigin(unsigned int plane_id, MeshBase * displaced_mes
   {
     if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
     {
-      std::vector<EFANode *> node_line(2, NULL);
+      std::vector<EFANode *> node_line(2, nullptr);
       node_line[0] = _efa_elem2d.getFragmentEdge(0, i)->getNode(0);
       node_line[1] = _efa_elem2d.getFragmentEdge(0, i)->getNode(1);
       cut_line_nodes.push_back(node_line);
@@ -156,7 +156,7 @@ XFEMCutElem2D::getCutPlaneNormal(unsigned int plane_id, MeshBase * displaced_mes
   {
     if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
     {
-      std::vector<EFANode *> node_line(2, NULL);
+      std::vector<EFANode *> node_line(2, nullptr);
       node_line[0] = _efa_elem2d.getFragmentEdge(0, i)->getNode(0);
       node_line[1] = _efa_elem2d.getFragmentEdge(0, i)->getNode(1);
       cut_line_nodes.push_back(node_line);
@@ -187,7 +187,7 @@ XFEMCutElem2D::getCrackTipOriginAndDirection(unsigned tip_id,
   {
     if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
     {
-      std::vector<EFANode *> node_line(2, NULL);
+      std::vector<EFANode *> node_line(2, nullptr);
       node_line[0] = _efa_elem2d.getFragmentEdge(0, i)->getNode(0);
       node_line[1] = _efa_elem2d.getFragmentEdge(0, i)->getNode(1);
       if (node_line[1]->id() == tip_id)
@@ -451,7 +451,7 @@ XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id,
   {
     if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
     {
-      std::vector<EFANode *> node_line(2, NULL);
+      std::vector<EFANode *> node_line(2, nullptr);
       node_line[0] = _efa_elem2d.getFragmentEdge(0, i)->getNode(0);
       node_line[1] = _efa_elem2d.getFragmentEdge(0, i)->getNode(1);
       cut_line_nodes.push_back(node_line);

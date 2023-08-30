@@ -34,7 +34,6 @@ private:
   std::map<unsigned int, EFANode *> _temp_nodes;
   std::map<unsigned int, EFANode *> _embedded_permanent_nodes;
   std::map<unsigned int, EFAElement *> _elements;
-  //  std::map< std::set< EFAnode* >, std::set< EFAelement* > > _merged_edge_map;
   std::set<EFAElement *> _crack_tip_elements;
   std::vector<EFANode *> _new_nodes;
   std::vector<EFANode *> _deleted_nodes;
@@ -44,8 +43,8 @@ private:
 
 public:
   unsigned int add2DElements(std::vector<std::vector<unsigned int>> & quads);
-  EFAElement * add2DElement(std::vector<unsigned int> quad, unsigned int id);
-  EFAElement * add3DElement(std::vector<unsigned int> quad, unsigned int id);
+  EFAElement * add2DElement(const std::vector<unsigned int> & quad, unsigned int id);
+  EFAElement * add3DElement(const std::vector<unsigned int> & quad, unsigned int id);
 
   void updateEdgeNeighbors();
   void initCrackTipTopology();
@@ -54,12 +53,12 @@ public:
   bool addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position);
   void addElemFaceIntersection(unsigned int elemid,
                                unsigned int faceid,
-                               std::vector<unsigned int> edgeid,
-                               std::vector<double> position);
+                               const std::vector<unsigned int> & edgeid,
+                               const std::vector<double> & position);
   void addFragFaceIntersection(unsigned int ElemID,
                                unsigned int FragFaceID,
-                               std::vector<unsigned int> FragFaceEdgeID,
-                               std::vector<double> position);
+                               const std::vector<unsigned int> & FragFaceEdgeID,
+                               const std::vector<double> & position);
 
   void updatePhysicalLinksAndFragments();
 

@@ -174,7 +174,7 @@ public:
   Point getEFANodeCoords(EFANode * CEMnode,
                          EFAElement * CEMElem,
                          const Elem * elem,
-                         MeshBase * displaced_mesh = NULL) const;
+                         MeshBase * displaced_mesh = nullptr) const;
 
   /**
    * Get the volume fraction of an element that is physical

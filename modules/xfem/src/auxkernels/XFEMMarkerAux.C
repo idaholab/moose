@@ -24,7 +24,7 @@ XFEMMarkerAux::validParams()
 XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
-  if (fe_problem == NULL)
+  if (fe_problem == nullptr)
     mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == nullptr)

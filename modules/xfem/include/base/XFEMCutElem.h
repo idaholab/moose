@@ -55,7 +55,7 @@ protected:
   std::vector<Real> _new_weights;
   /// face quadrature weights from surface area fraction
   std::vector<std::vector<Real>> _new_face_weights;
-  virtual Point getNodeCoordinates(EFANode * node, MeshBase * displaced_mesh = NULL) const = 0;
+  virtual Point getNodeCoordinates(EFANode * node, MeshBase * displaced_mesh = nullptr) const = 0;
 
 public:
   void setQuadraturePointsAndWeights(const std::vector<Point> & qp_points,
@@ -85,13 +85,13 @@ public:
   virtual void computeMomentFittingWeights() = 0;
   Real getMomentFittingWeight(unsigned int i_qp) const;
   virtual Point getCutPlaneOrigin(unsigned int plane_id,
-                                  MeshBase * displaced_mesh = NULL) const = 0;
+                                  MeshBase * displaced_mesh = nullptr) const = 0;
   virtual Point getCutPlaneNormal(unsigned int plane_id,
-                                  MeshBase * displaced_mesh = NULL) const = 0;
+                                  MeshBase * displaced_mesh = nullptr) const = 0;
   virtual void
   getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Point & direction) const = 0;
   virtual void getFragmentFaces(std::vector<std::vector<Point>> & frag_faces,
-                                MeshBase * displaced_mesh = NULL) const = 0;
+                                MeshBase * displaced_mesh = nullptr) const = 0;
   virtual const EFAElement * getEFAElement() const = 0;
   virtual unsigned int numCutPlanes() const = 0;
   void getWeightMultipliers(MooseArray<Real> & weights,
@@ -130,5 +130,5 @@ public:
   virtual void getIntersectionInfo(unsigned int plane_id,
                                    Point & normal,
                                    std::vector<Point> & intersectionPoints,
-                                   MeshBase * displaced_mesh = NULL) const = 0;
+                                   MeshBase * displaced_mesh = nullptr) const = 0;
 };

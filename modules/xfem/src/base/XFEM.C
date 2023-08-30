@@ -343,6 +343,7 @@ XFEM::buildEFAMesh()
     std::vector<unsigned int> quad;
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       quad.push_back(elem->node_id(i));
+
     if (_mesh->mesh_dimension() == 2)
       _efa_mesh.add2DElement(quad, elem->id());
     else if (_mesh->mesh_dimension() == 3)
@@ -604,8 +605,8 @@ XFEM::markCutEdgesByState(Real time)
     unsigned int nsides = CEMElem->numEdges();
     unsigned int orig_cut_side_id = std::numeric_limits<unsigned int>::max();
     Real orig_cut_distance = -1.0;
-    EFANode * orig_node = NULL;
-    EFAEdge * orig_edge = NULL;
+    EFANode * orig_node = nullptr;
+    EFAEdge * orig_edge = nullptr;
 
     // crack tip origin coordinates and direction
     Point crack_tip_origin(0, 0, 0);
@@ -1111,7 +1112,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
 
   // Copy the current geometric cut element info (from last time) into the
   // _old_geom_cut_elems.
-  _old_geom_cut_elems = _geom_cut_elems;
+  _old_geom_cut_elems.swap(_geom_cut_elems);
   _geom_cut_elems.clear();
 
   _efa_mesh.updatePhysicalLinksAndFragments();
@@ -1210,8 +1211,8 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
     if (new_elements[i]->getParent()->numChildren() > 1)
       temporary_parent_children_map[parent_elem->id()].push_back(libmesh_elem);
 
-    Elem * parent_elem2 = NULL;
-    Elem * libmesh_elem2 = NULL;
+    Elem * parent_elem2 = nullptr;
+    Elem * libmesh_elem2 = nullptr;
     if (_displaced_mesh)
     {
       parent_elem2 = _displaced_mesh->elem_ptr(parent_id);
@@ -1316,7 +1317,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
     if (_debug_output_level > 1)
       _console << "XFEM added new element: " << libmesh_elem->id() << std::endl;
 
-    XFEMCutElem * xfce = NULL;
+    XFEMCutElem * xfce = nullptr;
     if (_mesh->mesh_dimension() == 2)
     {
       EFAElement2D * new_efa_elem2d = dynamic_cast<EFAElement2D *>(new_elements[i]);
@@ -1704,24 +1705,23 @@ XFEM::isElemAtCrackTip(const Elem * elem) const
 bool
 XFEM::isElemCut(const Elem * elem, XFEMCutElem *& xfce) const
 {
-  xfce = NULL;
-  bool is_cut = false;
-  std::map<unique_id_type, XFEMCutElem *>::const_iterator it;
-  it = _cut_elem_map.find(elem->unique_id());
+  const auto it = _cut_elem_map.find(elem->unique_id());
   if (it != _cut_elem_map.end())
   {
     xfce = it->second;
     const EFAElement * EFAelem = xfce->getEFAElement();
     if (EFAelem->isPartial()) // exclude the full crack tip elements
-      is_cut = true;
+      return true;
   }
-  return is_cut;
+
+  xfce = nullptr;
+  return false;
 }
 
 bool
 XFEM::isElemCut(const Elem * elem) const
 {
-  XFEMCutElem * xfce = NULL;
+  XFEMCutElem * xfce;
   return isElemCut(elem, xfce);
 }
 
@@ -1846,10 +1846,10 @@ XFEM::getXFEMWeights(MooseArray<Real> & weights,
                      const MooseArray<Point> & q_points)
 {
   bool have_weights = false;
-  XFEMCutElem * xfce = NULL;
+  XFEMCutElem * xfce = nullptr;
   if (isElemCut(elem, xfce))
   {
-    mooseAssert(xfce != NULL, "Must have valid XFEMCutElem object here");
+    mooseAssert(xfce != nullptr, "Must have valid XFEMCutElem object here");
     xfce->getWeightMultipliers(weights, qrule, getXFEMQRule(), q_points);
     have_weights = true;
   }
@@ -1864,10 +1864,10 @@ XFEM::getXFEMFaceWeights(MooseArray<Real> & weights,
                          unsigned int side)
 {
   bool have_weights = false;
-  XFEMCutElem * xfce = NULL;
+  XFEMCutElem * xfce = nullptr;
   if (isElemCut(elem, xfce))
   {
-    mooseAssert(xfce != NULL, "Must have valid XFEMCutElem object here");
+    mooseAssert(xfce != nullptr, "Must have valid XFEMCutElem object here");
     xfce->getFaceWeightMultipliers(weights, qrule, getXFEMQRule(), q_points, side);
     have_weights = true;
   }

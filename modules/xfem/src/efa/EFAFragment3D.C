@@ -50,7 +50,7 @@ EFAFragment3D::~EFAFragment3D()
     if (_faces[i])
     {
       delete _faces[i];
-      _faces[i] = NULL;
+      _faces[i] = nullptr;
     }
   }
 }
@@ -106,25 +106,16 @@ EFAFragment3D::getAllNodes() const
 bool
 EFAFragment3D::isConnected(EFAFragment * other_fragment) const
 {
-  bool is_connected = false;
   EFAFragment3D * other_frag3d = dynamic_cast<EFAFragment3D *>(other_fragment);
   if (!other_frag3d)
     EFAError("in isConnected other_fragment is not of type EFAfragement3D");
 
   for (unsigned int i = 0; i < _faces.size(); ++i)
-  {
     for (unsigned int j = 0; j < other_frag3d->numFaces(); ++j)
-    {
       if (_faces[i]->equivalent(other_frag3d->_faces[j]))
-      {
-        is_connected = true;
-        break;
-      }
-    }
-    if (is_connected)
-      break;
-  } // i
-  return is_connected;
+        return true;
+
+  return false;
 }
 
 bool
@@ -156,16 +147,12 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & Em
     // build a local inverse map for all emb cut nodes in this fragment
     std::map<EFANode *, std::vector<EFAFace *>> emb_inverse_map;
     for (unsigned int i = 0; i < _faces.size(); ++i)
-    {
       for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
-      {
         if (_faces[i]->getEdge(j)->hasIntersection())
         {
           EFANode * emb_node = _faces[i]->getEdge(j)->getEmbeddedNode(0);
           emb_inverse_map[emb_node].push_back(_faces[i]);
         }
-      } // i
-    }   // j
 
     // find all invalid embedded nodes
     std::vector<EFANode *> invalid_emb;
@@ -206,10 +193,9 @@ EFAFragment3D::combine_tip_faces()
   {
     std::vector<unsigned int> frag_tip_face_id;
     for (unsigned int j = 0; j < _faces.size(); ++j)
-    {
       if (_host_elem->getFace(i)->containsFace(_faces[j]))
         frag_tip_face_id.push_back(j);
-    }
+
     if (frag_tip_face_id.size() == 2) // combine the two frag faces on this elem face
       combine_two_faces(frag_tip_face_id[0], frag_tip_face_id[1], _host_elem->getFace(i));
   }
@@ -224,17 +210,14 @@ EFAFragment3D::isFaceInterior(unsigned int face_id) const
 
   bool face_in_elem_face = false;
   for (unsigned int i = 0; i < _host_elem->numFaces(); ++i)
-  {
     if (_host_elem->getFace(i)->containsFace(_faces[face_id]))
     {
       face_in_elem_face = true;
       break;
     }
-  }
-  if (!face_in_elem_face)
-    return true; // yes, is interior
-  else
-    return false;
+
+  // the face is interior if it does not coincide with an element face
+  return !face_in_elem_face;
 }
 
 std::vector<unsigned int>
@@ -242,29 +225,23 @@ EFAFragment3D::get_interior_face_id() const
 {
   std::vector<unsigned int> interior_face_id;
   for (unsigned int i = 0; i < _faces.size(); ++i)
-  {
     if (isFaceInterior(i))
       interior_face_id.push_back(i);
-  }
+
   return interior_face_id;
 }
 
 bool
 EFAFragment3D::isThirdInteriorFace(unsigned int face_id) const
 {
-  bool is_third_cut = false;
   if (!_host_elem)
     EFAError("in isThirdInteriorFace fragment must have host elem");
 
   for (unsigned int i = 0; i < _host_elem->numInteriorNodes(); ++i)
-  {
     if (_faces[face_id]->containsNode(_host_elem->getInteriorNode(i)->getNode()))
-    {
-      is_third_cut = true;
-      break;
-    }
-  }
-  return is_third_cut;
+      return true;
+
+  return false;
 }
 
 unsigned int
@@ -326,7 +303,7 @@ EFAFragment3D::split()
   // build new frags
   if (hasFaceWithOneCut()) // "fakely" cut fragment
   {
-    EFAFragment3D * new_frag = new EFAFragment3D(_host_elem, false, NULL);
+    EFAFragment3D * new_frag = new EFAFragment3D(_host_elem, false, nullptr);
     for (unsigned int i = 0; i < all_subfaces.size(); ++i)
       for (unsigned int j = 0; j < all_subfaces[i].size(); ++j)
         new_frag->addFace(all_subfaces[i][j]);
@@ -336,8 +313,8 @@ EFAFragment3D::split()
   else // thoroughly cut fragment
   {
     // find the first face with 2 sub-faces
-    EFAFace * start_face1 = NULL;
-    EFAFace * start_face2 = NULL;
+    EFAFace * start_face1 = nullptr;
+    EFAFace * start_face2 = nullptr;
     unsigned int startOldFaceID = 0;
     for (unsigned int i = 0; i < _faces.size(); ++i)
     {
@@ -363,15 +340,14 @@ EFAFragment3D::findFacesAdjacentToFaces()
   _faces_adjacent_to_faces.clear();
   for (unsigned int i = 0; i < _faces.size(); ++i)
   {
-    std::vector<EFAFace *> face_adjacents(_faces[i]->numEdges(), NULL);
+    std::vector<EFAFace *> face_adjacents(_faces[i]->numEdges(), nullptr);
     for (unsigned int j = 0; j < _faces.size(); ++j)
-    {
       if (_faces[j] != _faces[i] && _faces[i]->isAdjacent(_faces[j]))
       {
         unsigned int adj_edge = _faces[i]->adjacentCommonEdge(_faces[j]);
         face_adjacents[adj_edge] = _faces[j];
       }
-    } // j
+
     _faces_adjacent_to_faces.push_back(face_adjacents);
   } // i
 }
@@ -466,7 +442,7 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
 
   // get the cut plane face
   std::vector<EFAEdge *> cut_plane_edges;
-  EFAFragment3D * new_frag = new EFAFragment3D(_host_elem, false, NULL);
+  EFAFragment3D * new_frag = new EFAFragment3D(_host_elem, false, nullptr);
   for (unsigned int i = 0; i < frag_faces.size(); ++i)
     new_frag->addFace(frag_faces[i]);
   new_frag->findFacesAdjacentToFaces();
@@ -474,7 +450,7 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
   for (unsigned int i = 0; i < new_frag->numFaces(); ++i)
   {
     EFAEdge * lone_edge = new_frag->loneEdgeOnFace(i);
-    if (lone_edge != NULL) // valid edge
+    if (lone_edge != nullptr) // valid edge
       cut_plane_edges.push_back(new EFAEdge(*lone_edge));
   }
 
@@ -496,9 +472,9 @@ EFAFragment3D::loneEdgeOnFace(unsigned int face_id) const
 {
   // if any face edge is not shared by any other face, we call it a lone edge
   for (unsigned int i = 0; i < _faces[face_id]->numEdges(); ++i)
-    if (_faces_adjacent_to_faces[face_id][i] == NULL)
+    if (_faces_adjacent_to_faces[face_id][i] == nullptr)
       return _faces[face_id]->getEdge(i);
-  return NULL;
+  return nullptr;
 }
 
 void
@@ -522,7 +498,7 @@ EFAFragment3D::combine_two_faces(unsigned int face_id1,
   for (unsigned int i = 0; i < common_adjacent_faces.size(); ++i)
   {
     EFAFace * comm_face = common_adjacent_faces[i];
-    if (comm_face != NULL)
+    if (comm_face != nullptr)
     {
       unsigned int edge_id1 = comm_face->adjacentCommonEdge(_faces[face_id1]);
       unsigned int edge_id2 = comm_face->adjacentCommonEdge(_faces[face_id2]);
