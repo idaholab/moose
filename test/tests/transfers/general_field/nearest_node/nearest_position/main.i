@@ -73,30 +73,34 @@
 
 [Transfers]
   [to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = to_sub
     variable = from_main
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
 
   [to_sub_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = to_sub_elem
     variable = from_main_elem
   []
 
   [from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = to_main
     variable = from_sub
     use_nearest_position = input
     bbox_factor = 100
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
 
   [from_sub_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = to_main_elem
     variable = from_sub_elem

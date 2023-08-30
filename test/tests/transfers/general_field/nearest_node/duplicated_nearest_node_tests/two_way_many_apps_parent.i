@@ -1,14 +1,14 @@
-# In this test, the Master App is a 10x10 grid on the unit square, and
+# In this test, the parent App is a 10x10 grid on the unit square, and
 # there are 5 Sub Apps which correspond to each vertex of the unit square
 # and the center, arranged in the following order:
 # 3   4
 #   2
 # 0   1
 # Sub Apps 0, 1, 3, and 4 currently overlap with a single element in
-# each corner of the Master App, while Sub App 2 overlaps with 4
-# Master App elements in the center. Note that we move the corner Sub
+# each corner of the parent App, while Sub App 2 overlaps with 4
+# parent App elements in the center. Note that we move the corner Sub
 # Apps "outward" slightly along the diagonals to avoid ambiguity with
-# which SubApp is "nearest" to a given Master App element centroid.
+# which child app is "nearest" to a given parent App element centroid.
 # This makes it easier to visually verify that the Transfers are
 # working correctly.
 [Mesh]
@@ -19,39 +19,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
-  [./elemental_from_sub]
+  [from_sub]
+  []
+  [elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     # Note, in case you want to modify this test.  It is important that there are
     # an odd number of apps because this way we will catch errors caused by load
     # imbalances with our -p 2 tests.
@@ -85,32 +85,41 @@
     input_files = two_way_many_apps_sub.i
     execute_on = timestep_end
     output_in_position = true
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+  [from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
-  [../]
-  [./elemental_from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
+  [elemental_from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u_elem
     variable = elemental_from_sub
-  [../]
-  [./to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+    greedy_search = true
+  []
+  [to_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
-  [../]
-  [./elemental_to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
+  [elemental_to_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
-  [../]
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
 []

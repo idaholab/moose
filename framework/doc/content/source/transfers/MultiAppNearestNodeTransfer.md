@@ -5,7 +5,7 @@
 The projection mapping may be cached at the first execution of the transfer for better performance in later executions using the [!param](/Transfers/MultiAppNearestNodeTransfer/fixed_meshes) parameter. This is incompatible with adaptivity and refinement of the mesh.
 
 !alert note
-This transfer has been re-implemented to be more flexible. Please consider using [MultiAppGeneralFieldNearestNodeTransfer.md]
+This transfer has been re-implemented to be more flexible. Please consider using [MultiAppGeneralFieldNearestLocationTransfer.md]
 
 ## Example Input File Syntax
 

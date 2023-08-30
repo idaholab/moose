@@ -1,4 +1,4 @@
-# Master mesh and sub mesh are same with 4x4 quad8 elements.
+# Parent mesh and sub mesh are same with 4x4 quad8 elements.
 # parent mesh has top boundary fixed at u=2 and bottom fixed at u=-1
 # sub mesh has top boundary fixed at v=2 and bottom fixed at v=1
 # The u variable is transferred to the left and bottom boundaries of the sub,
@@ -67,17 +67,21 @@
 
 [Transfers]
   [to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     to_boundaries = 'left bottom'
     variable = from_parent
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
   [from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = v
     to_boundaries = 'right top'
     variable = from_sub
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
 []

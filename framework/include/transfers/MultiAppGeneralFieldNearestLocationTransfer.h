@@ -17,13 +17,14 @@
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
  * in the origin mesh.
  */
-class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer,
-                                                public SolutionInvalidInterface
+class MultiAppGeneralFieldNearestLocationTransfer : public MultiAppGeneralFieldTransfer,
+                                                    public SolutionInvalidInterface
+
 {
 public:
   static InputParameters validParams();
 
-  MultiAppGeneralFieldNearestNodeTransfer(const InputParameters & parameters);
+  MultiAppGeneralFieldNearestLocationTransfer(const InputParameters & parameters);
 
   void initialSetup() override;
 

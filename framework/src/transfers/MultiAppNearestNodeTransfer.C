@@ -26,7 +26,7 @@
 // TIMPI includes
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
+registerMooseObjectDeprecated("MooseApp", MultiAppNearestNodeTransfer, "12/31/2024 24:00");
 
 InputParameters
 MultiAppNearestNodeTransfer::validParams()
@@ -69,6 +69,9 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
         declareRestartableData<std::map<std::pair<unsigned int, dof_id_type>, unsigned int>>(
             "cached_qp_inds"))
 {
+  mooseDeprecated("MultiAppNearestNodeTransfer is deprecated. Use "
+                  "MultiAppGeneralFieldNearestNodeTransfer instead and adapt the parameters");
+
   if (_to_var_names.size() != 1)
     paramError("variable", " Support single to-variable only");
 

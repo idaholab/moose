@@ -108,7 +108,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "allows for interpolation between origin app meshes. Origin app bounding boxes are still "
       "considered so you may want to increase them with 'fixed_bounding_box_size'");
   params.addParam<bool>("search_value_conflicts",
-                        false,
+                        true,
                         "Whether to look for potential conflicts between two valid and different "
                         "source values for any target point");
 
@@ -382,7 +382,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Check for conflicts and overlaps from the maps that were built during the transfer
   if (_search_value_conflicts)
-    outputValueConflicts(_to_var_names[i], dofobject_to_valsvec, distance_caches);
+    outputValueConflicts(i, dofobject_to_valsvec, distance_caches);
 
   // Set cached values into solution vector
   setSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
@@ -728,34 +728,34 @@ MultiAppGeneralFieldTransfer::registerConflict(
 }
 
 void
-MultiAppGeneralFieldTransfer::examineValueConflicts(
-    const VariableName var_name,
+MultiAppGeneralFieldTransfer::examineReceivedValueConflicts(
+    const unsigned int var_index,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
-    const InterpCaches & distance_caches,
-    std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> conflicts_vec)
+    const InterpCaches & distance_caches)
 {
+  const auto var_name = getToVarName(var_index);
   // We must check a posteriori because we could have two
   // equidistant points with different values from two different problems, but a third point from
   // another problem is actually closer, so there is no conflict because only that last one matters
   // We check here whether the potential conflicts actually were the nearest points
   // Loop over potential conflicts
-  for (auto conflict_it = conflicts_vec.begin(); conflict_it != conflicts_vec.end();)
+  for (auto conflict_it = _received_conflicts.begin(); conflict_it != _received_conflicts.end();)
   {
     const auto potential_conflict = *conflict_it;
     bool overlap_found = false;
 
-    // Extract info for the potential overlap
+    // Extract info for the potential conflict
     const unsigned int problem_id = std::get<0>(potential_conflict);
     const dof_id_type dof_object_id = std::get<1>(potential_conflict);
     const Point p = std::get<2>(potential_conflict);
     const Real distance = std::get<3>(potential_conflict);
 
-    // Extract variable info
+    // Extract target variable info
     auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
     System * to_sys = find_sys(es, var_name);
     auto var_num = to_sys->variable_number(var_name);
     auto & fe_type = to_sys->variable_type(var_num);
-    bool is_nodal = fe_type.family == LAGRANGE;
+    bool is_nodal = _to_variables[var_index]->isNodal();
 
     // Higher order elemental
     if (fe_type.order > CONSTANT && !is_nodal)
@@ -763,7 +763,6 @@ MultiAppGeneralFieldTransfer::examineValueConflicts(
       auto cached_distance = distance_caches[problem_id].find(p);
       if (cached_distance == distance_caches[problem_id].end())
         mooseError("Conflict point was not found in the map of all origin-target distances");
-
       // Distance is still the distance when we detected a potential overlap
       if (MooseUtils::absoluteFuzzyEqual(cached_distance->second, distance))
         overlap_found = true;
@@ -775,7 +774,168 @@ MultiAppGeneralFieldTransfer::examineValueConflicts(
 
     // Map will only keep the actual overlaps
     if (!overlap_found)
-      conflicts_vec.erase(conflict_it);
+      _received_conflicts.erase(conflict_it);
+    else
+      ++conflict_it;
+  }
+}
+
+void
+MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
+    const unsigned int var_index,
+    const DofobjectToInterpValVec & dofobject_to_valsvec,
+    const InterpCaches & distance_caches)
+{
+  const auto var_name = getToVarName(var_index);
+  // We must check a posteriori because we could have:
+  // - two equidistant points with different values from two different problems
+  // - two (or more) equidistant points with different values from the same problem
+  // but a third point/value couple from another problem is actually closer, so there is no conflict
+  // because only that last one matters. We check here whether the potential conflicts actually were
+  // the nearest points. We use several global reductions. If there are not too many potential
+  // conflicts (and there should not be in a well-posed problem) it should be manageably expensive
+
+  // Move relevant conflict info (location, distance) to a smaller data structure
+  std::vector<std::tuple<Point, Real>> potential_conflicts;
+  potential_conflicts.reserve(_local_conflicts.size());
+
+  // Loop over potential conflicts to broadcast all the conflicts
+  for (auto conflict_it = _local_conflicts.begin(); conflict_it != _local_conflicts.end();
+       ++conflict_it)
+  {
+    // Extract info for the potential conflict
+    const auto potential_conflict = *conflict_it;
+    const unsigned int i_from = std::get<0>(potential_conflict);
+    Point p = std::get<2>(potential_conflict);
+    const Real distance = std::get<3>(potential_conflict);
+    if (!_nearest_positions_obj)
+      p += _from_positions[i_from];
+
+    // Send data in the global frame of reference
+    potential_conflicts.push_back(std::make_tuple(p, distance));
+  }
+  _communicator.allgather(potential_conflicts, false);
+  // conflicts could have been reported multiple times within a tolerance
+  std::sort(potential_conflicts.begin(), potential_conflicts.end());
+  potential_conflicts.erase(unique(potential_conflicts.begin(),
+                                   potential_conflicts.end(),
+                                   [](auto l, auto r)
+                                   {
+                                     return std::get<0>(l).absolute_fuzzy_equals(std::get<0>(r)) &&
+                                            std::abs(std::get<1>(l) - std::get<1>(r)) < TOLERANCE;
+                                   }),
+                            potential_conflicts.end());
+
+  std::vector<std::tuple<Point, Real>> real_conflicts;
+  real_conflicts.reserve(potential_conflicts.size());
+
+  // For each potential conflict, we need to identify what problem asked for that value
+  for (auto conflict_it = potential_conflicts.begin(); conflict_it != potential_conflicts.end();
+       ++conflict_it)
+  {
+    // Extract info for the potential conflict
+    auto potential_conflict = *conflict_it;
+    const Point p = std::get<0>(potential_conflict);
+    const Real distance = std::get<1>(potential_conflict);
+
+    // Check all the problems to try to find this requested point in the data structures filled with
+    // the received information
+    bool target_found = false;
+    bool conflict_real = false;
+    for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+    {
+      // Extract variable info
+      auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
+      System * to_sys = find_sys(es, var_name);
+      auto var_num = to_sys->variable_number(var_name);
+      auto & fe_type = to_sys->variable_type(var_num);
+      bool is_nodal = _to_variables[var_index]->isNodal();
+
+      // Move to target problem local mesh
+      auto local_p = p + _to_positions[i_to];
+
+      // Higher order elemental
+      if (fe_type.order > CONSTANT && !is_nodal)
+      {
+        // distance_caches finds use a binned floating point search
+        auto cached_distance = distance_caches[i_to].find(local_p);
+        if (cached_distance != distance_caches[i_to].end())
+        {
+          target_found = true;
+          // Distance between source & target is still the distance we found in the sending process
+          // when we detected a potential overlap while gathering values to send
+          if (MooseUtils::absoluteFuzzyEqual(cached_distance->second, distance))
+            conflict_real = true;
+        }
+      }
+      // Nodal-value-dof-only and const monomial variable
+      else
+      {
+        // Find the dof id for the variable to be set
+        dof_id_type dof_object_id = std::numeric_limits<dof_id_type>::max();
+        auto pl = _to_problems[i_to]->mesh().getPointLocator();
+        pl->enable_out_of_mesh_mode();
+        if (is_nodal)
+        {
+          auto node = pl->locate_node(local_p);
+          if (node)
+            // this is not the dof_id for the variable, but the dof_object_id
+            dof_object_id = node->id();
+        }
+        else
+        {
+          auto elem = (*pl)(local_p);
+          if (elem)
+            dof_object_id = elem->id();
+        }
+        pl->disable_out_of_mesh_mode();
+
+        // point isn't even in mesh
+        if (dof_object_id == std::numeric_limits<dof_id_type>::max())
+          continue;
+
+        if (dofobject_to_valsvec[i_to].find(dof_object_id) == dofobject_to_valsvec[i_to].end())
+          continue;
+
+        target_found = true;
+        // Check the saved distance in the vector of saved results. If the same, then the local
+        // conflict we detected with that distance is still an issue after receiving all values
+        if (MooseUtils::absoluteFuzzyEqual(
+                dofobject_to_valsvec[i_to].find(dof_object_id)->second.distance, distance))
+          conflict_real = true;
+      }
+    }
+    // Only keep the actual conflicts / overlaps
+    if (target_found && conflict_real)
+      real_conflicts.push_back(potential_conflict);
+  }
+
+  // Communicate real conflicts to all so they can be checked by every process
+  _communicator.allgather(real_conflicts, false);
+
+  // Delete potential conflicts that were resolved
+  // Each local list of conflicts will now be updated. It's important to keep conflict lists local
+  // so we can give more context like the sending processor id (the domain of which can be inspected
+  // by the user)
+  for (auto conflict_it = _local_conflicts.begin(); conflict_it != _local_conflicts.end();)
+  {
+    // Extract info for the potential conflict
+    const auto potential_conflict = *conflict_it;
+    const unsigned int i_from = std::get<0>(potential_conflict);
+    Point p = std::get<2>(potential_conflict);
+    const Real distance = std::get<3>(potential_conflict);
+    if (!_nearest_positions_obj)
+      p += _from_positions[i_from];
+
+    // If not in the vector of real conflicts, was not real so delete it
+    if (std::find_if(real_conflicts.begin(),
+                     real_conflicts.end(),
+                     [p, distance](const auto & item)
+                     {
+                       return std::get<0>(item).absolute_fuzzy_equals(p) &&
+                              std::abs(std::get<1>(item) - distance) < TOLERANCE;
+                     }) == real_conflicts.end())
+      _local_conflicts.erase(conflict_it);
     else
       ++conflict_it;
   }
@@ -783,12 +943,13 @@ MultiAppGeneralFieldTransfer::examineValueConflicts(
 
 void
 MultiAppGeneralFieldTransfer::outputValueConflicts(
-    const VariableName var_name,
+    const unsigned int var_index,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & distance_caches)
 {
   // Remove potential conflicts that did not materialize, the value did not end up being used
-  examineValueConflicts(var_name, dofobject_to_valsvec, distance_caches, _received_conflicts);
+  examineReceivedValueConflicts(var_index, dofobject_to_valsvec, distance_caches);
+  examineLocalValueConflicts(var_index, dofobject_to_valsvec, distance_caches);
 
   // Output the conflicts from the selection of local values (evaluateInterpValues-type routines)
   // to send in response to value requests at target points
@@ -796,6 +957,9 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
   if (_local_conflicts.size())
   {
     std::string local_conflicts_string = "";
+    std::string potential_reasons =
+        "Are some points in target mesh equidistant from the sources "
+        "(nodes/centroids/apps/positions, depending on transfer) in origin mesh(es)?\n";
     for (const auto & conflict : _local_conflicts)
     {
       const unsigned int problem_id = std::get<0>(conflict);
@@ -807,7 +971,8 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         // NOTES:
         // - The origin app for a conflict may not be unique.
         // - The conflicts vectors only store the conflictual points, not the original one
-        //   The original value found with a given distance could be retrieved from the main caches
+        //   The original value found with a given distance could be retrieved from the main
+        //   caches
         const auto app_id = _from_local2global_map[problem_id];
         origin_domain_message = "In source child app " + std::to_string(app_id) + " mesh,";
       }
@@ -818,24 +983,34 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       else
         origin_domain_message = "In source parent app mesh,";
 
+      if (hasFromMultiApp() && _from_problems.size() > 1)
+        mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
+
       local_conflicts_string += origin_domain_message + " point: (" + std::to_string(p(0)) + ", " +
                                 std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")\n";
     }
-    mooseWarning(
-        "On rank " + rank_str +
-        ", multiple valid values from equidistant points were "
-        "found in the origin mesh for variable '" +
-        var_name + "' for " + std::to_string(_local_conflicts.size()) +
-        " target points.\nAre multiple subapps overlapping?\n"
-        "Are some points in target mesh equidistant from source nodes in origin mesh(es)?\n"
-        "Conflicts detected at :\n" +
-        local_conflicts_string);
+    // Explicitly name source to give more context
+    std::string source_str = "";
+    if (_from_var_names.size())
+      source_str = "variable '" + getFromVarName(var_index) + "'";
+    else
+      source_str = "user object ";
+
+    mooseWarning("On rank " + rank_str +
+                 ", multiple valid values from equidistant points were "
+                 "found in the origin mesh for source " +
+                 source_str + " for " + std::to_string(_local_conflicts.size()) +
+                 " target points.\n" + potential_reasons + "Conflicts detected at :\n" +
+                 local_conflicts_string);
   }
 
   // Output the conflicts discovered when receiving values from multiple origin problems
   if (_received_conflicts.size())
   {
     std::string received_conflict_string = "";
+    std::string potential_reasons =
+        "Are some points in target mesh equidistant from the sources "
+        "(nodes/centroids/apps/positions, depending on transfer) in origin mesh(es)?\n";
     for (const auto & conflict : _received_conflicts)
     {
       // Extract info for the potential overlap
@@ -851,18 +1026,27 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       else
         target_domain_message = "In target parent app mesh,";
 
+      if (hasToMultiApp() && _to_problems.size() > 1)
+        mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
       received_conflict_string += target_domain_message + " point: (" + std::to_string(p(0)) +
                                   ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")\n";
     }
-    mooseWarning(
-        "On rank " + rank_str +
-        ", multiple valid values from equidistant points were "
-        "received for variable '" +
-        var_name + "' for " + std::to_string(_received_conflicts.size()) +
-        " target points.\nAre multiple subapps overlapping?\n"
-        "Are some points in target mesh equidistant from source nodes in origin mesh(es)?\n"
-        "Conflicts detected at :\n" +
-        received_conflict_string);
+    mooseWarning("On rank " + rank_str +
+                 ", multiple valid values from equidistant points were "
+                 "received for target variable '" +
+                 getToVarName(var_index) + "' for " + std::to_string(_received_conflicts.size()) +
+                 " target points.\n" + potential_reasons + "Conflicts detected at :\n" +
+                 received_conflict_string);
+  }
+
+  if (_local_conflicts.empty() && _received_conflicts.empty())
+  {
+    if (isParamSetByUser("search_value_conflict"))
+      mooseInfo("Automated diagnosis did not detect floating point indetermination in transfer");
+    else if (_to_problems.size() > 10 || _from_problems.size() > 10)
+      mooseInfo("Automated diagnosis did not detect any floating point indetermination in "
+                "transfer. You may consider turning it off using `search_value_conflicts=false` "
+                "to improve performance/scalability.");
   }
 
   // Reset the conflicts vectors, to be used for checking conflicts when transferring the next
@@ -1269,6 +1453,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
 VariableName
 MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index)
 {
+  mooseAssert(var_index < _from_var_names.size(), "No source variable at this index");
   VariableName var_name = _from_var_names[var_index];
   if (_from_var_components.size())
     var_name += "_" + std::to_string(_from_var_components[var_index]);
@@ -1278,6 +1463,7 @@ MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index)
 VariableName
 MultiAppGeneralFieldTransfer::getToVarName(unsigned int var_index)
 {
+  mooseAssert(var_index < _to_var_names.size(), "No target variable at this index");
   VariableName var_name = _to_var_names[var_index];
   if (_to_var_components.size())
     var_name += "_" + std::to_string(_to_var_components[var_index]);
