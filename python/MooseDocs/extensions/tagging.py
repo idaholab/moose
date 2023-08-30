@@ -78,11 +78,14 @@ class TaggingExtension(command.CommandExtension):
     def postExecute(self):
         """
         At completion of execute process, collect and process all data attributes. Then, insert into
-        the supplied javascript file.
+        a javascript file designated as 'generated'.
         """
         js_filename = self['js_file']
         js_page = self.translator.findPage(js_filename, throw_on_zero=False)
         js_path=js_page.source
+        js_noext = os.path.splitext(js_path)[0]
+        js_final = js_noext + '_generated.js'
+
         if js_page is None:
             msg = "Javascript file listed in config.yml ("
             msg += js_filename
@@ -100,13 +103,12 @@ class TaggingExtension(command.CommandExtension):
                 tag_dict_str=re.sub("\s","", tag_dict_str)
                 replace_str += tag_dict_str + ","
 
-        """
-        Find and replace 'data:' dict structure within supplied javascript file
-        """
+        # Find and replace 'data:' dict structure within supplied javascript template file content,
+        # save to generated file and copy to destination.
         with open(js_path,'r') as f:
             content=f.readlines()
         content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
-        with open(js_path, 'w') as f:
+        with open(js_final, 'w') as f:
             f.writelines(content)
             f.close()
 
@@ -130,6 +132,10 @@ class TaggingCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page, settings):
+        """
+        Process name and key:value pairs provided in the documentation file, check against
+        previously-processed names and keys, and add new data to global attributes.
+        """
         name=info[2]
         keylist=info[3].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
