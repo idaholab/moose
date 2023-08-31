@@ -12,7 +12,7 @@
 #include "Closures1PhaseBase.h"
 
 /**
- * Simple 1-phase closures
+ * THM 1-phase closures
  */
 class Closures1PhaseTHM : public Closures1PhaseBase
 {

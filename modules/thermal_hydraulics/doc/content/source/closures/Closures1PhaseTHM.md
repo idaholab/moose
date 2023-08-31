@@ -7,25 +7,25 @@ The closures added are:
 - a wall friction factor for the pressure drop,
 - a wall heat transfer coefficient for heat transfer.
 
-The user can choose between a range of correlations for the heat transfer coefficient and friction factor that covers  pipes to rod-bundles. The following correlations for the heat transfer coefficient are available:
+The user can choose between a range of correlations for the heat transfer coefficient and friction factor that covers  pipes to rod-bundles. The available correlations for the heat transfer coefficient are listed in [HTC-correlations].
 
-!table id=HTC-correlations caption=Avaliable correlations for the heat transfer coefficient
-|      Name      |    Coolant    |   Geometry   |                          Reference                          |
-|----------------|---------------|--------------|-------------------------------------------------------------|
-| Dittus-Boelter | Liquid/Gases  | Pipes        | [ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial.md] |
-| Gnielinski     | Liquid/Gases  | Pipes        | [ADWallHeatTransferCoefficientGnielinskiMaterial.md]        |
-| Wolf-McCarthy  | Gases         | Pipes        | [ADWallHeatTransferCoefficientWolfMcCarthyMaterial.md]      |
-| Lyon           | Liquid Sodium | Pipes        | [ADWallHeatTransferCoefficientLyonMaterial.md]              |
-| Weisman        | Water         | Rod-bundles  | [ADWallHeatTransferCoefficientWeismanMaterial.md]           |
-| Kazimi-Carelli | Liquid Sodium | Rod-bundles  | [ADWallHeatTransferCoefficientKazimiMaterial.md]            |
-| Mikityuk       | Liquid Sodium | Rod-bundles  | [ADWallHeatTransferCoefficientMikityukMaterial.md]          |
-| Schad          | Liquid Sodium | Rod-bundles  | [ADWallHeatTransferCoefficientSchadMaterial.md]             |
+!table id=HTC-correlations caption=Available correlations for the heat transfer coefficient.
+| Name           | Coolant       | Geometry    | Reference                                                   |
+| -------------- | ------------- | ----------- | ----------------------------------------------------------- |
+| Dittus-Boelter | Liquid/Gases  | Pipes       | [ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial.md] |
+| Gnielinski     | Liquid/Gases  | Pipes       | [ADWallHeatTransferCoefficientGnielinskiMaterial.md]        |
+| Wolf-McCarthy  | Gases         | Pipes       | [ADWallHeatTransferCoefficientWolfMcCarthyMaterial.md]      |
+| Lyon           | Liquid Sodium | Pipes       | [ADWallHeatTransferCoefficientLyonMaterial.md]              |
+| Weisman        | Water         | Rod-bundles | [ADWallHeatTransferCoefficientWeismanMaterial.md]           |
+| Kazimi-Carelli | Liquid Sodium | Rod-bundles | [ADWallHeatTransferCoefficientKazimiMaterial.md]            |
+| Mikityuk       | Liquid Sodium | Rod-bundles | [ADWallHeatTransferCoefficientMikityukMaterial.md]          |
+| Schad          | Liquid Sodium | Rod-bundles | [ADWallHeatTransferCoefficientSchadMaterial.md]             |
 
-and for the fricition factor we have:
+The available correlations for the friction factor are listed in [FF-correlations].
 
-!table id=FF-correlations caption=Avaliable correlations for the friction factor.
+!table id=FF-correlations caption=Available correlations for the friction factor.
 | Name          | Geometry    | Reference                            |
-|---------------|-------------|--------------------------------------|
+| ------------- | ----------- | ------------------------------------ |
 | Churchill     | Pipes       | [ADWallFrictionChurchillMaterial.md] |
 | Cheng-Todreas | Rod-bundles | [ADWallFrictionChengMaterial.md]     |
 
