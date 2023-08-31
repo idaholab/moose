@@ -106,7 +106,9 @@ protected:
   /// @return The normalized residual norm of the equation.
   Real solveAdvectedSystem(const unsigned int system_num,
                            NonlinearSystemBase & system,
-                           const Real relaxation_factor);
+                           const Real relaxation_factor,
+                           SolverConfiguration & solver_config,
+                           const Real abs_tol);
 
   /**
    * Relax the update on a solution field using the following approach:
@@ -233,12 +235,20 @@ private:
   /// Options for the linear solver of the momentum equation
   SIMPLESolverConfiguration _momentum_ls_control;
 
+  const Real _momentum_l_abs_tol;
+
   /// Options for the linear solver of the pressure equation
   SIMPLESolverConfiguration _pressure_ls_control;
+
+  const Real _pressure_l_abs_tol;
 
   /// Options for the linear solver of the energy equation
   SIMPLESolverConfiguration _energy_ls_control;
 
+  const Real _energy_l_abs_tol;
+
   /// Options for the linear solver of the passive scalar equation
   SIMPLESolverConfiguration _passive_scalar_ls_control;
+
+  const Real _passive_scalar_l_abs_tol;
 };

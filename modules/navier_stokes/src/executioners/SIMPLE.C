@@ -144,7 +144,7 @@ SIMPLE::validParams()
    */
   params.addRangeCheckedParam<Real>("momentum_l_tol",
                                     1e-5,
-                                    "0.0<momentum_l_tol<1.0",
+                                    "0.0<=momentum_l_tol & momentum_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the momentum equation.");
   params.addRangeCheckedParam<Real>("momentum_l_abs_tol",
@@ -152,33 +152,31 @@ SIMPLE::validParams()
                                     "0.0<momentum_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the momentum equation.");
-  params.addRangeCheckedParam<unsigned int>(
+  params.addParam<unsigned int>(
       "momentum_l_max_its",
       10000,
-      "0<momentum_l_max_its",
       "The maximum allowed iterations in the linear solver of the momentum equation.");
   params.addRangeCheckedParam<Real>("pressure_l_tol",
                                     1e-5,
-                                    "0.0<pressure_l_tol<1.0",
+                                    "0.0<=pressure_l_tol & pressure_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the pressure equation.");
   params.addRangeCheckedParam<Real>("pressure_l_abs_tol",
-                                    1e-50,
+                                    1e-10,
                                     "0.0<pressure_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the pressure equation.");
-  params.addRangeCheckedParam<unsigned int>(
+  params.addParam<unsigned int>(
       "pressure_l_max_its",
       10000,
-      "0<pressure_l_max_its",
       "The maximum allowed iterations in the linear solver of the pressure equation.");
   params.addRangeCheckedParam<Real>("energy_l_tol",
                                     1e-5,
-                                    "0.0<energy_l_tol<1.0",
+                                    "0.0<=energy_l_tol & energy_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the energy equation.");
   params.addRangeCheckedParam<Real>("energy_l_abs_tol",
-                                    1e-50,
+                                    1e-10,
                                     "0.0<energy_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the energy equation.");
@@ -189,18 +187,17 @@ SIMPLE::validParams()
       "The maximum allowed iterations in the linear solver of the energy equation.");
   params.addRangeCheckedParam<Real>("passive_scalar_l_tol",
                                     1e-5,
-                                    "0.0<passive_scalar_l_tol<1.0",
+                                    "0.0<=passive_scalar_l_tol & passive_scalar_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the passive scalar equation(s).");
   params.addRangeCheckedParam<Real>("passive_scalar_l_abs_tol",
-                                    1e-50,
+                                    1e-10,
                                     "0.0<passive_scalar_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the passive scalar equation(s).");
-  params.addRangeCheckedParam<unsigned int>(
+  params.addParam<unsigned int>(
       "passive_scalar_l_max_its",
       10000,
-      "0<passive_scalar_l_max_its",
       "The maximum allowed iterations in the linear solver of the passive scalar equation.");
   params.addRangeCheckedParam<unsigned int>(
       "num_iterations",
@@ -244,7 +241,11 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
-    _print_fields(getParam<bool>("print_fields"))
+    _print_fields(getParam<bool>("print_fields")),
+    _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
+    _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
+    _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
+    _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol"))
 {
   if (_momentum_system_names.size() != 1 &&
       _momentum_system_names.size() != _problem.mesh().dimension())
@@ -319,17 +320,17 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
 
   _momentum_ls_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
   _momentum_ls_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
-  _momentum_ls_control.int_valued_data["max_its"] = getParam<Real>("momentum_l_max_its");
+  _momentum_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("momentum_l_max_its");
 
   _pressure_ls_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
   _pressure_ls_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
-  _pressure_ls_control.int_valued_data["max_its"] = getParam<Real>("pressure_l_max_its");
+  _pressure_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("pressure_l_max_its");
 
   if (_has_energy_system)
   {
     _energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
     _energy_ls_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
-    _energy_ls_control.int_valued_data["max_its"] = getParam<Real>("energy_l_max_its");
+    _energy_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("energy_l_max_its");
   }
 
   if (_has_passive_scalar_systems)
@@ -338,7 +339,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _passive_scalar_ls_control.real_valued_data["abs_tol"] =
         getParam<Real>("passive_scalar_l_abs_tol");
     _passive_scalar_ls_control.int_valued_data["max_its"] =
-        getParam<Real>("passive_scalar_l_max_its");
+        getParam<unsigned int>("passive_scalar_l_max_its");
   }
 
   _time = 0;
@@ -554,9 +555,12 @@ SIMPLE::solveMomentumPredictor()
   // norms in the linear solve
   KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
+  // Setting the lineat tolerances and maximum iteration counts
+  _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
+  momentum_solver.set_solver_configuration(_momentum_ls_control);
   // We solve the equation
   // TO DO: Add options to this function in Libmesh to accept absolute tolerance
-  momentum_solver.solve(mmat, mmat, solution, rhs, /*tol*/ 1e-10, /*num_its*/ 100);
+  momentum_solver.solve(mmat, mmat, solution, rhs);
   momentum_system.update();
   // Make sure that we reuse the preconditioner if we end up solving the segregated
   // momentum components
@@ -608,7 +612,7 @@ SIMPLE::solveMomentumPredictor()
 
     // Solve this component. We don't update the ghosted solution yet, that will come at the end of
     // the corrector step
-    momentum_solver.solve(mmat, mmat, solution, rhs, /*tol*/ 1e-10, /*num_its*/ 100);
+    momentum_solver.solve(mmat, mmat, solution, rhs);
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
@@ -664,8 +668,12 @@ SIMPLE::solvePressureCorrector()
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
+  // Setting the lineat tolerances and maximum iteration counts
+  _pressure_ls_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
+  pressure_solver.set_solver_configuration(_pressure_ls_control);
+
   // Solve the system and update current local solution
-  pressure_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+  pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
 
   if (_print_fields)
@@ -685,7 +693,9 @@ SIMPLE::solvePressureCorrector()
 Real
 SIMPLE::solveAdvectedSystem(const unsigned int system_num,
                             NonlinearSystemBase & system,
-                            const Real relaxation_factor)
+                            const Real relaxation_factor,
+                            SolverConfiguration & solver_config,
+                            const Real absolute_tol)
 {
   _problem.setCurrentNonlinearSystem(system_num);
 
@@ -729,8 +739,12 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
+  // Setting the lineat tolerances and maximum iteration counts
+  solver_config.real_valued_data["abs_tol"] = absolute_tol * norm_factor;
+  linear_solver.set_solver_configuration(solver_config);
+
   // Solve the system and update current local solution
-  linear_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+  linear_solver.solve(mmat, mmat, solution, rhs);
   ni_system.update();
 
   if (_print_fields)
@@ -827,8 +841,8 @@ SIMPLE::execute()
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        energy_residual =
-            solveAdvectedSystem(_energy_sys_number, *_energy_system, _energy_equation_relaxation);
+        energy_residual = solveAdvectedSystem(
+            _energy_sys_number, *_energy_system, _energy_equation_relaxation, _energy_ls_control, _energy_l_abs_tol);
       }
       else
         energy_residual = 0.0;
@@ -875,7 +889,9 @@ SIMPLE::execute()
           passive_scalar_residuals[system_i] =
               solveAdvectedSystem(_passive_scalar_system_numbers[system_i],
                                   *_passive_scalar_systems[system_i],
-                                  _passive_scalar_equation_relaxation[system_i]);
+                                  _passive_scalar_equation_relaxation[system_i],
+                                  _passive_scalar_ls_control,
+                                  _passive_scalar_l_abs_tol);
 
         _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
         for (auto system_i : index_range(_passive_scalar_systems))

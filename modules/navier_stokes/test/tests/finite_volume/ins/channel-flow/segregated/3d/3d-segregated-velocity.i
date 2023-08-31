@@ -196,21 +196,26 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  # petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
-  # petsc_options_value = 'hypre boomeramg NONZERO'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 60
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
-  momentum_petsc_options_iname = '-pc_type'
-  momentum_petsc_options_value = 'lu'
+  momentum_petsc_options = '-ksp_monitor'
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg'
+  pressure_petsc_options = '-ksp_monitor'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
+
+  momentum_l_abs_tol = 1e-6
+  pressure_l_abs_tol = 1e-6
+  momentum_l_tol = 0.0
+  pressure_l_tol = 0.0
   print_fields = false
 []
 
