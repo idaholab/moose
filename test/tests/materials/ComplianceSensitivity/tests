@@ -38,4 +38,12 @@
     rel_err = 1e-1
     detail = '2D topology optimization problem using a derivativeParsedMaterial.'
   []
+  [2d_mmb_2material_cost_initial]
+    type = 'CSVDiff'
+    input = '2d_mmb_2material_cost_initial.i'
+    csvdiff = '2d_mmb_2material_cost_initial_out.csv'
+    requirement = 'The system shall be able to compute a multi-material topology optimization '
+                  'problem.'
+    heavy = true
+  []
 []

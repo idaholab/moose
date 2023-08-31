@@ -9,7 +9,7 @@
 
 #include "CostSensitivity.h"
 
-registerMooseObject("troutApp", ComplianceSensitivity);
+registerMooseObject("troutApp", CostSensitivity);
 
 InputParameters
 CostSensitivity::validParams()
@@ -17,18 +17,15 @@ CostSensitivity::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Computes cost sensitivity needed for multimaterial SIMP method.");
   params.addRequiredCoupledVar("design_density", "Design density variable name.");
-  params.addRequiredRangeCheckedParam<int>("power", "power>=1", "Penalty power for SIMP method.");
-  params.addRequiredRangeCheckedParam<Real>("E", "E>0", "Young's modulus for the material.");
-  params.addRequiredRangeCheckedParam<Real>(
-      "Emin", "Emin>0", "Minimum value of Young's modulus for the material.");
-
+  params.addRequiredParam<MaterialPropertyName>("cost",
+                                                "DerivativeParsedMaterial for cost of materials.");
   return params;
 }
 
 CostSensitivity::CostSensitivity(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _sensitivity(declareProperty<Real>(_base_name + "sensitivity")),
+    _sensitivity(declareProperty<Real>(_base_name + "cost_sensitivity")),
     _design_density(coupledValue("design_density")),
     _design_density_name(coupledName("design_density", 0)),
     _dcostdrho(getMaterialPropertyDerivativeByName<Real>(getParam<MaterialPropertyName>("cost"),
