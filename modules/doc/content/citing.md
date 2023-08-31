@@ -85,6 +85,22 @@ url       = {https://doi.org/10.1080/00295450.2020.1826804}
 }
 ```
 
+## Machine Learning Integration using Libtorch
+
+If you are using Libtorch APIs within MOOSE, please consider citing:
+
+```
+@article{german2023enabling,
+  title={Enabling scientific machine learning in MOOSE using Libtorch},
+  author={German, P{\'e}ter and Yushu, Dewen},
+  journal={SoftwareX},
+  volume={23},
+  pages={101489},
+  year={2023},
+  publisher={Elsevier}
+}
+```
+
 ## Modules
 
 If you are using a physics module for your application, please cite the appropriate references
@@ -92,31 +108,22 @@ as listed here.
 
 ### Navier-Stokes
 
-If you use the finite volume incompressible, compressible and weakly compressible implementations in the Navier-Stokes module, please cite:
+The following document summarizes the main capabilities available in the Navier-Stokes module:
 
 ```
-@techreport{,
-      title = {NEAMS-TH-CRAB},
-     author = {Guillaume L. Giudicelli, Alexander D. Lindsay, Ramiro Freile, Jieun Lee},
-       year = {2021},
-     number = {INL/EXT-21-62895},
-institution = {Idaho National Laboratory}
+@article{lindsay2023moose,
+  title={MOOSE Navier--Stokes module},
+  author={Lindsay, Alexander and Giudicelli, Guillaume and German, Peter and Peterson, John and Wang, Yaqi and Freile, Ramiro and Andrs, David and Balestra, Paolo and Tano, Mauricio and Hu, Rui and others},
+  journal={SoftwareX},
+  volume={23},
+  pages={101503},
+  year={2023},
+  publisher={Elsevier}
 }
 ```
 
-If you use the finite volume incompressible porous flow equations implementation in the Navier-Stokes module, please cite:
-
-```
-@inproceedings{,
-    title = {Coupled Multiphysics Transient Simulations of the MK1-FHR reactor Using the Finite Volume Capabilities of the MOOSE Framework},
-   author = {Guillaume Giudicelli, Alexander Lindsay, Paolo Balestra, Robert Carlsen, Javier Ortensi, Derek Gaston, Mark DeHart, Abdalla Abou-Jaoude, April J. Novak},
-     year = {2021},
-booktitle = {Mathematics and Computation for Nuclear Science and Engineering},
-publisher = {American Nuclear Society}
-}
-```
-
-If you use the finite element incompressible portion of the Navier-Stokes module, please cite:
+If you use the finite element incompressible portion of the Navier-Stokes module, please considering citing
+the following paper as well:
 
 ```
 @article{peterson2018overview,
@@ -128,6 +135,19 @@ If you use the finite element incompressible portion of the Navier-Stokes module
    volume = {119},
     pages = {68--92},
 publisher = {Elsevier}
+}
+```
+
+For a more detailed summary of the finite volume incompressible,
+compressible and weakly compressible implementations in the Navier-Stokes module, please cite:
+
+```
+@techreport{,
+      title = {NEAMS-TH-CRAB},
+     author = {Guillaume L. Giudicelli, Alexander D. Lindsay, Ramiro Freile, Jieun Lee},
+       year = {2021},
+     number = {INL/EXT-21-62895},
+institution = {Idaho National Laboratory}
 }
 ```
 
