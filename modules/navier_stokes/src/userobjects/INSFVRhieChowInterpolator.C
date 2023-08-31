@@ -37,11 +37,37 @@ using namespace libMesh;
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolator);
 
 InputParameters
+INSFVRhieChowInterpolator::uniqueParams()
+{
+  auto params = emptyInputParameters();
+  params.addParam<bool>(
+      "pull_all_nonlocal_a",
+      false,
+      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
+      "means elements that we have access to (this may not be all the elements in the mesh if the "
+      "mesh is distributed) but that we do not own.");
+  params.addParamNamesToGroup("pull_all_nonlocal_a", "Parallel Execution Tuning");
+  params.addParam<NonlinearSystemName>("mass_momentum_system",
+                                       "nl0",
+                                       "The nonlinear system in which the monolithic momentum and "
+                                       "continuity equations are located.");
+  params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
+  return params;
+}
+
+std::vector<std::string>
+INSFVRhieChowInterpolator::listOfCommonParams()
+{
+  return {"pull_all_nonlocal_a", "mass_momentum_system"};
+}
+
+InputParameters
 INSFVRhieChowInterpolator::validParams()
 {
   auto params = GeneralUserObject::validParams();
   params += TaggingInterface::validParams();
   params += BlockRestrictable::validParams();
+  params += INSFVRhieChowInterpolator::uniqueParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
@@ -71,24 +97,12 @@ INSFVRhieChowInterpolator::validParams()
       "a_v",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 1. It represents the on-diagonal "
-      "coefficients for the 'y' component velocity, solved "
-      "via the Navier-Stokes equations.");
+      "coefficients for the 'y' component velocity, solved via the Navier-Stokes equations.");
   params.addParam<MooseFunctorName>(
       "a_w",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
-      "coefficients for the 'z' component velocity, solved "
-      "via the Navier-Stokes equations.");
-  params.addParam<bool>(
-      "pull_all_nonlocal_a",
-      false,
-      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
-      "means elements that we have access to (this may not be all the elements in the mesh if the "
-      "mesh is distributed) but that we do not own.");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
+      "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
   return params;
 }
 
@@ -360,10 +374,9 @@ INSFVRhieChowInterpolator::initialSetup()
     }
 
     if (var_objects.size() == 0 && !_a_data_provided)
-      mooseError(
-          "No INSFVKernels detected for the velocity variables. "
-          "If you are trying to use auxiliary variables for advection, please specify the a_u/v/w "
-          "coefficients. If not, please specify INSFVKernels for the momentum equations.");
+      mooseError("No INSFVKernels detected for the velocity variables. If you are trying to use "
+                 "auxiliary variables for advection, please specify the a_u/v/w coefficients. If "
+                 "not, please specify INSFVKernels for the momentum equations.");
   }
 }
 
@@ -390,6 +403,9 @@ INSFVRhieChowInterpolator::meshChanged()
 void
 INSFVRhieChowInterpolator::initialize()
 {
+  if (!needAComputation())
+    return;
+
   // Reset map of coefficients to zero.
   // The keys should not have changed unless the mesh has changed
   for (const auto & pair : _a)
@@ -399,12 +415,23 @@ INSFVRhieChowInterpolator::initialize()
 void
 INSFVRhieChowInterpolator::execute()
 {
-  if (_a_data_provided)
-    return;
-
-  // If advecting with auxiliary variables, no need to try to run those kernels
   if (_sys.number() != _u->sys().number())
+  {
+    mooseAssert(!needAComputation(),
+                "The velocity variables are in the auxiliary system. In this case we will not run "
+                "kernels to compute a-coefficients. Consequently the a-coefficient data must be "
+                "provided, approximated, or we should be using an average velocity interpolation");
     return;
+  }
+
+  mooseAssert(!_a_data_provided,
+              "a-coefficient data should not be provided if the velocity variables are in the "
+              "nonlinear system and we are running kernels that compute said a-coefficients");
+  // One might think that we should do a similar assertion for
+  // (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow). However, even if we are not
+  // using the generated a-coefficient data in that case, some kernels have been optimized to
+  // add their residuals into the global system during the generation of the a-coefficient data.
+  // Hence if we were to skip the kernel execution we would drop those residuals
 
   TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
 
@@ -437,8 +464,7 @@ INSFVRhieChowInterpolator::execute()
 void
 INSFVRhieChowInterpolator::finalize()
 {
-  if (_a_data_provided || this->n_processors() == 1 ||
-      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+  if (!needAComputation() || this->n_processors() == 1)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -516,8 +542,7 @@ INSFVRhieChowInterpolator::finalize()
 void
 INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 {
-  if (_a_data_provided || this->n_processors() == 1 ||
-      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+  if (!needAComputation() || this->n_processors() == 1)
     return;
 
   // Ghost a for the elements on the boundary
@@ -608,11 +633,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi, time);
+  const auto & grad_p = p.adGradSln(fi, time);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
 
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
