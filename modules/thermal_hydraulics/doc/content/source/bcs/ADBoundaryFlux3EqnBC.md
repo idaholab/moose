@@ -1,20 +1,21 @@
 # ADBoundaryFlux3EqnBC
 
-!alert construction title=Undocumented Class
-The ADBoundaryFlux3EqnBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ADBoundaryFlux3EqnBC
 
-## Overview
+The boundary conditions retrieves the flux from an `ADBoundaryFluxBase`-derived user object,
+such as the [ADBoundaryFlux3EqnFreeOutflow.md].
 
-!! Replace these lines with information regarding the ADBoundaryFlux3EqnBC object.
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-## Example Input File Syntax
+\begin{equation}
+R_i = (\psi_i, \Phi_{eqn} * \vec{n}) \quad \forall \psi_i,
+\end{equation}
 
-!! Describe and include an example of how to use the ADBoundaryFlux3EqnBC object.
+where $\psi_i$ are the test functions, $\Phi_{eqn}$ the flux for the equation considered, and $\vec{n}$ the local normal.
+
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by
+`FlowBoundary1Phase`-derived components, such as the [InletDensityVelocity1Phase.md] boundary component.
 
 !syntax parameters /BCs/ADBoundaryFlux3EqnBC
 

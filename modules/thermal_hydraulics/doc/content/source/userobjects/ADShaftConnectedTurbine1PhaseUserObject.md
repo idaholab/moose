@@ -1,20 +1,46 @@
 # ADShaftConnectedTurbine1PhaseUserObject
 
-!alert construction title=Undocumented Class
-The ADShaftConnectedTurbine1PhaseUserObject has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /UserObjects/ADShaftConnectedTurbine1PhaseUserObject
 
-## Overview
+A turbine is a volume junction, derived from 
+[ADVolumeJunction1PhaseUserObject.md]. As such its base contribution to the residual and Jacobian is set by this parent class.
 
-!! Replace these lines with information regarding the ADShaftConnectedTurbine1PhaseUserObject object.
+The additional residual for the momentum equation in each direction are:
 
-## Example Input File Syntax
+!equation
+\vec{R} = \Delta p A \vec{d}_{out}
 
-!! Describe and include an example of how to use the ADShaftConnectedTurbine1PhaseUserObject object.
+where $\Delta p$ is the pressure drop across the turbine, as computed below, $A$ the flow area and $\vec{d}$ the direction of
+the turbine outlet.
+
+!equation
+\Delta p =  (\rho V / volume) g_H;
+
+where $\rho V$ is a variable, $volume$ the volume of the junction and $g_H$ is defined below:
+
+!equation
+g_H = head D_{wheel}^2 \omega^2
+
+where $head$ is the head coefficient, $D_{wheel}$ is the diameter of the turbine, and $\omega$ is the inlet rotation speed.
+
+For the energy equation, the additional residual $R_e$ is simply the power of the turbine $\dot{W}$.
+
+!equation
+\dot{W} = T \omega
+
+with $T$ the torque of the turbine and $\omega$ its rotation speed.
+
+The user object also provides APIs to retrieve the turbine's:
+
+- driving torque
+- friction torque
+- flow coefficient
+- pressure drop
+- power
+
+!alert note
+This user object is created automatically by the [ShaftConnectedTurbine1Phase.md]
+component, users do not need to add it to an input file.
 
 !syntax parameters /UserObjects/ADShaftConnectedTurbine1PhaseUserObject
 

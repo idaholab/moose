@@ -186,7 +186,6 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
 
     // a positive head value results in a positive S_momentum
     const ADRealVectorValue S_momentum = (_rhoA[0] / _A[0]) * _g * _pump_head * _A_ref * _di_out;
-    //
 
     _residual[VolumeJunction1Phase::RHOEV_INDEX] -= S_energy;
 

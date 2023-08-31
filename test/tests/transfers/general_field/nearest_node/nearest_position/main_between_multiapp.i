@@ -47,7 +47,7 @@
 [Transfers]
   # Nodal to nodal variables
   [app1_to_2_nodal_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_nodal
@@ -58,7 +58,7 @@
     search_value_conflicts = true
   []
   [app2_to_1_nodal_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_nodal
@@ -70,7 +70,7 @@
 
   # Elemental to elemental variables
   [app1_to_2_elem_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_elem
@@ -80,7 +80,7 @@
     search_value_conflicts = true
   []
   [app2_to_1_elem_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_elem

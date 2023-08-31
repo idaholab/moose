@@ -18,8 +18,8 @@ RadiativeHeatFluxRZBC::validParams()
   InputParameters params = RadiativeHeatFluxBC::validParams();
   params += RZSymmetry::validParams();
 
-  params.addClassDescription(
-      "Radiative heat transfer boundary condition for a cylindrical heat structure");
+  params.addClassDescription("Radiative heat transfer boundary condition for a cylindrical heat "
+                             "structure in a XY coordinate system");
 
   return params;
 }

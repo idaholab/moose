@@ -1,117 +1,126 @@
 [Tests]
   design = 'transfers/MultiAppNearestNodeTransfer.md'
 
-  [./tosub]
+  [tosub]
     type = 'Exodiff'
     input = 'tosub_parent.i'
     exodiff = 'tosub_parent_out_sub0.e'
     issues = '#1866 #12245'
-    requirement = "The system shall transfer both nodal and elemental fields to a SubApp from the Master App."
+    requirement = "The system shall transfer both nodal and elemental fields to a child app from the "
+                  "parent app."
     max_parallel = 4 # Ticket #12523
-  [../]
+  []
 
-  [./fromsub]
+  [fromsub]
     type = 'Exodiff'
     input = 'fromsub_parent.i'
     exodiff = 'fromsub_parent_out.e'
     issues = '#1866 #12245'
-    requirement = "The system shall transfer both nodal and elemental fields from SubApps to the Master App."
-  [../]
+    requirement = "The system shall transfer both nodal and elemental fields from child apps to the "
+                  "parent app."
+  []
 
-  [./fromsub_displaced]
+  [fromsub_displaced]
     type = 'Exodiff'
     input = 'fromsub_displaced_parent.i'
     exodiff = 'fromsub_displaced_parent_out.e'
     issues = '#1868'
-    requirement = "The system shall transfer values from SubApps which set the displaced_source_mesh flag to true."
-  [../]
+    requirement = "The system shall transfer values from child apps which set the "
+                  "displaced_source_mesh flag to true."
+  []
 
-  [./tosub_displaced]
+  [tosub_displaced]
     type = 'Exodiff'
     input = 'tosub_displaced_parent.i'
     exodiff = 'tosub_displaced_parent_out_sub0.e'
     deleted = 'Not yet implemented properly!'
     issues = '#1868'
-    requirement = "The system shall transfer values from SubApps which set the displaced_target_mesh flag to true."
-  [../]
+    requirement = "The system shall transfer values from child apps which set the "
+                  "displaced_target_mesh flag to true."
+  []
 
-  [./fromsub_fixed_meshes]
+  [fromsub_fixed_meshes]
     type = 'Exodiff'
     input = 'fromsub_fixed_meshes_parent.i'
     exodiff = 'fromsub_fixed_meshes_parent_out.e'
     issues = '#2126'
-    requirement = "The system shall support the 'fixed_meshes' flag which allows caching of nearest neighbors."
-  [../]
+    requirement = "The system shall support the 'fixed_meshes' flag which allows caching of nearest "
+                  "neighbors."
+  []
 
-  [./boundary_tosub]
+  [boundary_tosub]
     type = 'Exodiff'
     input = 'boundary_tosub_parent.i'
     exodiff = 'boundary_tosub_parent_out_sub0.e'
     issues = '#6156'
-    requirement = "The system shall transfer values to multiple SubApps from the Master App's boundary."
-  [../]
+    requirement = "The system shall transfer values to multiple child apps from the parent app's "
+                  "boundary."
+  []
 
-  [./boundary_toparent]
+  [boundary_toparent]
     type = 'Exodiff'
     input = 'boundary_toparent_parent.i'
     exodiff = 'boundary_toparent_parent_out.e'
     issues = '#6156'
-    requirement = "The system shall transfer values from a SubApp boundary to the Master App."
-  [../]
+    requirement = "The system shall transfer values from a child app boundary to the parent app."
+  []
 
-  [./multiple_target_boundaries]
+  [multiple_target_boundaries]
     type = 'Exodiff'
     input = 'to_multiple_boundaries_parent.i'
     exodiff = 'to_multiple_boundaries_parent_out.e to_multiple_boundaries_parent_out_sub0.e'
     issues = '#18467'
-    requirement = "The system shall transfer values to multiple target boundaries in both the Master and Sub App."
-  [../]
+    requirement = "The system shall transfer values to multiple target boundaries in both the parent "
+                  "and child app."
+  []
 
-  [./two_way_many_apps]
+  [two_way_many_apps]
     type = 'Exodiff'
     input = 'two_way_many_apps_parent.i'
     exodiff = 'two_way_many_apps_parent_out.e two_way_many_apps_parent_out_sub0.e two_way_many_apps_parent_out_sub4.e'
     issues = '#5360'
-    requirement = "The system shall work when there are multiple SubApps present."
+    requirement = "The system shall work when there are multiple child apps present."
     max_parallel = 4 # Ticket #12523
-  [../]
+  []
 
-  [./parallel]
+  [parallel]
     type = 'Exodiff'
     input = 'parallel_parent.i'
     exodiff = 'parallel_parent_out.e'
     min_parallel = 2
     max_parallel = 2
     issues = '#8004'
-    requirement = "The system shall work in parallel between meshes with different spatial dimensions."
-  [../]
+    requirement = "The system shall work in parallel between meshes with different spatial "
+                  "dimensions."
+  []
 
-  [./target_boundary]
+  [target_boundary]
     type = 'Exodiff'
     input = 'target_boundary_parent.i'
     exodiff = 'target_boundary_parent_out.e target_boundary_parent_out_sub0.e target_boundary_parent_out_sub1.e'
     cli_args = 'Transfers/target_boundary/bbox_factor=1.1'
     issues = '#18730'
     requirement = "The system shall support target boundary transfer when use multiple mpi ranks"
-  [../]
+  []
 
-  [./source_boundary]
+  [source_boundary]
     type = 'Exodiff'
     input = 'source_boundary_parent.i'
     exodiff = 'source_boundary_parent_out.e source_boundary_parent_out_sub0.e source_boundary_parent_out_sub1.e'
     issues = '#18730'
     requirement = "The system shall support source boundary transfer when use multiple mpi ranks"
-  [../]
+  []
 
-  [./source_target_boundary]
+  [source_target_boundary]
     type = 'Exodiff'
     input = 'source_boundary_parent.i'
     exodiff = 'source_target_boundary.e source_target_boundary_sub0.e source_target_boundary_sub1.e'
     issues = '#18730'
     cli_args = 'Transfers/source_boundary/target_boundary="right" Outputs/file_base="source_target_boundary"'
     prereq = 'source_boundary'
-    requirement = "The system shall support source-and-target boundary transfer when use multiple mpi ranks"
-  [../]
+    requirement = "The system shall support source-and-target boundary transfer when use multiple "
+                  "mpi ranks"
+  []
 
   [invalid_source_boundary_from_app]
     type = RunException
@@ -119,7 +128,8 @@
     cli_args = "Transfers/source_boundary/source_boundary='abc'"
     expect_err = "The boundary 'abc' was not found in the mesh"
     issues = '#22817'
-    requirement = "The system shall error if the specified source boundary was not found in the mesh for the from_multiapp direction."
+    requirement = "The system shall error if the specified source boundary was not found in the mesh "
+                  "for the from_multiapp direction."
   []
 
   [invalid_target_boundary_from_app]
@@ -128,7 +138,8 @@
     cli_args = "Transfers/source_boundary/target_boundary='abc'"
     expect_err = "The boundary 'abc' was not found in the mesh"
     issues = '#22817'
-    requirement = "The system shall error if the specified target boundary was not found in the mesh for the from_multiapp direction."
+    requirement = "The system shall error if the specified target boundary was not found in the mesh "
+                  "for the from_multiapp direction."
   []
 
   [invalid_source_boundary_to_app]
@@ -137,7 +148,8 @@
     cli_args = "Transfers/to_sub_1/source_boundary='abc'"
     expect_err = "The boundary 'abc' was not found in the mesh"
     issues = '#22817'
-    requirement = "The system shall error if the specified source boundary was not found in the mesh for the to_multiapp direction."
+    requirement = "The system shall error if the specified source boundary was not found in the mesh "
+                  "for the to_multiapp direction."
   []
 
   [invalid_target_boundary_to_app]
@@ -146,6 +158,7 @@
     cli_args = "Transfers/to_sub_1/target_boundary='abc'"
     expect_err = "The boundary 'abc' was not found in the mesh"
     issues = '#22817'
-    requirement = "The system shall error if the specified target boundary was not found in the mesh for the to_multiapp direction."
+    requirement = "The system shall error if the specified target boundary was not found in the mesh "
+                  "for the to_multiapp direction."
   []
 []

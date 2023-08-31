@@ -1,20 +1,16 @@
 # SolidMaterialProperties
 
-!alert construction title=Undocumented Class
-The SolidMaterialProperties has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /HeatStructureMaterials/SolidMaterialProperties
 
-## Overview
+The material properties defined serve for heat transfer simulations:
 
-!! Replace these lines with information regarding the SolidMaterialProperties object.
+- specific heat capacity
+- density
+- thermal conductivity
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SolidMaterialProperties object.
+!alert warning
+`SolidMaterialProperties` will be deprecated in the future to use the `SolidProperties` module instead.
+Its equivalent in the module is the [ThermalFunctionSolidProperties.md].
 
 !syntax parameters /HeatStructureMaterials/SolidMaterialProperties
 

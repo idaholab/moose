@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16427 #16429'
-  design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [2d_overlay]
     requirement = "The system shall be able to transfer variables using a nearest node algorithm, limiting the transfer to boundaries,"

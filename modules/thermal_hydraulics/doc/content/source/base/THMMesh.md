@@ -1,20 +1,17 @@
 # THMMesh
 
-!alert construction title=Undocumented Class
-The THMMesh has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Mesh/THMMesh
 
-## Overview
+The `THMMesh` is created by combining the meshes of all the components.
+It provides APIs to add edge (1D) and quadrilateral (2D) elements which the components call
+to build the mesh.
 
-!! Replace these lines with information regarding the THMMesh object.
+The `THMMesh` can be set to second-order by setting the `Problem` parameter [!param](/Problem/THMProblem/2nd_order_mesh) to true.
+This is performed automatically for second order variables.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the THMMesh object.
+!alert note
+The THMMesh is created automatically by the [Simulation.md]. The user does not need to create it in their input
+file.
 
 !syntax parameters /Mesh/THMMesh
 

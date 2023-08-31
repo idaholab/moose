@@ -263,7 +263,7 @@ MeshGenerator::generateInternal()
   }
 
   // output the current mesh block to file
-  if (getParam<bool>("output"))
+  if (hasOutput())
   {
     if (!mesh->is_prepared())
       mesh->prepare_for_use();
@@ -364,9 +364,15 @@ MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
 }
 
 bool
-MeshGenerator::hasSaveMesh()
+MeshGenerator::hasSaveMesh() const
 {
   return _save_with_name.size();
+}
+
+bool
+MeshGenerator::hasOutput() const
+{
+  return getParam<bool>("output");
 }
 
 const std::string &

@@ -1,20 +1,22 @@
 # ADExternalAppConvectionHeatTransferBC
 
-!alert construction title=Undocumented Class
-The ADExternalAppConvectionHeatTransferBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ADExternalAppConvectionHeatTransferBC
 
-## Overview
+The contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the ADExternalAppConvectionHeatTransferBC object.
+\begin{equation}
+R_i = (\psi_i, S_{pp} S_{fn}(t, \vec{x}) h_{ext} (T - T_{ext}) ) \quad \forall \psi_i,
+\end{equation}
 
-## Example Input File Syntax
+where $\psi_i$ are the test functions, $S_{pp}$ a postprocessor scaling factor, $S_{fn}$ a scaling
+function, $h_{ext}$ is the heat transfer coefficient variable provided by the external application,
+$T$ is the temperature variable on the heat structure, and $T_{ext}$ the temperature variable provided by the
+external application
 
-!! Describe and include an example of how to use the ADExternalAppConvectionHeatTransferBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by the
+[HSBoundaryExternalAppConvection.md] to place a convective heat flux boundary condition on a heat structure with the
+temperature and heat transfer coefficients provided by an external application.
 
 !syntax parameters /BCs/ADExternalAppConvectionHeatTransferBC
 

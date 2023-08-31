@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppGeneralFieldNearestNodeTransfer.h"
+#include "MultiAppGeneralFieldNearestLocationTransfer.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -19,10 +19,14 @@
 
 #include "libmesh/system.h"
 
-registerMooseObject("MooseApp", MultiAppGeneralFieldNearestNodeTransfer);
+registerMooseObject("MooseApp", MultiAppGeneralFieldNearestLocationTransfer);
+registerMooseObjectRenamed("MooseApp",
+                           MultiAppGeneralFieldNearestNodeTransfer,
+                           "12/31/2024 24:00",
+                           MultiAppGeneralFieldNearestLocationTransfer);
 
 InputParameters
-MultiAppGeneralFieldNearestNodeTransfer::validParams()
+MultiAppGeneralFieldNearestLocationTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
@@ -51,7 +55,7 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
   return params;
 }
 
-MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(
+MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocationTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
     SolutionInvalidInterface(this),
@@ -65,7 +69,7 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
+MultiAppGeneralFieldNearestLocationTransfer::initialSetup()
 {
   MultiAppGeneralFieldTransfer::initialSetup();
 
@@ -157,7 +161,7 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
+MultiAppGeneralFieldNearestLocationTransfer::prepareEvaluationOfInterpValues(
     const unsigned int var_index)
 {
   _local_kdtrees.clear();
@@ -167,7 +171,7 @@ MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_index)
+MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var_index)
 {
   const unsigned int num_sources =
       _nearest_positions_obj ? _nearest_positions_obj->getPositions(/*initial=*/false).size()
@@ -275,14 +279,14 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
+MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValues(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesNearestNode(incoming_points, outgoing_vals);
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
+MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
@@ -366,18 +370,25 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
             zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
           std::sort(zipped_nearest_points.begin(), zipped_nearest_points.end());
 
-          // If two furthest are equally far from target point, then we have an indetermination
-          if (num_found > 1 &&
+          // If two furthest are equally far from target point, then we have an indetermination in
+          // what is sent in this communication round from this process. However, it may not
+          // materialize to an actual conflict, as values sent from another process for the desired
+          // target point could be closer (nearest). There is no way to know at this point in the
+          // communication that a closer value exists somewhere else
+          if (num_found > 1 && num_found == num_search &&
               MooseUtils::absoluteFuzzyEqual(zipped_nearest_points[num_found - 1].first,
                                              zipped_nearest_points[num_found - 2].first))
             registerConflict(i_from, 0, local_pt, outgoing_vals[i_pt].second, true);
 
+          // Recompute the distance for this problem. If it matches the cached value more than once
+          // it means multiple problems provide equidistant values for this point
           Real dist_sum = 0;
           for (auto i : make_range(num_search - 1))
           {
             auto index = zipped_nearest_points[i].second;
             dist_sum += (_local_points[i_from][index] - pt).norm();
           }
+
           // Compare to the selected value found after looking at all the problems
           if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),
                                              outgoing_vals[i_pt].second))
@@ -396,9 +407,9 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
 }
 
 bool
-MultiAppGeneralFieldNearestNodeTransfer::inBlocks(const std::set<SubdomainID> & blocks,
-                                                  const MooseMesh & mesh,
-                                                  const Elem * elem) const
+MultiAppGeneralFieldNearestLocationTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                                      const MooseMesh & mesh,
+                                                      const Elem * elem) const
 {
   // We need to override the definition of block restriction for an element
   // because we have to consider whether each node of an element is adjacent to a block

@@ -6,39 +6,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
-  [./elemental_from_sub]
+  [from_sub]
+  []
+  [elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -57,27 +57,31 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0.48 0 0 -1.01 0 0'
     input_files = fromsub_displaced_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+  [from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
     displaced_source_mesh = true
-  [../]
-  [./elemental_from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
+  [elemental_from_sub]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u
     variable = elemental_from_sub
     displaced_source_mesh = true
-  [../]
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
 []

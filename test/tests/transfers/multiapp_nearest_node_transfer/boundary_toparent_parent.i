@@ -1,4 +1,4 @@
-# Master mesh and sub mesh are same with 4x4 quad8 elements.
+# Parent mesh and sub mesh are same with 4x4 quad8 elements.
 # parent mesh has top boundary fixed at u=2 and bottom fixed at u=0
 # sub mesh has top boundary fixed at u = 0 and bottom fixed at u=1
 # The u variable at right boundary of sub mesh is transferred to
@@ -17,39 +17,39 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
+  [from_sub]
     family = LAGRANGE
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = top
     value = 2.0
-  [../]
-  [./bottom]
+  []
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -68,21 +68,21 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = boundary_toparent_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     source_boundary = right
     target_boundary = left
     variable = from_sub
-  [../]
+  []
 []

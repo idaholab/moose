@@ -320,15 +320,35 @@ private:
       InterpCaches & interp_caches,                   // for higher order elemental values
       InterpCaches & distance_caches);                // same but helps make origin point decisions
 
-  /// Remove potential value conflicts that did not materialize because another source was closer
-  void examineValueConflicts(
-      const VariableName var_name,
-      const DofobjectToInterpValVec & dofobject_to_valsvec,
-      const InterpCaches & distance_caches,
-      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> conflicts_vec);
+  /**
+   * Remove potential value conflicts that did not materialize because another source was closer
+   * Several equidistant valid values were received, but they were not closest
+   * @param var_index the index of the variable of interest
+   * @param dofobject_to_valsvec a data structure mapping dofobjects to received values and
+   * distances (used for nodal-value-dof-only variables and constant monomials)
+   * @param distance_caches a cache holding the distances received (used for higher order elemental
+   * variables)
+   */
+  void examineReceivedValueConflicts(const unsigned int var_index,
+                                     const DofobjectToInterpValVec & dofobject_to_valsvec,
+                                     const InterpCaches & distance_caches);
+
+  /**
+   * Remove potential value conflicts that did not materialize because another source was closer
+   * Several equidistant valid values were found when computing values to send, but they were not
+   * closest, another value got selected
+   * @param var_index the index of the variable of interest
+   * @param dofobject_to_valsvec a data structure mapping dofobjects to received values and
+   * distances (used for nodal-value-dof-only variables and constant monomials)
+   * @param distance_caches a cache holding the distances received (used for higher order elemental
+   * variables)
+   */
+  void examineLocalValueConflicts(const unsigned int var_index,
+                                  const DofobjectToInterpValVec & dofobject_to_valsvec,
+                                  const InterpCaches & distance_caches);
 
   /// Report on conflicts between overlapping child apps, equidistant origin points etc
-  void outputValueConflicts(const VariableName var_name,
+  void outputValueConflicts(const unsigned int var_index,
                             const DofobjectToInterpValVec & dofobject_to_valsvec,
                             const InterpCaches & distance_caches);
 

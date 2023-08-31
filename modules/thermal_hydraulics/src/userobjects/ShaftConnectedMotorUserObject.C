@@ -21,6 +21,8 @@ ShaftConnectedMotorUserObject::validParams()
   params.addRequiredParam<FunctionName>("inertia",
                                         "Moment of inertia as a function of shaft speed");
   params.addRequiredCoupledVar("shaft_speed", "Shaft speed");
+  params.addClassDescription(
+      "Computes the torque and moment of inertia of a shaft connected motor");
   return params;
 }
 

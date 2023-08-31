@@ -10,7 +10,7 @@ A `GeneralField` transfer proceeds as follows:
 Each process first looks to find which source application it will be talking to.
 This is based on geometric proximity, leveraging bounding boxes enclosing each application's
 domain. The bounding boxes may need to be extended using the
-[!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/bbox_factor)
+[!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/bbox_factor)
 parameter to expand the domain considered for transfers with wider stencils.
 
 Then each process shares the list of target points, locations it needs data for, with
@@ -47,6 +47,12 @@ All transfers derived from this base class should be able to support:
 !alert note
 Examine each derived object's respective documentation for feature support.
 
+!alert note
+Floating point equidistance detection is turned on by default and will limit the scalability
+of the transfer. Please set [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/search_value_conflicts)
+to `false` for large cases.
+
+
 ## Features not supported
 
 The following features cannot be supported by general field transfers, as a limitation of
@@ -75,22 +81,22 @@ obtains data from multiple applications.
 This process fails in several situations. When seeking to extrapolate from a source
 application (or interpolate between non-overlapping source applications), the target points
 can naturally be outside the bounding box of the source applications. In order to resolve this,
-the `Transfer`'s [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/bbox_factor) and
-[!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/fixed_bounding_box_size) may be
+the `Transfer`'s [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/bbox_factor) and
+[!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/fixed_bounding_box_size) may be
 used to inflate the bounding boxes.
 
 !alert note
 [!param](/MultiApps/TransientMultiApp/bounding_box_inflation) and
 [!param](/MultiApps/TransientMultiApp/bounding_box_padding) parameters of the origin `MultiApp` are ignored.
-Only the `MultiAppGeneralFieldTransfer` [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/bbox_factor)
-and [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/fixed_bounding_box_size)
+Only the `MultiAppGeneralFieldTransfer` [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/bbox_factor)
+and [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/fixed_bounding_box_size)
 parameters are taken into account.
 
 ## Using the Positions system to restrict transfer sources
 
 In addition to block and boundary restriction, the [Positions system](syntax/Positions/index.md) may
 be used to match origin and target points. When specified with the
-[!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/use_nearest_position) parameter, each target
+[!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/use_nearest_position) parameter, each target
 point of a transfer will only be matched with sources that are closest to the same `Position` as the
 target point. The sources are simply the applications for:
 
@@ -99,7 +105,7 @@ target point. The sources are simply the applications for:
 
 and nodes or centroids for:
 
-- [MultiAppGeneralFieldNearestNodeTransfer.md]
+- [MultiAppGeneralFieldNearestLocationTransfer.md]
 
 
 !alert note

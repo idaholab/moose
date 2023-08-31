@@ -14,6 +14,8 @@ ADOneDIntegratedBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<Real>("normal", "Component of outward normal along 1-D direction");
+  params.addClassDescription(
+      "Base class for integrated boundary conditions along a single direction (1D)");
   return params;
 }
 

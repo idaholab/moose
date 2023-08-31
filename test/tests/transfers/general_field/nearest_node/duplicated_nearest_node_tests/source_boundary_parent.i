@@ -11,11 +11,13 @@
 []
 
 [Variables]
-  [u][]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [from_sub][]
+  [from_sub]
+  []
 []
 
 [Kernels]
@@ -48,13 +50,13 @@
     positions = '-1.0 0.0 0.0
                   2. 0.0 0.0'
     output_in_position = true
-    cli_args='BCs/right/value="1" BCs/right/value="10"'
+    cli_args = 'BCs/right/value="1" BCs/right/value="10"'
   []
 []
 
 [Transfers]
   [source_boundary]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     source_variable = u
     from_multi_app = sub
     variable = from_sub
