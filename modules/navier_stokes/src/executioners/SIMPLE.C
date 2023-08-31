@@ -22,7 +22,6 @@
 #include <petscksp.h>
 
 registerMooseObject("NavierStokesApp", SIMPLE);
-
 InputParameters
 SIMPLE::validParams()
 {
@@ -140,6 +139,75 @@ SIMPLE::validParams()
                                             1000,
                                             "0<num_iterations",
                                             "The number of momentum-pressure iterations needed.");
+  /*
+   * Linear iteration tolerances for the different equations
+   */
+  params.addRangeCheckedParam<Real>("momentum_l_tol",
+                                    1e-5,
+                                    "0.0<momentum_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the momentum equation.");
+  params.addRangeCheckedParam<Real>("momentum_l_abs_tol",
+                                    1e-50,
+                                    "0.0<momentum_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the momentum equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "momentum_l_max_its",
+      10000,
+      "0<momentum_l_max_its",
+      "The maximum allowed iterations in the linear solver of the momentum equation.");
+  params.addRangeCheckedParam<Real>("pressure_l_tol",
+                                    1e-5,
+                                    "0.0<pressure_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the pressure equation.");
+  params.addRangeCheckedParam<Real>("pressure_l_abs_tol",
+                                    1e-50,
+                                    "0.0<pressure_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the pressure equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "pressure_l_max_its",
+      10000,
+      "0<pressure_l_max_its",
+      "The maximum allowed iterations in the linear solver of the pressure equation.");
+  params.addRangeCheckedParam<Real>("energy_l_tol",
+                                    1e-5,
+                                    "0.0<energy_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>("energy_l_abs_tol",
+                                    1e-50,
+                                    "0.0<energy_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the energy equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "energy_l_max_its",
+      10000,
+      "0<energy_l_max_its",
+      "The maximum allowed iterations in the linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>("passive_scalar_l_tol",
+                                    1e-5,
+                                    "0.0<passive_scalar_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the passive scalar equation(s).");
+  params.addRangeCheckedParam<Real>("passive_scalar_l_abs_tol",
+                                    1e-50,
+                                    "0.0<passive_scalar_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the passive scalar equation(s).");
+  params.addRangeCheckedParam<unsigned int>(
+      "passive_scalar_l_max_its",
+      10000,
+      "0<passive_scalar_l_max_its",
+      "The maximum allowed iterations in the linear solver of the passive scalar equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_iterations",
+      1000,
+      "0<num_iterations",
+      "The number of momentum-pressure-(other fields) iterations needed.");
+
   params.addParam<bool>(
       "print_fields",
       false,
@@ -248,6 +316,30 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
                                          _problem.mesh().dimension(),
                                          _passive_scalar_petsc_options);
+
+  _momentum_ls_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
+  _momentum_ls_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
+  _momentum_ls_control.int_valued_data["max_its"] = getParam<Real>("momentum_l_max_its");
+
+  _pressure_ls_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
+  _pressure_ls_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
+  _pressure_ls_control.int_valued_data["max_its"] = getParam<Real>("pressure_l_max_its");
+
+  if (_has_energy_system)
+  {
+    _energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
+    _energy_ls_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
+    _energy_ls_control.int_valued_data["max_its"] = getParam<Real>("energy_l_max_its");
+  }
+
+  if (_has_passive_scalar_systems)
+  {
+    _passive_scalar_ls_control.real_valued_data["rel_tol"] = getParam<Real>("passive_scalar_l_tol");
+    _passive_scalar_ls_control.real_valued_data["abs_tol"] =
+        getParam<Real>("passive_scalar_l_abs_tol");
+    _passive_scalar_ls_control.int_valued_data["max_its"] =
+        getParam<Real>("passive_scalar_l_max_its");
+  }
 
   _time = 0;
 }

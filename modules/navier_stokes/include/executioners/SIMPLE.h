@@ -17,10 +17,16 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/equation_systems.h"
+#include "libmesh/solver_configuration.h"
 
 // Forward declarations
 class InputParameters;
 class FEProblemBase;
+
+class SIMPLESolverConfiguration : public libMesh::SolverConfiguration
+{
+  virtual void configure_solver() override {}
+};
 
 /**
  * Something informative will come here eventually
@@ -223,4 +229,16 @@ private:
 
   /// Options which hold the petsc settings for the passive scalar equation(s)
   Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
+
+  /// Options for the linear solver of the momentum equation
+  SIMPLESolverConfiguration _momentum_ls_control;
+
+  /// Options for the linear solver of the pressure equation
+  SIMPLESolverConfiguration _pressure_ls_control;
+
+  /// Options for the linear solver of the energy equation
+  SIMPLESolverConfiguration _energy_ls_control;
+
+  /// Options for the linear solver of the passive scalar equation
+  SIMPLESolverConfiguration _passive_scalar_ls_control;
 };
