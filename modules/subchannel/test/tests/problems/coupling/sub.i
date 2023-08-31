@@ -78,9 +78,9 @@ heated_length = 1.0
   []
 []
 
-[DefaultElementQuality]
-  failure_type = warning
-[]
+# [DefaultElementQuality]
+#   failure_type = warning
+# []
 
 [UserObjects]
   [q_prime_uo]

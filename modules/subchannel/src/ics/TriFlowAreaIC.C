@@ -34,6 +34,7 @@ TriFlowAreaIC::TriFlowAreaIC(const InputParameters & params)
 Real
 TriFlowAreaIC::value(const Point & p)
 {
+  Real standard_area, rod_area, wire_area, additional_area;
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
   auto wire_diameter = _mesh.getWireDiameter();
@@ -50,52 +51,41 @@ TriFlowAreaIC::value(const Point & p)
   // based on the subchannel type: CENTER, EDGE or CORNER.
   auto subch_type = _mesh.getSubchannelType(i);
 
+  if (subch_type == EChannelType::CENTER)
+  {
+    standard_area = std::pow(pitch, 2) * std::sqrt(3.0) / 4.0;
+    rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0;
+    additional_area = 0.0;
+    wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
+  }
+  else if (subch_type == EChannelType::EDGE)
+  {
+    standard_area = pitch * (rod_diameter / 2.0 + gap);
+    rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0;
+    additional_area = 0.0;
+    wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
+  }
+  else
+  {
+    standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
+    rod_area = libMesh::pi * std::pow(rod_diameter, 2.0) / 24.0;
+    additional_area = 0.0;
+    wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
+  }
+
+  /// Calculate subchannel area
+  auto subchannel_area = standard_area + additional_area - rod_area - wire_area;
+
+  /// Apply area reduction on subchannels affected by blockage
   auto index = 0;
   for (const auto & i_blockage : index_blockage)
   {
     if (i == i_blockage && (p(2) >= z_blockage.front() && p(2) <= z_blockage.back()))
     {
-
-      if (subch_type == EChannelType::CENTER)
-      {
-        return reduction_blockage[index] *
-               (std::pow(pitch, 2) * std::sqrt(3.0) / 4.0 -
-                libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0 -
-                libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta));
-      }
-      else if (subch_type == EChannelType::EDGE)
-      {
-        return reduction_blockage[index] *
-               (pitch * (rod_diameter / 2.0 + gap) -
-                libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0 -
-                libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta));
-      }
-      else
-      {
-        return reduction_blockage[index] *
-               (1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0) -
-                libMesh::pi * std::pow(rod_diameter, 2.0) / 24.0 -
-                libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta));
-      }
+      return reduction_blockage[index] * subchannel_area;
     }
     index++;
   }
 
-  if (subch_type == EChannelType::CENTER)
-  {
-    return std::pow(pitch, 2) * std::sqrt(3.0) / 4.0 -
-           libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0 -
-           libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
-  }
-  else if (subch_type == EChannelType::EDGE)
-  {
-    return pitch * (rod_diameter / 2.0 + gap) - libMesh::pi * std::pow(rod_diameter, 2.0) / 8.0 -
-           libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
-  }
-  else
-  {
-    return 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0) -
-           libMesh::pi * std::pow(rod_diameter, 2.0) / 24.0 -
-           libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
-  }
+  return subchannel_area;
 }
