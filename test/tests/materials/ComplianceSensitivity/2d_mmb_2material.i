@@ -1,13 +1,13 @@
 vol_frac = 0.5
 
-power = 3
+power = 1
 
 E0 = 1e-5
-E1 = 0.3
-E2 = 0.5
+E1 = 0.6
+E2 = 1.0
 
 rho0 = 0.0
-rho1 = 0.3
+rho1 = 0.4
 rho2 = 1.0
 
 [GlobalParams]
@@ -55,10 +55,18 @@ rho2 = 1.0
   [mat_den]
     family = MONOMIAL
     order = CONSTANT
-    initial_condition = ${vol_frac}
+    # initial_condition = ${vol_frac}
   []
 []
-
+[ICs]
+  [mat_den]
+    type = RandomIC
+    seed = 5
+    variable = mat_den
+    max = '${fparse vol_frac+0.15}'
+    min = '${fparse vol_frac-0.15}'
+  []
+[]
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
