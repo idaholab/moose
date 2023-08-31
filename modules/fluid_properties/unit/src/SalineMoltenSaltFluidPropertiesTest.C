@@ -7,19 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SalineFluidPropertiesTest.h"
+#include "SalineMoltenSaltFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
 #ifdef SALINE_ENABLED
 /**
  * Test that the fluid name is correctly returned
  */
-TEST_F(SalineFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "LiF-NaF-KF"); }
+TEST_F(SalineMoltenSaltFluidPropertiesTest, fluidName)
+{
+  EXPECT_EQ(_fp->fluidName(), "LiF-NaF-KF");
+}
 
 /**
  * Verify calculation of the Saline fluid properties
  */
-TEST_F(SalineFluidPropertiesTest, properties)
+TEST_F(SalineMoltenSaltFluidPropertiesTest, properties)
 {
   const Real tol = REL_TOL_SAVED_VALUE;
   const Real very_large_tol = 1e-5;
@@ -66,7 +69,7 @@ TEST_F(SalineFluidPropertiesTest, properties)
  * Verify calculation of the derivatives of Saline properties by comparing with finite
  * differences
  */
-TEST_F(SalineFluidPropertiesTest, derivatives)
+TEST_F(SalineMoltenSaltFluidPropertiesTest, derivatives)
 {
   const Real tol = REL_TOL_DERIVATIVE;
 

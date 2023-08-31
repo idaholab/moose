@@ -10,23 +10,26 @@
 #pragma once
 
 #include "MooseObjectUnitTest.h"
-#include "SalineFluidProperties.h"
+#include "SalineMoltenSaltFluidProperties.h"
 
-class SalineFluidPropertiesTest : public MooseObjectUnitTest
+class SalineMoltenSaltFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  SalineFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
+  SalineMoltenSaltFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp")
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()
   {
-    InputParameters uo_pars = _factory.getValidParams("SalineFluidProperties");
+    InputParameters uo_pars = _factory.getValidParams("SalineMoltenSaltFluidProperties");
     uo_pars.set<std::string>("comp_name") = "LiF-NaF-KF";
     uo_pars.set<std::string>("comp_val") = "0.465-0.115-0.42";
     uo_pars.set<std::string>("prop_def") = "../test/tests/saline/saline_custom.prp";
-    _fe_problem->addUserObject("SalineFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<SalineFluidProperties>("fp");
+    _fe_problem->addUserObject("SalineMoltenSaltFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<SalineMoltenSaltFluidProperties>("fp");
   }
 
-  const SalineFluidProperties * _fp;
+  const SalineMoltenSaltFluidProperties * _fp;
 };

@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -25,7 +24,7 @@
 
 [FluidProperties]
   [salt]
-    type = SalineFluidProperties
+    type = SalineMoltenSaltFluidProperties
     comp_name = "LiF-NaF-KF"
     comp_val = "0.465-0.115-0.42"
     prop_def = "saline_custom.prp"
@@ -54,7 +53,7 @@
   [check_rho]
     type = PostprocessorComparison
     comparison_type = "equals"
-    value_a = ${fparse (2.579-6.24e-4*700)*1000}
+    value_a = '${fparse (2.579-6.24e-4*700)*1000}'
     value_b = "rho"
     absolute_tolerance = "0.1" # kg/m^3
   []

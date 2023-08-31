@@ -16,7 +16,7 @@
 #include "thermophysical_properties.hh"
 #endif
 
-class SalineFluidProperties : public SinglePhaseFluidProperties
+class SalineMoltenSaltFluidProperties : public SinglePhaseFluidProperties
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -24,7 +24,7 @@ public:
   // Constructor
   static InputParameters validParams();
 
-  SalineFluidProperties(const InputParameters & parameters);
+  SalineMoltenSaltFluidProperties(const InputParameters & parameters);
 
 #ifdef SALINE_ENABLED
 

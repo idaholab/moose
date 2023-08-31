@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 //
-#include "SalineFluidProperties.h"
+#include "SalineMoltenSaltFluidProperties.h"
 
-registerMooseObject("FluidPropertiesApp", SalineFluidProperties);
+registerMooseObject("FluidPropertiesApp", SalineMoltenSaltFluidProperties);
 
 InputParameters
-SalineFluidProperties::validParams()
+SalineMoltenSaltFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRequiredParam<std::string>(
@@ -26,7 +26,7 @@ SalineFluidProperties::validParams()
   return params;
 }
 
-SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
+SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters)
 {
 
@@ -56,7 +56,8 @@ SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
 #endif
 #ifndef SALINE_ENABLED
 
-  mooseError("Saline was not made available during the build and can not be used.");
+  mooseError("Saline was not made available during the build and can not be used. Make sure you "
+             "have the contrib/saline submodule checked out.");
 
 #endif
 }
@@ -74,19 +75,19 @@ const Real mN_to_N = 1 / N_to_mN;
 #ifdef SALINE_ENABLED
 
 std::string
-SalineFluidProperties::fluidName() const
+SalineMoltenSaltFluidProperties::fluidName() const
 {
   return _fluid_name;
 }
 
 Real
-SalineFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
+SalineMoltenSaltFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   return _tp.rho_kgm3(temperature, pressure * Pa_to_kPa);
 }
 
 void
-SalineFluidProperties::rho_from_p_T(
+SalineMoltenSaltFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
@@ -96,13 +97,13 @@ SalineFluidProperties::rho_from_p_T(
 }
 
 Real
-SalineFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
+SalineMoltenSaltFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   return _tp.cp_kg(temperature, pressure * Pa_to_kPa); // J/kg/K
 }
 
 void
-SalineFluidProperties::cp_from_p_T(
+SalineMoltenSaltFluidProperties::cp_from_p_T(
     Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
   cp = cp_from_p_T(pressure, temperature);
@@ -111,13 +112,13 @@ SalineFluidProperties::cp_from_p_T(
 }
 
 Real
-SalineFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
+SalineMoltenSaltFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _tp.h_t_kg(temperature);
 }
 
 void
-SalineFluidProperties::h_from_p_T(
+SalineMoltenSaltFluidProperties::h_from_p_T(
     Real /*pressure*/, Real temperature, Real & enthalpy, Real & dh_dp, Real & dh_dT) const
 {
   enthalpy = h_from_p_T(0.0, temperature);
@@ -127,19 +128,19 @@ SalineFluidProperties::h_from_p_T(
 }
 
 Real
-SalineFluidProperties::T_from_p_h(Real /*pressure*/, Real enthalpy) const
+SalineMoltenSaltFluidProperties::T_from_p_h(Real /*pressure*/, Real enthalpy) const
 {
   return _tp.t_h_kg(enthalpy);
 }
 
 Real
-SalineFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
+SalineMoltenSaltFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   return _tp.mu(temperature, pressure * Pa_to_kPa) * mN_to_N; // Ns/m^2
 }
 
 Real
-SalineFluidProperties::k_from_p_T(Real pressure, Real temperature) const
+SalineMoltenSaltFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   return _tp.k(temperature, pressure * Pa_to_kPa); // W/m/K
 }
