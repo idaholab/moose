@@ -631,9 +631,6 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   mooseAssert(neighbor && this->hasBlocks(neighbor->subdomain_id()),
               "We should be on an internal face...");
 
-  // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-  const auto face_eps = epsilon(tid)(face, time);
-
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
   const auto & grad_p = p.adGradSln(fi, time);
@@ -687,6 +684,9 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                                     ? Moose::FV::InterpMethod::SkewCorrectedAverage
                                                     : Moose::FV::InterpMethod::Average;
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
+
+  // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
+  const auto face_eps = epsilon(tid)(face, time);
 
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction

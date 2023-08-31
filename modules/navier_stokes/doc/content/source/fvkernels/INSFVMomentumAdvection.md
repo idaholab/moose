@@ -20,6 +20,14 @@ interpolated velocity as shown in the Rhie-Chow velocity computation shown in
 \bm{v}_f = \overline{\bm{v}_f} - \overline{\bm{D}_f}\left(\nabla p_f - \overline{\nabla p_f}\right)
 \end{equation}
 
+where
+
+!equation
+\overline{D_{fi}} = \overline{\frac{V}{a_i}}
+
+where $V$ corresponds to element volumes and $i$ denotes a Cartesian component,
+e.g. $x$, $y$, $z$.
+
 However, this default treatment
 creates some challenges. It adds additional nonlinearity to the already
 nonlinear momentum advection term because of the presence of $\vec{u}\cdot\hat{n}$ in
