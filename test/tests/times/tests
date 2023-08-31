@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#24696'
+  issues = '#24696 #25352'
   design = 'syntax/Times/index.md'
 
   [test]
@@ -10,6 +10,33 @@
       input = 'input_times.i'
       jsondiff = 'input_times_out.json'
       detail = 'a parameter in the input file,'
+    []
+    [time_interval_with_end]
+      type = 'JSONDiff'
+      input = 'time_interval_times.i'
+      jsondiff = 'time_interval_with_end.json'
+      recover = False # recover modifies end time for first half
+      detail = 'a fixed time interval between the transient start and end times, including the end time,'
+    []
+    [time_interval_without_end]
+      type = 'JSONDiff'
+      input = 'time_interval_times.i'
+      cli_args = "
+        Times/times/always_include_end_time=false
+        Outputs/file_base=time_interval_without_end"
+      jsondiff = 'time_interval_without_end.json'
+      recover = False # recover modifies end time for first half
+      detail = 'a fixed time interval between the transient start and end times, excluding the end time,'
+    []
+    [time_interval_custom]
+      type = 'JSONDiff'
+      input = 'time_interval_times.i'
+      cli_args = "
+        Times/times/start_time=20.0
+        Times/times/end_time=24.0
+        Outputs/file_base=time_interval_custom"
+      jsondiff = 'time_interval_custom.json'
+      detail = 'a fixed time interval between custom start and end times,'
     []
     [functors]
       type = 'JSONDiff'
@@ -42,6 +69,19 @@
       input = 'simulation_times.i'
       jsondiff = 'simulation_times_out.json'
       detail = 'the time steps taken by the simulation.'
+    []
+  []
+
+  [error_reporting]
+    requirement = 'The system shall report an error when'
+
+    [time_interval_steady_no_times]
+      type = 'RunException'
+      input = 'time_interval_times.i'
+      cli_args = '
+        Executioner/type=Steady'
+      expect_err = "If the parameter 'start_time' is not provided, the executioner type must be 'Transient'"
+      detail = 'times are gathered with a fixed time interval with no start and end times provided, while using a steady executioner.'
     []
   []
 []

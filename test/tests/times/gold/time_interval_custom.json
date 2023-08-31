@@ -1,0 +1,47 @@
+{
+    "reporters": {
+        "times": {
+            "type": "TimeIntervalTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "time": 5.0,
+            "time_step": 0,
+            "times": {
+                "times": [
+                    20.0,
+                    22.0,
+                    24.0
+                ]
+            }
+        },
+        {
+            "time": 7.5,
+            "time_step": 1,
+            "times": {
+                "times": [
+                    20.0,
+                    22.0,
+                    24.0
+                ]
+            }
+        },
+        {
+            "time": 10.0,
+            "time_step": 2,
+            "times": {
+                "times": [
+                    20.0,
+                    22.0,
+                    24.0
+                ]
+            }
+        }
+    ]
+}
