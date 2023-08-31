@@ -118,4 +118,24 @@ getIsotropicPoissonsRatio(const RankFourTensorTempl<T> & elasticity_tensor)
   return poissons_ratio;
 }
 
+void toVoigtNotationIndexConversion(int, int &, int &);
+
+template <bool is_ad>
+void
+toVoigtNotation(GenericDenseMatrix<is_ad> & voigt_matrix,
+                const GenericRankFourTensor<is_ad> & tensor)
+{
+  std::vector<int> index_vector = {0, 1, 2, 3, 4, 5};
+  int a = 0;
+  int b = 0;
+  int c = 0;
+  int d = 0;
+  for (int i : index_vector)
+    for (int j : index_vector)
+    {
+      toVoigtNotationIndexConversion(i, a, b);
+      toVoigtNotationIndexConversion(j, c, d);
+      voigt_matrix(i, j) = tensor(a, b, c, d);
+    }
+}
 }

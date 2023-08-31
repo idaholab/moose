@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HillElastoPlasticityStressUpdate.h"
+#include "RankTwoScalarTools.h"
+#include "ElasticityTensorTools.h"
 
 registerMooseObject("TensorMechanicsApp", ADHillElastoPlasticityStressUpdate);
 registerMooseObject("TensorMechanicsApp", HillElastoPlasticityStressUpdate);
@@ -28,6 +30,15 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::validParams()
       "hardening_exponent", 1.0, "Hardening exponent (n) for anisotropic plasticity");
   params.addRequiredParam<Real>("yield_stress",
                                 "Yield stress (constant value) for anisotropic plasticity");
+  params.addParam<bool>(
+      "local_cylindrical_csys",
+      false,
+      "Compute inelastic strain increment in local cylindrical coordinate system");
+
+  params.addParam<MooseEnum>("axis",
+                             MooseEnum("x y z", "y"),
+                             "The axis of cylindrical component about which to rotate when "
+                             "computing inelastic strain increment in local coordinate system");
 
   return params;
 }
@@ -61,12 +72,101 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::HillElastoPlasticityStressUpdateTe
                                                                                   "alpha_matrix")),
     _sigma_tilde(this->template declareGenericProperty<DenseVector<Real>, is_ad>(this->_base_name +
                                                                                  "sigma_tilde")),
+    _sigma_tilde_rotated(this->template declareGenericProperty<DenseVector<Real>, is_ad>(
+        this->_base_name + "sigma_tilde_rotated")),
     _hardening_derivative(0.0),
     _yield_condition(1.0),
     _yield_stress(this->template getParam<Real>("yield_stress")),
     _hill_tensor(this->template getMaterialPropertyByName<DenseMatrix<Real>>(this->_base_name +
-                                                                             "hill_tensor"))
+                                                                             "hill_tensor")),
+    _rotation_matrix(
+        this->template declareProperty<RankTwoTensor>(this->_base_name + "rotation_matrix")),
+    _rotation_matrix_transpose(this->template declareProperty<RankTwoTensor>(
+        this->_base_name + "rotation_matrix_transpose")),
+    _rotation_matrix_old(
+        this->template getMaterialPropertyOld<RankTwoTensor>(this->_base_name + "rotation_matrix")),
+    _rotation_matrix_transpose_old(this->template getMaterialPropertyOld<RankTwoTensor>(
+        this->_base_name + "rotation_matrix_transpose")),
+    _local_cylindrical_csys(this->template getParam<bool>("local_cylindrical_csys")),
+    _axis(this->template getParam<MooseEnum>("axis").template getEnum<Axis>())
 {
+  if (_local_cylindrical_csys && !parameters.isParamSetByUser("axis"))
+  {
+    this->paramError(
+        "local_cylindrical_csys",
+        "\nIf parameter local_cylindrical_csys is provided then parameter axis should be also "
+        "provided.");
+  }
+
+  if (!_local_cylindrical_csys && parameters.isParamSetByUser("axis"))
+  {
+    this->paramError("axis",
+                     "\nIf parameter axis is provided then the parameter local_cylindrical_csys "
+                     "should be set to true");
+  }
+}
+
+template <bool is_ad>
+void
+HillElastoPlasticityStressUpdateTempl<is_ad>::initQpStatefulProperties()
+{
+  RealVectorValue normal_vector(0, 0, 0);
+  RealVectorValue axial_vector(0, 0, 0);
+
+  if (_local_cylindrical_csys)
+  {
+    if (_axis == Axis::X)
+    {
+      normal_vector(0) = 0.0;
+      normal_vector(1) = _q_point[_qp](1);
+      normal_vector(2) = _q_point[_qp](2);
+      axial_vector(0) = 1.0;
+    }
+    else if (_axis == Axis::Y)
+    {
+      normal_vector(0) = _q_point[_qp](0);
+      normal_vector(1) = 0.0;
+      normal_vector(2) = _q_point[_qp](2);
+      axial_vector(1) = 1.0;
+    }
+    else if (_axis == Axis::Z)
+    {
+      normal_vector(0) = _q_point[_qp](0);
+      normal_vector(1) = _q_point[_qp](1);
+      normal_vector(2) = 0.0;
+      axial_vector(2) = 1.0;
+    }
+    else
+      mooseError("\nInvalid value for axis parameter provided in HillElastoPlasticityStressUpdate");
+  }
+
+  if (_local_cylindrical_csys)
+  {
+    Real nv_norm = normal_vector.norm();
+    Real av_norm = axial_vector.norm();
+
+    if (!(MooseUtils::absoluteFuzzyEqual(nv_norm, 0.0)))
+      normal_vector /= nv_norm;
+    else
+    {
+      mooseError("The normal vector cannot be a zero vector in "
+                 "HillElastoPlasticityStressUpdate");
+    }
+
+    if (!(MooseUtils::absoluteFuzzyEqual(av_norm, 0.0)))
+      axial_vector /= av_norm;
+    else
+    {
+      mooseError("The axial vector cannot be a zero vector in "
+                 "HillElastoPlasticityStressUpdate");
+    }
+
+    RankTwoScalarTools::setRotationMatrix(
+        normal_vector, axial_vector, _rotation_matrix[_qp], false);
+    _rotation_matrix_transpose[_qp] = _rotation_matrix[_qp].transpose();
+  }
+
+  AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::initQpStatefulProperties();
 }
 
 template <bool is_ad>
@@ -75,6 +175,13 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::propagateQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
+
+  if (_local_cylindrical_csys)
+  {
+    _rotation_matrix[_qp] = _rotation_matrix_old[_qp];
+    _rotation_matrix_transpose[_qp] = _rotation_matrix_transpose_old[_qp];
+  }
+
   AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties();
 }
 
@@ -97,6 +204,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
 
   _alpha_matrix[_qp].resize(6, 6);
   _sigma_tilde[_qp].resize(6);
+  _sigma_tilde_rotated[_qp].resize(6);
 
   // Algebra needed for the generalized return mapping of anisotropic elastoplasticity
   computeElasticityTensorEigenDecomposition();
@@ -110,47 +218,15 @@ void
 HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomposition()
 {
   // Helper method to compute qp matrices required for the elasto-plasticity algorithm.
-  _anisotropic_elastic_tensor(0, 0) = (_elasticity_tensor)[_qp](0, 0, 0, 0);
-  _anisotropic_elastic_tensor(0, 1) = (_elasticity_tensor)[_qp](0, 0, 1, 1);
-  _anisotropic_elastic_tensor(0, 2) = (_elasticity_tensor)[_qp](0, 0, 2, 2);
-  _anisotropic_elastic_tensor(0, 3) = (_elasticity_tensor)[_qp](0, 0, 1, 2);
-  _anisotropic_elastic_tensor(0, 4) = (_elasticity_tensor)[_qp](0, 0, 0, 2);
-  _anisotropic_elastic_tensor(0, 5) = (_elasticity_tensor)[_qp](0, 0, 0, 1);
 
-  _anisotropic_elastic_tensor(1, 0) = (_elasticity_tensor)[_qp](1, 1, 0, 0);
-  _anisotropic_elastic_tensor(1, 1) = (_elasticity_tensor)[_qp](1, 1, 1, 1);
-  _anisotropic_elastic_tensor(1, 2) = (_elasticity_tensor)[_qp](1, 1, 2, 2);
-  _anisotropic_elastic_tensor(1, 3) = (_elasticity_tensor)[_qp](1, 1, 1, 2);
-  _anisotropic_elastic_tensor(1, 4) = (_elasticity_tensor)[_qp](1, 1, 0, 2);
-  _anisotropic_elastic_tensor(1, 5) = (_elasticity_tensor)[_qp](1, 1, 0, 1);
+  GenericRankFourTensor<is_ad> elasticity_tensor = _elasticity_tensor[_qp];
 
-  _anisotropic_elastic_tensor(2, 0) = (_elasticity_tensor)[_qp](2, 2, 0, 0);
-  _anisotropic_elastic_tensor(2, 1) = (_elasticity_tensor)[_qp](2, 2, 1, 1);
-  _anisotropic_elastic_tensor(2, 2) = (_elasticity_tensor)[_qp](2, 2, 2, 2);
-  _anisotropic_elastic_tensor(2, 3) = (_elasticity_tensor)[_qp](2, 2, 1, 2);
-  _anisotropic_elastic_tensor(2, 4) = (_elasticity_tensor)[_qp](2, 2, 0, 2);
-  _anisotropic_elastic_tensor(2, 5) = (_elasticity_tensor)[_qp](2, 2, 0, 1);
+  if (_local_cylindrical_csys)
+  {
+    elasticity_tensor.rotate(_rotation_matrix_transpose[_qp]);
+  }
 
-  _anisotropic_elastic_tensor(3, 0) = (_elasticity_tensor)[_qp](1, 2, 0, 0);
-  _anisotropic_elastic_tensor(3, 1) = (_elasticity_tensor)[_qp](1, 2, 1, 1);
-  _anisotropic_elastic_tensor(3, 2) = (_elasticity_tensor)[_qp](1, 2, 2, 2);
-  _anisotropic_elastic_tensor(3, 3) = (_elasticity_tensor)[_qp](1, 2, 1, 2);
-  _anisotropic_elastic_tensor(3, 4) = (_elasticity_tensor)[_qp](1, 2, 0, 2);
-  _anisotropic_elastic_tensor(3, 5) = (_elasticity_tensor)[_qp](1, 2, 0, 1);
-
-  _anisotropic_elastic_tensor(4, 0) = (_elasticity_tensor)[_qp](0, 2, 0, 0);
-  _anisotropic_elastic_tensor(4, 1) = (_elasticity_tensor)[_qp](0, 2, 1, 1);
-  _anisotropic_elastic_tensor(4, 2) = (_elasticity_tensor)[_qp](0, 2, 2, 2);
-  _anisotropic_elastic_tensor(4, 3) = (_elasticity_tensor)[_qp](0, 2, 1, 2);
-  _anisotropic_elastic_tensor(4, 4) = (_elasticity_tensor)[_qp](0, 2, 0, 2);
-  _anisotropic_elastic_tensor(4, 5) = (_elasticity_tensor)[_qp](0, 2, 0, 1);
-
-  _anisotropic_elastic_tensor(5, 0) = (_elasticity_tensor)[_qp](0, 1, 0, 0);
-  _anisotropic_elastic_tensor(5, 1) = (_elasticity_tensor)[_qp](0, 1, 1, 1);
-  _anisotropic_elastic_tensor(5, 2) = (_elasticity_tensor)[_qp](0, 1, 2, 2);
-  _anisotropic_elastic_tensor(5, 3) = (_elasticity_tensor)[_qp](0, 1, 1, 2);
-  _anisotropic_elastic_tensor(5, 4) = (_elasticity_tensor)[_qp](0, 1, 0, 2);
-  _anisotropic_elastic_tensor(5, 5) = (_elasticity_tensor)[_qp](0, 1, 0, 1);
+  ElasticityTensorTools::toVoigtNotation<is_ad>(_anisotropic_elastic_tensor, elasticity_tensor);
 
   const unsigned int dimension = _anisotropic_elastic_tensor.n();
 
@@ -262,7 +338,11 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeOmega(
   for (unsigned int i = 0; i < 6; i++)
   {
     K(i) = _b_eigenvalues[_qp](i) / Utility::pow<2>(1 + delta_gamma * _b_eigenvalues[_qp](i));
-    omega += K(i) * _sigma_tilde[_qp](i) * _sigma_tilde[_qp](i);
+
+    if (_local_cylindrical_csys)
+      omega += K(i) * _sigma_tilde_rotated[_qp](i) * _sigma_tilde_rotated[_qp](i);
+    else
+      omega += K(i) * _sigma_tilde[_qp](i) * _sigma_tilde[_qp](i);
   }
   omega *= 0.5;
 
@@ -296,15 +376,39 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeResidual(
   if (_yield_condition <= 0.0)
     return 0.0;
 
-  // Get stress_tilde
-  GenericDenseVector<is_ad> stress_tilde(6);
-  GenericDenseMatrix<is_ad> alpha_temp(_alpha_matrix[_qp]);
-  alpha_temp.lu_solve(stress_sigma, stress_tilde);
+  GenericReal<is_ad> omega;
 
-  // Material property used in computeStressFinalize
-  _sigma_tilde[_qp] = stress_tilde;
+  if (_local_cylindrical_csys)
+  {
+    // Get stress_tilde_rotated
+    GenericRankTwoTensor<is_ad> stress;
+    RankTwoScalarTools::VoigtVectorToRankTwoTensor<is_ad>(stress_sigma, stress);
 
-  GenericReal<is_ad> omega = computeOmega(delta_gamma, stress_tilde);
+    stress.rotate(_rotation_matrix_transpose[_qp]);
+
+    GenericDenseVector<is_ad> stress_sigma_rotated(6);
+    RankTwoScalarTools::RankTwoTensorToVoigtVector<is_ad>(stress, stress_sigma_rotated);
+
+    GenericDenseVector<is_ad> stress_tilde_rotated(6);
+    GenericDenseMatrix<is_ad> alpha_temp_rotated(_alpha_matrix[_qp]);
+    alpha_temp_rotated.lu_solve(stress_sigma_rotated, stress_tilde_rotated);
+
+    // Material property used in computeStressFinalize
+    _sigma_tilde_rotated[_qp] = stress_tilde_rotated;
+    omega = computeOmega(delta_gamma, stress_tilde_rotated);
+  }
+
+  else
+  {
+    // Get stress_tilde
+    GenericDenseVector<is_ad> stress_tilde(6);
+    GenericDenseMatrix<is_ad> alpha_temp(_alpha_matrix[_qp]);
+    alpha_temp.lu_solve(stress_sigma, stress_tilde);
+
+    // Material property used in computeStressFinalize
+    _sigma_tilde[_qp] = stress_tilde;
+    omega = computeOmega(delta_gamma, stress_tilde);
+  }
 
   // Hardening variable is \alpha isotropic hardening for now.
   _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
@@ -366,7 +470,11 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeDeltaDerivatives(
   sy_gamma = 0.0;
 
   GenericDenseVector<is_ad> K_deltaGamma(6);
-  omega = computeOmega(delta_gamma, _sigma_tilde[_qp]);
+
+  if (_local_cylindrical_csys)
+    omega = computeOmega(delta_gamma, _sigma_tilde_rotated[_qp]);
+  else
+    omega = computeOmega(delta_gamma, _sigma_tilde[_qp]);
 
   GenericDenseVector<is_ad> K(6);
   for (unsigned int i = 0; i < 6; i++)
@@ -377,7 +485,12 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeDeltaDerivatives(
         -2.0 * _b_eigenvalues[_qp](i) * K(i) / (1 + _b_eigenvalues[_qp](i) * delta_gamma);
 
   for (unsigned int i = 0; i < 6; i++)
-    omega_gamma += K_deltaGamma(i) * _sigma_tilde[_qp](i) * _sigma_tilde[_qp](i);
+  {
+    if (_local_cylindrical_csys)
+      omega_gamma += K_deltaGamma(i) * _sigma_tilde_rotated[_qp](i) * _sigma_tilde_rotated[_qp](i);
+    else
+      omega_gamma += K_deltaGamma(i) * _sigma_tilde[_qp](i) * _sigma_tilde[_qp](i);
+  }
 
   omega_gamma /= 4.0 * omega;
   sy_gamma = 2.0 * sy_alpha * (omega + delta_gamma * omega_gamma);
@@ -413,12 +526,17 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
   GenericDenseVector<is_ad> hill_stress(6);
   GenericDenseVector<is_ad> stress_vector(6);
 
-  stress_vector(0) = stress(0, 0);
-  stress_vector(1) = stress(1, 1);
-  stress_vector(2) = stress(2, 2);
-  stress_vector(3) = stress(0, 1);
-  stress_vector(4) = stress(1, 2);
-  stress_vector(5) = stress(0, 2);
+  if (_local_cylindrical_csys)
+  {
+    GenericRankTwoTensor<is_ad> stress_rotated(stress);
+    stress_rotated.rotate(_rotation_matrix_transpose[_qp]);
+
+    RankTwoScalarTools::RankTwoTensorToVoigtVector<is_ad>(stress_rotated, stress_vector);
+  }
+  else
+  {
+    RankTwoScalarTools::RankTwoTensorToVoigtVector<is_ad>(stress, stress_vector);
+  }
 
   _hill_tensor[_qp].vector_mult(hill_stress, stress_vector);
   hill_stress.scale(delta_gamma);
@@ -433,6 +551,9 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
       inelasticStrainIncrement_vector(4) / 2.0;
   inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
       inelasticStrainIncrement_vector(5) / 2.0;
+
+  if (_local_cylindrical_csys)
+    inelasticStrainIncrement.rotate(_rotation_matrix[_qp]);
 
   // Calculate equivalent plastic strain
   GenericDenseVector<is_ad> Mepsilon(6);
@@ -473,14 +594,15 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
   _alpha_matrix[_qp].right_multiply(inv_matrix);
 
   GenericDenseVector<is_ad> stress_output(6);
-  _alpha_matrix[_qp].vector_mult(stress_output, _sigma_tilde[_qp]);
+  if (_local_cylindrical_csys)
+    _alpha_matrix[_qp].vector_mult(stress_output, _sigma_tilde_rotated[_qp]);
+  else
+    _alpha_matrix[_qp].vector_mult(stress_output, _sigma_tilde[_qp]);
 
-  stress_new(0, 0) = stress_output(0);
-  stress_new(1, 1) = stress_output(1);
-  stress_new(2, 2) = stress_output(2);
-  stress_new(0, 1) = stress_new(1, 0) = stress_output(3);
-  stress_new(1, 2) = stress_new(2, 1) = stress_output(4);
-  stress_new(0, 2) = stress_new(2, 0) = stress_output(5);
+  RankTwoScalarTools::VoigtVectorToRankTwoTensor<is_ad>(stress_output, stress_new);
+
+  if (_local_cylindrical_csys)
+    stress_new.rotate(_rotation_matrix[_qp]);
 }
 
 template <bool is_ad>

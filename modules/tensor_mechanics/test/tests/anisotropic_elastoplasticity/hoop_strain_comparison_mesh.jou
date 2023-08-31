@@ -1,0 +1,55 @@
+# Will generate meshed cylinder oriented along z axis
+undo on
+create cylinder height 0.25 radius 1
+create cylinder height 0.25 radius 0.9
+subtract volume 2 from volume 1 imprint
+webcut volume 1 with plane xplane offset 0
+delete volume 3
+webcut volume 1 with plane yplane
+delete volume 4
+undo group begin
+sideset 1 add surface 10
+sideset 1 name "x_face"
+undo group end
+undo group begin
+sideset 2 add surface 22
+sideset 2 name "y_face"
+undo group end
+undo group begin
+sideset 3 add surface 25
+sideset 3 name "bottom"
+undo group end
+undo group begin
+sideset 4 add surface 24
+sideset 4 name "inner"
+undo group end
+undo group begin
+sideset 5 add surface 23
+sideset 5 name "top"
+undo group end
+volume 1 size auto factor 7
+curve 35 36 37 38 interval 5
+curve 35 36 37 38 scheme equal
+undo group begin
+volume 1 size auto factor 7
+undo group end
+curve 35 36 37 38 interval 5
+curve 35 36 37 38 scheme equal
+undo group begin
+volume 1 size auto factor 7
+undo group end
+curve 9 7 32 34 interval 3
+curve 9 7 32 34 scheme equal
+curve 35 36 37 38 interval 5
+curve 35 36 37 38 scheme equal
+undo group begin
+mesh volume 1
+undo group end
+
+# Uncomment following lines to generate meshed cylinder oriented along x axis
+#rotate volume 1 angle 90 about y include_merged
+#sideset 1 name "z_face"
+
+# Uncomment following lines to generate meshed cylinder oriented along y axis
+#rotate volume 1 angle 90 about x include_merged
+#sideset 2 name "z_face"

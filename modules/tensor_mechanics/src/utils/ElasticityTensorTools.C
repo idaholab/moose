@@ -114,4 +114,28 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
   return test * phi * sum;
 }
 
+void
+toVoigtNotationIndexConversion(int k, int & a, int & b)
+{
+  if (k < 3 && k >= 0)
+    a = b = k;
+  else if (k == 3)
+  {
+    a = 1;
+    b = 2;
+  }
+  else if (k == 4)
+  {
+    a = 0;
+    b = 2;
+  }
+  else if (k == 5)
+  {
+    a = 0;
+    b = 1;
+  }
+  else
+    mooseError("\nIndex out of bound while converting from tensor to voigt notation in "
+               "toVoigtNotationIndexConversion");
+}
 }
