@@ -13,6 +13,8 @@
 #include "Moose.h"
 #include "MooseApp.h"
 
+#include "FileMeshGenerator.h"
+
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/nemesis_io.h"
@@ -97,11 +99,8 @@ FileMesh::buildMesh()
     }
     else
     {
-      // to support LATEST word for loading checkpoint files
-      _file_name =
-          MooseUtils::pathExists(_file_name)
-              ? std::string(_file_name)
-              : (MooseUtils::convertLatestCheckpoint(_file_name) + _app.checkpointSuffix());
+      // Supports old suffix (xxxx_mesh.cpr -> xxxx-mesh.cpr) and LATEST
+      _file_name = FileMeshGenerator::deduceCheckpointPath(*this, _file_name);
 
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
