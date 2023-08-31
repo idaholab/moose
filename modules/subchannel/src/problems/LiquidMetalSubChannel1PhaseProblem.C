@@ -57,9 +57,7 @@ LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
 void
 LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 {
-  unsigned int last_node = _n_cells;
-  unsigned int first_node = 1;
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  for (unsigned int iz = 1; iz < _n_cells + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
