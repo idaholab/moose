@@ -12,7 +12,8 @@ source:
   - path: ../../../moose
 
 build:
-  number: {{ build }}
+  number: 0
+  string: build_0
   skip: true # [win]
   pin_depends: strict
   script_env:

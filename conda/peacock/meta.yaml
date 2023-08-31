@@ -3,7 +3,6 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 0 %}
 {% set version = "2023.08.31" %}
 
 package:
@@ -14,7 +13,7 @@ source:
   path: ../peacock
 
 build:
-  number: {{ build }}
+  number: 0
 
 requirements:
   run:
