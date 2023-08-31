@@ -20,6 +20,7 @@
 #include "ExecFlagEnum.h"
 #include "JsonSyntaxTree.h"
 #include "pcrecpp.h"
+#include "hit.h"
 #include "waspcore/utils.h"
 #include <algorithm>
 #include <vector>
@@ -883,14 +884,48 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLo
 }
 
 bool
-MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTextEdits */,
-                                               int /* tab_size */,
+MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextEdits,
+                                               int tab_size,
                                                bool /* insert_spaces */)
 {
-  bool pass = true;
+  // return without adding any formatting text edits if parser root is null
+  if (!_check_app || !_check_app->parser()._root ||
+      _check_app->parser()._root->getNodeView().is_null())
+    return true;
 
-  // TODO - hook up this capability by adding server specific logic here
+  // get input root node line and column range to represent entire document
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  int document_start_line = view_root.line() - 1;
+  int document_start_char = view_root.column() - 1;
+  int document_last_line = view_root.last_line() - 1;
+  int document_last_char = view_root.last_column();
 
+  // lambda that traverses hit tree clearing legacy markers and blank lines
+  std::function<void(hit::Section *)> format_document = [&](hit::Section * section)
+  {
+    section->clearLegacyMarkers();
+    for (auto child : section->children())
+      if (child->type() == hit::NodeType::Blank)
+        delete child;
+      else if (child->type() == hit::NodeType::Section)
+        format_document(static_cast<hit::Section *>(child));
+  };
+
+  // clear legacy markers and blank lines, use tab size to render, and trim
+  format_document(static_cast<hit::Section *>(_check_app->parser()._root.get()));
+  std::string document_format = _check_app->parser()._root->render(0, std::string(tab_size, ' '));
+  document_format = MooseUtils::trim(document_format);
+
+  // add formatted text with whole line and column range to formatting list
+  formattingTextEdits.push_back(wasp::DataObject());
+  wasp::DataObject * item = formattingTextEdits.back().to_object();
+  bool pass = wasp::lsp::buildTextEditObject(*item,
+                                             errors,
+                                             document_start_line,
+                                             document_start_char,
+                                             document_last_line,
+                                             document_last_char,
+                                             document_format);
   return pass;
 }
 

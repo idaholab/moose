@@ -202,6 +202,37 @@ protected:
     }
   }
 
+  // traverse textedits and make formatted list for easy testing and viewing
+  void format_textedits(const wasp::DataArray & textedits_array,
+                        std::ostringstream & textedits_stream) const
+  {
+    std::size_t textedits_size = textedits_array.size();
+
+    for (std::size_t i = 0; i < textedits_size; i++)
+    {
+      std::stringstream textedit_errors;
+      int textedit_beg_line;
+      int textedit_beg_char;
+      int textedit_end_line;
+      int textedit_end_char;
+      std::string textedit_new_text;
+
+      EXPECT_TRUE(wasp::lsp::dissectTextEditObject(*(textedits_array.at(i).to_object()),
+                                                   textedit_errors,
+                                                   textedit_beg_line,
+                                                   textedit_beg_char,
+                                                   textedit_end_line,
+                                                   textedit_end_char,
+                                                   textedit_new_text));
+
+      textedits_stream << "textedit_position:"
+                       << " [" << textedit_beg_line << "." << textedit_beg_char << "]"
+                       << "-[" << textedit_end_line << "." << textedit_end_char << "]\n"
+                       << "textedit_new_text:\n"
+                       << textedit_new_text << "\n";
+    }
+  }
+
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
@@ -1428,10 +1459,70 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 
 TEST_F(MooseServerTest, DocumentFormattingRequest)
 {
+  // didchange test parameters - update input to set up document formatting
+
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int doc_version = 4;
+  std::string doc_text_change = R"INPUT(
+
+[./Mesh] type = GeneratedMesh
+       dim =   2         patch_size  =    40
+patch_update_strategy = AUTO
+
+        displacements = 'disp_x disp_y'
+     parallel_type = REPLICATED   bias_x = 1
+[../]
+
+[./Variables] [u]
+  [../]      [./v] [] [abc]
+
+
+    order     = CONSTANT
+    type = MooseVariableConstMonomial
+  []   []
+[AuxVariables]  [aux_name]
+type = MooseVariableBase family =   LAGRANGE
+
+                []       [] [./AuxVariables]
+  [disp_x]   [] [./xyz]
+type  = MooseVariable   family  =   MONOMIAL
+      []
+ [disp_y] []    [disp_z]
+    type = MooseVariableBase    [../]
+[../]      [BCs]
+
+    [./all]  type = VacuumBC
+  boundary   =   'left right' variable = abc
+
+   displacements  =  'xyz abc xyz disp_x' []
+[../] [./Executioner]
+type = Transient
+       [../]    [Problem] solve = false   []
+
+
+[./UserObjects] [./term_uo]
+    type =   Terminator expression  = 'expr'
+  error_level = NONE []
+
+      [../]
+
+)INPUT";
+
+  // build didchange notification and handle it with the moose_server
+
+  wasp::DataObject didchange_notification;
+  std::stringstream errors;
+  wasp::DataObject diagnostics_notification;
+
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
   // formatting test parameters
 
   int request_id = 13;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1441,7 +1532,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   std::stringstream formatting_errors;
 
   EXPECT_TRUE(wasp::lsp::buildFormattingRequest(
-      formatting_request, formatting_errors, request_id, document_uri, tab_size, insert_spaces));
+      formatting_request, formatting_errors, request_id, doc_uri, tab_size, insert_spaces));
 
   EXPECT_TRUE(formatting_errors.str().empty());
 
@@ -1453,7 +1544,90 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 
-  // formatting response will be checked when capability is implemented
+  // check the dissected values of the moose_server formatting response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray textedits_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectFormattingResponse(
+      formatting_response, response_errors, response_id, textedits_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(1u, textedits_array.size());
+
+  std::ostringstream textedits_actual;
+
+  format_textedits(textedits_array, textedits_actual);
+
+  // expected textedits with zero-based lines and columns
+
+  std::string textedits_expect = R"INPUT(
+textedit_position: [2.0]-[41.11]
+textedit_new_text:
+[Mesh]
+    type = GeneratedMesh
+    dim = 2
+    patch_size = 40
+    patch_update_strategy = AUTO
+    displacements = 'disp_x disp_y'
+    parallel_type = REPLICATED
+    bias_x = 1
+[]
+[Variables]
+    [u]
+    []
+    [v]
+    []
+    [abc]
+        order = CONSTANT
+        type = MooseVariableConstMonomial
+    []
+[]
+[AuxVariables]
+    [aux_name]
+        type = MooseVariableBase
+        family = LAGRANGE
+    []
+    [disp_x]
+    []
+    [xyz]
+        type = MooseVariable
+        family = MONOMIAL
+    []
+    [disp_y]
+    []
+    [disp_z]
+        type = MooseVariableBase
+    []
+[]
+[BCs]
+    [all]
+        type = VacuumBC
+        boundary = 'left right'
+        variable = abc
+        displacements = 'xyz abc xyz disp_x'
+    []
+[]
+[Executioner]
+    type = Transient
+[]
+[Problem]
+    solve = false
+[]
+[UserObjects]
+    [term_uo]
+        type = Terminator
+        expression = 'expr'
+        error_level = NONE
+    []
+[]
+)INPUT";
+
+  EXPECT_EQ(textedits_expect, "\n" + textedits_actual.str());
 }
 
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
