@@ -3,7 +3,6 @@
 # item in template/ is the conda_build_config.yaml file (moose_libmesh)
 {% set build = "<BUILD>" %}
 {% set version = "<VERSION>" %}
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: <PREFIX_PACKAGE_WITH><FORMATTED_APPLICATION>
@@ -14,7 +13,6 @@ source:
 
 build:
   number: {{ build }}  # [linux,osx]
-  string: {{ strbuild }}
   pin_depends: strict
   skip: true # [win]
 
