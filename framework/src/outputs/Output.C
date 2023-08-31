@@ -185,11 +185,18 @@ Output::Output(const InputParameters & parameters)
       _sync_times.insert(pwb_olf->domain(i));
   }
 
-  // Check that the sync times were retrieved as expected
-  if (_sync_times_object &&
-      (isParamValid("output_limiting_function") || isParamSetByUser("sync_times")))
-    paramError("sync_times_object",
-               "Only one method of specifying sync times is supported at a time");
+  // Get sync times from Times object if using
+  if (_sync_times_object)
+  {
+    if (isParamValid("output_limiting_function") || isParamSetByUser("sync_times"))
+      paramError("sync_times_object",
+                 "Only one method of specifying sync times is supported at a time");
+    else
+      // Sync times for the time steppers are taken from the output warehouse. The output warehouse
+      // takes sync times from the output objects immediately after the object is constructed. Hence
+      // we must ensure that we set the `_sync_times` in the constructor
+      _sync_times = _sync_times_object->getUniqueTimes();
+  }
 }
 
 void
@@ -252,9 +259,14 @@ Output::onInterval()
   if (_sync_only)
     output = false;
 
-  // Update sync times if a sync time object is in use
   if (_sync_times_object)
-    _sync_times = _sync_times_object->getUniqueTimes();
+  {
+    const auto & sync_times = _sync_times_object->getUniqueTimes();
+    if (sync_times != _sync_times)
+      mooseError("The provided sync times object has changing time values. Only static time "
+                 "values are supported since time steppers take sync times from the output "
+                 "warehouse which determines its sync times at output construction time.");
+  }
 
   // If sync times are not skipped, return true if the current time is a sync_time
   if (_sync_times.find(_time) != _sync_times.end())
