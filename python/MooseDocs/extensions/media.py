@@ -133,10 +133,10 @@ class ScriptCommand(ImageCommand):
 
         # Generate the plot
         LOG.info("Executing plot script %s", script_path)
-        result = subprocess.run(["python", script_path], capture_output=True)
+        result = subprocess.run(["python", script_path], capture_output=True, text=True)
         if result.returncode != 0:
-            msg = "Failed to execute python script: %s"
-            raise exceptions.MooseDocsException(msg, script_path)
+            msg = "Failed to execute python script '{}':\n{}"
+            raise exceptions.MooseDocsException(msg, script_path, result.stderr)
 
         # Currently the plot is assumed to reside in the same directory as the plot script.
         plot_name = settings['image_name'] or os.path.basename(script_path).replace('.py', '.png')
