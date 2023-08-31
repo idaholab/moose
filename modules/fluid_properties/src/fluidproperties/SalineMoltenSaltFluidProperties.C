@@ -15,6 +15,7 @@ InputParameters
 SalineMoltenSaltFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
+  params.addClassDescription("Molten salt fluid properties using Saline");
   params.addRequiredParam<std::string>(
       "comp_name", "The name of the components in the salt (e.g., 'LiF-NaF-KF')");
   params.addRequiredParam<std::string>(
