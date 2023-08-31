@@ -1797,6 +1797,20 @@ MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
   return *stored_data;
 }
 
+RestartableDataValue &
+MooseApp::registerRestartableData(const std::string & libmesh_dbg_var(name),
+                                  std::unique_ptr<RestartableDataValue> data,
+                                  THREAD_ID tid,
+                                  bool read_only,
+                                  const RestartableDataMapName & metaname)
+{
+  mooseDeprecated("The use of MooseApp::registerRestartableData with a data name is "
+                  "deprecated.\n\nUse the call without a name instead.");
+
+  mooseAssert(name == data->name(), "Inconsistent name");
+  return registerRestartableData(std::move(data), tid, read_only, metaname);
+}
+
 bool
 MooseApp::hasRestartableMetaData(const std::string & name,
                                  const RestartableDataMapName & metaname) const

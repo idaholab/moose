@@ -614,6 +614,17 @@ public:
                                                  const RestartableDataMapName & metaname = "");
 
   /*
+   * Deprecated method to register a piece of restartable data.
+   *
+   * Use the call without a data name instead.
+   */
+  RestartableDataValue & registerRestartableData(const std::string & name,
+                                                 std::unique_ptr<RestartableDataValue> data,
+                                                 THREAD_ID tid,
+                                                 bool read_only,
+                                                 const RestartableDataMapName & metaname = "");
+
+  /*
    * Check if a restartable meta data exists or not.
    *
    * @param name The full (unique) name.
