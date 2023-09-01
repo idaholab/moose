@@ -21,8 +21,9 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
-                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
+  MooseEnum tao_solver_enum(
+      "taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
+      "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm taoalmm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
