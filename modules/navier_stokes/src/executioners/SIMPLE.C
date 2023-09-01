@@ -15,6 +15,7 @@
 #include "NonlinearSystem.h"
 #include "KernelBase.h"
 #include "INSFVMomentumPressure.h"
+#include "libmesh/enum_point_locator_type.h"
 
 #include "libmesh/petsc_nonlinear_solver.h"
 #include <petscerror.h>
@@ -210,6 +211,12 @@ SIMPLE::validParams()
       false,
       "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
+  params.addParam<bool>(
+      "pin_pressure", false, "If the pressure field needs to be pinned at a point.");
+  params.addParam<Real>(
+      "pressure_pin_value", 0, "The value which needs to be enforced for the pressure.");
+  params.addParam<Point>("pressure_pin_point", "The point where the pressure needs to be pinned.");
+
   return params;
 }
 
@@ -245,7 +252,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
     _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
-    _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol"))
+    _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
+    _pin_pressure(getParam<bool>("pin_pressure")),
+    _pressure_pin_value(getParam<Real>("pressure_pin_value"))
+
 {
   if (_momentum_system_names.size() != 1 &&
       _momentum_system_names.size() != _problem.mesh().dimension())
@@ -358,6 +368,9 @@ SIMPLE::init()
 
   // Initialize the face velocities in the RC object
   _rc_uo->initFaceVelocities();
+
+  if (_pin_pressure)
+    _pressure_pin_dof = findDoFID("pressure", getParam<Point>("pressure_pin_point"));
 }
 
 void
@@ -440,8 +453,12 @@ SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
                                    const NumericVector<Number> & rhs)
 {
   // This function is based on the description provided here:
-  // https://www.openfoam.com/documentation/guides/latest/doc/guide-solvers-residuals.html
-  // (Accessed 06/01/2023)
+  // @article{greenshields2022notes,
+  // title={Notes on computational fluid dynamics: General principles},
+  // author={Greenshields, Christopher J and Weller, Henry G},
+  // journal={(No Title)},
+  // year={2022}
+  // }
   // so basically we normalize the residual with the following number:
   // sum(|Ax-Ax_avg|+|b-Ax_avg|)
   // where A is the system matrix, b is the system right hand side while x and x_avg are
@@ -472,6 +489,55 @@ SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
   // make this consistent and use the l2 norm of the vector
   // TODO: Would be nice to see if we can do l1 norms in the linear solve
   return A_times_average_solution->l2_norm();
+}
+
+void
+SIMPLE::constrainSystem(SparseMatrix<Number> & mx,
+                        NumericVector<Number> & rhs,
+                        const Real desired_value,
+                        const dof_id_type dof_id)
+{
+  // Solve the system and update current local solution
+  // Get diagonal
+  if (dof_id >= mx.row_start() && dof_id < mx.row_stop())
+  {
+    Real diag = mx(dof_id, dof_id);
+    rhs.add(dof_id, desired_value * diag);
+    mx.set(dof_id, dof_id, 2 * diag);
+  }
+}
+
+dof_id_type
+SIMPLE::findDoFID(const VariableName & var_name, const Point & point)
+{
+  // Find the element containing the point
+  auto point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _fe_problem.mesh());
+  point_locator->enable_out_of_mesh_mode();
+
+  const auto & variable = _fe_problem.getVariable(0, var_name);
+  unsigned int var_num = variable.sys().system().variable_number(var_name);
+
+  // We only check in the restricted blocks, if needed
+  const bool block_restricted =
+      variable.blockIDs().find(Moose::ANY_BLOCK_ID) == variable.blockIDs().end();
+  const Elem * elem =
+      block_restricted ? (*point_locator)(point, &variable.blockIDs()) : (*point_locator)(point);
+
+  // We communicate the results and if there is conflict between processes,
+  // the minimum cell ID is chosen
+  const dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
+  dof_id_type min_elem_id = elem_id;
+  comm().min(min_elem_id);
+
+  if (min_elem_id == DofObject::invalid_id)
+    mooseError("Variable ",
+               var_name,
+               " is not defined at ",
+               Moose::stringify(point),
+               "! Try alleviating block restrictions or using another point!");
+
+  return min_elem_id == elem_id ? elem->dof_number(variable.sys().number(), var_num, 0)
+                                : DofObject::invalid_id;
 }
 
 void
@@ -672,7 +738,9 @@ SIMPLE::solvePressureCorrector()
   _pressure_ls_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
   pressure_solver.set_solver_configuration(_pressure_ls_control);
 
-  // Solve the system and update current local solution
+  if (_pin_pressure)
+    constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
+
   pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
 

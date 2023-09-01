@@ -1,29 +1,29 @@
-mu = 0.002
-rho = 1.0
+mu = .005
+rho = 1
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
 pressure_tag = "pressure_grad"
 
-[Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
-    dim = 3
-    dx = '0.2'
-    dy = '0.2'
-    dz = '0.8'
-    ix = '3'
-    iy = '3'
-    iz = '12'
-  []
-[]
-
 [GlobalParams]
   rhie_chow_user_object = 'rc'
 []
 
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = .1
+    ymin = 0
+    ymax = .1
+    nx = 150
+    ny = 150
+  []
+[]
+
 [Problem]
-  nl_sys_names = 'u_system v_system w_system pressure_system'
+  nl_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -33,7 +33,6 @@ pressure_tag = "pressure_grad"
     type = INSFVRhieChowInterpolatorSegregated
     u = vel_x
     v = vel_y
-    w = vel_z
     pressure = pressure
   []
 []
@@ -49,12 +48,6 @@ pressure_tag = "pressure_grad"
     type = INSFVVelocityVariable
     initial_condition = 0.0
     nl_sys = v_system
-    two_term_boundary_expansion = false
-  []
-  [vel_z]
-    type = INSFVVelocityVariable
-    initial_condition = 0.5
-    nl_sys = w_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -108,27 +101,6 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
-  [w_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_z
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [w_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_z
-    mu = ${mu}
-    momentum_component = 'z'
-  []
-  [w_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_z
-    momentum_component = 'z'
-    pressure = pressure
-    extra_vector_tags = ${pressure_tag}
-  []
   [p_diffusion]
     type = FVDiffusion
     variable = pressure
@@ -144,52 +116,28 @@ pressure_tag = "pressure_grad"
 []
 
 [FVBCs]
-  [inlet-u]
-    type = INSFVInletVelocityBC
-    boundary = 'back'
+  [top_x]
+    type = INSFVNoSlipWallBC
     variable = vel_x
-    function = '0'
+    boundary = 'top'
+    function = 1
   []
-  [inlet-v]
-    type = INSFVInletVelocityBC
-    boundary = 'back'
-    variable = vel_y
-    function = '0'
-  []
-  [inlet-w]
-    type = INSFVInletVelocityBC
-    boundary = 'back'
-    variable = vel_z
-    function = '1.1'
-  []
-  [walls-u]
+  [no_slip_x]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom '
     variable = vel_x
-    function = 0.0
+    boundary = 'left right bottom'
+    function = 0
   []
-  [walls-v]
+  [no_slip_y]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom'
     variable = vel_y
-    function = 0.0
-  []
-  [walls-w]
-    type = INSFVNoSlipWallBC
     boundary = 'left right top bottom'
-    variable = vel_z
-    function = 0.0
-  []
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    boundary = 'front'
-    variable = pressure
-    function = 1.4
+    function = 0
   []
   [zero-grad-pressure]
     type = FVFunctionNeumannBC
     variable = pressure
-    boundary = 'back left right top bottom'
+    boundary = 'left right top bottom'
     function = 0.0
   []
 []
@@ -197,14 +145,14 @@ pressure_tag = "pressure_grad"
 [Executioner]
   type = SIMPLE
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system w_system'
+  momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   pressure_gradient_tag = ${pressure_tag}
-  momentum_equation_relaxation = 0.6
+  momentum_equation_relaxation = 0.9
   pressure_variable_relaxation = 0.3
-  num_iterations = 40
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
+  num_iterations = 260
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
   momentum_petsc_options = '-ksp_monitor'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
@@ -212,12 +160,17 @@ pressure_tag = "pressure_grad"
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
 
-  momentum_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-12
   pressure_l_abs_tol = 1e-10
+  momentum_l_max_its = 30
+  pressure_l_max_its = 30
   momentum_l_tol = 0.0
   pressure_l_tol = 0.0
   print_fields = false
 
+  pin_pressure = true
+  pressure_pin_value = 0.0
+  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]

@@ -120,6 +120,28 @@ protected:
   void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
 
   /**
+   * Implicitly constraint the system by adding a factor*(u-u_desired) to it at a desired dof
+   * value. To make sure the conditioning of the matrix does not change significantly, factor
+   * is chosen to be the diagonal component of the matrix coefficients for a given dof.
+   * @param mx The mmatrix of the system which needs to be constrained
+   * @param rhs The right hand side of the system which needs to be constrained
+   * @param value The desired value for the solution field at a dof
+   * @param dof_id The ID of the dof which needs to be constrained
+   */
+  void constrainSystem(SparseMatrix<Number> & mx,
+                       NumericVector<Number> & rhs,
+                       const Real desired_value,
+                       const dof_id_type dof_id);
+
+  /**
+   * Find the ID of the degree of freedom which corresponds to the variable and
+   * a given point on the mesh
+   * @param var_name The name of the variable
+   * @param point The point on the mesh
+   */
+  dof_id_type findDoFID(const VariableName & var_name, const Point & point);
+
+  /**
    * Determine if the iterative process on the Navier-Stokes equations converged or not
    * @param momentum_residual The normalized residuals for the momentum equation. This can either
    *                          be the residual of the monolithic momentum equation or a vector of
@@ -235,20 +257,37 @@ private:
   /// Options for the linear solver of the momentum equation
   SIMPLESolverConfiguration _momentum_ls_control;
 
+  /// Absolute linear tolerance for the momentum equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
   const Real _momentum_l_abs_tol;
 
   /// Options for the linear solver of the pressure equation
   SIMPLESolverConfiguration _pressure_ls_control;
 
+  /// Absolute linear tolerance for the pressure equation. We need to store this, because
+  /// it needs to be scaled with a representative flux.
   const Real _pressure_l_abs_tol;
 
   /// Options for the linear solver of the energy equation
   SIMPLESolverConfiguration _energy_ls_control;
 
+  /// Absolute linear tolerance for the energy equations. We need to store this, because
+  /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
 
-  /// Options for the linear solver of the passive scalar equation
+  /// Options for the linear solver of the passive scalar equation(s)
   SIMPLESolverConfiguration _passive_scalar_ls_control;
 
+  /// Absolute linear tolerance for the passive scalar equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
   const Real _passive_scalar_l_abs_tol;
+
+  /// If the pressure needs to be pinned
+  const bool _pin_pressure;
+
+  /// The value we want to enforce for pressure
+  const bool _pressure_pin_value;
+
+  /// The dof ID where the pressure needs to be pinned
+  dof_id_type _pressure_pin_dof;
 };
