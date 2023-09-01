@@ -258,12 +258,6 @@ ParameterMeshOptimization::parseData(const std::vector<unsigned int> & exodus_ti
   return parsedData;
 }
 
-// void
-// ParameterMeshOptimization::execute()
-// {
-//   computeMisfit();
-// }
-
 Real
 ParameterMeshOptimization::computeObjective()
 {

@@ -117,6 +117,9 @@ protected:
    */
   std::vector<Real> fillParamsVector(std::string type, Real default_value) const;
 
+  /// Sets the initial conditions and bounds right before it is needed.
+  virtual void setICsandBounds(){};
+
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
   /// Number of parameter vectors

@@ -11,6 +11,7 @@
 #include "MooseTypes.h"
 #include "GeneralOptimization.h"
 #include "libmesh/id_types.h"
+#include <numeric>
 
 registerMooseObject("OptimizationApp", GeneralOptimization);
 
@@ -20,13 +21,12 @@ GeneralOptimization::validParams()
   InputParameters params = OptimizationReporterBase::validParams();
 
   params.addRequiredParam<ReporterValueName>("objective_name", "Objective reporter name.");
-  params.addRequiredParam<ReporterValueName>(
-      "num_params_name",
-      "Reporter that holds the total number of parameters that need to be optimized.");
-  params.addParam<int>("num_params_value", "Total number of parameters.");
   params.addParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
+  params.addParam<ReporterValueName>("num_values_name",
+                                     "Reporter that holds the number of parameter values "
+                                     "associated with each parameter group in 'parameter_names'.");
   params.addParam<std::vector<std::vector<Real>>>(
       "initial_condition",
       "Initial conditions for each parameter. A vector is given for each parameter group.  A "
@@ -53,17 +53,16 @@ GeneralOptimization::GeneralOptimization(const InputParameters & parameters)
   : OptimizationReporterBase(parameters),
     _objective_val(declareValueByName<Real>(getParam<ReporterValueName>("objective_name"),
                                             REPORTER_MODE_REPLICATED)),
-    _number_params_value(isParamValid("num_params_value") ? getParam<int>("num_params_value") : 0),
-    _number_params(isParamValid("num_params_value")
-                       ? _number_params_value
-                       : declareValueByName<int>(getParam<ReporterValueName>("num_params_name"),
-                                                 REPORTER_MODE_REPLICATED))
+    _num_values_reporter(
+        isParamValid("num_values_name")
+            ? &declareValueByName<std::vector<dof_id_type>>(
+                  getParam<ReporterValueName>("num_values_name"), REPORTER_MODE_REPLICATED)
+            : nullptr)
 {
   // Check that one and only one set of parameters are given.
-  if (!(isParamValid("num_params_value") ^ isParamValid("num_params_name")))
-    paramError("Need to supply one and only one of num_params_value or num_params_value.");
 
-  setICsandBounds();
+  if (!(isParamValid("num_values_name") ^ isParamValid("num_values")))
+    paramError("Need to supply one and only one of num_values_name or num_values.");
 }
 
 Real
@@ -75,18 +74,24 @@ GeneralOptimization::computeObjective()
 dof_id_type
 GeneralOptimization::getNumParams() const
 {
-  if (_number_params == 0)
+  if (_ndof == 0)
     mooseError(
         "The number of parameters you have is zero and this shouldn't happen. Make sure you are "
         "running your forward problem on `INITIAL` if you are using a reporter transfer to supply "
         "that information.");
-  return _number_params;
+
+  return _ndof;
 }
 
 void
 GeneralOptimization::setICsandBounds()
 {
-  _nvalues = getParam<std::vector<dof_id_type>>("num_values");
+  if (_num_values_reporter)
+    _nvalues = *_num_values_reporter;
+  else
+    _nvalues = getParam<std::vector<dof_id_type>>("num_values");
+
+  _ndof = std::accumulate(_nvalues.begin(), _nvalues.end(), 0);
 
   // size checks
   if (_parameter_names.size() != _nvalues.size())

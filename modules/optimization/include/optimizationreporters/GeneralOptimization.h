@@ -27,11 +27,10 @@ protected:
   /// Reporter that will hold the objective value
   Real & _objective_val;
 
-  int _number_params_value;
-  // Reporter that holds the total number of parameters
-  int & _number_params;
+  std::vector<dof_id_type> * _num_values_reporter;
 
   virtual dof_id_type getNumParams() const override;
+
   virtual void setICsandBounds() override;
 
 private:

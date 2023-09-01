@@ -217,8 +217,8 @@ volume_constraint = 200
     type = ConstantReporter
     real_vector_names = 'radii'
     real_vector_values = '0 0'
-    integer_names = 'num_params'
-    integer_values = '2'
+    dof_id_type_vector_names = 'num_params'
+    dof_id_type_vector_values = '2'
   []
 []
 

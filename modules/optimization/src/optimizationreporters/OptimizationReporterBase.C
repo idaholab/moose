@@ -35,7 +35,7 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
     _gradients(_nparams),
-    _tikhonov_coeff(getParam<Real>("tikhonov_coeff"))
+    _tikhonov_coeff(getParam<Real>("tikhonov_coeff")),
     _equality_names(&getParam<std::vector<ReporterValueName>>("equality_names")),
     _n_eq_cons(_equality_names->size()),
     _eq_constraints(_n_eq_cons),
@@ -97,6 +97,7 @@ OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradien
 void
 OptimizationReporterBase::setInitialCondition(libMesh::PetscVector<Number> & x)
 {
+  setICsandBounds();
   x.init(getNumParams());
   OptUtils::copyReporterIntoPetscVector(_parameters, x);
 }

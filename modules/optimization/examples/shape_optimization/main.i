@@ -4,13 +4,12 @@
 [OptimizationReporter]
   type = GeneralOptimization
   parameter_names = 'radii'
+  num_values_name = num_radii
   equality_names = 'volume_constraint'
-  num_values = '2'
   initial_condition = '0 0'
   lower_bounds = '-10'
   upper_bounds = '10'
   objective_name = max_temp
-  num_params_name = num_radii
 []
 
 [Executioner]
@@ -36,6 +35,7 @@
     to_multi_app = forward
     from_reporters = 'OptimizationReporter/radii'
     to_reporters = 'params/radii'
+    execute_on = FORWARD
   []
   [from_forward]
     type = MultiAppReporterTransfer

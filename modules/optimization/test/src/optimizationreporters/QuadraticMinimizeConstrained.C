@@ -26,6 +26,7 @@ QuadraticMinimizeConstrained::QuadraticMinimizeConstrained(const InputParameters
     _result(getParam<Real>("objective")),
     _solution(getParam<std::vector<Real>>("solution"))
 {
+  setICsandBounds();
   if (_solution.size() != _ndof)
     paramError("solution", "Size not equal to number of degrees of freedom (", _ndof, ").");
 }
