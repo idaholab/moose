@@ -133,7 +133,8 @@
     creep_model = creep
     plasticity_model = plasticity
     max_iterations = 50
-    absolute_tolerance = 1e-06
+    relative_tolerance = 1e-8
+    absolute_tolerance = 1e-8
   []
   [creep]
     type = PowerLawCreepStressUpdate
