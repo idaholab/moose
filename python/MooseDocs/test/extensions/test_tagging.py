@@ -21,30 +21,20 @@ class TestTagging(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == tagging:
-            return dict(allowed_keys=['application', 'foo', 'simulation_type', 'fiscal_year'], js_file=['tagging.js'])
+            return dict(active=True, allowed_keys=['application', 'foo', 'simulation_type', 'fiscal_year'], js_file='tagging.js')
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content', content=['js/tagging.js'])]
         return common.get_content(config, '.md')
 
-    # ICONS = ['report', 'warning', 'comment', 'school']
-    MESSAGE = [['k:v ', '  strange:6', 'my_key:val!'],
-            ['k:v ', '  strange:6', 'my_key:val!'],
-            ['k:v ', '  strange:6', 'my_key:val!'],
-            ['k:v ', '  strange:6', 'my_key:val!']]
-
-    TEXT = ['!tagger ' +b+' '+' '.join(m) for b, m in zip(BRANDS, MESSAGE)]
-
-    def testAST(self):
-        for i, b in enumerate(self.BRANDS):
-            ast = self.tokenize(self.TEXT[i])
-            self.assertSize(ast, 0)
-
-            # self.assertToken(ast(0), 'TaggingToken', size=2, brand=b)
-
-            # self.assertToken(ast(0)(0), 'TaggingTitle', brand=b, prefix=True, icon=True, icon_name=self.ICONS[i])
-            # self.assertToken(ast(0)(1), 'TaggingContent', size=1, brand=b)
-
+    def testInit(self):
+        """
+        Test tagging extension initialization
+        """
+        with self.assertLogs(level=logging.WARNING) as cm:
+            self._MooseDocsTestCase__setup()
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn('The tagging extension is experimental!', cm.output[0])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
