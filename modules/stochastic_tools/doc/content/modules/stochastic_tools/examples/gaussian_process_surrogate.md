@@ -56,7 +56,7 @@ Creation of the `Surrogate` block follows the standard procedure laid out for ot
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Surrogates
 
-One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard [EvaluateSurrogate](EvaluateSurrogate.md) reporter is used with specification of [!param](/Reporters/EvaluateSurrogate/evaluate_std), which also outputs the standard deviation of the surrogate at the evaluation point.  
+One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard [EvaluateSurrogate](EvaluateSurrogate.md) reporter is used with specification of [!param](/Reporters/EvaluateSurrogate/evaluate_std), which also outputs the standard deviation of the surrogate at the evaluation point.
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Reporters
 
@@ -84,11 +84,11 @@ Inspection of the final hyperparameter values after tuning gives $\lbrace \sigma
 
 Next the idea is extended to two input dimensions and attempt to model the QoI behavior due to varying $k$ and $q$, while fixing values of $\lbrace L=0.03, T_{\infty}=300 \rbrace$.
 
-Due to the increased dimensionality, 50 training samples were selected from $q \in [9000,11000]$ and $k \in [1,10]$. An extra hyperparameter $\ell_k$ is also added to the set of hyperparameters to be tuned.  
+Due to the increased dimensionality, 50 training samples were selected from $q \in [9000,11000]$ and $k \in [1,10]$. An extra hyperparameter $\ell_k$ is also added to the set of hyperparameters to be tuned.
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_2D_tuned.i block=Samplers Trainers Covariance
 
-As was done in the 1D case above, first the surrogate was fitted using fixed hyperparameters $\lbrace \sigma_n=1E-3, \sigma_f=10, \ell_q=0.38971 , \ell_k=0.38971 \rbrace$. The QoI surface is shown in [2D_untuned], with the color map corresponding to the surrogate model's uncertainty at that point. As was the case in the 1D mode, uncertainty is highest at points furthest from training data points, and the overall response deviates strongly from the expected $\frac{q}{k}$ behavior predicted.  
+As was done in the 1D case above, first the surrogate was fitted using fixed hyperparameters $\lbrace \sigma_n=1E-3, \sigma_f=10, \ell_q=0.38971 , \ell_k=0.38971 \rbrace$. The QoI surface is shown in [2D_untuned], with the color map corresponding to the surrogate model's uncertainty at that point. As was the case in the 1D mode, uncertainty is highest at points furthest from training data points, and the overall response deviates strongly from the expected $\frac{q}{k}$ behavior predicted.
 
 !media gaussian_process_uniform_2D.svg id=2D_untuned style=width:60% caption=Surrogate model for 2D problem $\bar{T}(q,k)$ using fixed hyperparameters.
 
@@ -100,4 +100,9 @@ Hyperparameter tuning is then enabled by setting [!param](/Trainers/GaussianProc
 
 This idea is then extended naturally to the full problem in which the parameter set $\lbrace k, q, L, T_{\infty} \rbrace$ is modeled. Training occurs using $500$ training points in. Evaluation occurs by sampling the surrogate $10000$ times with perturbed inputs, with results shown in histogram form in [hist]. While the $10000$ evaluation points are sampled from the normal distribution in [param_table],the $500$ training data points are sampled from the uniform distributions. Sampling the training data from the normal distribution can result in an imbalance of data points near the mean, causing poor performance in outlying regions. The training and evaluation inputs are [examples/surrogates/gaussian_process/GP_normal_mc.i] and [examples/surrogates/gaussian_process/GP_normal.i] respectively.
 
-!media normal_hist.svg id=hist style=width:60% caption=Histogram of $10000$ samples of surrogate $\bar{T}(q,k,L,T_{\infty})$ compared to exact.
+!media normal_hist.png id=hist style=width:60% caption=Histogram of $10000$ samples of surrogate $\bar{T}(q,k,L,T_{\infty})$ compared to exact.
+
+To showcase more optimization options available in [GaussianProcessTrainer.md], we used Adam for fitting the length scales and signal variance
+in this process. The parameters for Adam (number of iterations, learning rate, etc.) can be set using the following syntax:
+
+!listing examples/surrogates/gaussian_process/GP_normal_mc.i block=Trainers

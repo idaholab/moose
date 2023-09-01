@@ -50,6 +50,17 @@ class INSFVRhieChowInterpolator : public GeneralUserObject,
                                   public ADFunctorInterface
 {
 public:
+  /**
+   * Parameters of this object that should be added to the NSFV action that are unique to this
+   * object
+   */
+  static InputParameters uniqueParams();
+
+  /**
+   * @returns A list of the parameters that are common between this object and the NSFV action
+   */
+  static std::vector<std::string> listOfCommonParams();
+
   static InputParameters validParams();
   INSFVRhieChowInterpolator(const InputParameters & params);
 
@@ -189,6 +200,11 @@ private:
    */
   void fillARead();
 
+  /**
+   * Whether we need 'a' coefficient computation
+   */
+  bool needAComputation() const;
+
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 
@@ -251,4 +267,10 @@ INSFVRhieChowInterpolator::pressure(const THREAD_ID tid) const
 {
   mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
   return *static_cast<INSFVPressureVariable *>(_ps[tid]);
+}
+
+inline bool
+INSFVRhieChowInterpolator::needAComputation() const
+{
+  return !_a_data_provided && _velocity_interp_method == Moose::FV::InterpMethod::RhieChow;
 }

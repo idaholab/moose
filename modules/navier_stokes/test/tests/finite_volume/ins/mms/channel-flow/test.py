@@ -46,6 +46,21 @@ class Test2DRC(unittest.TestCase):
             print("%s, %f" % (key, value))
             self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
 
+class Test2DApproximateRC(unittest.TestCase):
+    def test(self):
+        labels = ['L2u', 'L2v', 'L2p']
+        df1 = run_spatial('2d-rc.i', 8, "--error", "--error-unused",
+                          "FVKernels/u_advection/characteristic_speed=1",
+                          "FVKernels/v_advection/characteristic_speed=1",
+                          y_pp=labels, mpi=16)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('2d-rc-approx.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
+
 class TestPlanePoiseuilleRC(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']

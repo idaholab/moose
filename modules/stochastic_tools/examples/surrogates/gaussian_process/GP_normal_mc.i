@@ -75,11 +75,12 @@
     standardize_data = 'true'                 #Center and scale the training data
     sampler = sample
     response = results/data:avg:value
-    tao_options = '-tao_bncg_type gd'
     tune_parameters = ' signal_variance length_factor'
+    tuning_algorithm = 'adam'
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'
-    tuning_algorithm = 'tao'
+    iter_adam = 200
+    learning_rate_adam = 0.005
   []
 []
 
@@ -88,7 +89,7 @@
     type=SquaredExponentialCovariance
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     signal_variance = 1
-    length_factor = '0.038971 0.038971 0.038971 0.038971' #Select a length factor for each parameter (k and q)
+    length_factor = '0.038971 0.038971 0.038971 0.038971' #Select a length factor for each parameter
   []
 []
 

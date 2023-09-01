@@ -33,6 +33,19 @@
     required_python_packages = 'pandas matplotlib'
     max_time = 600
   []
+  [2d-rc-approx]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DApproximateRC
+    method = '!dbg'
+    min_parallel = 16
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an approximate Rhie-Chow interpolation scheme for the velocity.'
+    heavy = 'true'
+    valgrind = 'none'
+    required_python_packages = 'pandas matplotlib'
+    max_time = 600
+    installation_type = in_tree
+  []
   [plane-poiseuille-rc]
     type = PythonUnitTest
     input = test.py

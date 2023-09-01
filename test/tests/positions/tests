@@ -36,6 +36,14 @@
       jsondiff = 'reporter_positions_out.json'
       detail = 'a reporter with data in the expected vector of points format,'
     []
+    [functors]
+      type = 'JSONDiff'
+      input = 'functor_positions.i'
+      jsondiff = 'functor_positions_out.json'
+      detail = 'triplets on functors that are evaluated to obtain positions,'
+      # Needs to be able to find the element containing the origin
+      mesh_mode = replicated
+    []
     [multiapps]
       type = 'JSONDiff'
       input = 'multiapp_positions.i'

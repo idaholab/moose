@@ -17,10 +17,28 @@
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 
 InputParameters
+INSFVMomentumAdvection::uniqueParams()
+{
+  auto params = emptyInputParameters();
+  params.addParam<Real>(
+      "characteristic_speed",
+      "The characteristic speed. For porous medium simulations, this characteristic speed should "
+      "correspond to the superficial velocity, not the interstitial.");
+  return params;
+}
+
+std::vector<std::string>
+INSFVMomentumAdvection::listOfCommonParams()
+{
+  return {"characteristic_speed"};
+}
+
+InputParameters
 INSFVMomentumAdvection::validParams()
 {
   InputParameters params = INSFVAdvectionKernel::validParams();
   params += INSFVMomentumResidualObject::validParams();
+  params += INSFVMomentumAdvection::uniqueParams();
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
   params.addClassDescription("Object for advecting momentum, e.g. rho*u");
   return params;
@@ -29,7 +47,9 @@ INSFVMomentumAdvection::validParams()
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params),
     INSFVMomentumResidualObject(*this),
-    _rho(getFunctor<ADReal>(NS::density))
+    _rho(getFunctor<ADReal>(NS::density)),
+    _approximate_as(isParamValid("characteristic_speed")),
+    _cs(_approximate_as ? getParam<Real>("characteristic_speed") : 0)
 {
 }
 
@@ -71,6 +91,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
   const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
+  const auto vdotn = _normal * v_face;
 
   if (onBoundary(fi))
   {
@@ -81,17 +102,21 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto eps_face = epsilon()(ssf, state);
     const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
-    const auto coeff = _normal * v_face * rho_face / eps_face;
+    const auto coeff = vdotn * rho_face / eps_face;
 
-    if (sided_elem == &fi.elem())
+    if (sided_elem == fi.elemPtr())
     {
       _ae = coeff * d_u_face_d_dof;
       _elem_residual = coeff * u_face;
+      if (_approximate_as)
+        _ae = _cs / fi.elem().n_sides() * rho_face / eps_face;
     }
     else
     {
       _an = -coeff * d_u_face_d_dof;
       _neighbor_residual = -coeff * u_face;
+      if (_approximate_as)
+        _an = _cs / fi.neighborPtr()->n_sides() * rho_face / eps_face;
     }
   }
   else // we are an internal fluid flow face
@@ -127,12 +152,17 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       // neighbor side:
       // rho * v_superficial / eps_neigh * v_superficial = rho * v_interstitial_neigh *
       // v_superficial
-      const auto elem_coeff = _normal * v_face * rho_face / eps_elem_face;
-      const auto neighbor_coeff = _normal * v_face * rho_face / eps_neighbor_face;
+      const auto elem_coeff = vdotn * rho_face / eps_elem_face;
+      const auto neighbor_coeff = vdotn * rho_face / eps_neighbor_face;
       _ae = elem_coeff * d_var_elem_face_d_elem_dof;
       _elem_residual = elem_coeff * var_elem_face;
       _an = -neighbor_coeff * d_var_neighbor_face_d_neighbor_dof;
       _neighbor_residual = -neighbor_coeff * var_neighbor_face;
+      if (_approximate_as)
+      {
+        _ae = _cs / fi.elem().n_sides() * rho_face / eps_elem_face;
+        _an = _cs / fi.neighborPtr()->n_sides() * rho_face / eps_elem_face;
+      }
     }
     else
     {
@@ -148,12 +178,18 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       const auto var_elem = advected.first / rho_elem * eps_elem,
                  var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-      _ae = _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
+      _ae = vdotn * rho_elem / eps_elem * interp_coeffs.first;
       // Minus sign because we apply a minus sign to the residual in computeResidual
-      _an = -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
+      _an = -vdotn * rho_neighbor / eps_neighbor * interp_coeffs.second;
 
       _elem_residual = _ae * var_elem - _an * var_neighbor;
       _neighbor_residual = -_elem_residual;
+
+      if (_approximate_as)
+      {
+        _ae = _cs / fi.elem().n_sides() * rho_elem / eps_elem;
+        _an = _cs / fi.neighborPtr()->n_sides() * rho_neighbor / eps_neighbor;
+      }
     }
   }
 
