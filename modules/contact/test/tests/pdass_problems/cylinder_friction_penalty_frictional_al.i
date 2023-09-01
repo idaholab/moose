@@ -290,12 +290,12 @@
     disp_x = disp_x
     disp_y = disp_y
     penalty = 1e5
+    penalty_friction = 1e8
     secondary_variable = disp_x
     friction_coefficient = 0.4
     penetration_tolerance = 1e-7
     # Not solving the frictional problem tightly (below)
     slip_tolerance = 1 # 1e-6
-    penalty_friction = 1e9
     penalty_multiplier = 100
     penalty_multiplier_friction = 1
     use_physical_gap = true

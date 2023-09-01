@@ -120,8 +120,7 @@ PenaltyFrictionUserObject::timestepSetup()
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
-    tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
-                           MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {tangential_traction(0), tangential_traction(1)};
   }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
@@ -386,8 +385,11 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
                       old_tangential_traction;
     }
     // Update penalty.
-    // TODO: Include a more "consistent" adaptation of penalty values
-    if (_lagrangian_iteration_number > 1 && _lagrangian_iteration_number < 6)
+    if (_slip_tolerance < _dt * slip_velocity.norm())
       penalty_friction *= _penalty_multiplier_friction;
+
+    // Provide the user the ability of setting this maximum penalty
+    if (penalty_friction > _penalty_friction * 1e4)
+      penalty_friction = _penalty_friction * 1e4;
   }
 }

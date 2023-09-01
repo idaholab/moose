@@ -231,8 +231,8 @@
   petsc_options_value = lu
   line_search = 'basic'
 
-  nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-11
+  nl_rel_tol = 1e-9
   nl_max_its = 50
   l_tol = 1e-05
   l_abs_tol = 1e-13
@@ -295,7 +295,7 @@
     friction_coefficient = 0.4
     penetration_tolerance = 1e-7
     slip_tolerance = 3e-7
-    penalty_friction = 1e6
+    penalty_friction = 1e5
     penalty_multiplier = 10
     use_physical_gap = true
     aux_lm = dual_var

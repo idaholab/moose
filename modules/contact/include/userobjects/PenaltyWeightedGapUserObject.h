@@ -59,6 +59,19 @@ protected:
   void selfFinalize();
   void selfTimestepSetup();
 
+  /**
+   * Adaptive, local penalty for AL. See 'The adapted augmented Lagrangian method: a new method for
+   * the resolution of the mechanical frictional contact problem', Comput Mech (2012) 49: 259-275
+   */
+  void
+  bussettaAdaptivePenalty(const Real previous_gap, const Real gap, Real & penalty, Real & eval_tn);
+
+  /**
+   * See Algorithm 3 of 'The adapted augmented Lagrangian method: a new method for
+   * the resolution of the mechanical frictional contact problem', Comput Mech (2012) 49: 259-275
+   */
+  void adaptiveNormalPenalty(const Real previous_gap, const Real gap, Real & penalty);
+
   /// The penalty factor
   const Real _penalty;
 

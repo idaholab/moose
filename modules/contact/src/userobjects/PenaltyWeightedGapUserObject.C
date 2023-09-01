@@ -178,6 +178,9 @@ PenaltyWeightedGapUserObject::reinit()
 void
 PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
+  // Let's not clear the LMs for improved performance in
+  // nonlinear problems
+
   // reset penalty
   for (auto & dof_lp : _dof_to_local_penalty)
     dof_lp.second = _penalty;
@@ -282,17 +285,77 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto possible_normalization =
         (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
 
+    // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
+    // caps the penalty increase)
+    // Before we were updating the LM before adapting the penalty factor
     if (lagrange_multiplier + gap * penalty / possible_normalization <= 0)
       lagrange_multiplier += gap * penalty / possible_normalization;
     else
       lagrange_multiplier = 0.0;
 
-    // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
-    // caps the penalty increase)
+    // (1) Update the penalty factor for the normal problem
     const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (std::abs(gap) > 0.25 * std::abs(previous_gap) && _lagrangian_iteration_number < 6)
-      penalty *= _penalty_multiplier;
+    Real eval_tn = 0;
 
-    // Possible future development: Add possible check for a too-large penalty coefficient.
+    if (true)
+    {
+      if (std::abs(gap) > 0.25 * std::abs(previous_gap) && std::abs(gap) > _penetration_tolerance)
+        penalty *= _penalty_multiplier;
+    }
+    else
+      bussettaAdaptivePenalty(previous_gap, gap, penalty, eval_tn);
+  }
+}
+
+void
+PenaltyWeightedGapUserObject::bussettaAdaptivePenalty(const Real previous_gap,
+                                                      const Real gap,
+                                                      Real & penalty,
+                                                      Real & eval_tn)
+{
+  // Positive gaps means no contact
+  if (previous_gap > 0.0)
+  {
+    penalty = _penalty;
+    eval_tn = 0.0;
+  }
+  else
+  {
+    if (previous_gap * gap < 0)
+      eval_tn = 0.0;
+    else
+      eval_tn = penalty * previous_gap;
+
+    adaptiveNormalPenalty(previous_gap, gap, penalty);
+  }
+}
+
+void
+PenaltyWeightedGapUserObject::adaptiveNormalPenalty(const Real previous_gap,
+                                                    const Real gap,
+                                                    Real & penalty)
+{
+  const bool condition_one = std::abs(std::abs(previous_gap / gap) - 1.0) < 0.01;
+  const bool condition_two = std::abs(gap) > 1.01 * std::abs(previous_gap);
+
+  if (previous_gap * gap < 0)
+  {
+    if (previous_gap > _penetration_tolerance)
+      penalty = std::abs(penalty * previous_gap / gap * (std::abs(gap) + _penetration_tolerance) /
+                         (gap - previous_gap));
+    else
+      penalty = std::abs(penalty * previous_gap / 10.0 / gap);
+  }
+  else if (std::abs(gap) > _penetration_tolerance)
+  {
+    if (std::abs(gap - previous_gap) >
+        std::max(gap / 10.0, std::max(previous_gap / 10.0, 5.0 * _penetration_tolerance)))
+      penalty *= 10.0;
+    else if (condition_one && gap < 10.0 * _penetration_tolerance)
+      penalty *= MathUtils::pow(std::sqrt(std::abs(gap) / _penetration_tolerance - 1.0) + 1.0, 2);
+    else if (condition_two)
+      penalty *= 10.0 * previous_gap / gap;
+    else
+      penalty *= std::sqrt(std::abs(gap) / _penetration_tolerance - 1.0) + 1.0;
   }
 }
