@@ -205,7 +205,16 @@
       input = 'PolycrystalVoronoiTJVoidIC_2D.i'
       exodiff = 'PolycrystalVoronoiTJVoidIC_2D_out.e'
 
-      detail = 'polycrystal structure with triple junction voids in 2D, and'
+      detail = 'polycrystal structure with triple junction voids in 2D'
+    []
+
+    [PolycrystalVoronoiTJVoidIC_3D]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiTJVoidIC_3D.i'
+      exodiff = 'PolycrystalVoronoiTJVoidIC_3D_out.e'
+      method = '!DBG'
+
+      detail = 'polycrystal structure with triple junction voids in 3D, and'
     []
 
     [PolycrystalVoronoiTJVoidIC_3D_columnar_hex]
@@ -214,7 +223,7 @@
       exodiff = 'PolycrystalVoronoiTJVoidIC_3D_columnar_hex_out.e'
       method = '!DBG'
 
-      detail = 'columnar hexagonal structure with triple junction.'
+      detail = 'columnar hexagonal structure with triple junction voids.'
     []
   []
 
