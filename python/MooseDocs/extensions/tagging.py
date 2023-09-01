@@ -87,38 +87,40 @@ class TaggingExtension(command.CommandExtension):
 
     def postExecute(self):
         """
-        At completion of execute process, collect and process all data attributes. Then, insert into
-        a javascript file designated as 'generated'.
+        At completion execution process, collect and process all current data attributes. Then,
+        collect javascript template content, find/replace, and write to destination.
         """
-        js_filename = self['js_file']
-        js_page = self.translator.findPage(js_filename, throw_on_zero=False)
-        js_path=js_page.source
-        js_noext = os.path.splitext(js_path)[0]
-        js_final = js_noext + '_generated.js'
-
-        if js_page is None:
-            msg = "Javascript file listed in config.yml ("
-            msg += js_filename
-            msg += ") not found. Please ensure that file is located in content directories."
-            LOG.error(msg)
-
         replace_str = ""
         for iter in self.getAttributeItems():
             if bool(re.search('tagger_', iter[0])):
                 tag_dict_str=str(iter[1])
-                key_list_regex=self._allowed_keys+['data','name', 'path', 'key_vals']
+                key_list_regex=self._allowed_keys+['name', 'path', 'key_vals']
                 for entry in key_list_regex:
                     regex_replace=f"'{entry}':"
                     tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
                 tag_dict_str=re.sub("\s","", tag_dict_str)
-                replace_str += tag_dict_str + ","
+                if len(replace_str) == 0:
+                    replace_str += tag_dict_str
+                else:
+                    replace_str += "," + tag_dict_str
+
+        replace_str = "{data:[" + replace_str + "]}"
+
+        # Find the javascript file with error checking
+        js_page = self.translator.findPage(self['js_file'])
+        js_path = js_page.source
+
+        # Setup path to write content
+        js_dest_partpath = "js/" + os.path.basename(js_path)
+        js_dest_path = os.path.join(self.translator.destination, js_dest_partpath)
 
         # Find and replace 'data:' dict structure within supplied javascript template file content,
-        # save to generated file and copy to destination.
+        # save to javascript file in destination.
         with open(js_path,'r') as f:
             content=f.readlines()
+            f.close()
         content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
-        with open(js_final, 'w') as f:
+        with open(js_dest_path, 'w') as f:
             f.writelines(content)
             f.close()
 
