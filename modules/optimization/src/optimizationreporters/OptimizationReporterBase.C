@@ -41,7 +41,6 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
   }
 }
 
-
 void
 OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
@@ -136,7 +135,8 @@ OptimizationReporterBase::fillParamsVector(std::string type, Real default_value)
   for (const auto & vec : parsed_data)
     flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
 
-  return flattened_data;}
+  return flattened_data;
+}
 
 void
 OptimizationReporterBase::computeEqualityConstraints(
