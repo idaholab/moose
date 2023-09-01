@@ -29,6 +29,8 @@ public:
   virtual unsigned int getNumGrains() const override { return _grain_num; }
   virtual std::vector<Point> getGrainCenters() const { return _centerpoints; }
 
+  virtual bool isColumnar3D() const;
+
   // Build a KD tree
   void buildSearchTree();
 

@@ -352,3 +352,12 @@ PolycrystalVoronoi::findLinePoint(const Point & point,
 
   return cntr(vcomp) - l_sum / N(vcomp);
 }
+
+bool
+PolycrystalVoronoi::isColumnar3D() const
+{
+  if (_dim == 3 && _columnar_3D == true)
+    return true;
+  else
+    return false;
+}

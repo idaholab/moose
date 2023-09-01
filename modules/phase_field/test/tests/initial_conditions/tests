@@ -189,7 +189,7 @@
       # Testing optimal hex coloring with a backtracking algorithm
       method = '!DBG'
 
-      detail = 'hexagonal structure in 3D, and'
+      detail = 'hexagonal structure in 3D,'
     []
 
     [TricrystalTripleJunctionIC]
@@ -197,9 +197,25 @@
       input = 'TricrystalTripleJunctionIC.i'
       exodiff = 'TricrystalTripleJunctionIC_out.e'
 
-      detail = 'smooth interface in a triple junction.'
+      detail = 'smooth interface in a triple junction,'
     []
 
+    [PolycrystalVoronoiTJVoidIC_2D]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiTJVoidIC_2D.i'
+      exodiff = 'PolycrystalVoronoiTJVoidIC_2D_out.e'
+
+      detail = 'polycrystal structure with triple junction voids in 2D, and'
+    []
+
+    [PolycrystalVoronoiTJVoidIC_3D_columnar_hex]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiTJVoidIC_3D_columnar_hex.i'
+      exodiff = 'PolycrystalVoronoiTJVoidIC_3D_columnar_hex_out.e'
+      method = '!DBG'
+
+      detail = 'columnar hexagonal structure with triple junction.'
+    []
   []
 
   [GB_adaptivity]
@@ -386,7 +402,7 @@
     exodiff = 'BlockRestriction_out.e'
     requirement = 'The system shall be able to block-restrict crystal initial conditions.'
     issues = '#19193'
-    design = 'BicrystalBoundingBoxICAction.md BicrystalCircleGrainICAction.md PolycrystalColoringICAction.md PolycrystalRandomICAction.md PolycrystalVoronoiVoidICAction.md Tricrystal2CircleGrainsICAction.md'
+    design = 'BicrystalBoundingBoxICAction.md BicrystalCircleGrainICAction.md PolycrystalColoringICAction.md PolycrystalRandomICAction.md PolycrystalVoronoiCoupledVoidICAction.md Tricrystal2CircleGrainsICAction.md'
     recover = false
   []
 []

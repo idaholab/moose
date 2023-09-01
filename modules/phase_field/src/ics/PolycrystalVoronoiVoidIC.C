@@ -16,33 +16,15 @@
 #include "GrainTrackerInterface.h"
 #include "PolycrystalVoronoi.h"
 
-InputParameters
-PolycrystalVoronoiVoidIC::actionParameters()
-{
-  InputParameters params = MultiSmoothCircleIC::validParams();
-
-  params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
-
-  params.addParam<bool>(
-      "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-
-  return params;
-}
-
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoiVoidIC);
 
 InputParameters
 PolycrystalVoronoiVoidIC::validParams()
 {
-  InputParameters params = PolycrystalVoronoiVoidIC::actionParameters();
-  MooseEnum structure_options("grains voids");
-  params.addRequiredParam<MooseEnum>("structure_type",
-                                     structure_options,
-                                     "Which structure type is being initialized, grains or voids");
-  params.addParam<unsigned int>("op_index",
-                                0,
-                                "The index for the current order parameter, "
-                                "not needed if structure_type = voids");
+  InputParameters params = MultiSmoothCircleIC::validParams();
+  params.addClassDescription("Random distribution of smooth circles at grain boundaries "
+                             "given minimum spacing");
+  params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<UserObjectName>(
       "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
   params.addParam<FileName>("file_name",
@@ -54,10 +36,7 @@ PolycrystalVoronoiVoidIC::validParams()
 
 PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & parameters)
   : MultiSmoothCircleIC(parameters),
-    _structure_type(getParam<MooseEnum>("structure_type")),
     _op_num(getParam<unsigned int>("op_num")),
-    _op_index(getParam<unsigned int>("op_index")),
-    _columnar_3D(getParam<bool>("columnar_3D")),
     _poly_ic_uo(getUserObject<PolycrystalVoronoi>("polycrystal_ic_uo")),
     _file_name(getParam<FileName>("file_name"))
 {
@@ -74,9 +53,6 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
 void
 PolycrystalVoronoiVoidIC::initialSetup()
 {
-  if (_op_num <= _op_index)
-    mooseError("op_index is too large in CircleGrainVoidIC");
-
   // Obtain total number and centerpoints of the grains
   _grain_num = _poly_ic_uo.getNumGrains();
   _centerpoints = _poly_ic_uo.getGrainCenters();
@@ -209,27 +185,7 @@ PolycrystalVoronoiVoidIC::value(const Point & p)
   // Determine value for voids
   Real void_value = MultiSmoothCircleIC::value(p);
 
-  // Determine value for grains
-  Real grain_value = _poly_ic_uo.getVariableValue(_op_index, p);
-
-  switch (_structure_type)
-  {
-    case 0:                 // assigning values for grains (order parameters)
-      if (grain_value == 0) // Not in this grain
-        value = grain_value;
-      else                             // in this grain, but might be in a void
-          if (void_value == _outvalue) // Not in a void
-        value = grain_value;
-      else if (void_value > _outvalue && void_value < _invalue) // On void interface
-        value = grain_value * (_invalue - void_value) / (_invalue - _outvalue);
-      else if (void_value == _invalue) // In a void, so op = 0
-        value = 0.0;
-      break;
-
-    case 1: // assigning values for voids (concentration)
-      value = void_value;
-      break;
-  }
+  value = void_value;
 
   return value;
 }
@@ -241,12 +197,8 @@ PolycrystalVoronoiVoidIC::gradient(const Point & p)
   RealGradient void_gradient = MultiSmoothCircleIC::gradient(p);
 
   // Order parameter assignment assumes zero gradient (sharp interface)
-  switch (_structure_type)
-  {
-    case 1: // assigning gradient for voids
-      gradient = void_gradient;
-      break;
-  }
+  // assigning gradient for voids
+  gradient = void_gradient;
 
   return gradient;
 }

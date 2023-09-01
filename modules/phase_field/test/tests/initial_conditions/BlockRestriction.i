@@ -77,17 +77,6 @@
       op_num = 2
       random_type = 'continuous'
     []
-    [PolycrystalVoronoiVoidIC]
-      polycrystal_ic_uo = voronoi
-      block = '0'
-      numbub = 3
-      bubspac = 0.02
-      radius = 0.05
-      invalue = 1
-      outvalue = 0.1
-      var_name_base = 'voronoi_'
-      op_num = 8
-    []
   []
 []
 

@@ -40,17 +40,16 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+    [./PolycrystalVoronoiCoupledVoidIC]
+      v = c
       invalue = 1.0
       outvalue = 0.0
       polycrystal_ic_uo = voronoi
-      rand_seed = 10
     [../]
   [../]
   [./bubble_IC]
     variable = c
     type = PolycrystalVoronoiVoidIC
-    structure_type = voids
     invalue = 1.0
     outvalue = 0.0
     polycrystal_ic_uo = voronoi

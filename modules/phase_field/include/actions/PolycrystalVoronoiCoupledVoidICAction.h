@@ -13,15 +13,14 @@
 #include "Action.h"
 
 /**
- * Sets up a polycrystal initial condition with voids on grain boundaries for
- * all order parameters.
+ * Sets up a polycrystal initial condition with voids at specified positions
  */
-class PolycrystalVoronoiVoidICAction : public Action
+class PolycrystalVoronoiCoupledVoidICAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  PolycrystalVoronoiVoidICAction(const InputParameters & params);
+  PolycrystalVoronoiCoupledVoidICAction(const InputParameters & params);
 
   virtual void act();
 

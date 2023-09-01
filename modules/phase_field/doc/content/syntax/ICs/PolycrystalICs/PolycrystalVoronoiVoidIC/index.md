@@ -1,1 +1,0 @@
-!template load file=stubs/moose_system.md.template name=PolycrystalVoronoiVoidIC syntax=/ICs/PolycrystalICs/PolycrystalVoronoiVoidIC

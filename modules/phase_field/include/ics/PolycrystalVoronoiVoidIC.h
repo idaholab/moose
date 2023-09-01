@@ -13,7 +13,7 @@
 #include "MooseRandom.h"
 #include "PolycrystalICTools.h"
 
-// Forward Declarationsc
+// Forward Declarations
 class GrainTrackerInterface;
 class PolycrystalVoronoi;
 
@@ -30,15 +30,8 @@ public:
 
   virtual void initialSetup() override;
 
-  static InputParameters actionParameters();
-
 protected:
-  const MooseEnum _structure_type;
-
   const unsigned int _op_num;
-  const unsigned int _op_index;
-
-  const bool _columnar_3D;
 
   const PolycrystalVoronoi & _poly_ic_uo;
 

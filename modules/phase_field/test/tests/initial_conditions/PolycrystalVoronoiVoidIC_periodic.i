@@ -34,14 +34,14 @@
 
 [ICs]
   [./PolycrystalICs]
-    [./PolycrystalVoronoiVoidIC]
+    [./PolycrystalVoronoiCoupledVoidIC]
       polycrystal_ic_uo = voronoi
+      v = c
     [../]
   [../]
   [./c_IC]
     variable = c
     type = PolycrystalVoronoiVoidIC
-    structure_type = voids
     polycrystal_ic_uo = voronoi
   [../]
 []
