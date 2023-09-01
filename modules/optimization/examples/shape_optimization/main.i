@@ -53,7 +53,6 @@
 
 [Outputs]
   csv = false
-  json = true
   print_linear_residuals = false
   print_nonlinear_residuals = false
 []
