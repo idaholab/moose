@@ -71,7 +71,11 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                " ",
                name,
                ", QUAD4 elements option can only be selected when the two input vectors of Points "
-               "have the same length.");
+               "have the same length. In the current instance, the first vector has ",
+               boundary_points_vec_1.size(),
+               " points and the second ",
+               boundary_points_vec_2.size(),
+               " points");
 
   std::vector<Point> possibly_reoriented_boundary_points_vec_2;
   const std::vector<Point> * oriented_boundary_points_vec_2 = &boundary_points_vec_2;
