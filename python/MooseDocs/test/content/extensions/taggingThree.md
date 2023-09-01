@@ -8,7 +8,8 @@ This page tests the usage of the following tagging extension syntax:
 !tagger tagging_one application:test_two foo:bas simulation_type:triage fiscal_year:2024
 ```
 
-This syntax tests for a duplicated name identifier in the standard syntax.
+This syntax tests for a duplicated name identifier in the standard syntax, which presents as a warning
+with no addition to the tag list.
 
 See the other tagging pages:
 
