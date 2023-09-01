@@ -90,10 +90,11 @@ getBoundaryIDs(const MeshBase & mesh,
    */
   if (generate_unknown)
   {
-    const std::set<BoundaryID> & local_bids = mesh.get_boundary_info().get_boundary_ids();
-    max_boundary_local_id = local_bids.empty() ? 0 : *(local_bids.rbegin());
+    const auto & bids = mesh.is_prepared() ? mesh.get_boundary_info().get_global_boundary_ids()
+                                           : mesh.get_boundary_info().get_boundary_ids();
+    max_boundary_local_id = bids.empty() ? 0 : *(bids.rbegin());
     /* We should not hit this often */
-    if (!mesh.is_serial())
+    if (!mesh.is_prepared() && !mesh.is_serial())
       mesh.comm().max(max_boundary_local_id);
   }
 
