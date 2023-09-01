@@ -50,7 +50,8 @@ GeneratedMeshGenerator::validParams()
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
-  params.addParam<std::vector<SubdomainID>>("subdomain_ids", "Subdomain IDs, default to all zero");
+  params.addParam<std::vector<SubdomainID>>("subdomain_ids",
+                                            "Subdomain IDs for each element, default to all zero");
 
   params.addParam<bool>(
       "gauss_lobatto_grid",
