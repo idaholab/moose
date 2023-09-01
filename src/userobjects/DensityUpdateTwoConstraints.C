@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DensityUpdateTwoConstraints.h"
+#include "Transient.h"
 #include <algorithm>
 
 registerMooseObject("troutApp", DensityUpdateTwoConstraints);
@@ -35,7 +36,8 @@ DensityUpdateTwoConstraints::validParams()
   params.addParam<bool>("adaptive_move",
                         false,
                         "Whether incremental moves in the bisection algorithm will be reduced as "
-                        "the number of iterations increases.");
+                        "the number of iterations increases. Note that the time must correspond to "
+                        "iteration number for better results.");
   params.addRequiredParam<VariableName>("cost", "Name of the cost variable.");
 
   params.addParam<Real>("bisection_lower_bound", 0, "Lower bound for the bisection algorithm.");
@@ -131,7 +133,6 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
 
   bool perform_loop = true;
   // Loop until the relative difference between l1 and l2 is less than a small tolerance
-  Real loop_number = 0;
 
   while (perform_loop)
   {
@@ -156,8 +157,7 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
                                                elem_data.cost_sensitivity,
                                                elem_data.cost,
                                                lmid,
-                                               cmid,
-                                               loop_number);
+                                               cmid);
 
       // Update the current filtered density for the current element
       elem_data.new_density = new_density;
@@ -186,20 +186,13 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
     // Determine whether to continue the loop based on the relative difference between l1 and l2
     perform_loop =
         (l2 - l1) / (l1 + l2) > _relative_tolerance || (c2 - c1) / (c1 + c2) > _relative_tolerance;
-
-    loop_number++;
   }
 }
 
 // Method to compute the updated density for an element
 Real
-DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
-                                                   Real dc,
-                                                   Real cost_sensitivity,
-                                                   Real cost,
-                                                   Real lmid,
-                                                   Real cmid,
-                                                   Real loop_number)
+DensityUpdateTwoConstraints::computeUpdatedDensity(
+    Real current_density, Real dc, Real cost_sensitivity, Real cost, Real lmid, Real cmid)
 {
   Real move = _bisection_move;
 
@@ -209,7 +202,13 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
   const Real alpha = 0.96;
 
   if (_adaptive_move)
-    move = std::max(MathUtils::pow(alpha, loop_number) * move, move_min);
+  {
+    auto transient = dynamic_cast<Transient *>(_app.getExecutioner());
+    if (transient)
+      move = std::max(MathUtils::pow(alpha, transient->getTime()) * move, move_min);
+    else
+      mooseError("Cannot find a transient executioner for adaptive bisection move.");
+  }
 
   Real denominator = lmid + cmid * cost + cmid * current_density * cost_sensitivity;
 

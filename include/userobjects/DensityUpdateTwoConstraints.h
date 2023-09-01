@@ -68,13 +68,8 @@ private:
   void performOptimCritLoop();
   void computePhysDensity();
 
-  Real computeUpdatedDensity(Real current_density,
-                             Real dc,
-                             Real cost_sensitivity,
-                             Real cost,
-                             Real lmid,
-                             Real cmid,
-                             Real loop_number);
+  Real computeUpdatedDensity(
+      Real current_density, Real dc, Real cost_sensitivity, Real cost, Real lmid, Real cmid);
 
   /// Total volume allowed for volume contraint
   Real _total_allowable_volume;
