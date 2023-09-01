@@ -27,7 +27,7 @@ below, for listing the inequality constraints. The
 [GeneralOptimization](/OptimizationReporter/GeneralOptimization) also expects
 the parameters
 [!param](/OptimizationReporter/GeneralOptimization/objective_name) and
-[!param](/OptimizationReporter/GeneralOptimization/number_dofs_reporter), which
+[!param](/OptimizationReporter/GeneralOptimization/num_values_name), which
 are the names of the reporters that will hold the objective value and the number
 of parameters in the forward problem.
 
