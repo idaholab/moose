@@ -26,9 +26,12 @@ public:
 protected:
   /// Reporter that will hold the objective value
   Real & _objective_val;
-  int & _number_dofs;
 
-  virtual dof_id_type getNumParams() const override { return _number_dofs; };
+  int _number_params_value;
+  // Reporter that holds the total number of parameters
+  int & _number_params;
+
+  virtual dof_id_type getNumParams() const override;
   virtual void setICsandBounds() override;
 
 private:

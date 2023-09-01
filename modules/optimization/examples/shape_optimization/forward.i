@@ -146,7 +146,7 @@ volume_constraint = 200
   [h]
     type = ParsedOptimizationFunction
     # r0+${inner_radius} is the true current inner radius
-    expression = '${outer_radius} /(pi * (r0+${inner_radius})^3)'
+    expression = '10 /(pi * (r0+${inner_radius})^3)'
     param_symbol_names = 'r0 r1'
     param_vector_name = 'params/radii'
   []

@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GradientReporterCollector.h"
+#include "ConstraintGradCollector.h"
 #include "MooseError.h"
 #include "ReporterMode.h"
 #include <cstddef>
 
-registerMooseObject("OptimizationApp", GradientReporterCollector);
+registerMooseObject("OptimizationApp", ConstraintGradCollector);
 
 InputParameters
-GradientReporterCollector::validParams()
+ConstraintGradCollector::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reporter which collects single parameter contraint gradient into "
@@ -29,7 +29,7 @@ GradientReporterCollector::validParams()
   return params;
 }
 
-GradientReporterCollector::GradientReporterCollector(const InputParameters & parameters)
+ConstraintGradCollector::ConstraintGradCollector(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _parameters(
         getReporterValue<std::vector<Real>>("parameter_reporter_name", REPORTER_MODE_REPLICATED))
@@ -37,7 +37,7 @@ GradientReporterCollector::GradientReporterCollector(const InputParameters & par
 }
 
 void
-GradientReporterCollector::initialSetup()
+ConstraintGradCollector::initialSetup()
 {
   const ReporterData & rdata = _fe_problem.getReporterData();
   _gradient_vecs.reserve(getParam<std::vector<std::vector<ReporterName>>>("reporters").size());
@@ -59,7 +59,7 @@ GradientReporterCollector::initialSetup()
 }
 
 void
-GradientReporterCollector::execute()
+ConstraintGradCollector::execute()
 {
   const size_t num_params = _parameters.size();
   size_t num_before(0);

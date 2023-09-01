@@ -11,11 +11,11 @@
 
 #include "GeneralReporter.h"
 
-class GradientReporterCollector : public GeneralReporter
+class ConstraintGradCollector : public GeneralReporter
 {
 public:
   static InputParameters validParams();
-  GradientReporterCollector(const InputParameters & parameters);
+  ConstraintGradCollector(const InputParameters & parameters);
   virtual void initialSetup() override;
   virtual void initialize() override {}
   virtual void execute() override;
@@ -24,7 +24,8 @@ public:
 private:
   /// reporter that holds all the parameters
   const std::vector<Real> _parameters;
-  /// reporter that holds
+  /// holds all the sub-gradient vectors
   std::vector<std::vector<const std::vector<Real> *>> _gradient_vecs;
+  /// holds all the total gradient vectors
   std::vector<std::vector<Real> *> _total_vecs;
 };

@@ -10,7 +10,7 @@
   lower_bounds = '-10'
   upper_bounds = '10'
   objective_name = max_temp
-  number_dofs_reporter = num_radii
+  num_params_name = num_radii
 []
 
 [Executioner]
