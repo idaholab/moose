@@ -62,7 +62,9 @@ Executioner::Executioner(const InputParameters & parameters)
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _output_iteration_number(0),
+    _is_outer_iteration_solve(false)
 {
   _fe_problem.getNonlinearSystemBase().setVerboseFlag(_verbose);
 

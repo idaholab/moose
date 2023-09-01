@@ -272,13 +272,8 @@ Output::onInterval()
 int
 Output::getTimeStep()
 {
-  if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
-  {
-    if (steady->getIterationOutputFlag())
-      return steady->getIterationNumberOutput();
-    else
-      return _t_step;
-  }
+  if (_app.getExecutioner()->getIterationOutputFlag())
+    return _app.getExecutioner()->getIterationNumberOutput();
   else
     return _t_step;
 }

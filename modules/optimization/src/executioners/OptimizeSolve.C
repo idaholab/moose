@@ -267,6 +267,7 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _hess_iterate = 0;
 
   // Pass down the iteration number if the subapp is of the Steady/SteadyAndAdjoint type.
+  // If other executioners are used, the code below can be extended.
   // This enables exodus per-iteration output.
   for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
   {

@@ -153,6 +153,42 @@ public:
    */
   static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
+  /**
+   * Get a general iteration number for the purpose of outputting, useful in the presence of a
+   * nested solve. This output iteration number may be set by the parent app for a sub-app. This
+   * behavior is decided by the Executioner/Executor/SolveObject in charge of the solve.
+   */
+  virtual unsigned int getIterationNumberOutput() const { return _output_iteration_number; }
+
+  /**
+   * Set a general iteration number for the purpose of outputting, useful in the presence of a
+   * nested solve This output iteration number may be set by the parent app for a sub-app, e.g.
+   * OptimizeSolve.
+   *
+   * @param iteration_number The iteration number.
+   */
+  virtual void setIterationNumberOutput(unsigned int iteration_number)
+  {
+    _output_iteration_number = iteration_number;
+  }
+
+  /**
+   * Set whether we are solving with outer iterations (e.g. optimization).
+   *
+   * @param is_outer_iteration_solve Whether the solution process contains outer iterations.
+   */
+  virtual void setIterationOutputFlag(const bool is_outer_iteration_solve)
+  {
+    _is_outer_iteration_solve = is_outer_iteration_solve;
+  }
+
+  /**
+   * Get whether we are solving with outer iterations (e.g. optimization).
+   *
+   * @return Whether the solution process contains outer iterations.
+   */
+  virtual bool getIterationOutputFlag() const { return _is_outer_iteration_solve; }
+
 protected:
   /**
    * Adds a postprocessor that the executioner can directly assign values to
@@ -173,4 +209,11 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
+
+  /// Iteration number obtained from the main application
+  unsigned int _output_iteration_number;
+
+private:
+  /// Whether we are solving an outer-iteration problem (e.g. optimization).
+  bool _is_outer_iteration_solve;
 };
