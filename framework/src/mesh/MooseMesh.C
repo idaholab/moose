@@ -2939,6 +2939,8 @@ MooseMesh::ghostGhostedBoundaries()
 
   TIME_SECTION("GhostGhostedBoundaries", 3);
 
+  parallel_object_only();
+
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
   // We clear ghosted elements that were added by previous invocations of this
