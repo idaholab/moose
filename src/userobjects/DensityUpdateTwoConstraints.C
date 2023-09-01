@@ -29,8 +29,13 @@ DensityUpdateTwoConstraints::validParams()
                                         "Name of the density_sensitivity variable.");
   params.addRequiredParam<VariableName>("cost_density_sensitivity",
                                         "Name of the cost density sensitivity variable.");
-  params.addRequiredParam<Real>("volume_fraction", "Volume fraction");
-  params.addRequiredParam<Real>("cost_fraction", "Cost fraction");
+  params.addRequiredParam<Real>("volume_fraction", "Volume fraction.");
+  params.addRequiredParam<Real>("cost_fraction", "Cost fraction.");
+  params.addParam<Real>("bisection_move", 0.01, "Bisection move for the updated solution.");
+  params.addParam<bool>("adaptive_move",
+                        false,
+                        "Whether incremental moves in the bisection algorithm will be reduced as "
+                        "the number of iterations increases.");
   params.addRequiredParam<VariableName>("cost", "Name of the cost variable.");
 
   params.addParam<Real>("bisection_lower_bound", 0, "Lower bound for the bisection algorithm.");
@@ -53,7 +58,9 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
     _cost_fraction(getParam<Real>("cost_fraction")),
     _relative_tolerance(getParam<Real>("relative_tolerance")),
     _lower_bound(getParam<Real>("bisection_lower_bound")),
-    _upper_bound(getParam<Real>("bisection_upper_bound"))
+    _upper_bound(getParam<Real>("bisection_upper_bound")),
+    _bisection_move(getParam<Real>("bisection_move")),
+    _adaptive_move(getParam<bool>("adaptive_move"))
 {
 }
 
@@ -194,32 +201,29 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
                                                    Real cmid,
                                                    Real loop_number)
 {
-  // Define the maximum allowable change in density
-  const Real move_min = 1.0e-3;
-  const Real move_zero = 0.15;
-  const Real alpha = 0.16;
+  Real move = _bisection_move;
 
-  Real move = 0.1;
-  // move = std::max(MathUtils::pow(alpha, loop_number) * move_zero, move_min);
+  // Minimum move
+  const Real move_min = 1.0e-3;
+  // Control adaptivity
+  const Real alpha = 0.96;
+
+  if (_adaptive_move)
+    move = std::max(MathUtils::pow(alpha, loop_number) * move, move_min);
 
   Real denominator = lmid + cmid * cost + cmid * current_density * cost_sensitivity;
 
-  // Compute the updated density based on the current density, the sensitivity, and the midpoint
-  // value
-  // Real updated_density = std::max(
-  //     0.0,
-  //     std::min(1.0,
-  //              std::min(current_density + move,
-  //                       std::max(current_density - move,
-  //                                std::max(1e-5, current_density) * std::sqrt(-dc /
-  //                                denominator)))));
+  // Effect of damping has not shown
+  const Real damping = 1.0;
 
   Real updated_density = std::max(
       1.0e-5,
-      std::max(current_density - move,
-               std::min(1.0,
-                        std::min(current_density + move,
-                                 current_density * std::sqrt(std::abs(-dc / denominator))))));
+      std::max(
+          current_density - move,
+          std::min(1.0,
+                   std::min(current_density + move,
+                            current_density *
+                                MathUtils::pow(std::sqrt(std::abs(-dc / denominator)), damping)))));
 
   // Return the updated density
   return updated_density;

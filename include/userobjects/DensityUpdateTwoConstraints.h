@@ -89,4 +89,8 @@ private:
   const Real _lower_bound;
   /// Upper bound for bisection algorithm
   const Real _upper_bound;
+  /// Bisection algorithm move
+  const Real _bisection_move;
+  /// Whether bisection moves are adaptive
+  const bool _adaptive_move;
 };

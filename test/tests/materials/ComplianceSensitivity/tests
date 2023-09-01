@@ -46,4 +46,12 @@
                   'problem.'
     heavy = true
   []
+  [paper_three_materials_test]
+    type = 'CSVDiff'
+    input = 'paper_three_materials_test.i'
+    csvdiff = 'paper_three_materials_test_out.csv'
+    requirement = 'The system shall be able to compute a three-material topology optimization '
+                  'problem and reproduce approximate results from the literature.'
+    heavy = true
+  []
 []
