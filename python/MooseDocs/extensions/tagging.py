@@ -75,6 +75,16 @@ class TaggingExtension(command.CommandExtension):
                         "are desired, please request assistance from the MOOSE Framework development " \
                         "team.")
 
+    def get_tag_data(self, *args):
+        return self.getAttribute(*args)
+
+    def set_tag_data(self, *args):
+        return self.setAttribute(*args)
+
+    @property
+    def allowed_keys(self):
+        return self._allowed_keys
+
     def postExecute(self):
         """
         At completion of execute process, collect and process all data attributes. Then, insert into
@@ -112,15 +122,6 @@ class TaggingExtension(command.CommandExtension):
             f.writelines(content)
             f.close()
 
-    def get_tag_data(self, *args):
-        return self.getAttribute(*args)
-
-    def set_tag_data(self, *args):
-        return self.setAttribute(*args)
-
-    @property
-    def allowed_keys(self):
-        return self._allowed_keys
 
 class TaggingCommand(command.CommandComponent):
     COMMAND= 'tagger'
@@ -156,7 +157,7 @@ class TaggingCommand(command.CommandComponent):
 
         page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
-        if self.extension.get_tag_data(name):
+        if self.extension.get_tag_data("tagger_" + name):
             msg = page.name
             msg += ": Tag page identifier already exists; not adding the following 'name' to dictionary: "
             msg += name
