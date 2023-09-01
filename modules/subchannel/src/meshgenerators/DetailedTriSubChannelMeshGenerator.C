@@ -199,7 +199,7 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
           // corner subchannel
           _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
           // corner subchannel-dummy added to hinder array size violations
-          _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
+          // _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
           _subch_type[k] = EChannelType::CORNER;
 
           k = k + 1;
