@@ -31,7 +31,7 @@ heated_length = 1.0 # m
   [axial_heat_rate]
     type = ParsedFunction
     expression = '(pi/2)*sin(pi*z/L)'
-    vars = 'L'
+    symbol_names = 'L'
     symbol_values = '${heated_length}'
   []
 []
@@ -220,10 +220,10 @@ heated_length = 1.0 # m
 ################################################################################
 
 [MultiApps] # I have as many multiapps as pins
-  [SLAVE]
+  [sub]
     # app_type = BisonApp
     type = FullSolveMultiApp
-    input_files = slave.i # seperate file for multiapps due to radial power profile
+    input_files = sub.i # seperate file for multiapps due to radial power profile
     execute_on = 'timestep_end'
     positions = '0   0   0 '
     bounding_box_padding = '0 0 0.01'
@@ -239,14 +239,14 @@ heated_length = 1.0 # m
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
     type = MultiAppUserObjectTransfer2
-    to_multi_app = SLAVE
+    to_multi_app = sub
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
 
   [q_prime] # send heat flux from slave/BISON/heatConduction to subchannel/master
     type = MultiAppUserObjectTransfer2
-    from_multi_app = SLAVE
+    from_multi_app = sub
     variable = q_prime
     user_object = q_prime_uo
     execute_on = 'timestep_end'

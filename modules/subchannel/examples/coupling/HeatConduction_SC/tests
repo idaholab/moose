@@ -1,7 +1,7 @@
 [Tests]
-  [ss_check_syntax]
+  [check_syntax]
     type = 'RunApp'
-    input = 'master.i'
+    input = 'main.i'
     check_input = true
     mesh_mode = 'replicated'
   []

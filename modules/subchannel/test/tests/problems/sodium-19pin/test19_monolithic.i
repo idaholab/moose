@@ -124,6 +124,12 @@ P_out = 2.0e5 # Pa
     value = ${T_in}
   []
 
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 5.84e-3
+  []
+
   [P_ic]
     type = ConstantIC
     variable = P
