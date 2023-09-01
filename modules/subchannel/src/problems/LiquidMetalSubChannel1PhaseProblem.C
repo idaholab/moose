@@ -57,6 +57,95 @@ LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
 void
 LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 {
+  auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
+  if (pin_mesh_exist)
+  {
+    Real standard_area, wire_area, additional_area, wetted_perimeter;
+    auto pitch = _subchannel_mesh.getPitch();
+    auto rod_diameter = _subchannel_mesh.getRodDiameter();
+    auto wire_diameter = _tri_sch_mesh.getWireDiameter();
+    auto wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+    auto gap = _tri_sch_mesh.getDuctToRodGap();
+    auto z_blockage = _subchannel_mesh.getZBlockage();
+    auto index_blockage = _subchannel_mesh.getIndexBlockage();
+    auto reduction_blockage = _subchannel_mesh.getReductionBlockage();
+    auto theta = std::acos(wire_lead_length /
+                           std::sqrt(std::pow(wire_lead_length, 2) +
+                                     std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+    {
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto Z = _z_grid[iz];
+
+        Real rod_area = 0.0;
+        Real rod_perimeter = 0.0;
+        Real Index = 0.0;
+        for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+        {
+          auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+          if (subch_type == EChannelType::CENTER || subch_type == EChannelType::CORNER)
+          {
+            rod_area +=
+                (1.0 / 6.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
+            rod_perimeter += (1.0 / 6.0) * M_PI * (*_Dpin_soln)(pin_node);
+            Index += 1.0;
+          }
+          else
+          {
+            rod_area +=
+                (1.0 / 4.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
+            rod_perimeter += (1.0 / 4.0) * M_PI * (*_Dpin_soln)(pin_node);
+            Index += 1.0;
+          }
+        }
+
+        if (subch_type == EChannelType::CENTER)
+        {
+          standard_area = std::pow(pitch, 2.0) * std::sqrt(3.0) / 4.0;
+          additional_area = 0.0;
+          wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
+          wetted_perimeter = rod_perimeter + 0.5 * libMesh::pi * wire_diameter / std::cos(theta);
+        }
+        else if (subch_type == EChannelType::EDGE)
+        {
+          standard_area = pitch * (rod_diameter / 2.0 + gap);
+          additional_area = 0.0;
+          wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
+          wetted_perimeter =
+              rod_perimeter + 0.5 * libMesh::pi * wire_diameter / std::cos(theta) + pitch;
+        }
+        else
+        {
+          standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
+          additional_area = 0.0;
+          wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
+          wetted_perimeter = rod_perimeter + libMesh::pi * wire_diameter / std::cos(theta) / 6.0 +
+                             2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap);
+        }
+
+        /// Calculate subchannel area
+        auto subchannel_area = standard_area + additional_area - rod_area - wire_area;
+
+        /// Apply area reduction on subchannels affected by blockage
+        auto index = 0;
+        for (const auto & i_blockage : index_blockage)
+        {
+          if (i_ch == i_blockage && (Z >= z_blockage.front() && Z <= z_blockage.back()))
+          {
+            subchannel_area *= reduction_blockage[index];
+          }
+          index++;
+        }
+
+        _S_flow_soln->set(node, subchannel_area);
+        _w_perim_soln->set(node, wetted_perimeter);
+      }
+    }
+  }
+
   for (unsigned int iz = 1; iz < _n_cells + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
