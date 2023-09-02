@@ -147,6 +147,11 @@ class TaggingCommand(command.CommandComponent):
             key_vals=keys.split(':')
             entry_key_values.append([key_vals[0],key_vals[1]])
 
+        if len(entry_key_values) == 0:
+            msg = page.name
+            msg += ": No key:value pairs provided; check markdown file."
+            LOG.error(msg)
+
         good_keys=[]
         for pair in entry_key_values:
             if pair[0] not in self.extension.allowed_keys:

@@ -37,6 +37,7 @@ class TestTaggingCommand(MooseDocsTestCase):
     TEXT_PRESPACE = '!tagger  test application:moose foo:bar'
     TEXT_DUPLICATE = '!tagger test application:moose application:bar'
     TEXT_NOT_ALLOWED = '!tagger test application:moose application_wrong:bar'
+    TEXT_NO_KEYS = '!tagger test'
 
     def setupExtension(self, ext):
         if ext == tagging:
@@ -76,6 +77,13 @@ class TestTaggingCommand(MooseDocsTestCase):
             ast = self.tokenize(self.TEXT_NOT_ALLOWED)
         self.assertEqual(len(cm.output), 2)
         self.assertIn("Provided 'key' not in allowed_keys", cm.output[1])
+        self.assertSize(ast, 0)
+
+    def testNoKeys(self):
+        with self.assertLogs(level=logging.ERROR) as cm:
+            ast = self.tokenize(self.TEXT_NO_KEYS)
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn("No key:value pairs provided", cm.output[0])
         self.assertSize(ast, 0)
 
 if __name__ == '__main__':
