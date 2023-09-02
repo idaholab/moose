@@ -50,12 +50,16 @@ class TestTaggingCommand(MooseDocsTestCase):
     def testStandardUsage(self):
         with self.assertLogs(level=logging.INFO) as cm: # For warning suppression. TODO: remove cm when non-experimental
             ast = self.tokenize(self.TEXT)
-        self.assertSize(ast, 0)
+        self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
+        self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
 
     def testPostNameSpaceAllowed(self):
         with self.assertLogs(level=logging.INFO) as cm: # For warning suppression. TODO: remove cm when non-experimental
             ast = self.tokenize(self.TEXT_POSTSPACE)
-        self.assertSize(ast, 0)
+        self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
+        self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
 
     def testPreNameSpaceError(self):
         with self.assertLogs(level=logging.ERROR) as cm:
@@ -69,21 +73,25 @@ class TestTaggingCommand(MooseDocsTestCase):
             ast = self.tokenize(self.TEXT_DUPLICATE)
         self.assertEqual(len(cm.output), 1)
         self.assertIn("Following 'key' provided more than once;", cm.output[0])
-        self.assertSize(ast, 0)
+        self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['key_vals'], {'application':'moose'})
 
     def testNotAllowed(self):
         with self.assertLogs(level=logging.WARNING) as cm:
             ast = self.tokenize(self.TEXT_NOT_ALLOWED)
         self.assertEqual(len(cm.output), 2)
         self.assertIn("Provided 'key' not in allowed_keys", cm.output[1])
-        self.assertSize(ast, 0)
+        self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['key_vals'], {'application':'moose'})
 
     def testNoKeys(self):
         with self.assertLogs(level=logging.ERROR) as cm:
             ast = self.tokenize(self.TEXT_NO_KEYS)
         self.assertEqual(len(cm.output), 1)
         self.assertIn("No key:value pairs provided", cm.output[0])
-        self.assertSize(ast, 0)
+        self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['key_vals'], {})
+
 class TestTaggingDuplicateNamesWarning(MooseDocsTestCase):
     EXTENSIONS = [core, command, tagging]
     TEXT = '!tagger test foo:bar'
@@ -103,8 +111,10 @@ class TestTaggingDuplicateNamesWarning(MooseDocsTestCase):
             ast2 = self.tokenize(self.TEXT_DUPLICATE)
         self.assertEqual(len(cm.output), 2)
         self.assertIn('Tag page identifier already exists;', cm.output[1])
-        self.assertSize(ast1, 0)
-        self.assertSize(ast2, 0)
+        self.assertSize(ast1, 1)
+        self.assertEqual(ast1(0)['attr_name'], 'tagger_test')
+        self.assertSize(ast2, 1)
+        self.assertEqual(ast2(0)['attr_name'], '') #Not added to global attributes, so name attirbute is empty
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -9,7 +9,7 @@
 
 import os, re
 import logging
-from ..tree import pages
+from ..tree import tokens
 from ..common import __init__
 from . import command
 
@@ -42,6 +42,8 @@ LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return TaggingExtension(**kwargs)
+
+Tag = tokens.newToken('Tag', attr_name='', path='', key_vals=[])
 
 class TaggingExtension(command.CommandExtension):
 
@@ -169,6 +171,7 @@ class TaggingCommand(command.CommandComponent):
 
         page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
+        tag_id_name = ''
         if self.extension.get_tag_data("tagger_" + name):
             msg = page.name
             msg += ": Tag page identifier already exists; not adding the following 'name' to dictionary: "
@@ -177,5 +180,7 @@ class TaggingCommand(command.CommandComponent):
         else:
             tag_id_name = "tagger_" + name
             self.extension.set_tag_data(tag_id_name, page_data)
+
+        Tag(parent, attr_name=tag_id_name, path=mpath, key_vals=dict(good_keys))
 
         return parent
