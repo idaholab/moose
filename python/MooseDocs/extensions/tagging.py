@@ -159,23 +159,18 @@ class TaggingCommand(command.CommandComponent):
                 entry_key_values.append([key_vals[0],key_vals[1]])
 
         if len(entry_key_values) == 0:
-            msg = page.name
-            msg += ": No key:value pairs provided; check markdown file."
-            LOG.error(msg)
+            msg = "%s: No key:value pairs provided; check markdown file."
+            LOG.error(msg, page.name)
 
         good_keys=[]
         for pair in entry_key_values:
             if pair[0] not in self.extension.allowed_keys:
-                msg = page.name
-                msg += ": Provided 'key' not in allowed_keys (see config.yml); not adding the " \
-                       "following to the database: "
-                msg += pair[0]
-                LOG.warning(msg)
+                msg = "%s: Provided 'key' not in allowed_keys (see config.yml); not adding the " \
+                       "following to the database: %s"
+                LOG.warning(msg, page.name, pair[0])
             elif len(good_keys) != 0 and pair[0] in good_keys[0]:
-                msg = page.name
-                msg += ": Following 'key' provided more than once; check markdown file: "
-                msg += pair[0]
-                LOG.error(msg)
+                msg = "%s: Following 'key' provided more than once; check markdown file: %s"
+                LOG.error(msg, page.name, pair[0])
             else:
                 good_keys.append([pair[0], pair[1]])
 
@@ -183,10 +178,9 @@ class TaggingCommand(command.CommandComponent):
 
         tag_id_name = ''
         if self.extension.get_tag_data("tagger_" + name):
-            msg = page.name
-            msg += ": Tag page identifier already exists; not adding the following 'name' to dictionary: "
-            msg += name
-            LOG.warning(msg)
+            msg = "%s: Tag page identifier already exists; not adding the following 'name' to " \
+                  "dictionary: %s"
+            LOG.warning(msg, page.name, name)
         else:
             tag_id_name = "tagger_" + name
             self.extension.set_tag_data(tag_id_name, page_data)
