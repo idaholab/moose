@@ -16,8 +16,10 @@ from . import command
 """
 This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string
 that represents the markdown file that is associated with an arbitrary list of key:value pairs. Arbitrary
-spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.
-Ex: '!tagger name    k1:v1  ka:va thing1:thing2' is okay, but not '!tagger  name'.
+spacing is allowed after the name, however things become tricky with spaces before the name.
+Example: '!tagger name    k1:v1  ka:va thing1:thing2' is okay, but an IndexError could occur if
+'!tagger  name'. If this case occurs, the extension will try to determine what the intended name was
+and continue to avoid the error and report the guess as a warning to the developer.
 
 ALERT: The tagging extension is experimental! If documentation tagging features are desired, please
 request assistance from the MOOSE Framework development team.
@@ -147,7 +149,14 @@ class TaggingCommand(command.CommandComponent):
         entry_key_values=[]
         for keys in keylist:
             key_vals=keys.split(':')
-            entry_key_values.append([key_vals[0],key_vals[1]])
+            if len(key_vals) == 1 and name is None:
+                msg = "%s: It appears that no 'name' was provided for defined tag (due to a spacing " \
+                      "error between '!tagger' and the intended name or another mistake); check " \
+                      "markdown file. Guessing a 'name' and continuing: %s"
+                LOG.warning(msg, page.name, key_vals[0])
+                name = key_vals[0]
+            else:
+                entry_key_values.append([key_vals[0],key_vals[1]])
 
         if len(entry_key_values) == 0:
             msg = page.name
@@ -158,7 +167,8 @@ class TaggingCommand(command.CommandComponent):
         for pair in entry_key_values:
             if pair[0] not in self.extension.allowed_keys:
                 msg = page.name
-                msg += ": Provided 'key' not in allowed_keys (see config.yml); not adding the following to the database: "
+                msg += ": Provided 'key' not in allowed_keys (see config.yml); not adding the " \
+                       "following to the database: "
                 msg += pair[0]
                 LOG.warning(msg)
             elif len(good_keys) != 0 and pair[0] in good_keys[0]:

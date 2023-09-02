@@ -61,12 +61,13 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertEqual(ast(0)['attr_name'], 'tagger_test')
         self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
 
-    def testPreNameSpaceError(self):
-        with self.assertLogs(level=logging.ERROR) as cm:
+    def testPreNameSpaceWarning(self):
+        with self.assertLogs(level=logging.WARNING) as cm:
             ast = self.tokenize(self.TEXT_PRESPACE)
-        self.assertEqual(len(cm.output), 1)
-        self.assertIn('TOKENIZE ERROR: list index out of range', cm.output[0])
+        self.assertEqual(len(cm.output), 2)
+        self.assertIn("It appears that no 'name' was provided for defined tag", cm.output[1])
         self.assertSize(ast, 1)
+        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
 
     def testDuplicateKey(self):
         with self.assertLogs(level=logging.ERROR) as cm:
