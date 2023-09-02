@@ -46,11 +46,9 @@ ACSwitchingTempl<is_ad>::ACSwitchingTempl(const InputParameters & parameters)
     // get phase free energy
     _prop_Fj[n] = &this->template getGenericMaterialProperty<Real, is_ad>(_Fj_names[n]);
 
-    // mooseWarning("Derivative property name = ",
-    //              this->derivativePropertyNameFirst(_hj_names[n], _etai_name));
-    // get switching derivatives wrt eta_i, the nonlinear variable
-    _prop_dhjdetai[n] = &this->template getGenericMaterialProperty<Real, is_ad>(
-        this->derivativePropertyNameFirst(_hj_names[n], _etai_name));
+    // get first derivative of the switching functions
+    _prop_dhjdetai[n] =
+        &this->template getMaterialPropertyDerivative<Real, is_ad>(_hj_names[n], _etai_name);
   }
 }
 
@@ -80,16 +78,21 @@ ACSwitching::ACSwitching(const InputParameters & parameters)
   }
 }
 
+template <bool is_ad>
+void
+ACSwitchingTempl<is_ad>::initialSetup()
+{
+  ACSwitchingBase<is_ad>::initialSetup();
+  for (unsigned int n = 0; n < _num_j; ++n)
+    this->template validateNonlinearCoupling<GenericReal<is_ad>>(_hj_names[n]);
+}
+
 void
 ACSwitching::initialSetup()
 {
-  ACBulk<Real>::initialSetup();
-
+  ACSwitchingTempl<false>::initialSetup();
   for (unsigned int n = 0; n < _num_j; ++n)
-  {
     validateNonlinearCoupling<Real>(_Fj_names[n]);
-    validateNonlinearCoupling<Real>(_hj_names[n]);
-  }
 }
 
 Real

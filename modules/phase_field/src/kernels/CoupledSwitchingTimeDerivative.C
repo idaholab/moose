@@ -47,14 +47,12 @@ CoupledSwitchingTimeDerivativeTempl<is_ad>::CoupledSwitchingTimeDerivativeTempl(
   // reserve space and set phase material properties
   for (unsigned int n = 0; n < _num_j; ++n)
   {
-    // get phase free energy and derivatives
-    // _prop_Fj[n] = &getMaterialPropertyByName<Real>(_Fj_names[n]);
+    // get phase free energy
     _prop_Fj[n] = &this->template getGenericMaterialProperty<Real, is_ad>(_Fj_names[n]);
 
-    // get switching function and derivatives wrt eta_i, the nonlinear variable
-    // _prop_dhjdetai[n] = &getMaterialPropertyDerivative<Real>(_hj_names[n], _v_name);
-    _prop_dhjdetai[n] = &this->template getGenericMaterialProperty<Real, is_ad>(
-        this->derivativePropertyNameFirst(_hj_names[n], _v_name));
+    // get switching function derivatives wrt eta_i, the nonlinear variable
+    _prop_dhjdetai[n] =
+        &this->template getMaterialPropertyDerivative<Real, is_ad>(_hj_names[n], _v_name);
   }
 }
 

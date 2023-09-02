@@ -104,13 +104,12 @@
   [ADGrandPotentialMultiphase_jac]
     type = 'PetscJacobianTester'
     input = 'GrandPotentialMultiphase_AD.i'
-    allow_test_objects = true
     run_sim = 'True'
     cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
     ratio_tol = 1e-7
     difference_tol = 1e-4
     issues = '#15573'
     design = '/ADAllenCahn.md'
-    requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+    requirement = 'The jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
   []
 []

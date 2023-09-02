@@ -10,7 +10,8 @@
 #pragma once
 
 #include "ADKernelValue.h"
-#include "DerivativeMaterialPropertyNameInterface.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 /**
  * This is the Allen-Cahn equation base class that implements the bulk or
@@ -20,7 +21,7 @@
  * ADAllenCahnBase. This is the AD equivalent of ACBulk<>.
  */
 template <typename T>
-class ADAllenCahnBase : public ADKernelValue, public DerivativeMaterialPropertyNameInterface
+class ADAllenCahnBase : public DerivativeMaterialInterface<JvarMapKernelInterface<ADKernelValue>>
 {
 public:
   ADAllenCahnBase(const InputParameters & parameters);
@@ -50,8 +51,7 @@ ADAllenCahnBase<T>::validParams()
 
 template <typename T>
 ADAllenCahnBase<T>::ADAllenCahnBase(const InputParameters & parameters)
-  : ADKernelValue(parameters),
-    DerivativeMaterialPropertyNameInterface(),
+  : DerivativeMaterialInterface<JvarMapKernelInterface<ADKernelValue>>(parameters),
     _prop_L(getADMaterialProperty<T>("mob_name"))
 {
 }

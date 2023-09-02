@@ -11,6 +11,8 @@
 
 #include "ACBulk.h"
 #include "ADAllenCahnBase.h"
+// #include "JvarMapInterface.h"
+// #include "DerivativeMaterialInterface.h"
 
 /**
  * ACSwitching adds terms of the form
@@ -30,7 +32,7 @@ public:
   static InputParameters validParams();
 
   ACSwitchingTempl(const InputParameters & parameters);
-  // virtual void initialSetup() override;
+  virtual void initialSetup() override;
 
 protected:
   /// name of order parameter that derivatives are taken wrt (needed to retrieve the derivative material properties)
