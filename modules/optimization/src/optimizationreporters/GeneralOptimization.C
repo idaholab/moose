@@ -60,7 +60,6 @@ GeneralOptimization::GeneralOptimization(const InputParameters & parameters)
             : nullptr)
 {
   // Check that one and only one set of parameters are given.
-
   if (!(isParamValid("num_values_name") ^ isParamValid("num_values")))
     paramError("Need to supply one and only one of num_values_name or num_values.");
 }

@@ -6,6 +6,9 @@
 
 `ConstraintGradCollector` provides the ability to use constraints with multiple
 parameters.
+[!param](/Reporters/ConstraintGradCollector/gradient_reporter_names) expects the
+gradient reporter names to be grouped in the same order as they were listed in
+the OptimizationReporter in the main app.
 
 
 

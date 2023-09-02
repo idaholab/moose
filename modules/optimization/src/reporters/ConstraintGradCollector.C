@@ -23,7 +23,7 @@ ConstraintGradCollector::validParams()
   params.addRequiredParam<ReporterName>("parameter_reporter_name",
                                         "name of the reporter that holds all the parameters.");
   params.addRequiredParam<std::vector<std::vector<ReporterName>>>(
-      "reporters", "The gradient reporters to accumulate.");
+      "gradient_reporter_names", "The gradient reporters to accumulate.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
