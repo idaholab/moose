@@ -154,6 +154,11 @@ class TaggingCommand(command.CommandComponent):
                 msg += ": Provided 'key' not in allowed_keys (see config.yml); not adding the following to the database: "
                 msg += pair[0]
                 LOG.warning(msg)
+            elif len(good_keys) != 0 and pair[0] in good_keys[0]:
+                msg = page.name
+                msg += ": Following 'key' provided more than once; check markdown file: "
+                msg += pair[0]
+                LOG.error(msg)
             else:
                 good_keys.append([pair[0], pair[1]])
 
