@@ -93,29 +93,16 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertEqual(ast(0)['key_vals'], {})
 
-class TestTaggingDuplicateNamesWarning(MooseDocsTestCase):
-    EXTENSIONS = [core, command, tagging]
-    TEXT = '!tagger test foo:bar'
-    TEXT_DUPLICATE = '!tagger test foo:bar'
-
-    def setupExtension(self, ext):
-        if ext == tagging:
-            return dict(active=True, allowed_keys=['foo'], js_file='tagging.js')
-
-    def setupContent(self):
-        config = [dict(root_dir='python/MooseDocs/test/content', content=['js/tagging.js'])]
-        return common.get_content(config, '.md')
-
-    def test(self):
+    def testTaggingDuplicateNamesWarning(self):
         with self.assertLogs(level=logging.WARNING) as cm:
             ast1 = self.tokenize(self.TEXT)
-            ast2 = self.tokenize(self.TEXT_DUPLICATE)
+            ast2 = self.tokenize(self.TEXT)
         self.assertEqual(len(cm.output), 2)
         self.assertIn('Tag page identifier already exists;', cm.output[1])
         self.assertSize(ast1, 1)
         self.assertEqual(ast1(0)['attr_name'], 'tagger_test')
         self.assertSize(ast2, 1)
-        self.assertEqual(ast2(0)['attr_name'], '') #Not added to global attributes, so name attirbute is empty
+        self.assertEqual(ast2(0)['attr_name'], '') #Not added to global attributes, so name attribute is empty
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
