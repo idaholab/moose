@@ -40,4 +40,13 @@ private:
 
   /// whether to split subdomains using each element's type
   const bool _elem_type_separation;
+
+  /// whether to delete zero or tiny volume elements and stitch all
+  const bool _remove_small_volumes;
+  /// threshold for deletion
+  const Real _min_volume_threshold;
+
+  /// @brief Removes the elements with an absolute volume value below the user threshold
+  /// @param mesh the mesh to modify
+  void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
 };

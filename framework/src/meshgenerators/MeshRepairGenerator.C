@@ -37,6 +37,12 @@ MeshRepairGenerator::validParams()
                         false,
                         "Create new blocks if multiple element types are present in a block");
 
+  params.addParam<bool>("remove_small_elements",
+                        false,
+                        "Whether to remove all small elements below a certain absolute volume "
+                        "threshold and stitch up the mesh");
+  params.addParam<Real>(
+      "volume_threshold", 1e-8, "Minimum absolute size below which to remove elements");
   return params;
 }
 
@@ -46,8 +52,13 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _node_overlap_tol(getParam<Real>("node_overlap_tol")),
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
-    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types"))
+    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
+    _remove_small_volumes(getParam<bool>("remove_small_elements")),
+    _min_volume_threshold(getParam<Real>("volume_threshold"))
 {
+  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
+      !_remove_small_volumes)
+    mooseError("MeshRepairGenerator has not been specified any item to fix");
 }
 
 std::unique_ptr<MeshBase>
@@ -60,7 +71,10 @@ MeshRepairGenerator::generate()
   if (!mesh->is_serial())
     mooseError("MeshRepairGenerator requires a serial mesh. The mesh should not be distributed.");
 
-  if (_fix_overlapping_nodes)
+  if (_remove_small_volumes)
+    removeSmallVolumeElements(mesh);
+
+  if (_fix_overlapping_nodes || _remove_small_volumes)
   {
     _num_fixed_nodes = 0;
     auto pl = mesh->sub_point_locator();
@@ -169,4 +183,27 @@ MeshRepairGenerator::generate()
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_elements_removed = 0;
+  for (auto & elem : mesh->element_ptr_range())
+  {
+    if (std::abs(elem->volume()) < _min_volume_threshold)
+    {
+      num_elements_removed++;
+      // Move all nodes to the centroid
+      const Point centroid = elem->true_centroid();
+      for (auto & node : elem->node_ref_range())
+        node.subtract(node - centroid);
+
+      mesh->delete_elem(elem);
+    }
+  }
+  _console << "Number of small positive volume elements that were deleted: " << num_elements_removed
+           << std::endl;
+
+  mesh->contract();
 }
