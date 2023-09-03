@@ -32,8 +32,6 @@ private:
   const bool _fix_overlapping_nodes;
   /// tolerance for merging overlapping nodes
   const Real _node_overlap_tol;
-  /// counting number of overlapped nodes fixed
-  unsigned int _num_fixed_nodes;
 
   /// whether to flip element orientation such that they no longer have a negative volume
   const bool _fix_element_orientation;
@@ -46,7 +44,11 @@ private:
   /// threshold for deletion
   const Real _min_volume_threshold;
 
-  /// @brief Removes the elements with an absolute volume value below the user threshold
+  /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify
   void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Removes nodes that overlap
+  /// @param mesh the mesh to modify
+  void fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const;
 };

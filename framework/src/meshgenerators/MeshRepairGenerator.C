@@ -74,74 +74,8 @@ MeshRepairGenerator::generate()
   if (_remove_small_volumes)
     removeSmallVolumeElements(mesh);
 
-  if (_fix_overlapping_nodes || _remove_small_volumes)
-  {
-    _num_fixed_nodes = 0;
-    auto pl = mesh->sub_point_locator();
-    std::unordered_set<dof_id_type> nodes_removed;
-    // loop on nodes
-    for (auto & node : mesh->node_ptr_range())
-    {
-      // this node has already been removed
-      if (nodes_removed.count(node->id()))
-        continue;
-
-      // find all the elements around this node
-      std::set<const Elem *> elements;
-      (*pl)(*node, elements);
-
-      for (auto & elem : elements)
-      {
-        bool found = false;
-        for (auto & elem_node : elem->node_ref_range())
-        {
-          if (node->id() == elem_node.id())
-          {
-            found = true;
-            break;
-          }
-        }
-        if (!found)
-        {
-          for (auto & elem_node : elem->node_ref_range())
-          {
-            const Real tol = _node_overlap_tol;
-            // Compares the coordinates
-            const auto x_node = (*node)(0);
-            const auto x_elem_node = elem_node(0);
-            const auto y_node = (*node)(1);
-            const auto y_elem_node = elem_node(1);
-            const auto z_node = (*node)(2);
-            const auto z_elem_node = elem_node(2);
-
-            if (MooseUtils::absoluteFuzzyEqual(x_node, x_elem_node, tol) &&
-                MooseUtils::absoluteFuzzyEqual(y_node, y_elem_node, tol) &&
-                MooseUtils::absoluteFuzzyEqual(z_node, z_elem_node, tol))
-            {
-              // Coordinates are the same but it's not the same node
-              // Replace the node in the element
-              const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
-              nodes_removed.insert(elem_node.id());
-
-              _num_fixed_nodes++;
-              if (_num_fixed_nodes < 10)
-                _console << "Stitching a node at : " << *node << std::endl;
-              else if (_num_fixed_nodes == 10)
-                _console << "Node stitching will now proceed silently." << std::endl;
-            }
-          }
-        }
-      }
-    }
-    _console << "Number of overlapping nodes which got merged: " << _num_fixed_nodes << std::endl;
-    if (mesh->allow_renumbering())
-      mesh->renumber_nodes_and_elements();
-    else
-    {
-      mesh->remove_orphaned_nodes();
-      mesh->update_parallel_id_counts();
-    }
-  }
+  if (_fix_overlapping_nodes)
+    fixOverlappingNodes(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -206,4 +140,74 @@ MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh)
            << std::endl;
 
   mesh->contract();
+}
+
+void
+MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_fixed_nodes = 0;
+  auto pl = mesh->sub_point_locator();
+  std::unordered_set<dof_id_type> nodes_removed;
+  // loop on nodes
+  for (auto & node : mesh->node_ptr_range())
+  {
+    // this node has already been removed
+    if (nodes_removed.count(node->id()))
+      continue;
+
+    // find all the elements around this node
+    std::set<const Elem *> elements;
+    (*pl)(*node, elements);
+
+    for (auto & elem : elements)
+    {
+      bool found = false;
+      for (auto & elem_node : elem->node_ref_range())
+      {
+        if (node->id() == elem_node.id())
+        {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        for (auto & elem_node : elem->node_ref_range())
+        {
+          const Real tol = _node_overlap_tol;
+          // Compares the coordinates
+          const auto x_node = (*node)(0);
+          const auto x_elem_node = elem_node(0);
+          const auto y_node = (*node)(1);
+          const auto y_elem_node = elem_node(1);
+          const auto z_node = (*node)(2);
+          const auto z_elem_node = elem_node(2);
+
+          if (MooseUtils::absoluteFuzzyEqual(x_node, x_elem_node, tol) &&
+              MooseUtils::absoluteFuzzyEqual(y_node, y_elem_node, tol) &&
+              MooseUtils::absoluteFuzzyEqual(z_node, z_elem_node, tol))
+          {
+            // Coordinates are the same but it's not the same node
+            // Replace the node in the element
+            const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
+            nodes_removed.insert(elem_node.id());
+
+            num_fixed_nodes++;
+            if (num_fixed_nodes < 10)
+              _console << "Stitching a node at : " << *node << std::endl;
+            else if (num_fixed_nodes == 10)
+              _console << "Node stitching will now proceed silently." << std::endl;
+          }
+        }
+      }
+    }
+  }
+  _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
+  if (mesh->allow_renumbering())
+    mesh->renumber_nodes_and_elements();
+  else
+  {
+    mesh->remove_orphaned_nodes();
+    mesh->update_parallel_id_counts();
+  }
 }
