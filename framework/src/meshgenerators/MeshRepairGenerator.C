@@ -43,6 +43,10 @@ MeshRepairGenerator::validParams()
                         "threshold and stitch up the mesh");
   params.addParam<Real>(
       "volume_threshold", 1e-8, "Minimum absolute size below which to remove elements");
+  params.addParam<bool>(
+      "absolute_volumes",
+      true,
+      "Whether to consider absolute volumes or not when examining volumes for element deletion");
   return params;
 }
 
@@ -54,11 +58,16 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _remove_small_volumes(getParam<bool>("remove_small_elements")),
-    _min_volume_threshold(getParam<Real>("volume_threshold"))
+    _min_volume_threshold(getParam<Real>("volume_threshold")),
+    _absolute_volumes(getParam<bool>("absolute_volumes"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
       !_remove_small_volumes)
     mooseError("MeshRepairGenerator has not been specified any item to fix");
+  if (!isParamSetByUser("remove_small_elements") &&
+      (isParamSetByUser("volume_threshold") || isParamSetByUser("absolute_volumes")))
+    paramError("remove_small_elements",
+               "Some parameters were passed for a repair operation that was not requested");
 }
 
 std::unique_ptr<MeshBase>
@@ -125,7 +134,8 @@ MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh)
   unsigned int num_elements_removed = 0;
   for (auto & elem : mesh->element_ptr_range())
   {
-    if (std::abs(elem->volume()) < _min_volume_threshold)
+    if ((_absolute_volumes && std::abs(elem->volume()) < _min_volume_threshold) ||
+        (!_absolute_volumes && elem->volume() < _min_volume_threshold))
     {
       num_elements_removed++;
       // Move all nodes to the centroid

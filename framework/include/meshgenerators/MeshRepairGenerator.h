@@ -43,6 +43,8 @@ private:
   const bool _remove_small_volumes;
   /// threshold for deletion
   const Real _min_volume_threshold;
+  /// consider absolute volume or regular volume
+  const bool _absolute_volumes;
 
   /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify
