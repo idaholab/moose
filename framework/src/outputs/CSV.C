@@ -11,7 +11,7 @@
 #include "CSV.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
-#include "Steady.h"
+#include "Executioner.h"
 
 registerMooseObject("MooseApp", CSV);
 
@@ -175,7 +175,7 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
                 << std::right << _linear_iter;
     }
 
-    // These lines enable CSV per-optimization iteration output (Optimization module)
+    // These lines enable things like per-optimization iteration output (Optimization module)
 
     if (_app.getExecutioner()->getIterationOutputFlag() &&
         _current_execute_flag == EXEC_TIMESTEP_END)

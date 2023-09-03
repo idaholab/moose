@@ -25,7 +25,7 @@
 #include "Function.h"
 #include "PiecewiseLinear.h"
 #include "Times.h"
-#include "Steady.h"
+#include "Executioner.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -246,7 +246,7 @@ Output::onInterval()
   // Return true if the current step on the current output interval and within the output time range
   // and within the output step range
   if (_time >= _start_time && _time <= _end_time && _t_step >= _start_step &&
-      _t_step <= _end_step && (getTimeStep() % _interval) == 0)
+      _t_step <= _end_step && (getStep() % _interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true
@@ -270,7 +270,7 @@ Output::onInterval()
 }
 
 int
-Output::getTimeStep()
+Output::getStep()
 {
   if (_app.getExecutioner()->getIterationOutputFlag())
     return _app.getExecutioner()->getIterationNumberOutput();
