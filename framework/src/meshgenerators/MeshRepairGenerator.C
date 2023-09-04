@@ -37,16 +37,6 @@ MeshRepairGenerator::validParams()
                         false,
                         "Create new blocks if multiple element types are present in a block");
 
-  params.addParam<bool>("remove_small_elements",
-                        false,
-                        "Whether to remove all small elements below a certain absolute volume "
-                        "threshold and stitch up the mesh");
-  params.addParam<Real>(
-      "volume_threshold", 1e-8, "Minimum absolute size below which to remove elements");
-  params.addParam<bool>(
-      "absolute_volumes",
-      true,
-      "Whether to consider absolute volumes or not when examining volumes for element deletion");
   return params;
 }
 
@@ -56,18 +46,10 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _node_overlap_tol(getParam<Real>("node_overlap_tol")),
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
-    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
-    _remove_small_volumes(getParam<bool>("remove_small_elements")),
-    _min_volume_threshold(getParam<Real>("volume_threshold")),
-    _absolute_volumes(getParam<bool>("absolute_volumes"))
+    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types"))
 {
-  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_remove_small_volumes)
-    mooseError("MeshRepairGenerator has not been specified any item to fix");
-  if (!isParamSetByUser("remove_small_elements") &&
-      (isParamSetByUser("volume_threshold") || isParamSetByUser("absolute_volumes")))
-    paramError("remove_small_elements",
-               "Some parameters were passed for a repair operation that was not requested");
+  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation)
+    mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
 std::unique_ptr<MeshBase>
@@ -79,9 +61,6 @@ MeshRepairGenerator::generate()
   // Blanket ban on distributed. This can be relaxed for some operations if needed
   if (!mesh->is_serial())
     mooseError("MeshRepairGenerator requires a serial mesh. The mesh should not be distributed.");
-
-  if (_remove_small_volumes)
-    removeSmallVolumeElements(mesh);
 
   if (_fix_overlapping_nodes)
     fixOverlappingNodes(mesh);
@@ -96,32 +75,6 @@ MeshRepairGenerator::generate()
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
-}
-
-void
-MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const
-{
-  unsigned int num_elements_removed = 0;
-  for (auto & elem : mesh->element_ptr_range())
-  {
-    if ((_absolute_volumes && std::abs(elem->volume()) < _min_volume_threshold) ||
-        (!_absolute_volumes && elem->volume() < _min_volume_threshold))
-    {
-      num_elements_removed++;
-      mesh->delete_elem(elem);
-    }
-  }
-  _console << "Number of small volume elements that were deleted: " << num_elements_removed
-           << std::endl;
-
-  if (num_elements_removed > 0)
-  {
-    mesh->contract();
-    mesh->remove_orphaned_nodes();
-    _console << "Some elements were deleted. Triggering node overlap repair operation next"
-             << std::endl;
-    fixOverlappingNodes(mesh);
-  }
 }
 
 void
