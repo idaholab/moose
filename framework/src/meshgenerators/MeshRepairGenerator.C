@@ -92,37 +92,7 @@ MeshRepairGenerator::generate()
 
   // Disambiguate any block that has elements of multiple types
   if (_elem_type_separation)
-  {
-    std::set<subdomain_id_type> ids;
-    mesh->subdomain_ids(ids);
-    // loop on sub-domain
-    for (auto & id : ids)
-    {
-      // Gather all the element types and blocks
-      // ElemType defines an enum for geometric element types
-      std::set<ElemType> types;
-      // loop on elements within this sub-domain
-      for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
-        types.insert(elem->type());
-
-      if (types.size() > 1)
-      {
-        auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-        subdomain_id_type i = 0;
-        for (const auto type : types)
-        {
-          auto new_id = next_block_id + i++;
-          // Create blocks when a block has multiple element types
-          mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
-
-          // Re-assign elements to the new blocks
-          for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
-            if (elem->type() == type)
-              elem->subdomain_id() = new_id;
-        }
-      }
-    }
-  }
+    separateSubdomainsByElementType(mesh);
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
@@ -138,12 +108,6 @@ MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh)
         (!_absolute_volumes && elem->volume() < _min_volume_threshold))
     {
       num_elements_removed++;
-      // Move all nodes to the centroid
-      // we use the vertex_average because the true_centroid will trigger a reinit
-      // and fail on bad elements
-      const Point centroid = elem->vertex_average();
-      for (auto & node : elem->node_ref_range())
-        node.subtract(node - centroid);
       mesh->delete_elem(elem);
     }
   }
@@ -154,8 +118,7 @@ MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh)
   {
     mesh->contract();
     mesh->remove_orphaned_nodes();
-    _console << "Nodes for deleted elements were grouped at former centroid. Triggering node "
-                "overlap repair operation next"
+    _console << "Some elements were deleted. Triggering node overlap repair operation next"
              << std::endl;
     fixOverlappingNodes(mesh);
   }
@@ -195,8 +158,6 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
       {
         for (auto & elem_node : elem->node_ref_range())
         {
-          // if (!elem->is_vertex(elem->get_node_index(&elem_node)))
-          //   continue;
           if (elem_node.id() == node->id())
             continue;
           const Real tol = _node_overlap_tol;
@@ -212,6 +173,14 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
               MooseUtils::absoluteFuzzyEqual(y_node, y_elem_node, tol) &&
               MooseUtils::absoluteFuzzyEqual(z_node, z_elem_node, tol))
           {
+            // Merging two nodes from the same element is almost never a good idea
+            if (elem->get_node_index(node) != libMesh::invalid_uint)
+            {
+              _console << "Two overlapping nodes in element " << elem->id() << " right by "
+                       << elem->vertex_average() << ".\n They will not be stitched" << std::endl;
+              continue;
+            }
+
             // Coordinates are the same but it's not the same node
             // Replace the node in the element
             const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
@@ -238,5 +207,39 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
   {
     mesh->remove_orphaned_nodes();
     mesh->update_parallel_id_counts();
+  }
+}
+
+void
+MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const
+{
+  std::set<subdomain_id_type> ids;
+  mesh->subdomain_ids(ids);
+  // loop on sub-domain
+  for (auto & id : ids)
+  {
+    // Gather all the element types and blocks
+    // ElemType defines an enum for geometric element types
+    std::set<ElemType> types;
+    // loop on elements within this sub-domain
+    for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
+      types.insert(elem->type());
+
+    if (types.size() > 1)
+    {
+      auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+      subdomain_id_type i = 0;
+      for (const auto type : types)
+      {
+        auto new_id = next_block_id + i++;
+        // Create blocks when a block has multiple element types
+        mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
+
+        // Re-assign elements to the new blocks
+        for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
+          if (elem->type() == type)
+            elem->subdomain_id() = new_id;
+      }
+    }
   }
 }

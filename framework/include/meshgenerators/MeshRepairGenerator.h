@@ -53,4 +53,9 @@ private:
   /// @brief Removes nodes that overlap
   /// @param mesh the mesh to modify
   void fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Separate subdomain by element type because some output format (Exodus)
+  ///        do not support mixed element types
+  /// @param mesh the mesh to modify
+  void separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const;
 };
