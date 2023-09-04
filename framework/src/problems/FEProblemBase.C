@@ -673,8 +673,8 @@ FEProblemBase::initialSetup()
 
   SubProblem::initialSetup();
 
-  mooseAssert(_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) <= 1,
-              "Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
+  if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
+    mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
 
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
