@@ -1,0 +1,28 @@
+{
+    "reporters": {
+        "mesh": {
+            "type": "MeshInfo",
+            "values": {
+                "num_nodes": {
+                    "type": "unsigned int"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh": {
+                "num_nodes": 0
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh": {
+                "num_nodes": 3
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
