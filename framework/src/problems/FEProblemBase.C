@@ -174,6 +174,10 @@ FEProblemBase::validParams()
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
+  params.addParam<bool>("allow_initial_conditions_with_restart",
+                        false,
+                        "True to allow the user to specify initial conditions when restarting. "
+                        "Initial conditions can override any restarted field");
 
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
   /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
@@ -282,7 +286,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian",
                               "Nonlinear system(s)");
-  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data",
+  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data "
+                              "allow_initial_conditions_with_restart",
                               "Restart");
   params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
@@ -379,6 +384,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
+    _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
@@ -2999,6 +3005,22 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
                                    InputParameters & parameters)
 {
   parallel_object_only();
+
+  // Forbid initial conditions on a restarted problem, as they would override the restart
+  if (!_allow_ics_during_restart)
+  {
+    std::string restart_method = "";
+    if (_app.isRestarting())
+      restart_method = "a checkpoint restart";
+    else if (_app.getExReaderForRestart())
+      restart_method = "an Exodus restart";
+    if (!restart_method.empty())
+      mooseError(
+          "Initial condition has been specified during ",
+          restart_method,
+          ".\nThis is only allowed if you specify 'allow_initial_conditions_with_restart' to "
+          "the [Problem], as initial conditions can override restarted fields");
+  }
 
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);

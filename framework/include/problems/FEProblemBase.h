@@ -2473,6 +2473,7 @@ private:
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;
   const bool _skip_additional_restart_data;
+  const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
   const bool & _allow_invalid_solution;
