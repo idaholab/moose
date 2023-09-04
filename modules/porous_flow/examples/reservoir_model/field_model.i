@@ -11,6 +11,11 @@
   temperature_unit = Celsius
 []
 
+[Problem]
+  # Variable porepressure has an initial condition despite the restart
+  allow_initial_conditions_with_restart = true
+[]
+
 [Variables]
   [porepressure]
     initial_condition = 20e6
@@ -107,7 +112,7 @@
     type = Water97FluidProperties
   []
   [watertab]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = water
     save_file = false
   []

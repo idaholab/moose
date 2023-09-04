@@ -48,6 +48,11 @@
   []
 []
 
+[Problem]
+  # massfrac0 has an initial condition despite the restart
+  allow_initial_conditions_with_restart = true
+[]
+
 [ICs]
   [massfrac0]
     type = ConstantIC
@@ -72,7 +77,7 @@
   [ptop]
     type = DirichletBC
     variable = pp
-    boundary =  top
+    boundary = top
     value = 1e6
   []
   [pbottom]
@@ -158,7 +163,7 @@
   []
   [poro_fracture]
     type = PorousFlowPorosityConst
-    porosity = 1.0    # this is the true porosity of the fracture
+    porosity = 1.0 # this is the true porosity of the fracture
     block = 'fracture'
   []
   [poro_matrix]
@@ -196,9 +201,9 @@
 
 [Functions]
   [dt_controller]
-     type = PiecewiseConstant
-     x = '0    30   40 100 200 83200'
-     y = '0.01 0.1  1  10  100 32'
+    type = PiecewiseConstant
+    x = '0    30   40 100 200 83200'
+    y = '0.01 0.1  1  10  100 32'
   []
 []
 
@@ -229,12 +234,11 @@
     function = dt_controller
   []
 
-# controls for nonlinear iterations
+  # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-14
   nl_abs_tol = 1e-9
 []
-
 
 [VectorPostprocessors]
   [xmass]

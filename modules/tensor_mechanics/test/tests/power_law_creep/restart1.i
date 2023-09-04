@@ -20,6 +20,10 @@
   []
 []
 
+[Problem]
+  allow_initial_conditions_with_restart = true
+[]
+
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
