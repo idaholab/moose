@@ -139,17 +139,26 @@ MeshRepairGenerator::removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh)
     {
       num_elements_removed++;
       // Move all nodes to the centroid
-      const Point centroid = elem->true_centroid();
+      // we use the vertex_average because the true_centroid will trigger a reinit
+      // and fail on bad elements
+      const Point centroid = elem->vertex_average();
       for (auto & node : elem->node_ref_range())
         node.subtract(node - centroid);
-
       mesh->delete_elem(elem);
     }
   }
-  _console << "Number of small positive volume elements that were deleted: " << num_elements_removed
+  _console << "Number of small volume elements that were deleted: " << num_elements_removed
            << std::endl;
 
-  mesh->contract();
+  if (num_elements_removed > 0)
+  {
+    mesh->contract();
+    mesh->remove_orphaned_nodes();
+    _console << "Nodes for deleted elements were grouped at former centroid. Triggering node "
+                "overlap repair operation next"
+             << std::endl;
+    fixOverlappingNodes(mesh);
+  }
 }
 
 void
@@ -157,6 +166,8 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
 {
   unsigned int num_fixed_nodes = 0;
   auto pl = mesh->sub_point_locator();
+  pl->set_close_to_point_tol(_node_overlap_tol);
+
   std::unordered_set<dof_id_type> nodes_removed;
   // loop on nodes
   for (auto & node : mesh->node_ptr_range())
@@ -184,6 +195,10 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
       {
         for (auto & elem_node : elem->node_ref_range())
         {
+          // if (!elem->is_vertex(elem->get_node_index(&elem_node)))
+          //   continue;
+          if (elem_node.id() == node->id())
+            continue;
           const Real tol = _node_overlap_tol;
           // Compares the coordinates
           const auto x_node = (*node)(0);
@@ -204,7 +219,8 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
 
             num_fixed_nodes++;
             if (num_fixed_nodes < 10)
-              _console << "Stitching a node at : " << *node << std::endl;
+              _console << "Stitching nodes " << *node << " and            " << elem_node
+                       << std::endl;
             else if (num_fixed_nodes == 10)
               _console << "Node stitching will now proceed silently." << std::endl;
           }
@@ -214,7 +230,10 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
   }
   _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
   if (mesh->allow_renumbering())
+  {
+    mesh->remove_orphaned_nodes();
     mesh->renumber_nodes_and_elements();
+  }
   else
   {
     mesh->remove_orphaned_nodes();
