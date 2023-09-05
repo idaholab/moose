@@ -32,12 +32,12 @@ class TestTaggingInit(MooseDocsTestCase):
 
 class TestTaggingCommand(MooseDocsTestCase):
     EXTENSIONS = [core, command, tagging]
-    TEXT = '!tagger test application:moose foo:bar'
-    TEXT_POSTSPACE = '!tagger test  application:moose foo:bar'
-    TEXT_PRESPACE = '!tagger  test application:moose foo:bar'
-    TEXT_DUPLICATE = '!tagger test application:moose application:bar'
-    TEXT_NOT_ALLOWED = '!tagger test application:moose application_wrong:bar'
-    TEXT_NO_KEYS = '!tagger test'
+    TEXT = '!tag test application:moose foo:bar'
+    TEXT_POSTSPACE = '!tag test  application:moose foo:bar'
+    TEXT_PRESPACE = '!tag  test application:moose foo:bar'
+    TEXT_DUPLICATE = '!tag test application:moose application:bar'
+    TEXT_NOT_ALLOWED = '!tag test application:moose application_wrong:bar'
+    TEXT_NO_KEYS = '!tag test'
 
     def setupExtension(self, ext):
         if ext == tagging:

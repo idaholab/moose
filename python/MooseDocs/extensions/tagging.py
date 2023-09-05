@@ -14,23 +14,23 @@ from ..common import __init__
 from . import command
 
 """
-This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string
-that represents the markdown file that is associated with an arbitrary list of key:value pairs. Arbitrary
-spacing is allowed after the name, however things become tricky with spaces before the name.
-Example: '!tagger name    k1:v1  ka:va thing1:thing2' is okay, but an IndexError could occur if
-'!tagger  name'. If this case occurs, the extension will try to determine what the intended name was
+This extension defines the tagger command: !tag name path key:value. The tag command will except a string
+that represents the originating markdown file and is associated with an arbitrary list of key:value pairs.
+Arbitrary spacing is allowed after the name, however things become tricky with spaces before the name.
+Example: '!tag name    k1:v1  ka:va thing1:thing2' is okay, but an IndexError could occur if
+'!tag  name'. If this case occurs, the extension will try to determine what the intended name was
 and continue to avoid the error and report the guess as a warning to the developer.
 
 ALERT: The tagging extension is experimental! If documentation tagging features are desired, please
 request assistance from the MOOSE Framework development team.
 
-Tagger checks that all linked moose pages are unique and will not allow duplicate names in the
-dictionary.  Duplicate key value pairs are allowed.
+The tagging extension checks that all linked moose pages are unique and will not allow duplicate names
+in the dictionary. Duplicate key value pairs are allowed.
 
 Example Tagger command in *.md:
-!tagger geochem keyg:valg keychem:valuechem
+!tag geochem keyg:valg keychem:valuechem
 
-Example output tag dictionary:
+Example output tag dictionary for multiple pages, names, and key:value pairs:
 {"data":
 [{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
 {"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
@@ -130,7 +130,7 @@ class TaggingExtension(command.CommandExtension):
 
 
 class TaggingCommand(command.CommandComponent):
-    COMMAND= 'tagger'
+    COMMAND= 'tag'
     SUBCOMMAND= '*'
 
     @staticmethod
@@ -151,7 +151,7 @@ class TaggingCommand(command.CommandComponent):
             key_vals=keys.split(':')
             if len(key_vals) == 1 and name is None:
                 msg = "%s: It appears that no 'name' was provided for defined tag (due to a spacing " \
-                      "error between '!tagger' and the intended name or another mistake); check " \
+                      "error between '!tag' and the intended name or another mistake); check " \
                       "markdown file. Guessing a 'name' and continuing: %s"
                 LOG.warning(msg, page.name, key_vals[0])
                 name = key_vals[0]
