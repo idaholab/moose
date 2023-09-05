@@ -74,19 +74,12 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
 
-  std::vector<RankTwoTensor> inelastic_strain_increment(2);
-
   for (const auto i_rmm : index_range(_models))
-    inelastic_strain_increment[i_rmm].zero();
+    _inelastic_strain_increment[i_rmm].zero();
 
   elastic_strain_increment = _strain_increment[_qp];
-  // form the trial stress, with the check for changed elasticity constants
-  if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-    _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-  else
-  {
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
-  }
+  computeStress(elastic_strain_increment, _stress[_qp]);
+
   const RankTwoTensor trial_stress = _stress[_qp];
   const RankTwoTensor deviatoric_trial_stress = trial_stress.deviatoric();
   const Real effective_trial_stress =
@@ -97,8 +90,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
   //
   _creep_model->setQp(_qp);
   computeAdmissibleState(
-      0, elastic_strain_increment, inelastic_strain_increment[0], _consistent_tangent_operator[0]);
-  Real effective_creep_strain_increment = _creep_model->effectiveInelasticStrainIncrement();
+      0, elastic_strain_increment, _inelastic_strain_increment[0], _consistent_tangent_operator[0]);
+  _effective_creep_strain_increment = _creep_model->effectiveInelasticStrainIncrement();
 
   //
   // Now check the plasticity model.
@@ -106,14 +99,13 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
   //
   _plasticity_model->setQp(_qp);
   computeAdmissibleState(
-      1, elastic_strain_increment, inelastic_strain_increment[1], _consistent_tangent_operator[1]);
-
+      1, elastic_strain_increment, _inelastic_strain_increment[1], _consistent_tangent_operator[1]);
+  _effective_plastic_strain_increment = _plasticity_model->effectiveInelasticStrainIncrement();
   const Real yield_condition = _plasticity_model->yieldCondition();
-  Real effective_plastic_strain_increment = _plasticity_model->effectiveInelasticStrainIncrement();
 
   if (yield_condition > 0.0) // yielding even with maximum creep strain
   {
-    const Real max_effective_creep_strain_increment = effective_creep_strain_increment;
+    const Real max_effective_creep_strain_increment = _effective_creep_strain_increment;
 
     //
     // Compute plastic response given no creep
@@ -122,9 +114,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
     _stress[_qp] = trial_stress;
     computeAdmissibleState(1,
                            elastic_strain_increment,
-                           inelastic_strain_increment[1],
+                           _inelastic_strain_increment[1],
                            _consistent_tangent_operator[1]);
-
     const Real max_effective_plastic_strain_increment =
         _plasticity_model->effectiveInelasticStrainIncrement();
 
@@ -140,9 +131,9 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
     // the second term by adding the plastic strain.
     //
     Real creep_residual = _creep_model->computeResidual(effective_trial_stress,
-                                                        effective_creep_strain_increment +
-                                                            effective_plastic_strain_increment);
-    creep_residual += effective_plastic_strain_increment;
+                                                        _effective_creep_strain_increment +
+                                                            _effective_plastic_strain_increment);
+    creep_residual += _effective_plastic_strain_increment;
 
     //
     // We want the plasticity resdiual to be (effective_trial_stress - r - yield_stress)/3G - (total
@@ -153,8 +144,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
     // creep strain to correct the final term in our desired residual
     //
     Real plasticity_residual = _plasticity_model->computeResidual(
-        effective_trial_stress, effective_plastic_strain_increment);
-    plasticity_residual -= effective_creep_strain_increment;
+        effective_trial_stress, _effective_plastic_strain_increment);
+    plasticity_residual -= _effective_creep_strain_increment;
 
     unsigned int counter = 0;
     Real residual = 0;
@@ -174,8 +165,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
       // A11 (creep,creep)
       //
       Real A11 = _creep_model->computeDerivative(effective_trial_stress,
-                                                 effective_creep_strain_increment +
-                                                     effective_plastic_strain_increment);
+                                                 _effective_creep_strain_increment +
+                                                     _effective_plastic_strain_increment);
       //
       // A12 (creep,plasticity)
       //
@@ -188,7 +179,7 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
       // A22 (plasticity,plasticity)
       //
       Real A22 = _plasticity_model->computeDerivative(effective_trial_stress,
-                                                      effective_plastic_strain_increment);
+                                                      _effective_plastic_strain_increment);
 
       Real rhs1 = creep_residual;
       Real rhs2 = plasticity_residual;
@@ -207,46 +198,46 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
       Real x2 = rhs2 / A22;
       Real x1 = (rhs1 - A12 * x2) / A11;
 
-      while (effective_creep_strain_increment - x1 < 0)
+      while (_effective_creep_strain_increment - x1 < 0)
         x1 *= 0.5;
-      while (effective_plastic_strain_increment - x2 < 0)
+      while (_effective_plastic_strain_increment - x2 < 0)
         x2 *= 0.5;
 
-      while (effective_creep_strain_increment - x1 > max_effective_creep_strain_increment)
+      while (_effective_creep_strain_increment - x1 > max_effective_creep_strain_increment)
         x1 *= 0.5;
-      while (effective_plastic_strain_increment - x2 > max_effective_plastic_strain_increment)
+      while (_effective_plastic_strain_increment - x2 > max_effective_plastic_strain_increment)
         x2 *= 0.5;
 
       // This check is to avoid a fpe in the creep law.
       // Maybe it is better to check for this condition in the creep law
-      if (effective_trial_stress < threeG * (effective_creep_strain_increment - x1 +
-                                             effective_plastic_strain_increment - x2))
+      if (effective_trial_stress < threeG * (_effective_creep_strain_increment - x1 +
+                                             _effective_plastic_strain_increment - x2))
       {
         const Real sum =
-            effective_creep_strain_increment - x1 + effective_plastic_strain_increment - x2;
+            _effective_creep_strain_increment - x1 + _effective_plastic_strain_increment - x2;
         const Real factor = 0.9 * effective_trial_stress / (threeG * sum);
-        const Real cNew = (effective_creep_strain_increment - x1) * factor;
-        const Real pNew = (effective_plastic_strain_increment - x2) * factor;
-        x1 = effective_creep_strain_increment - cNew;
-        x2 = effective_plastic_strain_increment - pNew;
+        const Real cNew = (_effective_creep_strain_increment - x1) * factor;
+        const Real pNew = (_effective_plastic_strain_increment - x2) * factor;
+        x1 = _effective_creep_strain_increment - cNew;
+        x2 = _effective_plastic_strain_increment - pNew;
       }
 
-      effective_creep_strain_increment -= x1;
-      effective_plastic_strain_increment -= x2;
+      _effective_creep_strain_increment -= x1;
+      _effective_plastic_strain_increment -= x2;
 
       //
       // The residual for the creep law is (creep rate)*dt - (creep strain increment)
       //
       creep_residual = _creep_model->computeResidual(effective_trial_stress,
-                                                     effective_creep_strain_increment +
-                                                         effective_plastic_strain_increment);
-      creep_residual += effective_plastic_strain_increment;
+                                                     _effective_creep_strain_increment +
+                                                         _effective_plastic_strain_increment);
+      creep_residual += _effective_plastic_strain_increment;
       //
       // The residual for plasticity is (effective_trial_stress - r - yield_stress)/3G - scalar
       //
       plasticity_residual = _plasticity_model->computeResidual(effective_trial_stress,
-                                                               effective_plastic_strain_increment);
-      plasticity_residual -= effective_creep_strain_increment;
+                                                               _effective_plastic_strain_increment);
+      plasticity_residual -= _effective_creep_strain_increment;
 
       residual =
           std::sqrt(creep_residual * creep_residual + plasticity_residual * plasticity_residual);
@@ -261,8 +252,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
                  << "\n plasticity residual = " << plasticity_residual
                  << "\n creep iteration increment = " << x1
                  << "\n plasticity iteration increment = " << x2
-                 << "\n creep scalar strain = " << effective_creep_strain_increment
-                 << "\n plasticity scalar strain = " << effective_plastic_strain_increment
+                 << "\n creep scalar strain = " << _effective_creep_strain_increment
+                 << "\n plasticity scalar strain = " << _effective_plastic_strain_increment
                  << "\n max creep scalar strain = " << max_effective_creep_strain_increment
                  << "\n max plasticity scalar strain = " << max_effective_plastic_strain_increment
                  << "\n stress convergence absolute tolerance = " << _absolute_tolerance
@@ -281,8 +272,8 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
           << "\n stress convergence relative tolerance = " << _relative_tolerance
           << "\n absolute residual = " << residual << "\n creep residual = " << creep_residual
           << "\n plasticity residual = " << plasticity_residual
-          << "\n creep scalar strain = " << effective_creep_strain_increment
-          << "\n plasticity scalar strain = " << effective_plastic_strain_increment
+          << "\n creep scalar strain = " << _effective_creep_strain_increment
+          << "\n plasticity scalar strain = " << _effective_plastic_strain_increment
           << "\n max creep scalar strain = " << max_effective_creep_strain_increment
           << "\n max plasticity scalar strain = " << max_effective_plastic_strain_increment
           << "\n stress convergence absolute tolerance = " << _absolute_tolerance << std::endl;
@@ -291,82 +282,20 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
                            _name + msg.str());
     }
   }
-  if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
-  {
-    if (effective_creep_strain_increment != 0.0)
-      inelastic_strain_increment[0] =
-          deviatoric_trial_stress *
-          (1.5 * effective_creep_strain_increment / effective_trial_stress);
-    else
-      inelastic_strain_increment[0].zero();
+  computeInelasticStrainIncrements(effective_trial_stress, deviatoric_trial_stress);
 
-    if (effective_plastic_strain_increment != 0.0)
-      inelastic_strain_increment[1] =
-          deviatoric_trial_stress *
-          (1.5 * effective_plastic_strain_increment / effective_trial_stress);
-    else
-      inelastic_strain_increment[1].zero();
-  }
-  else
-  {
-    inelastic_strain_increment[0].zero();
-    inelastic_strain_increment[1].zero();
-  }
-
-  _creep_model->updateEffectiveInelasticStrainIncrement(effective_creep_strain_increment);
-  _plasticity_model->updateEffectiveInelasticStrainIncrement(effective_plastic_strain_increment);
-  _creep_model->updateEffectiveInelasticStrain(effective_creep_strain_increment);
-  _plasticity_model->updateEffectiveInelasticStrain(effective_plastic_strain_increment);
-  _creep_model->resetIncrementalMaterialProperties();
-  _creep_model->computeStressFinalize(inelastic_strain_increment[0]);
-  _plasticity_model->computeStressFinalize(inelastic_strain_increment[1]);
+  finalizeConstitutiveModels();
 
   combined_inelastic_strain_increment.zero();
   for (const auto i_rmm : make_range(_num_models))
-    combined_inelastic_strain_increment += inelastic_strain_increment[i_rmm];
+    combined_inelastic_strain_increment += _inelastic_strain_increment[i_rmm];
 
   if (yield_condition > 0.0)
   {
     elastic_strain_increment = _strain_increment[_qp] - combined_inelastic_strain_increment;
     _stress[_qp] = _elasticity_tensor[_qp] * (elastic_strain_increment + _elastic_strain_old[_qp]);
 
-    auto elastic_strain_inc = _strain_increment[_qp] - inelastic_strain_increment[1];
-
-    RankTwoTensor stress;
-    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-      stress = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_inc);
-    else
-    {
-      if (_damage_model)
-        stress = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_inc;
-      else
-        stress = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_inc;
-    }
-
-    RankTwoTensor deviatoric_stress = stress.deviatoric();
-    Real effective_stress = std::sqrt(1.5 * deviatoric_stress.doubleContraction(deviatoric_stress));
-
-    _creep_model->computeTangentOperator(
-        effective_stress, _stress[_qp], _consistent_tangent_operator[0]);
-
-    elastic_strain_inc = _strain_increment[_qp] - inelastic_strain_increment[0];
-
-    // form the stress, with the check for changed elasticity constants
-    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-      stress = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_inc);
-    else
-    {
-      if (_damage_model)
-        stress = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_inc;
-      else
-        stress = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_inc;
-    }
-
-    deviatoric_stress = stress.deviatoric();
-    effective_stress = std::sqrt(1.5 * deviatoric_stress.doubleContraction(deviatoric_stress));
-
-    _plasticity_model->computeTangentOperator(
-        effective_stress, _stress[_qp], _consistent_tangent_operator[1]);
+    computeTangentOperators();
   }
   else
   {
@@ -387,4 +316,82 @@ ComputeCreepPlasticityStress::updateQpState(RankTwoTensor & elastic_strain_incre
     _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
   else
     _material_timestep_limit[_qp] = 1.0 / _material_timestep_limit[_qp];
+}
+
+void
+ComputeCreepPlasticityStress::computeStress(const RankTwoTensor & elastic_strain_increment,
+                                            RankTwoTensor & stress)
+{
+  // form the stress, with the check for changed elasticity constants
+  if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+    stress = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+  else
+  {
+    if (_damage_model)
+      stress = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_increment;
+    else
+      stress = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  }
+}
+
+void
+ComputeCreepPlasticityStress::computeTangentOperators()
+{
+  auto elastic_strain_inc = _strain_increment[_qp] - _inelastic_strain_increment[1];
+
+  RankTwoTensor stress;
+  computeStress(elastic_strain_inc, stress);
+  RankTwoTensor deviatoric_stress = stress.deviatoric();
+  Real effective_stress = std::sqrt(1.5 * deviatoric_stress.doubleContraction(deviatoric_stress));
+
+  _creep_model->computeTangentOperator(
+      effective_stress, _stress[_qp], _consistent_tangent_operator[0]);
+
+  elastic_strain_inc = _strain_increment[_qp] - _inelastic_strain_increment[0];
+
+  computeStress(elastic_strain_inc, stress);
+  deviatoric_stress = stress.deviatoric();
+  effective_stress = std::sqrt(1.5 * deviatoric_stress.doubleContraction(deviatoric_stress));
+
+  _plasticity_model->computeTangentOperator(
+      effective_stress, _stress[_qp], _consistent_tangent_operator[1]);
+}
+
+void
+ComputeCreepPlasticityStress::computeInelasticStrainIncrements(
+    Real effective_trial_stress, const RankTwoTensor & deviatoric_trial_stress)
+{
+  if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
+  {
+    if (_effective_creep_strain_increment != 0.0)
+      _inelastic_strain_increment[0] =
+          deviatoric_trial_stress *
+          (1.5 * _effective_creep_strain_increment / effective_trial_stress);
+    else
+      _inelastic_strain_increment[0].zero();
+
+    if (_effective_plastic_strain_increment != 0.0)
+      _inelastic_strain_increment[1] =
+          deviatoric_trial_stress *
+          (1.5 * _effective_plastic_strain_increment / effective_trial_stress);
+    else
+      _inelastic_strain_increment[1].zero();
+  }
+  else
+  {
+    _inelastic_strain_increment[0].zero();
+    _inelastic_strain_increment[1].zero();
+  }
+}
+
+void
+ComputeCreepPlasticityStress::finalizeConstitutiveModels()
+{
+  _creep_model->updateEffectiveInelasticStrainIncrement(_effective_creep_strain_increment);
+  _plasticity_model->updateEffectiveInelasticStrainIncrement(_effective_plastic_strain_increment);
+  _creep_model->updateEffectiveInelasticStrain(_effective_creep_strain_increment);
+  _plasticity_model->updateEffectiveInelasticStrain(_effective_plastic_strain_increment);
+  _creep_model->resetIncrementalMaterialProperties();
+  _creep_model->computeStressFinalize(_inelastic_strain_increment[0]);
+  _plasticity_model->computeStressFinalize(_inelastic_strain_increment[1]);
 }
