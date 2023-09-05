@@ -74,7 +74,8 @@ NearestPointIntegralVariablePostprocessor::finalize()
   for (auto & user_object : _user_objects)
   {
     user_object->finalize();
-    _np_post_processor_values[i++] = user_object->getValue();
+    const auto & const_user_object = *user_object;
+    _np_post_processor_values[i++] = const_user_object.getValue();
   }
 }
 

@@ -4076,7 +4076,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     // them being stored.  This wouldn't be a problem if all userobjects satisfied the dependency
     // resolver interface and could be sorted appropriately with the general userobjects, but they
     // don't.
-    auto pp = dynamic_cast<Postprocessor *>(obj);
+    auto pp = dynamic_cast<const Postprocessor *>(obj);
     if (pp)
     {
       _reporter_data.finalize(obj->name());
