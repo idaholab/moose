@@ -20,8 +20,8 @@ ParsedElementDeletionGenerator::validParams()
   params.addClassDescription(
       "Removes elements such that the parsed expression is evaluated as strictly positive. "
       "The parameters of the parsed expression can be the X,Y,Z coordinates of the "
-      "element vertex average (must be 'x','y','z' in the expression) and the element volume "
-      "(must be 'volume' in the expression).");
+      "element vertex average (must be 'x','y','z' in the expression), the element volume "
+      "(must be 'volume' in the expression) and the element id ('id' in the expression).");
   params.addRequiredParam<ParsedFunctionExpression>(
       "expression", "Expression to evaluate to decide whether an element should be deleted");
   params.addParam<std::vector<std::string>>("constant_names",
@@ -46,10 +46,10 @@ ParsedElementDeletionGenerator::ParsedElementDeletionGenerator(const InputParame
                       getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
-  if (_function->Parse(getParam<ParsedFunctionExpression>("expression"), "x,y,z,volume") >= 0)
+  if (_function->Parse(getParam<ParsedFunctionExpression>("expression"), "x,y,z,volume,id") >= 0)
     paramError("expression", "Invalid function: ", _function->ErrorMsg());
 
-  _func_params.resize(4);
+  _func_params.resize(5);
 }
 
 bool
@@ -59,6 +59,7 @@ ParsedElementDeletionGenerator::shouldDelete(const Elem * elem)
   for (const auto i : make_range(3))
     _func_params[i] = vertex_average(i);
   _func_params[3] = elem->volume();
+  _func_params[4] = elem->id();
 
   return evaluate(_function, "expression") > 0;
 }
