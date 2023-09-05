@@ -175,7 +175,7 @@ FEProblemBase::validParams()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
   params.addParam<bool>("allow_initial_conditions_with_restart",
-                        false,
+                        true,
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
@@ -3006,6 +3006,10 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
 {
   parallel_object_only();
 
+  // before we start to mess with the initial condition, we need to check parameters for errors.
+  parameters.checkParams(name);
+  const std::string & var_name = parameters.get<VariableName>("variable");
+
   // Forbid initial conditions on a restarted problem, as they would override the restart
   if (!_allow_ics_during_restart)
   {
@@ -3013,21 +3017,27 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
     if (_app.isRestarting())
       restart_method = "a checkpoint restart";
     else if (_app.getExReaderForRestart())
-      restart_method = "an Exodus restart";
+    {
+      std::vector<std::string> restarted_vars = _app.getExReaderForRestart()->get_elem_var_names();
+      const auto nodal_vars = _app.getExReaderForRestart()->get_nodal_var_names();
+      const auto global_vars = _app.getExReaderForRestart()->get_global_var_names();
+      restarted_vars.insert(restarted_vars.end(), nodal_vars.begin(), nodal_vars.end());
+      restarted_vars.insert(restarted_vars.end(), global_vars.begin(), global_vars.end());
+
+      if (std::find(restarted_vars.begin(), restarted_vars.end(), var_name) != restarted_vars.end())
+        restart_method = "an Exodus restart, by IC object '" + ic_name + "' for variable '" + name +
+                         "' that is also being restarted";
+    }
     if (!restart_method.empty())
       mooseError(
-          "Initial condition has been specified during ",
+          "Initial conditions have been specified during ",
           restart_method,
           ".\nThis is only allowed if you specify 'allow_initial_conditions_with_restart' to "
           "the [Problem], as initial conditions can override restarted fields");
   }
 
-  // before we start to mess with the initial condition, we need to check parameters for errors.
-  parameters.checkParams(name);
-
   parameters.set<SubProblem *>("_subproblem") = this;
 
-  const std::string & var_name = parameters.get<VariableName>("variable");
   // field IC
   if (hasVariable(var_name))
   {
@@ -3298,8 +3308,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       // FV, DG, etc.) - but currently we always do it.  Figure out how to fix
       // this.
 
-      // The name of the object being created, this is changed multiple times as objects are created
-      // below
+      // The name of the object being created, this is changed multiple times as objects are
+      // created below
       std::string object_name;
 
       // Create a copy of the supplied parameters to the setting for "_material_data_type" isn't
@@ -3336,7 +3346,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       const auto param_names =
           _app.getInputParameterWarehouse().getControllableParameterNames(name);
 
-      // Connect parameters of the primary Material object to those on the face and neighbor objects
+      // Connect parameters of the primary Material object to those on the face and neighbor
+      // objects
       for (const auto & p_name : param_names)
       {
         MooseObjectParameterName primary_name(MooseObjectName(base, material->name()),
@@ -3783,8 +3794,8 @@ FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
 bool
 FEProblemBase::hasPostprocessor(const std::string & name) const
 {
-  mooseDeprecated(
-      "FEProblemBase::hasPostprocssor is being removed; use hasPostprocessorValueByName instead.");
+  mooseDeprecated("FEProblemBase::hasPostprocssor is being removed; use "
+                  "hasPostprocessorValueByName instead.");
   return hasPostprocessorValueByName(name);
 }
 
@@ -4229,7 +4240,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     if (!userobjs.empty())
     {
       // non-nodal user objects have to be run separately before the nodal user objects run
-      // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
+      // because some nodal user objects (NodalNormal related) depend on elemental user objects
+      // :-(
       ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
@@ -4316,7 +4328,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                 // Otherwise we don't know what to do
                 mooseError(
                     "We caught an exception during computation of mortar user objects outside of "
-                    "residual evaluation. Unfortunately we don't know how to handle this case, so "
+                    "residual evaluation. Unfortunately we don't know how to handle this case, "
+                    "so "
                     "we will abort.");
             };
             try

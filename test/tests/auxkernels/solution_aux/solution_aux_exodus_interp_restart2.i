@@ -71,6 +71,6 @@
 [Problem]
   restart_file_base = solution_aux_exodus_interp_restart1_out_cp/0005
   # There are initial conditions overwriting the restart on the nonlinear variables
-  # However this test is targetted at the auxiliary variable initialized from the solution uo so it's ok
+  # However this test is targeted at the auxiliary variable initialized from the solution uo so it's ok
   allow_initial_conditions_with_restart = true
 []

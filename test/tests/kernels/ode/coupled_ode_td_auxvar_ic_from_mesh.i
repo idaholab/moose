@@ -70,7 +70,7 @@
 
 [Problem]
   # There are initial conditions overwriting the restart on the nonlinear variables
-  # However this test is targetted at the auxiliary variable restart so it's ok
+  # However this test is targeted at the auxiliary variable restart so it's ok
   allow_initial_conditions_with_restart = true
 []
 
