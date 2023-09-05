@@ -55,8 +55,9 @@ ParsedElementDeletionGenerator::ParsedElementDeletionGenerator(const InputParame
 bool
 ParsedElementDeletionGenerator::shouldDelete(const Elem * elem)
 {
+  const auto vertex_average = elem->vertex_average();
   for (const auto i : make_range(3))
-    _func_params[i] = elem->vertex_average()(i);
+    _func_params[i] = vertex_average(i);
   _func_params[3] = elem->volume();
 
   return evaluate(_function, "expression") > 0;

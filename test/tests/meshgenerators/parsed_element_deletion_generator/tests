@@ -7,7 +7,6 @@
     input = 'cut_in_half.i'
     jsondiff = 'cut_in_half_json.json'
     recover = false
-
     requirement = 'The system shall have the ability to remove elements based on their vertex average position.'
   []
   [volume_too_small]
@@ -15,7 +14,6 @@
     input = 'cut_the_small.i'
     jsondiff = 'cut_the_small_json.json'
     recover = false
-
     requirement = 'The system shall have the ability to remove elements based on their volume.'
   []
 []

@@ -74,7 +74,7 @@ MeshRepairGenerator::generate()
     separateSubdomainsByElementType(mesh);
 
   mesh->set_isnt_prepared();
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return mesh;
 }
 
 void
@@ -152,10 +152,7 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
   }
   _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
   if (mesh->allow_renumbering())
-  {
-    mesh->remove_orphaned_nodes();
     mesh->renumber_nodes_and_elements();
-  }
   else
   {
     mesh->remove_orphaned_nodes();
@@ -169,7 +166,7 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
   std::set<subdomain_id_type> ids;
   mesh->subdomain_ids(ids);
   // loop on sub-domain
-  for (auto & id : ids)
+  for (const auto id : ids)
   {
     // Gather all the element types and blocks
     // ElemType defines an enum for geometric element types
@@ -178,9 +175,11 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
     for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
       types.insert(elem->type());
 
+    // This call must be performed on all processes
+    auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+
     if (types.size() > 1)
     {
-      auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
       subdomain_id_type i = 0;
       for (const auto type : types)
       {
