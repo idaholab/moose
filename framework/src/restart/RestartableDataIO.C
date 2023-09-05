@@ -27,14 +27,20 @@ RestartableDataIO::RestartableDataIO(MooseApp & app, std::vector<RestartableData
 {
 }
 
-RestartableDataMap &
-RestartableDataIO::currentData(const THREAD_ID tid)
+const RestartableDataMap &
+RestartableDataIO::currentData(const THREAD_ID tid) const
 {
   mooseAssert(dataSize() > tid, "Invalid thread");
 
   if (std::holds_alternative<RestartableDataMap *>(_data))
     return *std::get<RestartableDataMap *>(_data);
   return (*std::get<std::vector<RestartableDataMap> *>(_data))[tid];
+}
+
+RestartableDataMap &
+RestartableDataIO::currentData(const THREAD_ID tid)
+{
+  return const_cast<RestartableDataMap &>(std::as_const(*this).currentData(tid));
 }
 
 std::size_t

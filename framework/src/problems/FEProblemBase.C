@@ -1195,6 +1195,7 @@ FEProblemBase::initialSetup()
   // We do this late to allow objects to get late restartable data
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
     _app.finalizeRestore();
+  _app.finalizeRestartableMetaData();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
 }

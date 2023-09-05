@@ -70,8 +70,6 @@ TestMeshMetaData::checkMeshMetaData(const std::string mesh_data_name, const T re
 {
   if (hasMeshProperty<float>(mesh_data_name, _input))
     mooseError("Mesh metadata ", mesh_data_name, " of incorrect type was found");
-  if (!hasMeshProperty(mesh_data_name, _input))
-    mooseError("Mesh metadata ", mesh_data_name, " is missing");
   if (!hasMeshProperty<T>(mesh_data_name, _input))
     mooseError("Mesh metadata ",
                mesh_data_name,

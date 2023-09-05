@@ -98,14 +98,12 @@ TEST_F(RestartableDataIOTest, readWrite)
   RestartableDataReader reader(*_app, rdm);
   reader.setInput(std::move(header_stream), std::move(data_stream));
   reader.restore();
-
-  EXPECT_FALSE(reader.hasData<unsigned int>("foo"));
+  auto & late_restorer = reader.getLateRestorer();
 
   // Make sure every other value is there and has the right value
   for (const auto & [name, info] : data)
   {
-    EXPECT_TRUE(reader.hasData<unsigned int>(name));
-    EXPECT_FALSE(reader.hasData<int>(name));
+    EXPECT_EQ(info.no_declare, late_restorer.isRestorable<unsigned int>(name));
 
     if (!info.no_declare)
     {
@@ -118,12 +116,12 @@ TEST_F(RestartableDataIOTest, readWrite)
 
       try
       {
-        reader.restoreData<unsigned int>(name);
+        late_restorer.restore<unsigned int>(name);
         FAIL();
       }
       catch (const std::exception & err)
       {
-        const auto pos = std::string(err.what()).find("already been declared");
+        const auto pos = std::string(err.what()).find("already declared");
         ASSERT_TRUE(pos != std::string::npos);
       }
     }
@@ -144,7 +142,7 @@ TEST_F(RestartableDataIOTest, readWrite)
         ASSERT_TRUE(pos != std::string::npos);
       }
 
-      auto & val = reader.restoreData<unsigned int>(name);
+      auto & val = late_restorer.restore<unsigned int>(name);
       EXPECT_EQ(val, info.value);
     }
 

@@ -25,14 +25,16 @@
 RestartableDataReader::RestartableDataReader(MooseApp & app, RestartableDataMap & data)
   : RestartableDataIO(app, data),
     _is_restoring(false),
-    _error_on_different_number_of_processors(true)
+    _error_on_different_number_of_processors(true),
+    _late_restorer(*this)
 {
 }
 
 RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data)
   : RestartableDataIO(app, data),
     _is_restoring(false),
-    _error_on_different_number_of_processors(true)
+    _error_on_different_number_of_processors(true),
+    _late_restorer(*this)
 {
 }
 
@@ -222,6 +224,14 @@ RestartableDataReader::hasData(const std::string & data_name,
   return false;
 }
 
+bool
+RestartableDataReader::isLateRestorable(const std::string & data_name,
+                                        const std::type_info & type,
+                                        const THREAD_ID tid) const
+{
+  return isRestoring() && hasData(data_name, type, tid) && !currentData(tid).hasData(data_name);
+}
+
 const RestartableDataReader::HeaderEntry *
 RestartableDataReader::queryHeader(const std::string & data_name, const THREAD_ID tid) const
 {
@@ -340,19 +350,31 @@ RestartableDataReader::isSameType(const RestartableDataReader::HeaderEntry & hea
   return header_entry.type == type.name();
 }
 
-RestartableDataValue &
-RestartableDataReader::restoreData(const std::string & data_name,
-                                   std::unique_ptr<RestartableDataValue> value,
-                                   const THREAD_ID tid)
+const RestartableDataValue &
+RestartableDataReader::restoreLateData(std::unique_ptr<RestartableDataValue> value,
+                                       const THREAD_ID tid,
+                                       const RestoreLateDataKey)
 {
-  auto & data_map = currentData(tid);
-  if (data_map.hasData(data_name))
-    mooseError("RestartableDataReader::restoreData(): Cannot declare restartable data '",
-               data_name,
-               "' because it has already been declared");
+  mooseAssert(value, "Not set");
 
-  const auto & header = getHeader(data_name, tid);
-  auto & added_value = currentData(tid).addData(std::move(value));
-  deserializeValue(*_streams.data, added_value, header);
-  return added_value;
+  const auto error = [&value](auto... args)
+  {
+    mooseError("Failed to restore late restartable data '",
+               value->name(),
+               "' of type '",
+               value->type(),
+               "':\n\n",
+               args...);
+  };
+
+if (currentData(tid).hasData(value->name()))
+  error("This value has already been delcared and it does not make sense to declare it again");
+
+const auto & header = getHeader(value->name(), tid);
+if (header.has_context)
+  error("This type cannot be restored late because it requires a context");
+
+auto & added_value = currentData(tid).addData(std::move(value));
+deserializeValue(*_streams.data, added_value, header);
+return added_value;
 }

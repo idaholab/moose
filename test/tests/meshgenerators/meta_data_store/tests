@@ -25,15 +25,6 @@
     requirement = 'The system shall issue an error when mesh meta-data properties are requested but never declared.'
   []
 
-  [get_meta_data_error_check]
-    type = RunException
-    input = 'mesh_meta_data_store.i'
-    cli_args = '--test_getRestartableDataMap_error'
-
-    expect_err = "Unable to find RestartableDataMap object for the supplied name"
-    requirement = "The system shall error if a invalid identifier is supplied when attempting to retrieve a restart meta data object."
-  []
-
   [pre_split_mesh]
     type = RunApp
     input = 'mesh_meta_data_store.i'

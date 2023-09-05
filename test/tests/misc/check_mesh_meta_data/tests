@@ -6,7 +6,7 @@
     mesh_mode = REPLICATED
     issues = '#15987'
     design = '/MeshMetaDataInterface.md'
-    expect_out = 'Mesh meta data boundary_normals is provided by mesh generator normal'
+    expect_out = 'Mesh meta data boundary_normals of enum type map_BoundaryID_RealVectorValue is provided by normal'
     requirement = "The system shall support the ability for actions to query the existence of a mesh attribute (meta data)."
   [../]
 []

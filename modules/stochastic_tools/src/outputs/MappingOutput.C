@@ -9,7 +9,6 @@
 
 // Moose includes
 #include "MappingOutput.h"
-#include "RestartableDataWriter.h"
 
 registerMooseObject("StochasticToolsApp", MappingOutput);
 
@@ -37,11 +36,8 @@ MappingOutput::output()
     for (const auto & map_name : _mappings)
     {
       const VariableMappingBase & map = getMappingByName(map_name);
-      const auto filename =
+      const auto folder =
           RestartableDataIO::restartableDataFolder(this->filename() + "_" + map_name);
-      RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
-
-      RestartableDataWriter writer(_app, meta_data);
-      writer.write(filename);
+      _app.writeRestartableMetaData(map.modelMetaDataName(), folder);
     }
 }

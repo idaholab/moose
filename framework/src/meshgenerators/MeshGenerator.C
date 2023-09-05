@@ -309,10 +309,16 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
   _sub_mesh_generators.insert(&std::as_const(_app).getMeshGenerator(name));
 }
 
-RestartableDataValue &
-MeshGenerator::setMeshPropertyHelper(const std::string & data_name)
+const RestartableDataValue *
+MeshGenerator::queryMeshProperty(const std::string & data_name) const
 {
-  return _app.getRestartableMetaData(meshPropertyName(data_name), MooseApp::MESH_META_DATA, 0);
+  return _app.queryRestartableMetaData(meshPropertyName(data_name), MooseApp::MESH_META_DATA);
+}
+
+RestartableDataValue *
+MeshGenerator::queryMeshProperty(const std::string & data_name)
+{
+  return const_cast<RestartableDataValue *>(std::as_const(*this).queryMeshProperty(data_name));
 }
 
 void

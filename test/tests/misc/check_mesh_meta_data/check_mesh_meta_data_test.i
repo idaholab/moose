@@ -18,6 +18,7 @@
 [CheckMeshMetaData]
   mesh_generator_name = normal
   mesh_meta_data_name = boundary_normals
+  mesh_meta_data_type = map_BoundaryID_RealVectorValue
 []
 
 [Problem]

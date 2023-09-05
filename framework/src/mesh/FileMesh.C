@@ -122,7 +122,7 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
-      _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
+      _app.possiblyLoadCheckpointMetaData(MooseApp::MESH_META_DATA, _file_name, true);
 
       if (restarting)
       {

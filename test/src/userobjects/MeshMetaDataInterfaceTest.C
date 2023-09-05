@@ -41,8 +41,6 @@ MeshMetaDataInterfaceTest::MeshMetaDataInterfaceTest(const InputParameters & par
   {
     const auto & property_prefix = getParam<std::vector<std::string>>("has_property");
     mooseAssert(property_prefix.size() == 2, "Bad size");
-    if (!hasMeshProperty(property_prefix[0], property_prefix[1]))
-      mooseError("Has property fail");
     if (!hasMeshProperty<Real>(property_prefix[0], property_prefix[1]))
       mooseError("Has property typed fail");
     if (hasMeshProperty<Real>("foo", "bar"))

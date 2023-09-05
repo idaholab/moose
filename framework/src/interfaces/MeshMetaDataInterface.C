@@ -23,29 +23,62 @@ MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app)
 
 bool
 MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
-                                       const std::string & prefix) const
+                                       const std::string & generator_name,
+                                       const std::type_info & type) const
 {
-  return _meta_data_app.hasRestartableMetaData(meshPropertyName(data_name, prefix),
-                                               MooseApp::MESH_META_DATA);
+  return hasMeshPropertyInternal(data_name, generator_name, type, false) != DOES_NOT_HAVE;
 }
 
 std::string
-MeshMetaDataInterface::meshPropertyName(const std::string & data_name, const std::string & prefix)
+MeshMetaDataInterface::meshPropertyName(const std::string & data_name,
+                                        const std::string & generator_name)
 {
-  return std::string(SYSTEM) + "/" + prefix + "/" + data_name;
+  return std::string(SYSTEM) + "/" + generator_name + "/" + data_name;
 }
 
 std::string
 MeshMetaDataInterface::meshPropertyPrefix(const std::string &) const
 {
-  mooseError("This object does not support obtaining a mesh property without a prefix.\n\nThis "
-             "capability is upcoming.");
+  mooseError(
+      "This object does not support obtaining a mesh property without a generator_name.\n\nThis "
+      "capability is upcoming.");
 }
 
 const RestartableDataValue &
 MeshMetaDataInterface::getMeshPropertyInternal(const std::string & data_name,
-                                               const std::string & prefix) const
+                                               const std::string & generator_name) const
 {
   return _meta_data_app.getRestartableMetaData(
-      meshPropertyName(data_name, prefix), MooseApp::MESH_META_DATA, 0);
+      meshPropertyName(data_name, generator_name), MooseApp::MESH_META_DATA, 0);
+}
+
+MeshMetaDataInterface::HasMeshProperty
+MeshMetaDataInterface::hasMeshPropertyInternal(const std::string & data_name,
+                                               const std::string & generator_name,
+                                               const std::type_info & type,
+                                               const bool error_on_type) const
+{
+  const auto name = meshPropertyName(data_name, generator_name);
+
+  if (const auto query_data =
+          _meta_data_app.queryRestartableMetaData(name, MooseApp::MESH_META_DATA))
+  {
+    if (query_data->typeId() == type)
+      return HAS_LOADED;
+    else if (error_on_type)
+      mooseErrorInternal("While querying mesh property '",
+                         generator_name,
+                         "/",
+                         data_name,
+                         "' with type '",
+                         MooseUtils::prettyCppType(type),
+                         "',\nthe property exists with different type '",
+                         query_data->type(),
+                         "'");
+  }
+  else if (_meta_data_app.getLateRestartableDataRestorer(MooseApp::MESH_META_DATA)
+               .isRestorable(name, type))
+    return HAS_NOT_LOADED;
+
+  return DOES_NOT_HAVE;
 }

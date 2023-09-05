@@ -154,7 +154,7 @@ Checkpoint::output()
   // Write out meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
-    const auto paths = _app.writeRestartableMetaData(curr_file_struct.checkpoint);
+    const auto paths = _app.writeCheckpointMetaData(curr_file_struct.checkpoint);
     curr_file_struct.restart.insert(curr_file_struct.restart.begin(), paths.begin(), paths.end());
   }
 

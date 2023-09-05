@@ -11,7 +11,7 @@
 
 #include "Action.h"
 #include "Attributes.h"
-#include "RestartableDataReader.h"
+#include "MooseApp.h"
 #include "RestartableModelInterface.h"
 
 /**
@@ -70,11 +70,10 @@ LoadModelDataAction<T>::load(const T & object)
   reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
   // Read the supplied file
-  const std::string filename = object.getModelDataFileName();
+  const std::string folder = object.getModelDataFileName();
   try
   {
-    reader.setInput(filename);
-    reader.restore();
+    object.getMooseApp().loadRestartableMetaData(name, folder, false);
   }
   catch (...)
   {

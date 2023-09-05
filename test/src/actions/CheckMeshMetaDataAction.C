@@ -18,6 +18,9 @@ CheckMeshMetaDataAction::validParams()
   params.addRequiredParam<std::string>("mesh_generator_name",
                                        "The mesh generator providing the mesh meta data");
   params.addRequiredParam<std::string>("mesh_meta_data_name", "The name of the mesh meta data");
+  MooseEnum types("map_BoundaryID_RealVectorValue");
+  params.addRequiredParam<MooseEnum>(
+      "mesh_meta_data_type", types, "The type of the mesh meta data");
   return params;
 }
 
@@ -26,11 +29,17 @@ CheckMeshMetaDataAction::CheckMeshMetaDataAction(const InputParameters & params)
 void
 CheckMeshMetaDataAction::act()
 {
-  auto & mesher_name = getParam<std::string>("mesh_generator_name");
-  auto & data_name = getParam<std::string>("mesh_meta_data_name");
-  if (!hasMeshProperty(data_name, mesher_name))
-    mooseError(mesher_name, " generator does not provide the mesh meta data with name ", data_name);
-  else
-    _console << "Mesh meta data " << data_name << " is provided by mesh generator " << mesher_name
-             << "." << std::endl;
+  const auto & mesher_name = getParam<std::string>("mesh_generator_name");
+  const auto & data_name = getParam<std::string>("mesh_meta_data_name");
+  const auto & data_type = getParam<MooseEnum>("mesh_meta_data_type");
+
+  bool has_value = false;
+  if (data_type == "map_BoundaryID_RealVectorValue")
+    has_value = hasMeshProperty<std::map<BoundaryID, RealVectorValue>>(data_name, mesher_name);
+
+  if (!has_value)
+    mooseError(mesher_name, " does not provide meta data ", data_name, " of enum type ", data_type);
+
+  _console << "Mesh meta data " << data_name << " of enum type " << data_type << " is provided by "
+           << mesher_name << std::endl;
 }

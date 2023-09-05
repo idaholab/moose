@@ -57,7 +57,6 @@ public:
    * @returns Whether or not data with the name \p name is added
    */
   bool hasData(const std::string & name) const;
-
   /**
    * Tries to find data with the name \p name; returns nullptr if not found
    */

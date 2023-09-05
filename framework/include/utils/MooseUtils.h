@@ -292,9 +292,12 @@ std::string hostname();
 unsigned short getTermWidth(bool use_environment);
 
 /**
- * @returns A cleaner representation of the c++ type \p cpp_type.
+ * @returns A cleaner representation of the c++ type \p type.
  */
-std::string prettyCppType(const std::string & cpp_type);
+///@{
+std::string prettyCppType(const std::string & type);
+std::string prettyCppType(const std::type_info & type);
+///@}
 
 /**
  * @returns A cleaner representation of the type for the given object

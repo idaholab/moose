@@ -55,6 +55,6 @@ SetupRecoverFileBaseAction::act()
   {
     // Make sure that all of the mesh meta-data attributes have been declared (after the mesh
     // generators have run.
-    _app.loadRestartableMetaData(_app.getRestartRecoverFileBase() + _app.checkpointSuffix());
+    _app.loadCheckpointMetaData(_app.getRestartRecoverFileBase() + _app.checkpointSuffix());
   }
 }

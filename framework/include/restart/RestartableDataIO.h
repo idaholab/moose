@@ -66,9 +66,13 @@ protected:
   /**
    * @return The restartable data for thread \p tid
    *
-   * This exists so that we can support threaded and non-threaded data in _data
+   * These exist so that we can support threaded and non-threaded data in _data
    */
+  ///@{
+  const RestartableDataMap & currentData(const THREAD_ID tid) const;
   RestartableDataMap & currentData(const THREAD_ID tid);
+  ///@}
+
   /**
    * @return The size of _data
    */

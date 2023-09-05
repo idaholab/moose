@@ -1321,6 +1321,12 @@ prettyCppType(const std::string & cpp_type)
   r.GlobalReplace("std::vector<\\1>", &s);
   return s;
 }
+
+std::string
+prettyCppType(const std::type_info & type)
+{
+  return prettyCppType(type.name());
+}
 } // MooseUtils namespace
 
 void

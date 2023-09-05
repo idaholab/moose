@@ -25,12 +25,6 @@ MooseTestApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
-  // Flag for testing MooseApp::getRestartableDataMap error message
-  params.addCommandLineParam<bool>("test_getRestartableDataMap_error",
-                                   "--test_getRestartableDataMap_error",
-                                   false,
-                                   "Call getRestartableDataMap with a bad name.");
-
   // Flag for turning how EigenProblem output eigenvalues
   params.addCommandLineParam<bool>("output_inverse_eigenvalue",
                                    "--output-inverse-eigenvalue",
@@ -62,9 +56,6 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parame
 {
   MooseTestApp::registerAll(
       _factory, _action_factory, _syntax, !getParam<bool>("disallow_test_objects"));
-
-  if (getParam<bool>("test_getRestartableDataMap_error"))
-    getRestartableDataMap("slaughter");
 }
 
 MooseTestApp::~MooseTestApp() {}

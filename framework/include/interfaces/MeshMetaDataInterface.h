@@ -47,11 +47,16 @@ protected:
   MeshMetaDataInterface(MooseApp & moose_app);
 
   /**
-   * Method for retrieving a property with the given type and name exists in the mesh meta-data
-   * store. This method will throw an error if the property does not exist.
+   * @return The mesh property \p data_name from the generator \p generator_name of type T.
    */
   template <typename T>
-  const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
+  const T & getMeshProperty(const std::string & data_name, const std::string & generator_name);
+  /**
+   * @return The mesh property \p data_name from the default generator.
+   *
+   * If this object is a generator, the default is this generator. Otherwise, it is
+   * the final mesh generator.
+   */
   template <typename T>
   const T & getMeshProperty(const std::string & data_name)
   {
@@ -59,35 +64,52 @@ protected:
   }
 
   /**
-   * @returns Whether or not a mesh meta-data exists.
+   * @returns Whether or not a mesh meta-data exists with the name \p data_name
+   * of type \p type from generator \p generator_name of
    */
-  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+  bool hasMeshProperty(const std::string & data_name,
+                       const std::string & generator_name,
+                       const std::type_info & type) const;
   /**
-   * @returns Whether or not a mesh meta-data exists with the given type.
+   * @returns Whether or not a mesh meta-data with name \p data_name of type T from
+   * generator \p generator_name exists
    */
   template <typename T>
-  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
-
-  /**
-   * @returns Whether or not a mesh meta-data exists with the default prefix.
-   */
-  bool hasMeshProperty(const std::string & data_name) const
+  bool hasMeshProperty(const std::string & data_name, const std::string & generator_name) const
   {
-    return hasMeshProperty(data_name, meshPropertyPrefix(data_name));
-  }
-  /**
-   * @returns Whether or not a mesh meta-data exists with the default prefix and the given type.
-   */
-  template <typename T>
-  bool hasMeshProperty(const std::string & data_name) const
-  {
-    return hasMeshProperty<T>(data_name, meshPropertyPrefix(data_name));
+    return hasMeshProperty(data_name, generator_name, typeid(T));
   }
 
   /**
-   * @returns The full name for mesh property data.
+   * @returns Whether or not a mesh meta-data with the name \p data_name of type \p type
+   * exists from the default generator.
+   *
+   * If this object is a generator, the default is this generator. Otherwise, it is
+   * the final mesh generator.
    */
-  static std::string meshPropertyName(const std::string & data_name, const std::string & prefix);
+  bool hasMeshProperty(const std::string & data_name, const std::type_info & type) const
+  {
+    return hasMeshProperty(data_name, meshPropertyPrefix(data_name), type);
+  }
+  /**
+   * @returns Whether or not a mesh meta-data with the name \p data_name of type
+   * T exists from the default generator.
+   *
+   * If this object is a generator, the default is this generator. Otherwise, it is
+   * the final mesh generator.
+   */
+  template <typename T>
+  bool hasMeshProperty(const std::string & data_name) const
+  {
+    return hasMeshProperty(data_name, typeid(T));
+  }
+
+  /**
+   * @returns The full name for mesh property data with name \p data_name
+   * and from generator \p generator_name.
+   */
+  static std::string meshPropertyName(const std::string & data_name,
+                                      const std::string & generator_name);
 
   /**
    * @returns The default mesh property name for mesh property data
@@ -109,6 +131,23 @@ private:
   /// Helper for getting a mesh property
   const RestartableDataValue & getMeshPropertyInternal(const std::string & data_name,
                                                        const std::string & prefix) const;
+
+  /**
+   * Internal enum for whether or not a mesh property is had.
+   *
+   * Distinguishes between a property that is had and is loaded and one that is not.
+   */
+  enum HasMeshProperty
+  {
+    HAS_LOADED,
+    HAS_NOT_LOADED,
+    DOES_NOT_HAVE
+  };
+
+  MeshMetaDataInterface::HasMeshProperty hasMeshPropertyInternal(const std::string & data_name,
+                                                                 const std::string & prefix,
+                                                                 const std::type_info & type,
+                                                                 const bool error_on_type) const;
 
   /// Reference to the application
   MooseApp & _meta_data_app;
@@ -134,32 +173,13 @@ const T &
 MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std::string & prefix)
 
 {
-  if (!hasMeshProperty(data_name, prefix))
+  const auto has_property = hasMeshPropertyInternal(data_name, prefix, typeid(T), true);
+  if (has_property == DOES_NOT_HAVE)
     mooseErrorInternal("Failed to get mesh property '", prefix, "/", data_name, "'");
 
   auto value = &getMeshPropertyInternal(data_name, prefix);
   mooseAssert(value->declared(), "Value has not been declared");
   const RestartableData<T> * T_value = dynamic_cast<const RestartableData<T> *>(value);
-  if (!T_value)
-    mooseErrorInternal("While retrieving mesh property '",
-                       prefix,
-                       "/",
-                       data_name,
-                       "' with type '",
-                       MooseUtils::prettyCppType<T>(),
-                       "',\nthe property exists with different type '",
-                       value->type(),
-                       "'");
+  mooseAssert(T_value, "Bad cast");
   return T_value->get();
-}
-
-template <typename T>
-bool
-MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
-                                       const std::string & prefix) const
-{
-  if (!hasMeshProperty(data_name, prefix))
-    return false;
-  const auto & value = getMeshPropertyInternal(data_name, prefix);
-  return dynamic_cast<const RestartableData<T> *>(&value) != nullptr;
 }

@@ -385,10 +385,16 @@ private:
   getMeshGeneratorNamesFromParam(const std::string & param_name) const;
 
   /**
-   * Helper for getting a writable reference to a mesh property, used in
-   * declareMeshProperty and setMeshProperty.
+   * @return The mesh property value with name \p data_name, produced by this generator, if any
+   *
+   * Does not check for data that can be loaded late.
+   *
+   * Needed to avoid including MooseApp.h in this header.
    */
-  RestartableDataValue & setMeshPropertyHelper(const std::string & data_name);
+  ///@{
+  const RestartableDataValue * queryMeshProperty(const std::string & data_name) const;
+  RestartableDataValue * queryMeshProperty(const std::string & data_name);
+  ///@}
 
   /// The names of the MeshGenerators that were requested in the getMesh methods
   std::set<MeshGeneratorName> _requested_mesh_generators;
@@ -423,13 +429,13 @@ MeshGenerator::declareMeshProperty(const std::string & data_name, Args &&... arg
     mooseError("Can only call declareMeshProperty() during MeshGenerator construction");
 
   // We sort construction ordering so that we _must_ declare before retrieving
-  if (hasMeshProperty(data_name))
+  if (const auto other_prop = queryMeshProperty(data_name))
     mooseError("While declaring mesh property '",
                data_name,
                "' with type '",
                MooseUtils::prettyCppType<T>(),
                "',\nsaid property has already been declared with type '",
-               setMeshPropertyHelper(data_name).type(),
+               other_prop->type(),
                "'");
 
   const auto full_name = meshPropertyName(data_name);
@@ -453,9 +459,9 @@ MeshGenerator::setMeshProperty(const std::string & data_name, Args &&... args)
     mooseError("Updating mesh meta data with setMeshProperty() can only be called during "
                "MeshGenerator::generate()");
 
-  if (!hasMeshProperty(data_name))
+  RestartableDataValue * value = queryMeshProperty(data_name);
+  if (!value)
     mooseError("Failed to get the mesh property '", data_name, "'");
-  RestartableDataValue * value = &setMeshPropertyHelper(data_name);
   RestartableData<T> * T_value = dynamic_cast<RestartableData<T> *>(value);
   if (!T_value)
     mooseError("While retrieving mesh property '",

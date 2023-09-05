@@ -11,7 +11,6 @@
 #include "SurrogateTrainerOutput.h"
 #include "SurrogateTrainer.h"
 #include "FEProblem.h"
-#include "RestartableDataWriter.h"
 
 registerMooseObject("StochasticToolsApp", SurrogateTrainerOutput);
 
@@ -39,11 +38,8 @@ SurrogateTrainerOutput::output()
     for (const auto & surrogate_name : _trainers)
     {
       const SurrogateTrainerBase & trainer = getSurrogateTrainerByName(surrogate_name);
-      const auto filename =
+      const auto folder =
           RestartableDataIO::restartableDataFolder(this->filename() + "_" + surrogate_name);
-      RestartableDataMap & meta_data = _app.getRestartableDataMap(trainer.modelMetaDataName());
-
-      RestartableDataWriter writer(_app, meta_data);
-      writer.write(filename);
+      _app.writeRestartableMetaData(name, folder);
     }
 }
