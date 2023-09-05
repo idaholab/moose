@@ -24,7 +24,7 @@ PenaltyWeightedGapUserObject::validParams()
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
       "penalty_multiplier",
-      100.0,
+      1.0,
       "penalty_multiplier > 0",
       "The penalty growth factor between augmented Lagrange "
       "iterations if weighted gap does not get closed fast enough. For frictional simulations, "
@@ -108,7 +108,7 @@ PenaltyWeightedGapUserObject::test() const
 const ADVariableValue &
 PenaltyWeightedGapUserObject::contactPressure() const
 {
-  return _contact_force;
+  return _contact_pressure;
 }
 
 void
@@ -179,16 +179,16 @@ PenaltyWeightedGapUserObject::getNormalLagrangeMultiplier(const Node * const nod
 void
 PenaltyWeightedGapUserObject::reinit()
 {
-  _contact_force.resize(_qrule_msm->n_points());
+  _contact_pressure.resize(_qrule_msm->n_points());
   for (const auto qp : make_range(_qrule_msm->n_points()))
-    _contact_force[qp] = 0.0;
+    _contact_pressure[qp] = 0.0;
 
   for (const auto i : make_range(_test->size()))
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     for (const auto qp : make_range(_qrule_msm->n_points()))
-      _contact_force[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
+      _contact_pressure[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
   }
 }
 

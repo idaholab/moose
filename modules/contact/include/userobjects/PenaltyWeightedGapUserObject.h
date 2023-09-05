@@ -81,8 +81,8 @@ protected:
   /// penetration tolerance for augmented Lagrange contact
   const Real _penetration_tolerance;
 
-  /// The contact force on the mortar segument quadrature points
-  ADVariableValue _contact_force;
+  /// The contact pressure on the mortar segument quadrature points
+  ADVariableValue _contact_pressure;
 
   /// Map from degree of freedom to normal pressure for reporting
   std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;

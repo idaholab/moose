@@ -46,7 +46,7 @@ PenaltyFrictionUserObject::validParams()
       "the Coulomb limit and be less reliant on the initial penalty factor provided by the user.");
   params.addRangeCheckedParam<Real>(
       "penalty_multiplier_friction",
-      5.0,
+      1.0,
       "penalty_multiplier_friction > 0",
       "The penalty growth factor between augmented Lagrange "
       "iterations for penalizing relative slip distance if the node is under stick conditions.");
@@ -94,13 +94,13 @@ PenaltyFrictionUserObject::test() const
 const ADVariableValue &
 PenaltyFrictionUserObject::contactTangentialPressureDirOne() const
 {
-  return _frictional_contact_force_one;
+  return _frictional_contact_traction_one;
 }
 
 const ADVariableValue &
 PenaltyFrictionUserObject::contactTangentialPressureDirTwo() const
 {
-  return _frictional_contact_force_two;
+  return _frictional_contact_traction_two;
 }
 
 void
@@ -211,12 +211,12 @@ PenaltyFrictionUserObject::reinit()
   PenaltyWeightedGapUserObject::reinit();
 
   // Reset frictional pressure
-  _frictional_contact_force_one.resize(_qrule_msm->n_points());
-  _frictional_contact_force_two.resize(_qrule_msm->n_points()); // 3D
+  _frictional_contact_traction_one.resize(_qrule_msm->n_points());
+  _frictional_contact_traction_two.resize(_qrule_msm->n_points()); // 3D
   for (const auto qp : make_range(_qrule_msm->n_points()))
   {
-    _frictional_contact_force_one[qp] = 0.0;
-    _frictional_contact_force_two[qp] = 0.0;
+    _frictional_contact_traction_one[qp] = 0.0;
+    _frictional_contact_traction_two[qp] = 0.0;
   }
 
   // zero vector
@@ -302,8 +302,8 @@ PenaltyFrictionUserObject::reinit()
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
-      _frictional_contact_force_one[qp] += test_i[qp] * tangential_traction(0);
-      _frictional_contact_force_two[qp] += test_i[qp] * tangential_traction(1);
+      _frictional_contact_traction_one[qp] += test_i[qp] * tangential_traction(0);
+      _frictional_contact_traction_two[qp] += test_i[qp] * tangential_traction(1);
     }
   }
 }

@@ -107,13 +107,15 @@ ContactAction::validParams()
       1.0,
       "penalty_multiplier > 0",
       "The growth factor for the penalty applied at the end of each augmented "
-      "Lagrange update iteration");
+      "Lagrange update iteration (a value larger than one, e.g., 10, tends to speed up "
+      "convergence.)");
   params.addRangeCheckedParam<Real>(
       "penalty_multiplier_friction",
       1.0,
       "penalty_multiplier_friction > 0",
       "The penalty growth factor between augmented Lagrange "
-      "iterations for penalizing relative slip distance if the node is under stick conditions.");
+      "iterations for penalizing relative slip distance if the node is under stick conditions.(a "
+      "value larger than one, e.g., 10, tends to speed up convergence.)");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,

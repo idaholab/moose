@@ -74,10 +74,10 @@ protected:
       _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_force_one;
+  ADVariableValue _frictional_contact_traction_one;
 
   /// The second frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_force_two;
+  ADVariableValue _frictional_contact_traction_two;
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
