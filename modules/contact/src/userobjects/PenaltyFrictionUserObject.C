@@ -37,6 +37,13 @@ PenaltyFrictionUserObject::validParams()
       "slip_tolerance",
       "slip_tolerance > 0",
       "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
+  MooseEnum adaptivity_penalty_friction("SIMPLE FRICTION_LIMIT", "FRICTION_LIMIT");
+  params.addParam<MooseEnum>(
+      "adaptivity_penalty_friction",
+      adaptivity_penalty_friction,
+      "The augmented Lagrange update strategy used on the frictional penalty coefficient. 'Simple' "
+      "will keep multiplying by the penalty multiplier, whereas 'FrictionLimit' will be guided by "
+      "the Coulomb limit and be less reliant on the initial penalty factor provided by the user.");
   params.addRangeCheckedParam<Real>(
       "penalty_multiplier_friction",
       5.0,
@@ -68,7 +75,9 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
                                                        : getParam<Real>("penalty")),
     _slip_tolerance(isParamValid("slip_tolerance") ? getParam<Real>("slip_tolerance") : 0.0),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
-    _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction"))
+    _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
+    _adaptivity_friction(
+        getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>())
 {
   if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
     paramError("slip_tolerance",
@@ -103,6 +112,14 @@ PenaltyFrictionUserObject::timestepSetup()
 
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
+
+  // Clear step slip (values used in between AL iterations for penalty adaptivity)
+  for (auto & map_pr : _dof_to_step_slip)
+  {
+    auto & [step_slip, old_step_slip] = map_pr.second;
+    old_step_slip = {0.0, 0.0};
+    step_slip = {0.0, 0.0};
+  }
 
   // save off accumulated slip from the last timestep
   for (auto & map_pr : _dof_to_accumulated_slip)
@@ -240,8 +257,20 @@ PenaltyFrictionUserObject::reinit()
           _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : zero;
 
       // tangential trial traction (Simo 3.12)
+      // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
+      // capacity)
+      ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
+      if (penalty_friction * slip_distance.norm() >
+          0.4 * _friction_coefficient * std::abs(normal_pressure))
+      {
+        inner_iteration_penalty_friction =
+            MetaPhysicL::raw_value(0.4 * _friction_coefficient * std::abs(normal_pressure) /
+                                   (penalty_friction * slip_distance.norm())) *
+            penalty_friction * slip_distance;
+      }
+
       ADTwoVector tangential_trial_traction =
-          old_tangential_traction + tangential_lm + penalty_friction * slip_distance;
+          old_tangential_traction + tangential_lm + inner_iteration_penalty_friction;
 
       // Nonlinearity below
       ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
@@ -256,6 +285,10 @@ PenaltyFrictionUserObject::reinit()
 
       // track accumulated slip for output purposes
       accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
+
+      // Keep track of slip vector for adaptive penalty
+      auto & [step_slip, old_step_slip] = _dof_to_step_slip[node];
+      step_slip = MetaPhysicL::raw_value(slip_distance).cwiseAbs();
     }
     else
     {
@@ -384,12 +417,48 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
                           penalty_friction * normal_lm -
                       old_tangential_traction;
     }
-    // Update penalty.
-    if (_slip_tolerance < _dt * slip_velocity.norm())
-      penalty_friction *= _penalty_multiplier_friction;
 
-    // Provide the user the ability of setting this maximum penalty
-    if (penalty_friction > _penalty_friction * 1e4)
-      penalty_friction = _penalty_friction * 1e4;
+    // Update penalty.
+    if (_adaptivity_friction == AdaptivityFrictionalPenalty::SIMPLE)
+    {
+      if (_slip_tolerance < _dt * slip_velocity.norm())
+        penalty_friction *= _penalty_multiplier_friction;
+
+      // Provide the user the ability of setting this maximum penalty
+      if (penalty_friction > _penalty_friction * _max_penalty_multiplier)
+        penalty_friction = _penalty_friction * _max_penalty_multiplier;
+    }
+    else if (_adaptivity_friction == AdaptivityFrictionalPenalty::FRICTION_LIMIT)
+    {
+      const auto & step_slip = libmesh_map_find(_dof_to_step_slip, dof_object);
+      // No change of direction: Adjust penalty factor for the frictional problem
+      if (step_slip.first.dot(step_slip.second) > 0.0 &&
+          std::abs(_dof_to_lagrange_multiplier[dof_object]) > TOLERANCE &&
+          _slip_tolerance < _dt * slip_velocity.norm())
+      {
+        penalty_friction =
+            (_friction_coefficient * std::abs(_dof_to_lagrange_multiplier[dof_object])) / 2 /
+            (_dt * slip_velocity.norm());
+        // Alternative: accumulated_slip.norm() - old_accumulated_slip.norm()
+      }
+      // Change of direction: Reduce penalty factor to avoid lack of convergence
+      else if (step_slip.first.dot(step_slip.second) < 0.0)
+      {
+        penalty_friction /= 2.0;
+      }
+
+      // Heuristics to bound the penalty factor
+      if (penalty_friction < _penalty_friction)
+        penalty_friction = _penalty_friction;
+      else if (penalty_friction > _penalty_friction * _max_penalty_multiplier)
+        penalty_friction = _penalty_friction * _max_penalty_multiplier;
+    }
+
+    // save off step slip
+    for (auto & map_pr : _dof_to_step_slip)
+    {
+      auto & [step_slip, old_step_slip] = map_pr.second;
+      old_step_slip = step_slip;
+    }
   }
 }

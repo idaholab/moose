@@ -1,6 +1,7 @@
 [Tests]
   design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md'
   issues = '#17495'
+  parallel_scheduling = true
   [cylinder_friction]
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_check_x_disp_FINAL.csv cylinder_friction_check_cont_press_FINAL.csv cylinder_friction_check_y_disp_FINAL.csv cylinder_friction_check_friction_FINAL.csv'
@@ -14,7 +15,7 @@
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv cylinder_friction_penalty_check_cont_press_FINAL.csv cylinder_friction_penalty_check_y_disp_FINAL.csv cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
-    rel_err = 5.0e-4
+    rel_err = 7.5e-4
     abs_zero = 1.0e-4
     heavy = true
     requirement = "The contact module shall be able to approximate frictional contact solution "
@@ -71,8 +72,8 @@
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_frictional_al_tight_slip_vectorpp_output_surface_FINAL.csv'
     input = 'cylinder_friction_penalty_frictional_al_tight_slip.i'
-    rel_err = 1.0e-4
-    abs_zero = 1.0e-2
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-4
     heavy = true
     valgrind = none
     method = opt

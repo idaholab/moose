@@ -113,4 +113,10 @@ protected:
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
+
+  /// Maximum multiplier applied to the initial penalty factor in AL
+  const Real _max_penalty_multiplier;
+
+  /// The adaptivity method for the penalty factor at augmentations
+  const enum class AdaptivityNormalPenalty { SIMPLE, BUSSETTA } _adaptivity_normal;
 };

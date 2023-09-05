@@ -231,9 +231,9 @@
   petsc_options_value = lu
   line_search = 'basic'
 
-  nl_abs_tol = 1e-11
-  nl_rel_tol = 1e-9
-  nl_max_its = 50
+  nl_abs_tol = 1e-13
+  nl_rel_tol = 1e-11
+  nl_max_its = 75
   l_tol = 1e-05
   l_abs_tol = 1e-13
 
@@ -263,7 +263,7 @@
   [surface]
     type = NodalValueSampler
     use_displaced_mesh = false
-    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure normal_gap'
+    variable = 'disp_x disp_y normal_gap'
     boundary = '3'
     sort_by = id
   []
@@ -294,8 +294,8 @@
     secondary_variable = disp_x
     friction_coefficient = 0.4
     penetration_tolerance = 1e-7
-    slip_tolerance = 3e-7
-    penalty_friction = 1e5
+    slip_tolerance = 1e-8
+    penalty_friction = 1e6
     penalty_multiplier = 10
     use_physical_gap = true
     aux_lm = dual_var

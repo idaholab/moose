@@ -39,11 +39,27 @@ PenaltyWeightedGapUserObject::validParams()
       "penetration_tolerance",
       "penetration_tolerance > 0",
       "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
+  params.addRangeCheckedParam<Real>(
+      "max_penalty_multiplier",
+      1.0e3,
+      "max_penalty_multiplier >= 1.0",
+      "Maximum multiplier applied to penalty factors when adaptivity is used in an augmented "
+      "Lagrange setting. The penalty factor supplied by the user is used as a reference.");
+
+  MooseEnum adaptivity_penalty_normal("SIMPLE BUSSETTA", "SIMPLE");
+  params.addParam<MooseEnum>(
+      "adaptivity_penalty_normal",
+      adaptivity_penalty_normal,
+      "The augmented Lagrange update strategy used on the normal penalty coefficient. 'Simple' "
+      "will keep multiplying by the penalty multiplier, whereas 'Bussetta' will apply an algorithm "
+      "in Bussetta et al, 2012, Comput Mech 49:259-275.");
+
   params.addCoupledVar(
       "aux_lm",
       "Auxiliary variable that is utilized together with the "
       "penalty approach to interpolate the resulting contact tractions using dual bases.");
-  params.addParamNamesToGroup("penalty_multiplier penetration_tolerance", "Augmented Lagrange");
+  params.addParamNamesToGroup("penalty_multiplier penetration_tolerance max_penalty_multiplier",
+                              "Augmented Lagrange");
 
   return params;
 }
@@ -62,7 +78,10 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
                                      : _no_iterations),
     _dt(_fe_problem.dt()),
     _use_physical_gap(getParam<bool>("use_physical_gap")),
-    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr)
+    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
+    _max_penalty_multiplier(getParam<Real>("max_penalty_multiplier")),
+    _adaptivity_normal(
+        getParam<MooseEnum>("adaptivity_penalty_normal").getEnum<AdaptivityNormalPenalty>())
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -293,17 +312,22 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     else
       lagrange_multiplier = 0.0;
 
-    // (1) Update the penalty factor for the normal problem
     const auto previous_gap = _dof_to_previous_gap[dof_object];
     Real eval_tn = 0;
 
-    if (true)
+    if (_adaptivity_normal == AdaptivityNormalPenalty::SIMPLE)
     {
       if (std::abs(gap) > 0.25 * std::abs(previous_gap) && std::abs(gap) > _penetration_tolerance)
         penalty *= _penalty_multiplier;
     }
-    else
+    else if (_adaptivity_normal == AdaptivityNormalPenalty::BUSSETTA)
       bussettaAdaptivePenalty(previous_gap, gap, penalty, eval_tn);
+
+    // Heuristics to bound the penalty factor
+    if (penalty < _penalty)
+      penalty = _penalty;
+    else if (penalty > _max_penalty_multiplier * _penalty)
+      penalty = _max_penalty_multiplier * _penalty;
   }
 }
 

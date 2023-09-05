@@ -63,6 +63,9 @@ protected:
   /// The friction coefficient
   const Real _friction_coefficient;
 
+  /// Map from degree of freedom to current and old step slip
+  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_step_slip;
+
   /// Map from degree of freedom to current and old accumulated slip
   std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip;
 
@@ -84,4 +87,7 @@ protected:
 
   /// Penalty growth factor for augmented Lagrange
   const Real _penalty_multiplier_friction;
+
+  /// The adaptivity method for the penalty factor at augmentations
+  const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
 };
