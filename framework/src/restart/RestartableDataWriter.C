@@ -9,11 +9,11 @@
 
 #include "RestartableDataWriter.h"
 
-#include <fstream>
-#include <system_error>
-
 #include "DataIO.h"
 #include "RestartableDataMap.h"
+
+#include <fstream>
+#include <system_error>
 
 RestartableDataWriter::RestartableDataWriter(MooseApp & app, RestartableDataMap & data)
   : RestartableDataIO(app, data)

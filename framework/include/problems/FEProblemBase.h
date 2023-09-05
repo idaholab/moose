@@ -32,7 +32,6 @@
 #include "Attributes.h"
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
-
 #include "RestartableEquationSystems.h"
 
 #include "libmesh/enum_quadrature_type.h"

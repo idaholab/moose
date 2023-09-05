@@ -11,8 +11,6 @@
 
 #include "InputStream.h"
 
-#include <string>
-
 /**
  * Helper class that hands out input streams to a file.
  */

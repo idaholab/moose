@@ -31,7 +31,7 @@ public:
    * - If not, but a path with the new suffix exists instead (i.e.,
    *   /path/to/xxxx_mesh.cpr was provided but /path/to/xxxx-mesh.cpr
    *   exists), use that path and provide a param warning via \p object
-   * - If not, but it is LATEST and we have can find a latest checkpoint,
+   * - If not, but it is LATEST and we can find a latest checkpoint,
    *   use the latest checkpoint
    *
    * This is a static method because FileMesh needs the same thing. And

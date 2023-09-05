@@ -19,7 +19,10 @@
 #include <unordered_map>
 
 /**
- * Ordered storage for RestartableData.
+ * Storage for restartable data that is ordered based on insertion order.
+ *
+ * The intent here is to be able to load declared restartable data in the
+ * order that it is instantiated.
  */
 class RestartableDataMap
 {

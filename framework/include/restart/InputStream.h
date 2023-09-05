@@ -37,7 +37,7 @@ public:
    *
    * This is checked by seeing whether or not the use count
    * of any of the streams handed out by get() is > 1 (with the
-   * only use count being the one sstored in _shared_streams)
+   * only use count being the one stored in _shared_streams)
    */
   bool inUse() const;
 

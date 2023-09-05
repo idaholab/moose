@@ -128,7 +128,7 @@ protected:
    * for it. That is... at the very end.
    *
    * This is needed for objects whose destruction ordering is important, and
-   * enables natrual c++ destruction in reverse construction order of the object
+   * enables natural c++ destruction in reverse construction order of the object
    * that declares it.
    *
    * See delcareRestartableData and declareRestartableDataWithContext for more information.

@@ -12,7 +12,6 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 #include "MooseApp.h"
-
 #include "FileMeshGenerator.h"
 
 #include "libmesh/exodusII_io.h"

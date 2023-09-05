@@ -47,7 +47,7 @@ struct CheckpointFileNames
  *
  * 1. A restart file with a `.rd` extendsion that contains a single Backup that has been serialized
  * 2. Mesh file(s) in the form of a libMesh Checkpoint file(s)
- * 3. Mesh meta-data file... this will be underneath the file that the Checkpoint mesh creates
+ * 3. Mesh meta-data file... this will be underneath the directory that the Checkpoint mesh creates
  *
  * These files are written to a directory called output_prefix + _ + "_cp"
  */

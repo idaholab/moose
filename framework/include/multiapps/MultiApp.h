@@ -25,7 +25,6 @@ class FEProblemBase;
 class FEProblem;
 class Executioner;
 class MooseApp;
-struct Backup;
 class MultiAppTransfer;
 class MultiAppCoordTransform;
 class Positions;
