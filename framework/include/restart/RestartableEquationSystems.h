@@ -40,14 +40,16 @@ public:
   {
     bool operator==(const VectorHeader & other) const
     {
-      return name == other.name && variable_offset == other.variable_offset &&
-             vector == other.vector;
+      return name == other.name && projections == other.projections &&
+             variable_offset == other.variable_offset && vector == other.vector;
     }
 
     /// The name of the stored vector
     std::string name;
     /// The type of the stored vector
     libMesh::ParallelType type;
+    /// The projection flag (whether or not it should be projected or zeroed)
+    bool projections;
     /// The position of each variable for this vector (relative to the start of the data)
     std::map<std::string, std::size_t> variable_offset;
     /// The underlying vector (only valid during store, not used in load)

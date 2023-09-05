@@ -84,6 +84,7 @@ RestartableEquationSystems::buildHeader(
       mooseAssert(!sys_header.vectors.count(name), "Already inserted");
       auto & vec_header = sys_header.vectors[name];
       vec_header.name = sys.vector_name(vec_num);
+      vec_header.projections = sys.vector_preservation(vec_header.name);
       vec_header.vector = &sys.get_vector(vec_header.name);
       vec_header.type = vec_header.vector->type();
     }
@@ -265,7 +266,7 @@ RestartableEquationSystems::load(std::istream & stream)
       if (!is_solution && !sys.have_vector(vec_header.name))
       {
         if (_load_all_vectors)
-          sys.add_vector(vec_header.name, false, vec_header.type);
+          sys.add_vector(vec_header.name, vec_header.projections, vec_header.type);
         else
           continue;
       }
@@ -434,6 +435,7 @@ void
 dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *)
 {
   dataStore(stream, header.name, nullptr);
+  dataStore(stream, header.projections, nullptr);
   dataStore(stream, header.type, nullptr);
   dataStore(stream, header.variable_offset, nullptr);
 }
@@ -441,6 +443,7 @@ void
 dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *)
 {
   dataLoad(stream, header.name, nullptr);
+  dataLoad(stream, header.projections, nullptr);
   dataLoad(stream, header.type, nullptr);
   dataLoad(stream, header.variable_offset, nullptr);
 }
