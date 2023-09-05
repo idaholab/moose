@@ -15,7 +15,7 @@ TEST(StringInputStreamTest, testGet)
 {
   const std::string test_string = "it works!";
 
-  std::unique_ptr<std::stringstream> input = std::make_unique<std::stringstream>();
+  auto input = std::make_unique<std::stringstream>();
   *input << test_string;
   StringInputStream sis(std::move(input));
 
@@ -27,7 +27,7 @@ TEST(StringInputStreamTest, testGet)
 
 TEST(StringInputStreamTest, testRelease)
 {
-  std::unique_ptr<std::stringstream> input = std::make_unique<std::stringstream>();
+  auto input = std::make_unique<std::stringstream>();
   auto input_ptr = input.get();
   StringInputStream sis(std::move(input));
 
@@ -49,7 +49,7 @@ TEST(StringInputStreamTest, testRelease)
 
 TEST(StringInputStreamTest, testInUse)
 {
-  std::unique_ptr<std::stringstream> input = std::make_unique<std::stringstream>();
+  auto input = std::make_unique<std::stringstream>();
   StringInputStream sis(std::move(input));
 
   EXPECT_FALSE(sis.inUse());

@@ -50,8 +50,8 @@ TEST_F(RestartableDataIOTest, readWrite)
   const auto data = basicData();
 
   // Streams we're going to use on both sides
-  std::unique_ptr<std::stringstream> header_stream = std::make_unique<std::stringstream>();
-  std::unique_ptr<std::stringstream> data_stream = std::make_unique<std::stringstream>();
+  auto header_stream = std::make_unique<std::stringstream>();
+  auto data_stream = std::make_unique<std::stringstream>();
 
   {
     // Fill the map that we're storing
