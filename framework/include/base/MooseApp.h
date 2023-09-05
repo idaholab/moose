@@ -715,10 +715,14 @@ public:
 
   /**
    * Backs up the application to the folder \p folder_base
+   *
+   * @return The files that are written in the backup
    */
   std::vector<std::filesystem::path> backup(const std::filesystem::path & folder_base);
   /**
    * Backs up the application memory in a Backup.
+   *
+   * @return The backup
    */
   std::unique_ptr<Backup> backup();
 
