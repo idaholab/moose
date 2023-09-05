@@ -45,6 +45,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("EmptyAction", "ICs/PolycrystalICs"); // placeholder
   registerSyntax("EulerAngle2RGBAction", "Modules/PhaseField/EulerAngles2RGB");
   registerSyntax("GrainGrowthAction", "Modules/PhaseField/GrainGrowth");
+  registerSyntax("GrainGrowthLinearizedInterfaceAction",
+                 "Modules/PhaseField/GrainGrowthLinearizedInterface");
   registerSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   registerSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
   registerSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");

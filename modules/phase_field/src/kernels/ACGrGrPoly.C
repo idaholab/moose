@@ -25,26 +25,45 @@ ACGrGrPoly::ACGrGrPoly(const InputParameters & parameters)
 }
 
 Real
+ACGrGrPoly::assignThisOp()
+{
+  return _u[_qp];
+}
+
+std::vector<Real>
+ACGrGrPoly::assignOtherOps()
+{
+  std::vector<Real> other_ops(_op_num);
+  for (unsigned int i = 0; i < _op_num; ++i)
+    other_ops[i] = (*_vals[i])[_qp];
+
+  return other_ops;
+}
+
+Real
 ACGrGrPoly::computeDFDOP(PFFunctionType type)
 {
+  // assign op and other_ops
+  Real op = assignThisOp();
+  std::vector<Real> other_ops(_op_num);
+  other_ops = assignOtherOps();
+
   // Sum all other order parameters
-  Real SumEtaj = 0.0;
+  Real SumOPj = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
-    SumEtaj += (*_vals[i])[_qp] * (*_vals[i])[_qp];
+    SumOPj += other_ops[i] * other_ops[i];
 
   // Calculate either the residual or Jacobian of the grain growth free energy
   switch (type)
   {
     case Residual:
     {
-      return _mu[_qp] *
-             (_u[_qp] * _u[_qp] * _u[_qp] - _u[_qp] + 2.0 * _gamma[_qp] * _u[_qp] * SumEtaj);
+      return _mu[_qp] * (op * op * op - op + 2.0 * _gamma[_qp] * op * SumOPj);
     }
 
     case Jacobian:
     {
-      return _mu[_qp] *
-             (_phi[_j][_qp] * (3.0 * _u[_qp] * _u[_qp] - 1.0 + 2.0 * _gamma[_qp] * SumEtaj));
+      return _mu[_qp] * (_phi[_j][_qp] * (3.0 * op * op - 1.0 + 2.0 * _gamma[_qp] * SumOPj));
     }
 
     default:
@@ -55,12 +74,17 @@ ACGrGrPoly::computeDFDOP(PFFunctionType type)
 Real
 ACGrGrPoly::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  // assign op and other_ops
+  Real op = assignThisOp();
+  std::vector<Real> other_ops(_op_num);
+  other_ops = assignOtherOps();
+
   for (unsigned int i = 0; i < _op_num; ++i)
     if (jvar == _vals_var[i])
     {
-      // Derivative of SumEtaj
-      const Real dSumEtaj = 2.0 * (*_vals[i])[_qp] * _phi[_j][_qp];
-      const Real dDFDOP = _mu[_qp] * 2.0 * _gamma[_qp] * _u[_qp] * dSumEtaj;
+      // Derivative of Sumopj
+      const Real dSumOPj = 2.0 * other_ops[i] * _phi[_j][_qp];
+      const Real dDFDOP = _mu[_qp] * 2.0 * _gamma[_qp] * op * dSumOPj;
 
       return _L[_qp] * _test[_i][_qp] * dDFDOP;
     }
