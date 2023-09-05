@@ -20,8 +20,10 @@ InputStream::~InputStream()
 void
 InputStream::addSharedStream(std::weak_ptr<std::istream> stream) const
 {
+  mooseAssert(!stream.expired(), "Stream is expired");
+
   for (auto & entry : _shared_streams)
-    if (!entry.lock())
+    if (entry.expired())
     {
       entry = stream;
       return;
@@ -33,7 +35,7 @@ bool
 InputStream::inUse() const
 {
   for (auto & stream : _shared_streams)
-    if (stream.lock())
+    if (!stream.expired())
       return true;
   return false;
 }
