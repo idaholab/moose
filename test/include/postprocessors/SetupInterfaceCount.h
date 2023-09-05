@@ -57,7 +57,6 @@ public:
   /**
    * Return the count base on the count type supplied in the input file.
    */
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
 private:

@@ -28,7 +28,6 @@ public:
   virtual void execute() override;
 
   /// Returns the value of the PorousFlowSumQuantity
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
 protected:

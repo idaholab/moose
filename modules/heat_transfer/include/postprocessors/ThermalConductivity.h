@@ -24,7 +24,6 @@ public:
   ThermalConductivity(const InputParameters & parameters);
 
   virtual void finalize() override;
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

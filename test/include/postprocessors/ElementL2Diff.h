@@ -22,7 +22,6 @@ protected:
   /**
    * Get the L2 Error.
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
   virtual Real computeQpIntegral() override;

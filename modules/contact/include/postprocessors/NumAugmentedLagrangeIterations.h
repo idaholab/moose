@@ -29,7 +29,6 @@ public:
   virtual void execute() override {}
   virtual void finalize() override {}
 
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
   // only needed for ElementPostprocessors and NodalPostprocessors
