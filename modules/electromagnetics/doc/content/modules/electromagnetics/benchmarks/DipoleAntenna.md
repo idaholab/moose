@@ -1,5 +1,7 @@
 # Dipole Antenna Benchmark
 
+!tag name=dipole pairs=example_type:benchmark simulation_type:vector fiscal_year:2022
+
 This document summarizes and describes the half-wave dipole antenna benchmark.
 In this scenario, a vertically-oriented antenna structure is excited by a 1 GHz
 signal in an infinite vacuum. Then, the subsequent transmitted radiation is

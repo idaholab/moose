@@ -1,5 +1,7 @@
 # Electrostatic Contact Verification (Two Block Test)
 
+!tag name=two_block pairs=example_type:verification simulation_type:scalar fiscal_year:2022
+
 This document describes the two block 1-D verification test for the
 [ElectrostaticContactCondition.md] object. Below is a summary of the test, along
 with a derivation of the analytic solution used for comparison and the relevant

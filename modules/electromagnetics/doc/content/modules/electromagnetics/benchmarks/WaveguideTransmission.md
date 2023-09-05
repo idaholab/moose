@@ -1,5 +1,8 @@
 # Waveguide Transmission Benchmark
 
+!tag name=waveguide_2D pairs=example_type:benchmark simulation_type:scalar fiscal_year:2022
+
+
 This section summarizes and describes the single frequency two-dimensional
 waveguide benchmark and verification test for the electromagnetics module.
 

@@ -1,5 +1,7 @@
 # Waveguide Eigenvalue Benchmark
 
+!tag name=waveguide_eigenvalue pairs=example_type:benchmark simulation_type:eigenvalue fiscal_year:2022
+
 A discussion of eigenvalue problems in electromagnetics, and the basis for the
 modeling in this section can be found in [!citep](nasa-fem-eigenvalue-problems).
 In this set of verification exercises, fundamental wavenumbers for various waveguide
