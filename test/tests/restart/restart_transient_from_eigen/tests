@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'eigen.i'
     exodiff = 'eigen_out.e'
-    requirement = 'The system shall support storing the solution of an eigenvalue solve such that it can be restarted later into a non-eigenvalue solve'
+    requirement = 'The system shall support storing the solution of an eigenvalue solve such that it can be restarted later into a non-eigenvalue solve.'
   []
   [transient_from_eigen_solution]
     type = 'Exodiff'
@@ -15,5 +15,5 @@
     exodiff_opts = '-steps -1::'
     prereq = 'eigen_store_solution'
     requirement = 'The system shall support loading the restarted solution from an eigenvalue solve into a transient solve.'
-  [../]
+  []
 []

@@ -107,7 +107,7 @@
     input = 'checkpoint_old_prefix.i'
     check_files = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr/meta_data_mesh.rd/header'
     cli_args = 'Outputs/checkpoint=true Mesh/final_generator=gmg'
-    requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme'
+    requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme.'
     design = 'Checkpoint.md'
     issues = '#21011'
     recover = false
@@ -118,7 +118,7 @@
     input = 'checkpoint_old_prefix.i'
     expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr'
     cli_args = 'Mesh/final_generator=checkpoint'
-    requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix'
+    requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
     design = 'FileMeshGenerator.md'
     issues = '#21011'
     prereq = 'checkpoint_new_prefix'
