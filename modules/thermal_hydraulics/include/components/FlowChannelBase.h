@@ -27,8 +27,9 @@ public:
   /// Type of convective heat transfer geometry
   enum EConvHeatTransGeom
   {
-    PIPE,      ///< pipe geometry
-    ROD_BUNDLE ///< rod bundle geometry
+    PIPE,          ///< pipe geometry
+    ROD_BUNDLE,    ///< square array rod bundle geometry
+    HEX_ROD_BUNDLE ///< hexagonal array rod bundle geometry
   };
   /// Pipe type
   enum EPipeType
@@ -37,10 +38,19 @@ public:
     CURVED,
     DOWNCOMER
   };
+  /// Pipe location
+  enum EPipeLocation
+  {
+    INTERIOR,
+    EDGE,
+    CORNER
+  };
   /// Map of convective heat transfer geometry type to enum
   static const std::map<std::string, EConvHeatTransGeom> _heat_transfer_geom_to_enum;
   /// Map of pipe type to enum
   static const std::map<std::string, EPipeType> _pipe_type_to_enum;
+  /// Map of pipe location to enum
+  static const std::map<std::string, EPipeLocation> _pipe_location_to_enum;
 
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
@@ -78,6 +88,14 @@ public:
    */
   static MooseEnum getPipeType(const std::string & name);
 
+  /**
+   * Gets a MooseEnum for pipe location
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for pipe location
+   */
+  static MooseEnum getPipeLocation(const std::string & name);
+
   // Flow channel specific interface ----
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
 
@@ -97,6 +115,11 @@ public:
    * Gets heat transfer geometry
    */
   EConvHeatTransGeom getHeatTransferGeometry() const { return _HT_geometry; }
+
+  /**
+   * Gets the pipe location
+   */
+  EPipeLocation getPipeLocation() const { return _pipe_location; }
 
   /**
    * Gets the names of all connected heat transfer components
@@ -204,6 +227,8 @@ protected:
 
   /// Convective Heat transfer geometry
   EConvHeatTransGeom _HT_geometry;
+  /// Pipe location within the bundle
+  EPipeLocation _pipe_location;
   /// Pitch to diameter ratio for parallel bundle heat transfer
   const Real & _PoD;
   /// True if user provides PoD
@@ -242,4 +267,7 @@ FlowChannelBase::EConvHeatTransGeom stringToEnum(const std::string & s);
 
 template <>
 FlowChannelBase::EPipeType stringToEnum(const std::string & s);
+
+template <>
+FlowChannelBase::EPipeLocation stringToEnum(const std::string & s);
 }

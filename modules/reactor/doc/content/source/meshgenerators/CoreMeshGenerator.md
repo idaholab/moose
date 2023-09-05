@@ -30,8 +30,8 @@ Users may be interested in defining metadata to represent the reactor geometry a
 
 At the core level, the following metadata is defined on the output mesh:
 
-- `assembly_names`: Mesh generator names of constituent assemblies in lattice
-- `lattice`: 2-D lattice of assemblies in core, where each location represents the 0-based index of the assembly in the list of names under the `assembly_names` metadata entry.
+- `assembly_names`: Mesh generator names of input assemblies in lattice, similar to input parameter (/Mesh/CoreMeshGenerator/inputs) but with the dummy assembly name excluded
+- `lattice`: 2-D lattice of assemblies in core, where each location represents the 0-based index of the assembly in the list of names under the `assembly_names` metadata entry. A -1 entry represents a dummy assembly.
 
 For each of the assemblies listed in `assembly_names`, the assembly-level metadata is also displayed. In addition, if any of these assemblies are comprised of pins in a lattice, the pin-level metadata of these constituent pins is also displayed. A list of assembly-level and pin-level metadata defined on the core mesh can be found in [AssemblyMeshGenerator](AssemblyMeshGenerator.md) and [PinMeshGenerator](PinMeshGenerator.md) respectively.
 
