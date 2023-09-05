@@ -14,21 +14,17 @@ from ..common import __init__
 from . import command
 
 """
-This extension defines the tagger command: !tag name path key:value. The tag command will except a string
-that represents the originating markdown file and is associated with an arbitrary list of key:value pairs.
-Arbitrary spacing is allowed after the name, however things become tricky with spaces before the name.
-Example: '!tag name    k1:v1  ka:va thing1:thing2' is okay, but an IndexError could occur if
-'!tag  name'. If this case occurs, the extension will try to determine what the intended name was
-and continue to avoid the error and report the guess as a warning to the developer.
+This extension defines the tagging command: !tag name=id pairs=key:value. The tag command will accept
+a 'name' parameter string that represents the originating markdown file and is associated with an
+arbitrary list of key:value pairs taken in by the 'pairs' parameter. The tagging extension checks
+that all linked moose pages are unique and will not allow duplicate names in the dictionary.
+Duplicate key value pairs are allowed, but a warning is issued and only one of the pairs is taken in.
 
 ALERT: The tagging extension is experimental! If documentation tagging features are desired, please
 request assistance from the MOOSE Framework development team.
 
-The tagging extension checks that all linked moose pages are unique and will not allow duplicate names
-in the dictionary. Duplicate key value pairs are allowed.
-
 Example Tagger command in *.md:
-!tag geochem keyg:valg keychem:valuechem
+!tag name=geochem pairs=keyg:valg keychem:valuechem
 
 Example output tag dictionary for multiple pages, names, and key:value pairs:
 {"data":
@@ -136,7 +132,8 @@ class TaggingCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['name'] = (None, 'ID name for page and associated key:value pairs.')
+        settings['name'] = (None, 'ID name for page and associated key:value category/label pairs.')
+        settings['pairs'] = (None, 'Key:value pairs representing categories and page-specific labels for each category.')
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -144,28 +141,28 @@ class TaggingCommand(command.CommandComponent):
         Process name and key:value pairs provided in the documentation file, check against
         previously-processed names and keys, and add new data to global attributes.
         """
-        name=settings['name']
-        keylist=info[3].split()
+        if settings['name'] is None:
+            msg = "%s: No 'name' provided for page and associated tags; check markdown file. " \
+                  "This page will not be added to the tag database!"
+            LOG.error(msg, page.name)
+            name = ''
+        else:
+            name=settings['name']
+        if settings['pairs'] is None:
+            msg = "%s: No key:value pairs provided; check markdown file and add desired pairs."
+            LOG.error(msg, page.name)
+            keylist=''
+        else:
+            keylist=settings['pairs'].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
         entry_key_values=[]
         for keys in keylist:
             key_vals=keys.split(':')
-            if len(key_vals) == 1 and name is None:
-                msg = "%s: It appears that no 'name' was provided for defined tag (due to a spacing " \
-                      "error between '!tag' and the intended name or another mistake); check " \
-                      "markdown file. Guessing a 'name' and continuing: %s"
-                LOG.warning(msg, page.name, key_vals[0])
-                name = key_vals[0]
-            else:
-                entry_key_values.append([key_vals[0],key_vals[1]])
-
-        if len(entry_key_values) == 0:
-            msg = "%s: No key:value pairs provided; check markdown file."
-            LOG.error(msg, page.name)
+            entry_key_values.append([key_vals[0],key_vals[1]])
 
         good_keys=[]
         for pair in entry_key_values:
-            if pair[0] not in self.extension.allowed_keys:
+            if pair[0] not in self.extension.allowed_keys and len(self.extension.allowed_keys) > 0:
                 msg = "%s: Provided 'key' not in allowed_keys (see config.yml); not adding the " \
                        "following to the database: %s"
                 LOG.warning(msg, page.name, pair[0])
@@ -175,17 +172,18 @@ class TaggingCommand(command.CommandComponent):
             else:
                 good_keys.append([pair[0], pair[1]])
 
-        page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
+        if len(name) != 0: # Only add to tag database if 'name' is provided
+            page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
-        tag_id_name = ''
-        if self.extension.get_tag_data("tagger_" + name):
-            msg = "%s: Tag page identifier already exists; not adding the following 'name' to " \
-                  "dictionary: %s"
-            LOG.warning(msg, page.name, name)
-        else:
-            tag_id_name = "tagger_" + name
-            self.extension.set_tag_data(tag_id_name, page_data)
+            tag_id_name = ''
+            if self.extension.get_tag_data("tagger_" + name):
+                msg = "%s: Tag page identifier already exists; not adding the following 'name' to " \
+                    "dictionary: %s"
+                LOG.warning(msg, page.name, name)
+            else:
+                tag_id_name = "tagger_" + name
+                self.extension.set_tag_data(tag_id_name, page_data)
 
-        Tag(parent, attr_name=tag_id_name, path=mpath, key_vals=dict(good_keys))
+            Tag(parent, attr_name=tag_id_name, path=mpath, key_vals=dict(good_keys))
 
         return parent

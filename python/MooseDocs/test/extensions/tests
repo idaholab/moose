@@ -119,6 +119,7 @@
       type = PythonUnitTest
       input = test_tagging.py
       detail = "support documentation tags for filtering."
+      issues = '#25387'
     []
   []
 []

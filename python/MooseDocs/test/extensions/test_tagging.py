@@ -32,12 +32,11 @@ class TestTaggingInit(MooseDocsTestCase):
 
 class TestTaggingCommand(MooseDocsTestCase):
     EXTENSIONS = [core, command, tagging]
-    TEXT = '!tag test application:moose foo:bar'
-    TEXT_POSTSPACE = '!tag test  application:moose foo:bar'
-    TEXT_PRESPACE = '!tag  test application:moose foo:bar'
-    TEXT_DUPLICATE = '!tag test application:moose application:bar'
-    TEXT_NOT_ALLOWED = '!tag test application:moose application_wrong:bar'
-    TEXT_NO_KEYS = '!tag test'
+    TEXT = '!tag name=test pairs=application:moose foo:bar'
+    TEXT_DUPLICATE = '!tag name=test pairs=application:moose application:bar'
+    TEXT_NOT_ALLOWED = '!tag name=test pairs=application:moose application_wrong:bar'
+    TEXT_NO_KEYS = '!tag name=test'
+    TEXT_NO_NAME = '!tag pairs=application:moose'
 
     def setupExtension(self, ext):
         if ext == tagging:
@@ -53,21 +52,6 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertEqual(ast(0)['attr_name'], 'tagger_test')
         self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
-
-    def testPostNameSpaceAllowed(self):
-        with self.assertLogs(level=logging.INFO) as cm: # For warning suppression. TODO: remove cm when non-experimental
-            ast = self.tokenize(self.TEXT_POSTSPACE)
-        self.assertSize(ast, 1)
-        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
-        self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
-
-    def testPreNameSpaceWarning(self):
-        with self.assertLogs(level=logging.WARNING) as cm:
-            ast = self.tokenize(self.TEXT_PRESPACE)
-        self.assertEqual(len(cm.output), 2)
-        self.assertIn("It appears that no 'name' was provided for defined tag", cm.output[1])
-        self.assertSize(ast, 1)
-        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
 
     def testDuplicateKey(self):
         with self.assertLogs(level=logging.ERROR) as cm:
@@ -92,6 +76,13 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertIn("No key:value pairs provided", cm.output[0])
         self.assertSize(ast, 1)
         self.assertEqual(ast(0)['key_vals'], {})
+
+    def testNoName(self):
+        with self.assertLogs(level=logging.ERROR) as cm:
+            ast = self.tokenize(self.TEXT_NO_NAME)
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn("No 'name' provided for page and associated tags", cm.output[0])
+        self.assertSize(ast, 0) # No token is created if name is not provided
 
     def testTaggingDuplicateNamesWarning(self):
         with self.assertLogs(level=logging.WARNING) as cm:
