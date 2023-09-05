@@ -2112,8 +2112,6 @@ protected:
   MooseMesh & _mesh;
 
 private:
-  /// The restartable name used for the restartable EquationSystems
-  static const std::string equation_systems_restartable_name;
   /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
 
@@ -2189,14 +2187,6 @@ protected:
   InitialConditionWarehouse _ics;
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
-
-private:
-  /// The name of the restartable material property storage
-  static const std::string material_props_restartable_name;
-  /// The name of the restartable boundary material property storage
-  static const std::string bnd_material_props_restartable_name;
-  /// The name of the restartable neighbor material property storage
-  static const std::string neighbor_material_props_restartable_name;
 
 protected:
   // material properties

@@ -134,12 +134,6 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 
 Threads::spin_mutex get_function_mutex;
 
-const std::string FEProblemBase::equation_systems_restartable_name = "equation_systems";
-const std::string FEProblemBase::material_props_restartable_name = "material_props";
-const std::string FEProblemBase::bnd_material_props_restartable_name = "bnd_material_props";
-const std::string FEProblemBase::neighbor_material_props_restartable_name =
-    "neighbor_material_props";
-
 InputParameters
 FEProblemBase::validParams()
 {
@@ -312,7 +306,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>(
-        equation_systems_restartable_name, nullptr, _mesh)),
+        "equation_systems", nullptr, _mesh)),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),
@@ -328,11 +322,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        material_props_restartable_name, &_mesh, _material_prop_registry)),
+        "material_props", &_mesh, _material_prop_registry)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        bnd_material_props_restartable_name, &_mesh, _material_prop_registry)),
+        "bnd_material_props", &_mesh, _material_prop_registry)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        neighbor_material_props_restartable_name, &_mesh, _material_prop_registry)),
+        "neighbor_material_props", &_mesh, _material_prop_registry)),
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
