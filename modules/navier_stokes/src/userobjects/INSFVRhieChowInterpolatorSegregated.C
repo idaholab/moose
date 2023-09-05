@@ -388,9 +388,17 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     const Elem * elem = *it;
     if (this->hasBlocks(elem->subdomain_id()))
     {
+      Real coord_multiplier;
+      const auto coord_type = _fe_problem.getCoordSystem(elem->subdomain_id());
+      const unsigned int rz_radial_coord =
+          Moose::COORD_RZ ? _fe_problem.getAxisymmetricRadialCoord() : libMesh::invalid_uint;
+
+      MooseMeshUtils::coordTransformFactor(
+          elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
+
       const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
       const auto dof_index = elem->dof_number(momentum_system->number(), var_nums[0], 0);
-      _Ainv[elem->id()] = (*Ainv_petsc)(dof_index)*volume;
+      _Ainv[elem->id()] = (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
     }
   }
 
