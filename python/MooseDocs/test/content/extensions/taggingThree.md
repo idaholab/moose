@@ -1,11 +1,11 @@
 # Tagging Extension (Third Test Page)
 
-!tag tagging_one application:test_two foo:bas simulation_type:triage fiscal_year:2024
+!tag name=tagging_one application:test_two foo:bas simulation_type:triage fiscal_year:2024
 
 This page tests the usage of the following tagging extension syntax:
 
 ```
-!tag tagging_one application:test_two foo:bas simulation_type:triage fiscal_year:2024
+!tag name=tagging_one application:test_two foo:bas simulation_type:triage fiscal_year:2024
 ```
 
 This syntax tests for a duplicated name identifier in the standard syntax, which presents as a warning

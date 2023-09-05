@@ -1,11 +1,11 @@
 # Tagging Extension (Second Test Page)
 
-!tag tagging_two    application:test_two foo:bas simulation_type_wrong:warning fiscal_year:2024
+!tag name=tagging_two    application:test_two foo:bas simulation_type_wrong:warning fiscal_year:2024
 
 This page tests the usage of the following tagging extension syntax:
 
 ```
-!tag tagging_two    application:test_two foo:bas simulation_type_wrong:warning fiscal_year:2024
+!tag name=tagging_two    application:test_two foo:bas simulation_type_wrong:warning fiscal_year:2024
 ```
 
 This syntax tests for the allowance of extra spaces between the 'name' identifier and key:value

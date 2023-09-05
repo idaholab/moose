@@ -131,11 +131,12 @@ class TaggingExtension(command.CommandExtension):
 
 class TaggingCommand(command.CommandComponent):
     COMMAND= 'tag'
-    SUBCOMMAND= '*'
+    SUBCOMMAND= None
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['name'] = (None, 'ID name for page and associated key:value pairs.')
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -143,7 +144,7 @@ class TaggingCommand(command.CommandComponent):
         Process name and key:value pairs provided in the documentation file, check against
         previously-processed names and keys, and add new data to global attributes.
         """
-        name=info[2]
+        name=settings['name']
         keylist=info[3].split()
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
         entry_key_values=[]

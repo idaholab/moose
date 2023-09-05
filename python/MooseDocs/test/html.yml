@@ -104,6 +104,14 @@ Extensions:
             - test/include
     MooseDocs.extensions.ifelse: default
     MooseDocs.extensions.algorithm: default
+    MooseDocs.extensions.tagging:
+        active: True
+        js_file: tagging.js
+        allowed_keys:
+            - application
+            - foo
+            - simulation_type
+            - fiscal_year
 
 Translator:
     type: MooseDocs.base.Translator

@@ -1,12 +1,12 @@
 # Tagging Extension
 
-!tag tagging_one application:test foo:bar simulation_type:triage fiscal_year:2023
+!tag name=tagging_one application:test foo:bar simulation_type:triage fiscal_year:2023
 
 
 This page tests the usage of the following tagging extension standard syntax:
 
 ```
-!tag tagging_one application:test foo:bar simulation_type:triage fiscal_year:2023
+!tag name=tagging_one application:test foo:bar simulation_type:triage fiscal_year:2023
 ```
 
 See the other tagging pages:
