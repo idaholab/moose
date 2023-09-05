@@ -11,11 +11,6 @@
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
 #include "Steady.h"
-
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-#include <cstddef>
-#include <petsctao.h>
 #include "PetscSupport.h"
 InputParameters
 OptimizeSolve::validParams()
@@ -183,72 +178,7 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
-  { // Create equality vector
-    ierr = VecCreate(_my_comm.get(), &_ce);
-    CHKERRQ(ierr);
-    ierr = VecSetSizes(_ce, _obj_function->getNumEqCons(), _obj_function->getNumEqCons());
-    CHKERRQ(ierr);
-    ierr = VecSetFromOptions(_ce);
-    CHKERRQ(ierr);
-    ierr = VecSetUp(_ce);
-    CHKERRQ(ierr);
-
-    // Create inequality vector
-    ierr = VecCreate(_my_comm.get(), &_ci);
-    CHKERRQ(ierr);
-    ierr = VecSetSizes(_ci, _obj_function->getNumInEqCons(), _obj_function->getNumInEqCons());
-    CHKERRQ(ierr);
-    ierr = VecSetFromOptions(_ci);
-    CHKERRQ(ierr);
-    ierr = VecSetUp(_ci);
-    CHKERRQ(ierr);
-
-    // Set equality jacobian matrix
-    ierr = MatCreate(_my_comm.get(), &_gradient_e);
-    CHKERRQ(ierr);
-    ierr = MatSetSizes(
-        _gradient_e, _obj_function->getNumEqCons(), _ndof, _obj_function->getNumEqCons(), _ndof);
-    CHKERRQ(ierr);
-    ierr = MatSetFromOptions(_gradient_e);
-    CHKERRQ(ierr);
-    ierr = MatSetUp(_gradient_e);
-
-    // Set inequality jacobian matrix
-    ierr = MatCreate(_my_comm.get(), &_gradient_i);
-    CHKERRQ(ierr);
-    ierr = MatSetSizes(_gradient_i,
-                       _obj_function->getNumInEqCons(),
-                       _ndof,
-                       _obj_function->getNumInEqCons(),
-                       _ndof);
-    CHKERRQ(ierr);
-    ierr = MatSetFromOptions(_gradient_i);
-    CHKERRQ(ierr);
-    ierr = MatSetUp(_gradient_i);
-    CHKERRQ(ierr);
-
-    if (_obj_function->getNumEqCons())
-    { // Set the Equality Constraints
-      ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
-      CHKERRQ(ierr);
-
-      // Set the Equality Constraints Jacobian
-      ierr = TaoSetJacobianEqualityRoutine(
-          _tao, _gradient_e, _gradient_e, equalityGradientFunctionWrapper, this);
-      CHKERRQ(ierr);
-    }
-
-    if (_obj_function->getNumInEqCons())
-    { // Set the Inequality constraints
-      ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
-      CHKERRQ(ierr);
-
-      // Set the Inequality constraints Jacobian
-      ierr = TaoSetJacobianInequalityRoutine(
-          _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
-      CHKERRQ(ierr);
-    }
-  }
+    taoALCreate();
 
   // Backup multiapps so transient problems start with the same initial condition
   _problem.backupMultiApps(OptimizationAppTypes::EXEC_FORWARD);
@@ -273,19 +203,7 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
-  {
-    ierr = VecDestroy(&_ce);
-    CHKERRQ(ierr);
-
-    ierr = VecDestroy(&_ci);
-    CHKERRQ(ierr);
-
-    ierr = MatDestroy(&_gradient_e);
-    CHKERRQ(ierr);
-
-    ierr = MatDestroy(&_gradient_i);
-    CHKERRQ(ierr);
-  }
+    taoALDestroy();
 
   return ierr;
 }
@@ -575,5 +493,92 @@ OptimizeSolve::inequalityGradientFunctionWrapper(
   // constraints gradient
   OptimizationReporterBase * obj_func = solver->getObjFunction();
   obj_func->computeInequalityGradient(grad_ineq);
+  return 0;
+}
+
+PetscErrorCode
+OptimizeSolve::taoALCreate()
+{
+  PetscErrorCode ierr = 0;
+  // Create equality vector
+  ierr = VecCreate(_my_comm.get(), &_ce);
+  CHKERRQ(ierr);
+  ierr = VecSetSizes(_ce, _obj_function->getNumEqCons(), _obj_function->getNumEqCons());
+  CHKERRQ(ierr);
+  ierr = VecSetFromOptions(_ce);
+  CHKERRQ(ierr);
+  ierr = VecSetUp(_ce);
+  CHKERRQ(ierr);
+
+  // Create inequality vector
+  ierr = VecCreate(_my_comm.get(), &_ci);
+  CHKERRQ(ierr);
+  ierr = VecSetSizes(_ci, _obj_function->getNumInEqCons(), _obj_function->getNumInEqCons());
+  CHKERRQ(ierr);
+  ierr = VecSetFromOptions(_ci);
+  CHKERRQ(ierr);
+  ierr = VecSetUp(_ci);
+  CHKERRQ(ierr);
+
+  // Set equality jacobian matrix
+  ierr = MatCreate(_my_comm.get(), &_gradient_e);
+  CHKERRQ(ierr);
+  ierr = MatSetSizes(
+      _gradient_e, _obj_function->getNumEqCons(), _ndof, _obj_function->getNumEqCons(), _ndof);
+  CHKERRQ(ierr);
+  ierr = MatSetFromOptions(_gradient_e);
+  CHKERRQ(ierr);
+  ierr = MatSetUp(_gradient_e);
+
+  // Set inequality jacobian matrix
+  ierr = MatCreate(_my_comm.get(), &_gradient_i);
+  CHKERRQ(ierr);
+  ierr = MatSetSizes(
+      _gradient_i, _obj_function->getNumInEqCons(), _ndof, _obj_function->getNumInEqCons(), _ndof);
+  CHKERRQ(ierr);
+  ierr = MatSetFromOptions(_gradient_i);
+  CHKERRQ(ierr);
+  ierr = MatSetUp(_gradient_i);
+  CHKERRQ(ierr);
+
+  if (_obj_function->getNumEqCons())
+  { // Set the Equality Constraints
+    ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
+    CHKERRQ(ierr);
+
+    // Set the Equality Constraints Jacobian
+    ierr = TaoSetJacobianEqualityRoutine(
+        _tao, _gradient_e, _gradient_e, equalityGradientFunctionWrapper, this);
+    CHKERRQ(ierr);
+  }
+
+  if (_obj_function->getNumInEqCons())
+  { // Set the Inequality constraints
+    ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
+    CHKERRQ(ierr);
+
+    // Set the Inequality constraints Jacobian
+    ierr = TaoSetJacobianInequalityRoutine(
+        _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
+    CHKERRQ(ierr);
+  }
+  return 0;
+}
+
+PetscErrorCode
+OptimizeSolve::taoALDestroy()
+{
+  PetscErrorCode ierr = 0;
+  ierr = VecDestroy(&_ce);
+  CHKERRQ(ierr);
+
+  ierr = VecDestroy(&_ci);
+  CHKERRQ(ierr);
+
+  ierr = MatDestroy(&_gradient_e);
+  CHKERRQ(ierr);
+
+  ierr = MatDestroy(&_gradient_i);
+  CHKERRQ(ierr);
   return 0;
 }

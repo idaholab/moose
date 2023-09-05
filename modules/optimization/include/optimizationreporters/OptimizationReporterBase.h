@@ -100,7 +100,7 @@ public:
   dof_id_type getNumEqCons() const { return _n_eq_cons; }
 
   /**
-   * Function to get the total number of equalities
+   * Function to get the total number of inequalities
    * @return total number of parameters
    */
   dof_id_type getNumInEqCons() const { return _n_ineq_cons; }

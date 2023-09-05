@@ -19,13 +19,13 @@ is shown in [main_app].
          id=main_app
          caption= Constrained Optimization Main App
 
-For this optimization example, the [GeneralOptimization](/OptimizationReporter/GeneralOptimization) reporter is used. The
+For this optimization example, the [GeneralOptimization.md] reporter is used. The
 [!param](/OptimizationReporter/OptimizationReporter/equality_names) option lists
 equality constraints. There is also a
 [!param](/OptimizationReporter/OptimizationReporter/inequality_names), not shown
 below, for listing the inequality constraints. The
-[GeneralOptimization](/OptimizationReporter/GeneralOptimization) also expects
-the parameters
+[GeneralOptimization.md] also expects
+the controllable parameters
 [!param](/OptimizationReporter/GeneralOptimization/objective_name) and
 [!param](/OptimizationReporter/GeneralOptimization/num_values_name), which
 are the names of the reporters that will hold the objective value and the number
@@ -39,12 +39,14 @@ of parameters in the forward problem.
          constraints
 
 To enable constrained optimization the
-[!param](/Executioner/Optimize/tao_solver) needs to be set to `taoalmm`. This
-the only TAO solver that MOOSE currently interfaces to that has general
+[!param](/Executioner/Optimize/tao_solver) needs to be set to `taoalmm`, which
+is an Augmented Lagrangian method. This
+constraint support. The `taoalmm` subsolver is set with [!param](/Executioner/Optimize/petsc_options_iname) and
+[!param](/Executioner/Optimize/petsc_options_value).
 constraint support. Using the
 [!param](/Executioner/Optimize/petsc_options_iname) and
 [!param](/Executioner/Optimize/petsc_options_value) the type of subsolver that
-the `taoalmm` solver will use. In this example, the subsolver was set by
+Trust Region Method. This example computes the objective function's gradient using finite differencing in TAO with the `petsc_options_iname` `-tao_fd`.  Finite differencing only uses the forward problem's objective value and does not require an adjoint solve.
 `-tao_almm_subsolver_tao_type` and  `bqnktr` to the Bounded Quasi-Newton-Krylov
 Trust Region Method. Later on in the forward app we show that the objective
 function's gradient is not calculated explicitly. So a finite differencing scheme
@@ -58,7 +60,8 @@ is used for the gradient calculation.
 ## Forward Problem Sub-App
 
 In the forward app, a heat conduction problem is solved with convective flux
-type boundary condition that changes with the inner radius. The objective is
+type boundary condition that changes with the inner radius. The outer radius is
+insulated and there is a constant source term throughout. The objective is
 find the two radii that will have the lowest max temperature while satisfying a
 volume constraint.
 
@@ -67,7 +70,7 @@ volume constraint.
          caption= Constrained Optimization Forward SubApp
 
 In the forward app, the two optimization parameters control the inner and outer
-radius of the annulus. These parameters are used by the
+values are used to displace the boundaries of the
 [ParsedOptimizationFunction](/Functions/ParsedOptimizationFunction) to calculate
 the cartesian boundary displacement. These
 values are used displace the boundaries of the

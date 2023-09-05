@@ -176,4 +176,8 @@ private:
 
   /// Inequality constraint gradient
   Mat _gradient_i;
+
+  ///
+  PetscErrorCode taoALCreate();
+  PetscErrorCode taoALDestroy();
 };
