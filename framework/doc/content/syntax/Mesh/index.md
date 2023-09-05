@@ -265,6 +265,9 @@ the creation of the mesh into many individual steps. To debug this process, one 
   by default using the [Exodus.md] format with the name `<mesh_generator_name>_in.e`, so you may visualize it
   before it gets acted upon by the next mesh generator(s).
 
+For a narrow selection of mesh issues, listed in its documentation, the [MeshDiagnosticsGenerator.md] may be used to detect
+unsupported features in meshes.
+
 ## Examining meshes id=examination
 
 The results of finite element/volume simulations are highly dependent on the quality of the mesh(es) used.
