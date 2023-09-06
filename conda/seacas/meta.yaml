@@ -1,5 +1,5 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "0" %}
+{% set build = "1" %}
 {% set seacas_version = "2023.05.30" %}
 {% set seacas_git_rev = "v2023-05-30" %}
 {% set strbuild = "build_" + build|string %}
@@ -13,7 +13,6 @@ source:
   git_rev: {{ seacas_git_rev }}
   patches:
     - use-curl-instead-of-wget.patch
-    - revert-filesystem.patch # This patch reverts the inclusion of std::filesystem in Ioss_Utils.h, as it doesn't yet exist fully in SDK 10.12. This can be removed when our Intel MacOS packages move to a newer SDK (10.15 or later).
 
 build:
   number: {{ build }}
