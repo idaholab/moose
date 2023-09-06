@@ -38,12 +38,16 @@ PenaltyFrictionUserObject::validParams()
       "slip_tolerance > 0",
       "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
   MooseEnum adaptivity_penalty_friction("SIMPLE FRICTION_LIMIT", "FRICTION_LIMIT");
+  adaptivity_penalty_friction.addDocumentation(
+      "SIMPLE", "Keep multiplying by the frictional penalty multiplier between AL iterations");
+  adaptivity_penalty_friction.addDocumentation(
+      "FRICTION_LIMIT",
+      "This strategy will be guided by the Coulomb limit and be less reliant on the initial "
+      "penalty factor provided by the user.");
   params.addParam<MooseEnum>(
       "adaptivity_penalty_friction",
       adaptivity_penalty_friction,
-      "The augmented Lagrange update strategy used on the frictional penalty coefficient. 'Simple' "
-      "will keep multiplying by the penalty multiplier, whereas 'FrictionLimit' will be guided by "
-      "the Coulomb limit and be less reliant on the initial penalty factor provided by the user.");
+      "The augmented Lagrange update strategy used on the frictional penalty coefficient.");
   params.addRangeCheckedParam<Real>(
       "penalty_multiplier_friction",
       1.0,
@@ -137,7 +141,6 @@ PenaltyFrictionUserObject::timestepSetup()
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
-    tangential_traction = {tangential_traction(0), tangential_traction(1)};
   }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
@@ -443,9 +446,7 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
       }
       // Change of direction: Reduce penalty factor to avoid lack of convergence
       else if (step_slip.first.dot(step_slip.second) < 0.0)
-      {
         penalty_friction /= 2.0;
-      }
 
       // Heuristics to bound the penalty factor
       if (penalty_friction < _penalty_friction)

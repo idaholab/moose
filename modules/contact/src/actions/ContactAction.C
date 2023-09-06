@@ -153,19 +153,27 @@ ContactAction::validParams()
       "determine its maximum. If this multiplier is too large, the condition number of the system "
       "to be solved may be negatively impacted.");
   MooseEnum adaptivity_penalty_normal("SIMPLE BUSSETTA", "SIMPLE");
+  adaptivity_penalty_normal.addDocumentation(
+      "SIMPLE", "Keep multiplying by the penalty multiplier between AL iterations");
+  adaptivity_penalty_normal.addDocumentation(
+      "BUSSETTA",
+      "Modify the penalty using an algorithm from Bussetta et al, 2012, Comput Mech 49:259-275 "
+      "between AL iterations.");
   params.addParam<MooseEnum>(
       "adaptivity_penalty_normal",
       adaptivity_penalty_normal,
-      "The augmented Lagrange update strategy used on the normal penalty coefficient. 'Simple' "
-      "will keep multiplying by the penalty multiplier, whereas 'Bussetta' will apply an algorithm "
-      "in Bussetta et al, 2012, Comput Mech 49:259-275.");
+      "The augmented Lagrange update strategy used on the normal penalty coefficient.");
   MooseEnum adaptivity_penalty_friction("SIMPLE FRICTION_LIMIT", "FRICTION_LIMIT");
+  adaptivity_penalty_friction.addDocumentation(
+      "SIMPLE", "Keep multiplying by the frictional penalty multiplier between AL iterations");
+  adaptivity_penalty_friction.addDocumentation(
+      "FRICTION_LIMIT",
+      "This strategy will be guided by the Coulomb limit and be less reliant on the initial "
+      "penalty factor provided by the user.");
   params.addParam<MooseEnum>(
       "adaptivity_penalty_friction",
       adaptivity_penalty_friction,
-      "The augmented Lagrange update strategy used on the frictional penalty coefficient. 'Simple' "
-      "will keep multiplying by the penalty multiplier, whereas 'FrictionLimit' will be guided by "
-      "the Coulomb limit and be less reliant on the initial penalty factor provided by the user.");
+      "The augmented Lagrange update strategy used on the frictional penalty coefficient.");
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<Real>(

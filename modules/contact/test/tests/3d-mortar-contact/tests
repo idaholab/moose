@@ -187,7 +187,7 @@
     type = 'Exodiff'
     input = 'frictional-mortar-3d-al.i'
     exodiff = 'frictional-mortar-3d-al_out.e'
-    requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
+    requirement = 'The system shall be able to solve a 3D frictional problem with mortar constraint using a '
                   'augmented Lagrange approach and converging to prescribed tolerance.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
