@@ -10,5 +10,6 @@
     heavy=true
     recover = false
     allow_warnings=true
+    petsc_version = ">=3.15"
   []
 []

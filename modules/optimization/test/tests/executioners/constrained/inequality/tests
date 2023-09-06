@@ -9,5 +9,6 @@
    # steady solve
     recover = false
     requirement = "The system shall minimize an inequality  constrained quadratic objective function from a test object."
+    petsc_version = ">=3.15"
   []
 []
