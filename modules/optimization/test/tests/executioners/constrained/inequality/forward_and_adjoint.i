@@ -103,15 +103,6 @@
     boundary = left
     execute_on = ADJOINT_TIMESTEP_END
   []
-  [gradient_c]
-    type = VectorOfPostprocessors
-    postprocessors = 'dc_da dc_db'
-  []
-  [ineq]
-    type = VectorOfPostprocessors
-    postprocessors = 'constraint'
-    execute_on = TIMESTEP_END
-  []
 []
 
 [Postprocessors]
@@ -119,24 +110,6 @@
     type = FunctionSideIntegral
     boundary = left
     function = left_function
-
-  []
-  [constraint]
-    type = ParsedPostprocessor
-    function = '150 - sum' # 150 is the constraint we want to satisfy
-    pp_names = sum
-    execute_on = TIMESTEP_END
-
-  []
-  [dc_da]
-    type = FunctionSideIntegral
-    boundary = left
-    function = -1
-  []
-  [dc_db]
-    type = FunctionSideIntegral
-    boundary = left
-    function = '-y'
   []
 []
 
@@ -158,4 +131,35 @@
   console = false
   exodus = false
   json = true
+[]
+
+#---------Inequality constraints------------#
+
+[VectorPostprocessors]
+  [gradient_c]
+    type = VectorOfPostprocessors
+    postprocessors = 'dc_da dc_db'
+  []
+  [ineq]
+    type = VectorOfPostprocessors
+    postprocessors = 'constraint'
+  []
+[]
+
+[Postprocessors]
+  [constraint]
+    type = ParsedPostprocessor
+    function = '150 - sum' # 150 is the constraint we want to satisfy
+    pp_names = sum
+  []
+  [dc_da]
+    type = FunctionSideIntegral
+    boundary = left
+    function = -1
+  []
+  [dc_db]
+    type = FunctionSideIntegral
+    boundary = left
+    function = '-y'
+  []
 []

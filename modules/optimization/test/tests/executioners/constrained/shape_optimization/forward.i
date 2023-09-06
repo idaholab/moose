@@ -1,3 +1,6 @@
+# This test is documented as an example for ConstrainedShapeOptimization. This
+# test should now be changed without updating the documentation.
+
 inner_radius = 6
 outer_radius = 10
 volume_constraint = 200
@@ -272,7 +275,6 @@ volume_constraint = 200
 []
 
 [Outputs]
-  exodus = true
   console = false
 []
 

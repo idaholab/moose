@@ -8,6 +8,7 @@
   initial_condition = '1 1 1'
   objective = 0.0
   solution = '1 2 3'
+  solution_sum_equality = 5.0
   measurement_points = ''
   measurement_values = ''
   equality_names = 'equal'

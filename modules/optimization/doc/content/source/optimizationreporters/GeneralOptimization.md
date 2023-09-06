@@ -6,7 +6,7 @@
 
 
 `GeneralOptimization` is responsible for creating parameter vector(s) for
-optimization, setting the initial condition for the optimization, and setting
+optimization, setting the parameter initial condition for the optimization, and setting
 parameter bounds and constraints. Although the [Optimize.md] executioner holds a single vector
 for parameter values, this vector can be split into groups of parameters. This
 is done by specifying a name for each group with

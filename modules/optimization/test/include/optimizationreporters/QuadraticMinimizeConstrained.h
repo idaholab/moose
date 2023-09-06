@@ -34,4 +34,6 @@ private:
 
   /// Desired solution to optimization
   const std::vector<Real> & _solution;
+
+  const Real _eq_constraint;
 };

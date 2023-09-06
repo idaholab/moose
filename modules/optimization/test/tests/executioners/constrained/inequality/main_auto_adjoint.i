@@ -1,7 +1,5 @@
-# This tests that a linear and constant function can be scaled in
-# two separate functionNeumannBCs both applied to the same sideset using
-# two parsed functions.  The scale of the linear and constant functions
-# are being parameterized.
+# This tests constrained optimization of a linear and constant function
+# that are used to apply NuemannBCs on a side.
 
 [Optimization]
 []
@@ -16,10 +14,8 @@
 
   inequality_names = 'ineq'
 
-  measurement_file = 'measurementData.csv'
-  file_xcoord = 'coordx'
-  file_ycoord ='y'
-  file_zcoord = 'z'
+  measurement_points = '0.2 0.2 0'
+  measurement_values = '207'
   file_value = 'measured_value'
 []
 

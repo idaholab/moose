@@ -18,13 +18,16 @@ QuadraticMinimizeConstrained::validParams()
   InputParameters params = OptimizationReporter::validParams();
   params.addRequiredParam<Real>("objective", "Desired value of objective function.");
   params.addRequiredParam<std::vector<Real>>("solution", "Desired solution to optimization.");
+  params.addRequiredParam<Real>("solution_sum_equality",
+                                "Desired sum of the solution for constrained optimization.");
   return params;
 }
 
 QuadraticMinimizeConstrained::QuadraticMinimizeConstrained(const InputParameters & parameters)
   : OptimizationReporter(parameters),
     _result(getParam<Real>("objective")),
-    _solution(getParam<std::vector<Real>>("solution"))
+    _solution(getParam<std::vector<Real>>("solution")),
+    _eq_constraint(getParam<Real>("solution_sum_equality"))
 {
   setICsandBounds();
   if (_solution.size() != _ndof)
@@ -71,7 +74,7 @@ QuadraticMinimizeConstrained::computeEqualityConstraints(
     {
       equality_constraint += val;
     }
-    eqs_constraints.set(i++, equality_constraint - 5);
+    eqs_constraints.set(i++, equality_constraint - _eq_constraint);
   }
   eqs_constraints.close();
 }

@@ -15,7 +15,7 @@ system.  The main application contains the optimization executioner and the
 sub-applications solve the forward and adjoint PDE.   The main application input
 is shown in [main_app].
 
-!listing examples/shape_optimization/main.i
+!listing test/tests/executioners/constrained/shape_optimization/main.i
          id=main_app
          caption= Constrained Optimization Main App
 
@@ -32,7 +32,7 @@ are the names of the reporters that will hold the objective value and the number
 of parameters in the forward problem.
 
 
-!listing examples/shape_optimization/main.i
+!listing test/tests/executioners/constrained/shape_optimization/main.i
          block=OptimizationReporter
          id=OptRep
          caption= Main application `OptimizationReporter` block with equality
@@ -52,7 +52,7 @@ Trust Region Method. Later on in the forward app we show that the objective
 function's gradient is not calculated explicitly. So a finite differencing scheme
 is used for the gradient calculation.
 
-!listing examples/shape_optimization/main.i
+!listing test/tests/executioners/constrained/shape_optimization/main.i
         block= Executioner
         id=exec
         caption= Main application `Executioner` block
@@ -65,7 +65,7 @@ insulated and there is a constant source term throughout. The objective is
 find the two radii that will have the lowest max temperature while satisfying a
 volume constraint.
 
-!listing examples/shape_optimization/forward.i
+!listing test/tests/executioners/constrained/shape_optimization/forward.i
          id=forward_app
          caption= Constrained Optimization Forward SubApp
 
@@ -83,7 +83,7 @@ For the equality constraints, a gradient of the constraint with respect to the
 parameters is needed for TAO. The gradient is analytically computed for the
 current radii.
 
-!listing examples/shape_optimization/forward.i
+!listing test/tests/executioners/constrained/shape_optimization/forward.i
          block= Functions BCs Kernels
          id=forward_app_shape
          caption= Forward App Shape Optimization
@@ -95,7 +95,7 @@ These values are now able to be transferred to the main application for the
 optimization process.
 
 
-!listing examples/shape_optimization/forward.i
+!listing test/tests/executioners/constrained/shape_optimization/forward.i
          block=Postprocessors
          id=forward_app_obj
          caption= Forward App Objective Calculations

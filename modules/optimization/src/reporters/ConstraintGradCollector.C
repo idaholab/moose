@@ -10,7 +10,6 @@
 #include "ConstraintGradCollector.h"
 #include "MooseError.h"
 #include "ReporterMode.h"
-#include <cstddef>
 
 registerMooseObject("OptimizationApp", ConstraintGradCollector);
 
@@ -41,7 +40,7 @@ ConstraintGradCollector::initialSetup()
 {
   const ReporterData & rdata = _fe_problem.getReporterData();
   _gradient_vecs.reserve(getParam<std::vector<std::vector<ReporterName>>>("reporters").size());
-  size_t params_ind(0);
+  std::size_t params_ind(0);
 
   for (const auto & rname_vec : getParam<std::vector<std::vector<ReporterName>>>("reporters"))
   {
@@ -61,9 +60,9 @@ ConstraintGradCollector::initialSetup()
 void
 ConstraintGradCollector::execute()
 {
-  const size_t num_params = _parameters.size();
-  size_t num_before(0);
-  size_t total_vec_ind(0);
+  const std::size_t num_params = _parameters.size();
+  std::size_t num_before(0);
+  std::size_t total_vec_ind(0);
   for (const auto & vecs : _gradient_vecs)
   {
     if (vecs.empty())
@@ -73,7 +72,7 @@ ConstraintGradCollector::execute()
     }
 
     // get the first vector size
-    size_t vec_size = vecs[0]->size();
+    std::size_t vec_size = vecs[0]->size();
 
     // Check that all vectors in this group have the same size and if not error out.
     if (!std::all_of(vecs.begin(),
