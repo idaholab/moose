@@ -111,6 +111,23 @@
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
                   "approach allows for maintaining reasonable system condition numbers."
   []
+  [cylinder_friction_penalty_frictional_al_action_amg_tight]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_frictional_al_action_amg_tight_vectorpp_output_sur'
+              'face_FINAL.csv'
+    input = 'cylinder_friction_penalty_frictional_al_action_amg_tight.i'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-2
+    method = opt
+    valgrind = none
+    requirement = "The contact module shall be able to approximate frictional contact in a "
+                  "two-dimensional cylinder via an augmented Lagrange approach to constraint "
+                  "enforcement using the contact action and use the hypre algebraic multigrid "
+                  "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
+                  "approach allows for maintaining reasonable system condition numbers and selecting "
+                  "the 'Bussetta' and 'Simple' adaptivity strategies for the normal and frictional "
+                  "penalty values, respectively."
+  []
   [cylinder_friction_penalty_al_frictional_action_amg_bussetta_simple]
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple_vectorpp_output_sur'
@@ -123,7 +140,7 @@
                   "enforcement using the contact action and use the hypre algebraic multigrid "
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
                   "approach allows for maintaining reasonable system condition numbers and selecting "
-                  "the 'Bussetta' and 'Simple' adaptivity strategies for the normal and frictional "
+                  "the 'Bussetta' and 'FrictionLimit' adaptivity strategies for the normal and frictional "
                   "penalty values, respectively."
   []
   [cylinder_friction_penalty_al_separation]
