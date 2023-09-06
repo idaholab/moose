@@ -1,6 +1,6 @@
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
@@ -92,7 +92,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [ICs]
   [S_ic]
     type = QuadFlowAreaIC
@@ -174,6 +173,10 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+[]
+
+[Problem]
+  allow_initial_conditions_with_restart = true
 []
 
 [Executioner]
