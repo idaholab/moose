@@ -127,8 +127,12 @@ OptimizeSolve::taoSolve()
       ierr = TaoSetType(_tao, TAOBMRM);
       break;
     case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD:
+#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
       ierr = TaoSetType(_tao, TAOALMM);
       break;
+#else
+      mooseError("ALMM is only compatible with PETSc versions above 3.14. ");
+#endif
 
     default:
       mooseError("Invalid Tao solve type");
