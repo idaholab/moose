@@ -61,6 +61,9 @@ changeBoundaryId(MeshBase & mesh,
   // from showing up when printing information, etc.
   if (delete_prev)
     boundary_info.remove_id(old_id);
+
+  // global information may now be out of sync
+  mesh.set_isnt_prepared();
 }
 
 std::vector<boundary_id_type>
