@@ -255,7 +255,7 @@ C3 = 1.0
   petsc_options_value = 'lu superlu_dist'
   nl_abs_tol = 1e-10
   dt = 1.0
-  num_steps = 20
+  num_steps = 25
 []
 
 [Outputs]
@@ -284,5 +284,10 @@ C3 = 1.0
   [cost]
     type = ElementIntegralVariablePostprocessor
     variable = Cost
+  []
+  [objective]
+    type = ElementIntegralMaterialProperty
+    mat_prop = strain_energy_density
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
