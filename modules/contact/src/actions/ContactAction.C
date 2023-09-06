@@ -910,6 +910,8 @@ ContactAction::addMortarContact()
 
       // AL parameters
       var_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
+      var_params.set<MooseEnum>("adaptivity_penalty_normal") =
+          getParam<MooseEnum>("adaptivity_penalty_normal");
       var_params.set<MooseEnum>("adaptivity_penalty_friction") =
           getParam<MooseEnum>("adaptivity_penalty_friction");
       if (isParamValid("al_penetration_tolerance"))

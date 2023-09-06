@@ -276,7 +276,8 @@
     adaptivity_penalty_friction = SIMPLE
     adaptivity_penalty_normal = BUSSETTA
     al_penetration_tolerance = 1e-7
-    al_incremental_slip_tolerance = 1.0 # Not active
+    al_incremental_slip_tolerance = 1e-5 # Not active
     penalty_multiplier = 100
+    penalty_multiplier_friction = 5
   []
 []
