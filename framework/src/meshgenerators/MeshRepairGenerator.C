@@ -48,6 +48,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types"))
 {
+  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation)
+    mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
 std::unique_ptr<MeshBase>
@@ -61,73 +63,7 @@ MeshRepairGenerator::generate()
     mooseError("MeshRepairGenerator requires a serial mesh. The mesh should not be distributed.");
 
   if (_fix_overlapping_nodes)
-  {
-    _num_fixed_nodes = 0;
-    auto pl = mesh->sub_point_locator();
-    std::unordered_set<dof_id_type> nodes_removed;
-    // loop on nodes
-    for (auto & node : mesh->node_ptr_range())
-    {
-      // this node has already been removed
-      if (nodes_removed.count(node->id()))
-        continue;
-
-      // find all the elements around this node
-      std::set<const Elem *> elements;
-      (*pl)(*node, elements);
-
-      for (auto & elem : elements)
-      {
-        bool found = false;
-        for (auto & elem_node : elem->node_ref_range())
-        {
-          if (node->id() == elem_node.id())
-          {
-            found = true;
-            break;
-          }
-        }
-        if (!found)
-        {
-          for (auto & elem_node : elem->node_ref_range())
-          {
-            const Real tol = _node_overlap_tol;
-            // Compares the coordinates
-            const auto x_node = (*node)(0);
-            const auto x_elem_node = elem_node(0);
-            const auto y_node = (*node)(1);
-            const auto y_elem_node = elem_node(1);
-            const auto z_node = (*node)(2);
-            const auto z_elem_node = elem_node(2);
-
-            if (MooseUtils::absoluteFuzzyEqual(x_node, x_elem_node, tol) &&
-                MooseUtils::absoluteFuzzyEqual(y_node, y_elem_node, tol) &&
-                MooseUtils::absoluteFuzzyEqual(z_node, z_elem_node, tol))
-            {
-              // Coordinates are the same but it's not the same node
-              // Replace the node in the element
-              const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
-              nodes_removed.insert(elem_node.id());
-
-              _num_fixed_nodes++;
-              if (_num_fixed_nodes < 10)
-                _console << "Stitching a node at : " << *node << std::endl;
-              else if (_num_fixed_nodes == 10)
-                _console << "Node stitching will now proceed silently." << std::endl;
-            }
-          }
-        }
-      }
-    }
-    _console << "Number of overlapping nodes which got merged: " << _num_fixed_nodes << std::endl;
-    if (mesh->allow_renumbering())
-      mesh->renumber_nodes_and_elements();
-    else
-    {
-      mesh->remove_orphaned_nodes();
-      mesh->update_parallel_id_counts();
-    }
-  }
+    fixOverlappingNodes(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -135,38 +71,127 @@ MeshRepairGenerator::generate()
 
   // Disambiguate any block that has elements of multiple types
   if (_elem_type_separation)
+    separateSubdomainsByElementType(mesh);
+
+  mesh->set_isnt_prepared();
+  return mesh;
+}
+
+void
+MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_fixed_nodes = 0;
+  auto pl = mesh->sub_point_locator();
+  pl->set_close_to_point_tol(_node_overlap_tol);
+
+  std::unordered_set<dof_id_type> nodes_removed;
+  // loop on nodes
+  for (auto & node : mesh->node_ptr_range())
   {
-    std::set<subdomain_id_type> ids;
-    mesh->subdomain_ids(ids);
-    // loop on sub-domain
-    for (auto & id : ids)
+    // this node has already been removed
+    if (nodes_removed.count(node->id()))
+      continue;
+
+    // find all the elements around this node
+    std::set<const Elem *> elements;
+    (*pl)(*node, elements);
+
+    for (auto & elem : elements)
     {
-      // Gather all the element types and blocks
-      // ElemType defines an enum for geometric element types
-      std::set<ElemType> types;
-      // loop on elements within this sub-domain
-      for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
-        types.insert(elem->type());
-
-      if (types.size() > 1)
+      bool found = false;
+      for (auto & elem_node : elem->node_ref_range())
       {
-        auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-        subdomain_id_type i = 0;
-        for (const auto type : types)
+        if (node->id() == elem_node.id())
         {
-          auto new_id = next_block_id + i++;
-          // Create blocks when a block has multiple element types
-          mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        for (auto & elem_node : elem->node_ref_range())
+        {
+          if (elem_node.id() == node->id())
+            continue;
+          const Real tol = _node_overlap_tol;
+          // Compares the coordinates
+          const auto x_node = (*node)(0);
+          const auto x_elem_node = elem_node(0);
+          const auto y_node = (*node)(1);
+          const auto y_elem_node = elem_node(1);
+          const auto z_node = (*node)(2);
+          const auto z_elem_node = elem_node(2);
 
-          // Re-assign elements to the new blocks
-          for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
-            if (elem->type() == type)
-              elem->subdomain_id() = new_id;
+          if (MooseUtils::absoluteFuzzyEqual(x_node, x_elem_node, tol) &&
+              MooseUtils::absoluteFuzzyEqual(y_node, y_elem_node, tol) &&
+              MooseUtils::absoluteFuzzyEqual(z_node, z_elem_node, tol))
+          {
+            // Merging two nodes from the same element is almost never a good idea
+            if (elem->get_node_index(node) != libMesh::invalid_uint)
+            {
+              _console << "Two overlapping nodes in element " << elem->id() << " right by "
+                       << elem->vertex_average() << ".\n They will not be stitched" << std::endl;
+              continue;
+            }
+
+            // Coordinates are the same but it's not the same node
+            // Replace the node in the element
+            const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
+            nodes_removed.insert(elem_node.id());
+
+            num_fixed_nodes++;
+            if (num_fixed_nodes < 10)
+              _console << "Stitching nodes " << *node << " and            " << elem_node
+                       << std::endl;
+            else if (num_fixed_nodes == 10)
+              _console << "Node stitching will now proceed silently." << std::endl;
+          }
         }
       }
     }
   }
+  _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
+  if (mesh->allow_renumbering())
+    mesh->renumber_nodes_and_elements();
+  else
+  {
+    mesh->remove_orphaned_nodes();
+    mesh->update_parallel_id_counts();
+  }
+}
 
-  mesh->set_isnt_prepared();
-  return dynamic_pointer_cast<MeshBase>(mesh);
+void
+MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const
+{
+  std::set<subdomain_id_type> ids;
+  mesh->subdomain_ids(ids);
+  // loop on sub-domain
+  for (const auto id : ids)
+  {
+    // Gather all the element types and blocks
+    // ElemType defines an enum for geometric element types
+    std::set<ElemType> types;
+    // loop on elements within this sub-domain
+    for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
+      types.insert(elem->type());
+
+    // This call must be performed on all processes
+    auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+
+    if (types.size() > 1)
+    {
+      subdomain_id_type i = 0;
+      for (const auto type : types)
+      {
+        auto new_id = next_block_id + i++;
+        // Create blocks when a block has multiple element types
+        mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
+
+        // Re-assign elements to the new blocks
+        for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
+          if (elem->type() == type)
+            elem->subdomain_id() = new_id;
+      }
+    }
+  }
 }
