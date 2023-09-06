@@ -1,0 +1,12 @@
+[Tests]
+    design = 'ConstraintGradCollector.md'
+    [grad_collector]
+      issues = '#24930'
+      max_threads = 1
+      input = test.i
+      jsondiff = test_json.json
+      type = JSONDiff
+      requirement = "The system shall be able collect local constraint gradients and convert them to total gradients."
+      recover = false
+    []
+  []

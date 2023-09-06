@@ -1,0 +1,271 @@
+{
+    "reporters": {
+        "grad_collecta/vals": {
+            "values": {
+                "grad1a_total": {
+                    "type": "std::vector<double>"
+                },
+                "grad2a_total": {
+                    "type": "std::vector<double>"
+                },
+                "grad3a_total": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "grad_collectb/vals": {
+            "values": {
+                "grad1b_total": {
+                    "type": "std::vector<double>"
+                },
+                "grad3b_total": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "grad_collectc/vals": {
+            "values": {
+                "grad2b_total": {
+                    "type": "std::vector<double>"
+                },
+                "grad3b_total": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "vals": {
+            "type": "ConstantReporter",
+            "values": {
+                "grad1a": {
+                    "type": "std::vector<double>"
+                },
+                "grad1b": {
+                    "type": "std::vector<double>"
+                },
+                "grad2a": {
+                    "type": "std::vector<double>"
+                },
+                "grad2b": {
+                    "type": "std::vector<double>"
+                },
+                "grad3a": {
+                    "type": "std::vector<double>"
+                },
+                "grad3b": {
+                    "type": "std::vector<double>"
+                },
+                "parameters": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "grad_collecta/vals": {
+                "grad1a_total": [
+                    1.0,
+                    2.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad2a_total": [
+                    0.0,
+                    0.0,
+                    3.0,
+                    4.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3a_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "grad_collectb/vals": {
+                "grad1b_total": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3b_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "grad_collectc/vals": {
+                "grad2b_total": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3b_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0,
+            "vals": {
+                "grad1a": [
+                    1.0,
+                    2.0
+                ],
+                "grad1b": [
+                    1.0,
+                    2.0,
+                    3.0
+                ],
+                "grad2a": [
+                    3.0,
+                    4.0
+                ],
+                "grad2b": [
+                    1.0,
+                    2.0,
+                    3.0
+                ],
+                "grad3a": [
+                    5.0,
+                    6.0
+                ],
+                "grad3b": [
+                    4.0,
+                    5.0,
+                    6.0
+                ],
+                "parameters": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            }
+        },
+        {
+            "grad_collecta/vals": {
+                "grad1a_total": [
+                    1.0,
+                    2.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad2a_total": [
+                    0.0,
+                    0.0,
+                    3.0,
+                    4.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3a_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "grad_collectb/vals": {
+                "grad1b_total": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3b_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "grad_collectc/vals": {
+                "grad2b_total": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "grad3b_total": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1,
+            "vals": {
+                "grad1a": [
+                    1.0,
+                    2.0
+                ],
+                "grad1b": [
+                    1.0,
+                    2.0,
+                    3.0
+                ],
+                "grad2a": [
+                    3.0,
+                    4.0
+                ],
+                "grad2b": [
+                    1.0,
+                    2.0,
+                    3.0
+                ],
+                "grad3a": [
+                    5.0,
+                    6.0
+                ],
+                "grad3b": [
+                    4.0,
+                    5.0,
+                    6.0
+                ],
+                "parameters": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0,
+                    6.0
+                ]
+            }
+        }
+    ]
+}

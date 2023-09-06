@@ -9,6 +9,7 @@
 
 #include "ConstraintGradCollector.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 #include "ReporterMode.h"
 
 registerMooseObject("OptimizationApp", ConstraintGradCollector);
@@ -21,7 +22,7 @@ ConstraintGradCollector::validParams()
                              "global constraint gradients.");
   params.addRequiredParam<ReporterName>("parameter_reporter_name",
                                         "name of the reporter that holds all the parameters.");
-  params.addRequiredParam<std::vector<std::vector<ReporterName>>>(
+  params.addRequiredParam<std::vector<std::vector<ReporterValueName>>>(
       "gradient_reporter_names", "The gradient reporters to accumulate.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
@@ -39,19 +40,21 @@ void
 ConstraintGradCollector::initialSetup()
 {
   const ReporterData & rdata = _fe_problem.getReporterData();
-  _gradient_vecs.reserve(getParam<std::vector<std::vector<ReporterName>>>("reporters").size());
+  _gradient_vecs.resize(
+      getParam<std::vector<std::vector<ReporterValueName>>>("gradient_reporter_names").size());
   std::size_t params_ind(0);
 
-  for (const auto & rname_vec : getParam<std::vector<std::vector<ReporterName>>>("reporters"))
+  for (const auto & rname_vec :
+       getParam<std::vector<std::vector<ReporterValueName>>>("gradient_reporter_names"))
   {
     for (const auto & rname : rname_vec)
     {
       if (!rdata.hasReporterValue(rname))
         paramError("reporters", "Reporter ", rname, " does not exist.");
       _gradient_vecs[params_ind].push_back(
-          &getReporterValue<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED));
-      _total_vecs.push_back(&declareValueByName<std::vector<Real>>(rname.getValueName() + "_total",
-                                                                   REPORTER_MODE_REPLICATED));
+          &getReporterValueByName<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED));
+      _total_vecs.push_back(
+          &declareValueByName<std::vector<Real>>(rname + "_total", REPORTER_MODE_REPLICATED));
     }
     params_ind++;
   }
