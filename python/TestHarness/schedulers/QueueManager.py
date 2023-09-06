@@ -190,17 +190,20 @@ class QueueManager(Scheduler):
     def getRunTestsCommand(self, job, cpus):
         """ return the command necessary to launch the TestHarness within the third party scheduler """
 
-        # Build ['/path/to/run_tests', '-j', '#']
-        command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
-                   '-j', str(cpus)]
+        # Determine if we are running test from a relocatable binary
+        if "RELOCATED" in self.options._checks['installation_type']:
+            # Build ['/path/to/moose_app-method', '--run']
+            command = [job.getSpecs()['executable'], '--run']
+        else:
+            # Build ['/path/to/run_tests']
+            command = [os.path.join(self.harness.run_tests_dir, 'run_tests')]
 
         # get current sys.args we are allowed to include when we launch run_tests
         args = list(self.cleanAndModifyArgs())
 
-        # Build [<args>, '--spec-file' ,/path/to/tests', '-o', '/path/to', '--sep-files']
-        args.extend(['--spec-file',
-                     os.path.join(job.getTestDir(),
-                     self.options.input_file_name),
+        # Extend required args
+        args.extend(['-j', str(cpus),
+                     '--spec-file', os.path.join(job.getTestDir(), self.options.input_file_name),
                      '-o', job.getTestDir(),
                      '--sep-files'])
 
