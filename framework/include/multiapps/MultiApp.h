@@ -13,6 +13,7 @@
 #include "SetupInterface.h"
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
+#include "Backup.h"
 
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
@@ -24,7 +25,6 @@ class FEProblemBase;
 class FEProblem;
 class Executioner;
 class MooseApp;
-class Backup;
 class MultiAppTransfer;
 class MultiAppCoordTransform;
 class Positions;
@@ -94,8 +94,10 @@ LocalRankConfig rankConfig(processor_id_type rank,
 
 /**
  * Helper class for holding Sub-app backups
+ *
+ * Stores the backups and also triggers a backup on store and restore on load
  */
-class SubAppBackups : public std::vector<std::shared_ptr<Backup>>
+class SubAppBackups : public std::vector<std::unique_ptr<Backup>>
 {
 };
 
@@ -580,9 +582,6 @@ protected:
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
 
-  /// Backups for each local App
-  SubAppBackups & _backups;
-
   /// CommandLine arguments
   const std::vector<std::string> & _cli_args;
 
@@ -604,6 +603,9 @@ protected:
   /// Whether to run the child apps with their meshes transformed with the coordinate transforms
   const bool _run_in_position;
 
+  /// The cached subapp backups (passed from the parent app)
+  SubAppBackups & _sub_app_backups;
+
   /// Timers
   const PerfID _solve_step_timer;
   const PerfID _init_timer;
@@ -612,32 +614,5 @@ protected:
   const PerfID _reset_timer;
 };
 
-template <>
-inline void
-dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
-{
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-
-  multi_app->backup();
-
-  if (!multi_app)
-    mooseError("Error storing std::vector<Backup*>");
-
-  for (unsigned int i = 0; i < backups.size(); i++)
-    dataStore(stream, backups[i], context);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
-{
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-
-  if (!multi_app)
-    mooseError("Error loading std::vector<Backup*>");
-
-  for (unsigned int i = 0; i < backups.size(); i++)
-    dataLoad(stream, backups[i], context);
-
-  multi_app->restore();
-}
+void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);
+void dataLoad(std::istream & stream, SubAppBackups & backups, void * context);

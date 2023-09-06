@@ -45,7 +45,7 @@
     [train]
       type = CheckFiles
       input = GP_normal_mc.i
-      check_files = 'GP_training_normal_GP_avg.rd'
+      check_files = 'GP_training_normal_GP_avg.rd/data'
       heavy = true
       allow_test_objects = true
       method = opt

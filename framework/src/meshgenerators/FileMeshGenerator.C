@@ -9,7 +9,6 @@
 
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
-#include "RestartableDataIO.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -107,25 +106,50 @@ FileMeshGenerator::generate()
     if (_pars.isParamSetByUser("use_for_exodus_restart"))
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
-    // to support LATEST word for loading checkpoint files
-    std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
+    // Supports old suffix (xxxx_mesh.cpr -> xxxx-mesh.cpr) and LATEST
+    const auto file_name = deduceCheckpointPath(*this, _file_name);
 
     mesh->skip_partitioning(_skip_partitioning);
     mesh->allow_renumbering(_allow_renumbering);
     mesh->read(file_name);
 
-    // we also read declared mesh meta data here if there is meta data file
-    RestartableDataIO restartable(_app);
-    std::string fname = file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
-    if (MooseUtils::pathExists(fname))
-    {
-      restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-      // get reference to mesh meta data (created by MooseApp)
-      auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-      if (restartable.readRestartableDataHeaderFromFile(fname, false))
-        restartable.readRestartableData(meta_data, DataNames());
-    }
+    // Load the meta data if it is available
+    _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)file_name);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+std::string
+FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::string & file_name)
+{
+  // Just exists, use it
+  if (MooseUtils::pathExists(file_name))
+    return file_name;
+
+  // xxxx_mesh.cpr -> xxxx-mesh.cpr
+  const std::string old_ending = "_mesh.cpr";
+  if (std::equal(old_ending.rbegin(), old_ending.rend(), file_name.rbegin()))
+  {
+    const std::string new_ending = "-mesh.cpr";
+    auto new_path = file_name;
+    new_path.replace(new_path.size() - old_ending.size(), old_ending.size(), new_ending, 0);
+    if (MooseUtils::pathExists(new_path))
+    {
+      std::stringstream warning;
+      warning
+          << "The supplied checkpoint " << std::filesystem::path(file_name).filename()
+          << " uses the previous default checkpoint suffix of \"" << old_ending
+          << "\".\nThe new default checkpoint suffix is \"" << new_ending << "\".\n\n"
+          << "Your supplied checkpoint was not found, but one with the new ending was found in\n\""
+          << new_path << "\".\n\n"
+          << "The above checkpoint is being used instead.\nYou should modify your input "
+             "accordingly.";
+      object.paramWarning("file", warning.str());
+      return new_path;
+    }
+  }
+
+  // LATEST
+  return MooseUtils::convertLatestCheckpoint(file_name) + object.getMooseApp().checkpointSuffix();
 }

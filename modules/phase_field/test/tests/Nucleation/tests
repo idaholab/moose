@@ -26,7 +26,7 @@
   [./material_recover1]
     type = 'CheckFiles'
     input = 'material.i'
-    check_files = 'material_recover_cp/0005.xdr'
+    check_files = 'material_recover_cp/0005-restart-0.rd/data'
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=material_recover'
     prereq = 'material'
     recover = false
@@ -54,7 +54,7 @@
   [./parallel_recover1]
     type = 'CheckFiles'
     input = 'parallel.i'
-    check_files = 'parallel_recover_cp/0005.xdr'
+    check_files = 'parallel_recover_cp/0005-restart-0.rd/data'
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=parallel_recover'
     prereq = 'parallel'
     recover = false

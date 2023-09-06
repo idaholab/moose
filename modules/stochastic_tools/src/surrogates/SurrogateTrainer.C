@@ -10,7 +10,6 @@
 #include "SurrogateTrainer.h"
 #include "SurrogateModel.h"
 #include "Sampler.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 #include "MooseRandom.h"
 #include "Shuffle.h"

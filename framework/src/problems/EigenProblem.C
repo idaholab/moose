@@ -82,7 +82,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 
   FEProblemBase::initNullSpaceVectors(parameters, _nl);
 
-  _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
+  es().parameters.set<EigenProblem *>("_eigen_problem") = this;
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */

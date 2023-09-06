@@ -11,9 +11,9 @@
 
 // MOOSE includes
 #include "FileOutput.h"
-#include "RestartableDataIO.h"
 
 #include <deque>
+#include <filesystem>
 
 /**
  * Shortcut for determining what type of autosave this checkpoint is.
@@ -35,21 +35,21 @@ class MaterialPropertyStorage;
  */
 struct CheckpointFileNames
 {
-  /// Filename for CheckpointIO file
+  /// Filename for CheckpointIO file (the mesh)
   std::string checkpoint;
 
-  /// Filename for EquationsSystems::write
-  std::string system;
-
-  /// Filename for restartable data filename
-  std::string restart;
-
-  /// Filename for restartable data filename
-  std::set<std::string> restart_meta_data;
+  /// Filenames for restartable data
+  std::vector<std::filesystem::path> restart;
 };
 
 /**
+ * Writes out three things:
  *
+ * 1. A restart file with a `.rd` extendsion that contains a single Backup that has been serialized
+ * 2. Mesh file(s) in the form of a libMesh Checkpoint file(s)
+ * 3. Mesh meta-data file... this will be underneath the directory that the Checkpoint mesh creates
+ *
+ * These files are written to a directory called output_prefix + _ + "_cp"
  */
 class Checkpoint : public FileOutput
 {
@@ -72,14 +72,6 @@ public:
    * @return String containing the checkpoint output directory
    */
   std::string directory() const;
-
-  /**
-   * Method to return the file suffix (ASCII or binary) for the Checkpoint format.
-   */
-  std::string getMeshFileSuffix(bool is_binary)
-  {
-    return is_binary ? BINARY_MESH_SUFFIX : ASCII_MESH_SUFFIX;
-  }
 
   /// Output all necessary data for a single timestep.
   virtual void outputStep(const ExecFlagType & type) override;
@@ -109,21 +101,6 @@ private:
   /// Directory suffix
   const std::string _suffix;
 
-  /// True if outputting checkpoint files in binary format
-  bool _binary;
-
-  /// True if running with parallel mesh
-  bool _parallel_mesh;
-
-  /// Reference to the restartable data
-  const RestartableDataMaps & _restartable_data;
-
-  /// RestrableData input/output interface
-  RestartableDataIO _restartable_data_io;
-
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
-
-  static constexpr auto ASCII_MESH_SUFFIX = "_mesh.cpa";
-  static constexpr auto BINARY_MESH_SUFFIX = "_mesh.cpr";
 };

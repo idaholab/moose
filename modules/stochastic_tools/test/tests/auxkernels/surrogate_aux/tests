@@ -5,7 +5,7 @@
   [create]
     type = CheckFiles
     input = surrogate.i
-    check_files = 'surrogate_trainer_poly_regression.rd'
+    check_files = 'surrogate_trainer_poly_regression.rd/data'
     requirement = 'The system shall be able to create a surrogate that can be read in by file and use in aux kernels.'
   []
 

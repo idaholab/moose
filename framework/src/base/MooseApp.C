@@ -31,7 +31,6 @@
 #include "MooseObjectAction.h"
 #include "InputParameterWarehouse.h"
 #include "SystemInfo.h"
-#include "RestartableDataIO.h"
 #include "MooseMesh.h"
 #include "FileOutput.h"
 #include "ConsoleUtils.h"
@@ -52,6 +51,8 @@
 #include "ExecFlagRegistry.h"
 #include "SolutionInvalidity.h"
 #include "MooseServer.h"
+#include "RestartableDataWriter.h"
+#include "StringInputStream.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -231,11 +232,6 @@ MooseApp::validParams()
                                           "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
-  params.addCommandLineParam<std::string>("recoversuffix",
-                                          "--recoversuffix [suffix]",
-                                          "Use a different file extension, other than cpr, "
-                                          "for a recovery file");
-
   params.addCommandLineParam<bool>("half_transient",
                                    "--half-transient",
                                    false,
@@ -336,6 +332,7 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
+  params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -389,7 +386,6 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(
@@ -402,9 +398,11 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
+    _rd_reader(*this, _restartable_data),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),
-    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 {
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
@@ -603,7 +601,7 @@ MooseApp::MooseApp(InputParameters parameters)
   // file early during the simulation setup so that they are available to Actions and other objects
   // that need them during the setup process. Most of the restartable data isn't made available
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
-  registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
+  registerRestartableDataMapName(MooseApp::MESH_META_DATA, MooseApp::MESH_META_DATA_SUFFIX);
 
   if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
     mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
@@ -960,14 +958,6 @@ MooseApp::setupOptions()
         _restart_recover_base = recover_following_arg;
     }
 
-    // Optionally get command line argument following --recoversuffix
-    // on command line.  Currently this argument applies to both
-    // recovery and restart files.
-    if (isParamValid("recoversuffix"))
-    {
-      _restart_recover_suffix = getParam<std::string>("recoversuffix");
-    }
-
     // Pass list of input files and optional text string if provided to parser
     if (!isParamValid("_input_text"))
       _parser.parse(_input_filenames);
@@ -1202,28 +1192,104 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
   }
 }
 
-std::shared_ptr<Backup>
+std::vector<std::filesystem::path>
+MooseApp::backup(const std::filesystem::path & folder_base)
+{
+  TIME_SECTION("backup", 2, "Backing Up Application to File");
+
+  preBackup();
+
+  RestartableDataWriter writer(*this, _restartable_data);
+  return writer.write(folder_base);
+}
+
+std::unique_ptr<Backup>
 MooseApp::backup()
 {
   TIME_SECTION("backup", 2, "Backing Up Application");
 
-  mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = feProblem();
+  RestartableDataWriter writer(*this, _restartable_data);
 
-  RestartableDataIO rdio(fe_problem);
-  return rdio.createBackup();
+  preBackup();
+
+  auto backup = std::make_unique<Backup>();
+  writer.write(*backup->header, *backup->data);
+
+  return backup;
 }
 
 void
-MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
+MooseApp::restore(const std::filesystem::path & folder_base, const bool for_restart)
+{
+  TIME_SECTION("restore", 2, "Restoring Application from File");
+
+  const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
+
+  _rd_reader.setInput(folder_base);
+  _rd_reader.restore(filter_names);
+
+  postRestore(for_restart);
+}
+
+void
+MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 {
   TIME_SECTION("restore", 2, "Restoring Application");
 
-  mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = feProblem();
+  const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  RestartableDataIO rdio(fe_problem);
-  rdio.restoreBackup(backup, for_restart);
+  if (!backup)
+    mooseError("MooseApp::resore(): Provided backup is not initialized");
+
+  auto header = std::move(backup->header);
+  mooseAssert(header, "Header not available");
+
+  auto data = std::move(backup->data);
+  mooseAssert(data, "Data not available");
+
+  _rd_reader.setInput(std::move(header), std::move(data));
+  _rd_reader.restore(filter_names);
+
+  postRestore(for_restart);
+}
+
+void
+MooseApp::restoreFromInitialBackup(const bool for_restart)
+{
+  mooseAssert(hasInitialBackup(), "Missing initial backup");
+  restore(std::move(*_initial_backup), for_restart);
+}
+
+std::unique_ptr<Backup>
+MooseApp::finalizeRestore()
+{
+  if (!_rd_reader.isRestoring())
+    mooseError("MooseApp::finalizeRestore(): Not currently restoring");
+
+  // This gives us access to the underlying streams so that we can return it if needed
+  auto input_streams = _rd_reader.clear();
+
+  std::unique_ptr<Backup> backup;
+
+  // Give them back a backup if this restore started from a Backup, in which case
+  // the two streams in the Backup are formed into StringInputStreams
+  if (auto header_string_input = dynamic_cast<StringInputStream *>(input_streams.header.get()))
+  {
+    auto data_string_input = dynamic_cast<StringInputStream *>(input_streams.data.get());
+    mooseAssert(data_string_input, "Should also be a string input");
+
+    auto header_sstream = header_string_input->release();
+    mooseAssert(header_sstream, "Header not available");
+
+    auto data_sstream = data_string_input->release();
+    mooseAssert(data_sstream, "Data not available");
+
+    backup = std::make_unique<Backup>();
+    backup->header = std::move(header_sstream);
+    backup->data = std::move(data_sstream);
+  }
+
+  return backup;
 }
 
 void
@@ -1651,7 +1717,7 @@ std::list<std::string>
 MooseApp::getCheckpointFiles() const
 {
   auto checkpoint_dirs = getCheckpointDirectories();
-  return MooseUtils::getFilesInDirs(checkpoint_dirs);
+  return MooseUtils::getFilesInDirs(checkpoint_dirs, false);
 }
 
 void
@@ -1702,8 +1768,7 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 }
 
 RestartableDataValue &
-MooseApp::registerRestartableData(const std::string & name,
-                                  std::unique_ptr<RestartableDataValue> data,
+MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid,
                                   bool read_only,
                                   const RestartableDataMapName & metaname)
@@ -1717,22 +1782,41 @@ MooseApp::registerRestartableData(const std::string & name,
               "The desired meta data name does not exist: " + metaname);
 
   // Select the data store for saving this piece of restartable data (mesh or everything else)
-  auto & data_ref =
+  auto & data_map =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
-  auto data_it = data_ref.find(name);
-  if (data_it == data_ref.end())
+  RestartableDataValue * stored_data = data_map.findData(data->name());
+  if (stored_data)
   {
-    auto insert_pair = data_ref.emplace(name, std::move(data));
-    mooseAssert(insert_pair.second, "Insert didn't happen");
-    data_it = insert_pair.first;
+    if (data->typeId() != stored_data->typeId())
+      mooseError("Type mismatch found in RestartableData registration of '",
+                 data->name(),
+                 "'\n\n  Stored type: ",
+                 stored_data->type(),
+                 "\n  New type: ",
+                 data->type());
   }
+  else
+    stored_data = &data_map.addData(std::move(data));
 
-  auto & value = *data_it->second;
   if (!read_only)
-    value.setDeclared();
+    stored_data->setDeclared({});
 
-  return value;
+  return *stored_data;
+}
+
+RestartableDataValue &
+MooseApp::registerRestartableData(const std::string & libmesh_dbg_var(name),
+                                  std::unique_ptr<RestartableDataValue> data,
+                                  THREAD_ID tid,
+                                  bool read_only,
+                                  const RestartableDataMapName & metaname)
+{
+  mooseDeprecated("The use of MooseApp::registerRestartableData with a data name is "
+                  "deprecated.\n\nUse the call without a name instead.");
+
+  mooseAssert(name == data->name(), "Inconsistent name");
+  return registerRestartableData(std::move(data), tid, read_only, metaname);
 }
 
 bool
@@ -1742,17 +1826,13 @@ MooseApp::hasRestartableMetaData(const std::string & name,
   auto it = _restartable_meta_data.find(metaname);
   if (it == _restartable_meta_data.end())
     return false;
-  else
-  {
-    auto & m = it->second.first;
-    return m.find(name) != m.end();
-  }
+  return it->second.first.hasData(name);
 }
 
 RestartableDataValue &
 MooseApp::getRestartableMetaData(const std::string & name,
                                  const RestartableDataMapName & metaname,
-                                 THREAD_ID tid) const
+                                 THREAD_ID tid)
 {
   if (tid != 0)
     mooseError(
@@ -1760,12 +1840,63 @@ MooseApp::getRestartableMetaData(const std::string & name,
 
   // Get metadata reference from RestartableDataMap and return a (non-const) reference to its value
   auto & restartable_data_map = getRestartableDataMap(metaname);
-  auto iter = restartable_data_map.find(name);
-  if (iter == restartable_data_map.end())
+  RestartableDataValue * const data = restartable_data_map.findData(name);
+  if (!data)
     mooseError("Unable to find RestartableDataValue object with name " + name +
                " in RestartableDataMap");
 
-  return *iter->second;
+  return *data;
+}
+
+void
+MooseApp::possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
+                                          const std::filesystem::path & folder_base)
+{
+  const auto & map_name = getRestartableDataMapName(name);
+  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
+  if (RestartableDataReader::isAvailable(meta_data_folder_base))
+  {
+    RestartableDataReader reader(*this, getRestartableDataMap(name));
+    reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+    reader.setInput(meta_data_folder_base);
+    reader.restore();
+  }
+}
+
+void
+MooseApp::loadRestartableMetaData(const std::filesystem::path & folder_base)
+{
+  for (const auto & name_map_pair : _restartable_meta_data)
+    possiblyLoadRestartableMetaData(name_map_pair.first, folder_base);
+}
+
+std::vector<std::filesystem::path>
+MooseApp::writeRestartableMetaData(const RestartableDataMapName & name,
+                                   const std::filesystem::path & folder_base)
+{
+  if (processor_id() != 0)
+    mooseError("MooseApp::writeRestartableMetaData(): Should only run on processor 0");
+
+  const auto & map_name = getRestartableDataMapName(name);
+  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
+
+  RestartableDataWriter writer(*this, getRestartableDataMap(name));
+  return writer.write(meta_data_folder_base);
+}
+
+std::vector<std::filesystem::path>
+MooseApp::writeRestartableMetaData(const std::filesystem::path & folder_base)
+{
+  std::vector<std::filesystem::path> paths;
+
+  if (processor_id() == 0)
+    for (const auto & name_map_pair : _restartable_meta_data)
+    {
+      const auto map_paths = writeRestartableMetaData(name_map_pair.first, folder_base);
+      paths.insert(paths.end(), map_paths.begin(), map_paths.end());
+    }
+
+  return paths;
 }
 
 void
@@ -2076,26 +2207,6 @@ MooseApp::setRecover(bool value)
 }
 
 void
-MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
-{
-  _cached_backup = backup;
-}
-
-void
-MooseApp::restoreCachedBackup()
-{
-  if (!_cached_backup.get())
-    mooseError("No cached Backup to restore!");
-
-  TIME_SECTION("restoreCachedBackup", 2, "Restoring Cached Backup");
-
-  restore(_cached_backup, isRestarting());
-
-  // Release our hold on this Backup
-  _cached_backup.reset();
-}
-
-void
 MooseApp::createMinimalApp()
 {
   TIME_SECTION("createMinimalApp", 3, "Creating Minimal App");
@@ -2241,6 +2352,29 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 
   // Inform the caller whether the object was added or not
   return add;
+}
+
+const std::string &
+MooseApp::checkpointSuffix()
+{
+  static const std::string suffix = "-mesh.cpr";
+  return suffix;
+}
+
+std::filesystem::path
+MooseApp::metaDataFolderBase(const std::filesystem::path & folder_base,
+                             const std::string & map_suffix)
+{
+  return RestartableDataIO::restartableDataFolder(folder_base /
+                                                  std::filesystem::path("meta_data" + map_suffix));
+}
+
+std::filesystem::path
+MooseApp::restartFolderBase(const std::filesystem::path & folder_base) const
+{
+  auto folder = folder_base;
+  folder += "-restart-" + std::to_string(processor_id());
+  return RestartableDataIO::restartableDataFolder(folder);
 }
 
 bool
@@ -2578,9 +2712,9 @@ MooseApp::checkMetaDataIntegrity() const
 
     std::vector<std::string> not_declared;
 
-    for (const auto & pair : meta_data)
-      if (!pair.second->declared())
-        not_declared.push_back(pair.first);
+    for (const auto & data : meta_data)
+      if (!data.declared())
+        not_declared.push_back(data.name());
 
     if (!not_declared.empty())
     {
@@ -2597,9 +2731,10 @@ MooseApp::checkMetaDataIntegrity() const
 }
 
 const RestartableDataMapName MooseApp::MESH_META_DATA = "MeshMetaData";
+const RestartableDataMapName MooseApp::MESH_META_DATA_SUFFIX = "mesh";
 
-const RestartableDataMap &
-MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
+RestartableDataMap &
+MooseApp::getRestartableDataMap(const RestartableDataMapName & name)
 {
   auto iter = _restartable_meta_data.find(name);
   if (iter == _restartable_meta_data.end())
@@ -2648,7 +2783,7 @@ MooseApp::createRecoverablePerfGraph()
                                                    !getParam<bool>("disable_perf_graph_live"));
 
   return dynamic_cast<RestartableData<PerfGraph> &>(
-             registerRestartableData("perf_graph", std::move(perf_graph), 0, false))
+             registerRestartableData(std::move(perf_graph), 0, false))
       .set();
 }
 
@@ -2661,8 +2796,7 @@ MooseApp::createRecoverableSolutionInvalidity()
       std::make_unique<RestartableData<SolutionInvalidity>>("solution_invalidity", nullptr, *this);
 
   return dynamic_cast<RestartableData<SolutionInvalidity> &>(
-             registerRestartableData(
-                 "solution_invalidity", std::move(solution_invalidity), 0, false))
+             registerRestartableData(std::move(solution_invalidity), 0, false))
       .set();
 }
 

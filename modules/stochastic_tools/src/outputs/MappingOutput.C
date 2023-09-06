@@ -9,8 +9,7 @@
 
 // Moose includes
 #include "MappingOutput.h"
-#include "RestartableDataIO.h"
-#include "RestartableData.h"
+#include "RestartableDataWriter.h"
 
 registerMooseObject("StochasticToolsApp", MappingOutput);
 
@@ -35,16 +34,14 @@ void
 MappingOutput::output()
 {
   if (processor_id() == 0)
-  {
-    RestartableDataIO restartable_data_io(_app);
     for (const auto & map_name : _mappings)
     {
       const VariableMappingBase & map = getMappingByName(map_name);
-      const std::string filename =
-          this->filename() + "_" + map_name + restartable_data_io.getRestartableDataExt();
+      const auto filename =
+          RestartableDataIO::restartableDataFolder(this->filename() + "_" + map_name);
+      RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
 
-      const RestartableDataMap & meta_data = _app.getRestartableDataMap(map.modelMetaDataName());
-      restartable_data_io.writeRestartableData(filename, meta_data);
+      RestartableDataWriter writer(_app, meta_data);
+      writer.write(filename);
     }
-  }
 }

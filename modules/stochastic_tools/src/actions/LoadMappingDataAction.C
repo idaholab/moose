@@ -10,7 +10,6 @@
 #include "LoadMappingDataAction.h"
 #include "VariableMappingBase.h"
 #include "FEProblem.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 
 registerMooseAction("StochasticToolsApp", LoadMappingDataAction, "load_mapping_data");

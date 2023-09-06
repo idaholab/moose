@@ -7,15 +7,47 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "Backup.h"
-#include "RestartableData.h"
 
-#include "libmesh/parallel.h"
+#include "DataIO.h"
 
-// Backup Definitions
-Backup::Backup() : _restartable_data(libMesh::n_threads())
+void
+dataStore(std::ostream & stream, Backup & backup, void * context)
 {
-  for (auto & data_ptr : _restartable_data)
-    data_ptr = std::make_unique<std::stringstream>();
+  mooseAssert(backup.header, "Not set");
+  mooseAssert(backup.data, "Not set");
+
+  dataStore(stream, *backup.header, context);
+  dataStore(stream, *backup.data, context);
+}
+
+void
+dataLoad(std::istream & stream, Backup & backup, void * context)
+{
+  mooseAssert(backup.header, "Not set");
+  mooseAssert(backup.data, "Not set");
+
+  dataLoad(stream, *backup.header, context);
+  dataLoad(stream, *backup.data, context);
+}
+
+void
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context)
+{
+  bool has_value = backup != nullptr;
+  dataStore(stream, has_value, nullptr);
+  if (has_value)
+    dataStore(stream, *backup, context);
+}
+
+void
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context)
+{
+  bool has_value;
+  dataLoad(stream, has_value, nullptr);
+  if (has_value)
+  {
+    backup = std::make_unique<Backup>();
+    dataLoad(stream, *backup, context);
+  }
 }

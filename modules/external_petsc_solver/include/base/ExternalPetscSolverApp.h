@@ -28,9 +28,6 @@ public:
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
-  virtual std::shared_ptr<Backup> backup() override;
-  virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false) override;
-
   TS & getPetscTS();
 
   bool isPetscApp() const { return _is_petsc_app; }

@@ -50,7 +50,7 @@ FEProblem::FEProblem(const InputParameters & parameters)
 
   initNullSpaceVectors(parameters, _nl);
 
-  _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+  es().parameters.set<FEProblem *>("_fe_problem") = this;
 
   // Create extra vectors and matrices if any
   createTagVectors();

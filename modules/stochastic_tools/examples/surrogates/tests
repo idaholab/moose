@@ -7,7 +7,7 @@
     [nearest_point]
       type = CheckFiles
       input = nearest_point_training.i
-      check_files = 'nearest_point_training_out_nearest_point_avg.rd nearest_point_training_out_nearest_point_max.rd'
+      check_files = 'nearest_point_training_out_nearest_point_avg.rd/data nearest_point_training_out_nearest_point_max.rd/data'
       cli_args = "Samplers/grid/linear_space_items='1.45  0.9   3
                                                     9100  200   3
                                                     0.012 0.004 3
@@ -19,7 +19,7 @@
       type = CheckFiles
       input = poly_chaos_uniform_mc.i
       cli_args = 'Outputs/file_base=uniform_mc Samplers/sample/num_rows=10'
-      check_files = 'uniform_mc_poly_chaos_avg.rd uniform_mc_poly_chaos_max.rd'
+      check_files = 'uniform_mc_poly_chaos_avg.rd/data uniform_mc_poly_chaos_max.rd/data'
       method = opt
       detail = "polynomial chaos with uniform parameter distribution and Monte Carlo sampling, "
     []
@@ -27,7 +27,7 @@
       type = CheckFiles
       input = poly_chaos_uniform_quad.i
       cli_args = 'Outputs/file_base=uniform_quad Samplers/sample/order=2'
-      check_files = 'uniform_quad_poly_chaos_avg.rd uniform_quad_poly_chaos_max.rd'
+      check_files = 'uniform_quad_poly_chaos_avg.rd/data uniform_quad_poly_chaos_max.rd/data'
       method = opt
       detail = "polynomial chaos with uniform parameter distribution and quadrature sampling, "
     []
@@ -35,7 +35,7 @@
       type = CheckFiles
       input = poly_chaos_normal_mc.i
       cli_args = 'Outputs/file_base=normal_mc Samplers/sample/num_rows=10'
-      check_files = 'normal_mc_poly_chaos_avg.rd normal_mc_poly_chaos_max.rd'
+      check_files = 'normal_mc_poly_chaos_avg.rd/data normal_mc_poly_chaos_max.rd/data'
       method = opt
       detail = "polynomial chaos with normal parameter distribution and Monte Carlo sampling, "
     []
@@ -43,7 +43,7 @@
       type = CheckFiles
       input = poly_chaos_normal_quad.i
       cli_args = 'Outputs/file_base=normal_quad Samplers/sample/order=2'
-      check_files = 'normal_quad_poly_chaos_avg.rd normal_quad_poly_chaos_max.rd'
+      check_files = 'normal_quad_poly_chaos_avg.rd/data normal_quad_poly_chaos_max.rd/data'
       method = opt
       detail = "and polynomial chaos with normal parameter distribution and quadrature sampling."
     []

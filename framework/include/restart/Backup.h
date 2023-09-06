@@ -9,28 +9,19 @@
 
 #pragma once
 
-// C++ includes
 #include <sstream>
-#include <vector>
 #include <memory>
 
 /**
  * Helper class to hold streams for Backup and Restore operations.
  */
-class Backup
+struct Backup
 {
-public:
-  Backup();
-
-  /**
-   * Stream for holding binary blob data for the simulation.
-   */
-  std::stringstream _system_data;
-
-  /**
-   * Vector of streams for holding individual thread data for the simulation.
-   */
-  std::vector<std::unique_ptr<std::stringstream>> _restartable_data;
+  std::unique_ptr<std::stringstream> header = std::make_unique<std::stringstream>();
+  std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
 };
 
-// Specializations for dataLoad and dataStore appear in DataIO.C
+void dataStore(std::ostream & stream, Backup & backup, void * context);
+void dataLoad(std::istream & stream, Backup & backup, void * context);
+void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context);
+void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context);

@@ -106,8 +106,8 @@ SetupDebugAction::act()
     _console << "Mesh meta data:\n";
     for (auto it = _app.getRestartableDataMapBegin(); it != _app.getRestartableDataMapEnd(); ++it)
       if (it->first == MooseApp::MESH_META_DATA)
-        for (auto & pair : it->second.first)
-          _console << " " << pair.first << std::endl;
+        for (auto & data : it->second.first)
+          _console << " " << data.name() << std::endl;
   }
 
   // Print Reporter information

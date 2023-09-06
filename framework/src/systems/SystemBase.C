@@ -48,67 +48,6 @@ extraSparsity(SparsityPattern::Graph & sparsity,
   sys->augmentSparsity(sparsity, n_nz, n_oz);
 }
 
-template <>
-void
-dataStore(std::ostream & stream, SystemBase & system_base, void * context)
-{
-  System & libmesh_system = system_base.system();
-
-  NumericVector<Real> & solution = *(libmesh_system.solution.get());
-
-  dataStore(stream, solution, context);
-
-  // Need an l-value reference to pass to dataStore
-  unsigned int num_vectors = libmesh_system.n_vectors();
-  dataStore(stream, num_vectors, context);
-
-  for (System::vectors_iterator it = libmesh_system.vectors_begin();
-       it != libmesh_system.vectors_end();
-       it++)
-  {
-    // Store the vector name. A map iterator will have a const Key, so we need to make a copy
-    // because dataStore expects a non-const reference
-    auto vector_name = it->first;
-    dataStore(stream, vector_name, context);
-
-    // Store the vector
-    dataStore(stream, *(it->second), context);
-  }
-}
-
-template <>
-void
-dataLoad(std::istream & stream, SystemBase & system_base, void * context)
-{
-  System & libmesh_system = system_base.system();
-
-  NumericVector<Real> & solution = *(libmesh_system.solution.get());
-
-  dataLoad(stream, solution, context);
-
-  unsigned int num_vectors;
-  dataLoad(stream, num_vectors, context);
-
-  // Can't do a range based for loop because we don't actually use the index, resulting in an unused
-  // variable warning. So we make a dumb index variable and use it in the loop termination check
-  for (unsigned int vec_num = 0; vec_num < num_vectors; ++vec_num)
-  {
-    std::string vector_name;
-    dataLoad(stream, vector_name, context);
-
-    if (!libmesh_system.have_vector(vector_name))
-      mooseError("Trying to load vector name ",
-                 vector_name,
-                 " but that vector doesn't exist in the system.");
-
-    auto & vector = libmesh_system.get_vector(vector_name);
-
-    dataLoad(stream, vector, context);
-  }
-
-  system_base.update();
-}
-
 SystemBase::SystemBase(SubProblem & subproblem,
                        const std::string & name,
                        Moose::VarKindType var_kind)

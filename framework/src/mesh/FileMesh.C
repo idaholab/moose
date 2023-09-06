@@ -12,7 +12,7 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "RestartableDataIO.h"
+#include "FileMeshGenerator.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_tools.h"
@@ -98,13 +98,14 @@ FileMesh::buildMesh()
     }
     else
     {
+      // Supports old suffix (xxxx_mesh.cpr -> xxxx-mesh.cpr) and LATEST
+      _file_name = FileMeshGenerator::deduceCheckpointPath(*this, _file_name);
+
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
       // numbering.  In that case, we need to turn off repartitioning
       // and renumbering, at least at first.
-      _file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
-      bool restarting = _file_name.rfind(".cpa") < _file_name.size() ||
-                        _file_name.rfind(".cpr") < _file_name.size();
+      bool restarting = _file_name.rfind(".cpr") < _file_name.size();
 
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();
@@ -121,17 +122,7 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
-      // we also read declared mesh meta data here if there is meta data file
-      RestartableDataIO restartable(_app);
-      std::string fname = _file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
-      if (MooseUtils::pathExists(fname))
-      {
-        restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-        // get reference to mesh meta data (created by MooseApp)
-        auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-        if (restartable.readRestartableDataHeaderFromFile(fname, false))
-          restartable.readRestartableData(meta_data, DataNames());
-      }
+      _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
 
       if (restarting)
       {
