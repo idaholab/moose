@@ -29,6 +29,10 @@ offset = 0.00
   []
 []
 
+[Problem]
+  type = AugmentedLagrangianContactFEProblem
+[]
+
 [AuxKernels]
   [penalty_normal_pressure_auxk]
     type = PenaltyMortarUserObjectAux
@@ -239,8 +243,14 @@ offset = 0.00
     disp_z = disp_z
     friction_coefficient = 0.4
     secondary_variable = disp_x
-    penalty = 1e8
-    penalty_friction = 5e6
+    penalty = 1e0
+    penalty_friction = 1e1
+
+    slip_tolerance = 7.0e-4 # 1e-6
+    penetration_tolerance = 7.0e-4
+    # max_penalty_multiplier = 10
+    penalty_multiplier = 10
+    penalty_multiplier_friction = 5
   []
 []
 
@@ -407,7 +417,7 @@ offset = 0.00
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu       superlu_dist'
   l_max_its = 15
-  nl_max_its = 30
+  nl_max_its = 90
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13
   line_search = 'basic'

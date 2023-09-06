@@ -183,4 +183,18 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
+  [frictional-mortar-3d-al]
+    type = 'Exodiff'
+    input = 'frictional-mortar-3d-al.i'
+    exodiff = 'frictional-mortar-3d-al_out.e'
+    requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
+                  'augmented Lagrange approach and converging to prescribed tolerance.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    valgrind = none
+    method = 'opt'
+    heavy = true
+    min_ad_size = 200
+    max_time = 1000
+  []
 []
