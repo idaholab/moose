@@ -18,9 +18,11 @@ offset = 1e-2
 
 [Problem]
   #Note that the suffix is left off in the parameter below.
-  restart_file_base = frictional_bouncing_block_action_restart_1_checkpoint_cp/LATEST  # You may also use a specific number here
+  restart_file_base = frictional_bouncing_block_action_restart_1_checkpoint_cp/LATEST # You may also use a specific number here
   kernel_coverage_check = false
   material_coverage_check = false
+  # disp_y has an initial condition despite the checkpoint restart
+  allow_initial_conditions_with_restart = true
 []
 
 [Variables]
@@ -119,8 +121,7 @@ offset = 1e-2
   dtmin = .01
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor -snes_ksp_ew'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-13                   1e-5'
   l_max_its = 30

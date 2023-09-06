@@ -91,8 +91,7 @@
   [restart_use_end_error_check]
     type = 'RunException'
     input = 'restart_diffusion_from_end_part2.i'
-    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid '
-                 'integer between \d+ and \d+ inclusive, received \d+'
+    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid integer between \d+ and \d+ inclusive, received \d+'
 
     cli_args = 'Variables/u/initial_from_file_timestep=8'
     prereq = 'restart_use_end_part2'
@@ -100,5 +99,15 @@
     issues = "#5748"
     requirement = "The system shall issue a useful error message stating the valid options when a "
                   "user requests an invalid time step number or keyword."
+  []
+
+  [restart_error_with_ics]
+    type = 'RunException'
+    input = 'exodus_refined_restart_2_test.i'
+    expect_err = 'Initial conditions have been specified during an Exodus restart'
+    cli_args = 'Variables/u/initial_condition=3 Problem/allow_initial_conditions_with_restart=false'
+    issues = "#21423"
+    requirement = "The system shall issue a useful error message stating that initial conditions "
+                  "should not be used when restarting."
   []
 []
