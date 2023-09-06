@@ -130,7 +130,7 @@ public:
   std::string valueType() const override final { return MooseUtils::prettyCppType<T>(); }
 
   /**
-   * Loads and stores the data to/from a stream for restart
+   * Loads and stores the data from/to a stream for restart
    *
    * This is a special version that handles the fact that the calls declare/getReporterValue
    * occur within the constructor of objects. As such, the storage list already contains data
