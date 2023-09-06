@@ -99,7 +99,7 @@ protected:
    * A map functor from element IDs to $1/A_i$. Where $A_i$ is the diagonal of the system matrix
    * for the momentum equation.
    */
-  CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _Ainv;
+  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;

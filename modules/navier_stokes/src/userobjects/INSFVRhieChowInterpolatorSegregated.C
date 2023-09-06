@@ -174,7 +174,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
       const Moose::FaceArg face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-      Real Ainv;
+      RealVectorValue Ainv;
       RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
 
       interpolate(Moose::FV::InterpMethod::Average,
@@ -186,7 +186,8 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
 
       RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
       for (const auto comp_index : make_range(_dim))
-        _face_velocity[fi->id()](comp_index) = -HbyA(comp_index) - Ainv * grad_p(comp_index);
+        _face_velocity[fi->id()](comp_index) =
+            -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
     }
     else
     {
@@ -201,11 +202,12 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
         _face_velocity[fi->id()] = -raw_value(_HbyA(boundary_face, time_arg));
       else
       {
-        const Real & Ainv = raw_value(_Ainv(boundary_face, time_arg));
+        const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
         const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
         const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
         for (const auto comp_index : make_range(_dim))
-          _face_velocity[fi->id()](comp_index) = -HbyA(comp_index) - Ainv * grad_p(comp_index);
+          _face_velocity[fi->id()](comp_index) =
+              -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
       }
     }
   }
@@ -214,18 +216,11 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
 void
 INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
 {
-  bool segregated_systems = _momentum_implicit_systems.size() > 1;
   std::vector<unsigned int> var_nums = {_momentum_implicit_systems[0]->variable_number(_u->name())};
   if (_v)
-  {
-    unsigned int system_index = segregated_systems ? 1 : 0;
-    var_nums.push_back(_momentum_implicit_systems[system_index]->variable_number(_v->name()));
-  }
+    var_nums.push_back(_momentum_implicit_systems[1]->variable_number(_v->name()));
   if (_w)
-  {
-    unsigned int system_index = segregated_systems ? 2 : 0;
-    var_nums.push_back(_momentum_implicit_systems[system_index]->variable_number(_w->name()));
-  }
+    var_nums.push_back(_momentum_implicit_systems[2]->variable_number(_w->name()));
 
   const auto time_arg = Moose::currentState();
 
@@ -233,24 +228,20 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
        as_range(_mesh.active_local_elements_begin(), _mesh.active_local_elements_end()))
   {
     const auto elem_arg = makeElemArg(elem);
-    const Real Ainv = _Ainv(elem_arg, time_arg);
+    const RealVectorValue Ainv = _Ainv(elem_arg, time_arg);
     const RealVectorValue & grad_p = raw_value(_p->gradient(elem_arg, time_arg));
 
     for (auto comp_index : make_range(_dim))
     {
       // If we are doing segregated momentum components we need to access different vector
       // components otherwise everything is in the same vector (with different variable names)
-      unsigned int hbya_index = segregated_systems ? comp_index : 0;
-      unsigned int system_number = segregated_systems
-                                       ? _momentum_implicit_systems[comp_index]->number()
-                                       : _momentum_implicit_systems[0]->number();
-
+      const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
       const auto index = elem->dof_number(system_number, var_nums[comp_index], 0);
 
       // We set the dof value in the solution vector the same logic applies:
       // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
-      _momentum_implicit_systems[hbya_index]->solution->set(
-          index, -(*_HbyA_raw[hbya_index])(index)-Ainv * grad_p(comp_index));
+      _momentum_implicit_systems[comp_index]->solution->set(
+          index, -(*_HbyA_raw[comp_index])(index)-Ainv(comp_index) * grad_p(comp_index));
     }
   }
 
@@ -268,7 +259,6 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
     const std::vector<unsigned int> & var_nums)
 {
-  bool segregated_systems = raw_hbya.size() > 1;
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
     // If we are on an internal face, we just interpolate the values to the faces.
@@ -281,10 +271,7 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
       const Elem * neighbor = fi->neighborPtr();
       for (auto comp_index : make_range(_dim))
       {
-        // If we are not segregated in momentum components, every variable is
-        // in the same vector
-        unsigned int hbya_index = segregated_systems ? comp_index : 0;
-        unsigned int system_number = _momentum_implicit_systems[hbya_index]->number();
+        unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
         const auto dof_index_elem = elem->dof_number(system_number, var_nums[comp_index], 0);
         const auto dof_index_neighbor =
             neighbor->dof_number(system_number, var_nums[comp_index], 0);
@@ -292,8 +279,8 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
         _HbyA[fi->id()](comp_index) = 0.0;
         interpolate(Moose::FV::InterpMethod::Average,
                     _HbyA[fi->id()](comp_index),
-                    (*raw_hbya[hbya_index])(dof_index_elem),
-                    (*raw_hbya[hbya_index])(dof_index_neighbor),
+                    (*raw_hbya[comp_index])(dof_index_elem),
+                    (*raw_hbya[comp_index])(dof_index_neighbor),
                     *fi,
                     true);
       }
@@ -311,11 +298,10 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
       else
         for (const auto comp_index : make_range(_dim))
         {
-          unsigned int hbya_index = segregated_systems ? comp_index : 0;
-          unsigned int system_number = _momentum_implicit_systems[hbya_index]->number();
+          unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
           const auto dof_index_elem =
               boundary_elem->dof_number(system_number, var_nums[comp_index], 0);
-          _HbyA[fi->id()](comp_index) = (*raw_hbya[hbya_index])(dof_index_elem);
+          _HbyA[fi->id()](comp_index) = (*raw_hbya[comp_index])(dof_index_elem);
         }
     }
   }
@@ -337,81 +323,35 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
   std::vector<unsigned int> var_nums = {_momentum_implicit_systems[0]->variable_number(_u->name())};
   if (_v)
-  {
-    unsigned int system_index = _momentum_systems.size() > 1 ? 1 : 0;
-    var_nums.push_back(_momentum_implicit_systems[system_index]->variable_number(_v->name()));
-  }
+    var_nums.push_back(_momentum_implicit_systems[1]->variable_number(_v->name()));
   if (_w)
-  {
-    unsigned int system_index = _momentum_systems.size() > 1 ? 2 : 0;
-    var_nums.push_back(_momentum_implicit_systems[system_index]->variable_number(_w->name()));
-  }
+    var_nums.push_back(_momentum_implicit_systems[2]->variable_number(_w->name()));
 
   // We will need the petsc interface in this case, until the libmesh functions are there
-  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
+  // PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
 
   // Data structure to manipulate 1/A_i where A_i is the diagonal of the momentum system matrix
-  std::unique_ptr<NumericVector<Number>> Ainv =
-      momentum_system->current_local_solution->zero_clone();
-  PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
+  // std::unique_ptr<NumericVector<Number>> Ainv =
+  //     momentum_system->current_local_solution->zero_clone();
+  // PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
 
   // A working vector which will be used as a placeholder for partial results
-  std::unique_ptr<NumericVector<Number>> working_vector =
-      momentum_system->current_local_solution->zero_clone();
-  PetscVector<Number> * working_vector_petsc =
-      dynamic_cast<PetscVector<Number> *>(working_vector.get());
-
-  if (verbose)
-  {
-    _console << "Matrix in rc object" << std::endl;
-    mmat->print();
-  }
+  // std::unique_ptr<NumericVector<Number>> working_vector =
+  //     momentum_system->current_local_solution->zero_clone();
+  // PetscVector<Number> * working_vector_petsc =
+  //     dynamic_cast<PetscVector<Number> *>(working_vector.get());
 
   // Populating 1/A first
-  mmat->get_diagonal(*Ainv_petsc);
+  // mmat->get_diagonal(*Ainv_petsc);
 
-  if (verbose)
-  {
-    _console << "A" << std::endl;
-    Ainv_petsc->print();
-  }
+  // if (verbose)
+  // {
+  //   _console << "A" << std::endl;
+  //   Ainv_petsc->print();
+  // }
 
-  *working_vector_petsc = 1.0;
-  Ainv_petsc->pointwise_divide(*working_vector_petsc, *Ainv_petsc);
-
-  // We fill the 1/A functor
-  auto active_local_begin =
-      _mesh.evaluable_elements_begin(momentum_system->get_dof_map(), var_nums[0]);
-  auto active_local_end = _mesh.evaluable_elements_end(momentum_system->get_dof_map(), var_nums[0]);
-  for (auto it = active_local_begin; it != active_local_end; ++it)
-  {
-    const Elem * elem = *it;
-    if (this->hasBlocks(elem->subdomain_id()))
-    {
-      Real coord_multiplier;
-      const auto coord_type = _fe_problem.getCoordSystem(elem->subdomain_id());
-      const unsigned int rz_radial_coord =
-          Moose::COORD_RZ ? _fe_problem.getAxisymmetricRadialCoord() : libMesh::invalid_uint;
-
-      MooseMeshUtils::coordTransformFactor(
-          elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
-
-      const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
-      const auto dof_index = elem->dof_number(momentum_system->number(), var_nums[0], 0);
-      _Ainv[elem->id()] = (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
-    }
-  }
-
-  // Now we set the diagonal of our system matrix to 0 so we can create H*u
-  // TODO: Add a function for this in libmesh
-  *working_vector_petsc = 0.0;
-  MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
-
-  if (verbose)
-  {
-    _console << "H" << std::endl;
-    mmat->print();
-  }
+  // *working_vector_petsc = 1.0;
+  // Ainv_petsc->pointwise_divide(*working_vector_petsc, *Ainv_petsc);
 
   _HbyA_raw.clear();
   for (auto system_i : index_range(_momentum_systems))
@@ -423,6 +363,26 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     NumericVector<Number> & rhs = *(momentum_system->rhs);
     NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
     NumericVector<Number> & solution = *(momentum_system->solution);
+    PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
+
+    if (verbose)
+    {
+      _console << "Matrix in rc object" << std::endl;
+      mmat->print();
+    }
+
+    std::unique_ptr<NumericVector<Number>> Ainv = current_local_solution.zero_clone();
+    PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
+
+    mmat->get_diagonal(*Ainv_petsc);
+
+    std::unique_ptr<NumericVector<Number>> working_vector =
+        momentum_system->current_local_solution->zero_clone();
+    PetscVector<Number> * working_vector_petsc =
+        dynamic_cast<PetscVector<Number> *>(working_vector.get());
+
+    *working_vector_petsc = 1.0;
+    Ainv_petsc->pointwise_divide(*working_vector_petsc, *Ainv_petsc);
 
     _HbyA_raw.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & HbyA = *(_HbyA_raw.back());
@@ -431,6 +391,42 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     {
       _console << "Velocity solution in H(u)" << std::endl;
       solution.print();
+    }
+
+    // We fill the 1/A functor
+    auto active_local_begin =
+        _mesh.evaluable_elements_begin(momentum_system->get_dof_map(), var_nums[system_i]);
+    auto active_local_end =
+        _mesh.evaluable_elements_end(momentum_system->get_dof_map(), var_nums[system_i]);
+
+    for (auto it = active_local_begin; it != active_local_end; ++it)
+    {
+      const Elem * elem = *it;
+      if (this->hasBlocks(elem->subdomain_id()))
+      {
+        Real coord_multiplier;
+        const auto coord_type = _fe_problem.getCoordSystem(elem->subdomain_id());
+        const unsigned int rz_radial_coord =
+            Moose::COORD_RZ ? _fe_problem.getAxisymmetricRadialCoord() : libMesh::invalid_uint;
+
+        MooseMeshUtils::coordTransformFactor(
+            elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
+
+        const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
+        const auto dof_index = elem->dof_number(momentum_system->number(), var_nums[system_i], 0);
+        _Ainv[elem->id()](system_i) = (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
+      }
+    }
+
+    // Now we set the diagonal of our system matrix to 0 so we can create H*u
+    // TODO: Add a function for this in libmesh
+    *working_vector_petsc = 0.0;
+    MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
+
+    if (verbose)
+    {
+      _console << "H" << std::endl;
+      mmat->print();
     }
 
     // We need to subtract the contribution of the pressure gradient from the residual (right hand

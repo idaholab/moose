@@ -109,7 +109,7 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [p_diffusion]
-    type = FVDiffusion
+    type = FVAnisotropicDiffusion
     variable = pressure
     coeff = "Ainv"
     coeff_interp_method = 'average'
