@@ -76,7 +76,8 @@ GeneralOptimization::getNumParams() const
   if (_ndof == 0)
     mooseError(
         "The number of parameters you have is zero and this shouldn't happen. Make sure you are "
-        "running your forward problem on `INITIAL` if you are using a reporter transfer to supply "
+        "running your forward problem on \'INITIAL\' if you are using a reporter transfer to "
+        "supply "
         "that information.");
 
   return _ndof;
