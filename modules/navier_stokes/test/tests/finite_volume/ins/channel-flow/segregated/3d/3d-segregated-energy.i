@@ -256,6 +256,13 @@ pressure_tag = "pressure_grad"
   momentum_absolute_tolerance = 1e-9
   energy_absolute_tolerance = 1e-9
   print_fields = false
+
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
+  momentum_l_tol = 0
+  pressure_l_tol = 0
+  energy_l_tol = 0
 []
 
 [Outputs]

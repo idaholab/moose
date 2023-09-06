@@ -257,10 +257,9 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _pressure_pin_value(getParam<Real>("pressure_pin_value"))
 
 {
-  if (_momentum_system_names.size() != 1 &&
-      _momentum_system_names.size() != _problem.mesh().dimension())
+  if (_momentum_system_names.size() != _problem.mesh().dimension())
     paramError("momentum_systems",
-               "The number of momentum components should either be equal to 1 or the number of "
+               "The number of momentum components should be equal to the number of "
                "spatial dimensions on the mesh.");
 
   // We fetch the system numbers for the momentum components plus add vectors
@@ -577,113 +576,132 @@ SIMPLE::solveMomentumPredictor()
   // system. In case of split momentum systems the system matrix will be exactly the
   // same for all components if wee lag the advecting velocity, thus it is enough to use
   // use the first system.
-  _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
+  // _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
 
   // We will use functions from the implicit system directly
-  NonlinearImplicitSystem & momentum_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
+  // NonlinearImplicitSystem & momentum_system =
+  //     libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
 
   // We need a linear solver
   // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
-  PetscLinearSolver<Real> & momentum_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+  // PetscLinearSolver<Real> & momentum_solver =
+  //     libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
   // We create a vector which can be used as a helper in different situations. We
   // need the ghosting here so we use current_local_solution
-  auto zero_solution = momentum_system.current_local_solution->zero_clone();
+  // auto zero_solution = momentum_system.current_local_solution->zero_clone();
 
   // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
-  auto diff_diagonal = momentum_system.solution->zero_clone();
+  // auto diff_diagonal = momentum_system.solution->zero_clone();
 
   // We will use the solution vector of the equation
-  NumericVector<Number> & solution = *(momentum_system.solution);
+  // NumericVector<Number> & solution = *(momentum_system.solution);
 
   // We get the matrix and right hand side
-  SparseMatrix<Number> & mmat = *(momentum_system.matrix);
-  NumericVector<Number> & rhs = *(momentum_system.rhs);
+  // SparseMatrix<Number> & mmat = *(momentum_system.matrix);
+  // NumericVector<Number> & rhs = *(momentum_system.rhs);
 
   // We plug zero in this to get the system matrix and the right hand side of the linear problem
-  _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
+  // _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
 
   // Unfortunately, the the right hand side has the opposite side due to the definition of the
   // residual
-  rhs.scale(-1.0);
+  // rhs.scale(-1.0);
 
   // Go and relax the system matrix and the right hand side
-  relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-  relaxRightHandSide(rhs, solution, *diff_diagonal);
+  // relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+  // relaxRightHandSide(rhs, solution, *diff_diagonal);
 
   // We need to compute normalization factors to be able to decide if we are converged
   // or not
-  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+  // Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
   // Very important, for deciding the convergence, we need the unpreconditioned
   // norms in the linear solve
-  KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+  // KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
   // Setting the lineat tolerances and maximum iteration counts
-  _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
-  momentum_solver.set_solver_configuration(_momentum_ls_control);
+  // _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
+  // momentum_solver.set_solver_configuration(_momentum_ls_control);
   // We solve the equation
   // TO DO: Add options to this function in Libmesh to accept absolute tolerance
-  momentum_solver.solve(mmat, mmat, solution, rhs);
-  momentum_system.update();
+  // momentum_solver.solve(mmat, mmat, solution, rhs);
+  // momentum_system.update();
   // Make sure that we reuse the preconditioner if we end up solving the segregated
   // momentum components
-  momentum_solver.reuse_preconditioner(true);
+  // momentum_solver.reuse_preconditioner(true);
 
-  if (_print_fields)
-  {
-    _console << " matrix when we solve " << std::endl;
-    mmat.print();
-    _console << " rhs when we solve " << std::endl;
-    rhs.print();
-    _console << " velocity solution component 0" << std::endl;
-    solution.print();
-    _console << "Norm factor " << norm_factor << std::endl;
-    _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
-  }
+  // if (_print_fields)
+  // {
+  //   _console << " matrix when we solve " << std::endl;
+  //   mmat.print();
+  //   _console << " rhs when we solve " << std::endl;
+  //   rhs.print();
+  //   _console << " velocity solution component 0" << std::endl;
+  //   solution.print();
+  //   _console << "Norm factor " << norm_factor << std::endl;
+  //   _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
+  // }
 
   // Compute the normalized residual
-  normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
+  // normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
   // If we use a segregated approach between momentum components as well, we need to solve
   // the other equations. Luckily, the system matrix is exactly the same so we only need
   // to compute right hand sides.
   for (auto system_i : index_range(_momentum_systems))
   {
-    // We are already done with the first system
-    if (!system_i)
-      continue;
-
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
 
     // We will need the right hand side and the solution of the next component
     NonlinearImplicitSystem & momentum_system =
         libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+
+    PetscLinearSolver<Real> & momentum_solver =
+        libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+
+    auto zero_solution = momentum_system.current_local_solution->zero_clone();
+
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
+    SparseMatrix<Number> & mmat = *(momentum_system.matrix);
 
-    // Only evaluating right hand side which is R(0)
-    _problem.computeResidual(*zero_solution, rhs, _momentum_system_numbers[system_i]);
+    auto diff_diagonal = solution.zero_clone();
+
+    // We plug zero in this to get the system matrix and the right hand side of the linear problem
+    _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
     // Sadly, this returns -b so we multiply with -1
     rhs.scale(-1.0);
 
     // Still need to relax the right hand side with the same vector
+    relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
     relaxRightHandSide(rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
-    norm_factor = computeNormalizationFactor(solution, mmat, rhs);
+    Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
+    // Very important, for deciding the convergence, we need the unpreconditioned
+    // norms in the linear solve
+    KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
     // Solve this component. We don't update the ghosted solution yet, that will come at the end of
     // the corrector step
+    // Setting the lineat tolerances and maximum iteration counts
+    _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
+    momentum_solver.set_solver_configuration(_momentum_ls_control);
+
+    // We solve the equation
+    // TO DO: Add options to this function in Libmesh to accept absolute tolerance
     momentum_solver.solve(mmat, mmat, solution, rhs);
+    momentum_system.update();
+
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
     if (_print_fields)
     {
+      _console << " matrix when we solve " << std::endl;
+      mmat.print();
       _console << " rhs when we solve " << std::endl;
       rhs.print();
       _console << " velocity solution component " << system_i << std::endl;

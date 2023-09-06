@@ -223,8 +223,12 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  # petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
-  # petsc_options_value = 'hypre boomeramg NONZERO'
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  passive_scalar_l_abs_tol = 1e-10
+  momentum_l_tol = 0
+  pressure_l_tol = 0
+  passive_scalar_l_tol = 0
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
