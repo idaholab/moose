@@ -2236,6 +2236,8 @@ FEProblemBase::addFunction(const std::string & type,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  parallel_object_only();
+
   parameters.set<SubProblem *>("_subproblem") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -2425,6 +2427,8 @@ FEProblemBase::addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & params)
 {
+  parallel_object_only();
+
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
@@ -2480,6 +2484,8 @@ FEProblemBase::addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -2515,6 +2521,8 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -2546,6 +2554,8 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -2577,6 +2587,8 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -2612,6 +2624,8 @@ FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
+  parallel_object_only();
+
   _has_constraints = true;
 
   auto determine_var_param_name = [&parameters, this]()
@@ -2659,6 +2673,8 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & params)
 {
+  parallel_object_only();
+
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
 
@@ -2679,6 +2695,8 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains)
 {
+  parallel_object_only();
+
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
@@ -2715,6 +2733,8 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
                                    unsigned int components,
                                    const std::set<SubdomainID> * const active_subdomains)
 {
+  parallel_object_only();
+
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
@@ -2742,6 +2762,8 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
                                     Real /*scale_factor*/,
                                     const std::set<SubdomainID> * const active_subdomains)
 {
+  parallel_object_only();
+
   mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
 
   if (order > _max_scalar_order)
@@ -2772,6 +2794,8 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2807,6 +2831,8 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2836,6 +2862,8 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -2870,6 +2898,8 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
 
@@ -2931,6 +2961,8 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
 
@@ -2966,6 +2998,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
                                    const std::string & name,
                                    InputParameters & parameters)
 {
+  parallel_object_only();
+
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
 
@@ -3193,6 +3227,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -3589,6 +3625,8 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
+  parallel_object_only();
+
   std::vector<std::shared_ptr<UserObject>> uos;
 
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
@@ -4038,7 +4076,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     // them being stored.  This wouldn't be a problem if all userobjects satisfied the dependency
     // resolver interface and could be sorted appropriately with the general userobjects, but they
     // don't.
-    auto pp = dynamic_cast<Postprocessor *>(obj);
+    auto pp = dynamic_cast<const Postprocessor *>(obj);
     if (pp)
     {
       _reporter_data.finalize(obj->name());
@@ -4447,6 +4485,8 @@ FEProblemBase::addDamper(const std::string & damper_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  parallel_object_only();
+
   const auto nl_sys_num =
       parameters.isParamValid("variable")
           ? determineNonlinearSystem(parameters.varName("variable", name), true).second
@@ -4471,6 +4511,8 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
                             const std::string & name,
                             InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -4512,6 +4554,8 @@ FEProblemBase::addMarker(const std::string & marker_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -4546,6 +4590,8 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  parallel_object_only();
+
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
@@ -4891,6 +4937,8 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  parallel_object_only();
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -5852,6 +5900,8 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  parallel_object_only();
+
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   for (auto & nl : _nl)
@@ -5880,6 +5930,8 @@ FEProblemBase::addPredictor(const std::string & type,
                             const std::string & name,
                             InputParameters & parameters)
 {
+  parallel_object_only();
+
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
   for (auto & nl : _nl)
@@ -6710,6 +6762,8 @@ FEProblemBase::predictorCleanup(NumericVector<Number> & /*ghosted_solution*/)
 void
 FEProblemBase::addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem)
 {
+  parallel_object_only();
+
   _displaced_mesh = &displaced_problem->mesh();
   _displaced_problem = displaced_problem;
 }
@@ -7764,6 +7818,8 @@ FEProblemBase::addOutput(const std::string & object_type,
                          const std::string & object_name,
                          InputParameters & parameters)
 {
+  parallel_object_only();
+
   // Get a reference to the OutputWarehouse
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 

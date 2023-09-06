@@ -1,0 +1,28 @@
+[Tests]
+  [linearized_interface_grain_growth_model]
+    type = 'Exodiff'
+    input = 'grain_growth_linearized_interface.i'
+    exodiff = 'grain_growth_linearized_interface_out.e'
+    requirement = 'The system executes a grain growth simulation using linearized interface substitution'
+    design = 'Linearized_Interface_Grain_Growth.md'
+    issues = '#21940'
+  []
+
+  [linearized_interface_action]
+    type = 'Exodiff'
+    input = 'linearized_interface_action.i'
+    exodiff = 'linearized_interface_action_out.e'
+    requirement = 'Action creates the variables, kernels, bounds, etc. for linearized interface with grain growth'
+    design = 'GrainGrowthLinearizedInterfaceAction.md'
+    issues = '#21940'
+  []
+
+  [voronoi_with_linearized_interface]
+    type = 'Exodiff'
+    input = 'voronoi_linearized_interface.i'
+    exodiff = 'voronoi_linearized_interface_out.e'
+    requirement = 'Initializes linearized interface variables for a voronoi tesselation IC'
+    design = 'PolycrystalColoringICLinearizedInterface.md'
+    issues = '#21940'
+  []
+[]

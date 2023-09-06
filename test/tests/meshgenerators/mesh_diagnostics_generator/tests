@@ -1,0 +1,218 @@
+[Tests]
+  issues = '#25278'
+  design = 'meshgenerators/MeshDiagnosticsGenerator.md'
+
+  [generate]
+    requirement = 'The system shall be able to diagnostize potential issues in a mesh, such as'
+
+    [nonconformality]
+      type = 'RunApp'
+      input = 'conformality_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes: 3'
+      detail = 'element overlapping,'
+    []
+    [inconsistent_sidesets]
+      type = RunApp
+      input = 'consistent_domains.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+      expect_out = 'Inconsistent orientation of sideset bad_one \(4\) with regards to subdomain pairs'
+      detail = 'inconsistently oriented sidesets between subdomains,'
+    []
+    [overlap]
+      type = 'RunApp'
+      input = 'node_based_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of elements overlapping \(node-based heuristics\): '
+      detail = 'non-conformality in two dimensions,'
+    []
+    [nonconformality_3d]
+      type = 'RunApp'
+      input = 'conformality_test_3d.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes: 6'
+      detail = 'non-conformality in three dimensions,'
+    []
+    [elem_types]
+      type = 'RunException'
+      input = 'elem_types_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_err = 'Element type in subdomain  \(0\) : TRI3 QUAD4'
+      detail = 'different element types in a single subdomain,'
+    []
+    [max_size]
+      type = 'RunException'
+      input = 'max_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_err = 'Number of elements above prescribed maximum volume : 1'
+      detail = 'elements above a certain volume,'
+    []
+    [min_size]
+      type = 'RunException'
+      input = 'min_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_err = 'Number of elements below prescribed minimum volume : 1'
+      detail = 'elements below a certain volume,'
+    []
+    [non_planar]
+      type = 'RunApp'
+      input = 'non_planar_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-planar element sides detected: 1'
+
+      detail = 'non-planar sides on elements,'
+    []
+    [negative_jacobian]
+      type = RunApp
+      input = jacobian_test.i
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = '(Number of elements with a negative Jacobian: 1|Number of element sides with negative Jacobians: 2)'
+      detail = 'elements with negative Jacobians'
+    []
+  []
+
+  [amr_detection]
+    requirement = 'The system shall be able to recognize non-conformalities created by uniform mesh refinements for'
+    [quad]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'quadrilateral elements,'
+    []
+    [quad_second_order]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=QUAD9 --mesh-only'
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'quadrilateral elements of second order,'
+    []
+    [quad_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 --mesh-only'
+      # Detects one too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 3'
+
+      detail = 'quadrilateral elements refined twice near an unrefined quadrilateral element,'
+    []
+    [hex]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'hexahedral elements,'
+    []
+    [hex_second_order]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=HEX20 --mesh-only'
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'hexahedral elements of second order,'
+    []
+    [hex_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_hex.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/ix=4 Mesh/cut_one/iy=4 Mesh/cut_one/iz=4 --mesh-only'
+      # Detects too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 9'
+
+      detail = 'hexahedral elements refined twice near an unrefined quadrilateral element,'
+    []
+    [tri]
+      type = 'RunApp'
+      input = 'detect_amr_tri.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'triangle elements,'
+    []
+    [tri_second_order]
+      type = 'RunException'
+      input = 'detect_amr_tri.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TRI6 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'triangle elements of second order,'
+    []
+    [tri_two_levels_across]
+      type = 'RunApp'
+      input = 'detect_amr_tri.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/nx=4 Mesh/cut_one/ny=4 --mesh-only'
+      # Detects one too many but only reconstructing the whole unrefined mesh can eliminate the center one
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 3'
+
+      detail = 'triangle elements refined twice near an unrefined triangle element,'
+    []
+    [tet]
+      type = 'RunApp'
+      input = 'detect_amr_tet.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 8'
+
+      detail = 'tetrahedral elements,'
+    []
+    [tet_second_order]
+      type = 'RunException'
+      input = 'detect_amr_tet.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TET10 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 8'
+
+      detail = 'tetrahedral elements of second order,'
+    []
+  []
+
+  [amr_detection_avoid_false_positives]
+    requirement = 'The system shall be able to recognize that non-conformalities are not created by uniform mesh refinements in the case of'
+    [only_nx_refined]
+      type = 'RunApp'
+      input = 'detect_amr_quad.i'
+      mesh_mode = replicated
+      expect_out = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 0'
+      cli_args = 'Mesh/cut_one/iy=1 --mesh-only'
+
+      detail = 'quadrilateral elements refined in only one direction,'
+    []
+  []
+  [errors]
+    requirement = 'The system shall error if'
+    [no_diag]
+      type = RunException
+      input = all_at_once.i
+      expect_err = 'You need to turn on at least one diagnostic'
+      cli_args = "Mesh/diag/examine_element_overlap=NO_CHECK
+                  Mesh/diag/examine_element_types=NO_CHECK
+                  Mesh/diag/examine_element_volumes=NO_CHECK
+                  Mesh/diag/examine_non_conformality=NO_CHECK
+                  Mesh/diag/examine_nonplanar_sides=NO_CHECK
+                  Mesh/diag/examine_sidesets_orientation=NO_CHECK
+                  Mesh/diag/search_for_adaptivity_nonconformality=NO_CHECK
+                  Mesh/diag/check_local_jacobian=NO_CHECK --mesh-only"
+      detail = 'a diagnostics object is created but no diagnostics are requested.'
+    []
+  []
+[]

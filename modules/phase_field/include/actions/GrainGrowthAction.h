@@ -24,9 +24,8 @@ public:
   virtual void act();
 
 protected:
-  void addKernel(const std::string & kernel_type,
-                 const std::string & kernel_name,
-                 InputParameters params);
+  void addVariables();
+  void addBnds(const std::string & name_base);
 
   /// number of variables and variable name base for variable creation
   const unsigned int _op_num;
@@ -34,6 +33,9 @@ protected:
 
   /// FEType for the variable being created
   const FEType _fe_type;
+
+  /// Take initial values from file?
+  const bool _initial_from_file;
 
   /// use AD objects where possible
   const bool _use_ad;

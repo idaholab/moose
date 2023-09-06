@@ -27,4 +27,5 @@ public:
 private:
   const unsigned int _op_num;
   const std::string _var_name_base;
+  const bool _linearized_interface;
 };

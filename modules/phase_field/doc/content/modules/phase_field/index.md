@@ -52,6 +52,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 - [Grain Tracker Algorithm](/GrainTracker.md): Tracking arbitrary features on an unstructured mesh over time
 - [phase_field/Grain_Boundary_Anisotropy.md]: For systems with misorientation dependence of GB properties
 - [phase_field/Elastic_Driving_Force_Grain_Growth.md]: Coupling mechanics to influence grain growth
+- [phase_field/Linearized_Interface_Grain_Growth.md]: Grain growth model using linearized interface to reduce the required mesh size
 
 ## Initial Conditions
 

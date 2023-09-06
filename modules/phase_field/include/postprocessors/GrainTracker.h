@@ -194,6 +194,12 @@ protected:
   /// The threshold above (or below) where a grain may be found on a reserve op field
   const Real _reserve_op_threshold;
 
+  /**
+   * Absolute value of the lower bound used to represent a region not assigned to this grain, used
+   * when a grain is remapped to another order parameter. The actual value used is -_bound_value
+   */
+  const Real _bound_value;
+
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
 

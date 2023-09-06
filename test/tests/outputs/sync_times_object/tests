@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#25368'
+  design = 'syntax/Outputs/index.md'
+
+  [sync_times_object]
+    type = CSVDiff
+    input = 'sync_times_object.i'
+    csvdiff = 'sync_times_object_out.csv'
+    requirement = "The system shall allow output to occur at times provided by a times object."
+  []
+  [sync_times_object_changing_times]
+    type = RunException
+    input = 'sync_times_object.i'
+    cli_args = "Outputs/out/sync_times_object=simulation_times"
+    expect_err = 'The provided sync times object has changing time values. Only static time values are supported'
+    requirement = "The system shall report an error if output is specified to use a times object with changing times."
+  []
+[]

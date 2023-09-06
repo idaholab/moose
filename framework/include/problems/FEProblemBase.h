@@ -2590,6 +2590,8 @@ FEProblemBase::addObject(const std::string & type,
                          InputParameters & parameters,
                          const bool threaded)
 {
+  parallel_object_only();
+
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name);
 

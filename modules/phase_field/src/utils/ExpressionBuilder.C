@@ -57,7 +57,8 @@ ExpressionBuilder::EBTempIDNode::stringify() const
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
-  const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
+  const char * name[] = {
+      "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh", "tanh"};
   std::ostringstream s;
   s << name[_type] << '(' << *_subnode << ')';
   return s.str();
@@ -256,6 +257,7 @@ UNARY_FUNC_IMPLEMENT(log10, LOG10)
 UNARY_FUNC_IMPLEMENT(exp, EXP)
 UNARY_FUNC_IMPLEMENT(sinh, SINH)
 UNARY_FUNC_IMPLEMENT(cosh, COSH)
+UNARY_FUNC_IMPLEMENT(tanh, TANH)
 
 #define BINARY_FUNC_IMPLEMENT(op, OP)                                                              \
   ExpressionBuilder::EBTerm op(const ExpressionBuilder::EBTerm & left,                             \

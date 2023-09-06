@@ -26,6 +26,8 @@ public:
   ACGrGrPoly(const InputParameters & parameters);
 
 protected:
+  virtual Real assignThisOp();
+  virtual std::vector<Real> assignOtherOps();
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 

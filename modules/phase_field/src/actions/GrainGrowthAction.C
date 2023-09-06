@@ -92,6 +92,7 @@ GrainGrowthAction::GrainGrowthAction(const InputParameters & params)
     _var_name_base(getParam<std::string>("var_name_base")),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+    _initial_from_file(getParam<bool>("initial_from_file")),
     _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
@@ -99,40 +100,17 @@ GrainGrowthAction::GrainGrowthAction(const InputParameters & params)
 void
 GrainGrowthAction::act()
 {
-  // take initial values from file?
-  bool initial_from_file = getParam<bool>("initial_from_file");
+  // Add Variables
+  addVariables();
 
-  // Loop over order parameters
+  // Add Kernels
   for (unsigned int op = 0; op < _op_num; op++)
   {
-    auto type = AddVariableAction::variableType(_fe_type);
-    auto var_params = _factory.getValidParams(type);
-
-    var_params.applySpecificParameters(_pars, {"family", "order", "block"});
-    var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-
     // Create variable name
     std::string var_name = _var_name_base + Moose::stringify(op);
 
-    // Setup initial from file if requested
-    if (initial_from_file)
-    {
-      if (_current_task == "check_copy_nodal_vars")
-        _app.setExodusFileRestart(true);
-
-      if (_current_task == "copy_nodal_vars")
-      {
-        auto * system = &_problem->getNonlinearSystemBase();
-        system->addVariableToCopy(var_name, var_name, "LATEST");
-      }
-    }
-
-    // Add variable
-    if (_current_task == "add_variable")
-      _problem->addVariable(type, var_name, var_params);
-
-    // Add Kernels
-    else if (_current_task == "add_kernel")
+    // Add the kernels for each grain growth variable
+    if (_current_task == "add_kernel")
     {
       //
       // Add time derivative kernel
@@ -146,7 +124,7 @@ GrainGrowthAction::act()
         params.set<NonlinearVariableName>("variable") = var_name;
         params.applyParameters(parameters());
 
-        addKernel(kernel_type, kernel_name, params);
+        _problem->addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -172,7 +150,7 @@ GrainGrowthAction::act()
         params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mobility");
         params.applyParameters(parameters());
 
-        addKernel(kernel_type, kernel_name, params);
+        _problem->addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -190,7 +168,7 @@ GrainGrowthAction::act()
         params.set<bool>("variable_L") = getParam<bool>("variable_mobility");
         params.applyParameters(parameters());
 
-        addKernel(kernel_type, kernel_name, params);
+        _problem->addKernel(kernel_type, kernel_name, params);
       }
 
       //
@@ -214,6 +192,50 @@ GrainGrowthAction::act()
       }
     }
   }
+
+  // Add AuxVriable and AuxKernel for Bnds variable
+  addBnds(_var_name_base);
+}
+
+void
+GrainGrowthAction::addVariables()
+{
+  for (unsigned int op = 0; op < _op_num; op++)
+  {
+    // Create variable name
+    std::string var_name = _var_name_base + Moose::stringify(op);
+
+    // Setup initial from file if requested
+    if (_initial_from_file)
+    {
+      if (_current_task == "check_copy_nodal_vars")
+        _app.setExodusFileRestart(true);
+
+      if (_current_task == "copy_nodal_vars")
+      {
+        auto * system = &_problem->getNonlinearSystemBase();
+        system->addVariableToCopy(var_name, var_name, "LATEST");
+      }
+    }
+
+    // Add each grain growth variable
+    if (_current_task == "add_variable")
+    {
+      auto type = AddVariableAction::variableType(_fe_type);
+      auto var_params = _factory.getValidParams(type);
+
+      var_params.applySpecificParameters(_pars, {"family", "order", "block"});
+      var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
+      // Add variable
+      _problem->addVariable(type, var_name, var_params);
+    }
+  }
+}
+
+void
+GrainGrowthAction::addBnds(const std::string & name_base)
+{
   // Create auxvariable
   if (_current_task == "add_aux_variable")
   {
@@ -223,8 +245,7 @@ GrainGrowthAction::act()
     var_params.applySpecificParameters(_pars, {"block"});
     _problem->addAuxVariable("MooseVariable", "bnds", var_params);
   }
-
-  // Create BndsCalcAux auxkernel
+  // Create auxkernel
   else if (_current_task == "add_aux_kernel")
   {
     // Make vector of order parameter names, excluding this one std::vector<VariableName> v;
@@ -232,7 +253,7 @@ GrainGrowthAction::act()
     v.resize(_op_num);
 
     for (unsigned int j = 0; j < _op_num; ++j)
-      v[j] = _var_name_base + Moose::stringify(j);
+      v[j] = name_base + Moose::stringify(j);
 
     std::string aux_kernel_type = "BndsCalcAux";
 
@@ -240,16 +261,9 @@ GrainGrowthAction::act()
     InputParameters params = _factory.getValidParams(aux_kernel_type);
     params.set<AuxVariableName>("variable") = "bnds";
     params.set<std::vector<VariableName>>("v") = v;
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     params.applyParameters(parameters());
 
     _problem->addAuxKernel(aux_kernel_type, aux_kernel_name, params);
   }
-}
-
-void
-GrainGrowthAction::addKernel(const std::string & kernel_type,
-                             const std::string & kernel_name,
-                             InputParameters params)
-{
-  _problem->addKernel(kernel_type, kernel_name, params);
 }

@@ -64,13 +64,17 @@ Postprocessor::declareValue(const MooseObject & moose_object)
 PostprocessorValue
 Postprocessor::getValue()
 {
-  return static_cast<const Postprocessor *>(this)->getValue();
+  mooseError(
+      "The non-const 'Postprocessor::getValue()' method is deprecated and should not be called.");
 }
 
 PostprocessorValue
 Postprocessor::getValue() const
 {
-  mooseError("getValue() (const or non-const) must be implemented.");
+  mooseDeprecated("The non-const 'Postprocessor::getValue()' method is deprecated. Please override "
+                  "the 'Postprocessor::getValue() const' method instead.");
+
+  return const_cast<Postprocessor *>(this)->getValue();
 }
 
 typename Postprocessor::ValueType
