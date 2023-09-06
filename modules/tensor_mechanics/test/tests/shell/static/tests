@@ -71,6 +71,15 @@
 
     requirement = "The mechanics system shall accurately compute the axial stress and strain of the shell elements."
   [../]
+  [./finite_straintest_axial]
+    type = 'Exodiff'
+    input = finite_straintest.i
+    exodiff = 'finite_straintest_out.e'
+
+    issues = '#25266'
+
+    requirement = "The mechanics system shall accurately compute the axial stress and strain of the shell elements using the finite strain formulation."
+  [../]
   [./straintest_shear]
     type = 'Exodiff'
     input = straintest_shear.i
