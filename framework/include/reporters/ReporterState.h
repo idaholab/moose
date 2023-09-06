@@ -139,6 +139,9 @@ public:
    * The default dataLoad assumes the list being populated is empty and simply uses push_back.
    * Therefore, this function loads the data directly into the container to avoid this problem
    * and unnecessary copies.
+   *
+   * The default dataStore is very similar, but to ensure consistency (because we're re-defining
+   * the load), we implement it again here.
    */
   ///@{
   void storeInternal(std::ostream & stream) override final;
