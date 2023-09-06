@@ -268,10 +268,19 @@ C3 = 1.0
 []
 
 [Postprocessors]
+  [mesh_volume]
+    type = VolumePostprocessor
+    execute_on = 'initial timestep_end'
+  []
   [total_vol]
     type = ElementIntegralVariablePostprocessor
     variable = mat_den
     execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [vol_frac]
+    type = ParsedPostprocessor
+    function = 'total_vol / mesh_volume'
+    pp_names = 'total_vol mesh_volume'
   []
   [sensitivity]
     type = ElementIntegralMaterialProperty
@@ -284,6 +293,11 @@ C3 = 1.0
   [cost]
     type = ElementIntegralVariablePostprocessor
     variable = Cost
+  []
+  [cost_frac]
+    type = ParsedPostprocessor
+    function = 'cost / mesh_volume'
+    pp_names = 'cost mesh_volume'
   []
   [objective]
     type = ElementIntegralMaterialProperty
