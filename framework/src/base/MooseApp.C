@@ -1197,6 +1197,8 @@ MooseApp::backup(const std::filesystem::path & folder_base)
 {
   TIME_SECTION("backup", 2, "Backing Up Application to File");
 
+  preBackup();
+
   RestartableDataWriter writer(*this, _restartable_data);
   return writer.write(folder_base);
 }
@@ -1207,6 +1209,8 @@ MooseApp::backup()
   TIME_SECTION("backup", 2, "Backing Up Application");
 
   RestartableDataWriter writer(*this, _restartable_data);
+
+  preBackup();
 
   auto backup = std::make_unique<Backup>();
   writer.write(*backup->header, *backup->data);
@@ -1223,6 +1227,8 @@ MooseApp::restore(const std::filesystem::path & folder_base, const bool for_rest
 
   _rd_reader.setInput(folder_base);
   _rd_reader.restore(filter_names);
+
+  postRestore(for_restart);
 }
 
 void
@@ -1243,6 +1249,8 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 
   _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
+
+  postRestore(for_restart);
 }
 
 void

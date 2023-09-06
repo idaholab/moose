@@ -727,6 +727,11 @@ public:
   std::unique_ptr<Backup> backup();
 
   /**
+   * Insertion point for other apps that is called before backup()
+   */
+  virtual void preBackup() {}
+
+  /**
    * Restore an application from file
 
    * @param folder_base The backup folder base
@@ -751,6 +756,14 @@ public:
    * the initial restore (that is, the restoration of data that has already been declared).
    */
   void restore(std::unique_ptr<Backup> backup, const bool for_restart);
+
+  /**
+   * Insertion point for other apps that is called after restore()
+   *
+   * @param for_restart Whether this restoration is explicitly for the
+   * first restoration of restart data
+   */
+  virtual void postRestore(const bool /* for_restart */) {}
 
   /**
    * Restores from a "initial" backup, that is, one set in _initial_backup.
