@@ -141,6 +141,7 @@ PenaltyFrictionUserObject::timestepSetup()
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {0.0, 0.0};
   }
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
@@ -291,7 +292,7 @@ PenaltyFrictionUserObject::reinit()
 
       // Keep track of slip vector for adaptive penalty
       auto & [step_slip, old_step_slip] = _dof_to_step_slip[node];
-      step_slip = MetaPhysicL::raw_value(slip_distance).cwiseAbs();
+      step_slip = MetaPhysicL::raw_value(slip_distance);
     }
     else
     {
@@ -321,6 +322,14 @@ PenaltyFrictionUserObject::finalize()
 bool
 PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
 {
+  // save off step slip
+  // This method is called at the beginning of the AL iteration.
+  for (auto & map_pr : _dof_to_step_slip)
+  {
+    auto & [step_slip, old_step_slip] = map_pr.second;
+    old_step_slip = step_slip;
+  }
+
   std::pair<Real, dof_id_type> max_slip{0.0, 0};
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
@@ -435,13 +444,11 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     {
       const auto & step_slip = libmesh_map_find(_dof_to_step_slip, dof_object);
       // No change of direction: Adjust penalty factor for the frictional problem
-      if (step_slip.first.dot(step_slip.second) > 0.0 &&
-          std::abs(_dof_to_lagrange_multiplier[dof_object]) > TOLERANCE &&
+      if (step_slip.first.dot(step_slip.second) > 0.0 && std::abs(normal_lm) > TOLERANCE &&
           _slip_tolerance < _dt * slip_velocity.norm())
       {
         penalty_friction =
-            (_friction_coefficient * std::abs(_dof_to_lagrange_multiplier[dof_object])) / 2 /
-            (_dt * slip_velocity.norm());
+            (_friction_coefficient * std::abs(normal_lm)) / 2 / (_dt * slip_velocity.norm());
         // Alternative: accumulated_slip.norm() - old_accumulated_slip.norm()
       }
       // Change of direction: Reduce penalty factor to avoid lack of convergence
@@ -453,13 +460,6 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
         penalty_friction = _penalty_friction;
       else if (penalty_friction > _penalty_friction * _max_penalty_multiplier)
         penalty_friction = _penalty_friction * _max_penalty_multiplier;
-    }
-
-    // save off step slip
-    for (auto & map_pr : _dof_to_step_slip)
-    {
-      auto & [step_slip, old_step_slip] = map_pr.second;
-      old_step_slip = step_slip;
     }
   }
 }

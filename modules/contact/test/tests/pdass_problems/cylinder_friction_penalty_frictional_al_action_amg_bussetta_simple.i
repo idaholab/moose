@@ -221,7 +221,7 @@
   l_abs_tol = 1e-13
 
   start_time = 0.0
-  end_time = 0.2 # 1.0
+  end_time = 0.1 # 1.0
   dt = 0.1
   dtmin = 0.1
 

@@ -36,6 +36,8 @@
   []
   [active]
   []
+  [pid]
+  []
 []
 
 [Functions]
@@ -61,6 +63,10 @@
 []
 
 [AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
+  []
   [penalty_normal_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
@@ -214,9 +220,9 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-8
-  nl_max_its = 50
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-10
+  nl_max_its = 150
   l_tol = 1e-05
   l_abs_tol = 1e-13
 
@@ -274,7 +280,7 @@
     penalty_friction = 1e+7
     friction_coefficient = 0.4
     al_penetration_tolerance = 1e-7
-    al_incremental_slip_tolerance = 3e-6
+    al_incremental_slip_tolerance = 1e-7
     adaptivity_penalty_normal = BUSSETTA
     adaptivity_penalty_friction = FRICTION_LIMIT
     penalty_multiplier = 5
