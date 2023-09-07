@@ -242,6 +242,9 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
   for (const auto & elem : mesh.element_ptr_range())
     if (elem->subdomain_id() == old_id)
       elem->subdomain_id() = new_id;
+
+  // global cached information may now be out of sync
+  mesh.set_isnt_prepared();
 }
 
 Point
