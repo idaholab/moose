@@ -50,7 +50,7 @@ class TestTaggingCommand(MooseDocsTestCase):
         with self.assertLogs(level=logging.INFO) as cm: # For warning suppression. TODO: remove cm when non-experimental
             ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
-        self.assertEqual(ast(0)['attr_name'], 'tagger_test')
+        self.assertEqual(ast(0)['attr_name'], 'tag_test')
         self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bar'})
 
     def testDuplicateKey(self):
@@ -91,7 +91,7 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertEqual(len(cm.output), 2)
         self.assertIn('Tag page identifier already exists;', cm.output[1])
         self.assertSize(ast1, 1)
-        self.assertEqual(ast1(0)['attr_name'], 'tagger_test')
+        self.assertEqual(ast1(0)['attr_name'], 'tag_test')
         self.assertSize(ast2, 1)
         self.assertEqual(ast2(0)['attr_name'], '') #Not added to global attributes, so name attribute is empty
 

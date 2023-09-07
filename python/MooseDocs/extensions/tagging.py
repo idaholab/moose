@@ -23,7 +23,7 @@ Duplicate key value pairs are allowed, but a warning is issued and only one of t
 ALERT: The tagging extension is experimental! If documentation tagging features are desired, please
 request assistance from the MOOSE Framework development team.
 
-Example Tagger command in *.md:
+Example Tag command in *.md:
 !tag name=geochem pairs=keyg:valg keychem:valuechem
 
 Example output tag dictionary for multiple pages, names, and key:value pairs:
@@ -92,7 +92,7 @@ class TaggingExtension(command.CommandExtension):
         """
         replace_str = ""
         for iter in self.getAttributeItems():
-            if bool(re.search('tagger_', iter[0])):
+            if bool(re.search('tag_', iter[0])):
                 tag_dict_str=str(iter[1])
                 key_list_regex=self._allowed_keys+['name', 'path', 'key_vals']
                 for entry in key_list_regex:
@@ -132,7 +132,7 @@ class TaggingCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['name'] = (None, 'ID name for page and associated key:value category/label pairs.')
+        settings['name'] = (None, 'ID name for page and associated key:value category:label pairs.')
         settings['pairs'] = (None, 'Key:value pairs representing categories and page-specific labels for each category.')
         return settings
 
@@ -176,12 +176,12 @@ class TaggingCommand(command.CommandComponent):
             page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
 
             tag_id_name = ''
-            if self.extension.get_tag_data("tagger_" + name):
+            if self.extension.get_tag_data("tag_" + name):
                 msg = "%s: Tag page identifier already exists; not adding the following 'name' to " \
                     "dictionary: %s"
                 LOG.warning(msg, page.name, name)
             else:
-                tag_id_name = "tagger_" + name
+                tag_id_name = "tag_" + name
                 self.extension.set_tag_data(tag_id_name, page_data)
 
             Tag(parent, attr_name=tag_id_name, path=mpath, key_vals=dict(good_keys))

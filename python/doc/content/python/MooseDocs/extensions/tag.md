@@ -1,7 +1,7 @@
 # Tagging Extension
 
 The tagging extension provides the "tag" command, which provides a mechanism for setting a set of
-tags made up of arbitrary key:value pairs for categories/labels associated with a given markdown page.
+tags made up of arbitrary key:value pairs for categories:labels associated with a given markdown page.
 The provided metadata is then injected into a compatible user-provided JavaScript file, which then
 allows for the filtering of tagged pages against the defined categories in the generated website.
 The configuration of the extension contains an optional allowed key list, which is checked against
