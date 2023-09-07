@@ -97,6 +97,8 @@
     variable = 'from_sub from_sub'
     target_variable_components = '0 1'
     source_type = 'nodes nodes'
+    # to stabilize nearest-node results in parallel
+    search_value_conflicts = false
   []
 
   [from_sub_elem]
