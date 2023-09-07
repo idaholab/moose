@@ -230,7 +230,8 @@ ifeq ($(MOOSE_UNITY),true)
 
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
-moose_non_unity := %/base %/utils
+# This folder does not build with unity
+moose_non_unity := %/utils_nonunity
 
 # Add additional non-unity directories if libtorch is enabled
 ifeq ($(ENABLE_LIBTORCH),true)
