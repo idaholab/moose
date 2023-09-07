@@ -34,6 +34,8 @@ protected:
    */
   virtual const Moose::FunctorBase<ADReal> & epsFunctor() const { return _unity_functor; }
 
+  ADReal computeQpResidual() override;
+
   /// x-velocity
   const Moose::Functor<ADReal> & _u;
   /// y-velocity

@@ -26,6 +26,9 @@ public:
   void gatherRCData(const FaceInfo & fi) override;
 
 protected:
+
+  ADReal computeQpResidual() override;
+
   /// x-velocity
   const Moose::Functor<ADReal> & _u_functor;
   /// y-velocity

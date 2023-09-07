@@ -27,9 +27,9 @@ public:
 
   virtual ~INSFVFluxBC() = default;
 
-  void computeResidual(const FaceInfo &) override final {}
-  void computeJacobian(const FaceInfo &) override final {}
-  void computeResidualAndJacobian(const FaceInfo &) override final {}
+  void computeResidual(const FaceInfo &) override;
+  void computeJacobian(const FaceInfo &) override;
+  void computeResidualAndJacobian(const FaceInfo &) override;
 
   /**
    * Process into either the system residual or Jacobian
@@ -37,8 +37,5 @@ public:
   void addResidualAndJacobian(const ADReal & residual);
 
 protected:
-  ADReal computeQpResidual() override final
-  {
-    mooseError("INSFVFluxBCs must implement gatherRCData and not computeQpResidual");
-  }
+  ADReal computeQpResidual() override { return 0.0;}
 };

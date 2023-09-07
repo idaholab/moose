@@ -46,6 +46,27 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
     mooseError("In threedimensions, the w velocity must be supplied using the 'w' parameter");
 }
 
+ADReal
+INSFVMomentumAdvectionOutflowBC::computeQpResidual()
+{
+  using namespace Moose::FV;
+
+  const auto boundary_face = singleSidedFaceArg();
+  const auto state = determineState();
+  ADRealVectorValue v(_rc_uo.getVelocity(*_face_info, state, _tid, InterpMethod::RhieChow));
+
+  const auto rho_boundary = _rho(boundary_face, state);
+  const auto eps_boundary = epsFunctor()(boundary_face, state);
+
+  // This will tend to be an extrapolated boundary for the velocity in which case, when using two
+  // term expansion, this boundary value will actually be a function of more than just the degree of
+  // freedom at the cell centroid adjacent to the face, e.g. it can/will depend on surrounding cell
+  // degrees of freedom as well
+  auto var_boundary = _var(boundary_face, state);
+
+  return _normal * v * rho_boundary / eps_boundary * var_boundary;
+}
+
 void
 INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
 {
