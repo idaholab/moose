@@ -109,7 +109,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 1e5 #1.000e5 # W
@@ -133,7 +133,8 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}

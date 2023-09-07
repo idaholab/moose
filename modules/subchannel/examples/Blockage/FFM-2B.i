@@ -13,6 +13,7 @@ Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
 vol_flow = 0.00341 #m3/sec
 mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
 P_out = 2.0e5 # Pa
+
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
@@ -115,7 +116,8 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
