@@ -175,7 +175,7 @@ FEProblemBase::validParams()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
   params.addParam<bool>("allow_initial_conditions_with_restart",
-                        true,
+                        false,
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
