@@ -1,0 +1,20 @@
+[Tests]
+  design = "Restartable.md Receiver.md"
+  issues = "#25414"
+
+  [checkpoint]
+    type = 'CSVDiff'
+    input = 'receiver_initial.i'
+    csvdiff = 'receiver_initial_out.csv'
+    recover = false
+    requirement = "The system shall support the checkpointed output of postprocessors."
+  []
+  [restart]
+    type = 'CSVDiff'
+    input = 'receiver_restart.i'
+    csvdiff = 'receiver_restart_out.csv'
+    recover = false
+    prereq = checkpoint
+    requirement = "The system shall support loading a postprocessor into another postprocessor during restart."
+  []
+[]
