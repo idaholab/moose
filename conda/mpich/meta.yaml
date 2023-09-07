@@ -6,9 +6,11 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 9 %}
-{% set strbuild = "build_" + build|string %}
+{% set build = 10 %}
 {% set version = "4.0.2" %}
+
+# permanent
+{% set strbuild = "build_" + build|string %}
 
 package:
   name: moose-mpich

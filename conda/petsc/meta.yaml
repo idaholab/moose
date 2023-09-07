@@ -4,10 +4,11 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 9 %}
-{% set strbuild = "build_" + build|string %}
+{% set build = 10 %}
 {% set version = "3.16.6" %}
-{% set sha256 = "d676eb67e79314d6cca6422d7c477d2b192c830b89d5edc6b46934f7453bcfc0" %}
+
+# permanent
+{% set strbuild = "build_" + build|string %}
 
 package:
   name: moose-petsc

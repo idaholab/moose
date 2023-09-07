@@ -3,8 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 0 %}
-{% set version = "2023.08.17" %}
+{% set version = "2023.08.31" %}
 
 package:
   name: moose-tools
@@ -14,7 +13,7 @@ source:
   path: ../tools
 
 build:
-  number: {{ build }}
+  number: 0
 
 requirements:
   build:
