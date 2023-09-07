@@ -11,6 +11,8 @@
 #include "MooseConfig.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -179,13 +181,6 @@ dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
   stream.write((char *)&s_size, sizeof(s_size));
 
   stream.write(s_str.c_str(), sizeof(char) * (s_str.size()));
-}
-
-template <>
-void
-dataStore(std::ostream & stream, std::stringstream *& s, void * context)
-{
-  dataStore(stream, *s, context);
 }
 
 template <>
@@ -477,13 +472,6 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   // Clear the stringstream before loading new data into it.
   s.str(std::string());
   s.write(s_s.get(), s_size);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, std::stringstream *& s, void * context)
-{
-  dataLoad(stream, *s, context);
 }
 
 template <>

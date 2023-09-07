@@ -60,7 +60,7 @@
       min_parallel = 1
       max_parallel = 1
       prereq = parallel_error/error1
-      expect_err = 'Cannot restart using a different number of processors'
+      expect_err = 'The number of MPI ranks is not consistent'
       detail = "restarted with a different number processors."
     []
   []
@@ -87,7 +87,7 @@
       max_threads = 2
       prereq = thread_error/with_threads
       cli_args = 'Problem/restart_file_base=kernel_restartable_out_threads_cp/0005'
-      expect_err = 'Cannot restart using a different number of threads'
+      expect_err = 'The number of threads is not consistent'
       max_parallel = 1
       detail = "restarted with a different number threads."
     []

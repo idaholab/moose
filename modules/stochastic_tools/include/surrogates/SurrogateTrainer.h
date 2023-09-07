@@ -15,7 +15,6 @@
 #include "RestartableModelInterface.h"
 
 #include "Sampler.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 #include "SurrogateModelInterface.h"
 #include "MooseRandom.h"

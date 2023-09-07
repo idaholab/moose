@@ -11,7 +11,6 @@
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
-#include "RestartableDataIO.h"
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
@@ -107,6 +106,7 @@
 #include "MortarUserObject.h"
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
+#include "Checkpoint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -166,10 +166,11 @@ FEProblemBase::validParams()
                         "EXPERIMENTAL: If true, a sub_app may use a "
                         "restart file instead of using of using the master "
                         "backup file");
-  params.addParam<bool>("skip_additional_restart_data",
-                        false,
-                        "True to skip additional data in equation system for restart. It is useful "
-                        "for starting a transient calculation with a steady-state solution");
+  params.addDeprecatedParam<bool>("skip_additional_restart_data",
+                                  false,
+                                  "True to skip additional data in equation system for restart.",
+                                  "This parameter is no longer used, as we do not load additional "
+                                  "vectors by default with restart");
   params.addParam<bool>("skip_nl_system_check",
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
@@ -286,9 +287,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian",
                               "Nonlinear system(s)");
-  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data "
-                              "allow_initial_conditions_with_restart",
-                              "Restart");
+  params.addParamNamesToGroup(
+      "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
   params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
@@ -305,7 +305,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
-    _eq(_mesh),
+    _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>(
+        "equation_systems", nullptr, _mesh)),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),
@@ -383,7 +384,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             : _app.errorOnJacobianNonzeroReallocation()),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
-    _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
@@ -439,9 +439,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _bnd_mat_side_cache.resize(n_threads);
   _interface_mat_side_cache.resize(n_threads);
 
-  _restart_io = std::make_unique<RestartableDataIO>(*this);
-
-  _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
   if (parameters.isParamSetByUser("coord_type"))
     setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
@@ -452,8 +450,17 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (isParamValid("restart_file_base"))
   {
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
-    restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
-    setRestartFile(restart_file_base);
+
+    // This check reverts to old behavior of providing "restart_file_base=" to mean
+    // don't restart... BISON currently relies on this. It could probably be removed.
+    // The new MooseUtils::convertLatestCheckpoint will error out if a checkpoint file
+    // is not found, which I think makes sense. Which means, without this, if you
+    // set "restart_file_base=", you'll get a "No checkpoint file found" error
+    if (restart_file_base.size())
+    {
+      restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
+      setRestartFile(restart_file_base);
+    }
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
@@ -643,10 +650,10 @@ FEProblemBase::getEvaluableElementRange()
 {
   if (!_evaluable_local_elem_range)
   {
-    std::vector<const DofMap *> dof_maps(_eq.n_systems());
-    for (const auto i : make_range(_eq.n_systems()))
+    std::vector<const DofMap *> dof_maps(es().n_systems());
+    for (const auto i : make_range(es().n_systems()))
     {
-      const auto & sys = _eq.get_system(i);
+      const auto & sys = es().get_system(i);
       dof_maps[i] = &sys.get_dof_map();
     }
     _evaluable_local_elem_range =
@@ -758,29 +765,22 @@ FEProblemBase::initialSetup()
   // it may be necessary later.
   addAnyRedistributers();
 
-  // Restart/recovery code
-
-  if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
+  if (_app.isRestarting() || _app.isRecovering() || _force_restart)
   {
-    if (_app.getRestartRecoverFileSuffix() == "cpa")
-      _restart_io->useAsciiExtension();
-  }
+    // Only load all of the vectors if we're recovering
+    _req.set().setLoadAllVectors(_app.isRecovering());
 
-  if (_app.isRestarting() || _app.isRecovering())
-  {
-    if (_app.isUltimateMaster() || _force_restart)
-    {
-      TIME_SECTION("restartFromFile", 3, "Restarting From File");
+    TIME_SECTION("restore", 3, "Restoring from backup");
 
-      _restart_io->readRestartableDataHeader(true);
-      _restart_io->restartEquationSystemsObject();
+    // We could have a cached backup when this app is a sub-app and has been given a Backup
+    if (!_app.hasInitialBackup())
+      _app.restore(_app.restartFolderBase(_app.getRestartRecoverFileBase()), _app.isRestarting());
+    else
+      _app.restoreFromInitialBackup(_app.isRestarting());
 
-      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
-
-      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-          _neighbor_material_props.hasStatefulProperties())
-        _has_initialized_stateful = true;
-    }
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+        _neighbor_material_props.hasStatefulProperties())
+      _has_initialized_stateful = true;
   }
   else
   {
@@ -1014,38 +1014,6 @@ FEProblemBase::initialSetup()
     }
   }
 
-  // Restore for MultiApps (this app is a sub-app and has been given a Backup
-  // from the primary app)
-  //
-  // We would prefer that this is further up where the main app restore is, but
-  // currently the MultiApp recover doesn't use a more featureful system reload,
-  // and instead just saves and loads vectors directly. This isn't flexible and
-  // leads to lots of issues where we try to load into vectors that haven't been
-  // declared yet (because they happen between this call and the primary app
-  // load, in things like the system's initial setup). #24510 will unify the
-  // primary and multiapp loads by using a more flexible system load that will
-  // initialized vectors that haven't been declared yet if needed
-  if ((_app.isRestarting() || _app.isRecovering()) && _app.hasCachedBackup())
-  {
-    _app.restoreCachedBackup();
-
-    // We may have just clobbered initial conditions that were explicitly set
-    // In a _restart_ scenario it is completely valid to specify new initial conditions
-    // for some of the variables which should override what's coming from the restart file
-    //
-    // NOTE: we don't need to do this for the primary app because the primary app restore
-    // call is much further up and happens before ICs
-    if (!_app.isRecovering())
-    {
-      TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-        _ics.initialSetup(tid);
-      _scalar_ics.sort();
-      projectSolution();
-    }
-  }
-
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
   // has been restored
 
@@ -1223,6 +1191,10 @@ FEProblemBase::initialSetup()
   // Perform Reporter get/declare check
   _reporter_data.check();
 
+  // We do this late to allow objects to get late restartable data
+  if (_app.isRestarting() || _app.isRecovering() || _force_restart)
+    _app.finalizeRestore();
+
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
 
@@ -1291,7 +1263,7 @@ FEProblemBase::timestepSetup()
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
     //     we're ready to update the sparsity pattern
-    _eq.reinit_systems();
+    es().reinit_systems();
   }
 
   if (_line_search)
@@ -4508,7 +4480,7 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed
   if (needs_reinit)
   {
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done
-    _eq.reinit();
+    es().reinit();
 
     if (_displaced_mesh)
       _displaced_problem->es().reinit();
@@ -5615,7 +5587,7 @@ FEProblemBase::init()
 
   {
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
-    _eq.init();
+    es().init();
   }
 
   for (auto & nl : _nl)
@@ -7028,7 +7000,7 @@ FEProblemBase::adaptMesh()
   // We're done with all intermediate changes; now get systems ready
   // for real if necessary.
   if (mesh_changed)
-    _eq.reinit_systems();
+    es().reinit_systems();
 
   return mesh_changed;
 }
@@ -7114,9 +7086,9 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // If we're just going to alter the mesh again, all we need to
   // handle here is AMR and projections, not full system reinit
   if (intermediate_change)
-    _eq.reinit_solutions();
+    es().reinit_solutions();
   else
-    _eq.reinit();
+    es().reinit();
 
   // Updating MooseMesh first breaks other adaptivity code, unless we
   // then *again* update the MooseMesh caches.  E.g. the definition of

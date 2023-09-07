@@ -8,7 +8,6 @@
 
 [Problem]
   restart_file_base = steady_with_2subs_out_cp/LATEST
-  skip_additional_restart_data = true
 []
 
 [AuxVariables]

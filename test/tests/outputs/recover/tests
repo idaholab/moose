@@ -4,7 +4,10 @@
     # Run simple transient problem to 5 time steps, with checkpoint files enabled
     type = 'CheckFiles'
     input = 'recover1.i'
-    check_files = 'test_recover_dir_cp/0005.xdr'
+    check_files = 'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
+                  'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/header '
+                  'test_recover_dir_cp/0005-restart-0.rd/data '
+                  'test_recover_dir_cp/0005-restart-0.rd/header'
     delete_output_folders = false
     cli_args = 'Executioner/num_steps=5'
 
@@ -29,7 +32,10 @@
     # Run simple transient problem to 5 time steps, with checkpoint files enabled
     type = 'CheckFiles'
     input = 'recover1.i'
-    check_files = 'test_recover_dir_cp/0005.xdr'
+    check_files = 'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
+                  'test_recover_dir_cp/0005-mesh.cpr/meta_data_mesh.rd/header '
+                  'test_recover_dir_cp/0005-restart-0.rd/data '
+                  'test_recover_dir_cp/0005-restart-0.rd/header'
     cli_args = 'Executioner/num_steps=5'
     delete_output_before_running = true
     prereq = part2

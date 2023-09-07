@@ -32,6 +32,7 @@
 #include "Attributes.h"
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
+#include "RestartableEquationSystems.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -52,7 +53,6 @@ class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
-class RestartableDataIO;
 class Assembly;
 class JacobianBlock;
 class Control;
@@ -148,7 +148,7 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
-  virtual EquationSystems & es() override { return _eq; }
+  virtual EquationSystems & es() override { return _req.set().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
@@ -1712,11 +1712,6 @@ public:
    */
   bool needsPreviousNewtonIteration() const;
 
-  /**
-   * Whether or not to skip loading the additional data when restarting
-   */
-  bool skipAdditionalRestartData() const { return _skip_additional_restart_data; }
-
   ///@{
   /**
    * Convenience zeros
@@ -2114,7 +2109,12 @@ protected:
   void createTagSolutions();
 
   MooseMesh & _mesh;
-  EquationSystems _eq;
+
+private:
+  /// The EquationSystems object, wrapped for restart
+  Restartable::ManagedValue<RestartableEquationSystems> _req;
+
+protected:
   bool _initialized;
 
   std::set<TagID> _fe_vector_tags;
@@ -2187,6 +2187,7 @@ protected:
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
+protected:
   // material properties
   MaterialPropertyRegistry _material_prop_registry;
   MaterialPropertyStorage & _material_props;
@@ -2338,9 +2339,6 @@ protected:
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
 
-  /// Object responsible for restart (read/write)
-  std::unique_ptr<RestartableDataIO> _restart_io;
-
   /// true if the Jacobian is constant
   bool _const_jacobian;
 
@@ -2472,7 +2470,6 @@ private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;
-  const bool _skip_additional_restart_data;
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
@@ -2501,7 +2498,6 @@ private:
   friend class NonlinearSystemBase;
   friend class MooseEigenSystem;
   friend class Resurrector;
-  friend class RestartableDataIO;
   friend class Restartable;
   friend class DisplacedProblem;
 

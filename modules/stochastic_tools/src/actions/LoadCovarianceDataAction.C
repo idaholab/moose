@@ -10,7 +10,6 @@
 #include "LoadCovarianceDataAction.h"
 #include "GaussianProcess.h"
 #include "FEProblem.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 
 registerMooseAction("StochasticToolsApp", LoadCovarianceDataAction, "load_covariance_data");

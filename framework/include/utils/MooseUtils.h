@@ -92,11 +92,9 @@ std::string docsDir(const std::string & app_name);
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
 
 /**
- * Replaces "LATEST" placeholders with the latest checkpoint file name.  If base_only is true, then
- * only return the base-name of the checkpoint directory - otherwise, a full mesh
- * checkpoint file path is returned.
+ * Replaces "LATEST" placeholders with the latest checkpoint file name.
  */
-std::string convertLatestCheckpoint(std::string orig, bool base_only = true);
+std::string convertLatestCheckpoint(std::string orig);
 
 /// Computes and returns the Levenshtein distance between strings s1 and s2.
 int levenshteinDist(const std::string & s1, const std::string & s2);
@@ -706,17 +704,17 @@ bool pathIsDirectory(const std::string & path);
  * the routine. The names returned will be the paths to the files relative to the current
  * directory.
  * @param directory_list The list of directories to retrieve files from.
+ * @param file_only Whether or not to list only files
  */
-std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list);
+std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list,
+                                      const bool files_only = true);
 
 /**
- * Returns the most recent checkpoint or mesh file given a list of files.
+ * Returns the most recent checkpoint prefix (the four numbers at the begining)
  * If a suitable file isn't found the empty string is returned
  * @param checkpoint_files the list of files to analyze
  */
-std::string getLatestMeshCheckpointFile(const std::list<std::string> & checkpoint_files);
-
-std::string getLatestAppCheckpointFileBase(const std::list<std::string> & checkpoint_files);
+std::string getLatestCheckpointFilePrefix(const std::list<std::string> & checkpoint_files);
 
 /*
  * Checks to see if a string matches a search string

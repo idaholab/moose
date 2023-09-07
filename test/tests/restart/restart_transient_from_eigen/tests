@@ -1,0 +1,19 @@
+[Tests]
+  design = "Restartable.md"
+  issues = '#21011'
+
+  [eigen_store_solution]
+    type = 'Exodiff'
+    input = 'eigen.i'
+    exodiff = 'eigen_out.e'
+    requirement = 'The system shall support storing the solution of an eigenvalue solve such that it can be restarted later into a non-eigenvalue solve.'
+  []
+  [transient_from_eigen_solution]
+    type = 'Exodiff'
+    input = 'transient_from_eigen.i'
+    exodiff = 'transient_from_eigen_out.e'
+    exodiff_opts = '-steps -1::'
+    prereq = 'eigen_store_solution'
+    requirement = 'The system shall support loading the restarted solution from an eigenvalue solve into a transient solve.'
+  []
+[]

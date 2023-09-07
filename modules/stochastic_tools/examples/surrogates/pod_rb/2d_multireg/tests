@@ -6,7 +6,7 @@
     type = CheckFiles
     input = trainer.i
     allow_test_objects = true
-    check_files = 'trainer_out_pod_rb.rd'
+    check_files = 'trainer_out_pod_rb.rd/data'
     cli_args = "Samplers/sample/num_rows=2
                 sub:halfa=1
                 sub:fulla=2"

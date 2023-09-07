@@ -139,7 +139,7 @@ public:
    * Therefore, this function loads the data directly into the container to avoid this problem
    * and unnecessary copies.
    */
-  void load(std::istream & stream) override final;
+  void loadInternal(std::istream & stream) override final;
 };
 
 template <typename T>
@@ -192,7 +192,7 @@ ReporterState<T>::copyValuesBack()
 
 template <typename T>
 void
-ReporterState<T>::load(std::istream & stream)
+ReporterState<T>::loadInternal(std::istream & stream)
 {
   // Read the container size
   unsigned int size = 0;

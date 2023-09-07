@@ -61,18 +61,6 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
                    void * context);
 
 /**
- * IO Methods for restart, backup and restore.
- */
-template <>
-void dataStore(std::ostream & stream, SystemBase & system_base, void * context);
-
-/**
- * IO Methods for restart, backup and restore.
- */
-template <>
-void dataLoad(std::istream & stream, SystemBase & system_base, void * context);
-
-/**
  * Information about variables that will be copied
  */
 struct VarCopyInfo

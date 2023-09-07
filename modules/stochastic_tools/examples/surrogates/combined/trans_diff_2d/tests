@@ -28,9 +28,9 @@
                   runner:Mesh/msh/nx=10
                   runner:Mesh/msh/ny=10
                   runner:Executioner/num_steps=2"
-      check_files = 'trans_diff_trainer_out_np_max.rd trans_diff_trainer_out_np_min.rd
-                     trans_diff_trainer_out_pc_max.rd trans_diff_trainer_out_pc_min.rd
-                     trans_diff_trainer_out_pr_max.rd trans_diff_trainer_out_pr_min.rd'
+      check_files = 'trans_diff_trainer_out_np_max.rd/data trans_diff_trainer_out_np_min.rd/data
+                     trans_diff_trainer_out_pc_max.rd/data trans_diff_trainer_out_pc_min.rd/data
+                     trans_diff_trainer_out_pr_max.rd/data trans_diff_trainer_out_pr_min.rd/data'
 
       detail = "then training surrogate models "
     []

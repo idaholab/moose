@@ -7,7 +7,7 @@
     [train]
       type = CheckFiles
       input = train.i
-      check_files = 'train_out_train.rd'
+      check_files = 'train_out_train.rd/data'
       allow_test_objects = true
       detail = 'training using known 3D data '
     []

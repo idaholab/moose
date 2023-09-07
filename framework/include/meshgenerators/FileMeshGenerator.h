@@ -23,6 +23,23 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  /**
+   * Helper for deducing a checkpoint file given the path.
+   *
+   * We pick one of the following:
+   * - If the path just exists, use it
+   * - If not, but a path with the new suffix exists instead (i.e.,
+   *   /path/to/xxxx_mesh.cpr was provided but /path/to/xxxx-mesh.cpr
+   *   exists), use that path and provide a param warning via \p object
+   * - If not, but it is LATEST and we can find a latest checkpoint,
+   *   use the latest checkpoint
+   *
+   * This is a static method because FileMesh needs the same thing. And
+   * eventually FileMesh should be axed in favor of this.
+   */
+  static std::string deduceCheckpointPath(const MooseObject & object,
+                                          const std::string & file_name);
+
 protected:
   /// the path/name of the file containing the mesh
   const MeshFileName & _file_name;

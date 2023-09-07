@@ -9,138 +9,77 @@
 
 #pragma once
 
-// MOOSE includes
-#include "DataIO.h"
-#include "RestartableData.h"
 #include "PerfGraphInterface.h"
 
-// C++ includes
-#include <sstream>
-#include <string>
-#include <list>
+#include "libmesh/parallel_object.h"
 
-// Forward declarations
-class Backup;
-class FEProblemBase;
+#include <vector>
+#include <variant>
+#include <filesystem>
+
+class RestartableDataMap;
 
 /**
  * Class for doing restart.
  *
  * It takes care of writing and reading the restart files.
  */
-class RestartableDataIO : public PerfGraphInterface
+class RestartableDataIO : public PerfGraphInterface, public libMesh::ParallelObject
 {
 public:
-  RestartableDataIO(FEProblemBase & fe_problem);
-
-  RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_problem_ptr = nullptr);
-
-  virtual ~RestartableDataIO() = default;
+  RestartableDataIO(MooseApp & app, RestartableDataMap & data);
+  RestartableDataIO(MooseApp & app, std::vector<RestartableDataMap> & data);
 
   /**
-   * Tell the Resurrector to use Ascii formatted data instead of the default binary format.
+   * @return The common extension for restartable data folders
    */
-  void useAsciiExtension();
+  static const std::string & getRestartableExt();
+  /**
+   * @return The filename for the restartable data
+   */
+  static const std::string & restartableDataFile();
+  /**
+   * @return The filename for the restartable header
+   */
+  static const std::string & restartableHeaderFile();
 
   /**
-   * Perform a restart of the libMesh Equation Systems from a file.
-   */
-  void restartEquationSystemsObject();
-
-  /**
-   * Write out the restartable data.
-   */
-  void writeRestartableData(const std::string & base_file_name,
-                            const RestartableDataMap & restartable_datas);
-
-  void writeRestartableDataPerProc(const std::string & base_file_name,
-                                   const RestartableDataMaps & restartable_data);
-
-  /**
-   * Read restartable data header to verify that we are restarting on the correct number of
-   * processors and threads.
-   */
-  bool readRestartableDataHeader(bool per_proc_id, const std::string & suffix = "");
-  bool readRestartableDataHeaderFromFile(const std::string & recover_file, bool per_proc_id);
-
-  /**
-   * Read the restartable data.
-   */
-  void readRestartableData(const RestartableDataMaps & restartable_datas,
-                           const DataNames & _recoverable_data_names);
-  void readRestartableData(const RestartableDataMap & restartable_data,
-                           const DataNames & _recoverable_data_names,
-                           unsigned int tid = 0);
-  /**
-   * Create a Backup for the current system.
-   */
-  std::shared_ptr<Backup> createBackup();
-
-  /**
-   * Restore a Backup for the current system.
-   */
-  void restoreBackup(std::shared_ptr<Backup> backup, bool for_restart = false);
-
-  std::string getESFileExtension(bool is_binary) const
-  {
-    return is_binary ? ES_BINARY_EXT : ES_ASCII_EXT;
-  }
-
-  std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
-
-  ///@{
-  /*
-   * Enable/Disable errors to allow meta data to be created/loaded on different number or processors
+   *  @return The path to the restartable data folder with base \p folder_base
    *
-   * See LoadSurrogateModelAction for use case
+   * This just appends .rd
    */
-  void setErrorOnLoadWithDifferentNumberOfProcessors(bool value);
-  void setErrorOnLoadWithDifferentNumberOfThreads(bool value);
-  ///@}
-
-private:
+  static std::filesystem::path restartableDataFolder(const std::filesystem::path & folder_base);
   /**
-   * Serializes the data into the stream object.
+   * @return The path to the restartable data file with base \p folder_base
+   *
+   * Does not append .rd to the folder base
    */
-  void serializeRestartableData(const RestartableDataMap & restartable_data, std::ostream & stream);
-
+  static std::filesystem::path restartableDataFile(const std::filesystem::path & folder_base);
   /**
-   * Deserializes the data from the stream object.
+   * @return The path to the restartable header file with base \p folder_base
+   *
+   * Does not append .rd to the folder base
    */
-  void deserializeRestartableData(const RestartableDataMap & restartable_data,
-                                  std::istream & stream,
-                                  const DataNames & filter_names);
+  static std::filesystem::path restartableHeaderFile(const std::filesystem::path & folder_base);
 
+protected:
   /**
-   * Serializes the data for the Systems in FEProblemBase
+   * @return The restartable data for thread \p tid
+   *
+   * This exists so that we can support threaded and non-threaded data in _data
    */
-  void serializeSystems(std::ostream & stream);
-
+  RestartableDataMap & currentData(const THREAD_ID tid);
   /**
-   * Deserializes the data for the Systems in FEProblemBase
+   * @return The size of _data
    */
-  void deserializeSystems(std::istream & stream);
+  std::size_t dataSize() const;
 
-  /// A reference to the MooseApp object for retrieving restartable data stores and filters
-  MooseApp & _moose_app;
+  /// The data we wish to act on
+  /// This is a variant so that we can act on threaded and non-threaded data
+  const std::variant<RestartableDataMap *, std::vector<RestartableDataMap> *> _data;
 
-  /// Pointer to the FEProblemBase when serializing/deserializing system data
-  FEProblemBase * _fe_problem_ptr;
-
-  /// Boolean to indicate that the restartable data header has been read
-  bool _is_header_read;
-
-  /// name of the file extension that we restart from
-  bool _use_binary_ext;
-
-  /// A vector of file handles, one per thread
-  std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;
-
-  static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
-  static constexpr auto ES_BINARY_EXT = ".xdr";
-  static constexpr auto ES_ASCII_EXT = ".xda";
-
-  /// Error check controls
-  bool _error_on_different_number_of_processors = true;
-  bool _error_on_different_number_of_threads = true;
+  /// The current version for the backup file
+  static const unsigned int CURRENT_BACKUP_FILE_VERSION;
+  /// The type to used for comparing hash codes (sanity checking)
+  typedef int COMPARE_HASH_CODE_TYPE;
 };

@@ -15,16 +15,16 @@
     type = CheckFiles
     input = poly_chaos_train_uniform.i
     cli_args = 'Samplers/sample/order=1'
-    check_files = 'poly_chaos_train_uniform_out_dispx_center_inner.rd
-                   poly_chaos_train_uniform_out_dispx_center_outer.rd
-                   poly_chaos_train_uniform_out_dispx_end_inner.rd
-                   poly_chaos_train_uniform_out_dispx_end_outer.rd
-                   poly_chaos_train_uniform_out_dispz_inner.rd
-                   poly_chaos_train_uniform_out_dispz_outer.rd
-                   poly_chaos_train_uniform_out_temp_center_inner.rd
-                   poly_chaos_train_uniform_out_temp_center_outer.rd
-                   poly_chaos_train_uniform_out_temp_end_inner.rd
-                   poly_chaos_train_uniform_out_temp_end_outer.rd'
+    check_files = 'poly_chaos_train_uniform_out_dispx_center_inner.rd/data
+                   poly_chaos_train_uniform_out_dispx_center_outer.rd/data
+                   poly_chaos_train_uniform_out_dispx_end_inner.rd/data
+                   poly_chaos_train_uniform_out_dispx_end_outer.rd/data
+                   poly_chaos_train_uniform_out_dispz_inner.rd/data
+                   poly_chaos_train_uniform_out_dispz_outer.rd/data
+                   poly_chaos_train_uniform_out_temp_center_inner.rd/data
+                   poly_chaos_train_uniform_out_temp_center_outer.rd/data
+                   poly_chaos_train_uniform_out_temp_end_inner.rd/data
+                   poly_chaos_train_uniform_out_temp_end_outer.rd/data'
     detail = "train a polynomial chaos surrogate, and "
   []
   [poly_chaos_uniform]

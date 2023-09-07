@@ -15,7 +15,7 @@
     requirement = 'The system shall be able to train a libtorch-based neural network.'
     type = CheckFiles
     input = train.i
-    check_files = 'train_out_train.rd mynet.pt'
+    check_files = 'train_out_train.rd/data mynet.pt'
     cli_args = "Trainers/train/read_from_file=false"
     allow_test_objects = true
     libtorch = true
@@ -43,7 +43,7 @@
     requirement = 'The system shall be able to train a libtorch-based neural network using a relative tolerance instead of fixed epoch number.'
     type = CheckFiles
     input = train.i
-    check_files = 'train_out_train.rd mynet.pt'
+    check_files = 'train_out_train.rd/data mynet.pt'
     cli_args = "Trainers/train/read_from_file=false Trainers/train/rel_loss_tol=0.1"
     allow_test_objects = true
     libtorch = true
@@ -53,7 +53,7 @@
     requirement = 'The system shall be able to train a libtorch-based neural network with standardized input and output parameters.'
     type = CheckFiles
     input = train.i
-    check_files = 'standardized_train.rd mynet.pt'
+    check_files = 'standardized_train.rd/data mynet.pt'
     cli_args = "Trainers/train/read_from_file=false Trainers/train/standardize_input=true "
                "Trainers/train/standardize_output=true Outputs/file_base=standardized"
     allow_test_objects = true

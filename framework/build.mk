@@ -58,6 +58,12 @@ else
 endif
 endif
 
+# Give us that sweet std::filesystem (not needed on mac)
+# Hopefully this can go in libMesh one day
+ifneq ($(shell uname -s),Darwin)
+	libmesh_LDFLAGS += -lstdc++fs
+endif
+
 # Google Test relies on static construction of objects in test
 # compilation units to register those tests, but with some Linux
 # distributions (Ubuntu 21.04 for me; others in

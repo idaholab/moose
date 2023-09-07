@@ -149,7 +149,10 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
-        _apps[j]->restore(_batch_backup[_local_batch_app_index][j]);
+      {
+        _apps[j]->restore(std::move(_batch_backup[_local_batch_app_index][j]), false);
+        _apps[j]->finalizeRestore();
+      }
 
     SamplerFullSolveMultiApp::execBatchTransfers(to_transfers,
                                                  i,

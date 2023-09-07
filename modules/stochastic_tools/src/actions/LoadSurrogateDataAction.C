@@ -10,7 +10,6 @@
 #include "LoadSurrogateDataAction.h"
 #include "SurrogateModel.h"
 #include "FEProblem.h"
-#include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 
 registerMooseAction("StochasticToolsApp", LoadSurrogateDataAction, "load_surrogate_data");

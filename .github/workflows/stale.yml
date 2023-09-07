@@ -9,20 +9,19 @@ on:
   schedule:
   - cron: '36 5 * * *'
 
+permissions:
+  pull-requests: write
+
 jobs:
   stale:
-
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-
     steps:
-    - uses: actions/stale@v7
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-pr-message: 'This pull request has been automatically marked as stale because it has not had recent activity in the last 100 days. It will be closed in 7 days if no further activity occurs. Thank you for your contributions.'
-        stale-pr-label: 'stale'
-        days-before-pr-stale: 100
-        days-before-pr-close: 7
-        days-before-issue-stale: -1
-        operations-per-run: 100
+      - uses: actions/stale@v8
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-pr-message: 'This pull request has been automatically marked as stale because it has not had recent activity in the last 100 days. It will be closed in 7 days if no further activity occurs. Thank you for your contributions.'
+          stale-pr-label: 'stale'
+          days-before-pr-stale: 100
+          days-before-pr-close: 7
+          days-before-issue-stale: -1
+          operations-per-run: 100

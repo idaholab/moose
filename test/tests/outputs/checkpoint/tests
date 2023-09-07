@@ -9,30 +9,34 @@
     [test_files]
       type = 'CheckFiles'
       input = 'checkpoint_interval.i'
-      check_files =      'checkpoint_interval_out_cp/0006.xdr '
-                         'checkpoint_interval_out_cp/0006.xdr.0000 '
-                         'checkpoint_interval_out_cp/0006.rd-0 '
-                         'checkpoint_interval_out_cp/0006_mesh.cpr/1/header.cpr '
-                         'checkpoint_interval_out_cp/0009.xdr '
-                         'checkpoint_interval_out_cp/0009.xdr.0000 '
-                         'checkpoint_interval_out_cp/0009.rd-0 '
-                         'checkpoint_interval_out_cp/0009_mesh.cpr/1/header.cpr'
-      check_not_exists = 'checkpoint_interval_out_cp/0003.xdr '
-                          'checkpoint_interval_out_cp/0003.xdr.0000 '
-                          'checkpoint_interval_out_cp/0003.rd-0 '
-                          'checkpoint_interval_out_cp/0003_mesh.cpr/1/header.cpr '
-                          'checkpoint_interval_out_cp/0007.xdr '
-                          'checkpoint_interval_out_cp/0007.xdr.0000 '
-                          'checkpoint_interval_out_cp/0007.rd-0 '
-                          'checkpoint_interval_out_cp/0007_mesh.cpr/1/header.cpr '
-                          'checkpoint_interval_out_cp/0008.xdr '
-                          'checkpoint_interval_out_cp/0008.xdr.0000 '
-                          'checkpoint_interval_out_cp/0008.rd-0 '
-                          'checkpoint_interval_out_cp/0008_mesh.cpr/1/header.cpr '
-                          'checkpoint_interval_out_cp/0010.xdr '
-                          'checkpoint_interval_out_cp/0010.xdr.0000 '
-                          'checkpoint_interval_out_cp/0010.rd-0 '
-                          'checkpoint_interval_out_cp/0010_mesh.cpr/1/header.cpr'
+      check_files =      'checkpoint_interval_out_cp/0006-restart-0.rd/data '
+                         'checkpoint_interval_out_cp/0006-restart-0.rd/header '
+                         'checkpoint_interval_out_cp/0006-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0006-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0006-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_interval_out_cp/0006-mesh.cpr/meta_data_mesh.rd/header '
+                         'checkpoint_interval_out_cp/0009-restart-0.rd/data '
+                         'checkpoint_interval_out_cp/0009-restart-0.rd/header '
+                         'checkpoint_interval_out_cp/0009-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0009-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0009-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_interval_out_cp/0009-mesh.cpr/meta_data_mesh.rd/header'
+      check_not_exists = 'checkpoint_interval_out_cp/0003-restart-0.rd '
+                         'checkpoint_interval_out_cp/0003-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0003-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0003-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_interval_out_cp/0007-restart-0.rd '
+                         'checkpoint_interval_out_cp/0007-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0007-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0007-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_interval_out_cp/0008-restart-0.rd '
+                         'checkpoint_interval_out_cp/0008-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0008-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0008-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_interval_out_cp/0010-restart-0.rd '
+                         'checkpoint_interval_out_cp/0010-mesh.cpr/1/header.cpr '
+                         'checkpoint_interval_out_cp/0010-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_interval_out_cp/0010-mesh.cpr/meta_data_mesh.rd'
       recover = false
 
       # The suffixes of these files change when running in parallel or with threads
@@ -47,7 +51,10 @@
       type = 'Exodiff'
       input = 'checkpoint_interval.i'
       exodiff = 'checkpoint_interval_out.e'
+      delete_output_before_running = false
       prereq = 'interval/test_files'
+      cli_args = '--recover'
+      expect_out = 'Using checkpoint_interval_out_cp/0009 for recovery'
       recover = false
       max_parallel = 1
       max_threads = 1
@@ -63,26 +70,30 @@
       cli_args = 'Outputs/checkpoint=true --half-transient'
       recover = false
 
-      check_files =      'checkpoint_out_cp/0004.xdr '
-                         'checkpoint_out_cp/0004.xdr.0000 '
-                         'checkpoint_out_cp/0004.rd-0 '
-                         'checkpoint_out_cp/0004_mesh.cpr/1/header.cpr '
-                         'checkpoint_out_cp/0005.xdr '
-                         'checkpoint_out_cp/0005.xdr.0000 '
-                         'checkpoint_out_cp/0005.rd-0 '
-                         'checkpoint_out_cp/0005_mesh.cpr/1/header.cpr'
-      check_not_exists = 'checkpoint_out_cp/0001.xdr '
-                         'checkpoint_out_cp/0001.xdr.0000 '
-                         'checkpoint_out_cp/0001.rd-0 '
-                         'checkpoint_out_cp/0001_mesh.cpr/1/header.cpr '
-                         'checkpoint_out_cp/0002.xdr '
-                         'checkpoint_out_cp/0002.xdr.0000 '
-                         'checkpoint_out_cp/0002.rd-0 '
-                         'checkpoint_out_cp/0002_mesh.cpr/1/header.cpr '
-                         'checkpoint_out_cp/0003.xdr '
-                         'checkpoint_out_cp/0003.xdr.0000 '
-                         'checkpoint_out_cp/0003.rd-0 '
-                         'checkpoint_out_cp/0003_mesh.cpr/1/header.cpr'
+      check_files =      'checkpoint_out_cp/0004-restart-0.rd/data '
+                         'checkpoint_out_cp/0004-restart-0.rd/header '
+                         'checkpoint_out_cp/0004-mesh.cpr/1/header.cpr '
+                         'checkpoint_out_cp/0004-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_out_cp/0004-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_out_cp/0004-mesh.cpr/meta_data_mesh.rd/header '
+                         'checkpoint_out_cp/0005-restart-0.rd/data '
+                         'checkpoint_out_cp/0005-restart-0.rd/header '
+                         'checkpoint_out_cp/0005-mesh.cpr/1/header.cpr '
+                         'checkpoint_out_cp/0005-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_out_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_out_cp/0005-mesh.cpr/meta_data_mesh.rd/header'
+      check_not_exists = 'checkpoint_out_cp/0001-restart-0.rd '
+                         'checkpoint_out_cp/0001-mesh.cpr/1/header.cpr '
+                         'checkpoint_out_cp/0001-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_out_cp/0001-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_out_cp/0002-restart-0.rd '
+                         'checkpoint_out_cp/0002-mesh.cpr/1/header.cpr '
+                         'checkpoint_out_cp/0002-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_out_cp/0002-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_out_cp/0003-restart-0.rd '
+                         'checkpoint_out_cp/0003-mesh.cpr/1/header.cpr '
+                         'checkpoint_out_cp/0003-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_out_cp/0003-mesh.cpr/meta_data_mesh.rd'
 
       # The suffixes of these files change when running in parallel or with threads
       max_parallel = 1
@@ -100,6 +111,8 @@
       max_threads = 1
       prereq = 'default/recover_half_transient'
       delete_output_before_running = false
+      cli_args = '--recover'
+      expect_out = 'Using checkpoint_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
   []
@@ -114,32 +127,34 @@
       recover = false
       detail = "at every timestep while maintaining the most recent two files and"
 
-      check_files =      'checkpoint_block_out_cp/0004.xdr '
-                         'checkpoint_block_out_cp/0004.xdr.0000 '
-                         'checkpoint_block_out_cp/0004.rd-0 '
-                         'checkpoint_block_out_cp/0004_mesh.cpr/1/header.cpr '
-                         'checkpoint_block_out_cp/0005.xdr '
-                         'checkpoint_block_out_cp/0005.xdr.0000 '
-                         'checkpoint_block_out_cp/0005.rd-0 '
-                         'checkpoint_block_out_cp/0005_mesh.cpr/1/header.cpr'
-      check_not_exists = 'checkpoint_block_out_cp/0001.xdr '
-                         'checkpoint_block_out_cp/0001.xdr.0000 '
-                         'checkpoint_block_out_cp/0001.rd-0 '
-                         'checkpoint_block_out_cp/0001_mesh.cpr/1/header.cpr '
-                         'checkpoint_block_out_cp/0002.xdr '
-                         'checkpoint_block_out_cp/0002.xdr.0000 '
-                         'checkpoint_block_out_cp/0002.rd-0 '
-                         'checkpoint_block_out_cp/0002_mesh.cpr/1/header.cpr '
-                         'checkpoint_block_out_cp/0003.xdr '
-                         'checkpoint_block_out_cp/0003.xdr.0000 '
-                         'checkpoint_block_out_cp/0003.rd-0 '
-                         'checkpoint_block_out_cp/0003_mesh.cpr/1/header.cpr'
+      check_files =      'checkpoint_block_out_cp/0004-restart-0.rd/data '
+                         'checkpoint_block_out_cp/0004-restart-0.rd/header '
+                         'checkpoint_block_out_cp/0004-mesh.cpr/1/header.cpr '
+                         'checkpoint_block_out_cp/0004-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_block_out_cp/0004-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_block_out_cp/0004-mesh.cpr/meta_data_mesh.rd/header '
+                         'checkpoint_block_out_cp/0005-restart-0.rd/data '
+                         'checkpoint_block_out_cp/0005-restart-0.rd/header '
+                         'checkpoint_block_out_cp/0005-mesh.cpr/1/header.cpr '
+                         'checkpoint_block_out_cp/0005-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_block_out_cp/0005-mesh.cpr/meta_data_mesh.rd/data '
+                         'checkpoint_block_out_cp/0005-mesh.cpr/meta_data_mesh.rd/header'
+      check_not_exists = 'checkpoint_block_out_cp/0001-restart-0.rd '
+                         'checkpoint_block_out_cp/0001-mesh.cpr/1/header.cpr '
+                         'checkpoint_block_out_cp/0001-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_block_out_cp/0001-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_block_out_cp/0002-restart-0.rd '
+                         'checkpoint_block_out_cp/0002-mesh.cpr/1/header.cpr '
+                         'checkpoint_block_out_cp/0002-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_block_out_cp/0002-mesh.cpr/meta_data_mesh.rd '
+                         'checkpoint_block_out_cp/0003-restart-0.rd '
+                         'checkpoint_block_out_cp/0003-mesh.cpr/1/header.cpr '
+                         'checkpoint_block_out_cp/0003-mesh.cpr/1/split-1-0.cpr '
+                         'checkpoint_block_out_cp/0003-mesh.cpr/meta_data_mesh.rd'
 
       # The suffixes of these files change when running in parallel or with threads
       max_parallel = 1
       max_threads = 1
-
-
     []
     [recover_with_checkpoint_block]
       # Gold for this test was created using checkpoint_block.i without any recover options
@@ -152,6 +167,7 @@
       max_threads = 1
       delete_output_before_running = false
       prereq = 'block/recover_with_checkpoint_block_half_transient'
+      expect_out = 'Using checkpoint_block_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
   []

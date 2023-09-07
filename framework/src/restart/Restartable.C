@@ -48,12 +48,11 @@ Restartable::Restartable(MooseApp & moose_app,
 }
 
 RestartableDataValue &
-Restartable::registerRestartableDataOnApp(const std::string & name,
-                                          std::unique_ptr<RestartableDataValue> data,
+Restartable::registerRestartableDataOnApp(std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid) const
 {
   return _restartable_app.registerRestartableData(
-      name, std::move(data), tid, _restartable_read_only, _metaname);
+      std::move(data), tid, _restartable_read_only, _metaname);
 }
 
 void

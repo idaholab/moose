@@ -7,7 +7,7 @@
     [uniform]
       type = CheckFiles
       input = uniform_train.i
-      check_files = 'uniform_train_pc_out_pc_max.rd uniform_train_pr_out_pr_max.rd'
+      check_files = 'uniform_train_pc_out_pc_max.rd/data uniform_train_pr_out_pr_max.rd/data'
       cli_args = "Samplers/pc_sampler/order=1
                   Samplers/pr_sampler/num_rows=6
                   Trainers/pc_max/order=1
@@ -20,7 +20,7 @@
     [normal]
       type = CheckFiles
       input = normal_train.i
-      check_files = 'normal_train_pc_out_pc_max.rd normal_train_pr_out_pr_max.rd'
+      check_files = 'normal_train_pc_out_pc_max.rd/data normal_train_pr_out_pr_max.rd/data'
       cli_args = "Samplers/pc_sampler/order=1
                   Samplers/pr_sampler/num_rows=6
                   Trainers/pc_max/order=1

@@ -1,5 +1,5 @@
 [Mesh]
-  file = new_dt_out_cp/0010_mesh.cpr
+  file = new_dt_out_cp/0010-mesh.cpr
 []
 
 [Variables]
