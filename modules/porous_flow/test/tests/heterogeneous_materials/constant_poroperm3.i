@@ -11,6 +11,10 @@
   gravity = '0 0 -10'
 []
 
+[Problem]
+  allow_initial_conditions_with_restart = true
+[]
+
 [Variables]
   [ppwater]
     initial_condition = 1e6

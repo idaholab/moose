@@ -2,6 +2,9 @@
   restart_file_base = parent_ss_checkpoint_cp/LATEST
   force_restart = true
   skip_additional_restart_data = true
+
+  # The auxiliary field has an initial condition
+  allow_initial_conditions_with_restart = true
 []
 
 [Mesh]
@@ -9,68 +12,68 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     # no initial condition for restart.
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./power]
+  [power]
     order = FIRST
     family = L2_LAGRANGE
     initial_condition = 350
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
-  [./heat_ie]
+  []
+  [heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
-  [../]
-  [./heat_source_fuel]
+  []
+  [heat_source_fuel]
     type = CoupledForce
     variable = temp
     v = 'power'
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = temp
     boundary = 'bottom top left right'
     value = 300
-  [../]
+  []
 []
 
 [Materials]
-  [./heat_material]
+  [heat_material]
     type = HeatConductionMaterial
     temp = temp
     specific_heat = 1000
     thermal_conductivity = 500
-  [../]
-  [./density]
+  []
+  [density]
     type = Density
     density = 2000
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./avg_temp]
+  [avg_temp]
     type = ElementAverageValue
     variable = temp
     execute_on = 'timestep_end'
-  [../]
-  [./avg_power]
+  []
+  [avg_power]
     type = ElementAverageValue
     variable = power
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,20 +102,20 @@
 []
 
 [MultiApps]
-  [./bison]
+  [bison]
     type = TransientMultiApp
     positions = '0 0 0'
     input_files = 'sub_tr.i'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./to_bison_mechanics]
+  [to_bison_mechanics]
     type = MultiAppProjectionTransfer
     to_multi_app = bison
     variable = temp
     source_variable = temp
     execute_on = 'timestep_end'
-  [../]
+  []
 []

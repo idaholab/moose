@@ -174,6 +174,10 @@ FEProblemBase::validParams()
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
+  params.addParam<bool>("allow_initial_conditions_with_restart",
+                        true,
+                        "True to allow the user to specify initial conditions when restarting. "
+                        "Initial conditions can override any restarted field");
 
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
   /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
@@ -282,7 +286,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
                               "ignore_zeros_in_jacobian",
                               "Nonlinear system(s)");
-  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data",
+  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data "
+                              "allow_initial_conditions_with_restart",
                               "Restart");
   params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
@@ -379,6 +384,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
+    _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
@@ -673,8 +679,8 @@ FEProblemBase::initialSetup()
 
   SubProblem::initialSetup();
 
-  mooseAssert(_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) <= 1,
-              "Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
+  if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
+    mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
 
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
@@ -3002,10 +3008,36 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
 
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
+  const std::string & var_name = parameters.get<VariableName>("variable");
+
+  // Forbid initial conditions on a restarted problem, as they would override the restart
+  if (!_allow_ics_during_restart)
+  {
+    std::string restart_method = "";
+    if (_app.isRestarting())
+      restart_method = "a checkpoint restart";
+    else if (_app.getExReaderForRestart())
+    {
+      std::vector<std::string> restarted_vars = _app.getExReaderForRestart()->get_elem_var_names();
+      const auto nodal_vars = _app.getExReaderForRestart()->get_nodal_var_names();
+      const auto global_vars = _app.getExReaderForRestart()->get_global_var_names();
+      restarted_vars.insert(restarted_vars.end(), nodal_vars.begin(), nodal_vars.end());
+      restarted_vars.insert(restarted_vars.end(), global_vars.begin(), global_vars.end());
+
+      if (std::find(restarted_vars.begin(), restarted_vars.end(), var_name) != restarted_vars.end())
+        restart_method = "an Exodus restart, by IC object '" + ic_name + "' for variable '" + name +
+                         "' that is also being restarted";
+    }
+    if (!restart_method.empty())
+      mooseError(
+          "Initial conditions have been specified during ",
+          restart_method,
+          ".\nThis is only allowed if you specify 'allow_initial_conditions_with_restart' to "
+          "the [Problem], as initial conditions can override restarted fields");
+  }
 
   parameters.set<SubProblem *>("_subproblem") = this;
 
-  const std::string & var_name = parameters.get<VariableName>("variable");
   // field IC
   if (hasVariable(var_name))
   {
@@ -3276,8 +3308,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       // FV, DG, etc.) - but currently we always do it.  Figure out how to fix
       // this.
 
-      // The name of the object being created, this is changed multiple times as objects are created
-      // below
+      // The name of the object being created, this is changed multiple times as objects are
+      // created below
       std::string object_name;
 
       // Create a copy of the supplied parameters to the setting for "_material_data_type" isn't
@@ -3314,7 +3346,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       const auto param_names =
           _app.getInputParameterWarehouse().getControllableParameterNames(name);
 
-      // Connect parameters of the primary Material object to those on the face and neighbor objects
+      // Connect parameters of the primary Material object to those on the face and neighbor
+      // objects
       for (const auto & p_name : param_names)
       {
         MooseObjectParameterName primary_name(MooseObjectName(base, material->name()),
@@ -3761,8 +3794,8 @@ FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
 bool
 FEProblemBase::hasPostprocessor(const std::string & name) const
 {
-  mooseDeprecated(
-      "FEProblemBase::hasPostprocssor is being removed; use hasPostprocessorValueByName instead.");
+  mooseDeprecated("FEProblemBase::hasPostprocssor is being removed; use "
+                  "hasPostprocessorValueByName instead.");
   return hasPostprocessorValueByName(name);
 }
 
@@ -4207,7 +4240,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     if (!userobjs.empty())
     {
       // non-nodal user objects have to be run separately before the nodal user objects run
-      // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
+      // because some nodal user objects (NodalNormal related) depend on elemental user objects
+      // :-(
       ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
@@ -4294,7 +4328,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                 // Otherwise we don't know what to do
                 mooseError(
                     "We caught an exception during computation of mortar user objects outside of "
-                    "residual evaluation. Unfortunately we don't know how to handle this case, so "
+                    "residual evaluation. Unfortunately we don't know how to handle this case, "
+                    "so "
                     "we will abort.");
             };
             try

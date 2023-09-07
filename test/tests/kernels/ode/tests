@@ -1,15 +1,16 @@
 [Tests]
-  [./test_expl]
+  [test_expl]
     type = 'Exodiff'
     input = 'ode_expl_test.i'
     exodiff = 'ode_expl_test_out.e'
 
     design = "ScalarKernels/index.md"
     issues = "#726"
-    requirement = "The system shall support solving Ordinary Differential Equations in explicit form."
-  [../]
+    requirement = "The system shall support solving Ordinary Differential Equations in explicit "
+                  "form."
+  []
 
-  [./test_sys_impl]
+  [test_sys_impl]
     type = 'Exodiff'
     input = 'ode_sys_impl_test.i'
     exodiff = 'ode_sys_impl_test_out.e'
@@ -18,10 +19,11 @@
 
     design = "ScalarKernels/index.md"
     issues = "#726"
-    requirement = "The system shall support solving Ordinary Differential Equations in implicit form."
-  [../]
+    requirement = "The system shall support solving Ordinary Differential Equations in implicit "
+                  "form."
+  []
 
-  [./test_parsed_sys_impl]
+  [test_parsed_sys_impl]
     # uses the same gold file as the previous test
     prereq = 'test_sys_impl'
     type = 'Exodiff'
@@ -32,20 +34,22 @@
 
     design = "ParsedODEKernel.md"
     issues = "#726"
-    requirement = "The system shall support solving ODEs specified within the input file through parsed expression syntax."
-  [../]
+    requirement = "The system shall support solving ODEs specified within the input file through "
+                  "parsed expression syntax."
+  []
 
-  [./test_parsed_pp]
+  [test_parsed_pp]
     type = 'CSVDiff'
     input = 'parsedode_pp_test.i'
     csvdiff = 'ode_pp_test_out.csv'
 
     design = "ParsedODEKernel.md"
     issues = "#14034"
-    requirement = "The system support coupling of postprocessor values in the parsed expression ODE kernel."
-  [../]
+    requirement = "The system support coupling of postprocessor values in the parsed expression ODE "
+                  "kernel."
+  []
 
-  [./test_coupled_ode_td]
+  [test_coupled_ode_td]
     type = 'CSVDiff'
     input = 'coupled_ode_td.i'
     csvdiff = 'coupled_ode_td_out.csv'
@@ -54,9 +58,9 @@
     design = "ScalarKernels/index.md"
     issues = "#726"
     requirement = "The system shall support solving Coupled Ordinary Differential Equations."
-  [../]
+  []
 
-  [./test_coupled_ode_td_var_ic_from_mesh]
+  [test_coupled_ode_td_var_ic_from_mesh]
     type = 'CSVDiff'
     input = 'coupled_ode_td_var_ic_from_mesh.i'
     csvdiff = 'coupled_ode_td_var_ic_from_mesh_out.csv'
@@ -64,10 +68,11 @@
 
     design = "SystemBase.md"
     issues = "#13040"
-    requirement = "The system shall allow scalar variable initial condition to be loaded from a file mesh"
-  [../]
+    requirement = "The system shall allow scalar variable initial condition to be loaded from a file "
+                  "mesh"
+  []
 
-  [./test_coupled_ode_td_auxvar_ic_from_mesh]
+  [test_coupled_ode_td_auxvar_ic_from_mesh]
     type = 'CSVDiff'
     input = 'coupled_ode_td_auxvar_ic_from_mesh.i'
     csvdiff = 'coupled_ode_td_auxvar_ic_from_mesh_out.csv'
@@ -75,6 +80,7 @@
 
     design = "SystemBase.md"
     issues = "#13040"
-    requirement = "The system shall allow auxscalar variable initial condition to be loaded from a file mesh"
-  [../]
+    requirement = "The system shall allow auxscalar variable initial condition to be loaded from a "
+                  "file mesh"
+  []
 []

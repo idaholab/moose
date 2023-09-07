@@ -6,50 +6,50 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./nn]
+  [nn]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nn]
+  [nn]
     type = SolutionAux
     variable = nn
     solution = soln
-  [../]
+  []
 []
 
 [UserObjects]
-  [./soln]
+  [soln]
     type = SolutionUserObject
     mesh = cubesource.e
     system_variables = source_nodal
-  [../]
+  []
 []
 
 [BCs]
-  [./stuff]
+  [stuff]
     type = DirichletBC
     variable = u
     boundary = '1 2'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,4 +70,7 @@
 
 [Problem]
   restart_file_base = solution_aux_exodus_interp_restart1_out_cp/0005
+  # There are initial conditions overwriting the restart on the nonlinear variables
+  # However this test is targeted at the auxiliary variable initialized from the solution uo so it's ok
+  allow_initial_conditions_with_restart = true
 []

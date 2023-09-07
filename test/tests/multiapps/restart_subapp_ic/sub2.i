@@ -7,51 +7,57 @@
 []
 
 [Functions]
-  [./u_fn]
+  [u_fn]
     type = ParsedFunction
     expression = t*x
-  [../]
-  [./ffn]
+  []
+  [ffn]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 4.2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
-  [./fn]
+  []
+  [fn]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionDirichletBC
     variable = u
     boundary = right
     function = u_fn
-  [../]
+  []
+[]
+
+[Problem]
+  # Being restarted by the parent, yet the ICs are overriding the initial solution
+  # See t=0.5s in the gold/parent2_out_sub_app0.e file
+  allow_initial_conditions_with_restart = true
 []
 
 [Executioner]
