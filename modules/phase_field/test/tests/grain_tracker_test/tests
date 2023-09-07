@@ -119,8 +119,9 @@
 
     requirement = "The GrainTracker object shall support remapping order parameter values with "
                   "nonlinear preconditioning."
-    issues = '#21938 #21940'
+    issues = '#21938 #21940 #25419'
     design = "GrainTracker.md"
+    valgrind = 'HEAVY'
   []
 
   [test_recovery_serial_part1]
