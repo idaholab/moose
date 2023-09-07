@@ -332,10 +332,6 @@ umat_simple(double * stress,
             int * kinc,
             short cmname_len)
 {
-
-  // std::cout << "Property one from UMAT: " << props[0] << "\n";
-  // std::cout << "Property two from UMAT: " << props[1] << "\n";
-
   const double E = props[0];
   const double nu = props[1];
   const double constant = E / (1.0 + nu) / (1.0 - 2.0 * nu);

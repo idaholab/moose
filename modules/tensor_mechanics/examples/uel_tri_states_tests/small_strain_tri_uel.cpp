@@ -121,7 +121,7 @@ uel_(double RHS[],
 
   const auto Jdet = J.determinant();
   if (Jdet <= 0)
-    std::cerr << "Negative Jacobian in element " << *JELEM << "\n";
+    std::cerr << "Negative Jacobian in element git " << *JELEM << "\n";
 
   // const auto Jinv = J.inverse();
 

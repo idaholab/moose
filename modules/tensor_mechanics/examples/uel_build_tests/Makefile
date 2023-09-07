@@ -5,5 +5,8 @@ plugin_SOURCES := uel_test.f90
 # set plugin name
 plugin_NAME := uel
 
-# build the plugin
+# build the plugin (MOOSE_DIR must point to the root of the MOOSE installation)
 -include $(MOOSE_DIR)/framework/plugin.mk
+
+fail:
+	@echo "Make sure the MOOSE_DIR environment variable is set and pointing to the root of the MOOSE installation."

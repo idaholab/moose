@@ -32,7 +32,7 @@
     boundary = left
     value = 0
   []
-  
+
   inactive = 'right_dirichlet'
   # inactive = 'right_neumann'
   [right_neumann]

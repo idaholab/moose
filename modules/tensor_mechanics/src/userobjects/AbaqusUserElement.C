@@ -11,7 +11,6 @@
 #include "SystemBase.h"
 #include "UELThread.h"
 
-
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("TensorMechanicsApp", AbaqusUserElement);
@@ -127,7 +126,6 @@ AbaqusUserElement::execute()
   // swap the current and old state data at the end of a converged timestep
   if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_END)
   {
-    std::cout << _statev_index_old << _statev_index_current << '\n';
     std::swap(_statev_index_old, _statev_index_current);
     return;
   }

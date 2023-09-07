@@ -91,7 +91,7 @@ public:
    * ENERGY(3) Creep dissipation.
    * ENERGY(4) Plastic dissipation.
    * ENERGY(5) Viscous dissipation.
-   * ENERGY(6) “Artificial strain energy” associated with such effects as artificial stiffness
+   * ENERGY(6) "Artificial strain energy" associated with such effects as artificial stiffness
    * introduced to control hourglassing or other singular modes in the element. ENERGY(7)
    * Electrostatic energy. ENERGY(8) Incremental work done by loads applied within the user element.
    */
