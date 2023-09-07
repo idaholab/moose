@@ -7,8 +7,7 @@
     input = 'receiver_initial.i'
     csvdiff = 'receiver_initial_out.csv'
     recover = false
-
-    requirement = "The system shall support the checkpointed output of postprocessors"
+    requirement = "The system shall support the checkpointed output of postprocessors."
   []
   [restart]
     type = 'CSVDiff'
@@ -16,7 +15,6 @@
     csvdiff = 'receiver_restart_out.csv'
     recover = false
     prereq = checkpoint
-
-    requirement = "The system shall support loading a postprocessor into another postprocessor during restart"
+    requirement = "The system shall support loading a postprocessor into another postprocessor during restart."
   []
 []
