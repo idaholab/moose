@@ -1,5 +1,8 @@
 # 3D laser welding
 
+!alert note
+This input requires tests objects. It can only be run with the Navier Stokes module executable or an application that also compiled the Navier Stokes test objects. The `--allow-test-objects` argument must be passed on the command line as well.
+
 The input file below can be used to model a full rotation of a laser spot around
 the surface of a cubic representation of a welding material. This input, whose
 results are published in [!cite](lindsay2021automatic),
@@ -11,7 +14,8 @@ equation is used to model the displacement field:
 The incompressible Navier-Stokes equations are solved for mass, momentum, and energy. These
 equations are run on the displaced mesh such that a mesh convection term (see
 [INSADMeshConvection.md]) must be added to correct the material
-velocity. Both SUPG and PSPG stabilizations are used in this input. The kernels used
+velocity, as shown in equation 2 of [!cite](kong2017scalable). Both SUPG and PSPG
+stabilizations are used in this input. The kernels used
 to model the Navier-Stokes equations are shown below:
 
 !listing modules/navier_stokes/examples/laser-welding/3d.i block=Kernels remove=Kernels/disp_x Kernels/disp_y Kernels/disp_z

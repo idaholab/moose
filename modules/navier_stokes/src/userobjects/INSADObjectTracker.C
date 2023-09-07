@@ -69,7 +69,7 @@ INSADObjectTracker::validTrackerParams()
   params.addParam<VariableName>("disp_x", "The x displacement");
   params.addParam<VariableName>("disp_y", "The y displacement");
   params.addParam<VariableName>("disp_z", "The z displacement");
-
+  params.addParamNamesToGroup("has_convected_mesh disp_x disp_y disp_z", "Moving mesh");
   return params;
 }
 

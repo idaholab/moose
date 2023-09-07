@@ -108,6 +108,9 @@ INSADMaterial::subdomainSetup()
   else
     _gravity_vector = 0;
 
+  // Setup data for Arbitrary Lagrangian Eulerian (ALE) simulations in which the simulation domain
+  // is displacing. We will need to subtract the mesh velocity from the velocity solution in order
+  // to get the correct material velocity for the momentum convection term.
   if ((_has_convected_mesh =
            _object_tracker->get<bool>("has_convected_mesh", _current_subdomain_id)))
   {

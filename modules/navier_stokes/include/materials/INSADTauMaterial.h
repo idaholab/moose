@@ -248,6 +248,11 @@ INSADTauMaterialTempl<T>::computeViscousStrongResidual()
     }
   };
 
+  // libMesh does not yet have the capability for computing second order spatial derivatives of
+  // vector bases. Lacking that capability, we can compute the second order spatial derivatives "by
+  // hand" using the scalar field version of the vector basis, e.g. LAGRANGE instead of
+  // LAGRANGE_VEC. Adding this implementation allows us to be fully consistent with results from a
+  // scalar velocity field component implementation of Navier-Stokes
   const auto & vel_dof_indices = _velocity_var->dofIndices();
   for (const auto i : index_range(vel_dof_indices))
   {
@@ -265,6 +270,8 @@ INSADTauMaterialTempl<T>::computeViscousStrongResidual()
       d2vel[qp] += dof_value * _scalar_lagrange_fe->get_d2phi()[scalar_i_component][qp];
   }
 
+  // Now that we have the second order spatial derivatives of velocity, we can compute the strong
+  // form of the viscous residual for use in our stabilization calculations
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     _viscous_strong_residual[_qp](0) = -_mu[_qp] * _d2u[_qp].tr();
