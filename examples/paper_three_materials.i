@@ -1,5 +1,5 @@
 vol_frac = 0.4
-cost_frac = 0.3 #0.283 # Change back to 0.4
+cost_frac = 0.3 
 
 power = 4
 
@@ -51,18 +51,6 @@ C3 = 1.0
     new_boundary = push_center
     coord = '50 0 0'
   []
-  # [push_right]
-  #   type = ExtraNodesetGenerator
-  #   input = push_center
-  #   new_boundary = push_right
-  #   coord = '75 0 0'
-  # []
-  # [support]
-  #   type = ExtraNodesetGenerator
-  #   input = push_right
-  #   new_boundary = support
-  #   coord = '100 0 0'
-  # []
 []
 
 [Variables]
@@ -199,7 +187,12 @@ C3 = 1.0
     coupled_variables = 'mat_den'
     property_name = Cost_mat
   []
-
+  [CostDensity]
+    type = ParsedMaterial
+    property_name = CostDensity
+    coupled_variables = 'mat_den Cost'
+    expression = 'mat_den*Cost'
+  []
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
@@ -231,7 +224,7 @@ C3 = 1.0
 [UserObjects]
   [rad_avg]
     type = RadialAverage
-    radius = 4
+    radius = 3
     weights = linear
     prop_name = sensitivity
     execute_on = TIMESTEP_END
@@ -239,7 +232,7 @@ C3 = 1.0
   []
   [rad_avg_cost]
     type = RadialAverage
-    radius = 4
+    radius = 3
     weights = linear
     prop_name = cost_sensitivity
     execute_on = TIMESTEP_END
@@ -260,7 +253,7 @@ C3 = 1.0
     bisection_upper_bound = 1.0e16 # 100
 
     # moves of 0.5 typically drive solution to "black and white"
-    bisection_move = 0.12
+    bisection_move = 0.05
     adaptive_move = true
 
     relative_tolerance = 1.0e-3
@@ -312,6 +305,15 @@ C3 = 1.0
     variable = mat_den
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [mesh_volume]
+    type = VolumePostprocessor
+    execute_on = 'initial timestep_end'
+  []
+  [vol_frac]
+    type = ParsedPostprocessor
+    function = 'total_vol / mesh_volume'
+    pp_names = 'total_vol mesh_volume'
+  []
   [sensitivity]
     type = ElementIntegralMaterialProperty
     mat_prop = sensitivity
@@ -321,7 +323,13 @@ C3 = 1.0
     mat_prop = cost_sensitivity
   []
   [cost]
-    type = ElementIntegralVariablePostprocessor
-    variable = Cost
+    type = ElementIntegralMaterialProperty
+    mat_prop = CostDensity
   []
+  [cost_frac]
+    type = ParsedPostprocessor
+    function = 'cost / mesh_volume'
+    pp_names = 'cost mesh_volume'
+  []
+
 []

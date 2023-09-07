@@ -17,7 +17,7 @@ ax1.set_ylabel("Objective Function")
 
 # -------------------Plotting Constraints
 vol_frac = 0.4
-cost_frac = 0.3
+cost_frac = 0.2
 vol_frac_arr = [vol_frac] * df["time"].shape[0]
 cost_frac_arr = [cost_frac] * df["time"].shape[0]
 

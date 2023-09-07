@@ -1,5 +1,5 @@
 vol_frac = 0.4
-cost_frac = 0.3 #0.283 # Change back to 0.4
+cost_frac = 0.2 #0.283 # Change back to 0.4
 
 power = 4
 
@@ -164,7 +164,12 @@ C3 = 1.0
     coupled_variables = 'mat_den'
     property_name = Cost_mat
   []
-
+  [CostDensity]
+    type = ParsedMaterial
+    property_name = CostDensity
+    coupled_variables = 'mat_den Cost'
+    expression = 'mat_den*Cost'
+  []
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
@@ -225,7 +230,7 @@ C3 = 1.0
     bisection_upper_bound = 1.0e16 # 100
 
     relative_tolerance = 1.0e-3
-    bisection_move = 0.05
+    bisection_move = 0.02
     execute_on = TIMESTEP_BEGIN
   []
   # Provides Dc
@@ -291,8 +296,8 @@ C3 = 1.0
     mat_prop = cost_sensitivity
   []
   [cost]
-    type = ElementIntegralVariablePostprocessor
-    variable = Cost
+    type = ElementIntegralMaterialProperty
+    mat_prop = CostDensity
   []
   [cost_frac]
     type = ParsedPostprocessor

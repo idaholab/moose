@@ -110,13 +110,12 @@ DensityUpdateTwoConstraints::gatherElementData()
                                    0);
     _elem_data_map[elem_id] = data;
     _total_allowable_volume += elem->volume();
-    _total_allowable_cost += 1.0;
   }
 
   _communicator.sum(_total_allowable_volume);
   _communicator.sum(_total_allowable_cost);
 
-  _total_allowable_cost *= _cost_fraction;
+  _total_allowable_cost = _cost_fraction * _total_allowable_volume;
   _total_allowable_volume *= _volume_fraction;
 }
 
@@ -164,7 +163,7 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
       // Update the current total volume
       curr_total_volume += new_density * elem_data.volume;
       // Update the current total cost
-      curr_total_cost += new_density * elem_data.cost;
+      curr_total_cost += new_density * elem_data.volume * elem_data.cost;
     }
 
     // Sum the current total volume across all processors
@@ -212,7 +211,7 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(
 
   Real denominator = lmid + cmid * cost + cmid * current_density * cost_sensitivity;
 
-  // Effect of damping has not shown
+  // Effect of damping to be assessed
   const Real damping = 1.0;
 
   Real updated_density = std::max(
