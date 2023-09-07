@@ -26,6 +26,8 @@ public:
   void gatherRCData(const Elem &) override;
 
 protected:
+  ADReal computeQpResidual() override;
+
   /// The linear friction factor, for laminar flow
   const Moose::Functor<ADReal> * const _linear_friction;
   /// The quadratic friction factor, for turbulent flow

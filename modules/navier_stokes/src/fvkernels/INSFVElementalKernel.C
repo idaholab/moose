@@ -23,6 +23,25 @@ INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
 }
 
 void
+INSFVElementalKernel::computeResidual()
+{
+  if (_rc_uo.segregated())
+    FVElementalKernel::computeResidual();
+}
+void
+INSFVElementalKernel::computeJacobian()
+{
+  if (_rc_uo.segregated())
+    FVElementalKernel::computeJacobian();
+}
+void
+INSFVElementalKernel::computeResidualAndJacobian()
+{
+  if (_rc_uo.segregated())
+    FVElementalKernel::computeResidualAndJacobian();
+}
+
+void
 INSFVElementalKernel::addResidualAndJacobian(const ADReal & residual, const dof_id_type dof_index)
 {
   addResidualsAndJacobian(_assembly,

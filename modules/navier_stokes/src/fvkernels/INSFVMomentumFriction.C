@@ -42,6 +42,22 @@ INSFVMomentumFriction::INSFVMomentumFriction(const InputParameters & parameters)
     mooseError("INSFVMomentumFriction should be provided with at least one friction coefficiant!");
 }
 
+ADReal
+INSFVMomentumFriction::computeQpResidual()
+{
+  const auto & elem_arg = makeElemArg(_current_elem);
+  const auto state = determineState();
+
+  ADReal coefficient = 0.0;
+  if (_linear_friction)
+    coefficient += (*_linear_friction)(makeElemArg(_current_elem), determineState());
+  if (_quadratic_friction)
+    coefficient += (*_quadratic_friction)(makeElemArg(_current_elem), state) *
+                   std::abs(_u_functor(elem_arg, state));
+
+  return raw_value(coefficient) * _u_functor(elem_arg, state);
+}
+
 void
 INSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
