@@ -63,5 +63,5 @@ protected:
   Real _effective_creep_strain_increment;
   Real _effective_plastic_strain_increment;
 
-  RankTwoTensor _inelastic_strain_increment[2];
+  std::array<RankTwoTensor, 2> _inelastic_strain_increment;
 };
