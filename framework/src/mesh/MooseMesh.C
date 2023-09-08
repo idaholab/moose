@@ -2570,10 +2570,16 @@ MooseMesh::effectiveSpatialDimension() const
 unsigned int
 MooseMesh::getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) const
 {
+  const auto & mesh = getMesh();
+
+  // Take a shortcut if possible
+  if (const auto & elem_dims = mesh.elem_dimensions(); mesh.is_prepared() && elem_dims.size() == 1)
+    return *elem_dims.begin();
+
   unsigned short dim = 0;
   const auto subdomain_ids = getSubdomainIDs(blocks);
   const std::set<SubdomainID> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
-  for (const auto & elem : getMesh().active_subdomain_set_elements_ptr_range(subdomain_ids_set))
+  for (const auto & elem : mesh.active_subdomain_set_elements_ptr_range(subdomain_ids_set))
     dim = std::max(dim, elem->dim());
 
   // Get the maximumal globally
