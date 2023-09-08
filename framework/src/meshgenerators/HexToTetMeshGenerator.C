@@ -40,7 +40,6 @@ std::unique_ptr<MeshBase>
 HexToTetMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  auto & boundary_info = mesh->get_boundary_info();
 
   // TODO: no real reason for this restriction, just didn't need it in the first pass
   if (!mesh->is_replicated())
