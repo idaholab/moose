@@ -20,13 +20,13 @@ HexToTetMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to convert");
-  params.addClassDescription("Converts from a hexahedral (HEX8) mesh to a tetrahedral (TET4) mesh.");
+  params.addClassDescription(
+      "Converts from a hexahedral (HEX8) mesh to a tetrahedral (TET4) mesh.");
   return params;
 }
 
 HexToTetMeshGenerator::HexToTetMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input"))
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
   _tet4_nodes.push_back({4, 1, 0, 7});
   _tet4_nodes.push_back({3, 0, 1, 7});
