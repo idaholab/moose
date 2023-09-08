@@ -460,10 +460,6 @@ public:
   virtual std::string render(int /*indent = 0*/,
                              const std::string & /*indent_text = default_indent*/,
                              int /*maxlen = 0*/
-#ifdef WASP_ENABLED
-                             ,
-                             int /*parent_newline_count = 0*/
-#endif
                              ) override
   {
     return "\n";
