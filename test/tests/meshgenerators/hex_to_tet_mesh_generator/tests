@@ -6,4 +6,10 @@
     expect_err = "This mesh generator can only be applied to meshes with HEX8 elements!"
     requirement = "The system shall error if using a non-hex8 element type with the hex to tet converter"
   []
+  [convert]
+    type = Exodiff
+    input = convert.i
+    exodiff = convert_out.e
+    requirement = "The system shall convert a HEX8 mesh into a TET4 mesh"
+  []
 []
