@@ -81,7 +81,7 @@ enum class NodeType
   Field,   /// Represents field-value pairs (i.e. paramname=val).
   Blank,   /// Represents a blank line
 #ifdef WASP_ENABLED
-  Other,   /// Represents any other type of node
+  Other, /// Represents any other type of node
 #endif
 };
 
