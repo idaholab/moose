@@ -41,7 +41,6 @@ HexToTetMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   auto & boundary_info = mesh->get_boundary_info();
-  const auto & original_boundaries = boundary_info.get_boundary_ids();
 
   // TODO: no real reason for this restriction, just didn't need it in the first pass
   if (!mesh->is_replicated())
@@ -69,7 +68,6 @@ HexToTetMeshGenerator::generate()
   // nodes, and then also the element centroid (which we will use as the additional node tying
   // all the tet4 elements together)
   int i = 0;
-  auto max_node_id = mesh->max_node_id();
   for (const auto & elem : mesh->element_ptr_range())
   {
     elem_block_ids.push_back(elem->subdomain_id());
