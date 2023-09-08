@@ -3,8 +3,6 @@
 # conda_build_config.yaml file (moose_libmesh)
 {% set VERSION = "<VERSION>" %}
 {% set SKIP_DOCS = "<SKIP_DOCS>" %}
-{% set build = 0 %}
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: moose
@@ -14,8 +12,8 @@ source:
   - path: ../../../moose
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
+  number: 0
+  string: build_0
   skip: true # [win]
   pin_depends: strict
   script_env:

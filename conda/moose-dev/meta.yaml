@@ -4,9 +4,7 @@
 #   template/conda_build_config.yaml
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 0 %}
-{% set version = "2023.08.29" %}
-{% set strbuild = "build_" + build|string %}
+{% set version = "2023.09.06" %}
 
 package:
   name: moose-dev
@@ -16,8 +14,8 @@ source:
   path: ../moose-dev
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
+  number: 0
+  string: build_0
   skip: true  # [win]
 
 requirements:

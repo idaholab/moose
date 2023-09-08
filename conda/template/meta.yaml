@@ -1,9 +1,7 @@
 # Do not alter <BUILD>, <VERSION>. These are template tokens altered
 # on the fly by the generate_recipe.py script. The only modifiable
 # item in template/ is the conda_build_config.yaml file (moose_libmesh)
-{% set build = "<BUILD>" %}
 {% set version = "<VERSION>" %}
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: <PREFIX_PACKAGE_WITH><FORMATTED_APPLICATION>
@@ -13,8 +11,8 @@ source:
   path: <REPO>
 
 build:
-  number: {{ build }}  # [linux,osx]
-  string: {{ strbuild }}
+  number: 0
+  string: build_0
   pin_depends: strict
   skip: true # [win]
 
