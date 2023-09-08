@@ -1,0 +1,14 @@
+[Tests]
+  design = 'laser_welding.md'
+  issues = '#24462'
+  [3d]
+    input = 3d.i
+    exodiff = '3d_exodus.e  3d_exodus.e-s002  3d_exodus.e-s003  3d_exodus.e-s004'
+    type = Exodiff
+    requirement = 'The system shall be able to simulate the rastering of a laser spot around an initially solid material which melts and then vaporizes.'
+    allow_test_objects = true
+    cli_args = "Mesh/uniform_refine=0 Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
+    valgrind = 'heavy'
+    strumpack = true
+  []
+[]

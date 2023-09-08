@@ -37,27 +37,29 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
   if (coupledComponents("temperature") != 1)
     paramError("temperature", "Only one variable should be used for 'temperature'");
 
-  // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
-  // don't need
-  auto & obj_tracker = const_cast<INSADObjectTracker &>(
-      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-
-  const auto alpha_name = getMaterialPropertyName("alpha_name");
-  const auto ref_temp = getMaterialPropertyName("ref_temp");
-
-  for (const auto block_id : blockIDs())
+  if (_tid == 0)
   {
-    obj_tracker.set("has_boussinesq", true, block_id);
+    // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
+    // don't need
+    auto & obj_tracker = _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker");
 
-    // We actually want to perform the material property requests during object construction in
-    // order to ensure that material property dependency is recorded correctly (I don't think this
-    // should actually matter for non-Material MaterialPropertyInterface classes, but might as well
-    // be consistent)
-    obj_tracker.set("alpha", alpha_name, block_id);
-    obj_tracker.set("ref_temp", ref_temp, block_id);
+    const auto alpha_name = getMaterialPropertyName("alpha_name");
+    const auto ref_temp = getMaterialPropertyName("ref_temp");
 
-    obj_tracker.set("temperature", getVar("temperature", 0)->name(), block_id);
-    obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"), block_id);
+    for (const auto block_id : blockIDs())
+    {
+      obj_tracker.set("has_boussinesq", true, block_id);
+
+      // We actually want to perform the material property requests during object construction in
+      // order to ensure that material property dependency is recorded correctly (I don't think this
+      // should actually matter for non-Material MaterialPropertyInterface classes, but might as
+      // well be consistent)
+      obj_tracker.set("alpha", alpha_name, block_id);
+      obj_tracker.set("ref_temp", ref_temp, block_id);
+
+      obj_tracker.set("temperature", getVar("temperature", 0)->name(), block_id);
+      obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"), block_id);
+    }
   }
 }
 

@@ -1,3 +1,3 @@
-time,advection,convective_heat_transfer,source,energy_balance
+time,advection,convective_heat_transfer,energy_balance,source
 0,0,0,0,0
-1,0.035399450358858,0.61909901913896,0.65449846949787,-5.9174887212521e-14
+1,0.035376853388243,0.61912161610963,-5.5511151231258e-16,0.65449846949787

@@ -42,16 +42,6 @@
   []
 []
 
-[ICs]
-  [vel]
-    type = VectorConstantIC
-    variable = velocity
-    x_value = 1e-15
-    y_value = 1e-15
-    block = 1
-  []
-[]
-
 [Kernels]
   [mass]
     type = INSADMass
