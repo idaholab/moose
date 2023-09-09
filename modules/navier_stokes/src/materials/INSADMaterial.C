@@ -218,8 +218,7 @@ INSADMaterial::computeQpProperties()
       _mesh_velocity[_qp](1) = (*_disp_y_dot)[_qp];
     if (_disp_z_dot)
       _mesh_velocity[_qp](2) = (*_disp_z_dot)[_qp];
-    _convected_mesh_strong_residual[_qp] =
-        -_rho[_qp] * _grad_velocity[_qp].left_multiply(_mesh_velocity[_qp]);
+    _convected_mesh_strong_residual[_qp] = -_rho[_qp] * _grad_velocity[_qp] * _mesh_velocity[_qp];
   }
 
   if (_has_coupled_force)

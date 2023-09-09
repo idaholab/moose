@@ -1,14 +1,7 @@
 [GlobalParams]
-  gravity = '0 0 0'
-  integrate_p_by_parts = true
-  laplace = true
-  convective_term = true
-  transient_term = true
-  pspg = true
-  supg = true
   displacements = 'disp_x disp_y'
-  preset = false
   order = FIRST
+  preset = false
   use_displaced_mesh = true
 []
 
@@ -24,7 +17,6 @@
     ny = 15
     elem_type = QUAD4
   []
-
   [subdomain1]
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0.0 0.5 0'
@@ -32,7 +24,6 @@
     top_right = '3.0 1.0 0'
     input = gmg
   []
-
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '0'
@@ -40,7 +31,6 @@
     new_boundary = 'master0_interface'
     input = subdomain1
   []
-
   [break_boundary]
     type = BreakBoundaryOnSubdomainGenerator
     input = interface
@@ -48,249 +38,224 @@
 []
 
 [Variables]
-  [./vel_x]
+  [vel]
     block = 0
-  [../]
-  [./vel_y]
+    family = LAGRANGE_VEC
+  []
+  [p]
     block = 0
-  [../]
-  [./p]
-    block = 0
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./vel_x_solid]
+    order = FIRST
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [vel_x_solid]
     block = 1
-  [../]
-  [./vel_y_solid]
+  []
+  [vel_y_solid]
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./vel_x_time]
-    type = INSMomentumTimeDerivative
-    variable = vel_x
-    block = 0
-  [../]
-  [./vel_y_time]
-    type = INSMomentumTimeDerivative
-    variable = vel_y
-    block = 0
-  [../]
-  [./mass]
-    type = INSMass
+  [mass]
+    type = INSADMass
     variable = p
-    u = vel_x
-    v = vel_y
-    pressure = p
     block = 0
-  [../]
-  [./x_momentum_space]
-    type = INSMomentumLaplaceForm
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    pressure = p
-    component = 0
-    block = 0
-  [../]
-  [./y_momentum_space]
-    type = INSMomentumLaplaceForm
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    pressure = p
-    component = 1
-    block = 0
-  [../]
-  [./vel_x_mesh]
-    type = ConvectedMesh
-    disp_x = disp_x
-    disp_y = disp_y
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    pressure = p
-    block = 0
-  [../]
-  [./vel_y_mesh]
-    type = ConvectedMesh
-    disp_x = disp_x
-    disp_y = disp_y
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    pressure = p
-    block = 0
-  [../]
-  [./p_mesh]
-    type = ConvectedMeshPSPG
-    disp_x = disp_x
-    disp_y = disp_y
+  []
+  [mass_pspg]
+    type = INSADMassPSPG
     variable = p
-    u = vel_x
-    v = vel_y
-    pressure = p
     block = 0
-  [../]
-  [./disp_x_fluid]
+  []
+  [momentum_time]
+    type = INSADMomentumTimeDerivative
+    variable = vel
+    block = 0
+  []
+  [momentum_convection]
+    type = INSADMomentumAdvection
+    variable = vel
+    block = 0
+  []
+  [momentum_viscous]
+    type = INSADMomentumViscous
+    variable = vel
+    block = 0
+  []
+  [momentum_pressure]
+    type = INSADMomentumPressure
+    variable = vel
+    pressure = p
+    integrate_p_by_parts = true
+    block = 0
+  []
+  [momentum_supg]
+    type = INSADMomentumSUPG
+    variable = vel
+    velocity = vel
+    block = 0
+  []
+  [momentum_mesh]
+    type = INSADMomentumMeshAdvection
+    variable = vel
+    disp_x = 'disp_x'
+    disp_y = 'disp_y'
+    block = 0
+  []
+  [disp_x_fluid]
     type = Diffusion
     variable = disp_x
     block = 0
     use_displaced_mesh = false
-  [../]
-  [./disp_y_fluid]
+  []
+  [disp_y_fluid]
     type = Diffusion
     variable = disp_y
     block = 0
     use_displaced_mesh = false
-  [../]
-  [./accel_tensor_x]
+  []
+  [accel_tensor_x]
     type = CoupledTimeDerivative
     variable = disp_x
     v = vel_x_solid
     block = 1
     use_displaced_mesh = false
-  [../]
-  [./accel_tensor_y]
+  []
+  [accel_tensor_y]
     type = CoupledTimeDerivative
     variable = disp_y
     v = vel_y_solid
     block = 1
     use_displaced_mesh = false
-  [../]
-  [./vxs_time_derivative_term]
+  []
+  [vxs_time_derivative_term]
     type = CoupledTimeDerivative
     variable = vel_x_solid
     v = disp_x
     block = 1
     use_displaced_mesh = false
-  [../]
-  [./vys_time_derivative_term]
+  []
+  [vys_time_derivative_term]
     type = CoupledTimeDerivative
     variable = vel_y_solid
     v = disp_y
     block = 1
     use_displaced_mesh = false
-  [../]
-  [./source_vxs]
+  []
+  [source_vxs]
     type = MatReaction
     variable = vel_x_solid
     block = 1
     mob_name = 1
     use_displaced_mesh = false
-  [../]
-  [./source_vys]
+  []
+  [source_vys]
     type = MatReaction
     variable = vel_y_solid
     block = 1
     mob_name = 1
     use_displaced_mesh = false
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./penalty_interface_x]
-    type = CoupledPenaltyInterfaceDiffusion
-    variable = vel_x
-    neighbor_var = disp_x
-    secondary_coupled_var = vel_x_solid
+  [penalty]
+    type = ADPenaltyVelocityContinuity
+    variable = vel
+    fluid_velocity = vel
+    displacements = 'disp_x disp_y'
+    solid_velocities = 'vel_x_solid vel_y_solid'
     boundary = master0_interface
     penalty = 1e6
-  [../]
-  [./penalty_interface_y]
-    type = CoupledPenaltyInterfaceDiffusion
-    variable = vel_y
-    neighbor_var = disp_y
-    secondary_coupled_var = vel_y_solid
-    boundary = master0_interface
-    penalty = 1e6
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./solid_domain]
+  [solid_domain]
     strain = SMALL
     incremental = false
     # generate_output = 'strain_xx strain_yy strain_zz' ## Not at all necessary, but nice
     block = '1'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e2
     poissons_ratio = 0.3
     block = '1'
     use_displaced_mesh = false
-  [../]
-  [./small_stress]
+  []
+  [small_stress]
     type = ComputeLinearElasticStress
     block = 1
-  [../]
-  [./const]
-    type = GenericConstantMaterial
+  []
+  [const]
+    type = ADGenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '1  1'
-    use_displaced_mesh = false
-  [../]
+  []
+  [ins_mat]
+    type = INSADTauMaterial
+    velocity = vel
+    pressure = p
+    block = 0
+  []
 []
 
 [BCs]
-  [./fluid_x_no_slip]
-    type = DirichletBC
-    variable = vel_x
+  [fluid_bottom]
+    type = ADVectorFunctionDirichletBC
+    variable = vel
     boundary = 'bottom'
-    value = 0.0
-  [../]
-  [./fluid_y_no_slip]
-    type = DirichletBC
-    variable = vel_y
-    boundary = 'bottom left_to_0'
-    value = 0.0
-  [../]
-  [./x_inlet]
-    type = FunctionDirichletBC
-    variable = vel_x
+    function_x = 0
+    function_y = 0
+  []
+  [fluid_left]
+    type = ADVectorFunctionDirichletBC
+    variable = vel
     boundary = 'left_to_0'
-    function = 'inlet_func'
-  [../]
-  [./no_disp_x]
+    function_x = 'inlet_func'
+    function_y = 0
+    # The displacements actually affect the result of the function evaluation so in order to eliminate the impact
+    # on the Jacobian we set 'use_displaced_mesh = false' here
+    use_displaced_mesh = false
+  []
+  [no_disp_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'bottom top left_to_1 right_to_1 left_to_0 right_to_0'
     value = 0
-  [../]
-  [./no_disp_y]
+  []
+  [no_disp_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top left_to_1 right_to_1 left_to_0 right_to_0'
     value = 0
-  [../]
-  [./solid_x_no_slip]
+  []
+  [solid_x_no_slip]
     type = DirichletBC
     variable = vel_x_solid
     boundary = 'top left_to_1 right_to_1'
     value = 0.0
-  [../]
-  [./solid_y_no_slip]
+  []
+  [solid_y_no_slip]
     type = DirichletBC
     variable = vel_y_solid
     boundary = 'top left_to_1 right_to_1'
     value = 0.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -299,21 +264,19 @@
   # num_steps = 60
   dt = 0.1
   dtmin = 0.1
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   line_search = none
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  exodus = true
 []
 
 [Functions]
-  [./inlet_func]
+  [inlet_func]
     type = ParsedFunction
     expression = '(-16 * (y - 0.25)^2 + 1) * (1 + cos(t))'
-  [../]
+  []
 []
