@@ -53,13 +53,27 @@ public:
    */
   template <typename V, typename T>
   void nonlinear(V & guess, T compute);
-
   template <typename R, typename J>
   void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
   template <typename R, typename J>
   void nonlinear(Real & guess, R computeResidual, J computeJacobian);
   template <typename R, typename J>
   void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
+
+  enum class DampedNewton
+  {
+    DAMP_ONCE,
+    DAMP_LOOP
+  };
+  template <typename V, typename T, typename B>
+  void nonlinear(V & guess,
+                 T compute,
+                 Real _damping_factor,
+                 B ci_lower_bounds,
+                 B ci_upper_bounds,
+                 unsigned int _num_eta,
+                 unsigned int _num_c,
+                 DampedNewton damped_newton);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -344,6 +358,122 @@ NestedSolve::nonlinear(V & guess, T compute)
     // solve and apply next increment
     linear(jacobian, delta, residual);
     guess -= delta;
+    _n_iterations++;
+
+    // compute residual and jacobian for the next iteration
+    compute(guess, residual, jacobian);
+    r_square = normSquare(residual);
+  }
+
+  // if we exceed the max iterations, we could still be converged
+  if (!is_converged())
+    _state = State::NOT_CONVERGED;
+}
+
+template <typename V, typename T, typename B>
+void
+NestedSolve::nonlinear(V & guess,
+                       T compute,
+                       Real _damping_factor,
+                       B ci_lower_bounds,
+                       B ci_upper_bounds,
+                       unsigned int _num_eta,
+                       unsigned int _num_c,
+                       DampedNewton damped_newton)
+{
+  V delta;
+  V residual;
+  V guess_prev;
+  // bool condition;
+  CorrespondingJacobian<V> jacobian;
+  sizeItems(guess, residual, jacobian);
+
+  _n_iterations = 0;
+  compute(guess, residual, jacobian);
+
+  // compute first residual norm for relative convergence checks
+  auto r0_square = normSquare(residual);
+  if (r0_square == 0)
+  {
+    _state = State::EXACT_GUESS;
+    return;
+  }
+  auto r_square = r0_square;
+
+  // lambda to check for convergence and set the state accordingly
+  auto is_converged = [&]()
+  {
+    if (r_square < _absolute_tolerance_square)
+    {
+      _state = State::CONVERGED_ABS;
+      return true;
+    }
+    if (r_square / r0_square < _relative_tolerance_square)
+    {
+      _state = State::CONVERGED_REL;
+      return true;
+    }
+    return false;
+  };
+
+  // lambda to check if ci is within bounds
+  auto condition = [&]()
+  {
+    // check independent ci
+    for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
+    {
+      if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
+          guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
+        return false;
+    }
+
+    // check dependent ci
+    for (unsigned int m = 0; m < _num_eta; ++m)
+    {
+      Real _sum_independent = 0;
+      for (unsigned int n = 0; n < _num_c; ++n)
+        _sum_independent += guess[n * _num_eta + m];
+
+      if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
+          _sum_independent == 0)
+        return false;
+    }
+    return true;
+  };
+
+  // perform non-linear iterations
+  while (_n_iterations < _max_iterations)
+  {
+    // check convergence
+    if (_n_iterations >= _min_iterations && is_converged())
+      return;
+
+    // solve and apply next increment
+    linear(jacobian, delta, residual);
+
+    guess_prev = guess;
+    guess = guess_prev - delta;
+
+    if (!condition())
+    {
+      Real _alpha = 1;
+      if (damped_newton == DampedNewton::DAMP_ONCE)
+      {
+        _alpha = _alpha * _damping_factor;
+        guess = guess_prev - _alpha * delta;
+      }
+      else if (damped_newton == DampedNewton::DAMP_LOOP)
+      {
+        while (!condition())
+        {
+          _alpha = _alpha * _damping_factor;
+          guess = guess_prev - _alpha * delta;
+        }
+      }
+      else
+        mooseError("Damped_newton does not match the given options.");
+    }
+
     _n_iterations++;
 
     // compute residual and jacobian for the next iteration
