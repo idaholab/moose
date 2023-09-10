@@ -1,19 +1,38 @@
 [Tests]
   issues = '#22356'
   design = 'SIMPLE.md'
-  [2d-segregated-momentum]
+  [segregated-momentum]
     type = 'Exodiff'
     input = 2d-segregated-velocity.i
     exodiff = 2d-segregated-velocity_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D channel using the SIMPLE algorithm with separating the momentum components into different systems."
   []
-  [2d-segregated-energy]
+  [segregated-rz]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz.i
+    exodiff = 2d-segregated-velocity-rz_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D cylindrical channel using the SIMPLE algorithm."
+  []
+  [segregated-slip]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz-slip.i
+    exodiff = 2d-segregated-velocity-rz-slip_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D cylindrical channel with slip boundary conditions using the SIMPLE algorithm."
+  []
+  [segregated-slip-with-friction]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz-slip.i
+    exodiff = 2d-segregated-velocity-rz-slip-friction.e
+    cli_args = "FVKernels/inactive='' Outputs/file_base='2d-segregated-velocity-rz-slip-friction'"
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D cylindrical channel with slip boundary conditions using the SIMPLE algorithm."
+  []
+  [segregated-energy]
     type = 'Exodiff'
     input = 2d-segregated-energy.i
     exodiff = 2d-segregated-energy_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together with the energy equation in a 2D channel using the SIMPLE algorithm."
   []
-  [2d-segregated-scalar]
+  [segregated-scalar]
     type = 'Exodiff'
     input = 2d-segregated-scalar.i
     exodiff = 2d-segregated-scalar_out.e

@@ -26,19 +26,23 @@ public:
 
   virtual ~INSFVElementalKernel() = default;
 
-  void computeResidual() override;
-  void computeJacobian() override;
+  void computeResidual() override final {}
+  void computeJacobian() override final {}
   using FVElementalKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final {}
-  void computeResidualAndJacobian() override;
+  void computeResidualAndJacobian() override final {}
 
 protected:
-  ADReal computeQpResidual() override { return 0.0; }
+  ADReal computeQpResidual() override final
+  {
+    mooseError("INSFVElementalKernels must implement gatherRCData and not computeQpResidual");
+  }
 
   /**
    * Process into either the system residual or Jacobian
    */
   void addResidualAndJacobian(const ADReal & residual, dof_id_type dof);
 
-  // using FVElementalKernel::_current_elem;
+private:
+  using FVElementalKernel::_current_elem;
 };
