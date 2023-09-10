@@ -61,6 +61,15 @@ INSADObjectTracker::validTrackerParams()
                                              "Variables imposing coupled forces");
   params.addParam<std::vector<FunctionName>>("coupled_force_vector_function",
                                              "The function(s) standing in as a coupled force(s)");
+
+  params.addParam<bool>("has_convected_mesh",
+                        false,
+                        "Whether the fluid domain is undergoing displacement in which case we must "
+                        "add a convecting mesh term to correct the material velocity.");
+  params.addParam<VariableName>("disp_x", "The x displacement");
+  params.addParam<VariableName>("disp_y", "The y displacement");
+  params.addParam<VariableName>("disp_z", "The z displacement");
+  params.addParamNamesToGroup("has_convected_mesh disp_x disp_y disp_z", "Moving mesh");
   return params;
 }
 

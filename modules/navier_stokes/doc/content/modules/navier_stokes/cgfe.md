@@ -131,3 +131,9 @@ Notes on the above table:
   the velocity variable as it will not introduce any inconsistency. (Recall from above that the
   vector variable, AD implementation cannot currently include Laplacian terms. For a first order
   basis this incurs no error, but for a second order basis it does)
+
+  ### Additional examples
+
+  Please see the following for descriptions of more exotic tests/examples
+
+  - [laser_welding.md]

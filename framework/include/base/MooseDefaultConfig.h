@@ -15,7 +15,7 @@
 
 /* The size of the derivative backing array */
 #ifndef MOOSE_AD_MAX_DOFS_PER_ELEM
-#define MOOSE_AD_MAX_DOFS_PER_ELEM 53
+#define MOOSE_AD_MAX_DOFS_PER_ELEM 64
 #endif
 
 /* Whether or not libpng was detected on the system */

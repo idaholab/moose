@@ -22,6 +22,12 @@ MooseEnum getSplittingEnum();
 
 namespace NS
 {
+enum class ViscousForm : int
+{
+  Traction,
+  Laplace
+};
+
 namespace phase
 {
 enum PhaseEnum
