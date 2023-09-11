@@ -116,7 +116,7 @@ P_out = 4.923e6 # Pa
 [SubChannel]
     type = LiquidMetalInterWrapper1PhaseProblem
     fp = sodium
-    n_blocks = 10
+    n_blocks = 5
     beta = 0.1
     P_out = 2.0e5
     CT = 1.0
