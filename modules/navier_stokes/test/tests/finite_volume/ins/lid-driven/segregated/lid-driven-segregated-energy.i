@@ -1,5 +1,7 @@
-mu = .01
+mu = 1
 rho = 1
+k = .01
+cp = 1
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
@@ -14,16 +16,16 @@ pressure_tag = "pressure_grad"
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = .1
+    xmax = 1
     ymin = 0
-    ymax = .1
+    ymax = 1
     nx = 20
     ny = 20
   []
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system pressure_system'
+  nl_sys_names = 'u_system v_system pressure_system energy_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -54,6 +56,11 @@ pressure_tag = "pressure_grad"
     type = INSFVPressureVariable
     nl_sys = pressure_system
     initial_condition = 0.2
+    two_term_boundary_expansion = false
+  []
+  [T_fluid]
+    type = INSFVEnergyVariable
+    nl_sys = energy_system
     two_term_boundary_expansion = false
   []
 []
@@ -113,6 +120,19 @@ pressure_tag = "pressure_grad"
     vector_field = "HbyA"
     force_boundary_execution = true
   []
+
+  [temp_conduction]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T_fluid
+  []
+
+  [temp_advection]
+    type = INSFVEnergyAdvection
+    variable = T_fluid
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+  []
 []
 
 [FVBCs]
@@ -140,6 +160,28 @@ pressure_tag = "pressure_grad"
     boundary = 'left right top bottom'
     function = 0.0
   []
+  [T_hot]
+    type = FVDirichletBC
+    variable = T_fluid
+    boundary = 'bottom'
+    value = 1
+  []
+
+  [T_cold]
+    type = FVDirichletBC
+    variable = T_fluid
+    boundary = 'top'
+    value = 0
+  []
+[]
+
+[Materials]
+  [ins_fv]
+    type = INSFVEnthalpyMaterial
+    temperature = 'T_fluid'
+    rho = ${rho}
+    cp = ${cp}
+  []
 []
 
 [Executioner]
@@ -147,22 +189,29 @@ pressure_tag = "pressure_grad"
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
   pressure_gradient_tag = ${pressure_tag}
-  momentum_equation_relaxation = 0.9
-  pressure_variable_relaxation = 0.3
-  num_iterations = 100
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
+  momentum_equation_relaxation = 0.90
+  energy_equation_relaxation = 0.99
+  pressure_variable_relaxation = 0.30
+  num_iterations = 60
+  pressure_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = 1e-7
+  energy_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
+  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
+  energy_petsc_options_value = 'hypre boomeramg'
 
-  momentum_l_abs_tol = 1e-12
+  momentum_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
   pressure_l_abs_tol = 1e-10
   momentum_l_max_its = 30
   pressure_l_max_its = 30
   momentum_l_tol = 0.0
+  energy_l_tol = 0.0
   pressure_l_tol = 0.0
   print_fields = false
 
