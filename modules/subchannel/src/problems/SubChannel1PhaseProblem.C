@@ -215,6 +215,13 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   createPetscVector(_hc_added_heat_rhs, _block_size * _n_channels);
   createPetscMatrix(_hc_sys_h_mat, _block_size * _n_channels, _block_size * _n_channels);
   createPetscVector(_hc_sys_h_rhs, _block_size * _n_channels);
+
+  if ((_n_blocks == _n_cells) && _implicit_bool)
+  {
+    mooseError(name(),
+               ": When implicit number of blocks can't be equal to number of cells. This will "
+               "cause problems with the subchannel interpolation scheme.");
+  }
 }
 
 void
@@ -805,7 +812,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
               k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
-        // interpolation weight coefficient
         auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated density

@@ -5,6 +5,7 @@
     exodiff = steady_out.e
     recover = false
     abs_zero = 1e-7
+    max_threads = 1
   []
   [transient]
     type = Exodiff
