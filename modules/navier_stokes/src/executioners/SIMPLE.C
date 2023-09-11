@@ -926,8 +926,8 @@ SIMPLE::execute()
     unsigned int iteration_counter = 0;
     unsigned int no_systems =
         _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
-    std::vector<Real> ns_residuals(1.0, no_systems);
-    std::vector<Real> ns_abs_tols(_momentum_absolute_tolerance, _momentum_systems.size());
+    std::vector<Real> ns_residuals(no_systems, 1.0);
+    std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
     if (_has_energy_system)
     {
@@ -1083,7 +1083,9 @@ bool
 SIMPLE::converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances)
 {
   mooseAssert(residuals.size() == abs_tolerances.size(),
-              "The number of residuals should be the same as the number of tolerances!");
+              "The number of residuals should (now " + std::to_string(residuals.size()) +
+                  ") be the same as the number of tolerances (" +
+                  std::to_string(abs_tolerances.size()) + ")!");
 
   bool converged = true;
   for (const auto system_i : index_range(residuals))
