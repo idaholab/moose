@@ -1,9 +1,15 @@
 mu = 1
 rho = 1
-k = .01
+k = 0.01
 cp = 1
-advected_interp_method = 'average'
+alpha = 1
+
+advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
+
+rayleigh = 1e3
+hot_temp = ${rayleigh}
+temp_ref = '${fparse hot_temp / 2.}'
 
 pressure_tag = "pressure_grad"
 
@@ -66,6 +72,7 @@ pressure_tag = "pressure_grad"
 []
 
 [FVKernels]
+  inactive = 'u_buoyancy u_gravity v_buoyancy v_gravity'
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
@@ -87,6 +94,24 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
+  [u_buoyancy]
+    type = INSFVMomentumBoussinesq
+    variable = vel_x
+    T_fluid = T_fluid
+    gravity = '0 -1 0'
+    rho = ${rho}
+    ref_temperature = ${temp_ref}
+    alpha_name = ${alpha}
+    momentum_component = 'x'
+  []
+  [u_gravity]
+    type = INSFVMomentumGravity
+    variable = vel_x
+    gravity = '0 -1 0'
+    rho = ${rho}
+    momentum_component = 'x'
+  []
+
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
@@ -108,6 +133,24 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
+  [v_buoyancy]
+    type = INSFVMomentumBoussinesq
+    variable = vel_y
+    T_fluid = T_fluid
+    gravity = '0 -1 0'
+    rho = ${rho}
+    ref_temperature = ${temp_ref}
+    alpha_name = ${alpha}
+    momentum_component = 'y'
+  []
+  [v_gravity]
+    type = INSFVMomentumGravity
+    variable = vel_y
+    gravity = '0 -1 0'
+    rho = ${rho}
+    momentum_component = 'y'
+  []
+
   [p_diffusion]
     type = FVAnisotropicDiffusion
     variable = pressure
@@ -194,7 +237,7 @@ pressure_tag = "pressure_grad"
   momentum_equation_relaxation = 0.90
   energy_equation_relaxation = 0.99
   pressure_variable_relaxation = 0.30
-  num_iterations = 60
+  num_iterations = 70
   pressure_absolute_tolerance = 1e-7
   momentum_absolute_tolerance = 1e-7
   energy_absolute_tolerance = 1e-7

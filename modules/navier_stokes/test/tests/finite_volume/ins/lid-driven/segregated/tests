@@ -13,4 +13,11 @@
     exodiff = 'lid-driven-segregated-energy_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations together with the energy eequation in a lid-driven cavity using the SIMPLE algorithm.'
   []
+  [with-buoyancy]
+    type = 'Exodiff'
+    input = 'lid-driven-segregated-energy.i'
+    exodiff = 'lid-driven-segregated-boussinesq.e'
+    cli_args = "FVKernels/inactive='' Outputs/file_base='lid-driven-segregated-boussinesq'"
+    requirement = 'The system shall be able to solve the incompressible buoyant Navier-Stokes equations with the Boussinesq approximation using the .'
+  []
 []
