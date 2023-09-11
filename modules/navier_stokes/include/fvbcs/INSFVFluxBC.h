@@ -27,9 +27,9 @@ public:
 
   virtual ~INSFVFluxBC() = default;
 
-  void computeResidual(const FaceInfo &) override;
-  void computeJacobian(const FaceInfo &) override;
-  void computeResidualAndJacobian(const FaceInfo &) override;
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
   /**
    * Process into either the system residual or Jacobian
@@ -37,5 +37,19 @@ public:
   void addResidualAndJacobian(const ADReal & residual);
 
 protected:
-  ADReal computeQpResidual() override { return 0.0;}
+  ADReal computeQpResidual() override final
+  {
+    mooseError("INSFVFluxBCs must implement gatherRCData and not computeQpResidual");
+  }
+
+  /// Compute the contribution which goes into the residual of the segregated system. This
+  /// needs to accomodate the different linearization approaches needed to get the suitable
+  /// system matrix contributions when the Jacobian assembly routine is called.
+  virtual ADReal computeSegregatedContribution()
+  {
+    mooseError("computeSegregatedContribution not implemented for ",
+               this->type(),
+               ". This is function needs to be implemented to be able to use this object with a "
+               "segregated solver!");
+  }
 };

@@ -28,7 +28,7 @@ public:
 protected:
   ADReal computeStrongResidual();
 
-  ADReal computeQpResidual() override;
+  ADReal computeSegregatedContribution() override;
 
   /// the dimension of the simulation
   const unsigned int _dim;

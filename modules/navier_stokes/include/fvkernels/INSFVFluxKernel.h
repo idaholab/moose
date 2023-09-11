@@ -55,8 +55,9 @@ protected:
   /// system matrix contributions when the Jacobian assembly routine is called.
   virtual ADReal computeSegregatedContribution()
   {
-    mooseError(
-        this->type(),
-        " needs to implement computeSegregatedContribution to be usable with a segregated solver!");
+    mooseError("computeSegregatedContribution not implemented for ",
+               this->type(),
+               ". This is function needs to be implemented to be able to use this object with a "
+               "segregated solver!");
   }
 };

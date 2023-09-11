@@ -47,7 +47,7 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
 }
 
 ADReal
-INSFVMomentumAdvectionOutflowBC::computeQpResidual()
+INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
 {
   using namespace Moose::FV;
 

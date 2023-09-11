@@ -42,8 +42,9 @@ INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
 }
 
 ADReal
-INSFVWallFunctionBC::computeQpResidual()
+INSFVWallFunctionBC::computeSegregatedContribution()
 {
+  mooseError("Sheer-stress-based wall function enforcement not supported for segregated solvers.");
   return 0.0;
 }
 

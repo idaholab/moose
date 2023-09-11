@@ -36,7 +36,7 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
 }
 
 ADReal
-INSFVSymmetryVelocityBC::computeQpResidual()
+INSFVSymmetryVelocityBC::computeSegregatedContribution()
 {
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
   const auto elem_arg =
