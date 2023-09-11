@@ -1,0 +1,293 @@
+mu = 1
+rho = 1
+k = 1e-3
+cp = 1
+u_inlet = 1
+T_inlet = 200
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
+
+pressure_tag = "pressure_grad"
+
+[Mesh]
+  [mesh]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '5 5'
+    dy = '1.0'
+    ix = '20 20'
+    iy = '5'
+    subdomain_id = '1 2'
+  []
+[]
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolatorSegregated
+    u = superficial_vel_x
+    v = superficial_vel_y
+    pressure = pressure
+  []
+[]
+
+[Problem]
+  nl_sys_names = 'u_system v_system pressure_system energy_system solid_energy_system'
+  previous_nl_solution_required = true
+  error_on_jacobian_nonzero_reallocation = true
+[]
+
+[Variables]
+  [superficial_vel_x]
+    type = PINSFVSuperficialVelocityVariable
+    initial_condition = ${u_inlet}
+    nl_sys = u_system
+    two_term_boundary_expansion = false
+  []
+  [superficial_vel_y]
+    type = PINSFVSuperficialVelocityVariable
+    initial_condition = 1e-6
+    nl_sys = v_system
+    two_term_boundary_expansion = false
+  []
+  [pressure]
+    type = INSFVPressureVariable
+    two_term_boundary_expansion = false
+    nl_sys = pressure_system
+  []
+  [T_fluid]
+    type = INSFVEnergyVariable
+    two_term_boundary_expansion = false
+    nl_sys = energy_system
+  []
+  [T_solid]
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = false
+    nl_sys = solid_energy_system
+  []
+[]
+
+[AuxVariables]
+  [porosity]
+    type = MooseVariableFVReal
+    initial_condition = 0.5
+    two_term_boundary_expansion = false
+  []
+[]
+
+[FVKernels]
+  [u_advection]
+    type = PINSFVMomentumAdvection
+    variable = superficial_vel_x
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+    porosity = porosity
+    momentum_component = 'x'
+  []
+  [u_viscosity]
+    type = PINSFVMomentumDiffusion
+    variable = superficial_vel_x
+    mu = ${mu}
+    porosity = porosity
+    momentum_component = 'x'
+  []
+  [u_pressure]
+    type = PINSFVMomentumPressure
+    variable = superficial_vel_x
+    momentum_component = 'x'
+    pressure = pressure
+    porosity = porosity
+  []
+
+  [v_advection]
+    type = PINSFVMomentumAdvection
+    variable = superficial_vel_y
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+    porosity = porosity
+    momentum_component = 'y'
+  []
+  [v_viscosity]
+    type = PINSFVMomentumDiffusion
+    variable = superficial_vel_y
+    mu = ${mu}
+    porosity = porosity
+    momentum_component = 'y'
+  []
+  [v_pressure]
+    type = PINSFVMomentumPressure
+    variable = superficial_vel_y
+    momentum_component = 'y'
+    pressure = pressure
+    porosity = porosity
+  []
+
+  [p_diffusion]
+    type = FVAnisotropicDiffusion
+    variable = pressure
+    coeff = "Ainv"
+    coeff_interp_method = 'average'
+  []
+  [p_source]
+    type = FVDivergence
+    variable = pressure
+    vector_field = "HbyA"
+    force_boundary_execution = true
+  []
+
+  [energy_advection]
+    type = PINSFVEnergyAdvection
+    variable = T_fluid
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+  []
+  [energy_diffusion]
+    type = PINSFVEnergyDiffusion
+    k = ${k}
+    variable = T_fluid
+    porosity = porosity
+  []
+  [energy_convection]
+    type = PINSFVEnergyAmbientConvection
+    variable = T_fluid
+    is_solid = false
+    T_fluid = 'T_fluid'
+    T_solid = 'T_solid'
+    h_solid_fluid = 'h_cv'
+  []
+
+  [solid_energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T_solid
+  []
+  [solid_energy_convection]
+    type = PINSFVEnergyAmbientConvection
+    variable = T_solid
+    is_solid = true
+    T_fluid = 'T_fluid'
+    T_solid = 'T_solid'
+    h_solid_fluid = 'h_cv'
+  []
+[]
+
+[FVBCs]
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = superficial_vel_x
+    function = ${u_inlet}
+  []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = superficial_vel_y
+    function = 0
+  []
+  [inlet-T]
+    type = FVNeumannBC
+    variable = T_fluid
+    value = '${fparse u_inlet * rho * cp * T_inlet}'
+    boundary = 'left'
+  []
+
+  [no-slip-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top'
+    variable = superficial_vel_x
+    function = 0
+  []
+  [no-slip-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top'
+    variable = superficial_vel_y
+    function = 0
+  []
+  [heated-side]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = 'T_solid'
+    value = 150
+  []
+
+  [symmetry-u]
+    type = PINSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = superficial_vel_x
+    u = superficial_vel_x
+    v = superficial_vel_y
+    mu = ${mu}
+    momentum_component = 'x'
+  []
+  [symmetry-v]
+    type = PINSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = superficial_vel_y
+    u = superficial_vel_x
+    v = superficial_vel_y
+    mu = ${mu}
+    momentum_component = 'y'
+  []
+  [symmetry-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
+
+  [outlet-p]
+    type = INSFVOutletPressureBC
+    boundary = 'right'
+    variable = pressure
+    function = 0.1
+  []
+[]
+
+[Materials]
+  [constants]
+    type = ADGenericFunctorMaterial
+    prop_names = 'h_cv cp'
+    prop_values = '1 ${cp}'
+  []
+  [ins_fv]
+    type = INSFVEnthalpyMaterial
+    rho = ${rho}
+    temperature = 'T_fluid'
+  []
+[]
+
+[Executioner]
+  type = SIMPLE
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
+  solid_energy_l_abs_tol = 1e-10
+  momentum_l_tol = 0
+  pressure_l_tol = 0
+  energy_l_tol = 0
+  solid_energy_l_tol = 0
+  rhie_chow_user_object = 'rc'
+  momentum_systems = 'u_system v_system'
+  pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
+  solid_energy_system = 'solid_energy_system'
+  pressure_gradient_tag = ${pressure_tag}
+  momentum_equation_relaxation = 0.8
+  pressure_variable_relaxation = 0.3
+  energy_equation_relaxation = 0.9
+  num_iterations = 60
+  pressure_absolute_tolerance = 1e-9
+  momentum_absolute_tolerance = 1e-9
+  energy_absolute_tolerance = 1e-9
+  print_fields = false
+[]
+
+
+[Outputs]
+  exodus = true
+  csv = false
+[]

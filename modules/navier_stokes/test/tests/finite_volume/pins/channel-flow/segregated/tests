@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [momentum-pressure]
+    type = 'Exodiff'
+    input = 2d-momentum.i
+    exodiff = 2d-momentum_out.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem in a 2D channel using the SIMPLE algorithm."
+  []
+  [heated]
+    type = 'Exodiff'
+    input = 2d-heated.i
+    exodiff = 2d-heated_out.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem coupled with solid energy equation in a 2D channel using the SIMPLE algorithm."
+  []
+[]
