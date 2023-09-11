@@ -7,8 +7,11 @@ This page includes various demonstrations intended to introduce the basics of [!
 ## Framework Workshops id=workshop
 
 The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training. Registration is
-typically open for all who wish to attend, although space is usually limited. Below is a recording
-of a MOOSE training webinar given in Summer 2020, as well as links to the training presentation and
+typically open for all who wish to attend, although space is usually limited. The upcoming trainings can
+be found on [this page](training/index.md).
+
+
+Below is a recording of a MOOSE training webinar given in Summer 2020, as well as links to the training presentation and
 other targeted, advanced workshop presentations.
 
 !media https://www.youtube.com/embed/2tJwBsYaLaI
@@ -19,8 +22,6 @@ other targeted, advanced workshop presentations.
 - [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
 - [MOOSE Verification Workshop](tutorial03_verification/presentation/index.md alternative=missing_config.md)
 
-MOOSE training events will typically be announced on the [home page](index.md exact=true), but be
-sure to join the [mailing list](help/contact_us.md) for further updates!
 
 ## Framework Examples
 
@@ -85,7 +86,7 @@ for some of the individual physics modules as listed below.
 - [Heat Conduction](modules/heat_conduction/tutorials/introduction/index.md)
 - [Level Set](modules/level_set/level_set_examples.md)
 - [Porous Flow](modules/porous_flow/porous_flow_examples.md)
-- [Reconstructed Dicontinuous Galerkin](modules/rdg/index.md#example)
+- [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)
 - [Stochastic Tools](modules/stochastic_tools/examples/index.md)
 - [Tensor Mechanics](modules/tensor_mechanics/examples_index.md)
 

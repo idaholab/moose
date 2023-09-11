@@ -145,6 +145,17 @@ Flow in a lid-driven cavity with Re=417 (left) and Re=833 (right).
 
 !---
 
+## Optimization
+
+The MOOSE optimization module provides functionality for solving inverse optimization problems in moose. It is based on PDE constrained optimization using the PETSc TAO optimization solver.
+
+!media large_media/optimization/fig_optCycle.png
+       style=width:80%;margin:auto;padding-top:2.5%;
+       id=fig:optCycle
+       caption=Optimization cycle example for parameterizing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
+
+!---
+
 ## Phase Field
 
 The MOOSE phase field module is a library for simplifying the implementation of simulation tools that
