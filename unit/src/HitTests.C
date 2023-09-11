@@ -270,8 +270,13 @@ TEST(HitTests, ParseFields)
        "foo/bar/baz",
        "42",
        hit::Field::Kind::Int},
-
-  };
+      // numbers with # in front; used to represent issue #'s in test harness
+      {"number with #", "issue='#1234'", "issue", "#1234", hit::Field::Kind::String},
+      {"multiple numbers with #s",
+       "issue='#1234 #5678'",
+       "issue",
+       "#1234 #5678",
+       hit::Field::Kind::String}};
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
   {
