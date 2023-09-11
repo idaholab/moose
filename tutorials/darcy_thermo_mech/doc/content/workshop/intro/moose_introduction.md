@@ -104,10 +104,6 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
-
-!---
-
 ## License
 
 - LGPL 2.1
