@@ -208,9 +208,9 @@ Some examples:
 
 - LU : form the actual Jacobian inverse, useful for small to medium problems but does not scale well
 - Hypre BoomerAMG : algebraic multi-grid, works well for diffusive problems
-- jacobi : preconditions with the diagonal of Jacobian
+- Jacobi : preconditions with the diagonal, row sum, or row max of Jacobian
 
-Can also combine pre-conditioners using sub-preconditioning with option `-sub_pc_type`.
+For parallel preconditioners, the sub-block (on-process) preconditioners can be controlled with the PETSc option `-sub_pc_type`. E.g. for a parallel block Jacobi preconditioner (-pc_type bjacobi) the sub-block preconditioner could be set to ILU or LU etc. with `-sub_pc_type ilu`, `-sub_pc_type lu`, etc.
 
 !---
 
