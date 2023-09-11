@@ -88,4 +88,13 @@
                'nonlinear variable.'
     []
   []
+
+  [kks_example_nested]
+    type = 'Exodiff'
+    input = 'kks_example_nested.i'
+    exodiff = 'kks_example_nested.e'
+    issues = '#19981'
+    design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
+    requirement = 'The nested solve of Kim-Kim-Suzuki shall yield the correct results with non-linear phase free energies'
+  []
 []
