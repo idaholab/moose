@@ -49,7 +49,7 @@ protected:
   {
     mooseError("computeSegregatedContribution not implemented for ",
                this->type(),
-               ". This is function needs to be implemented to be able to use this object with a "
+               ". This function needs to be implemented to be able to use this object with a "
                "segregated solver!");
   }
 };
