@@ -11,6 +11,8 @@ Content:
             - large_media/gallery/dipole_antenna.mp4
             - large_media/ray_tracing/cone_ray_study_u.png
             - large_media/ray_tracing/cone_ray_study_rays.png
+            - large_media/optimization/fig_optCycle.png
+            - large_media/fsi/sloshing.gif
             - contrib/**
             - css/**
             - js/**

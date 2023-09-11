@@ -71,13 +71,13 @@ As mentioned before, speeding up Hypre is usually done by doing more coarsening.
 
 There are a lot more options other than `Falgout`, `HMIS` and `PMIS` - but I'm not going to list them here because those are really the ones you will want to use.
 
-#### Agressive Coarsening
+#### Aggressive Coarsening
 
 Another option that can do a lot of coarsening is "Aggressive Coarsening".  BoomerAMG actually has many parameters surrounding this - but currently only 2 are available to us as PETSc options: `-pc_hypre_boomeramg_agg_nl` and `-pc_hypre_boomeramg_agg_num_paths`.
 
 `-pc_hypre_boomeramg_agg_nl` is the number of coarsening levels to apply "aggressive coarsening" to.  Aggressive coarsening does just what you think it does: it tries even harder to remove matrix entries.  The way it does this is looking at "second-order" connections: does there exist a path from one important entry to another important entry *through* several other entries.  By looking at these pathways the algorithm will decide whether or not to keep an entry.  Doing more aggressive coarsening will result in less time spent in BoomerAMG (and a lot less communication done) but will also impact the effectiveness of the preconditioner by quite a lot - so it's a balance.
 
-`-pc_hypre_boomeramg_agg_num_paths` is the number of pathways to consider to find a connection and keep something.  That means increasing this value will _reduce_ the ammount of aggressive coarsening happening in each aggressive coarsening level.  What this means is that a higher `-pc_hypre_boomeramg_agg_num_paths` will improve accuracy/effectiveness but slow things down.  So it's a balance.
+`-pc_hypre_boomeramg_agg_num_paths` is the number of pathways to consider to find a connection and keep something.  That means increasing this value will _reduce_ the amount of aggressive coarsening happening in each aggressive coarsening level.  What this means is that a higher `-pc_hypre_boomeramg_agg_num_paths` will improve accuracy/effectiveness but slow things down.  So it's a balance.
 
 By default aggressive coarsening is off (`-pc_hypre_boomeramg_agg_nl 0`), so to turn it on set `-pc_hypre_boomeramg_agg_nl` to something higher than zero.  I recommend 2 or 3 to start with, but even 4 can be ok in 3D.  `-pc_hypre_boomeramg_agg_num_paths` defaults to `1`: which is the most aggressive setting.  If the aggressive coarsening levels are causing too many linear iterations, try increasing the number of paths _first_.  Go up to about 4,5 or 6 and see if it helps reduce the number of linear iterations.  If it doesn't, then you may need to back off on the number of aggressive coarsening levels you are doing.  All a balancing act...
 

@@ -23,6 +23,7 @@ contact forces.
 !media contact/ironing_gallery.mp4
   style=margin:auto;
   caption=Frictional ironing model using mortar contact.
+  autoplay=true
 
 !---
 
@@ -36,6 +37,7 @@ and 2-D. Electrostatic contact is also provided for imperfect electric interface
 !media gallery/dipole_antenna.mp4
   style=width:40%;margin:auto;
   caption=Electric field radiation pattern of half-wave dipole antenna.
+  autoplay=true
 
 !---
 
@@ -61,6 +63,10 @@ swapping the name of the Fluid Properties UserObject in a plug-and-play manner.
 Provides tools that solve fluid and structure problems, wherein, their behavior is
 inter-dependent. Currently capable of simulating fluid-structure interaction
 behavior using an acoustic formulation for the fluid.
+
+!media fsi/sloshing.gif
+  style=width:25%;margin:auto;
+  caption=Sloshing in an advanced reactor vessel
 
 !---
 
@@ -142,6 +148,17 @@ Flow in a lid-driven cavity with Re=417 (left) and Re=833 (right).
 
 !col-end!
 !row-end!
+
+!---
+
+## Optimization
+
+The MOOSE optimization module provides functionality for solving inverse optimization problems in MOOSE. It is based on PDE constrained optimization using the PETSc TAO optimization solver.
+
+!media optimization/fig_optCycle.png
+       style=width:80%;margin:auto;padding-top:2.5%;
+       id=fig:optCycle
+       caption=Optimization cycle example for parameterizing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
 
 !---
 

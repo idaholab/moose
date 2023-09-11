@@ -26,11 +26,11 @@ Multi-physics Object Oriented Simulation Environment
 
 ## MOOSE By The Numbers
 
-- 202 contributors
-- 44,000 commits
+- 208 contributors
+- 46,000 commits
 - 5000 unique visitors per month
 - ~6 new Discussion participants per week
-- 1240 citations for the MOOSE papers
+- 1500 citations for the MOOSE papers
 
   - Most cited paper in Elsevier Software-X
   - More than 500 publications using MOOSE
@@ -82,6 +82,7 @@ Multi-physics Object Oriented Simulation Environment
 - MOOSE includes a test suite and documentation system to allow for agile development while
   maintaining a NQA-1 process
 - Utilizes the Continuous Integration Environment for Verification, Enhancement, and Testing (CIVET)
+- External contributions are guided through the process by the team, and are very welcome!
 
 !---
 
@@ -100,10 +101,6 @@ Multi-physics Object Oriented Simulation Environment
 !---
 
 !media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
-
-!---
-
-!media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !---
 
