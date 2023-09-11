@@ -206,7 +206,7 @@ Select a preconditioner using PETSC options, either in the executioner or in the
 
 Some examples:
 
-- LU : form the actual Jacobian inverse, useful for small problems but does not scale
+- LU : form the actual Jacobian inverse, useful for small to medium problems but does not scale well
 - Hypre BoomerAMG : algebraic multi-grid, works well for diffusive problems
 - jacobi : preconditions with the diagonal of Jacobian
 
