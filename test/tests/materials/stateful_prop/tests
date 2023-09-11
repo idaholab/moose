@@ -116,8 +116,25 @@
       input = 'spatial_adaptivity_test.i'
       exodiff = 'spatial_adaptivity_test_out.e-s004'
 
-      detail = 'when properties vary spatially.'
+      detail = 'when properties vary spatially,'
     []
+
+    [spatially_const_p]
+      type = 'RunApp'
+      input = 'stateful_prop_adaptivity_test.i'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true'
+      detail = 'when properties are spatially constant and we are performing p-refinement, and'
+      prereq = 'adaptivity/spatially_const'
+    []
+
+    [spatially_varying_p]
+      type = 'RunApp'
+      input = 'spatial_adaptivity_test.i'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true'
+      detail = 'when properties vary spatially and we are performing p-refinement.'
+      prereq = 'adaptivity/spatially_varying'
+    []
+
   []
 
   [many_stateful_props]
