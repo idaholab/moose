@@ -12,6 +12,7 @@
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/cell_tet4.h"
 
 registerMooseObject("MooseApp", HexToTetMeshGenerator);
 
