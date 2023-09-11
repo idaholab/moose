@@ -108,7 +108,7 @@ SIMPLE::validParams()
   params.addParam<MultiMooseEnum>("solid_energy_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the solid energy equation");
-  params.addParam<MultiMooseEnum>("solid energy_petsc_options_iname",
+  params.addParam<MultiMooseEnum>("solid_energy_petsc_options_iname",
                                   Moose::PetscSupport::getCommonPetscKeys(),
                                   "Names of PETSc name/value pairs for the solid energy equation");
   params.addParam<std::vector<std::string>>(

@@ -400,11 +400,13 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     auto active_local_end =
         _mesh.evaluable_elements_end(momentum_system->get_dof_map(), var_nums[system_i]);
 
+    const Moose::StateArg & state = Moose::currentState();
     for (auto it = active_local_begin; it != active_local_end; ++it)
     {
       const Elem * elem = *it;
       if (this->hasBlocks(elem->subdomain_id()))
       {
+        const Moose::ElemArg & elem_arg = makeElemArg(elem);
         Real coord_multiplier;
         const auto coord_type = _fe_problem.getCoordSystem(elem->subdomain_id());
         const unsigned int rz_radial_coord =
@@ -415,7 +417,8 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
         const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
         const auto dof_index = elem->dof_number(momentum_system->number(), var_nums[system_i], 0);
-        _Ainv[elem->id()](system_i) = (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
+        _Ainv[elem->id()](system_i) = raw_value(epsilon(_tid)(elem_arg, state)) *
+                                      (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
       }
     }
 
