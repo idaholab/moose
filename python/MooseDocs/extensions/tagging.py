@@ -27,12 +27,12 @@ Example Tag command in *.md:
 !tag name=geochem pairs=keyg:valg keychem:valuechem
 
 Example output tag dictionary for multiple pages, names, and key:value pairs:
-{"data":
-[{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
-{"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
-{"name": "index2", "path": "moose/modules/doc/content/index2.md", "key_vals": {"key1": "val1", "keya": "val", "thing1": "thing2"}},
-{"name": "geochem", "path": "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", "key_vals": {"keyg": "valg", "keychem": "valuechem"}},
-{"name": "vortex", "path": "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", "key_vals": {"keyvor": "valvor", "key": "val", "key1": "val1"}}]
+{data:
+[{name: "heatconduction", path: "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", key_vals: {keyheat: "valheat", key: "val", key1: "val1"}},
+{name: "index", path: "moose/modules/doc/content/index.md", key_vals: {key1: "val1", keya: "val"}},
+{name: "index2", path: "moose/modules/doc/content/index2.md", key_vals: {key1: "val1", keya: "val", thing1: "thing2"}},
+{name: "geochem", path: "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", key_vals: {keyg: "valg", keychem: "valuechem"}},
+{name: "vortex", path: "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", key_vals: {keyvor: "valvor", key: "val", key1: "val1"}}]
 }
 """
 
@@ -99,6 +99,7 @@ class TaggingExtension(command.CommandExtension):
                     regex_replace=f"'{entry}':"
                     tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
                 tag_dict_str=re.sub("\s","", tag_dict_str)
+                tag_dict_str=re.sub("'",'"', tag_dict_str)
                 if len(replace_str) == 0:
                     replace_str += tag_dict_str
                 else:
