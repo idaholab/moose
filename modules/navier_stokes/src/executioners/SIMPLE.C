@@ -38,6 +38,8 @@ SIMPLE::validParams()
                                                "The nonlinear system for the pressure equation.");
   params.addParam<NonlinearSystemName>("energy_system",
                                        "The nonlinear system for the energy equation.");
+  params.addParam<NonlinearSystemName>("solid_energy_system",
+                                       "The nonlinear system for the solid energy equation.");
   params.addParam<std::vector<std::string>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
   params.addParam<std::string>("pressure_gradient_tag",
@@ -103,6 +105,17 @@ SIMPLE::validParams()
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
       "energy equation");
 
+  params.addParam<MultiMooseEnum>("solid_energy_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the solid energy equation");
+  params.addParam<MultiMooseEnum>("solid energy_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the solid energy equation");
+  params.addParam<std::vector<std::string>>(
+      "solid_energy_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "solid energy equation");
+
   params.addParam<MultiMooseEnum>("passive_scalar_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the energy equation");
@@ -132,6 +145,11 @@ SIMPLE::validParams()
       1e-5,
       "0.0<energy_absolute_tolerance",
       "The absolute tolerance on the normalized residual of the energy equation.");
+  params.addRangeCheckedParam<Real>(
+      "solid_energy_absolute_tolerance",
+      1e-5,
+      "0.0<solid_energy_absolute_tolerance",
+      "The absolute tolerance on the normalized residual of the solid energy equation.");
   params.addParam<std::vector<Real>>(
       "passive_scalar_absolute_tolerance",
       std::vector<Real>(),
@@ -186,6 +204,21 @@ SIMPLE::validParams()
       10000,
       "0<energy_l_max_its",
       "The maximum allowed iterations in the linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>("solid_energy_l_tol",
+                                    1e-5,
+                                    "0.0<=solid_energy_l_tol & solid_energy_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the solid energy equation.");
+  params.addRangeCheckedParam<Real>("solid_energy_l_abs_tol",
+                                    1e-10,
+                                    "0.0<solid_energy_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the solid energy equation.");
+  params.addRangeCheckedParam<unsigned int>(
+      "solid_energy_l_max_its",
+      10000,
+      "0<solid_energy_l_max_its",
+      "The maximum allowed iterations in the linear solver of the solid energy equation.");
   params.addRangeCheckedParam<Real>("passive_scalar_l_tol",
                                     1e-5,
                                     "0.0<=passive_scalar_l_tol & passive_scalar_l_tol<1.0",
@@ -226,15 +259,23 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
     _has_energy_system(isParamValid("energy_system")),
+    _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
     _momentum_system_names(getParam<std::vector<std::string>>("momentum_systems")),
     _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
     _energy_sys_number(_has_energy_system
                            ? _problem.nlSysNum(getParam<NonlinearSystemName>("energy_system"))
                            : libMesh::invalid_uint),
+    _solid_energy_sys_number(
+        _has_solid_energy_system
+            ? _problem.nlSysNum(getParam<NonlinearSystemName>("solid_energy_system"))
+            : libMesh::invalid_uint),
     _pressure_system(_problem.getNonlinearSystemBase(_pressure_sys_number)),
     _energy_system(_has_energy_system ? &_problem.getNonlinearSystemBase(_energy_sys_number)
                                       : nullptr),
+    _solid_energy_system(_has_solid_energy_system
+                             ? &_problem.getNonlinearSystemBase(_solid_energy_sys_number)
+                             : nullptr),
     _pressure_tag_name(getParam<std::string>("pressure_gradient_tag")),
     _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name)),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
@@ -245,6 +286,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
+    _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
@@ -252,6 +294,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
     _pressure_l_abs_tol(getParam<Real>("pressure_l_abs_tol")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
+    _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value"))
@@ -303,6 +346,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   Moose::PetscSupport::processPetscPairs(
       momentum_petsc_pair_options, _problem.mesh().dimension(), _momentum_petsc_options);
 
+  _momentum_ls_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
+  _momentum_ls_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
+  _momentum_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("momentum_l_max_its");
+
   const auto & pressure_petsc_options = getParam<MultiMooseEnum>("pressure_petsc_options");
   const auto & pressure_petsc_pair_options = getParam<MooseEnumItem, std::string>(
       "pressure_petsc_options_iname", "pressure_petsc_options_value");
@@ -310,40 +357,56 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   Moose::PetscSupport::processPetscPairs(
       pressure_petsc_pair_options, _problem.mesh().dimension(), _pressure_petsc_options);
 
-  const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
-  const auto & energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
-      "energy_petsc_options_iname", "energy_petsc_options_value");
-  Moose::PetscSupport::processPetscFlags(energy_petsc_options, _energy_petsc_options);
-  Moose::PetscSupport::processPetscPairs(
-      energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
-
-  const auto & passive_scalar_petsc_options =
-      getParam<MultiMooseEnum>("passive_scalar_petsc_options");
-  const auto & passive_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
-      "passive_scalar_petsc_options_iname", "passive_scalar_petsc_options_value");
-  Moose::PetscSupport::processPetscFlags(passive_scalar_petsc_options,
-                                         _passive_scalar_petsc_options);
-  Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
-                                         _problem.mesh().dimension(),
-                                         _passive_scalar_petsc_options);
-
-  _momentum_ls_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
-  _momentum_ls_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
-  _momentum_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("momentum_l_max_its");
-
   _pressure_ls_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
   _pressure_ls_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
   _pressure_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("pressure_l_max_its");
 
   if (_has_energy_system)
   {
+    const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
+    const auto & energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "energy_petsc_options_iname", "energy_petsc_options_value");
+    Moose::PetscSupport::processPetscFlags(energy_petsc_options, _energy_petsc_options);
+    Moose::PetscSupport::processPetscPairs(
+        energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
+
     _energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
     _energy_ls_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
     _energy_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("energy_l_max_its");
+
+    // We only allow the solve for a solid energy system if we already solve for the fluid energy
+    if (_has_solid_energy_system)
+    {
+      const auto & solid_energy_petsc_options =
+          getParam<MultiMooseEnum>("solid_energy_petsc_options");
+      const auto & solid_energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+          "solid_energy_petsc_options_iname", "solid_energy_petsc_options_value");
+      Moose::PetscSupport::processPetscFlags(solid_energy_petsc_options,
+                                             _solid_energy_petsc_options);
+      Moose::PetscSupport::processPetscPairs(solid_energy_petsc_pair_options,
+                                             _problem.mesh().dimension(),
+                                             _solid_energy_petsc_options);
+
+      _solid_energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("solid_energy_l_tol");
+      _solid_energy_ls_control.real_valued_data["abs_tol"] =
+          getParam<Real>("solid_energy_l_abs_tol");
+      _solid_energy_ls_control.int_valued_data["max_its"] =
+          getParam<unsigned int>("solid_energy_l_max_its");
+    }
   }
 
   if (_has_passive_scalar_systems)
   {
+    const auto & passive_scalar_petsc_options =
+        getParam<MultiMooseEnum>("passive_scalar_petsc_options");
+    const auto & passive_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "passive_scalar_petsc_options_iname", "passive_scalar_petsc_options_value");
+    Moose::PetscSupport::processPetscFlags(passive_scalar_petsc_options,
+                                           _passive_scalar_petsc_options);
+    Moose::PetscSupport::processPetscPairs(passive_scalar_petsc_pair_options,
+                                           _problem.mesh().dimension(),
+                                           _passive_scalar_petsc_options);
+
     _passive_scalar_ls_control.real_valued_data["rel_tol"] = getParam<Real>("passive_scalar_l_tol");
     _passive_scalar_ls_control.real_valued_data["abs_tol"] =
         getParam<Real>("passive_scalar_l_abs_tol");
@@ -572,80 +635,8 @@ SIMPLE::solveMomentumPredictor()
   // different momentum components
   std::vector<Real> normalized_residuals;
 
-  // The 0 index is because if we have a monolithic system we only have one
-  // system. In case of split momentum systems the system matrix will be exactly the
-  // same for all components if wee lag the advecting velocity, thus it is enough to use
-  // use the first system.
-  // _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
-
-  // We will use functions from the implicit system directly
-  // NonlinearImplicitSystem & momentum_system =
-  //     libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
-
-  // We need a linear solver
-  // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
-  // PetscLinearSolver<Real> & momentum_solver =
-  //     libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
-
-  // We create a vector which can be used as a helper in different situations. We
-  // need the ghosting here so we use current_local_solution
-  // auto zero_solution = momentum_system.current_local_solution->zero_clone();
-
-  // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
-  // auto diff_diagonal = momentum_system.solution->zero_clone();
-
-  // We will use the solution vector of the equation
-  // NumericVector<Number> & solution = *(momentum_system.solution);
-
-  // We get the matrix and right hand side
-  // SparseMatrix<Number> & mmat = *(momentum_system.matrix);
-  // NumericVector<Number> & rhs = *(momentum_system.rhs);
-
-  // We plug zero in this to get the system matrix and the right hand side of the linear problem
-  // _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
-
-  // Unfortunately, the the right hand side has the opposite side due to the definition of the
-  // residual
-  // rhs.scale(-1.0);
-
-  // Go and relax the system matrix and the right hand side
-  // relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-  // relaxRightHandSide(rhs, solution, *diff_diagonal);
-
-  // We need to compute normalization factors to be able to decide if we are converged
-  // or not
-  // Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
-
-  // Very important, for deciding the convergence, we need the unpreconditioned
-  // norms in the linear solve
-  // KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-
-  // Setting the lineat tolerances and maximum iteration counts
-  // _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
-  // momentum_solver.set_solver_configuration(_momentum_ls_control);
-  // We solve the equation
-  // TO DO: Add options to this function in Libmesh to accept absolute tolerance
-  // momentum_solver.solve(mmat, mmat, solution, rhs);
-  // momentum_system.update();
-  // Make sure that we reuse the preconditioner if we end up solving the segregated
-  // momentum components
-  // momentum_solver.reuse_preconditioner(true);
-
-  // if (_print_fields)
-  // {
-  //   _console << " matrix when we solve " << std::endl;
-  //   mmat.print();
-  //   _console << " rhs when we solve " << std::endl;
-  //   rhs.print();
-  //   _console << " velocity solution component 0" << std::endl;
-  //   solution.print();
-  //   _console << "Norm factor " << norm_factor << std::endl;
-  //   _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
-  // }
-
-  // Compute the normalized residual
-  // normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
-
+  // We can create this here with the assumption that every momentum component has the same number
+  // of dofs
   auto zero_solution = _momentum_systems[0]->system().current_local_solution->zero_clone();
 
   // If we use a segregated approach between momentum components as well, we need to solve
@@ -848,6 +839,65 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   return linear_solver.get_initial_residual() / norm_factor;
 }
 
+Real
+SIMPLE::solveSolidEnergySystem()
+{
+  _problem.setCurrentNonlinearSystem(_solid_energy_sys_number);
+
+  // We will need some members from the implicit nonlinear system
+  NonlinearImplicitSystem & se_system =
+      libMesh::cast_ref<NonlinearImplicitSystem &>(_solid_energy_system->system());
+
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(se_system.current_local_solution);
+  NumericVector<Number> & solution = *(se_system.solution);
+  SparseMatrix<Number> & mat = *(se_system.matrix);
+  NumericVector<Number> & rhs = *(se_system.rhs);
+
+  // Fetch the linear solver from the system
+  PetscLinearSolver<Real> & se_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
+
+  // We need a zero vector to be able to emulate the Ax=b system by evaluating the
+  // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
+  // so we correct it by multiplying it with (-1)
+  auto zero_solution = current_local_solution.zero_clone();
+  _problem.computeResidualAndJacobian(*zero_solution, rhs, mat);
+  rhs.scale(-1.0);
+
+  if (_print_fields)
+  {
+    _console << "Solid energy matrix" << std::endl;
+    mat.print();
+  }
+
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = computeNormalizationFactor(solution, mat, rhs);
+
+  // We need the non-preconditioned norm to be consistent with the norm factor
+  KSPSetNormType(se_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+
+  // Setting the lineat tolerances and maximum iteration counts
+  _solid_energy_ls_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
+  se_solver.set_solver_configuration(_solid_energy_ls_control);
+
+  se_solver.solve(mat, mat, solution, rhs);
+  se_system.update();
+
+  if (_print_fields)
+  {
+    _console << " solid eneregy rhs " << std::endl;
+    rhs.print();
+    _console << " Solid temperature " << std::endl;
+    solution.print();
+    _console << "Norm factor " << norm_factor << std::endl;
+  }
+
+  _solid_energy_system->setSolution(current_local_solution);
+
+  return se_solver.get_initial_residual() / norm_factor;
+}
+
 void
 SIMPLE::execute()
 {
@@ -874,13 +924,20 @@ SIMPLE::execute()
   {
     // Initialize the quantities which matter in terms of the iteration
     unsigned int iteration_counter = 0;
-    std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
-    Real pressure_residual = 1.0;
-    Real energy_residual = 1.0;
+    unsigned int no_systems =
+        _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
+    std::vector<Real> ns_residuals(1.0, no_systems);
+    std::vector<Real> ns_abs_tols(_momentum_absolute_tolerance, _momentum_systems.size());
+    ns_abs_tols.push_back(_pressure_absolute_tolerance);
+    if (_has_energy_system)
+    {
+      ns_abs_tols.push_back(_energy_absolute_tolerance);
+      if (_has_solid_energy_system)
+        ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
+    }
 
     // Loop until converged or hit the maximum allowed iteration number
-    while (iteration_counter < _num_iterations &&
-           !convergedNavierStokes(momentum_residual, pressure_residual, energy_residual))
+    while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
     {
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
@@ -889,7 +946,11 @@ SIMPLE::execute()
 
       // If we solve for energy, we clear the caches there too
       if (_has_energy_system)
+      {
         _energy_system->residualSetup();
+        if (_has_solid_energy_system)
+          _solid_energy_system->residualSetup();
+      }
 
       iteration_counter++;
 
@@ -899,17 +960,19 @@ SIMPLE::execute()
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
 
       // Solve the momentum predictor step
-      momentum_residual = solveMomentumPredictor();
+      auto momentum_residual = solveMomentumPredictor();
+      for (const auto system_i : index_range(momentum_residual))
+        ns_residuals[system_i] = momentum_residual[system_i];
 
       // Compute the coupling fields between the momentum and pressure equations
       _rc_uo->computeHbyA(_print_fields);
 
-      // We set the preconditioner/controllable parameters for the pressure equations through petsc
-      // options. Linear tolerances will be overridden within the solver.
+      // We set the preconditioner/controllable parameters for the pressure equations through
+      // petsc options. Linear tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
       // Solve the pressure corrector
-      pressure_residual = solvePressureCorrector();
+      ns_residuals[momentum_residual.size()] = solvePressureCorrector();
 
       // Compute the face velocity which is used in the advection terms
       _rc_uo->computeFaceVelocity();
@@ -928,11 +991,21 @@ SIMPLE::execute()
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        energy_residual = solveAdvectedSystem(
-            _energy_sys_number, *_energy_system, _energy_equation_relaxation, _energy_ls_control, _energy_l_abs_tol);
+        ns_residuals[momentum_residual.size() + 1] =
+            solveAdvectedSystem(_energy_sys_number,
+                                *_energy_system,
+                                _energy_equation_relaxation,
+                                _energy_ls_control,
+                                _energy_l_abs_tol);
+
+        if (_has_solid_energy_system)
+        {
+          // We set the preconditioner/controllable parameters through petsc options. Linear
+          // tolerances will be overridden within the solver.
+          Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+          ns_residuals[momentum_residual.size() + 2] = solveSolidEnergySystem();
+        }
       }
-      else
-        energy_residual = 0.0;
 
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
@@ -941,12 +1014,17 @@ SIMPLE::execute()
                          ? std::string(" Component ") + std::to_string(system_i + 1) +
                                std::string(" ")
                          : std::string(" "))
-                 << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
-      _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
-               << std::endl;
+                 << COLOR_GREEN << ns_residuals[system_i] << COLOR_DEFAULT << std::endl;
+      _console << " Pressure equation: " << COLOR_GREEN << ns_residuals[momentum_residual.size()]
+               << COLOR_DEFAULT << std::endl;
       if (_has_energy_system)
-        _console << " Energy equation: " << COLOR_GREEN << energy_residual << COLOR_DEFAULT
-                 << std::endl;
+      {
+        _console << " Energy equation: " << COLOR_GREEN
+                 << ns_residuals[momentum_residual.size() + 1] << COLOR_DEFAULT << std::endl;
+        if (_has_solid_energy_system)
+          _console << " Solid energy equation: " << COLOR_GREEN
+                   << ns_residuals[momentum_residual.size() + 2] << COLOR_DEFAULT << std::endl;
+      }
     }
 
     // Now we solve for the passive scalar equations, they should not influence the solution of the
@@ -963,7 +1041,7 @@ SIMPLE::execute()
       iteration_counter = 0;
       std::vector<Real> passive_scalar_residuals(1.0, _passive_scalar_systems.size());
       while (iteration_counter < _num_iterations &&
-             !convergedPassiveScalars(passive_scalar_residuals))
+             !converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance))
       {
         // We clear the caches in the passive scalar variables
         for (auto system_i : index_range(_passive_scalar_systems))
@@ -1002,30 +1080,15 @@ SIMPLE::execute()
 }
 
 bool
-SIMPLE::convergedNavierStokes(const std::vector<Real> & momentum_residuals,
-                              const Real pressure_residual,
-                              const Real energy_residual)
+SIMPLE::converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances)
 {
-  bool converged = true;
-  for (const auto & residual : momentum_residuals)
-  {
-    converged = converged && (residual < _momentum_absolute_tolerance);
-    if (!converged)
-      return converged;
-  }
-  converged = converged && (pressure_residual < _pressure_absolute_tolerance);
-  converged = converged && (energy_residual < _energy_absolute_tolerance);
-  return converged;
-}
+  mooseAssert(residuals.size() == abs_tolerances.size(),
+              "The number of residuals should be the same as the number of tolerances!");
 
-bool
-SIMPLE::convergedPassiveScalars(const std::vector<Real> & passive_scalar_residuals)
-{
   bool converged = true;
-  for (const auto system_i : index_range(passive_scalar_residuals))
+  for (const auto system_i : index_range(residuals))
   {
-    converged = converged &&
-                (passive_scalar_residuals[system_i] < _passive_scalar_absolute_tolerance[system_i]);
+    converged = converged && (residuals[system_i] < abs_tolerances[system_i]);
     if (!converged)
       return converged;
   }

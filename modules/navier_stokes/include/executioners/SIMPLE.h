@@ -103,12 +103,21 @@ protected:
 
   /// Solve the an equation which contains an advection term that depends
   /// on the solution of the Navier-Stokes equations.
+  /// @param system_num The number of the system which is solved
+  /// @param system Reference to the system which is solved
+  /// @param relaxation_factor The relaxation factor for matrix relaxation
+  /// @param solver_config The solver configuration object for the linear solve
+  /// @param abs_tol The scaled absolute tolerance for the linear solve
   /// @return The normalized residual norm of the equation.
   Real solveAdvectedSystem(const unsigned int system_num,
                            NonlinearSystemBase & system,
                            const Real relaxation_factor,
                            SolverConfiguration & solver_config,
                            const Real abs_tol);
+
+  /// Solve the solid energy conservation equation.
+  /// @return The normalized residual norm of the solid equation.
+  Real solveSolidEnergySystem();
 
   /**
    * Relax the update on a solution field using the following approach:
@@ -142,22 +151,11 @@ protected:
   dof_id_type findDoFID(const VariableName & var_name, const Point & point);
 
   /**
-   * Determine if the iterative process on the Navier-Stokes equations converged or not
-   * @param momentum_residual The normalized residuals for the momentum equation. This can either
-   *                          be the residual of the monolithic momentum equation or a vector of
-   *                          residuals for the direction-wise equations.
-   * @param pressure_residual The normalized residual of the pressure equation.
-   * @param energy_residual The normalized residual of the energy equation.
+   * Determine if the iterative process on a set of equations converged or not
+   * @param ns_residuals The residuals for the momnetum, pressure and energy equations.
+   * @param abs_tolerances The corresponding abolute tolerances.
    */
-  bool convergedNavierStokes(const std::vector<Real> & momentum_residuals,
-                             const Real pressure_residual,
-                             const Real energy_residual);
-
-  /**
-   * Determine if the iterative process on the passive scalar equations converged or not
-   * @param passive_scalar_residuals The normalized residual(s) of the passive scalar equation(s).
-   */
-  bool convergedPassiveScalars(const std::vector<Real> & passive_scalar_residuals);
+  bool converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances);
 
   FEProblemBase & _problem;
   Real _system_time;
@@ -166,6 +164,9 @@ protected:
 
   /// Boolean for easy check if an energy system shall be solved or not
   const bool _has_energy_system;
+
+  /// Boolean for easy check if an solid energy system shall be solved or not
+  const bool _has_solid_energy_system;
 
   /// Boolean for easy check if an passive scalar systems shall be solved or not
   const bool _has_passive_scalar_systems;
@@ -183,6 +184,9 @@ protected:
   /// The number of the system corresponding to the energy equation
   const unsigned int _energy_sys_number;
 
+  /// The number of the system corresponding to the solid energy equation
+  const unsigned int _solid_energy_sys_number;
+
   /// The number(s) of the system(s) corresponding to the passive scalar equation(s)
   std::vector<unsigned int> _passive_scalar_system_numbers;
 
@@ -192,8 +196,11 @@ protected:
   /// Reference to the nonlinear system corresponding to the pressure equation
   NonlinearSystemBase & _pressure_system;
 
-  /// Reference to the nonlinear system corresponding to the energy equation
+  /// Pointer to the nonlinear system corresponding to the energy equation
   NonlinearSystemBase * _energy_system;
+
+  /// Pointer to the nonlinear system corresponding to the solid energy equation
+  NonlinearSystemBase * _solid_energy_system;
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<NonlinearSystemBase *> _passive_scalar_systems;
@@ -233,6 +240,9 @@ private:
   /// The user-defined absolute tolerance for determining the convergence in energy
   const Real _energy_absolute_tolerance;
 
+  /// The user-defined absolute tolerance for determining the convergence in solid energy
+  const Real _solid_energy_absolute_tolerance;
+
   /// The user-defined absolute tolerance for determining the convergence in passive scalars
   const std::vector<Real> _passive_scalar_absolute_tolerance;
 
@@ -250,6 +260,9 @@ private:
 
   /// Options which hold the petsc settings for the energy equation
   Moose::PetscSupport::PetscOptions _energy_petsc_options;
+
+  /// Options which hold the petsc settings for the energy equation
+  Moose::PetscSupport::PetscOptions _solid_energy_petsc_options;
 
   /// Options which hold the petsc settings for the passive scalar equation(s)
   Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
@@ -274,6 +287,13 @@ private:
   /// Absolute linear tolerance for the energy equations. We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
+
+  /// Options for the linear solver of the solid energy equation
+  SIMPLESolverConfiguration _solid_energy_ls_control;
+
+  /// Absolute linear tolerance for the solid energy equations. We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _solid_energy_l_abs_tol;
 
   /// Options for the linear solver of the passive scalar equation(s)
   SIMPLESolverConfiguration _passive_scalar_ls_control;
