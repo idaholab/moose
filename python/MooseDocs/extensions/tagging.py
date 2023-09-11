@@ -166,7 +166,7 @@ class TaggingCommand(command.CommandComponent):
                 msg = "%s: Provided 'key' not in allowed_keys (see config.yml); not adding the " \
                        "following to the database: %s"
                 LOG.warning(msg, page.name, pair[0])
-            elif len(good_keys) != 0 and pair[0] in good_keys[0]:
+            elif len(good_keys) > 0 and pair[0] in [item[0] for item in good_keys]:
                 msg = "%s: Following 'key' provided more than once; check markdown file: %s"
                 LOG.error(msg, page.name, pair[0])
             else:

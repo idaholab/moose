@@ -33,7 +33,7 @@ class TestTaggingInit(MooseDocsTestCase):
 class TestTaggingCommand(MooseDocsTestCase):
     EXTENSIONS = [core, command, tagging]
     TEXT = '!tag name=test pairs=application:moose foo:bar'
-    TEXT_DUPLICATE = '!tag name=test pairs=application:moose application:bar'
+    TEXT_DUPLICATE = '!tag name=test pairs=application:moose foo:bas application:bar'
     TEXT_NOT_ALLOWED = '!tag name=test pairs=application:moose application_wrong:bar'
     TEXT_NO_KEYS = '!tag name=test'
     TEXT_NO_NAME = '!tag pairs=application:moose'
@@ -59,7 +59,7 @@ class TestTaggingCommand(MooseDocsTestCase):
         self.assertEqual(len(cm.output), 1)
         self.assertIn("Following 'key' provided more than once;", cm.output[0])
         self.assertSize(ast, 1)
-        self.assertEqual(ast(0)['key_vals'], {'application':'moose'})
+        self.assertEqual(ast(0)['key_vals'], {'application':'moose', 'foo':'bas'})
 
     def testNotAllowed(self):
         with self.assertLogs(level=logging.WARNING) as cm:
