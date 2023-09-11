@@ -38,15 +38,23 @@ Extensions:
 
 ## Basic Tag
 
-There is only one version of the tag command, demonstrated below. The available settings for the
-tag command are listed in [tagging-settings].
+There is only one version of the tag command, and the available settings for the
+tag command are listed in [tagging-settings]. A demonstration of the command is as follows:
 
 ```
 !tag name=tagging_one pairs=application:test foo:bar simulation_type:triage fiscal_year:2023
 ```
 
-If either the 'name' or the 'pairs' parameters are left out of the invocation of the tag command, an
-error message is generated that directs the user to the affected markdown file.
+where the `name` parameter (here, "tagging_one") can be any user-defined string to signify the ID
+for the set of tags, and the `pairs` parameter can be any space-separated list of category:label
+string pairs (optionally checked against the allowed key list, as described above). Currently, the
+tag ID will appear in the rendered filtering page as the label for the documentation page being tagged.
+
+!alert! note
+If either the `name` or the `pairs` parameters are left out of the invocation of the tag command, an
+error message is generated that directs the user to the affected markdown file. This error will not
+stop the build of the site.
+!alert-end!
 
 !devel settings module=MooseDocs.extensions.tagging
                 object=TaggingCommand
