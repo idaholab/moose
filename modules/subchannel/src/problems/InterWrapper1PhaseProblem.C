@@ -44,6 +44,9 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
   for (PetscInt i = 0; i < size; i++)
     solution_seed(i) = xx[i];
 
+  ierr = VecRestoreArrayRead(x, &xx);
+  CHKERRQ(ierr);
+
   libMesh::DenseVector<Real> Wij_residual_vector =
       cc->schp->residualFunction(cc->iblock, solution_seed);
 
@@ -52,10 +55,9 @@ formFunctionIW(SNES, Vec x, Vec f, void * ctxIW)
   for (int i = 0; i < size; i++)
     ff[i] = Wij_residual_vector(i);
 
-  ierr = VecRestoreArrayRead(x, &xx);
-  CHKERRQ(ierr);
   ierr = VecRestoreArray(f, &ff);
   CHKERRQ(ierr);
+
   return 0;
 }
 
@@ -200,13 +202,19 @@ InterWrapper1PhaseProblem::InterWrapper1PhaseProblem(const InputParameters & par
   createPetscVector(_hc_added_heat_rhs, _block_size * _n_channels);
   createPetscMatrix(_hc_sys_h_mat, _block_size * _n_channels, _block_size * _n_channels);
   createPetscVector(_hc_sys_h_rhs, _block_size * _n_channels);
+
+  if ((_n_blocks == _n_cells) && _implicit_bool)
+  {
+    mooseError(name(),
+               ": When implicit number of blocks can't be equal to number of cells. This will "
+               "cause problems with the subchannel interpolation scheme.");
+  }
 }
 
 void
 InterWrapper1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
-
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
@@ -417,7 +425,7 @@ InterWrapper1PhaseProblem::populateSolutionChan(const Vec & x,
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
     {
       loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      loc_solution->set(loc_node, xx[iz_ind * cross_dimension + i_l]);
+      loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
   return 0;
@@ -451,7 +459,6 @@ InterWrapper1PhaseProblem::computeWijFromSolve(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
   // Initial guess, port crossflow of block (iblock) into a vector that will act as my initial guess
   libMesh::DenseVector<Real> solution_seed(_n_gaps * _block_size, 0.0);
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -485,7 +492,6 @@ InterWrapper1PhaseProblem::computeSumWij(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
   // Add to solution vector if explicit
   if (!_implicit_bool)
   {
@@ -521,7 +527,7 @@ InterWrapper1PhaseProblem::computeSumWij(int iblock)
         {
           PetscInt row = i_ch + _n_channels * iz_ind;
           PetscInt col = i_gap + _n_gaps * iz_ind;
-          PetscScalar value = 1.0 * _subchannel_mesh.getCrossflowSign(i_ch, counter);
+          PetscScalar value = _subchannel_mesh.getCrossflowSign(i_ch, counter);
           MatSetValues(_mc_sumWij_mat, 1, &row, 1, &col, &value, INSERT_VALUES);
           counter++;
         }
@@ -531,21 +537,17 @@ InterWrapper1PhaseProblem::computeSumWij(int iblock)
     MatAssemblyEnd(_mc_sumWij_mat, MAT_FINAL_ASSEMBLY);
     if (_segregated_bool)
     {
+      Vec loc_prod;
+      Vec loc_Wij;
+      VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
+      VecDuplicate(_Wij_vec, &loc_Wij);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-          _Wij_vec, _Wij, first_node, last_node, _n_gaps);
-      MatMult(_mc_sumWij_mat, _Wij_vec, _prod);
-      PetscScalar * xx;
-      VecGetArray(_prod, &xx);
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        unsigned int iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-          _SumWij_soln->set(node_out, value);
-        }
-      }
+          loc_Wij, _Wij, first_node, last_node + 1, _n_gaps);
+      MatMult(_mc_sumWij_mat, loc_Wij, loc_prod);
+      populateSolutionChan<SolutionHandle>(
+          loc_prod, *_SumWij_soln, first_node, last_node, _n_channels);
+      VecDestroy(&loc_prod);
+      VecDestroy(&loc_Wij);
     }
   }
 }
@@ -555,7 +557,6 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
   if (!_implicit_bool)
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -626,7 +627,6 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
         if (_segregated_bool)
         {
           PetscScalar value_vec_2 = -1.0 * (*_SumWij_soln)(node_out);
-          // PetscScalar value_vec_2 = -1.0 * (*_SumWij_soln)(node_in);
           PetscInt row_vec_2 = i_ch + _n_channels * iz_ind;
           VecSetValues(_mc_axial_convection_rhs, 1, &row_vec_2, &value_vec_2, ADD_VALUES);
         }
@@ -649,18 +649,7 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
       KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
       KSPSetFromOptions(ksploc);
       KSPSolve(ksploc, _mc_axial_convection_rhs, sol);
-      PetscScalar * xx;
-      VecGetArray(sol, &xx);
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-          _mdot_soln->set(node_out, value);
-        }
-      }
+      populateSolutionChan<SolutionHandle>(sol, *_mdot_soln, first_node, last_node, _n_channels);
       VecZeroEntries(_mc_axial_convection_rhs);
       KSPDestroy(&ksploc);
       VecDestroy(&sol);
@@ -741,11 +730,11 @@ InterWrapper1PhaseProblem::computeWijPrime(int iblock)
           PetscScalar value_tl = base_value / (Si_in + Sj_in);
           PetscInt row = i_gap + _n_gaps * iz_ind;
 
-          PetscInt col_ich = i_ch + _n_channels * iz_ind;
+          PetscInt col_ich = i_ch + _n_channels * (iz_ind - 1);
           MatSetValues(
               _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_tl, INSERT_VALUES);
 
-          PetscInt col_jch = j_ch + _n_channels * iz_ind;
+          PetscInt col_jch = j_ch + _n_channels * (iz_ind - 1);
           MatSetValues(
               _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_tl, INSERT_VALUES);
         }
@@ -754,33 +743,31 @@ InterWrapper1PhaseProblem::computeWijPrime(int iblock)
         PetscScalar value_bl = base_value / (Si_out + Sj_out);
         PetscInt row = i_gap + _n_gaps * iz_ind;
 
-        PetscInt col_ich = i_ch + _n_channels * (iz_ind + 1);
+        PetscInt col_ich = i_ch + _n_channels * iz_ind;
         MatSetValues(
             _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_bl, INSERT_VALUES);
 
-        PetscInt col_jch = j_ch + _n_channels * (iz_ind + 1);
+        PetscInt col_jch = j_ch + _n_channels * iz_ind;
         MatSetValues(
             _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_bl, INSERT_VALUES);
       }
     }
     MatAssemblyBegin(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
-    if (_segregated_bool)
-    {
-      populateVectorFromHandle<SolutionHandle>(
-          _prod, *_mdot_soln, first_node, last_node, _n_channels);
-      MatMult(_amc_turbulent_cross_flows_mat, _prod, _Wij_vec);
-      PetscScalar * xx;
-      VecGetArray(_Wij_vec, &xx);
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-        {
-          _WijPrime(i_gap, iz) = xx[iz_ind * _n_gaps + i_gap];
-        }
-      }
-    }
+
+    /// Update turbulent crossflow
+    Vec loc_prod;
+    Vec loc_Wij;
+    VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
+    VecDuplicate(_Wij_vec, &loc_Wij);
+    populateVectorFromHandle<SolutionHandle>(
+        loc_prod, *_mdot_soln, first_node, last_node, _n_channels);
+    MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij);
+    VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs);
+    populateDenseFromVector<libMesh::DenseMatrix<Real>>(
+        loc_Wij, _WijPrime, first_node, last_node, _n_gaps);
+    VecDestroy(&loc_prod);
+    VecDestroy(&loc_Wij);
   }
 }
 
@@ -810,14 +797,11 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
                          dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
                              rho_in / _dt;
-
         auto mass_term1 =
             std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
         auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
-
         auto crossflow_term = 0.0;
         auto turbulent_term = 0.0;
-
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
@@ -832,7 +816,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
           auto rho_j = (*_rho_soln)(node_in_j);
           auto Si = (*_S_flow_soln)(node_in_i);
           auto Sj = (*_S_flow_soln)(node_in_j);
-          auto u_star = 0.0;
+          Real u_star = 0.0;
           // figure out donor axial velocity
           if (_Wij(i_gap, iz) > 0.0)
             u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
@@ -848,7 +832,6 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
           counter++;
         }
         turbulent_term *= _CT;
-
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
         auto fi = computeFrictionFactor(Re);
         auto ki = k_grid[i_ch][iz - 1];
@@ -875,7 +858,6 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
     VecZeroEntries(_amc_gravity_rhs);
     MatZeroEntries(_amc_sys_mdot_mat);
     VecZeroEntries(_amc_sys_mdot_rhs);
-
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto k_grid = _subchannel_mesh.getKGrid();
@@ -886,6 +868,10 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         // inlet and outlet nodes
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+
+        // interpolation weight coefficient
+        PetscScalar Pe = 0.5;
+        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
 
         // inlet, outlet, and interpolated density
         auto rho_in = (*_rho_soln)(node_in);
@@ -907,10 +893,6 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         auto w_perim_out = (*_w_perim_soln)(node_out);
         auto w_perim_interp =
             computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference");
-
-        // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
 
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
@@ -954,7 +936,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in) / (S_in * rho_in);
+          PetscScalar value_at = -1.0 * std::abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
           MatSetValues(
               _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
         }
@@ -962,7 +944,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
         // Adding diagonal elements
         PetscInt row_at = i_ch + _n_channels * iz_ind;
         PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = (*_mdot_soln)(node_out) / (S_out * rho_out);
+        PetscScalar value_at = std::abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
         MatSetValues(
             _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
 
@@ -1048,7 +1030,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
             PetscScalar value_vec_ct = -2.0 * alpha *
                                        (*_mdot_soln)(node_in)*_WijPrime(i_gap, cross_index) /
                                        (rho_interp * S_interp);
-            value_vec_ct =
+            value_vec_ct +=
                 alpha * (*_mdot_soln)(node_in_j)*_WijPrime(i_gap, cross_index) / (rho_j * S_j);
             value_vec_ct +=
                 alpha * (*_mdot_soln)(node_in_i)*_WijPrime(i_gap, cross_index) / (rho_i * S_i);
@@ -1214,7 +1196,7 @@ InterWrapper1PhaseProblem::computeDP(int iblock)
           // Setting solutions
           if (S_interp != 0)
           {
-            auto DP = std::pow(S_interp, 0.0) * xx[iz_ind * _n_channels + i_ch];
+            auto DP = std::pow(S_interp, -1.0) * xx[iz_ind * _n_channels + i_ch];
             _DP_soln->set(node_out, DP);
           }
           else
@@ -1234,7 +1216,6 @@ InterWrapper1PhaseProblem::computeP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
   if (!_implicit_bool)
   {
     if (!_staggered_pressure_bool)
@@ -1322,7 +1303,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
           if (_segregated_bool)
           {
             auto dp_out = (*_DP_soln)(node_out);
-            PetscScalar value_v = -1.0 * dp_out;
+            PetscScalar value_v = -1.0 * dp_out * S_interp;
             PetscInt row_v = i_ch + _n_channels * iz_ind;
             VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES);
           }
@@ -1331,7 +1312,6 @@ InterWrapper1PhaseProblem::computeP(int iblock)
       // Solving pressure problem
       MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
-
       if (_segregated_bool)
       {
         KSP ksploc;
@@ -1409,7 +1389,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
               auto dp_in = (*_DP_soln)(node_in);
               auto dp_out = (*_DP_soln)(node_out);
               auto dp_interp = computeInterpolatedValue(dp_out, dp_in, "central_difference");
-              PetscScalar value_v = -1.0 * dp_interp;
+              PetscScalar value_v = -1.0 * dp_interp * S_interp;
               PetscInt row_v = i_ch + _n_channels * iz_ind;
               VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES);
             }
@@ -2110,7 +2090,6 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
           MatSetValues(
               _cmc_advective_derivative_mat, 1, &row_ad, 1, &col_ad, &value_ad, INSERT_VALUES);
         }
-
         // Assembling friction force
         PetscInt row_ff = i_gap + _n_gaps * iz_ind;
         PetscInt col_ff = i_gap + _n_gaps * iz_ind;
@@ -2210,11 +2189,12 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
       createPetscVector(sol_holder_P, _block_size * _n_gaps);
       Vec sol_holder_W;
       createPetscVector(sol_holder_W, _block_size * _n_gaps);
+      Vec loc_holder_Wij;
+      createPetscVector(loc_holder_Wij, _block_size * _n_gaps);
       populateVectorFromHandle<SolutionHandle>(
           _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-          _Wij_vec, _Wij, first_node, last_node, _n_gaps);
-
+          loc_holder_Wij, _Wij, first_node, last_node, _n_gaps);
       MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W);
       VecAXPY(sol_holder_W, -1.0, _cmc_sys_Wij_rhs);
       MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P);
@@ -2222,7 +2202,6 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
       VecAXPY(sol_holder_W, 1.0, sol_holder_P);
       PetscScalar * xx;
       VecGetArray(sol_holder_W, &xx);
-
       for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
       {
         auto iz_ind = iz - first_node - 1;
@@ -2231,9 +2210,9 @@ InterWrapper1PhaseProblem::computeWij(int iblock)
           _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps + i_gap];
         }
       }
-
       VecDestroy(&sol_holder_P);
       VecDestroy(&sol_holder_W);
+      VecDestroy(&loc_holder_Wij);
     }
   }
 }
@@ -2243,9 +2222,7 @@ InterWrapper1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Rea
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size;
-
   libMesh::DenseVector<Real> Wij_residual_vector(_n_gaps * _block_size, 0.0);
-
   // Assign the solution to the cross-flow matrix
   int i = 0;
   for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
@@ -2259,19 +2236,14 @@ InterWrapper1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Rea
 
   // Calculating sum of crossflows
   computeSumWij(iblock);
-
   // Solving axial flux
   computeMdot(iblock);
-
   // Calculation of turbulent Crossflow
   computeWijPrime(iblock);
-
   // Solving for Pressure Drop
   computeDP(iblock);
-
   // Solving for pressure
   computeP(iblock);
-
   // Solving cross fluxes
   computeWij(iblock);
 
@@ -2299,15 +2271,12 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
   PetscErrorCode ierr;
   PetscMPIInt size;
   PetscScalar * xx;
-
   ierr = MPI_Comm_size(PETSC_COMM_WORLD, &size);
   CHKERRMPI(ierr);
   if (size > 1)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
-
   ierr = SNESCreate(PETSC_COMM_WORLD, &snes);
   CHKERRQ(ierr);
-
   ierr = VecCreate(PETSC_COMM_WORLD, &x);
   CHKERRQ(ierr);
   ierr = VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps);
@@ -2337,10 +2306,8 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
   CHKERRQ(ierr);
   ierr = KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit);
   CHKERRQ(ierr);
-
   ierr = SNESSetFromOptions(snes);
   CHKERRQ(ierr);
-
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -2352,7 +2319,6 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
 
   ierr = SNESSolve(snes, NULL, x);
   CHKERRQ(ierr);
-
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -2360,14 +2326,12 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
 
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
-
   ierr = VecDestroy(&x);
   CHKERRQ(ierr);
   ierr = VecDestroy(&r);
   CHKERRQ(ierr);
   ierr = SNESDestroy(&snes);
   CHKERRQ(ierr);
-
   return ierr;
 }
 
@@ -2382,8 +2346,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
   std::vector<Mat> mat_array(Q * Q);
   std::vector<Vec> vec_array(Q);
-  //  Mat            mat_array[Q*Q];
-  //  Vec            vec_array[Q];
 
   /// Initializing flags
   bool _axial_mass_flow_tight_coupling = true;
@@ -2410,7 +2372,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     computeh(iblock);
 
   _console << "Starting nested system." << std::endl;
-  _console << Q << std::endl;
+  _console << "Number of simultaneous variables: " << Q << std::endl;
   // Mass conservation
   PetscInt field_num = 0;
   ierr = MatDuplicate(_mc_axial_convection_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 0]);
@@ -2460,14 +2422,10 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
         VecSetValues(sumWij_loc, 1, &row_vec_2, &value_vec_2, ADD_VALUES);
       }
     }
-    // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
     ierr = VecAXPY(vec_array[field_num], 1.0, sumWij_loc);
     CHKERRQ(ierr);
     VecDestroy(&sumWij_loc);
   }
-
-  //  MatGetRowMaxAbs(_mc_axial_convection_mat, _mc_axial_convection_rhs, NULL);
-  //  VecView(_mc_axial_convection_rhs, PETSC_VIEWER_STDOUT_WORLD);
 
   _console << "Mass ok." << std::endl;
   // Axial momentum conservation
@@ -2515,16 +2473,10 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     VecDuplicate(_amc_sys_mdot_rhs, &ls);
     MatMult(_amc_sys_mdot_mat, _prod, ls);
     VecAXPY(ls, -1.0, _amc_sys_mdot_rhs);
-    // VecView(ls, PETSC_VIEWER_STDOUT_WORLD);
     VecAXPY(vec_array[field_num], -1.0, ls);
     VecDestroy(&ls);
   }
 
-  //  MatView(_amc_pressure_force_mat, PETSC_VIEWER_STDOUT_WORLD);
-  //  VecView(vec_array[field_num], PETSC_VIEWER_STDOUT_WORLD);
-
-  //  MatGetRowMaxAbs(_amc_pressure_force_mat, _amc_pressure_force_rhs, NULL);
-  //  VecView(_amc_pressure_force_rhs, PETSC_VIEWER_STDOUT_WORLD);
   _console << "Lin mom OK." << std::endl;
 
   // Cross momentum conservation
@@ -2544,146 +2496,9 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q * field_num + 1] = NULL;
   }
   //  mat_array[Q*field_num+1] = NULL;
-  if (false)
-  {
-    unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size + 1;
-    populateVectorFromHandle<SolutionHandle>(
-        _prod, *_mdot_soln, first_node, last_node, _n_channels);
-    Vec ls;
-    VecDuplicate(_amc_sys_mdot_rhs, &ls);
-    MatMult(_amc_sys_mdot_mat, _prod, ls);
-
-    KSP ksploc;
-    PC pc;
-    Vec sol;
-    VecDuplicate(_amc_pressure_force_rhs, &sol);
-    KSPCreate(PETSC_COMM_WORLD, &ksploc);
-    KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat);
-    KSPGetPC(ksploc, &pc);
-    PCSetType(pc, PCJACOBI);
-    KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-    KSPSetFromOptions(ksploc);
-    VecAXPY(_amc_pressure_force_rhs, 1.0, ls);
-    KSPSolve(ksploc, _amc_pressure_force_rhs, sol);
-    KSPDestroy(&ksploc);
-    VecDestroy(&ls);
-
-    Vec sol_holder_P;
-    createPetscVector(sol_holder_P, _block_size * _n_gaps);
-    ierr = MatMult(_cmc_pressure_force_mat, sol, sol_holder_P);
-    CHKERRQ(ierr);
-    ierr = VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs);
-    CHKERRQ(ierr);
-
-    Vec diag_Wij;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &diag_Wij);
-    CHKERRQ(ierr);
-    ierr = MatGetDiagonal(_cmc_sys_Wij_mat, diag_Wij);
-    CHKERRQ(ierr);
-    VecPointwiseDivide(sol_holder_P, sol_holder_P, diag_Wij);
-
-    Vec sumWij_loc;
-    ierr = VecDuplicate(_mc_axial_convection_rhs, &sumWij_loc);
-    CHKERRQ(ierr);
-    ierr = VecSet(sumWij_loc, 0.0);
-    CHKERRQ(ierr);
-
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      {
-        PetscScalar sumWij = 0.0;
-        // Calculate sum of crossflow into channel i from channels j around i
-        unsigned int counter = 0;
-        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-        {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int i_ch_loc = chans.first;
-          PetscInt row_vec = i_ch_loc + _n_channels * iz_ind;
-          PetscScalar loc_Wij_value;
-          VecGetValues(sol_holder_P, 1, &row_vec, &loc_Wij_value);
-          sumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * loc_Wij_value;
-          counter++;
-        }
-        PetscInt row_vec = i_ch + _n_channels * iz_ind;
-        VecSetValues(sumWij_loc, 1, &row_vec, &sumWij, INSERT_VALUES);
-      }
-    }
-
-    populateVectorFromHandle<SolutionHandle>(
-        _prod, *_mdot_soln, first_node, last_node, _n_channels);
-    VecAbs(_prod);
-    VecAbs(sumWij_loc);
-    VecPointwiseDivide(sumWij_loc, sumWij_loc, _prod);
-
-    // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
-    PetscScalar max_value;
-    // VecMax(sumWij_loc, NULL, &max_value);
-#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
-    VecMean(sumWij_loc, &max_value);
-#else
-    VecSum(sumWij_loc, &max_value);
-    max_value /= _block_size * _n_channels;
-#endif
-    _console << "Max val: " << max_value << std::endl;
-
-    Vec Wij_new_loc, Wij_old_loc;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &Wij_old_loc);
-    CHKERRQ(ierr);
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &Wij_new_loc);
-    CHKERRQ(ierr);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        Wij_old_loc, _Wij_old, first_node, last_node, _n_gaps);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        Wij_new_loc, _Wij, first_node, last_node, _n_gaps);
-    VecAXPY(Wij_new_loc, -1.0, Wij_old_loc);
-    PetscScalar loc_sum_vec;
-    VecAbs(Wij_new_loc);
-#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
-    VecMean(Wij_new_loc, &loc_sum_vec);
-#else
-    VecSum(Wij_new_loc, &loc_sum_vec);
-    loc_sum_vec /= _block_size * _n_gaps;
-#endif
-    max_value *= (std::exp(100 * loc_sum_vec) - 1.0);
-
-    // VecView(sol_holder_P, PETSC_VIEWER_STDOUT_WORLD);
-    VecAbs(sol_holder_P);
-    VecScale(sol_holder_P, max_value);
-
-    ierr = MatDiagonalSet(_cmc_sys_Wij_mat, sol_holder_P, ADD_VALUES);
-    CHKERRQ(ierr);
-
-    VecDestroy(&sol);
-    VecDestroy(&sol_holder_P);
-    VecDestroy(&diag_Wij);
-    VecDestroy(&sumWij_loc);
-    VecDestroy(&Wij_new_loc);
-    VecDestroy(&Wij_old_loc);
-
-    //    PetscScalar relaxation_factor = 0.5;
-    //    Vec diag_Wij;
-    //    ierr = VecDuplicate(_cmc_sys_Wij_rhs,&diag_Wij); CHKERRQ(ierr);
-    //    ierr = MatGetDiagonal(_cmc_sys_Wij_mat,diag_Wij); CHKERRQ(ierr);
-    //    ierr = VecScale(diag_Wij, 1.0/relaxation_factor); CHKERRQ(ierr);
-    //    ierr = MatDiagonalSet(_cmc_sys_Wij_mat, diag_Wij, ADD_VALUES); CHKERRQ(ierr);
-    //    populateVectorFromDense<libMesh::DenseMatrix<Real>>(_Wij_vec, _Wij_old, first_node,
-    //    last_node, _n_gaps); ierr = VecScale(diag_Wij, (1.0-relaxation_factor)); CHKERRQ(ierr);
-    //    ierr = VecPointwiseMult(_Wij_vec, _Wij_vec, diag_Wij); CHKERRQ(ierr);
-    //    VecDestroy(&diag_Wij);
-  }
-  if (false)
-  {
-    PetscScalar local_shift = -1.0;
-    ierr = MatShift(_cmc_sys_Wij_mat, local_shift);
-    CHKERRQ(ierr);
-  }
 
   ierr = MatDuplicate(_cmc_sys_Wij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]);
   CHKERRQ(ierr);
-  // ierr = MatScale(mat_array[Q*field_num+2], -1.0); CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY);
   CHKERRQ(ierr);
   ierr = MatAssemblyEnd(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY);
@@ -2701,7 +2516,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   {
     ierr = VecAXPY(vec_array[field_num], 1.0, _cmc_pressure_force_rhs);
     CHKERRQ(ierr);
-    // ierr = VecScale(vec_array[field_num], -1.0); CHKERRQ(ierr);
   }
   else
   {
@@ -2718,97 +2532,8 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     ierr = VecAXPY(vec_array[field_num], 1.0, sol_holder_P);
     CHKERRQ(ierr);
-  }
-
-  // Automated relaxation for cross flows
-  if (false)
-  {
-    PetscScalar safety_factor = 0.5;
-    Vec sol_holder_P;
-    createPetscVector(sol_holder_P, _block_size * _n_gaps);
-    Vec sol_holder_W;
-    createPetscVector(sol_holder_W, _block_size * _n_gaps);
-    populateVectorFromHandle<SolutionHandle>(
-        _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        _Wij_vec, _Wij, first_node, last_node, _n_gaps);
-
-    Vec diag_Wij;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &diag_Wij);
-    CHKERRQ(ierr);
-    ierr = MatGetDiagonal(_cmc_sys_Wij_mat, diag_Wij);
-    CHKERRQ(ierr);
-    // VecView(diag_Wij, PETSC_VIEWER_STDOUT_WORLD);
-    ierr = VecScale(diag_Wij, -1.0);
-    CHKERRQ(ierr);
-    ierr = MatDiagonalSet(_cmc_sys_Wij_mat, diag_Wij, ADD_VALUES);
-    CHKERRQ(ierr);
-    ierr = VecScale(diag_Wij, -1.0);
-    CHKERRQ(ierr);
-
-    MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W);
-    VecAXPY(sol_holder_W, -1.0, _cmc_sys_Wij_rhs);
-    VecAbs(sol_holder_W);
-    MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P);
-    VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs);
-    VecAbs(sol_holder_W);
-    VecAXPY(sol_holder_W, 1.0, sol_holder_P);
-
-    PetscScalar min_mdot = 1.0;
-    populateVectorFromHandle<SolutionHandle>(
-        _prod, *_mdot_soln, first_node, last_node, _n_channels);
-    ierr = VecAbs(_prod);
-    CHKERRQ(ierr);
-    ierr = VecMin(_prod, NULL, &min_mdot);
-    CHKERRQ(ierr);
-    min_mdot *= safety_factor;
-    min_mdot += 1e-10;
-    ierr = VecScale(sol_holder_W, 1.0 / min_mdot);
-
-    Vec unit_vector;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &unit_vector);
-    CHKERRQ(ierr);
-    ierr = VecSet(unit_vector, 1.0);
-    CHKERRQ(ierr);
-    ierr = VecAXPY(diag_Wij, 1e-10, unit_vector);
-    CHKERRQ(ierr);
-    ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, diag_Wij);
-    CHKERRQ(ierr);
-
-    PetscScalar constraint_max;
-    PetscInt max_pos;
-    Vec abs_diag_Wij;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecCopy(diag_Wij, abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecAbs(abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecMax(sol_holder_W, &max_pos, &constraint_max);
-    CHKERRQ(ierr);
-
-    PetscScalar diag_value;
-    ierr = VecGetValues(diag_Wij, 1, &max_pos, &diag_value);
-    CHKERRQ(ierr);
-    PetscScalar scaling = diag_value * constraint_max;
-    _console << "Max constraint: " << constraint_max << std::endl;
-    _console << "Diagonal value: " << diag_value << std::endl;
-
-    _console << "Relaxation diagonal factor for Wij: " << scaling << std::endl;
-    ierr = MatShift(mat_array[Q * field_num + 2], -1.0 * std::abs(scaling));
-    CHKERRQ(ierr);
-
     VecDestroy(&sol_holder_P);
-    VecDestroy(&sol_holder_W);
-    VecDestroy(&diag_Wij);
-    VecDestroy(&unit_vector);
-    VecDestroy(&abs_diag_Wij);
   }
-
-  //  MatGetRowMaxAbs(_cmc_sys_Wij_mat, _cmc_sys_Wij_rhs, NULL);
-  //  VecView(_cmc_sys_Wij_rhs, PETSC_VIEWER_STDOUT_WORLD);
 
   _console << "Cross mom ok." << std::endl;
 
@@ -2833,6 +2558,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   _console << "Energy ok." << std::endl;
 
   // Relaxing linear system
+  // Weaker relaxation
   if (true)
   {
     // Estimating cross-flow resistances to achieve realizable solves
@@ -2860,7 +2586,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     createPetscVector(_Wij_loc_vec, _block_size * _n_gaps);
     Vec _Wij_old_loc_vec;
     createPetscVector(_Wij_old_loc_vec, _block_size * _n_gaps);
-
     ierr = MatMult(mat_array[Q], _prod, mdot_estimate);
     CHKERRQ(ierr);
     ierr = MatGetDiagonal(mat_array[Q + 1], pmat_diag);
@@ -2869,7 +2594,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     ierr = VecPointwiseDivide(p_estimate, mdot_estimate, pmat_diag);
     CHKERRQ(ierr);
-
     ierr = MatMult(mat_array[2 * Q + 1], p_estimate, sol_holder_P);
     CHKERRQ(ierr);
     ierr = VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs);
@@ -2880,7 +2604,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     ierr = VecPointwiseDivide(Wij_estimate, sol_holder_P, diag_Wij_loc);
     CHKERRQ(ierr);
-
     Vec sumWij_loc;
     createPetscVector(sumWij_loc, _block_size * _n_channels);
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -2912,9 +2635,10 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     _console << "Minimum estimated mdot: " << min_mdot << std::endl;
 
     VecAbs(sumWij_loc);
-    ierr = VecMax(sumWij_loc, NULL, &max_sumWij);
+    ierr = VecMax(sumWij_loc, NULL, &_max_sumWij);
     CHKERRQ(ierr);
-    _console << "Maximum estimated Wij: " << max_sumWij << std::endl;
+    _max_sumWij = std::max(1e-10, _max_sumWij);
+    _console << "Maximum estimated Wij: " << _max_sumWij << std::endl;
 
     populateVectorFromDense<libMesh::DenseMatrix<Real>>(
         _Wij_loc_vec, _Wij, first_node, last_node, _n_gaps);
@@ -2932,12 +2656,11 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     VecSum(_Wij_loc_vec, &relax_factor);
     relax_factor /= _block_size * _n_gaps;
 #endif
-
-    relax_factor = relax_factor / max_sumWij + 0.5;
+    relax_factor = relax_factor / _max_sumWij + 0.5;
     _console << "Relax base value: " << relax_factor << std::endl;
 
     PetscScalar resistance_relaxation = 0.9;
-    _added_K = max_sumWij / min_mdot;
+    _added_K = _max_sumWij / min_mdot;
     _console << "New cross resistance: " << _added_K << std::endl;
     _added_K = (_added_K * resistance_relaxation + (1.0 - resistance_relaxation) * _added_K_old) *
                relax_factor;
@@ -2960,7 +2683,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     // Adding cross resistances
     ierr = MatDiagonalSet(mat_array[2 * Q + 2], unity_vec_Wij, ADD_VALUES);
     CHKERRQ(ierr);
-
     VecDestroy(&mdot_estimate);
     VecDestroy(&pmat_diag);
     VecDestroy(&unity_vec);
@@ -2974,22 +2696,11 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     VecDestroy(&_Wij_old_loc_vec);
 
     // Auto-computing relaxation factors
-
     PetscScalar relaxation_factor_mdot, relaxation_factor_P, relaxation_factor_Wij;
-    //    if (relax_factor < 1E-10)
-    //    {
     relaxation_factor_mdot = 1.0;
     relaxation_factor_P = 1.0; // std::exp(-5.0);
     relaxation_factor_Wij = 0.1;
-    //    }
-    //    else
-    //    {
-    //      PetscScalar relax_factor_loc = std::min(relax_factor, 7.0);
-    //      relaxation_factor_mdot = std::exp(-1.0*relax_factor_loc);
-    //      relaxation_factor_P = std::exp(-1.0*relax_factor_loc);
-    //      relax_factor_loc = std::min(relax_factor, 7.0);
-    //      relaxation_factor_Wij = std::exp(-1.0*relax_factor_loc);
-    //    }
+
     _console << "Relax mdot: " << relaxation_factor_mdot << std::endl;
     _console << "Relax P: " << relaxation_factor_P << std::endl;
     _console << "Relax Wij: " << relaxation_factor_Wij << std::endl;
@@ -3107,8 +2818,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   CHKERRQ(ierr);
   ierr = KSPSolve(ksp, b_nest, x_nest);
   CHKERRQ(ierr);
-  //  VecView(x_nest, PETSC_VIEWER_STDOUT_WORLD);
-  //  _console << "Linear system solved." << std::endl;
 
   /// Destroying solver elements
   ierr = VecDestroy(&b_nest);
@@ -3147,28 +2856,18 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   CHKERRQ(ierr);
   ierr = VecCopy(loc_vecs[2], sol_Wij);
   CHKERRQ(ierr);
-  // VecView(sol_Wij, PETSC_VIEWER_STDOUT_WORLD);
   _console << "Getting individual field solutions from coupled solver." << std::endl;
 
   /// Assigning the solutions to arrays
-  PetscScalar * sol_mdot_array;
-  VecGetArray(sol_mdot, &sol_mdot_array);
   PetscScalar * sol_p_array;
   VecGetArray(sol_p, &sol_p_array);
   PetscScalar * sol_Wij_array;
   VecGetArray(sol_Wij, &sol_Wij_array);
 
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-  {
-    auto iz_ind = iz - first_node;
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      PetscScalar value = sol_mdot_array[iz_ind * _n_channels + i_ch];
-      _mdot_soln->set(node_out, value);
-    }
-  }
+  /// Populating Mass flow
+  populateSolutionChan<SolutionHandle>(sol_mdot, *_mdot_soln, first_node, last_node, _n_channels);
 
+  /// Populating Pressure
   for (unsigned int iz = last_node; iz > first_node - 1; iz--)
   {
     auto iz_ind = iz - first_node;
@@ -3177,80 +2876,61 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       PetscScalar value = sol_p_array[iz_ind * _n_channels + i_ch];
       _P_soln->set(node_in, value);
-      //_console << (*_P_soln)(node_in) << std::endl;
     }
   }
 
-  for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
-  {
-    auto iz_ind = iz - first_node - 1;
-    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-    {
-      _Wij(i_gap, iz - 1 - iblock * _block_size) = sol_Wij_array[iz_ind * _n_gaps + i_gap];
-    }
-  }
+  /// Populating Crossflow
+  populateDenseFromVector<libMesh::DenseMatrix<Real>>(
+      sol_Wij, _Wij, first_node, last_node - 1, _n_gaps);
 
+  /// Populating Enthalpy
   if (_monolithic_thermal_bool)
   {
     Vec sol_h;
-    ierr = VecDuplicate(_cmc_sys_Wij_rhs, &sol_h);
+    ierr = VecDuplicate(_hc_sys_h_rhs, &sol_h);
     CHKERRQ(ierr);
     ierr = VecCopy(loc_vecs[3], sol_h);
     CHKERRQ(ierr);
     PetscScalar * sol_h_array;
     VecGetArray(sol_h, &sol_h_array);
-
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto iz_ind = iz - first_node;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        PetscScalar value = sol_h_array[iz_ind * _n_channels + i_ch];
+        _h_soln->set(node_out, value);
 
-        if (sol_h_array[iz_ind * _n_channels + i_ch] < 0)
+        if (value < 0)
         {
-          _console << "Wij = : " << _Wij << "\n";
           mooseError(name(),
                      " : Calculation of negative Enthalpy h_out = : ",
-                     sol_h_array[iz_ind * _n_channels + i_ch],
+                     value,
                      " Axial Level= : ",
                      iz);
         }
-        _h_soln->set(node_out, sol_h_array[iz_ind * _n_channels + i_ch]);
       }
     }
-
     ierr = VecDestroy(&sol_h);
     CHKERRQ(ierr);
   }
 
-  // Populating sum_Wij
+  /// Populating sum_Wij
   MatMult(_mc_sumWij_mat, sol_Wij, _prod);
-  PetscScalar * xx;
-  VecGetArray(_prod, &xx);
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_node;
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-      _SumWij_soln->set(node_out, value);
-      //_console << "Sum Wij: " << value << std::endl;
-    }
-  }
+  populateSolutionChan<SolutionHandle>(_prod, *_SumWij_soln, first_node, last_node, _n_channels);
 
   Vec sumWij_loc;
   createPetscVector(sumWij_loc, _block_size * _n_channels);
   populateVectorFromHandle<SolutionHandle>(
       _prod, *_SumWij_soln, first_node, last_node, _n_channels);
-  PetscScalar max_sumWij_new;
+
   VecAbs(_prod);
-  ierr = VecMax(_prod, NULL, &max_sumWij_new);
+  ierr = VecMax(_prod, NULL, &_max_sumWij_new);
   CHKERRQ(ierr);
-  _console << "Maximum estimated Wij new: " << max_sumWij_new << std::endl;
-  correction_factor = max_sumWij_new / max_sumWij;
-  _console << "Correction factor: " << correction_factor << std::endl;
+  _console << "Maximum estimated Wij new: " << _max_sumWij_new << std::endl;
+  _correction_factor = _max_sumWij_new / _max_sumWij;
+  _console << "Correction factor: " << _correction_factor << std::endl;
 
   _console << "Solutions assigned to MOOSE variables." << std::endl;
 
@@ -3263,6 +2943,8 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   CHKERRQ(ierr);
   ierr = VecDestroy(&sol_Wij);
   CHKERRQ(ierr);
+  ierr = VecDestroy(&sumWij_loc);
+  CHKERRQ(ierr);
   _console << "Solutions destroyed." << std::endl;
 
   return ierr;
@@ -3271,10 +2953,8 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
 void
 InterWrapper1PhaseProblem::initializeSolution()
 {
-
   unsigned int last_node = _n_cells;
   unsigned int first_node = 1;
-
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -3282,25 +2962,6 @@ InterWrapper1PhaseProblem::initializeSolution()
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
-      _h_soln->set(node_out, (*_h_soln)(node_in));
-    }
-  }
-
-  for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-  {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      _P_soln->set(node_bottom, (*_P_soln)(node_top));
-    }
-  }
-
-  for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
-  {
-    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-    {
-      _Wij(i_gap, iz) = _Wij(i_gap, iz - 1);
     }
   }
 }
@@ -3309,20 +2970,24 @@ void
 InterWrapper1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
-  auto P_error = 1.0;
+  initializeSolution();
+  _console << "Solution initialized" << std::endl;
+  Real P_error = 1.0;
   unsigned int P_it = 0;
-  unsigned int P_it_max = 2 * _n_blocks;
-  if (_n_blocks == 1)
-    P_it_max = 1;
-  if (!_segregated_bool)
-  {
-    initializeSolution();
-    _console << "Solution initialized" << std::endl;
-  }
+  unsigned int P_it_max;
+
+  if (_segregated_bool)
+    P_it_max = 20 * _n_blocks;
+  else
+    P_it_max = 100;
+
+  if ((_n_blocks == 1) && (_segregated_bool))
+    P_it_max = 5;
+
   while ((P_error > _P_tol && P_it < P_it_max))
   {
     P_it += 1;
-    if (P_it == P_it_max and _n_blocks != 1)
+    if (P_it == P_it_max && _n_blocks != 1)
     {
       _console << "Reached maximum number of axial pressure iterations" << std::endl;
       _converged = false;
@@ -3333,7 +2998,7 @@ InterWrapper1PhaseProblem::externalSolve()
     {
       int last_level = (iblock + 1) * _block_size;
       int first_level = iblock * _block_size + 1;
-      auto T_block_error = 1.0;
+      Real T_block_error = 1.0;
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
@@ -3351,6 +3016,7 @@ InterWrapper1PhaseProblem::externalSolve()
         if (_segregated_bool)
         {
           computeWijFromSolve(iblock);
+
           if (_compute_power)
           {
             computeh(iblock);
@@ -3361,22 +3027,21 @@ InterWrapper1PhaseProblem::externalSolve()
         }
         else
         {
+          implicitPetscSolve(iblock);
+          computeWijPrime(iblock);
+
+          _console << "Done with main solve." << std::endl;
           if (_monolithic_thermal_bool)
           {
-            _console << "No llores mas aqui estoy 1." << std::endl;
-            implicitPetscSolve(iblock);
+            // Enthalpy is already solved from the monolithic solve
             computeT(iblock);
           }
           else
           {
             _console << "No llores mas aqui estoy 2." << std::endl;
-            implicitPetscSolve(iblock);
-            _console << "Done with main solve." << std::endl;
             if (_compute_power)
             {
-              _console << "Starting enthalpy solve." << std::endl;
               computeh(iblock);
-              _console << "Done with enthalpy solve." << std::endl;
               computeT(iblock);
             }
             _console << "Done with thermal solve." << std::endl;
@@ -3450,6 +3115,7 @@ InterWrapper1PhaseProblem::externalSolve()
     }
   }
   _aux->solution().close();
+  _aux->update();
 }
 
 void InterWrapper1PhaseProblem::syncSolutions(Direction /*direction*/) {}

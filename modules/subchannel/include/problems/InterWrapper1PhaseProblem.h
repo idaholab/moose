@@ -184,6 +184,12 @@ protected:
                                          const unsigned int last_axial_level,
                                          const unsigned int cross_dimension);
   template <class T>
+  PetscErrorCode populateDenseFromVector(const Vec & x,
+                                         T & solution,
+                                         const unsigned int first_axial_level,
+                                         const unsigned int last_axial_level,
+                                         const unsigned int cross_dimension);
+  template <class T>
   PetscErrorCode populateVectorFromHandle(Vec & x,
                                           const T & solution,
                                           const unsigned int first_axial_level,
@@ -282,10 +288,35 @@ protected:
   /// Added resistances for monolithic convergence
   PetscScalar _added_K = 0.0;
   PetscScalar _added_K_old = 1000.0;
-  PetscScalar max_sumWij;
-  PetscScalar max_sumWij_new;
-  PetscScalar correction_factor = 1.0;
+  PetscScalar _max_sumWij;
+  PetscScalar _max_sumWij_new;
+  PetscScalar _correction_factor = 1.0;
 
 public:
   static InputParameters validParams();
 };
+
+template <class T>
+PetscErrorCode
+InterWrapper1PhaseProblem::populateDenseFromVector(const Vec & x,
+                                                   T & loc_solution,
+                                                   const unsigned int first_axial_level,
+                                                   const unsigned int last_axial_level,
+                                                   const unsigned int cross_dimension)
+{
+  PetscErrorCode ierr;
+  PetscScalar * xx;
+  ierr = VecGetArray(x, &xx);
+  CHKERRQ(ierr);
+  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
+  {
+    unsigned int iz_ind = iz - first_axial_level;
+    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
+    {
+      loc_solution(i_l, iz) = xx[iz_ind * cross_dimension + i_l];
+    }
+  }
+  ierr = VecRestoreArray(x, &xx);
+  CHKERRQ(ierr);
+  return 0;
+}
