@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef WASP_ENABLED
-
 #include "MooseServer.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -873,5 +871,3 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
 
   return pass;
 }
-
-#endif

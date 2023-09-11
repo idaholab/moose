@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef WASP_ENABLED
-
 #include "gtest_include.h"
 
 #include "MooseServer.h"
@@ -1470,5 +1468,3 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 }
-
-#endif

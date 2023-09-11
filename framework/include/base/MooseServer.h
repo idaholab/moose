@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef WASP_ENABLED
-
 #pragma once
 
 #include "MooseApp.h"
@@ -272,5 +270,3 @@ private:
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
 };
-
-#endif

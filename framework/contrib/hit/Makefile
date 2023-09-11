@@ -39,7 +39,7 @@ ifeq ($(wasp_LIBS),)
   $(error WASP does not seem to be available. Make sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory, or set WASP_DIR to a valid WASP install)
 endif
 
-wasp_CXXFLAGS  += -DWASP_ENABLED -I$(WASP_DIR)/include
+wasp_CXXFLAGS  += -I$(WASP_DIR)/include
 wasp_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 
 hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
