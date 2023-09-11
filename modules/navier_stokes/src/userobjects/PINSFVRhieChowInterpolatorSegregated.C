@@ -28,7 +28,9 @@ PINSFVRhieChowInterpolatorSegregated::validParams()
 
 PINSFVRhieChowInterpolatorSegregated::PINSFVRhieChowInterpolatorSegregated(
     const InputParameters & params)
-  : INSFVRhieChowInterpolatorSegregated(params), _eps(getFunctor<ADReal>(NS::porosity))
+  : INSFVRhieChowInterpolatorSegregated(params),
+    _eps(getFunctor<ADReal>(NS::porosity)),
+    _epss(libMesh::n_threads(), nullptr)
 {
   const auto porosity_name = deduceFunctorName(NS::porosity);
   for (const auto tid : make_range(libMesh::n_threads()))
