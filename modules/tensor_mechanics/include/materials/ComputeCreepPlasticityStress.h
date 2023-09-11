@@ -51,6 +51,17 @@ protected:
   virtual void updateQpState(RankTwoTensor & elastic_strain_increment,
                              RankTwoTensor & combined_inelastic_strain_increment) override;
 
+  void computeStress(const RankTwoTensor & elastic_strain_increment, RankTwoTensor & stress);
+  void computeTangentOperators();
+  void computeInelasticStrainIncrements(Real effective_trial_stress,
+                                        const RankTwoTensor & deviatoric_trial_stress);
+  void finalizeConstitutiveModels();
+
   PowerLawCreepStressUpdate * _creep_model;
   IsotropicPlasticityStressUpdate * _plasticity_model;
+
+  Real _effective_creep_strain_increment;
+  Real _effective_plastic_strain_increment;
+
+  std::array<RankTwoTensor, 2> _inelastic_strain_increment;
 };
