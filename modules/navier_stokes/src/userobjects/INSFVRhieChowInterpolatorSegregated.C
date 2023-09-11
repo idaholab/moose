@@ -251,6 +251,7 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
     _momentum_implicit_systems[system_i]->update();
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
+    // _momentum_implicit_systems[system_i]->solution->print();
   }
 }
 

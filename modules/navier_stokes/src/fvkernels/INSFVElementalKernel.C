@@ -26,19 +26,32 @@ void
 INSFVElementalKernel::computeResidual()
 {
   if (_rc_uo.segregated())
-    FVElementalKernel::computeResidual();
+  {
+    prepareVectorTag(_assembly, _var.number());
+    _local_re(0) +=
+        MetaPhysicL::raw_value(computeSegregatedContribution() * _assembly.elemVolume());
+    accumulateTaggedLocalResidual();
+  }
 }
 void
 INSFVElementalKernel::computeJacobian()
 {
   if (_rc_uo.segregated())
-    FVElementalKernel::computeJacobian();
+  {
+    const auto r = computeSegregatedContribution() * _assembly.elemVolume();
+    mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+    addJacobian(_assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
+  }
 }
 void
 INSFVElementalKernel::computeResidualAndJacobian()
 {
   if (_rc_uo.segregated())
-    FVElementalKernel::computeResidualAndJacobian();
+  {
+    const auto r = computeSegregatedContribution() * _assembly.elemVolume();
+    addResidualsAndJacobian(
+        _assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
+  }
 }
 
 void

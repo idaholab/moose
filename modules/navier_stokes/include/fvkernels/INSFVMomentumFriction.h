@@ -26,7 +26,10 @@ public:
   void gatherRCData(const Elem &) override;
 
 protected:
-  ADReal computeQpResidual() override;
+  ADReal computeSegregatedContribution() override;
+
+  /// Computes the friction coefficient which gets multiplied by the velocity
+  ADReal computeCoefficient();
 
   /// The linear friction factor, for laminar flow
   const Moose::Functor<ADReal> * const _linear_friction;

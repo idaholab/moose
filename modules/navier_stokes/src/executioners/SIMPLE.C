@@ -487,7 +487,7 @@ SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
   // Since use the l2 norm of the solution vectors in the linear solver, we will
   // make this consistent and use the l2 norm of the vector
   // TODO: Would be nice to see if we can do l1 norms in the linear solve
-  return A_times_average_solution->l2_norm();
+  return (A_times_average_solution->l2_norm() + 1e-14);
 }
 
 void
@@ -646,10 +646,12 @@ SIMPLE::solveMomentumPredictor()
   // Compute the normalized residual
   // normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
+  auto zero_solution = _momentum_systems[0]->system().current_local_solution->zero_clone();
+
   // If we use a segregated approach between momentum components as well, we need to solve
   // the other equations. Luckily, the system matrix is exactly the same so we only need
   // to compute right hand sides.
-  for (auto system_i : index_range(_momentum_systems))
+  for (const auto system_i : index_range(_momentum_systems))
   {
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
 
@@ -659,8 +661,6 @@ SIMPLE::solveMomentumPredictor()
 
     PetscLinearSolver<Real> & momentum_solver =
         libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
-
-    auto zero_solution = momentum_system.current_local_solution->zero_clone();
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -684,9 +684,8 @@ SIMPLE::solveMomentumPredictor()
     // Very important, for deciding the convergence, we need the unpreconditioned
     // norms in the linear solve
     KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-    // Solve this component. We don't update the ghosted solution yet, that will come at the end of
-    // the corrector step
-    // Setting the lineat tolerances and maximum iteration counts
+    // Solve this component. We don't update the ghosted solution yet, that will come at the end
+    // of the corrector step Setting the lineat tolerances and maximum iteration counts
     _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
     momentum_solver.set_solver_configuration(_momentum_ls_control);
 
@@ -694,6 +693,8 @@ SIMPLE::solveMomentumPredictor()
     // TO DO: Add options to this function in Libmesh to accept absolute tolerance
     momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
+    _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
+    _momentum_systems[system_i]->copySolutionsBackwards();
 
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);

@@ -50,7 +50,7 @@ PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputPa
 }
 
 ADReal
-PINSFVMomentumFrictionCorrection::computeQpResidual()
+PINSFVMomentumFrictionCorrection::computeStrongResidual()
 {
   using namespace Moose::FV;
 
@@ -134,7 +134,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   using namespace Moose::FV;
 
   // Compute face superficial velocity gradient
-  auto strong_residual = computeQpResidual();
+  auto strong_residual = computeStrongResidual();
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

@@ -1225,8 +1225,9 @@ SystemBase::copySolutionsBackwards()
   {
     const auto states = _solution_states[iteration_index].size();
     if (states > 1)
-      for (unsigned int i = 1; i <= states - 1; ++i)
-        solutionState(i) = solutionState(0);
+      for (unsigned int i = states - 1; i > 0; --i)
+        solutionState(i, Moose::SolutionIterationType(iteration_index)) =
+            solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
   }
 
   if (solutionUDotOld())

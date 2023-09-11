@@ -69,6 +69,8 @@ public:
    */
   const INSFVPressureVariable & pressure(THREAD_ID tid) const;
 
+  const INSFVVelocityVariable * vel() const { return _u;}
+
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   virtual bool segregated() const = 0;
 
