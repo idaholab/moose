@@ -15,23 +15,18 @@ registerMooseObject("OptimizationTestApp", QuadraticMinimizeConstrained);
 InputParameters
 QuadraticMinimizeConstrained::validParams()
 {
-  InputParameters params = OptimizationReporter::validParams();
-  params.addRequiredParam<Real>("objective", "Desired value of objective function.");
-  params.addRequiredParam<std::vector<Real>>("solution", "Desired solution to optimization.");
+  InputParameters params = QuadraticMinimize::validParams();
   params.addRequiredParam<Real>("solution_sum_equality",
                                 "Desired sum of the solution for constrained optimization.");
   return params;
 }
 
 QuadraticMinimizeConstrained::QuadraticMinimizeConstrained(const InputParameters & parameters)
-  : OptimizationReporter(parameters),
+  : QuadraticMinimize(parameters),
     _result(getParam<Real>("objective")),
     _solution(getParam<std::vector<Real>>("solution")),
     _eq_constraint(getParam<Real>("solution_sum_equality"))
 {
-  setICsandBounds();
-  if (_solution.size() != _ndof)
-    paramError("solution", "Size not equal to number of degrees of freedom (", _ndof, ").");
 }
 
 Real
@@ -69,11 +64,7 @@ QuadraticMinimizeConstrained::computeEqualityConstraints(
   unsigned int i = 0;
   for (const auto & param : _parameters)
   {
-    Real equality_constraint = 0;
-    for (const auto & val : *param)
-    {
-      equality_constraint += val;
-    }
+    const Real equality_constraint = std::accumulate(param->begin(), param->end(), 0.0);
     eqs_constraints.set(i++, equality_constraint - _eq_constraint);
   }
   eqs_constraints.close();
@@ -82,9 +73,8 @@ void
 QuadraticMinimizeConstrained::computeEqualityGradient(libMesh::PetscMatrix<Number> & gradient) const
 {
   gradient.zero();
-
-  for (unsigned long i = 0; i < _n_eq_cons; i++)
-    for (unsigned long j = 0; j < _parameters[0]->size(); j++)
+  for (const auto i : make_range(_n_eq_cons))
+    for (const auto j : index_range(*_parameters[0]))
       gradient.set(i, j, 1);
 
   gradient.close();

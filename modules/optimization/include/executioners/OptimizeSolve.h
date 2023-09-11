@@ -177,7 +177,8 @@ private:
   /// Inequality constraint gradient
   Mat _gradient_i;
 
-  ///
+  /// Used for creating petsc structures when using the ALMM algorithm
   PetscErrorCode taoALCreate();
+  /// Used for destroying petsc structures when using the ALMM algorithm
   PetscErrorCode taoALDestroy();
 };

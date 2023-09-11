@@ -42,14 +42,10 @@ void
 copyReporterIntoPetscMatrix(const std::vector<std::vector<Real> *> reporterVectors,
                             libMesh::PetscMatrix<Number> & x)
 {
-  dof_id_type i = 0;
-  dof_id_type j = 0;
-  for (const auto & data : reporterVectors)
-  {
-    for (const auto & val : *data)
-      x.set(i, j++, val);
-    i++;
-  }
+  for (const auto i : index_range(reporterVectors))
+    for (const auto j : index_range(*reporterVectors[i]))
+      x.set(i, j, reporterVectors[i]->at(j));
+
   x.close();
 }
 
@@ -57,13 +53,8 @@ void
 copyPetscMatrixIntoReporter(const libMesh::PetscMatrix<Number> & x,
                             std::vector<std::vector<Real> *> reporterVectors)
 {
-  dof_id_type i = 0;
-  dof_id_type j = 0;
-  for (auto & data : reporterVectors)
-  {
-    for (auto & val : *data)
-      val = x(i, j++);
-    i++;
-  }
+  for (const auto i : index_range(reporterVectors))
+    for (const auto j : index_range(*reporterVectors[i]))
+      reporterVectors[i]->at(j) = x(i, j);
 }
 }

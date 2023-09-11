@@ -20,7 +20,8 @@ GeneralOptimization::validParams()
 {
   InputParameters params = OptimizationReporterBase::validParams();
 
-  params.addRequiredParam<ReporterValueName>("objective_name", "Objective reporter name.");
+  params.addRequiredParam<ReporterValueName>(
+      "objective_name", "Preferred name of reporter value defining the objective.");
   params.addParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");

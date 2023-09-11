@@ -9,14 +9,17 @@
 
 #pragma once
 
-#include "OptimizationReporter.h"
+#include "QuadraticMinimize.h"
 
 /**
- * This form function simply represents a quadratic objective function:
- *    f(x) = val + \sum_{i=1}^N (x_i - a_i)^2
- * where val is the input objective value and a_i is the input solution.
+ * This form function represents a constrained quadratic objective function:
+ *    minimize f(x) = val + \sum_{i=1}^N (x_i - a_i)^2
+ * Subject to the equality constraint:
+ *    c_e(x) = \sum_{i=1}^N x_i - c_{total} = 0
+ *    where val is the input objective value, a_i is the input solution, and
+ *    c_total is the equality sum constant.
  */
-class QuadraticMinimizeConstrained : public OptimizationReporter
+class QuadraticMinimizeConstrained : public QuadraticMinimize
 {
 public:
   static InputParameters validParams();
@@ -32,7 +35,7 @@ private:
   /// Input objective function value
   const Real & _result;
 
-  /// Desired solution to optimization
+  /// Desired solution to optimize to
   const std::vector<Real> & _solution;
 
   const Real _eq_constraint;

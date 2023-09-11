@@ -71,13 +71,13 @@ public:
 
   /**
    * Function to compute the equality constraints.
-   *
+   * This is the last call of the equality function routine.
    */
   virtual void computeEqualityConstraints(libMesh::PetscVector<Number> & eqs_constraints) const;
 
   /**
    * Function to compute the inequality constraints.
-   *
+   * This is the last call of the inequality function routine.
    */
   virtual void computeInequalityConstraints(libMesh::PetscVector<Number> & ineqs_constraints) const;
 
@@ -95,13 +95,13 @@ public:
 
   /**
    * Function to get the total number of equalities
-   * @return total number of parameters
+   * @return total number of equality constraints
    */
   dof_id_type getNumEqCons() const { return _n_eq_cons; }
 
   /**
    * Function to get the total number of inequalities
-   * @return total number of parameters
+   * @return total number of inequalities constraints
    */
   dof_id_type getNumInEqCons() const { return _n_ineq_cons; }
 
@@ -133,14 +133,18 @@ protected:
   /// Tikhonov Coefficient for regularization
   const Real _tikhonov_coeff;
 
+  /// Equality constraint names
   const std::vector<ReporterValueName> * _equality_names;
+  /// Number of equality constraint names
   const unsigned int _n_eq_cons;
   /// Equality values declared as reporter data
   std::vector<std::vector<Real> *> _eq_constraints;
   /// Gradient values declared as reporter data
   std::vector<std::vector<Real> *> _eq_gradients;
 
+  /// Inequality constraint names
   const std::vector<ReporterValueName> * _inequality_names;
+  /// Number of inequality constraint names
   const unsigned int _n_ineq_cons;
   /// Inequality values declared as reporter data
   std::vector<std::vector<Real> *> _ineq_constraints;
