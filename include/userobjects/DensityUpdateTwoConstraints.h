@@ -48,15 +48,18 @@ private:
     Real old_density;
     Real sensitivity;
     Real cost_sensitivity;
+    Real thermal_sensitivity;
     Real cost;
     Real volume;
     Real new_density;
 
     ElementData() = default;
-    ElementData(Real dens, Real sens, Real cost_sens, Real cst, Real vol, Real filt_dens)
+    ElementData(
+        Real dens, Real sens, Real cost_sens, Real thermal_sens, Real cst, Real vol, Real filt_dens)
       : old_density(dens),
         sensitivity(sens),
         cost_sensitivity(cost_sens),
+        thermal_sensitivity(thermal_sens),
         cost(cst),
         volume(vol),
         new_density(filt_dens)
@@ -68,8 +71,13 @@ private:
   void performOptimCritLoop();
   void computePhysDensity();
 
-  Real computeUpdatedDensity(
-      Real current_density, Real dc, Real cost_sensitivity, Real cost, Real lmid, Real cmid);
+  Real computeUpdatedDensity(Real current_density,
+                             Real dc,
+                             Real cost_sensitivity,
+                             Real thermal_sensitivity,
+                             Real cost,
+                             Real lmid,
+                             Real cmid);
 
   /// Total volume allowed for volume contraint
   Real _total_allowable_volume;
@@ -88,4 +96,8 @@ private:
   const Real _bisection_move;
   /// Whether bisection moves are adaptive
   const bool _adaptive_move;
+  /// Thermal compliance sensitivity name
+  VariableName _thermal_sensitivity_name;
+  /// Thermal compliance variable
+  MooseVariable * _thermal_sensitivity;
 };

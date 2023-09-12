@@ -51,7 +51,21 @@
     input = 'paper_three_materials_test.i'
     csvdiff = 'paper_three_materials_test_out.csv'
     requirement = 'The system shall be able to compute a three-material topology optimization '
-                  'problem and reproduce approximate results from the literature.'
+                  'mechanical complianceproblem and reproduce approximate results from the '
+                  'literature.'
     heavy = true
+    method = 'opt'
+    valgrind = 'none'
+  []
+  [three_materials_thermal]
+    type = 'CSVDiff'
+    input = 'three_materials_thermal.i'
+    csvdiff = 'three_materials_thermal_out.csv'
+    requirement = 'The system shall be able to compute a three-material topology optimization '
+                  'thermal complianceproblem and qualitatively reproduce results from the '
+                  'literature.'
+    heavy = true
+    method = 'opt'
+    valgrind = 'none'
   []
 []

@@ -30,6 +30,8 @@ DensityUpdateTwoConstraints::validParams()
                                         "Name of the density_sensitivity variable.");
   params.addRequiredParam<VariableName>("cost_density_sensitivity",
                                         "Name of the cost density sensitivity variable.");
+  params.addParam<VariableName>("thermal_sensitivity",
+                                "Name of the thermal density sensitivity variable.");
   params.addRequiredParam<Real>("volume_fraction", "Volume fraction.");
   params.addRequiredParam<Real>("cost_fraction", "Cost fraction.");
   params.addParam<Real>("bisection_move", 0.01, "Bisection move for the updated solution.");
@@ -42,6 +44,16 @@ DensityUpdateTwoConstraints::validParams()
 
   params.addParam<Real>("bisection_lower_bound", 0, "Lower bound for the bisection algorithm.");
   params.addParam<Real>("bisection_upper_bound", 1e16, "Upper bound for the bisection algorithm.");
+
+  params.addParam<std::vector<Real>>(
+      "weight_mechanical_thermal",
+      "List of values between 0 and 1 to weight the stiffness and thermal sensitivities");
+
+  params.addParam<bool>("use_thermal_compliance",
+                        false,
+                        "Whether to include the thermal compliance in the sensitivities to "
+                        "minimize in conjunction with stiffness compliance.");
+
   return params;
 }
 
@@ -62,8 +74,33 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
     _lower_bound(getParam<Real>("bisection_lower_bound")),
     _upper_bound(getParam<Real>("bisection_upper_bound")),
     _bisection_move(getParam<Real>("bisection_move")),
-    _adaptive_move(getParam<bool>("adaptive_move"))
+    _adaptive_move(getParam<bool>("adaptive_move")),
+    _thermal_sensitivity_name(
+        isParamValid("thermal_sensitivity") ? getParam<VariableName>("thermal_sensitivity") : ""),
+    _thermal_sensitivity(isParamValid("thermal_sensitivity")
+                             ? &_subproblem.getStandardVariable(_tid, _thermal_sensitivity_name)
+                             : nullptr)
 {
+  if (isParamValid("thermal_sensitivity"))
+  {
+    if (!isParamValid("thermal_sensitivity"))
+      paramError("thermal_sensitivity",
+                 "The thermal_sensitivity variable name must be provided by the user if "
+                 "include_thermal_compliance is chosen to be true.");
+
+    if (isParamValid("weight_mechanical_thermal"))
+    {
+      const std::vector<Real> & weight_values =
+          getParam<std::vector<Real>>("weight_mechanical_thermal");
+      if (weight_values.size() != 2)
+        paramError("weight_mechanical_thermal",
+                   "Weighing of sensitivities is only available for the mechanical compliance and "
+                   "the thermal compliances problems, respectively.");
+    }
+    else
+      paramError("weight_mechanical_thermal",
+                 "This parameter needs to be provided when including thermal sensitivity.");
+  }
 }
 
 void
@@ -102,12 +139,14 @@ DensityUpdateTwoConstraints::gatherElementData()
   for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
   {
     dof_id_type elem_id = elem->id();
-    ElementData data = ElementData(_design_density.getElementalValue(elem),
-                                   _density_sensitivity.getElementalValue(elem),
-                                   _cost_density_sensitivity.getElementalValue(elem),
-                                   _cost.getElementalValue(elem),
-                                   elem->volume(),
-                                   0);
+    ElementData data = ElementData(
+        _design_density.getElementalValue(elem),
+        _density_sensitivity.getElementalValue(elem),
+        _cost_density_sensitivity.getElementalValue(elem),
+        isParamValid("thermal_sensitivity") ? _thermal_sensitivity->getElementalValue(elem) : 0.0,
+        _cost.getElementalValue(elem),
+        elem->volume(),
+        0);
     _elem_data_map[elem_id] = data;
     _total_allowable_volume += elem->volume();
   }
@@ -150,10 +189,14 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
     // Loop over all elements
     for (auto && [id, elem_data] : _elem_data_map)
     {
+      const std::vector<Real> & weight_values =
+          getParam<std::vector<Real>>("weight_mechanical_thermal");
+
       // Compute the updated density for the current element
       Real new_density = computeUpdatedDensity(elem_data.old_density,
-                                               elem_data.sensitivity,
+                                               elem_data.sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[0] : 1.0),
                                                elem_data.cost_sensitivity,
+                                               elem_data.thermal_sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[1] : 1.0),
                                                elem_data.cost,
                                                lmid,
                                                cmid);
@@ -190,8 +233,13 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
 
 // Method to compute the updated density for an element
 Real
-DensityUpdateTwoConstraints::computeUpdatedDensity(
-    Real current_density, Real dc, Real cost_sensitivity, Real cost, Real lmid, Real cmid)
+DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
+                                                   Real dc,
+                                                   Real cost_sensitivity,
+                                                   Real temp_sensitivity,
+                                                   Real cost,
+                                                   Real lmid,
+                                                   Real cmid)
 {
   Real move = _bisection_move;
 
@@ -216,12 +264,13 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(
 
   Real updated_density = std::max(
       1.0e-5,
-      std::max(
-          current_density - move,
-          std::min(1.0,
-                   std::min(current_density + move,
-                            current_density *
-                                MathUtils::pow(std::sqrt(std::abs(-dc / denominator)), damping)))));
+      std::max(current_density - move,
+               std::min(1.0,
+                        std::min(current_density + move,
+                                 current_density *
+                                     MathUtils::pow(std::sqrt((-(dc + temp_sensitivity) /
+                                                                       denominator)),
+                                                    damping)))));
 
   // Return the updated density
   return updated_density;
