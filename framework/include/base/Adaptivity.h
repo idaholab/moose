@@ -129,10 +129,11 @@ public:
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
-   * Switch from h-refinement to p-refinement
-   * @param disable_lagrange_p_refinement Whether to disable the p-refinement of Lagrange variables
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * @param doing_p_refinement Whether we're doing p-refinement
+   * @param disable_lagrange_p_refinement Whether to disable p-refinement of Lagrange variables
    */
-  void switchHToPRefinement(bool disable_lagrange_p_refinement);
+  void doingPRefinement(bool doing_p_refinement, bool disable_lagrange_p_refinement);
 
   /**
    * Adapts the mesh based on the error estimator used

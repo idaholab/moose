@@ -1319,7 +1319,7 @@ public:
   /**
    * Indicate whether the kind of adaptivity we're doing is p-refinement
    */
-  void doingPRefinement(bool have_p_refinement) { _doing_p_refinement = have_p_refinement; }
+  void doingPRefinement(bool doing_p_refinement) { _doing_p_refinement = doing_p_refinement; }
 
   /**
    * Query whether we have p-refinement

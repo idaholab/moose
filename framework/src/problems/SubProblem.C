@@ -57,7 +57,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
     _output_functors(false),
-    _typed_vector_tags(2)
+    _typed_vector_tags(2),
+    _have_p_refinement(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -1274,35 +1275,35 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 }
 
 void
-SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
+SubProblem::doingPRefinement(const bool doing_p_refinement,
+                             const bool disable_lagrange_p_refinement)
 {
-  mesh().doingPRefinement();
+  mesh().doingPRefinement(doing_p_refinement);
 
-  for (const auto tid : make_range(libMesh::n_threads()))
-    for (const auto s : make_range(numNonlinearSystems()))
-      assembly(tid, s).havePRefinement(disable_lagrange_p_refinement);
-
-  if (disable_lagrange_p_refinement)
+  if (doing_p_refinement)
   {
-    auto & eq = es();
-    for (const auto i : make_range(eq.n_systems()))
+    for (const auto tid : make_range(libMesh::n_threads()))
+      for (const auto s : make_range(numNonlinearSystems()))
+        assembly(tid, s).havePRefinement(disable_lagrange_p_refinement);
+
+    if (disable_lagrange_p_refinement)
     {
-      auto & system = eq.get_system(i);
-      auto & dof_map = system.get_dof_map();
-      for (const auto vg : make_range(system.n_variable_groups()))
+      auto & eq = es();
+      for (const auto i : make_range(eq.n_systems()))
       {
-        const auto & var_group = system.variable_group(vg);
-        if (var_group.type().family == LAGRANGE)
-          dof_map.should_p_refine(vg, false);
+        auto & system = eq.get_system(i);
+        auto & dof_map = system.get_dof_map();
+        for (const auto vg : make_range(system.n_variable_groups()))
+        {
+          const auto & var_group = system.variable_group(vg);
+          if (var_group.type().family == LAGRANGE)
+            dof_map.should_p_refine(vg, false);
+        }
       }
     }
-  }
-}
 
-bool
-SubProblem::havePRefinement() const
-{
-  return mesh().doingPRefinement();
+    _have_p_refinement = true;
+  }
 }
 
 template MooseVariableFEBase &

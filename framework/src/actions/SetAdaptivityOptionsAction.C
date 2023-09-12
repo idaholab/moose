@@ -152,6 +152,6 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.switchHToPRefinement(getParam<bool>("disable_lagrange_p_refinement"));
+      adapt.doingPRefinement(true, getParam<bool>("disable_lagrange_p_refinement"));
   }
 }

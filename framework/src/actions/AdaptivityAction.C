@@ -186,7 +186,7 @@ AdaptivityAction::act()
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.switchHToPRefinement(getParam<bool>("disable_lagrange_p_refinement"));
+      adapt.doingPRefinement(true, getParam<bool>("disable_lagrange_p_refinement"));
   }
 }
 

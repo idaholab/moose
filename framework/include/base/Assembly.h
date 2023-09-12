@@ -1835,6 +1835,8 @@ public:
 
   /**
    * Indicate that we have p-refinement
+   * @param disable_lagrange_p_refinement Indicate whether we should disable p-refinement of
+   * Lagrange objects
    */
   void havePRefinement(bool disable_lagrange_p_refinement);
 
@@ -2756,6 +2758,9 @@ protected:
   /// have libMesh-level constraints (hanging nodes, periodic bcs) applied to them. These are for
   /// storing the dof indices
   std::vector<dof_id_type> _row_indices, _column_indices;
+
+  /// Whether we have adjusted our FE objects due to the presence of p-refinement
+  bool _adjusted_fe_objects_for_p_refinement;
 };
 
 template <typename OutputType>

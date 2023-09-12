@@ -921,14 +921,16 @@ public:
   virtual bool hasNonlocalCoupling() const = 0;
 
   /**
-   * Indicate that we have p-refinement
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * @param doing_p_refinement Whether we're doing p-refinement
+   * @param disable_lagrange_p_refinement Whether to disable p-refinement of Lagrange variables
    */
-  virtual void havePRefinement(bool disable_lagrange_p_refinement);
+  virtual void doingPRefinement(bool doing_p_refinement, bool disable_lagrange_p_refinement);
 
   /**
-   * Query whether we have p-refinement
+   * Query whether p-refinement has been requested at any point during the simulation
    */
-  bool havePRefinement() const;
+  [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
 
 protected:
   /**
@@ -1111,6 +1113,9 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
+
+  /// Whether p-refinement has been requested at any point during the simulation
+  bool _have_p_refinement;
 
   friend class Restartable;
 };
