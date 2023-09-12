@@ -29,10 +29,15 @@ CacheChangedListsThread::onElement(const Elem * elem)
 {
   if (_mesh.getHavePRefinement())
   {
-    if (elem->p_refinement_flag() == Elem::JUST_REFINED)
-      _refined_elements.push_back(elem);
-    else if (elem->p_refinement_flag() == Elem::JUST_COARSENED)
-      _coarsened_elements.push_back(elem);
+    // When we p-refine an active child element this can lead to p-refinement of the parent as well.
+    // We don't care about inactive parents
+    if (elem->active())
+    {
+      if (elem->p_refinement_flag() == Elem::JUST_REFINED)
+        _refined_elements.push_back(elem);
+      else if (elem->p_refinement_flag() == Elem::JUST_COARSENED)
+        _coarsened_elements.push_back(elem);
+    }
   }
   else
   {
