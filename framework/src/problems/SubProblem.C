@@ -1276,7 +1276,7 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 void
 SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
 {
-  mesh().setHavePRefinement();
+  mesh().doingPRefinement();
 
   for (const auto tid : make_range(libMesh::n_threads()))
     for (const auto s : make_range(numNonlinearSystems()))
@@ -1302,7 +1302,7 @@ SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
 bool
 SubProblem::havePRefinement() const
 {
-  return mesh().getHavePRefinement();
+  return mesh().doingPRefinement();
 }
 
 template MooseVariableFEBase &

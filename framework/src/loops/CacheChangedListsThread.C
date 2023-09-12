@@ -27,7 +27,7 @@ CacheChangedListsThread::~CacheChangedListsThread() {}
 void
 CacheChangedListsThread::onElement(const Elem * elem)
 {
-  if (_mesh.getHavePRefinement())
+  if (_mesh.doingPRefinement())
   {
     // When we p-refine an active child element this can lead to p-refinement of the parent as well.
     // We don't care about inactive parents

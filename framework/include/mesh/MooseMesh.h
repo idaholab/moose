@@ -1319,12 +1319,12 @@ public:
   /**
    * Indicate that we have p-refinement
    */
-  void setHavePRefinement() { _have_p_refinement = true; }
+  void doingPRefinement() { _have_p_refinement = true; }
 
   /**
    * Query whether we have p-refinement
    */
-  bool getHavePRefinement() const { return _have_p_refinement; }
+  bool doingPRefinement() const { return _have_p_refinement; }
 
 protected:
   /// Deprecated (DO NOT USE)

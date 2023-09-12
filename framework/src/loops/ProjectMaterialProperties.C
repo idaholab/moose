@@ -90,7 +90,7 @@ ProjectMaterialProperties::onElement(const Elem * elem)
         -1,
         -1,
         -1,
-        _mesh.getHavePRefinement()); // Gets us volume projection
+        _mesh.doingPRefinement()); // Gets us volume projection
   }
   else
   {
@@ -134,7 +134,7 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
           side,
           -1,
           side,
-          _mesh.getHavePRefinement()); // Gets us side to side projection
+          _mesh.doingPRefinement()); // Gets us side to side projection
     }
     else
     {
@@ -180,7 +180,7 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
               -1,
               child,
               side,
-              _mesh.getHavePRefinement()); // Gets us volume to side projection
+              _mesh.doingPRefinement()); // Gets us volume to side projection
         }
       }
     }

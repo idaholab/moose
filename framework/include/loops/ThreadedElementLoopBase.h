@@ -406,7 +406,7 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
 {
   auto level = [this](const auto & elem_arg)
   {
-    if (_mesh.getHavePRefinement())
+    if (_mesh.doingPRefinement())
       return elem_arg.p_level();
     else
       return elem_arg.level();
