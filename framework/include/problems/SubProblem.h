@@ -928,7 +928,7 @@ public:
   /**
    * Query whether we have p-refinement
    */
-  bool havePRefinement() const { return _have_p_refinement; }
+  bool havePRefinement() const;
 
 protected:
   /**
@@ -1111,9 +1111,6 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
-
-  /// Whether this simulation has p-refinement in it
-  bool _have_p_refinement;
 
   friend class Restartable;
 };

@@ -219,7 +219,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
     _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
-    _coord_system_set(false)
+    _coord_system_set(false),
+    _have_p_refinement(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -277,7 +278,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _rz_coord_axis(other_mesh._rz_coord_axis),
     _subdomain_id_to_rz_coord_axis(other_mesh._subdomain_id_to_rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
-    _provided_coord_blocks(other_mesh._provided_coord_blocks)
+    _provided_coord_blocks(other_mesh._provided_coord_blocks),
+    _have_p_refinement(other_mesh._have_p_refinement)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.

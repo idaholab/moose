@@ -1316,6 +1316,16 @@ public:
    */
   void setupFiniteVolumeMeshData() const;
 
+  /**
+   * Indicate that we have p-refinement
+   */
+  void setHavePRefinement() { _have_p_refinement = true; }
+
+  /**
+   * Query whether we have p-refinement
+   */
+  bool getHavePRefinement() const { return _have_p_refinement; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1738,6 +1748,9 @@ private:
 
   /// Set for holding user-provided coordinate system type block names
   std::vector<SubdomainName> _provided_coord_blocks;
+
+  /// Whether we have p-refinement (as opposed to h-refinement)
+  bool _have_p_refinement;
 
   template <typename T>
   struct MeshType;

@@ -57,8 +57,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
     _output_functors(false),
-    _typed_vector_tags(2),
-    _have_p_refinement(false)
+    _typed_vector_tags(2)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -1277,6 +1276,8 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 void
 SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
 {
+  mesh().setHavePRefinement();
+
   for (const auto tid : make_range(libMesh::n_threads()))
     for (const auto s : make_range(numNonlinearSystems()))
       assembly(tid, s).havePRefinement(disable_lagrange_p_refinement);
@@ -1296,8 +1297,12 @@ SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
       }
     }
   }
+}
 
-  _have_p_refinement = true;
+bool
+SubProblem::havePRefinement() const
+{
+  return mesh().getHavePRefinement();
 }
 
 template MooseVariableFEBase &
