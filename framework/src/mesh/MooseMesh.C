@@ -2091,7 +2091,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     }
 
     // Child side to parent volume mapping for "internal" child sides
-    if (elem->has_children()) // false for p-refinement
+    if (!_have_p_refinement)
       for (unsigned int child = 0; child < elem->n_children(); ++child)
         for (unsigned int side = 0; side < elem->n_sides();
              ++side) // Assume children have the same number of sides!
