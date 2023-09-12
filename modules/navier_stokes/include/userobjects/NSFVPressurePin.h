@@ -37,17 +37,13 @@ class MeshBase;
 }
 
 /**
- * This user-object gathers 'a' (on-diagonal velocity coefficients) data. Having the gathered 'a'
- * data, this object is responsible for the computation of the Rhie-Chow velocity, which can be used
- * in advection kernels and postprocessors. This class also supports computation of an average face
- * velocity although this is generally not encouraged as it will lead to a checkerboard in the
- * pressure field
+ * This user-object corrects the pressure
  */
 class NSFVPressurePin : public GeneralUserObject,
-                                  public TaggingInterface,
-                                  public BlockRestrictable,
-                                  public FaceArgProducerInterface,
-                                  public ADFunctorInterface
+                        public TaggingInterface,
+                        public BlockRestrictable,
+                        public FaceArgProducerInterface,
+                        public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -58,11 +54,18 @@ public:
 
 protected:
   /// The thread 0 copy of the pressure variable
-  INSFVPressureVariable * _p;
+  INSFVPressureVariable * const _p;
+
+  /// Pressure pin type
+  const MooseEnum _pressure_pin_type;
+
+  /// If using point-value pressure pin, the point at which to apply the pin
+  const Point _pressure_pin_point;
+
+  /// If using average pressure pin, provides the average pressure value
+  PostprocessorValue * const _current_pressure_average;
 
 private:
-
   /// The nonlinear system
   SystemBase & _sys;
-
 };
