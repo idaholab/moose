@@ -1,5 +1,9 @@
 # Waveguide Eigenvalue Benchmark
 
+!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
+!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
+
+!if function=!hasSubmodule('moose')
 !tag name=waveguide_eigenvalue pairs=example_type:benchmark simulation_type:eigenvalue fiscal_year:2022
 
 A discussion of eigenvalue problems in electromagnetics, and the basis for the

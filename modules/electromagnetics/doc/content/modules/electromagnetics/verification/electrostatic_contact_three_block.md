@@ -1,5 +1,9 @@
 # Electrostatic Contact Verification (Three Block Test)
 
+!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
+!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
+
+!if function=!hasSubmodule('moose')
 !tag name=three_block pairs=example_type:verification simulation_type:scalar fiscal_year:2021
 
 This document describes the three block 1-D verification test for the
