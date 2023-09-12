@@ -12,7 +12,7 @@
 #include "FVDirichletBCBase.h"
 
 /**
- * Base class for
+ * Base class for finite volume Dirichlet boundary conditions
  */
 class FVDirichletBC : public FVDirichletBCBase
 {

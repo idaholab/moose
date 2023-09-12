@@ -25,7 +25,7 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 
 ## Advanced Test Reactor (ATR)
 
-- World's most powerful test reactor
+- World's most powerful test reactor (250 MW thermal)
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 

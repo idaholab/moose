@@ -11,7 +11,7 @@ The overall flow of the optimization algorithm implemented in the MOOSE optimiza
 !media large_media/optimization/fig_optCycle.png
        style=width:80%;margin:auto;padding-top:2.5%;
        id=fig:optCycle
-       caption=Optimization cycle example for parameterizaing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
+       caption=Optimization cycle example for parameterizing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
 
 [comment0]: <> (% ----------------------------------------------------------------------------------------------------------%)
 

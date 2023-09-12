@@ -60,11 +60,11 @@
   end_time = 2
   dt = 0.2
 
-  picard_max_its = 10
+  fixed_point_max_its = 10
 
   nl_abs_tol = 1e-10
-  picard_rel_tol = 1e-6
-  picard_abs_tol = 1e-10
+  fixed_point_rel_tol = 1e-6
+  fixed_point_abs_tol = 1e-10
 
   solve_type = 'PJFNK'
 

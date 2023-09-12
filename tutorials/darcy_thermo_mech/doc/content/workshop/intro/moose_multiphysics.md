@@ -115,12 +115,11 @@ VectorPostprocessors\\
 
 !style! halign=center
 !row!
-!col! small=12 medium=6 large=3 style=margin-right:2%;
+!col! small=12 medium=6 large=3 style=margin-left:10%;
 +Physics+\\
 Chemical Reactions\\
 Contact\\
 Electromagnetics\\
-Fluid Properties\\
 Fluid Structure Interaction (FSI)\\
 Geochemistry\\
 Heat Conduction\\
@@ -129,23 +128,34 @@ Navier Stokes\\
 Peridynamics\\
 Phase Field\\
 Porous Flow\\
-Reactor\\
 Tensor (solid) Mechanics\\
 Thermal Hydraulics\\
-XFEM\\
 !col-end!
 
 !col! small=12 medium=6 large=3 style=margin-right:2%;
 +Numerics+\\
 External PETSc Solver\\
 Function Expansion Tools\\
+Optimization\\
 Ray Tracing\\
 rDG\\
 Stochastic Tools\\
+XFEM\\
+!col-end!
+
+!col! small=12 medium=6 large=3 style=margin-right:10%;
++Physics support+\\
+Fluid Properties\\
+Solid Properties\\
+Reactor\\
 !col-end!
 !row-end!
 !style-end!
 
 !---
 
+## The MOOSE ecosystem
+
 !media darcy_thermo_mech/moose_herd_2022.png style=margin-left:auto;margin-right:auto;display:block;
+
+Many are open-source on GitHub. Some are accessible through the [NCRC](https://inl.gov/ncrc/)

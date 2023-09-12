@@ -193,6 +193,27 @@ during linear iterations.
 
 !---
 
+## Preconditioning
+
+Select a preconditioner using PETSC options, either in the executioner or in the `[Preconditioning]` block:
+
+```language=cpp
+[Executioner]
+  type = Steady
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+```
+
+Some examples:
+
+- LU : form the actual Jacobian inverse, useful for small to medium problems but does not scale well
+- Hypre BoomerAMG : algebraic multi-grid, works well for diffusive problems
+- jacobi : preconditions with the diagonal of Jacobian
+
+Can also combine pre-conditioners using sub-preconditioning with option `-sub_pc_type`.
+
+!---
+
 ## Summary
 
 The Finite Element Method is a way of numerically approximating the solution of PDEs.

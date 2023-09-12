@@ -63,7 +63,7 @@ Loose coupling, though easy and stable, may not be accurate.  Since data is only
 
 To fix this, you can iterate back and forth between the apps until you reach a "stationary point".  In MOOSE we call this Picard iteration, though it has many other names including "Tight Coupling".
 
-To get this behavior with MultiApps, all that is needed is to set `picard_max_its` in the `Executioner` block of the parent app to something greater than 1.  Note that you can do this at any point in a large MultiApp hierarchy!
+To get this behavior with MultiApps, all that is needed is to set `fixed_point_max_its` in the `Executioner` block of the parent app to something greater than 1.  Note that you can do this at any point in a large MultiApp hierarchy!
 
 One caveat: in order for this to work, both apps need to have Backup/Restore capability.  All MOOSE-based applications already have this, but some work is necessary for MOOSE-wrapped apps.
 
