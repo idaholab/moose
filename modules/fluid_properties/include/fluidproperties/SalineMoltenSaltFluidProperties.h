@@ -26,6 +26,16 @@ public:
 
   SalineMoltenSaltFluidProperties(const InputParameters & parameters);
 
+  // Unit conversion constants for communicating with Saline
+  static constexpr Real kPa_to_Pa = 1.0e3;
+  static constexpr Real Pa_to_kPa = 1.0 / kPa_to_Pa;
+  static constexpr Real kg_to_g = 1.0e3;
+  static constexpr Real g_to_kg = 1.0 / kg_to_g;
+  static constexpr Real m_to_cm = 1.0e2;
+  static constexpr Real cm_to_m = 1.0 / m_to_cm;
+  static constexpr Real N_to_mN = 1.0e3;
+  static constexpr Real mN_to_N = 1 / N_to_mN;
+
 #ifdef SALINE_ENABLED
 
   /**

@@ -2,7 +2,6 @@
   type = GeneratedMesh
   dim = 1
   nx = 1
-
   # Required for NodalVariableValue on distributed mesh
   allow_renumbering = false
 []
@@ -48,7 +47,6 @@
     variable = rho
     nodeid = 0
   []
-
   # Acceptance test
   [check_rho]
     type = PostprocessorComparison

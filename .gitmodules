@@ -15,6 +15,7 @@
 [submodule "modules/fluid_properties/contrib/saline"]
 	path = modules/fluid_properties/contrib/saline
 	url = https://code.ornl.gov/neams/saline
+        update = none
 [submodule "framework/contrib/wasp"]
     path = framework/contrib/wasp
     url = https://code.ornl.gov/neams-workbench/wasp.git

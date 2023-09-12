@@ -30,48 +30,32 @@ SalineMoltenSaltFluidProperties::validParams()
 SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters)
 {
-
 #ifdef SALINE_ENABLED
-
-  std::string propDef = getParam<std::string>("prop_def");
+  const auto & propDef = getParam<std::string>("prop_def");
   _d.load(propDef);
   bool success = _tp.initialize(&_d);
   if (!success)
-    mooseError("The initialize of the Saline interface has failed");
-  std::string name = getParam<std::string>("comp_name");
-  std::string comp = getParam<std::string>("comp_val");
+    mooseError("The initialization of the Saline interface has failed");
+  const auto & name = getParam<std::string>("comp_name");
+  const auto & comp = getParam<std::string>("comp_val");
   std::vector<std::string> nameList;
   MooseUtils::tokenize<std::string>(name, nameList, 1, "-");
   std::vector<Real> valList;
   MooseUtils::tokenizeAndConvert<Real>(comp, valList, "-");
   Real mole_sum = 0.0;
-  for (Real val : valList)
-    mole_sum = mole_sum + val;
+  for (const auto val : valList)
+    mole_sum += val;
   if (std::abs(mole_sum - 1.0) > 1e-6)
     mooseError("Mole fractions of defined salt compound do not sum to 1.0.");
   success = _tp.setComposition(nameList, valList);
   if (!success)
     mooseError("The composition set has failed");
   _fluid_name = name;
-
-#endif
-#ifndef SALINE_ENABLED
-
+#else
   mooseError("Saline was not made available during the build and can not be used. Make sure you "
              "have the contrib/saline submodule checked out.");
-
 #endif
 }
-
-// Unit conversion constants for communicating with Saline
-const Real kPa_to_Pa = 1.0e3;
-const Real Pa_to_kPa = 1.0 / kPa_to_Pa;
-const Real kg_to_g = 1.0e3;
-const Real g_to_kg = 1.0 / kg_to_g;
-const Real m_to_cm = 1.0e2;
-const Real cm_to_m = 1.0 / m_to_cm;
-const Real N_to_mN = 1.0e3;
-const Real mN_to_N = 1 / N_to_mN;
 
 #ifdef SALINE_ENABLED
 
@@ -124,7 +108,7 @@ SalineMoltenSaltFluidProperties::h_from_p_T(
 {
   enthalpy = h_from_p_T(0.0, temperature);
   dh_dp = 0.0;
-  // finite difference approximate
+  // finite difference approximation
   dh_dT = (h_from_p_T(0.0, temperature * (1 + 1e-6)) - enthalpy) / (temperature * 1e-6);
 }
 
