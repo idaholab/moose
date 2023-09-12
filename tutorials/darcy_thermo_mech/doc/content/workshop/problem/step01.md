@@ -21,8 +21,8 @@ where $\psi_i$ are the test functions and $u_h$ is the finite element solution.
 
 ## Input File(s)
 
-All capabilities of MOOSE, modules, and your application are compiled into a single executable.
-An input file is used to define which capabilities are used to perform a simulation.
+An input file is used to represent the problem in MOOSE. It follows a very standardized
+syntax.
 
 MOOSE uses the "hierarchical input text" (hit) format.
 
@@ -37,7 +37,7 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 - `[Kernels]`: Define the equation(s) to solve
 - `[BCs]`: Define the boundary condition(s) of the problem
 - `[Executioner]`: Define how the problem will be solved
-- `[Outputs]`: Define how the solution will be written
+- `[Outputs]`: Define how the solution will be returned
 
 !---
 
@@ -48,6 +48,9 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 !---
 
 ## Step 1: Run
+
+An executable is produced by compiling an application or a MOOSE module. It can be used
+to run input files.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step01_diffusion

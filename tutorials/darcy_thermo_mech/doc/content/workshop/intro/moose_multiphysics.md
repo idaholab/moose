@@ -6,7 +6,7 @@
 - Scientists are adept at creating applications in their domain
 - What about collaborating across research groups and/or disciplines?
 
-  - Head in the sand?
+  - Iterating between design teams?
   - Development of "coupling" codes?
   - Is there something better?
 
