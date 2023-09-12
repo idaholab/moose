@@ -62,13 +62,12 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
-
   num_steps = 4
   dt = 1
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-14
 []
 
 [Adaptivity]
