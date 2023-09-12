@@ -229,7 +229,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 !style! fontsize=60%
 
 !row!
-!col! width=20%
+!col! width=15%
 !listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=Kernels remove=Kernels/active
 !col-end!
 
@@ -237,7 +237,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 $\quad$
 !col-end!
 
-!col! width=20%
+!col! width=15%
 !listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=BCs remove=BCs/active BCs/left
 !col-end!
 
@@ -245,7 +245,7 @@ $\quad$
 $\quad$
 !col-end!
 
-!col! width=20%
+!col! width=15%
 !listing test/tests/dgkernels/1d_advection_dg/1d_advection_dg.i block=Kernels remove=Kernels/time_u
 !col-end!
 
@@ -253,7 +253,7 @@ $\quad$
 $\quad$
 !col-end!
 
-!col! width=20%
+!col! width=15%
 !listing test/tests/bcs/nodal_normals/circle_tris.i block=Kernels remove=Kernels/diff
 !col-end!
 
