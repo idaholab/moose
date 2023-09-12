@@ -78,6 +78,7 @@ public:
    * @param input_parent_side - the side of the parent for which material properties are prolonged
    * @param input_child - the number of the child
    * @param input_child_side - the side on the child where material properties will be prolonged
+   * @param p_refinement - Whether the mesh is undergoing p-adaptivity instead of h-adaptivity
    */
   void prolongStatefulProps(processor_id_type pid,
                             const std::vector<std::vector<QpMap>> & refinement_map,
@@ -88,7 +89,8 @@ public:
                             const Elem & elem,
                             const int input_parent_side,
                             const int input_child,
-                            const int input_child_side);
+                            const int input_child_side,
+                            const bool p_refinement);
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the

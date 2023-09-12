@@ -74,7 +74,8 @@ MaterialPropertyStorage::prolongStatefulProps(
     const Elem & elem,
     const int input_parent_side,
     const int input_child,
-    const int input_child_side)
+    const int input_child_side,
+    const bool p_refinement)
 {
   mooseAssert(input_child != -1 || input_parent_side == input_child_side, "Invalid inputs!");
 
@@ -91,45 +92,75 @@ MaterialPropertyStorage::prolongStatefulProps(
 
   getMaterialData(tid).resize(n_qpoints);
 
-  unsigned int n_children = elem.n_children();
-
-  std::vector<unsigned int> children;
-
-  if (input_child != -1) // Passed in a child explicitly
-    children.push_back(input_child);
-  else
+  if (p_refinement)
   {
-    children.resize(n_children);
-    for (unsigned int child = 0; child < n_children; child++)
-      children[child] = child;
-  }
+    mooseAssert(input_child == -1, "No children for p-refinement");
+    mooseAssert(
+        input_parent_side == input_child_side,
+        "Parent and child sides should match for p-refinement since we are the same element");
+    mooseAssert(elem.active(), "We should be doing p-refinement");
+    mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
+    mooseAssert(refinement_map.size(), "Refinement_map vector not initialized");
 
-  for (const auto & child : children)
-  {
-    // If we're not projecting an internal child side, but we are projecting sides, see if this
-    // child is on that side
-    if (input_child == -1 && input_child_side != -1 && !elem.is_child_on_side(child, parent_side))
-      continue;
-
-    const Elem * child_elem = elem.child_ptr(child);
-
-    // If it's not a local child then it'll be prolonged where it is
-    // local
-    if (child_elem->processor_id() != pid)
-      continue;
-
-    mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
-    const std::vector<QpMap> & child_map = refinement_map[child];
-
-    initProps(tid, child_elem, child_side, n_qpoints);
+    // This is not really a child map since we are just mapping to ourselves
+    const auto & child_map = refinement_map[0];
+    initProps(tid, &elem, child_side, n_qpoints);
 
     for (const auto state : stateIndexRange())
     {
       const auto & parent_props = parent_material_props.props(&elem, parent_side, state);
-      auto & child_props = setProps(child_elem, child_side, state);
+      auto & child_props = setProps(&elem, child_side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
-        for (const auto qp : index_range(refinement_map[child]))
+      {
+        auto & child_prop = child_props[i];
+        child_prop.resize(n_qpoints);
+        for (const auto qp : index_range(child_map))
           child_props[i].qpCopy(qp, parent_props[i], child_map[qp]._to);
+      }
+    }
+  }
+  else
+  {
+    unsigned int n_children = elem.n_children();
+
+    std::vector<unsigned int> children;
+
+    if (input_child != -1) // Passed in a child explicitly
+      children.push_back(input_child);
+    else
+    {
+      children.resize(n_children);
+      for (unsigned int child = 0; child < n_children; child++)
+        children[child] = child;
+    }
+
+    for (const auto & child : children)
+    {
+      // If we're not projecting an internal child side, but we are projecting sides, see if this
+      // child is on that side
+      if (input_child == -1 && input_child_side != -1 && !elem.is_child_on_side(child, parent_side))
+        continue;
+
+      const Elem * child_elem = elem.child_ptr(child);
+
+      // If it's not a local child then it'll be prolonged where it is
+      // local
+      if (child_elem->processor_id() != pid)
+        continue;
+
+      mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
+      const std::vector<QpMap> & child_map = refinement_map[child];
+
+      initProps(tid, child_elem, child_side, n_qpoints);
+
+      for (const auto state : stateIndexRange())
+      {
+        const auto & parent_props = parent_material_props.props(&elem, parent_side, state);
+        auto & child_props = setProps(child_elem, child_side, state);
+        for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+          for (const auto qp : index_range(refinement_map[child]))
+            child_props[i].qpCopy(qp, parent_props[i], child_map[qp]._to);
+      }
     }
   }
 }
