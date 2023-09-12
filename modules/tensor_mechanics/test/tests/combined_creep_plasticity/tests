@@ -1,6 +1,7 @@
 [Tests]
   issues = '#6873 #8651'
   design = 'source/materials/ComputeMultipleInelasticStress.md'
+  parallel_scheduling = true
   [combined]
     type = 'Exodiff'
     input = 'combined_creep_plasticity.i'
