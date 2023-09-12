@@ -142,6 +142,28 @@ ContactAction::validParams()
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
                         "The tolerance of the incremental slip for augmented Lagrangian method.");
+  params.addRangeCheckedParam<Real>(
+      "max_penalty_multiplier",
+      1.0e3,
+      "max_penalty_multiplier >= 1.0",
+      "Maximum multiplier applied to penalty factors when adaptivity is used in an augmented "
+      "Lagrange setting. The penalty factor supplied by the user is used as a reference to "
+      "determine its maximum. If this multiplier is too large, the condition number of the system "
+      "to be solved may be negatively impacted.");
+  MooseEnum adaptivity_penalty_normal("SIMPLE BUSSETTA", "SIMPLE");
+  params.addParam<MooseEnum>(
+      "adaptivity_penalty_normal",
+      adaptivity_penalty_normal,
+      "The augmented Lagrange update strategy used on the normal penalty coefficient. 'Simple' "
+      "will keep multiplying by the penalty multiplier, whereas 'Bussetta' will apply an algorithm "
+      "in Bussetta et al, 2012, Comput Mech 49:259-275.");
+  MooseEnum adaptivity_penalty_friction("SIMPLE FRICTION_LIMIT", "FRICTION_LIMIT");
+  params.addParam<MooseEnum>(
+      "adaptivity_penalty_friction",
+      adaptivity_penalty_friction,
+      "The augmented Lagrange update strategy used on the frictional penalty coefficient. 'Simple' "
+      "will keep multiplying by the penalty multiplier, whereas 'FrictionLimit' will be guided by "
+      "the Coulomb limit and be less reliant on the initial penalty factor provided by the user.");
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<Real>(
@@ -842,6 +864,10 @@ ContactAction::addMortarContact()
       var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       var_params.set<Real>("penalty") = getParam<Real>("penalty");
 
+      // AL parameters
+      var_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
+      var_params.set<MooseEnum>("adaptivity_penalty_normal") =
+          getParam<MooseEnum>("adaptivity_penalty_normal");
       if (isParamValid("al_penetration_tolerance"))
         var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
       if (isParamValid("penalty_multiplier"))
@@ -876,10 +902,16 @@ ContactAction::addMortarContact()
 
       var_params.set<VariableName>("secondary_variable") = displacements[0];
       var_params.set<bool>("use_displaced_mesh") = true;
+      var_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
+      var_params.set<Real>("penalty") = getParam<Real>("penalty");
+      var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
 
+      // AL parameters
+      var_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
+      var_params.set<MooseEnum>("adaptivity_penalty_friction") =
+          getParam<MooseEnum>("adaptivity_penalty_friction");
       if (isParamValid("al_penetration_tolerance"))
         var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
-
       if (isParamValid("penalty_multiplier"))
         var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
       if (isParamValid("penalty_multiplier_friction"))

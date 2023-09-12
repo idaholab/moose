@@ -4,16 +4,21 @@
   parallel_scheduling = true
   [cylinder_friction]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_check_x_disp_FINAL.csv cylinder_friction_check_cont_press_FINAL.csv cylinder_friction_check_y_disp_FINAL.csv cylinder_friction_check_friction_FINAL.csv'
+    csvdiff = 'cylinder_friction_check_x_disp_FINAL.csv cylinder_friction_check_cont_press_FINAL.csv '
+              'cylinder_friction_check_y_disp_FINAL.csv cylinder_friction_check_friction_FINAL.csv'
     input = 'cylinder_friction.i'
     rel_err = 5.0e-4
     min_parallel = 4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a cylinder and a plane.'
+    requirement = 'The contact module shall be able to solve frictional contact between a cylinder '
+                  'and a plane.'
   []
   [cylinder_friction_penalty]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv cylinder_friction_penalty_check_cont_press_FINAL.csv cylinder_friction_penalty_check_y_disp_FINAL.csv cylinder_friction_penalty_check_friction_FINAL.csv'
+    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv '
+              'cylinder_friction_penalty_check_cont_press_FINAL.csv '
+              'cylinder_friction_penalty_check_y_disp_FINAL.csv '
+              'cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
     rel_err = 7.5e-4
     abs_zero = 1.0e-4
@@ -106,6 +111,21 @@
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
                   "approach allows for maintaining reasonable system condition numbers."
   []
+  [cylinder_friction_penalty_al_frictional_action_amg_bussetta_simple]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple_vectorpp_output_sur'
+              'face_FINAL.csv'
+    input = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple.i'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-2
+    requirement = "The contact module shall be able to approximate frictional contact in a "
+                  "two-dimensional cylinder via an augmented Lagrange approach to constraint "
+                  "enforcement using the contact action and use the hypre algebraic multigrid "
+                  "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
+                  "approach allows for maintaining reasonable system condition numbers and selecting "
+                  "the 'Bussetta' and 'Simple' adaptivity strategies for the normal and frictional "
+                  "penalty values, respectively."
+  []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_normal_al_backup_vectorpp_output_surface_FINAL.csv'
@@ -127,7 +147,8 @@
     min_parallel = 4
     heavy = true
     min_ad_size = '200'
-    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and flexible base material.'
+    requirement = 'The contact module shall be able to solve frictional contact between a '
+                  'semicircular tool and flexible base material.'
   []
   [ironing_penalty]
     type = 'CSVDiff'
@@ -155,15 +176,18 @@
   []
   [frictional_bouncing_block]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv frictional_bouncing_block_checkfile_friction_0029.csv'
+    csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
+              'frictional_bouncing_block_checkfile_friction_0029.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and flexible base material.'
+    requirement = 'The contact module shall be able to solve frictional contact between a bouncing '
+                  'block and flexible base material.'
   []
   [frictional_bouncing_block_action]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_action_checkfile_cont_press_0029.csv frictional_bouncing_block_action_checkfile_friction_0029.csv'
+    csvdiff = 'frictional_bouncing_block_action_checkfile_cont_press_0029.csv '
+              'frictional_bouncing_block_action_checkfile_friction_0029.csv'
     input = 'frictional_bouncing_block_action.i'
     rel_err = 1.0e-4
     heavy = true
@@ -172,7 +196,8 @@
   []
   [frictional_bouncing_block_edge_dropping]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv frictional_bouncing_block_edge_dropping_friction_0023.csv'
+    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv '
+              'frictional_bouncing_block_edge_dropping_friction_0023.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     method = '!dbg'

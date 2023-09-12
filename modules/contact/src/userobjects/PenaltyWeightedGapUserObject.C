@@ -45,7 +45,6 @@ PenaltyWeightedGapUserObject::validParams()
       "max_penalty_multiplier >= 1.0",
       "Maximum multiplier applied to penalty factors when adaptivity is used in an augmented "
       "Lagrange setting. The penalty factor supplied by the user is used as a reference.");
-
   MooseEnum adaptivity_penalty_normal("SIMPLE BUSSETTA", "SIMPLE");
   params.addParam<MooseEnum>(
       "adaptivity_penalty_normal",
@@ -53,7 +52,6 @@ PenaltyWeightedGapUserObject::validParams()
       "The augmented Lagrange update strategy used on the normal penalty coefficient. 'Simple' "
       "will keep multiplying by the penalty multiplier, whereas 'Bussetta' will apply an algorithm "
       "in Bussetta et al, 2012, Comput Mech 49:259-275.");
-
   params.addCoupledVar(
       "aux_lm",
       "Auxiliary variable that is utilized together with the "
