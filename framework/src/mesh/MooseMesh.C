@@ -2283,7 +2283,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   fe->attach_quadrature_rule(&qrule);
   fe_face->attach_quadrature_rule(&qrule_face);
 
-  // The current q_points
+  // The current q_points (locations in *physical* space)
   const std::vector<Point> * q_points;
 
   if (parent_side != -1)
@@ -2303,6 +2303,9 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   MeshRefinement mesh_refinement(mesh);
   mesh_refinement.uniformly_refine(1);
 
+  // A map from the child element index to the locations of all the child's quadrature points in
+  // *reference* space. Note that we use a map here instead of a vector because the caller can pass
+  // an explicit child index. We are not guaranteed to have a sequence from [0, n_children)
   std::map<unsigned int, std::vector<Point>> child_to_ref_points;
 
   unsigned int n_children = elem->n_children();

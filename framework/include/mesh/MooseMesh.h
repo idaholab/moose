@@ -1632,6 +1632,18 @@ private:
   void checkDuplicateSubdomainNames();
 
   /// Holds mappings for volume to volume and parent side to child side
+  /// Map key:
+  /// - first member corresponds to element side. It's -1 for volume quadrature points
+  /// - second member correponds to the element type
+  /// Map value:
+  /// - Outermost index is the child element index
+  /// - Once we have indexed by the child element index, we have a std::vector of QpMaps. This
+  ///   vector is sized by the number of reference points in the child element. Then for each
+  ///   reference point in the child element we have a QpMap whose \p _from index corresponds to
+  ///   the child element reference point, a \p _to index which corresponds to the reference point
+  ///   on the parent element that the child element reference point is closest to, and a
+  ///   \p _distance member which is the distance between the mapped child and parent reference
+  ///   quadrature points
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 
   /// Holds mappings for "internal" child sides to parent volume.  The second key is (child, child_side).
@@ -1639,6 +1651,19 @@ private:
       _elem_type_to_child_side_refinement_map;
 
   /// Holds mappings for volume to volume and parent side to child side
+  /// Map key:
+  /// - first member corresponds to element side. It's -1 for volume quadrature points
+  /// - second member correponds to the element type
+  /// Map value:
+  /// - Vector is sized based on the number of quadrature points in the parent (e.g. coarser)
+  ///   element.
+  /// - For each parent quadrature point we store a pair
+  ///   - The first member of the pair identifies which child holds the closest refined-level
+  ///     quadrature point
+  ///   - The second member of the pair is the QpMap. The \p _from data member will correspond to
+  ///     the parent quadrature point index. The \p _to data member will correspond to which child
+  ///     element quadrature point is closest to the parent quadrature point. And \p _distance is
+  ///     the distance between the two
   std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap>>>
       _elem_type_to_coarsening_map;
 
