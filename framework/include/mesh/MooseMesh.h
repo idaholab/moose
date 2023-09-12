@@ -1317,14 +1317,14 @@ public:
   void setupFiniteVolumeMeshData() const;
 
   /**
-   * Indicate that we have p-refinement
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
    */
-  void doingPRefinement() { _have_p_refinement = true; }
+  void doingPRefinement(bool have_p_refinement) { _doing_p_refinement = have_p_refinement; }
 
   /**
    * Query whether we have p-refinement
    */
-  bool doingPRefinement() const { return _have_p_refinement; }
+  [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1750,7 +1750,7 @@ private:
   std::vector<SubdomainName> _provided_coord_blocks;
 
   /// Whether we have p-refinement (as opposed to h-refinement)
-  bool _have_p_refinement;
+  bool _doing_p_refinement;
 
   template <typename T>
   struct MeshType;
