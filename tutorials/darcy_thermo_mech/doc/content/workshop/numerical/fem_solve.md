@@ -42,7 +42,7 @@ Gaussian Quadrature can exactly integrate polynomials of order $2n-1$ with $n$ q
 
 !---
 
-Quadrature applied to [ref_elems] yields an equation that can be analyzed numerically:
+Applying the quadrature to [ref_elems] we can simply compute:
 
 !equation
 \sum_e \int_{\hat{\Omega}_e} f(\vec{\xi}) \left|\mathcal{J}_e\right| \;\text{d}\vec{\xi} \approx
@@ -208,9 +208,9 @@ Some examples:
 
 - LU : form the actual Jacobian inverse, useful for small to medium problems but does not scale well
 - Hypre BoomerAMG : algebraic multi-grid, works well for diffusive problems
-- jacobi : preconditions with the diagonal of Jacobian
+- Jacobi : preconditions with the diagonal, row sum, or row max of Jacobian
 
-Can also combine pre-conditioners using sub-preconditioning with option `-sub_pc_type`.
+For parallel preconditioners, the sub-block (on-process) preconditioners can be controlled with the PETSc option `-sub_pc_type`. E.g. for a parallel block Jacobi preconditioner (-pc_type bjacobi) the sub-block preconditioner could be set to ILU or LU etc. with `-sub_pc_type ilu`, `-sub_pc_type lu`, etc.
 
 !---
 
@@ -227,7 +227,7 @@ Integrals are computed numerically using quadrature.
 
 Newton's method provides a mechanism for solving a system of nonlinear equations.
 
-The Preconditioned Jacobian Free Newton Krylov (JFNK) method allows us to avoid explicitly forming
+The Preconditioned Jacobian Free Newton Krylov (PJFNK) method allows us to avoid explicitly forming
 the Jacobian matrix while still computing its action.
 
 !---
@@ -285,6 +285,12 @@ Thus, the $i^{th}$ component of the residual vector is:
 \end{aligned}
 
 !---
+
+!equation
+\begin{aligned}
+\vec{R}_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
+\left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)
+\end{aligned}
 
 Using the previously-defined rules in [diff_u] and [grad_u] for $\frac{\partial u_h}{\partial u_j}$
 and $\frac{\partial \left(\nabla u_h\right)}{\partial u_j}$, the $(i,j)$ entry of the Jacobian is
