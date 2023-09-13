@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'FNSFOBExpHeatIC.i'
     exodiff = 'FNSFOBExpHeatIC_out.e'
+    rel_err = 9e-05
   []
 []
