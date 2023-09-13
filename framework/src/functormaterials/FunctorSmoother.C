@@ -39,10 +39,31 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
     _functors_out(getParam<std::vector<MooseFunctorName>>("functors_out")),
     _smoothing_technique(getParam<MooseEnum>("smoothing_technique"))
 {
-  // Delete the resources created on behalf of the RM if it ends up not being added to the
-  // App.
-  if (!_app.addRelationshipManager(rm_obj))
-    factory.releaseSharedObjects(*rm_obj);
+  if (_tid == 0)
+  {
+    // We need one layer of ghosting at least to get neighbor values
+    auto & factory = _app.getFactory();
+    auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+    rm_params.template set<std::string>("for_whom") = name();
+    rm_params.template set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
+    rm_params.template set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING;
+    rm_params.template set<unsigned short>("layers") = 1;
+    rm_params.template set<bool>("use_point_neighbors") = false;
+    rm_params.template set<bool>("attach_geometric_early") = false;
+    rm_params.template set<bool>("use_displaced_mesh") =
+        parameters.template get<bool>("use_displaced_mesh");
+    mooseAssert(rm_params.areAllRequiredParamsValid(),
+                "All relationship manager parameters should be valid.");
+    auto rm_obj = factory.template create<RelationshipManager>(
+        "ElementSideNeighborLayers", name() + "_functor_smoothing", rm_params);
+
+    // Delete the resources created on behalf of the RM if it ends up not being added to the
+    // App.
+    if (!_app.addRelationshipManager(rm_obj))
+      factory.releaseSharedObjects(*rm_obj);
+  }
 
   for (const auto i : index_range(_functors_in))
   {
