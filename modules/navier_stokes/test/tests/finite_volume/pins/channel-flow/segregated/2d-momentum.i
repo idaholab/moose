@@ -11,8 +11,8 @@ pressure_tag = "pressure_grad"
     xmax = 5
     ymin = 0
     ymax = 1
-    nx = 20
-    ny = 10
+    nx = 40
+    ny = 6
   []
 []
 
@@ -66,6 +66,7 @@ pressure_tag = "pressure_grad"
 []
 
 [FVKernels]
+  inactive = "u_friction v_friction"
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = superficial_vel_x
@@ -87,6 +88,15 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     porosity = porosity
     extra_vector_tags = ${pressure_tag}
+  []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    variable = superficial_vel_x
+    momentum_component = 'y'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    porosity = 'porosity'
+    rho = ${rho}
   []
 
   [v_advection]
@@ -111,6 +121,15 @@ pressure_tag = "pressure_grad"
     porosity = porosity
     extra_vector_tags = ${pressure_tag}
   []
+  [v_friction]
+    type = PINSFVMomentumFriction
+    variable = superficial_vel_y
+    momentum_component = 'y'
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    porosity = 'porosity'
+    rho = ${rho}
+  []
 
   [p_diffusion]
     type = FVAnisotropicDiffusion
@@ -127,6 +146,7 @@ pressure_tag = "pressure_grad"
 []
 
 [FVBCs]
+  inactive = 'slip-u slip-v'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -174,13 +194,33 @@ pressure_tag = "pressure_grad"
     boundary = 'bottom'
     variable = pressure
   []
-
-  # Possible outlet boundary conditions
   [outlet-p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = 0.4
+  []
+  ### Are disabled by default but we switch it on for certain tests ###
+  [slip-u]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top'
+    variable = superficial_vel_x
+    momentum_component = 'x'
+  []
+  [slip-v]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top'
+    variable = superficial_vel_y
+    momentum_component = 'y'
+  []
+  #####################################################################
+[]
+
+[Materials]
+  [darcy]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = '0.01 0.02 0.03 0.01 0.02 0.03'
   []
 []
 
@@ -195,8 +235,8 @@ pressure_tag = "pressure_grad"
   pressure_system = 'pressure_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.85
-  pressure_variable_relaxation = 0.4
-  num_iterations = 60
+  pressure_variable_relaxation = 0.45
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   print_fields = false
