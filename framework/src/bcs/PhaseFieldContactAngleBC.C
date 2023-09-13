@@ -38,6 +38,6 @@ PhaseFieldContactAngleBC::PhaseFieldContactAngleBC(const InputParameters & param
 ADReal
 PhaseFieldContactAngleBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * (0.75 * _epsilon * _epsilon / _lambda) * _sigma *
+  return _test[_i][_qp] * (0.75 * _epsilon * _epsilon / _lambda) * _sigma *
          std::cos(_contactangle) * (1 - _pf[_qp] * _pf[_qp]);
 }
