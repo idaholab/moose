@@ -29,7 +29,7 @@ protected:
   ADReal computeSegregatedContribution() override;
 
   /// Computes the friction coefficient which gets multiplied by the velocity
-  ADReal computeCoefficient();
+  ADReal computeCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
 
   /// The linear friction factor, for laminar flow
   const Moose::Functor<ADReal> * const _linear_friction;

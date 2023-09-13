@@ -43,17 +43,14 @@ INSFVMomentumFriction::INSFVMomentumFriction(const InputParameters & parameters)
 }
 
 ADReal
-INSFVMomentumFriction::computeCoefficient()
+INSFVMomentumFriction::computeCoefficient(const Moose::ElemArg & elem_arg,
+                                          const Moose::StateArg & state)
 {
-  const auto & elem_arg = makeElemArg(_current_elem);
-  const auto state = determineState();
-
   ADReal coefficient = 0.0;
   if (_linear_friction)
-    coefficient += (*_linear_friction)(makeElemArg(_current_elem), determineState());
+    coefficient += (*_linear_friction)(elem_arg, determineState());
   if (_quadratic_friction)
-    coefficient += (*_quadratic_friction)(makeElemArg(_current_elem), state) *
-                   std::abs(_u_functor(elem_arg, state));
+    coefficient += (*_quadratic_friction)(elem_arg, state) * std::abs(_u_functor(elem_arg, state));
 
   return coefficient;
 }
@@ -64,7 +61,7 @@ INSFVMomentumFriction::computeSegregatedContribution()
   const auto & elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
 
-  return raw_value(computeCoefficient()) * _u_functor(elem_arg, state);
+  return raw_value(computeCoefficient(elem_arg, state)) * _u_functor(elem_arg, state);
 }
 
 void
@@ -73,7 +70,7 @@ INSFVMomentumFriction::gatherRCData(const Elem & elem)
   const auto & elem_arg = makeElemArg(&elem);
   const auto state = determineState();
 
-  ADReal coefficient = computeCoefficient();
+  ADReal coefficient = computeCoefficient(elem_arg, state);
   coefficient *= _assembly.elementVolume(&elem);
 
   _rc_uo.addToA(&elem, _index, coefficient);
