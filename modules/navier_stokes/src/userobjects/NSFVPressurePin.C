@@ -129,4 +129,14 @@ NSFVPressurePin::execute()
   }
   else
     pin_value = _p0 - *_current_pressure_average;
+
+  // Offset the entire pressure vector by the value of the pin
+  NumericVector<Number> & sln = _sys.solution();
+  for (const auto & elem : _mesh.active_local_element_ptr_range())
+  {
+    auto dof = elem->dof_number(_sys.number(), _p->number(), 0);
+    if (dof != libMesh::DofObject::invalid_id)
+      sln.add(dof, pin_value);
+  }
+  sln.close();
 }
