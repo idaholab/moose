@@ -684,8 +684,6 @@ SIMPLE::solveMomentumPredictor()
     // TO DO: Add options to this function in Libmesh to accept absolute tolerance
     momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
-    _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copySolutionsBackwards();
 
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
@@ -701,6 +699,14 @@ SIMPLE::solveMomentumPredictor()
       _console << "Norm factor " << norm_factor << std::endl;
       _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
     }
+  }
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    NonlinearImplicitSystem & momentum_system =
+        libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+    _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
+    _momentum_systems[system_i]->copySolutionsBackwards();
   }
 
   return normalized_residuals;
