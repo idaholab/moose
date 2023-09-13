@@ -1,5 +1,5 @@
 # This test uses the custom kernal "FNSFOBExpHeatSource" that provides a heat source as an exponential decay function based on the depth of the fusion blanket.
-# The results where visually confirmed in paraview and used as a gold file for testing. 
+# The results where visually confirmed in paraview and used as a gold file for testing.
 
 [Mesh]
   [msh]
@@ -22,7 +22,7 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type --pc_hypre_type'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 

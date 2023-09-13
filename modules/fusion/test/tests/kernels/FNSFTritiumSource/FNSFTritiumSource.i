@@ -1,5 +1,5 @@
 # This test uses the custom kernal "FNSFTritiumSource" to project a tritium source term onto the outboard section of a fusion blanket
-# This test projects a value of 1 on the first half near the first wall and a term of 2 on the second half near the back wall. The results where 
+# This test projects a value of 1 on the first half near the first wall and a term of 2 on the second half near the back wall. The results where
 # visually confirmed in paraview and used as a gold file for testing.
 
 [Mesh]
@@ -23,7 +23,7 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type --pc_hypre_type'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 

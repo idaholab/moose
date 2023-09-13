@@ -1,4 +1,4 @@
-# This tests uses the custom boundary condition "INFVInletVelcityNormalBC" that provides and inlet boundry condition to the normal for velocity. This case uses the object 
+# This tests uses the custom boundary condition "INFVInletVelcityNormalBC" that provides and inlet boundry condition to the normal for velocity. This case uses the object
 # for the velocity variable alongside a 1D line. The results from this case was visually confirmed in paraview and used as a gold file for testing.
 
 [Mesh]
@@ -36,7 +36,7 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type --pc_hypre_type'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 

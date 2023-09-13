@@ -4,31 +4,31 @@
         file = '../../FNSF_Blanket.msh'
     []
 []
-  
+
 [Outputs]
     exodus = true
     csv = true
 []
-  
+
 [Preconditioning]
     [smp]
         type = SMP
         full = true
     []
 []
-  
+
 [Executioner]
     type = Steady
     solve_type = 'PJFNK'
-    petsc_options_iname = '-pc_type --pc_hypre_type'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
     petsc_options_value = 'hypre boomeramg'
 []
-  
+
 [Variables]
     [temp]
     []
 []
-  
+
 [Kernels]
     [conduction]
         type = HeatConduction
@@ -59,7 +59,7 @@
         value = 'sin(x*pi)*sin(z*pi)*cos(y*pi)'
     []
 []
-  
+
 [BCs]
     [all]
       type = FunctionDirichletBC
@@ -68,7 +68,7 @@
       function = Exact
     []
 []
-  
+
 [Materials]
     [hcm]
       type = HeatConductionMaterial

@@ -1,5 +1,5 @@
 # This test uses a cutsom boundary condition "FVFunctionNormalDirichlet" on a 1D line. This custom object is intended to be used for the porous flow model
-# along the navier stokes module and provides a boundary condtion for the normal. The results of this case was visually checked in paraview and used as a gold 
+# along the navier stokes module and provides a boundary condtion for the normal. The results of this case was visually checked in paraview and used as a gold
 # file for testing.
 
 [Mesh]
@@ -37,7 +37,7 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type --pc_hypre_type'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
