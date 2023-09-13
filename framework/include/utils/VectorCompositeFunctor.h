@@ -57,7 +57,6 @@ private:
   ValueType evaluate(const ElemPointArg & elem_point_arg, const StateArg & state) const override;
   ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override;
 
-
   using FunctorBase<VectorValue<T>>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;
 

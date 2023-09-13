@@ -37,7 +37,6 @@ public:
   using StateArg = Moose::StateArg;
   using NodeArg = Moose::NodeArg;
 
-
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
    */
@@ -75,7 +74,6 @@ private:
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
   ValueType evaluate(const NodeArg & elem_arg, const StateArg &) const override;
-
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;

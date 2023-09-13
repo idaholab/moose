@@ -36,7 +36,6 @@ public:
   using StateArg = Moose::StateArg;
   using NodeArg = Moose::NodeArg;
 
-
   FaceCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
 
   FaceCenteredMapFunctor(const MooseMesh & mesh,
@@ -60,7 +59,6 @@ private:
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
   ValueType evaluate(const NodeAr & node_arg, const StateArg & state) const override final;
-
 };
 
 template <typename T, typename Map>
