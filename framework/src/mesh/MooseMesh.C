@@ -2041,10 +2041,8 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 }
 
 void
-MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
+MooseMesh::buildHRefinementAndCoarseningMaps(Assembly * const assembly)
 {
-  TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
-
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
@@ -2091,13 +2089,115 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     }
 
     // Child side to parent volume mapping for "internal" child sides
-    if (!_doing_p_refinement)
-      for (unsigned int child = 0; child < elem->n_children(); ++child)
-        for (unsigned int side = 0; side < elem->n_sides();
-             ++side) // Assume children have the same number of sides!
-          if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
-            buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
+    for (unsigned int child = 0; child < elem->n_children(); ++child)
+      for (unsigned int side = 0; side < elem->n_sides();
+           ++side)                                // Assume children have the same number of sides!
+        if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
+          buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
+}
+
+void
+MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
+{
+  std::map<ElemType, std::pair<Elem *, unsigned int>> elems_and_max_p_level;
+
+  for (const auto & elem : getMesh().active_element_ptr_range())
+  {
+    const auto type = elem->type();
+    auto & [picked_elem, max_p_level] = elems_and_max_p_level[type];
+    if (!picked_elem)
+      picked_elem = elem;
+    max_p_level = std::max(max_p_level, elem->p_level());
+  }
+
+  // The only requirement on the FEType is that it can be arbitrarily p-refined
+  const FEType p_refinable_fe_type(CONSTANT, MONOMIAL);
+  std::vector<Point> volume_ref_points_coarse, volume_ref_points_fine, face_ref_points_coarse,
+      face_ref_points_fine;
+  std::vector<unsigned int> p_levels;
+
+  for (auto & [elem_type, elem_p_level_pair] : elems_and_max_p_level)
+  {
+    auto & [moose_elem, max_p_level] = elem_p_level_pair;
+    const auto dim = moose_elem->dim();
+    // Need to do this just once to get the right qrules put in place
+    assembly->setCurrentSubdomainID(moose_elem->subdomain_id());
+    assembly->reinit(moose_elem);
+    assembly->reinit(moose_elem, 0);
+    auto & qrule = assembly->writeableQRule();
+    auto & qrule_face = assembly->writeableQRuleFace();
+
+    ReplicatedMesh mesh(_communicator);
+    mesh.skip_partitioning(true);
+    mesh.set_mesh_dimension(dim);
+    for (const auto & nd : moose_elem->node_ref_range())
+      mesh.add_point(nd);
+
+    Elem * const elem = mesh.add_elem(Elem::build(elem_type).release());
+    for (const auto i : elem->node_index_range())
+      elem->set_node(i) = mesh.node_ptr(i);
+
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, p_refinable_fe_type));
+    std::unique_ptr<FEBase> fe_face(FEBase::build(dim, p_refinable_fe_type));
+    fe_face->get_phi();
+    const auto & face_phys_points = fe_face->get_xyz();
+
+    fe->attach_quadrature_rule(qrule);
+    fe_face->attach_quadrature_rule(qrule_face);
+    fe->reinit(elem);
+    volume_ref_points_coarse = qrule->get_points();
+    fe_face->reinit(elem, (unsigned int)0);
+    FEInterface::inverse_map(
+        dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_coarse);
+
+    p_levels.resize(max_p_level + 1);
+    std::iota(p_levels.begin(), p_levels.end(), 0);
+    MeshRefinement mesh_refinement(mesh);
+
+    for (const auto p_level : p_levels)
+    {
+      mesh_refinement.uniformly_p_refine(p_level + 1);
+      fe->reinit(elem);
+      volume_ref_points_fine = qrule->get_points();
+      fe_face->reinit(elem, (unsigned int)0);
+      FEInterface::inverse_map(
+          dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_fine);
+
+      const auto map_key = std::make_pair(elem_type, p_level);
+      auto & volume_refine_map = _elem_type_to_p_refinement_map[map_key];
+      auto & face_refine_map = _elem_type_to_p_refinement_side_map[map_key];
+      auto & volume_coarsen_map = _elem_type_to_p_coarsening_map[map_key];
+      auto & face_coarsen_map = _elem_type_to_p_coarsening_side_map[map_key];
+
+      auto fill_maps = [this](const auto & coarse_ref_points,
+                              const auto & fine_ref_points,
+                              auto & coarsen_map,
+                              auto & refine_map)
+      {
+        mapPoints(fine_ref_points, coarse_ref_points, refine_map);
+        mapPoints(coarse_ref_points, fine_ref_points, coarsen_map);
+      };
+
+      fill_maps(
+          volume_ref_points_coarse, volume_ref_points_fine, volume_coarsen_map, volume_refine_map);
+      fill_maps(face_ref_points_coarse, face_ref_points_fine, face_coarsen_map, face_refine_map);
+
+      // With this level's maps filled our fine points now become our coarse points
+      volume_ref_points_fine.swap(volume_ref_points_coarse);
+      face_ref_points_fine.swap(face_ref_points_coarse);
+    }
+  }
+}
+
+void
+MooseMesh::buildRefinementAndCoarseningMaps(Assembly * const assembly)
+{
+  TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
+  if (doingPRefinement())
+    buildPRefinementAndCoarseningMaps(assembly);
+  else
+    buildHRefinementAndCoarseningMaps(assembly);
 }
 
 void
@@ -2275,13 +2375,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
     elem->set_node(i) = mesh.node_ptr(i);
 
-  // The only requirement on the FEType is that it can be arbitrarily p-refined
-  const FEType p_refinable_fe_type(CONSTANT, MONOMIAL);
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, p_refinable_fe_type));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType()));
   fe->get_phi();
   const std::vector<Point> & q_points_volume = fe->get_xyz();
 
-  std::unique_ptr<FEBase> fe_face(FEBase::build(dim, p_refinable_fe_type));
+  std::unique_ptr<FEBase> fe_face(FEBase::build(dim, FEType()));
   fe_face->get_phi();
   const std::vector<Point> & q_points_face = fe_face->get_xyz();
 
@@ -2304,142 +2402,89 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
   std::vector<Point> parent_ref_points;
 
-  FEInterface::inverse_map(elem->dim(), p_refinable_fe_type, elem, *q_points, parent_ref_points);
+  FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, parent_ref_points);
   MeshRefinement mesh_refinement(mesh);
-  if (_doing_p_refinement)
-    mesh_refinement.uniformly_p_refine(1);
-  else
-    mesh_refinement.uniformly_refine(1);
+  mesh_refinement.uniformly_refine(1);
 
-  if (_doing_p_refinement)
+  // A map from the child element index to the locations of all the child's quadrature points in
+  // *reference* space. Note that we use a map here instead of a vector because the caller can
+  // pass an explicit child index. We are not guaranteed to have a sequence from [0, n_children)
+  std::map<unsigned int, std::vector<Point>> child_to_ref_points;
+
+  unsigned int n_children = elem->n_children();
+
+  refinement_map.resize(n_children);
+
+  std::vector<unsigned int> children;
+
+  if (child != -1) // Passed in a child explicitly
+    children.push_back(child);
+  else
   {
-    // We have no children, only ourself
-    refinement_map.resize(1);
-    mooseAssert(child == -1, "No children for p-refinement");
-    mooseAssert(
-        parent_side == child_side,
-        "Parent and child sides should match for p-refinement since we are the same element");
-    mooseAssert(elem->active(), "We should be doing p-refinement");
+    children.resize(n_children);
+    for (unsigned int child = 0; child < n_children; ++child)
+      children[child] = child;
+  }
+
+  for (unsigned int i = 0; i < children.size(); ++i)
+  {
+    unsigned int child = children[i];
+
+    if ((parent_side != -1 && !elem->is_child_on_side(child, parent_side)))
+      continue;
+
+    const Elem * child_elem = elem->child_ptr(child);
 
     if (child_side != -1)
     {
-      fe_face->reinit(elem, child_side);
+      fe_face->reinit(child_elem, child_side);
       q_points = &q_points_face;
     }
     else
     {
-      fe->reinit(elem);
+      fe->reinit(child_elem);
       q_points = &q_points_volume;
     }
 
-    // In the case of a side reinit, the reference points we would get from the face quadrature rule
-    // would correspond to a lower-dimensional side element's reference points, so we do this
-    // physical point inversion
-    std::vector<Point> p_refined_ref_points;
-    FEInterface::inverse_map(
-        elem->dim(), p_refinable_fe_type, elem, *q_points, p_refined_ref_points);
-    std::vector<QpMap> & refine_qp_map = refinement_map[0];
-    mapPoints(p_refined_ref_points, parent_ref_points, refine_qp_map);
-    mooseAssert(p_refined_ref_points.size() == refine_qp_map.size(),
-                "The returned container should express which unrefined element quadrature point "
-                "each refined element quadrature point is closest to.");
+    std::vector<Point> child_ref_points;
 
-    coarsen_map.resize(parent_ref_points.size());
-    std::vector<QpMap> coarsen_qp_map;
-    mapPoints(parent_ref_points, p_refined_ref_points, coarsen_qp_map);
-    mooseAssert(parent_ref_points.size() == coarsen_qp_map.size(),
-                "The returned container should express which refined element quadrature point "
-                "each unrefined element quadrature point is closest to.");
-    for (const auto unrefined_qp : index_range(parent_ref_points))
-    {
-      auto & [child, map] = coarsen_map[unrefined_qp];
-      // No mystery here. We are just mapping to ourselves
-      child = 0;
-      map = coarsen_qp_map[unrefined_qp];
-    }
+    FEInterface::inverse_map(elem->dim(), FEType(), elem, *q_points, child_ref_points);
+    child_to_ref_points[child] = child_ref_points;
+
+    std::vector<QpMap> & qp_map = refinement_map[child];
+
+    // Find the closest parent_qp to each child_qp
+    mapPoints(child_ref_points, parent_ref_points, qp_map);
   }
-  else
+
+  coarsen_map.resize(parent_ref_points.size());
+
+  // For each parent qp find the closest child qp
+  for (unsigned int child = 0; child < n_children; child++)
   {
-    // A map from the child element index to the locations of all the child's quadrature points in
-    // *reference* space. Note that we use a map here instead of a vector because the caller can
-    // pass an explicit child index. We are not guaranteed to have a sequence from [0, n_children)
-    std::map<unsigned int, std::vector<Point>> child_to_ref_points;
+    if (parent_side != -1 && !elem->is_child_on_side(child, child_side))
+      continue;
 
-    unsigned int n_children = elem->n_children();
+    std::vector<Point> & child_ref_points = child_to_ref_points[child];
 
-    refinement_map.resize(n_children);
+    std::vector<QpMap> qp_map;
 
-    std::vector<unsigned int> children;
+    // Find all of the closest points from parent_qp to _THIS_ child's qp
+    mapPoints(parent_ref_points, child_ref_points, qp_map);
 
-    if (child != -1) // Passed in a child explicitly
-      children.push_back(child);
-    else
+    // Check those to see if they are closer than what we currently have for each point
+    for (unsigned int parent_qp = 0; parent_qp < parent_ref_points.size(); ++parent_qp)
     {
-      children.resize(n_children);
-      for (unsigned int child = 0; child < n_children; ++child)
-        children[child] = child;
-    }
+      std::pair<unsigned int, QpMap> & child_and_map = coarsen_map[parent_qp];
+      unsigned int & closest_child = child_and_map.first;
+      QpMap & closest_map = child_and_map.second;
 
-    for (unsigned int i = 0; i < children.size(); ++i)
-    {
-      unsigned int child = children[i];
+      QpMap & current_map = qp_map[parent_qp];
 
-      if ((parent_side != -1 && !elem->is_child_on_side(child, parent_side)))
-        continue;
-
-      const Elem * child_elem = elem->child_ptr(child);
-
-      if (child_side != -1)
+      if (current_map._distance < closest_map._distance)
       {
-        fe_face->reinit(child_elem, child_side);
-        q_points = &q_points_face;
-      }
-      else
-      {
-        fe->reinit(child_elem);
-        q_points = &q_points_volume;
-      }
-
-      std::vector<Point> child_ref_points;
-
-      FEInterface::inverse_map(elem->dim(), p_refinable_fe_type, elem, *q_points, child_ref_points);
-      child_to_ref_points[child] = child_ref_points;
-
-      std::vector<QpMap> & qp_map = refinement_map[child];
-
-      // Find the closest parent_qp to each child_qp
-      mapPoints(child_ref_points, parent_ref_points, qp_map);
-    }
-
-    coarsen_map.resize(parent_ref_points.size());
-
-    // For each parent qp find the closest child qp
-    for (unsigned int child = 0; child < n_children; child++)
-    {
-      if (parent_side != -1 && !elem->is_child_on_side(child, child_side))
-        continue;
-
-      std::vector<Point> & child_ref_points = child_to_ref_points[child];
-
-      std::vector<QpMap> qp_map;
-
-      // Find all of the closest points from parent_qp to _THIS_ child's qp
-      mapPoints(parent_ref_points, child_ref_points, qp_map);
-
-      // Check those to see if they are closer than what we currently have for each point
-      for (unsigned int parent_qp = 0; parent_qp < parent_ref_points.size(); ++parent_qp)
-      {
-        std::pair<unsigned int, QpMap> & child_and_map = coarsen_map[parent_qp];
-        unsigned int & closest_child = child_and_map.first;
-        QpMap & closest_map = child_and_map.second;
-
-        QpMap & current_map = qp_map[parent_qp];
-
-        if (current_map._distance < closest_map._distance)
-        {
-          closest_child = child;
-          closest_map = current_map;
-        }
+        closest_child = child;
+        closest_map = current_map;
       }
     }
   }
@@ -3999,4 +4044,32 @@ MooseMesh::checkDuplicateSubdomainNames()
     else
       subdomain[sub_name] = sbd_id;
   }
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementMap(const Elem & elem) const
+{
+  return libmesh_map_find(_elem_type_to_p_refinement_map,
+                          std::make_pair(elem.type(), elem.p_level()));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningMap(const Elem & elem) const
+{
+  return libmesh_map_find(_elem_type_to_p_refinement_side_map,
+                          std::make_pair(elem.type(), elem.p_level()));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementSideMap(const Elem & elem) const
+{
+  return libmesh_map_find(_elem_type_to_p_coarsening_map,
+                          std::make_pair(elem.type(), elem.p_level()));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningSideMap(const Elem & elem) const
+{
+  return libmesh_map_find(_elem_type_to_p_coarsening_side_map,
+                          std::make_pair(elem.type(), elem.p_level()));
 }

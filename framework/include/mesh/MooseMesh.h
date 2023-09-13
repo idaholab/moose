@@ -1326,6 +1326,11 @@ public:
    */
   [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
 
+  const std::vector<QpMap> & getPRefinementMap(const Elem & elem) const;
+  const std::vector<QpMap> & getPCoarseningMap(const Elem & elem) const;
+  const std::vector<QpMap> & getPRefinementSideMap(const Elem & elem) const;
+  const std::vector<QpMap> & getPCoarseningSideMap(const Elem & elem) const;
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1629,6 +1634,10 @@ private:
                             int child,
                             int child_side);
 
+  void buildHRefinementAndCoarseningMaps(Assembly * assembly);
+
+  void buildPRefinementAndCoarseningMaps(Assembly * assembly);
+
   /**
    * Update the coordinate transformation object based on our coordinate system data. The coordinate
    * transformation will be created if it hasn't been already
@@ -1656,6 +1665,10 @@ private:
   ///   quadrature points
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 
+  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> _elem_type_to_p_refinement_map;
+  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>>
+      _elem_type_to_p_refinement_side_map;
+
   /// Holds mappings for "internal" child sides to parent volume.  The second key is (child, child_side).
   std::map<ElemType, std::map<std::pair<int, int>, std::vector<std::vector<QpMap>>>>
       _elem_type_to_child_side_refinement_map;
@@ -1676,6 +1689,10 @@ private:
   ///     the distance between the two
   std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap>>>
       _elem_type_to_coarsening_map;
+
+  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> _elem_type_to_p_coarsening_map;
+  std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>>
+      _elem_type_to_p_coarsening_side_map;
 
   /// Holds a map from subomdain ids to the neighboring subdomain ids
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _sub_to_neighbor_subs;
