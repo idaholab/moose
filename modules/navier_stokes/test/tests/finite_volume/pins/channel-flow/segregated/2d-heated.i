@@ -36,7 +36,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system pressure_system energy_system'
+  nl_sys_names = 'u_system v_system pressure_system energy_system solid_energy_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -65,12 +65,12 @@ pressure_tag = "pressure_grad"
     nl_sys = energy_system
     initial_condition = 200
   []
-  # [T_solid]
-  #   type = MooseVariableFVReal
-  #   two_term_boundary_expansion = false
-  #   nl_sys = solid_energy_system
-  #   initial_condition = 200
-  # []
+  [T_solid]
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = false
+    nl_sys = solid_energy_system
+    initial_condition = 200
+  []
 []
 
 [AuxVariables]
@@ -78,11 +78,6 @@ pressure_tag = "pressure_grad"
     type = MooseVariableFVReal
     initial_condition = 0.5
     two_term_boundary_expansion = false
-  []
-  [T_solid]
-    type = MooseVariableFVReal
-    two_term_boundary_expansion = false
-    initial_condition = 150
   []
 []
 
@@ -155,6 +150,7 @@ pressure_tag = "pressure_grad"
     variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
+    boundaries_to_force = bottom
   []
   [energy_diffusion]
     type = PINSFVEnergyDiffusion
@@ -171,19 +167,19 @@ pressure_tag = "pressure_grad"
     h_solid_fluid = 'h_cv'
   []
 
-  # [solid_energy_diffusion]
-  #   type = FVDiffusion
-  #   coeff = ${k}
-  #   variable = T_solid
-  # []
-  # [solid_energy_convection]
-  #   type = PINSFVEnergyAmbientConvection
-  #   variable = T_solid
-  #   is_solid = true
-  #   T_fluid = 'T_fluid'
-  #   T_solid = 'T_solid'
-  #   h_solid_fluid = 'h_cv'
-  # []
+  [solid_energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T_solid
+  []
+  [solid_energy_convection]
+    type = PINSFVEnergyAmbientConvection
+    variable = T_solid
+    is_solid = true
+    T_fluid = 'T_fluid'
+    T_solid = 'T_solid'
+    h_solid_fluid = 'h_cv'
+  []
 []
 
 [FVBCs]
@@ -200,9 +196,9 @@ pressure_tag = "pressure_grad"
     function = 0
   []
   [inlet-T]
-    type = FVNeumannBC
+    type = FVDirichletBC
     variable = T_fluid
-    value = '${fparse u_inlet * rho * cp * T_inlet}'
+    value = ${T_inlet}
     boundary = 'left'
   []
 
@@ -218,12 +214,12 @@ pressure_tag = "pressure_grad"
     variable = superficial_vel_y
     function = 0
   []
-  # [heated-side]
-  #   type = FVDirichletBC
-  #   boundary = 'top'
-  #   variable = 'T_solid'
-  #   value = 150
-  # []
+  [heated-side]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = 'T_solid'
+    value = 250
+  []
 
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
@@ -248,12 +244,6 @@ pressure_tag = "pressure_grad"
     boundary = 'bottom'
     variable = pressure
   []
-  # [symmetry-T-solid]
-  #   type = FVNeumannBC
-  #   variable = T_solid
-  #   value = 0
-  #   boundary = 'bottom'
-  # []
 
   [outlet-p]
     type = INSFVOutletPressureBC
@@ -281,16 +271,16 @@ pressure_tag = "pressure_grad"
   momentum_l_abs_tol = 1e-12
   pressure_l_abs_tol = 1e-12
   energy_l_abs_tol = 1e-12
-  # solid_energy_l_abs_tol = 1e-12
+  solid_energy_l_abs_tol = 1e-12
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
-  # solid_energy_l_tol = 0
+  solid_energy_l_tol = 0
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  # solid_energy_system = 'solid_energy_system'
+  solid_energy_system = 'solid_energy_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.4
@@ -302,7 +292,6 @@ pressure_tag = "pressure_grad"
   # solid_energy_absolute_tolerance = 1e-9
   print_fields = false
 []
-
 
 [Outputs]
   exodus = true
