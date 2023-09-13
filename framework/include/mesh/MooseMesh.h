@@ -1327,9 +1327,11 @@ public:
   [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
 
   const std::vector<QpMap> & getPRefinementMap(const Elem & elem) const;
-  const std::vector<QpMap> & getPCoarseningMap(const Elem & elem) const;
   const std::vector<QpMap> & getPRefinementSideMap(const Elem & elem) const;
+  const std::vector<QpMap> & getPCoarseningMap(const Elem & elem) const;
   const std::vector<QpMap> & getPCoarseningSideMap(const Elem & elem) const;
+
+  void buildPRefinementAndCoarseningMaps(Assembly * assembly);
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1636,7 +1638,12 @@ private:
 
   void buildHRefinementAndCoarseningMaps(Assembly * assembly);
 
-  void buildPRefinementAndCoarseningMaps(Assembly * assembly);
+  const std::vector<QpMap> & getPRefinementMapHelper(
+      const Elem & elem,
+      const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> &) const;
+  const std::vector<QpMap> & getPCoarseningMapHelper(
+      const Elem & elem,
+      const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> &) const;
 
   /**
    * Update the coordinate transformation object based on our coordinate system data. The coordinate

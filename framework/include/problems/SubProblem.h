@@ -928,6 +928,11 @@ public:
   virtual void doingPRefinement(bool doing_p_refinement, bool disable_lagrange_p_refinement);
 
   /**
+   * @returns whether the kind of adaptivity we're doing is p-refinement
+   */
+  [[nodiscard]] bool doingPRefinement() const;
+
+  /**
    * Query whether p-refinement has been requested at any point during the simulation
    */
   [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }

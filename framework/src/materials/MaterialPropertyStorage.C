@@ -64,15 +64,13 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 }
 
 void
-MaterialPropertyStorage::updateStatefulPropsP(
-    const processor_id_type libmesh_dbg_var(pid),
-    const std::vector<QpMap> & p_refinement_map,
-    const QBase & qrule,
-    const QBase & qrule_face,
-    MaterialPropertyStorage & previous_level_material_props,
-    const THREAD_ID tid,
-    const Elem & elem,
-    const int input_side)
+MaterialPropertyStorage::updateStatefulPropsP(const processor_id_type libmesh_dbg_var(pid),
+                                              const std::vector<QpMap> & p_refinement_map,
+                                              const QBase & qrule,
+                                              const QBase & qrule_face,
+                                              const THREAD_ID tid,
+                                              const Elem & elem,
+                                              const int input_side)
 {
   unsigned int n_qpoints = 0;
 
@@ -88,20 +86,26 @@ MaterialPropertyStorage::updateStatefulPropsP(
 
   mooseAssert(elem.active(), "We should be doing p-refinement");
   mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
-  mooseAssert(p_refinement_map.size(), "Refinement_map vector not initialized");
+  mooseAssert(p_refinement_map.size() == n_qpoints, "Refinement map not proper size");
 
   initProps(tid, &elem, side, n_qpoints);
 
   for (const auto state : stateIndexRange())
   {
-    const auto & previous_level_props = previous_level_material_props.props(&elem, side, state);
-    auto & current_level_props = setProps(&elem, side, state);
+    auto & props = setProps(&elem, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
     {
-      auto & current_level_prop = current_level_props[i];
-      current_level_prop.resize(n_qpoints);
+      auto & current_p_level_prop = props[i];
+      // We need to clone this property in order to not overwrite the values we're going to be
+      // reading from
+      auto previous_p_level_prop = current_p_level_prop.clone(current_p_level_prop.size());
+      // Cloning, despite its name, does not copy the data. Luckily since we are about to overwrite
+      // all of the current_p_level_prop data, we can just swap its data over to our
+      // previous_p_level_prop
+      previous_p_level_prop->swap(current_p_level_prop);
+      current_p_level_prop.resize(n_qpoints);
       for (const auto qp : index_range(p_refinement_map))
-        current_level_prop.qpCopy(qp, previous_level_props[i], p_refinement_map[qp]._to);
+        current_p_level_prop.qpCopy(qp, *previous_p_level_prop, p_refinement_map[qp]._to);
     }
   }
 }

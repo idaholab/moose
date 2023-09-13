@@ -94,7 +94,6 @@ public:
                             const std::vector<QpMap> & p_refinement_map,
                             const QBase & qrule,
                             const QBase & qrule_face,
-                            MaterialPropertyStorage & previous_level_material_props,
                             const THREAD_ID tid,
                             const Elem & elem,
                             const int input_side);

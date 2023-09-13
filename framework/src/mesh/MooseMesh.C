@@ -2100,6 +2100,11 @@ MooseMesh::buildHRefinementAndCoarseningMaps(Assembly * const assembly)
 void
 MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
 {
+  _elem_type_to_p_refinement_map.clear();
+  _elem_type_to_p_refinement_side_map.clear();
+  _elem_type_to_p_coarsening_map.clear();
+  _elem_type_to_p_coarsening_side_map.clear();
+
   std::map<ElemType, std::pair<Elem *, unsigned int>> elems_and_max_p_level;
 
   for (const auto & elem : getMesh().active_element_ptr_range())
@@ -2157,7 +2162,7 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
 
     for (const auto p_level : p_levels)
     {
-      mesh_refinement.uniformly_p_refine(p_level + 1);
+      mesh_refinement.uniformly_p_refine(1);
       fe->reinit(elem);
       volume_ref_points_fine = qrule->get_points();
       fe_face->reinit(elem, (unsigned int)0);
@@ -4047,29 +4052,48 @@ MooseMesh::checkDuplicateSubdomainNames()
 }
 
 const std::vector<QpMap> &
-MooseMesh::getPRefinementMap(const Elem & elem) const
+MooseMesh::getPRefinementMapHelper(
+    const Elem & elem,
+    const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> & map) const
 {
-  return libmesh_map_find(_elem_type_to_p_refinement_map,
-                          std::make_pair(elem.type(), elem.p_level()));
+  mooseAssert(elem.active() && elem.p_refinement_flag() == Elem::JUST_REFINED,
+              "These are the conditions that should be met for requesting a refinement map");
+  // We are actually seeking the map stored with the p_level - 1 key, e.g. the refinement map that
+  // maps from the previous p_level to this element's p_level
+  return libmesh_map_find(map,
+                          std::make_pair(elem.type(), cast_int<unsigned int>(elem.p_level() - 1)));
 }
 
 const std::vector<QpMap> &
-MooseMesh::getPCoarseningMap(const Elem & elem) const
+MooseMesh::getPCoarseningMapHelper(
+    const Elem & elem,
+    const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> & map) const
 {
-  return libmesh_map_find(_elem_type_to_p_refinement_side_map,
-                          std::make_pair(elem.type(), elem.p_level()));
+  mooseAssert(elem.active() && elem.p_refinement_flag() == Elem::JUST_COARSENED,
+              "These are the conditions that should be met for requesting a coarsening map");
+  return libmesh_map_find(map, std::make_pair(elem.type(), elem.p_level()));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementMap(const Elem & elem) const
+{
+  return getPRefinementMapHelper(elem, _elem_type_to_p_refinement_map);
 }
 
 const std::vector<QpMap> &
 MooseMesh::getPRefinementSideMap(const Elem & elem) const
 {
-  return libmesh_map_find(_elem_type_to_p_coarsening_map,
-                          std::make_pair(elem.type(), elem.p_level()));
+  return getPRefinementMapHelper(elem, _elem_type_to_p_refinement_side_map);
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningMap(const Elem & elem) const
+{
+  return getPCoarseningMapHelper(elem, _elem_type_to_p_coarsening_map);
 }
 
 const std::vector<QpMap> &
 MooseMesh::getPCoarseningSideMap(const Elem & elem) const
 {
-  return libmesh_map_find(_elem_type_to_p_coarsening_side_map,
-                          std::make_pair(elem.type(), elem.p_level()));
+  return getPCoarseningMapHelper(elem, _elem_type_to_p_coarsening_side_map);
 }

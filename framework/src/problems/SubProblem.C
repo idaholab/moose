@@ -1306,6 +1306,12 @@ SubProblem::doingPRefinement(const bool doing_p_refinement,
   }
 }
 
+bool
+SubProblem::doingPRefinement() const
+{
+  return mesh().doingPRefinement();
+}
+
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
