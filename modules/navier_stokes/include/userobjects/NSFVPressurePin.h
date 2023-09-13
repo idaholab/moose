@@ -61,7 +61,7 @@ protected:
   INSFVPressureVariable * const _p;
 
   /// Value of the pressure pin
-  const Real & _p0;
+  const PostprocessorValue & _p0;
 
   /// Pressure pin type
   const MooseEnum _pressure_pin_type;

@@ -54,13 +54,12 @@ NSFVPressurePin::validParams()
   // Avoid uninitialized residual objects
   params.suppressParameter<bool>("force_preic");
 
-  params.addParam<VariableName>(NS::pressure, "Pressure variable");
-  params.addParam<Real>("p0", "Pressure pin value");
+  params.addParam<VariableName>("variable", NS::pressure, "Pressure variable");
+  params.addParam<PostprocessorName>("phi0", "Pressure pin value");
   MooseEnum pin_types("point_value average");
   params.addRequiredParam<MooseEnum>("pin_type", pin_types, "How to pin the pressure");
   params.addParam<Point>(
-      "pressure_point",
-      "The XYZ coordinates of the points where the pinned value shall be enforced.");
+      "point", "The XYZ coordinates of the points where the pinned value shall be enforced.");
   params.addParam<PostprocessorName>(
       "pressure_average", "A postprocessor that computes the average of the pressure variable");
 
@@ -76,10 +75,10 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
     NonADFunctorInterface(this),
     _mesh(UserObject::_subproblem.mesh().getMesh()),
     _p(dynamic_cast<INSFVPressureVariable *>(
-        &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
-    _p0(getParam<Real>("p0")),
+        &UserObject::_subproblem.getVariable(0, getParam<VariableName>("variable")))),
+    _p0(getPostprocessorValue("phi0")),
     _pressure_pin_type(getParam<MooseEnum>("pin_type")),
-    _pressure_pin_point(_pressure_pin_type == "point_value" ? getParam<Point>("pressure_point")
+    _pressure_pin_point(_pressure_pin_type == "point_value" ? getParam<Point>("point")
                                                             : Point(0, 0, 0)),
     _current_pressure_average(
         _pressure_pin_type == "average" ? &getPostprocessorValue("pressure_average") : nullptr),
