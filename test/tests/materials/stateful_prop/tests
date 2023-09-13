@@ -122,17 +122,15 @@
     [spatially_const_p]
       type = 'RunApp'
       input = 'stateful_prop_adaptivity_test.i'
-      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true Outputs/file_base=stateful_prop_adaptivity_test_p'
       detail = 'when properties are spatially constant and we are performing p-refinement, and'
-      prereq = 'adaptivity/spatially_const'
     []
 
     [spatially_varying_p]
       type = 'RunApp'
       input = 'spatial_adaptivity_test.i'
-      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true'
+      cli_args = 'Adaptivity/switch_h_to_p_refinement=true Adaptivity/disable_lagrange_p_refinement=true Outputs/file_base=spatial_adaptivity_test_p'
       detail = 'when properties vary spatially and we are performing p-refinement.'
-      prereq = 'adaptivity/spatially_varying'
     []
 
   []
