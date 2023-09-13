@@ -36,15 +36,37 @@ protected:
   /**
    * Based on the computations in preNeedSample, the decision to get more data is passed and results
    * from the GP fills @param val
+   *
+   * @param row Input parameters to the model
+   * @param local_ind Current processor row index
+   * @param global_ind All processors row index
+   * @param val Output predicted by either the LF model + GP correction or the HF model
+   * @return bool Whether a full order model evaluation is required
    */
   virtual bool needSample(const std::vector<Real> & row,
                           dof_id_type local_ind,
                           dof_id_type global_ind,
                           Real & val) override;
 
-private:
   /**
-   * This evaluates the active learning acquisition function and returns bool
+   * Make decisions whether to call the full model or not based on
+   * GP prediction and uncertainty.
+   *
+   * @return bool Whether a full order model evaluation is required
+   */
+  virtual bool facilitateDecision();
+
+  /**
+   * This sets up data for re-training the GP.
+   *
+   * @param inputs Matrix of inputs for the current step
+   * @param outputs Vector of outputs for the current step
+   */
+  virtual void setupData(const std::vector<std::vector<Real>> & inputs,
+                         const std::vector<Real> & outputs);
+
+  /**
+   * This method evaluates the active learning acquisition function and returns bool
    * that indicates whether the GP model failed.
    *
    * @param gp_mean Mean of the gaussian process model
@@ -53,28 +75,17 @@ private:
    */
   bool learningFunction(const Real & gp_mean, const Real & gp_std) const;
 
-  /**
-   * This sets up data for re-training the GP.
-   *
-   * @param inputs Matrix of inputs for the current step
-   * @param outputs Vector of outputs for the current step
-   */
-  void setupData(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs);
-
-  /**
-   * This makes decisions whether to call the full model or not based on
-   * GP prediction and uncertainty.
-   *
-   * @return bool Whether a full order model evaluation is required
-   */
-  bool facilitateDecision();
-
   /// The learning function for active learning
   const MooseEnum & _learning_function;
   /// The learning function threshold
   const Real & _learning_function_threshold;
   /// The learning function parameter
   const Real & _learning_function_parameter;
+
+  /// Store all the input vectors used for training
+  std::vector<std::vector<Real>> _inputs_batch;
+  /// Store all the outputs used for training
+  std::vector<Real> _outputs_batch;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
@@ -102,9 +113,4 @@ private:
   const std::vector<std::vector<Real>> & _inputs_global;
   /// Reference to global output data requested from base class
   const std::vector<Real> & _outputs_global;
-
-  /// Store all the input vectors used for training
-  std::vector<std::vector<Real>> _inputs_batch;
-  /// Store all the outputs used for training
-  std::vector<Real> _outputs_batch;
 };

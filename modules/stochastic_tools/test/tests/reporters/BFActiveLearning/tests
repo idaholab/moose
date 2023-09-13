@@ -1,0 +1,24 @@
+[Tests]
+  issues = "#23315"
+  design = "BiFidelityActiveLearningGPDecision.md"
+  [sampling_bf]
+    requirement = 'The system shall be able to perform Monte Carlo sampling with bi-fidelity active learning with'
+    [SingleProc_SingleRow_Ufunction]
+      type = 'JSONDiff'
+      input = main_adam.i
+      min_parallel = 1
+      max_parallel = 1
+      jsondiff = 'single_proc_single_row_ufunction.json'
+      detail = 'a single row in the sampler using the U learning function;'
+    []
+    [MultipleProc_MultipleRow_Ufunction]
+      type = 'JSONDiff'
+      input = main_adam.i
+      min_parallel = 2
+      max_parallel = 2
+      jsondiff = 'multiple_proc_multiple_row_ufunction.json'
+      cli_args = "Samplers/mc/num_batch=2 Outputs/file_base='multiple_proc_multiple_row_ufunction'"
+      detail = 'multiple rows in the sampler using the U learning function;'
+    []
+  []
+[]
