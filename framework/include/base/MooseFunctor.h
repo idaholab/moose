@@ -259,7 +259,7 @@ protected:
 
   virtual GradientType evaluateGradient(const NodeArg &, const StateArg &) const
   {
-    mooseError("Element gradient not implemented for functor " + functorName());
+    mooseError("Gradient at node not implemented for functor " + functorName());
   }
   /**
    * Evaluate the functor time derivative with a given element. Some example implementations of
@@ -312,7 +312,7 @@ protected:
 
   virtual DotType evaluateDot(const NodeArg &, const StateArg &) const
   {
-    mooseError("Element time derivative not implemented for functor " + functorName());
+    mooseError("Time derivative at node not implemented for functor " + functorName());
   }
   ///@}
 
@@ -383,7 +383,7 @@ private:
   /// Map from face arguments to their cached evaluations
   mutable std::map<FaceArg, ValueType> _face_arg_to_value;
 
-  /// Map from element arguments to their cached evaluations
+  /// Map from nodal arguments to their cached evaluations
   mutable std::map<NodeArg, ValueType> _node_arg_to_value;
 
 
