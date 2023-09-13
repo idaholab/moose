@@ -76,8 +76,8 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>(
       "output_element_phases",
       "List of elements whose molar amounts in specific phases are requested");
-  params.addParam<std::string>(
-      "uo_name", "Thermochimica", "Name of the ThermochimicaNodalDataUserObject.");
+  params.addParam<bool>(
+      "make_element_aux_variables", true, "Flag to automatically create element aux variables");
   return params;
 }
 
@@ -413,6 +413,7 @@ ChemicalCompositionAction::act()
     params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
     params.set<MooseEnum>("family") = "LAGRANGE";
 
+    if (getParam<bool>("make_element_aux_variables"))
     for (const auto i : index_range(_elements))
       _problem->addAuxVariable(aux_var_type, _elements[i], params);
 

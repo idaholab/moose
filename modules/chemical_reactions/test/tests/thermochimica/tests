@@ -12,6 +12,19 @@
     required_submodule = 'contrib/thermochimica'
   []
 
+  [MoRu_manual_element]
+    type = Exodiff
+    input = MoRu_manual_element.i
+    exodiff = MoRu_manual_element_out.e
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#22711'
+    requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action with manual element variable creation'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
   [MoRu_reinit]
     type = Exodiff
     input = MoRu.i
