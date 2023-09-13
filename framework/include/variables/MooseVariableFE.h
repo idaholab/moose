@@ -691,7 +691,6 @@ private:
   using StateArg = Moose::StateArg;
   using NodeArg = Moose::NodeArg;
 
-
   ValueType evaluate(const ElemArg &, const StateArg &) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");

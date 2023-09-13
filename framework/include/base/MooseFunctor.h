@@ -386,7 +386,6 @@ private:
   /// Map from nodal arguments to their cached evaluations
   mutable std::map<NodeArg, ValueType> _node_arg_to_value;
 
-
   /// name of the functor
   MooseFunctorName _functor_name;
 };
@@ -547,7 +546,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 {
-    return evaluate(node, state);
+  return evaluate(node, state);
 }
 
 template <typename T>
@@ -1014,7 +1013,6 @@ private:
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override { return _value; }
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override { return _value; }
   ValueType evaluate(const NodeArg &, const StateArg &) const override { return _value; }
-
 
   GradientType evaluateGradient(const ElemArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradient(const FaceArg &, const StateArg &) const override { return 0; }

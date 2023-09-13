@@ -80,7 +80,6 @@ public:
   using StateArg = Moose::StateArg;
   using NodeArg = Moose::NodeArgs;
 
-
   static InputParameters validParams();
 
   MooseVariableFV(const InputParameters & parameters);
