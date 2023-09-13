@@ -59,6 +59,19 @@ protected:
   void selfFinalize();
   void selfTimestepSetup();
 
+  /**
+   * Adaptive, local penalty for AL. See 'The adapted augmented Lagrangian method: a new method for
+   * the resolution of the mechanical frictional contact problem', Comput Mech (2012) 49: 259-275
+   */
+  void
+  bussettaAdaptivePenalty(const Real previous_gap, const Real gap, Real & penalty, Real & eval_tn);
+
+  /**
+   * See Algorithm 3 of 'The adapted augmented Lagrangian method: a new method for
+   * the resolution of the mechanical frictional contact problem', Comput Mech (2012) 49: 259-275
+   */
+  void adaptiveNormalPenalty(const Real previous_gap, const Real gap, Real & penalty);
+
   /// The penalty factor
   const Real _penalty;
 
@@ -68,8 +81,8 @@ protected:
   /// penetration tolerance for augmented Lagrange contact
   const Real _penetration_tolerance;
 
-  /// The contact force on the mortar segument quadrature points
-  ADVariableValue _contact_force;
+  /// The contact pressure on the mortar segument quadrature points
+  ADVariableValue _contact_pressure;
 
   /// Map from degree of freedom to normal pressure for reporting
   std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
@@ -100,4 +113,10 @@ protected:
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
+
+  /// Maximum multiplier applied to the initial penalty factor in AL
+  const Real _max_penalty_multiplier;
+
+  /// The adaptivity method for the penalty factor at augmentations
+  const enum class AdaptivityNormalPenalty { SIMPLE, BUSSETTA } _adaptivity_normal;
 };

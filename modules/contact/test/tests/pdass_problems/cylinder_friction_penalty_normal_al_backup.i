@@ -264,6 +264,7 @@
     disp_x = disp_x
     disp_y = disp_y
     penalty = 1e7
+    penalty_multiplier = 10
     penetration_tolerance = 1e-12
     use_physical_gap = true
   []

@@ -263,8 +263,8 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
-
+  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-10
   start_time = 0.0
   end_time = 0.3 # 3.5
   l_tol = 1e-4
