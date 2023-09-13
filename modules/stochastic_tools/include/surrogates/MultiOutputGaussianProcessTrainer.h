@@ -18,7 +18,7 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
-// #include "MultiOutputGaussianProcessHandler.h"
+#include "MultiOutputGaussianProcessHandler.h"
 
 class MultiOutputGaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
@@ -29,15 +29,15 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  // StochasticTools::MultiOutputGaussianProcessHandler & gpHandler() { return _gp_handler; }
-  // const StochasticTools::MultiOutputGaussianProcessHandler & getGPHandler() const { return _gp_handler; }
+  StochasticTools::MultiOutputGaussianProcessHandler & gpHandler() { return _gp_handler; }
+  const StochasticTools::MultiOutputGaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 private:
   // /// Data from the current predictor row
-  // const std::vector<Real> & _predictor_row;
+  const std::vector<Real> & _predictor_row;
 
-  // /// Gaussian process handler responsible for managing training related tasks
-  // StochasticTools::MultiOutputGaussianProcessHandler & _gp_handler;
+  /// Gaussian process handler responsible for managing training related tasks
+  StochasticTools::MultiOutputGaussianProcessHandler & _gp_handler;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
   std::vector<std::vector<Real>> _params_buffer;
@@ -46,32 +46,23 @@ private:
   std::vector<std::vector<Real>> _data_buffer;
 
   // /// Paramaters (x) used for training, along with statistics
-  // RealEigenMatrix & _training_params;
+  RealEigenMatrix & _training_params;
 
   // /// Data (y) used for training
-  // RealEigenMatrix _training_data;
+  RealEigenMatrix _training_data;
 
-  // /// Switch for training param (x) standardization
-  // bool _standardize_params;
-
-  // /// Switch for training data(y) standardization
-  // bool _standardize_data;
-
-  // /// Flag to toggle hyperparameter tuning/optimization
-  // bool _do_tuning;
-
-  // /// Struct holding parameters necessary for parameter tuning
-  // const StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions _optimization_opts;
+  /// Struct holding parameters necessary for parameter tuning
+  const StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions _optimization_opts;
 
   // /// Data from the current sampler row
-  // const std::vector<Real> & _sampler_row;
+  const std::vector<Real> & _sampler_row;
 
   // /// Predictor values from reporters
-  // std::vector<const Real *> _pvals;
+  std::vector<const Real *> _pvals;
 
   // /// Columns from sampler for predictors
-  // std::vector<unsigned int> _pcols;
+  std::vector<unsigned int> _pcols;
 
   // /// Total number of parameters/dimensions
-  // unsigned int _n_params;
+  unsigned int _n_params;
 };
