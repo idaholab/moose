@@ -42,19 +42,26 @@ class MeshBase;
 class NSFVPressurePin : public GeneralUserObject,
                         public TaggingInterface,
                         public BlockRestrictable,
-                        public FaceArgProducerInterface,
-                        public ADFunctorInterface
+                        public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
   NSFVPressurePin(const InputParameters & params);
 
-  void initialSetup() override;
+  void initialSetup() override{};
+  void initialize() override{};
   void execute() override;
+  void finalize() override{};
 
 protected:
+  /// LibMesh mesh class for the current simulation mesh
+  MeshBase & _mesh;
+
   /// The thread 0 copy of the pressure variable
   INSFVPressureVariable * const _p;
+
+  /// Value of the pressure pin
+  const Real & _p0;
 
   /// Pressure pin type
   const MooseEnum _pressure_pin_type;
@@ -63,7 +70,7 @@ protected:
   const Point _pressure_pin_point;
 
   /// If using average pressure pin, provides the average pressure value
-  PostprocessorValue * const _current_pressure_average;
+  const PostprocessorValue * const _current_pressure_average;
 
 private:
   /// The nonlinear system
