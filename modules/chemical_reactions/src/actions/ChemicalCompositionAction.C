@@ -59,7 +59,7 @@ ChemicalCompositionAction::validParams()
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>(
-      "execute_on", exec_enum, "When to execute the ThermochimicaNodalData UO");
+      "execute_on", exec_enum, "When to execute the Thermochimica UserObject");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -76,8 +76,17 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>(
       "output_element_phases",
       "List of elements whose molar amounts in specific phases are requested");
+  params.addParam<std::string>("uo_name", "Thermochimica", "Name of the Thermochimica UserObject.");
   params.addParam<bool>(
       "make_element_aux_variables", true, "Flag to automatically create element aux variables");
+
+  params.addCoupledVar("chemical_potential", "Coupled chemical_potential");
+  params.addParam<int>("which_mu", "Index of element for Which chemical potential to match");
+  params.addParam<Real>("finite_difference_width",
+                        0.01,
+                        "Fractional width of finite difference to use for Newton Iteration");
+  params.addParam<bool>("verbose", false, "Flag to output verbose information");
+
   return params;
 }
 
@@ -99,6 +108,17 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
   std::replace(_munit.begin(), _munit.end(), '_', ' ');
+
+  if (isParamValid("chemical_potential"))
+  {
+    if (!isParamValid("which_mu"))
+      paramError("which_mu", "If chemical_potential provided, which_mu must also be provided");
+  }
+  else if (_pars.isParamSetByUser("which_mu") || _pars.isParamSetByUser("verbose") ||
+           _pars.isParamSetByUser("finite_difference_width"))
+    paramError("chemical_potential",
+               "If chemical_potential is not provided, which_mu, verbose, and "
+               "finite_difference_width are unused must also be provided");
 
 #ifdef THERMOCHIMICA_ENABLED
   // Initialize database in Thermochimica
@@ -414,8 +434,8 @@ ChemicalCompositionAction::act()
     params.set<MooseEnum>("family") = "LAGRANGE";
 
     if (getParam<bool>("make_element_aux_variables"))
-    for (const auto i : index_range(_elements))
-      _problem->addAuxVariable(aux_var_type, _elements[i], params);
+      for (const auto i : index_range(_elements))
+        _problem->addAuxVariable(aux_var_type, _elements[i], params);
 
     for (const auto i : index_range(_phases))
       _problem->addAuxVariable(aux_var_type, _phases[i], params);
@@ -454,8 +474,10 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_user_object")
   {
-
-    auto uo_params = _factory.getValidParams("ThermochimicaNodalData");
+    auto uo_name = "ThermochimicaNodalData";
+    if (isParamValid("chemical_potential"))
+      uo_name = "ThermochimicaInverseNodalData";
+    auto uo_params = _factory.getValidParams(uo_name);
 
     std::copy(_elements.begin(),
               _elements.end(),
@@ -492,9 +514,13 @@ ChemicalCompositionAction::act()
 
     uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
 
-    uo_params.applyParameters(parameters());
+    uo_params.applyParameters(parameters(),
+                              {"chemical_potential", "which_mu", "finite_difference", "verbose"});
+    if (isParamValid("chemical_potential"))
+      uo_params.applySpecificParameters(
+          parameters(), {"chemical_potential", "which_mu", "finite_difference", "verbose"});
 
-    _problem->addUserObject("ThermochimicaNodalData", _uo_name, uo_params);
+    _problem->addUserObject(uo_name, _uo_name, uo_params);
   }
 
 #endif

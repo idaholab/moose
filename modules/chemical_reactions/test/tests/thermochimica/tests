@@ -37,6 +37,30 @@
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
+  [MoRu_single_point]
+    type = CSVDiff
+    input = MoRu_single_point.i
+    csvdiff = MoRu_single_point_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#22711'
+    requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action for a single point'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+  [MoRu_single_point_inverse]
+    type = CSVDiff
+    input = MoRu_single_point_inverse.i
+    csvdiff = MoRu_single_point_inverse_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md ThermochimicaInverseNodalData.md'
+    issues = '#22711'
+    requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action for a single point and solve the inverse problem of providing temperature and chemical potential and retrieving compositions'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
 
   [csv_ic]
     type = Exodiff
