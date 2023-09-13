@@ -32,20 +32,20 @@ pressure_tag = "pressure_grad"
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolatorSegregated
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 0.5
     nl_sys = u_system
     two_term_boundary_expansion = false
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
     nl_sys = v_system
@@ -68,7 +68,7 @@ pressure_tag = "pressure_grad"
 [FVKernels]
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -76,20 +76,20 @@ pressure_tag = "pressure_grad"
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -97,13 +97,13 @@ pressure_tag = "pressure_grad"
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
@@ -141,28 +141,29 @@ pressure_tag = "pressure_grad"
 []
 
 [FVBCs]
+  inactive = "symmetry-u symmetry-v symmetry-p"
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = u
+    variable = vel_x
     function = '1.1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = v
+    variable = vel_y
     function = '0.0'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
-    variable = u
+    variable = vel_x
     function = 0.0
   []
   [walls-v]
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
-    variable = v
+    variable = vel_y
     function = 0.0
   []
   [outlet_p]
@@ -183,6 +184,32 @@ pressure_tag = "pressure_grad"
     variable = T_fluid
     value = 300
   []
+
+  ### Inactive by default, some tests will turn these on ###
+  [symmetry-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    momentum_component = 'x'
+  []
+  [symmetry-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    momentum_component = 'y'
+  []
+  [symmetry-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
+  ##########################################################
 []
 
 [Executioner]
@@ -200,8 +227,8 @@ pressure_tag = "pressure_grad"
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.9
-  num_iterations = 30
+  energy_equation_relaxation = 0.99
+  num_iterations = 40
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   energy_absolute_tolerance = 1e-9
