@@ -24,8 +24,8 @@ ThermochimicaInverseNodalData::validParams()
   params += NestedSolve::validParams();
 
   params.addRequiredCoupledVar("chemical_potential", "Coupled chemical_potential");
-  params.addRequiredParam<int>("which_mu",
-                               "Index of element for Which chemical potential to match");
+  params.addRequiredParam<VariableName>("chemical_potential_element",
+                                        "Name of element the chemical potential corresponds to");
   params.addParam<Real>(
       "finite_difference_width", 0.01, "Width of finite difference to use for Newton Iteration");
   params.addParam<bool>("verbose", false, "Flag to output verbose information");
@@ -35,17 +35,24 @@ ThermochimicaInverseNodalData::validParams()
 
 ThermochimicaInverseNodalData::ThermochimicaInverseNodalData(const InputParameters & parameters)
   : ThermochimicaNodalBase(parameters),
+    _nested_solve(NestedSolve(parameters)),
     _el_writable(_n_elements),
     _mu(coupledValue("chemical_potential")),
-    _nested_solve(NestedSolve(parameters)),
-    _which_mu(getParam<int>("which_mu")),
     _finite_difference_width(getParam<Real>("finite_difference_width")),
     _verbose(getParam<bool>("verbose"))
 {
+  const auto names = coupledNames("elements");
+  auto it =
+      std::find(names.begin(), names.end(), getParam<VariableName>("chemical_potential_element"));
+  if (it == names.end())
+    paramError("chemical_potential_name",
+               "Element to use for chemical potential not found list of elements");
+  _mu_index = std::distance(names.begin(), it);
+
   for (const auto i : make_range(_n_elements))
   {
     _el_writable[i] = &writableVariable("elements", i);
-    if (i == _which_mu)
+    if (i == _mu_index)
       _el[i] = &coupledValueOld("elements", i);
     else
       _el[i] = &coupledValue("elements", i);
@@ -69,7 +76,7 @@ ThermochimicaInverseNodalData::execute()
     element_values[i] = (*_el[i])[_qp];
 
   NestedSolve::Value<> solution(1);
-  solution << element_values[_which_mu];
+  solution << element_values[_mu_index];
 
   if (_verbose)
   {
@@ -81,44 +88,44 @@ ThermochimicaInverseNodalData::execute()
 
   auto computeResidual = [&](const NestedSolve::Value<> & guess, NestedSolve::Value<> & residual)
   {
-    element_values[_which_mu] = guess(0);
+    element_values[_mu_index] = guess(0);
 
     idbg = setParamsAndRun(element_values);
     if (idbg)
       mooseError("Thermochimica error ", idbg);
-    residual(0) = getElementalChemicalPotentials(_which_mu) - _mu[_qp];
+    residual(0) = getElementalChemicalPotentials(_mu_index) - _mu[_qp];
 
     if (_verbose)
-      Moose::out << "  guess: " << guess(0) << " pot: " << getElementalChemicalPotentials(_which_mu)
+      Moose::out << "  guess: " << guess(0) << " pot: " << getElementalChemicalPotentials(_mu_index)
                  << " mu: " << _mu[_qp] << " res: " << residual(0) << std::endl;
   };
 
   auto computeJacobian = [&](const NestedSolve::Value<> & guess, NestedSolve::Jacobian<> & jacobian)
   {
-    element_values[_which_mu] = guess(0) * (1.0 + _finite_difference_width / 2.0);
+    element_values[_mu_index] = guess(0) * (1.0 + _finite_difference_width / 2.0);
 
     idbg = setParamsAndRun(element_values);
     if (idbg)
       mooseError("Thermochimica error ", idbg);
-    jacobian(0) = getElementalChemicalPotentials(_which_mu);
+    jacobian(0) = getElementalChemicalPotentials(_mu_index);
 
     if (_verbose)
-      Moose::out << "    high: " << jacobian(0) << " at " << element_values[_which_mu];
+      Moose::out << "    high: " << jacobian(0) << " at " << element_values[_mu_index];
 
-    element_values[_which_mu] = guess(0) * (1.0 - _finite_difference_width / 2.0);
+    element_values[_mu_index] = guess(0) * (1.0 - _finite_difference_width / 2.0);
     idbg = setParamsAndRun(element_values);
     if (idbg)
       mooseError("Thermochimica error ", idbg);
-    jacobian(0) -= getElementalChemicalPotentials(_which_mu);
+    jacobian(0) -= getElementalChemicalPotentials(_mu_index);
 
-    jacobian(0) /= _finite_difference_width;
+    jacobian(0) /= _finite_difference_width * guess(0);
 
     // Reset element_values back to correct guess
-    element_values[_which_mu] = guess(0);
+    element_values[_mu_index] = guess(0);
 
     if (_verbose)
-      Moose::out << "\n    low: " << getElementalChemicalPotentials(_which_mu) << " at "
-                 << element_values[_which_mu] << "\n    jac: " << jacobian(0) << std::endl;
+      Moose::out << "\n    low: " << getElementalChemicalPotentials(_mu_index) << " at "
+                 << element_values[_mu_index] << "\n    jac: " << jacobian(0) << std::endl;
   };
 
   _nested_solve.nonlinear(solution, computeResidual, computeJacobian);
@@ -130,7 +137,15 @@ ThermochimicaInverseNodalData::execute()
            _nested_solve.getState() == NestedSolve::State::EXACT_GUESS)
   {
     if (_verbose)
-      Moose::out << "converged at " << element_values[_which_mu] << std::endl;
+    {
+      Moose::out << "converged at " << element_values[_mu_index] << " due to ";
+      if (_nested_solve.getState() == NestedSolve::State::CONVERGED_ABS)
+        Moose::out << "CONVERGED_ABS" << std::endl;
+      if (_nested_solve.getState() == NestedSolve::State::CONVERGED_REL)
+        Moose::out << "CONVERGED_REL" << std::endl;
+      if (_nested_solve.getState() == NestedSolve::State::EXACT_GUESS)
+        Moose::out << "EXACT_GUESS" << std::endl;
+    }
 
     // Write elemental values
     for (const auto i : make_range(_n_elements))
@@ -142,6 +157,8 @@ ThermochimicaInverseNodalData::execute()
     // Save outputs
     setOutputNodalValues();
   }
+  else
+    mooseError("In ", _name, ": something went wrong with NestedSolve");
 
 #endif
 }

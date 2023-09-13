@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseUtils.h"
+#include "NestedSolve.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -81,11 +82,13 @@ ChemicalCompositionAction::validParams()
       "make_element_aux_variables", true, "Flag to automatically create element aux variables");
 
   params.addCoupledVar("chemical_potential", "Coupled chemical_potential");
-  params.addParam<int>("which_mu", "Index of element for Which chemical potential to match");
+  params.addParam<VariableName>("chemical_potential_element",
+                                "Name of element the chemical potential corresponds to");
   params.addParam<Real>("finite_difference_width",
                         0.01,
                         "Fractional width of finite difference to use for Newton Iteration");
   params.addParam<bool>("verbose", false, "Flag to output verbose information");
+  params += NestedSolve::validParams();
 
   return params;
 }
@@ -111,13 +114,15 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   if (isParamValid("chemical_potential"))
   {
-    if (!isParamValid("which_mu"))
-      paramError("which_mu", "If chemical_potential provided, which_mu must also be provided");
+    if (!isParamValid("chemical_potential_element"))
+      paramError(
+          "chemical_potential_element",
+          "If chemical_potential provided, chemical_potential_element must also be provided");
   }
-  else if (_pars.isParamSetByUser("which_mu") || _pars.isParamSetByUser("verbose") ||
-           _pars.isParamSetByUser("finite_difference_width"))
+  else if (_pars.isParamSetByUser("chemical_potential_element") ||
+           _pars.isParamSetByUser("verbose") || _pars.isParamSetByUser("finite_difference_width"))
     paramError("chemical_potential",
-               "If chemical_potential is not provided, which_mu, verbose, and "
+               "If chemical_potential is not provided, chemical_potential_element, verbose, and "
                "finite_difference_width are unused must also be provided");
 
 #ifdef THERMOCHIMICA_ENABLED
@@ -514,11 +519,13 @@ ChemicalCompositionAction::act()
 
     uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
 
-    uo_params.applyParameters(parameters(),
-                              {"chemical_potential", "which_mu", "finite_difference", "verbose"});
+    uo_params.applyParameters(
+        parameters(),
+        {"chemical_potential", "chemical_potential_element", "finite_difference", "verbose"});
     if (isParamValid("chemical_potential"))
       uo_params.applySpecificParameters(
-          parameters(), {"chemical_potential", "which_mu", "finite_difference", "verbose"});
+          parameters(),
+          {"chemical_potential", "chemical_potential_element", "finite_difference", "verbose"});
 
     _problem->addUserObject(uo_name, _uo_name, uo_params);
   }

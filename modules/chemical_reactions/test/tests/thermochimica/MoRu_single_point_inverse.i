@@ -19,7 +19,7 @@
   output_vapor_pressures = 'vp:gas_ideal:Mo'
   output_element_phases = 'ep:BCCN:Mo'
 
-  which_mu = 0
+  chemical_potential_element = Mo
   chemical_potential = -157452.85733323
 []
 

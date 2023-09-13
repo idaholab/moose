@@ -26,17 +26,17 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Instantiation of the NestedSolve class
+  NestedSolve _nested_solve;
+
   /// Writable elemental variable
   std::vector<MooseVariable *> _el_writable;
 
   /// Chemical potential to solve for
   const VariableValue & _mu;
 
-  /// Instantiation of the NestedSolve class
-  NestedSolve _nested_solve;
-
   /// Index of which mu to match
-  const unsigned int _which_mu;
+  unsigned int _mu_index;
 
   /// Width for finite difference calculation
   const Real _finite_difference_width;

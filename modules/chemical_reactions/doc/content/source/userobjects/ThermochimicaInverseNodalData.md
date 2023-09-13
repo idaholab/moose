@@ -15,10 +15,10 @@ compositions for all elements present in the system, one (and only one) element 
 [`NestedSolve`](NestedSolve.md) to search for a elemental composition that returns a specificed
 chemical potential for the particular species. This is enabled by providing a coupled variable via
 the `chemical_potential` input sytax, along with an index corresponding to that particular via
-`which_mu`.
+`chemical_potential_element`.
 
 Similar to [`ThermochimicaNodalData`](ThermochimicaNodalData.md),
-[`ChemicalComposition`](ChemicalComposition.md) is utilized to enable this method For all other
+[`ChemicalComposition`](ChemicalCompositionAction.md) is utilized to enable this method For all other
 specifications, [`ThermochimicaNodalData`](ThermochimicaNodalData.md) is should be referenced.
 
 ## Example Input Syntax

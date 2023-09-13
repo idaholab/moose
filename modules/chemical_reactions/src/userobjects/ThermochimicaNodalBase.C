@@ -141,6 +141,7 @@ ThermochimicaNodalBase::initialize()
 int
 ThermochimicaNodalBase::setParamsAndRun(const std::vector<Real> element_values)
 {
+#ifdef THERMOCHIMICA_ENABLED
   // Set temperature and pressure for thermochemistry solver
   Thermochimica::setTemperaturePressure(_temperature[_qp], _pressure[_qp]);
 
@@ -159,11 +160,16 @@ ThermochimicaNodalBase::setParamsAndRun(const std::vector<Real> element_values)
 
   // Check for error status
   return Thermochimica::checkInfoThermo();
+#else
+  libmesh_ignore(element_values);
+  mooseError("Thermochimica not available, should not get here.");
+#endif
 }
 
 Real
 ThermochimicaNodalBase::getElementalChemicalPotentials(const int idx)
 {
+#ifdef THERMOCHIMICA_ENABLED
   {
     auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[idx]);
 
@@ -171,11 +177,16 @@ ThermochimicaNodalBase::getElementalChemicalPotentials(const int idx)
       mooseError("From ", _name, ": getOutputChemPot error: ", idbg);
     return potential;
   }
+#else
+  libmesh_ignore(idx);
+  mooseError("Thermochimica not available, should not get here.");
+#endif
 }
 
 void
 ThermochimicaNodalBase::setOutputNodalValues()
 {
+#ifdef THERMOCHIMICA_ENABLED
   // Get requested phase indices if phase concentration output was requested
   // i.e. if output_phases is coupled
   auto moles_phase = Thermochimica::getMolesPhase();
@@ -330,6 +341,7 @@ ThermochimicaNodalBase::setOutputNodalValues()
                    idbg);
 #endif
     }
+#endif
 }
 
 void
