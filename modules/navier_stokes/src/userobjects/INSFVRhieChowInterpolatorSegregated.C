@@ -127,24 +127,28 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
 {
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    // On internal face we do a regular interpoaltion with geometric weights
-    if (_u->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      const Moose::FaceArg face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+      // On internal face we do a regular interpoaltion with geometric weights
+      if (_u->isInternalFace(*fi))
+      {
+        const Moose::FaceArg face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-      _face_velocity[fi->id()] = raw_value((*_vel)(face, Moose::currentState()));
-    }
-    // On the boundary, we just take the boundary values
-    else
-    {
-      const Elem * const boundary_elem =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+        _face_velocity[fi->id()] = raw_value((*_vel)(face, Moose::currentState()));
+      }
+      // On the boundary, we just take the boundary values
+      else
+      {
+        const Elem * const boundary_elem =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
 
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-      _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face, Moose::currentState()));
+        _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face, Moose::currentState()));
+      }
     }
   }
 }
@@ -165,49 +169,53 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    // On internal face we just use the interpoalted H/A and the pressure face gradient
-    // So u_f = -(H/A)_f - (1/A)_f*grad(p)_f
-    // Notice the (-) sign on H/A which comes from the face that we use the Jacobian/Residual
-    // computations and we get -H instead of H.
-    if (_u->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      const Moose::FaceArg face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
-
-      RealVectorValue Ainv;
-      RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
-
-      interpolate(Moose::FV::InterpMethod::Average,
-                  Ainv,
-                  _Ainv(makeElemArg(fi->elemPtr()), time_arg),
-                  _Ainv(makeElemArg(fi->neighborPtr()), time_arg),
-                  *fi,
-                  true);
-
-      RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
-      for (const auto comp_index : make_range(_dim))
-        _face_velocity[fi->id()](comp_index) =
-            -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
-    }
-    else
-    {
-      const Elem * const boundary_elem =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
-
-      // If we have a dirichlet boundary conditions, this sill give us the exact value of the
-      // velocity on the face as expected (see populateHbyA())
-      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, time_arg))
-        _face_velocity[fi->id()] = -raw_value(_HbyA(boundary_face, time_arg));
-      else
+      // On internal face we just use the interpoalted H/A and the pressure face gradient
+      // So u_f = -(H/A)_f - (1/A)_f*grad(p)_f
+      // Notice the (-) sign on H/A which comes from the face that we use the Jacobian/Residual
+      // computations and we get -H instead of H.
+      if (_u->isInternalFace(*fi))
       {
-        const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
-        const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
-        const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
+        const Moose::FaceArg face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+
+        RealVectorValue Ainv;
+        RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
+
+        interpolate(Moose::FV::InterpMethod::Average,
+                    Ainv,
+                    _Ainv(makeElemArg(fi->elemPtr()), time_arg),
+                    _Ainv(makeElemArg(fi->neighborPtr()), time_arg),
+                    *fi,
+                    true);
+
+        RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
         for (const auto comp_index : make_range(_dim))
           _face_velocity[fi->id()](comp_index) =
               -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+      }
+      else
+      {
+        const Elem * const boundary_elem =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+
+        // If we have a dirichlet boundary conditions, this sill give us the exact value of the
+        // velocity on the face as expected (see populateHbyA())
+        if (_u->isDirichletBoundaryFace(*fi, boundary_elem, time_arg))
+          _face_velocity[fi->id()] = -raw_value(_HbyA(boundary_face, time_arg));
+        else
+        {
+          const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
+          const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
+          const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
+          for (const auto comp_index : make_range(_dim))
+            _face_velocity[fi->id()](comp_index) =
+                -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+        }
       }
     }
   }
@@ -227,21 +235,24 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
   for (auto & elem :
        as_range(_mesh.active_local_elements_begin(), _mesh.active_local_elements_end()))
   {
-    const auto elem_arg = makeElemArg(elem);
-    const RealVectorValue Ainv = _Ainv(elem_arg, time_arg);
-    const RealVectorValue & grad_p = raw_value(_p->gradient(elem_arg, time_arg));
-
-    for (auto comp_index : make_range(_dim))
+    if (hasBlocks(elem->subdomain_id()))
     {
-      // If we are doing segregated momentum components we need to access different vector
-      // components otherwise everything is in the same vector (with different variable names)
-      const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
-      const auto index = elem->dof_number(system_number, var_nums[comp_index], 0);
+      const auto elem_arg = makeElemArg(elem);
+      const RealVectorValue Ainv = _Ainv(elem_arg, time_arg);
+      const RealVectorValue & grad_p = raw_value(_p->gradient(elem_arg, time_arg));
 
-      // We set the dof value in the solution vector the same logic applies:
-      // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
-      _momentum_implicit_systems[comp_index]->solution->set(
-          index, -(*_HbyA_raw[comp_index])(index)-Ainv(comp_index) * grad_p(comp_index));
+      for (auto comp_index : make_range(_dim))
+      {
+        // If we are doing segregated momentum components we need to access different vector
+        // components otherwise everything is in the same vector (with different variable names)
+        const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
+        const auto index = elem->dof_number(system_number, var_nums[comp_index], 0);
+
+        // We set the dof value in the solution vector the same logic applies:
+        // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
+        _momentum_implicit_systems[comp_index]->solution->set(
+            index, -(*_HbyA_raw[comp_index])(index)-Ainv(comp_index) * grad_p(comp_index));
+      }
     }
   }
 
@@ -262,48 +273,52 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
 {
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    // If we are on an internal face, we just interpolate the values to the faces.
-    // Otherwise, depending on the boundary type, we take the velocity value or
-    // extrapolated HbyA values.
-    if (_u->isInternalFace(*fi))
+    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
+        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      RealVectorValue HbyA;
-      const Elem * elem = fi->elemPtr();
-      const Elem * neighbor = fi->neighborPtr();
-      for (auto comp_index : make_range(_dim))
+      // If we are on an internal face, we just interpolate the values to the faces.
+      // Otherwise, depending on the boundary type, we take the velocity value or
+      // extrapolated HbyA values.
+      if (_u->isInternalFace(*fi))
       {
-        unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
-        const auto dof_index_elem = elem->dof_number(system_number, var_nums[comp_index], 0);
-        const auto dof_index_neighbor =
-            neighbor->dof_number(system_number, var_nums[comp_index], 0);
-
-        _HbyA[fi->id()](comp_index) = 0.0;
-        interpolate(Moose::FV::InterpMethod::Average,
-                    _HbyA[fi->id()](comp_index),
-                    (*raw_hbya[comp_index])(dof_index_elem),
-                    (*raw_hbya[comp_index])(dof_index_neighbor),
-                    *fi,
-                    true);
-      }
-    }
-    else
-    {
-      const Elem * const boundary_elem =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
-
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
-
-      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
-        _HbyA[fi->id()] = -raw_value((*_vel)(boundary_face, Moose::currentState()));
-      else
-        for (const auto comp_index : make_range(_dim))
+        RealVectorValue HbyA;
+        const Elem * elem = fi->elemPtr();
+        const Elem * neighbor = fi->neighborPtr();
+        for (auto comp_index : make_range(_dim))
         {
           unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
-          const auto dof_index_elem =
-              boundary_elem->dof_number(system_number, var_nums[comp_index], 0);
-          _HbyA[fi->id()](comp_index) = (*raw_hbya[comp_index])(dof_index_elem);
+          const auto dof_index_elem = elem->dof_number(system_number, var_nums[comp_index], 0);
+          const auto dof_index_neighbor =
+              neighbor->dof_number(system_number, var_nums[comp_index], 0);
+
+          _HbyA[fi->id()](comp_index) = 0.0;
+          interpolate(Moose::FV::InterpMethod::Average,
+                      _HbyA[fi->id()](comp_index),
+                      (*raw_hbya[comp_index])(dof_index_elem),
+                      (*raw_hbya[comp_index])(dof_index_neighbor),
+                      *fi,
+                      true);
         }
+      }
+      else
+      {
+        const Elem * const boundary_elem =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+
+        if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
+          _HbyA[fi->id()] = -raw_value((*_vel)(boundary_face, Moose::currentState()));
+        else
+          for (const auto comp_index : make_range(_dim))
+          {
+            unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
+            const auto dof_index_elem =
+                boundary_elem->dof_number(system_number, var_nums[comp_index], 0);
+            _HbyA[fi->id()](comp_index) = (*raw_hbya[comp_index])(dof_index_elem);
+          }
+      }
     }
   }
 }
