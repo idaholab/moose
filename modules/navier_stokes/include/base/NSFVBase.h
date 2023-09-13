@@ -1644,9 +1644,26 @@ NSFVBase<BaseType>::addINSMassKernels()
       object_type = "NSFVPressurePin";
     else
       object_type = "NSFVPressurePin";
+
+    // Create the average value postprocessor if needed
+    if (pin_type == "average-uo")
+    {
+      // Volume average by default, but we could do inlet or outlet for example
+      InputParameters params = getFactory().getValidParams("ElementAverageValue");
+      params.template set<std::vector<VariableName>>("variable") = {_pressure_name};
+      assignBlocks(params, _blocks);
+      params.template set<std::vector<OutputName>>("outputs") = {"none"};
+      getProblem().addPostprocessor("ElementAverageValue", "nsfv_pressure_average", params);
+    }
+
     InputParameters params = getFactory().getValidParams(object_type);
     if (pin_type == "point-value" || pin_type == "average")
       params.template set<CoupledName>("lambda") = {"lambda"};
+    else if (pin_type == "point-value-uo")
+      params.template set<MooseEnum>("pin_type") = "point-value";
+    else
+      params.template set<MooseEnum>("pin_type") = "average";
+
     params.template set<PostprocessorName>("phi0") =
         parameters().template get<PostprocessorName>("pinned_pressure_value");
     params.template set<NonlinearVariableName>("variable") = _pressure_name;
@@ -1660,16 +1677,6 @@ NSFVBase<BaseType>::addINSMassKernels()
       getProblem().addFVKernel(object_type, prefix() + "ins_mass_pressure_constraint", params);
     else
       getProblem().addUserObject(object_type, prefix() + "ins_mass_pressure_pin", params);
-
-    // Create the average value postprocessor if needed
-    if (pin_type == "average-uo")
-    {
-      // Volume average by default, but we could do inlet or outlet for example
-      InputParameters params = getFactory().getValidParams("ElementAverageValue");
-      params.template set<VariableName>("variable") = _pressure_name;
-      assignBlocks(params, _blocks);
-      getProblem().addPostprocessor("ElementAverageValue", "nsfv_pressure_average", params);
-    }
   }
 }
 
@@ -3098,8 +3105,9 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
     checkDependentParameterError("pin_pressure", {"pinned_pressure_type"}, true);
 
     MooseEnum pin_type = parameters().template get<MooseEnum>("pinned_pressure_type");
-    checkDependentParameterError(
-        "pinned_pressure_type", {"pinned_pressure_point"}, pin_type == "point-value");
+    checkDependentParameterError("pinned_pressure_type",
+                                 {"pinned_pressure_point"},
+                                 pin_type == "point-value" || pin_type == "point-value-uo");
   }
 
   if (!_has_energy_equation)

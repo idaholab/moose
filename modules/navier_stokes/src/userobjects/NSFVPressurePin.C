@@ -8,31 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVPressurePin.h"
-#include "INSFVAttributes.h"
-#include "GatherRCDataElementThread.h"
-#include "GatherRCDataFaceThread.h"
 #include "SubProblem.h"
-#include "MooseMesh.h"
 #include "SystemBase.h"
 #include "NS.h"
-#include "Assembly.h"
-#include "INSFVVelocityVariable.h"
-#include "PiecewiseByBlockLambdaFunctor.h"
-#include "VectorCompositeFunctor.h"
-#include "FVElementalKernel.h"
-#include "NSFVUtils.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
-#include "libmesh/parallel_algebra.h"
-#include "libmesh/remote_elem.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/mesh_tools.h"
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
-#include "timpi/parallel_sync.h"
 
 using namespace libMesh;
 
@@ -54,12 +37,13 @@ NSFVPressurePin::validParams()
   // Avoid uninitialized residual objects
   params.suppressParameter<bool>("force_preic");
 
-  params.addParam<VariableName>("variable", NS::pressure, "Pressure variable");
+  params.addParam<NonlinearVariableName>("variable", NS::pressure, "Pressure variable");
   params.addParam<PostprocessorName>("phi0", "Pressure pin value");
-  MooseEnum pin_types("point_value average");
+  MooseEnum pin_types("point-value average");
   params.addRequiredParam<MooseEnum>("pin_type", pin_types, "How to pin the pressure");
   params.addParam<Point>(
-      "point", "The XYZ coordinates of the points where the pinned value shall be enforced.");
+      "point",
+      "The XYZ coordinates of a point inside an element where the pinned value shall be enforced.");
   params.addParam<PostprocessorName>(
       "pressure_average", "A postprocessor that computes the average of the pressure variable");
 
@@ -75,10 +59,10 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
     NonADFunctorInterface(this),
     _mesh(UserObject::_subproblem.mesh().getMesh()),
     _p(dynamic_cast<INSFVPressureVariable *>(
-        &UserObject::_subproblem.getVariable(0, getParam<VariableName>("variable")))),
+        &UserObject::_subproblem.getVariable(0, getParam<NonlinearVariableName>("variable")))),
     _p0(getPostprocessorValue("phi0")),
     _pressure_pin_type(getParam<MooseEnum>("pin_type")),
-    _pressure_pin_point(_pressure_pin_type == "point_value" ? getParam<Point>("point")
+    _pressure_pin_point(_pressure_pin_type == "point-value" ? getParam<Point>("point")
                                                             : Point(0, 0, 0)),
     _current_pressure_average(
         _pressure_pin_type == "average" ? &getPostprocessorValue("pressure_average") : nullptr),
@@ -87,9 +71,10 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
   // Check execute_on of the postprocessor
-  if (_pressure_pin_type == "average" && !_fe_problem.getUserObjectBase("pressure_average")
-                                              .getExecuteOnEnum()
-                                              .contains(getExecuteOnEnum()))
+  if (_pressure_pin_type == "average" &&
+      !_fe_problem.getUserObjectBase(getParam<PostprocessorName>("pressure_average"))
+           .getExecuteOnEnum()
+           .contains(getExecuteOnEnum()))
     paramError("pressure_average",
                "Pressure average postprocessor must include the pin execute_on flags");
 }
@@ -104,38 +89,39 @@ NSFVPressurePin::execute()
 
   // Get the value of the pin
   Real pin_value = 0;
-  if (_pressure_pin_type == "point_value")
+  if (_pressure_pin_type == "point-value")
   {
-    // We query the point every time for now in case the mesh moved
-    auto pl = _mesh.sub_point_locator();
-    pl->enable_out_of_mesh_mode();
+    Real point_value = _sys.system().point_value(_p->number(), _pressure_pin_point, false);
 
-    auto elem =
-        blockRestricted() ? (*pl)(_pressure_pin_point, &blockIDs()) : (*pl)(_pressure_pin_point);
-    const auto state_arg = Moose::currentState();
-    const Moose::ElemPointArg elem_point_arg = {elem, _pressure_pin_point, false};
+    /**
+     * If we get exactly zero, we don't know if the locator couldn't find an element, or
+     * if the solution is truly zero, more checking is needed.
+     */
+    if (MooseUtils::absoluteFuzzyEqual(point_value, 0.0))
+    {
+      auto pl = _mesh.sub_point_locator();
+      pl->enable_out_of_mesh_mode();
 
-    Real point_value = -std::numeric_limits<Real>::min();
-    if (elem)
-      point_value = MetaPhysicL::raw_value((*_p)(elem_point_arg, state_arg));
-    comm().max(point_value);
-    if (point_value == -std::numeric_limits<Real>::min())
-      mooseError("A pressure value should have been found on at least one process. "
-                 "The pressure pin point is likely outside of the mesh");
+      auto * elem = (*pl)(_pressure_pin_point);
+      auto elem_id = elem ? elem->id() : DofObject::invalid_id;
+      gatherMin(elem_id);
+
+      if (elem_id == DofObject::invalid_id)
+        mooseError("No element to gather point pressure from located at ", _pressure_pin_point);
+      // Default at construction
+      pl->disable_out_of_mesh_mode();
+    }
+
     pin_value = _p0 - point_value;
-    // Default at construction
-    pl->disable_out_of_mesh_mode();
   }
   else
     pin_value = _p0 - *_current_pressure_average;
 
   // Offset the entire pressure vector by the value of the pin
   NumericVector<Number> & sln = _sys.solution();
-  for (const auto & elem : _mesh.active_local_element_ptr_range())
-  {
-    auto dof = elem->dof_number(_sys.number(), _p->number(), 0);
-    if (dof != libMesh::DofObject::invalid_id)
-      sln.add(dof, pin_value);
-  }
+  std::set<dof_id_type> local_dofs;
+  _sys.system().local_dof_indices(_p->number(), local_dofs);
+  for (const auto & dof : local_dofs)
+    sln.add(dof, pin_value);
   sln.close();
 }
