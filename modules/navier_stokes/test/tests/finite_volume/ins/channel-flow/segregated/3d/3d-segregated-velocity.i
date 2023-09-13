@@ -202,12 +202,12 @@ pressure_tag = "pressure_grad"
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.6
   pressure_variable_relaxation = 0.3
-  num_iterations = 40
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
+  num_iterations = 100
+  pressure_absolute_tolerance = 1e-13
+  momentum_absolute_tolerance = 1e-13
 
-  momentum_l_abs_tol = 1e-10
-  pressure_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   print_fields = false

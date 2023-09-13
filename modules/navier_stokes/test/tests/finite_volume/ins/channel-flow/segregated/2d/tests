@@ -15,6 +15,7 @@
     exodiff = 2d-segregated-velocity-rz_out.e
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
                   "cylindrical channel using the SIMPLE algorithm."
+    abs_zero = 1e-9
   []
   [slip]
     type = 'Exodiff'

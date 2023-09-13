@@ -250,9 +250,9 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-10
-  pressure_l_abs_tol = 1e-10
-  passive_scalar_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
+  passive_scalar_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   passive_scalar_l_tol = 0
@@ -264,10 +264,10 @@ pressure_tag = "pressure_grad"
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
   passive_scalar_equation_relaxation = '0.9 0.9'
-  num_iterations = 40
-  pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
-  passive_scalar_absolute_tolerance = '1e-7 1e-7'
+  num_iterations = 100
+  pressure_absolute_tolerance = 1e-13
+  momentum_absolute_tolerance = 1e-13
+  passive_scalar_absolute_tolerance = '1e-13 1e-13'
   print_fields = false
 []
 

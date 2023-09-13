@@ -226,8 +226,8 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-10
-  pressure_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = 'rc'
@@ -236,9 +236,9 @@ pressure_tag = "pressure_grad"
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.85
   pressure_variable_relaxation = 0.45
-  num_iterations = 100
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
+  num_iterations = 150
+  pressure_absolute_tolerance = 1e-13
+  momentum_absolute_tolerance = 1e-13
   print_fields = false
 []
 

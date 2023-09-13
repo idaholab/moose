@@ -268,10 +268,10 @@ pressure_tag = "pressure_grad"
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-12
-  pressure_l_abs_tol = 1e-12
-  energy_l_abs_tol = 1e-12
-  solid_energy_l_abs_tol = 1e-12
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
+  energy_l_abs_tol = 1e-14
+  solid_energy_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -285,11 +285,11 @@ pressure_tag = "pressure_grad"
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.4
   energy_equation_relaxation = 1.0
-  num_iterations = 120
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
-  energy_absolute_tolerance = 1e-9
-  # solid_energy_absolute_tolerance = 1e-9
+  num_iterations = 160
+  pressure_absolute_tolerance = 1e-13
+  momentum_absolute_tolerance = 1e-13
+  energy_absolute_tolerance = 1e-13
+  solid_energy_absolute_tolerance = 1e-13
   print_fields = false
 []
 
