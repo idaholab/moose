@@ -25,7 +25,6 @@ InputParameters
 NSFVPressurePin::validParams()
 {
   auto params = GeneralUserObject::validParams();
-  params += TaggingInterface::validParams();
   params += BlockRestrictable::validParams();
 
   // Not much flexibility there, applying the pin at the wrong time prevents convergence
@@ -54,7 +53,6 @@ NSFVPressurePin::validParams()
 
 NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
   : GeneralUserObject(params),
-    TaggingInterface(this),
     BlockRestrictable(this),
     NonADFunctorInterface(this),
     _mesh(UserObject::_subproblem.mesh().getMesh()),
@@ -82,11 +80,6 @@ NSFVPressurePin::NSFVPressurePin(const InputParameters & params)
 void
 NSFVPressurePin::execute()
 {
-  // For average pressure interpolation, we expect a checkerboard.
-  // We can smooth it here by average each value with the average of several of its neighbors
-  // This will change the value of the pressure pin, but if we are careful it will not change the
-  // average (provided by the postprocessor)
-
   // Get the value of the pin
   Real pin_value = 0;
   if (_pressure_pin_type == "point-value")
@@ -121,7 +114,8 @@ NSFVPressurePin::execute()
   NumericVector<Number> & sln = _sys.solution();
   std::set<dof_id_type> local_dofs;
   _sys.system().local_dof_indices(_p->number(), local_dofs);
-  for (const auto & dof : local_dofs)
+  for (const auto dof : local_dofs)
     sln.add(dof, pin_value);
   sln.close();
+  _sys.system().update();
 }

@@ -12,7 +12,7 @@ The `NSFVPressurePin` can pin the pressure in two modes:
 
 
 !alert note
-In the [NSFVAction.md], a `NSFVPressurePin` can be passed by the setting the [!param](/Modules/NavierStokesFV/pinned_pressure_type) parameter
+In the [NSFVAction.md], a `NSFVPressurePin` can be used by setting the [!param](/Modules/NavierStokesFV/pinned_pressure_type) parameter
 to `average-uo` or `point-value-uo` respectively.
 
 !syntax parameters /UserObjects/NSFVPressurePin

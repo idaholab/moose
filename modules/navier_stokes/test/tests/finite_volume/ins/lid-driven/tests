@@ -49,7 +49,7 @@
     type = 'Exodiff'
     input = 'lid-driven-action.i'
     exodiff = 'lid-driven-point-pressure-action.e'
-    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate using the NSFV action syntax, with a post-treatment of the pressure rather than a Lagrange multiplier-based constraint.'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate using the Navier-Stokes finite volume action syntax, with a post-treatment of the pressure rather than a Lagrange multiplier-based constraint.'
     cli_args = "Modules/NavierStokesFV/pinned_pressure_type=point-value-uo "
                "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0' "
                "Outputs/file_base='lid-driven-point-pressure-action' "

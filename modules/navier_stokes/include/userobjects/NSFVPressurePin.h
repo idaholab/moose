@@ -10,37 +10,17 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "TaggingInterface.h"
 #include "BlockRestrictable.h"
-#include "ADReal.h"
-#include "MooseTypes.h"
-#include "CellCenteredMapFunctor.h"
-#include "VectorComponentFunctor.h"
-#include "FaceArgInterface.h"
 #include "INSFVPressureVariable.h"
-#include "ADFunctorInterface.h"
-
-#include "libmesh/vector_value.h"
-#include "libmesh/id_types.h"
-#include "libmesh/stored_range.h"
-#include <unordered_map>
-#include <set>
-#include <unordered_set>
+#include "NonADFunctorInterface.h"
 
 class MooseMesh;
-class INSFVVelocityVariable;
 class INSFVPressureVariable;
-namespace libMesh
-{
-class Elem;
-class MeshBase;
-}
 
 /**
  * This user-object corrects the pressure
  */
 class NSFVPressurePin : public GeneralUserObject,
-                        public TaggingInterface,
                         public BlockRestrictable,
                         public NonADFunctorInterface
 {
