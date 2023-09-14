@@ -33,7 +33,7 @@ FVFunctionalNormalDirichletBC::FVFunctionalNormalDirichletBC(const InputParamete
 {
 }
 
-Real
+ADReal
 FVFunctionalNormalDirichletBC::boundaryValue(const FaceInfo & fi) const
 {
   return _function.value(_t, fi.faceCentroid()) * (-fi.normal()(_direction));
