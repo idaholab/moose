@@ -6,21 +6,7 @@
 [Mesh]
   [input_file]
     type = FileMeshGenerator
-    file = hertz_cyl_finer.e
-  []
-  [secondary]
-    type = LowerDBlockFromSidesetGenerator
-    new_block_id = 10001
-    new_block_name = 'secondary_lower'
-    sidesets = '3'
-    input = input_file
-  []
-  [primary]
-    type = LowerDBlockFromSidesetGenerator
-    new_block_id = 10000
-    sidesets = '2'
-    new_block_name = 'primary_lower'
-    input = secondary
+    file = cond_number.e
   []
   allow_renumbering = false
 []
@@ -28,6 +14,7 @@
 [Problem]
   type = AugmentedLagrangianContactFEProblem
   extra_tag_vectors = 'ref'
+  maximum_lagrangian_update_iterations = 1000
 []
 
 [AuxVariables]
@@ -48,10 +35,6 @@
   [saved_y]
   []
   [active]
-  []
-  [dual_var]
-    use_dual = true
-    block = '10001'
   []
 []
 
@@ -81,42 +64,42 @@
   [penalty_normal_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = normal_pressure
     boundary = 3
   []
   [penalty_frictional_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = tangential_pressure_one
     boundary = 3
   []
   [penalty_tangential_vel_one]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = tangential_velocity_one
     boundary = 3
   []
   [penalty_accumulated_slip_one]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = accumulated_slip_one
     boundary = 3
   []
   [normal_lm]
     type = PenaltyMortarUserObjectAux
     variable = normal_lm
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = normal_lm
     boundary = 3
   []
   [normal_gap]
     type = PenaltyMortarUserObjectAux
     variable = normal_gap
-    user_object = friction_uo
+    user_object = penalty_friction_object_al_friction
     contact_quantity = normal_gap
     boundary = 3
   []
@@ -225,10 +208,11 @@
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
-  line_search = 'basic'
+  petsc_options = '-ksp_snes_ew'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = ' 201                hypre    boomeramg      8'
+
+  line_search = 'none'
 
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-8
@@ -237,7 +221,7 @@
   l_abs_tol = 1e-13
 
   start_time = 0.0
-  end_time = 0.2 # 3.5
+  end_time = 0.1 # 1.0
   dt = 0.1
   dtmin = 0.1
 
@@ -280,76 +264,20 @@
   []
 []
 
-[UserObjects]
-  [friction_uo]
-    type = PenaltyFrictionUserObject
-    primary_boundary = '2'
-    secondary_boundary = '3'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
-    disp_x = disp_x
-    disp_y = disp_y
-    penalty = 1e5
-    penalty_friction = 1e8
-    secondary_variable = disp_x
+[Contact]
+  [al_friction]
+    formulation = mortar_penalty
+    model = coulomb
+    primary = '2'
+    secondary = '3'
+    penalty = 1e7
+    penalty_friction = 1e+7
     friction_coefficient = 0.4
-    penetration_tolerance = 1e-7
-    # Not solving the frictional problem tightly (below)
-    slip_tolerance = 1 # 1e-6
+    adaptivity_penalty_friction = SIMPLE
+    adaptivity_penalty_normal = BUSSETTA
+    al_penetration_tolerance = 1e-7
+    al_incremental_slip_tolerance = 1e-5 # Not active
     penalty_multiplier = 100
-    penalty_multiplier_friction = 1
-    use_physical_gap = true
-    aux_lm = dual_var
-  []
-[]
-
-[Constraints]
-  [x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = '2'
-    secondary_boundary = '3'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = friction_uo
-  []
-  [y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = '2'
-    secondary_boundary = '3'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = friction_uo
-  []
-  [tangential_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 2
-    secondary_boundary = 3
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = friction_uo
-  []
-  [tangential_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 2
-    secondary_boundary = 3
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = friction_uo
+    penalty_multiplier_friction = 5
   []
 []

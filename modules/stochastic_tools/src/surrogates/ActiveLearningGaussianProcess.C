@@ -91,8 +91,6 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
                ").");
   if (inputs.empty())
     mooseError("There is no data for retraining.");
-  if (outputs.size() < _optimization_opts.batch_size)
-    paramError("batch_size", "Batch size cannot be greater than the training data set size.");
 
   RealEigenMatrix training_data;
   _training_params.setZero(outputs.size(), inputs[0].size());

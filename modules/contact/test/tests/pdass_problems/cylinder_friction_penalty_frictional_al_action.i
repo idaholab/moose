@@ -269,9 +269,11 @@
     primary = '2'
     secondary = '3'
     penalty = 1e5
+    penalty_friction = 1e8
     friction_coefficient = 0.4
     al_penetration_tolerance = 1e-7
     al_incremental_slip_tolerance = 1.0 # Not active
     penalty_multiplier = 100
+    penalty_multiplier_friction = 1
   []
 []

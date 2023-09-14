@@ -63,6 +63,9 @@ protected:
   /// The friction coefficient
   const Real _friction_coefficient;
 
+  /// Map from degree of freedom to current and old step slip
+  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_step_slip;
+
   /// Map from degree of freedom to current and old accumulated slip
   std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip;
 
@@ -71,10 +74,10 @@ protected:
       _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_force_one;
+  ADVariableValue _frictional_contact_traction_one;
 
   /// The second frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_force_two;
+  ADVariableValue _frictional_contact_traction_two;
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
@@ -84,4 +87,7 @@ protected:
 
   /// Penalty growth factor for augmented Lagrange
   const Real _penalty_multiplier_friction;
+
+  /// The adaptivity method for the penalty factor at augmentations
+  const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
 };

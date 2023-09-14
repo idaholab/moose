@@ -55,12 +55,5 @@
       expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please "
                    "use Adam optimization."
     []
-    [adam_wrong_batch_size]
-      type = RunException
-      input = main_adam.i
-      cli_args = "Trainers/GP_al_trainer/batch_size=500"
-      detail = 'the batch size is greater than the training data set size for Adam optimization;'
-      expect_err = "Batch size cannot be greater than the training data set size."
-    []
   []
 []
