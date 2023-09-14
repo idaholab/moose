@@ -109,7 +109,7 @@ The source file implements the weak form evaluation at each quadrature point, he
 
 Where $\sigma_{t}$ and $\sigma_{t - \Delta t}$ are stress tensor from current/last time step. The code snippet is given below, notice that for each custom function, user needs to register the function to their own app using ```registerMooseObject```. (```TensorMechanicsApp``` is a custom app name that can be replaced).
 
-!listing moose/modules/tensor_mechanics/test/include/kernels/StiffPropDamping.C
+!listing moose/modules/tensor_mechanics/test/src/kernels/StiffPropDamping.C
 caption=StiffPropDamping: Source File
 
 To utilize the kernel, allocate it inside ```[Kernels]``` section of input file:
