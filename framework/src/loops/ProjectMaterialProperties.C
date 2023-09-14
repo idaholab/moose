@@ -79,13 +79,13 @@ ProjectMaterialProperties::onElement(const Elem * elem)
     if (_mesh.doingPRefinement())
     {
       const auto & p_refinement_map = _mesh.getPRefinementMap(*elem);
-      _material_props.updateStatefulPropsP(_mesh.processor_id(),
-                                           p_refinement_map,
-                                           *_assembly[_tid][0]->qRule(),
-                                           *_assembly[_tid][0]->qRuleFace(),
-                                           _tid,
-                                           *elem,
-                                           -1);
+      _material_props.updateStatefulPropsForPRefinement(_mesh.processor_id(),
+                                                        p_refinement_map,
+                                                        *_assembly[_tid][0]->qRule(),
+                                                        *_assembly[_tid][0]->qRuleFace(),
+                                                        _tid,
+                                                        *elem,
+                                                        -1);
     }
     else
     {
@@ -110,13 +110,13 @@ ProjectMaterialProperties::onElement(const Elem * elem)
     if (_mesh.doingPRefinement())
     {
       const auto & p_coarsening_map = _mesh.getPCoarseningMap(*elem);
-      _material_props.updateStatefulPropsP(_mesh.processor_id(),
-                                           p_coarsening_map,
-                                           *_assembly[_tid][0]->qRule(),
-                                           *_assembly[_tid][0]->qRuleFace(),
-                                           _tid,
-                                           *elem,
-                                           -1);
+      _material_props.updateStatefulPropsForPRefinement(_mesh.processor_id(),
+                                                        p_coarsening_map,
+                                                        *_assembly[_tid][0]->qRule(),
+                                                        *_assembly[_tid][0]->qRuleFace(),
+                                                        _tid,
+                                                        *elem,
+                                                        -1);
     }
     else
     {
@@ -150,13 +150,13 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
       if (_mesh.doingPRefinement())
       {
         const auto & p_refinement_map = _mesh.getPRefinementSideMap(*elem);
-        _bnd_material_props.updateStatefulPropsP(_mesh.processor_id(),
-                                                 p_refinement_map,
-                                                 *_assembly[_tid][0]->qRule(),
-                                                 *_assembly[_tid][0]->qRuleFace(),
-                                                 _tid,
-                                                 *elem,
-                                                 side);
+        _bnd_material_props.updateStatefulPropsForPRefinement(_mesh.processor_id(),
+                                                              p_refinement_map,
+                                                              *_assembly[_tid][0]->qRule(),
+                                                              *_assembly[_tid][0]->qRuleFace(),
+                                                              _tid,
+                                                              *elem,
+                                                              side);
       }
       else
       {
@@ -181,13 +181,13 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
       if (_mesh.doingPRefinement())
       {
         const auto & p_coarsening_map = _mesh.getPCoarseningSideMap(*elem);
-        _bnd_material_props.updateStatefulPropsP(_mesh.processor_id(),
-                                                 p_coarsening_map,
-                                                 *_assembly[_tid][0]->qRule(),
-                                                 *_assembly[_tid][0]->qRuleFace(),
-                                                 _tid,
-                                                 *elem,
-                                                 side);
+        _bnd_material_props.updateStatefulPropsForPRefinement(_mesh.processor_id(),
+                                                              p_coarsening_map,
+                                                              *_assembly[_tid][0]->qRule(),
+                                                              *_assembly[_tid][0]->qRuleFace(),
+                                                              _tid,
+                                                              *elem,
+                                                              side);
       }
       else
       {

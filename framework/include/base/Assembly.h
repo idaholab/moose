@@ -1834,9 +1834,14 @@ public:
   const Elem * const & msmElem() const { return _msm_elem; }
 
   /**
-   * Indicate that we have p-refinement
+   * Indicate that we have p-refinement. This method will perform the following tasks:
+   * - Disable p-refinement as requested by the user with \p disable_lagrange_p_refinement
+   * -.Disable p-refinement of Lagrange helper types that we use for getting things like the
+   *   physical locations of quadrature points and JxW. (Don't worry, we still use the element
+   *   p-level when initializing the quadrature rule attached to the Lagrange helper so the number
+   *   of quadrature points reflects the element p-level)
    * @param disable_lagrange_p_refinement Indicate whether we should disable p-refinement of
-   * Lagrange objects
+   * Lagrange FE objects
    */
   void havePRefinement(bool disable_lagrange_p_refinement);
 
@@ -2759,8 +2764,8 @@ protected:
   /// storing the dof indices
   std::vector<dof_id_type> _row_indices, _column_indices;
 
-  /// Whether we have adjusted our FE objects due to the presence of p-refinement
-  bool _adjusted_fe_objects_for_p_refinement;
+  /// Whether we have ever conducted p-refinement
+  bool _have_p_refinement;
 };
 
 template <typename OutputType>

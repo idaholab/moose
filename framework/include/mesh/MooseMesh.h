@@ -1326,9 +1326,25 @@ public:
    */
   [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
 
+  /**
+   * Get the map describing for each volumetric quadrature point (qp) on the refined level which qp
+   * on the previous coarser level the fine qp is closest to
+   */
   const std::vector<QpMap> & getPRefinementMap(const Elem & elem) const;
+  /**
+   * Get the map describing for each side quadrature point (qp) on the refined level which qp
+   * on the previous coarser level the fine qp is closest to
+   */
   const std::vector<QpMap> & getPRefinementSideMap(const Elem & elem) const;
+  /**
+   * Get the map describing for each volumetric quadrature point (qp) on the coarse level which qp
+   * on the previous finer level the coarse qp is closest to
+   */
   const std::vector<QpMap> & getPCoarseningMap(const Elem & elem) const;
+  /**
+   * Get the map describing for each side quadrature point (qp) on the coarse level which qp
+   * on the previous finer level the coarse qp is closest to
+   */
   const std::vector<QpMap> & getPCoarseningSideMap(const Elem & elem) const;
 
   void buildPRefinementAndCoarseningMaps(Assembly * assembly);

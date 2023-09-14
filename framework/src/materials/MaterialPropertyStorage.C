@@ -64,13 +64,14 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 }
 
 void
-MaterialPropertyStorage::updateStatefulPropsP(const processor_id_type libmesh_dbg_var(pid),
-                                              const std::vector<QpMap> & p_refinement_map,
-                                              const QBase & qrule,
-                                              const QBase & qrule_face,
-                                              const THREAD_ID tid,
-                                              const Elem & elem,
-                                              const int input_side)
+MaterialPropertyStorage::updateStatefulPropsForPRefinement(
+    const processor_id_type libmesh_dbg_var(pid),
+    const std::vector<QpMap> & p_refinement_map,
+    const QBase & qrule,
+    const QBase & qrule_face,
+    const THREAD_ID tid,
+    const Elem & elem,
+    const int input_side)
 {
   unsigned int n_qpoints = 0;
 
@@ -84,7 +85,7 @@ MaterialPropertyStorage::updateStatefulPropsP(const processor_id_type libmesh_db
 
   getMaterialData(tid).resize(n_qpoints);
 
-  mooseAssert(elem.active(), "We should be doing p-refinement");
+  mooseAssert(elem.active(), "We should be doing p-refinement on active elements only");
   mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
   mooseAssert(p_refinement_map.size() == n_qpoints, "Refinement map not proper size");
 

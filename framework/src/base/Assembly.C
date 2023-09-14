@@ -137,7 +137,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_face_xyz(false),
     _calculate_curvatures(false),
     _calculate_ad_coord(false),
-    _adjusted_fe_objects_for_p_refinement(false)
+    _have_p_refinement(false)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   _building_helpers = true;
@@ -4724,8 +4724,8 @@ Assembly::helpersRequestData()
 void
 Assembly::havePRefinement(const bool user_disabled_lagrange_p_refinement)
 {
-  if (_adjusted_fe_objects_for_p_refinement)
-    // Already done did it
+  if (_have_p_refinement)
+    // Already performed tasks for p-refinement
     return;
 
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
@@ -4802,7 +4802,7 @@ Assembly::havePRefinement(const bool user_disabled_lagrange_p_refinement)
 
   helpersRequestData();
 
-  _adjusted_fe_objects_for_p_refinement = true;
+  _have_p_refinement = true;
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

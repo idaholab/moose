@@ -63,6 +63,7 @@ SetAdaptivityOptionsAction::validParams()
   params.addParam<MarkerName>(
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
+  params.addParamNamesToGroup("initial_steps initial_marker", "Initial Adaptivity");
   return params;
 }
 
