@@ -66,14 +66,6 @@
       order = FIRST
       family = LAGRANGE
   []
-  [./vel_slipweakening_x]
-      order = FIRST
-      family = LAGRANGE
-  []
-  [./vel_slipweakening_y]
-      order = FIRST
-      family = LAGRANGE
-  []
   [./mu_s]
       order = CONSTANT
       family = MONOMIAL
@@ -261,5 +253,5 @@
 
 [Outputs]
   exodus = true
-  interval = 10
+  interval = 50
 []
