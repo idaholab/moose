@@ -14,7 +14,7 @@ Kernel of Stiffness Proportional Damping
 #include "StiffPropDamping.h"
 #include "ElasticityTensorTools.h"
 
-registerMooseObject("TensorMechanicsTestApp", StiffPropDamping);
+registerMooseObject("TensorMechanicsApp", StiffPropDamping);
 
 InputParameters
 StiffPropDamping::validParams()

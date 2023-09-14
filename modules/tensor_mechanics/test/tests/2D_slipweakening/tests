@@ -1,0 +1,9 @@
+[Tests]
+    [./2d_slipweakening]
+        type = Exodiff
+        input = 'tpv2052D.i'
+        exodiff = 'tpv2052D_out.e'
+        abs_zero = 1e-4
+        rel_err = 1e-3
+    []
+[]

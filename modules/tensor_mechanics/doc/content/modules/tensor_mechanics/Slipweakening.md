@@ -321,15 +321,24 @@ Notice the last two lines that the spatial distribution of static friction coeff
 
 The spatial distribution of $\mu_s$:
 
-!listing moose/modules/tensor_mechanics/test/include/functions/StaticFricCoeffMus.h
-
-!listing moose/modules/tensor_mechanics/test/src/functions/StaticFricCoeffMus.C
+!listing id=local22 caption=PiecewiseConstant mu_s: Input File. language=cpp
+[func_static_friction_coeff_mus]
+       type = PiecewiseConstant
+       axis=x
+       x = '-1000e3 -15e3 15e3'
+       y = '10000 0.677 10000.0'
+       direction = left
+[]
 
 The spatial distribution of $T_1^o$:
 
-!listing moose/modules/tensor_mechanics/test/include/functions/InitialStrikeShearStress.h
-
-!listing moose/modules/tensor_mechanics/test/src/functions/InitialStrikeShearStress.C
+!listing id=local23 caption=PiecewiseConstant T1_o: Input File. language=cpp
+[func_initial_strike_shear_stress]
+       type = PiecewiseConstant
+       axis=x
+       x = '-1000e3 -9.0e3 -6.0e3 -1.5e3  1.5e3  6.0e3  9.0e3'
+       y = ' 70.0e6 78.0e6 70.0e6 81.6e6 70.0e6 62.0e6 70.0e6'
+[]
 
 We then have them defined in the input file within ```[Functions]``` section:
 

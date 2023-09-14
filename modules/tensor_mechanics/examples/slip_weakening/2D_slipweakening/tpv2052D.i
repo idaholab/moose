@@ -6,12 +6,12 @@
     [./msh]
       type = GeneratedMeshGenerator
       dim = 2
-      nx = 100
-      ny = 100
-      xmin = -5000
-      xmax = 5000
-      ymin = -5000
-      ymax = 5000
+      nx = 60
+      ny = 60
+      xmin = -3000
+      xmax = 3000
+      ymin = -3000
+      ymax = 3000
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -82,6 +82,10 @@
         order = CONSTANT
         family = MONOMIAL
     []
+    [./tangent_jump_rate]
+        order = CONSTANT
+        family = MONOMIAL
+    []
   []
 
   [Modules/TensorMechanics/CohesiveZoneMaster]
@@ -122,6 +126,12 @@
       type = ProjectionAux
       variable = disp_slipweakening_y
       v = disp_y
+      execute_on = 'TIMESTEP_BEGIN'
+    []
+    [tangent_jump_rate]
+      type = TimeDerivativeAux
+      variable = tangent_jump_rate
+      functor = tangent_jump
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_x]
@@ -216,22 +226,17 @@
 
   [Functions]
     [func_static_friction_coeff_mus]
-      type = StaticFricCoeffMus
-      xcoord_left = -15000
-      xcoord_right = 15000
-      mu_s_weakening_patch = 0.677
-      mu_s_strengthing_patch = 10000
+      type = PiecewiseConstant
+      axis=x
+      x = '-1000e3 -15e3 15e3'
+      y = '10000 0.677 10000.0'
+      direction = left
     []
     [func_initial_strike_shear_stress]
-      type = InitialStrikeShearStress
-      len = 1500
-      xcoord_leftpatchcenter = -7500
-      xcoord_middlepatchcenter = 0
-      xcoord_rightpathcenter = 7500
-      Tso_centerpatch = 8.16e+07
-      Tso_leftpatch = 7.8e+07
-      Tso_rightpatch = 6.2e+07
-      Tso_else = 6.2e+07
+      type = PiecewiseConstant
+      axis=x
+      x = '-1000e3 -9.0e3 -6.0e3 -1.5e3  1.5e3  6.0e3  9.0e3'
+      y = ' 70.0e6 78.0e6 70.0e6 81.6e6 70.0e6 62.0e6 70.0e6'
     []
   []
 
@@ -247,7 +252,7 @@
   [Executioner]
     type = Transient
     dt = 0.0025
-    end_time = 12.0
+    num_steps = 200
     [TimeIntegrator]
       type = CentralDifference
       solve_type = lumped
@@ -256,5 +261,5 @@
 
   [Outputs]
     exodus = true
-    interval = 20
+    interval = 10
   []
