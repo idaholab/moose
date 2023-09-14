@@ -297,21 +297,34 @@ MultiOutputGaussianProcessHandler::petscVecToMap(
 
 } // StochasticTools namespace
 
-// template <>
-// void
-// dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-// {
-//   // Store the L matrix as opposed to the full matrix to avoid compounding
-//   // roundoff error and decomposition error
-//   RealEigenMatrix L(decomp.matrixL());
-//   dataStore(stream, L, context);
-// }
+template <>
+void
+dataStore(std::ostream & stream,
+          StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+          void * context)
+{
+  dataStore(stream, gp_utils.hyperparamMap(), context);
+  dataStore(stream, gp_utils.hyperparamVectorMap(), context);
+  dataStore(stream, gp_utils.covarType(), context);
+  dataStore(stream, gp_utils.K(), context);
+  dataStore(stream, gp_utils.KResultsSolve(), context);
+  dataStore(stream, gp_utils.KCholeskyDecomp(), context);
+  dataStore(stream, gp_utils.paramStandardizer(), context);
+  dataStore(stream, gp_utils.dataStandardizer(), context);
+}
 
-// template <>
-// void
-// dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-// {
-//   RealEigenMatrix L;
-//   dataLoad(stream, L, context);
-//   decomp.compute(L * L.transpose());
-// }
+template <>
+void
+dataLoad(std::istream & stream,
+         StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+         void * context)
+{
+  dataLoad(stream, gp_utils.hyperparamMap(), context);
+  dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
+  dataLoad(stream, gp_utils.covarType(), context);
+  dataLoad(stream, gp_utils.K(), context);
+  dataLoad(stream, gp_utils.KResultsSolve(), context);
+  dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
+  dataLoad(stream, gp_utils.paramStandardizer(), context);
+  dataLoad(stream, gp_utils.dataStandardizer(), context);
+}

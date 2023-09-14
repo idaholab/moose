@@ -44,8 +44,8 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _gp_handler(
-        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_gp_handler")),
+    _mogp_handler(
+        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _optimization_opts(StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
@@ -70,14 +70,8 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
   }
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-
   std::vector<Real> lower_bounds, upper_bounds;
-  // if (isParamValid("tuning_min"))
-  //   lower_bounds = getParam<std::vector<Real>>("tuning_min");
-  // if (isParamValid("tuning_max"))
-  //   upper_bounds = getParam<std::vector<Real>>("tuning_max");
-
-  _gp_handler.initialize(
+  _mogp_handler.initialize(
       getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
       tune_parameters,
       lower_bounds,
@@ -119,11 +113,11 @@ MultiOutputGaussianProcessTrainer::postTrain()
   }
 
   // Standardize (center and scale) training params
-  _gp_handler.standardizeParameters(_training_params);
+  _mogp_handler.standardizeParameters(_training_params);
 
   // Standardize (center and scale) training data
-  _gp_handler.standardizeData(_training_data);
+  _mogp_handler.standardizeData(_training_data);
 
   // Setup the covariance
-  _gp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
