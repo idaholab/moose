@@ -64,6 +64,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [extensions/datetime.md] | Functions for adding date/time information. |
 | [extensions/gitutils.md] | Tools for gleaning information regarding git repository. |
 | [extensions/algorithm.md] | Provides means of displaying algorithms. |
+| [extensions/tag.md] | Provides means for tagging markdown pages for documentation filtering. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |

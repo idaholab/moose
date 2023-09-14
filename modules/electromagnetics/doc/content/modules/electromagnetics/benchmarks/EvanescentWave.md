@@ -1,5 +1,11 @@
 # Evanescent Wave Decay Benchmark
 
+!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
+!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
+
+!if function=!hasSubmodule('moose')
+!tag name=evanescent_wave pairs=example_type:benchmark simulation_type:vector fiscal_year:2022
+
 This document describes the evanescent wave decay benchmark / validation test
 for the electromagnetics module. Below is a summary of the test, along with
 relevant background theory, results, and the test input file for review.

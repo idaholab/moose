@@ -198,3 +198,5 @@ Extensions:
     MooseDocs.extensions.analytics:
         active: True
         google_measurement_id: G-RH7BY5XXNW
+    # Used to create a reference/example page for the tagging extension (see PR #25388)
+    MooseDocs.extensions.tagging: !include modules/electromagnetics/doc/config.yml Extensions MooseDocs.extensions.tagging

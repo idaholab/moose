@@ -1,5 +1,11 @@
 # 1D Reflection Benchmark
 
+!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
+!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
+
+!if function=!hasSubmodule('moose')
+!tag name=reflection pairs=example_type:benchmark simulation_type:scalar fiscal_year:2022
+
 This document describes the 1D metal-backed dielectric slab benchmark / verification
 test for the electromagnetics module. This is based on Section 3.4 in [!citep](jin-fem).
 The goal of the benchmark is to accurately determine the power reflected by the

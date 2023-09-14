@@ -149,7 +149,7 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
 
     def preWrite(self, page, result):
         """
-        Called after renderer has written content.
+        Called before renderer has written content.
 
         Inputs:
             page[pages.Source]: The source object representing the content

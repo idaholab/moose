@@ -1,7 +1,7 @@
 [Tests]
   [all]
     design = 'MooseDocs/index.md'
-    issues = '#6699 #9638 #12049 #13567 #13611 #15232 #15927 #16622'
+    issues = '#6699 #9466 #9638 #9728 #12049 #13580 #13611 #15232 #15927 #16176 #16248 #16401 #16617 #16622 #16807 #17218 #17505 #20202 #25387'
 
     requirement = "The system shall include documentation tools that provide support for"
     [core]
@@ -108,12 +108,17 @@
     [datetime]
       type = PythonUnitTest
       input = test_datetime.py
-      detail = "include date/time operations, and"
+      detail = "include date/time operations,"
     []
     [gitutils]
       type = PythonUnitTest
       input = test_gitutils.py
-      detail = "include git repository information."
+      detail = "include git repository information, and"
+    []
+    [tagging]
+      type = PythonUnitTest
+      input = test_tagging.py
+      detail = "support documentation tags for filtering."
     []
   []
 []
