@@ -80,7 +80,6 @@ struct ElemPointArg
  */
 struct FaceArg
 {
-public:
   /// a face information object which defines our location in space
   const FaceInfo * fi;
 
@@ -134,8 +133,13 @@ public:
 
 struct NodeArg
 {
+  /// The node which defines our location in space
   const Node * node;
+  /// Indicates what subdomain this argument should be associated with. This removes ambiguity when
+  /// this argument is used to evaluate functors at the intersection of different blocks
   SubdomainID subdomain_id;
+
+  Point getPoint() const { return *node; }
 };
 
 /**

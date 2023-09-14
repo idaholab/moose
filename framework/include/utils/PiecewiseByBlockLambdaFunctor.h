@@ -299,8 +299,7 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
                                            const Moose::StateArg & time) const
 {
-  mooseAssert(node && node != libMesh::remote_node,
-              "The element must be non-null and non-remote in functor material properties");
+  mooseAssert(node_arg.node, "The node must be non-null in functor material properties");
   auto it = _node_functor.find(node_arg.subdomain_id);
   if (it == _node_functor.end())
     subdomainErrorMessage(node_arg.subdomain_id);

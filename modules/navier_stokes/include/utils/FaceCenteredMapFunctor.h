@@ -58,7 +58,7 @@ private:
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
-  ValueType evaluate(const NodeAr & node_arg, const StateArg & state) const override final;
+  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
 };
 
 template <typename T, typename Map>
@@ -102,6 +102,13 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, const StateArg &) co
 template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, const StateArg &) const
+{
+  mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename FaceCenteredMapFunctor<T, Map>::ValueType
+FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) const
 {
   mooseError("not implemented");
 }
