@@ -33,6 +33,12 @@ OutputCovarianceBase::OutputCovarianceBase(const InputParameters & parameters)
 {
 }
 
+unsigned int
+OutputCovarianceBase::setupNumLatent(const unsigned int & /*num_outputs*/) const
+{
+  return 0;
+}
+
 // void
 // OutputCovarianceBase::buildHyperParamMap(
 //     std::unordered_map<std::string, Real> & map,

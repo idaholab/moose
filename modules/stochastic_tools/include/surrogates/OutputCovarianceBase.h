@@ -22,7 +22,8 @@ public:
   OutputCovarianceBase(const InputParameters & parameters);
 
   /// Generates the B Covariance Matrix for capturing output covariances
-  virtual void computeBCovarianceMatrix(RealEigenMatrix & B) const = 0;
+  virtual void computeBCovarianceMatrix(RealEigenMatrix & B,
+                                        const std::vector<Real> & latent) const = 0;
 
   /// Generates the full Covariance Matrix given two points in the parameter space
   virtual void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
@@ -51,8 +52,11 @@ public:
   // loadAdditionalHyperParamMap(std::unordered_map<std::string, Real> & /*map*/,
   //                             std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/){};
 
-  /// Redirect dK/dhp for hyperparameter "hp"
-  virtual void computeBGrad(RealEigenMatrix & BGrad, const RealEigenMatrix & B) const = 0;
+  /// Compute the gradient of the B matrix
+  virtual void computeBGrad(RealEigenMatrix & BGrad, const std::vector<Real> & latent) const = 0;
+
+  /// Setup the number of latent params
+  virtual unsigned int setupNumLatent(const unsigned int & num_outputs) const;
 
   // virtual bool isTunable(std::string name) const;
 

@@ -18,9 +18,14 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
+#include "OutputCovarianceBase.h"
+#include "OutputCovarianceInterface.h"
+
 #include "MultiOutputGaussianProcessHandler.h"
 
-class MultiOutputGaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
+class MultiOutputGaussianProcessTrainer : public SurrogateTrainer,
+                                          public CovarianceInterface,
+                                          public OutputCovarianceInterface
 {
 public:
   static InputParameters validParams();
