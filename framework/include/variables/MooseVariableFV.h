@@ -78,7 +78,7 @@ public:
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
   using StateArg = Moose::StateArg;
-  using NodeArg = Moose::NodeArgs;
+  using NodeArg = Moose::NodeArg;
 
   static InputParameters validParams();
 
@@ -718,7 +718,7 @@ MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg &
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const Node & node_arg, const StateArg & state) const
+MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
 {
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
@@ -730,8 +730,7 @@ MooseVariableFV<OutputType>::evaluate(const Node & node_arg, const StateArg & st
     mooseAssert(elem, "We should have this element available");
     if (!this->hasBlocks(elem->subdomain_id()))
       continue;
-    const ElemArg elem_arg{elem, /*correct_skewness=*/false};
-    sum += getElemValue(elem_arg, state);
+    sum += getElemValue(elem, state);
     ++num_values;
   }
   return sum / num_values;

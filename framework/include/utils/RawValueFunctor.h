@@ -91,6 +91,10 @@ protected:
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(elem_point, state));
   }
+  GradientType evaluateGradient(const NodeArg & node, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradient(node, state));
+  }
 
   DotType evaluateDot(const ElemArg & elem, const StateArg & state) const override
   {
@@ -111,6 +115,10 @@ protected:
   DotType evaluateDot(const ElemPointArg & elem_point, const StateArg & state) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(elem_point, state));
+  }
+  DotType evaluateDot(const NodeArg & node, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.dot(node, state));
   }
   ///@}
 
