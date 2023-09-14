@@ -232,7 +232,11 @@ protected:
 
 } // StochasticTools namespac
 
-// template <>
-// void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-// template <>
-// void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+template <>
+void dataStore(std::ostream & stream,
+               StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+               void * context);
+template <>
+void dataLoad(std::istream & stream,
+              StochasticTools::MultiOutputGaussianProcessHandler & gp_utils,
+              void * context);
