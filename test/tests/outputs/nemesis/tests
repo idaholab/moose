@@ -11,7 +11,6 @@
     issues = '#2122'
   [../]
   [./nemesis_elemental_replicated]
-    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_replicated.e.4.0 nemesis_elemental_replicated.e.4.1 nemesis_elemental_replicated.e.4.2 nemesis_elemental_replicated.e.4.3'
@@ -30,7 +29,6 @@
     issues = '#2122'
   [../]
   [./nemesis_elemental_distributed]
-    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = 'Exodiff'
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_distributed.e.4.0 nemesis_elemental_distributed.e.4.1 nemesis_elemental_distributed.e.4.2 nemesis_elemental_distributed.e.4.3'
@@ -45,7 +43,6 @@
     issues = '#2122'
   [../]
   [./nemesis_scalar_replicated]
-    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_replicated.e.4.0 nemesis_scalar_replicated.e.4.1 nemesis_scalar_replicated.e.4.2 nemesis_scalar_replicated.e.4.3'
@@ -65,7 +62,6 @@
     recover = false
   [../]
   [./nemesis_scalar_distributed]
-    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = 'Exodiff'
     input = nemesis_scalar.i
     exodiff = 'nemesis_scalar_distributed.e.4.0 nemesis_scalar_distributed.e.4.1 nemesis_scalar_distributed.e.4.2 nemesis_scalar_distributed.e.4.3'

@@ -39,7 +39,6 @@
   []
 
   [nemesis]
-    skip = 'Nemesis issue, libMesh/libmesh#3601'
     type = Exodiff
     input = 'ray_mesh_output.i'
     cli_args = 'Mesh/Partitioner/type=GridPartitioner
@@ -74,7 +73,6 @@
       detail = 'Exodus format and'
     []
     [nemesis]
-      skip = 'Nemesis issue, libMesh/libmesh#3601'
       type = Exodiff
       input = 'ray_mesh_output.i'
       cli_args = 'Mesh/Partitioner/type=GridPartitioner
@@ -101,7 +99,6 @@
       detail = 'exodus and'
     []
     [nemesis]
-      skip = 'Nemesis issue, libMesh/libmesh#3601'
       type = Exodiff
       input = 'ray_mesh_output_data.i'
       cli_args = 'Mesh/Partitioner/type=GridPartitioner
