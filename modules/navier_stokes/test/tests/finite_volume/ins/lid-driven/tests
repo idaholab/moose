@@ -13,6 +13,13 @@
     exodiff = 'lid-driven-action_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action.'
   []
+  [exo-action-uo-pin-average]
+    type = 'Exodiff'
+    input = 'lid-driven-action.i'
+    cli_args = 'Modules/NavierStokesFV/pinned_pressure_type=average-uo Postprocessors/lambda/type=Receiver Postprocessors/lambda/default=0'
+    exodiff = 'lid-driven-action_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action and an average pressure pin applied at the end of every time step.'
+  []
   [exo-approximate-rc-action]
     type = 'Exodiff'
     input = 'lid-driven-action.i'
@@ -25,20 +32,36 @@
     input = 'lid-driven.i'
     exodiff = 'lid-driven-point-pressure.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate.'
-    cli_args = "FVKernels/mean_zero_pressure/type='FVPointValueConstraint' FVKernels/mean_zero_pressure/point='0.001 0.099 0.0' Outputs/file_base='lid-driven-point-pressure'"
+    cli_args = "FVKernels/mean_zero_pressure/type='FVPointValueConstraint' "
+               "FVKernels/mean_zero_pressure/point='0.001 0.099 0.0' "
+               "Outputs/file_base='lid-driven-point-pressure'"
   []
   [point-pressure-action]
     type = 'Exodiff'
     input = 'lid-driven-action.i'
     exodiff = 'lid-driven-point-pressure-action.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate using the NSFV action syntax.'
-    cli_args = "Modules/NavierStokesFV/pinned_pressure_type=point-value Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0' Outputs/file_base='lid-driven-point-pressure-action'"
+    cli_args = "Modules/NavierStokesFV/pinned_pressure_type=point-value "
+               "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0' "
+               "Outputs/file_base='lid-driven-point-pressure-action'"
+  []
+  [point-pressure-action-uo]
+    type = 'Exodiff'
+    input = 'lid-driven-action.i'
+    exodiff = 'lid-driven-point-pressure-action.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate using the Navier-Stokes finite volume action syntax, with a post-treatment of the pressure rather than a Lagrange multiplier-based constraint.'
+    cli_args = "Modules/NavierStokesFV/pinned_pressure_type=point-value-uo "
+               "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0' "
+               "Outputs/file_base='lid-driven-point-pressure-action' "
+               "Postprocessors/lambda/type=Receiver Postprocessors/lambda/default=0"
+    prereq = 'point-pressure-action'
   []
   [point-pressure-action-error]
     type = 'RunException'
     input = 'lid-driven-action.i'
     requirement = 'The system shall throw an error if the user requests integral value pressure pinning while specifying a point for the pin.'
-    expect_err = "This parameter should not be given by the user with the corresponding pinned_pressure_type setting!"
+    expect_err = "This parameter should not be given by the user with the corresponding "
+                 "pinned_pressure_type setting!"
     cli_args = "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0'"
   []
   [nonsingular]
