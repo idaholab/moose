@@ -205,7 +205,6 @@ NonlinearSystem::solve()
   else
   {
     system().solve();
-
     _n_iters = _nl_implicit_sys.n_nonlinear_iterations();
     _n_linear_iters = solver.get_total_linear_iterations();
   }

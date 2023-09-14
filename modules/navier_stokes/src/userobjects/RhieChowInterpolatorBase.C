@@ -183,13 +183,13 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     fill_container("v", _vs);
     if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
       mooseError("x and y velocity component face interpolation methods do not match");
-  }
 
-  if (_dim >= 3)
-  {
-    fill_container("w", _ws);
-    if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
-      mooseError("x and z velocity component face interpolation methods do not match");
+    if (_dim >= 3)
+    {
+      fill_container("w", _ws);
+      if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
+        mooseError("x and z velocity component face interpolation methods do not match");
+    }
   }
 
   if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))

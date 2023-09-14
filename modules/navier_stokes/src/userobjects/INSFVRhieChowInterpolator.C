@@ -97,16 +97,6 @@ INSFVRhieChowInterpolator::validParams()
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
-  params.addParam<bool>(
-      "pull_all_nonlocal_a",
-      false,
-      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
-      "means elements that we have access to (this may not be all the elements in the mesh if the "
-      "mesh is distributed) but that we do not own.");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
   return params;
 }
 
@@ -442,10 +432,10 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 }
 
 VectorValue<ADReal>
-INSFVRhieChowInterpolator::getVelocity(const FaceInfo & fi,
+INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
+                                       const FaceInfo & fi,
                                        const Moose::StateArg & time,
-                                       THREAD_ID tid,
-                                       Moose::FV::InterpMethod m) const
+                                       const THREAD_ID tid) const
 {
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();

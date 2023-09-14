@@ -37,10 +37,10 @@ public:
   INSFVRhieChowInterpolatorSegregated(const InputParameters & params);
 
   /// Get the face velocity (used in advection terms)
-  VectorValue<ADReal> getVelocity(const FaceInfo & fi,
+  VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
+                                  const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  THREAD_ID tid,
-                                  Moose::FV::InterpMethod m) const override;
+                                  const THREAD_ID tid) const override;
 
   /// Initialize the container for face velocities
   void initFaceVelocities();

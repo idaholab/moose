@@ -59,17 +59,17 @@ public:
    * @param tid The thread ID
    * @return The face velocity
    */
-  virtual VectorValue<ADReal> getVelocity(const FaceInfo & fi,
+  virtual VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
+                                          const FaceInfo & fi,
                                           const Moose::StateArg & time,
-                                          THREAD_ID tid,
-                                          Moose::FV::InterpMethod m) const = 0;
+                                          const THREAD_ID tid) const = 0;
 
   /**
    * @return The pressure variable corresponding to the provided thread ID
    */
   const INSFVPressureVariable & pressure(THREAD_ID tid) const;
 
-  const INSFVVelocityVariable * vel() const { return _u;}
+  const INSFVVelocityVariable * vel() const { return _u; }
 
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   virtual bool segregated() const = 0;
@@ -129,7 +129,8 @@ private:
   const Moose::ConstantFunctor<ADReal> _unity_functor{1};
 };
 
-inline const Moose::FunctorBase<ADReal> & RhieChowInterpolatorBase::epsilon(THREAD_ID) const
+inline const Moose::FunctorBase<ADReal> &
+RhieChowInterpolatorBase::epsilon(THREAD_ID) const
 {
   return _unity_functor;
 }

@@ -61,17 +61,17 @@ public:
 
   /**
    * Retrieve a face velocity
-   * @param fi The face that we wish to retrieve the velocity for
-   * @param time The time at which to evaluate the velocity
-   * @param tid The thread ID\
    * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
    * recommended as it avoids checkerboards in the pressure field
+   * @param fi The face that we wish to retrieve the velocity for
+   * @param time The time at which to evaluate the velocity
+   * @param tid The thread ID
    * @return The face velocity
    */
-  VectorValue<ADReal> getVelocity(const FaceInfo & fi,
+  VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
+                                  const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  THREAD_ID tid,
-                                  Moose::FV::InterpMethod m) const override;
+                                  const THREAD_ID tid) const override;
 
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
@@ -145,9 +145,6 @@ private:
    * Whether we need 'a' coefficient computation
    */
   bool needAComputation() const;
-
-  /// The velocity variable numbers
-  std::vector<unsigned int> _var_numbers;
 
   /// Non-local elements that we should push and pull data for across processes
   std::unordered_set<const Elem *> _elements_to_push_pull;

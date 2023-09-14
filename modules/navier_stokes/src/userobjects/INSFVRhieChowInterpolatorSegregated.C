@@ -154,10 +154,11 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
 }
 
 VectorValue<ADReal>
-INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
+INSFVRhieChowInterpolatorSegregated::getVelocity(const Moose::FV::InterpMethod libmesh_dbg_var(m),
+                                                 const FaceInfo & fi,
                                                  const Moose::StateArg & /*time*/,
-                                                 THREAD_ID /*tid*/,
-                                                 Moose::FV::InterpMethod m) const
+                                                 const THREAD_ID /*tid*/
+) const
 {
   mooseAssert(m == Moose::FV::InterpMethod::RhieChow,
               "Segregated solution algorithms only support Rhie-Chow interpolation!");

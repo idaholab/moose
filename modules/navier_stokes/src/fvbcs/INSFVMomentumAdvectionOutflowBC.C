@@ -53,7 +53,7 @@ INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
 
   const auto boundary_face = singleSidedFaceArg();
   const auto state = determineState();
-  ADRealVectorValue v(_rc_uo.getVelocity(*_face_info, state, _tid, InterpMethod::RhieChow));
+  ADRealVectorValue v(_rc_uo.getVelocity(InterpMethod::RhieChow, *_face_info, state, _tid));
 
   const auto rho_boundary = _rho(boundary_face, state);
   const auto eps_boundary = epsFunctor()(boundary_face, state);

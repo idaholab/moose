@@ -102,11 +102,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto eps_face = epsilon()(ssf, state);
     const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
-<<<<<<< HEAD
     const auto coeff = vdotn * rho_face / eps_face;
-=======
-    const auto coeff = _normal * v_face * rho_face / eps_face;
->>>>>>> Switch transform_reduce to accumulate due to lack of support. (#22356)
 
     if (sided_elem == fi.elemPtr())
     {
@@ -182,15 +178,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       const auto var_elem = advected.first / rho_elem * eps_elem,
                  var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-<<<<<<< HEAD
       _ae = vdotn * rho_elem / eps_elem * interp_coeffs.first;
       // Minus sign because we apply a minus sign to the residual in computeResidual
       _an = -vdotn * rho_neighbor / eps_neighbor * interp_coeffs.second;
-=======
-      _ae = _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
-      // Minus sign because we apply a minus sign to the residual in computeResidual
-      _an = -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
->>>>>>> Switch transform_reduce to accumulate due to lack of support. (#22356)
 
       _elem_residual = _ae * var_elem - _an * var_neighbor;
       _neighbor_residual = -_elem_residual;

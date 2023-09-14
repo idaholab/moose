@@ -52,7 +52,6 @@ FVAnisotropicDiffusion::computeQpResidual()
                                            Moose::FV::InterpMethod::SkewCorrectedAverage);
 
   ADRealVectorValue coeff;
-
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
     interpolate(_coeff_interp_method,
