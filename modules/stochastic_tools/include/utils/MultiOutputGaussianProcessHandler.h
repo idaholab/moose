@@ -13,6 +13,7 @@
 #include <Eigen/Dense>
 
 #include "CovarianceFunctionBase.h"
+#include "OutputCovarianceBase.h"
 
 namespace StochasticTools
 {
@@ -34,7 +35,8 @@ public:
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
    */
-  void initialize(CovarianceFunctionBase * covariance_function,
+  void initialize(OutputCovarianceBase * output_covariance,
+                  CovarianceFunctionBase * covariance_function,
                   const std::vector<std::string> params_to_tune,
                   std::vector<Real> min = std::vector<Real>(),
                   std::vector<Real> max = std::vector<Real>());
@@ -84,7 +86,8 @@ public:
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
    */
-  void linkCovarianceFunction(CovarianceFunctionBase * covariance_function);
+  void linkCovarianceFunction(
+      OutputCovarianceBase * output_covariance, CovarianceFunctionBase * covariance_function);
 
   /**
    * Sets up the tuning map which is used if the user requires parameter tuning.
@@ -146,11 +149,16 @@ public:
   const StochasticTools::Standardizer & getParamStandardizer() const { return _param_standardizer; }
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
   const RealEigenMatrix & getK() const { return _K; }
+  const RealEigenMatrix & getB() const { return _B; }
+  const std::vector<Real> & getLatent() const { return _latent; }
   const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
   const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
+  const OutputCovarianceBase & getOutputCovar() const { return *_output_covariance; }
+  const OutputCovarianceBase * getOutputCovarPtr() const { return _output_covariance; }
   const std::string & getCovarType() const { return _covar_type; }
+  const std::string & getOutputCovarType() const { return _output_covar_type; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
   const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
@@ -167,11 +175,16 @@ public:
   StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
   StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
+  RealEigenMatrix & B() { return _B; }
+  std::vector<Real> & latent() { return _latent; }
   RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
   Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
+  OutputCovarianceBase * outputCovarPtr() { return _output_covariance; }
+  OutputCovarianceBase & outputCovar() { return *_output_covariance; }
   std::string & covarType() { return _covar_type; }
+  std::string & outputCovarType() { return _output_covar_type; }
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> & tuningData()
   {
     return _tuning_data;
@@ -187,6 +200,9 @@ protected:
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
 
+  /// Output covariance object
+  OutputCovarianceBase * _output_covariance = nullptr;
+
   /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
@@ -195,6 +211,9 @@ protected:
 
   /// Type of covariance function used for this surrogate
   std::string _covar_type;
+
+  /// Type of output covariance used for this surrogate
+  std::string _output_covar_type;
 
   /// Tao Communicator
   Parallel::Communicator _tao_comm;
@@ -213,6 +232,12 @@ protected:
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   RealEigenMatrix _K;
+
+  /// An _n_output by _n_output covariance matrix constructed from the selected output kernel
+  RealEigenMatrix _B;
+
+  /// A vector of latent params to capture output covariances
+  std::vector<Real> _latent;
 
   /// A solve of Ax=b via Cholesky.
   RealEigenMatrix _K_results_solve;

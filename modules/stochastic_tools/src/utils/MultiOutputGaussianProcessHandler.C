@@ -36,21 +36,26 @@ MultiOutputGaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
 {
 }
 
-// MultiOutputGaussianProcessHandler::MultiOutputGaussianProcessHandler() : _tao_comm(MPI_COMM_SELF) {}
-
 void
-MultiOutputGaussianProcessHandler::initialize(CovarianceFunctionBase * covariance_function,
-                                   const std::vector<std::string> params_to_tune,
-                                   std::vector<Real> min,
-                                   std::vector<Real> max)
+MultiOutputGaussianProcessHandler::initialize(OutputCovarianceBase * output_covariance,
+                                              CovarianceFunctionBase * covariance_function,
+                                              const std::vector<std::string> params_to_tune,
+                                              std::vector<Real> min,
+                                              std::vector<Real> max)
 {
-  linkCovarianceFunction(covariance_function);
+  linkCovarianceFunction(output_covariance, covariance_function);
   generateTuningMap(params_to_tune, min, max);
 }
 
 void
-MultiOutputGaussianProcessHandler::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
+MultiOutputGaussianProcessHandler::linkCovarianceFunction(
+    OutputCovarianceBase * output_covariance, CovarianceFunctionBase * covariance_function)
 {
+  // For outputs
+  _output_covariance = output_covariance;
+  _output_covar_type = _output_covariance->type();
+
+  // For inputs
   _covariance_function = covariance_function;
   _covar_type = _covariance_function->type();
 }
@@ -62,6 +67,8 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
 {
   const unsigned int batch_size = opts.batch_size > 0 ? opts.batch_size : training_params.rows();
   _K.resize(batch_size, batch_size);
+  _B.resize(training_data.cols(), training_data.cols());
+  _latent.assign(_output_covariance->setupNumLatent(training_data.cols()), 1.0);
 
   tuneHyperParamsAdam(training_params,
                       training_data,
@@ -307,6 +314,8 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.hyperparamVectorMap(), context);
   dataStore(stream, gp_utils.covarType(), context);
   dataStore(stream, gp_utils.K(), context);
+  dataStore(stream, gp_utils.outputCovarType(), context);
+  dataStore(stream, gp_utils.B(), context);
   dataStore(stream, gp_utils.KResultsSolve(), context);
   dataStore(stream, gp_utils.KCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
@@ -323,6 +332,8 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
   dataLoad(stream, gp_utils.covarType(), context);
   dataLoad(stream, gp_utils.K(), context);
+  dataLoad(stream, gp_utils.outputCovarType(), context);
+  dataLoad(stream, gp_utils.B(), context);
   dataLoad(stream, gp_utils.KResultsSolve(), context);
   dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
