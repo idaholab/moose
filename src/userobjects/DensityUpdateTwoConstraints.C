@@ -136,21 +136,42 @@ DensityUpdateTwoConstraints::gatherElementData()
   _total_allowable_volume = 0;
   _total_allowable_cost = 0;
 
-  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+  if (blockRestricted())
   {
-    dof_id_type elem_id = elem->id();
-    ElementData data = ElementData(
-        _design_density.getElementalValue(elem),
-        _density_sensitivity.getElementalValue(elem),
-        _cost_density_sensitivity.getElementalValue(elem),
-        isParamValid("thermal_sensitivity") ? _thermal_sensitivity->getElementalValue(elem) : 0.0,
-        _cost.getElementalValue(elem),
-        elem->volume(),
-        0);
-    _elem_data_map[elem_id] = data;
-    _total_allowable_volume += elem->volume();
+    for (const auto & sub_id : blockIDs())
+      for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
+      {
+        dof_id_type elem_id = elem->id();
+        ElementData data = ElementData(_design_density.getElementalValue(elem),
+                                       _density_sensitivity.getElementalValue(elem),
+                                       _cost_density_sensitivity.getElementalValue(elem),
+                                       isParamValid("thermal_sensitivity")
+                                           ? _thermal_sensitivity->getElementalValue(elem)
+                                           : 0.0,
+                                       _cost.getElementalValue(elem),
+                                       elem->volume(),
+                                       0);
+        _elem_data_map[elem_id] = data;
+        _total_allowable_volume += elem->volume();
+      }
   }
-
+  else
+  {
+    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      dof_id_type elem_id = elem->id();
+      ElementData data = ElementData(
+          _design_density.getElementalValue(elem),
+          _density_sensitivity.getElementalValue(elem),
+          _cost_density_sensitivity.getElementalValue(elem),
+          isParamValid("thermal_sensitivity") ? _thermal_sensitivity->getElementalValue(elem) : 0.0,
+          _cost.getElementalValue(elem),
+          elem->volume(),
+          0);
+      _elem_data_map[elem_id] = data;
+      _total_allowable_volume += elem->volume();
+    }
+  }
   _communicator.sum(_total_allowable_volume);
   _communicator.sum(_total_allowable_cost);
 
@@ -193,13 +214,15 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
           getParam<std::vector<Real>>("weight_mechanical_thermal");
 
       // Compute the updated density for the current element
-      Real new_density = computeUpdatedDensity(elem_data.old_density,
-                                               elem_data.sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[0] : 1.0),
-                                               elem_data.cost_sensitivity,
-                                               elem_data.thermal_sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[1] : 1.0),
-                                               elem_data.cost,
-                                               lmid,
-                                               cmid);
+      Real new_density = computeUpdatedDensity(
+          elem_data.old_density,
+          elem_data.sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[0] : 1.0),
+          elem_data.cost_sensitivity,
+          elem_data.thermal_sensitivity *
+              (isParamValid("thermal_sensitivity") ? weight_values[1] : 1.0),
+          elem_data.cost,
+          lmid,
+          cmid);
 
       // Update the current filtered density for the current element
       elem_data.new_density = new_density;
@@ -264,13 +287,13 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
 
   Real updated_density = std::max(
       1.0e-5,
-      std::max(current_density - move,
-               std::min(1.0,
-                        std::min(current_density + move,
-                                 current_density *
-                                     MathUtils::pow(std::sqrt((-(dc + temp_sensitivity) /
-                                                                       denominator)),
-                                                    damping)))));
+      std::max(
+          current_density - move,
+          std::min(1.0,
+                   std::min(current_density + move,
+                            current_density *
+                                MathUtils::pow(std::sqrt((-(dc + temp_sensitivity) / denominator)),
+                                               damping)))));
 
   // Return the updated density
   return updated_density;

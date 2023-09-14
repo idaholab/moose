@@ -71,15 +71,33 @@ DensityUpdate::gatherElementData()
 {
   _elem_data_map.clear();
   _total_allowable_volume = 0;
-  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+
+  if (blockRestricted())
   {
-    dof_id_type elem_id = elem->id();
-    ElementData data = ElementData(_design_density.getElementalValue(elem),
-                                   _density_sensitivity.getElementalValue(elem),
-                                   elem->volume(),
-                                   0);
-    _elem_data_map[elem_id] = data;
-    _total_allowable_volume += elem->volume();
+    for (const auto & sub_id : blockIDs())
+      for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
+      {
+        dof_id_type elem_id = elem->id();
+        ElementData data = ElementData(_design_density.getElementalValue(elem),
+                                       _density_sensitivity.getElementalValue(elem),
+                                       elem->volume(),
+                                       0);
+        _elem_data_map[elem_id] = data;
+        _total_allowable_volume += elem->volume();
+      }
+  }
+  else
+  {
+    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      dof_id_type elem_id = elem->id();
+      ElementData data = ElementData(_design_density.getElementalValue(elem),
+                                     _density_sensitivity.getElementalValue(elem),
+                                     elem->volume(),
+                                     0);
+      _elem_data_map[elem_id] = data;
+      _total_allowable_volume += elem->volume();
+    }
   }
 
   _communicator.sum(_total_allowable_volume);
@@ -115,8 +133,8 @@ DensityUpdate::performOptimCritLoop()
     // Sum the current total volume across all processors
     _communicator.sum(curr_total_volume);
 
-    // Update l1 or l2 based on whether the current total volume is greater than the total allowable
-    // volume
+    // Update l1 or l2 based on whether the current total volume is greater than the total
+    // allowable volume
     if (curr_total_volume > _total_allowable_volume)
       l1 = lmid;
     else
