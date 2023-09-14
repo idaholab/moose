@@ -420,7 +420,7 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
     {
       // Split param name and vector assignment: "param[0,(3.14),1]" -> {"param", "0,(3.14),1]"}
       const std::vector<std::string> & vector_param = MooseUtils::split(cli_args_name[i], "[");
-      // Get inices of vector: "0,(3.14),1]" -> {"0", "(3.14)", "1"}
+      // Get indices of vector: "0,(3.14),1]" -> {"0", "(3.14)", "1"}
       const std::vector<std::string> & index_string =
           MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
 

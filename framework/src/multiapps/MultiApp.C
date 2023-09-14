@@ -175,9 +175,9 @@ MultiApp::validParams()
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<CLIArgString>>(
       "cli_args",
-      std::vector<std::string>(),
+      std::vector<CLIArgString>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -275,7 +275,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _move_positions(getParam<std::vector<Point>>("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _cli_args(getParam<std::vector<std::string>>("cli_args")),
+    _cli_args(getParam<std::vector<CLIArgString>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
     _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
@@ -335,7 +335,7 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
 
   // if cliArgs() != _cli_args, then cliArgs() was overridden and we need to check it
   auto cla = cliArgs();
-  if (cla != _cli_args)
+  if (cla != std::vector<std::string>(_cli_args.begin(), _cli_args.end()))
   {
     if ((cla.size() > 1) && (_total_num_apps != cla.size()))
       mooseError("The number of items supplied as command line argument to subapps must be 1 or "

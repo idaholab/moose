@@ -49,5 +49,5 @@ protected:
   const std::vector<std::string> & _param_names;
 
   /// The original cli_args from input
-  std::vector<std::string> _orig_args;
+  std::vector<CLIArgString> _orig_args;
 };

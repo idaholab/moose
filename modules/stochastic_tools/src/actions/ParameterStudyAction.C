@@ -438,7 +438,7 @@ ParameterStudyAction::act()
       // If we are doing batch-restore, the parameters must be controllable.
       // So we will add the necessary control to the sub-app using command-line
       std::string clia = "Controls/" + samplerReceiverName() + "/type=SamplerReceiver";
-      params.set<std::vector<std::string>>("cli_args").push_back(clia);
+      params.set<std::vector<CLIArgString>>("cli_args").push_back(clia);
 
       // batch-keep-solution
       if (_multiapp_mode == 3)
