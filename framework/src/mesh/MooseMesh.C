@@ -2133,8 +2133,8 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
     auto & qrule = assembly->writeableQRule();
     auto & qrule_face = assembly->writeableQRuleFace();
 
-    ReplicatedMesh mesh(_communicator);
-    mesh.skip_partitioning(true);
+    libMesh::Parallel::Communicator self_comm{};
+    ReplicatedMesh mesh(self_comm);
     mesh.set_mesh_dimension(dim);
     for (const auto & nd : moose_elem->node_ref_range())
       mesh.add_point(nd);
