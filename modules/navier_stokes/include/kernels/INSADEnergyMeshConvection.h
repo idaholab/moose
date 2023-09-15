@@ -27,5 +27,5 @@ protected:
 
   const ADMaterialProperty<Real> & _temperature_convected_mesh_strong_residual;
 
-  friend class INSADMeshConvection;
+  friend class INSADMomentumMeshAdvection;
 };
