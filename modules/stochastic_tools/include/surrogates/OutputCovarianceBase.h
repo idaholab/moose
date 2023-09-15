@@ -28,10 +28,7 @@ public:
   /// Generates the full Covariance Matrix given two points in the parameter space
   virtual void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
                                            const RealEigenMatrix & B,
-                                           const RealEigenMatrix & K,
-                                           const RealEigenMatrix & x,
-                                           const RealEigenMatrix & xp,
-                                           const bool is_self_covariance) const = 0;
+                                           const RealEigenMatrix & K) const = 0;
 
   // /// Used for outputting Hyper-parameter settings
   // virtual void
@@ -53,7 +50,9 @@ public:
   //                             std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/){};
 
   /// Compute the gradient of the B matrix
-  virtual void computeBGrad(RealEigenMatrix & BGrad, const std::vector<Real> & latent) const = 0;
+  virtual void computeBGrad(RealEigenMatrix & BGrad,
+                            const std::vector<Real> & latent,
+                            const unsigned int & index) const = 0;
 
   /// Setup the number of latent params
   virtual unsigned int setupNumLatent(const unsigned int & num_outputs) const;

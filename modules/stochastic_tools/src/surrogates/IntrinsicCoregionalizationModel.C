@@ -34,16 +34,14 @@ IntrinsicCoregionalizationModel::computeBCovarianceMatrix(RealEigenMatrix & B,
 void
 IntrinsicCoregionalizationModel::computeFullCovarianceMatrix(RealEigenMatrix & kappa,
                                                              const RealEigenMatrix & B,
-                                                             const RealEigenMatrix & K,
-                                                             const RealEigenMatrix & x,
-                                                             const RealEigenMatrix & xp,
-                                                             const bool is_self_covariance) const
+                                                             const RealEigenMatrix & K) const
 {
 }
 
 void
 IntrinsicCoregionalizationModel::computeBGrad(RealEigenMatrix & BGrad,
-                                              const std::vector<Real> & latent) const
+                                              const std::vector<Real> & latent,
+                                              const unsigned int & index) const
 {
 }
 

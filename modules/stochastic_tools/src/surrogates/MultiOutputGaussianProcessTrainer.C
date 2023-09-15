@@ -33,7 +33,7 @@ MultiOutputGaussianProcessTrainer::validParams()
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
   params.addParam<bool>(
-      "show_optimization_details", false, "Switch to show TAO or Adam solver results");
+      "show_optimization_details", false, "Switch to show Adam solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   return params;
@@ -45,8 +45,8 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
     CovarianceInterface(parameters),
     OutputCovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    _mogp_handler(
-        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
+    // _mogp_handler(
+    //     declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _optimization_opts(StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
@@ -70,14 +70,14 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
 
-  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-  std::vector<Real> lower_bounds, upper_bounds;
-  _mogp_handler.initialize(
-      getOutputCovarianceByName(parameters.get<UserObjectName>("output_covariance")),
-      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
-      tune_parameters,
-      lower_bounds,
-      upper_bounds);
+  // std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  // std::vector<Real> lower_bounds, upper_bounds;
+  // _mogp_handler.initialize(
+  //     getOutputCovarianceByName(parameters.get<UserObjectName>("output_covariance")),
+  //     getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+  //     tune_parameters,
+  //     lower_bounds,
+  //     upper_bounds);
 }
 
 void
@@ -114,12 +114,17 @@ MultiOutputGaussianProcessTrainer::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
+  // std::cout << Moose::stringify(_training_data) << std::endl;
+  // RealEigenMatrix tmp = _training_data.transpose().reshaped(_training_data.rows() * _training_data.cols(), 1);
+  // std::cout << "Here ******" << std::endl;
+  // std::cout << Moose::stringify(tmp) << std::endl;
+
   // Standardize (center and scale) training params
-  _mogp_handler.standardizeParameters(_training_params);
+  // _mogp_handler.standardizeParameters(_training_params);
 
   // Standardize (center and scale) training data
-  _mogp_handler.standardizeData(_training_data);
+  // _mogp_handler.standardizeData(_training_data);
 
   // Setup the covariance
-  _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  // _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
