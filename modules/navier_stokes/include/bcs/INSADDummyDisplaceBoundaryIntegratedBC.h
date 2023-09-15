@@ -31,7 +31,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// The velocity vector
-  const ADVectorVariableValue & _velocity;
+  const Moose::Functor<ADRealVectorValue> & _velocity;
 
   /// What component of velocity/displacement this object is acting on
   const unsigned short _component;

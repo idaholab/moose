@@ -12,12 +12,13 @@
 #include "MooseVariableInterface.h"
 #include "NodalBCBase.h"
 #include "ADDirichletBCBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for deriving any automatic differentiation boundary condition of a integrated type
  */
 template <typename T, typename Base>
-class ADNodalBCTempl : public Base, public MooseVariableInterface<T>
+class ADNodalBCTempl : public Base, public MooseVariableInterface<T>, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

@@ -18,17 +18,23 @@ INSADDisplaceBoundaryBC::validParams()
 {
   InputParameters params = ADNodalBC::validParams();
   params.addClassDescription("Boundary condition for displacing a boundary");
-  params.addRequiredCoupledVar("velocity", "The velocity at which to displace");
+  params.addRequiredParam<MooseFunctorName>("velocity", "The velocity at which to displace");
   params.addRequiredParam<unsigned short>(
       "component", "What component of velocity/displacement this object is acting on.");
+  params.addRequiredParam<SubdomainName>(
+      "associated_subdomain",
+      "The subdomain that the boundary nodeset is associated with. This will be passed to the "
+      "coupled functor for unambigious evaluation (e.g. at the edge of the node-patch where we "
+      "might run into the intersection of subdomains");
   return params;
 }
 
 INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & parameters)
   : ADNodalBC(parameters),
-    _velocity(adCoupledNodalValue<RealVectorValue>("velocity")),
+    _velocity(getFunctor<ADRealVectorValue>("velocity")),
     _u_old(_var.nodalValueOld()),
-    _component(getParam<unsigned short>("component"))
+    _component(getParam<unsigned short>("component")),
+    _sub_id(_mesh.getSubdomainID(getParam<SubdomainName>("associated_subdomain")))
 {
   if (!dynamic_cast<ImplicitEuler *>(_sys.getTimeIntegrator()))
     mooseError("This boundary condition hard-codes a displacement update with the form of an "
@@ -39,5 +45,6 @@ INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & paramet
 ADReal
 INSADDisplaceBoundaryBC::computeQpResidual()
 {
-  return _u - (_u_old + this->_dt * _velocity(_component));
+  const Moose::NodeArg nd{_current_node, _sub_id};
+  return _u - (_u_old + this->_dt * _velocity(nd, determineState())(_component));
 }

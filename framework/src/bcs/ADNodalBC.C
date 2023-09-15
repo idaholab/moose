@@ -60,6 +60,7 @@ ADNodalBCTempl<T, Base>::ADNodalBCTempl(const InputParameters & parameters)
                               Moose::VarKindType::VAR_NONLINEAR,
                               std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
+    ADFunctorInterface(this),
     _var(*this->mooseVariable()),
     _current_node(_var.node()),
     _u(_var.adNodalValue()),
