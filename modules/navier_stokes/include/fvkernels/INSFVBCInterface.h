@@ -17,6 +17,7 @@
 #include "MooseApp.h"
 #include "INSFVNoSlipWallBC.h"
 #include "INSFVSlipWallBC.h"
+#include "INSFVFreeSurfaceBC.h"
 #include "INSFVSymmetryBC.h"
 #include "INSFVFullyDevelopedFlowBC.h"
 #include <set>
@@ -40,6 +41,9 @@ protected:
 
   /// Boundary IDs with slip walls
   std::set<BoundaryID> _slip_wall_boundaries;
+
+  /// Boundary IDs for free surfaces
+  std::set<BoundaryID> _free_surface_boundaries;
 
   /// Flow Boundary IDs
   std::set<BoundaryID> _flow_boundaries;
@@ -92,6 +96,8 @@ INSFVBCInterface::initialSetup(T & insfv_fk)
         insfv_fk, bnd_id, INSFVBCs::INSFVNoSlipWallBC, _no_slip_wall_boundaries);
     setupBoundaries<INSFVSlipWallBC>(
         insfv_fk, bnd_id, INSFVBCs::INSFVSlipWallBC, _slip_wall_boundaries);
+    setupBoundaries<INSFVFreeSurfaceBC>(
+        insfv_fk, bnd_id, INSFVBCs::INSFVFreeSurfaceBC, _free_surface_boundaries);
     setupBoundaries<INSFVSymmetryBC>(
         insfv_fk, bnd_id, INSFVBCs::INSFVSymmetryBC, _symmetry_boundaries);
   }

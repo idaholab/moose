@@ -9,22 +9,23 @@
 
 #pragma once
 
-#include "ADVectorIntegratedBC.h"
+#include "INSFVFluxBC.h"
+#include "INSFVFreeSurfaceBC.h"
 
 /**
  * A class that imparts a surface recoil force on the momentum equation due to liquid phase
  * evaporation
  */
-class INSADVaporRecoilPressureMomentumFluxBC : public ADVectorIntegratedBC
+class INSFVVaporRecoilPressureMomentumFluxBC : public INSFVFreeSurfaceBC
 {
 public:
   static InputParameters validParams();
+  INSFVVaporRecoilPressureMomentumFluxBC(const InputParameters & params);
 
-  INSADVaporRecoilPressureMomentumFluxBC(const InputParameters & parameters);
+  using INSFVFluxBC::gatherRCData;
+  void gatherRCData(const FaceInfo & fi) override;
 
 protected:
-  virtual ADReal computeQpResidual() override;
-
   /// The recoil pressure
-  const ADMaterialProperty<Real> & _rc_pressure;
+  const Moose::Functor<ADReal> & _rc_pressure;
 };
