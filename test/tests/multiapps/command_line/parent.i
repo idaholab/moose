@@ -18,6 +18,7 @@
     positions = '0 0 0
                  1 1 1'
     input_files = 'sub.i'
-    cli_args = 'Mesh/nx=10 Mesh/nx=100'
+    cli_args = 'Mesh/mesh/type=GeneratedMeshGenerator;Mesh/mesh/dim=1;Mesh/mesh/nx=10
+                Mesh/mesh/type=GeneratedMeshGenerator;Mesh/mesh/dim=1;Mesh/mesh/nx=100'
   []
 []

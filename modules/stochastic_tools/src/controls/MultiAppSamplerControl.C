@@ -108,7 +108,7 @@ MultiAppSamplerControl::execute()
   // Gather the original arguments given in the parameter so we can keep them
   if (_orig_args.empty())
   {
-    _orig_args = getControllableValueByName<std::vector<std::string>>(
+    _orig_args = getControllableValueByName<std::vector<CLIArgString>>(
         "MultiApp", _multi_app->name(), "cli_args", true);
     if (_orig_args.size() == 0)
       _orig_args.push_back("");
@@ -117,7 +117,7 @@ MultiAppSamplerControl::execute()
         clia += ";";
   }
 
-  std::vector<std::string> cli_args = _orig_args;
+  auto cli_args = _orig_args;
 
   // To avoid storing duplicated param_names for each sampler, we store only param_names once in
   // "cli_args".
@@ -154,6 +154,6 @@ MultiAppSamplerControl::execute()
   for (auto & clia : cli_args)
     clia += oss.str();
 
-  setControllableValueByName<std::vector<std::string>>(
+  setControllableValueByName<std::vector<CLIArgString>>(
       "MultiApp", _multi_app->name(), "cli_args", cli_args);
 }

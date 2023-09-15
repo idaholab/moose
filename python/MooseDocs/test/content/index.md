@@ -37,6 +37,7 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/gitutils.md]
 1. [extensions/modal.md]
 1. [extensions/algorithm.md]
+1. [extensions/tag.md]
 
 ## Subsite Link Test
 

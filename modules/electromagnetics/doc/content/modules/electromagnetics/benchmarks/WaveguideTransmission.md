@@ -1,5 +1,11 @@
 # Waveguide Transmission Benchmark
 
+!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
+!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
+
+!if function=!hasSubmodule('moose')
+!tag name=waveguide_2D pairs=example_type:benchmark simulation_type:scalar fiscal_year:2022
+
 This section summarizes and describes the single frequency two-dimensional
 waveguide benchmark and verification test for the electromagnetics module.
 

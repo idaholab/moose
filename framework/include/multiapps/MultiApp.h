@@ -384,7 +384,10 @@ public:
 
 protected:
   /// function that provides cli_args to subapps
-  virtual std::vector<std::string> cliArgs() const { return _cli_args; }
+  virtual std::vector<std::string> cliArgs() const
+  {
+    return std::vector<std::string>(_cli_args.begin(), _cli_args.end());
+  }
 
   /**
    * _must_ fill in _positions with the positions of the sub-aps
@@ -583,7 +586,7 @@ protected:
   bool _has_an_app;
 
   /// CommandLine arguments
-  const std::vector<std::string> & _cli_args;
+  const std::vector<CLIArgString> & _cli_args;
 
   /// CommandLine arguments from files
   std::vector<std::string> _cli_args_from_file;

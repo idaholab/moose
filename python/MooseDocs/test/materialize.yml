@@ -126,6 +126,14 @@ Extensions:
     MooseDocs.extensions.analytics:
         active: True
         google_measurement_id: G-RH7BY5XXNW
+    MooseDocs.extensions.tagging:
+        active: True
+        js_file: tagging.js
+        allowed_keys:
+            - application
+            - foo
+            - simulation_type
+            - fiscal_year
 
 Translator:
     type: MooseDocs.base.Translator

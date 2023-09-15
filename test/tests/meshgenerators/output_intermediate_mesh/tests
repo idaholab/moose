@@ -15,7 +15,6 @@
       detail = "the exodus file format"
     []
     [nemesis]
-      skip = 'Nemesis issue, libMesh/libmesh#3601'
       type = 'Exodiff'
       input = 'output_intermediate_mesh.i'
       exodiff = 'left_in.e.2.0 left_in.e.2.1'
