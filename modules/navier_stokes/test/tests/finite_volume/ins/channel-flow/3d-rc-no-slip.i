@@ -13,17 +13,16 @@ velocity_interp_method='rc'
     ymax = 1
     zmin = -1
     zmax = 1
-    nx = 20
-    ny = 4
-    nz = 4
+    nx = 15
+    ny = 3
+    nz = 3
     elem_type = TET4
   []
 []
 
 [GlobalParams]
-  # retain behavior at time of test creation
-  two_term_boundary_expansion = false
   rhie_chow_user_object = 'rc'
+  face_interp_method = 'skewness-corrected'
 []
 
 [UserObjects]
@@ -43,11 +42,9 @@ velocity_interp_method='rc'
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
   []
   [w]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
   []
   [pressure]
     type = INSFVPressureVariable
@@ -107,7 +104,7 @@ velocity_interp_method='rc'
 
   [w_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = w
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
