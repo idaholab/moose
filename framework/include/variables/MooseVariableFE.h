@@ -699,10 +699,7 @@ private:
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }
-  ValueType evaluate(const NodeArg &, const StateArg &) const override final
-  {
-    mooseError("Node functor overload not yet implemented for finite element variables");
-  }
+  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
 };
 
 template <typename OutputType>

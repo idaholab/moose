@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 #include "MooseConfig.h"
 
+class SubProblem;
 class SystemBase;
 namespace libMesh
 {
@@ -148,4 +149,8 @@ globalDofIndexToDerivative(const T & ad_real_container,
   return ret_val;
 }
 
+/**
+ * @returns whether we should be doing derivatives
+ */
+bool doDerivatives(const SubProblem & subproblem, const SystemBase & sys);
 }

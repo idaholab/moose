@@ -1072,8 +1072,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_u_dotdot.resize(nqp);
   }
 
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   for (unsigned int qp = 0; qp < nqp; qp++)
   {

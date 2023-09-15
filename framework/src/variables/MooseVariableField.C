@@ -68,16 +68,8 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   if (computing_dot)
     dof_values_dot.reserve(dof_indices.size());
 
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
-
-  // It's not safe to use solutionState(0) because it returns the libMesh System solution member
-  // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
-  // perturbs the solution vector we feed these perturbations into the current_local_solution
-  // while the libMesh solution is frozen in the non-perturbed state
-  const auto & global_soln = (state.state == 0)
-                                 ? *_sys.currentSolution()
-                                 : _sys.solutionState(state.state, state.iteration_type);
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
+  const auto & global_soln = getSolution(state);
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
@@ -384,6 +376,18 @@ MooseVariableField<OutputType>::timestepSetup()
 {
   MooseVariableFieldBase::timestepSetup();
   FunctorBase<typename Moose::ADType<OutputType>::type>::timestepSetup();
+}
+
+template <typename OutputType>
+const NumericVector<Number> &
+MooseVariableField<OutputType>::getSolution(const StateArg & state) const
+{
+  // It's not safe to use solutionState(0) because it returns the libMesh System solution member
+  // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
+  // perturbs the solution vector we feed these perturbations into the current_local_solution
+  // while the libMesh solution is frozen in the non-perturbed state
+  return (state.state == 0) ? *this->_sys.currentSolution()
+                            : this->_sys.solutionState(state.state, state.iteration_type);
 }
 
 template class MooseVariableField<Real>;
