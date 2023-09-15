@@ -2101,6 +2101,9 @@ public:
    */
   void havePRefinement();
 
+  virtual void needFV() override { _have_fv = true; }
+  virtual bool haveFV() const override { return _have_fv; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2527,6 +2530,9 @@ private:
   /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
   /// called
   std::vector<VectorTag> _current_residual_vector_tags;
+
+  /// Whether we are performing some calculations with finite volume discretizations
+  bool _have_fv = false;
 };
 
 using FVProblemBase = FEProblemBase;

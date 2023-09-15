@@ -106,10 +106,10 @@ public:
   virtual bool isTransient() const = 0;
 
   /// marks this problem as including/needing finite volume functionality.
-  void needFV() { _have_fv = true; }
+  virtual void needFV() = 0;
 
   /// returns true if this problem includes/needs finite volume functionality.
-  bool haveFV() const { return _have_fv; }
+  virtual bool haveFV() const = 0;
 
   /**
    * Whether or not the user has requested default ghosting ot be on.
@@ -1039,8 +1039,6 @@ private:
 
   /// Map of vector tag TagName to TagID
   std::map<TagName, TagID> _vector_tags_name_map;
-
-  bool _have_fv = false;
 
   ///@{ Helper functions for checking MaterialProperties
   std::string restrictionSubdomainCheckName(SubdomainID check_id);

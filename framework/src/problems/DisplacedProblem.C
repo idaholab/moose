@@ -176,6 +176,11 @@ DisplacedProblem::init()
     _eq.init();
   }
 
+  /// Get face types properly set for variables
+  for (auto & nl : _displaced_nl)
+    nl->update(/*update_libmesh_system=*/false);
+  _displaced_aux->update(/*update_libmesh_system=*/false);
+
   _mesh.meshChanged();
 }
 
@@ -1322,4 +1327,16 @@ bool
 DisplacedProblem::safeAccessTaggedVectors() const
 {
   return _mproblem.safeAccessTaggedVectors();
+}
+
+void
+DisplacedProblem::needFV()
+{
+  _mproblem.needFV();
+}
+
+bool
+DisplacedProblem::haveFV() const
+{
+  return _mproblem.haveFV();
 }
