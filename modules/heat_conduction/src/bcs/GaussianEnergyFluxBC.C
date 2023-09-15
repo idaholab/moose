@@ -13,16 +13,31 @@
 registerMooseObject("HeatConductionApp", GaussianEnergyFluxBC);
 
 InputParameters
-GaussianEnergyFluxBC::validParams()
+GaussianEnergyFluxBC::beamParams()
 {
-  InputParameters params = ADIntegratedBC::validParams();
-  params.addClassDescription("Describes an incoming heat flux beam with a Gaussian profile");
+  auto params = emptyInputParameters();
   params.addRequiredParam<Real>("P0", "The total power of the beam.");
   params.addRequiredParam<Real>(
       "R", "The radius at which the beam intensity falls to $1/e^2$ of its axis value.");
-  params.addParam<FunctionName>("x_beam_coord", 0, "The x coordinate of the center of the beam");
-  params.addParam<FunctionName>("y_beam_coord", 0, "The y coordinate of the center of the beam");
-  params.addParam<FunctionName>("z_beam_coord", 0, "The z coordinate of the center of the beam");
+  auto beam_coord_doc = [](const std::string & coord)
+  {
+    return "The " + coord +
+           " coordinate of the center of the beam as a function of time. Note that we will pass "
+           "the origin as the spatial argument to the function; any spatial dependence in the "
+           "passed-in function will be ignored";
+  };
+  params.addParam<FunctionName>("x_beam_coord", 0, beam_coord_doc("x"));
+  params.addParam<FunctionName>("y_beam_coord", 0, beam_coord_doc("y"));
+  params.addParam<FunctionName>("z_beam_coord", 0, beam_coord_doc("z"));
+  params.addClassDescription("Describes an incoming heat flux beam with a Gaussian profile");
+  return params;
+}
+
+InputParameters
+GaussianEnergyFluxBC::validParams()
+{
+  InputParameters params = ADIntegratedBC::validParams();
+  params += GaussianEnergyFluxBC::beamParams();
   return params;
 }
 
@@ -39,9 +54,5 @@ GaussianEnergyFluxBC::GaussianEnergyFluxBC(const InputParameters & params)
 ADReal
 GaussianEnergyFluxBC::computeQpResidual()
 {
-  const RealVectorValue beam_coords{_x_beam_coord.value(_t, _q_point[_qp]),
-                                    _y_beam_coord.value(_t, _q_point[_qp]),
-                                    _z_beam_coord.value(_t, _q_point[_qp])};
-  const auto r = (_ad_q_points[_qp] - beam_coords).norm();
-  return -_test[_i][_qp] * 2 * _P0 / (libMesh::pi * _R * _R) * std::exp(-2 * r * r / (_R * _R));
+  return _test[_i][_qp] * beamFlux(*this, _ad_q_points[_qp]);
 }
