@@ -361,6 +361,9 @@ public:
    */
   void havePRefinement();
 
+  virtual void needFV() override;
+  virtual bool haveFV() const override;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;
