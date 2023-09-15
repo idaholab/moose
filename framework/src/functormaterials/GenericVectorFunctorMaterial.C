@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GenericVectorFunctorMaterial.h"
-#include "Function.h"
+#include "MathUtils.h"
 
 registerMooseObject("MooseApp", GenericVectorFunctorMaterial);
 registerMooseObject("MooseApp", ADGenericVectorFunctorMaterial);
@@ -70,6 +70,7 @@ GenericVectorFunctorMaterialTempl<is_ad>::GenericVectorFunctorMaterialTempl(
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))
+  {
     addFunctorProperty<GenericRealVectorValue<is_ad>>(
         _prop_names[i],
         [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
@@ -78,6 +79,16 @@ GenericVectorFunctorMaterialTempl<is_ad>::GenericVectorFunctorMaterialTempl(
                   (*_functors[LIBMESH_DIM * i + 2])(r, t)};
         },
         clearance_schedule);
+    addFunctorProperty<GenericRealVectorValue<is_ad>>(
+        MathUtils::timeDerivName(_prop_names[i]),
+        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad>
+        {
+          return {_functors[LIBMESH_DIM * i]->dot(r, t),
+                  _functors[LIBMESH_DIM * i + 1]->dot(r, t),
+                  _functors[LIBMESH_DIM * i + 2]->dot(r, t)};
+        },
+        clearance_schedule);
+  }
 }
 
 template class GenericVectorFunctorMaterialTempl<false>;
