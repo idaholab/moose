@@ -193,6 +193,7 @@ sb=5.67e-8
     variable = 'disp_x'
     velocity = 'vel'
     component = 0
+    associated_subdomain = 0
   []
   [displace_y_top]
     type = INSADDisplaceBoundaryBC
@@ -200,6 +201,7 @@ sb=5.67e-8
     variable = 'disp_y'
     velocity = 'vel'
     component = 1
+    associated_subdomain = 0
   []
   [displace_z_top]
     type = INSADDisplaceBoundaryBC
@@ -207,6 +209,7 @@ sb=5.67e-8
     variable = 'disp_z'
     velocity = 'vel'
     component = 2
+    associated_subdomain = 0
   []
   [displace_x_top_dummy]
     type = INSADDummyDisplaceBoundaryIntegratedBC
