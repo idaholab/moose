@@ -47,7 +47,7 @@ function configure_libmesh()
   if [[ $(uname) == Darwin  ]] && [[ $(uname -m) == arm64 ]]; then
     echo "INFO: Re-bootstrapping libMesh and its dependencies"
     cd $SRC_DIR || exit $?
-    ./bootstrap || exit $?
+    autoreconf -fiv || exit $?
     cd contrib/metaphysicl || exit $?
     ./bootstrap || exit $?
     cd ../timpi || exit $?
