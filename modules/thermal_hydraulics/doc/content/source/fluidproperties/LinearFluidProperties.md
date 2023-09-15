@@ -1,6 +1,6 @@
 # LinearFluidProperties
 
-!syntax description /Modules/FluidProperties/LinearFluidProperties
+!syntax description /FluidProperties/LinearFluidProperties
 
 All other fluid properties are either constant, such as:
 
@@ -15,8 +15,8 @@ or dependent on pressure and temperature through density's dependence:
 - specific energy
 - specific enthalpy
 
-!syntax parameters /Modules/FluidProperties/LinearFluidProperties
+!syntax parameters /FluidProperties/LinearFluidProperties
 
-!syntax inputs /Modules/FluidProperties/LinearFluidProperties
+!syntax inputs /FluidProperties/LinearFluidProperties
 
-!syntax children /Modules/FluidProperties/LinearFluidProperties
+!syntax children /FluidProperties/LinearFluidProperties
