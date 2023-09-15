@@ -68,7 +68,10 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
   const unsigned int batch_size = opts.batch_size > 0 ? opts.batch_size : training_params.rows();
   _K.resize(batch_size, batch_size);
   _B.resize(training_data.cols(), training_data.cols());
-  _latent.assign(_output_covariance->setupNumLatent(training_data.cols()), 1.0);
+  _kappa.resize(batch_size * training_data.cols(), batch_size * training_data.cols());
+  // Initializing all latent params internally because there would be too many to ask the user
+  _num_tunable_out = _output_covariance->setupNumLatent(training_data.cols());
+  _latent.assign(_num_tunable_out, 1.0);
 
   tuneHyperParamsAdam(training_params,
                       training_data,
@@ -89,8 +92,8 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
 void
 MultiOutputGaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & input)
 {
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(input);
+  _kappa_cho_decomp = _kappa.llt();
+  _kappa_results_solve = _kappa_cho_decomp.solve(input);
 }
 
 void
@@ -98,7 +101,7 @@ MultiOutputGaussianProcessHandler::generateTuningMap(const std::vector<std::stri
                                           std::vector<Real> min_vector,
                                           std::vector<Real> max_vector)
 {
-  _num_tunable = 0;
+  _num_tunable_inp = 0;
 
   bool upper_bounds_specified = false;
   bool lower_bounds_specified = false;
@@ -122,8 +125,8 @@ MultiOutputGaussianProcessHandler::generateTuningMap(const std::vector<std::stri
       min = lower_bounds_specified ? min_vector[param_i] : min;
       max = upper_bounds_specified ? max_vector[param_i] : max;
       // Save data in tuple
-      _tuning_data[hp] = std::make_tuple(_num_tunable, size, min, max);
-      _num_tunable += size;
+      _tuning_data[hp] = std::make_tuple(_num_tunable_inp, size, min, max);
+      _num_tunable_inp += size;
     }
   }
 }
@@ -150,20 +153,19 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
                                             const Real & learning_rate,
                                             const bool & show_optimization_details)
 {
-  libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
+  libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable_inp);
   _batch_size = batch_size;
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   mapToPetscVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-  Real b1;
-  Real b2;
-  Real eps;
+  RealEigenMatrix vectorize_out;
   // Internal params for Adam; set to the recommended values in the paper
-  b1 = 0.9;
-  b2 = 0.999;
-  eps = 1e-7;
-  std::vector<Real> m0(_num_tunable, 0.0);
-  std::vector<Real> v0(_num_tunable, 0.0);
+  Real b1 = 0.9;
+  Real b2 = 0.999;
+  Real eps = 1e-7;
+  Real lambda = 1e-4;
 
+  std::vector<Real> m0(_num_tunable_inp + _num_tunable_out, 0.0);
+  std::vector<Real> v0(_num_tunable_inp + _num_tunable_out, 0.0);
   Real new_val;
   Real m_hat;
   Real v_hat;
@@ -174,7 +176,7 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
   std::vector<unsigned int> v_sequence(training_params.rows());
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   RealEigenMatrix inputs(_batch_size, training_params.cols());
-  RealEigenMatrix outputs(_batch_size, 1);
+  RealEigenMatrix outputs(_batch_size, training_data.cols());
   if (show_optimization_details)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < iter; ++ss)
@@ -188,23 +190,33 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
     {
       for (unsigned int jj = 0; jj < training_params.cols(); ++jj)
         inputs(ii, jj) = training_params(v_sequence[ii], jj);
-      outputs(ii, 0) = training_data(v_sequence[ii], 0);
+      for (unsigned int jj = 0; jj < training_data.cols(); ++jj)
+        outputs(ii, jj) = training_data(v_sequence[ii], jj);
     }
-
-    store_loss = getLossAdam(inputs, outputs);
+    vectorize_out = outputs.transpose().reshaped(_batch_size * outputs.cols(), 1);
+    store_loss = getLoss(inputs, vectorize_out);
     if (show_optimization_details && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
-    grad1 = getGradientAdam(inputs);
-    for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    grad1 = getGradient(inputs, vectorize_out);
+    for (unsigned int ii = 0; ii < _num_tunable_inp + _num_tunable_out; ++ii)
     {
       m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
       v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
       m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
       v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
-      new_val = theta(ii) - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+      // new_val = theta(ii) - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+      if (ii < _num_tunable_inp)
+        new_val = theta(ii) - 1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) + lambda * theta(ii));
+      else
+        new_val = _latent[ii - _num_tunable_inp] -
+                  1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) +
+                         lambda * _latent[ii - _num_tunable_inp]);
       if (new_val < 0.01) // constrain params on the lower side
         new_val = 0.01;
-      theta.set(ii, new_val);
+      if (ii < _num_tunable_inp)
+        theta.set(ii, new_val);
+      else
+        _latent[ii - _num_tunable_inp] = new_val;
     }
     petscVecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
     _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -218,25 +230,29 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
 }
 
 Real
-MultiOutputGaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
+  _output_covariance->computeBCovarianceMatrix(_B, _latent);
+  _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
   setupStoredMatrices(outputs);
   Real log_likelihood = 0;
-  log_likelihood += -(outputs.transpose() * _K_results_solve)(0, 0);
-  log_likelihood += -std::log(_K.determinant());
+  log_likelihood += -(outputs * _kappa_results_solve)(0, 0);
+  log_likelihood += -std::log(std::pow(_K.determinant(), _B.rows()) * std::pow(_B.determinant(), _K.rows()));
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   return log_likelihood;
 }
 
 std::vector<Real>
-MultiOutputGaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
+MultiOutputGaussianProcessHandler::getGradient(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
-  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
+  RealEigenMatrix B_grad(_B.rows(), _B.rows());
+  RealEigenMatrix alpha = _kappa_results_solve * _kappa_results_solve.transpose();
   std::vector<Real> grad_vec;
-  grad_vec.resize(_num_tunable);
+  RealEigenMatrix kappa_grad;
+  grad_vec.resize(_num_tunable_inp + _num_tunable_out);
   int count;
   count = 1;
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
@@ -245,7 +261,8 @@ MultiOutputGaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
     for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
     {
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
-      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
+      _output_covariance->computeFullCovarianceMatrix(kappa_grad, _B, dKdhp);
+      RealEigenMatrix tmp = alpha * kappa_grad - _kappa_cho_decomp.solve(kappa_grad);
       Real grad1 = -tmp.trace() / 2.0;
       if (hyper_param_name.compare("length_factor") == 0)
       {
@@ -255,6 +272,15 @@ MultiOutputGaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
       else
         grad_vec[0] = grad1;
     }
+  }
+  for (unsigned int ii = 0; ii < _num_tunable_out; ++ii)
+  {
+    _output_covariance->computeBGrad(B_grad, _latent, ii);
+    _output_covariance->computeFullCovarianceMatrix(kappa_grad, B_grad, _K);
+    RealEigenMatrix tmp = alpha * kappa_grad - _kappa_cho_decomp.solve(kappa_grad);
+    Real grad1 = -tmp.trace() / 2.0;
+    grad_vec[count] = grad1;
+    ++count;
   }
   return grad_vec;
 }
@@ -316,8 +342,8 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.K(), context);
   dataStore(stream, gp_utils.outputCovarType(), context);
   dataStore(stream, gp_utils.B(), context);
-  dataStore(stream, gp_utils.KResultsSolve(), context);
-  dataStore(stream, gp_utils.KCholeskyDecomp(), context);
+  dataStore(stream, gp_utils.kappaResultsSolve(), context);
+  dataStore(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
 }
@@ -334,8 +360,8 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.K(), context);
   dataLoad(stream, gp_utils.outputCovarType(), context);
   dataLoad(stream, gp_utils.B(), context);
-  dataLoad(stream, gp_utils.KResultsSolve(), context);
-  dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
+  dataLoad(stream, gp_utils.kappaResultsSolve(), context);
+  dataLoad(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }

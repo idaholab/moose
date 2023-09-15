@@ -23,13 +23,12 @@ public:
   /// Generates the full Covariance Matrix given two points in the parameter space
   void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
                                    const RealEigenMatrix & B,
-                                   const RealEigenMatrix & K,
-                                   const RealEigenMatrix & x,
-                                   const RealEigenMatrix & xp,
-                                   const bool is_self_covariance) const override;
+                                   const RealEigenMatrix & K) const override;
 
   /// Compute the gradient of the B matrix
-  void computeBGrad(RealEigenMatrix & BGrad, const std::vector<Real> & latent) const override;
+  void computeBGrad(RealEigenMatrix & BGrad,
+                    const std::vector<Real> & latent,
+                    const unsigned int & index) const override;
 
   /// Setup the number of latent params
   unsigned int setupNumLatent(const unsigned int & num_outputs) const override;

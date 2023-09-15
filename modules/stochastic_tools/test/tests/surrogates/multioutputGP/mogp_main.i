@@ -86,6 +86,7 @@
     response_type = vector_real
     execute_on = initial
     covariance_function = 'covar'
+    output_covariance = 'outcovar'
   []
 []
 
@@ -95,6 +96,12 @@
     signal_variance = 1
     noise_variance = 1e-3
     length_factor = '1.0 1.0 1.0 1.0'         # There needs to be an error check
+  []
+[]
+
+[OutputCovariance]
+  [outcovar]
+    type=IntrinsicCoregionalizationModel
   []
 []
 

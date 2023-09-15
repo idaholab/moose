@@ -120,10 +120,10 @@ public:
                            const bool & verbose);
 
   // Computes the loss function for Adam usage
-  Real getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
   // Computes Gradient of the loss function for Adam usage
-  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs);
+  std::vector<Real> getGradient(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors
@@ -150,16 +150,18 @@ public:
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
   const RealEigenMatrix & getK() const { return _K; }
   const RealEigenMatrix & getB() const { return _B; }
+  const RealEigenMatrix & getKappa() const { return _kappa; }
   const std::vector<Real> & getLatent() const { return _latent; }
-  const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
-  const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
+  const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
+  const Eigen::LLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const OutputCovarianceBase & getOutputCovar() const { return *_output_covariance; }
   const OutputCovarianceBase * getOutputCovarPtr() const { return _output_covariance; }
   const std::string & getCovarType() const { return _covar_type; }
   const std::string & getOutputCovarType() const { return _output_covar_type; }
-  const unsigned int & getNumTunableParams() const { return _num_tunable; }
+  const unsigned int & getNumTunableParamsInp() const { return _num_tunable_inp; }
+  const unsigned int & getNumTunableParamsOut() const { return _num_tunable_out; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
   const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
   {
@@ -176,9 +178,10 @@ public:
   StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
   RealEigenMatrix & B() { return _B; }
+  RealEigenMatrix & kappa() { return _kappa; }
   std::vector<Real> & latent() { return _latent; }
-  RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
-  Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
+  RealEigenMatrix & kappaResultsSolve() { return _kappa_results_solve; }
+  Eigen::LLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   OutputCovarianceBase * outputCovarPtr() { return _output_covariance; }
@@ -206,8 +209,11 @@ protected:
   /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
-  /// Number of tunable hyperparameters
-  unsigned int _num_tunable;
+  /// Number of tunable hyperparameters (input covariance)
+  unsigned int _num_tunable_inp;
+
+  /// Number of tunable hyperparameters (output covariance)
+  unsigned int _num_tunable_out;
 
   /// Type of covariance function used for this surrogate
   std::string _covar_type;
@@ -236,14 +242,17 @@ protected:
   /// An _n_output by _n_output covariance matrix constructed from the selected output kernel
   RealEigenMatrix _B;
 
+  /// An _n_output*_n_sample by _n_output*_n_sample covariance matrix
+  RealEigenMatrix _kappa;
+
   /// A vector of latent params to capture output covariances
   std::vector<Real> _latent;
 
   /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix _K_results_solve;
+  RealEigenMatrix _kappa_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
+  Eigen::LLT<RealEigenMatrix> _kappa_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
   const RealEigenMatrix * _training_params;
