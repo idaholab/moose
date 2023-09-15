@@ -53,7 +53,7 @@ protected:
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;
   /// the gap thickness between the duct and peripheral fuel rods
-  Real _duct_to_rod_gap;
+  Real _duct_to_pin_gap;
   /// whether the side bypass shape follows the hexagonal shape of the assemblies
   /// TODO: add a picture in the documentation of both tight and non-tight layouts
   const bool _tight_side_bypass;
@@ -62,6 +62,8 @@ protected:
   std::vector<std::vector<Node *>> _nodes;
   /// stores the channel pairs for each gap
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  /// stores the fuel pin pairs for each gap each gap
+  std::vector<std::pair<unsigned int, unsigned int>> _gap_to_pin_map;
   /// stores the gaps that forms each interstice
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
   /// Defines the global cross-flow direction -1 or 1 for each interstice and
@@ -74,13 +76,11 @@ protected:
   /// x,y coordinates of the interstices
   std::vector<std::vector<Real>> _subchannel_position;
   /// x,y coordinates of the fuel rods
-  std::vector<Point> _rod_position;
+  std::vector<Point> _pin_position;
   /// fuel rods that are belonging to each ring
-  std::vector<std::vector<Real>> _rods_in_rings;
+  std::vector<std::vector<Real>> _pins_in_rings;
   /// stores the fuel rods belonging to each interstice
-  std::vector<std::vector<unsigned int>> _subchannel_to_rod_map;
-  /// stores the fuel rods belonging to each gap
-  std::vector<std::vector<unsigned int>> _gap_to_rod_map;
+  std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// number of fuel rods
   unsigned int _n_assemblies;
   /// number of gaps

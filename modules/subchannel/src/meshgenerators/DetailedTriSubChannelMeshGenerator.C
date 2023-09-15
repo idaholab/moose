@@ -82,15 +82,15 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   Real dist0 = 0.0;
   // the indicator used while setting _gap_to_chan_map array
   std::vector<std::pair<unsigned int, unsigned int>> gap_fill;
-  TriSubChannelMesh::rodPositions(_rod_position, _n_rings, _pitch, Point(0, 0));
-  _nrods = _rod_position.size();
+  TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
+  _nrods = _pin_position.size();
   // assign the rods to the corresponding rings
   unsigned int k = 0; // initialize the fuel rod counter index
-  _rods_in_rings.resize(_n_rings);
-  _rods_in_rings[0].push_back(k++);
+  _pins_in_rings.resize(_n_rings);
+  _pins_in_rings[0].push_back(k++);
   for (unsigned int i = 1; i < _n_rings; i++)
     for (unsigned int j = 0; j < i * 6; j++)
-      _rods_in_rings[i].push_back(k++);
+      _pins_in_rings[i].push_back(k++);
   //  Given the number of rods and number of fuel rod rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
@@ -101,13 +101,13 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 
   // Utils for building the mesh
-  _subchannel_to_rod_map.resize(_n_channels);
+  _chan_to_pin_map.resize(_n_channels);
   _subch_type.resize(_n_channels);
   _subchannel_position.resize(_n_channels);
 
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    _subchannel_to_rod_map[i].reserve(3);
+    _chan_to_pin_map[i].reserve(3);
     _subchannel_position[i].reserve(3);
     for (unsigned int j = 0; j < 3; j++)
     {
@@ -120,39 +120,39 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   for (unsigned int i = 1; i < _n_rings; i++)
   {
     // find the closest rod at back ring
-    for (unsigned int j = 0; j < _rods_in_rings[i].size(); j++)
+    for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
-      if (j == _rods_in_rings[i].size() - 1)
+      if (j == _pins_in_rings[i].size() - 1)
       {
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][0]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][0]);
         avg_coor_x =
-            0.5 * (_rod_position[_rods_in_rings[i][j]](0) + _rod_position[_rods_in_rings[i][0]](0));
+            0.5 * (_pin_position[_pins_in_rings[i][j]](0) + _pin_position[_pins_in_rings[i][0]](0));
         avg_coor_y =
-            0.5 * (_rod_position[_rods_in_rings[i][j]](1) + _rod_position[_rods_in_rings[i][0]](1));
+            0.5 * (_pin_position[_pins_in_rings[i][j]](1) + _pin_position[_pins_in_rings[i][0]](1));
       }
       else
       {
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j + 1]);
-        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]](0) +
-                            _rod_position[_rods_in_rings[i][j + 1]](0));
-        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]](1) +
-                            _rod_position[_rods_in_rings[i][j + 1]](1));
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j + 1]);
+        avg_coor_x = 0.5 * (_pin_position[_pins_in_rings[i][j]](0) +
+                            _pin_position[_pins_in_rings[i][j + 1]](0));
+        avg_coor_y = 0.5 * (_pin_position[_pins_in_rings[i][j]](1) +
+                            _pin_position[_pins_in_rings[i][j + 1]](1));
       }
 
       dist0 = 1.0e+5;
 
-      _subchannel_to_rod_map[k].push_back(_rods_in_rings[i - 1][0]);
+      _chan_to_pin_map[k].push_back(_pins_in_rings[i - 1][0]);
 
-      for (unsigned int l = 0; l < _rods_in_rings[i - 1].size(); l++)
+      for (unsigned int l = 0; l < _pins_in_rings[i - 1].size(); l++)
       {
-        dist = std::sqrt(pow(_rod_position[_rods_in_rings[i - 1][l]](0) - avg_coor_x, 2) +
-                         pow(_rod_position[_rods_in_rings[i - 1][l]](1) - avg_coor_y, 2));
+        dist = std::sqrt(pow(_pin_position[_pins_in_rings[i - 1][l]](0) - avg_coor_x, 2) +
+                         pow(_pin_position[_pins_in_rings[i - 1][l]](1) - avg_coor_y, 2));
 
         if (dist < dist0)
         {
-          _subchannel_to_rod_map[k][2] = _rods_in_rings[i - 1][l];
+          _chan_to_pin_map[k][2] = _pins_in_rings[i - 1][l];
           dist0 = dist;
         } // if
       }   // l
@@ -165,25 +165,25 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
 
     // find the closest rod at front ring
 
-    for (unsigned int j = 0; j < _rods_in_rings[i].size(); j++)
+    for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
-      if (j == _rods_in_rings[i].size() - 1)
+      if (j == _pins_in_rings[i].size() - 1)
       {
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][0]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][0]);
         avg_coor_x =
-            0.5 * (_rod_position[_rods_in_rings[i][j]](0) + _rod_position[_rods_in_rings[i][0]](0));
+            0.5 * (_pin_position[_pins_in_rings[i][j]](0) + _pin_position[_pins_in_rings[i][0]](0));
         avg_coor_y =
-            0.5 * (_rod_position[_rods_in_rings[i][j]](1) + _rod_position[_rods_in_rings[i][0]](1));
+            0.5 * (_pin_position[_pins_in_rings[i][j]](1) + _pin_position[_pins_in_rings[i][0]](1));
       }
       else
       {
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j + 1]);
-        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]](0) +
-                            _rod_position[_rods_in_rings[i][j + 1]](0));
-        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]](1) +
-                            _rod_position[_rods_in_rings[i][j + 1]](1));
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i][j + 1]);
+        avg_coor_x = 0.5 * (_pin_position[_pins_in_rings[i][j]](0) +
+                            _pin_position[_pins_in_rings[i][j + 1]](0));
+        avg_coor_y = 0.5 * (_pin_position[_pins_in_rings[i][j]](1) +
+                            _pin_position[_pins_in_rings[i][j + 1]](1));
       }
 
       // if the outermost ring, set the edge subchannels first... then the corner subchannels
@@ -197,9 +197,9 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
         {
 
           // corner subchannel
-          _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
+          _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
           // corner subchannel-dummy added to hinder array size violations
-          // _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
+          // _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
           _subch_type[k] = EChannelType::CORNER;
 
           k = k + 1;
@@ -209,14 +209,14 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       else
       {
         dist0 = 1.0e+5;
-        _subchannel_to_rod_map[k].push_back(_rods_in_rings[i + 1][0]);
-        for (unsigned int l = 0; l < _rods_in_rings[i + 1].size(); l++)
+        _chan_to_pin_map[k].push_back(_pins_in_rings[i + 1][0]);
+        for (unsigned int l = 0; l < _pins_in_rings[i + 1].size(); l++)
         {
-          dist = std::sqrt(pow(_rod_position[_rods_in_rings[i + 1][l]](0) - avg_coor_x, 2) +
-                           pow(_rod_position[_rods_in_rings[i + 1][l]](1) - avg_coor_y, 2));
+          dist = std::sqrt(pow(_pin_position[_pins_in_rings[i + 1][l]](0) - avg_coor_x, 2) +
+                           pow(_pin_position[_pins_in_rings[i + 1][l]](1) - avg_coor_y, 2));
           if (dist < dist0)
           {
-            _subchannel_to_rod_map[k][2] = _rods_in_rings[i + 1][l];
+            _chan_to_pin_map[k][2] = _pins_in_rings[i + 1][l];
             dist0 = dist;
           } // if
         }   // l
@@ -229,57 +229,57 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   }     // for i
 
   // set the subchannel positions
-  Real _duct_to_rod_gap =
+  Real _duct_to_pin_gap =
       0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
   for (unsigned int i = 0; i < _n_channels; i++)
   {
     if (_subch_type[i] == EChannelType::CENTER)
     {
-      _subchannel_position[i][0] = (_rod_position[_subchannel_to_rod_map[i][0]](0) +
-                                    _rod_position[_subchannel_to_rod_map[i][1]](0) +
-                                    _rod_position[_subchannel_to_rod_map[i][2]](0)) /
-                                   3.0;
-      _subchannel_position[i][1] = (_rod_position[_subchannel_to_rod_map[i][0]](1) +
-                                    _rod_position[_subchannel_to_rod_map[i][1]](1) +
-                                    _rod_position[_subchannel_to_rod_map[i][2]](1)) /
-                                   3.0;
+      _subchannel_position[i][0] =
+          (_pin_position[_chan_to_pin_map[i][0]](0) + _pin_position[_chan_to_pin_map[i][1]](0) +
+           _pin_position[_chan_to_pin_map[i][2]](0)) /
+          3.0;
+      _subchannel_position[i][1] =
+          (_pin_position[_chan_to_pin_map[i][0]](1) + _pin_position[_chan_to_pin_map[i][1]](1) +
+           _pin_position[_chan_to_pin_map[i][2]](1)) /
+          3.0;
     }
     else if (_subch_type[i] == EChannelType::EDGE)
     {
       for (unsigned int j = 0; j < _n_channels; j++)
       {
         if (_subch_type[j] == EChannelType::CENTER &&
-            ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][0] &&
-              _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][1]) ||
-             (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
-              _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][0])))
+            ((_chan_to_pin_map[i][0] == _chan_to_pin_map[j][0] &&
+              _chan_to_pin_map[i][1] == _chan_to_pin_map[j][1]) ||
+             (_chan_to_pin_map[i][0] == _chan_to_pin_map[j][1] &&
+              _chan_to_pin_map[i][1] == _chan_to_pin_map[j][0])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][2]](0);
-          y0 = _rod_position[_subchannel_to_rod_map[j][2]](1);
+          x0 = _pin_position[_chan_to_pin_map[j][2]](0);
+          y0 = _pin_position[_chan_to_pin_map[j][2]](1);
         }
         else if (_subch_type[j] == EChannelType::CENTER &&
-                 ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][0] &&
-                   _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][2]) ||
-                  (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
-                   _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][0])))
+                 ((_chan_to_pin_map[i][0] == _chan_to_pin_map[j][0] &&
+                   _chan_to_pin_map[i][1] == _chan_to_pin_map[j][2]) ||
+                  (_chan_to_pin_map[i][0] == _chan_to_pin_map[j][2] &&
+                   _chan_to_pin_map[i][1] == _chan_to_pin_map[j][0])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][1]](0);
-          y0 = _rod_position[_subchannel_to_rod_map[j][1]](1);
+          x0 = _pin_position[_chan_to_pin_map[j][1]](0);
+          y0 = _pin_position[_chan_to_pin_map[j][1]](1);
         }
         else if (_subch_type[j] == EChannelType::CENTER &&
-                 ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
-                   _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][2]) ||
-                  (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
-                   _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][1])))
+                 ((_chan_to_pin_map[i][0] == _chan_to_pin_map[j][1] &&
+                   _chan_to_pin_map[i][1] == _chan_to_pin_map[j][2]) ||
+                  (_chan_to_pin_map[i][0] == _chan_to_pin_map[j][2] &&
+                   _chan_to_pin_map[i][1] == _chan_to_pin_map[j][1])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][0]](0);
-          y0 = _rod_position[_subchannel_to_rod_map[j][0]](1);
+          x0 = _pin_position[_chan_to_pin_map[j][0]](0);
+          y0 = _pin_position[_chan_to_pin_map[j][0]](1);
         }
-        x1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](0) +
-                    _rod_position[_subchannel_to_rod_map[i][1]](0));
-        y1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](1) +
-                    _rod_position[_subchannel_to_rod_map[i][1]](1));
-        a1 = _rod_diameter / 2.0 + _duct_to_rod_gap / 2.0;
+        x1 = 0.5 *
+             (_pin_position[_chan_to_pin_map[i][0]](0) + _pin_position[_chan_to_pin_map[i][1]](0));
+        y1 = 0.5 *
+             (_pin_position[_chan_to_pin_map[i][0]](1) + _pin_position[_chan_to_pin_map[i][1]](1));
+        a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -287,11 +287,11 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
     }
     else if (_subch_type[i] == EChannelType::CORNER)
     {
-      x0 = _rod_position[0](0);
-      y0 = _rod_position[0](1);
-      x1 = _rod_position[_subchannel_to_rod_map[i][0]](0);
-      y1 = _rod_position[_subchannel_to_rod_map[i][0]](1);
-      a1 = _rod_diameter / 2.0 + _duct_to_rod_gap / 2.0;
+      x0 = _pin_position[0](0);
+      y0 = _pin_position[0](1);
+      x1 = _pin_position[_chan_to_pin_map[i][0]](0);
+      y1 = _pin_position[_chan_to_pin_map[i][0]](1);
+      a1 = _rod_diameter / 2.0 + _duct_to_pin_gap / 2.0;
       a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -414,17 +414,17 @@ DetailedTriSubChannelMeshGenerator::generate()
   // this detailed mesh with a nearest-neighbor search.
   const Real shrink_factor = 0.99999;
   // Quadrants are used only for the side and corner subchannels
-  Real _duct_to_rod_gap =
+  Real _duct_to_pin_gap =
       0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
   std::array<Point, 2> quadrant_centers_sides;
   quadrant_centers_sides[0] = Point(
-      -_pitch * 0.5 * shrink_factor, -(_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+      -_pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
   quadrant_centers_sides[1] = Point(
-      _pitch * 0.5 * shrink_factor, -(_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+      _pitch * 0.5 * shrink_factor, -(_duct_to_pin_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
   std::array<Point, 1> quadrant_centers_corner;
   quadrant_centers_corner[0] =
-      Point(-(_duct_to_rod_gap + _rod_diameter) * 0.5 * std::sin(libMesh::pi / 6) * shrink_factor,
-            -(_duct_to_rod_gap + _rod_diameter) * 0.5 * std::cos(libMesh::pi / 6) * shrink_factor,
+      Point(-(_duct_to_pin_gap + _rod_diameter) * 0.5 * std::sin(libMesh::pi / 6) * shrink_factor,
+            -(_duct_to_pin_gap + _rod_diameter) * 0.5 * std::cos(libMesh::pi / 6) * shrink_factor,
             0);
   // Triangles are used for all center subchannels
   std::array<Point, 3> triangle_centers;
@@ -477,8 +477,8 @@ DetailedTriSubChannelMeshGenerator::generate()
       auto c_pt = circle_points_triangle[1 * m_quarter - ii];
       corner_points[ii + 1] = quadrant_centers_corner[0] + c_pt;
     }
-    Real side_short = (_duct_to_rod_gap + _rod_diameter) * 0.5;
-    Real side_long = (2.0 * _duct_to_rod_gap + _rod_diameter) * 0.5;
+    Real side_short = (_duct_to_pin_gap + _rod_diameter) * 0.5;
+    Real side_long = (2.0 * _duct_to_pin_gap + _rod_diameter) * 0.5;
     Real side_length = std::sqrt(std::pow(side_short, 2) + std::pow(side_long, 2) -
                                  2 * side_short * side_long * std::cos(libMesh::pi / 6));
     Real angle =
@@ -489,8 +489,8 @@ DetailedTriSubChannelMeshGenerator::generate()
                                                 -side_length * std::sin(angle) * shrink_factor,
                                                 0);
     corner_points[points_per_sixth + 2] =
-        Point(0.5 * _duct_to_rod_gap * shrink_factor * std::tan(libMesh::pi / 6),
-              0.5 * _duct_to_rod_gap * shrink_factor / std::cos(libMesh::pi / 6),
+        Point(0.5 * _duct_to_pin_gap * shrink_factor * std::tan(libMesh::pi / 6),
+              0.5 * _duct_to_pin_gap * shrink_factor / std::cos(libMesh::pi / 6),
               0);
     corner_points[points_per_sixth + 3] =
         Point(-side_length * std::cos(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor,
@@ -518,9 +518,9 @@ DetailedTriSubChannelMeshGenerator::generate()
       side_points[points_per_quadrant + ii + 1] = quadrant_centers_sides[1] + c_pt;
     }
     side_points[2 * points_per_quadrant + 1] =
-        Point(_pitch * 0.5 * shrink_factor, 0.5 * _duct_to_rod_gap * shrink_factor, 0);
+        Point(_pitch * 0.5 * shrink_factor, 0.5 * _duct_to_pin_gap * shrink_factor, 0);
     side_points[2 * points_per_quadrant + 2] =
-        Point(-_pitch * 0.5 * shrink_factor, 0.5 * _duct_to_rod_gap * shrink_factor, 0);
+        Point(-_pitch * 0.5 * shrink_factor, 0.5 * _duct_to_pin_gap * shrink_factor, 0);
   }
 
   int point_counter = 0;

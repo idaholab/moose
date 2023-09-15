@@ -37,7 +37,7 @@ public:
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
 
-  virtual const Real & getDuctToRodGap() const { return _duct_to_rod_gap; }
+  virtual const Real & getDuctToRodGap() const { return _duct_to_pin_gap; }
 
   /**
    * Return the number of rods
@@ -50,7 +50,7 @@ public:
   virtual const unsigned int & getRodIndex(const unsigned int channel_idx,
                                            const unsigned int neighbor_idx)
   {
-    return _subchannel_to_rod_map[channel_idx][neighbor_idx];
+    return _chan_to_pin_map[channel_idx][neighbor_idx];
   }
 
   /**
@@ -70,7 +70,7 @@ public:
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
   virtual const std::pair<unsigned int, unsigned int> &
-  getGapNeighborChannels(unsigned int i_gap) const override
+  getGapChannels(unsigned int i_gap) const override
   {
     return _gap_to_chan_map[i_gap];
   }
@@ -111,7 +111,7 @@ public:
 
   virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const override
   {
-    return _subchannel_to_rod_map[i_chan];
+    return _chan_to_pin_map[i_chan];
   }
 
   virtual unsigned int getPinIndexFromPoint(const Point & p) const override;
@@ -160,7 +160,7 @@ protected:
   /// wire lead length
   Real _hwire;
   /// the gap thickness between the duct and peripheral fuel rods
-  Real _duct_to_rod_gap;
+  Real _duct_to_pin_gap;
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
   /// pin nodes
@@ -178,6 +178,8 @@ protected:
 
   /// stores the channel pairs for each gap
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  /// stores the fuel pins belonging to each gap
+  std::vector<std::pair<unsigned int, unsigned int>> _gap_to_pin_map;
   /// stores the gaps that forms each subchannel
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
   /// Defines the global cross-flow direction -1 or 1 for each subchannel and
@@ -188,13 +190,11 @@ protected:
   /// gap size
   std::vector<Real> _gij_map;
   /// x,y coordinates of the fuel rods
-  std::vector<Point> _rod_position;
+  std::vector<Point> _pin_position;
   /// fuel rods that are belonging to each ring
-  std::vector<std::vector<Real>> _rods_in_rings;
+  std::vector<std::vector<Real>> _pins_in_rings;
   /// stores the fuel rods belonging to each subchannel
-  std::vector<std::vector<unsigned int>> _subchannel_to_rod_map;
-  /// stores the fuel rods belonging to each gap
-  std::vector<std::vector<unsigned int>> _gap_to_rod_map;
+  std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// number of fuel rods
   unsigned int _nrods;
   /// number of gaps

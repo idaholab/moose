@@ -96,7 +96,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeDP(int iblock)
       unsigned int counter = 0;
       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
       {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+        auto chans = _subchannel_mesh.getGapChannels(i_gap);
         unsigned int ii_ch = chans.first;
         unsigned int jj_ch = chans.second;
         auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
@@ -393,7 +393,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeh(int iblock)
       unsigned int counter = 0;
       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
       {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+        auto chans = _subchannel_mesh.getGapChannels(i_gap);
         unsigned int ii_ch = chans.first;
         // i is always the smallest and first index in the mapping
         unsigned int jj_ch = chans.second;

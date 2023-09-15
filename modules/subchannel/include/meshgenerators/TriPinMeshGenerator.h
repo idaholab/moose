@@ -49,7 +49,7 @@ protected:
   /// block index
   unsigned int _block_id;
   /// x-y positions of the fuel rods
-  std::vector<Point> _rod_position;
+  std::vector<Point> _pin_position;
 
 public:
   static InputParameters validParams();

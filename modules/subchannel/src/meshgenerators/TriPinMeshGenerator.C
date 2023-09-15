@@ -85,8 +85,8 @@ TriPinMeshGenerator::generate()
   mesh_base->set_mesh_dimension(3);
 
   // Defining the rod positions
-  TriSubChannelMesh::rodPositions(_rod_position, _n_rings, _pitch, Point(0, 0));
-  auto _nrods = _rod_position.size();
+  TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
+  auto _nrods = _pin_position.size();
 
   // Reserving memory in the mesh
   mesh_base->reserve_elem(_n_cells * _nrods);
@@ -113,7 +113,7 @@ TriPinMeshGenerator::generate()
     for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
     {
       _pin_nodes[i].push_back(mesh_base->add_point(
-          Point(_rod_position[i](0), _rod_position[i](1), _z_grid[iz]), node_id++));
+          Point(_pin_position[i](0), _pin_position[i](1), _z_grid[iz]), node_id++));
     }
   }
 
