@@ -99,8 +99,8 @@ SlipWeakeningFriction2d::computeInterfaceTractionAndDerivatives()
   RealVectorValue R_minus_local = _rot[_qp].transpose() * R_minus_global;
 
   // t is along tangential direction, n is along normal direction
-  Real R_plus_local_n  = R_plus_local(0);
-  Real R_plus_local_t  = R_plus_local(1);
+  Real R_plus_local_n = R_plus_local(0);
+  Real R_plus_local_t = R_plus_local(1);
   Real R_minus_local_n = R_minus_local(0);
   Real R_minus_local_t = R_minus_local(1);
 
@@ -120,12 +120,19 @@ SlipWeakeningFriction2d::computeInterfaceTractionAndDerivatives()
       ((R_minus_local_n - R_plus_local_n) / (2 * _len)) - T2_o;
 
   // Compute fault traction
-  if (T2 < 0){}else{T2 = 0;}
+  if (T2 < 0)
+  {
+  }
+  else
+  {
+    T2 = 0;
+  }
 
   // Compute friction strength
   if (std::abs(displacement_jump_t) < _Dc)
   {
-    tau_f = (_mu_s[_qp] - (_mu_s[_qp] - _mu_d) * std::abs(displacement_jump_t) / _Dc) * (-T2); // square for shear component
+    tau_f = (_mu_s[_qp] - (_mu_s[_qp] - _mu_d) * std::abs(displacement_jump_t) / _Dc) *
+            (-T2); // square for shear component
   }
   else
   {
@@ -133,14 +140,16 @@ SlipWeakeningFriction2d::computeInterfaceTractionAndDerivatives()
   }
 
   // Compute fault traction
-  if (std::abs(T1) < tau_f){}
+  if (std::abs(T1) < tau_f)
+  {
+  }
   else
   {
     T1 = tau_f * T1 / std::abs(T1);
   }
 
   // Assign back traction in CZM
-  RealVectorValue traction(T2+T2_o,-T1+T1_o,0);
+  RealVectorValue traction(T2 + T2_o, -T1 + T1_o, 0);
   _interface_traction[_qp] = traction;
   _dinterface_traction_djump[_qp] = 0;
 }

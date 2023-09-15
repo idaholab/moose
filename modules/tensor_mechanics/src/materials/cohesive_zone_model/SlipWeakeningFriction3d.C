@@ -21,11 +21,11 @@ SlipWeakeningFriction3d::validParams()
 {
   InputParameters params = CZMComputeLocalTractionTotalBase::validParams();
   params.addClassDescription("linear slip weakening traction separation law.");
-  params.addRequiredParam<Real>("T2_o","background normal traction");
-  params.addRequiredParam<Real>("T3_o","background shear traction in dip dir");
-  params.addRequiredParam<Real>("mu_d","value of dynamic friction parameter");
-  params.addRequiredParam<Real>("Dc","value of characteristic length");
-  params.addRequiredParam<Real>("len","element edge length");
+  params.addRequiredParam<Real>("T2_o", "background normal traction");
+  params.addRequiredParam<Real>("T3_o", "background shear traction in dip dir");
+  params.addRequiredParam<Real>("mu_d", "value of dynamic friction parameter");
+  params.addRequiredParam<Real>("Dc", "value of characteristic length");
+  params.addRequiredParam<Real>("len", "element edge length");
   params.addRequiredCoupledVar("disp_slipweakening_x", "displacement in x dir");
   params.addRequiredCoupledVar("disp_slipweakening_y", "displacement in y dir");
   params.addRequiredCoupledVar("disp_slipweakening_z", "displacement in z dir");
@@ -92,7 +92,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
   RealVectorValue displacement_jump = _rot[_qp].transpose() * displacement_jump_global;
   RealVectorValue displacement_jump_rate = _rot[_qp].transpose() * displacement_jump_rate_global;
 
-  //n is along normal direction; t is along tangential direction; d is along dip direction
+  // n is along normal direction; t is along tangential direction; d is along dip direction
   Real displacement_jump_n = displacement_jump(0);
   Real displacement_jump_rate_n = displacement_jump_rate(0);
   Real displacement_jump_rate_t = displacement_jump_rate(1);
@@ -112,7 +112,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
   RealVectorValue R_plus_local = _rot[_qp].transpose() * R_plus_global;
   RealVectorValue R_minus_local = _rot[_qp].transpose() * R_minus_global;
 
-  //n is along normal direction; t is along tangential direction; d is along dip direction
+  // n is along normal direction; t is along tangential direction; d is along dip direction
   Real R_plus_local_n = R_plus_local(0);
   Real R_plus_local_t = R_plus_local(1);
   Real R_plus_local_d = R_plus_local(2);
@@ -138,7 +138,13 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
             ((R_minus_local_n - R_plus_local_n) / (2 * _len * _len)) - T2_o;
 
   // Compute fault traction
-  if (T2 < 0){}else{T2 = 0;}
+  if (T2 < 0)
+  {
+  }
+  else
+  {
+    T2 = 0;
+  }
 
   // Compute friction strength
   if (std::norm(displacement_jump) < _Dc)
@@ -152,7 +158,9 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
   }
 
   // Compute fault traction
-  if (std::sqrt(T1 * T1 + T3 * T3) < tau_f){}
+  if (std::sqrt(T1 * T1 + T3 * T3) < tau_f)
+  {
+  }
   else
   {
     T1 = tau_f * T1 / std::sqrt(T1 * T1 + T3 * T3);
@@ -160,7 +168,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
   }
 
   // Assign back traction in CZM
-  RealVectorValue traction(T2+T2_o,-T1+T1_o,-T3+T3_o);
+  RealVectorValue traction(T2 + T2_o, -T1 + T1_o, -T3 + T3_o);
   _interface_traction[_qp] = traction;
   _dinterface_traction_djump[_qp] = 0;
 }
