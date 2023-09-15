@@ -389,6 +389,28 @@ euclideanMod(T1 dividend, T2 divisor)
   return (dividend % divisor + divisor) % divisor;
 }
 
+/**
+ * automatic prefixing for naming material properties based on gradients of coupled
+ * variables/functors
+ */
+template <typename T>
+T
+gradName(const T & base_prop_name)
+{
+  return "grad_" + base_prop_name;
+}
+
+/**
+ * automatic prefixing for naming material properties based on time derivatives of coupled
+ * variables/functors
+ */
+template <typename T>
+T
+timeDerivName(const T & base_prop_name)
+{
+  return "d" + base_prop_name + "_dt";
+}
+
 } // namespace MathUtils
 
 /// A helper function for MathUtils::multiIndex

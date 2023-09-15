@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include "MathUtils.h"
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
 #include "HeatConductionNames.h"
@@ -86,13 +87,13 @@ static const std::string fluid = "fp";
 inline std::string
 grad(const std::string & var)
 {
-  return "grad_" + var;
+  return MathUtils::gradName(var);
 }
 // for Navier-Stokes material props representing time derivatives of nonlin+aux vars
 inline std::string
 time_deriv(const std::string & var)
 {
-  return "d" + var + "_dt";
+  return MathUtils::timeDerivName(var);
 }
 
 // Navier-Stokes Variables
