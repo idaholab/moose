@@ -254,16 +254,19 @@ sb=5.67e-8
     type = AriaLaserWeld304LStainlessSteel
     temperature = T
     beta = 1e7
+    use_displaced_mesh = true
   []
   [steel_boundary]
     type = AriaLaserWeld304LStainlessSteelBoundary
     boundary = 'front'
     temperature = T
+    use_displaced_mesh = true
   []
   [const]
     type = GenericConstantMaterial
     prop_names = 'abs sb_constant'
     prop_values = '1 ${sb}'
+    use_displaced_mesh = true
   []
 []
 
