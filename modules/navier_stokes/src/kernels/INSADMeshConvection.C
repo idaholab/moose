@@ -13,14 +13,22 @@
 registerMooseObject("NavierStokesApp", INSADMeshConvection);
 
 InputParameters
-INSADMeshConvection::validParams()
+INSADMeshConvection::displacementParams()
 {
-  InputParameters params = ADVectorKernelValue::validParams();
-  params.addClassDescription(
-      "Corrects the convective derivative for situations in which the fluid mesh is dynamic.");
+  auto params = emptyInputParameters();
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  return params;
+}
+
+InputParameters
+INSADMeshConvection::validParams()
+{
+  InputParameters params = ADVectorKernelValue::validParams();
+  params += INSADMeshConvection::displacementParams();
+  params.addClassDescription(
+      "Corrects the convective derivative for situations in which the fluid mesh is dynamic.");
   return params;
 }
 
@@ -29,32 +37,7 @@ INSADMeshConvection::INSADMeshConvection(const InputParameters & parameters)
     _convected_mesh_strong_residual(
         getADMaterialProperty<RealVectorValue>("convected_mesh_strong_residual"))
 {
-  auto check_coupled = [&](const auto & var_name)
-  {
-    if (coupledComponents(var_name) > 1)
-      paramError(var_name, "Only one variable should be used for '", var_name, "'");
-    if (isCoupledConstant(var_name))
-      paramError(var_name, "Displacement variables cannot be constants");
-  };
-  check_coupled("disp_x");
-  check_coupled("disp_y");
-  check_coupled("disp_z");
-
-  if (_tid == 0)
-  {
-    // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
-    // don't need
-    auto & obj_tracker = _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker");
-    for (const auto block_id : blockIDs())
-    {
-      obj_tracker.set("has_convected_mesh", true, block_id);
-      obj_tracker.set("disp_x", coupledName("disp_x"), block_id);
-      if (isParamValid("disp_y"))
-        obj_tracker.set("disp_y", coupledName("disp_y"), block_id);
-      if (isParamValid("disp_z"))
-        obj_tracker.set("disp_z", coupledName("disp_z"), block_id);
-    }
-  }
+  setDisplacementParams(*this);
 }
 
 ADRealVectorValue

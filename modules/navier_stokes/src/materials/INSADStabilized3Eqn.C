@@ -68,4 +68,7 @@ INSADStabilized3Eqn::computeQpProperties()
 
   if (_has_heat_source)
     _temperature_strong_residual[_qp] += _temperature_source_strong_residual[_qp];
+
+  if (_has_convected_mesh)
+    _temperature_strong_residual[_qp] += _temperature_convected_mesh_strong_residual[_qp];
 }
