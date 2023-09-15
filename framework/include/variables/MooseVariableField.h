@@ -374,6 +374,11 @@ protected:
   using ElemPointArg = Moose::ElemPointArg;
   using StateArg = Moose::StateArg;
 
+  /**
+   * Get the solution corresponding to the provided state
+   */
+  const NumericVector<Number> & getSolution(const StateArg & state) const;
+
   ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,
                      const StateArg & state) const override final;

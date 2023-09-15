@@ -831,6 +831,43 @@ MooseVariableFE<OutputType>::clearAllDofIndices()
   _lower_data->clearDofIndices();
 }
 
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::ValueType
+MooseVariableFE<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
+{
+  mooseAssert(node_arg.node, "Must have a node");
+  mooseAssert(this->hasBlocks(node_arg.subdomain_id),
+              "Our variable should be defined on the requested subdomain ID");
+  const Node & node = *node_arg.node;
+  mooseAssert(node.n_dofs(this->_sys.number(), this->number()),
+              "Our variable must have dofs on the requested node");
+  const auto & soln = this->getSolution(state);
+  if constexpr (std::is_same<OutputType, Real>::value)
+  {
+    const auto dof_number = node.dof_number(this->_sys.number(), this->number(), 0);
+    ValueType ret = soln(dof_number);
+    if (Moose::doDerivatives(_subproblem, _sys))
+      Moose::derivInsert(ret.derivatives(), dof_number, 1);
+    return ret;
+  }
+  else if constexpr (std::is_same<OutputType, RealVectorValue>::value)
+  {
+    ValueType ret;
+    const auto do_derivatives = Moose::doDerivatives(_subproblem, _sys);
+    for (const auto d : make_range(_mesh.dimension()))
+    {
+      const auto dof_number = node.dof_number(this->_sys.number(), this->number(), d);
+      auto & component = ret(d);
+      component = soln(dof_number);
+      if (do_derivatives)
+        Moose::derivInsert(component.derivatives(), dof_number, 1);
+    }
+    return ret;
+  }
+  else
+    mooseError("RealEigenVector not yet supported for functors");
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
 template class MooseVariableFE<RealEigenVector>;
