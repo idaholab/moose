@@ -114,6 +114,12 @@ public:
    */
   void pullAllNonlocal() { _pull_all_nonlocal = true; }
 
+  /**
+   * Whether central differencing face interpolations of velocity should include a skewness
+   * correction
+   */
+  bool velocitySkewCorrection(THREAD_ID tid) const;
+
 protected:
   /**
    * A virtual method that allows us to only implement getVelocity once for free and porous flows
@@ -273,4 +279,11 @@ inline bool
 INSFVRhieChowInterpolator::needAComputation() const
 {
   return !_a_data_provided && _velocity_interp_method == Moose::FV::InterpMethod::RhieChow;
+}
+
+inline bool
+INSFVRhieChowInterpolator::velocitySkewCorrection(const THREAD_ID tid) const
+{
+  const auto * const u = _us[tid];
+  return (u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 }

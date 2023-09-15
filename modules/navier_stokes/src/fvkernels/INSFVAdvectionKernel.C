@@ -22,6 +22,7 @@ INSFVAdvectionKernel::validParams()
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<MooseFunctorName>("mesh_velocity", "The mesh velocity in an ALE simulation");
 
   // We currently do not have a need for this, boundary conditions tell us where to execute
   // advection kernels
@@ -32,7 +33,9 @@ INSFVAdvectionKernel::validParams()
 
 INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   : FVFluxKernel(params),
-    _rc_vel_provider(getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object"))
+    _rc_vel_provider(getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object")),
+    _mesh_velocity(isParamValid("mesh_velocity") ? &getFunctor<ADRealVectorValue>("mesh_velocity")
+                                                 : nullptr)
 {
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
@@ -98,4 +101,20 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
   // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
   // should not contribute any advective flux
   return true;
+}
+
+ADRealVectorValue
+INSFVAdvectionKernel::velocity(const bool on_boundary) const
+{
+  const auto state = determineState();
+  auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, state, _tid);
+  if (_mesh_velocity && hasMaterialTimeDerivative())
+  {
+    if (on_boundary)
+      v_face -= (*_mesh_velocity)(singleSidedFaceArg(), state);
+    else
+      v_face -= (*_mesh_velocity)(
+          makeCDFace(*_face_info, _rc_vel_provider.velocitySkewCorrection(_tid)), state);
+  }
+  return v_face;
 }

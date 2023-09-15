@@ -26,6 +26,18 @@ public:
 protected:
   bool skipForBoundary(const FaceInfo & fi) const override;
 
+  /**
+   * @returns whether the equation this object adds to has a material time derivative. An instance
+   * when this will be false is the mass equation for incompressible flows
+   */
+  virtual bool hasMaterialTimeDerivative() const = 0;
+
+  /**
+   * @returns the advecting velocity
+   */
+  ADRealVectorValue velocity(bool on_boundary) const;
+  ADRealVectorValue velocity() const;
+
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 
@@ -34,4 +46,13 @@ protected:
 
   /// The Rhie-Chow user object that provides us with the velocity
   const INSFVRhieChowInterpolator & _rc_vel_provider;
+
+  /// Optional mesh velocity
+  const Moose::Functor<ADRealVectorValue> * const _mesh_velocity;
 };
+
+inline ADRealVectorValue
+INSFVAdvectionKernel::velocity() const
+{
+  return velocity(onBoundary(*_face_info));
+}

@@ -22,7 +22,8 @@ public:
   INSFVEnergyAdvection(const InputParameters & params);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
+  virtual bool hasMaterialTimeDerivative() const { return true; }
 
   /// The advected heat quantity
   const Moose::Functor<ADReal> & _adv_quant;

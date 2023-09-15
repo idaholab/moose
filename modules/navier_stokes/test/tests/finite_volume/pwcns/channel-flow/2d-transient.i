@@ -88,7 +88,7 @@ velocity_interp_method = 'rc'
     drho_dt = 'drho_dt'
   []
   [mass]
-    type = PINSFVMassAdvection
+    type = PWCNSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}

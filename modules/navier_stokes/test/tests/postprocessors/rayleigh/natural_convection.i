@@ -51,7 +51,7 @@ l = 4
     drho_dt = drho_dt
   []
   [mass]
-    type = INSFVMassAdvection
+    type = WCNSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}

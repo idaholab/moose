@@ -582,8 +582,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   MooseVariableFVReal * const w = _w ? _ws[tid] : nullptr;
 
   // Check if skewness-correction is necessary
-  const bool correct_skewness =
-      (u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+  const bool correct_skewness = velocitySkewCorrection(tid);
 
   if (Moose::FV::onBoundary(*this, fi))
   {

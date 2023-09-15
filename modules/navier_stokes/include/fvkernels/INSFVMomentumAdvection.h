@@ -43,7 +43,8 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
+  virtual bool hasMaterialTimeDerivative() const { return true; }
 
   /**
    * A virtual method that allows us to reuse all the code from free-flow for porous

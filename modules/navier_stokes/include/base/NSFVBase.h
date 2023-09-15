@@ -1603,13 +1603,16 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::addINSMassKernels()
 {
-  std::string kernel_type = "INSFVMassAdvection";
+  std::string kernel_type =
+      (_compressibility == "incompressible") ? "INSFVMassAdvection" : "WCNSFVMassAdvection";
+  ;
   std::string kernel_name = prefix() + "ins_mass_advection";
   std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
 
   if (_porous_medium_treatment)
   {
-    kernel_type = "PINSFVMassAdvection";
+    kernel_type =
+        (_compressibility == "incompressible") ? "PINSFVMassAdvection" : "PWCNSFVMassAdvection";
     kernel_name = prefix() + "pins_mass_advection";
     rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
   }
