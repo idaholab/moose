@@ -48,7 +48,7 @@ public:
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return false; }
   virtual const std::pair<unsigned int, unsigned int> &
-  getGapNeighborChannels(unsigned int i_gap) const override
+  getGapChannels(unsigned int i_gap) const override
   {
     return _gap_to_chan_map[i_gap];
   }

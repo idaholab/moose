@@ -39,19 +39,19 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _flat_to_flat(other_mesh._flat_to_flat),
     _dwire(other_mesh._dwire),
     _hwire(other_mesh._hwire),
-    _duct_to_rod_gap(other_mesh._duct_to_rod_gap),
+    _duct_to_pin_gap(other_mesh._duct_to_pin_gap),
     _nodes(other_mesh._nodes),
     _duct_nodes(other_mesh._duct_nodes),
     _chan_to_duct_node_map(other_mesh._chan_to_duct_node_map),
     _duct_node_to_chan_map(other_mesh._duct_node_to_chan_map),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
+    _gap_to_pin_map(other_mesh._gap_to_pin_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
     _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
     _gij_map(other_mesh._gij_map),
-    _rod_position(other_mesh._rod_position),
-    _rods_in_rings(other_mesh._rods_in_rings),
-    _subchannel_to_rod_map(other_mesh._subchannel_to_rod_map),
-    _gap_to_rod_map(other_mesh._gap_to_rod_map),
+    _pin_position(other_mesh._pin_position),
+    _pins_in_rings(other_mesh._pins_in_rings),
+    _chan_to_pin_map(other_mesh._chan_to_pin_map),
     _nrods(other_mesh._nrods),
     _n_gaps(other_mesh._n_gaps),
     _subch_type(other_mesh._subch_type),
@@ -93,7 +93,7 @@ TriSubChannelMesh::channelIndex(const Point & p) const
 
   // Projecting point into hexahedral coordinated to determine if the point belongs to a center
   // subchannel
-  Real distance_outer_ring = _flat_to_flat / 2 - _duct_to_rod_gap - _rod_diameter / 2;
+  Real distance_outer_ring = _flat_to_flat / 2 - _duct_to_pin_gap - _rod_diameter / 2;
   Real channel_distance = std::sqrt(std::pow(p(0), 2) + std::pow(p(1), 2));
   Real angle = std::abs(std::atan(p(1) / p(0)));
   Real projection_angle =

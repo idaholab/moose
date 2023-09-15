@@ -718,7 +718,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
           unsigned int ii_ch = chans.first;
           unsigned int jj_ch = chans.second;
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
@@ -899,7 +899,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         unsigned int cross_index = iz; // iz-1;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
           unsigned int ii_ch = chans.first;
           unsigned int jj_ch = chans.second;
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
@@ -1489,7 +1489,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
       for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
       {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+        auto chans = _subchannel_mesh.getGapChannels(i_gap);
         unsigned int i_ch = chans.first;
         unsigned int j_ch = chans.second;
         auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -1551,7 +1551,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
       auto iz_ind = iz - first_node - 1;
       for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
       {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+        auto chans = _subchannel_mesh.getGapChannels(i_gap);
         unsigned int i_ch = chans.first;
         unsigned int j_ch = chans.second;
         auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -2199,7 +2199,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
           unsigned int i_ch_loc = chans.first;
           PetscInt row_vec = i_ch_loc + _n_channels * iz_ind;
           PetscScalar loc_Wij_value;

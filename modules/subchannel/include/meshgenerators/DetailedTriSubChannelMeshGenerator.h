@@ -30,9 +30,9 @@ protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
   Point rotatePoint(Point b, Real theta);
   Point translatePoint(Point b, Point translation_vector);
-  Point getRodPosition(unsigned int i) { return _rod_position[i]; }
+  Point getRodPosition(unsigned int i) { return _pin_position[i]; }
   std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
-  std::vector<unsigned int> getSubChannelRods(unsigned int i) { return _subchannel_to_rod_map[i]; }
+  std::vector<unsigned int> getSubChannelRods(unsigned int i) { return _chan_to_pin_map[i]; }
 
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;
@@ -53,7 +53,7 @@ protected:
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the fuel rods
-  std::vector<Point> _rod_position;
+  std::vector<Point> _pin_position;
   /// x,y coordinates of the subchannels
   std::vector<std::vector<Real>> _subchannel_position;
   /// Subdomain ID used for the mesh block
@@ -63,13 +63,13 @@ protected:
   /// Number of rods
   unsigned int _nrods;
   /// fuel rods that are belonging to each ring
-  std::vector<std::vector<Real>> _rods_in_rings;
+  std::vector<std::vector<Real>> _pins_in_rings;
   /// map inner and outer rings
   std::map<unsigned int, Real> _orientation_map;
   /// number of subchannels
   unsigned int _n_channels;
   /// stores the fuel rods belonging to each subchannel
-  std::vector<std::vector<unsigned int>> _subchannel_to_rod_map;
+  std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   /// Flag to print out the detailed mesh assembly and coordinates
   bool _verbose;
 

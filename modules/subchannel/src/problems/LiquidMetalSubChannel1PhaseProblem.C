@@ -353,7 +353,7 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
     auto dz = z_grid[iz] - z_grid[iz - 1];
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
-      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      auto chans = _subchannel_mesh.getGapChannels(i_gap);
       unsigned int i_ch = chans.first;
       unsigned int j_ch = chans.second;
       auto subch_type1 = _subchannel_mesh.getSubchannelType(i_ch);
@@ -655,7 +655,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
           unsigned int ii_ch = chans.first;
           // i is always the smallest and first index in the mapping
           unsigned int jj_ch = chans.second;
@@ -994,7 +994,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         // Real radial_heat_conduction(0.0);
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
           unsigned int ii_ch = chans.first;
           unsigned int jj_ch = chans.second;
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
