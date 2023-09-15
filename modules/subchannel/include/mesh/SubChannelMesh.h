@@ -121,6 +121,11 @@ public:
   getGapChannels(unsigned int i_gap) const = 0;
 
   /**
+   * Return a pair of pin indices for a given gap index
+   */
+  virtual const std::pair<unsigned int, unsigned int> & getGapPins(unsigned int i_gap) const = 0;
+
+  /**
    * Return a vector of gap indices for a given channel index
    */
   virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const = 0;
