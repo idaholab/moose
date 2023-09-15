@@ -14,7 +14,7 @@
 /**
  * Subtracts the mesh velocity from the convection term in the Navier-Stokes momentum equation
  */
-class INSADMeshConvection : public ADVectorKernelValue
+class INSADMomentumMeshAdvection : public ADVectorKernelValue
 {
 public:
   static InputParameters validParams();
@@ -22,7 +22,7 @@ public:
   template <typename T>
   static void setDisplacementParams(T & mesh_convection_obj);
 
-  INSADMeshConvection(const InputParameters & parameters);
+  INSADMomentumMeshAdvection(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
@@ -34,7 +34,7 @@ protected:
 
 template <typename T>
 void
-INSADMeshConvection::setDisplacementParams(T & mesh_convection_obj)
+INSADMomentumMeshAdvection::setDisplacementParams(T & mesh_convection_obj)
 {
   auto check_coupled = [&](const auto & var_name)
   {

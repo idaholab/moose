@@ -82,7 +82,7 @@ sb=5.67e-8
     use_displaced_mesh = true
   []
   [momentum_mesh_convection]
-    type = INSADMeshConvection
+    type = INSADMomentumMeshAdvection
     variable = vel
     disp_x = disp_x
     disp_y = disp_y

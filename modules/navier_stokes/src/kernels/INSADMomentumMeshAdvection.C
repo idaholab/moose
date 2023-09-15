@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADMeshConvection.h"
+#include "INSADMomentumMeshAdvection.h"
 #include "INSADObjectTracker.h"
 
-registerMooseObject("NavierStokesApp", INSADMeshConvection);
+registerMooseObject("NavierStokesApp", INSADMomentumMeshAdvection);
 
 InputParameters
-INSADMeshConvection::displacementParams()
+INSADMomentumMeshAdvection::displacementParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredCoupledVar("disp_x", "The x displacement");
@@ -23,16 +23,16 @@ INSADMeshConvection::displacementParams()
 }
 
 InputParameters
-INSADMeshConvection::validParams()
+INSADMomentumMeshAdvection::validParams()
 {
   InputParameters params = ADVectorKernelValue::validParams();
-  params += INSADMeshConvection::displacementParams();
+  params += INSADMomentumMeshAdvection::displacementParams();
   params.addClassDescription(
       "Corrects the convective derivative for situations in which the fluid mesh is dynamic.");
   return params;
 }
 
-INSADMeshConvection::INSADMeshConvection(const InputParameters & parameters)
+INSADMomentumMeshAdvection::INSADMomentumMeshAdvection(const InputParameters & parameters)
   : ADVectorKernelValue(parameters),
     _convected_mesh_strong_residual(
         getADMaterialProperty<RealVectorValue>("convected_mesh_strong_residual"))
@@ -41,7 +41,7 @@ INSADMeshConvection::INSADMeshConvection(const InputParameters & parameters)
 }
 
 ADRealVectorValue
-INSADMeshConvection::precomputeQpResidual()
+INSADMomentumMeshAdvection::precomputeQpResidual()
 {
   return _convected_mesh_strong_residual[_qp];
 }

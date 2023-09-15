@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSADEnergyMeshConvection.h"
-#include "INSADMeshConvection.h"
+#include "INSADMomentumMeshAdvection.h"
 
 registerMooseObject("NavierStokesApp", INSADEnergyMeshConvection);
 
@@ -16,7 +16,7 @@ InputParameters
 INSADEnergyMeshConvection::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
-  params += INSADMeshConvection::displacementParams();
+  params += INSADMomentumMeshAdvection::displacementParams();
   params.addClassDescription("This class computes the residual and Jacobian contributions for "
                              "temperature advection from mesh velocity in an ALE simulation.");
   return params;
@@ -27,7 +27,7 @@ INSADEnergyMeshConvection::INSADEnergyMeshConvection(const InputParameters & par
     _temperature_convected_mesh_strong_residual(
         getADMaterialProperty<Real>("temperature_convected_mesh_strong_residual"))
 {
-  INSADMeshConvection::setDisplacementParams(*this);
+  INSADMomentumMeshAdvection::setDisplacementParams(*this);
 }
 
 ADReal
