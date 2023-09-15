@@ -76,17 +76,17 @@ sb=5.67e-8
     variable = vel
     use_displaced_mesh = true
   []
-  [mesh]
+  [momentum_convection]
+    type = INSADMomentumAdvection
+    variable = vel
+    use_displaced_mesh = true
+  []
+  [momentum_mesh_convection]
     type = INSADMeshConvection
     variable = vel
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    use_displaced_mesh = true
-  []
-  [momentum_convection]
-    type = INSADMomentumAdvection
-    variable = vel
     use_displaced_mesh = true
   []
   [momentum_viscous]
@@ -107,14 +107,22 @@ sb=5.67e-8
     velocity = vel
     use_displaced_mesh = true
   []
-  [temperature_advection]
+  [temperature_time]
+    type = INSADHeatConductionTimeDerivative
+    variable = T
+    use_displaced_mesh = true
+  []
+  [temperature_convection]
     type = INSADEnergyAdvection
     variable = T
     use_displaced_mesh = true
   []
-  [temperature_time]
-    type = INSADHeatConductionTimeDerivative
+  [temperature_mesh_convection]
+    type = INSADEnergyMeshConvection
     variable = T
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     use_displaced_mesh = true
   []
   [temperature_conduction]
