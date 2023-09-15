@@ -4,17 +4,18 @@
 Upcoming MOOSE related training:
 !style-end!
 
-- [MOOSE Framework (2023 Sept 12-14, Georgia Tech)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
-
-  - [Details, Agenda](more_detail/2023_09_12-14_georgia_tech.md)
-
 - [Modeling and Simulation of Advanced Reactors (2023 Oct 23-26, Idaho Falls)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
   - [Details](more_detail/2023_10_23-26_idaho_falls.md)
   - *Invitation Only*
 
+- [MOOSE Training (2024 April 2-4, Oregon State University)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+
+  - [Details](more_detail/2024_04_02-04_OSU.md)
 
 Past Training:
+
+- MOOSE Framework (2023 Sept 12-14, Georgia Tech)
 
 - MOOSE Framework (2023 June 6-8, Idaho Falls & Virtual)
 
