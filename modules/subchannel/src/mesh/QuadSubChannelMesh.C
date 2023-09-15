@@ -46,6 +46,7 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _nodes(other_mesh._nodes),
     _gapnodes(other_mesh._gapnodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
+    _gap_to_pin_map(other_mesh._gap_to_pin_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
     _chan_to_pin_map(other_mesh._chan_to_pin_map),
     _pin_to_chan_map(other_mesh._pin_to_chan_map),

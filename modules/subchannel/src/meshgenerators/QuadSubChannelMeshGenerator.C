@@ -176,6 +176,7 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
 
   // Defining the size of the maps
   _gap_to_chan_map.resize(_n_gaps);
+  _gap_to_pin_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
   _chan_to_pin_map.resize(_n_channels);
@@ -351,6 +352,35 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     }
   }
 
+  // Make gap to pin map
+  for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+  {
+    auto i_ch = _gap_to_chan_map[i_gap].first;
+    auto j_ch = _gap_to_chan_map[i_gap].second;
+    auto i_pins = _chan_to_pin_map[i_ch];
+    auto j_pins = _chan_to_pin_map[j_ch];
+    _gap_to_pin_map[i_gap] = {10000, 10000}; // Initialize with default values
+
+    for (unsigned int i : i_pins)
+    {
+      for (unsigned int j : j_pins)
+      {
+        if (i == j)
+        {
+          if (_gap_to_pin_map[i_gap].first == 10000)
+          {
+            _gap_to_pin_map[i_gap].first = i;
+          }
+          else
+          {
+            _gap_to_pin_map[i_gap].second = i; // We found the common index (or a duplicate)
+          }
+          break;
+        }
+      }
+    }
+  }
+
   // Reduce reserved memory in the channel-to-gap map.
   for (auto & gap : _chan_to_gap_map)
     gap.shrink_to_fit();
@@ -453,6 +483,7 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh->_nodes = _nodes;
   sch_mesh->_gapnodes = _gapnodes;
   sch_mesh->_gap_to_chan_map = _gap_to_chan_map;
+  sch_mesh->_gap_to_pin_map = _gap_to_pin_map;
   sch_mesh->_chan_to_gap_map = _chan_to_gap_map;
   sch_mesh->_chan_to_pin_map = _chan_to_pin_map;
   sch_mesh->_pin_to_chan_map = _pin_to_chan_map;

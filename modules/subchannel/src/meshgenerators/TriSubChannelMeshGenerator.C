@@ -206,13 +206,13 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   _subch_type.resize(_n_channels);
   _n_gaps = _n_channels + _nrods - 1; /// initial assignment
   _gap_to_chan_map.resize(_n_gaps);
+  _gap_to_pin_map.resize(_n_gaps);
   gap_fill.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
   _gap_pairs_sf.resize(_n_channels);
   _chan_pairs_sf.resize(_n_channels);
   _gij_map.resize(_n_gaps);
   _sign_id_crossflow_map.resize(_n_channels);
-  _gap_to_pin_map.resize(_n_gaps);
   _gap_type.resize(_n_gaps);
   _subchannel_position.resize(_n_channels);
 

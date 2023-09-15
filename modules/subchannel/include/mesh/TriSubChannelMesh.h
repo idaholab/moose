@@ -74,6 +74,11 @@ public:
   {
     return _gap_to_chan_map[i_gap];
   }
+  virtual const std::pair<unsigned int, unsigned int> &
+  getGapPins(unsigned int i_gap) const override
+  {
+    return _gap_to_pin_map[i_gap];
+  }
   virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const override
   {
     return _chan_to_gap_map[i_chan];

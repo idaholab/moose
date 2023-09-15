@@ -52,6 +52,11 @@ public:
   {
     return _gap_to_chan_map[i_gap];
   }
+  virtual const std::pair<unsigned int, unsigned int> &
+  getGapPins(unsigned int i_gap) const override
+  {
+    return _gap_to_pin_map[i_gap];
+  }
   virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const override
   {
     return _chan_to_gap_map[i_chan];
@@ -101,6 +106,7 @@ protected:
   std::vector<std::vector<Node *>> _pin_nodes;
   std::vector<std::vector<Node *>> _gapnodes;
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  std::vector<std::pair<unsigned int, unsigned int>> _gap_to_pin_map;
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
