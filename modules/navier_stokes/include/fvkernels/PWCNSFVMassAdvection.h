@@ -9,19 +9,17 @@
 
 #pragma once
 
-#include "INSFVAdvectionKernel.h"
+#include "PINSFVMassAdvection.h"
 
 /**
- * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
- * physics and that advects arbitrary scalar quantities
+ * A flux kernel transporting mass in porous media across cell faces
  */
-class INSFVScalarFieldAdvection : public INSFVAdvectionKernel
+class PWCNSFVMassAdvection : public PINSFVMassAdvection
 {
 public:
   static InputParameters validParams();
-  INSFVScalarFieldAdvection(const InputParameters & params);
+  PWCNSFVMassAdvection(const InputParameters & params);
 
 protected:
-  virtual ADReal computeQpResidual() override;
   virtual bool hasMaterialTimeDerivative() const { return true; }
 };

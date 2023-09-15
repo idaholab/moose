@@ -87,13 +87,14 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   using namespace Moose::FV;
 
   const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
+  const bool on_boundary = onBoundary(fi);
 
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
-  const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
+  const auto v_face = velocity(on_boundary);
   const auto vdotn = _normal * v_face;
 
-  if (onBoundary(fi))
+  if (on_boundary)
   {
     const auto ssf = singleSidedFaceArg();
     const Elem * const sided_elem = ssf.face_side;
