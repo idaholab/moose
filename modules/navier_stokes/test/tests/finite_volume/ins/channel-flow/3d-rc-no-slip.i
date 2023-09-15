@@ -107,7 +107,7 @@ velocity_interp_method='rc'
 
   [w_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = w
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
