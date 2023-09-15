@@ -18,11 +18,18 @@ PolycrystalVoronoiTJVoidIC::validParams()
   InputParameters params = PolycrystalVoronoiVoidIC::validParams();
   params.addClassDescription("Random distribution of smooth circles at triple juctions "
                              "of voronoi grains, with a given minimum spacing");
+  MooseEnum periodic_graincenters_option("true false", "true");
+  params.addParam<MooseEnum>("periodic_graincenters",
+                             periodic_graincenters_option,
+                             "Option to opt out of generating periodic graincenters. Defaults to "
+                             "true when periodic boundary conditions are used.");
   return params;
 }
 
 PolycrystalVoronoiTJVoidIC::PolycrystalVoronoiTJVoidIC(const InputParameters & parameters)
-  : PolycrystalVoronoiVoidIC(parameters), _dim(_mesh.dimension())
+  : PolycrystalVoronoiVoidIC(parameters),
+    _periodic_graincenters_option(getParam<MooseEnum>("periodic_graincenters")),
+    _dim(_mesh.dimension())
 {
 }
 
@@ -38,6 +45,89 @@ PolycrystalVoronoiTJVoidIC::computeCircleCenters()
   _centers.resize(_numbub);
 
   const bool _is_columnar_3D = _poly_ic_uo.isColumnar3D();
+  unsigned int _pbc_grain_num;
+  unsigned int num_cells = 0;
+  unsigned int dim = _dim;
+  unsigned int rank = _dim + 1;
+
+  if (_is_columnar_3D)
+  {
+    dim -= 1;
+    rank -= 1;
+  }
+
+  switch (_periodic_graincenters_option)
+  {
+    case 0: // default
+      // Check if periodic BC is applicable
+      for (unsigned int op = 0; op < _op_num; ++op)
+        for (unsigned int i = 0; i < dim; ++i)
+          if (!_mesh.isTranslatedPeriodic(op, i))
+            _pbc = false;
+      break;
+    case 1: // false
+      _pbc = false;
+  }
+
+  // If periodic BC is applicable, generate grain centers in periodic domains
+  if (_pbc == true)
+  {
+    Point translate;
+
+    translate(0) = 0;
+    translate(1) = 1;
+    translate(2) = -1;
+
+    if (_dim == 2 || _is_columnar_3D)
+      num_cells = 9;
+    else if (_dim == 3 && !_is_columnar_3D)
+      num_cells = 27;
+
+    _pbc_grain_num = num_cells * _grain_num;
+    _pbc_centerpoints.resize(_pbc_grain_num);
+
+    int cell = -1;
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        if (_dim == 2 || _is_columnar_3D)
+        {
+          cell += 1;
+          for (unsigned int gr = cell * _grain_num; gr < (cell + 1) * _grain_num; ++gr)
+          {
+            _pbc_centerpoints[gr](0) =
+                _centerpoints[gr - cell * _grain_num](0) + translate(i) * _top_right(0);
+            _pbc_centerpoints[gr](1) =
+                _centerpoints[gr - cell * _grain_num](1) + translate(j) * _top_right(1);
+
+            if (_is_columnar_3D == true)
+              _pbc_centerpoints[gr](2) = _centerpoints[gr - cell * _grain_num](2);
+          }
+        }
+        else if (_dim == 3 && !_is_columnar_3D)
+        {
+          for (unsigned int k = 0; k < 3; ++k)
+          {
+            cell += 1;
+            for (unsigned int gr = cell * _grain_num; gr < (cell + 1) * _grain_num; ++gr)
+            {
+              _pbc_centerpoints[gr](0) =
+                  _centerpoints[gr - cell * _grain_num](0) + translate(i) * _top_right(0);
+              _pbc_centerpoints[gr](1) =
+                  _centerpoints[gr - cell * _grain_num](1) + translate(j) * _top_right(1);
+              _pbc_centerpoints[gr](2) =
+                  _centerpoints[gr - cell * _grain_num](2) + translate(k) * _top_right(2);
+            }
+          }
+        }
+  }
+  else // If not periodic, just use grain centers in current domain
+  {
+    num_cells = 1;
+
+    _pbc_grain_num = num_cells * _grain_num;
+    _pbc_centerpoints.resize(_pbc_grain_num);
+    _pbc_centerpoints = _centerpoints;
+  }
 
   for (unsigned int vp = 0; vp < _numbub; ++vp)
   {
@@ -55,84 +145,6 @@ PolycrystalVoronoiTJVoidIC::computeCircleCenters()
       Point rand_point;
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         rand_point(i) = _bottom_left(i) + _range(i) * _random.rand(_tid);
-
-      unsigned int _pbc_grain_num;
-      unsigned int num_cells = 0;
-
-      unsigned int dim = _dim;
-      unsigned int rank = _dim + 1;
-
-      if (_is_columnar_3D)
-      {
-        dim -= 1;
-        rank -= 1;
-      }
-
-      // Check if periodic BC is not applicable
-      for (unsigned int op = 0; op < _op_num; ++op)
-        for (unsigned int i = 0; i < dim; ++i)
-          if (!_mesh.isTranslatedPeriodic(op, i))
-            _pbc = false;
-
-      // If periodic BC is applicable, generate grain centers in periodic domains
-      if (_pbc == true)
-      {
-        Point translate;
-
-        translate(0) = 0;
-        translate(1) = 1;
-        translate(2) = -1;
-
-        if (_dim == 2 || _is_columnar_3D)
-          num_cells = 9;
-        else if (_dim == 3 && !_is_columnar_3D)
-          num_cells = 27;
-
-        _pbc_grain_num = num_cells * _grain_num;
-        _pbc_centerpoints.resize(_pbc_grain_num);
-
-        int cell = -1;
-        for (unsigned int i = 0; i < 3; ++i)
-          for (unsigned int j = 0; j < 3; ++j)
-            if (_dim == 2 || _is_columnar_3D)
-            {
-              cell += 1;
-              for (unsigned int gr = cell * _grain_num; gr < (cell + 1) * _grain_num; ++gr)
-              {
-                _pbc_centerpoints[gr](0) =
-                    _centerpoints[gr - cell * _grain_num](0) + translate(i) * _top_right(0);
-                _pbc_centerpoints[gr](1) =
-                    _centerpoints[gr - cell * _grain_num](1) + translate(j) * _top_right(1);
-
-                if (_is_columnar_3D == true)
-                  _pbc_centerpoints[gr](2) = _centerpoints[gr - cell * _grain_num](2);
-              }
-            }
-            else if (_dim == 3 && !_is_columnar_3D)
-            {
-              for (unsigned int k = 0; k < 3; ++k)
-              {
-                cell += 1;
-                for (unsigned int gr = cell * _grain_num; gr < (cell + 1) * _grain_num; ++gr)
-                {
-                  _pbc_centerpoints[gr](0) =
-                      _centerpoints[gr - cell * _grain_num](0) + translate(i) * _top_right(0);
-                  _pbc_centerpoints[gr](1) =
-                      _centerpoints[gr - cell * _grain_num](1) + translate(j) * _top_right(1);
-                  _pbc_centerpoints[gr](2) =
-                      _centerpoints[gr - cell * _grain_num](2) + translate(k) * _top_right(2);
-                }
-              }
-            }
-      }
-      else // If not periodic, just use grain centers in current domain
-      {
-        num_cells = 1;
-
-        _pbc_grain_num = num_cells * _grain_num;
-        _pbc_centerpoints.resize(_pbc_grain_num);
-        _pbc_centerpoints = _centerpoints;
-      }
 
       // Search and sort nearest grain centers to a random point (i.e. void center point)
       std::vector<PolycrystalVoronoiVoidIC::DistancePoint> diff(_pbc_grain_num);
@@ -155,40 +167,29 @@ PolycrystalVoronoiTJVoidIC::computeCircleCenters()
       // Project the random point on to the vertex (TJ point)
       if (_dim == 2 || _is_columnar_3D)
       {
-        RankTwoTensor D;
-        RankTwoTensor M0;
-        RankTwoTensor M1;
-        RankTwoTensor M2;
+        // Square of triangle edge lengths
+        Real edge01 = (closest_point - next_closest_point).norm_sq();
+        Real edge02 = (closest_point - third_closest_point).norm_sq();
+        Real edge12 = (next_closest_point - third_closest_point).norm_sq();
 
-        for (unsigned int d = 0; d < dim; ++d)
-        {
-          D(0, d) = 2 * closest_point(d);
-          D(1, d) = 2 * next_closest_point(d);
-          D(2, d) = 2 * third_closest_point(d);
-          M0(0, 0) += pow(closest_point(d), 2);
-          M0(1, 0) += pow(next_closest_point(d), 2);
-          M0(2, 0) += pow(third_closest_point(d), 2);
-        }
+        // Barycentric weights for circumcenter
+        Real weight0 = edge12 * (edge01 + edge02 - edge12);
+        Real weight1 = edge02 * (edge01 + edge12 - edge02);
+        Real weight2 = edge01 * (edge02 + edge12 - edge01);
+        Real sum_weights = weight0 + weight1 + weight2;
 
-        for (unsigned int r = 0; r < rank; ++r)
-        {
-          D(r, dim) = 1;
-          M0(r, dim) = 1;
-          M0(r, 1) = D(r, 1);
-          M1(r, 0) = D(r, 0);
-          M1(r, 1) = M0(r, 0);
-          M1(r, dim) = 1;
-        }
-
-        Real inv_D_det = 1 / D.det();
-
-        // This is to prevent leak of voids when nan or inf is returned by .det()
-        if (std::isnan(inv_D_det) || std::isinf(inv_D_det))
+        // This is to prevent leak of voids when sum_weights is zero
+        if (MooseUtils::isZero(sum_weights))
           try_again = true;
         else
         {
-          vertex(0) = M0.det() * inv_D_det;
-          vertex(1) = M1.det() * inv_D_det;
+          // Barycentric to cartesian coordinates
+          vertex(0) = (closest_point(0) * weight0 + next_closest_point(0) * weight1 +
+                       third_closest_point(0) * weight2) /
+                      sum_weights;
+          vertex(1) = (closest_point(1) * weight0 + next_closest_point(1) * weight1 +
+                       third_closest_point(1) * weight2) /
+                      sum_weights;
         }
 
         if (_is_columnar_3D)
@@ -199,62 +200,53 @@ PolycrystalVoronoiTJVoidIC::computeCircleCenters()
         _centers[vp] = vertex;
       }
 
-      // It could be possible to have a more succinct code here since 2D and 3D cases have common
-      // matrix elements. However, using DenseMatrix for 2D returns Lapack LU factorization
-      // error when testing TJ void placement for hexagonal polycrystal, and RankTwoTensor
-      // doesn't seem to support resizing to 4x4 for 3D.
-
       // Locate voronoi vertex by searching nearest four grain centers
       // Project the random point on to the nearest TJ line
       if (_dim == 3 && !_is_columnar_3D)
       {
-        DenseMatrix<Real> D(rank, rank);
-        DenseMatrix<Real> M0(rank, rank);
-        DenseMatrix<Real> M1(rank, rank);
-        DenseMatrix<Real> M2(rank, rank);
+        Point fourth_closest_point = _pbc_centerpoints[diff[3].gr];
 
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          D(0, d) = 2 * closest_point(d);
-          D(1, d) = 2 * next_closest_point(d);
-          D(2, d) = 2 * third_closest_point(d);
-          M0(0, 0) += pow(closest_point(d), 2);
-          M0(1, 0) += pow(next_closest_point(d), 2);
-          M0(2, 0) += pow(third_closest_point(d), 2);
+        // Square of tetrahedron edge lengths
+        Real edge01 = (closest_point - next_closest_point).norm_sq();
+        Real edge02 = (closest_point - third_closest_point).norm_sq();
+        Real edge03 = (closest_point - fourth_closest_point).norm_sq();
+        Real edge12 = (next_closest_point - third_closest_point).norm_sq();
+        Real edge13 = (next_closest_point - fourth_closest_point).norm_sq();
+        Real edge23 = (third_closest_point - fourth_closest_point).norm_sq();
 
-          Point fourth_closest_point = _pbc_centerpoints[diff[3].gr];
-          D(3, d) = 2 * fourth_closest_point(d);
-          M0(3, 0) += pow(fourth_closest_point(d), 2);
-        }
+        // Barycentric weights for circumcenter
+        Real weight0 = -2 * edge12 * edge13 * edge23 +
+                       edge01 * edge23 * (edge13 + edge12 - edge23) +
+                       edge02 * edge13 * (edge12 + edge23 - edge13) +
+                       edge03 * edge12 * (edge13 + edge23 - edge12);
+        Real weight1 = -2 * edge02 * edge03 * edge23 +
+                       edge01 * edge23 * (edge02 + edge03 - edge23) +
+                       edge13 * edge02 * (edge03 + edge23 - edge02) +
+                       edge12 * edge03 * (edge02 + edge23 - edge03);
+        Real weight2 = -2 * edge01 * edge03 * edge13 +
+                       edge02 * edge13 * (edge01 + edge03 - edge13) +
+                       edge23 * edge01 * (edge03 + edge13 - edge01) +
+                       edge12 * edge03 * (edge01 + edge13 - edge03);
+        Real weight3 = -2 * edge01 * edge02 * edge12 +
+                       edge03 * edge12 * (edge01 + edge02 - edge12) +
+                       edge23 * edge01 * (edge02 + edge12 - edge01) +
+                       edge13 * edge02 * (edge01 + edge12 - edge02);
+        Real sum_weights = weight0 + weight1 + weight2 + weight3;
 
-        for (unsigned int r = 0; r < rank; ++r)
-        {
-          D(r, _dim) = 1;
-          M0(r, _dim) = 1;
-          M0(r, 1) = D(r, 1);
-          M1(r, 0) = D(r, 0);
-          M1(r, 1) = M0(r, 0);
-          M1(r, _dim) = 1;
-
-          M0(r, 2) = D(r, 2);
-          M1(r, 2) = D(r, 2);
-          M1(3, 1) = M0(3, 0);
-          M2(r, 0) = D(r, 0);
-          M2(r, 1) = D(r, 1);
-          M2(r, 2) = M0(r, 0);
-          M2(r, 3) = 1;
-        }
-
-        Real inv_D_det = 1 / D.det();
-
-        // This is to prevent leak of voids when nan or inf is returned by .det()
-        if (std::isnan(inv_D_det) || std::isinf(inv_D_det))
+        // This is to prevent leak of voids when sum_weights is zero
+        if (MooseUtils::isZero(sum_weights))
           try_again = true;
         else
         {
-          vertex(0) = M0.det() * inv_D_det;
-          vertex(1) = M1.det() * inv_D_det;
-          vertex(2) = M2.det() * inv_D_det;
+          vertex(0) = (closest_point(0) * weight0 + next_closest_point(0) * weight1 +
+                       third_closest_point(0) * weight2 + fourth_closest_point(0) * weight3) /
+                      sum_weights;
+          vertex(1) = (closest_point(1) * weight0 + next_closest_point(1) * weight1 +
+                       third_closest_point(1) * weight2 + fourth_closest_point(1) * weight3) /
+                      sum_weights;
+          vertex(2) = (closest_point(2) * weight0 + next_closest_point(2) * weight1 +
+                       third_closest_point(2) * weight2 + fourth_closest_point(2) * weight3) /
+                      sum_weights;
         }
 
         if (try_again == false)

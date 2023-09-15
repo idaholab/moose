@@ -25,7 +25,8 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  bool _pbc = true;
+  bool _pbc = true; // default
+  const MooseEnum _periodic_graincenters_option;
 
   const unsigned int _dim;
   std::vector<Point> _pbc_centerpoints;
