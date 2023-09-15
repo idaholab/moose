@@ -118,7 +118,7 @@ public:
    * Return a pair of subchannel indices for a given gap index
    */
   virtual const std::pair<unsigned int, unsigned int> &
-  getGapNeighborChannels(unsigned int i_gap) const = 0;
+  getGapChannels(unsigned int i_gap) const = 0;
 
   /**
    * Return a vector of gap indices for a given channel index
