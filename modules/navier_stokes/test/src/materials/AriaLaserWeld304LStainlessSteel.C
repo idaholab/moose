@@ -33,8 +33,8 @@ AriaLaserWeld304LStainlessSteel::validParams()
   params.addParam<MaterialPropertyName>(
       "mu_name", "mu", "The name of the viscosity material property");
   params.addParam<MaterialPropertyName>("k_name", "k", "The name of the thermal conductivity");
-  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the thermal conductivity");
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the thermal conductivity");
+  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
   return params;
 }
 
