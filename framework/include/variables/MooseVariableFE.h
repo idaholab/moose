@@ -671,7 +671,7 @@ public:
   void setActiveTags(const std::set<TagID> & vtags) override;
 
 protected:
-  usingMooseVariableBaseMembers;
+  usingMooseVariableFieldMembers;
 
   /// Holder for all the data associated with the "main" element
   std::unique_ptr<MooseVariableData<OutputType>> _element_data;
