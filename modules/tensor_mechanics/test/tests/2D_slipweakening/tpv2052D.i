@@ -244,7 +244,7 @@
 [Executioner]
   type = Transient
   dt = 0.0025
-  num_steps = 200
+  num_steps = 10
   [TimeIntegrator]
     type = CentralDifference
     solve_type = lumped
@@ -253,5 +253,5 @@
 
 [Outputs]
   exodus = true
-  interval = 50
+  interval = 5
 []
