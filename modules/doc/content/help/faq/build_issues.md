@@ -1,8 +1,8 @@
 ## Build Issues id=buildissues
 
-Build issues are commonly caused by an invalid environment, an update to your repository
-and you now have a mismatch between MOOSE and your application, or one of our MOOSE Conda packages
-being out of date.
+Build issues are commonly caused by an invalid environment, an update to your repository (leading to
+a mismatch between MOOSE and your application), or one of our MOOSE Conda packages being out of
+date.
 
 - Verify the Conda Environment is active and up to date, with the latest version of our moose
   packages:
@@ -15,8 +15,8 @@ being out of date.
   if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
   !alert note
-  When ever an update is performed in Conda, an update should also be performed on your MOOSE repo.
-  And vice versa. It is important to keep both of these in sync.
+  Whenever an update is performed in Conda, an update should also be performed on your MOOSE
+  repository, and vice versa. It is important to keep both of these in sync.
 
 - Verify the MOOSE repository is up to date, with the correct vetted version of libMesh:
 
@@ -110,7 +110,7 @@ being out of date.
   Hello world from processor my_hostname, rank 2 out of 4 processors
   ```
 
-- Sometimes a build will fail due to running out of memory. When a build failes in this way, it is
+- Sometimes a build will fail due to running out of memory. When a build fails in this way, it is
   not always apparent. The compiler will simply die while not explaining why:
 
   ```bash
@@ -128,9 +128,9 @@ being out of date.
   ```
 
   If you are receiving a similar result, try reducing how many cores you are compiling with (try
-  `make -j 4` instead). Each core consumes roughly 2GB of RAM. More if you are compiling in debug
-  mode. Errors of this type are common among users who may be running on some form of virtual
-  machine. Or when operating within an HPC cluster with strict resource availability guidelines.
+  `make -j 4` instead). Each core consumes roughly 2GB of RAM (more if you are compiling in debug
+  mode). Errors of this type are common among users who may be running on some form of virtual
+  machine, or when operating within an HPC cluster with strict resource availability guidelines.
 
 - If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again.
   If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to
