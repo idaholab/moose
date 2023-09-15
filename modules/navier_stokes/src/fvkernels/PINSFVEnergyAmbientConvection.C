@@ -40,6 +40,7 @@ PINSFVEnergyAmbientConvection::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
   const auto state = determineState();
+
   if (_is_solid)
     return -_h_solid_fluid(elem, state) * (_temp_fluid(elem, state) - _temp_solid(elem, state));
   else

@@ -73,9 +73,6 @@ public:
                                   const Moose::StateArg & time,
                                   const THREAD_ID tid) const override;
 
-  /// Return the interpolation method used for velocity
-  Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
-
   void initialSetup() override;
   void meshChanged() override;
 
@@ -88,7 +85,7 @@ public:
   /**
    * makes sure coefficient data gets communicated on both sides of a given boundary
    */
-  void ghostADataOnBoundary(const BoundaryID boundary_id);
+  void ghostADataOnBoundary(const BoundaryID boundary_id) override;
 
   /**
    * Whether to pull all 'a' coefficient data from the owning process for all nonlocal elements we
@@ -104,9 +101,6 @@ protected:
 
   /// A functor for computing the (non-RC corrected) velocity
   std::vector<std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>> _vel;
-
-  /// The interpolation method to use for the velocity
-  Moose::FV::InterpMethod _velocity_interp_method;
 
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;

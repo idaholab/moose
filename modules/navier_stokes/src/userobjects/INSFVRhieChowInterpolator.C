@@ -75,12 +75,6 @@ INSFVRhieChowInterpolator::validParams()
   exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
-  MooseEnum velocity_interp_method("average rc", "rc");
-  params.addParam<MooseEnum>(
-      "velocity_interp_method",
-      velocity_interp_method,
-      "The interpolation to use for the velocity. Options are "
-      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
   params.addParam<MooseFunctorName>(
       "a_u",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
@@ -130,16 +124,9 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         blockIDs());
   }
 
-  const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
-  if (velocity_interp_method == "average")
-  {
-    _velocity_interp_method = Moose::FV::InterpMethod::Average;
-    if (isParamValid("a_u"))
-      paramError("a_u",
-                 "Rhie Chow coefficients may not be specified for average velocity interpolation");
-  }
-  else if (velocity_interp_method == "rc")
-    _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
+  if (_velocity_interp_method == Moose::FV::InterpMethod::Average && isParamValid("a_u"))
+    paramError("a_u",
+               "Rhie Chow coefficients may not be specified for average velocity interpolation");
 
   if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
     fillARead();

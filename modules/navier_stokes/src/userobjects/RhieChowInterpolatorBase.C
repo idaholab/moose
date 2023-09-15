@@ -53,6 +53,13 @@ RhieChowInterpolatorBase::validParams()
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
 
+  MooseEnum velocity_interp_method("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interp_method",
+      velocity_interp_method,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+
   return params;
 }
 
@@ -194,6 +201,12 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
 
   if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))
     mooseError("Different subproblems in RhieChowInterpolatorBase!");
+
+  const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
+  if (velocity_interp_method == "average")
+    _velocity_interp_method = Moose::FV::InterpMethod::Average;
+  else if (velocity_interp_method == "rc")
+    _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
 }
 
 bool

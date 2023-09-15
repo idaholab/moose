@@ -64,6 +64,14 @@ public:
                                           const Moose::StateArg & time,
                                           const THREAD_ID tid) const = 0;
 
+  /// Return the interpolation method used for velocity
+  Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
+
+  /**
+   * makes sure coefficient data gets communicated on both sides of a given boundary
+   */
+  virtual void ghostADataOnBoundary(const BoundaryID boundary_id) {}
+
   /**
    * @return The pressure variable corresponding to the provided thread ID
    */
@@ -123,6 +131,9 @@ protected:
 
   /// The nonlinear system
   SystemBase & _sys;
+
+  /// The interpolation method to use for the velocity
+  Moose::FV::InterpMethod _velocity_interp_method;
 
 private:
   /// A unity functor used in the epsilon virtual method

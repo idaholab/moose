@@ -86,6 +86,10 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
     UserObject::_subproblem.addFunctor("Ainv", _Ainv, tid);
     UserObject::_subproblem.addFunctor("HbyA", _HbyA, tid);
   }
+
+  if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
+    paramError("velocity_interp_method",
+               "Segregated momentum-pressure solvers do not allow average interpolation methods!");
 }
 
 void
