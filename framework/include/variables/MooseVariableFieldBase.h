@@ -203,3 +203,5 @@ public:
    */
   virtual unsigned int oldestSolutionStateRequested() const = 0;
 };
+
+#define usingMooseVariableFieldBaseMembers usingMooseVariableBaseMembers

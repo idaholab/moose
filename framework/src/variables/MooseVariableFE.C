@@ -854,7 +854,7 @@ MooseVariableFE<OutputType>::evaluate(const NodeArg & node_arg, const StateArg &
   {
     ValueType ret;
     const auto do_derivatives = Moose::doDerivatives(_subproblem, _sys);
-    for (const auto d : make_range(_mesh.dimension()))
+    for (const auto d : make_range(this->_mesh.dimension()))
     {
       const auto dof_number = node.dof_number(this->_sys.number(), this->number(), d);
       auto & component = ret(d);

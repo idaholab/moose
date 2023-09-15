@@ -451,3 +451,5 @@ private:
   /// The values of the time derivative for the \p _current_elem_side_qp_functor_elem_side
   mutable std::vector<DotType> _current_elem_side_qp_functor_dot;
 };
+
+#define usingMooseVariableFieldMembers usingMooseVariableFieldBaseMembers

@@ -641,7 +641,7 @@ protected:
    */
   void clearCaches();
 
-  usingMooseVariableBaseMembers;
+  usingMooseVariableFieldMembers;
 
   /// Holder for all the data associated with the "main" element
   std::unique_ptr<MooseVariableDataFV<OutputType>> _element_data;
@@ -720,13 +720,13 @@ template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
 {
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = this->_mesh.nodeToElemMap();
   const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
   ValueType sum = 0;
   unsigned short num_values = 0;
   for (const auto elem_id : elem_ids)
   {
-    const Elem * const elem = _mesh.queryElemPtr(elem_id);
+    const Elem * const elem = this->_mesh.queryElemPtr(elem_id);
     mooseAssert(elem, "We should have this element available");
     if (!this->hasBlocks(elem->subdomain_id()))
       continue;
