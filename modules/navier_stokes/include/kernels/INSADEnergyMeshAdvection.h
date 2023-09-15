@@ -15,12 +15,12 @@
  * This class computes the residual and Jacobian contributions for temperature advection from mesh
  * velocity in an ALE simulation
  */
-class INSADEnergyMeshConvection : public ADKernelValue
+class INSADEnergyMeshAdvection : public ADKernelValue
 {
 public:
   static InputParameters validParams();
 
-  INSADEnergyMeshConvection(const InputParameters & parameters);
+  INSADEnergyMeshAdvection(const InputParameters & parameters);
 
 protected:
   virtual ADReal precomputeQpResidual() override;

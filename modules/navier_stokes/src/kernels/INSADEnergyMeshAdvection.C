@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADEnergyMeshConvection.h"
+#include "INSADEnergyMeshAdvection.h"
 #include "INSADMomentumMeshAdvection.h"
 
-registerMooseObject("NavierStokesApp", INSADEnergyMeshConvection);
+registerMooseObject("NavierStokesApp", INSADEnergyMeshAdvection);
 
 InputParameters
-INSADEnergyMeshConvection::validParams()
+INSADEnergyMeshAdvection::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params += INSADMomentumMeshAdvection::displacementParams();
@@ -22,7 +22,7 @@ INSADEnergyMeshConvection::validParams()
   return params;
 }
 
-INSADEnergyMeshConvection::INSADEnergyMeshConvection(const InputParameters & parameters)
+INSADEnergyMeshAdvection::INSADEnergyMeshAdvection(const InputParameters & parameters)
   : ADKernelValue(parameters),
     _temperature_convected_mesh_strong_residual(
         getADMaterialProperty<Real>("temperature_convected_mesh_strong_residual"))
@@ -31,7 +31,7 @@ INSADEnergyMeshConvection::INSADEnergyMeshConvection(const InputParameters & par
 }
 
 ADReal
-INSADEnergyMeshConvection::precomputeQpResidual()
+INSADEnergyMeshAdvection::precomputeQpResidual()
 {
   return _temperature_convected_mesh_strong_residual[_qp];
 }
