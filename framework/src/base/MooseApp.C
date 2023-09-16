@@ -516,6 +516,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
   _the_warehouse->registerAttribute<AttribResidualObject>("residual_object");
   _the_warehouse->registerAttribute<AttribSorted>("sorted");
+  _the_warehouse->registerAttribute<AttribDisplaced>("displaced", -1);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {

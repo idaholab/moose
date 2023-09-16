@@ -475,5 +475,26 @@ private:
   uint64_t _val = 0;
 };
 
+/**
+ * Tracks whether the object is on the displaced mesh
+ */
+class AttribDisplaced : public Attribute
+{
+public:
+  typedef char Key;
+  void setFrom(Key k) { _val = k; }
+
+  AttribDisplaced(TheWarehouse & w) : Attribute(w, "displaced") {}
+  AttribDisplaced(TheWarehouse & w, char t) : Attribute(w, "displaced"), _val(t) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribDisplaced);
+
+private:
+  char _val = -1;
+};
+
 #undef clonefunc
 #undef hashfunc

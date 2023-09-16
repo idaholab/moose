@@ -1544,11 +1544,21 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     ComputeResidualThread cr(_fe_problem, tags);
     Threads::parallel_reduce(elem_range, cr);
 
+    using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     if (_fe_problem.haveFV())
     {
-      using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxResidualThread<FVRange> fvr(_fe_problem, this->number(), tags);
+      ComputeFVFluxResidualThread<FVRange> fvr(
+          _fe_problem, this->number(), tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
+      Threads::parallel_reduce(faces, fvr);
+    }
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem();
+        displaced_problem && displaced_problem->haveFV())
+    {
+      ComputeFVFluxResidualThread<FVRange> fvr(
+          _fe_problem, this->number(), tags, /*on_displaced=*/true);
+      FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
+                    displaced_problem->mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvr);
     }
 
@@ -1766,12 +1776,22 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     ComputeResidualAndJacobianThread crj(_fe_problem, vector_tags, matrix_tags);
     Threads::parallel_reduce(elem_range, crj);
 
+    using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     if (_fe_problem.haveFV())
     {
-      using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxRJThread<FVRange> fvrj(_fe_problem, this->number(), vector_tags, matrix_tags);
+      ComputeFVFluxRJThread<FVRange> fvrj(
+          _fe_problem, this->number(), vector_tags, matrix_tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvrj);
+    }
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem();
+        displaced_problem && displaced_problem->haveFV())
+    {
+      ComputeFVFluxRJThread<FVRange> fvr(
+          _fe_problem, this->number(), vector_tags, matrix_tags, /*on_displaced=*/true);
+      FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
+                    displaced_problem->mesh().ownedFaceInfoEnd());
+      Threads::parallel_reduce(faces, fvr);
     }
 
     mortarConstraints(Moose::ComputeType::ResidualAndJacobian, vector_tags, matrix_tags);
@@ -2607,14 +2627,24 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
     }
 
+    using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     if (_fe_problem.haveFV())
     {
       // the same loop works for both residual and jacobians because it keys
       // off of FEProblem's _currently_computing_jacobian parameter
-      using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxJacobianThread<FVRange> fvj(_fe_problem, this->number(), tags);
+      ComputeFVFluxJacobianThread<FVRange> fvj(
+          _fe_problem, this->number(), tags, /*on_displaced=*/false);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvj);
+    }
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem();
+        displaced_problem && displaced_problem->haveFV())
+    {
+      ComputeFVFluxJacobianThread<FVRange> fvr(
+          _fe_problem, this->number(), tags, /*on_displaced=*/true);
+      FVRange faces(displaced_problem->mesh().ownedFaceInfoBegin(),
+                    displaced_problem->mesh().ownedFaceInfoEnd());
+      Threads::parallel_reduce(faces, fvr);
     }
 
     mortarConstraints(Moose::ComputeType::Jacobian, {}, tags);

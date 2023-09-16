@@ -248,6 +248,9 @@ private:
 
   /// Whether we want to pull all nonlocal 'a' coefficient data
   bool _pull_all_nonlocal;
+
+  /// Whether this object is operating on the displaced mesh
+  bool _displaced;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const

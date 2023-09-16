@@ -28,7 +28,8 @@ public:
 
   GatherRCDataFaceThread(FEProblemBase & fe_problem,
                          const unsigned int nl_sys_number,
-                         const std::vector<unsigned int> & vars);
+                         const std::vector<unsigned int> & vars,
+                         bool on_displaced);
 
   // Splitting Constructor
   GatherRCDataFaceThread(GatherRCDataFaceThread & x, Threads::split split);
@@ -73,8 +74,9 @@ private:
 template <typename RangeType>
 GatherRCDataFaceThread<RangeType>::GatherRCDataFaceThread(FEProblemBase & fe_problem,
                                                           const unsigned int nl_sys_number,
-                                                          const std::vector<unsigned int> & vars)
-  : ThreadedFaceLoop<RangeType>(fe_problem, nl_sys_number, {}), _vars(vars)
+                                                          const std::vector<unsigned int> & vars,
+                                                          bool on_displaced)
+  : ThreadedFaceLoop<RangeType>(fe_problem, nl_sys_number, {}, on_displaced), _vars(vars)
 {
 }
 
@@ -124,6 +126,7 @@ GatherRCDataFaceThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bn
                        .query()
                        .template condition<AttribSystem>("FVFluxBC")
                        .template condition<AttribSysNum>(this->_nl_system_num)
+                       .template condition<AttribDisplaced>(this->_on_displaced)
                        .template condition<AttribThread>(this->_tid)
                        .template condition<AttribBoundaries>(bnd_id);
     getVarROs(bcs, queries);
@@ -140,6 +143,7 @@ GatherRCDataFaceThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bn
                        .query()
                        .template condition<AttribSystem>("FVInterfaceKernel")
                        .template condition<AttribSysNum>(this->_nl_system_num)
+                       .template condition<AttribDisplaced>(this->_on_displaced)
                        .template condition<AttribThread>(this->_tid)
                        .template condition<AttribBoundaries>(bnd_id);
     getVarROs(iks, queries);
@@ -166,6 +170,7 @@ GatherRCDataFaceThread<RangeType>::subdomainChanged()
                      .query()
                      .template condition<AttribSysNum>(this->_nl_system_num)
                      .template condition<AttribSystem>("FVFluxKernel")
+                     .template condition<AttribDisplaced>(this->_on_displaced)
                      .template condition<AttribSubdomains>(this->_subdomain)
                      .template condition<AttribThread>(this->_tid);
   getVarROs(kernels, queries);
@@ -193,6 +198,7 @@ GatherRCDataFaceThread<RangeType>::neighborSubdomainChanged()
                      .query()
                      .template condition<AttribSysNum>(this->_nl_system_num)
                      .template condition<AttribSystem>("FVFluxKernel")
+                     .template condition<AttribDisplaced>(this->_on_displaced)
                      .template condition<AttribSubdomains>(this->_neighbor_subdomain)
                      .template condition<AttribThread>(this->_tid);
   getVarROs(kernels, queries);
