@@ -202,6 +202,118 @@ multiIndex(unsigned int dim, unsigned int order)
   return multi_index;
 }
 
+Point
+barycentricToCartesian2D(const Point & p0,
+                         const Point & p1,
+                         const Point & p2,
+                         const Real b0,
+                         const Real b1,
+                         const Real b2,
+                         Point & center)
+{
+  // p0, p1, p2 are vertices of triangle
+  // b0, b1, b2 are Barycentric coordinates of the triangle center
+  for (unsigned int d = 0; d < 2; ++d)
+    center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2;
+
+  return center;
+}
+
+Point
+barycentricToCartesian3D(const Point & p0,
+                         const Point & p1,
+                         const Point & p2,
+                         const Point & p3,
+                         const Real b0,
+                         const Real b1,
+                         const Real b2,
+                         const Real b3,
+                         Point & center)
+{
+  // p0, p1, p2, p3 are vertices of tetrahedron
+  // b0, b1, b2, b3 are Barycentric coordinates of the tetrahedron center
+  for (unsigned int d = 0; d < 3; ++d)
+    center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2 + p3(d) * b3;
+
+  return center;
+}
+
+Point
+circumcenter2D(const Point & p0, const Point & p1, const Point & p2)
+{
+  // Check to make sure points are not collinear
+  Real A = p0(0) * (p1(1) - p2(1)) + p1(0) * (p2(1) - p0(1)) + p2(0) * (p0(1) - p1(1));
+
+  if (MooseUtils::isZero(A))
+    mooseError("Cannot evaluate circumcenter. Points should be non-collinear.");
+
+  // Square of triangle edge lengths
+  Real edge01 = (p0 - p1).norm_sq();
+  Real edge02 = (p0 - p2).norm_sq();
+  Real edge12 = (p1 - p2).norm_sq();
+
+  // Barycentric weights for circumcenter
+  Real weight0 = edge12 * (edge01 + edge02 - edge12);
+  Real weight1 = edge02 * (edge01 + edge12 - edge02);
+  Real weight2 = edge01 * (edge02 + edge12 - edge01);
+
+  Real inv_sum_weights = 1 / (weight0 + weight1 + weight2);
+
+  // Barycentric coordinates
+  Real b0 = weight0 * inv_sum_weights;
+  Real b1 = weight1 * inv_sum_weights;
+  Real b2 = weight2 * inv_sum_weights;
+
+  Point circumcenter;
+  circumcenter = MathUtils::barycentricToCartesian2D(p0, p1, p2, b0, b1, b2, circumcenter);
+
+  return circumcenter;
+}
+
+Point
+circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3)
+{
+  // Square of tetrahedron edge lengths
+  Real edge01 = (p0 - p1).norm_sq();
+  Real edge02 = (p0 - p2).norm_sq();
+  Real edge03 = (p0 - p3).norm_sq();
+  Real edge12 = (p1 - p2).norm_sq();
+  Real edge13 = (p1 - p3).norm_sq();
+  Real edge23 = (p2 - p3).norm_sq();
+
+  // Barycentric weights for circumcenter
+  Real weight0 = -2 * edge12 * edge13 * edge23 + edge01 * edge23 * (edge13 + edge12 - edge23) +
+                 edge02 * edge13 * (edge12 + edge23 - edge13) +
+                 edge03 * edge12 * (edge13 + edge23 - edge12);
+  Real weight1 = -2 * edge02 * edge03 * edge23 + edge01 * edge23 * (edge02 + edge03 - edge23) +
+                 edge13 * edge02 * (edge03 + edge23 - edge02) +
+                 edge12 * edge03 * (edge02 + edge23 - edge03);
+  Real weight2 = -2 * edge01 * edge03 * edge13 + edge02 * edge13 * (edge01 + edge03 - edge13) +
+                 edge23 * edge01 * (edge03 + edge13 - edge01) +
+                 edge12 * edge03 * (edge01 + edge13 - edge03);
+  Real weight3 = -2 * edge01 * edge02 * edge12 + edge03 * edge12 * (edge01 + edge02 - edge12) +
+                 edge23 * edge01 * (edge02 + edge12 - edge01) +
+                 edge13 * edge02 * (edge01 + edge12 - edge02);
+
+  Real sum_weights = weight0 + weight1 + weight2 + weight3;
+  Real inv_sum_weights = 1 / sum_weights;
+
+  // Barycentric coordinates
+  Real b0 = weight0 * inv_sum_weights;
+  Real b1 = weight1 * inv_sum_weights;
+  Real b2 = weight2 * inv_sum_weights;
+  Real b3 = weight3 * inv_sum_weights;
+
+  // Check to make sure vertices are not coplanar
+  if (MooseUtils::isZero(sum_weights))
+    mooseError("Cannot evaluate circumcenter. Points should be non-coplanar.");
+
+  Point circumcenter;
+  circumcenter = MathUtils::barycentricToCartesian3D(p0, p1, p2, p3, b0, b1, b2, b3, circumcenter);
+
+  return circumcenter;
+}
+
 } // namespace MathUtils
 
 std::vector<std::vector<unsigned int>>

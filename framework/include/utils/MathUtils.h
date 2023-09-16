@@ -16,6 +16,12 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/compare_types.h"
 
+// libMesh forward declarations
+namespace libMesh
+{
+class Point;
+}
+
 namespace MathUtils
 {
 
@@ -27,6 +33,24 @@ Real poly2Log(Real x, Real tol, unsigned int derivative_order);
 Real poly3Log(Real x, Real tol, unsigned int derivative_order);
 Real poly4Log(Real x, Real tol, unsigned int derivative_order);
 Real taylorLog(Real x);
+Point barycentricToCartesian2D(const Point & p0,
+                               const Point & p1,
+                               const Point & p2,
+                               const Real b0,
+                               const Real b1,
+                               const Real b2,
+                               Point & center);
+Point barycentricToCartesian3D(const Point & p0,
+                               const Point & p1,
+                               const Point & p2,
+                               const Point & p3,
+                               const Real b0,
+                               const Real b1,
+                               const Real b2,
+                               const Real b3,
+                               Point & center);
+Point circumcenter2D(const Point & p0, const Point & p1, const Point & p2);
+Point circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3);
 
 template <typename T>
 T
