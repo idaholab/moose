@@ -206,8 +206,8 @@ class Shape {
 public:
   Shape(int x=0, int y=0): _x(x), _y(y) {}  // Constructor
   virtual ~Shape() {} // Destructor
-  virtual float area()=0;  // Pure Virtual Function
-  void printPosition();    // Body appears elsewhere
+  virtual float area() const = 0;  // Pure Virtual Function
+  void printPosition() const;    // Body appears elsewhere
 
 protected:
   // Coordinates at the centroid of the shape
@@ -231,9 +231,7 @@ public:
     _height(height)
   {}
 
-  virtual ~Rectangle() {}
-
-  virtual float area() { return _width * _height; }
+  virtual float area() const override { return _width * _height; }
 
 protected:
   int _width;
@@ -255,9 +253,7 @@ public:
     _radius(radius)
   {}
 
-  virtual ~Circle() {}
-
-  virtual float area() { return PI * _radius * _radius; }
+  virtual float area() const override { return PI * _radius * _radius; }
 protected:
   int _radius;
   const double PI = 3.14159265359;
