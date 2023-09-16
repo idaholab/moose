@@ -321,6 +321,32 @@ void printInformation(const Shape & shape)
 
 !---
 
+## Summary
+
+Templates
+
+- compile-time polymorphism
+- slower to compile
+- must be instantiated to be compiled
+
+
+Classes
+
+- run-time polymorphism: routine calls forwarded to derived classes
+- slower execution due to cost of virtual table searches
+- easier to develop with, somewhat more readable
+
+
+Both enable better code re-use, lower duplication. They are used for different purposes,
+but both concepts can be combined! For example:
+
+```
+// class template
+template<typename T> class A { };
+```
+
+!---
+
 ## Homework Ideas
 
 1. Implement a new Shape called Square. Try deriving from Rectangle directly instead of Shape. What

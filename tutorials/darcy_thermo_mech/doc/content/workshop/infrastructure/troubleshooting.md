@@ -114,7 +114,8 @@ To check initialization, use the [Exodus](Exodus.md) output:
 
 Meshing is hard. We have some tools to help in the [MeshGenerator system](syntax/Mesh/index.md) but generally you should:
 
-- visually inspect your mesh. Look for unsupported features: non-conformality (except from libmesh refinement), overlapping cells, mixed element types within a subdomain (within a mesh is OK)
+- visually inspect your mesh. Look for unsupported features: non-conformality (except from libmesh refinement), overlapping cells...
+- use the [MeshDiagnosticsGenerator.md] and turn on the relevant checks
 - use `show_info = true` in the [FileMeshGenerator](FileMeshGenerator.md) and verify that the output is as expected
 - replace your mesh with a simple MOOSE-generated rectangular mesh to check if the mesh is at fault
 
