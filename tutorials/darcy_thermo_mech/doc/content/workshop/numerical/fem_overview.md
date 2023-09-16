@@ -106,9 +106,27 @@ respective functions.
 
 !---
 
-## Simplified FEM
+## FEM can be used to solve both linear and nonlinear PDEs
 
 FEM is a method for numerically approximating the solution to [!ac](PDEs).
+FEM is widely applicable for a large range of PDEs and domains.
+
+Example PDEs:
+Have you seen them before? Are they linear/ nonlinear? Coupled?
+
+!equation
+-\nabla \cdot \nabla u = q
+
+!equation
+\dfrac{\partial u_x}{\partial t} -\nabla\cdot \mu \nabla u_x + \vec{u} \cdot \nabla u_x = 0
+
+!equation
+C \dfrac{\partial T}{\partial t} -\nabla \cdot k(T) \nabla T = q(\psi) \\
+\dfrac{1}{v} \dfrac{\partial \psi}{\partial t} + \Omega \cdot \nabla \psi + \Sigma(T) \psi = Q(\psi, T)
+
+!---
+
+## FEM is a general method to discretize these equations
 
 FEM finds a solution function that is made up of "shape functions" multiplied by coefficients and
 added together, just like in polynomial fitting, except the functions are not typically as simple
@@ -118,11 +136,10 @@ The Galerkin Finite Element method is different from finite difference and finit
 because it finds a piecewise continuous function which is an approximate solution to the governing
 PDEs.
 
-Just as in polynomial fitting you can evaluate a finite element solution anywhere in the domain.
+FEM provides an approximate solution. The true solution can only be represented as well as the shape
+function basis can represent it!
 
-FEM is widely applicable for a large range of PDEs and domains.
-
-It is supported by a rich mathematical theory with proofs about accuracy, stability, convergence and
+FEM is supported by a rich mathematical theory with proofs about accuracy, stability, convergence and
 solution uniqueness.
 
 !---
@@ -144,12 +161,16 @@ Generating a weak form generally involves these steps:
 1.  Integrate by parts and use the divergence theorem to get the desired derivative order on your
     functions and simultaneously generate boundary integrals.
 
+!alert note title=Exercise
+Obtain the weak form for the equations listed before, write the equations in terms of the coefficients
+and the shape functions.
+
 !---
 
 ## Integration by Parts and Divergence Theorem
 
 Suppose $\varphi$ is a scalar function, $\vec{v}$ is a vector function, and both are continuously
-differentialable functions, then the product rule states:
+differentiable functions, then the product rule states:
 
 !equation
 \nabla\cdot(\varphi\vec{v}) = \varphi(\nabla\cdot\vec{v}) + \vec{v}\cdot(\nabla \varphi)
