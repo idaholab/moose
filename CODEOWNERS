@@ -68,6 +68,9 @@
 /modules/thermal_hydraulics @joshuahansel
 /modules/xfem @bwspenc @jiangwen84
 
+/python/MooseDocs @cticenhour
+/python/moosesqa @cticenhour
+
 /scripts/hpc_proxy.pac @loganharbour
 /scripts/configure_petsc.sh @cticenhour @milljm @loganharbour
 /scripts/update_and_rebuild_petsc.sh @cticenhour @milljm @loganharbour
