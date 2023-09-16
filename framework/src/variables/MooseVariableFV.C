@@ -766,6 +766,26 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & sta
 }
 
 template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
+{
+  const auto & node_to_elem_map = this->_mesh.nodeToElemMap();
+  const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
+  ValueType sum = 0;
+  unsigned short num_values = 0;
+  for (const auto elem_id : elem_ids)
+  {
+    const Elem * const elem = this->_mesh.queryElemPtr(elem_id);
+    mooseAssert(elem, "We should have this element available");
+    if (!this->hasBlocks(elem->subdomain_id()))
+      continue;
+    sum += getElemValue(elem, state);
+    ++num_values;
+  }
+  return sum / num_values;
+}
+
+template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const ElemArg &, const StateArg &) const
 {

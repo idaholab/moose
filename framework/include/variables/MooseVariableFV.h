@@ -75,10 +75,15 @@ public:
       typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
   using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;
   using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
   using StateArg = Moose::StateArg;
   using NodeArg = Moose::NodeArg;
+  using ElemPointArg = Moose::ElemPointArg;
+  using typename MooseVariableField<OutputType>::ValueType;
+  using typename MooseVariableField<OutputType>::DotType;
+  using typename MooseVariableField<OutputType>::GradientType;
 
   static InputParameters validParams();
 
@@ -457,11 +462,6 @@ public:
    */
   ADReal getElemValue(const Elem * elem, const StateArg & state) const;
 
-  using FunctorArg = typename Moose::ADType<OutputType>::type;
-  using typename Moose::FunctorBase<FunctorArg>::ValueType;
-  using typename Moose::FunctorBase<FunctorArg>::DotType;
-  using typename Moose::FunctorBase<FunctorArg>::GradientType;
-
   void setActiveTags(const std::set<TagID> & vtags) override;
 
   /**
@@ -559,6 +559,10 @@ private:
   ValueType evaluate(const ElemArg & elem, const StateArg &) const override final;
   ValueType evaluate(const FaceArg & face, const StateArg &) const override final;
   ValueType evaluate(const NodeArg & node, const StateArg &) const override final;
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final;
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const StateArg & state) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
@@ -718,22 +722,26 @@ MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg &
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
+MooseVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point, const StateArg & state) const
 {
-  const auto & node_to_elem_map = this->_mesh.nodeToElemMap();
-  const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
-  ValueType sum = 0;
-  unsigned short num_values = 0;
-  for (const auto elem_id : elem_ids)
-  {
-    const Elem * const elem = this->_mesh.queryElemPtr(elem_id);
-    mooseAssert(elem, "We should have this element available");
-    if (!this->hasBlocks(elem->subdomain_id()))
-      continue;
-    sum += getElemValue(elem, state);
-    ++num_values;
-  }
-  return sum / num_values;
+  return (*this)(elem_point.makeElem(), state) +
+         (elem_point.point - elem_point.elem->vertex_average()) *
+             this->gradient(elem_point.makeElem(), state);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
+{
+  return (*this)(ElemPointArg{elem_qp.elem, elem_qp.point, false}, state);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
+                                      const StateArg & state) const
+{
+  return (*this)(ElemPointArg{elem_side_qp.elem, elem_side_qp.point, false}, state);
 }
 
 template <typename OutputType>
