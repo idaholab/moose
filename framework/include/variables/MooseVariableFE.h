@@ -700,6 +700,13 @@ protected:
   ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,
                      const StateArg & state) const override final;
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final;
+  ValueType evaluate(const ElemPointArg &, const StateArg &) const override final;
+  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final
+  {
+    mooseError("Face info functor overload not yet implemented for finite element variables");
+  }
 
   GradientType evaluateGradient(const ElemQpArg & elem_qp, const StateArg & state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
@@ -708,13 +715,7 @@ protected:
   DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
                       const StateArg & state) const override final;
-  ValueType evaluate(const ElemArg &, const StateArg &) const override final;
-  ValueType evaluate(const ElemPointArg &, const StateArg &) const override final;
-  ValueType evaluate(const FaceArg &, const StateArg &) const override final
-  {
-    mooseError("Face info functor overload not yet implemented for finite element variables");
-  }
-  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
+  DotType evaluateDot(const ElemArg &, const StateArg &) const override final;
 
 private:
   /**
