@@ -45,8 +45,8 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
     CovarianceInterface(parameters),
     OutputCovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
-    // _mogp_handler(
-    //     declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
+    _mogp_handler(
+        declareModelData<StochasticTools::MultiOutputGaussianProcessHandler>("_mogp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _optimization_opts(StochasticTools::MultiOutputGaussianProcessHandler::GPOptimizerOptions(
         getParam<bool>("show_optimization_details"),
@@ -70,14 +70,14 @@ MultiOutputGaussianProcessTrainer::MultiOutputGaussianProcessTrainer(
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
 
-  // std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-  // std::vector<Real> lower_bounds, upper_bounds;
-  // _mogp_handler.initialize(
-  //     getOutputCovarianceByName(parameters.get<UserObjectName>("output_covariance")),
-  //     getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
-  //     tune_parameters,
-  //     lower_bounds,
-  //     upper_bounds);
+  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  std::vector<Real> lower_bounds, upper_bounds;
+  _mogp_handler.initialize(
+      getOutputCovarianceByName(parameters.get<UserObjectName>("output_covariance")),
+      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+      tune_parameters,
+      lower_bounds,
+      upper_bounds);
 }
 
 void

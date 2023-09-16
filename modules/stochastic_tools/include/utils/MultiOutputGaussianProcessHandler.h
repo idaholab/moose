@@ -12,6 +12,8 @@
 #include "Standardizer.h"
 #include <Eigen/Dense>
 
+#include "GaussianProcessHandler.h"
+
 #include "CovarianceFunctionBase.h"
 #include "OutputCovarianceBase.h"
 
@@ -123,7 +125,7 @@ public:
   Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
   // Computes Gradient of the loss function for Adam usage
-  std::vector<Real> getGradient(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  std::vector<Real> getGradient(RealEigenMatrix & inputs); // , RealEigenMatrix & outputs
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors
@@ -264,7 +266,12 @@ protected:
   unsigned int _batch_size;
 };
 
-} // StochasticTools namespac
+} // StochasticTools namespace
+
+// template <>
+// void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+// template <>
+// void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
 void dataStore(std::ostream & stream,

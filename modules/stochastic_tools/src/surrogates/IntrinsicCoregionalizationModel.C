@@ -29,13 +29,22 @@ void
 IntrinsicCoregionalizationModel::computeBCovarianceMatrix(RealEigenMatrix & B,
                                                           const std::vector<Real> & latent) const
 {
-}
-
-void
-IntrinsicCoregionalizationModel::computeFullCovarianceMatrix(RealEigenMatrix & kappa,
-                                                             const RealEigenMatrix & B,
-                                                             const RealEigenMatrix & K) const
-{
+  unsigned int siz = latent.size() / 2;
+  RealEigenMatrix B1(siz, 1);
+  RealEigenVector B2(siz);
+  unsigned int count = 0;
+  for (unsigned int ii = 0; ii < siz; ++ii)
+  {
+    B1(ii, 0) = latent[count];
+    ++count;
+  }
+  for (unsigned int ii = 0; ii < siz; ++ii)
+  {
+    B2(ii) = latent[count];
+    ++count;
+  }
+  RealEigenMatrix tmp = B2.asDiagonal();
+  B = B1 * B1.transpose() + tmp;
 }
 
 void
@@ -43,6 +52,18 @@ IntrinsicCoregionalizationModel::computeBGrad(RealEigenMatrix & BGrad,
                                               const std::vector<Real> & latent,
                                               const unsigned int & index) const
 {
+  unsigned int siz = latent.size() / 2;
+  RealEigenVector B1(siz);
+  BGrad.Zero(siz, siz);
+  if (index < siz)
+  {
+    for (unsigned int ii = 0; ii < siz; ++ii)
+      B1(ii) = latent[ii];
+    BGrad.col(index) = B1;
+    BGrad = BGrad + BGrad.transpose();
+  }
+  else
+    BGrad(index, index) = 1.0;
 }
 
 unsigned int

@@ -21,9 +21,9 @@ public:
   void computeBCovarianceMatrix(RealEigenMatrix & B, const std::vector<Real> & latent) const override;
 
   /// Generates the full Covariance Matrix given two points in the parameter space
-  void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
-                                   const RealEigenMatrix & B,
-                                   const RealEigenMatrix & K) const override;
+  // void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
+  //                                  const RealEigenMatrix & B,
+  //                                  const RealEigenMatrix & K) const override;
 
   /// Compute the gradient of the B matrix
   void computeBGrad(RealEigenMatrix & BGrad,

@@ -28,7 +28,7 @@ public:
   /// Generates the full Covariance Matrix given two points in the parameter space
   virtual void computeFullCovarianceMatrix(RealEigenMatrix & kappa,
                                            const RealEigenMatrix & B,
-                                           const RealEigenMatrix & K) const = 0;
+                                           const RealEigenMatrix & K) const;
 
   // /// Used for outputting Hyper-parameter settings
   // virtual void
@@ -61,7 +61,10 @@ public:
 
   // virtual void getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const;
 
-// protected:
+protected:
+  void kron(const RealEigenMatrix & mat_A,
+            const RealEigenMatrix & mat_B,
+            RealEigenMatrix & mat_req) const;
   // /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   // std::vector<Real> _length_factor;
 

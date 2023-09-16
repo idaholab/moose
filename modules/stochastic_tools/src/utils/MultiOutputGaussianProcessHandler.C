@@ -197,7 +197,7 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
     store_loss = getLoss(inputs, vectorize_out);
     if (show_optimization_details && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
-    grad1 = getGradient(inputs, vectorize_out);
+    grad1 = getGradient(inputs); // , vectorize_out
     for (unsigned int ii = 0; ii < _num_tunable_inp + _num_tunable_out; ++ii)
     {
       m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
@@ -245,7 +245,8 @@ MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMa
 }
 
 std::vector<Real>
-MultiOutputGaussianProcessHandler::getGradient(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+MultiOutputGaussianProcessHandler::getGradient(
+    RealEigenMatrix & inputs) // , RealEigenMatrix & outputs
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix B_grad(_B.rows(), _B.rows());
@@ -330,6 +331,25 @@ MultiOutputGaussianProcessHandler::petscVecToMap(
 
 } // StochasticTools namespace
 
+// template <>
+// void
+// dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+// {
+//   // Store the L matrix as opposed to the full matrix to avoid compounding
+//   // roundoff error and decomposition error
+//   RealEigenMatrix L(decomp.matrixL());
+//   dataStore(stream, L, context);
+// }
+
+// template <>
+// void
+// dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+// {
+//   RealEigenMatrix L;
+//   dataLoad(stream, L, context);
+//   decomp.compute(L * L.transpose());
+// }
+
 template <>
 void
 dataStore(std::ostream & stream,
@@ -343,7 +363,7 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.outputCovarType(), context);
   dataStore(stream, gp_utils.B(), context);
   dataStore(stream, gp_utils.kappaResultsSolve(), context);
-  dataStore(stream, gp_utils.kappaCholeskyDecomp(), context);
+  // dataStore(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
 }
@@ -361,7 +381,7 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.outputCovarType(), context);
   dataLoad(stream, gp_utils.B(), context);
   dataLoad(stream, gp_utils.kappaResultsSolve(), context);
-  dataLoad(stream, gp_utils.kappaCholeskyDecomp(), context);
+  // dataLoad(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }
