@@ -11,7 +11,6 @@
 #include "INSFVAttributes.h"
 #include "GatherRCDataElementThread.h"
 #include "GatherRCDataFaceThread.h"
-#include "SubProblem.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
 #include "NS.h"
@@ -21,6 +20,7 @@
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
 #include "NSFVUtils.h"
+#include "DisplacedProblem.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -106,6 +106,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
 {
+  _displaced = dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem));
+
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     _vel[tid] = std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
@@ -303,7 +305,7 @@ INSFVRhieChowInterpolator::execute()
   PARALLEL_TRY
   {
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers);
+    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers, _displaced);
     FVRange faces(_moose_mesh.ownedFaceInfoBegin(), _moose_mesh.ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }

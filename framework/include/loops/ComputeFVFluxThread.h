@@ -74,7 +74,8 @@ class ThreadedFaceLoop
 public:
   ThreadedFaceLoop(FEProblemBase & fe_problem,
                    const unsigned int nl_system_num,
-                   const std::set<TagID> & tags);
+                   const std::set<TagID> & tags,
+                   bool on_displaced);
 
   ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split split);
 
@@ -134,6 +135,9 @@ protected:
   THREAD_ID _tid;
   const unsigned int _nl_system_num;
 
+  /// Whether this loop is operating on the displaced mesh
+  const bool _on_displaced;
+
   /// The subdomain for the current element
   SubdomainID _subdomain;
 
@@ -167,11 +171,13 @@ private:
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
                                               const unsigned int nl_system_num,
-                                              const std::set<TagID> & tags)
+                                              const std::set<TagID> & tags,
+                                              const bool on_displaced)
   : _fe_problem(fe_problem),
     _mesh(fe_problem.mesh()),
     _tags(tags),
     _nl_system_num(nl_system_num),
+    _on_displaced(on_displaced),
     _zeroth_copy(true),
     _incoming_throw_on_error(Moose::_throw_on_error)
 {
@@ -184,6 +190,7 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::spl
     _mesh(x._mesh),
     _tags(x._tags),
     _nl_system_num(x._nl_system_num),
+    _on_displaced(x._on_displaced),
     _zeroth_copy(false),
     _incoming_throw_on_error(false)
 {
@@ -228,6 +235,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .queryInto(kernels);
   if (kernels.size() == 0)
     return;
@@ -326,7 +334,8 @@ class ComputeFVFluxThread : public ThreadedFaceLoop<RangeType>
 public:
   ComputeFVFluxThread(FEProblemBase & fe_problem,
                       const unsigned int nl_system_num,
-                      const std::set<TagID> & tags);
+                      const std::set<TagID> & tags,
+                      bool on_displaced);
 
   ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split);
 
@@ -367,6 +376,7 @@ protected:
   using ThreadedFaceLoop<RangeType>::_tid;
   using ThreadedFaceLoop<RangeType>::_tags;
   using ThreadedFaceLoop<RangeType>::_nl_system_num;
+  using ThreadedFaceLoop<RangeType>::_on_displaced;
   using ThreadedFaceLoop<RangeType>::_subdomain;
   using ThreadedFaceLoop<RangeType>::_neighbor_subdomain;
   using ThreadedFaceLoop<RangeType>::_blocks_exec_printed;
@@ -419,8 +429,9 @@ private:
 template <typename RangeType, typename AttributeTagType>
 ComputeFVFluxThread<RangeType, AttributeTagType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
                                                                       unsigned int nl_system_num,
-                                                                      const std::set<TagID> & tags)
-  : ThreadedFaceLoop<RangeType>(fe_problem, nl_system_num, tags),
+                                                                      const std::set<TagID> & tags,
+                                                                      bool on_displaced)
+  : ThreadedFaceLoop<RangeType>(fe_problem, nl_system_num, tags, on_displaced),
     _scaling_jacobian(fe_problem.computingScalingJacobian()),
     _scaling_residual(fe_problem.computingScalingResidual())
 {
@@ -509,6 +520,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::onBoundary(const FaceInfo & fi
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
@@ -522,6 +534,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::onBoundary(const FaceInfo & fi
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
@@ -703,6 +716,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::subdomainChanged()
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribSubdomains>(_subdomain)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -762,6 +776,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::neighborSubdomainChanged()
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribSubdomains>(_neighbor_subdomain)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -802,6 +817,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .queryInto(bcs);
@@ -811,6 +827,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .queryInto(iks);
@@ -820,6 +837,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
       .query()
       .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .queryInto(kernels);
@@ -858,7 +876,8 @@ class ComputeFVFluxResidualThread : public ComputeFVFluxThread<RangeType, Attrib
 public:
   ComputeFVFluxResidualThread(FEProblemBase & fe_problem,
                               const unsigned int nl_system_num,
-                              const std::set<TagID> & tags);
+                              const std::set<TagID> & tags,
+                              bool on_displaced);
 
   ComputeFVFluxResidualThread(ComputeFVFluxResidualThread & x, Threads::split split);
 
@@ -866,6 +885,7 @@ protected:
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_fe_problem;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tid;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_nl_system_num;
+  using ComputeFVFluxThread<RangeType, AttribVectorTags>::_on_displaced;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_num_cached;
 
   void postFace(const FaceInfo & fi) override;
@@ -876,8 +896,11 @@ protected:
 
 template <typename RangeType>
 ComputeFVFluxResidualThread<RangeType>::ComputeFVFluxResidualThread(
-    FEProblemBase & fe_problem, const unsigned int nl_system_num, const std::set<TagID> & tags)
-  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, nl_system_num, tags)
+    FEProblemBase & fe_problem,
+    const unsigned int nl_system_num,
+    const std::set<TagID> & tags,
+    bool on_displaced)
+  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, nl_system_num, tags, on_displaced)
 {
 }
 
@@ -906,7 +929,8 @@ class ComputeFVFluxJacobianThread : public ComputeFVFluxThread<RangeType, Attrib
 public:
   ComputeFVFluxJacobianThread(FEProblemBase & fe_problem,
                               const unsigned int nl_system_num,
-                              const std::set<TagID> & tags);
+                              const std::set<TagID> & tags,
+                              bool on_displaced);
 
   ComputeFVFluxJacobianThread(ComputeFVFluxJacobianThread & x, Threads::split split);
 
@@ -923,8 +947,11 @@ protected:
 
 template <typename RangeType>
 ComputeFVFluxJacobianThread<RangeType>::ComputeFVFluxJacobianThread(
-    FEProblemBase & fe_problem, const unsigned int nl_system_num, const std::set<TagID> & tags)
-  : ComputeFVFluxThread<RangeType, AttribMatrixTags>(fe_problem, nl_system_num, tags)
+    FEProblemBase & fe_problem,
+    const unsigned int nl_system_num,
+    const std::set<TagID> & tags,
+    bool on_displaced)
+  : ComputeFVFluxThread<RangeType, AttribMatrixTags>(fe_problem, nl_system_num, tags, on_displaced)
 {
 }
 
@@ -958,7 +985,8 @@ public:
   ComputeFVFluxRJThread(FEProblemBase & fe_problem,
                         const unsigned int nl_system_num,
                         const std::set<TagID> & vector_tags,
-                        const std::set<TagID> & /*matrix_tags*/);
+                        const std::set<TagID> & /*matrix_tags*/,
+                        bool on_displaced);
 
   ComputeFVFluxRJThread(ComputeFVFluxRJThread & x, Threads::split split);
 
@@ -984,8 +1012,10 @@ template <typename RangeType>
 ComputeFVFluxRJThread<RangeType>::ComputeFVFluxRJThread(FEProblemBase & fe_problem,
                                                         const unsigned int nl_system_num,
                                                         const std::set<TagID> & vector_tags,
-                                                        const std::set<TagID> & /*matrix_tags*/)
-  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, nl_system_num, vector_tags)
+                                                        const std::set<TagID> & /*matrix_tags*/,
+                                                        bool on_displaced)
+  : ComputeFVFluxThread<RangeType, AttribVectorTags>(
+        fe_problem, nl_system_num, vector_tags, on_displaced)
 {
 }
 
@@ -1073,6 +1103,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
@@ -1082,6 +1113,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribDisplaced>(_on_displaced)
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
