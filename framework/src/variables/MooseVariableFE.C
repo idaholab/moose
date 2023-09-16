@@ -1010,32 +1010,6 @@ MooseVariableFE<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg 
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::GradientType
-MooseVariableFE<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
-                                              const StateArg & state) const
-{
-  evaluateOnElement(elem_qp, state, /*query_cache=*/true);
-  const auto qp = elem_qp.qp;
-  mooseAssert(qp < _current_elem_qp_functor_gradient.size(),
-              "The requested " << qp << " is outside our gradient size");
-  return _current_elem_qp_functor_gradient[qp];
-}
-
-template <typename OutputType>
-typename MooseVariableFE<OutputType>::DotType
-MooseVariableFE<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
-{
-  mooseAssert(_time_integrator && _time_integrator->dt(),
-              "A time derivative is being requested but we do not have a time integrator so we'll "
-              "have no idea how to compute it");
-  evaluateOnElement(elem_qp, state, /*query_cache=*/true);
-  const auto qp = elem_qp.qp;
-  mooseAssert(qp < _current_elem_qp_functor_dot.size(),
-              "The requested " << qp << " is outside our dot size");
-  return _current_elem_qp_functor_dot[qp];
-}
-
-template <typename OutputType>
 typename MooseVariableFE<OutputType>::ValueType
 MooseVariableFE<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
@@ -1067,6 +1041,46 @@ MooseVariableFE<OutputType>::evaluate(const ElemPointArg & elem_point_arg,
   mooseAssert(qp < _current_elem_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
   return _current_elem_qp_functor_sln[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::GradientType
+MooseVariableFE<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
+                                              const StateArg & state) const
+{
+  evaluateOnElement(elem_qp, state, /*query_cache=*/true);
+  const auto qp = elem_qp.qp;
+  mooseAssert(qp < _current_elem_qp_functor_gradient.size(),
+              "The requested " << qp << " is outside our gradient size");
+  return _current_elem_qp_functor_gradient[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::DotType
+MooseVariableFE<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  evaluateOnElement(elem_qp, state, /*query_cache=*/true);
+  const auto qp = elem_qp.qp;
+  mooseAssert(qp < _current_elem_qp_functor_dot.size(),
+              "The requested " << qp << " is outside our dot size");
+  return _current_elem_qp_functor_dot[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::DotType
+MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
+{
+  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  // We can use whatever we want for the point argument since it won't be used
+  const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
+  evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
+  const auto qp = elem_qp_arg.qp;
+  mooseAssert(qp < _current_elem_qp_functor_dot.size(),
+              "The requested " << qp << " is outside our solution size");
+  return _current_elem_qp_functor_dot[qp];
 }
 
 template <typename OutputType>
