@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object is responsible for generating the following filed for a [SIMPLE.md]-type
+This object is responsible for generating the following fields for a [SIMPLE.md]-type
 segregated solver:
 
 - $A^{-1}$ (inverse of the matrix diagonal) used as a diffusivity for the pressure equation.
