@@ -110,7 +110,12 @@ public:
   }
 
   /// Called if a MooseException is caught anywhere during the computation.
-  virtual void caughtMooseException(MooseException &) {}
+  void caughtMooseException(MooseException & e)
+  {
+    Threads::spin_mutex::scoped_lock lock(threaded_element_mutex);
+    std::string what(e.what());
+    _fe_problem.setException(what);
+  }
 
 protected:
   /// Print list of object types executed and in which order
