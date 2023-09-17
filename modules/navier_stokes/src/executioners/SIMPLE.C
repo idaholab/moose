@@ -1045,7 +1045,7 @@ SIMPLE::execute()
       Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
 
       iteration_counter = 0;
-      std::vector<Real> passive_scalar_residuals(1.0, _passive_scalar_systems.size());
+      std::vector<Real> passive_scalar_residuals(_passive_scalar_systems.size(), 1.0);
       while (iteration_counter < _num_iterations &&
              !converged(passive_scalar_residuals, _passive_scalar_absolute_tolerance))
       {

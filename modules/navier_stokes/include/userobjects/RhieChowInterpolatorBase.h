@@ -68,9 +68,10 @@ public:
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
 
   /**
-   * makes sure coefficient data gets communicated on both sides of a given boundary
+   * makes sure coefficient data gets communicated on both sides of a given boundary. This
+   * is a virtual function, mostly used for monolithic approaches.
    */
-  virtual void ghostADataOnBoundary(const BoundaryID boundary_id) {}
+  virtual void ghostADataOnBoundary(const BoundaryID /*boundary_id*/) {}
 
   /**
    * @return The pressure variable corresponding to the provided thread ID
