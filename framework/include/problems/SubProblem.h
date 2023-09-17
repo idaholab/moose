@@ -888,6 +888,11 @@ public:
                                          const std::vector<VectorTag> & input_vector_tags,
                                          std::set<TagID> & selected_tags);
 
+  /**
+   * reinitialize the finite volume assembly data for the provided face and thread
+   */
+  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
