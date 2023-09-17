@@ -4,6 +4,7 @@ Content:
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
+            - ../../../tutorials/tutorial02_multiapps/doc/content/getting_started/examples_and_tutorials/tutorial02_multiapps/images/coupling.png
             - large_media/tutorials/darcy_thermo_mech/*
             - large_media/testing/*
             - large_media/tutorials/INL_Hex_Light_Presentation_Background_Thin.png
@@ -26,6 +27,7 @@ Content:
             - source/relationshipmanagers/RelationshipManager.md
             - source/outputs/Exodus.md
             - source/meshgenerators/FileMeshGenerator.md
+            - source/meshgenerators/MeshDiagnosticsGenerator.md
     modules:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
@@ -54,6 +56,7 @@ Renderer:
 
 Extensions:
     disable_defaults: True
+    MooseDocs.extensions.alert: default
     MooseDocs.extensions.comment: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.core: default
