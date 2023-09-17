@@ -204,6 +204,9 @@ protected:
   /// the system object for variable 2
   SystemBase & _sys2;
 
+  MooseVariableFV<Real> & _var1;
+  MooseVariableFV<Real> & _var2;
+
   /// The Assembly object for system 1
   Assembly & _assembly1;
 
