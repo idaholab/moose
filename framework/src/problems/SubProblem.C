@@ -1182,6 +1182,13 @@ SubProblem::getCoordSystem(SubdomainID sid) const
   return mesh().getCoordSystem(sid);
 }
 
+void
+SubProblem::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
+{
+  for (const auto nl : make_range(numNonlinearSystems()))
+    assembly(tid, nl).reinitFVFace(fi);
+}
+
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(THREAD_ID tid,
                               const std::string & var_name,

@@ -2031,12 +2031,6 @@ public:
   MooseAppCoordTransform & coordTransform();
 
   std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
-
-  /**
-   * reinitialize the finite volume assembly data for the provided face and thread
-   */
-  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
-
   unsigned int currentNlSysNum() const override;
 
   /**

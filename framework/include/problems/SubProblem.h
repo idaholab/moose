@@ -878,6 +878,11 @@ public:
    */
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const = 0;
 
+  /**
+   * reinitialize the finite volume assembly data for the provided face and thread
+   */
+  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

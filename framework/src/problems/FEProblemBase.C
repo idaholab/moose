@@ -8104,13 +8104,6 @@ FEProblemBase::coordTransform()
   return mesh().coordTransform();
 }
 
-void
-FEProblemBase::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
-{
-  for (auto & assembly : _assembly[tid])
-    assembly->reinitFVFace(fi);
-}
-
 unsigned int
 FEProblemBase::currentNlSysNum() const
 {
