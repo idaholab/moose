@@ -132,12 +132,6 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV interface kernels do not yet support displaced mesh");
 
-  if (!_var1.isFV())
-    paramError("variable1", "Variable 1 should be a finite volume variable!");
-
-  if (!_var2.isFV())
-    paramError("variable2", "Variable 2 should be a finite volume variable!");
-
   _subproblem.haveADObjects(true);
   addMooseVariableDependency(&_var1);
   addMooseVariableDependency(&_var2);
@@ -230,9 +224,6 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
   auto & assembly_neigh = _elem_is_one ? _assembly2 : _assembly1;
 
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
-
-  std::cout << "Computing residual" << _subproblem.currentNlSysNum() << " "
-            << MetaPhysicL::raw_value(r) << std::endl;
 
   addResidual(r, var_elem_num, assembly_elem, false);
   addResidual(-r, var_neigh_num, assembly_neigh, true);
