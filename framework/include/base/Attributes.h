@@ -481,11 +481,11 @@ private:
 class AttribDisplaced : public Attribute
 {
 public:
-  typedef char Key;
+  typedef signed char Key;
   void setFrom(Key k) { _val = k; }
 
   AttribDisplaced(TheWarehouse & w) : Attribute(w, "displaced") {}
-  AttribDisplaced(TheWarehouse & w, char t) : Attribute(w, "displaced"), _val(t) {}
+  AttribDisplaced(TheWarehouse & w, Key t) : Attribute(w, "displaced"), _val(t) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
@@ -493,7 +493,7 @@ public:
   clonefunc(AttribDisplaced);
 
 private:
-  char _val = -1;
+  Key _val = -1;
 };
 
 #undef clonefunc
