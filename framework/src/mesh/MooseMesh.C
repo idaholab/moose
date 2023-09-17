@@ -3370,15 +3370,12 @@ MooseMesh::buildFiniteVolumeInfo() const
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
       buildActiveSideList();
   std::map<Keytype, std::set<boundary_id_type>> side_map;
-  for (auto & e : side_list)
+  for (auto & [elem_id, side, bc_id] : side_list)
   {
-    const Elem * elem = _mesh->elem_ptr(std::get<0>(e));
-    Keytype key(elem, std::get<1>(e));
-    auto it = side_map.find(key);
-    if (it == side_map.end())
-      side_map[key] = {std::get<2>(e)};
-    else
-      side_map[key].insert(std::get<2>(e));
+    const Elem * elem = _mesh->elem_ptr(elem_id);
+    Keytype key(elem, side);
+    auto & bc_set = side_map[key];
+    bc_set.insert(bc_id);
   }
 
   _face_info.clear();
