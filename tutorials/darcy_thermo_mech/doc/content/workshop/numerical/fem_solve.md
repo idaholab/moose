@@ -246,6 +246,27 @@ often results in decreased solve time overall.
 
 !---
 
+Relies on two techniques:
+
+- chain rule
+
+!equation
+\dfrac{\partial f(g(x))}{\partial x} = \dfrac{\partial f(g(x))}{\partial g(x)} \dfrac{\partial g(x)}{\partial x}
+
+- operator overloading
+
+\equation
+\bold{x} = (x, \dfrac{\partial x}{\partial x}, \dfrac{\partial x}{\partial y}) = (x, 1, 0) \\
+\bold{y} = (y, \dfrac{\partial y}{\partial x}, \dfrac{\partial y}{\partial y}) = (y, 0, 1) \\
+x + y = (x + y, 1, 1) \\
+x * y = (x * y, y, x)
+
+One thing to note is that the derivatives are with regards to the degrees of freedom, but
+the residual is computed at quadrature points! There are therefore often several non-zero coefficients
+even for simply $_u[_qp]$.
+
+!---
+
 ## Manual Jacobian Calculation
 
 The remainder of the tutorial will focus on using [!ac](AD) for computing
