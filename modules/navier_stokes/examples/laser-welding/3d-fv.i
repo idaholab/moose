@@ -57,6 +57,10 @@ cp='cp'
   [pressure]
     type = INSFVPressureVariable
   []
+  [lambda]
+    family = SCALAR
+    order = FIRST
+  []
   [disp_x]
   []
   [disp_y]
@@ -97,6 +101,13 @@ cp='cp'
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     use_displaced_mesh = true
+  []
+  [pin_zero_pressure]
+    type = FVPointValueConstraint
+    variable = pressure
+    lambda = lambda
+    phi0 = 0.0
+    point = '0 0 0'
   []
 
   # momentum equations
