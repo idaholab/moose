@@ -28,7 +28,8 @@ requires the positions to be provided as a set of $(x, y, z)$ coordinates for ea
 
 The number of coordinate sets determines the actual number of sub-applications created.  If there is
 a large number of positions a file can be provided instead using the
-`positions_file` parameter.
+`positions_file` parameter. For alternative ways to specify `positions`, notably dynamically during the simulation,
+use the `[Positions]` block.
 
 
 - The $(x, y, z)$ coordinates are a vector that is being added to the coordinates of the sub-app's
@@ -165,10 +166,11 @@ Now for a more complicated scenario: multiple sub-apps within the same MultiApp.
 
 This is achieved by giving each sub-app a `position` where that sub-app's domain lies within the parent app's domain.
 
-There are two ways to provide positions:
+There are three ways to provide positions:
 
 - `positions`: Space separated x,y,z triplets for the position of each sub-app
 - `positions_file`: A filename that includes x,y,z triplets (one per line)
+- in the `[Positions]` block, from the mesh, from various files, etc
 
 The `positions_file` option is useful if you have MANY sub-apps (for instance: tens of thousands!).
 
