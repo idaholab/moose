@@ -2908,6 +2908,8 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+    _reinit_displaced_elem = true;
   addObject<FVKernel>(fv_kernel_name, name, parameters);
 }
 
