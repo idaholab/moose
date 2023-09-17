@@ -737,16 +737,19 @@ public:
                                             ConstBndNodeRange & bnd_node_range);
 
   // Materials /////
-  virtual void addMaterial(const std::string & kernel_name,
+  virtual void addMaterial(const std::string & material_name,
                            const std::string & name,
                            InputParameters & parameters);
   virtual void addMaterialHelper(std::vector<MaterialWarehouse *> warehouse,
-                                 const std::string & kernel_name,
+                                 const std::string & material_name,
                                  const std::string & name,
                                  InputParameters & parameters);
-  virtual void addInterfaceMaterial(const std::string & kernel_name,
+  virtual void addInterfaceMaterial(const std::string & material_name,
                                     const std::string & name,
                                     InputParameters & parameters);
+  void addFunctorMaterial(const std::string & functor_material_name,
+                          const std::string & name,
+                          InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.

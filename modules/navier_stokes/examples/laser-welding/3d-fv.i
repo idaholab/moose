@@ -360,7 +360,6 @@ cp='cp'
     type = AriaLaserWeld304LStainlessSteelFunctorMaterial
     temperature = T
     beta = 1e7
-    use_displaced_mesh = true
   []
   # [const]
   #   type = GenericConstantMaterial
@@ -372,7 +371,6 @@ cp='cp'
     type = ADGenericVectorFunctorMaterial
     prop_names = 'disp_vec'
     prop_values = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
   []
   [vel]
     type = ADGenericVectorFunctorMaterial
@@ -381,7 +379,6 @@ cp='cp'
   []
   [h]
     type = INSFVEnthalpyMaterial
-    use_displaced_mesh = true
     rho = 'rho'
     temperature = T
   []
