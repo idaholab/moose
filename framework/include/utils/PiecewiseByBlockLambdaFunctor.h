@@ -156,6 +156,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
     _elem_point_functor.emplace(block_id, my_lammy);
+    _node_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
