@@ -30,7 +30,7 @@
     exodiff = 2d-segregated-velocity-rz-slip-friction.e
     cli_args = "FVKernels/inactive='' Outputs/file_base='2d-segregated-velocity-rz-slip-friction'"
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
-                  "cylindrical channel with slip boundary conditions using the SIMPLE algorithm."
+                  "cylindrical channel with homogenized friction using the SIMPLE algorithm."
   []
   [with-energy]
     type = 'Exodiff'

@@ -9,28 +9,18 @@
 
 #include "INSFVRhieChowInterpolatorSegregated.h"
 #include "INSFVAttributes.h"
-#include "GatherRCDataElementThread.h"
-#include "GatherRCDataFaceThread.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
-#include "SystemBase.h"
 #include "NS.h"
 #include "Assembly.h"
 #include "INSFVVelocityVariable.h"
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
-#include "FVElementalKernel.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
-#include "libmesh/parallel_algebra.h"
-#include "libmesh/remote_elem.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
-#include "timpi/parallel_sync.h"
 
 #include "NonlinearSystem.h"
 #include "libmesh/petsc_matrix.h"
@@ -140,7 +130,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
         const Moose::FaceArg face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-        _face_velocity[fi->id()] = raw_value((*_vel)(face, Moose::currentState()));
+        _face_velocity[fi->id()] = MetaPhysicL::raw_value((*_vel)(face, Moose::currentState()));
       }
       // On the boundary, we just take the boundary values
       else
@@ -151,7 +141,8 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
         const Moose::FaceArg boundary_face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-        _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face, Moose::currentState()));
+        _face_velocity[fi->id()] =
+            MetaPhysicL::raw_value((*_vel)(boundary_face, Moose::currentState()));
       }
     }
   }
@@ -189,7 +180,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
             fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
         RealVectorValue Ainv;
-        RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
+        RealVectorValue HbyA = MetaPhysicL::raw_value(_HbyA(face, time_arg));
 
         interpolate(Moose::FV::InterpMethod::Average,
                     Ainv,
@@ -198,7 +189,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
                     *fi,
                     true);
 
-        RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
+        RealVectorValue grad_p = MetaPhysicL::raw_value(_p->gradient(face, time_arg));
         for (const auto comp_index : make_range(_dim))
           _face_velocity[fi->id()](comp_index) =
               -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
@@ -213,12 +204,13 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
         // If we have a dirichlet boundary conditions, this sill give us the exact value of the
         // velocity on the face as expected (see populateHbyA())
         if (_u->isDirichletBoundaryFace(*fi, boundary_elem, time_arg))
-          _face_velocity[fi->id()] = -raw_value(_HbyA(boundary_face, time_arg));
+          _face_velocity[fi->id()] = -MetaPhysicL::raw_value(_HbyA(boundary_face, time_arg));
         else
         {
-          const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
-          const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
-          const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
+          const RealVectorValue & Ainv = MetaPhysicL::raw_value(_Ainv(boundary_face, time_arg));
+          const RealVectorValue & HbyA = MetaPhysicL::raw_value(_HbyA(boundary_face, time_arg));
+          const RealVectorValue & grad_p =
+              MetaPhysicL::raw_value(_p->gradient(boundary_face, time_arg));
           for (const auto comp_index : make_range(_dim))
             _face_velocity[fi->id()](comp_index) =
                 -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
@@ -316,7 +308,7 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
             fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
         if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
-          _HbyA[fi->id()] = -raw_value((*_vel)(boundary_face, Moose::currentState()));
+          _HbyA[fi->id()] = -MetaPhysicL::raw_value((*_vel)(boundary_face, Moose::currentState()));
         else
           for (const auto comp_index : make_range(_dim))
           {
@@ -349,32 +341,6 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     var_nums.push_back(_momentum_implicit_systems[1]->variable_number(_v->name()));
   if (_w)
     var_nums.push_back(_momentum_implicit_systems[2]->variable_number(_w->name()));
-
-  // We will need the petsc interface in this case, until the libmesh functions are there
-  // PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
-
-  // Data structure to manipulate 1/A_i where A_i is the diagonal of the momentum system matrix
-  // std::unique_ptr<NumericVector<Number>> Ainv =
-  //     momentum_system->current_local_solution->zero_clone();
-  // PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
-
-  // A working vector which will be used as a placeholder for partial results
-  // std::unique_ptr<NumericVector<Number>> working_vector =
-  //     momentum_system->current_local_solution->zero_clone();
-  // PetscVector<Number> * working_vector_petsc =
-  //     dynamic_cast<PetscVector<Number> *>(working_vector.get());
-
-  // Populating 1/A first
-  // mmat->get_diagonal(*Ainv_petsc);
-
-  // if (verbose)
-  // {
-  //   _console << "A" << std::endl;
-  //   Ainv_petsc->print();
-  // }
-
-  // *working_vector_petsc = 1.0;
-  // Ainv_petsc->pointwise_divide(*working_vector_petsc, *Ainv_petsc);
 
   _HbyA_raw.clear();
   for (auto system_i : index_range(_momentum_systems))
@@ -439,7 +405,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
         const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
         const auto dof_index = elem->dof_number(momentum_system->number(), var_nums[system_i], 0);
-        _Ainv[elem->id()](system_i) = raw_value(epsilon(_tid)(elem_arg, state)) *
+        _Ainv[elem->id()](system_i) = MetaPhysicL::raw_value(epsilon(_tid)(elem_arg, state)) *
                                       (*Ainv_petsc)(dof_index)*volume * coord_multiplier;
       }
     }

@@ -29,6 +29,8 @@ SIMPLE::validParams()
   InputParameters params = Executioner::validParams();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
 
+  params.addClassDescription("Solves the Navier-Stokes equations using the SIMPLE algorithm.");
+
   /*
    * The names of the different systems in the segregated solver
    */
