@@ -1,8 +1,8 @@
 ## Build Issues id=buildissues
 
-Build issues are normally caused by an invalid environment, or perhaps an update to your repository
-occurred, and you now have a mismatch between MOOSE and your application, or a combination of the
-two with the moose-libmesh Conda package being out of date.
+Build issues are commonly caused by an invalid environment, an update to your repository (leading to
+a mismatch between MOOSE and your application), or one of our MOOSE Conda packages being out of
+date.
 
 - Verify the Conda Environment is active and up to date, with the latest version of our moose
   packages:
@@ -15,10 +15,8 @@ two with the moose-libmesh Conda package being out of date.
   if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
   !alert note
-  When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your
-  application. While specific updates to `moose-dev` may not have occurred,
-  there are several other libraries out of our control which may have been upgraded, requiring you
-  to rebuild.
+  Whenever an update is performed in Conda, an update should also be performed on your MOOSE
+  repository, and vice versa. It is important to keep both of these in sync.
 
 - Verify the MOOSE repository is up to date, with the correct vetted version of libMesh:
 
@@ -111,6 +109,28 @@ two with the moose-libmesh Conda package being out of date.
   Hello world from processor my_hostname, rank 3 out of 4 processors
   Hello world from processor my_hostname, rank 2 out of 4 processors
   ```
+
+- Sometimes a build will fail due to running out of memory. When a build fails in this way, it is
+  not always apparent. The compiler will simply die while not explaining why:
+
+  ```bash
+  make -j 8
+  ...<trimmed>
+  Compiling C++ (in opt mode) moose/framework/contrib/exodiff/FileInfo.C...
+  Compiling C++ (in opt mode) moose/framework/contrib/exodiff/stringx.C...
+  Compiling C++ (in opt mode) moose/framework/contrib/exodiff/iqsort.C...
+  (standard input): Assembler message:
+  (standard input): 488982: Warning: end of file not at end of a line; newline inserted
+  x86_64-conda-linux-gnu-c++: fatal error: Killed signal terminated program cc1plus
+  compilation terminated.
+  make: *** [moose/framework/build.mk:150: moose/test/build/unity_src/object.x86_64-conda-linux-gnu.opt.lo] Error 1
+  make: *** Waiting for unfinished jobs....
+  ```
+
+  If you are receiving a similar result, try reducing how many cores you are compiling with (try
+  `make -j 4` instead). Each core consumes roughly 2GB of RAM (more if you are compiling in debug
+  mode). Errors of this type are common among users who may be running on some form of virtual
+  machine, or when operating within an HPC cluster with strict resource availability guidelines.
 
 - If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again.
   If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to
