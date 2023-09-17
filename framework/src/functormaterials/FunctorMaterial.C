@@ -12,7 +12,9 @@
 InputParameters
 FunctorMaterial::validParams()
 {
-  return Material::validParams();
+  auto params = Material::validParams();
+  params.suppressParameter<bool>("use_displaced_mesh");
+  return params;
 }
 
 FunctorMaterial::FunctorMaterial(const InputParameters & parameters) : Material(parameters) {}

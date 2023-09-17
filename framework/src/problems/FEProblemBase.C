@@ -3205,6 +3205,36 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 }
 
 void
+FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+
+  auto add_functor_materials = [&](const auto & parameters, const auto & name)
+  {
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      // Create the general Block/Boundary MaterialBase object
+      std::shared_ptr<MaterialBase> material =
+          _factory.create<MaterialBase>(functor_material_name, name, parameters, tid);
+
+      _all_materials.addObject(material, tid);
+      _materials.addObject(material, tid);
+    }
+  };
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  add_functor_materials(parameters, name);
+  if (_displaced_problem)
+  {
+    auto disp_params = parameters;
+    disp_params.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    add_functor_materials(disp_params, name + "_displaced");
+  }
+}
+
+void
 FEProblemBase::addMaterial(const std::string & mat_name,
                            const std::string & name,
                            InputParameters & parameters)
