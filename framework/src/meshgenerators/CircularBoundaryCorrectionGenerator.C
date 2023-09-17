@@ -374,7 +374,12 @@ CircularBoundaryCorrectionGenerator::circularCenterCalculator(const std::vector<
 
   for (const auto & pt : pts_list)
     if (!MooseUtils::absoluteFuzzyEqual((pt - circ_origin).norm(), radius, tol))
-      paramError("input_mesh_circular_boundaries", "the boundary provided is not circular.");
+      paramError("input_mesh_circular_boundaries",
+                 "the boundary provided is not circular. The generator found point " +
+                     Moose::stringify(circ_origin) +
+                     " to be the likely circle origin to the boundary, with a radius of " +
+                     std::to_string(radius) + ". However, boundary node " + Moose::stringify(pt) +
+                     " is at a radius of " + std::to_string((pt - circ_origin).norm()));
   return circ_origin;
 }
 
