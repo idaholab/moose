@@ -90,11 +90,16 @@ ComputeResidualAndJacobianThread::join(const ComputeResidualAndJacobianThread & 
 void
 ComputeResidualAndJacobianThread::determineObjectWarehouses()
 {
-  // if (_vector_tags.size() &&
-  //     _vector_tags.size() != _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
-  //   mooseError("Can only currently compute the residual and Jacobian together if we are computing
-  //   "
-  //              "the full suite of residual tags");
+  // We need to filter out vector tags that don't belong to the current nonlinear system
+  const auto & residual_vector_tags = _fe_problem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+  unsigned int vector_tag_counter = 0;
+  for (const auto & residual_vector_tag : residual_vector_tags)
+    if (_nl.hasVector(residual_vector_tag._id))
+      vector_tag_counter++;
+
+  if (_vector_tags.size() && _vector_tags.size() != vector_tag_counter)
+    mooseError("Can only currently compute the residual and Jacobian together if we are computing "
+               "the full suite of residual tags");
 
   if (_matrix_tags.size() && _matrix_tags.size() != _fe_problem.numMatrixTags())
     mooseError("Can only currently compute the residual and Jacobian together if we are computing "
