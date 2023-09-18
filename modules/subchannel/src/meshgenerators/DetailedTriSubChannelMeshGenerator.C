@@ -464,12 +464,13 @@ DetailedTriSubChannelMeshGenerator::generate()
   }
 
   // Build an array of points that represent a cross section of a top left corner subchannel
-  // cell. The points are ordered in this fashion:
-  // 6
-  //        5
-  //    0
-  // 1 2         4
-  //   3
+  // cell. The points are ordered in this fashion (x direction towards point 4, y direction towards
+  // point 6):
+  //    5       6
+  //
+  //      0
+  // 4        2 3
+  //        1
   std::array<Point, points_per_corner> corner_points;
   {
     for (unsigned int ii = 0; ii < points_per_sixth; ii++)
@@ -489,8 +490,9 @@ DetailedTriSubChannelMeshGenerator::generate()
                                                 -side_length * std::sin(angle) * shrink_factor,
                                                 0);
     corner_points[points_per_sixth + 2] =
-        Point(0.5 * _duct_to_pin_gap * shrink_factor * std::tan(libMesh::pi / 6),
-              0.5 * _duct_to_pin_gap * shrink_factor / std::cos(libMesh::pi / 6),
+        Point(side_length * std::sin(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor *
+                  std::tan(libMesh::pi / 6),
+              side_length * std::sin(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor,
               0);
     corner_points[points_per_sixth + 3] =
         Point(-side_length * std::cos(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor,

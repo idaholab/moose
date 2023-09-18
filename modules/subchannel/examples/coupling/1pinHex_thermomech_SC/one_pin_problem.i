@@ -2,18 +2,15 @@
 # “Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
 # ”Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
 T_in = 588.5
-flow_area = 0.0004980799633447909 #m2
-mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 1 #3
     n_cells = 40
-    flat_to_flat = 1.2e-2 # 3.41e-2
+    flat_to_flat = 2.1e-2 # 3.41e-2
     heated_length = 1.0 # 0.5334
-    # unheated_length_entry = 0.4064
-    # unheated_length_exit = 0.0762
     rod_diameter = 5.84e-3
     pitch = 7.26e-3
     dwire = 1.42e-3
@@ -28,8 +25,6 @@ P_out = 2.0e5 # Pa
     nrings = 1 #3
     n_cells = 40
     heated_length = 1.0 # 0.5334
-    # unheated_length_entry = 0.4064
-    # unheated_length_exit = 0.0762
     pitch = 7.26e-3
   []
 []
@@ -102,7 +97,7 @@ P_out = 2.0e5 # Pa
   CT = 2.6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
+  compute_power = false
   P_tol = 1.0e-4
   T_tol = 1.0e-4
   implicit = true
@@ -214,22 +209,9 @@ P_out = 2.0e5 # Pa
   type = Steady
 []
 
-[Postprocessors]
-  [total_pressure_drop]
-    type = SubChannelPressureDrop
-    execute_on = "timestep_end"
-  []
-  [T]
-    type = SubChannelPointValue
-    variable = T
-    index = 36
-    execute_on = "timestep_end"
-    height = 0.7
-  []
-[]
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
+###############################################################################
+####  A multiapp that projects data to a detailed mesh
+###############################################################################
 
 # [MultiApps]
 #   [viz]
@@ -240,9 +222,14 @@ P_out = 2.0e5 # Pa
 # []
 
 # [Transfers]
-#   [xfer]
+#   [subchannel_transfer]
 #     type = MultiAppDetailedSolutionTransfer
 #     to_multi_app = viz
-#     variable = 'mdot SumWij P DP h T rho mu q_prime S'
+#     variable = 'mdot SumWij P DP h T rho mu S'
+#   []
+#   [pin_transfer]
+#     type = MultiAppDetailedPinSolutionTransfer
+#     to_multi_app = viz
+#     variable = 'Tpin q_prime Dpin'
 #   []
 # []
