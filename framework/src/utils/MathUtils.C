@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MathUtils.h"
-#include "libmesh/utility.h"
-#include "libmesh/point.h"
 #include "MooseUtils.h"
 
 namespace MathUtils
@@ -205,14 +203,16 @@ multiIndex(unsigned int dim, unsigned int order)
 }
 
 Point
-barycentricToCartesian2D(const libMesh::Point & p0,
-                         const libMesh::Point & p1,
-                         const libMesh::Point & p2,
+barycentricToCartesian2D(const Point & p0,
+                         const Point & p1,
+                         const Point & p2,
                          const Real b0,
                          const Real b1,
                          const Real b2)
 {
-  libMesh::Point center;
+  mooseAssert(!MooseUtils::isZero(b0 + b1 + b2 - 1.0), "Barycentric coordinates must sum to one!");
+
+  Point center;
 
   for (unsigned int d = 0; d < 2; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2;
@@ -223,16 +223,19 @@ barycentricToCartesian2D(const libMesh::Point & p0,
 }
 
 Point
-barycentricToCartesian3D(const libMesh::Point & p0,
-                         const libMesh::Point & p1,
-                         const libMesh::Point & p2,
-                         const libMesh::Point & p3,
+barycentricToCartesian3D(const Point & p0,
+                         const Point & p1,
+                         const Point & p2,
+                         const Point & p3,
                          const Real b0,
                          const Real b1,
                          const Real b2,
                          const Real b3)
 {
-  libMesh::Point center;
+  mooseAssert(!MooseUtils::isZero(b0 + b1 + b2 + b3 - 1.0),
+              "Barycentric coordinates must sum to one!");
+
+  Point center;
 
   for (unsigned int d = 0; d < 3; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2 + p3(d) * b3;
@@ -243,14 +246,8 @@ barycentricToCartesian3D(const libMesh::Point & p0,
 }
 
 Point
-circumcenter2D(const libMesh::Point & p0, const libMesh::Point & p1, const libMesh::Point & p2)
+circumcenter2D(const Point & p0, const Point & p1, const Point & p2)
 {
-  // Check to make sure points are not collinear
-  Real A = p0(0) * (p1(1) - p2(1)) + p1(0) * (p2(1) - p0(1)) + p2(0) * (p0(1) - p1(1));
-
-  if (MooseUtils::isZero(A))
-    mooseError("Cannot evaluate circumcenter. Points should be non-collinear.");
-
   // Square of triangle edge lengths
   Real edge01 = (p0 - p1).norm_sq();
   Real edge02 = (p0 - p2).norm_sq();
@@ -261,7 +258,13 @@ circumcenter2D(const libMesh::Point & p0, const libMesh::Point & p1, const libMe
   Real weight1 = edge02 * (edge01 + edge12 - edge02);
   Real weight2 = edge01 * (edge02 + edge12 - edge01);
 
-  Real inv_sum_weights = 1 / (weight0 + weight1 + weight2);
+  Real sum_weights = weight0 + weight1 + weight2;
+
+  // Check to make sure vertices are not collinear
+  if (MooseUtils::isZero(sum_weights))
+    mooseError("Cannot evaluate circumcenter. Points should be non-collinear.");
+
+  Real inv_sum_weights = 1.0 / sum_weights;
 
   // Barycentric coordinates
   Real b0 = weight0 * inv_sum_weights;
@@ -272,10 +275,7 @@ circumcenter2D(const libMesh::Point & p0, const libMesh::Point & p1, const libMe
 }
 
 Point
-circumcenter3D(const libMesh::Point & p0,
-               const libMesh::Point & p1,
-               const libMesh::Point & p2,
-               const libMesh::Point & p3)
+circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3)
 {
   // Square of tetrahedron edge lengths
   Real edge01 = (p0 - p1).norm_sq();
@@ -305,7 +305,7 @@ circumcenter3D(const libMesh::Point & p0,
   if (MooseUtils::isZero(sum_weights))
     mooseError("Cannot evaluate circumcenter. Points should be non-coplanar.");
 
-  Real inv_sum_weights = 1 / sum_weights;
+  Real inv_sum_weights = 1.0 / sum_weights;
 
   // Barycentric coordinates
   Real b0 = weight0 * inv_sum_weights;
