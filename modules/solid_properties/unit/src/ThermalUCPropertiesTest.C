@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "SolidPropertiesTestUtils.h"
 #include "ThermalUCPropertiesTest.h"
 
@@ -10,7 +19,7 @@ TEST_F(ThermalUCPropertiesTest, k)
   Real T;
 
   T = 800.0;
-  REL_TEST(_sp1->k_from_T(T), 21.57840004, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp1->k_from_T(T), 21.578400000000002, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp1->k_from_T, T, REL_TOL_DERIVATIVE);
 
   T = 500.0;
