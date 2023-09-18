@@ -205,14 +205,14 @@ multiIndex(unsigned int dim, unsigned int order)
 }
 
 Point
-barycentricToCartesian2D(const Point & p0,
-                         const Point & p1,
-                         const Point & p2,
+barycentricToCartesian2D(const libMesh::Point & p0,
+                         const libMesh::Point & p1,
+                         const libMesh::Point & p2,
                          const Real b0,
                          const Real b1,
                          const Real b2)
 {
-  Point center;
+  libMesh::Point center;
 
   for (unsigned int d = 0; d < 2; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2;
@@ -223,16 +223,16 @@ barycentricToCartesian2D(const Point & p0,
 }
 
 Point
-barycentricToCartesian3D(const Point & p0,
-                         const Point & p1,
-                         const Point & p2,
-                         const Point & p3,
+barycentricToCartesian3D(const libMesh::Point & p0,
+                         const libMesh::Point & p1,
+                         const libMesh::Point & p2,
+                         const libMesh::Point & p3,
                          const Real b0,
                          const Real b1,
                          const Real b2,
                          const Real b3)
 {
-  Point center;
+  libMesh::Point center;
 
   for (unsigned int d = 0; d < 3; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2 + p3(d) * b3;
@@ -243,7 +243,7 @@ barycentricToCartesian3D(const Point & p0,
 }
 
 Point
-circumcenter2D(const Point & p0, const Point & p1, const Point & p2)
+circumcenter2D(const libMesh::Point & p0, const libMesh::Point & p1, const libMesh::Point & p2)
 {
   // Check to make sure points are not collinear
   Real A = p0(0) * (p1(1) - p2(1)) + p1(0) * (p2(1) - p0(1)) + p2(0) * (p0(1) - p1(1));
@@ -272,7 +272,10 @@ circumcenter2D(const Point & p0, const Point & p1, const Point & p2)
 }
 
 Point
-circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3)
+circumcenter3D(const libMesh::Point & p0,
+               const libMesh::Point & p1,
+               const libMesh::Point & p2,
+               const libMesh::Point & p3)
 {
   // Square of tetrahedron edge lengths
   Real edge01 = (p0 - p1).norm_sq();
@@ -297,6 +300,11 @@ circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point
                  edge13 * edge02 * (edge01 + edge12 - edge02);
 
   Real sum_weights = weight0 + weight1 + weight2 + weight3;
+
+  // Check to make sure vertices are not coplanar
+  if (MooseUtils::isZero(sum_weights))
+    mooseError("Cannot evaluate circumcenter. Points should be non-coplanar.");
+
   Real inv_sum_weights = 1 / sum_weights;
 
   // Barycentric coordinates
@@ -304,10 +312,6 @@ circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point
   Real b1 = weight1 * inv_sum_weights;
   Real b2 = weight2 * inv_sum_weights;
   Real b3 = weight3 * inv_sum_weights;
-
-  // Check to make sure vertices are not coplanar
-  if (MooseUtils::isZero(sum_weights))
-    mooseError("Cannot evaluate circumcenter. Points should be non-coplanar.");
 
   return MathUtils::barycentricToCartesian3D(p0, p1, p2, p3, b0, b1, b2, b3);
 }
