@@ -89,7 +89,7 @@ RayTracingMeshOutput::filename()
   output << _file_base << ".e";
 
   // Add the _000x extension to the file
-  if (_file_num > 1)
+  if (_file_num > 0)
     output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
