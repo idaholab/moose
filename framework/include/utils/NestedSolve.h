@@ -82,7 +82,7 @@ public:
 
   /// Solve the N*N nonlinear equation system using a built-in Netwon-Raphson loop
   template <typename V, typename T>
-  void nonlinear(V & guess, T & compute);
+  void nonlinear(V & guess, T && compute);
 
   /// @{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
   /// with a custom backwards compatible convergence check that allows for looser tolerances.
@@ -401,7 +401,7 @@ NestedSolveTempl<is_ad>::nonlinearBounded(NSReal & guess,
 template <bool is_ad>
 template <typename V, typename T>
 void
-NestedSolveTempl<is_ad>::nonlinear(V & guess, T & compute)
+NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
 {
   V delta;
   V residual;
