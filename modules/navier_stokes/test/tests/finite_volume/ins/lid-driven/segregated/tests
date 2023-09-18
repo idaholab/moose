@@ -6,12 +6,14 @@
     input = 'lid-driven-segregated.i'
     exodiff = 'lid-driven-segregated_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm.'
+    recover = false # we don't support recovery for SIMPLE yet
   []
   [with-energy]
     type = 'Exodiff'
     input = 'lid-driven-segregated-energy.i'
     exodiff = 'lid-driven-segregated-energy_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations together with the energy eequation in a lid-driven cavity using the SIMPLE algorithm.'
+    recover = false # we don't support recovery for SIMPLE yet
   []
   [with-buoyancy]
     type = 'Exodiff'
@@ -19,5 +21,6 @@
     exodiff = 'lid-driven-segregated-boussinesq.e'
     cli_args = "FVKernels/inactive='' Outputs/file_base='lid-driven-segregated-boussinesq'"
     requirement = 'The system shall be able to solve the incompressible buoyant Navier-Stokes equations with the Boussinesq approximation using the .'
+    recover = false # we don't support recovery for SIMPLE yet
   []
 []

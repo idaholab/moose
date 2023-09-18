@@ -8,6 +8,7 @@
     requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
                   "in a 2D channel using the SIMPLE algorithm."
     abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
   []
   [2d-momentum-pressure-slip]
     type = 'Exodiff'
@@ -18,6 +19,7 @@
                   "in a 2D channel with slip and symmetry boundary conditions using the SIMPLE "
                   "algorithm."
     abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
   []
   [2d-momentum-friction]
     type = 'Exodiff'
@@ -29,6 +31,7 @@
                   "in a 2D channel with friction caused by porous media using the SIMPLE "
                   "algorithm."
     abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
   []
   [2d-heated]
     type = 'Exodiff'
@@ -37,5 +40,6 @@
     requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
                   "coupled with solid energy equation in a 2D channel using the SIMPLE algorithm."
     abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
   []
 []

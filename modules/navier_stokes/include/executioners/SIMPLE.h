@@ -47,8 +47,12 @@ public:
   /**
    * Compute a normalization factor which is applied to the linear residual to determine
    * convergence. This function is based on the description provided here:
-   * https://www.openfoam.com/documentation/guides/latest/doc/guide-solvers-residuals.html
-   * (Accessed 06/01/2023)
+   *  // @article{greenshields2022notes,
+   * title={Notes on computational fluid dynamics: General principles},
+   * author={Greenshields, Christopher J and Weller, Henry G},
+   * journal={(No Title)},
+   * year={2022}
+   * }
    * @param solution The solution vector
    * @param mat The system matrix
    * @param rhs The system right hand side
@@ -132,7 +136,7 @@ protected:
    * Implicitly constraint the system by adding a factor*(u-u_desired) to it at a desired dof
    * value. To make sure the conditioning of the matrix does not change significantly, factor
    * is chosen to be the diagonal component of the matrix coefficients for a given dof.
-   * @param mx The mmatrix of the system which needs to be constrained
+   * @param mx The matrix of the system which needs to be constrained
    * @param rhs The right hand side of the system which needs to be constrained
    * @param value The desired value for the solution field at a dof
    * @param dof_id The ID of the dof which needs to be constrained
@@ -152,8 +156,8 @@ protected:
 
   /**
    * Determine if the iterative process on a set of equations converged or not
-   * @param ns_residuals The residuals for the momnetum, pressure and energy equations.
-   * @param abs_tolerances The corresponding abolute tolerances.
+   * @param ns_residuals The current residuals for the systems.
+   * @param abs_tolerances The corresponding absolute tolerances.
    */
   bool converged(const std::vector<Real> & residuals, const std::vector<Real> & abs_tolerances);
 
