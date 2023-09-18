@@ -25,6 +25,7 @@ ShaftConnectedTurbine1Phase::validParams()
   params.makeParamRequired<Real>("A_ref");
   params.addRequiredParam<BoundaryName>("inlet", "Turbine inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Turbine outlet");
+  params.set<std::vector<BoundaryName>>("connections") = {};
   params.suppressParameter<std::vector<BoundaryName>>("connections");
   params.addRequiredParam<Real>("omega_rated", "Rated turbine speed [rad/s]");
   params.addRequiredParam<Real>("D_wheel",

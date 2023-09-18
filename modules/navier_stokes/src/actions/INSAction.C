@@ -41,7 +41,7 @@ INSAction::validParams()
   params.addParam<MooseEnum>("equation_type", type, "Navier-Stokes equation type");
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
+      "block", {}, "The list of block ids (SubdomainID) on which NS equation is defined on");
 
   // temperature equation parameters
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");

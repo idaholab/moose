@@ -23,9 +23,9 @@ FiniteStrainCrystalPlasticity::validParams()
   params.addClassDescription(
       "Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int>("nss", "Number of slip systems");
-  params.addParam<std::vector<Real>>("gprops", "Initial values of slip system resistances");
-  params.addParam<std::vector<Real>>("hprops", "Hardening properties");
-  params.addParam<std::vector<Real>>("flowprops", "Parameters used in slip rate equations");
+  params.addParam<std::vector<Real>>("gprops", {}, "Initial values of slip system resistances");
+  params.addParam<std::vector<Real>>("hprops", {}, "Hardening properties");
+  params.addParam<std::vector<Real>>("flowprops", {}, "Parameters used in slip rate equations");
   params.addRequiredParam<FileName>("slip_sys_file_name",
                                     "Name of the file containing the slip system");
   params.addParam<FileName>(

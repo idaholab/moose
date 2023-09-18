@@ -57,10 +57,12 @@ PorousFlowActionBase::validParams()
                                 "if the simulation does not involve chemistry)");
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The name of the displacement variables (relevant only for "
       "mechanically-coupled simulations)");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
+      {},
       "List of all eigenstrain models used in mechanics calculations. "
       "Typically the eigenstrain_name used in "
       "ComputeThermalExpansionEigenstrain.  Only needed for "
@@ -99,9 +101,13 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
     _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _mass_fraction_vars(getParam<std::vector<VariableName>>("mass_fraction_vars")),
+    _mass_fraction_vars(isParamValid("mass_fraction_vars")
+                            ? getParam<std::vector<VariableName>>("mass_fraction_vars")
+                            : std::vector<VariableName>{}),
     _num_mass_fraction_vars(_mass_fraction_vars.size()),
-    _temperature_var(getParam<std::vector<VariableName>>("temperature")),
+    _temperature_var(isParamValid("temperature")
+                         ? getParam<std::vector<VariableName>>("temperature")
+                         : std::vector<VariableName>{}),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),

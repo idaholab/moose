@@ -39,7 +39,7 @@ OptimizationDataTempl<T>::validParams()
   params.addParam<std::string>(
       "file_time", "time", "time column name from csv file being read in.");
   params.addParam<std::vector<std::string>>(
-      "file_variable_weights", "variable weight column names from csv file being read in.");
+      "file_variable_weights", {}, "variable weight column names from csv file being read in.");
   params.addParam<std::string>(
       "file_value", "value", "measurement value column name from csv file being read in.");
 
@@ -269,7 +269,7 @@ template <typename T>
 void
 OptimizationDataTempl<T>::readMeasurementsFromInput()
 {
-  if (this->isParamValid("file_variable_weights"))
+  if (this->template getParam<std::vector<std::string>>("file_variable_weights").size())
     this->paramError(
         "measurement_values",
         "file_variable_weights cannot be used with measurement data read from the input "

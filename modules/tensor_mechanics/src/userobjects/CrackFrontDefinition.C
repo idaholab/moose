@@ -88,10 +88,10 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<VariableName>("disp_x", "Variable containing the x displacement");
   params.addParam<VariableName>("disp_y", "Variable containing the y displacement");
   params.addParam<VariableName>("disp_z", "Variable containing the z displacement");
-  params.addParam<std::vector<Real>>("j_integral_radius_inner",
-                                     "Radius for J-Integral calculation");
-  params.addParam<std::vector<Real>>("j_integral_radius_outer",
-                                     "Radius for J-Integral calculation");
+  params.addParam<std::vector<Real>>(
+      "j_integral_radius_inner", {}, "Radius for J-Integral calculation");
+  params.addParam<std::vector<Real>>(
+      "j_integral_radius_outer", {}, "Radius for J-Integral calculation");
   MooseEnum q_function_type("Geometry Topology", "Geometry");
   params.addParam<MooseEnum>("q_function_type",
                              q_function_type,
@@ -131,7 +131,7 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
 {
   if (isParamValid("crack_front_points"))
   {
-    if (isParamValid("boundary"))
+    if (isParamSetByUser("boundary"))
       paramError("crack_front_points",
                  "CrackFrontDefinition error: since boundary is defined, crack_front_points should "
                  "not be added.");
@@ -148,7 +148,7 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
   }
   else if (isParamValid("crack_front_points_provider"))
   {
-    if (isParamValid("boundary"))
+    if (isParamSetByUser("boundary"))
       paramError("crack_front_points_provider",
                  "CrackFrontDefinition error: since boundary is defined, "
                  "crack_front_points_provider should not be added.");

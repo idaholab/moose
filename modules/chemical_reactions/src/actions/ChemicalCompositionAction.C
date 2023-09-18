@@ -76,6 +76,7 @@ ChemicalCompositionAction::validParams()
       "List of gas phase species for which vapor pressures are requested");
   params.addParam<std::vector<std::string>>(
       "output_element_phases",
+      {},
       "List of elements whose molar amounts in specific phases are requested");
   params.addParam<std::string>(
       "uo_name", "Thermochimica", "Name of the ThermochimicaDataUserObject.");
@@ -350,7 +351,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  if (isParamValid("output_element_phases"))
+  if (_pars.isParamSetByUser("output_element_phases"))
   {
     auto phases = Thermochimica::getPhaseNamesSystem();
     if (_element_phases.size() == 1 && _element_phases[0] == "ALL")
@@ -489,7 +490,7 @@ ChemicalCompositionAction::act()
                   _vapor_pressures.begin(),
                   _vapor_pressures.end());
 
-    if (isParamValid("output_element_phases"))
+    if (_pars.isParamSetByUser("output_element_phases"))
       uo_params.set<std::vector<VariableName>>("output_element_phases")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
                   _element_phases.begin(),

@@ -20,8 +20,9 @@ JacobianTestGeneralAction::validParams()
 {
   InputParameters params = JacobianTestAction::validParams();
 
-  params.addParam<std::vector<VariableName>>("variable_names", "List of variables");
-  params.addParam<std::vector<FunctionName>>("variable_values", "List of values of the variables");
+  params.addParam<std::vector<VariableName>>("variable_names", {}, "List of variables");
+  params.addParam<std::vector<FunctionName>>(
+      "variable_values", {}, "List of values of the variables");
 
   params.set<std::string>("fe_family") = "LAGRANGE";
   params.set<std::string>("fe_order") = "FIRST";

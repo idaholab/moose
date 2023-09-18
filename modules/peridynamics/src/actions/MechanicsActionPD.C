@@ -48,13 +48,15 @@ MechanicsActionPD::validParams()
                                 "Nonlinear variable name for the out_of_plane strain for "
                                 "plane stress using the NOSPD formulation");
   params.addParam<std::vector<SubdomainName>>("block",
+                                              {},
                                               "List of ids of the blocks (subdomains) that the "
                                               "peridynamic mechanics kernel will be applied to");
-  params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
-  params.addParam<std::vector<AuxVariableName>>("diag_save_in",
-                                                "The displacement diagonal preconditioner terms");
+  params.addParam<std::vector<AuxVariableName>>("save_in", {}, "The displacement residuals");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in", {}, "The displacement diagonal preconditioner terms");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
+      {},
       "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");
 
   return params;

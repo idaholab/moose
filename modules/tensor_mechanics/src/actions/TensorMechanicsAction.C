@@ -54,6 +54,7 @@ TensorMechanicsAction::validParams()
   // parameters specified here only appear in the input file sub-blocks of the
   // Master action, not in the common parameters area
   params.addParam<std::vector<SubdomainName>>("block",
+                                              {},
                                               "The list of ids of the blocks (subdomain) "
                                               "that the stress divergence kernels will be "
                                               "applied to");
@@ -107,6 +108,7 @@ TensorMechanicsAction::validParams()
                                   "Type of each constraint: "
                                   "stress or strain.");
   params.addParam<std::vector<FunctionName>>("targets",
+                                             {},
                                              "Functions giving the target "
                                              "values of each constraint.");
 

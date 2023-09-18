@@ -80,6 +80,7 @@ ContactAction::validParams()
       "secondary", "The list of boundary IDs referring to secondary sidesets");
   params.addParam<std::vector<BoundaryName>>(
       "automatic_pairing_boundaries",
+      {},
       "List of boundary IDs for sidesets that are automatically paired with any other boundary in "
       "this list having a centroid-to-centroid distance less than the value specified in the "
       "'automatic_pairing_distance' parameter. ");
@@ -103,6 +104,7 @@ ContactAction::validParams()
                                 "Offset to gap distance mapped from primary side");
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<Real>(
       "penalty",

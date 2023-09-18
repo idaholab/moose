@@ -16,7 +16,7 @@ ComputeStrainIncrementBasedStress::validParams()
 {
   InputParameters params = ComputeStressBase::validParams();
   params.addClassDescription("Compute stress after subtracting inelastic strain increments");
-  params.addParam<std::vector<MaterialPropertyName>>("inelastic_strain_names",
+  params.addParam<std::vector<MaterialPropertyName>>("inelastic_strain_names", {},
                                                      "Names of inelastic strain properties");
 
   return params;

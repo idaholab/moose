@@ -48,7 +48,8 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
                                "dPorousFlow_mass_frac_nodal_dvar")
                          : &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                "dPorousFlow_mass_frac_qp_dvar")),
-    _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
+    _num_passed_mf_vars(isParamValid("mass_fraction_vars") ? coupledComponents("mass_fraction_vars")
+                                                           : 0)
 {
   if (_num_phases < 1 || _num_components < 1)
     mooseError("PorousFlowMassFraction: The Dictator proclaims that the number of phases is ",

@@ -26,6 +26,7 @@ AzimuthalBlockSplitGenerator::validParams()
       "new_block_ids", "The block IDs to be used for the new selected azimuthal angle blocks.");
   params.addParam<std::vector<SubdomainName>>(
       "new_block_names",
+      {},
       "The optional block names to be used for the new selected azimulathal angle blocks.");
   params.addParam<bool>("preserve_volumes",
                         true,

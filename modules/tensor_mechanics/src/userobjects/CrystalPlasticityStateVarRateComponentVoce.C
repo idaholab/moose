@@ -29,6 +29,7 @@ CrystalPlasticityStateVarRateComponentVoce::validParams()
       CrystalPlasticityStateVarRateComponentVoce::crystalLatticeTypeOptions(),
       "Type of crystal lattyce structure output");
   params.addParam<std::vector<unsigned int>>("groups",
+                                             {},
                                              "To group the initial values on different "
                                              "slip systems 'format: [start end)', i.e.'0 "
                                              "12 24 48' groups 0-11, 12-23 and 24-48 ");

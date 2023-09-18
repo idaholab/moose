@@ -171,6 +171,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 ######################################
 
 [Mesh]
+  coord_type = RZ
   [aq_top_fine]
     type = GeneratedMeshGenerator
     dim = 2
@@ -343,10 +344,6 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
     new_block = 'aquifer caps caps'
     input = 'injection_area'
   []
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [GlobalParams]

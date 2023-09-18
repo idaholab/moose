@@ -28,6 +28,7 @@ PorousFlowFluidMassTempl<is_ad>::validParams()
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<std::vector<unsigned int>>("phase",
+                                             {},
                                              "The index of the fluid phase that this "
                                              "Postprocessor is restricted to.  Multiple "
                                              "indices can be entered");

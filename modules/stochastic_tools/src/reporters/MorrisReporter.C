@@ -24,7 +24,7 @@ MorrisReporter::validParams()
       "vectorpostprocessors",
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
   params.addParam<std::vector<ReporterName>>(
-      "reporters", "List of Reporter values to utilized for statistic computations.");
+      "reporters", {}, "List of Reporter values to utilized for statistic computations.");
 
   // Confidence Levels
   params.addParam<std::vector<Real>>(

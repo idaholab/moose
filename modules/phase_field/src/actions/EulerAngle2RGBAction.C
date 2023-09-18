@@ -39,8 +39,8 @@ EulerAngle2RGBAction::validParams()
       "no_grain_color",
       Point(0, 0, 0),
       "RGB value of color used to represent area with no grains, defaults to black");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
   return params;
 }
 

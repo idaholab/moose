@@ -19,10 +19,11 @@ ComputeLagrangianStrainBase<G>::baseParams()
   params.addParam<bool>(
       "large_kinematics", false, "Use large displacement kinematics in the kernel.");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
-  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names",
-                                                     "List of eigenstrains to account for");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", {}, "List of eigenstrains to account for");
   params.addParam<std::vector<MaterialPropertyName>>(
       "homogenization_gradient_names",
+      {},
       "List of homogenization gradients to add to the displacement gradient");
 
   params.addParam<std::string>("base_name", "Material property base name");

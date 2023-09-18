@@ -73,11 +73,13 @@ GrandPotentialKernelAction::validParams()
       "concentrations", "List of concentration variables for strict mass conservation");
   parameters.addParam<std::vector<MaterialPropertyName>>(
       "hj_c_min",
+      {},
       "List of body forces coefficients for strict mass conservation formulation that indicates "
       "the minima in concentration free energy."
       "Place in same order as switching_function_names.");
   parameters.addParam<std::vector<MaterialPropertyName>>(
       "hj_over_kVa",
+      {},
       "List of MatReaction coefficients for strict mass conservation formulation that relates "
       "chemical potential with switching functionj between phases"
       "Place in same order as switching_function_names.");

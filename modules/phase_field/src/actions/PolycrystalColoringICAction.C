@@ -23,8 +23,8 @@ PolycrystalColoringICAction::validParams()
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "Optional: TODO");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the initial condition");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the initial condition");
   params.addParam<bool>(
       "linearized_interface", false, "Whether to use linearized interface or the standard model");
   params.addParam<Real>("bound_value",

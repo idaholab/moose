@@ -29,7 +29,7 @@ ComputeStrainBaseNOSPD::validParams()
                         "Plane strain problem or not, this will affect the mechanical stretch "
                         "calculation for problem with eigenstrains");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
 
   return params;
 }

@@ -16,8 +16,8 @@ GeneratedMeshComponent::validParams()
   InputParameters params = GeometricalComponent::validParams();
   params += DiscreteLineSegmentInterface::validParams();
 
-  params.addParam<std::vector<std::string>>("axial_region_names",
-                                            "Names to assign to axial regions");
+  params.addParam<std::vector<std::string>>(
+      "axial_region_names", {}, "Names to assign to axial regions");
 
   return params;
 }

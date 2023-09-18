@@ -100,7 +100,9 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     if (_sampler.getNumberOfRows() < _optimization_opts.batch_size)
       paramError("batch_size", "Batch size cannot be greater than the training data set size.");
 
-  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  std::vector<std::string> tune_parameters(
+      _do_tuning ? getParam<std::vector<std::string>>("tune_parameters")
+                 : std::vector<std::string>{});
 
   if (isParamValid("tuning_min") &&
       (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))

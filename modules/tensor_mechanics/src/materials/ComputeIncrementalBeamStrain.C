@@ -55,7 +55,9 @@ ComputeIncrementalBeamStrain::validParams()
                                "supplied as either a number or a variable name.");
   params.addParam<bool>("large_strain", false, "Set to true if large strain are to be calculated.");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calculation.");
+      "eigenstrain_names",
+      {},
+      "List of beam eigenstrains to be applied in this strain calculation.");
   params.addParam<FunctionName>(
       "elasticity_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");

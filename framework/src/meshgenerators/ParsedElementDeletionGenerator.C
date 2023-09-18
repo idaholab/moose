@@ -24,10 +24,11 @@ ParsedElementDeletionGenerator::validParams()
       "(must be 'volume' in the expression) and the element id ('id' in the expression).");
   params.addRequiredParam<ParsedFunctionExpression>(
       "expression", "Expression to evaluate to decide whether an element should be deleted");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   return params;
 }
