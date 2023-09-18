@@ -9,6 +9,8 @@
 
 #include "MathUtils.h"
 #include "libmesh/utility.h"
+#include "libmesh/point.h"
+#include "MooseUtils.h"
 
 namespace MathUtils
 {
@@ -208,13 +210,14 @@ barycentricToCartesian2D(const Point & p0,
                          const Point & p2,
                          const Real b0,
                          const Real b1,
-                         const Real b2,
-                         Point & center)
+                         const Real b2)
 {
-  // p0, p1, p2 are vertices of triangle
-  // b0, b1, b2 are Barycentric coordinates of the triangle center
+  Point center;
+
   for (unsigned int d = 0; d < 2; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2;
+  // p0, p1, p2 are vertices of triangle
+  // b0, b1, b2 are Barycentric coordinates of the triangle center
 
   return center;
 }
@@ -227,13 +230,14 @@ barycentricToCartesian3D(const Point & p0,
                          const Real b0,
                          const Real b1,
                          const Real b2,
-                         const Real b3,
-                         Point & center)
+                         const Real b3)
 {
-  // p0, p1, p2, p3 are vertices of tetrahedron
-  // b0, b1, b2, b3 are Barycentric coordinates of the tetrahedron center
+  Point center;
+
   for (unsigned int d = 0; d < 3; ++d)
     center(d) = p0(d) * b0 + p1(d) * b1 + p2(d) * b2 + p3(d) * b3;
+  // p0, p1, p2, p3 are vertices of tetrahedron
+  // b0, b1, b2, b3 are Barycentric coordinates of the tetrahedron center
 
   return center;
 }
@@ -264,10 +268,7 @@ circumcenter2D(const Point & p0, const Point & p1, const Point & p2)
   Real b1 = weight1 * inv_sum_weights;
   Real b2 = weight2 * inv_sum_weights;
 
-  Point circumcenter;
-  circumcenter = MathUtils::barycentricToCartesian2D(p0, p1, p2, b0, b1, b2, circumcenter);
-
-  return circumcenter;
+  return MathUtils::barycentricToCartesian2D(p0, p1, p2, b0, b1, b2);
 }
 
 Point
@@ -308,10 +309,7 @@ circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point
   if (MooseUtils::isZero(sum_weights))
     mooseError("Cannot evaluate circumcenter. Points should be non-coplanar.");
 
-  Point circumcenter;
-  circumcenter = MathUtils::barycentricToCartesian3D(p0, p1, p2, p3, b0, b1, b2, b3, circumcenter);
-
-  return circumcenter;
+  return MathUtils::barycentricToCartesian3D(p0, p1, p2, p3, b0, b1, b2, b3);
 }
 
 } // namespace MathUtils

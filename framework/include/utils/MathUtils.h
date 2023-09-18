@@ -15,12 +15,9 @@
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/compare_types.h"
+#include "libmesh/point.h"
 
-// libMesh forward declarations
-namespace libMesh
-{
-class Point;
-}
+using libMesh::Point;
 
 namespace MathUtils
 {
@@ -38,8 +35,7 @@ Point barycentricToCartesian2D(const Point & p0,
                                const Point & p2,
                                const Real b0,
                                const Real b1,
-                               const Real b2,
-                               Point & center);
+                               const Real b2);
 Point barycentricToCartesian3D(const Point & p0,
                                const Point & p1,
                                const Point & p2,
@@ -47,8 +43,7 @@ Point barycentricToCartesian3D(const Point & p0,
                                const Real b0,
                                const Real b1,
                                const Real b2,
-                               const Real b3,
-                               Point & center);
+                               const Real b3);
 Point circumcenter2D(const Point & p0, const Point & p1, const Point & p2);
 Point circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3);
 
