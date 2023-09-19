@@ -89,8 +89,10 @@ INSFVRhieChowInterpolator::validParams()
       "a_w",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
-      "coefficients for the 'z' component velocity, solved "
-      "via the Navier-Stokes equations.");
+      "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
+  params.addRequiredParam<VariableName>("disp_x", "The x-component of displacement");
+  params.addParam<VariableName>("disp_y", "The y-component of displacement");
+  params.addParam<VariableName>("disp_z", "The z-component of displacement");
   return params;
 }
 
@@ -108,6 +110,37 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 {
   _displaced = dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem));
 
+  if (isParamValid("disp_x"))
+  {
+    _disp_xs.resize(libMesh::n_threads());
+    fillContainer("disp_x", _disp_xs);
+    checkBlocks(*_disp_xs[0]);
+  }
+
+  if (_dim >= 2)
+  {
+    if (isParamValid("disp_y"))
+    {
+      _disp_ys.resize(libMesh::n_threads());
+      fillContainer("disp_y", _disp_ys);
+      checkBlocks(*_disp_ys[0]);
+    }
+    else if (isParamValid("disp_x"))
+      paramError("disp_y", "If 'disp_x' is provided, then 'disp_y' must be as well");
+  }
+
+  if (_dim >= 3)
+  {
+    if (isParamValid("disp_z"))
+    {
+      _disp_zs.resize(libMesh::n_threads());
+      fillContainer("disp_z", _disp_zs);
+      checkBlocks(*_disp_zs[0]);
+    }
+    else if (isParamValid("disp_x"))
+      paramError("disp_z", "If 'disp_x' is provided, then 'disp_z' must be as well");
+  }
+
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     _vel[tid] = std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
@@ -124,6 +157,15 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
         blockIDs());
+
+    if (_disp_xs.size())
+      _disps.push_back(std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
+          name() + "_disp_" + std::to_string(tid),
+          *_disp_xs[tid],
+          _dim >= 2 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_ys[tid])
+                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor),
+          _dim >= 3 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_zs[tid])
+                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor)));
   }
 
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average && isParamValid("a_u"))
@@ -424,7 +466,8 @@ VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
                                        const Moose::StateArg & time,
-                                       const THREAD_ID tid) const
+                                       const THREAD_ID tid,
+                                       const bool subtract_mesh_velocity) const
 {
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
@@ -455,6 +498,9 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     velocity(1) = (*v)(face, time);
   if (w)
     velocity(2) = (*w)(face, time);
+
+  if (_disps.size() && subtract_mesh_velocity)
+    velocity -= _disps[tid]->dot(face, time);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||

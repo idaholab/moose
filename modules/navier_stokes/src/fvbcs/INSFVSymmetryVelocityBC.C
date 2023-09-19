@@ -78,8 +78,12 @@ INSFVSymmetryVelocityBC::computeSegregatedContribution()
 
   const auto normal_squared = normal(_index) * normal(_index);
 
-  const auto face_flux =
-      _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow, *_face_info, state, _tid) * normal;
+  const auto face_flux = _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow,
+                                            *_face_info,
+                                            state,
+                                            _tid,
+                                            /*subtract_mesh_velocity=*/true) *
+                         normal;
 
   ADReal matrix_contribution;
   ADReal rhs_contribution;

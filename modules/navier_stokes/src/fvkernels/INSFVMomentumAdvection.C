@@ -91,7 +91,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
 
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
-  const auto v_face = velocity(on_boundary);
+  const auto v_face = velocity();
   const auto vdotn = _normal * v_face;
 
   if (on_boundary)

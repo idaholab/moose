@@ -10,7 +10,6 @@ mu='mu'
 cp='cp'
 
 [GlobalParams]
-  mesh_velocity = 'ddisp_vec_dt'
   rhie_chow_user_object = 'rc'
 []
 
@@ -38,6 +37,9 @@ cp='cp'
     w = vel_z
     pressure = pressure
     use_displaced_mesh = true
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   []
 []
 

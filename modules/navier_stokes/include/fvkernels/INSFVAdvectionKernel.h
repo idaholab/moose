@@ -35,7 +35,6 @@ protected:
   /**
    * @returns the advecting velocity
    */
-  ADRealVectorValue velocity(bool on_boundary) const;
   ADRealVectorValue velocity() const;
 
   /// The interpolation method to use for the advected quantity
@@ -54,5 +53,6 @@ protected:
 inline ADRealVectorValue
 INSFVAdvectionKernel::velocity() const
 {
-  return velocity(onBoundary(*_face_info));
+  return _rc_vel_provider.getVelocity(
+      _velocity_interp_method, *_face_info, determineState(), _tid, hasMaterialTimeDerivative());
 }

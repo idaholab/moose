@@ -40,7 +40,8 @@ public:
   VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
                                   const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  const THREAD_ID tid) const override;
+                                  const THREAD_ID tid,
+                                  bool subtract_mesh_velocity) const override;
 
   /// Initialize the container for face velocities
   void initFaceVelocities();

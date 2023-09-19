@@ -68,8 +68,11 @@ INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
   const auto boundary_face = singleSidedFaceArg();
   const auto state = determineState();
   return _normal *
-         _rc_uo.getVelocity(
-             Moose::FV::InterpMethod::RhieChow, *_face_info, determineState(), _tid) *
+         _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow,
+                            *_face_info,
+                            determineState(),
+                            _tid,
+                            /*subtract_mesh_velocity=*/true) *
          computeAdvectedQuantity(boundary_face, state);
 }
 

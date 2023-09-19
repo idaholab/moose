@@ -12,6 +12,7 @@
 #include "RhieChowInterpolatorBase.h"
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
+#include "VectorCompositeFunctor.h"
 
 #include <unordered_map>
 #include <set>
@@ -71,7 +72,8 @@ public:
   VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
                                   const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  const THREAD_ID tid) const override;
+                                  const THREAD_ID tid,
+                                  bool subtract_mesh_velocity) const override;
 
   void initialSetup() override;
   void meshChanged() override;
@@ -107,6 +109,18 @@ protected:
 
   /// A functor for computing the (non-RC corrected) velocity
   std::vector<std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>> _vel;
+
+  /// All the thread copies of the x-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_xs;
+
+  /// All the thread copies of the y-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_ys;
+
+  /// All the thread copies of the z-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_zs;
+
+  /// A functor for computing the displacement
+  std::vector<std::unique_ptr<Moose::VectorCompositeFunctor<ADReal>>> _disps;
 
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;
