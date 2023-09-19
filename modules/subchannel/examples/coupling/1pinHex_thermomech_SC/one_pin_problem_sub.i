@@ -1,6 +1,6 @@
-rod_diameter = 0.00950
+rod_diameter = 5.84e-3
 heated_length = 1.0
-T_in = 359.15
+T_in = 588.5
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -23,7 +23,7 @@ T_in = 359.15
 [Functions]
   [volumetric_heat_rate]
     type = ParsedFunction
-    expression = '(4.0 * 100000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
+    expression = '(4.0 * 5000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)' #beware to use same power as main app
     symbol_names = 'L D'
     symbol_values = '${heated_length} ${rod_diameter}'
   []
@@ -243,9 +243,6 @@ T_in = 359.15
     type = VolumePostprocessor
     use_displaced_mesh = true
   []
-
-  # [qprime_integral]
-  # []
 []
 
 [Outputs]

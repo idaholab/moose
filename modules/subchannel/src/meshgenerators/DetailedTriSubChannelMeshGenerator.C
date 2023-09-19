@@ -296,6 +296,18 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
     }
+
+    /// Special case _n_rings == 1
+    if (_n_rings == 1)
+    {
+      for (unsigned int i = 0; i < _n_channels; i++)
+      {
+        Real angle = (2 * i + 1) * libMesh::pi / 6.0;
+        _subch_type[i] = EChannelType::CORNER;
+        _subchannel_position[i][0] = std::cos(angle) * _flat_to_flat / 2.0;
+        _subchannel_position[i][1] = std::sin(angle) * _flat_to_flat / 2.0;
+      }
+    }
   }
 }
 
