@@ -47,6 +47,7 @@
                ray_mesh_output_transient_rays.e-s0003'
     allow_test_objects = true
     requirement = 'The system shall support the mesh output of traced rays into the exodus format for a transient simulation'
+    design = 'RayTracingExodus.md RayTracingMeshOutput.md'
   []
 
   [nemesis]
