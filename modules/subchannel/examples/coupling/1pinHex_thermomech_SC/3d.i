@@ -1,21 +1,23 @@
+rod_diameter = 5.84e-3
+heated_length = 1.0
 [Mesh]
   [subchannel]
     type = DetailedTriSubChannelMeshGenerator
-    nrings = 1 #3
+    nrings = 2
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
-    heated_length = 1.0 # 0.5334
-    rod_diameter = 5.84e-3
+    heated_length = ${heated_length} # 0.5334
+    rod_diameter = ${rod_diameter}
     pitch = 7.26e-3
   []
 
   [fuel_pins]
     type = DetailedTriPinMeshGenerator
     input = subchannel
-    nrings = 2 #3
+    nrings = 2
     n_cells = 40
-    heated_length = 1.0 # 0.5334
-    rod_diameter = 5.84e-3
+    heated_length = ${heated_length} # 0.5334
+    rod_diameter = ${rod_diameter}
     pitch = 7.26e-3
   []
 []

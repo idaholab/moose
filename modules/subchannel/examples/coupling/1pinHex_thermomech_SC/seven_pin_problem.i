@@ -4,15 +4,18 @@
 T_in = 588.5
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 2.0e5 # Pa
+rod_diameter = 5.84e-3
+heated_length = 1.0
+pitch = 7.26e-3
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    nrings = 1 #3
+    nrings = 2
     n_cells = 40
     flat_to_flat = 2.1e-2 # 3.41e-2
-    heated_length = 1.0 # 0.5334
-    rod_diameter = 5.84e-3
-    pitch = 7.26e-3
+    heated_length = ${heated_length} # 0.5334
+    rod_diameter = ${rod_diameter}
+    pitch = ${pitch}
     dwire = 1.42e-3
     hwire = 0.3048
     spacer_z = '0'
@@ -22,10 +25,10 @@ P_out = 2.0e5 # Pa
   [fuel_pins]
     type = TriPinMeshGenerator
     input = subchannel
-    nrings = 1 #3
+    nrings = 2
     n_cells = 40
-    heated_length = 1.0 # 0.5334
-    pitch = 7.26e-3
+    heated_length = ${heated_length} # 0.5334
+    pitch = ${pitch}
   []
 []
 
@@ -34,7 +37,7 @@ P_out = 2.0e5 # Pa
     type = ParsedFunction
     expression = '(pi/2)*sin(pi*z/L)'
     symbol_names = 'L'
-    symbol_values = 1.0
+    symbol_values = '${heated_length}'
   []
 []
 
@@ -97,7 +100,7 @@ P_out = 2.0e5 # Pa
   CT = 2.6
   compute_density = true
   compute_viscosity = true
-  compute_power = false
+  compute_power = true
   P_tol = 1.0e-4
   T_tol = 1.0e-4
   implicit = true
@@ -105,7 +108,7 @@ P_out = 2.0e5 # Pa
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
-  verbose_subchannel = false
+  verbose_subchannel = true
   interpolation_scheme = 'upwind'
 []
 
@@ -120,10 +123,10 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 5000 #W
+    power = 5000.0 #W
     axial_heat_rate = axial_heat_rate
     filename = "power_profile.txt"
   []
@@ -205,13 +208,32 @@ P_out = 2.0e5 # Pa
   exodus = true
 []
 
-[Executioner]
-  type = Steady
+# Need to have as many points as pins in the object
+[UserObjects]
+  [Tpin_avg_uo]
+    type = NearestPointLayeredAverage
+    direction = z
+    num_layers = 1000
+    variable = Tpin
+    block = fuel_pins
+    points = ' 0   0   0
+              ${fparse  1.0 * pitch}   0  0
+              ${fparse -1.0 * pitch}   0  0
+              ${fparse  0.5 * pitch}   ${fparse  0.866 * pitch}   0
+              ${fparse  0.5 * pitch}   ${fparse -0.866 * pitch}   0
+              ${fparse -0.5 * pitch}   ${fparse  0.866 * pitch}   0
+              ${fparse -0.5 * pitch}   ${fparse -0.866 * pitch}   0'
+    execute_on = timestep_end
+  []
 []
 
-###############################################################################
-####  A multiapp that projects data to a detailed mesh
-###############################################################################
+# [Executioner]
+#   type = Steady
+# []
+
+# ##############################################################################
+# ###  A multiapp that projects data to a detailed mesh
+# ##############################################################################
 
 # [MultiApps]
 #   [viz]
@@ -233,3 +255,72 @@ P_out = 2.0e5 # Pa
 #     variable = 'Tpin q_prime Dpin'
 #   []
 # []
+
+[Executioner]
+  type = Steady
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  fixed_point_max_its = 2
+  fixed_point_min_its = 2
+  fixed_point_rel_tol = 1e-6
+[]
+
+################################################################################
+[MultiApps]
+  ################################################################################
+  # Couple to BISON
+  ################################################################################
+  [sub]
+    type = FullSolveMultiApp
+    app_type = BisonApp
+    input_files = one_pin_problem_sub.i
+    execute_on = 'timestep_end'
+    positions = '0   0   0 '
+    output_in_position = true
+    bounding_box_padding = '0 0 0.01'
+  []
+
+  ################################################################################
+  # A multiapp that projects data to a detailed mesh
+  ################################################################################
+  [viz]
+    type = FullSolveMultiApp
+    input_files = '3d.i'
+    execute_on = 'FINAL'
+  []
+[]
+
+[Transfers]
+  [Tpin] # send pin surface temperature to bison,
+    type = MultiAppUserObjectTransfer2
+    to_multi_app = sub
+    variable = Pin_surface_temperature
+    user_object = Tpin_avg_uo
+  []
+
+  [diameter] # send diameter information from /BISON/heatConduction to subchannel/master
+    type = MultiAppUserObjectTransfer2
+    from_multi_app = sub
+    variable = Dpin
+    user_object = rod_diameter_uo
+  []
+
+  [q_prime] # send heat flux from /BISON/heatConduction to subchannel/master
+    type = MultiAppUserObjectTransfer2
+    from_multi_app = sub
+    variable = q_prime
+    user_object = q_prime_uo
+  []
+
+  [subchannel_transfer]
+    type = MultiAppDetailedSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+
+  [pin_transfer]
+    type = MultiAppDetailedPinSolutionTransfer
+    to_multi_app = viz
+    variable = 'Tpin Dpin q_prime'
+  []
+[]
