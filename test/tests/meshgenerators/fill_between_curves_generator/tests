@@ -17,7 +17,7 @@
                "Mesh/fbcg/input_mesh_2=add_nodeset2 --mesh-only "
                "fill_between_curves_preserve_nodesets_in.e"
     exodiff_opts = '-pedantic'
-    requirement = 'The system shall generate a mesh that fills between two coplanar curves and keep nodesets defined on these curves.'
+    requirement = 'The system shall generate a mesh that fills between two coplanar curves and keeps nodesets defined on these curves.'
     recover = false
   []
 []

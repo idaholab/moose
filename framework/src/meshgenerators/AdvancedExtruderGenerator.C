@@ -402,22 +402,23 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
-          auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
-                               ? height / (Real)num_layers / (Real)order
-                               : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
-                                     (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+          const auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
+                                     ? height / (Real)num_layers / (Real)order
+                                     : height * std::pow(bias, (Real)(layer_index - 1)) *
+                                           (1.0 - bias) /
+                                           (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
 
           current_distance = old_distance + _direction * step_size;
 
           // Handle helicoidal extrusion
-          if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, .0))
+          if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
           {
             // twist 1 should be 'normal' to the extruded shape
             RealVectorValue twist1 = _direction.cross(*node);
             // This happens for any node on the helicoidal extrusion axis
             if (!MooseUtils::absoluteFuzzyEqual(twist1.norm(), .0))
               twist1 /= twist1.norm();
-            RealVectorValue twist2 = twist1.cross(_direction);
+            const RealVectorValue twist2 = twist1.cross(_direction);
 
             auto twist = (cos(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
                           cos(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
@@ -425,7 +426,7 @@ AdvancedExtruderGenerator::generate()
                          (sin(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
                           sin(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
                              twist1;
-            twist *= sqrt(node->norm_sq() + std::pow(_direction * (*node), 2));
+            twist *= std::sqrt(node->norm_sq() + libMesh::Utility::pow<2>(_direction * (*node)));
             current_distance += twist;
           }
         }

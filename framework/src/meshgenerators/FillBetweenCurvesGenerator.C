@@ -168,18 +168,22 @@ FillBetweenCurvesGenerator::generate()
 
   // Nodes could have been re-ordered during the FillBetweenPointVectors operation
   // We need to locate the nodes from input nodesets in the new mesh
-  mesh->prepare_for_use();
+  if (!mesh->is_prepared())
+    mesh->prepare_for_use();
   auto pl = mesh->sub_point_locator();
 
-  short int offset = 0;
-  for (const auto & t : input_bdy_1.build_node_list())
+  boundary_id_type offset = 0;
+  const auto node_list_mesh1 = input_bdy_1.build_node_list();
+  for (const auto & t : node_list_mesh1)
   {
     mooseAssert(pl->locate_node(*input_mesh_1->node_ptr(std::get<0>(t))),
                 "We should have found the old node in input mesh 1");
     boundary.add_node(pl->locate_node(*input_mesh_1->node_ptr(std::get<0>(t))), std::get<1>(t));
     offset = std::max(std::get<1>(t), offset);
   }
-  for (const auto & t : input_bdy_2.build_node_list())
+
+  const auto node_list_mesh2 = input_bdy_2.build_node_list();
+  for (const auto & t : node_list_mesh2)
   {
     mooseAssert(pl->locate_node(*input_mesh_1->node_ptr(std::get<0>(t))),
                 "We should have found the old node in input mesh 2");
@@ -187,11 +191,11 @@ FillBetweenCurvesGenerator::generate()
                       std::get<1>(t) + offset);
   }
 
-  for (auto nodeset_pair : input_bdy_1.get_nodeset_name_map())
+  for (const auto & nodeset_pair : input_bdy_1.get_nodeset_name_map())
     boundary.set_nodeset_name_map().insert(nodeset_pair);
-  for (auto nodeset_pair : input_bdy_2.get_nodeset_name_map())
-    boundary.set_nodeset_name_map()[nodeset_pair.first + offset] = nodeset_pair.second;
-  if (input_bdy_1.build_node_list().size() + input_bdy_2.build_node_list().size())
+  for (const auto & [bnd_id, bnd_name] : input_bdy_2.get_nodeset_name_map())
+    boundary.set_nodeset_name_map()[bnd_id + offset] = bnd_name;
+  if (node_list_mesh1.size() + node_list_mesh2.size())
     mesh->set_isnt_prepared();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
