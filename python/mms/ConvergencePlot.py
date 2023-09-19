@@ -41,7 +41,7 @@ class ConvergencePlot(object):
 
         # Adjust tick mark fonts
         for tick in self._axes.xaxis.get_major_ticks() + self._axes.yaxis.get_major_ticks():
-            tick.label.set_fontsize(fontsize)
+            tick.label1.set_fontsize(fontsize)
 
         # Apply grid marks
         plt.grid(True, which='both', color=[0.8]*3)
