@@ -54,16 +54,17 @@ IntrinsicCoregionalizationModel::computeBGrad(RealEigenMatrix & BGrad,
 {
   unsigned int siz = latent.size() / 2;
   RealEigenVector B1(siz);
-  BGrad.Zero(siz, siz);
+  BGrad = RealEigenMatrix::Zero(siz, siz);
   if (index < siz)
   {
     for (unsigned int ii = 0; ii < siz; ++ii)
       B1(ii) = latent[ii];
     BGrad.col(index) = B1;
-    BGrad = BGrad + BGrad.transpose();
+    RealEigenMatrix tmp = BGrad.transpose();
+    BGrad = BGrad + tmp;
   }
   else
-    BGrad(index, index) = 1.0;
+    BGrad(index - siz, index - siz) = 1.0;
 }
 
 unsigned int

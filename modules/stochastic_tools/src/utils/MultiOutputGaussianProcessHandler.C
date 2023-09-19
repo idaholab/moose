@@ -71,7 +71,11 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
   _kappa.resize(batch_size * training_data.cols(), batch_size * training_data.cols());
   // Initializing all latent params internally because there would be too many to ask the user
   _num_tunable_out = _output_covariance->setupNumLatent(training_data.cols());
-  _latent.assign(_num_tunable_out, 1.0);
+  _latent.resize(_num_tunable_out);
+  MooseRandom generator_latent;
+  generator_latent.seed(0, 1980);
+  for (unsigned int i = 0; i < _num_tunable_out; ++i)
+    _latent[i] = 3.0 * generator_latent.rand(0) + 1.0;
 
   tuneHyperParamsAdam(training_params,
                       training_data,
@@ -82,9 +86,17 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
 
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
+  _B.resize(training_data.cols(), training_data.cols());
+  _kappa.resize(training_params.rows() * training_data.cols(),
+                training_params.rows() * training_data.cols());
+  _output_covariance->computeBCovarianceMatrix(_B, _latent);
+  _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
 
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
-  setupStoredMatrices(training_data);
+  RealEigenMatrix vectorize_out;
+  vectorize_out =
+      training_data.transpose().reshaped(training_params.rows() * training_data.cols(), 1);
+  setupStoredMatrices(vectorize_out);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
@@ -141,8 +153,10 @@ MultiOutputGaussianProcessHandler::standardizeParameters(RealEigenMatrix & data)
 void
 MultiOutputGaussianProcessHandler::standardizeData(RealEigenMatrix & data)
 {
-  _data_standardizer.computeCovariance(data);
-  _data_standardizer.getStandardizedCovariance(data);
+  // _data_standardizer.computeCovariance(data);
+  // _data_standardizer.getStandardizedCovariance(data);
+  _data_standardizer.computeSet(data);
+  _data_standardizer.getStandardized(data);
 }
 
 void
@@ -194,17 +208,18 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
         outputs(ii, jj) = training_data(v_sequence[ii], jj);
     }
     vectorize_out = outputs.transpose().reshaped(_batch_size * outputs.cols(), 1);
-    store_loss = getLoss(inputs, vectorize_out);
     if (show_optimization_details && ss == 0)
+    {
+      store_loss = getLoss(inputs, vectorize_out);
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
-    grad1 = getGradient(inputs); // , vectorize_out
+    }
+    grad1 = getGradient(inputs);
     for (unsigned int ii = 0; ii < _num_tunable_inp + _num_tunable_out; ++ii)
     {
       m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
       v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
       m_hat = m0[ii] / (1 - std::pow(b1, (ss + 1)));
       v_hat = v0[ii] / (1 - std::pow(b2, (ss + 1)));
-      // new_val = theta(ii) - learning_rate * m_hat / (std::sqrt(v_hat) + eps);
       if (ii < _num_tunable_inp)
         new_val = theta(ii) - 1.0 * (learning_rate * m_hat / (std::sqrt(v_hat) + eps) + lambda * theta(ii));
       else
@@ -225,6 +240,8 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
   {
     Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
     theta.print();
+    Moose::out << Moose::stringify(_latent) << std::endl;
+    store_loss = getLoss(inputs, vectorize_out);
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
   }
 }
@@ -237,7 +254,7 @@ MultiOutputGaussianProcessHandler::getLoss(RealEigenMatrix & inputs, RealEigenMa
   _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
   setupStoredMatrices(outputs);
   Real log_likelihood = 0;
-  log_likelihood += -(outputs * _kappa_results_solve)(0, 0);
+  log_likelihood += -(outputs.transpose() * _kappa_results_solve)(0, 0);
   log_likelihood += -std::log(std::pow(_K.determinant(), _B.rows()) * std::pow(_B.determinant(), _K.rows()));
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;

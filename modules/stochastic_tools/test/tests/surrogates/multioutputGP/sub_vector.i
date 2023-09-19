@@ -1,4 +1,4 @@
-L = 0.0341817
+L = 5.92999
 subtract = 1.0
 req1 = '${fparse L-subtract}'
 
@@ -28,7 +28,7 @@ req1 = '${fparse L-subtract}'
   [source]
     type = BodyForce
     variable = T
-    value = 10000
+    value = 71.4081 # 10333.1
   []
 []
 
@@ -36,7 +36,7 @@ req1 = '${fparse L-subtract}'
   [conductivity]
     type = GenericConstantMaterial
     prop_names = k
-    prop_values = 5.40334
+    prop_values = 4.23908
   []
 []
 
@@ -45,7 +45,7 @@ req1 = '${fparse L-subtract}'
     type = DirichletBC
     variable = T
     boundary = right
-    value = 300
+    value = 465.688
   []
 []
 
@@ -65,3 +65,7 @@ req1 = '${fparse L-subtract}'
     sort_by = x
   []
 []
+
+# [Outputs]
+#   csv = true
+# []

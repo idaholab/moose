@@ -112,8 +112,9 @@ Standardizer::getStandardizedCovariance(RealEigenMatrix & input) const
 void
 Standardizer::getDestandardizedCovariance(RealEigenMatrix & input) const
 {
-  RealEigenMatrix covariated = input * _cov;
-  input = covariated.rowwise() + _mean_colwise.colwise().mean();
+  RealEigenMatrix covariated = input.transpose() * _cov;
+  input = covariated + _mean_colwise.colwise().mean(); // .rowwise()
+  input = input.transpose();
 }
 
 void

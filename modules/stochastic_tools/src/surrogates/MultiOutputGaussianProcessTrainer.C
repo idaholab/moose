@@ -114,17 +114,12 @@ MultiOutputGaussianProcessTrainer::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
-  // std::cout << Moose::stringify(_training_data) << std::endl;
-  // RealEigenMatrix tmp = _training_data.transpose().reshaped(_training_data.rows() * _training_data.cols(), 1);
-  // std::cout << "Here ******" << std::endl;
-  // std::cout << Moose::stringify(tmp) << std::endl;
-
   // Standardize (center and scale) training params
-  // _mogp_handler.standardizeParameters(_training_params);
+  _mogp_handler.standardizeParameters(_training_params);
 
   // Standardize (center and scale) training data
-  // _mogp_handler.standardizeData(_training_data);
+  _mogp_handler.standardizeData(_training_data);
 
   // Setup the covariance
-  // _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
