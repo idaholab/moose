@@ -89,20 +89,6 @@
     boundary = 'top'
     function = function_pull
   []
-  # [InclinedNoDisplacementBC]
-  #   [penalty_inclined_top]
-  #     boundary = 'top'
-  #     penalty = 1.0e9
-  #   []
-  #   [penalty_inclined_right]
-  #     boundary = 'right'
-  #     penalty = 1.0e9
-  #   []
-  #   [penalty_inclined_front]
-  #     boundary = 'front'
-  #     penalty = 1.0e9
-  #   []
-  # []
 []
 
 [UserObjects]

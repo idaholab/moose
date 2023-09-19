@@ -13,6 +13,7 @@
 #include "AbaqusUserElement.h"
 #include "libmesh/elem_range.h"
 #include "AuxiliarySystem.h"
+
 class UELThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -24,8 +25,8 @@ public:
   void join(const UELThread &) {}
 
 protected:
-  void subdomainChanged() override final;
-  void onElement(const Elem * elem) override final;
+  virtual void subdomainChanged() override final;
+  virtual void onElement(const Elem * elem) override final;
 
 private:
   /// Current nonlinear system
@@ -36,7 +37,7 @@ private:
 
   /// dof indices of all coupled variables
   std::vector<dof_id_type> _var_dof_indices;
-  std::vector<dof_id_type> _all_dof_indices; // numeric_index_type?
+  std::vector<dof_id_type> _all_dof_indices;
   std::vector<Real> _all_dof_values;
   std::vector<Real> _all_dof_increments;
   std::vector<Real> _all_udot_dof_values;
@@ -44,7 +45,7 @@ private:
 
   // vectors for aux variables
   std::vector<dof_id_type> _aux_var_dof_indices;
-  std::vector<dof_id_type> _all_aux_var_dof_indices; // numeric_index_type?
+  std::vector<dof_id_type> _all_aux_var_dof_indices;
   std::vector<Real> _all_aux_var_dof_increments;
   std::vector<Real> _all_aux_var_dof_values;
   std::vector<Real> _aux_var_values_to_uel;

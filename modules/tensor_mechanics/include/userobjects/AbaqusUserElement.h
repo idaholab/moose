@@ -43,20 +43,20 @@ public:
       int * NSVARS,  //
       Real PROPS[],  // (NPROPS) real property values defined for use with this element.
       int * NPROPS,  //
-      Real COORDS[], // (MCRD,NNODE)    array containing the original coordinates of the nodes of
-                     //                 the element. COORDS(K1,K2) is the K1th coordinate of the
-                     //                 K2th node of the element
+      Real COORDS[], // (MCRD,NNODE) array containing the original coordinates of the nodes of
+                     //              the element. COORDS(K1,K2) is the K1th coordinate of the
+                     //              K2th node of the element
       int * MCRD,    // maximum of the user-defined maximum number of coordinates needed at any node
                      // point
       int * NNODE,   //
-      Real U[],      // (NDOFEL)        Total values of the variables
-      Real DU[], // (MLVARX, *)      Incremental values of the variables for the current increment
-                 //                  for right-hand-side
-      Real V[],  // (NDOFEL)        Time rate of change of the variables (velocities,
-                //                 rates of rotation). Defined for implicit dynamics only (LFLAGS(1)
-                //                 11 or 12)
-      Real A[],    // (NDOFEL)        Accelerations of the variables. Defined for implicit dynamics
-                   //                 only (LFLAGS(1) 11 or 12).
+      Real U[],      // (NDOFEL) Total values of the variables
+      Real DU[],     // (MLVARX, *) Incremental values of the variables for the current increment
+                     //             for right-hand-side
+      Real V[],      // (NDOFEL) Time rate of change of the variables (velocities,
+                     //          rates of rotation). Defined for implicit dynamics only (LFLAGS(1)
+                     //          11 or 12)
+      Real A[],      // (NDOFEL) Accelerations of the variables. Defined for implicit dynamics
+                     //          only (LFLAGS(1) 11 or 12).
       int * JTYPE, // Integer defining the element type. This is the user-defined integer value n in
                    // element type Un
       Real TIME[], // (2)
@@ -64,28 +64,28 @@ public:
       int * KSTEP,   //
       int * KINC,    //
       int * JELEM,   // User-assigned element number
-      Real PRAMS[],  // (*)            parameters associated with the solution procedure
+      Real PRAMS[],  // (*) parameters associated with the solution procedure
       int * NDLOAD,  //
       int JDLTYP[],  // (MDLOAD, *) array containing the integers used to define distributed load
-                     // types for the element
+                     //             types for the element
       Real ADLMAG[], // (MDLOAD,*)
       Real PREDEF[], // (2,NPREDF,NNODE) predefined field variables, such as temperature in an
-                     // uncoupled stress/displacement analysis
+                     //                  uncoupled stress/displacement analysis
       int * NPREDF,  // Number of predefined field variables, including temperature
-      int LFLAGS[],  // (*)              flags that define the current solution procedure
+      int LFLAGS[],  // (*) flags that define the current solution procedure
       int * MLVARX,  // used when several displacement or right-hand-side vectors are used
       Real DDLMAG[], // (MDLOAD,*)
       int * MDLOAD,  // Total number of distributed loads and/or fluxes defined on this element
       Real * PNEWDT, //
       int JPROPS[],  // (*) integer array containing the NJPROP integer property values defined for
-                     // use with this element
+                     //     use with this element
       int * NJPROP,  //
       Real * PERIOD  //
   );
 
-  // UEL routine sets RHS, AMATRX, SVARS, ENERGY, and PNEWDT
-
   /*
+   * The UEL routine sets RHS, AMATRX, SVARS, ENERGY, and PNEWDT
+   *
    * ENERGY(1) Kinetic energy.
    * ENERGY(2) Elastic strain energy.
    * ENERGY(3) Creep dissipation.
@@ -119,15 +119,13 @@ protected:
   /// setup the range of elements this object operates on
   void setupElemRange();
 
-  void setupRange();
-
-  // The plugin file name
+  /// The plugin file name
   FileName _plugin;
 
-  // The plugin library wrapper
+  /// The plugin library wrapper
   DynamicLibraryLoader _library;
 
-  // Function pointer to the dynamically loaded function
+  /// Function pointer to the dynamically loaded function
   const uel_t _uel;
 
   /// The \p MooseMesh that this user object operates on

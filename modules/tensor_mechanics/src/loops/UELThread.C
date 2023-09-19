@@ -20,9 +20,6 @@ UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
     _uel(uel_uo.getPlugin()),
     _statev_copy(uel_uo._nstatev)
 {
-  // regular step
-  _lflags[3] = 0;
-
   // newton based solution (should be 1 when using a predictor or maybe at the start of the
   // iteration)
   _lflags[3] = 0;
@@ -52,7 +49,6 @@ UELThread::subdomainChanged()
  * C++ array memory layout:     [0][0], [0][1], [0][2], [1][0], [1][1], [1][2], [2][0], [2][1],
  * [2][2]
  */
-
 void
 UELThread::onElement(const Elem * elem)
 {
@@ -93,7 +89,7 @@ UELThread::onElement(const Elem * elem)
   _all_udot_dof_values.resize(ndofel);
   _all_udotdot_dof_values.resize(ndofel);
 
-  // Get u_dot and u_dotdot solution values
+  // Get u_dot and u_dotdot solution values (required for future expansion of the interface)
   if (false)
   {
     _all_udot_dof_values.resize(ndofel);
@@ -104,8 +100,8 @@ UELThread::onElement(const Elem * elem)
 
   // Prepare external fields
   const auto nvar_aux = _aux_variables.size();
-  _all_aux_var_dof_indices.resize(nnode * nvar_aux);    // ok
-  _all_aux_var_dof_increments.resize(nnode * nvar_aux); // ok
+  _all_aux_var_dof_indices.resize(nnode * nvar_aux);
+  _all_aux_var_dof_increments.resize(nnode * nvar_aux);
 
   for (const auto i : index_range(_aux_variables))
   {
@@ -137,21 +133,6 @@ UELThread::onElement(const Elem * elem)
     index++;
   }
   // End of prepare external fields.
-
-  // for (unsigned int n = 0; n < nvar_aux; n++)
-  // {
-  //   for (int i = 0; i < nnode; i++)
-  //   {
-  //     _aux_var_values_to_uel[n * nnode + i] = _all_aux_var_dof_values[nvar_aux * index + n];
-  //     _aux_var_values_to_uel[n * nnode + i + 1] = _all_aux_var_dof_increments[nvar_aux * index +
-  //     n]; Moose::out << "aux field nodal value: " << _aux_var_values_to_uel[n * nnode + i] <<
-  //     "\n"; Moose::out << "aux field increment nodal value: " << _aux_var_values_to_uel[n * nnode
-  //     + i + 1]
-  //                << "\n";
-  //     // Moose::out << "_aux_var_values_to_uel[i]: " << _aux_var_values_to_uel[i] << "\n";
-  //     // Moose::out << "_aux_var_values_to_uel[i+1]: " << _aux_var_values_to_uel[i + 1] << "\n";
-  //   }
-  // }
 
   const bool do_residual = _sys.hasVector(_sys.residualVectorTag());
   const bool do_jacobian = _sys.hasMatrix(_sys.systemMatrixTag());

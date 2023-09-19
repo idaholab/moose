@@ -5,37 +5,37 @@
   [build_uel_tri_tests]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; make"
-    requirement = "The uel_tri_tests example shall be built."
+    requirement = "The UEL tri tests example shall be built."
     method = 'opt'
   []
   [build_uel_tri_states_tests]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_states_tests; make"
-    requirement = "The uel_tri_states_tests example shall be built."
+    requirement = "The UEL tri states tests example shall be built."
     method = 'opt'
   []
   [build_uel_build_tests]
     type = RunCommand
     command = "cd ../../../examples/uel_build_tests; make"
-    requirement = "The uel_build_tests example shall be built."
+    requirement = "The UEL build tests example shall be built."
     method = 'opt'
   []
   [build_uel_tri_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_tests; METHOD=dbg make"
-    requirement = "The uel_tri_tests example shall be built."
+    requirement = "The UEL tri tests example shall be built."
     method = 'dbg'
   []
   [build_uel_tri_states_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_tri_states_tests; METHOD=dbg make"
-    requirement = "The uel_tri_states_tests example shall be built."
+    requirement = "The UEL tri states tests example shall be built."
     method = 'dbg'
   []
   [build_uel_build_tests_dbg]
     type = RunCommand
     command = "cd ../../../examples/uel_build_tests; METHOD=dbg make"
-    requirement = "The uel_build_tests example shall be built."
+    requirement = "The UEL build tests example shall be built."
     method = 'dbg'
   []
   [reference]
@@ -54,8 +54,7 @@
     exodiff = small_out.e
     abs_zero = 5e-12
     requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
-                  "deformation with a triangular mesh using a UEL plugin to that effect that "
-                  "interfaces with the AbaqusUserElement user object."
+                  "deformation with a triangular mesh using a UEL plugin."
     # Only test plugins in dbg and opt.
     method = 'dbg opt'
   []
@@ -65,8 +64,7 @@
     exodiff = small_test_out.e
     abs_zero = 5e-12
     requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
-                  "deformation with a triangular mesh using a UEL plugin to that effect that "
-                  "interfaces with the AbaqusUserElement user object and calls a UMAT routine with "
+                  "deformation with a triangular mesh using a UEL plugin calling a UMAT routine with "
                   "its standard interface."
     # Only test plugins in dbg and opt.
     method = 'dbg opt'

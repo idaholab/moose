@@ -36,11 +36,11 @@ AbaqusUserElement::validParams()
   // auxiliary variables (including temperature)
   params.addParam<std::vector<AuxVariableName>>(
       "external_fields",
-      "External fields passed to the uel plugins. Some users may assume that the first field is "
+      "Auxiliary fields passed to the uel plugins. Some users may assume that the first field is "
       "temperature when there are multiple external fields.");
 
   // UEL plugin file
-  params.addParam<FileName>("plugin", "UEL plugin file");
+  params.addRequiredParam<FileName>("plugin", "UEL plugin file");
 
   params.addRequiredParam<std::vector<Real>>(
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");

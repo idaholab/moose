@@ -122,8 +122,6 @@ uel_(double RHS[],
   if (Jdet <= 0)
     std::cerr << "Negative Jacobian in element " << *JELEM << "\n";
 
-  // const auto Jinv = J.inverse();
-
   // Area
   const auto A = Jdet / 2.0;
 
@@ -256,7 +254,7 @@ uel_(double RHS[],
   // nodal forces
   const auto re = Bt * Sigma * t * A;
 
-  int range[] = {0, 1, 2, 3, 4, 5};
+  const int range[] = {0, 1, 2, 3, 4, 5};
   // copy residual (nodal forces) and Jacobian (Element characteristic matrix)
   for (const auto i : range)
   {

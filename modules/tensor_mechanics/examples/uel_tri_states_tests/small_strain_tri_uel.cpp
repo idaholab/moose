@@ -86,7 +86,6 @@ uel_(double RHS[],
      int * /*NJPROP*/,
      double * /*PERIOD*/)
 {
-
   // solution at the beginning of the increment
   Eigen::Matrix<double, 6, 1> u;
   u << U_[0], U_[1], U_[2], U_[3], U_[4], U_[5];
@@ -98,12 +97,12 @@ uel_(double RHS[],
   // current solution
   u += du;
 
-  const auto & x1 = COORDS[0];
-  const auto & y1 = COORDS[1];
-  const auto & x2 = COORDS[2];
-  const auto & y2 = COORDS[3];
-  const auto & x3 = COORDS[4];
-  const auto & y3 = COORDS[5];
+  const auto x1 = COORDS[0];
+  const auto y1 = COORDS[1];
+  const auto x2 = COORDS[2];
+  const auto y2 = COORDS[3];
+  const auto x3 = COORDS[4];
+  const auto y3 = COORDS[5];
 
   const auto x13 = x1 - x3;
   const auto x21 = x2 - x1;
@@ -122,8 +121,6 @@ uel_(double RHS[],
   const auto Jdet = J.determinant();
   if (Jdet <= 0)
     std::cerr << "Negative Jacobian in element git " << *JELEM << "\n";
-
-  // const auto Jinv = J.inverse();
 
   // Area
   const auto A = Jdet / 2.0;
@@ -157,9 +154,7 @@ uel_(double RHS[],
 
   const auto nu = PROPS[1];
 
-  // double * stress = nullptr;
   double * statev = nullptr;
-  // double * ddsdde = nullptr;
   double * sse = nullptr;
   double * spd = nullptr;
   double * scd = nullptr;
@@ -168,7 +163,6 @@ uel_(double RHS[],
   double * drplde = nullptr;
   double * drpldt = nullptr;
   double * stran = nullptr;
-  // double * dstran = nullptr;
   double * time = nullptr;
   double * dtime = nullptr;
   double * temp = nullptr;
@@ -179,7 +173,6 @@ uel_(double RHS[],
   int * ndi = nullptr;
   int * nshr = nullptr;
   int * nstatv = nullptr;
-  // double * props = nullptr;
   int * nprops = nullptr;
   double * coords = nullptr;
   double * drot = nullptr;
@@ -204,6 +197,7 @@ uel_(double RHS[],
   // 3x3 ddsdde
   double ddsdde[9];
   int ntens = 3;
+
   // copy residual (nodal forces) and Jacobian (Element characteristic matrix)
   for (const auto i : range_stress)
     stress[i] = SVARS[i];
@@ -269,7 +263,7 @@ uel_(double RHS[],
   // nodal forces
   const auto re = Bt * Sigma * t * A;
 
-  int range[] = {0, 1, 2, 3, 4, 5};
+  const int range[] = {0, 1, 2, 3, 4, 5};
   // copy residual (nodal forces) and Jacobian (Element characteristic matrix)
   for (const auto i : range)
   {

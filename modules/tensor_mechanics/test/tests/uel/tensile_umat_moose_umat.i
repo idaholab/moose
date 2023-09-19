@@ -39,9 +39,6 @@
     add_variables = true
     generate_output = 'vonmises_stress'
     strain = FINITE
-    # extra_vector_tags = 'react react_z'
-    # material_output_family = MONOMIAL
-    # material_output_order = FIRST
   []
 []
 
@@ -117,20 +114,6 @@
     boundary = 'top'
     function = function_pull
   []
-  # [InclinedNoDisplacementBC]
-  #   [penalty_inclined_top]
-  #     boundary = 'top'
-  #     penalty = 1.0e9
-  #   []
-  #   [penalty_inclined_right]
-  #     boundary = 'right'
-  #     penalty = 1.0e9
-  #   []
-  #   [penalty_inclined_front]
-  #     boundary = 'front'
-  #     penalty = 1.0e9
-  #   []
-  # []
 []
 
 # Something wrong in the input?

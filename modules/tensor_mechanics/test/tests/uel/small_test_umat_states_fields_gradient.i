@@ -8,8 +8,6 @@
     dim = 2
     nx = 20
     ny = 10
-    # nx = 10
-    # ny = 3
     xmax = 10
     ymax = 3
     elem_type = TRI3
@@ -60,7 +58,6 @@
   []
 
   inactive = 'right_dirichlet'
-  # inactive = 'right_neumann'
   [right_neumann]
     type = FunctionNeumannBC
     variable = disp_x

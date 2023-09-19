@@ -93,8 +93,5 @@
       enddo
 
 
-!      STOP 1
-!      write(*,"('Program execution is terminated.')")
-
       return
       end subroutine uel
