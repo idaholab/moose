@@ -50,11 +50,11 @@ private:
    * Utility routine to output the final diagnostics level in the desired mode
    * @param msg the message to output
    * @param log_level the log level to output the message at
-   * @param may_error if set to false, prevents erroring from the log, despite the log level
-   * may_error is used to avoid erroring when the log is requested but there are no issues so it
-   * should just say "0 problems" with an info message
+   * @param problem_detected if set to false, prevents erroring from the log, despite the log level
+   * problem_detected is used to avoid erroring when the log is requested but there are no issues so
+   * it should just say "0 problems" with an info message
    */
-  void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool may_error) const;
+  void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool problem_detected) const;
 
   /**
    * Utility routine to re-order a vector of nodes so that they form a valid quad
