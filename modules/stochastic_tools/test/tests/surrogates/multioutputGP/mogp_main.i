@@ -9,7 +9,7 @@
   []
   [L_dist]
     type = Uniform
-    lower_bound = 0.1
+    lower_bound = 2.0
     upper_bound = 10.0
   []
   [bc_dist]
@@ -19,18 +19,22 @@
   []
   [body_dist]
     type = Uniform
-    lower_bound = 9000
-    upper_bound = 11000
+    lower_bound = 50.0
+    upper_bound = 100.0
   []
 []
 
 [Samplers]
   [sample]
     type = LatinHypercube
-    num_rows = 5
+    num_rows = 50 # 200
     distributions = 'k_dist L_dist bc_dist body_dist'
     execute_on = PRE_MULTIAPP_SETUP
-    # min_procs_per_row = 2
+  []
+  [test]
+    type = LatinHypercube
+    num_rows = 10 # 1 # 200
+    distributions = 'k_dist L_dist bc_dist body_dist'
   []
 []
 
@@ -70,13 +74,14 @@
     type = StochasticReporter
     outputs = none
   []
-  # [eval]
-  #   type = EvaluateSurrogate
-  #   model = pr_surrogate
-  #   response_type = vector_real
-  #   parallel_type = ROOT
-  #   execute_on = timestep_end
-  # []
+  [eval]
+    type = EvaluateSurrogate
+    model = mogp_surrogate
+    response_type = vector_real
+    parallel_type = ROOT
+    execute_on = final
+    sampler = test
+  []
 []
 
 [Trainers]
@@ -87,15 +92,22 @@
     execute_on = initial
     covariance_function = 'covar'
     output_covariance = 'outcovar'
+    sampler = sample
+    tune_parameters = 'signal_variance length_factor'
+    iterations = 15000
+    batch_size = 50
+    learning_rate = 1e-4
+    show_optimization_details = true
   []
 []
 
 [Covariance]
   [covar]
-    type=SquaredExponentialCovariance
-    signal_variance = 1
-    noise_variance = 1e-3
-    length_factor = '1.0 1.0 1.0 1.0'         # There needs to be an error check
+    type= MaternHalfIntCovariance # SquaredExponentialCovariance
+    p = 1
+    signal_variance = 2.76658083
+    noise_variance = 1e-8
+    length_factor = '3.67866381 2.63421705 1.52975445 3.41603576'         # There needs to be an error check
   []
 []
 
@@ -105,12 +117,12 @@
   []
 []
 
-# [Surrogates]
-#   [pr_surrogate]
-#     type = PolynomialRegressionSurrogate
-#     trainer = pr
-#   []
-# []
+[Surrogates]
+  [mogp_surrogate]
+    type = MultiOutputGaussianProcess
+    trainer = mogp
+  []
+[]
 
 [Outputs]
   [out]

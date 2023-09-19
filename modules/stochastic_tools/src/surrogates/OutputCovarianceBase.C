@@ -47,6 +47,19 @@ OutputCovarianceBase::computeFullCovarianceMatrix(RealEigenMatrix & kappa,
   kron(B, K, kappa);
 }
 
+// void
+// OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
+//                            const RealEigenMatrix & mat_B,
+//                            RealEigenMatrix & mat_req) const
+// {
+//   mat_req.resize(mat_A.rows() * mat_B.rows(), mat_A.rows() * mat_B.rows());
+//   for (unsigned int i = 0; i < mat_A.rows(); i++)
+//     for (unsigned int j = 0; j < mat_A.rows(); j++)
+//       for (unsigned int k = 0; k < mat_B.rows(); k++)
+//         for (unsigned int l = 0; l < mat_B.rows(); l++)
+//           mat_req(((i * mat_A.rows()) + k), ((j * mat_A.rows()) + l)) = mat_A(i, j) * mat_B(k, l);
+// }
+
 void
 OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
                            const RealEigenMatrix & mat_B,
@@ -57,7 +70,7 @@ OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
     for (unsigned int j = 0; j < mat_A.rows(); j++)
       for (unsigned int k = 0; k < mat_B.rows(); k++)
         for (unsigned int l = 0; l < mat_B.rows(); l++)
-          mat_req(((i * mat_A.rows()) + k), ((j * mat_A.rows()) + l)) = mat_A(i, j) * mat_B(k, l);
+          mat_req(((i * mat_B.rows()) + k), ((j * mat_B.rows()) + l)) = mat_A(i, j) * mat_B(k, l);
 }
 
     // void

@@ -28,7 +28,8 @@ namespace StochasticTools
 class MultiOutputGaussianProcessHandler
 {
 public:
-  MultiOutputGaussianProcessHandler();
+  MultiOutputGaussianProcessHandler() {}
+  // MultiOutputGaussianProcessHandler();
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -155,7 +156,7 @@ public:
   const RealEigenMatrix & getKappa() const { return _kappa; }
   const std::vector<Real> & getLatent() const { return _latent; }
   const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
-  const Eigen::LLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
+  // const Eigen::LLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const OutputCovarianceBase & getOutputCovar() const { return *_output_covariance; }
@@ -183,7 +184,7 @@ public:
   RealEigenMatrix & kappa() { return _kappa; }
   std::vector<Real> & latent() { return _latent; }
   RealEigenMatrix & kappaResultsSolve() { return _kappa_results_solve; }
-  Eigen::LLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
+  // Eigen::LLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   OutputCovarianceBase * outputCovarPtr() { return _output_covariance; }
