@@ -144,9 +144,7 @@ uel_(double RHS[],
 
   Eigen::Matrix<double, 3, 3> E;
 
-  // double * stress = nullptr;
   double * statev = nullptr;
-  // double * ddsdde = nullptr;
   double * sse = nullptr;
   double * spd = nullptr;
   double * scd = nullptr;
@@ -155,7 +153,6 @@ uel_(double RHS[],
   double * drplde = nullptr;
   double * drpldt = nullptr;
   double * stran = nullptr;
-  // double * dstran = nullptr;
   double * time = nullptr;
   double * dtime = nullptr;
   double * temp = nullptr;
@@ -166,7 +163,6 @@ uel_(double RHS[],
   int * ndi = nullptr;
   int * nshr = nullptr;
   int * nstatv = nullptr;
-  // double * props = nullptr;
   int * nprops = nullptr;
   double * coords = nullptr;
   double * drot = nullptr;

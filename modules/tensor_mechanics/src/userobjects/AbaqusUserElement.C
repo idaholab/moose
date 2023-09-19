@@ -21,6 +21,7 @@ AbaqusUserElement::validParams()
   auto params = GeneralUserObject::validParams();
   params += BlockRestrictable::validParams();
   params += TaggingInterface::validParams();
+  params.addClassDescription("Coupling UserObject to use Abaqus UEL plugins in MOOSE");
 
   // execute during residual and Jacobian evaluation
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -32,12 +33,13 @@ AbaqusUserElement::validParams()
   params.suppressParameter<bool>("force_preic");
 
   // coupled variables
-  params.addParam<std::vector<NonlinearVariableName>>("variables", "coupled variables");
+  params.addParam<std::vector<NonlinearVariableName>>("variables", "Nonlinear coupled variables");
   // auxiliary variables (including temperature)
   params.addParam<std::vector<AuxVariableName>>(
       "external_fields",
-      "Auxiliary fields passed to the uel plugins. Some users may assume that the first field is "
-      "temperature when there are multiple external fields.");
+      "Auxiliary field variables (or 'predifined field variables') passed to the UEL plugin. Some "
+      "plugins may assume that the first field is temperature when there are multiple external "
+      "fields.");
 
   // UEL plugin file
   params.addRequiredParam<FileName>("plugin", "UEL plugin file");

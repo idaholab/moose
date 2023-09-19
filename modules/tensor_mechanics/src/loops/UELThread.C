@@ -20,9 +20,12 @@ UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
     _uel(uel_uo.getPlugin()),
     _statev_copy(uel_uo._nstatev)
 {
+  // general solve step
+  _lflags[3] = 0;
+
   // newton based solution (should be 1 when using a predictor or maybe at the start of the
   // iteration)
-  _lflags[3] = 0;
+  _lflags[4] = 0;
 }
 
 // Splitting Constructor
@@ -125,12 +128,10 @@ UELThread::onElement(const Elem * elem)
   for (const auto i : index_range(_all_aux_var_dof_values))
     _all_aux_var_dof_increments[i] -= _all_aux_var_dof_values[i];
 
-  unsigned int index = 0;
-  for (unsigned int i = 0; i < _all_aux_var_dof_values.size() * 2; i = i + 2)
+  for (const auto i : index_range(_all_aux_var_dof_values))
   {
-    _aux_var_values_to_uel[i] = _all_aux_var_dof_values[index];
-    _aux_var_values_to_uel[i + 1] = _all_aux_var_dof_increments[index];
-    index++;
+    _aux_var_values_to_uel[i * 2] = _all_aux_var_dof_values[i];
+    _aux_var_values_to_uel[i * 2 + 1] = _all_aux_var_dof_increments[i];
   }
   // End of prepare external fields.
 
@@ -160,8 +161,11 @@ UELThread::onElement(const Elem * elem)
 
   int nrhs = 1;               // : RHS should contain the residual vector
   int jtype = _uel_uo._jtype; // type of user element
-  std::vector<Real> time(2);  // dummy
+
   Real dt = _fe_problem.dt();
+  Real time = _fe_problem.time();
+  std::vector<Real> times{time - dt, time - dt}; // first entry should be the step time (TODO)
+
   std::array<Real, 8> energy;
   int jelem = elem->id() + 1; // User-assigned element number
   Real pnewdt;
@@ -197,7 +201,7 @@ UELThread::onElement(const Elem * elem)
        _all_udot_dof_values.data() /* V[] */,
        _all_udotdot_dof_values.data() /* A[] */,
        &jtype,
-       time.data(),
+       times.data(),
        &dt,
        &idummy /* KSTEP */,
        &idummy /* KINC */,

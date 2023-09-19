@@ -31,80 +31,66 @@ class AbaqusUserElement : public GeneralUserObject,
 public:
   /// function type for the external UMAT function
   typedef void (*uel_t)(
-      Real RHS[],    // (MLVARX,*)      contributions of this element to the right-hand-side vector
-      Real AMATRX[], // (NDOFEL,NDOFEL) contribution of this element to the Jacobian
-      Real SVARS[],  // (NSVARS)        values of the solution-dependent state variables associated
-                     //                 with this element
-      Real ENERGY[], // (8)             element energy quantities at the start of the current
-                     //                 increment (update this)
-      int * NDOFEL,  // number of solution-dependent state variables associated with the element
+      Real RHS[],    // (MLVARX,*)      Residual vector contribution for the current element
+      Real AMATRX[], // (NDOFEL,NDOFEL) Jacobian contribution for the current element
+      Real SVARS[],  // (NSVARS)        Persistent state variable values for the current element
+      Real ENERGY[], // (8)             Energy quantities at the start of the current
+                     //                 increment (to be updated by the UEL routine)
+      int * NDOFEL,  // Number of degrees of freedom (DOFs) for the current element
       int * NRHS,    // NRHS=1: RHS should contain the residual vector,
                      // NRHS=2: not implemented (modified Riks static procedure)
-      int * NSVARS,  //
-      Real PROPS[],  // (NPROPS) real property values defined for use with this element.
+      int * NSVARS,  // Number of persistent state variables for the element
+      Real PROPS[],  // (NPROPS) Static property values (parameters) defined for use with this
+                     // element.
       int * NPROPS,  //
-      Real COORDS[], // (MCRD,NNODE) array containing the original coordinates of the nodes of
-                     //              the element. COORDS(K1,K2) is the K1th coordinate of the
+      Real COORDS[], // (MCRD,NNODE) Undisplaced coordinates of the element nodes
+                     //              COORDS(K1,K2) is the K1th coordinate of the
                      //              K2th node of the element
-      int * MCRD,    // maximum of the user-defined maximum number of coordinates needed at any node
-                     // point
-      int * NNODE,   //
-      Real U[],      // (NDOFEL) Total values of the variables
-      Real DU[],     // (MLVARX, *) Incremental values of the variables for the current increment
-                     //             for right-hand-side
-      Real V[],      // (NDOFEL) Time rate of change of the variables (velocities,
-                     //          rates of rotation). Defined for implicit dynamics only (LFLAGS(1)
-                     //          11 or 12)
-      Real A[],      // (NDOFEL) Accelerations of the variables. Defined for implicit dynamics
-                     //          only (LFLAGS(1) 11 or 12).
+      int * MCRD,  // Maximum number of coordinates needed at any node point (COORDINATES keyword -
+                   // unsupported)
+      int * NNODE, // Number of nodes in the current element
+      Real U[],    // (NDOFEL)   Total values of the variables
+      Real DU[],   // (MLVARX,*) Incremental values of the variables for the current increment
+                   //            for right-hand-side
+      Real V[],    // (NDOFEL) Time rate of change of the variables (velocities,
+                   //          rates of rotation). Defined for implicit dynamics only (LFLAGS(1)
+                   //          11 or 12)
+      Real A[],    // (NDOFEL) Accelerations of the variables. Defined for implicit dynamics
+                   //          only (LFLAGS(1) 11 or 12).
       int * JTYPE, // Integer defining the element type. This is the user-defined integer value n in
                    // element type Un
-      Real TIME[], // (2)
-      Real * DTIME,  //
-      int * KSTEP,   //
-      int * KINC,    //
-      int * JELEM,   // User-assigned element number
+      Real TIME[], // (2) step time and total time
+      Real * DTIME,  // Time increment
+      int * KSTEP,   // Step number (as per Abaqus definition) can be set by the user
+      int * KINC,    // Increment number (MOOSE time step)
+      int * JELEM,   // User-defined element number
       Real PRAMS[],  // (*) parameters associated with the solution procedure
-      int * NDLOAD,  //
+      int * NDLOAD,  // Number of applied loads to the element (unused)
       int JDLTYP[],  // (MDLOAD, *) array containing the integers used to define distributed load
                      //             types for the element
       Real ADLMAG[], // (MDLOAD,*)
       Real PREDEF[], // (2,NPREDF,NNODE) predefined field variables, such as temperature in an
                      //                  uncoupled stress/displacement analysis
-      int * NPREDF,  // Number of predefined field variables, including temperature
+      int * NPREDF,  // Number of predefined field (auxiliary) variables, including temperature
       int LFLAGS[],  // (*) flags that define the current solution procedure
       int * MLVARX,  // used when several displacement or right-hand-side vectors are used
       Real DDLMAG[], // (MDLOAD,*)
       int * MDLOAD,  // Total number of distributed loads and/or fluxes defined on this element
-      Real * PNEWDT, //
-      int JPROPS[],  // (*) integer array containing the NJPROP integer property values defined for
-                     //     use with this element
-      int * NJPROP,  //
-      Real * PERIOD  //
+      Real * PNEWDT, // Recommended new timestep (unused)
+      int JPROPS[],  // (NJPROP) NJPROP integer property values defined for the current element
+      int * NJPROP,  // Number of user defined integer properties
+      Real * PERIOD  // Current step time period (unused)
   );
-
-  /*
-   * The UEL routine sets RHS, AMATRX, SVARS, ENERGY, and PNEWDT
-   *
-   * ENERGY(1) Kinetic energy.
-   * ENERGY(2) Elastic strain energy.
-   * ENERGY(3) Creep dissipation.
-   * ENERGY(4) Plastic dissipation.
-   * ENERGY(5) Viscous dissipation.
-   * ENERGY(6) "Artificial strain energy" associated with such effects as artificial stiffness
-   * introduced to control hourglassing or other singular modes in the element. ENERGY(7)
-   * Electrostatic energy. ENERGY(8) Incremental work done by loads applied within the user element.
-   */
 
   static InputParameters validParams();
   AbaqusUserElement(const InputParameters & params);
 
-  void initialSetup() override;
-  void meshChanged() override;
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
 
-  void initialize() override final;
-  void execute() override;
-  void finalize() override final {}
+  virtual void initialize() override final;
+  virtual void execute() override;
+  virtual void finalize() override final {}
 
   /// getters for the loop class
   const std::vector<const MooseVariableFieldBase *> & getVariables() const { return _variables; }

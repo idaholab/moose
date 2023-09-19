@@ -70,7 +70,6 @@
 []
 
 [Problem]
-  kernel_coverage_check = false
   extra_tag_vectors = 'kernel_residual'
 []
 
