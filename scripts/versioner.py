@@ -256,7 +256,7 @@ class Versioner:
 
     @staticmethod
     def augment_dictionaries(base_meta, library):
-        """ tack on emtpy child key=values to suppied dictionary key """
+        """ tack on empty child key=values to supplied dictionary key """
         child = base_meta[library]
         child['hash_list'] = []
         child['hash_table'] = {}

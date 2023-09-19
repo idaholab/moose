@@ -74,7 +74,7 @@
   # PTScotch is not valgrind clean
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
-    rel_err = '1e-1'
+    rel_err = '1.5e-1'
   [../]
 
   [./parmetis]

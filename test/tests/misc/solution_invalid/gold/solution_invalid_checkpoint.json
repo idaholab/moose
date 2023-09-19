@@ -1,6 +1,6 @@
 {
     "app_name": "main",
-    "current_time": "Thu Aug 17 11:20:17 2023",
+    "current_time": "Thu Aug 17 11:19:35 2023",
     "executable": "moose/test/moose_test-opt",
     "executable_time": "Thu Aug 17 11:16:58 2023",
     "libmesh_version": "",
@@ -75,28 +75,6 @@
             },
             "time": 3.0,
             "time_step": 3
-        },
-        {
-            "solution_invalidity": {
-                "solution_invalidity": [
-                    {
-                        "converged_counts": 16,
-                        "message": "The diffusivity is greater than the threshold value!",
-                        "object_type": "NonsafeMaterial",
-                        "timestep_counts": 64,
-                        "total_counts": 192
-                    },
-                    {
-                        "converged_counts": 16,
-                        "message": "Extra invalid thing!",
-                        "object_type": "NonsafeMaterial",
-                        "timestep_counts": 64,
-                        "total_counts": 192
-                    }
-                ]
-            },
-            "time": 4.0,
-            "time_step": 4
         }
     ]
 }

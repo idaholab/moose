@@ -87,13 +87,14 @@
     requirement = 'A 2D simulation shall throw an exception if there is a zero element Jacobian, when use_displaced_mesh = true'
   [../]
 
-[./inf_nan]
+  [./inf_nan]
     type = PetscJacobianTester
     input = 'inf_nan.i'
     recover = false
     ratio_tol = nan
     difference_tol = nan
     cli_args = '--no-trap-fpe'
+    petsc_version = '<3.19.3'
     issues = '#10788'
     requirement = 'The PETSc Jacobian test shall reveal nans if there are nans in the matrix'
   [../]

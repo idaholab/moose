@@ -27,7 +27,7 @@ def add_plot(ax, prefix, name, label, yscale, marker='o'):
     """Show matplotlib plot of memory data"""
     dirname = os.path.abspath(os.path.dirname(__file__))
     data = pandas.read_csv(os.path.join(dirname, '{}.csv'.format(prefix)))
-    ax.plot(data['n_procs'], data[name]/yscale, label=label, marker=marker)
+    ax.plot(data['n_procs'].to_numpy(), data[name].to_numpy()/yscale, label=label, marker=marker)
 
 if __name__ == '__main__':
 

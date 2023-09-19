@@ -839,7 +839,10 @@
     input = 'waterncg_twophase_nonisothermal.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
+    # Due to more consistent divergence status reporting in PETSc (as of PETSc commit 5f3c5e7a), this
+    # test will fail to converge despite the Jacobian test successfully passing. Aborting on solve fail
+    # allows this test to pass.
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1 Executioner/abort_on_solve_fail=true'
     threading = '!pthreads'
     requirement = 'The porous flow module shall compute all Jacobian entries of physics kernels for the non-condensible gas version of water, 2 phase, nonisothermal.'
     issues = '#6845 #10167'
@@ -1221,6 +1224,10 @@
     input = linear_por.i
     ratio_tol = 1E-6
     difference_tol = 1E10
+    # Due to more consistent divergence status reporting in PETSc (as of PETSc commit 5f3c5e7a), this
+    # test will fail to converge despite the Jacobian test successfully passing. Aborting on solve fail
+    # allows this test to pass.
+    cli_args = 'Executioner/abort_on_solve_fail=true'
     threading = '!pthreads'
     requirement = 'The porous flow module shall be able to calculate the analytic Jacobian of systems that include a porosity that is a linear function of effective porepressure, temperature and volumetric strain.'
     issues = '#18079'
