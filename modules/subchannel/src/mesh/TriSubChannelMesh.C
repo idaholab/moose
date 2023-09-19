@@ -114,41 +114,50 @@ TriSubChannelMesh::channelIndex(const Point & p) const
   // looping over all channels
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    // Distance from the point to subchannel
-    distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
-                          std::pow((p(1) - _subchannel_position[i][1]), 2.0));
 
-    // If subchannel belongs to center ring
-    if (channel_distance < distance_outer_ring)
+    if (_n_rings == 1)
     {
-      if ((distance1 < distance0) && (_subch_type[i] == EChannelType::CENTER))
-      {
-        j = i;
-        distance0 = distance1;
-      } // if
-    } // if
-    // If subchannel belongs to outer ring
+      Real angle = std::atan(p(1) / p(0));
+      if ((i * libMesh::pi / 6.0 < angle) && (angle <= (i + 1) * libMesh::pi / 6.0))
+        return i;
+    }
     else
     {
-      if ((distance1 < distance0) &&
-          (_subch_type[i] == EChannelType::EDGE || _subch_type[i] == EChannelType::CORNER))
+      // Distance from the point to subchannel
+      distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
+                            std::pow((p(1) - _subchannel_position[i][1]), 2.0));
+
+      // If subchannel belongs to center ring
+      if (channel_distance < distance_outer_ring)
       {
-        if (((x_coord_new > x_lim) || (x_coord_new < -x_lim)) &&
-            _subch_type[i] == EChannelType::CORNER)
-        {
-          j = i;
-          distance0 = distance1;
-        } // if
-        else if (((x_coord_new > x_lim) || (x_coord_new > -x_lim)) &&
-                 _subch_type[i] == EChannelType::EDGE)
+        if ((distance1 < distance0) && (_subch_type[i] == EChannelType::CENTER))
         {
           j = i;
           distance0 = distance1;
         } // if
       }   // if
-    }     // else
-
-  }   // for
+      // If subchannel belongs to outer ring
+      else
+      {
+        if ((distance1 < distance0) &&
+            (_subch_type[i] == EChannelType::EDGE || _subch_type[i] == EChannelType::CORNER))
+        {
+          if (((x_coord_new > x_lim) || (x_coord_new < -x_lim)) &&
+              _subch_type[i] == EChannelType::CORNER)
+          {
+            j = i;
+            distance0 = distance1;
+          } // if
+          else if (((x_coord_new > x_lim) || (x_coord_new > -x_lim)) &&
+                   _subch_type[i] == EChannelType::EDGE)
+          {
+            j = i;
+            distance0 = distance1;
+          }
+        }
+      }
+    }
+  }
   return j;
 }
 
