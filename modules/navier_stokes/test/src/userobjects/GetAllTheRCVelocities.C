@@ -37,5 +37,9 @@ void
 GetAllTheRCVelocities::execute()
 {
   for (const auto & fi : _subproblem.mesh().allFaceInfo())
-    _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow, fi, Moose::currentState(), 0);
+    _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow,
+                       fi,
+                       Moose::currentState(),
+                       0,
+                       /*subtract_mesh_velocity=*/true);
 }

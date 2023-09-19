@@ -124,8 +124,8 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const auto state = determineState();
 
   // Get face value for velocity
-  const auto vel =
-      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, state, _tid));
+  const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(
+      _velocity_interp_method, *fi, state, _tid, /*subtract_mesh_velocity=*/true));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 

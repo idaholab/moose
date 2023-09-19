@@ -19,6 +19,7 @@
 #include "FaceArgInterface.h"
 #include "INSFVPressureVariable.h"
 #include "ADFunctorInterface.h"
+#include "VectorCompositeFunctor.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/id_types.h"
@@ -84,7 +85,8 @@ public:
   VectorValue<ADReal> getVelocity(Moose::FV::InterpMethod m,
                                   const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  THREAD_ID tid) const;
+                                  THREAD_ID tid,
+                                  bool subtract_mesh_velocity) const;
 
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
@@ -169,6 +171,18 @@ protected:
 
   /// All the thread copies of the z-velocity variable
   std::vector<MooseVariableFVReal *> _ws;
+
+  /// All the thread copies of the x-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_xs;
+
+  /// All the thread copies of the y-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_ys;
+
+  /// All the thread copies of the z-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_zs;
+
+  /// A functor for computing the displacement
+  std::vector<std::unique_ptr<Moose::VectorCompositeFunctor<ADReal>>> _disps;
 
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;

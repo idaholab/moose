@@ -103,6 +103,9 @@ INSFVRhieChowInterpolator::validParams()
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
+  params.addRequiredParam<VariableName>("disp_x", "The x-component of displacement");
+  params.addParam<VariableName>("disp_y", "The y-component of displacement");
+  params.addParam<VariableName>("disp_z", "The z-component of displacement");
   return params;
 }
 
@@ -147,9 +150,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
   auto fill_container = [this](const auto & name, auto & container)
   {
+    typedef typename std::remove_reference_t<decltype(container)>::value_type ContainedType;
     for (const auto tid : make_range(libMesh::n_threads()))
     {
-      auto * const var = static_cast<MooseVariableFVReal *>(
+      auto * const var = static_cast<ContainedType>(
           &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));
       container[tid] = var;
     }
@@ -220,6 +224,12 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
   fill_container("u", _us);
   check_blocks(*_u);
   _var_numbers.push_back(_u->number());
+  if (isParamValid("disp_x"))
+  {
+    _disp_xs.resize(libMesh::n_threads());
+    fill_container("disp_x", _disp_xs);
+    check_blocks(*_disp_xs[0]);
+  }
 
   if (_dim >= 2)
   {
@@ -232,6 +242,15 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _var_numbers.push_back(_v->number());
     if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
       mooseError("x and y velocity component face interpolation methods do not match");
+
+    if (isParamValid("disp_y"))
+    {
+      _disp_ys.resize(libMesh::n_threads());
+      fill_container("disp_y", _disp_ys);
+      check_blocks(*_disp_ys[0]);
+    }
+    else if (isParamValid("disp_x"))
+      paramError("disp_y", "If 'disp_x' is provided, then 'disp_y' must be as well");
   }
 
   if (_dim >= 3)
@@ -245,6 +264,15 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _var_numbers.push_back(_w->number());
     if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
       mooseError("x and z velocity component face interpolation methods do not match");
+
+    if (isParamValid("disp_z"))
+    {
+      _disp_zs.resize(libMesh::n_threads());
+      fill_container("disp_z", _disp_zs);
+      check_blocks(*_disp_zs[0]);
+    }
+    else if (isParamValid("disp_x"))
+      paramError("disp_z", "If 'disp_x' is provided, then 'disp_z' must be as well");
   }
 
   if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))
@@ -266,6 +294,15 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
         blockIDs());
+
+    if (_disp_xs.size())
+      _disps.push_back(std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
+          name() + "_disp_" + std::to_string(tid),
+          *_disp_xs[tid],
+          _dim >= 2 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_ys[tid])
+                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor),
+          _dim >= 3 ? static_cast<const Moose::FunctorBase<ADReal> &>(*_disp_zs[tid])
+                    : static_cast<const Moose::FunctorBase<ADReal> &>(_zero_functor)));
   }
 
   const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
@@ -573,7 +610,8 @@ VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
                                        const Moose::StateArg & time,
-                                       const THREAD_ID tid) const
+                                       const THREAD_ID tid,
+                                       const bool subtract_mesh_velocity) const
 {
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
@@ -604,6 +642,9 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     velocity(1) = (*v)(face, time);
   if (w)
     velocity(2) = (*w)(face, time);
+
+  if (_disps.size() && subtract_mesh_velocity)
+    velocity -= _disps[tid]->dot(face, time);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
