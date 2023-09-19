@@ -37,6 +37,7 @@ RayTracingExodus::outputMesh()
   TIME_SECTION("outputMesh", 3, "Writing Ray Mesh");
 
   ExodusII_IO eio(*_segment_mesh);
+  eio.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep
   if (_output_data_nodal)

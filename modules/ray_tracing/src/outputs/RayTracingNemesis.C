@@ -41,6 +41,7 @@ RayTracingNemesis::outputMesh()
 
   // Build the nemesis IO object
   Nemesis_IO nemesis_io(*_segment_mesh);
+  nemesis_io.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep
   if (_output_data_nodal)
