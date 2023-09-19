@@ -93,6 +93,8 @@
     max_parallel = 4
     requirement = 'The system shall support the mesh output of traced rays into the nemesis format for a transient simulation'
     design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
+    # cannot do recover because we don't have a single exodus file, the first two timesteps won't exist
+    recover = false
   []
 
   [no_segments]
