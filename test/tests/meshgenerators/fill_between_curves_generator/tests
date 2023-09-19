@@ -6,7 +6,18 @@
     input = 'fill_between_curves.i'
     exodiff = 'fill_between_curves_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate a mesh that fills between two coplanar curves.'
+    requirement = 'The system shall generate a mesh that fills between two coplanar curves.'
+    recover = false
+  []
+  [fill_and_keep_nodesets]
+    type = 'Exodiff'
+    input = 'fill_between_curves.i'
+    exodiff = 'fill_between_curves_preserve_nodesets_in.e'
+    cli_args = "Mesh/inactive='' Mesh/fbcg/input_mesh_1=add_nodeset1 "
+               "Mesh/fbcg/input_mesh_2=add_nodeset2 --mesh-only "
+               "fill_between_curves_preserve_nodesets_in.e"
+    exodiff_opts = '-pedantic'
+    requirement = 'The system shall generate a mesh that fills between two coplanar curves and keeps nodesets defined on these curves.'
     recover = false
   []
 []

@@ -20,4 +20,21 @@
     num_layers = 3
     bias_parameter = 0.0
   []
+
+  # For the nodeset preservation test
+  inactive = 'add_nodeset1 add_nodeset2'
+  [add_nodeset1]
+    type = BoundingBoxNodeSetGenerator
+    input = 'pcg1'
+    bottom_left = '0.51 0 -1'
+    top_right = '2 10 1'
+    new_boundary = 'nodeset1'
+  []
+  [add_nodeset2]
+    type = BoundingBoxNodeSetGenerator
+    input = 'pcg2'
+    bottom_left = '0.5 -2 -1'
+    top_right = '2 0 1'
+    new_boundary = 'nodeset2'
+  []
 []

@@ -90,7 +90,7 @@ AdvancedExtruderGenerator::validParams()
 
   params.addParam<boundary_id_type>(
       "top_boundary",
-      "The boundary ID to set on the top boundary.  If ommitted one will be generated.");
+      "The boundary ID to set on the top boundary.  If omitted one will be generated.");
 
   params.addParam<boundary_id_type>(
       "bottom_boundary",
@@ -114,7 +114,10 @@ AdvancedExtruderGenerator::validParams()
       "Boundary Assignment");
   params.addParamNamesToGroup(
       "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
-
+  params.addParam<Real>("twist_pitch",
+                        0,
+                        "Pitch for helicoidal extrusion around an axis going through the origin "
+                        "following the direction vector");
   return params;
 }
 
@@ -155,7 +158,8 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
         isParamValid("downward_boundary_ids")
             ? getParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids")
             : std::vector<std::vector<boundary_id_type>>(_heights.size(),
-                                                         std::vector<boundary_id_type>()))
+                                                         std::vector<boundary_id_type>())),
+    _twist_pitch(getParam<Real>("twist_pitch"))
 {
   if (!_direction.norm())
     paramError("direction", "Must have some length!");
@@ -397,14 +401,34 @@ AdvancedExtruderGenerator::generate()
           // Shift the previous position by a certain fraction of 'height' along the extrusion
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
-          if (MooseUtils::absoluteFuzzyEqual(bias, 1.0))
-            current_distance =
-                old_distance + _direction * (height / (Real)num_layers / (Real)order);
-          else
-            current_distance =
-                old_distance + _direction * height * std::pow(bias, (Real)(layer_index - 1)) *
-                                   (1.0 - bias) / (1.0 - std::pow(bias, (Real)(num_layers))) /
-                                   (Real)order;
+
+          const auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
+                                     ? height / (Real)num_layers / (Real)order
+                                     : height * std::pow(bias, (Real)(layer_index - 1)) *
+                                           (1.0 - bias) /
+                                           (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+
+          current_distance = old_distance + _direction * step_size;
+
+          // Handle helicoidal extrusion
+          if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+          {
+            // twist 1 should be 'normal' to the extruded shape
+            RealVectorValue twist1 = _direction.cross(*node);
+            // This happens for any node on the helicoidal extrusion axis
+            if (!MooseUtils::absoluteFuzzyEqual(twist1.norm(), .0))
+              twist1 /= twist1.norm();
+            const RealVectorValue twist2 = twist1.cross(_direction);
+
+            auto twist = (cos(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
+                          cos(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
+                             twist2 +
+                         (sin(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
+                          sin(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
+                             twist1;
+            twist *= std::sqrt(node->norm_sq() + libMesh::Utility::pow<2>(_direction * (*node)));
+            current_distance += twist;
+          }
         }
 
         Node * new_node = mesh->add_point(*node + current_distance,

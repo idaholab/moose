@@ -28,6 +28,15 @@ Boundary ID remapping also works similarly to subdomain ID remapping. During ext
 
 The other categories of the boundaries that can be defined are the interfaces between subdomains in different elevations, as well as the top/bottom surfaces of the subdomains. As each elevation interface (or top/bottom surface) is simply a duplicate of the `input` mesh, these interface (or top/bottom surface) boundaries correspond to the subdomains of the `input` mesh, which are referred to as `source_blocks`. Also, due to the nature of sidesets, they can be defined on either side of the elevation interface. Thus, both `upward` and `downward` boundaries can be defined. Here `upward` means the normal vector of the sideset has the "same-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector; `downward` means the normal vector of the sideset has the "opposite-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector.
 
+
+## Helicoidal extrusion
+
+The user may elect to perform a helicoidal extrusion along an axis going through the (0, 0, 0) point aligned with
+the extrusion [!param](/Mesh/AdvancedExtruderGenerator/direction) vector parameter. The user must then select a non-zero
+[!param](/Mesh/AdvancedExtruderGenerator/twist_pitch) parameter.
+After an extrusion distance of a pitch, a full rotation of the 2D shape being extruded will have been performed.
+By default, the rotation is performed in a clockwise direction around the axis of extrusion. To change the direction of the rotation, please specify a negative [!param](/Mesh/AdvancedExtruderGenerator/twist_pitch).
+
 ## Example Syntax
 
 !listing test/tests/meshgenerators/advanced_extruder_generator/gen_extrude.i block=Mesh/extrude
