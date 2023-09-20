@@ -299,7 +299,7 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto Si_out = (*_S_flow_soln)(node_out_i);
         auto Sj_out = (*_S_flow_soln)(node_out_j);
         // crossflow area between channels i,j (dz*gap_width)
-        auto gap = _subchannel_mesh.getGapWidth(i_gap);
+        auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Sij = dz * gap;
         auto avg_massflux =
             0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
@@ -378,7 +378,7 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto Si_out = (*_S_flow_soln)(node_out_i);
         auto Sj_out = (*_S_flow_soln)(node_out_j);
         // crossflow area between channels i,j (dz*gap_width)
-        auto gap = _subchannel_mesh.getGapWidth(i_gap);
+        auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Sij = dz * gap;
         auto avg_massflux =
             0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +

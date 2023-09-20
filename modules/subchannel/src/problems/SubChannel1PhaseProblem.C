@@ -1500,7 +1500,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
         auto rho_j = (*_rho_soln)(node_in_j);
         auto Si = (*_S_flow_soln)(node_in_i);
         auto Sj = (*_S_flow_soln)(node_in_j);
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
         // total local form loss in the ij direction
         auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
@@ -1574,7 +1574,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
         auto S_j_out = (*_S_flow_soln)(node_out_j);
 
         // Cross-sectional gap area
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
 
         // Figure out donor cell density

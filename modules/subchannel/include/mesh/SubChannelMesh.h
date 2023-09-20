@@ -192,7 +192,7 @@ public:
   /**
    * Return gap width for a given gap index
    */
-  virtual Real getGapWidth(unsigned int gap_index) const = 0;
+  virtual Real getGapWidth(unsigned int axial_index, unsigned int gap_index) const = 0;
 
   /**
    * Function that return the vector with the maps to the nodes if they exist

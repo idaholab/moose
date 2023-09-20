@@ -96,7 +96,10 @@ public:
     return _subch_type[index];
   }
 
-  virtual Real getGapWidth(unsigned int gap_index) const override { return _gij_map[gap_index]; }
+  virtual Real getGapWidth(unsigned int axial_index, unsigned int gap_index) const override
+  {
+    return _gij_map[gap_index];
+  }
 
   virtual const std::pair<unsigned int, unsigned int> & getSweepFlowGaps(unsigned int i_chan) const
   {
