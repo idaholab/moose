@@ -191,6 +191,76 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
                 " is consistently oriented with regards to the blocks it neighbors";
 
     diagnosticsLog(message, _check_sidesets_orientation, flipped_pairs.size());
+
+    // Now check that there is no sideset radically flipping from one side's normal to another
+    // side next to it, in the same sideset
+    // We'll consider pi / 2 to be the most steep angle we'll pass
+    unsigned int num_normals_flipping = 0;
+    Real steepest_side_angles = 1;
+    for (const auto & [elem_id, side_id, side_bid] : side_tuples)
+    {
+      if (side_bid != bid)
+        continue;
+      const auto & elem_ptr = mesh->elem_ptr(elem_id);
+
+      // Get side normal
+      const std::unique_ptr<const Elem> face = elem_ptr->build_side_ptr(side_id);
+      std::unique_ptr<FEBase> fe(FEBase::build(elem_ptr->dim(), FEType(elem_ptr->default_order())));
+      QGauss qface(elem_ptr->dim() - 1, CONSTANT);
+      fe->attach_quadrature_rule(&qface);
+      const auto & normals = fe->get_normals();
+      fe->reinit(elem_ptr, side_id);
+      mooseAssert(normals.size() == 1, "We expected only one normal here");
+      const auto & side_normal = normals[0];
+
+      // Compare to the sideset normals of neighbor sides in that sideset
+      for (const auto neighbor : elem_ptr->neighbor_ptr_range())
+        if (neighbor)
+          for (const auto neigh_side_index : neighbor->side_index_range())
+          {
+            // Check that the neighbor side is also in the sideset being examined
+            if (!boundary_info.has_boundary_id(neighbor, neigh_side_index, bid))
+              continue;
+
+            // We re-init everything for the neighbor in case it's a different dimension
+            std::unique_ptr<FEBase> fe_neighbor(
+                FEBase::build(neighbor->dim(), FEType(neighbor->default_order())));
+            QGauss qface(neighbor->dim() - 1, CONSTANT);
+            fe_neighbor->attach_quadrature_rule(&qface);
+            const auto & neigh_normals = fe_neighbor->get_normals();
+            fe_neighbor->reinit(neighbor, neigh_side_index);
+            mooseAssert(neigh_normals.size() == 1, "We expected only one normal here");
+            const auto & neigh_side_normal = neigh_normals[0];
+
+            // Check the angle by computing the dot product
+            if (neigh_side_normal * side_normal <= 0)
+            {
+              num_normals_flipping++;
+              steepest_side_angles =
+                  std::min(std::acos(neigh_side_normal * side_normal), steepest_side_angles);
+              if (num_normals_flipping <= _num_outputs)
+                _console << "Side normals changed by more than pi/2 for sideset "
+                         << sideset_full_name << " between side " << side_id << " of element "
+                         << elem_ptr->id() << " and side " << neigh_side_index
+                         << " of neighbor element " << neighbor->id() << std::endl;
+              else if (num_normals_flipping == _num_outputs + 1)
+                _console << "Maximum output reached for sideset normal flipping check. Silencing "
+                            "output from now on"
+                         << std::endl;
+            }
+          }
+    }
+
+    if (num_normals_flipping)
+      message = "Sideset " + sideset_full_name +
+                " has two neighboring sides with a very large angle. Largest angle detected: " +
+                std::to_string(steepest_side_angles) + " rad.";
+    else
+      message = "Sideset " + sideset_full_name +
+                " does not appear to have side-to-neighbor-side orientation flips. All neighbor "
+                "sides normal differ by less than pi/2";
+
+    diagnosticsLog(message, _check_sidesets_orientation, num_normals_flipping);
   }
 }
 
@@ -1213,11 +1283,11 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
 void
 MeshDiagnosticsGenerator::diagnosticsLog(std::string msg,
                                          const MooseEnum & log_level,
-                                         bool may_error) const
+                                         bool problem_detected) const
 {
   mooseAssert(log_level != "NO_CHECK",
               "We should not be outputting logs if the check had been disabled");
-  if (log_level == "INFO" || !may_error)
+  if (log_level == "INFO" || !problem_detected)
     mooseInfoRepeated(msg);
   else if (log_level == "WARNING")
     mooseWarning(msg);
