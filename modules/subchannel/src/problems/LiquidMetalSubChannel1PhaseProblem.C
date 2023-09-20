@@ -379,7 +379,7 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
       auto Re = avg_massflux * avg_hD / avg_mu;
       // crossflow area between channels i,j (dz*gap_width)
-      auto gap = _subchannel_mesh.getGapWidth(i_gap);
+      auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
       auto Sij = dz * gap;
       // Calculation of flow regime
       auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
@@ -694,11 +694,12 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
             dist_ij = pitch / std::sqrt(3);
           }
 
-          auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+          auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
           auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
           auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
-          auto shape_factor = 0.66 * (pitch / rod_diameter) *
-                              std::pow((_subchannel_mesh.getGapWidth(i_gap) / rod_diameter), -0.3);
+          auto shape_factor =
+              0.66 * (pitch / rod_diameter) *
+              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / rod_diameter), -0.3);
           if (ii_ch == i_ch)
           {
             e_cond += 0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
@@ -1121,7 +1122,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
             dist_ij = pitch / std::sqrt(3);
           }
 
-          auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+          auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
           auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
           auto K_j = _fp->k_from_p_T((*_P_soln)(node_in_j), (*_T_soln)(node_in_j));
           auto cp_i = _fp->cp_from_p_T((*_P_soln)(node_in_i), (*_T_soln)(node_in_i));
@@ -1129,8 +1130,9 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           auto A_i = K_i / cp_i;
           auto A_j = K_j / cp_j;
           auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
-          auto shape_factor = 0.66 * (pitch / rod_diameter) *
-                              std::pow((_subchannel_mesh.getGapWidth(i_gap) / rod_diameter), -0.3);
+          auto shape_factor =
+              0.66 * (pitch / rod_diameter) *
+              std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / rod_diameter), -0.3);
           // auto base_value =  0.5 * (A_i + A_j) * Sij * shape_factor / dist_ij;
           auto base_value = harm_A * shape_factor * Sij / dist_ij;
           auto neg_base_value = -1.0 * base_value;
