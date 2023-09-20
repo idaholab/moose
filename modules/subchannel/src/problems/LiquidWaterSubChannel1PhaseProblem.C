@@ -112,6 +112,28 @@ LiquidWaterSubChannel1PhaseProblem::initializeSolution()
         _w_perim_soln->set(node, wetted_perimeter);
       }
     }
+
+    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+    {
+      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+      {
+        auto gap_pins = _subchannel_mesh.getGapPins(i_gap);
+        auto pin_1 = gap_pins.first;
+        auto pin_2 = gap_pins.second;
+        auto * pin_node_1 = _subchannel_mesh.getPinNode(pin_1, iz);
+        auto * pin_node_2 = _subchannel_mesh.getPinNode(pin_2, iz);
+
+        if (pin_1 == pin_2) // Corner or edge gap
+        {
+          _subchannel_mesh._gij_map[iz][i_gap] = (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap;
+        }
+        else // center gap
+        {
+          _subchannel_mesh._gij_map[iz][i_gap] =
+              pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
+        }
+      }
+    }
   }
 
   for (unsigned int iz = 1; iz < _n_cells + 1; iz++)
