@@ -85,7 +85,7 @@ protected:
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;
   /// Vector to store gap size
-  std::vector<double> _gij_map;
+  std::vector<std::vector<Real>> _gij_map;
   /// x,y coordinates of the subchannel centroid
   std::vector<std::vector<Real>> _subchannel_position;
   /// Subchannel type

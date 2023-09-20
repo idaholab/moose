@@ -92,7 +92,7 @@ public:
 
   virtual Real getGapWidth(unsigned int axial_index, unsigned int gap_index) const override
   {
-    return _gij_map[gap_index];
+    return _gij_map[axial_index][gap_index];
   }
 
 protected:
@@ -115,7 +115,7 @@ protected:
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;
   /// Vector to store gap size
-  std::vector<double> _gij_map;
+  std::vector<std::vector<Real>> _gij_map;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// Flag that informs the solver whether there is a Pin Mesh or not
@@ -137,4 +137,5 @@ public:
 
   friend class QuadSubChannelMeshGenerator;
   friend class QuadPinMeshGenerator;
+  friend class LiquidWaterSubChannel1PhaseProblem;
 };
