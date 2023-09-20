@@ -44,9 +44,9 @@ private:
   /// The function that represents the velocity field
   const Function & _velocity_function;
 
-  /// Whether or not we've generated rays yet
-  bool _has_generated;
+  /// Whether or not we've generated rays yet (restartable)
+  bool & _has_generated;
 
-  /// The banked rays to be used on the next timestep
-  std::vector<std::shared_ptr<Ray>> _banked_rays;
+  /// The banked rays to be used on the next timestep (restartable)
+  std::vector<std::shared_ptr<Ray>> & _banked_rays;
 };
