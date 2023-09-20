@@ -1073,6 +1073,9 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
 {
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
   const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
@@ -1086,17 +1089,17 @@ MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateAr
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
-                                                   const StateArg & state) const
+                                                   const StateArg & state,
+                                                   const bool cache_eligible) const
 {
   mooseAssert(this->hasBlocks(elem_side_qp.elem->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
   const Elem * const elem = elem_side_qp.elem;
   const auto side = elem_side_qp.side;
-  if (elem != _current_elem_side_qp_functor_elem_side.first ||
+  if (!cache_eligible || elem != _current_elem_side_qp_functor_elem_side.first ||
       side != _current_elem_side_qp_functor_elem_side.second)
   {
-    _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);
     const QBase * const qrule_template = elem_side_qp.qrule;
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
@@ -1118,12 +1121,17 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
                     _current_elem_side_qp_functor_gradient,
                     _current_elem_side_qp_functor_dot);
   }
+  if (cache_eligible)
+    _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);
+  else
+    _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
 }
 
 template <>
 void
 MooseVariableFE<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &,
-                                                        const StateArg &) const
+                                                        const StateArg &,
+                                                        bool) const
 {
   mooseError("evaluate not implemented for array variables");
 }
@@ -1133,7 +1141,7 @@ typename MooseVariableFE<OutputType>::ValueType
 MooseVariableFE<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
                                       const StateArg & state) const
 {
-  evaluateOnElementSide(elem_side_qp, state);
+  evaluateOnElementSide(elem_side_qp, state, true);
   const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
@@ -1145,7 +1153,7 @@ typename MooseVariableFE<OutputType>::GradientType
 MooseVariableFE<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                               const StateArg & state) const
 {
-  evaluateOnElementSide(elem_side_qp, state);
+  evaluateOnElementSide(elem_side_qp, state, true);
   const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
@@ -1160,10 +1168,28 @@ MooseVariableFE<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
-  evaluateOnElementSide(elem_side_qp, state);
+  evaluateOnElementSide(elem_side_qp, state, true);
   const auto qp = elem_side_qp.qp;
   mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
               "The requested " << qp << " is outside our dot size");
+  return _current_elem_side_qp_functor_dot[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::DotType
+MooseVariableFE<OutputType>::evaluateDot(const FaceArg & face_arg, const StateArg & state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  const QMonomial qrule(face_arg.fi->elem().dim() - 1, CONSTANT);
+  // We can use whatever we want for the point argument since it won't be used
+  const ElemSideQpArg elem_side_qp_arg{
+      face_arg.fi->elemPtr(), face_arg.fi->elemSideID(), /*qp=*/0, &qrule, Point(0, 0, 0)};
+  evaluateOnElementSide(elem_side_qp_arg, state, /*cache_eligible=*/false);
+  const auto qp = elem_side_qp_arg.qp;
+  mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
+              "The requested " << qp << " is outside our solution size");
   return _current_elem_side_qp_functor_dot[qp];
 }
 
