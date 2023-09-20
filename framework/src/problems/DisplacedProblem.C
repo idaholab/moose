@@ -921,27 +921,6 @@ DisplacedProblem::addResidualLower(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::cacheResidual(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheResidual(Assembly::GlobalDataKey{},
-                                                   currentResidualVectorTags());
-}
-
-void
-DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
-                                                           currentResidualVectorTags());
-}
-
-void
-DisplacedProblem::addCachedResidual(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals(Assembly::GlobalDataKey{},
-                                                        currentResidualVectorTags());
-}
-
-void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
   if (_displaced_nl[currentNlSysNum()]->hasVector(
@@ -1012,27 +991,9 @@ DisplacedProblem::addJacobianLowerD(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::cacheJacobian(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheJacobian(Assembly::GlobalDataKey{});
-}
-
-void
 DisplacedProblem::cacheJacobianNonlocal(THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
-}
-
-void
-DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
-}
-
-void
-DisplacedProblem::addCachedJacobian(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->addCachedJacobian(Assembly::GlobalDataKey{});
 }
 
 void
@@ -1339,4 +1300,10 @@ bool
 DisplacedProblem::haveFV() const
 {
   return _mproblem.haveFV();
+}
+
+bool
+DisplacedProblem::hasNonlocalCoupling() const
+{
+  return _mproblem.hasNonlocalCoupling();
 }

@@ -245,10 +245,6 @@ public:
   virtual void addResidualNeighbor(THREAD_ID tid) override;
   virtual void addResidualLower(THREAD_ID tid) override;
 
-  virtual void cacheResidual(THREAD_ID tid) override;
-  virtual void cacheResidualNeighbor(THREAD_ID tid) override;
-  virtual void addCachedResidual(THREAD_ID tid) override;
-
   virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
@@ -283,10 +279,7 @@ public:
                                    const std::set<TagID> & tags,
                                    THREAD_ID tid) override;
 
-  virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNonlocal(THREAD_ID tid);
-  virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addCachedJacobian(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
@@ -363,6 +356,8 @@ public:
 
   virtual void needFV() override;
   virtual bool haveFV() const override;
+
+  virtual bool hasNonlocalCoupling() const override;
 
 protected:
   FEProblemBase & _mproblem;

@@ -18,6 +18,7 @@
 #include "FVFluxBC.h"
 #include "FVInterfaceKernel.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 #include "SwapBackSentinel.h"
 #include "MaterialBase.h"
 #include "libmesh/libmesh_exceptions.h"
@@ -143,6 +144,9 @@ protected:
   /// Whether this loop is operating on the displaced mesh
   const bool _on_displaced;
 
+  /// FEProblemBase or DisplacedProblem depending on \p _on_displaced
+  SubProblem & _subproblem;
+
   /// The subdomain for the current element
   SubdomainID _subdomain;
 
@@ -183,6 +187,8 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
     _tags(tags),
     _nl_system_num(nl_system_num),
     _on_displaced(on_displaced),
+    _subproblem(_on_displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                              : static_cast<SubProblem &>(_fe_problem)),
     _zeroth_copy(true),
     _incoming_throw_on_error(Moose::_throw_on_error)
 {
@@ -196,6 +202,7 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::spl
     _tags(x._tags),
     _nl_system_num(x._nl_system_num),
     _on_displaced(x._on_displaced),
+    _subproblem(x._subproblem),
     _zeroth_copy(false),
     _incoming_throw_on_error(false)
 {
@@ -465,10 +472,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // to conditionally do some FE-specific reinit here if we have any active FE
   // variables.  However, we still want to keep/do FV-style quadrature.
   // Figure out how to do all this some day.
-  if (_on_displaced)
-    _fe_problem.getDisplacedProblem()->reinitFVFace(_tid, fi);
-  else
-    _fe_problem.reinitFVFace(_tid, fi);
+  this->_subproblem.reinitFVFace(_tid, fi);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -899,7 +903,7 @@ protected:
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override { ro.computeResidual(fi); }
   void setup(SetupInterface & obj) override { obj.residualSetup(); }
-  void addCached() override { _fe_problem.addCachedResidual(_tid); }
+  void addCached() override { this->_subproblem.SubProblem::addCachedResidual(_tid); }
 };
 
 template <typename RangeType>
@@ -925,10 +929,10 @@ ComputeFVFluxResidualThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   // TODO: do we need both calls - or just the neighbor one? - confirm this
-  _fe_problem.cacheResidual(_tid);
-  _fe_problem.cacheResidualNeighbor(_tid);
+  this->_subproblem.SubProblem::cacheResidual(_tid);
+  this->_subproblem.SubProblem::cacheResidualNeighbor(_tid);
 
-  _fe_problem.addCachedResidual(_tid);
+  this->_subproblem.SubProblem::addCachedResidual(_tid);
 }
 
 template <typename RangeType>
@@ -950,7 +954,7 @@ protected:
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override { ro.computeJacobian(fi); }
   void setup(SetupInterface & obj) override { obj.jacobianSetup(); }
-  void addCached() override { _fe_problem.addCachedJacobian(_tid); }
+  void addCached() override { this->_subproblem.SubProblem::addCachedJacobian(_tid); }
 };
 
 template <typename RangeType>
@@ -976,13 +980,13 @@ ComputeFVFluxJacobianThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   // TODO: do we need both calls - or just the neighbor one? - confirm this
-  _fe_problem.cacheJacobian(_tid);
-  _fe_problem.cacheJacobianNeighbor(_tid);
+  this->_subproblem.SubProblem::cacheJacobian(_tid);
+  this->_subproblem.SubProblem::cacheJacobianNeighbor(_tid);
 
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedJacobian(_tid);
+    this->_subproblem.SubProblem::addCachedJacobian(_tid);
   }
 }
 
@@ -1011,8 +1015,8 @@ protected:
   void setup(SetupInterface & obj) override { obj.residualSetup(); }
   void addCached() override
   {
-    _fe_problem.addCachedResidual(_tid);
-    _fe_problem.addCachedJacobian(_tid);
+    this->_subproblem.SubProblem::addCachedResidual(_tid);
+    this->_subproblem.SubProblem::addCachedJacobian(_tid);
   }
 };
 
@@ -1040,16 +1044,16 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   // TODO: do we need both calls - or just the neighbor one? - confirm this
-  _fe_problem.cacheResidual(_tid);
-  _fe_problem.cacheResidualNeighbor(_tid);
-  _fe_problem.cacheJacobian(_tid);
-  _fe_problem.cacheJacobianNeighbor(_tid);
+  this->_subproblem.SubProblem::cacheResidual(_tid);
+  this->_subproblem.SubProblem::cacheResidualNeighbor(_tid);
+  this->_subproblem.SubProblem::cacheJacobian(_tid);
+  this->_subproblem.SubProblem::cacheJacobianNeighbor(_tid);
 
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid);
-    _fe_problem.addCachedJacobian(_tid);
+    this->_subproblem.SubProblem::addCachedResidual(_tid);
+    this->_subproblem.SubProblem::addCachedJacobian(_tid);
   }
 }
 
