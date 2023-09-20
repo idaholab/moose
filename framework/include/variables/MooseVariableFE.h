@@ -716,6 +716,7 @@ protected:
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
                       const StateArg & state) const override final;
   DotType evaluateDot(const ElemArg &, const StateArg &) const override final;
+  DotType evaluateDot(const FaceArg &, const StateArg &) const override final;
 
 private:
   /**
@@ -740,7 +741,9 @@ private:
   /**
    * Evaluate solution and gradient for the \p elem_side_qp argument
    */
-  void evaluateOnElementSide(const ElemSideQpArg & elem_side_qp, const StateArg & state) const;
+  void evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
+                             const StateArg & state,
+                             bool cache_eligible) const;
 
   /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return
