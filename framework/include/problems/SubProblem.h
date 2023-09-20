@@ -1090,7 +1090,7 @@ SubProblem::getFunctor(const std::string & name,
       mooseError("Attempted to get a functor with the name '",
                  name,
                  "' but multiple functors match. Make sure that you do not have functor material "
-                 "properties, functions, and variables with the same names");
+                 "properties, functions, postprocessors or variables with the same names");
 
     auto & [true_functor_is, non_ad_functor, ad_functor] = find_ret->second;
     auto & functor_wrapper = requested_functor_is_ad ? *ad_functor : *non_ad_functor;
