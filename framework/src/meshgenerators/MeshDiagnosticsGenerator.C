@@ -192,26 +192,26 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 
     diagnosticsLog(message, _check_sidesets_orientation, flipped_pairs.size());
 
-    // Now check that there is no sideset radically flipping from one side to another
+    // Now check that there is no sideset radically flipping from one side's normal to another
+    // side next to it, in the same sideset
     // We'll consider pi / 2 to be the most steep angle we'll pass
     unsigned int num_normals_flipping = 0;
     Real steepest_side_angles = 1;
-    for (const auto index : index_range(side_tuples))
+    for (const auto & [elem_id, side_id, side_bid] : side_tuples)
     {
-      if (std::get<2>(side_tuples[index]) != bid)
+      if (side_bid != bid)
         continue;
-      const auto elem_ptr = mesh->elem_ptr(std::get<0>(side_tuples[index]));
-      const auto side_id = std::get<1>(side_tuples[index]);
+      const auto & elem_ptr = mesh->elem_ptr(elem_id);
 
       // Get side normal
       const std::unique_ptr<const Elem> face = elem_ptr->build_side_ptr(side_id);
       std::unique_ptr<FEBase> fe(FEBase::build(elem_ptr->dim(), FEType(elem_ptr->default_order())));
       QGauss qface(elem_ptr->dim() - 1, CONSTANT);
       fe->attach_quadrature_rule(&qface);
-      const std::vector<Point> & normals = fe->get_normals();
+      const auto & normals = fe->get_normals();
       fe->reinit(elem_ptr, side_id);
       mooseAssert(normals.size() == 1, "We expected only one normal here");
-      const auto side_normal = normals[0];
+      const auto & side_normal = normals[0];
 
       // Compare to the sideset normals of neighbor sides in that sideset
       for (const auto neighbor : elem_ptr->neighbor_ptr_range())
@@ -227,10 +227,10 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
                 FEBase::build(neighbor->dim(), FEType(neighbor->default_order())));
             QGauss qface(neighbor->dim() - 1, CONSTANT);
             fe_neighbor->attach_quadrature_rule(&qface);
-            const std::vector<Point> & neigh_normals = fe_neighbor->get_normals();
+            const auto & neigh_normals = fe_neighbor->get_normals();
             fe_neighbor->reinit(neighbor, neigh_side_index);
             mooseAssert(neigh_normals.size() == 1, "We expected only one normal here");
-            const auto neigh_side_normal = neigh_normals[0];
+            const auto & neigh_side_normal = neigh_normals[0];
 
             // Check the angle by computing the dot product
             if (neigh_side_normal * side_normal <= 0)
