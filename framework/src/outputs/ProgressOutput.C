@@ -39,12 +39,11 @@ ProgressOutput::ProgressOutput(const InputParameters & parameters)
 void
 ProgressOutput::output()
 {
-  if (_transient_executioner == nullptr || _current_execute_flag != EXEC_TIMESTEP_END ||
-      !_transient)
+  if (_transient_executioner == nullptr || _current_execute_flag != EXEC_TIMESTEP_END)
     return;
 
   const auto passed = _transient_executioner->getTime() - _transient_executioner->getStartTime();
-  const auto total = _transient_executioner->endTime() - _transient_executioner->getStartTime();
+  const auto total = _transient_executioner->getEndTime() - _transient_executioner->getStartTime();
   if (total == 0)
     return;
 

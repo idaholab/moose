@@ -13,6 +13,9 @@
 
 class Transient;
 
+/**
+ * Output a simulation time progress bar on the console
+ */
 class ProgressOutput : public Output
 {
 public:
@@ -23,7 +26,7 @@ public:
 protected:
   void output() override;
 
-  Transient * _transient_executioner;
+  const Transient * const _transient_executioner;
 
   /// display input file name in the progress bar title
   const bool _use_filename;

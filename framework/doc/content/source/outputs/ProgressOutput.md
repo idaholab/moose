@@ -12,8 +12,8 @@ The Progress output displays an ASCII art progress bar at the end of each timest
 +--------------------------------------------------+
 ```
 
-!syntax parameters /Outputs/DOFMap
+!syntax parameters /Outputs/Progress
 
-!syntax inputs /Outputs/DOFMap
+!syntax inputs /Outputs/Progress
 
-!syntax children /Outputs/DOFMap
+!syntax children /Outputs/Progress
