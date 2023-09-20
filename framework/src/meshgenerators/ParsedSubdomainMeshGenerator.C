@@ -32,7 +32,7 @@ ParsedSubdomainMeshGenerator::validParams()
                                  "Subdomain name to set for inside of the combinatorial");
   params.addParam<std::vector<SubdomainName>>(
       "excluded_subdomains",
-      "A set of subdomain ids that will not changed even if "
+      "A set of subdomain names that will not changed even if "
       "they are inside/outside the combinatorial geometry");
   params.addDeprecatedParam<std::vector<subdomain_id_type>>(
       "excluded_subdomain_ids",
