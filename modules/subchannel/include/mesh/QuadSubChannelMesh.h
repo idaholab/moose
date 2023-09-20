@@ -69,7 +69,6 @@ public:
   {
     return _chan_to_pin_map[i_chan];
   }
-  virtual const std::vector<double> & getGapMap() const override { return _gij_map; }
   virtual const Real & getPitch() const override { return _pitch; }
   virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const override
   {

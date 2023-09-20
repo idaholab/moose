@@ -83,7 +83,6 @@ public:
   {
     return _chan_to_gap_map[i_chan];
   }
-  virtual const std::vector<double> & getGapMap() const override { return _gij_map; }
   virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const override
   {
     return _sign_id_crossflow_map[i_chan][i_local];

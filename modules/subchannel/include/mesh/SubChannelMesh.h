@@ -141,11 +141,6 @@ public:
   virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const = 0;
 
   /**
-   * Return a map with gap sizes
-   */
-  virtual const std::vector<double> & getGapMap() const = 0;
-
-  /**
    * Return the pitch between 2 subchannels
    */
   virtual const Real & getPitch() const { return _pitch; }
