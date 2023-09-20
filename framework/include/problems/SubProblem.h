@@ -332,9 +332,9 @@ public:
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
   virtual void addResidualLower(THREAD_ID tid) = 0;
 
-  virtual void cacheResidual(THREAD_ID tid) = 0;
-  virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedResidual(THREAD_ID tid) = 0;
+  virtual void cacheResidual(THREAD_ID tid);
+  virtual void cacheResidualNeighbor(THREAD_ID tid);
+  virtual void addCachedResidual(THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
@@ -352,9 +352,9 @@ public:
                                    const std::set<TagID> & tags,
                                    THREAD_ID tid) = 0;
 
-  virtual void cacheJacobian(THREAD_ID tid) = 0;
-  virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedJacobian(THREAD_ID tid) = 0;
+  virtual void cacheJacobian(THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(THREAD_ID tid);
+  virtual void addCachedJacobian(THREAD_ID tid);
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
@@ -882,6 +882,11 @@ public:
    * reinitialize the finite volume assembly data for the provided face and thread
    */
   void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+
+  /**
+   * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
+   */
+  virtual bool hasNonlocalCoupling() const = 0;
 
 protected:
   /**

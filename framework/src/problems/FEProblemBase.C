@@ -1582,8 +1582,7 @@ FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 void
 FEProblemBase::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual(Assembly::GlobalDataKey{},
-                                                           currentResidualVectorTags());
+  SubProblem::cacheResidual(tid);
   if (_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -1591,8 +1590,7 @@ FEProblemBase::cacheResidual(THREAD_ID tid)
 void
 FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
-                                                                   currentResidualVectorTags());
+  SubProblem::cacheResidualNeighbor(tid);
   if (_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -1600,9 +1598,7 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(Assembly::GlobalDataKey{},
-                                                                currentResidualVectorTags());
-
+  SubProblem::addCachedResidual(tid);
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
 }
@@ -1700,21 +1696,15 @@ FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*
 void
 FEProblemBase::cacheJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobian(Assembly::GlobalDataKey{});
-  if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
+  SubProblem::cacheJacobian(tid);
   if (_displaced_problem)
-  {
     _displaced_problem->cacheJacobian(tid);
-    if (_has_nonlocal_coupling)
-      _displaced_problem->cacheJacobianNonlocal(tid);
-  }
 }
 
 void
 FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
+  SubProblem::cacheJacobianNeighbor(tid);
   if (_displaced_problem)
     _displaced_problem->cacheJacobianNeighbor(tid);
 }
@@ -1722,7 +1712,7 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedJacobian(Assembly::GlobalDataKey{});
+  SubProblem::addCachedJacobian(tid);
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(tid);
 }

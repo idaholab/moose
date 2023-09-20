@@ -2101,6 +2101,8 @@ public:
   virtual void needFV() override { _have_fv = true; }
   virtual bool haveFV() const override { return _have_fv; }
 
+  virtual bool hasNonlocalCoupling() const override { return _has_nonlocal_coupling; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
