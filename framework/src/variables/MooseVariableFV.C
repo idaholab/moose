@@ -779,7 +779,8 @@ MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg &
     mooseAssert(elem, "We should have this element available");
     if (!this->hasBlocks(elem->subdomain_id()))
       continue;
-    sum += getElemValue(elem, state);
+    const ElemPointArg elem_point{elem, *node_arg.node, false};
+    sum += (*this)(elem_point, state);
     ++num_values;
   }
   return sum / num_values;
