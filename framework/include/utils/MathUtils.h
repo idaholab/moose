@@ -15,6 +15,7 @@
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/compare_types.h"
+#include "libmesh/point.h"
 
 namespace MathUtils
 {
@@ -27,6 +28,48 @@ Real poly2Log(Real x, Real tol, unsigned int derivative_order);
 Real poly3Log(Real x, Real tol, unsigned int derivative_order);
 Real poly4Log(Real x, Real tol, unsigned int derivative_order);
 Real taylorLog(Real x);
+/**
+ * Evaluate Cartesian coordinates of any center point of a triangle given Barycentric
+ * coordinates of center point and Cartesian coordinates of triangle's vertices
+ * @param p0,p1,p2 are the three non-collinear vertices in Cartesian coordinates
+ * @param b0,b1,b2 is the center point in barycentric coordinates with b0+b1+b2=1, e.g.
+ * (1/3,1/3,1/3) for a centroid
+ * @return the center point of triangle in Cartesian coordinates
+ */
+Point barycentricToCartesian2D(const Point & p0,
+                               const Point & p1,
+                               const Point & p2,
+                               const Real b0,
+                               const Real b1,
+                               const Real b2);
+/**
+ * Evaluate Cartesian coordinates of any center point of a tetrahedron given Barycentric
+ * coordinates of center point and Cartesian coordinates of tetrahedon's vertices
+ * @param p0,p1,p2,p3 are the three non-coplanar vertices in Cartesian coordinates
+ * @param b0,b1,b2,b3 is the center point in barycentric coordinates with b0+b1+b2+b3=1, e.g.
+ * (1/4,1/4,1/4,1/4) for a centroid.
+ * @return the center point of tetrahedron in Cartesian coordinates
+ */
+Point barycentricToCartesian3D(const Point & p0,
+                               const Point & p1,
+                               const Point & p2,
+                               const Point & p3,
+                               const Real b0,
+                               const Real b1,
+                               const Real b2,
+                               const Real b3);
+/**
+ * Evaluate circumcenter of a triangle given three arbitrary points
+ * @param p0,p1,p2 are the three non-collinear vertices in Cartesian coordinates
+ * @return the circumcenter in Cartesian coordinates
+ */
+Point circumcenter2D(const Point & p0, const Point & p1, const Point & p2);
+/**
+ * Evaluate circumcenter of a tetrahedrom given four arbitrary points
+ * @param p0,p1,p2,p3 are the four non-coplanar vertices in Cartesian coordinates
+ * @return the circumcenter in Cartesian coordinates
+ */
+Point circumcenter3D(const Point & p0, const Point & p1, const Point & p2, const Point & p3);
 
 template <typename T>
 T

@@ -23,6 +23,10 @@
 []
 
 [Kernels]
+  [du_dt]
+    type = TimeDerivative
+    variable = u
+  []
   [diffusion]
     type = MatDiffusion
     variable = u

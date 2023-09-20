@@ -92,7 +92,8 @@
     cli_args = 'Mesh/extrude/heights="1 2 -3" --mesh-only'
     expect_err = "Cannot have both positive and negative heights!"
 
-    requirement = "The system shall error if missing a consistent positive or negative extrusion direction."
+    requirement = "The system shall error if missing a consistent positive or negative extrusion "
+                  "direction."
     design = "AdvancedExtruderGenerator.md"
     issues = "#21273"
   []
@@ -106,5 +107,16 @@
     requirement = 'The system shall be able to retain and swap boundary ids during extrusion.'
     design = 'AdvancedExtruderGenerator.md'
     issues = '#21852'
+  []
+  [helicoidal]
+    type = Exodiff
+    input = 'helicoidal.i'
+    exodiff = 'helicoidal_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = 'The system shall be able to helically extrude a 2D mesh into a twisted 3D mesh.'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#25486'
   []
 []

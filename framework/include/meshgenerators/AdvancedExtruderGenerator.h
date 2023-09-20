@@ -81,6 +81,9 @@ protected:
   /// Downward boundary interfaces for each layer of elevation
   const std::vector<std::vector<boundary_id_type>> _downward_boundary_ids;
 
+  /// Axial pitch for a full rotation
+  const Real _twist_pitch;
+
   /**
    * Swap two nodes within an element
    * @param elem element whose nodes need to be swapped

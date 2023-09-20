@@ -31,27 +31,25 @@ The [!ac](EA) record can be accessed from the [!ac](INL) network as follows.
 
 1. From the Nucleus Home page select +A-Z+
 1. From the alphabetical list select +CTM---Capabilities & Technology Management+
-1. Begin typing the name of the application in the search box in the upper right corner of the screen
-1. When the search is complete, click on the ellipses (three dots) to the left of the application
-   name and then select +View Details+
+1. Click +All+ to enable a search of all entries
+1. Enter the name of the application in the search box in the upper right corner of the screen
+1. When the search is complete, click on the name of the application
 
 ## [!ac](SSD) id=safety_software_determination
 
 The [!ac](SSD) can be accessed from the [!ac](INL) network as follows.
 
-1. From the [!ac](EA) +Details+ screen for the application (refer to [#enterprise_architecture_entry]),
-   select the +General+ tab
-1. Scroll to the bottom of the screen and in the +Related Artifacts+ section select +Safety
-   Software Determination+
+1. Under +Related Links+ on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
+   select the +Application Documents+ tab
+1. The +Safety Software Determination+ link will either be listed directly or shown under +Other+
 
 ## [!ac](QLD) id=quality_level_determination
 
 The [!ac](QLD) can be accessed from the [!ac](INL) network as follows.
 
-1. From the [!ac](EA) +Details+ screen for the application (refer to [#enterprise_architecture_entry]),
-   select the +General+ tab
-1. Scroll to the bottom of the screen and in the +Related Artifacts+ section select +Quality
-   Level Determination+
+1.  Under +Related Links+ on the [!ac](EA) application page, (refer to [#enterprise_architecture_entry]),
+   select the +Application Documents+ tab
+1. The +Quality Level Determination+ link will either be listed directly or shown under +Other+
 
 ## Configuration Management Plan (CMP) id=configuration_management_plan
 

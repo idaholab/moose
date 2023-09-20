@@ -66,9 +66,11 @@ From: {{ APPTAINER_FROM }}
     cd ${ROOT_BUILD_DIR}/moose
     MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} ${PETSC_BUILD_SCRIPT} {{ PETSC_OPTIONS }}
 
+{%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
     cd petsc
     make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
+{%- endif %}
 
     # Fix possibly bad permissions
     chmod -R o=u-w,g=u-w ${PETSC_DIR}

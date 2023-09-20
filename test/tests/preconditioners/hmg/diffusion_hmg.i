@@ -77,8 +77,8 @@
 
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hmg_use_subspace_coarsening'
-  petsc_options_value = 'hmg true'
+  petsc_options_iname = '-pc_type -pc_hmg_use_subspace_coarsening -hmg_inner_pc_type'
+  petsc_options_value = 'hmg true gamg'
   petsc_options = '-snes_view'
 []
 
