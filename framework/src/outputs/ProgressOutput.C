@@ -22,8 +22,8 @@ ProgressOutput::validParams()
       "use_filename", true, "Put the input filename into the title of the progress bar");
   params.addParam<unsigned int>(
       "progress_bar_width",
-      "Explicitly specify the bar width. If omitted the MOOSE_PPS_WIDTH environment variable or - "
-      "if not set - the terminal width are queried.");
+      "Explicitly specify the bar width. If omitted the MOOSE_PPS_WIDTH environment variable or, "
+      "if not set, the terminal width is queried.");
   return params;
 }
 
@@ -43,13 +43,13 @@ ProgressOutput::output()
       !_transient)
     return;
 
-  auto passed = _transient_executioner->getTime() - _transient_executioner->getStartTime();
-  auto total = _transient_executioner->endTime() - _transient_executioner->getStartTime();
+  const auto passed = _transient_executioner->getTime() - _transient_executioner->getStartTime();
+  const auto total = _transient_executioner->endTime() - _transient_executioner->getStartTime();
   if (total == 0)
     return;
 
   // length of filled portion
-  auto progress = std::round((passed * _length) / total);
+  const auto progress = std::round((passed * _length) / total);
 
   // title string
   std::string title = name();

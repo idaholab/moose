@@ -25,9 +25,9 @@ protected:
 
   Transient * _transient_executioner;
 
-  // display input file name in the progress bar title
+  /// display input file name in the progress bar title
   const bool _use_filename;
 
-  // total length of the progress bar
+  /// total length of the progress bar
   const unsigned int _length;
 };
