@@ -112,15 +112,15 @@ FEM is a method for numerically approximating the solution to [!ac](PDEs).
 FEM is widely applicable for a large range of PDEs and domains.
 
 Example PDEs:
-Have you seen them before? Are they linear/ nonlinear? Coupled?
+Have you seen them before? Are they linear/nonlinear? Coupled?
 
-!equation
+!equation id=diffusion
 -\nabla \cdot \nabla u = q
 
-!equation
+!equation id=ns_momentum
 \dfrac{\partial u_x}{\partial t} -\nabla\cdot \mu \nabla u_x + \vec{u} \cdot \nabla u_x = 0
 
-!equation
+!equation id=reactor_physics
 C \dfrac{\partial T}{\partial t} -\nabla \cdot k(T) \nabla T = q(\psi) \\
 \dfrac{1}{v} \dfrac{\partial \psi}{\partial t} + \Omega \cdot \nabla \psi + \Sigma(T) \psi = Q(\psi, T)
 
@@ -162,7 +162,7 @@ Generating a weak form generally involves these steps:
     functions and simultaneously generate boundary integrals.
 
 !alert note title=Exercise
-Obtain the weak form for the equations listed before, write the equations in terms of the coefficients
+Obtain the weak form for the equations listed on the previous slide
 and the shape functions.
 
 !---

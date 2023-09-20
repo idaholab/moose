@@ -103,14 +103,14 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   // Handle incompatible parameters
   if (_include_only_external_sides && _check_neighbor_subdomains)
     paramError("include_only_external_sides", "External sides dont have neighbors");
-  const auto included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
+  const auto & included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
   if (std::find(included_boundaries.begin(), included_boundaries.end(), _sideset_name) !=
       included_boundaries.end())
     paramError("new_boundary",
                "A boundary cannot be both the new boundary and be included in the list of included "
                "boundaries. If you are trying to restrict an existing boundary, you must use a "
-               "different name for the new_boundary, then delete the old sideset and rename the "
-               "new one if you wish to use the old name");
+               "different name for 'new_boundary', delete the old boundary, and then rename the "
+               "new boundary to the old boundary.");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
