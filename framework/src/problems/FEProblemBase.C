@@ -8078,6 +8078,12 @@ void
 FEProblemBase::residualSetup()
 {
   SubProblem::residualSetup();
+  // We need to setup all the nonlinear systems other than our current one which actually called
+  // this method (so we have to make sure we don't go in a circle)
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (i != currentNlSysNum())
+      _nl[i]->residualSetup();
+  // We don't setup the aux sys because that's been done elsewhere
   if (_displaced_problem)
     _displaced_problem->residualSetup();
 }
@@ -8086,6 +8092,12 @@ void
 FEProblemBase::jacobianSetup()
 {
   SubProblem::jacobianSetup();
+  // We need to setup all the nonlinear systems other than our current one which actually called
+  // this method (so we have to make sure we don't go in a circle)
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (i != currentNlSysNum())
+      _nl[i]->jacobianSetup();
+  // We don't setup the aux sys because that's been done elsewhere
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
 }
