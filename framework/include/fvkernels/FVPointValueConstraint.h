@@ -32,8 +32,10 @@ public:
   static InputParameters validParams();
 
   FVPointValueConstraint(const InputParameters & parameters);
+  virtual void meshChanged() override { setMyElem(); }
 
 private:
+  void setMyElem();
   ADReal computeQpResidual() override final;
 
   /// The point where the constraint should be enforced

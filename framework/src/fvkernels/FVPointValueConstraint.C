@@ -32,6 +32,12 @@ FVPointValueConstraint::FVPointValueConstraint(const InputParameters & parameter
     _point(getParam<Point>("point")),
     _my_elem(nullptr)
 {
+  setMyElem();
+}
+
+void
+FVPointValueConstraint::setMyElem()
+{
   // Find the element containing the point
   _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _mesh);
   _point_locator->enable_out_of_mesh_mode();
