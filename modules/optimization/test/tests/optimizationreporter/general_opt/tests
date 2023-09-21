@@ -1,13 +1,14 @@
 [Tests]
   design = 'GeneralOptimization.md'
   [general_optimization]
-    issues = '#24930'
-    max_threads = 1
+    type = JSONDiff
     input = main.i
     jsondiff = main_json.json
-    type = JSONDiff
-    requirement = "The system shall be able to minimize an objective function that is reporter transfer using TAO."
     recover = false
     abs_zero = 1.0e-6
+    max_threads = 1
+
+    issues = '#24930'
+    requirement = "The system shall be able to minimize an objective function that is reporter transfer using TAO."
   []
 []

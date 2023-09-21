@@ -44,7 +44,7 @@ copyReporterIntoPetscMatrix(const std::vector<std::vector<Real> *> reporterVecto
 {
   for (const auto i : index_range(reporterVectors))
     for (const auto j : index_range(*reporterVectors[i]))
-      x.set(i, j, reporterVectors[i]->at(j));
+      x.set(i, j, (*reporterVectors[i])[j]);
 
   x.close();
 }
@@ -55,6 +55,6 @@ copyPetscMatrixIntoReporter(const libMesh::PetscMatrix<Number> & x,
 {
   for (const auto i : index_range(reporterVectors))
     for (const auto j : index_range(*reporterVectors[i]))
-      reporterVectors[i]->at(j) = x(i, j);
+      (*reporterVectors[i])[j] = x(i, j);
 }
 }
