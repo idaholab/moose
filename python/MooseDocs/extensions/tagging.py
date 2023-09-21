@@ -98,8 +98,9 @@ class TaggingExtension(command.CommandExtension):
                 for entry in key_list_regex:
                     regex_replace=f"'{entry}':"
                     tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
-                tag_dict_str=re.sub("\s","", tag_dict_str)
                 tag_dict_str=re.sub("'",'"', tag_dict_str)
+                # Downstream js cannot handle double quotes
+                tag_dict_str=re.sub("\"\"",'"', tag_dict_str)
                 if len(replace_str) == 0:
                     replace_str += tag_dict_str
                 else:
