@@ -184,11 +184,11 @@ void
 OptimizationReporterBase::computeEqualityGradient(libMesh::PetscMatrix<Number> & jacobian) const
 {
   for (const auto & p : make_range(_n_eq_cons))
-    if (_eq_gradients[p]->size() != _nvalues[p])
+    if (_eq_gradients[p]->size() != _ndof)
       mooseError("The equality jacobian for parameter ",
                  _parameter_names[p],
                  " has changed, expected ",
-                 _nvalues[p],
+                 _ndof,
                  " versus ",
                  _eq_gradients[p]->size(),
                  ".");
@@ -199,11 +199,11 @@ void
 OptimizationReporterBase::computeInequalityGradient(libMesh::PetscMatrix<Number> & jacobian) const
 {
   for (const auto & p : make_range(_n_ineq_cons))
-    if (_ineq_gradients[p]->size() != _nvalues[p])
+    if (_ineq_gradients[p]->size() != _ndof)
       mooseError("The inequality jacobian for parameter ",
                  _parameter_names[p],
                  " has changed, expected ",
-                 _nvalues[p],
+                 _ndof,
                  " versus ",
                  _ineq_gradients[p]->size(),
                  ".");

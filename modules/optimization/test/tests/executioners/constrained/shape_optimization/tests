@@ -1,6 +1,6 @@
 [Tests]
   design = 'GeneralOptimization.md'
-  [inequality_constraint]
+  [equality_constraint]
     issues = '#24930'
     max_threads = 1 # Optimize executioner does not support multiple threads
     input = main.i

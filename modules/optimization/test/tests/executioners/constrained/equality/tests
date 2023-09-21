@@ -4,7 +4,7 @@
     type = CSVDiff
     input = quadratic_minimize_constrained.i
     csvdiff = quadratic_minimize_constrained_out_OptimizationReporter_0001.csv
-    rel_err = 1.0e-4
+    rel_err = 1e-4
     allow_test_objects = True
     max_threads = 1 # Optimize executioner does not support multiple threads
     petsc_version = ">=3.15"

@@ -1,5 +1,5 @@
 # This test is documented as an example for ConstrainedShapeOptimization. This
-# test should now be changed without updating the documentation.
+# test should not be changed without updating the documentation.
 
 inner_radius = 6
 outer_radius = 10

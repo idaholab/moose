@@ -67,10 +67,6 @@ insulated and there is a constant source term throughout. The objective is
 find the two radii that will have the lowest max temperature while satisfying a
 volume constraint.
 
-!listing test/tests/executioners/constrained/shape_optimization/forward.i
-         id=forward_app
-         caption= Constrained Optimization Forward SubApp
-
 In the forward app, the two optimization parameters control the inner and outer
 values are used to displace the boundaries of the
 [ParsedOptimizationFunction](/Functions/ParsedOptimizationFunction) to calculate
@@ -81,14 +77,14 @@ problem on the displacements then allow for the interior elements to be
 smoothed. For the temperature field, the physics is solved on the displaced mesh
 to calculate the current objective.
 
-For the equality constraints, a gradient of the constraint with respect to the
-parameters is needed for TAO. The gradient is analytically computed for the
-current radii.
-
 !listing test/tests/executioners/constrained/shape_optimization/forward.i
          block= Functions BCs Kernels
          id=forward_app_shape
          caption= Forward App Shape Optimization
+
+For the equality constraints, a gradient of the constraint with respect to the
+parameters is needed for TAO. The gradient is analytically computed for the
+current radii.
 
 Using postprocesors, the objective and constraint functions can be calculated.
 The objective in this case is to minimize the maximum temperature. Also the
@@ -106,12 +102,7 @@ optimization process.
 
 Optimization problems are solved using the [MultiApps](MultiApps/index.md)
 system.  The main application contains the optimization executioner and the
-sub-application solve the forward problem.   The main application input
-is shown in [main_app].
-
-!listing test/tests/executioners/constrained/shape_optimization/main.i
-         id=main_app
-         caption= Constrained Optimization Main App
+sub-application solve the forward problem.
 
 For this optimization example, the [GeneralOptimization.md] reporter is used. The
 [!param](/OptimizationReporter/OptimizationReporter/equality_names) option lists

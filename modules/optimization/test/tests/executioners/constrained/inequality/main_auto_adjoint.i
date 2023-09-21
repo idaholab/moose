@@ -22,8 +22,8 @@
 [Executioner]
   type = Optimize
   tao_solver = taoalmm
-  petsc_options_iname = '-tao_gatol -tao_catol  -tao_almm_type -tao_almm_mu_factor -tao_almm_mu_init'
-  petsc_options_value = ' 1e-1 1e-1  phr  1.1 1.0'
+  petsc_options_iname = '-tao_gatol -tao_catol  -tao_almm_type -tao_almm_mu_factor -tao_almm_mu_init  -tao_almm_subsolver_tao_type'
+  petsc_options_value = ' 1e-3 1e-3  phr  1.1 1.0 bqnktr'
   verbose = true
 []
 
