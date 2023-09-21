@@ -41,12 +41,15 @@ cp='cp'
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
+    # scaling = 1e-8
   []
   [vel_y]
     type = INSFVVelocityVariable
+    # scaling = 1e-8
   []
   [T]
     type = INSFVEnergyVariable
+    # scaling = 1e-5
   []
   [pressure]
     type = INSFVPressureVariable
