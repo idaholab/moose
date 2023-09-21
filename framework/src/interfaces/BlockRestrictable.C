@@ -186,7 +186,10 @@ BlockRestrictable::blocks() const
 const std::set<SubdomainID> &
 BlockRestrictable::blockIDs() const
 {
-  return _blk_ids;
+  if (_blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
+    return _blk_mesh->meshSubdomains();
+  else
+    return _blk_ids;
 }
 
 unsigned int

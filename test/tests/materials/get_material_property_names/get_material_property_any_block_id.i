@@ -54,7 +54,7 @@
 [UserObjects]
   [./get_material_block_names_test]
     type = GetMaterialPropertyBoundaryBlockNamesTest
-    expected_names = 'ANY_BLOCK_ID'
+    expected_names = 'top 0'
     property_name = 'block_prop'
     test_type = 'block'
   [../]
