@@ -979,10 +979,6 @@ void
 ComputeFVFluxJacobianThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
-  // TODO: do we need both calls - or just the neighbor one? - confirm this
-  this->_subproblem.SubProblem::cacheJacobian(_tid);
-  this->_subproblem.SubProblem::cacheJacobianNeighbor(_tid);
-
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -1046,9 +1042,6 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
   // TODO: do we need both calls - or just the neighbor one? - confirm this
   this->_subproblem.SubProblem::cacheResidual(_tid);
   this->_subproblem.SubProblem::cacheResidualNeighbor(_tid);
-  this->_subproblem.SubProblem::cacheJacobian(_tid);
-  this->_subproblem.SubProblem::cacheJacobianNeighbor(_tid);
-
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
