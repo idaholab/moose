@@ -98,7 +98,7 @@ public:
 
   virtual Real getGapWidth(unsigned int axial_index, unsigned int gap_index) const override
   {
-    return _gij_map[gap_index];
+    return _gij_map[axial_index][gap_index];
   }
 
   virtual const std::pair<unsigned int, unsigned int> & getSweepFlowGaps(unsigned int i_chan) const
@@ -195,7 +195,7 @@ protected:
   /// set it to -1, otherwise set it to 1.
   std::vector<std::vector<Real>> _sign_id_crossflow_map;
   /// gap size
-  std::vector<Real> _gij_map;
+  std::vector<std::vector<Real>> _gij_map;
   /// x,y coordinates of the fuel rods
   std::vector<Point> _pin_position;
   /// fuel rods that are belonging to each ring
@@ -237,6 +237,7 @@ public:
   friend class TriDuctMeshGenerator;
   friend class TriPinMeshGenerator;
   friend class DetailedTriPinMeshGenerator;
+  friend class LiquidMetalSubChannel1PhaseProblem;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;
