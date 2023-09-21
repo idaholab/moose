@@ -362,40 +362,44 @@ cp='cp'
 []
 
 
-[Adaptivity]
-  marker = combo
-  max_h_level = 4
+# [Adaptivity]
+#   marker = uniform
+#   max_h_level = 4
 
-  [Indicators]
-    [error_T]
-      type = GradientJumpIndicator
-      variable = T
-    []
-    [error_dispy]
-      type = GradientJumpIndicator
-      variable = disp_y
-    []
-  []
+#   [Indicators]
+#     [error_T]
+#       type = GradientJumpIndicator
+#       variable = T
+#     []
+#     [error_dispy]
+#       type = GradientJumpIndicator
+#       variable = disp_y
+#     []
+#   []
 
-  [Markers]
-    [errorfrac_T]
-      type = ErrorFractionMarker
-      refine = 0.4
-      coarsen = 0.2
-      indicator = error_T
-    []
-    [errorfrac_dispy]
-      type = ErrorFractionMarker
-      refine = 0.4
-      coarsen = 0.2
-      indicator = error_dispy
-    []
-    [combo]
-      type = ComboMarker
-      markers = 'errorfrac_T errorfrac_dispy'
-    []
-  []
-[]
+#   [Markers]
+#     [errorfrac_T]
+#       type = ErrorFractionMarker
+#       refine = 0.4
+#       coarsen = 0.2
+#       indicator = error_T
+#     []
+#     [errorfrac_dispy]
+#       type = ErrorFractionMarker
+#       refine = 0.4
+#       coarsen = 0.2
+#       indicator = error_dispy
+#     []
+#     [combo]
+#       type = ComboMarker
+#       markers = 'errorfrac_T errorfrac_dispy'
+#     []
+#     [uniform]
+#       type = UniformMarker
+#       mark = 'refine'
+#     []
+#   []
+# []
 
 [Postprocessors]
   [num_dofs]
