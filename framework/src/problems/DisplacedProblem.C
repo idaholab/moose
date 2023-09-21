@@ -276,6 +276,10 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   Threads::parallel_reduce(node_range, udmt);
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
+  _mesh.finiteVolumeInfoDirty();
+  for (auto & disp_nl : _displaced_nl)
+    disp_nl->update(false);
+  _displaced_aux->update(false);
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
