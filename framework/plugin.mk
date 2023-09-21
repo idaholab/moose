@@ -14,7 +14,7 @@ ifeq (x$(METHOD),x)
   METHOD := opt
 endif
 
--include $(MOOSE_DIR)/framework/build.mk
+include $(MOOSE_DIR)/framework/build.mk
 
 ADDITIONAL_CPPFLAGS += $(foreach i, $(shell find $(plugin_INCLUDEDIRS) $(MOOSE_DIR)/modules/tensor_mechanics/include/utils/abaqus -type d), -I $(i))
 

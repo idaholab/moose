@@ -1,0 +1,231 @@
+[Tests]
+  issues = '#25163'
+  design = 'AbaqusUserElement.md'
+
+  [build_uel_tri_tests]
+    type = RunCommand
+    command = "cd ../../../examples/uel_tri_tests; make"
+    requirement = "The UEL tri tests example shall be built."
+    method = 'opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_tri_states_tests]
+    type = RunCommand
+    command = "cd ../../../examples/uel_tri_states_tests; make"
+    requirement = "The UEL tri states tests example shall be built."
+    method = 'opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_build_tests]
+    type = RunCommand
+    command = "cd ../../../examples/uel_build_tests; make"
+    requirement = "The UEL build tests example shall be built."
+    method = 'opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_tri_tests_dbg]
+    type = RunCommand
+    command = "cd ../../../examples/uel_tri_tests; METHOD=dbg make"
+    requirement = "The UEL tri tests example shall be built."
+    method = 'dbg'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_tri_states_tests_dbg]
+    type = RunCommand
+    command = "cd ../../../examples/uel_tri_states_tests; METHOD=dbg make"
+    requirement = "The UEL tri states tests example shall be built."
+    method = 'dbg'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_build_tests_dbg]
+    type = RunCommand
+    command = "cd ../../../examples/uel_build_tests; METHOD=dbg make"
+    requirement = "The UEL build tests example shall be built."
+    method = 'dbg'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [reference]
+    type = Exodiff
+    input = reference.i
+    exodiff = reference_out.e
+    abs_zero = 5e-12
+    requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
+                  "deformation with a triangular mesh using MOOSE capabilities."
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+  []
+  [small]
+    type = Exodiff
+    input = small.i
+    exodiff = small_out.e
+    abs_zero = 5e-12
+    requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
+                  "deformation with a triangular mesh using a UEL plugin."
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test]
+    type = Exodiff
+    input = small_test.i
+    exodiff = small_test_out.e
+    abs_zero = 5e-12
+    requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
+                  "deformation with a triangular mesh using a UEL plugin calling a UMAT routine with "
+                  "its standard interface."
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [uel_test_print]
+    type = RunApp
+    input = uel_test_print.i
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    # Testing output
+    max_parallel = 1
+    errors = 'StringThatWillNotBePresentInOutput'
+    expect_out = 'Number of predefined variables:            2\n External field number            1  '
+                 'for node            1  is:    1500.0000000000000     \n External field number      '
+                 '      1  for node            2  is:    1500.0000000000000     \n External field '
+                 'number            1  for node            3  is:    1500.0000000000000     \n '
+                 'External field number            1  for node            4  is:    '
+                 '1500.0000000000000     \n External field number            1  for node            '
+                 '5  is:    1500.0000000000000     \n External field number            1  for node   '
+                 '         6  is:    1500.0000000000000     \n External field number            1  '
+                 'for node            7  is:    1500.0000000000000     \n External field number      '
+                 '      1  for node            8  is:    1500.0000000000000     \n External field '
+                 'number            2  for node            1  is:    210.00000000000000     \n '
+                 'External field number            2  for node            2  is:    '
+                 '210.00000000000000     \n External field number            2  for node            '
+                 '3  is:    210.00000000000000     \n External field number            2  for node   '
+                 '         4  is:    210.00000000000000     \n External field number            2  '
+                 'for node            5  is:    210.00000000000000     \n External field number      '
+                 '      2  for node            6  is:    210.00000000000000     \n External field '
+                 'number            2  for node            7  is:    210.00000000000000     \n '
+                 'External field number            2  for node            8  is:    '
+                 '210.00000000000000     \n Time increment is:    10.000000000000000     \n '
+                 'Coordinates for node            1  are:   0.66666666666666663      ,   '
+                 '0.33333333333333331      ,   0.66666666666666663     \n Coordinates for node       '
+                 '     2  are:    1.0000000000000000      ,   0.33333333333333331      ,   '
+                 '0.66666666666666663     \n Coordinates for node            3  are:    '
+                 '1.0000000000000000      ,   0.66666666666666663      ,   0.66666666666666663     '
+                 '\n Coordinates for node            4  are:   0.66666666666666663      ,   '
+                 '0.66666666666666663      ,   0.66666666666666663     \n Coordinates for node       '
+                 '     5  are:   0.66666666666666663      ,   0.33333333333333331      ,    '
+                 '1.0000000000000000     \n Coordinates for node            6  are:    '
+                 '1.0000000000000000      ,   0.33333333333333331      ,    1.0000000000000000     '
+                 '\n Coordinates for node            7  are:    1.0000000000000000      ,   '
+                 '0.66666666666666663      ,    1.0000000000000000     \n Coordinates for node       '
+                 '     8  are:   0.66666666666666663      ,   0.66666666666666663      ,    '
+                 '1.0000000000000000     \n Element number is:           25\n Number of coordinates '
+                 'at a node:            3\n Element type is:           10\n Number of UEL properties '
+                 'is:            5\n Property            1  is:    2.0000000000000000     \n '
+                 'Property            2  is:    1.0000000000000000     \n Property            3  is: '
+                 '   2.0000000000000000     \n Property            4  is:    210000.00000000000     '
+                 '\n Property            5  is:   0.29999999999999999     \n Number of nodes in this '
+                 'element:            8\n Number of state variables is:           96\n State '
+                 'variable            1  is:    0.0000000000000000     \n State variable            '
+                 '2  is:    0.0000000000000000     \n State variable            3  is:    '
+                 '0.0000000000000000     \n'
+    requirement = 'The Abaqus UEL interface shall be able to pass initial correct values of '
+                  'coordinates into a user-defined UEL routine for a hexahedral element and a '
+                  'non-trivial setup.'
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_uel_umat]
+    type = Exodiff
+    input = small_test_expanded.i
+    exodiff = small_test_expanded_out.e
+    requirement = 'The Abaqus UEL interface shall be able to interface with a UEL that calls a UMAT '
+                  'interface and must yield the same results for a triangular element as a UEL '
+                  'routine that computes internal forces without calling a UMAT routine.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_moose_umat]
+    type = Exodiff
+    input = small_test_expanded_umat.i
+    exodiff = small_test_expanded_umat_out.e
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
+                  'triangular element as a UEL routine that computes internal forces without calling '
+                  'a UMAT routine or an analogous UEL interface that calls a UMAT routine for '
+                  'computing the stress vector and the Jacobian.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_uel_states_fields]
+    type = Exodiff
+    input = small_test_uel_states_fields.i
+    exodiff = small_test_uel_states_fields_out.e
+    requirement = 'The Abaqus UEL interface, calling a UMAT routine, shall be able to yield the same '
+                  'results for a triangular element that a UMAT routine that computes internal '
+                  'forces when the solution depends on system states and two external fields, '
+                  'including temperature.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_umat_states_fields]
+    type = Exodiff
+    input = small_test_umat_states_fields.i
+    exodiff = small_test_umat_states_fields_out.e
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
+                  'triangular element that a UEL routine that computes internal forces, calling a '
+                  'UMAT routine, when the solution depends on system states and two external fields, '
+                  'including temperature.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_umat_states_fields_gradient]
+    type = Exodiff
+    input = small_test_umat_states_fields_gradient.i
+    exodiff = small_test_umat_states_fields_gradient_out.e
+    requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a '
+                  'triangular element that a UEL routine that computes internal forces, calling a '
+                  'UMAT routine, when the solution depends on system states and two external fields, '
+                  'including temperature, which vary significantly with space.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [small_test_uel_states_fields_gradient]
+    type = Exodiff
+    input = small_test_uel_states_fields_gradient.i
+    exodiff = small_test_uel_states_fields_gradient_out.e
+    requirement = 'The Abaqus UEL interface shall be able to yield the same results for a triangular '
+                  'element that a UMAT routine that computes internal forces when the solution '
+                  'depends on system states and two external fields, including temperature, which '
+                  'vary significantly with space. Therefore, the system shall properly handle state '
+                  'and external fields whose values depend on element location.'
+    abs_zero = 1e-12
+    # Only test plugins in dbg and opt.
+    method = 'dbg opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+[]
