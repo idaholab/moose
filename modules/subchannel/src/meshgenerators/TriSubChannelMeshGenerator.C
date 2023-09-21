@@ -211,7 +211,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   _chan_to_gap_map.resize(_n_channels);
   _gap_pairs_sf.resize(_n_channels);
   _chan_pairs_sf.resize(_n_channels);
-  _gij_map.resize(_n_gaps);
+  _gij_map.resize(_n_cells + 1);
   _sign_id_crossflow_map.resize(_n_channels);
   _gap_type.resize(_n_gaps);
   _subchannel_position.resize(_n_channels);
@@ -227,7 +227,12 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       _sign_id_crossflow_map.at(i).push_back(positive_flow);
       _subchannel_position.at(i).push_back(0.0);
     }
-  } // i
+  }
+
+  for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+  {
+    _gij_map[iz].reserve(_n_gaps);
+  }
 
   for (unsigned int i = 0; i < _nrods; i++)
     _pin_to_chan_map[i].reserve(6);
@@ -581,18 +586,21 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   }
 
   // set the _gij_map
-
-  for (unsigned int j = 0; j < _n_gaps; j++)
+  for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
   {
-    if (_gap_type[j] == EChannelType::CENTER)
+    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
-      _gij_map[j] = _pitch - _rod_diameter;
-    }
-    else if (_gap_type[j] == EChannelType::EDGE || _gap_type[j] == EChannelType::CORNER)
-    {
-      _gij_map[j] = _duct_to_pin_gap;
+      if (_gap_type[i_gap] == EChannelType::CENTER)
+      {
+        _gij_map[iz].push_back(_pitch - _rod_diameter);
+      }
+      else if (_gap_type[i_gap] == EChannelType::EDGE || _gap_type[i_gap] == EChannelType::CORNER)
+      {
+        _gij_map[iz].push_back(_duct_to_pin_gap);
+      }
     }
   }
+
   for (unsigned int i = 0; i < _n_channels; i++)
   {
     if (_subch_type[i] == EChannelType::CENTER || _subch_type[i] == EChannelType::EDGE)
