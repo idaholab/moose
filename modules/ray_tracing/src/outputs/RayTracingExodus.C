@@ -17,6 +17,8 @@
 // Local includes
 #include "RayTracingStudy.h"
 
+#include "libmesh/exodusII_io.h"
+
 registerMooseObject("RayTracingApp", RayTracingExodus);
 
 InputParameters
@@ -27,31 +29,30 @@ RayTracingExodus::validParams()
   return params;
 }
 
-RayTracingExodus::RayTracingExodus(const InputParameters & params)
-  : RayTracingMeshOutput(params), _exodus_num(1)
-{
-}
+RayTracingExodus::RayTracingExodus(const InputParameters & params) : RayTracingMeshOutput(params) {}
 
 void
 RayTracingExodus::outputMesh()
 {
   TIME_SECTION("outputMesh", 3, "Writing Ray Mesh");
 
-  // Build the Exodus IO object if it hasn't been built yet
-  if (!_exodus_io)
-    _exodus_io = std::make_unique<ExodusII_IO>(*_segment_mesh);
+  ExodusII_IO eio(*_segment_mesh);
+  eio.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep
   if (_output_data_nodal)
-    _exodus_io->set_output_variables(_study.rayDataNames());
+    eio.set_output_variables(_study.rayDataNames());
   // Otherwise, there's no variables to write in write_timestep
   else
-    _exodus_io->set_output_variables(std::vector<std::string>());
+    eio.set_output_variables(std::vector<std::string>());
   // Write the timestep, which is the mesh + nodal vars (if any)
-  _exodus_io->write_timestep(filename(), *_es, _exodus_num++, time() + _app.getGlobalTimeOffset());
+  eio.write_timestep(filename(), *_es, 1, time() + _app.getGlobalTimeOffset());
 
   // This will default to write_element_data getting all available elemental vars
-  _exodus_io->set_output_variables(std::vector<std::string>());
+  eio.set_output_variables(std::vector<std::string>());
   // Write the elemental variables, which are the variables with the constant Ray field data
-  _exodus_io->write_element_data(*_es);
+  eio.write_element_data(*_es);
+
+  // We write a new file every time as we don't keep track of whether or not the rays change
+  ++_file_num;
 }

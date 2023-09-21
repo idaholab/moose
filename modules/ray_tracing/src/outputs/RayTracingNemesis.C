@@ -39,11 +39,9 @@ RayTracingNemesis::outputMesh()
 {
   TIME_SECTION("outputMesh", 3, "Outputting Nemesis RayTracing Mesh");
 
-  // We write a new file every time for nemesis because the mesh changes
-  _file_num++;
-
   // Build the nemesis IO object
   Nemesis_IO nemesis_io(*_segment_mesh);
+  nemesis_io.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep
   if (_output_data_nodal)
@@ -58,4 +56,7 @@ RayTracingNemesis::outputMesh()
   nemesis_io.set_output_variables(std::vector<std::string>());
   // Write the elemental variables, which are the variables with the constant Ray field data
   nemesis_io.write_element_data(*_es);
+
+  // We write a new file every time as we don't keep track of whether or not the rays change
+  ++_file_num;
 }

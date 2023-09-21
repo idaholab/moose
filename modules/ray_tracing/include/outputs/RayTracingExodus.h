@@ -11,8 +11,6 @@
 
 #include "RayTracingMeshOutput.h"
 
-#include "libmesh/exodusII_io.h"
-
 class RayTracingExodus : public RayTracingMeshOutput
 {
 public:
@@ -21,10 +19,4 @@ public:
   static InputParameters validParams();
 
   virtual void outputMesh() override;
-
-  /// The ExodusII_IO object that does the writing
-  std::unique_ptr<ExodusII_IO> _exodus_io;
-
-  /// The number of exodus outputs we've done (begins with 1)
-  unsigned int _exodus_num;
 };

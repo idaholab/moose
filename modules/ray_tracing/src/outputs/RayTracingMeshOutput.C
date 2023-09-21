@@ -89,7 +89,7 @@ RayTracingMeshOutput::filename()
   output << _file_base << ".e";
 
   // Add the _000x extension to the file
-  if (_file_num > 1)
+  if (_file_num > 0)
     output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
@@ -124,11 +124,9 @@ RayTracingMeshOutput::output()
   // Done with these
   // We don't necessarily need to create a new mesh every time, but it's easier than
   // checking if the Rays have changed from last time we built a mesh
-  _es->clear();
   _es = nullptr;
   _sys = nullptr;
-  _segment_mesh->clear();
-  _sys = nullptr;
+  _segment_mesh = nullptr;
 }
 
 void
@@ -263,25 +261,21 @@ RayTracingMeshOutput::buildSegmentMesh()
     }
   }
 
-  // Build a mesh if we don't have one yet
-  if (!_segment_mesh)
+  // Build the segment mesh
+  mooseAssert(!_segment_mesh, "Not cleared");
+  if (_communicator.size() == 1)
+    _segment_mesh = std::make_unique<ReplicatedMesh>(_communicator, _mesh_ptr->dimension());
+  else
   {
-    if (_communicator.size() == 1)
-      _segment_mesh = std::make_unique<ReplicatedMesh>(_communicator, _mesh_ptr->dimension());
-    else
-    {
-      _segment_mesh = std::make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
-      _segment_mesh->set_distributed();
-    }
-
-    // We don't need neighbors to just create output
-    _segment_mesh->allow_find_neighbors(false);
-    // Don't renumber so that we can remain consistent between processor counts
-    _segment_mesh->allow_renumbering(false);
-    // As we're building segments for just this partiton, we're partitioning on our own
-    _segment_mesh->skip_partitioning(true);
+    _segment_mesh = std::make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
+    _segment_mesh->set_distributed();
   }
-
+  // We don't need neighbors to just create output
+  _segment_mesh->allow_find_neighbors(false);
+  // Don't renumber so that we can remain consistent between processor counts
+  _segment_mesh->allow_renumbering(false);
+  // As we're building segments for just this partiton, we're partitioning on our own
+  _segment_mesh->skip_partitioning(true);
   // Reserve nodes and elems
   _segment_mesh->reserve_nodes(num_nodes);
   _segment_mesh->reserve_elem(num_elems);

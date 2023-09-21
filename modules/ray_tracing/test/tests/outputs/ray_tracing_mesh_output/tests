@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16028 #16320'
+  issues = '#16028 #16320 #25501'
 
   [elem_type]
     requirement = 'The system shall support the mesh output of traced rays on meshes of element types '
@@ -38,6 +38,18 @@
     []
   []
 
+  [transient]
+    type = Exodiff
+    input = 'ray_mesh_output_transient.i'
+    exodiff = 'ray_mesh_output_transient_rays.e
+               ray_mesh_output_transient_rays.e-s0001
+               ray_mesh_output_transient_rays.e-s0002
+               ray_mesh_output_transient_rays.e-s0003'
+    allow_test_objects = true
+    requirement = 'The system shall support the mesh output of traced rays into the exodus format for a transient simulation'
+    design = 'RayTracingExodus.md RayTracingMeshOutput.md'
+  []
+
   [nemesis]
     type = Exodiff
     input = 'ray_mesh_output.i'
@@ -53,6 +65,37 @@
     recover = false
     requirement = 'The system shall support the mesh output of traced rays using the Nemesis format.'
     design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
+  []
+
+  [nemesis_transient]
+    type = Exodiff
+    input = 'ray_mesh_output_transient.i'
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner
+                Mesh/Partitioner/nx=2
+                Mesh/Partitioner/ny=2
+                Outputs/rays/type=RayTracingNemesis
+                "Outputs/rays/output_properties=\'intersections pid processor_crossings trajectory_changes\'"
+                Outputs/rays/file_base=ray_mesh_output_transient_nemesis_rays'
+    # Missing some files here beacuse exodiff doesn't like diffing empty output,
+    # which is the case for the early transient when not all procs are hit
+    exodiff = 'ray_mesh_output_transient_nemesis_rays.e.4.0
+               ray_mesh_output_transient_nemesis_rays.e.4.1
+               ray_mesh_output_transient_nemesis_rays.e-s0001.4.0
+               ray_mesh_output_transient_nemesis_rays.e-s0001.4.1
+               ray_mesh_output_transient_nemesis_rays.e-s0002.4.0
+               ray_mesh_output_transient_nemesis_rays.e-s0002.4.1
+               ray_mesh_output_transient_nemesis_rays.e-s0002.4.3
+               ray_mesh_output_transient_nemesis_rays.e-s0003.4.0
+               ray_mesh_output_transient_nemesis_rays.e-s0003.4.1
+               ray_mesh_output_transient_nemesis_rays.e-s0003.4.2
+               ray_mesh_output_transient_nemesis_rays.e-s0003.4.3'
+    allow_test_objects = true
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The system shall support the mesh output of traced rays into the nemesis format for a transient simulation'
+    design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
+    # cannot do recover because we don't have a single exodus file, the first two timesteps won't exist
+    recover = false
   []
 
   [no_segments]
