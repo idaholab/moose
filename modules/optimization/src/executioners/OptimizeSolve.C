@@ -11,7 +11,7 @@
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
 #include "Steady.h"
-#include "PetscSupport.h"
+
 InputParameters
 OptimizeSolve::validParams()
 {
