@@ -98,7 +98,7 @@ cp='cp'
     variable = pressure
     lambda = lambda
     phi0 = 0.0
-    point = '0 0 0'
+    point = '0 -.35e-3 0'
   []
 
   # momentum equations
