@@ -1231,6 +1231,26 @@ DisplacedProblem::customSetup(const ExecFlagType & exec_type)
 }
 
 void
+DisplacedProblem::residualSetup()
+{
+  SubProblem::residualSetup();
+
+  for (auto & nl : _displaced_nl)
+    nl->residualSetup();
+  _displaced_aux->residualSetup();
+}
+
+void
+DisplacedProblem::jacobianSetup()
+{
+  SubProblem::jacobianSetup();
+
+  for (auto & nl : _displaced_nl)
+    nl->jacobianSetup();
+  _displaced_aux->jacobianSetup();
+}
+
+void
 DisplacedProblem::haveADObjects(const bool have_ad_objects)
 {
   _have_ad_objects = have_ad_objects;
