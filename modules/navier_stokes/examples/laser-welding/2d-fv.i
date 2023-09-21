@@ -293,7 +293,7 @@ cp='cp'
   [steel]
     type = AriaLaserWeld304LStainlessSteelFunctorMaterial
     temperature = T
-    beta = 1e7
+    beta = 1e3
   []
   # [const]
   #   type = GenericConstantMaterial
