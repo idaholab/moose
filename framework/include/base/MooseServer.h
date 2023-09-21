@@ -214,10 +214,6 @@ private:
    * @return - true if the gathering of text edits completed successfully
    */
   bool gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextEdits,
-                                         int start_line,
-                                         int start_character,
-                                         int end_line,
-                                         int end_character,
                                          int tab_size,
                                          bool insert_spaces);
 

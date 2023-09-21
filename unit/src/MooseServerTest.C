@@ -1373,10 +1373,6 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 
   int request_id = 7;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int start_line = 0;
-  int start_character = 0;
-  int end_line = 0;
-  int end_character = 0;
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1385,16 +1381,8 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   wasp::DataObject formatting_request;
   std::stringstream formatting_errors;
 
-  EXPECT_TRUE(wasp::lsp::buildFormattingRequest(formatting_request,
-                                                formatting_errors,
-                                                request_id,
-                                                document_uri,
-                                                start_line,
-                                                start_character,
-                                                end_line,
-                                                end_character,
-                                                tab_size,
-                                                insert_spaces));
+  EXPECT_TRUE(wasp::lsp::buildFormattingRequest(
+      formatting_request, formatting_errors, request_id, document_uri, tab_size, insert_spaces));
 
   EXPECT_TRUE(formatting_errors.str().empty());
 
