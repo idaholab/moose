@@ -596,22 +596,14 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
           x0 = _pin_position[_chan_to_pin_map[j][0]](0);
           y0 = _pin_position[_chan_to_pin_map[j][0]](1);
         }
-<<<<<<< HEAD
-        x1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](0) +
-                    _rod_position[_subchannel_to_rod_map[i][1]](0));
-        y1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](1) +
-                    _rod_position[_subchannel_to_rod_map[i][1]](1));
-        if (_tight_side_bypass)
-          a1 = _flat_to_flat * std::tan(libMesh::pi / 6.0) / 2.0 + _duct_to_pin_gap / 2.0;
-        else
-          a1 = _flat_to_flat / 2.0 + _duct_to_pin_gap / 2.0;
-=======
         x1 = 0.5 *
              (_pin_position[_chan_to_pin_map[i][0]](0) + _pin_position[_chan_to_pin_map[i][1]](0));
         y1 = 0.5 *
              (_pin_position[_chan_to_pin_map[i][0]](1) + _pin_position[_chan_to_pin_map[i][1]](1));
-        a1 = _flat_to_flat / 2.0 + _duct_to_pin_gap / 2.0;
->>>>>>> 4880507 (Adopt consistent naming Refs #289)
+        if (_tight_side_bypass)
+          a1 = _flat_to_flat * std::tan(libMesh::pi / 6.0) / 2.0 + _duct_to_pin_gap / 2.0;
+        else
+          a1 = _flat_to_flat / 2.0 + _duct_to_pin_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
