@@ -126,7 +126,7 @@ cp='cp'
     use_displaced_mesh = true
   []
   [u_pressure]
-    type = INSFVMomentumPressureFlux
+    type = INSFVMomentumPressure
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
@@ -157,7 +157,7 @@ cp='cp'
     use_displaced_mesh = true
   []
   [v_pressure]
-    type = INSFVMomentumPressureFlux
+    type = INSFVMomentumPressure
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
