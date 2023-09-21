@@ -103,7 +103,7 @@ INSFVRhieChowInterpolator::validParams()
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
-  params.addRequiredParam<VariableName>("disp_x", "The x-component of displacement");
+  params.addParam<VariableName>("disp_x", "The x-component of displacement");
   params.addParam<VariableName>("disp_y", "The y-component of displacement");
   params.addParam<VariableName>("disp_z", "The z-component of displacement");
   return params;
