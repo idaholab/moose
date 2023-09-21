@@ -20,10 +20,9 @@ cp='cp'
   xmax = 0.35e-3
   ymin = -.7e-3
   ymax = 0
-  nx = 2
-  ny = 2
+  nx = 50
+  ny = 50
   displacements = 'disp_x disp_y'
-  uniform_refine = 2
 []
 
 [UserObjects]
