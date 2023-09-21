@@ -1,6 +1,6 @@
-period=1.25e-3
-endtime=${period}
-timestep=1.25e-5
+period=4e-4
+endtime=${fparse 2 * period}
+timestep=${fparse period / 100}
 surfacetemp=300
 sb=5.67e-8
 advected_interp_method='upwind'
@@ -18,9 +18,9 @@ cp='cp'
   dim = 2
   xmin = -.35e-3
   xmax = 0.35e-3
-  ymin = -.7e-3
+  ymin = -.35e-3
   ymax = 0
-  nx = 50
+  nx = 100
   ny = 50
   displacements = 'disp_x disp_y'
 []
@@ -34,6 +34,21 @@ cp='cp'
     use_displaced_mesh = true
     disp_x = disp_x
     disp_y = disp_y
+  []
+[]
+
+[AuxVariables]
+  [mu_out]
+    type = MooseVariableFVReal
+  []
+[]
+
+[AuxKernels]
+  [mu_out]
+    type = FunctorElementalAux
+    functor = mu
+    variable = mu_out
+    execute_on = timestep_end
   []
 []
 
@@ -67,7 +82,7 @@ cp='cp'
   [T]
     type = FunctionIC
     variable = T
-    function = '(${surfacetemp} - 300) / .7e-3 * y + ${surfacetemp}'
+    function = '${surfacetemp}'
   []
 []
 
@@ -97,7 +112,7 @@ cp='cp'
     variable = pressure
     lambda = lambda
     phi0 = 0.0
-    point = '0 -.35e-3 0'
+    point = '0 -.175e-3 0'
   []
 
   # momentum equations
@@ -293,7 +308,7 @@ cp='cp'
   [steel]
     type = AriaLaserWeld304LStainlessSteelFunctorMaterial
     temperature = T
-    beta = 1e3
+    beta = 1e7
   []
   # [const]
   #   type = GenericConstantMaterial
@@ -347,13 +362,9 @@ cp='cp'
 []
 
 [Outputs]
-  [exodus]
-    type = Exodus
-    output_material_properties = true
-    show_material_properties = 'mu'
-  []
+  exodus = true
   checkpoint = true
-  perf_graph = true
+  perf_graph = false
 []
 
 [Debug]
