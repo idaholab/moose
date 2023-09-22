@@ -224,6 +224,11 @@ public:
   void setInputFileName(const std::string & input_file_name);
 
   /**
+   * Set the input file names when multiple inputs shall be merged to set up the app.
+   */
+  void setInputFileNames(const std::vector<FileName> & input_filenames);
+
+  /**
    * Returns the input file name that was set with setInputFileName
    */
   std::string getInputFileName() const
@@ -1096,7 +1101,7 @@ protected:
   const std::shared_ptr<Parallel::Communicator> _comm;
 
   /// Input file names used
-  std::vector<std::string> _input_filenames;
+  std::vector<FileName> _input_filenames;
 
   /// The output file basename
   std::string _output_file_base;

@@ -98,7 +98,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
-  params.addCommandLineParam<std::vector<std::string>>(
+  params.addCommandLineParam<std::vector<FileName>>(
       "input_file",
       "-i <input_files>",
       "Specify one or multiple input files. Multiple files get merged into a single simulation "
@@ -941,7 +941,7 @@ MooseApp::setupOptions()
            isParamValid("input_file")) // They already specified an input filename
   {
     if (_input_filenames.empty())
-      _input_filenames = getParam<std::vector<std::string>>("input_file");
+      _input_filenames = getParam<std::vector<FileName>>("input_file");
 
     if (isParamValid("recover"))
     {
@@ -1048,6 +1048,12 @@ MooseApp::setInputFileName(const std::string & input_filename)
 {
   // for now we only permit single input to be set for multiapps
   _input_filenames = {input_filename};
+}
+
+void
+MooseApp::setInputFileNames(const std::vector<FileName> & input_filenames)
+{
+  _input_filenames = input_filenames;
 }
 
 std::string

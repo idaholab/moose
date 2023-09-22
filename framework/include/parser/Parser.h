@@ -76,7 +76,7 @@ public:
    * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void parse(const std::vector<std::string> & input_filenames,
+  void parse(const std::vector<FileName> & input_filenames,
              const std::optional<std::string> & input_text = std::nullopt);
 
   /**
@@ -254,7 +254,7 @@ protected:
   std::unique_ptr<SyntaxTree> _syntax_formatter;
 
   /// The input file names that are used for parameter extraction
-  std::vector<std::string> _input_filenames;
+  std::vector<FileName> _input_filenames;
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;

@@ -492,8 +492,8 @@ protected:
   /// List of positions can be created using the Positions system
   const bool _use_positions;
 
-  /// The input file for each app's simulation
-  std::vector<FileName> _input_files;
+  /// The input file(s) for each app's simulation
+  std::vector<std::vector<FileName>> _input_files;
 
   /// Whether to create the first app on rank 0 while all other MPI ranks are idle
   const bool & _wait_for_first_app_init;

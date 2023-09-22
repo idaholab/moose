@@ -652,7 +652,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 }
 
 void
-Parser::parse(const std::vector<std::string> & input_filenames,
+Parser::parse(const std::vector<FileName> & input_filenames,
               const std::optional<std::string> & input_text)
 {
   // Check that if the input_text string is provided, then there is only one filename to match

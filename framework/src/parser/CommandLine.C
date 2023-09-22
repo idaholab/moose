@@ -155,6 +155,12 @@ CommandLine::populateInputParams(InputParameters & params)
         continue;
       }
 
+      if (params.have_parameter<std::vector<FileName>>(orig_name))
+      {
+        search(orig_name, params.set<std::vector<FileName>>(orig_name));
+        continue;
+      }
+
       if (params.have_parameter<Real>(orig_name))
       {
         search(orig_name, params.set<Real>(orig_name));

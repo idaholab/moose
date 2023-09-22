@@ -107,11 +107,12 @@ MultiApp::validParams()
       false,
       "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
 
-  params.addRequiredParam<std::vector<FileName>>(
+  params.addRequiredParam<std::vector<std::vector<FileName>>>(
       "input_files",
-      "The input file for each App.  If this parameter only contains one input file "
+      "The input file(s) for each App.  If this parameter only contains one input file "
       "it will be used for all of the Apps.  When using 'positions_from_file' it is "
-      "also admissable to provide one input_file per file.");
+      "also admissable to provide one input_file per file. Specify a vector of vectors of input "
+      "files (separated by ;) to specify multiple inputs for each app.");
   params.addParam<Real>("bounding_box_inflation",
                         0.01,
                         "Relative amount to 'inflate' the bounding box of this MultiApp.");
@@ -252,7 +253,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
-    _input_files(getParam<std::vector<FileName>>("input_files")),
+    _input_files(getParam<std::vector<std::vector<FileName>>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
     _my_num_apps(0),
@@ -305,6 +306,21 @@ MultiApp::MultiApp(const InputParameters & parameters)
   std::sort(sorted_times.begin(), sorted_times.end());
   if (_reset_times.size() && _reset_times != sorted_times)
     paramError("reset_time", "List of reset times must be sorted in increasing order");
+
+  // if a single vector of filenames is given, we assume that the old vector of file names format is
+  // used. We translate this into teh vector of vector of file names (which supports multiple inputs
+  // per app).
+  if (_input_files.size() == 1 && _input_files[0].size() > 1)
+  {
+    auto inputs = _input_files[0];
+    _input_files.clear();
+    for (const auto & input : inputs)
+      _input_files.push_back({input});
+  }
+  // remove empty input file lists from the back (this allows users to specify multiple inputs for a
+  // single multi app as "input1 input2;")
+  while (!_input_files.empty() && _input_files.back().empty())
+    _input_files.pop_back();
 }
 
 void
@@ -422,8 +438,8 @@ MultiApp::readCommandLineArguments()
   {
     _cli_args_from_file.clear();
 
-    std::vector<FileName> cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
-    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
+    auto cli_args_files = getParam<std::vector<FileName>>("cli_args_files");
+    auto input_files = _input_files;
 
     // If we use parameter "cli_args_files", at least one file should be provided
     if (!cli_args_files.size())
@@ -535,8 +551,8 @@ MultiApp::fillPositions()
   }
   else if (isParamValid("positions_file"))
   {
-    std::vector<FileName> positions_files = getParam<std::vector<FileName>>("positions_file");
-    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
+    auto positions_files = getParam<std::vector<FileName>>("positions_file");
+    auto input_files = _input_files;
 
     if (input_files.size() != 1 && positions_files.size() != input_files.size())
       mooseError("Number of input_files for MultiApp ",
@@ -569,7 +585,7 @@ MultiApp::fillPositions()
   else if (isParamValid("positions_objects"))
   {
     const auto & positions_param_objs = getParam<std::vector<PositionsName>>("positions_objects");
-    const auto & input_files = getParam<std::vector<FileName>>("input_files");
+    const auto & input_files = _input_files;
 
     if (input_files.size() != 1 && positions_param_objs.size() != input_files.size())
       mooseError("Number of input_files for MultiApp ",
@@ -1098,14 +1114,14 @@ MultiApp::createApp(unsigned int i, Real start_time)
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
-  std::string input_file = "";
+  std::vector<FileName> input_files;
   if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
-    input_file = _input_files[0];
+    input_files = _input_files[0];
   else
-    input_file = _input_files[_first_local_app + i];
+    input_files = _input_files[_first_local_app + i];
 
   app->setGlobalTimeOffset(start_time);
-  app->setInputFileName(input_file);
+  app->setInputFileNames(input_files);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());
