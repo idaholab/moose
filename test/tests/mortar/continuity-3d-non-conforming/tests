@@ -78,6 +78,20 @@
     map = False
     partial = True
   []
+  [continuity_tet14]
+    type = 'Exodiff'
+    min_ad_size = 100
+    input = 'continuity_tet.i'
+    exodiff = 'continuity_tet14_out.e'
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+               'Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD '
+               'Outputs/file_base=continuity_tet14_out'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a TET14 conforming mesh, e.g. the primal '
+                  'variable values across the mortar interface shall be the same.'
+    map = False
+    partial = True
+  []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
     input = 'continuity_non_conforming_tet.i'
@@ -118,6 +132,18 @@
                'Variables/T/order=SECOND Outputs/file_base=continuity_penalty_tet10_out'
     requirement = 'The system shall be able to produce the expected result for a solution continuity '
                   'test case using the penalty-based mortar method on a TET10 conforming mesh, e.g. '
+                  'the primal variable values across the mortar interface shall be the same.'
+    map = False
+    partial = True
+  []
+  [continuity_penalty_tet14]
+    type = 'Exodiff'
+    input = 'continuity_penalty_tet.i'
+    exodiff = 'continuity_penalty_tet14_out.e'
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+               'Variables/T/order=THIRD Outputs/file_base=continuity_penalty_tet14_out'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a TET14 conforming mesh, e.g. '
                   'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
