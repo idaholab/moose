@@ -79,6 +79,14 @@
       detail = 'TET10'
       heavy = true
     []
+    [tet14]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_tet14.csv
+      cli_args = 'GlobalParams/elem_type=tet14 GlobalParams/order=third Outputs/file_base=3d_tet14'
+      detail = 'TET14'
+      heavy = true
+    []
 
     [hex8]
       type = CSVDiff
