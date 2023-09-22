@@ -13,7 +13,7 @@
 
 /**
  * Test study for generating rays for a basic particle-in-cell capability,
- * where Rays have propagate a bit each time step
+ * where Rays propagate a bit each time step
  */
 class TestPICRayStudy : public RayTracingStudy
 {

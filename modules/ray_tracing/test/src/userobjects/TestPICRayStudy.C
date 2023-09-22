@@ -84,7 +84,7 @@ TestPICRayStudy::generateRays()
     // ...and then add them to be traced
     moveRaysToBuffer(claimed_rays);
   }
-  // Rays are in the bank: reset them and update the velocities
+  // Rays are in the bank: reset them and update the velocities / end distance
   else
   {
     // Reset each ray
