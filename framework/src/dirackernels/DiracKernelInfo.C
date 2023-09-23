@@ -131,8 +131,7 @@ DiracKernelInfo::findPoint(const Point & p,
   // far as the DiracKernels are concerned: sometimes the Mesh moves
   // out from the Dirac point entirely and in that case the Point just
   // gets "deactivated".
-  const bool block_restricted = blocks.find(Moose::ANY_BLOCK_ID) == blocks.end();
-  const Elem * elem = block_restricted ? (*_point_locator)(p, &blocks) : (*_point_locator)(p);
+  const Elem * elem = (*_point_locator)(p, &blocks);
 
   // The processors may not agree on which Elem the point is in.  This
   // can happen if a Dirac point lies on the processor boundary, and

@@ -3339,7 +3339,7 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   std::set<SubdomainID> input_subdomains;
   std::set<std::string> kernel_variables;
 
-  bool global_kernels_exist = _kernels.hasActiveBlockObjects(Moose::ANY_BLOCK_ID);
+  bool global_kernels_exist = false;
   global_kernels_exist |= _scalar_kernels.hasActiveObjects();
   global_kernels_exist |= _nodal_kernels.hasActiveObjects();
 

@@ -616,7 +616,7 @@ SubProblem::checkBlockMatProps()
 void
 SubProblem::checkBoundaryMatProps()
 {
-  // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
+  // Variable for storing the value for ANY_BOUNDARY_ID
   BoundaryID any_id = Moose::ANY_BOUNDARY_ID;
 
   // Variable for storing all available blocks/boundaries from the mesh
