@@ -20,6 +20,12 @@
     exodiff = 'lid-driven-action-approx-rc.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action with an approximate computation of the Rhie-Chow coefficients.'
   []
+  [exo-displaced]
+    type = 'Exodiff'
+    input = 'lid-driven-displaced.i'
+    exodiff = 'lid-driven-displaced_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume method on a (zero-)displaced mesh.'
+  []
   [point-pressure]
     type = 'Exodiff'
     input = 'lid-driven.i'
