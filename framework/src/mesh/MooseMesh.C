@@ -924,9 +924,6 @@ MooseMesh::getElemIDsOnBlocks(unsigned int elem_id_index, const std::set<Subdoma
   std::set<dof_id_type> unique_ids;
   for (auto & blk : blks)
   {
-    if (blk == Moose::ANY_BLOCK_ID)
-      return getAllElemIDs(elem_id_index);
-
     auto it = _block_id_mapping[elem_id_index].find(blk);
     if (it == _block_id_mapping[elem_id_index].end())
       mooseError("Block ", blk, " is not available on the mesh");
@@ -3561,11 +3558,6 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase 
       const MooseVariableFieldBase * const var = moose_vars[j];
       const auto & var_name = var->name();
       std::set<SubdomainID> var_subdomains = var->blockIDs();
-
-      // unfortunately, MOOSE is lazy and all subdomains has its own
-      // ID. If ANY_BLOCK_ID is in var_subdomains, inject all subdomains explicitly
-      if (var_subdomains.find(Moose::ANY_BLOCK_ID) != var_subdomains.end())
-        var_subdomains = this->meshSubdomains();
 
       /**
        * The following paragraph of code assigns the VarFaceNeighbors

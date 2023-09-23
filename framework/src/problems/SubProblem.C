@@ -446,17 +446,12 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   for (const auto & block_id : blocks)
   {
     SubdomainName name;
-    if (block_id == Moose::ANY_BLOCK_ID)
-      name = "ANY_BLOCK_ID";
-    else
+    name = mesh().getMesh().subdomain_name(block_id);
+    if (name.empty())
     {
-      name = mesh().getMesh().subdomain_name(block_id);
-      if (name.empty())
-      {
-        std::ostringstream oss;
-        oss << block_id;
-        name = oss.str();
-      }
+      std::ostringstream oss;
+      oss << block_id;
+      name = oss.str();
     }
     block_names.push_back(name);
   }
@@ -579,9 +574,6 @@ SubProblem::storeBoundaryDelayedCheckMatProp(const std::string & requestor,
 void
 SubProblem::checkBlockMatProps()
 {
-  // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
-  SubdomainID any_id = Moose::ANY_BLOCK_ID;
-
   // Variable for storing all available blocks/boundaries from the mesh
   std::set<SubdomainID> all_ids(mesh().meshSubdomains());
 
@@ -593,11 +585,7 @@ SubProblem::checkBlockMatProps()
     // The current id for the property being checked (BoundaryID || BlockID)
     SubdomainID check_id = check_it.first;
 
-    // In the case when the material being checked has an ID is set to ANY, then loop through all
-    // the possible ids and verify that the material property is defined.
     std::set<SubdomainID> check_ids = {check_id};
-    if (check_id == any_id)
-      check_ids = all_ids;
 
     // Loop through all the block/boundary ids
     for (const auto & id : check_ids)
@@ -609,9 +597,7 @@ SubProblem::checkBlockMatProps()
         // and any block/boundary
         // and not is not a zero material property.
         if (_map_block_material_props[id].count(prop_it.second) == 0 &&
-            _map_block_material_props[any_id].count(prop_it.second) == 0 &&
-            _zero_block_material_props[id].count(prop_it.second) == 0 &&
-            _zero_block_material_props[any_id].count(prop_it.second) == 0)
+            _zero_block_material_props[id].count(prop_it.second) == 0)
         {
           std::string check_name = restrictionSubdomainCheckName(id);
           if (check_name.empty())
