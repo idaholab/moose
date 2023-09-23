@@ -13,6 +13,15 @@
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated'"
     []
+    [fluid_only_displaced]
+      type = 'Exodiff'
+      input = 2d-rc-heated-disp-system.i
+      exodiff = 2d-rc-heated-disp-system_out.e
+      method = "!dbg"
+      abs_zero = 1e-9
+      detail = 'with a Cartesian geometry, only modeling the fluid phase, with objects running on the displaced mesh,'
+      valgrind = HEAVY
+    []
     [rz]
       type = 'Exodiff'
       input = 2d-rc-heated.i
