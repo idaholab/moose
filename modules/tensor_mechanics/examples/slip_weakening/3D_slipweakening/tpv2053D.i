@@ -6,15 +6,15 @@
     [./msh]
       type = GeneratedMeshGenerator
       dim = 3
-      nx = 60
-      ny = 60
-      nz = 60
-      xmin = -3000
-      xmax = 3000
-      ymin = -3000
-      ymax = 3000
-      zmin = -3000
-      zmax = 3000
+      nx = 20
+      ny = 6
+      nz = 6
+      xmin = -2000
+      xmax = 2000
+      ymin = -600
+      ymax = 600
+      zmin = -600
+      zmax = 600
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -104,6 +104,10 @@
         family = MONOMIAL
     []
     [./tangent_jump_rate]
+      order = CONSTANT
+      family = MONOMIAL
+    []
+    [./tangent_jump]
       order = CONSTANT
       family = MONOMIAL
     []
@@ -301,8 +305,8 @@
 
   [Executioner]
     type = Transient
-    dt = 0.0025
-    end_time = 0.9
+    dt = 0.005
+    num_steps = 100
     [TimeIntegrator]
       type = CentralDifference
       solve_type = lumped
@@ -311,5 +315,27 @@
 
   [Outputs]
     exodus = true
-    interval = 10
+    csv = true
+    interval = 20
+  []
+
+  [Postprocessors]
+    [./tangent_jump_elem310]
+      type = ElementalVariableValue
+      variable = tangent_jump
+      elementid = 310
+      outputs = csv
+    []
+    [./tangent_jump_elem305]
+      type = ElementalVariableValue
+      variable = tangent_jump
+      elementid = 305
+      outputs = csv
+    []
+    [./tangent_jump_elem315]
+      type = ElementalVariableValue
+      variable = tangent_jump
+      elementid = 315
+      outputs = csv
+    []
   []

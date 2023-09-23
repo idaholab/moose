@@ -1,8 +1,8 @@
 [Tests]
     [./2d_slipweakening]
         type = CSVDiff
-        input = 'tpv2052D.i'
-        csvdiff = 'tpv2052D_out.csv'
+        input = 'tpv2053D.i'
+        csvdiff = 'tpv2053D_out.csv'
         abs_zero = 1e-6
         rel_err = 1e-6
     []

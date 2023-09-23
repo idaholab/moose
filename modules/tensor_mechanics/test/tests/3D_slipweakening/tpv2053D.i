@@ -1,17 +1,20 @@
-# Verification of Benchmark Problem TPV205-2D from the SCEC Dynamic Rupture Validation exercises #
+# Verification of Benchmark Problem TPV205-3D from the SCEC Dynamic Rupture Validation exercises #
 # Reference: #
 # Harris, R. M.-P.-A. (2009). The SCEC/USGS Dynamic Earthquake Rupture Code Verification Exercise. Seismological Research Letters, vol. 80, no. 1, pages 119-126. #
 
 [Mesh]
     [./msh]
       type = GeneratedMeshGenerator
-      dim = 2
-      nx = 40
-      ny = 14
+      dim = 3
+      nx = 20
+      ny = 6
+      nz = 6
       xmin = -2000
       xmax = 2000
-      ymin = -700
-      ymax = 700
+      ymin = -600
+      ymax = 600
+      zmin = -600
+      zmax = 600
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -28,25 +31,31 @@
 
   [GlobalParams]
     #primary variables
-    displacements = 'disp_x disp_y'
+    displacements = 'disp_x disp_y disp_z'
     #damping ratio
     q = 0.1
     #characteristic length (m)
     Dc = 0.4
     #initial normal stress (Pa)
     T2_o = 120e6
+    #initial shear stress along dip direction (Pa)
+    T3_o = 0.0
     #dynamic friction coefficient
     mu_d = 0.525
     #element edge length (m)
-    len = 100
+    len = 200
   []
 
   [AuxVariables]
     [./resid_x]
-      order = FIRST
-      family = LAGRANGE
+        order = FIRST
+        family = LAGRANGE
     [../]
     [./resid_y]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./resid_z]
         order = FIRST
         family = LAGRANGE
     []
@@ -58,11 +67,31 @@
         order = FIRST
         family = LAGRANGE
     [../]
+    [./resid_slipweakening_z]
+        order = FIRST
+        family = LAGRANGE
+    [../]
     [./disp_slipweakening_x]
         order = FIRST
         family = LAGRANGE
     []
     [./disp_slipweakening_y]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./disp_slipweakening_z]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./vel_slipweakening_x]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./vel_slipweakening_y]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./vel_slipweakening_z]
         order = FIRST
         family = LAGRANGE
     []
@@ -75,12 +104,12 @@
         family = MONOMIAL
     []
     [./tangent_jump_rate]
-        order = CONSTANT
-        family = MONOMIAL
+      order = CONSTANT
+      family = MONOMIAL
     []
     [./tangent_jump]
-        order = CONSTANT
-        family = MONOMIAL
+      order = CONSTANT
+      family = MONOMIAL
     []
   []
 
@@ -88,7 +117,7 @@
     [./czm_ik]
       boundary = 'Block0_Block1'
       strain = SMALL
-      generate_output='traction_x traction_y jump_x jump_y normal_traction tangent_traction normal_jump tangent_jump'
+      generate_output = 'tangent_jump'
     [../]
   []
 
@@ -99,8 +128,6 @@
         [./all]
           strain = SMALL
           add_variables = true
-          planar_formulation = PLANE_STRAIN
-          generate_output = 'stress_xx stress_yy stress_xy'
           extra_vector_tags = 'restore_tag'
         [../]
       [../]
@@ -124,10 +151,10 @@
       v = disp_y
       execute_on = 'TIMESTEP_BEGIN'
     []
-    [tangent_jump_rate]
-      type = TimeDerivativeAux
-      variable = tangent_jump_rate
-      functor = tangent_jump
+    [Displacement_z]
+      type = ProjectionAux
+      variable = disp_slipweakening_z
+      v = disp_z
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_x]
@@ -142,6 +169,18 @@
       v = resid_y
       execute_on = 'TIMESTEP_BEGIN'
     []
+    [Residual_z]
+      type = ProjectionAux
+      variable = resid_slipweakening_z
+      v = resid_z
+      execute_on = 'TIMESTEP_BEGIN'
+    []
+    [tangent_jump_rate]
+      type = TimeDerivativeAux
+      variable = tangent_jump_rate
+      functor = tangent_jump
+      execute_on = 'TIMESTEP_BEGIN'
+    []
     [restore_x]
       type = TagVectorAux
       vector_tag = 'restore_tag'
@@ -154,6 +193,13 @@
       vector_tag = 'restore_tag'
       v = 'disp_y'
       variable = 'resid_y'
+      execute_on = 'TIMESTEP_END'
+    []
+    [restore_z]
+      type = TagVectorAux
+      vector_tag = 'restore_tag'
+      v = 'disp_z'
+      variable = 'resid_z'
       execute_on = 'TIMESTEP_END'
     []
     [StaticFricCoeff]
@@ -181,6 +227,11 @@
       use_displaced_mesh = false
       variable = disp_y
     []
+    [./inertia_z]
+      type = InertialForce
+      use_displaced_mesh = false
+      variable = disp_z
+    []
     [./Reactionx]
       type = StiffPropDamping
       variable = 'disp_x'
@@ -190,6 +241,11 @@
       type = StiffPropDamping
       variable = 'disp_y'
       component = '1'
+    []
+    [./Reactionz]
+      type = StiffPropDamping
+      variable = 'disp_z'
+      component = '2'
     []
   []
 
@@ -209,11 +265,13 @@
         prop_values = 2670
     []
     [./czm_mat]
-        type = SlipWeakeningFriction2d
+        type = SlipWeakeningFriction3d
         disp_slipweakening_x     = disp_slipweakening_x
         disp_slipweakening_y     = disp_slipweakening_y
+        disp_slipweakening_z     = disp_slipweakening_z
         reaction_slipweakening_x = resid_slipweakening_x
         reaction_slipweakening_y = resid_slipweakening_y
+        reaction_slipweakening_z = resid_slipweakening_z
         mu_s = mu_s
         ini_shear_sts = ini_shear_stress
         boundary = 'Block0_Block1'
@@ -256,28 +314,27 @@
   []
 
   [Outputs]
-    exodus = true
     csv = true
     interval = 20
   []
 
   [Postprocessors]
-    [./tangent_jump_elem300]
-      type = ElementalVariableValue
-      variable = tangent_jump
-      elementid = 300
-      outputs = csv
-    []
-    [./tangent_jump_elem290]
-      type = ElementalVariableValue
-      variable = tangent_jump
-      elementid = 290
-      outputs = csv
-    []
     [./tangent_jump_elem310]
       type = ElementalVariableValue
       variable = tangent_jump
       elementid = 310
+      outputs = csv
+    []
+    [./tangent_jump_elem305]
+      type = ElementalVariableValue
+      variable = tangent_jump
+      elementid = 305
+      outputs = csv
+    []
+    [./tangent_jump_elem315]
+      type = ElementalVariableValue
+      variable = tangent_jump
+      elementid = 315
       outputs = csv
     []
   []
