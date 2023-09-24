@@ -76,11 +76,39 @@ JSONFileReader::getScalar(const std::vector<std::string> & scalar_keys, Real & s
 }
 
 void
-JSONFileReader::getVector(const std::string & vector_name, std::vector<Real> & vector) const
+JSONFileReader::getVector(const std::string & vector_name, std::vector<Real> & vector_to_fill) const
 {
   if (!_root.contains(vector_name))
-    mooseError("Attempted to get", vector_name, "but the JSON file does not contain this key");
-  // _root.from_json<std::vector<Real>>(vector_name, vector);
+    mooseError("Attempted to get",
+               vector_name,
+               "but the JSON file does not contain this key at the root level");
+  const auto num_items = _root[vector_name].size();
+  vector_to_fill.resize(num_items);
+  for (const auto & index : make_range(num_items))
+    vector_to_fill[index] = getReal(_root[vector_name][index]);
+}
+
+void
+JSONFileReader::getVector(const std::vector<std::string> & vector_keys,
+                          std::vector<Real> & vector_to_fill) const
+{
+  if (!vector_keys.size())
+    mooseError("There should be at least one key to retrieve a value from the JSON");
+
+  // traverse the JSON tree
+  auto * current_node = &_root[vector_keys[0]];
+  for (const auto & key_index : index_range(vector_keys))
+  {
+    if (key_index == vector_keys.size() - 1)
+    {
+      const auto num_items = (*current_node).size();
+      vector_to_fill.resize(num_items);
+      for (const auto & index : make_range(num_items))
+        vector_to_fill[index] = getReal((*current_node)[index]);
+      break;
+    }
+    current_node = &(*current_node)[vector_keys[key_index + 1]];
+  }
 }
 
 Real

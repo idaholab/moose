@@ -46,7 +46,18 @@ public:
   void getScalar(const std::vector<std::string> & scalar_keys, Real & scalar) const;
 
   /// Getter for vector values
+  /**
+   * Get a vector that is directly indexed at the root of the JSON file/tree
+   * @param vector_name the name of the desired vector
+   * @param scalar reference to the vector that will be set with the vector in the JSON
+   */
   void getVector(const std::string & vector_name, std::vector<Real> & vector) const;
+  /**
+   * Get a vector in the JSON file/tree
+   * @param vector_keys the keys in descending order to access the vector
+   * @param vector reference to the vector that will be set with the vector in the JSON
+   */
+  void getVector(const std::vector<std::string> & vector_keys, std::vector<Real> & vector) const;
 
 private:
   /**
