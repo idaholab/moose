@@ -101,12 +101,22 @@ JSONFileReader::getVector(const std::vector<std::string> & vector_keys,
   {
     if (key_index == vector_keys.size() - 1)
     {
-      const auto num_items = (*current_node).size();
+      if (!current_node->is_array())
+        mooseError("Cannot retrieve a vector from JSON node",
+                   *current_node,
+                   "obtained with last key",
+                   vector_keys[key_index]);
+      const auto num_items = current_node->size();
       vector_to_fill.resize(num_items);
       for (const auto & index : make_range(num_items))
         vector_to_fill[index] = getReal((*current_node)[index]);
-      break;
+      return;
     }
+    if (current_node->is_array())
+      mooseError("Cannot obtain nested JSON item with key",
+                 vector_keys[key_index + 1],
+                 "because the current item is an array:",
+                 *current_node);
     current_node = &(*current_node)[vector_keys[key_index + 1]];
   }
 }
