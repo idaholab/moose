@@ -16,13 +16,20 @@ PiecewiseTabularBase::validParams()
 {
   InputParameters params = PiecewiseBase::validParams();
 
+  // Parameters shared across all data input methods
   MooseEnum axis("x=0 y=1 z=2");
   params.addParam<MooseEnum>(
       "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.declareControllable("scale_factor");
+
+  // Data from input file parameters
   params.addParam<std::vector<Real>>("xy_data",
                                      "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<std::vector<Real>>("x", "The abscissa values");
   params.addParam<std::vector<Real>>("y", "The ordinate values");
+
+  // Data from CSV file parameters
   params.addParam<FileName>("data_file", "File holding CSV data");
   params.addParam<unsigned int>("x_index_in_file", 0, "The abscissa index in the data file");
   params.addParam<unsigned int>("y_index_in_file", 1, "The ordinate index in the data file");
@@ -32,12 +39,22 @@ PiecewiseTabularBase::validParams()
       "y_title", "The title of the column/row containing the y data in the data file");
   params.addParam<bool>(
       "xy_in_file_only", true, "If the data file only contains abscissa and ordinate data");
-
   MooseEnum format("columns=0 rows=1", "rows");
   params.addParam<MooseEnum>(
       "format", format, "Format of csv data file that is in either in columns or rows");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
-  params.declareControllable("scale_factor");
+
+  // Data from JSON parameters
+  params.addParam<UserObjectName>("json_uo", "JSONFileReader holding the data");
+  params.addParam<std::vector<std::string>>(
+      "x_keys", "Ordered vector of keys in the JSON tree to obtain the abscissa");
+  params.addParam<std::vector<std::string>>(
+      "y_keys", "Ordered vector of keys in the JSON tree to obtain the ordinate");
+
+  params.addParamNamesToGroup("xy_data x y", "Data from input file");
+  params.addParamNamesToGroup(
+      "data_file x_index_in_file y_index_in_file x_title y_title xy_in_file_only format",
+      "Data from input file");
+  params.addParamNamesToGroup("json_uo x_keys y_keys", "Data from JSON");
   return params;
 }
 
@@ -50,20 +67,23 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
   if (_has_axis)
     _axis = this->template getParam<MooseEnum>("axis");
 
-  // determine data source and check parameter consistency
-  if (isParamValid("data_file") && !isParamValid("x") && !isParamValid("y") &&
-      !isParamValid("xy_data"))
+  // Check all parameters for inconsistencies
+  mooseError("In ",
+             _name,
+             ": Either 'data_file' or 'json_uo' or 'x' and 'y' or 'xy_data' must be specified "
+             "exclusively.");
+
+  // load the data
+  if (isParamValid("data_file"))
     buildFromFile();
-  else if (!isParamValid("data_file") && isParamValid("x") && isParamValid("y") &&
-           !isParamValid("xy_data"))
+  else if (isParamValid("x") && isParamValid("y"))
     buildFromXandY();
-  else if (!isParamValid("data_file") && !isParamValid("x") && !isParamValid("y") &&
-           isParamValid("xy_data"))
+  else if (isParamValid("xy_data"))
     buildFromXY();
+  else if (isParamValid("json_uo"))
+    buildFromJSON();
   else
-    mooseError("In ",
-               _name,
-               ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively.");
+    mooseError("Unknown input source. Are you missing a parameter? Did you misspell one?");
 }
 
 void
@@ -154,6 +174,11 @@ PiecewiseTabularBase::buildFromFile()
   // Size mismatch error
   if (_raw_x.size() != _raw_y.size())
     mooseError("In ", _name, ": Lengths of x and y data do not match.");
+}
+
+void
+PiecewiseTabularBase::buildFromJSON()
+{
 }
 
 void

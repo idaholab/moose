@@ -37,6 +37,9 @@ private:
   /// Reads data from supplied CSV file.
   void buildFromFile();
 
+  /// Reads data from supplied JSON reader.
+  void buildFromJSON();
+
   /// Builds data from 'x' and 'y' parameters.
   void buildFromXandY();
 
