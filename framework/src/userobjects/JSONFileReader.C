@@ -50,8 +50,29 @@ void
 JSONFileReader::getScalar(const std::string & scalar_name, Real & scalar) const
 {
   if (!_root.contains(scalar_name))
-    mooseError("Attempted to get", scalar_name, "but the JSON file does not contain this key");
+    mooseError("Attempted to get",
+               scalar_name,
+               "but the JSON file does not contain this key directly at the root level");
   scalar = getReal(_root[scalar_name]);
+}
+
+void
+JSONFileReader::getScalar(const std::vector<std::string> & scalar_keys, Real & scalar) const
+{
+  if (!scalar_keys.size())
+    mooseError("There should be at least one key to retrieve a value from the JSON");
+
+  // traverse the JSON tree
+  auto * current_node = &_root[scalar_keys[0]];
+  for (const auto & key_index : index_range(scalar_keys))
+  {
+    if (key_index == scalar_keys.size() - 1)
+    {
+      scalar = getReal(*current_node);
+      break;
+    }
+    current_node = &(*current_node)[scalar_keys[key_index + 1]];
+  }
 }
 
 void

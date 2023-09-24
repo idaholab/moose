@@ -474,7 +474,7 @@ protected:
 
   /**
    * Copy the Debye-Huckel parameters for computing neutral species activity (if any) found in the
-   * databasebase into _neutral_species_activity.  This method is cdalled in the constructor
+   * database into _neutral_species_activity.  This method is called in the constructor
    */
   void setNeutralSpeciesActivity();
 

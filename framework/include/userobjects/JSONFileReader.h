@@ -31,7 +31,20 @@ public:
   virtual void execute() override { read(_filename); };
 
   /// Getters for scalar values
+  /**
+   * Get a scalar that is directly indexed at the root of the JSON file/tree
+   * @param scalar_name the name of the desired scalar
+   * @param scalar reference to the scalar that will be set with the scalar in the JSON
+   */
   void getScalar(const std::string & scalar_name, Real & scalar) const;
+
+  /**
+   * Get a scalar in the JSON file/tree
+   * @param scalar_keys the keys in descending order to access the scalar
+   * @param scalar reference to the scalar that will be set with the scalar in the JSON
+   */
+  void getScalar(const std::vector<std::string> & scalar_keys, Real & scalar) const;
+
   /// Getter for vector values
   void getVector(const std::string & vector_name, std::vector<Real> & vector) const;
 
