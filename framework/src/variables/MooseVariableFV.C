@@ -780,8 +780,7 @@ MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg &
     if (!this->hasBlocks(elem->subdomain_id()))
       continue;
     const ElemPointArg elem_point{elem, *node_arg.node, false};
-    sum += (*this)(elem_point.makeElem(), state) +
-           Point(0, 0, 0) * this->gradient(elem_point.makeElem(), state);
+    sum += (*this)(elem_point, state);
     ++num_values;
   }
   return sum / num_values;
