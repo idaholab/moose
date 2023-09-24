@@ -47,96 +47,97 @@ OutputCovarianceBase::computeFullCovarianceMatrix(RealEigenMatrix & kappa,
   kron(B, K, kappa);
 }
 
-// void
-// OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
-//                            const RealEigenMatrix & mat_B,
-//                            RealEigenMatrix & mat_req) const
-// {
-//   mat_req.resize(mat_A.rows() * mat_B.rows(), mat_A.rows() * mat_B.rows());
-//   for (unsigned int i = 0; i < mat_A.rows(); i++)
-//     for (unsigned int j = 0; j < mat_A.rows(); j++)
-//       for (unsigned int k = 0; k < mat_B.rows(); k++)
-//         for (unsigned int l = 0; l < mat_B.rows(); l++)
-//           mat_req(((i * mat_A.rows()) + k), ((j * mat_A.rows()) + l)) = mat_A(i, j) * mat_B(k, l);
-// }
-
 void
 OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
                            const RealEigenMatrix & mat_B,
                            RealEigenMatrix & mat_req) const
 {
-  mat_req.resize(mat_A.rows() * mat_B.rows(), mat_A.rows() * mat_B.rows());
+  mat_req.resize(mat_A.rows() * mat_B.rows(), mat_A.cols() * mat_B.cols());
   for (unsigned int i = 0; i < mat_A.rows(); i++)
-    for (unsigned int j = 0; j < mat_A.rows(); j++)
+    for (unsigned int j = 0; j < mat_A.cols(); j++)
       for (unsigned int k = 0; k < mat_B.rows(); k++)
-        for (unsigned int l = 0; l < mat_B.rows(); l++)
-          mat_req(((i * mat_B.rows()) + k), ((j * mat_B.rows()) + l)) = mat_A(i, j) * mat_B(k, l);
+        for (unsigned int l = 0; l < mat_B.cols(); l++)
+          mat_req(((i * mat_B.rows()) + k), ((j * mat_B.cols()) + l)) = mat_A(i, j) * mat_B(k, l);
 }
 
-    // void
-    // OutputCovarianceBase::buildHyperParamMap(
-    //     std::unordered_map<std::string, Real> & map,
-    //     std::unordered_map<std::string, std::vector<Real>> & vec_map) const
-    // {
-    //   map["noise_variance"] = _sigma_n_squared;
-    //   map["signal_variance"] = _sigma_f_squared;
+// void
+// OutputCovarianceBase::kron(const RealEigenMatrix & mat_A,
+//                            const RealEigenMatrix & mat_B,
+//                            RealEigenMatrix & mat_req) const
+// {
+//   mat_req.resize(mat_A.rows() * mat_B.rows(), mat_A.cols() * mat_B.cols());
+//   for (unsigned int i = 0; i < mat_A.rows(); i++)
+//     for (unsigned int j = 0; j < mat_A.cols(); j++)
+//       for (unsigned int k = 0; k < mat_B.rows(); k++)
+//         for (unsigned int l = 0; l < mat_B.cols(); l++)
+//           mat_req(((j * mat_B.rows()) + k), ((i * mat_B.cols()) + l)) = mat_A(j, i) * mat_B(k,
+//           l);
+// }
 
-    //   vec_map["length_factor"] = _length_factor;
+// void
+// OutputCovarianceBase::buildHyperParamMap(
+//     std::unordered_map<std::string, Real> & map,
+//     std::unordered_map<std::string, std::vector<Real>> & vec_map) const
+// {
+//   map["noise_variance"] = _sigma_n_squared;
+//   map["signal_variance"] = _sigma_f_squared;
 
-    //   buildAdditionalHyperParamMap(map, vec_map);
-    // }
+//   vec_map["length_factor"] = _length_factor;
 
-    // void
-    // OutputCovarianceBase::loadHyperParamMap(
-    //     std::unordered_map<std::string, Real> & map,
-    //     std::unordered_map<std::string, std::vector<Real>> & vec_map)
-    // {
-    //   _sigma_n_squared = map["noise_variance"];
-    //   _sigma_f_squared = map["signal_variance"];
+//   buildAdditionalHyperParamMap(map, vec_map);
+// }
 
-    //   _length_factor = vec_map["length_factor"];
+// void
+// OutputCovarianceBase::loadHyperParamMap(
+//     std::unordered_map<std::string, Real> & map,
+//     std::unordered_map<std::string, std::vector<Real>> & vec_map)
+// {
+//   _sigma_n_squared = map["noise_variance"];
+//   _sigma_f_squared = map["signal_variance"];
 
-    //   loadAdditionalHyperParamMap(map, vec_map);
-    // }
+//   _length_factor = vec_map["length_factor"];
 
-    // void
-    // OutputCovarianceBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-    //                                         const RealEigenMatrix & /*x*/,
-    //                                         std::string /*hyper_param_name*/,
-    //                                         unsigned int /*ind*/) const
-    // {
-    //   mooseError("Hyperparameter tuning not set up for this covariance function. Please define "
-    //              "computedKdhyper() to compute gradient.");
-    // }
+//   loadAdditionalHyperParamMap(map, vec_map);
+// }
 
-    // bool
-    // OutputCovarianceBase::isTunable(std::string name) const
-    // {
-    //   if (_tunable_hp.find(name) != _tunable_hp.end())
-    //     return true;
-    //   else if (isParamValid(name))
-    //     mooseError("Tuning not supported for parameter ", name);
-    //   else
-    //     mooseError("Parameter ", name, " selected for tuning is not a valid parameter");
-    //   return false;
-    // }
+// void
+// OutputCovarianceBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
+//                                         const RealEigenMatrix & /*x*/,
+//                                         std::string /*hyper_param_name*/,
+//                                         unsigned int /*ind*/) const
+// {
+//   mooseError("Hyperparameter tuning not set up for this covariance function. Please define "
+//              "computedKdhyper() to compute gradient.");
+// }
 
-    // void
-    // OutputCovarianceBase::getTuningData(std::string name,
-    //                                       unsigned int & size,
-    //                                       Real & min,
-    //                                       Real & max) const
-    // {
-    //   if ((name == "noise_variance") || (name == "signal_variance"))
-    //   {
-    //     min = 1e-9;
-    //     max = 1e9;
-    //     size = 1;
-    //   }
-    //   else if (name == "length_factor")
-    //   {
-    //     min = 1e-9;
-    //     max = 1e9;
-    //     size = _length_factor.size();
-    //   }
-    // }
+// bool
+// OutputCovarianceBase::isTunable(std::string name) const
+// {
+//   if (_tunable_hp.find(name) != _tunable_hp.end())
+//     return true;
+//   else if (isParamValid(name))
+//     mooseError("Tuning not supported for parameter ", name);
+//   else
+//     mooseError("Parameter ", name, " selected for tuning is not a valid parameter");
+//   return false;
+// }
+
+// void
+// OutputCovarianceBase::getTuningData(std::string name,
+//                                       unsigned int & size,
+//                                       Real & min,
+//                                       Real & max) const
+// {
+//   if ((name == "noise_variance") || (name == "signal_variance"))
+//   {
+//     min = 1e-9;
+//     max = 1e9;
+//     size = 1;
+//   }
+//   else if (name == "length_factor")
+//   {
+//     min = 1e-9;
+//     max = 1e9;
+//     size = _length_factor.size();
+//   }
+// }

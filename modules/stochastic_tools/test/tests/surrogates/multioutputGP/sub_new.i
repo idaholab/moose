@@ -1,15 +1,9 @@
-L = 9.31376
-subtract = 1.0
-req1 = '${fparse L-subtract}'
-
 [Mesh]
-  [gmg]
-    type = GeneratedMeshGenerator
-    dim = 1
-    nx = 1000
-    xmax = ${L}
-    elem_type = EDGE3
-  []
+  type = GeneratedMesh
+  dim = 1
+  nx = 100
+  xmax = 0.13061533868990033
+  elem_type = EDGE3
 []
 
 [Variables]
@@ -20,7 +14,7 @@ req1 = '${fparse L-subtract}'
 []
 
 [Kernels]
-  [diff]
+  [diffusion]
     type = MatDiffusion
     variable = T
     diffusivity = k
@@ -28,7 +22,7 @@ req1 = '${fparse L-subtract}'
   [source]
     type = BodyForce
     variable = T
-    value = 71.4081 # 10333.1
+    value = 10951.864006672608
   []
 []
 
@@ -36,7 +30,7 @@ req1 = '${fparse L-subtract}'
   [conductivity]
     type = GenericConstantMaterial
     prop_names = k
-    prop_values = 3.15171
+    prop_values = 17.7835
   []
 []
 
@@ -45,27 +39,40 @@ req1 = '${fparse L-subtract}'
     type = DirichletBC
     variable = T
     boundary = right
-    value = 542.124
+    value = 1075.97
   []
 []
 
 [Executioner]
   type = Steady
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Postprocessors]
+  [avg]
+    type = AverageNodalVariableValue
+    variable = T
+  []
+  [max]
+    type = NodalExtremeValue
+    variable = T
+    value_type = max
+  []
 []
 
 [VectorPostprocessors]
   [T_vec]
     type = LineValueSampler
     variable = T
-    start_point = '0 0 0'
-    end_point = '${req1} 0 0'
+    start_point = '0.05 0 0'
+    end_point = '0.12 0 0'
     num_points = 2
     sort_by = x
   []
 []
 
 # [Outputs]
-#   csv = true
+#   csv=true
 # []

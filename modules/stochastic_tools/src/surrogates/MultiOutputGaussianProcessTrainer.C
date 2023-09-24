@@ -117,8 +117,24 @@ MultiOutputGaussianProcessTrainer::postTrain()
   // Standardize (center and scale) training params
   _mogp_handler.standardizeParameters(_training_params);
 
+  // RealEigenMatrix train = _training_data;
+  // RealEigenMatrix centered = _training_data.rowwise() - _training_data.colwise().mean();
+  // RealEigenMatrix cov = (centered.adjoint() * centered) / double(_training_data.rows() - 1);
+  // Eigen::LDLT<RealEigenMatrix> cov_inv;
+  // cov_inv = cov.ldlt();
+  // for (unsigned int i = 0; i < centered.rows(); ++i)
+  //   train.row(i) = cov_inv.solve(centered.row(i).transpose());
+  // std::cout << "Y_LDLT " << Moose::stringify(train) << std::endl;
+
+  // std::cout << "Y " << Moose::stringify(_training_data) << std::endl;
   // Standardize (center and scale) training data
   _mogp_handler.standardizeData(_training_data);
+  // std::cout << "Y_LDLT " << Moose::stringify(_training_data) << std::endl;
+
+  // for (unsigned int i = 0; i < _training_data.rows(); ++i)
+  // {
+  //   std::cout << "[" << _training_data(i, 0) << "," << _training_data(i, 1) << "]," << std::endl;
+  // }
 
   // Setup the covariance
   _mogp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);

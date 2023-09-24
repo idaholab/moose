@@ -58,43 +58,67 @@ MultiOutputGaussianProcess::evaluate(const std::vector<Real> & x, std::vector<Re
   // Inputs
   std::cout << "Test: " << Moose::stringify(test_points) << std::endl;
   _mogp_handler.getParamStandardizer().getStandardized(test_points);
-  RealEigenMatrix K_train_test(_training_params.rows(), test_points.rows());
-  _mogp_handler.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, _training_params, test_points, false);
-  K_train_test = K_train_test.transpose();
-  // RealEigenMatrix K_test(test_points.rows(), test_points.rows());
-  // _mogp_handler.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
+  // std::cout << "Test: " << Moose::stringify(test_points) << std::endl;
   RealEigenMatrix K_train = _mogp_handler.getK();
+  RealEigenMatrix K_train_test(test_points.rows(), K_train.rows());
+  // RealEigenMatrix batch_inp = _mogp_handler.getBatchInputs();
+  _mogp_handler.getCovarFunction().computeCovarianceMatrix(
+      K_train_test, test_points, _training_params, false); // batch_inp
+
+  // std::cout << "Test: " << Moose::stringify(_training_params.row(0)) << std::endl;
+  // RealEigenMatrix K_train = _mogp_handler.getK();
+  // RealEigenMatrix K_train_test(test_points.rows(), K_train.rows());
+  // RealEigenMatrix batch_inp = _mogp_handler.getBatchInputs();
+  // _mogp_handler.getCovarFunction().computeCovarianceMatrix(
+  //     K_train_test, _training_params.row(0), batch_inp, false);
 
   // Outputs
   RealEigenMatrix B = _mogp_handler.getB();
   RealEigenMatrix kappa_results_solve = _mogp_handler.getKappaResultsSolve();
+  // std::cout << Moose::stringify(kappa_results_solve) << std::endl;
+  // std::cout << kappa_results_solve.rows() << " cols " << kappa_results_solve.cols() << std::endl;
   RealEigenMatrix kappa_train_test;
-  _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_train_test, B, K_train_test);
-  RealEigenMatrix mogp_mean = kappa_train_test * kappa_results_solve;
-  mogp_mean = mogp_mean.transpose();
-  std::cout << "mogp_mean " << Moose::stringify(mogp_mean) << std::endl;
-  _mogp_handler.getDataStandardizer().getDestandardized(mogp_mean); // Covariance
+  // K_train_test = K_train_test.transpose();
+  _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_train_test, K_train_test, B);
+
+  // KEY PIECE OF THE CODE
+  RealEigenMatrix kappa_train_test_new(kappa_train_test.rows(), kappa_train_test.cols());
+  RealEigenMatrix tmp;
+  for (unsigned int j = 0; j < kappa_train_test.rows(); ++j) //
+  {
+    unsigned int count = 0;
+    for (unsigned int i = 0; i < kappa_train_test.rows(); ++i)
+    {
+      tmp = kappa_train_test(j, Eigen::seq(i, kappa_train_test.cols() - 1, B.rows()));
+      kappa_train_test_new(j, Eigen::seq(i * count, i * count + tmp.cols() - 1)) = tmp;
+      count += tmp.cols();
+    }
+  }
+
+  // for (unsigned int i = 0; i < kappa_train_test_new.cols(); ++i)
+  // {
+  //   std::cout << kappa_train_test_new(1, i) << "," << std::endl;
+  // }
+  // RealEigenMatrix mogp_mean = kappa_train_test * kappa_results_solve;
+  RealEigenMatrix mogp_mean = kappa_train_test_new * kappa_results_solve;
+  // std::cout << Moose::stringify(mogp_mean) << std::endl;
+  _mogp_handler.getDataStandardizer().getDestandardizedCovariance(mogp_mean); //
+
+  // _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_train_test, K_train_test.transpose(), B);
+  // std::cout << Moose::stringify(B) << std::endl;
+
   std::cout << Moose::stringify(mogp_mean) << std::endl;
+
+  // RealEigenMatrix test(2,1);
+  // test(0, 0) = 836.5923827409;
+  // test(1, 0) = 517.89436917846;
+  // _mogp_handler.getDataStandardizer().getStandardizedCovariance(test);
+  // std::cout << "True " << Moose::stringify(test) << std::endl;
+
+  // RealEigenMatrix kappa_test;
+  // _mogp_handler.getOutputCovar().computeFullCovarianceMatrix(kappa_test, B, K_test);
 
   y.resize(mogp_mean.rows());
   for (unsigned int i = 0; i < mogp_mean.rows(); ++i)
     y[i] = mogp_mean(i, 0);
-
-  // std::cout << Moose::stringify(mogp_mean) << std::endl;
-  // std::cout << mogp_mean.rows() << " cols " << mogp_mean.cols() << std::endl;
-  // std::cout << "Finished ********" << std::endl;
-
-  // // Compute the predicted mean value (centered)
-  // RealEigenMatrix pred_value = (K_train_test.transpose() * _mogp_handler.getKResultsSolve());
-  // // De-center/scale the value and store for return
-  // _mogp_handler.getDataStandardizer().getDestandardized(pred_value);
-
-  // RealEigenMatrix pred_var =
-  //     K_test - (K_train_test.transpose() * _mogp_handler.getKCholeskyDecomp().solve(K_train_test));
-
-  // // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  // RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
-  // _mogp_handler.getDataStandardizer().getDescaled(std_dev_mat);
-  // std_dev = std_dev_mat(0, 0);
 }
