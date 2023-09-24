@@ -157,6 +157,8 @@ public:
   const std::vector<Real> & getLatent() const { return _latent; }
   const RealEigenMatrix & getKappaResultsSolve() const { return _kappa_results_solve; }
   // const Eigen::LLT<RealEigenMatrix> & getKappaCholeskyDecomp() const { return _kappa_cho_decomp; }
+  const RealEigenMatrix & getBatchInputs() const { return _batch_inputs; }
+  const RealEigenMatrix & getBatchOutputs() const { return _batch_outputs; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const OutputCovarianceBase & getOutputCovar() const { return *_output_covariance; }
@@ -185,6 +187,8 @@ public:
   std::vector<Real> & latent() { return _latent; }
   RealEigenMatrix & kappaResultsSolve() { return _kappa_results_solve; }
   // Eigen::LLT<RealEigenMatrix> & kappaCholeskyDecomp() { return _kappa_cho_decomp; }
+  RealEigenMatrix & batchInputs() { return _batch_inputs; }
+  RealEigenMatrix & batchOutputs() { return _batch_outputs; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   OutputCovarianceBase * outputCovarPtr() { return _output_covariance; }
@@ -255,7 +259,7 @@ protected:
   RealEigenMatrix _kappa_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _kappa_cho_decomp;
+  Eigen::LDLT<RealEigenMatrix> _kappa_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
   const RealEigenMatrix * _training_params;
@@ -265,6 +269,12 @@ protected:
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
+
+  /// The random batch of inputs
+  RealEigenMatrix _batch_inputs;
+
+  /// The random batch of outputs
+  RealEigenMatrix _batch_outputs;
 };
 
 } // StochasticTools namespace

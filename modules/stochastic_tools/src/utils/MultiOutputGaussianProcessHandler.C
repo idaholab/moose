@@ -91,12 +91,17 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
                 training_params.rows() * training_data.cols());
   _output_covariance->computeBCovarianceMatrix(_B, _latent);
   _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
-
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
   RealEigenMatrix vectorize_out;
   vectorize_out =
-      training_data.transpose().reshaped(training_params.rows() * training_data.cols(), 1);
+      training_data.reshaped(training_params.rows() * training_data.cols(), 1); // .transpose()
   setupStoredMatrices(vectorize_out);
+  // RealEigenMatrix tmpl = _kappa_cho_decomp.matrixL();
+  // std::cout << Moose::stringify(_kappa_results_solve) << std::endl;
+  // for (unsigned int i = 0; i < _kappa_results_solve.rows(); ++i)
+  // {
+  //   std::cout << _kappa_results_solve(i, 0) << "," << std::endl;
+  // }
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
@@ -104,7 +109,7 @@ MultiOutputGaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix &
 void
 MultiOutputGaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & input)
 {
-  _kappa_cho_decomp = _kappa.llt();
+  _kappa_cho_decomp = _kappa.ldlt();
   _kappa_results_solve = _kappa_cho_decomp.solve(input);
 }
 
@@ -153,10 +158,10 @@ MultiOutputGaussianProcessHandler::standardizeParameters(RealEigenMatrix & data)
 void
 MultiOutputGaussianProcessHandler::standardizeData(RealEigenMatrix & data)
 {
-  // _data_standardizer.computeCovariance(data);
-  // _data_standardizer.getStandardizedCovariance(data);
-  _data_standardizer.computeSet(data);
-  _data_standardizer.getStandardized(data);
+  _data_standardizer.computeCovariance(data);
+  _data_standardizer.getStandardizedCovariance(data);
+  // _data_standardizer.computeSet(data);
+  // _data_standardizer.getStandardized(data);
 }
 
 void
@@ -192,7 +197,7 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
   RealEigenMatrix inputs(_batch_size, training_params.cols());
   RealEigenMatrix outputs(_batch_size, training_data.cols());
   if (show_optimization_details)
-    Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
+    Moose::out << "OPTIMIZING MOGP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < iter; ++ss)
   {
     // Shuffle data
@@ -208,12 +213,11 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
         outputs(ii, jj) = training_data(v_sequence[ii], jj);
     }
     vectorize_out = outputs.transpose().reshaped(_batch_size * outputs.cols(), 1);
+    store_loss = getLoss(inputs, vectorize_out);
     if (show_optimization_details && ss == 0)
-    {
-      store_loss = getLoss(inputs, vectorize_out);
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
-    }
     grad1 = getGradient(inputs);
+    // std::cout << "Grad: " << Moose::stringify(grad1) << std::endl;
     for (unsigned int ii = 0; ii < _num_tunable_inp + _num_tunable_out; ++ii)
     {
       m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
@@ -238,12 +242,24 @@ MultiOutputGaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & t
   }
   if (show_optimization_details)
   {
-    Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
+    Moose::out << "OPTIMIZED MOGP HYPER-PARAMETERS:" << std::endl;
     theta.print();
     Moose::out << Moose::stringify(_latent) << std::endl;
     store_loss = getLoss(inputs, vectorize_out);
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
   }
+  // _batch_inputs = inputs;
+  // _batch_outputs = outputs;
+  // _K.resize(batch_size, batch_size);
+  // _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
+  // _B.resize(training_data.cols(), training_data.cols());
+  // _kappa.resize(batch_size * training_data.cols(), batch_size * training_data.cols());
+  // _output_covariance->computeBCovarianceMatrix(_B, _latent);
+  // _output_covariance->computeFullCovarianceMatrix(_kappa, _B, _K);
+  // // Compute the Cholesky decomposition and inverse action of the covariance matrix
+  // vectorize_out = outputs.transpose().reshaped(_batch_size * outputs.cols(), 1);
+  // setupStoredMatrices(vectorize_out);
+  // _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
 
 Real
@@ -348,25 +364,6 @@ MultiOutputGaussianProcessHandler::petscVecToMap(
 
 } // StochasticTools namespace
 
-// template <>
-// void
-// dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-// {
-//   // Store the L matrix as opposed to the full matrix to avoid compounding
-//   // roundoff error and decomposition error
-//   RealEigenMatrix L(decomp.matrixL());
-//   dataStore(stream, L, context);
-// }
-
-// template <>
-// void
-// dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-// {
-//   RealEigenMatrix L;
-//   dataLoad(stream, L, context);
-//   decomp.compute(L * L.transpose());
-// }
-
 template <>
 void
 dataStore(std::ostream & stream,
@@ -380,7 +377,6 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.outputCovarType(), context);
   dataStore(stream, gp_utils.B(), context);
   dataStore(stream, gp_utils.kappaResultsSolve(), context);
-  // dataStore(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
 }
@@ -398,7 +394,6 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.outputCovarType(), context);
   dataLoad(stream, gp_utils.B(), context);
   dataLoad(stream, gp_utils.kappaResultsSolve(), context);
-  // dataLoad(stream, gp_utils.kappaCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }

@@ -67,7 +67,8 @@ protected:
   std::vector<Real> _stdev;
   RealEigenMatrix _mean_colwise;
   RealEigenMatrix _cov;
-  RealEigenMatrix _cov_inv;
+  // RealEigenMatrix _cov_inv;
+  // Eigen::LLT<RealEigenMatrix> _cov_inv;
 };
 
 } // StochasticTools namespace
