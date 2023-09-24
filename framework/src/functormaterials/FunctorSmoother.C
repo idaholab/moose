@@ -51,7 +51,6 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
         Moose::RelationshipManagerType::COUPLING;
     rm_params.template set<unsigned short>("layers") = 1;
     rm_params.template set<bool>("use_point_neighbors") = false;
-    rm_params.template set<bool>("attach_geometric_early") = false;
     rm_params.template set<bool>("use_displaced_mesh") =
         parameters.template get<bool>("use_displaced_mesh");
     mooseAssert(rm_params.areAllRequiredParamsValid(),
@@ -140,29 +139,35 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
           {
             if constexpr (std::is_same_v<const Moose::ElemArg &, decltype(r)>)
             {
+              // We average the local value with the average of the two values furthest away
+              // among the neighbors. For a checkerboarding but overall linear evolution, this will
+              // compute the average of the "high" and "low" profiles
               average += base_value / 2;
 
               // Find the neighbor with the furthest value
               typename Moose::ADType<T>::type extreme_value = 0;
-              typename Moose::ADType<T>::type distance = 0;
+              typename Moose::ADType<T>::type delta = 0;
 
               unsigned int furthest_one = 0;
+              unsigned int num_neighbors = 0;
               for (const auto side_index : r_elem->side_index_range())
               {
                 auto neighbor = r_elem->neighbor_ptr(side_index);
                 if (neighbor)
                 {
+                  num_neighbors++;
                   auto neighbor_value = functor_in(Moose::ElemArg{neighbor, false}, t);
-                  if (std::abs(neighbor_value - base_value) > distance)
+                  if (std::abs(neighbor_value - base_value) > delta)
                   {
                     furthest_one = side_index;
                     extreme_value = neighbor_value;
-                    distance = std::abs(neighbor_value - base_value);
+                    delta = std::abs(neighbor_value - base_value);
                   }
                 }
               }
 
-              if (r_elem->n_neighbors() == 1)
+              // We're on a boundary in 1D, or maybe an odd shape corner in 2D
+              if (num_neighbors == 1)
               {
                 average += extreme_value / 2;
                 return average;
@@ -187,7 +192,7 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
               catch (libMesh::LogicError & e)
               {
                 // find the second furthest
-                distance = 0;
+                delta = 0;
                 typename Moose::ADType<T>::type second_extreme_value = 0;
 
                 for (const auto side_index : r_elem->side_index_range())
@@ -195,11 +200,10 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                   auto neighbor = r_elem->neighbor_ptr(side_index);
                   auto neighbor_value =
                       neighbor ? functor_in(Moose::ElemArg{neighbor, false}, t) : base_value;
-                  if (std::abs(neighbor_value - base_value) > distance &&
-                      side_index != furthest_one)
+                  if (std::abs(neighbor_value - base_value) > delta && side_index != furthest_one)
                   {
                     second_extreme_value = neighbor_value;
-                    distance = std::abs(neighbor_value - base_value);
+                    delta = std::abs(neighbor_value - base_value);
                   }
                 }
                 average += second_extreme_value / 4;
