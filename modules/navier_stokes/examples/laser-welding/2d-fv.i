@@ -1,9 +1,9 @@
-period=4e-4
+period=.4e-4
 endtime=${fparse 2 * period}
 timestep=${fparse period / 100}
-surfacetemp=300
+surfacetemp=2700
 sb=5.67e-8
-advected_interp_method='upwind'
+advected_interp_method='average'
 velocity_interp_method='rc'
 rho='rho'
 mu='mu'
@@ -16,12 +16,12 @@ cp='cp'
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = -.35e-3
-  xmax = 0.35e-3
+  xmin = -.7e-3
+  xmax = 0.7e-3
   ymin = -.35e-3
   ymax = 0
-  nx = 100
-  ny = 50
+  nx = 50
+  ny = 13
   displacements = 'disp_x disp_y'
 []
 
@@ -68,10 +68,10 @@ cp='cp'
   [pressure]
     type = INSFVPressureVariable
   []
-  [lambda]
-    family = SCALAR
-    order = FIRST
-  []
+  # [lambda]
+  #   family = SCALAR
+  #   order = FIRST
+  # []
   [disp_x]
   []
   [disp_y]
@@ -88,12 +88,14 @@ cp='cp'
 
 [Kernels]
   [disp_x]
-    type = Diffusion
+    type = MatDiffusion
     variable = disp_x
+    diffusivity = 1e6
   []
   [disp_y]
-    type = Diffusion
+    type = MatDiffusion
     variable = disp_y
+    diffusivity = 1e6
   []
 []
 
@@ -106,14 +108,15 @@ cp='cp'
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     use_displaced_mesh = true
+    boundaries_to_force = top
   []
-  [pin_zero_pressure]
-    type = FVPointValueConstraint
-    variable = pressure
-    lambda = lambda
-    phi0 = 0.0
-    point = '0 -.175e-3 0'
-  []
+  # [pin_zero_pressure]
+  #   type = FVPointValueConstraint
+  #   variable = pressure
+  #   lambda = lambda
+  #   phi0 = 0.0
+  #   point = '0 -.175e-3 0'
+  # []
 
   # momentum equations
   # u equation
@@ -141,7 +144,7 @@ cp='cp'
     use_displaced_mesh = true
   []
   [u_pressure]
-    type = INSFVMomentumPressure
+    type = INSFVMomentumPressureFlux
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
@@ -172,7 +175,7 @@ cp='cp'
     use_displaced_mesh = true
   []
   [v_pressure]
-    type = INSFVMomentumPressure
+    type = INSFVMomentumPressureFlux
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
@@ -250,7 +253,7 @@ cp='cp'
     variable = T
     boundary = 'top'
     P0 = 159.96989792079225
-    R = 1.8257418583505537e-4
+    R = 1e-4
     x_beam_coord = '2e-4 * sin(t * 2 * pi / ${period})'
     y_beam_coord = 0
     z_beam_coord = 0
@@ -357,7 +360,7 @@ cp='cp'
     optimal_iterations = 7
     dt = ${timestep}
     linear_iteration_ratio = 1e6
-    growth_factor = 1.5
+    growth_factor = 1.1
   []
 []
 
