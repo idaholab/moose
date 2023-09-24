@@ -1,9 +1,10 @@
-period=.4e-4
+period=.3e-4
 endtime=${fparse 2 * period}
 timestep=${fparse period / 100}
 surfacetemp=2700
+bottomtemp=2700
 sb=5.67e-8
-advected_interp_method='average'
+advected_interp_method='upwind'
 velocity_interp_method='rc'
 rho='rho'
 mu='mu'
@@ -20,8 +21,8 @@ cp='cp'
   xmax = 0.7e-3
   ymin = -.35e-3
   ymax = 0
-  nx = 50
-  ny = 13
+  nx = 75
+  ny = 20
   displacements = 'disp_x disp_y'
 []
 
@@ -82,7 +83,7 @@ cp='cp'
   [T]
     type = FunctionIC
     variable = T
-    function = '${surfacetemp}'
+    function = '2700 + ((${surfacetemp} - ${bottomtemp}) / .35e-3) * y'
   []
 []
 
@@ -237,7 +238,7 @@ cp='cp'
     type = FVDirichletBC
     variable = T
     boundary = 'bottom'
-    value = 300
+    value = '${bottomtemp}'
   []
   [radiation_flux]
     type = FVFunctorRadiativeBC
@@ -253,7 +254,7 @@ cp='cp'
     variable = T
     boundary = 'top'
     P0 = 159.96989792079225
-    R = 1e-4
+    R = 1.25e-4
     x_beam_coord = '2e-4 * sin(t * 2 * pi / ${period})'
     y_beam_coord = 0
     z_beam_coord = 0
