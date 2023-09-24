@@ -68,10 +68,23 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
     _axis = this->template getParam<MooseEnum>("axis");
 
   // Check all parameters for inconsistencies
-  mooseError("In ",
-             _name,
-             ": Either 'data_file' or 'json_uo' or 'x' and 'y' or 'xy_data' must be specified "
-             "exclusively.");
+  if (isParamValid("data_file") + isParamValid("json_uo") +
+          (isParamValid("x") || isParamValid("y")) + isParamValid("xy_data") >
+      1)
+    mooseError("Either 'data_file' or 'json_uo' or 'x' and 'y' or 'xy_data' must be specified "
+               "exclusively.");
+  if ((isParamValid("x") + isParamValid("y")) % 2 != 0)
+    mooseError(
+        "Both 'x' and 'y' parameters or neither (for another input method) must be specified");
+  if (!isParamValid("data_file") &&
+      (isParamSetByUser("x_index_in_file") || isParamSetByUser("y_index_in_file") ||
+       isParamValid("x_title") || isParamValid("y_title") || isParamSetByUser("xy_in_file_only") ||
+       isParamSetByUser("format")))
+    mooseError("A parameter was passed for an option with using data from a CSV file but the "
+               "'data_file' parameter has not been set. This is not allowed");
+  if (!isParamValid("json_uo") && (isParamValid("x_keys") || isParamValid("y_keys")))
+    mooseError("A parameter was passed for a JSON input option but the 'json_uo' parameter has not "
+               "been set. This is not allowed");
 
   // load the data
   if (isParamValid("data_file"))
