@@ -92,7 +92,7 @@ public:
   /**
    * Get the current time.
    */
-  virtual Real getTime() { return _time; };
+  virtual Real getTime() const { return _time; };
 
   /**
    * Get the current target time
@@ -120,6 +120,7 @@ public:
    * @return Pointer to the time stepper for this Executioner
    */
   TimeStepper * getTimeStepper() { return _time_stepper; }
+  const TimeStepper * getTimeStepper() const { return _time_stepper; }
 
   /**
    * Set the timestepper to use.
@@ -143,7 +144,7 @@ public:
    * Get the time scheme used
    * @return MooseEnum with the time scheme
    */
-  Moose::TimeIntegratorType getTimeScheme() { return _time_scheme; }
+  Moose::TimeIntegratorType getTimeScheme() const { return _time_scheme; }
 
   /**
    * Get the set of sync times
@@ -167,10 +168,16 @@ public:
    * Return the start time
    * @return The start time
    */
-  Real getStartTime() { return _start_time; }
+  Real getStartTime() const { return _start_time; }
 
   /**
    * Get the end time
+   * @return The end time
+   */
+  Real getEndTime() const { return _end_time; }
+
+  /**
+   * Get a modifiable reference to the end time
    * @return The end time
    */
   Real & endTime() { return _end_time; }

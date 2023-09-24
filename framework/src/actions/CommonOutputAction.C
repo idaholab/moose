@@ -69,6 +69,7 @@ CommonOutputAction::validParams()
       "Output the scalar and postprocessor results using the default settings for GNUPlot output");
   params.addParam<bool>(
       "solution_history", false, "Print a solution history file (.slh) using the default settings");
+  params.addParam<bool>("progress", false, "Print a progress bar");
   params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
   params.addParam<bool>("controls", false, "Enable the screen output of Control systems.");
 
@@ -219,6 +220,9 @@ CommonOutputAction::act()
 
     if (getParam<bool>("solution_history"))
       create("SolutionHistory");
+
+    if (getParam<bool>("progress"))
+      create("Progress");
 
     if (getParam<bool>("dofmap"))
       create("DOFMap");
