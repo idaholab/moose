@@ -9,6 +9,7 @@
 
 #include "PiecewiseTabularBase.h"
 #include "DelimitedFileReader.h"
+#include "JSONFileReader.h"
 #include "libmesh/int_range.h"
 
 InputParameters
@@ -93,10 +94,19 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
     buildFromXandY();
   else if (isParamValid("xy_data"))
     buildFromXY();
-  else if (isParamValid("json_uo"))
-    buildFromJSON();
-  else
+  else if (!isParamValid("json_uo"))
     mooseError("Unknown input source. Are you missing a parameter? Did you misspell one?");
+  // JSON data is not available at construction as we rely on a user object
+}
+
+void
+PiecewiseTabularBase::initialSetup()
+{
+  // For JSON UO input, we need to wait for initialSetup to load the data
+  if (!isParamValid("json_uo"))
+    return;
+  else
+    buildFromJSON();
 }
 
 void
@@ -192,6 +202,9 @@ PiecewiseTabularBase::buildFromFile()
 void
 PiecewiseTabularBase::buildFromJSON()
 {
+  auto & json_uo = getUserObject<JSONFileReader>("json_uo");
+  json_uo.getVector(getParam<std::vector<std::string>>("x_keys"), _raw_x);
+  json_uo.getVector(getParam<std::vector<std::string>>("y_keys"), _raw_x);
 }
 
 void

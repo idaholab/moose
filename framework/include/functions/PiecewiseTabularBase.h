@@ -24,6 +24,9 @@ public:
 
   PiecewiseTabularBase(const InputParameters & parameters);
 
+  /// Needed to load data from user objects that are not available at construction
+  void initialSetup() override;
+
 protected:
   /// function value scale factor
   const Real & _scale_factor;
