@@ -62,7 +62,8 @@ PiecewiseTabularBase::validParams()
 PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
   : PiecewiseBase(parameters),
     _scale_factor(this->template getParam<Real>("scale_factor")),
-    _has_axis(isParamValid("axis"))
+    _has_axis(isParamValid("axis")),
+    _raw_data_loaded(false)
 {
   // determine function argument
   if (_has_axis)
@@ -95,7 +96,7 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
   else if (isParamValid("xy_data"))
     buildFromXY();
   else if (!isParamValid("json_uo"))
-    mooseError("Unknown input source. Are you missing a parameter? Did you misspell one?");
+    mooseError("Unknown X-Y data source. Are you missing a parameter? Did you misspell one?");
   // JSON data is not available at construction as we rely on a user object
 }
 
@@ -197,14 +198,25 @@ PiecewiseTabularBase::buildFromFile()
   // Size mismatch error
   if (_raw_x.size() != _raw_y.size())
     mooseError("In ", _name, ": Lengths of x and y data do not match.");
+
+  _raw_data_loaded = true;
 }
 
 void
 PiecewiseTabularBase::buildFromJSON()
 {
   auto & json_uo = getUserObject<JSONFileReader>("json_uo");
+  if (!isParamValid("x_keys"))
+    mooseError("Missing 'x_keys' parameters for loading data from JSON");
+  if (!isParamValid("y_keys"))
+    mooseError("Missing 'y_keys' parameters for loading data from JSON");
   json_uo.getVector(getParam<std::vector<std::string>>("x_keys"), _raw_x);
-  json_uo.getVector(getParam<std::vector<std::string>>("y_keys"), _raw_x);
+  json_uo.getVector(getParam<std::vector<std::string>>("y_keys"), _raw_y);
+  _raw_data_loaded = true;
+
+  // Size mismatch error
+  if (_raw_x.size() != _raw_y.size())
+    mooseError("Lengths of x (", _raw_x.size(), ") and y (", _raw_y.size(), ") data do not match.");
 }
 
 void
@@ -212,6 +224,7 @@ PiecewiseTabularBase::buildFromXandY()
 {
   _raw_x = this->template getParam<std::vector<Real>>("x");
   _raw_y = this->template getParam<std::vector<Real>>("y");
+  _raw_data_loaded = true;
 }
 
 void
@@ -230,4 +243,5 @@ PiecewiseTabularBase::buildFromXY()
     _raw_x[i] = xy[2 * i];
     _raw_y[i] = xy[2 * i + 1];
   }
+  _raw_data_loaded = true;
 }

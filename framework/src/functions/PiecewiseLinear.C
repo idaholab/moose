@@ -23,7 +23,22 @@ PiecewiseLinear::validParams()
 }
 
 PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters)
-  : PiecewiseLinearBase(parameters)
+  : PiecewiseLinearBase(parameters), _interpolation_created(false)
 {
-  this->buildInterpolation(this->template getParam<bool>("extrap"));
+  if (_raw_data_loaded)
+  {
+    this->buildInterpolation(this->template getParam<bool>("extrap"));
+    _interpolation_created = true;
+  }
+}
+
+void
+PiecewiseLinear::initialSetup()
+{
+  PiecewiseTabularBase::initialSetup();
+  if (_raw_data_loaded && !_interpolation_created)
+    this->buildInterpolation(this->template getParam<bool>("extrap"));
+  else if (!_raw_data_loaded)
+    mooseError("Data has still not been loaded at setup time. Something has gone wrong during "
+               "Function initialization, contact a developer");
 }

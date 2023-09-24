@@ -36,6 +36,9 @@ protected:
   const bool _has_axis;
   ///@}
 
+  /// Boolean to keep track of whether the data has been loaded
+  bool _raw_data_loaded;
+
 private:
   /// Reads data from supplied CSV file.
   void buildFromFile();
