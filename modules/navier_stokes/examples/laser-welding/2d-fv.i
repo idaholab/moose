@@ -1,5 +1,5 @@
-period=.3e-4
-endtime=${fparse 2 * period}
+period=.35e-4
+endtime=${fparse 3 * period}
 timestep=${fparse period / 100}
 surfacetemp=2700
 bottomtemp=2700
