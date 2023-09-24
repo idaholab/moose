@@ -25,4 +25,24 @@
     requirement = "The system shall be able to compute a piecewise constant function based on x- and "
                   "y-data loaded from a JSON file."
   []
+
+  [errors]
+    requirement = "The system shall error if"
+    [param_meant_for_file]
+      type = RunException
+      input = 'piecewise_constant_simple.i'
+      cli_args = 'Functions/left/x_title=hello'
+      expect_err = "A parameter was passed for an option with using data from a CSV file but the "
+                   "\'data_file\' parameter has not been set"
+      detail = 'parameters meant for loading data from file are passed for a function loading data differently,'
+    []
+    [param_meant_for_json]
+      type = RunException
+      input = 'piecewise_constant_simple.i'
+      cli_args = 'Functions/left/x_keys=hello'
+      expect_err = "A parameter was passed for a JSON input option but the \'json_uo\' parameter has "
+                   "not been set"
+      detail = 'parameters meant for loading data from JSON are passed for a function loading data differently,'
+    []
+  []
 []
