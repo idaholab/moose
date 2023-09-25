@@ -16,5 +16,11 @@
         10.0
       ]
     }
-  }
+  },
+  "direct_key": 3,
+  "direct_vector_key": [
+    0,
+    1,
+    2
+  ]
 }
