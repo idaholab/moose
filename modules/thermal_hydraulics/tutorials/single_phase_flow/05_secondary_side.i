@@ -26,9 +26,9 @@ m_dot_sec_in = 1    # kg/s
 
 [GlobalParams]
   initial_p = ${press}
-  initial_vel = 0
+  initial_vel = 1
   initial_T = ${T_in}
-  initial_vel_x = 0
+  initial_vel_x = 1
   initial_vel_y = 0
   initial_vel_z = 0
 
