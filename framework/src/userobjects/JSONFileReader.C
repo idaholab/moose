@@ -18,29 +18,24 @@ InputParameters
 JSONFileReader::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-
   // Add parameters
-  params.addRequiredParam<std::string>("filename", "The path to the file including its name");
-
+  params.addRequiredParam<FileName>("filename", "The path to the file including its name");
   // we run this object once at the initialization by default
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-
   params.addClassDescription("Loads a JSON file and makes it content available to consumers");
-
   return params;
 }
 
 JSONFileReader::JSONFileReader(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _filename(getParam<std::string>("filename"))
+  : GeneralUserObject(parameters), _filename(getParam<FileName>("filename"))
 {
   read(_filename);
 }
 
 void
-JSONFileReader::read(const FileName filename)
+JSONFileReader::read(const FileName & filename)
 {
   MooseUtils::checkFileReadable(filename);
-
   // Read the JSON database
   std::ifstream jsondata(filename);
   jsondata >> _root;
@@ -64,7 +59,7 @@ JSONFileReader::getScalar(const std::vector<std::string> & scalar_keys, Real & s
 
   // traverse the JSON tree
   auto * current_node = &_root[scalar_keys[0]];
-  for (const auto & key_index : index_range(scalar_keys))
+  for (const auto key_index : index_range(scalar_keys))
   {
     if (key_index == scalar_keys.size() - 1)
     {
@@ -84,7 +79,7 @@ JSONFileReader::getVector(const std::string & vector_name, std::vector<Real> & v
                "' but the JSON file does not contain this key at the root level");
   const auto num_items = _root[vector_name].size();
   vector_to_fill.resize(num_items);
-  for (const auto & index : make_range(num_items))
+  for (const auto index : make_range(num_items))
     vector_to_fill[index] = getReal(_root[vector_name][index]);
 }
 
@@ -97,7 +92,7 @@ JSONFileReader::getVector(const std::vector<std::string> & vector_keys,
 
   // traverse the JSON tree
   auto * current_node = &_root[vector_keys[0]];
-  for (const auto & key_index : index_range(vector_keys))
+  for (const auto key_index : index_range(vector_keys))
   {
     if (key_index == vector_keys.size() - 1)
     {
@@ -108,7 +103,7 @@ JSONFileReader::getVector(const std::vector<std::string> & vector_keys,
                    vector_keys[key_index]);
       const auto num_items = current_node->size();
       vector_to_fill.resize(num_items);
-      for (const auto & index : make_range(num_items))
+      for (const auto index : make_range(num_items))
         vector_to_fill[index] = getReal((*current_node)[index]);
       return;
     }

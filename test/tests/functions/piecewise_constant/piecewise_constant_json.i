@@ -18,8 +18,8 @@
   [from_json]
     type = PiecewiseConstant
     json_uo = 'json'
-    x_keys = "los_datos some_key some_other_key"
-    y_keys = "los_datos second_key some_other_key"
+    x_keys = "the_data some_key some_other_key"
+    y_keys = "the_data second_key some_other_key"
   []
 []
 

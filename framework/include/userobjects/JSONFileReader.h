@@ -22,13 +22,13 @@ public:
   JSONFileReader(const InputParameters & parameters);
 
   /// Required implementation of a pure virtual function (not used)
-  virtual void initialize() override{};
+  virtual void initialize() override {}
 
   /// Required implementation of a pure virtual function (not used)
-  virtual void finalize() override{};
+  virtual void finalize() override {}
 
   /// Read the file again
-  virtual void execute() override { read(_filename); };
+  virtual void execute() override { read(_filename); }
 
   /// Getters for scalar values
   /**
@@ -39,7 +39,8 @@ public:
   void getScalar(const std::string & scalar_name, Real & scalar) const;
 
   /**
-   * Get a scalar in the JSON file/tree
+   * Get a scalar in the JSON file/tree using the keys in the 'scalar_keys' one by one to
+   * traverse the JSON tree down to the requested scalar
    * @param scalar_keys the keys in descending order to access the scalar
    * @param scalar reference to the scalar that will be set with the scalar in the JSON
    */
@@ -53,7 +54,8 @@ public:
    */
   void getVector(const std::string & vector_name, std::vector<Real> & vector) const;
   /**
-   * Get a vector in the JSON file/tree
+   * Get a vector in the JSON file/tree using the keys in the 'vector_keys' vector one by one
+   * to traverse the JSON tree down to the requested vector
    * @param vector_keys the keys in descending order to access the vector
    * @param vector reference to the vector that will be set with the vector in the JSON
    */
@@ -64,7 +66,7 @@ private:
    * Read the JSON file and load it into _root
    * @param filename the name of the file
    */
-  void read(const FileName filename);
+  void read(const FileName & filename);
 
   /**
    * Get a real number from a node and handle potential type conversions needed
@@ -74,7 +76,7 @@ private:
   Real getReal(const nlohmann::json & node) const;
 
   /// Database filename
-  const FileName _filename;
+  const FileName & _filename;
   /// JSON data
   nlohmann::json _root;
 };

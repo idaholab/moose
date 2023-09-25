@@ -36,8 +36,8 @@ protected:
   const bool _has_axis;
   ///@}
 
-  /// Boolean to keep track of whether the data has been loaded
-  bool _raw_data_loaded;
+  /// Returns whether the raw data has been loaded already
+  bool isRawDataLoaded() const { return _raw_data_loaded; };
 
 private:
   /// Reads data from supplied CSV file.
@@ -51,4 +51,7 @@ private:
 
   /// Builds data from 'xy_data' parameter.
   void buildFromXY();
+
+  /// Boolean to keep track of whether the data has been loaded
+  bool _raw_data_loaded;
 };

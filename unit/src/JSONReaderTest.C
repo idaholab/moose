@@ -30,7 +30,7 @@ TEST(JSONFileReader, errors)
   params.set<SubProblem *>("_subproblem") = fe_problem;
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "JSONFileReader";
-  params.set<std::string>("filename") = "data/json/function_values.json";
+  params.set<FileName>("filename") = "data/json/function_values.json";
   JSONFileReader JSONFileReader(params);
 
   // Scalar getters
@@ -103,21 +103,21 @@ TEST(JSONFileReader, getters)
   params.set<SubProblem *>("_subproblem") = fe_problem;
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "JSONFileReader";
-  params.set<std::string>("filename") = "data/json/function_values.json";
+  params.set<FileName>("filename") = "data/json/function_values.json";
   JSONFileReader JSONFileReader(params);
 
   // Test scalar getters
   Real from_json;
   JSONFileReader.getScalar("direct_key", from_json);
   EXPECT_EQ(from_json, 3);
-  JSONFileReader.getScalar(std::vector<std::string>({"los_datos", "random_other_key"}), from_json);
+  JSONFileReader.getScalar(std::vector<std::string>({"the_data", "random_other_key"}), from_json);
   EXPECT_EQ(from_json, 2);
 
   // Test vector getters
   std::vector<Real> from_json_vec;
   JSONFileReader.getVector("direct_vector_key", from_json_vec);
   EXPECT_EQ(from_json_vec[2], 2);
-  JSONFileReader.getVector(std::vector<std::string>({"los_datos", "some_key", "some_other_key"}),
+  JSONFileReader.getVector(std::vector<std::string>({"the_data", "some_key", "some_other_key"}),
                            from_json_vec);
   EXPECT_EQ(from_json_vec[2], 7);
 }

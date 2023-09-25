@@ -32,7 +32,7 @@
       type = RunException
       input = 'piecewise_constant_simple.i'
       cli_args = 'Functions/left/x_title=hello'
-      expect_err = "A parameter was passed for an option with using data from a CSV file but the "
+      expect_err = "A parameter was passed for an option using data from a CSV file but the "
                    "\'data_file\' parameter has not been set"
       detail = 'parameters meant for loading data from file are passed for a function loading data differently,'
     []
@@ -42,7 +42,7 @@
       cli_args = 'Functions/left/x_keys=hello'
       expect_err = "A parameter was passed for a JSON input option but the \'json_uo\' parameter has "
                    "not been set"
-      detail = 'parameters meant for loading data from JSON are passed for a function loading data differently,'
+      detail = 'or if parameters meant for loading data from JSON are passed for a function loading data differently.'
     []
   []
 []

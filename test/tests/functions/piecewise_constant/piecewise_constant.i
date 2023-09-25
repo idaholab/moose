@@ -15,7 +15,6 @@
 []
 
 [Variables]
-
   [aVar]
     order = FIRST
     family = LAGRANGE

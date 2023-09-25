@@ -474,7 +474,7 @@
     expect_err = "Unable to find function \S+"
 
     requirement = "The system shall report an error when the coupled function does not exist or can "
-                  "not be parsedfor the Piecewise utility."
+                  "not be parsed by a piecewise utility."
     issues = '#1405'
   []
 

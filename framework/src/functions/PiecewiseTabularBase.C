@@ -82,7 +82,7 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
       (isParamSetByUser("x_index_in_file") || isParamSetByUser("y_index_in_file") ||
        isParamValid("x_title") || isParamValid("y_title") || isParamSetByUser("xy_in_file_only") ||
        isParamSetByUser("format")))
-    mooseError("A parameter was passed for an option with using data from a CSV file but the "
+    mooseError("A parameter was passed for an option using data from a CSV file but the "
                "'data_file' parameter has not been set. This is not allowed");
   if (!isParamValid("json_uo") && (isParamValid("x_keys") || isParamValid("y_keys")))
     mooseError("A parameter was passed for a JSON input option but the 'json_uo' parameter has not "
