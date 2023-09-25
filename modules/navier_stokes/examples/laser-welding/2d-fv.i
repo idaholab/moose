@@ -56,23 +56,16 @@ cp='cp'
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    # scaling = 1e-8
   []
   [vel_y]
     type = INSFVVelocityVariable
-    # scaling = 1e-8
   []
   [T]
     type = INSFVEnergyVariable
-    # scaling = 1e-5
   []
   [pressure]
     type = INSFVPressureVariable
   []
-  # [lambda]
-  #   family = SCALAR
-  #   order = FIRST
-  # []
   [disp_x]
   []
   [disp_y]
@@ -111,13 +104,6 @@ cp='cp'
     use_displaced_mesh = true
     boundaries_to_force = top
   []
-  # [pin_zero_pressure]
-  #   type = FVPointValueConstraint
-  #   variable = pressure
-  #   lambda = lambda
-  #   phi0 = 0.0
-  #   point = '0 -.175e-3 0'
-  # []
 
   # momentum equations
   # u equation
@@ -314,12 +300,6 @@ cp='cp'
     temperature = T
     beta = 1e7
   []
-  # [const]
-  #   type = GenericConstantMaterial
-  #   prop_names = 'abs sb_constant'
-  #   prop_values = '1 ${sb}'
-  #   use_displaced_mesh = true
-  # []
   [disp_vec_value_and_dot]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'disp_vec'
@@ -367,64 +347,8 @@ cp='cp'
 
 [Outputs]
   exodus = true
-  checkpoint = true
-  perf_graph = false
 []
 
 [Debug]
   show_var_residual_norms = true
-[]
-
-
-# [Adaptivity]
-#   marker = uniform
-#   max_h_level = 4
-
-#   [Indicators]
-#     [error_T]
-#       type = GradientJumpIndicator
-#       variable = T
-#     []
-#     [error_dispy]
-#       type = GradientJumpIndicator
-#       variable = disp_y
-#     []
-#   []
-
-#   [Markers]
-#     [errorfrac_T]
-#       type = ErrorFractionMarker
-#       refine = 0.4
-#       coarsen = 0.2
-#       indicator = error_T
-#     []
-#     [errorfrac_dispy]
-#       type = ErrorFractionMarker
-#       refine = 0.4
-#       coarsen = 0.2
-#       indicator = error_dispy
-#     []
-#     [combo]
-#       type = ComboMarker
-#       markers = 'errorfrac_T errorfrac_dispy'
-#     []
-#     [uniform]
-#       type = UniformMarker
-#       mark = 'refine'
-#     []
-#   []
-# []
-
-[Postprocessors]
-  [num_dofs]
-    type = NumDOFs
-    system = 'NL'
-  []
-  [nl]
-    type = NumNonlinearIterations
-  []
-  [tot_nl]
-    type = CumulativeValuePostprocessor
-    postprocessor = 'nl'
-  []
 []
