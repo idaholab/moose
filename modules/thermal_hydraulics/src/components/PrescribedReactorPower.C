@@ -15,6 +15,8 @@ InputParameters
 PrescribedReactorPower::validParams()
 {
   InputParameters params = TotalPowerBase::validParams();
+  params.addClassDescription(
+      "Specifies the total power of a component. This component is deprecated");
   params.addRequiredParam<Real>("power", "Total power [W]");
   return params;
 }

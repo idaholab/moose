@@ -16,6 +16,7 @@ InputParameters
 SolidWall1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
+  params.addClassDescription("Adds the boundary condition for a wall in single phase flow");
   return params;
 }
 

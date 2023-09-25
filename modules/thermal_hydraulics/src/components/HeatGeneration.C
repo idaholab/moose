@@ -15,6 +15,8 @@ InputParameters
 HeatGeneration::validParams()
 {
   InputParameters params = Component::validParams();
+  params.addClassDescription(
+      "Specify a heat source in a heat structure. This component is deprecated.");
   params.addRequiredParam<std::string>("hs", "Heat structure in which to apply heat source");
   params.addRequiredParam<std::vector<std::string>>(
       "regions", "Heat structure regions where heat generation is to be applied");

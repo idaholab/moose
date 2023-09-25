@@ -15,6 +15,8 @@ InputParameters
 FreeBoundary::validParams()
 {
   InputParameters params = FlowBoundary::validParams();
+  params.addClassDescription(
+      "Component to create a free flow boundary for 1D flow. This component is deprecated.");
   return params;
 }
 

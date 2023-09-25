@@ -17,6 +17,7 @@ InputParameters
 PrandtlNumberAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Computes the Prandtl number for the fluid in the simulation domain");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredParam<UserObjectName>("fp",
