@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#22906'
+  design = ProgressOutput.md
+  [full]
+    type = RunApp
+    input = 'full.i'
+    expect_out = "\+-Progress \(.*\)-*\+\n\|#########################.........................\|\n\+--------------------------------------------------\+"
+    requirement = "The system shall support printing a progress bar that indicates the fraction of total simulation time passed."
+  []
+  [common]
+    type = RunApp
+    input = 'common.i'
+    expect_out = '\+-progress \(.*\)-*\+'
+    requirement = "The system shall support using a shortcut to set up a progress bar output."
+  []
+[]
+

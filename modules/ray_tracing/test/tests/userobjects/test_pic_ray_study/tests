@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#16028 #25521'
+  design = 'RayTracingStudy.md'
+
+  [pic]
+      type = 'Exodiff'
+      input = 'pic_ray_study.i'
+      exodiff = 'pic_ray_study_rays.e
+                 pic_ray_study_rays.e-s0001
+                 pic_ray_study_rays.e-s0002
+                 pic_ray_study_rays.e-s0003
+                 pic_ray_study_rays.e-s0004
+                 pic_ray_study_rays.e-s0005
+                 pic_ray_study_rays.e-s0006
+                 pic_ray_study_rays.e-s0007
+                 pic_ray_study_rays.e-s0008
+                 pic_ray_study_rays.e-s0009'
+      allow_test_objects = tru
+      requirement = 'The system shall support the propagation of rays for particle-in-cell capability by tracing rays via a temporally and spatially varying velocity in time'
+  []
+[]
