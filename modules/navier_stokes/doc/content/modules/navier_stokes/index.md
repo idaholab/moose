@@ -30,6 +30,7 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | INSFE      | Hand-coded | incompressible       | mixing length      | Not porous        | CGFE   | SUPG                              |
 | PINSFE     | Hand-coded | incompressible       | mixing length      | porous            | CGFE   | SUPG                              |
 | NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
+| INSChorin  | Hand-coded | incompressible       | None               | Not porous        | CGFE   | Chorin predictor-corrector        |
 | INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
 | PINSFV     | AD         | incompressible       | mixing length      | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |

@@ -132,8 +132,13 @@ Notes on the above table:
   vector variable, AD implementation cannot currently include Laplacian terms. For a first order
   basis this incurs no error, but for a second order basis it does)
 
-  ### Additional examples
+### Additional examples
 
-  Please see the following for descriptions of more exotic tests/examples
+Please see the following for descriptions of more exotic tests/examples
 
-  - [laser_welding.md]
+- [laser_welding.md]
+
+
+### Other numerical discretization schemes implemented
+
+- [Chorin predictor-corrector scheme](inschorin.md)
