@@ -103,29 +103,6 @@ INSADObjectTracker::addBlockIDs(const std::set<SubdomainID> & additional_block_i
 {
   for (const auto sub_id : additional_block_ids)
     _block_id_to_params.emplace(sub_id, validTrackerParams());
-
-  if (_block_id_to_params.find(Moose::ANY_BLOCK_ID) != _block_id_to_params.end() &&
-      _block_id_to_params.size() > 1)
-    mooseError(
-        "If INSADObjectTracker::_block_id_to_params holds Moose::ANY_BLOCK_ID, then it cannot hold "
-        "any other other block ids. Do you have an INSADMaterial that's not block "
-        "restricted, and other INSADMaterials that are? If so, you have duplicate coverage, "
-        "and you should fix that in your input file.");
-}
-
-bool
-INSADObjectTracker::singleMaterialCoverage() const
-{
-  if (_block_id_to_params.find(Moose::ANY_BLOCK_ID) != _block_id_to_params.end())
-  {
-    mooseAssert(_block_id_to_params.size() == 1,
-                "If our _block_id_to_params container has a Moose::ANY_BLOCK_ID key, then its size "
-                "must be exactly one.");
-
-    return true;
-  }
-  else
-    return false;
 }
 
 bool
@@ -137,16 +114,10 @@ INSADObjectTracker::isTrackerParamValid(const std::string & name, const Subdomai
 const InputParameters &
 INSADObjectTracker::getParams(const SubdomainID sub_id) const
 {
-  // Do we have a single unrestricted material that supplies all our material properties?
-  if (singleMaterialCoverage())
-    return _block_id_to_params.begin()->second;
-  else
-  {
-    auto map_it = _block_id_to_params.find(sub_id);
-    if (map_it == _block_id_to_params.end())
-      mooseError("The requested sub_id is not a key in INSADObjectTracker::_block_id_to_params. "
-                 "Please contact a Moose developer to fix this bug.");
+  auto map_it = _block_id_to_params.find(sub_id);
+  if (map_it == _block_id_to_params.end())
+    mooseError("The requested sub_id is not a key in INSADObjectTracker::_block_id_to_params. "
+               "Please contact a Moose developer to fix this bug.");
 
-    return map_it->second;
-  }
+  return map_it->second;
 }

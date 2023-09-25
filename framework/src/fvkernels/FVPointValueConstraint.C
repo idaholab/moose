@@ -37,9 +37,8 @@ FVPointValueConstraint::FVPointValueConstraint(const InputParameters & parameter
   _point_locator->enable_out_of_mesh_mode();
 
   // We only check in the restricted blocks, if needed
-  const bool block_restricted = blockIDs().find(Moose::ANY_BLOCK_ID) == blockIDs().end();
   const Elem * elem =
-      block_restricted ? (*_point_locator)(_point, &blockIDs()) : (*_point_locator)(_point);
+      blockRestricted() ? (*_point_locator)(_point, &blockIDs()) : (*_point_locator)(_point);
 
   // We communicate the results and if there is conflict between processes,
   // the minimum cell ID is chosen

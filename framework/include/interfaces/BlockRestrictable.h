@@ -103,6 +103,7 @@ public:
 
   /**
    * Return the block subdomain ids for this object
+   * Note, if this is not block restricted, this function returns all mesh subdomain ids.
    * @return a set of SudomainIDs that are valid for this object
    */
   const virtual std::set<SubdomainID> & blockIDs() const;

@@ -450,8 +450,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
         for (auto element : neighbor_elements->second)
         {
           auto & elem = to_mesh.elem_ref(element);
-          if (blockids.find(elem.subdomain_id()) != blockids.end() ||
-              blockids.find(Moose::ANY_BLOCK_ID) != blockids.end())
+          if (blockids.find(elem.subdomain_id()) != blockids.end())
           {
             scale_current_node = true;
             break;
@@ -482,8 +481,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
       if (pps)
       {
         auto & blockids = pps->blockIDs();
-        if (blockids.find(elem->subdomain_id()) != blockids.end() ||
-            blockids.find(Moose::ANY_BLOCK_ID) != blockids.end())
+        if (blockids.find(elem->subdomain_id()) != blockids.end())
         {
           scale_current_element = true;
         }
