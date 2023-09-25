@@ -23,7 +23,7 @@ PiecewiseLinear::validParams()
 }
 
 PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters)
-  : PiecewiseLinearBase(parameters), _interpolation_created(false)
+  : PiecewiseLinearBase(parameters)
 {
   if (isRawDataLoaded())
   {

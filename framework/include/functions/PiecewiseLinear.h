@@ -24,8 +24,4 @@ public:
 
   /// Needed to process data from user objects that are not available at construction
   void initialSetup() override;
-
-private:
-  /// Whether the interpolation has been created
-  bool _interpolation_created;
 };
