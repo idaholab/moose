@@ -4,55 +4,55 @@
   # NearestNodeLocator, which is needed by TiedValueConstraint,
   # only works with ReplicatedMesh currently
   parallel_type = replicated
-[../]
+[]
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  [/]
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Constraints]
-  [./complete]
+  [complete]
     type = TiedValueConstraint
     variable = u
     secondary = 2
     primary = 3
     primary_variable = u
-  [../]
-  [./lower]
+  []
+  [lower]
     type = TiedValueConstraint
     variable = u
     secondary = inside_right_lower
     primary = inside_left_lower
     primary_variable = u
-  [../]
+  []
 []
 
 [Executioner]
