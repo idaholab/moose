@@ -8,7 +8,7 @@
 
 [Variables]
   [u]
-  [/]
+  []
 []
 
 [Kernels]
