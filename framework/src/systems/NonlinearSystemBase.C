@@ -950,7 +950,8 @@ NonlinearSystemBase::getResidualTimeVector()
     _Re_time_tag = _fe_problem.addVectorTag("TIME");
 
     // Most applications don't need the expense of ghosting
-    _Re_time = &addVector(_Re_time_tag, false, PARALLEL);
+    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    _Re_time = &addVector(_Re_time_tag, false, ptype);
   }
   else if (_need_residual_ghosted && _Re_time->type() == PARALLEL)
   {
@@ -970,7 +971,10 @@ NonlinearSystemBase::getResidualNonTimeVector()
   if (!_Re_non_time)
   {
     _Re_non_time_tag = _fe_problem.addVectorTag("NONTIME");
-    _Re_non_time = &addVector(_Re_non_time_tag, false, PARALLEL);
+
+    // Most applications don't need the expense of ghosting
+    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    _Re_non_time = &addVector(_Re_non_time_tag, false, ptype);
   }
   else if (_need_residual_ghosted && _Re_non_time->type() == PARALLEL)
   {
