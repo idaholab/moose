@@ -14,7 +14,6 @@
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
 
-#include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
