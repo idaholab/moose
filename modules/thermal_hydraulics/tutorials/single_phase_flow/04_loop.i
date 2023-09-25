@@ -272,8 +272,8 @@ tot_power = 100     # W
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
   nl_max_its = 5
 []
 

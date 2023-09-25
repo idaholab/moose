@@ -380,8 +380,8 @@ m_dot_sec_in = 1    # kg/s
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-7
   nl_max_its = 5
 []
 
