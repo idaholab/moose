@@ -154,6 +154,7 @@ fe_lagrange_2D_shape(const ElemType type,
         case TRI3:
         case TRISHELL3:
         case TRI6:
+        case TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -233,6 +234,7 @@ fe_lagrange_2D_shape(const ElemType type,
                   fe_lagrange_1D_shape(SECOND, i1[i], eta));
         }
         case TRI6:
+        case TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -329,6 +331,7 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
         case TRI3:
         case TRISHELL3:
         case TRI6:
+        case TRI7:
         {
           libmesh_assert_less(i, 3);
 
@@ -502,6 +505,7 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
         }
 
         case TRI6:
+        case TRI7:
         {
           libmesh_assert_less(i, 6);
 

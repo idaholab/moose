@@ -48,6 +48,7 @@ projectQPoints3d(const Elem * const msm_elem,
       case QUAD4:
         return {{0, 1, 2, 3}};
       case TRI6:
+      case TRI7:
         switch (sub_elem)
         {
           case 0:
@@ -109,6 +110,7 @@ projectQPoints3d(const Elem * const msm_elem,
       case QUAD4:
         return Point(nu, xi, 0);
       case TRI6:
+      case TRI7:
         switch (sub_elem)
         {
           case 0:
@@ -165,6 +167,7 @@ projectQPoints3d(const Elem * const msm_elem,
     {
       case TRI3:
       case TRI6:
+      case TRI7:
         return TRI3;
       case QUAD4:
       case QUAD9:
@@ -260,7 +263,8 @@ projectQPoints3d(const Elem * const msm_elem,
       // erroring simply truncate quadrature point, these points typically have very small
       // contributions to integrals
       auto & qp_back = q_pts.back();
-      if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
+      if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6 ||
+          primal_elem->type() == TRI7)
       {
         if (qp_back(0) < -TOLERANCE || qp_back(1) < -TOLERANCE ||
             qp_back(0) + qp_back(1) > (1 + TOLERANCE))
