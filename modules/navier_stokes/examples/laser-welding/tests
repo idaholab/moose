@@ -1,14 +1,27 @@
 [Tests]
   design = 'laser_welding.md'
   issues = '#24462'
-  [3d]
-    input = 3d.i
-    exodiff = '3d_exodus.e  3d_exodus.e-s002  3d_exodus.e-s003  3d_exodus.e-s004'
-    type = Exodiff
-    requirement = 'The system shall be able to simulate the rastering of a laser spot around an initially solid material which melts and then vaporizes.'
-    allow_test_objects = true
-    cli_args = "Mesh/uniform_refine=0 Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
-    valgrind = 'heavy'
-    strumpack = true
+  [ALE]
+    requirement = 'The system shall be able to simulate the rastering of a laser spot around an initially solid material which melts and then vaporizes'
+    [3d-fe]
+      input = 3d.i
+      exodiff = '3d_exodus.e  3d_exodus.e-s002  3d_exodus.e-s003  3d_exodus.e-s004'
+      type = Exodiff
+      allow_test_objects = true
+      cli_args = "Mesh/uniform_refine=0 Executioner/num_steps=4 Postprocessors/active='' Adaptivity/Markers/active='errorfrac_T combo' Adaptivity/Markers/combo/markers='errorfrac_T'"
+      valgrind = 'heavy'
+      strumpack = true
+      detail = 'in three dimensions, using a finite element discretization for all variables, and'
+    []
+    [2d-fv]
+      input = 2d-fv.i
+      exodiff = 2d-fv_out.e
+      type = Exodiff
+      detail = 'in two dimensions, using finite volume discretizations for pressure, velocity, and temperature and a finite element discretization for mesh displacements.'
+      allow_test_objects = true
+      cli_args = 'Executioner/num_steps=3 Mesh/nx=15 Mesh/ny=4'
+      valgrind = 'heavy'
+      strumpack = true
+    []
   []
 []
