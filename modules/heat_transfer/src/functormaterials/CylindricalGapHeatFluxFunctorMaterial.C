@@ -58,14 +58,16 @@ CylindricalGapHeatFluxFunctorMaterialTempl<is_ad>::CylindricalGapHeatFluxFunctor
 {
   addFunctorProperty<GenericReal<is_ad>>(
       getParam<MooseFunctorName>("conduction_heat_flux_name"),
-      [this](const auto & r, const auto & t) -> GenericReal<is_ad> {
+      [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+      {
         return HeatTransferModels::cylindricalGapConductionHeatFlux(
             _k_gap(r, t), _r_inner(r, t), _r_outer(r, t), _T_inner(r, t), _T_outer(r, t));
       });
 
   addFunctorProperty<GenericReal<is_ad>>(
       getParam<MooseFunctorName>("radiation_heat_flux_name"),
-      [this](const auto & r, const auto & t) -> GenericReal<is_ad> {
+      [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+      {
         return HeatTransferModels::cylindricalGapRadiationHeatFlux(_r_inner(r, t),
                                                                    _r_outer(r, t),
                                                                    _emiss_inner(r, t),
@@ -76,7 +78,8 @@ CylindricalGapHeatFluxFunctorMaterialTempl<is_ad>::CylindricalGapHeatFluxFunctor
 
   addFunctorProperty<GenericReal<is_ad>>(
       getParam<MooseFunctorName>("total_heat_flux_name"),
-      [this](const auto & r, const auto & t) -> GenericReal<is_ad> {
+      [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+      {
         return HeatTransferModels::cylindricalGapConductionHeatFlux(
                    _k_gap(r, t), _r_inner(r, t), _r_outer(r, t), _T_inner(r, t), _T_outer(r, t)) +
                HeatTransferModels::cylindricalGapRadiationHeatFlux(_r_inner(r, t),

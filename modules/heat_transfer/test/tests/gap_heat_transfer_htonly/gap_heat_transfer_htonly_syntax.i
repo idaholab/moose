@@ -45,7 +45,7 @@
   [../]
 []
 
-[Modules/HeatConduction/ThermalContact/BC]
+[Modules/HeatTransfer/ThermalContact/BC]
   [./thermal_contact]
     type = GapHeatTransfer
     variable = temp
