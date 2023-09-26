@@ -138,6 +138,15 @@ pathJoin(const std::vector<std::string> & paths)
   return fullpath.substr(1);
 }
 
+Node::Node() : _parent(nullptr)
+{
+  Node * root = hit::parse("blankline", "# blankline");
+  const auto & first_child = *root->_children.front();
+  _dhi = first_child._dhi;
+  _hnv = first_child._hnv;
+  delete root;
+}
+
 Node::Node(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv)
   : _dhi(dhi), _hnv(hnv), _parent(nullptr)
 {
@@ -272,7 +281,9 @@ Node::vecStrVal()
 NodeType
 Node::type()
 {
-  if (_hnv.type() == wasp::COMMENT)
+  if (_hnv.data() == "# blankline")
+    return NodeType::Blank;
+  else if (_hnv.type() == wasp::COMMENT)
     return NodeType::Comment;
   if (_hnv.type() == wasp::OBJECT || _hnv.type() == wasp::DOCUMENT_ROOT)
     return NodeType::Section;
@@ -308,12 +319,7 @@ Node::children(NodeType t)
 }
 
 std::string
-Node::render(int indent,
-             const std::string & indent_text,
-             int maxlen
-             ,
-             int /*parent_newline_count = 0*/
-)
+Node::render(int indent, const std::string & indent_text, int maxlen)
 {
   if (root() != this)
     indent = -1;
@@ -344,7 +350,7 @@ Node::path()
   if (!_override_path.empty())
     return _override_path;
   std::string node_name = std::string(_hnv.name());
-  return node_name == "/" ? "" : node_name;
+  return _hnv.type() == wasp::DOCUMENT_ROOT ? "" : node_name;
 }
 
 std::string
@@ -420,12 +426,7 @@ Comment::Comment(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNode
 }
 
 std::string
-Comment::render(int indent,
-                const std::string & indent_text,
-                int /*maxlen*/
-                ,
-                int /*parent_newline_count=0*/
-)
+Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
 {
   const auto & comment_text = _hnv.data();
 
@@ -440,6 +441,7 @@ Comment::clone(bool
 )
 {
   auto n = new Comment(_dhi, _hnv);
+  n->setInline(_isinline);
   if (absolute_path)
     n->setOverridePath(fullpath());
   return n;
@@ -450,6 +452,12 @@ Comment::setText(const std::string & text)
 {
   if (text != _hnv.data() && _hnv.is_leaf())
     _hnv.set_data(text.c_str());
+}
+
+void
+Comment::setInline(bool is_inline)
+{
+  _isinline = is_inline;
 }
 
 Section::Section(const std::string & path) : Node(path) {}
@@ -477,63 +485,32 @@ Section::path()
 }
 
 std::string
-Section::render(int indent,
-                const std::string & indent_text,
-                int maxlen
-                ,
-                int parent_newline_count /* = 0 */
-)
+Section::render(int indent, const std::string & indent_text, int maxlen)
 {
-  // renders blank lines before sections, fields, and comments by comparing
-  // the number of lines already rendered with the line number of the next
-  // non-blank returning the gathered line count
-  const auto append_blank_lines = [](std::string & render_out, int next_print, int start_line)
-  {
-    int line_tally = start_line + std::count(render_out.begin(), render_out.end(), '\n');
-    next_print--;
-
-    if (line_tally < next_print)
-    {
-      int line_delta = next_print - line_tally;
-      render_out += strRepeat("\n", line_delta);
-      line_tally += line_delta;
-    }
-
-    return line_tally;
-  };
-
   std::string s;
 
-  if (path() != "document" && path() != "-")
+  if (!path().empty() && path() != "-")
   {
     std::string opening_marks;
-
     if (_hnv.child_count() > 3 && _hnv.child_at(2).type() == wasp::DECL &&
         _hnv.child_at(1).is_leaf())
       opening_marks = _hnv.child_at(1).data();
-
     std::string decl_data = "[" + opening_marks + path() + "]";
-
-    append_blank_lines(s, _hnv.line(), parent_newline_count);
-
     s = "\n" + strRepeat(indent_text, indent) + decl_data;
   }
 
   for (auto child : children())
   {
-    int current_newline_count = append_blank_lines(s, child->line(), parent_newline_count);
-    if (path() != "document" && path() != "-")
-      s += child->render(indent + 1, indent_text, maxlen, current_newline_count);
+    if (!path().empty() && path() != "-")
+      s += child->render(indent + 1, indent_text, maxlen);
     else
-      s += child->render(indent, indent_text, maxlen, current_newline_count);
+      s += child->render(indent, indent_text, maxlen);
   }
 
-  if (path() != "document" && path() != "-")
+  if (!path().empty() && path() != "-")
   {
     wasp::HITNodeView term_node = _hnv.first_child_by_name("term");
     std::string term_data = !term_node.is_null() ? term_node.data() : "[]";
-    if (!term_node.is_null())
-      append_blank_lines(s, term_node.line(), parent_newline_count);
     s += "\n" + strRepeat(indent_text, indent) + term_data;
   }
 
@@ -573,12 +550,7 @@ Field::path()
 }
 
 std::string
-Field::render(int indent,
-              const std::string & indent_text,
-              int maxlen
-              ,
-              int /*parent_newline_count=0*/
-)
+Field::render(int indent, const std::string & indent_text, int maxlen)
 {
   auto render_field = path();
   auto render_val = val();
@@ -681,6 +653,9 @@ Field::render(int indent,
     s += "'" + render_val + "'";
   else
     s += render_val;
+
+  for (auto child : children())
+    s += child->render(indent + 1, indent_text, maxlen);
 
   return s;
 }
@@ -945,7 +920,8 @@ parse(const std::string & fname, const std::string & input)
     throw ParseError(input_errors.str());
 
   std::unique_ptr<Node> root(new Section(interpreter, interpreter->root()));
-  buildHITTree(interpreter, interpreter->root(), root.get());
+  std::size_t starting_line = 0;
+  buildHITTree(interpreter, interpreter->root(), root.get(), starting_line);
 
   return root.release();
 }
@@ -1207,7 +1183,8 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
 void
 buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
              wasp::HITNodeView hnv_parent,
-             Node * hit_parent)
+             Node * hit_parent,
+             std::size_t & previous_line)
 {
   if (hnv_parent.is_null())
     return;
@@ -1220,14 +1197,33 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
     // create and add comment node as terminal leaf but do not recurse deeper
     if (hnv_child.type() == wasp::COMMENT)
     {
+      // add blank line if needed between previous node line and this node line
+      if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+        hit_parent->addChild(new Blank());
+
       auto hit_child = new Comment(interpreter, hnv_child);
-      hit_parent->addChild(hit_child);
+      if (hnv_child.line() == previous_line && hit_parent->children().size() > 0)
+      {
+        hit_child->setInline(true);
+        hit_parent->children().back()->addChild(hit_child);
+      }
+      else
+      {
+        hit_child->setInline(false);
+        hit_parent->addChild(hit_child);
+      }
+      previous_line = hnv_child.last_line();
     }
     // create and add field node as a combined leaf but do not recurse deeper
     else if (hnv_child.type() == wasp::KEYED_VALUE || hnv_child.type() == wasp::ARRAY)
     {
+      // add blank line if needed between previous node line and this node line
+      if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+        hit_parent->addChild(new Blank());
+
       auto hit_child = new Field(interpreter, hnv_child);
       hit_parent->addChild(hit_child);
+      previous_line = hnv_child.last_line();
     }
     // section handling is dependant on if specification is explode or normal
     else if (hnv_child.type() == wasp::OBJECT || hnv_child.type() == wasp::DOCUMENT_ROOT)
@@ -1241,7 +1237,7 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       {
         if (Node * hit_child = hit_parent->find(hnv_child.name()))
         {
-          buildHITTree(interpreter, hnv_child, hit_child);
+          buildHITTree(interpreter, hnv_child, hit_child, previous_line);
           explode_section_found = true;
         }
       }
@@ -1249,9 +1245,15 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       // normal or absent section so create and add node then recurse with it
       if (!explode_section_found)
       {
+        // add blank line if needed between previous node line and this node line
+        if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+          hit_parent->addChild(new Blank());
+
         auto hit_child = new Section(interpreter, hnv_child);
         hit_parent->addChild(hit_child);
-        buildHITTree(interpreter, hnv_child, hit_child);
+        previous_line = hnv_child.line();
+        buildHITTree(interpreter, hnv_child, hit_child, previous_line);
+        previous_line = hnv_child.last_line();
       }
     }
   }

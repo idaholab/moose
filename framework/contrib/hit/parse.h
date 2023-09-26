@@ -145,6 +145,9 @@ std::string pathJoin(const std::vector<std::string> & paths);
 class Node
 {
 public:
+  /// constructs a Node with no aguments which is used for Blank nodes
+  Node();
+
   /// constructs a Node from wasp interpreter shared pointer and nodeview
   Node(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
 
@@ -226,12 +229,8 @@ public:
   /// identical to this nodes tree downward.  indent is the indent level using indent_text as the
   /// indent string (repeated once for each level).  maxlen is the maximum line length before
   /// breaking string values.
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-                             ,
-                             int parent_newline_count = 0
-  );
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0);
 
   /// walk does a depth-first traversal of the hit tree starting at this node (it
   /// doesn't visit any nodes that require traversing this node's parent) calling the passed
@@ -395,16 +394,30 @@ public:
 
   void setText(const std::string & text);
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-                             ,
-                             int parent_newline_count = 0
-                             ) override;
+  /// override the value of the is_inline flag setting for this comment
+  void setInline(bool is_inline);
+
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+
   virtual Node * clone(bool absolute_path = false) override;
 
 private:
   bool _isinline;
+};
+
+/// Blank represents a blank line in the input.  It aids in correctly re-rendering parsed input.
+class Blank : public Node
+{
+public:
+  Blank() : Node() {}
+  virtual std::string render(int /*indent = 0*/,
+                             const std::string & /*indent_text = default_indent*/,
+                             int /*maxlen = 0*/) override
+  {
+    return "\n";
+  }
+  virtual Node * clone(bool /*absolute_path = false*/) override { return new Blank(); };
 };
 
 /// Section represents a hit section including the section header path and all entries inside
@@ -422,12 +435,9 @@ public:
   /// path returns the hit path located in the section's header i.e. the section's name.
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-                             ,
-                             int parent_newline_count = 0
-                             ) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+
   virtual Node * clone(bool absolute_path = false) override;
 };
 
@@ -455,12 +465,9 @@ public:
   /// path returns the hit Field name (i.e. content before the "=")
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-                             ,
-                             int parent_newline_count = 0
-                             ) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+
   virtual Node * clone(bool absolute_path = false) override;
 
   /// kind returns the semantic type of the value stored in this field (e.g. Int, Bool, Float,
@@ -671,6 +678,7 @@ public:
 /// using the root of the data processed by the wasp interpreter
 void buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
                   wasp::HITNodeView hnv_parent,
-                  Node * hit_parent);
+                  Node * hit_parent,
+                  std::size_t & previous_line);
 
 } // namespace hit

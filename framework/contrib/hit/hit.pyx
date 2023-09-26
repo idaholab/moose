@@ -61,6 +61,10 @@ cpdef NewComment(text, is_inline=False):
     cdef chit.Node* f = <chit.Node*> new chit.Comment(ctext, <cbool>is_inline)
     return _initpynode(f)
 
+cpdef NewBlank():
+    cdef chit.Node* f = <chit.Node*> new chit.Blank()
+    return _initpynode(f)
+
 cdef class Formatter:
     cdef chit.Formatter _formatter
 
@@ -97,6 +101,10 @@ cdef class Node:
 
     @classmethod
     def NewComment(cls, text):
+        pass
+
+    @classmethod
+    def NewBlank(cls):
         pass
 
     def __cinit__(self, own=False, fname=''):

@@ -89,6 +89,10 @@ cdef extern from "parse.h" namespace "hit":
         void setText(const string & text)
 
 cdef extern from "parse.h" namespace "hit":
+    cdef cppclass Blank "hit::Blank":
+        Blank()
+
+cdef extern from "parse.h" namespace "hit":
     cdef cppclass Section "hit::Section":
         Section(const string & path)
 

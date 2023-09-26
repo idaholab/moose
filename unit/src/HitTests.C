@@ -522,10 +522,10 @@ TEST(HitTests, RenderCases)
        "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
        "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
        "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
-       "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
-       "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
-       "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
-       "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
+       "[section01]\n\n  field01 = 10\n\n  field02 = '20'\n\n  [section02]\n\n  "
+       "  field03 = '30 31 32 33'\n\n    field04 = 40\n    [section03]\n\n      "
+       "field05 = \"double 50 quoted 51 string\"\n    []\n\n    field06 = 60\n  "
+       "[]\n  field07 = '70 71 72 73 74'\n[]",
        0},
   };
 
