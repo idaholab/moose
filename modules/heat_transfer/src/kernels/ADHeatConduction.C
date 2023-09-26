@@ -9,7 +9,7 @@
 
 #include "ADHeatConduction.h"
 
-registerMooseObject("HeatConductionApp", ADHeatConduction);
+registerMooseObject("HeatTransferApp", ADHeatConduction);
 
 InputParameters
 ADHeatConduction::validParams()

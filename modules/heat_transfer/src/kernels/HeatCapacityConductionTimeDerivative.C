@@ -9,7 +9,7 @@
 
 #include "HeatCapacityConductionTimeDerivative.h"
 
-registerMooseObject("HeatConductionApp", HeatCapacityConductionTimeDerivative);
+registerMooseObject("HeatTransferApp", HeatCapacityConductionTimeDerivative);
 
 InputParameters
 HeatCapacityConductionTimeDerivative::validParams()

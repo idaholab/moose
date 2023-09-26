@@ -23,7 +23,7 @@
 #include "ReflectRayBC.h"
 #include "RayTracingPackingUtils.h"
 
-registerMooseObject("HeatConductionApp", ViewFactorRayStudy);
+registerMooseObject("HeatTransferApp", ViewFactorRayStudy);
 
 InputParameters
 ViewFactorRayStudy::validParams()

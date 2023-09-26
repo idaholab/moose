@@ -7,71 +7,71 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HeatConductionTestApp.h"
-#include "HeatConductionApp.h"
+#include "HeatTransferTestApp.h"
+#include "HeatTransferApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
 InputParameters
-HeatConductionTestApp::validParams()
+HeatTransferTestApp::validParams()
 {
-  InputParameters params = HeatConductionApp::validParams();
+  InputParameters params = HeatTransferApp::validParams();
   return params;
 }
 
-registerKnownLabel("HeatConductionTestApp");
+registerKnownLabel("HeatTransferTestApp");
 
-HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : MooseApp(parameters)
+HeatTransferTestApp::HeatTransferTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  HeatConductionTestApp::registerAll(
+  HeatTransferTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
-HeatConductionTestApp::~HeatConductionTestApp() {}
+HeatTransferTestApp::~HeatTransferTestApp() {}
 
 void
-HeatConductionTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+HeatTransferTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  HeatConductionApp::registerAll(f, af, s);
+  HeatTransferApp::registerAll(f, af, s);
   if (use_test_objs)
   {
-    Registry::registerObjectsTo(f, {"HeatConductionTestApp"});
-    Registry::registerActionsTo(af, {"HeatConductionTestApp"});
+    Registry::registerObjectsTo(f, {"HeatTransferTestApp"});
+    Registry::registerActionsTo(af, {"HeatTransferTestApp"});
   }
 }
 
 void
-HeatConductionTestApp::registerApps()
+HeatTransferTestApp::registerApps()
 {
-  registerApp(HeatConductionApp);
-  registerApp(HeatConductionTestApp);
+  registerApp(HeatTransferApp);
+  registerApp(HeatTransferTestApp);
 }
 
 void
-HeatConductionTestApp::registerObjects(Factory & factory)
+HeatTransferTestApp::registerObjects(Factory & factory)
 {
-  Registry::registerObjectsTo(factory, {"HeatConductionTestApp"});
+  Registry::registerObjectsTo(factory, {"HeatTransferTestApp"});
 }
 
 void
-HeatConductionTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
+HeatTransferTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  Registry::registerActionsTo(action_factory, {"HeatConductionTestApp"});
+  Registry::registerActionsTo(action_factory, {"HeatTransferTestApp"});
 }
 
 void
-HeatConductionTestApp::registerExecFlags(Factory & /*factory*/)
+HeatTransferTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
 
 extern "C" void
-HeatConductionTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+HeatTransferTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  HeatConductionTestApp::registerAll(f, af, s);
+  HeatTransferTestApp::registerAll(f, af, s);
 }
 extern "C" void
-HeatConductionTestApp__registerApps()
+HeatTransferTestApp__registerApps()
 {
-  HeatConductionTestApp::registerApps();
+  HeatTransferTestApp::registerApps();
 }

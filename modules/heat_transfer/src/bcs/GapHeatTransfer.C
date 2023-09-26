@@ -19,7 +19,7 @@
 
 #include "libmesh/string_to_enum.h"
 
-registerMooseObject("HeatConductionApp", GapHeatTransfer);
+registerMooseObject("HeatTransferApp", GapHeatTransfer);
 
 InputParameters
 GapHeatTransfer::validParams()

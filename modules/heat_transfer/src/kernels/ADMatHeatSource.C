@@ -9,7 +9,7 @@
 
 #include "ADMatHeatSource.h"
 
-registerMooseObject("HeatConductionApp", ADMatHeatSource);
+registerMooseObject("HeatTransferApp", ADMatHeatSource);
 
 InputParameters
 ADMatHeatSource::validParams()

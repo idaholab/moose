@@ -20,10 +20,10 @@
 
 #include <algorithm>
 
-registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "append_mesh_generator");
-registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_mortar_variable");
-registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_constraint");
-registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_user_object");
+registerMooseAction("HeatTransferApp", MortarGapHeatTransferAction, "append_mesh_generator");
+registerMooseAction("HeatTransferApp", MortarGapHeatTransferAction, "add_mortar_variable");
+registerMooseAction("HeatTransferApp", MortarGapHeatTransferAction, "add_constraint");
+registerMooseAction("HeatTransferApp", MortarGapHeatTransferAction, "add_user_object");
 
 InputParameters
 MortarGapHeatTransferAction::validParams()

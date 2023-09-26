@@ -14,7 +14,7 @@
 // Stefan - Boltzmann Constant
 const Real SIGMA = 5.670374419E-8;
 
-registerMooseObject("HeatConductionApp", SideSetHeatTransferMaterial);
+registerMooseObject("HeatTransferApp", SideSetHeatTransferMaterial);
 
 InputParameters
 SideSetHeatTransferMaterial::validParams()

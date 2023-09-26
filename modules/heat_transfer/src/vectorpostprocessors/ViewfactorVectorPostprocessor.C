@@ -10,7 +10,7 @@
 #include "ViewfactorVectorPostprocessor.h"
 #include "GrayLambertSurfaceRadiationBase.h"
 
-registerMooseObject("HeatConductionApp", ViewfactorVectorPostprocessor);
+registerMooseObject("HeatTransferApp", ViewfactorVectorPostprocessor);
 
 InputParameters
 ViewfactorVectorPostprocessor::validParams()

@@ -9,7 +9,7 @@
 
 #include "TrussHeatConductionTimeDerivative.h"
 
-registerMooseObject("HeatConductionApp", TrussHeatConductionTimeDerivative);
+registerMooseObject("HeatTransferApp", TrussHeatConductionTimeDerivative);
 
 InputParameters
 TrussHeatConductionTimeDerivative::validParams()

@@ -12,7 +12,7 @@
 
 #include "libmesh/parallel_algebra.h"
 
-registerMooseObject("HeatConductionApp", SelfShadowSideUserObject);
+registerMooseObject("HeatTransferApp", SelfShadowSideUserObject);
 
 InputParameters
 SelfShadowSideUserObject::validParams()

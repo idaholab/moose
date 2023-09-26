@@ -13,7 +13,7 @@
 
 using MetaPhysicL::raw_value;
 
-registerMooseObject("HeatConductionApp", ConjugateHeatTransfer);
+registerMooseObject("HeatTransferApp", ConjugateHeatTransfer);
 
 InputParameters
 ConjugateHeatTransfer::validParams()

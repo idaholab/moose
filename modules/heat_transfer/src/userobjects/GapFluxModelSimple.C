@@ -9,7 +9,7 @@
 
 #include "GapFluxModelSimple.h"
 
-registerMooseObject("HeatConductionApp", GapFluxModelSimple);
+registerMooseObject("HeatTransferApp", GapFluxModelSimple);
 
 InputParameters
 GapFluxModelSimple::validParams()

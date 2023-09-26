@@ -10,7 +10,7 @@
 #include "TrussHeatConduction.h"
 #include "MooseMesh.h"
 
-registerMooseObject("HeatConductionApp", TrussHeatConduction);
+registerMooseObject("HeatTransferApp", TrussHeatConduction);
 
 InputParameters
 TrussHeatConduction::validParams()

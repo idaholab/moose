@@ -2,8 +2,8 @@
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("HeatConductionApp", ConvectiveHeatTransferSideIntegral);
-registerMooseObject("HeatConductionApp", ADConvectiveHeatTransferSideIntegral);
+registerMooseObject("HeatTransferApp", ConvectiveHeatTransferSideIntegral);
+registerMooseObject("HeatTransferApp", ADConvectiveHeatTransferSideIntegral);
 
 template <bool is_ad>
 InputParameters

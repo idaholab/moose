@@ -9,7 +9,7 @@
 
 #include "GapConductanceConstant.h"
 
-registerMooseObject("HeatConductionApp", GapConductanceConstant);
+registerMooseObject("HeatTransferApp", GapConductanceConstant);
 
 InputParameters
 GapConductanceConstant::validParams()

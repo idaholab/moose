@@ -9,7 +9,7 @@
 
 #include "ThinLayerHeatTransfer.h"
 
-registerMooseObject("HeatConductionApp", ThinLayerHeatTransfer);
+registerMooseObject("HeatTransferApp", ThinLayerHeatTransfer);
 
 InputParameters
 ThinLayerHeatTransfer::validParams()

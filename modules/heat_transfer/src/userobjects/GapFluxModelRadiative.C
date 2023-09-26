@@ -10,7 +10,7 @@
 #include "GapFluxModelRadiative.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("HeatConductionApp", GapFluxModelRadiative);
+registerMooseObject("HeatTransferApp", GapFluxModelRadiative);
 
 InputParameters
 GapFluxModelRadiative::validParams()

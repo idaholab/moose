@@ -10,7 +10,7 @@
 #include "ViewFactorRayBC.h"
 #include "ViewFactorRayStudy.h"
 
-registerMooseObject("HeatConductionApp", ViewFactorRayBC);
+registerMooseObject("HeatTransferApp", ViewFactorRayBC);
 
 InputParameters
 ViewFactorRayBC::validParams()

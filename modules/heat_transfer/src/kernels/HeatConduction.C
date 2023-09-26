@@ -10,7 +10,7 @@
 #include "HeatConduction.h"
 #include "MooseMesh.h"
 
-registerMooseObjectAliased("HeatConductionApp", HeatConductionKernel, "HeatConduction");
+registerMooseObjectAliased("HeatTransferApp", HeatConductionKernel, "HeatConduction");
 
 InputParameters
 HeatConductionKernel::validParams()

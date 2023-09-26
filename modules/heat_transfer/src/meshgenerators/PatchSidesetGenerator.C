@@ -37,7 +37,7 @@
 #include <limits>
 #include "libmesh/mesh_tools.h"
 
-registerMooseObject("HeatConductionApp", PatchSidesetGenerator);
+registerMooseObject("HeatTransferApp", PatchSidesetGenerator);
 
 InputParameters
 PatchSidesetGenerator::validParams()

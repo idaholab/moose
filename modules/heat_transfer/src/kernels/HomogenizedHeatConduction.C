@@ -9,7 +9,7 @@
 
 #include "HomogenizedHeatConduction.h"
 
-registerMooseObject("HeatConductionApp", HomogenizedHeatConduction);
+registerMooseObject("HeatTransferApp", HomogenizedHeatConduction);
 
 InputParameters
 HomogenizedHeatConduction::validParams()

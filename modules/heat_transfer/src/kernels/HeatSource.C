@@ -9,7 +9,7 @@
 
 #include "HeatSource.h"
 
-registerMooseObject("HeatConductionApp", HeatSource);
+registerMooseObject("HeatTransferApp", HeatSource);
 
 InputParameters
 HeatSource::validParams()

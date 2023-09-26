@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", ConvectiveFluxFunction);
+registerMooseObject("HeatTransferApp", ConvectiveFluxFunction);
 
 InputParameters
 ConvectiveFluxFunction::validParams()

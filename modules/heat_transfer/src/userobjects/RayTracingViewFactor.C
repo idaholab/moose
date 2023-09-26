@@ -11,7 +11,7 @@
 
 #include "ViewFactorRayStudy.h"
 
-registerMooseObject("HeatConductionApp", RayTracingViewFactor);
+registerMooseObject("HeatTransferApp", RayTracingViewFactor);
 
 InputParameters
 RayTracingViewFactor::validParams()

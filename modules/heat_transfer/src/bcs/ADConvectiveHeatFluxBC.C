@@ -9,7 +9,7 @@
 
 #include "ADConvectiveHeatFluxBC.h"
 
-registerMooseObject("HeatConductionApp", ADConvectiveHeatFluxBC);
+registerMooseObject("HeatTransferApp", ADConvectiveHeatFluxBC);
 
 InputParameters
 ADConvectiveHeatFluxBC::validParams()

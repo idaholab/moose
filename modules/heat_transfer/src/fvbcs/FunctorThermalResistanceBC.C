@@ -10,7 +10,7 @@
 #include "FunctorThermalResistanceBC.h"
 #include "HeatConductionNames.h"
 
-registerMooseObject("HeatConductionApp", FunctorThermalResistanceBC);
+registerMooseObject("HeatTransferApp", FunctorThermalResistanceBC);
 
 InputParameters
 FunctorThermalResistanceBC::validParams()

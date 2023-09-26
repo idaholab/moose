@@ -9,7 +9,7 @@
 
 #include "SideSetHeatTransferKernel.h"
 
-registerMooseObject("HeatConductionApp", SideSetHeatTransferKernel);
+registerMooseObject("HeatTransferApp", SideSetHeatTransferKernel);
 
 InputParameters
 SideSetHeatTransferKernel::validParams()

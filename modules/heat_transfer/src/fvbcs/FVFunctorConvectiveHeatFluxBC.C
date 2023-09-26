@@ -10,7 +10,7 @@
 #include "FVFunctorConvectiveHeatFluxBC.h"
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", FVFunctorConvectiveHeatFluxBC);
+registerMooseObject("HeatTransferApp", FVFunctorConvectiveHeatFluxBC);
 
 InputParameters
 FVFunctorConvectiveHeatFluxBC::validParams()

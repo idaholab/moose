@@ -10,8 +10,8 @@
 #include "InfiniteCylinderRadiativeBC.h"
 #include "MathUtils.h"
 
-registerMooseObject("HeatConductionApp", InfiniteCylinderRadiativeBC);
-registerMooseObject("HeatConductionApp", ADInfiniteCylinderRadiativeBC);
+registerMooseObject("HeatTransferApp", InfiniteCylinderRadiativeBC);
+registerMooseObject("HeatTransferApp", ADInfiniteCylinderRadiativeBC);
 
 template <bool is_ad>
 InputParameters

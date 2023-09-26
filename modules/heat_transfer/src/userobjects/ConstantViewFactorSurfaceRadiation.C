@@ -9,7 +9,7 @@
 
 #include "ConstantViewFactorSurfaceRadiation.h"
 
-registerMooseObject("HeatConductionApp", ConstantViewFactorSurfaceRadiation);
+registerMooseObject("HeatTransferApp", ConstantViewFactorSurfaceRadiation);
 
 InputParameters
 ConstantViewFactorSurfaceRadiation::validParams()

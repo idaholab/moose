@@ -15,7 +15,7 @@
 
 #include "libmesh/parallel_algebra.h"
 
-registerMooseObject("HeatConductionApp", ModularGapConductanceConstraint);
+registerMooseObject("HeatTransferApp", ModularGapConductanceConstraint);
 
 InputParameters
 ModularGapConductanceConstraint::validParams()

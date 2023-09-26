@@ -10,7 +10,7 @@
 #include "DirectionalFluxBC.h"
 #include "SelfShadowSideUserObject.h"
 
-registerMooseObject("HeatConductionApp", DirectionalFluxBC);
+registerMooseObject("HeatTransferApp", DirectionalFluxBC);
 
 InputParameters
 DirectionalFluxBC::validParams()

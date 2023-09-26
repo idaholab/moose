@@ -9,7 +9,7 @@
 
 #include "ADInterfaceJouleHeatingConstraint.h"
 
-registerMooseObject("HeatConductionApp", ADInterfaceJouleHeatingConstraint);
+registerMooseObject("HeatTransferApp", ADInterfaceJouleHeatingConstraint);
 
 InputParameters
 ADInterfaceJouleHeatingConstraint::validParams()

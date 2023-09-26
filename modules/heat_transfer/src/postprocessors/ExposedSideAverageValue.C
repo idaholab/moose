@@ -10,7 +10,7 @@
 #include "ExposedSideAverageValue.h"
 #include "SelfShadowSideUserObject.h"
 
-registerMooseObject("HeatConductionApp", ExposedSideAverageValue);
+registerMooseObject("HeatTransferApp", ExposedSideAverageValue);
 
 InputParameters
 ExposedSideAverageValue::validParams()

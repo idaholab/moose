@@ -12,8 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("HeatConductionApp", HeatConductionMaterial);
-registerMooseObject("HeatConductionApp", ADHeatConductionMaterial);
+registerMooseObject("HeatTransferApp", HeatConductionMaterial);
+registerMooseObject("HeatTransferApp", ADHeatConductionMaterial);
 
 template <bool is_ad>
 InputParameters

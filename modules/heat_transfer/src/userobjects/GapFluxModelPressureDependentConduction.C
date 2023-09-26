@@ -9,7 +9,7 @@
 
 #include "GapFluxModelPressureDependentConduction.h"
 
-registerMooseObject("HeatConductionApp", GapFluxModelPressureDependentConduction);
+registerMooseObject("HeatTransferApp", GapFluxModelPressureDependentConduction);
 
 InputParameters
 GapFluxModelPressureDependentConduction::validParams()

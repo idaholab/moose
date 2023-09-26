@@ -9,7 +9,7 @@
 
 #include "FunctorGapFluxModelRadiation.h"
 
-registerMooseObject("HeatConductionApp", FunctorGapFluxModelRadiation);
+registerMooseObject("HeatTransferApp", FunctorGapFluxModelRadiation);
 
 InputParameters
 FunctorGapFluxModelRadiation::validParams()

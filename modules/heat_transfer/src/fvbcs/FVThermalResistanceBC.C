@@ -10,7 +10,7 @@
 #include "FVThermalResistanceBC.h"
 #include "HeatConductionNames.h"
 
-registerMooseObject("HeatConductionApp", FVThermalResistanceBC);
+registerMooseObject("HeatTransferApp", FVThermalResistanceBC);
 
 InputParameters
 FVThermalResistanceBC::validParams()

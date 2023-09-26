@@ -9,7 +9,7 @@
 
 #include "GapConductanceConstraint.h"
 
-registerMooseObject("HeatConductionApp", GapConductanceConstraint);
+registerMooseObject("HeatTransferApp", GapConductanceConstraint);
 
 InputParameters
 GapConductanceConstraint::validParams()

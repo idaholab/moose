@@ -9,7 +9,7 @@
 
 #include "JouleHeatingSource.h"
 
-registerMooseObject("HeatConductionApp", JouleHeatingSource);
+registerMooseObject("HeatTransferApp", JouleHeatingSource);
 
 InputParameters
 JouleHeatingSource::validParams()

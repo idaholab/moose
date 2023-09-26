@@ -10,8 +10,8 @@
 #include "FunctionRadiativeBC.h"
 #include "MathUtils.h"
 
-registerMooseObject("HeatConductionApp", FunctionRadiativeBC);
-registerMooseObject("HeatConductionApp", ADFunctionRadiativeBC);
+registerMooseObject("HeatTransferApp", FunctionRadiativeBC);
+registerMooseObject("HeatTransferApp", ADFunctionRadiativeBC);
 
 template <bool is_ad>
 InputParameters

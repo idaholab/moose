@@ -10,7 +10,7 @@
 #include "FunctorGapFluxModelConduction.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("HeatConductionApp", FunctorGapFluxModelConduction);
+registerMooseObject("HeatTransferApp", FunctorGapFluxModelConduction);
 
 InputParameters
 FunctorGapFluxModelConduction::validParams()

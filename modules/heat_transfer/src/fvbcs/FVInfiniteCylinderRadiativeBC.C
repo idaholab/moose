@@ -10,7 +10,7 @@
 #include "FVInfiniteCylinderRadiativeBC.h"
 #include "MathUtils.h"
 
-registerMooseObject("HeatConductionApp", FVInfiniteCylinderRadiativeBC);
+registerMooseObject("HeatTransferApp", FVInfiniteCylinderRadiativeBC);
 
 InputParameters
 FVInfiniteCylinderRadiativeBC::validParams()

@@ -9,8 +9,8 @@
 
 #include "FinEnhancementFactorFunctorMaterial.h"
 
-registerMooseObject("HeatConductionApp", FinEnhancementFactorFunctorMaterial);
-registerMooseObject("HeatConductionApp", ADFinEnhancementFactorFunctorMaterial);
+registerMooseObject("HeatTransferApp", FinEnhancementFactorFunctorMaterial);
+registerMooseObject("HeatTransferApp", ADFinEnhancementFactorFunctorMaterial);
 
 template <bool is_ad>
 InputParameters

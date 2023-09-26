@@ -10,7 +10,7 @@
 #include "ViewFactorObjectSurfaceRadiation.h"
 #include "ViewFactorBase.h"
 
-registerMooseObject("HeatConductionApp", ViewFactorObjectSurfaceRadiation);
+registerMooseObject("HeatTransferApp", ViewFactorObjectSurfaceRadiation);
 
 InputParameters
 ViewFactorObjectSurfaceRadiation::validParams()

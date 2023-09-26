@@ -10,7 +10,7 @@
 #include "ViewFactorPP.h"
 #include "ViewFactorBase.h"
 
-registerMooseObject("HeatConductionApp", ViewFactorPP);
+registerMooseObject("HeatTransferApp", ViewFactorPP);
 
 InputParameters
 ViewFactorPP::validParams()

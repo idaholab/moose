@@ -9,7 +9,7 @@
 
 #include "ADConvectiveHeatFluxTest.h"
 
-registerMooseObject("HeatConductionTestApp", ADConvectiveHeatFluxTest);
+registerMooseObject("HeatTransferTestApp", ADConvectiveHeatFluxTest);
 
 InputParameters
 ADConvectiveHeatFluxTest::validParams()

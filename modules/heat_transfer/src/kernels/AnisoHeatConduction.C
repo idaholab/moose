@@ -9,7 +9,7 @@
 
 #include "AnisoHeatConduction.h"
 
-registerMooseObject("HeatConductionApp", AnisoHeatConduction);
+registerMooseObject("HeatTransferApp", AnisoHeatConduction);
 
 InputParameters
 AnisoHeatConduction::validParams()

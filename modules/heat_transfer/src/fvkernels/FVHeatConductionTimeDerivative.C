@@ -9,7 +9,7 @@
 
 #include "FVHeatConductionTimeDerivative.h"
 
-registerMooseObject("HeatConductionApp", FVHeatConductionTimeDerivative);
+registerMooseObject("HeatTransferApp", FVHeatConductionTimeDerivative);
 
 InputParameters
 FVHeatConductionTimeDerivative::validParams()

@@ -11,7 +11,7 @@
 #include "libmesh/utility.h"
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", GapFluxModelConduction);
+registerMooseObject("HeatTransferApp", GapFluxModelConduction);
 
 InputParameters
 GapFluxModelConduction::validParams()

@@ -16,11 +16,11 @@
 #include "ViewFactorRayBC.h"
 #include "ViewFactorRayStudy.h"
 
-registerMooseAction("HeatConductionApp", RadiationTransferAction, "append_mesh_generator");
-registerMooseAction("HeatConductionApp", RadiationTransferAction, "setup_mesh_complete");
-registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_user_object");
-registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_bc");
-registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_ray_boundary_condition");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "append_mesh_generator");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "setup_mesh_complete");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_user_object");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_bc");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_ray_boundary_condition");
 
 InputParameters
 RadiationTransferAction::validParams()

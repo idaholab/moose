@@ -12,7 +12,7 @@
 #include <limits>
 #include "libmesh/utility.h"
 
-registerMooseObject("HeatConductionApp", SurfaceRadiationVectorPostprocessor);
+registerMooseObject("HeatTransferApp", SurfaceRadiationVectorPostprocessor);
 
 InputParameters
 SurfaceRadiationVectorPostprocessor::validParams()

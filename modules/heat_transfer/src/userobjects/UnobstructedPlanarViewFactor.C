@@ -20,7 +20,7 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("HeatConductionApp", UnobstructedPlanarViewFactor);
+registerMooseObject("HeatTransferApp", UnobstructedPlanarViewFactor);
 
 InputParameters
 UnobstructedPlanarViewFactor::validParams()

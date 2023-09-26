@@ -10,7 +10,7 @@
 #include "GaussianEnergyFluxBC.h"
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", GaussianEnergyFluxBC);
+registerMooseObject("HeatTransferApp", GaussianEnergyFluxBC);
 
 InputParameters
 GaussianEnergyFluxBC::validParams()

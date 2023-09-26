@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", FunctionPathEllipsoidHeatSource);
+registerMooseObject("HeatTransferApp", FunctionPathEllipsoidHeatSource);
 
 InputParameters
 FunctionPathEllipsoidHeatSource::validParams()

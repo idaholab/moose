@@ -9,7 +9,7 @@
 
 #include "GrayLambertSurfaceRadiationPP.h"
 
-registerMooseObject("HeatConductionApp", GrayLambertSurfaceRadiationPP);
+registerMooseObject("HeatTransferApp", GrayLambertSurfaceRadiationPP);
 
 InputParameters
 GrayLambertSurfaceRadiationPP::validParams()

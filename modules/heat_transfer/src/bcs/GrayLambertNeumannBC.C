@@ -10,7 +10,7 @@
 #include "GrayLambertNeumannBC.h"
 #include "MathUtils.h"
 
-registerMooseObject("HeatConductionApp", GrayLambertNeumannBC);
+registerMooseObject("HeatTransferApp", GrayLambertNeumannBC);
 
 Real GrayLambertNeumannBC::_sigma_stefan_boltzmann = 5.670367e-8;
 

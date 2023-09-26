@@ -10,8 +10,8 @@
 #include "CylindricalGapHeatFluxFunctorMaterial.h"
 #include "HeatTransferModels.h"
 
-registerMooseObject("HeatConductionApp", CylindricalGapHeatFluxFunctorMaterial);
-registerMooseObject("HeatConductionApp", ADCylindricalGapHeatFluxFunctorMaterial);
+registerMooseObject("HeatTransferApp", CylindricalGapHeatFluxFunctorMaterial);
+registerMooseObject("HeatTransferApp", ADCylindricalGapHeatFluxFunctorMaterial);
 
 template <bool is_ad>
 InputParameters

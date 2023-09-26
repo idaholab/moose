@@ -28,12 +28,12 @@ static unsigned int bcs_counter = 0;
 // Counter for naming aux kernels
 static unsigned int aux_kenels_counter = 0;
 
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_aux_kernel");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_aux_variable");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_bc");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_dirac_kernel");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_material");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_secondary_flux_vector");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_aux_kernel");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_aux_variable");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_bc");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_dirac_kernel");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_material");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_secondary_flux_vector");
 
 InputParameters
 ThermalContactAction::validParams()
