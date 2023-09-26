@@ -170,7 +170,7 @@ dictionary used for this option. These sub-options are detailed as follows.
   specifications.
 - `specs`: A list of test specifications names.
 - `dependencies`: A list of category dependencies. For example, in [example-categories-config]
-  the "heat_conduction" category depends on the "framework" category. This list allows the
+  the "heat_transfer" category depends on the "framework" category. This list allows the
   dependency lists within the various SQA documents.
 - `reports`: Options for SQA report generation, see [python/moosesqa/index.md] for additional
   details.
@@ -184,15 +184,15 @@ MooseDocs.extensions.sqa:
             specs:
                 - tests
             repo: moose
-         heat_conduction:
+         heat_transfer:
             directories:
-                - ${MOOSE_DIR}/modules/heat_conduction/test/tests
+                - ${MOOSE_DIR}/modules/heat_transfer/test/tests
             specs:
                 - tests
             dependencies:
                 - framework
             repo: moose
-            reports: !include ${MOOSE_DIR}/modules/heat_conduction/doc/sqa_reports.yml
+            reports: !include ${MOOSE_DIR}/modules/heat_transfer/doc/sqa_reports.yml
 
 ### +`requirement-groups`+
 
