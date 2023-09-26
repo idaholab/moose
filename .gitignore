@@ -282,7 +282,7 @@ share/
 /modules/peridynamics/peridynamics.yaml
 /modules/ray_tracing/ray_tracing.yaml
 /modules/phase_field/phase_field.yaml
-/modules/heat_conduction/heat_conduction.yaml
+/modules/heat_transfer/heat_transfer.yaml
 /modules/tensor_mechanics/tensor_mechanics.yaml
 /modules/richards/richards.yaml
 /modules/level_set/level_set.yaml
@@ -309,7 +309,7 @@ share/
 /modules/peridynamics/unit/peridynamics-unit.yaml
 /modules/ray_tracing/unit/ray_tracing-unit.yaml
 /modules/phase_field/unit/phase_field-unit.yaml
-/modules/heat_conduction/unit/heat_conduction-unit.yaml
+/modules/heat_transfer/unit/heat_transfer-unit.yaml
 /modules/tensor_mechanics/unit/tensor_mechanics-unit.yaml
 /modules/richards/unit/richards-unit.yaml
 /modules/level_set/unit/level_set-unit.yaml
