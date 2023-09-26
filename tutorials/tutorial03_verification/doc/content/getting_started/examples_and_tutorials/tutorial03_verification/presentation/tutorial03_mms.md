@@ -175,7 +175,7 @@ Executing the simulation is straightforward, simply execute the heat conduction 
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_conduction/heat_conduction-opt -i 2d_main.i
+~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 2d_main.i
 ```
 
 !---

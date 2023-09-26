@@ -21,13 +21,13 @@ implemented in the MOOSE heat conduction module as `ADHeatConduction`.
 
 ## ADHeatConduction.h
 
-!listing heat_conduction/include/kernels/ADHeatConduction.h
+!listing heat_transfer/include/kernels/ADHeatConduction.h
 
 !---
 
 ## ADHeatConduction.C
 
-!listing heat_conduction/src/kernels/ADHeatConduction.C
+!listing heat_transfer/src/kernels/ADHeatConduction.C
 
 !---
 
@@ -85,13 +85,13 @@ only an update to the input file is required to run the transient case.
 
 ## ADHeatConductionTimeDerivative.h
 
-!listing heat_conduction/include/kernels/ADHeatConductionTimeDerivative.h
+!listing heat_transfer/include/kernels/ADHeatConductionTimeDerivative.h
 
 !---
 
 ## ADHeatConductionTimeDerivative.C
 
-!listing heat_conduction/src/kernels/ADHeatConductionTimeDerivative.C
+!listing heat_transfer/src/kernels/ADHeatConductionTimeDerivative.C
 
 !---
 
