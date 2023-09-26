@@ -1,8 +1,8 @@
 # Step 1 - Basic Thermal/Mechanical Coupling
 
-In the tutorials for the Heat Conduction and Tensor Mechanics modules,
-basic thermal and mechanical problems were developed. The Heat Conduction tutorial
-culminated with a [model](heat_conduction/tutorials/introduction/therm_step03a.md)
+In the tutorials for the Heat Transfer and Tensor Mechanics modules,
+basic thermal and mechanical problems were developed. The Heat Transfer tutorial
+culminated with a [model](heat_transfer/tutorials/introduction/therm_step03a.md)
 that solves the heat equation on a simple rectangular domain, including terms
 for heat conduction, time-dependent effects, and volumetric heating.
 
@@ -23,10 +23,10 @@ in a single input file, and defining interactions between the physics.
 
 The `Variables` block in this input files looks just like it does for a thermal-only
 problem. A single variable,`T`, is defined, with an initial condition of 300 Kelvin.
-An obvious question is why no variables are defined for mechanics. Coupled physics 
+An obvious question is why no variables are defined for mechanics. Coupled physics
 problems are usually defined in MOOSE by defining multiple variables and their associated
 Kernels. This is actually done in this model, but the `Modules/TensorMechanics/Master` Action
-block automatically sets up the displacement variables, so they don't explicitly 
+block automatically sets up the displacement variables, so they don't explicitly
 appear in the `Variables` block in the input file. That Action sets up variables
 with the names defined by the `displacements` parameter, which is defined in
 `GlobalParams`. In this case, there are thus three solution variables: `T`, `disp_x`,
@@ -57,7 +57,7 @@ this ensures that a consistent set of options are selected for the desired formu
 
 ### `Materials`
 
-Material properties must be defined for both the thermal and mechanical models. 
+Material properties must be defined for both the thermal and mechanical models.
 For the thermal model, the thermal conductivity, specific heat, and density
 are needed. For the mechanical model, the elasticity tensor, thermal eigenstrain, and stress
 are computed. The models listed here are essentially a combination of the models
