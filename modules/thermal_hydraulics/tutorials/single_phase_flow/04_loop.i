@@ -15,9 +15,9 @@ tot_power = 100     # W
 
 [GlobalParams]
   initial_p = ${press}
-  initial_vel = 0
+  initial_vel = 1
   initial_T = ${T_in}
-  initial_vel_x = 0
+  initial_vel_x = 1
   initial_vel_y = 0
   initial_vel_z = 0
 
@@ -272,8 +272,8 @@ tot_power = 100     # W
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
   nl_max_its = 5
 []
 
