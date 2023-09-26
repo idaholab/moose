@@ -57,23 +57,24 @@
 
 [Executioner]
   type = Transient
-  num_steps = 40
+  num_steps = 2
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  exodus = true
-[]
-
-[Controls]
-  [constraints]
-    type = TimePeriod
-    disable_objects = 'Constraints/lower Constraint::complete'
-    start_time      = '0.0   2.0'
-    end_time        = '2.0   4.0'
-    execute_on = 'initial timestep_begin'
+[Postprocessors]
+  [test_time_type]
+    type = TestVectorType
+    system = nl
+    vector = TIME
+    vector_type = ghosted
+  []
+  [test_nontime_type]
+    type = TestVectorType
+    system = nl
+    vector = NONTIME
+    vector_type = ghosted
   []
 []

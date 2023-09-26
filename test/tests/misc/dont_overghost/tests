@@ -1,0 +1,15 @@
+[Tests]
+  design = 'NonlinearSystemBase.md'
+  [ghosted]
+    type = RunApp
+    input = test_properly_ghosted.i
+    issues = '#20654'
+    requirement = 'The system shall add ghost entries to residual vectors when needed'
+  []
+  [not_ghosted]
+    type = RunApp
+    input = test_vector_type.i
+    issues = '#20654'
+    requirement = 'The system shall not add ghost entries to residual vectors when not needed'
+  []
+[]

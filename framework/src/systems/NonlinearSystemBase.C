@@ -948,8 +948,20 @@ NonlinearSystemBase::getResidualTimeVector()
   if (!_Re_time)
   {
     _Re_time_tag = _fe_problem.addVectorTag("TIME");
-    _Re_time = &addVector(_Re_time_tag, false, GHOSTED);
+
+    // Most applications don't need the expense of ghosting
+    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    _Re_time = &addVector(_Re_time_tag, false, ptype);
   }
+  else if (_need_residual_ghosted && _Re_time->type() == PARALLEL)
+  {
+    const auto vector_name = _subproblem.vectorTagName(_Re_time_tag);
+
+    // If an application changes its mind, the libMesh API lets us
+    // change the vector.
+    _Re_time = &system().add_vector(vector_name, false, GHOSTED);
+  }
+
   return *_Re_time;
 }
 
@@ -959,8 +971,20 @@ NonlinearSystemBase::getResidualNonTimeVector()
   if (!_Re_non_time)
   {
     _Re_non_time_tag = _fe_problem.addVectorTag("NONTIME");
-    _Re_non_time = &addVector(_Re_non_time_tag, false, GHOSTED);
+
+    // Most applications don't need the expense of ghosting
+    ParallelType ptype = _need_residual_ghosted ? GHOSTED : PARALLEL;
+    _Re_non_time = &addVector(_Re_non_time_tag, false, ptype);
   }
+  else if (_need_residual_ghosted && _Re_non_time->type() == PARALLEL)
+  {
+    const auto vector_name = _subproblem.vectorTagName(_Re_non_time_tag);
+
+    // If an application changes its mind, the libMesh API lets us
+    // change the vector.
+    _Re_non_time = &system().add_vector(vector_name, false, GHOSTED);
+  }
+
   return *_Re_non_time;
 }
 
@@ -3167,7 +3191,28 @@ NonlinearSystemBase::residualGhosted()
 {
   _need_residual_ghosted = true;
   if (!_residual_ghosted)
+  {
+    // The first time we realize we need a ghosted residual vector,
+    // we add it.
     _residual_ghosted = &addVector("residual_ghosted", false, GHOSTED);
+
+    // If we've already realized we need time and/or non-time
+    // residual vectors, but we haven't yet realized they need to be
+    // ghosted, fix that now.
+    //
+    // If an application changes its mind, the libMesh API lets us
+    // change the vector.
+    if (_Re_time)
+    {
+      const auto vector_name = _subproblem.vectorTagName(_Re_time_tag);
+      _Re_time = &system().add_vector(vector_name, false, GHOSTED);
+    }
+    if (_Re_non_time)
+    {
+      const auto vector_name = _subproblem.vectorTagName(_Re_non_time_tag);
+      _Re_non_time = &system().add_vector(vector_name, false, GHOSTED);
+    }
+  }
   return *_residual_ghosted;
 }
 
