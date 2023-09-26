@@ -173,8 +173,8 @@
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       NONZERO               1e-15'
   solve_type = NEWTON
 []
 
