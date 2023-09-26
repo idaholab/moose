@@ -578,6 +578,7 @@ LiquidMetalInterWrapper1PhaseProblem::externalSolve()
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
   }
 
+  /// TODO: add a verbose print flag
   auto Total_surface_area = 0.0;
   auto mass_flow_in = 0.0;
   auto mass_flow_out = 0.0;
