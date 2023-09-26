@@ -10,7 +10,7 @@ rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
 Total_surface_area = 0.000452826 #m2
 Blocked_surface_area = ${fparse 8.65158e-06 * 13}
 Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
-vol_flow = 0.0034 #m3/sec
+vol_flow = 0.00341 #m3/sec
 mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
