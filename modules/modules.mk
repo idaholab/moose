@@ -23,7 +23,7 @@ ifeq ($(ALL_MODULES),yes)
         FSI                         := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
         GEOCHEMISTRY                := yes
-        HEAT_CONDUCTION             := yes
+        HEAT_TRANSFER               := yes
         LEVEL_SET                   := yes
         MISC                        := yes
         OPTIMIZATION                := yes
@@ -48,7 +48,7 @@ endif
 ifeq ($(THERMAL_HYDRAULICS),yes)
         NAVIER_STOKES               := yes
         FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
+        HEAT_TRANSFER               := yes
         RAY_TRACING                 := yes
         RDG                         := yes
         SOLID_PROPERTIES            := yes
@@ -62,19 +62,25 @@ endif
 
 ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
+        HEAT_TRANSFER               := yes
         RDG                         := yes
 endif
 
 ifeq ($(SOLID_PROPERTIES),yes)
-        HEAT_CONDUCTION             := yes
+        HEAT_TRANSFER               := yes
 endif
 
 ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
 
+# heat_conduction was renamed to heat_transfer
 ifeq ($(HEAT_CONDUCTION),yes)
+  HEAT_TRANSFER      := yes
+  $(warning The heat conduction module was renamed to the heat transfer module. Please update your Makefile and replace HEAT_CONDUCTION with HEAT_TRANSFER)
+endif
+
+ifeq ($(HEAT_TRANSFER),yes)
         RAY_TRACING                 := yes
 endif
 
@@ -101,15 +107,15 @@ ifeq ($(SCALAR_TRANSPORT),yes)
         NAVIER_STOKES               := yes
         THERMAL_HYDRAULICS          := yes
         FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
+        HEAT_TRANSFER               := yes
         RDG                         := yes
         RAY_TRACING                 := yes
         SOLID_PROPERTIES            := yes
         MISC                        := yes
 endif
 
-# The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
+# The complete list of all moose modules
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_transfer level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -211,18 +217,18 @@ endif
 # dependencies are defined first
 
 # Depended on by navier_stokes, fsi (through navier_stokes)
-ifeq ($(HEAT_CONDUCTION),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
-  APPLICATION_NAME   := heat_conduction
+ifeq ($(HEAT_TRANSFER),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_transfer
+  APPLICATION_NAME   := heat_transfer
   DEPEND_MODULES     := ray_tracing
-  SUFFIX             := hc
+  SUFFIX             := ht
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
 ifeq ($(SOLID_PROPERTIES),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
   APPLICATION_NAME   := solid_properties
-  DEPEND_MODULES     := heat_conduction
+  DEPEND_MODULES     := heat_transfer
   SUFFIX             := sp
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -239,7 +245,7 @@ endif
 ifeq ($(NAVIER_STOKES),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
   APPLICATION_NAME   := navier_stokes
-  DEPEND_MODULES     := fluid_properties rdg heat_conduction
+  DEPEND_MODULES     := fluid_properties rdg heat_transfer
   SUFFIX             := ns
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -304,7 +310,7 @@ endif
 ifeq ($(THERMAL_HYDRAULICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/thermal_hydraulics
   APPLICATION_NAME   := thermal_hydraulics
-  DEPEND_MODULES     := navier_stokes fluid_properties heat_conduction rdg ray_tracing solid_properties misc
+  DEPEND_MODULES     := navier_stokes fluid_properties heat_transfer rdg ray_tracing solid_properties misc
   SUFFIX             := th
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -312,7 +318,7 @@ endif
 ifeq ($(SCALAR_TRANSPORT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/scalar_transport
   APPLICATION_NAME   := scalar_transport
-  DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_conduction rdg ray_tracing solid_properties misc
+  DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_transfer rdg ray_tracing solid_properties misc
   SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
