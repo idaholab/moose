@@ -44,7 +44,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual bool hasMaterialTimeDerivative() const { return true; }
+  virtual bool hasMaterialTimeDerivative() const override { return true; }
 
   /**
    * A virtual method that allows us to reuse all the code from free-flow for porous

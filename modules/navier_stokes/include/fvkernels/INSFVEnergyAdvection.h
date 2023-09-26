@@ -23,7 +23,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual bool hasMaterialTimeDerivative() const { return true; }
+  virtual bool hasMaterialTimeDerivative() const override { return true; }
 
   /// The advected heat quantity
   const Moose::Functor<ADReal> & _adv_quant;

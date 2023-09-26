@@ -22,7 +22,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual bool hasMaterialTimeDerivative() const { return false; }
+  virtual bool hasMaterialTimeDerivative() const override { return false; }
 
   /// Density
   const Moose::Functor<ADReal> & _rho;

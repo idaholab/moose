@@ -21,5 +21,5 @@ public:
   PWCNSFVMassAdvection(const InputParameters & params);
 
 protected:
-  virtual bool hasMaterialTimeDerivative() const { return true; }
+  virtual bool hasMaterialTimeDerivative() const override { return true; }
 };
