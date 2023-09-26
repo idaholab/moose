@@ -178,7 +178,7 @@ ShaftConnectedPump1Phase::addMooseObjects()
     getTHMProblem().addAuxScalarKernel(class_name, Component::genName(name(), "head_aux"), params);
   }
   {
-    std::string class_name = "HydraulicTorqueAux";
+    std::string class_name = "PumpHydraulicTorqueAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _hydraulic_torque_var_name;
     params.set<UserObjectName>("pump_uo") = getShaftConnectedUserObjectName();
