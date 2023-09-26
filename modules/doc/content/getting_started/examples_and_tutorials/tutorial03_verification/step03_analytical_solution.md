@@ -127,7 +127,7 @@ with the input file included using the "-i" option as follows.
 
 ```
 cd ~/projects/moose/tutorials/tutorial03_verification/step03_analytical
-~/projects/moose/modules/heat_conduction/heat_conduction-opt -i 1d_analytical.i
+~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 1d_analytical.i
 ```
 
 When complete an output file will be produced with the name "1d_analytical_out.e", this file

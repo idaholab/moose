@@ -123,7 +123,7 @@ with the input file included using the "-i" option as follows.
 
 ```
 cd ~/projects/problems/verification
-../../moose/modules/heat_conduction/heat_conduction-opt -i 2d_main.i
+../../moose/modules/heat_transfer/heat_conduction-opt -i 2d_main.i
 ```
 
 When complete an output file will be produced with the name "2d_main_out.e", this file
