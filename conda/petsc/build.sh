@@ -36,9 +36,8 @@ else
     FCFLAGS="${FCFLAGS} -I$PREFIX/include"
 fi
 
-# Remove std=C++17 from CXXFLAGS as we specify the C++ dialect for PETSc as C++11 in configure_petsc.
-# Specifying both causes an error as of PETSc 3.17, and C++11 as the dialect seems to still be needed
-# for min clang/gcc.
+# Remove std=C++17 from CXXFLAGS as we specify the C++ dialect for PETSc as C++17 in configure_petsc.
+# Specifying both causes an error as of PETSc 3.17.
 CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
 
 source $PETSC_DIR/configure_petsc.sh

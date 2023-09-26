@@ -2,7 +2,7 @@
   design = 'Surrogates/index.md'
   issues = '#15538'
   [train]
-    requirement = "The sytem shall train a POD surrogate model for the POD-RB example."
+    requirement = "The system shall train a POD surrogate model for the POD-RB example."
     type = CheckFiles
     input = trainer.i
     allow_test_objects = true
@@ -13,7 +13,7 @@
     max_parallel = 2
   []
   [evaluate]
-    requirement = "The sytem shall evaluate a POD surrogate model for the POD-RB example."
+    requirement = "The system shall evaluate a POD surrogate model for the POD-RB example."
     type = CSVDiff
     input = surr.i
     allow_test_objects = true

@@ -3,7 +3,7 @@
   design = 'Surrogates/index.md'
 
   [1D_HC_avg]
-    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the 1D exampl"
+    requirement = "The system shall test syntax for training gaussian process surrogate models for the 1D example"
     [untuned]
       type = CSVDiff
       input = gaussian_process_uniform_1D.i
@@ -21,7 +21,7 @@
     []
   []
   [2D_HC_avg]
-    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the 2D exampl"
+    requirement = "The system shall test syntax for training gaussian process surrogate models for the 2D example"
     [untuned]
       type = CSVDiff
       input = gaussian_process_uniform_2D.i
@@ -41,7 +41,7 @@
     []
   []
   [4D_HC_avg]
-    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the full 4D example "
+    requirement = "The system shall test syntax for training gaussian process surrogate models for the full 4D example "
     [train]
       type = CheckFiles
       input = GP_normal_mc.i
