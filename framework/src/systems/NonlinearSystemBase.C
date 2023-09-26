@@ -1522,7 +1522,9 @@ NonlinearSystemBase::residualSetup()
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
 
-  _fe_problem.residualSetup();
+  // Avoid recursion
+  if (this == &_fe_problem.currentNonlinearSystem())
+    _fe_problem.residualSetup();
   _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
@@ -2577,7 +2579,9 @@ NonlinearSystemBase::jacobianSetup()
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
 
-  _fe_problem.jacobianSetup();
+  // Avoid recursion
+  if (this == &_fe_problem.currentNonlinearSystem())
+    _fe_problem.jacobianSetup();
   _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
