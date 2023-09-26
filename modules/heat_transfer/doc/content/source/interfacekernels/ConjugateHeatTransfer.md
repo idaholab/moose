@@ -30,7 +30,7 @@ equation is solved for the solid temperature.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/conjugate_heat_transfer/conjugate_heat_transfer.i
+!listing modules/heat_transfer/test/tests/conjugate_heat_transfer/conjugate_heat_transfer.i
  block=InterfaceKernels
 
 !syntax parameters /InterfaceKernels/ConjugateHeatTransfer

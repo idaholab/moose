@@ -1,4 +1,4 @@
-!template load file=sqa/module_srs.md.template category=heat_conduction module=Heat Conduction
+!template load file=sqa/module_srs.md.template category=heat_transfer module=Heat Conduction
 
 !template! item key=system-purpose
 !! system-purpose-begin

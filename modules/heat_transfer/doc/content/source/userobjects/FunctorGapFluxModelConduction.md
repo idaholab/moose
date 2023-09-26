@@ -13,12 +13,12 @@ object may be the more appropriate object to use.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/fv_modular_gap_heat_transfer_mortar_radiation_conduction.i block=UserObjects/conduction
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/fv_modular_gap_heat_transfer_mortar_radiation_conduction.i block=UserObjects/conduction
 
 `FunctorGapFluxModelConduction` must be used in conjunction with the modular gap conductance
 constraint as shown below:
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/fv_modular_gap_heat_transfer_mortar_radiation_conduction.i block=Constraints/ced
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/fv_modular_gap_heat_transfer_mortar_radiation_conduction.i block=Constraints/ced
 
 !syntax parameters /UserObjects/FunctorGapFluxModelConduction
 

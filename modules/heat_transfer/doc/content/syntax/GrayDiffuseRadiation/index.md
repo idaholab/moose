@@ -28,7 +28,7 @@ The raytracing computation uses the `QGRID` quadrature available in libMesh whic
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/radiation_transfer_action/radiative_transfer_action.i
+!listing modules/heat_transfer/test/tests/radiation_transfer_action/radiative_transfer_action.i
 block=GrayDiffuseRadiation/cavity
 
 !syntax parameters /GrayDiffuseRadiation

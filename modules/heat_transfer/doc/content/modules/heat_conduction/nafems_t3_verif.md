@@ -15,12 +15,12 @@ is modeled using uniform sized elements with either a coarse mesh (5 elements,
 transient heat conduction simulation is performed with a total simulation time
 of 32 seconds. The simulation was modeled using 1D, 2D and 3D element types.
 
-!media media/heat_conduction/nafems_t3_coarse_mesh.png
+!media media/heat_transfer/nafems_t3_coarse_mesh.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:t3_coarse_mesh
        caption=Coarse mesh for NAFEMS T3 transient heat conduction model.
 
-!media media/heat_conduction/nafems_t3_fine_mesh.png
+!media media/heat_transfer/nafems_t3_fine_mesh.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:t3_fine_mesh
        caption=Fine mesh for NAFEMS T3 transient heat conduction model.

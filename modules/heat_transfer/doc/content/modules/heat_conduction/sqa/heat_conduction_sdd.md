@@ -1,4 +1,4 @@
-!template load file=sqa/module_sdd.md.template category=heat_conduction module=Heat Conduction
+!template load file=sqa/module_sdd.md.template category=heat_transfer module=Heat Conduction
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits
@@ -7,7 +7,7 @@ Specific details unique to the module are outlined in this document.
 !template-end!
 
 !template! item key=system-scope
-!include heat_conduction_srs.md start=system-scope-begin end=system-scope-finish
+!include heat_transfer_srs.md start=system-scope-begin end=system-scope-finish
 !template-end!
 
 !template! item key=dependencies-and-limitations

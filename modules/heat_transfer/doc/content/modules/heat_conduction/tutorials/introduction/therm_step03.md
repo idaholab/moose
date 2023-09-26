@@ -15,7 +15,7 @@ where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordi
 The first step will be to add the time derivative term to this equation, and
 then in a subsequent step, a volumetric heating term will be added.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03.i
+!listing modules/heat_transfer/tutorials/introduction/therm_step03.i
 
 ## Input file
 
@@ -29,7 +29,7 @@ effect on the transient solution. The `initial_condition` parameter is set
 for the `T` variable to 300. Units of Kelvin are used here, and this is close
 to room temperature.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Variables
+!listing modules/heat_transfer/tutorials/introduction/therm_step03.i block=Variables
 
 ### `Kernels`
 
@@ -38,7 +38,7 @@ time dependent term $\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t}
 in the heat equation. The Kernel that provides this term is named `HeatConductionTimeDerivative`
 because this term has a dependence on the time derivative of the temperature.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Kernels
+!listing modules/heat_transfer/tutorials/introduction/therm_step03.i block=Kernels
 
 ### `Materials`
 
@@ -56,7 +56,7 @@ is a material model that can be used to define one or more properties by providi
 the name of the property and the constant value. This is used here as a simple way
 to define the density.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Materials
+!listing modules/heat_transfer/tutorials/introduction/therm_step03.i block=Materials
 
 ## Questions
 
@@ -64,7 +64,7 @@ Before running the model, consider the initial conditions and boundary condition
 and estimate what expected solution should be when the time-dependent term
 is included.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer03a.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer03a.md)
 
 Now go ahead and run the input and visualize the result to see if it matches
 the behavior you would expect.
@@ -75,14 +75,14 @@ Which parameters would you expect to be able to change to give a solution that m
 more closely with the steady-state solution? Try changing those parameters to see if they
 have the expected effect after re-running the model.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer03b.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer03b.md)
 
 ### Sidebar: 
 
 > Some problems also have volumetric heating, which can be included by adding another
 > Kernel.
 
-[Click here for the sidebar on adding volumetric heating.](heat_conduction/tutorials/introduction/therm_step03a.md)
+[Click here for the sidebar on adding volumetric heating.](heat_transfer/tutorials/introduction/therm_step03a.md)
 
 
 ### Comparison of results

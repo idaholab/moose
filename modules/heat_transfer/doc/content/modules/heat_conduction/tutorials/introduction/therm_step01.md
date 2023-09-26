@@ -2,7 +2,7 @@
 
 Let's get started with a minimal input file.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i
 
 ## Input file
 
@@ -41,7 +41,7 @@ is the temperature. The name of the variable is defined by the name in the openi
 brackets of the block (`[T]`). There is no content in the block in this case because
 only the default parameters are used.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Variables
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i block=Variables
 
 ### `Kernels`
 
@@ -49,10 +49,10 @@ This top-level block is used to define the kernels that provide volume integrals
 in the partial differential equation being solved. Generally, a separate `Kernel`
 is used to define each term in a partial differential equation. The full heat equation
 is generally expressed with multiple terms, as described in the Heat Conduction module
-[introduction](modules/heat_conduction/index.md). However, for this simple example, we are only
+[introduction](modules/heat_transfer/index.md). However, for this simple example, we are only
 including the conduction term, so the equation being solve takes the form:
 
-\begin{equation}\label{eq:heat_conduction_equation}
+\begin{equation}\label{eq:heat_transfer_equation}
   0 = \nabla k(t,\vec{x}) \nabla T ~\text{for}~\vec{x} \in \Omega,
 \end{equation}
 
@@ -60,14 +60,14 @@ where $T$ is the temperature, $t$ is time, $\vec{x}$ is the vector of spatial co
 and $\Omega$ is the solution domain. Later problems in this series will add the
 additional terms to the heat equation.
 
-The single `[heat_conduction]' block nested in the `Kernels` block defines the conduction
+The single `[heat_transfer]' block nested in the `Kernels` block defines the conduction
 term in the heat equation defined above. The `type = HeatConduction` parameter defines
 the name of the Kernel object that provides that term, and the `variable = T` parameter
 defines the variable that the kernel is operating on. There is only one variable in the case
 of this model, but in a multiphysics simulation, individual kernels would be assigned
 to operate on specific variables.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Kernels
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i block=Kernels
 
 ### `Materials`
 
@@ -80,7 +80,7 @@ The `HeatConductionMaterial` is a model that provides basic properties used for
 the terms in the heat equation. In this case, the only property needed is the thermal
 conductivity, which is defined with a constant value.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Materials
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i block=Materials
 
 ### `Executioner`
 
@@ -89,7 +89,7 @@ problem are set. [`type = Transient`](Transient.md) selects a time-dependent sim
 opposed to [`type = Steady`](Steady.md)). We chose to run for five simulation steps; with a
 timestep of `1`.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Executioner
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i block=Executioner
 
 ### `Outputs`
 
@@ -97,7 +97,7 @@ We use the `exodus = true` shorthand to setup an output object of type `Exodus` 
 an Exodus II mesh and solution file to the disk. You can visualize these outputs using
 [Paraview](https://www.paraview.org).
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Outputs
+!listing modules/heat_transfer/tutorials/introduction/therm_step01.i block=Outputs
 
 ## Questions
 
@@ -108,14 +108,14 @@ A question that comes up often is "What units does MOOSE use?".
 >  Look through the input file and try to identify places where units might be
 >  relevant.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer01a.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer01a.md)
 
 ### Expected outcome
 
 > Before you run this first input file take a moment to think about what you
 > expect to happen.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer01b.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer01b.md)
 
 Once you've answered the questions and run the first example it is time to move
-on to a slightly more complex scenario in [Step 2](heat_conduction/tutorials/introduction/therm_step02.md).
+on to a slightly more complex scenario in [Step 2](heat_transfer/tutorials/introduction/therm_step02.md).

@@ -30,7 +30,7 @@ Third, in contrast to [!cite](hales15homogenization) some notational inconsisten
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/homogenization/heatConduction2D.i block=Postprocessors/k_xx
+!listing modules/heat_transfer/test/tests/homogenization/heatConduction2D.i block=Postprocessors/k_xx
 
 
 !syntax parameters /Postprocessors/HomogenizedThermalConductivity

@@ -67,7 +67,7 @@ The following parameters are defined in detail:
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/gray_lambert_radiator/gray_lambert_cavity.i
+!listing modules/heat_transfer/test/tests/gray_lambert_radiator/gray_lambert_cavity.i
 block=UserObjects
 
 !syntax parameters /UserObjects/ConstantViewFactorSurfaceRadiation

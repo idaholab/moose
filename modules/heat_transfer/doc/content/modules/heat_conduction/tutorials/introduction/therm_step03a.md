@@ -6,7 +6,7 @@ thermal problems also involve a volumetric heat source, which could arise
 due to a number of phenomena, including  exothermic chemical reactions, nuclear
 fission, and resistive heating.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03a.i
+!listing modules/heat_transfer/tutorials/introduction/therm_step03a.i
 
 ## Input file
 
@@ -24,14 +24,14 @@ in nature to a boundary condition. However, volume integrals are prescribed as
 Kernels in MOOSE, regardless of whether they are source terms or terms that
 depend on a derivative of the solution.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step03a.i block=Kernels
+!listing modules/heat_transfer/tutorials/introduction/therm_step03a.i block=Kernels
 
 ## Questions
 
 Before running the model, consider how the solution should change with the
 addition of volumetric heating.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer03c.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer03c.md)
 
 Now go ahead and run the input and visualize the result to see if it matches
 the behavior you would expect.

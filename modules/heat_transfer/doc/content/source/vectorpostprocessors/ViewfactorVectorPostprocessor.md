@@ -8,7 +8,7 @@ ViewfactorVectorPostprocessor outputs the view factors between all
 boundaries involved in a gray, diffuse view factor calculation.
 
 
-!listing modules/heat_conduction/test/tests/gray_lambert_radiator/gray_lambert_cavity.i start=[./view_factors] end=[../] include-end=true
+!listing modules/heat_transfer/test/tests/gray_lambert_radiator/gray_lambert_cavity.i start=[./view_factors] end=[../] include-end=true
 
 !syntax parameters /VectorPostprocessors/ViewfactorVectorPostprocessor
 

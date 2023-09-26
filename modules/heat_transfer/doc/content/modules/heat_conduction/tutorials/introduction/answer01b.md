@@ -10,10 +10,10 @@ instantly converge.
 
 #### Running the input
 
-If you have not done so already, compile the `heat_conduction-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/heat_conduction/`. Then run the first tutorial input by typing
+If you have not done so already, compile the `heat_transfer-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/heat_transfer/`. Then run the first tutorial input by typing
 
 ```
-./heat_conduction-opt -i tutorials/introduction/therm_step01.i
+./heat_transfer-opt -i tutorials/introduction/therm_step01.i
 ```
 
 You should see some Framework information output, info on your mesh, and the non-linear system that is being solved, followed by the convergence history:

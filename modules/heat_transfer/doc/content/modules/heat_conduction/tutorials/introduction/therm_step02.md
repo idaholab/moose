@@ -4,7 +4,7 @@ In the previous step we set up a basic thermal simulation that
 did... nothing. In this step will prescribe values for the temperature
 on the left and right sides of the block.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step02.i
+!listing modules/heat_transfer/tutorials/introduction/therm_step02.i
 
 ## Input file
 
@@ -15,7 +15,7 @@ sidesets) of the simulation domain. In all boundary condition objects you will
 see the mandatory `boundary` parameter, which expects a list of sideset names or
 IDs.
 
-!listing modules/heat_conduction/tutorials/introduction/therm_step02.i block=BCs
+!listing modules/heat_transfer/tutorials/introduction/therm_step02.i block=BCs
 
 #### `DirichletBC`
 
@@ -38,11 +38,11 @@ this is a Dirichlet boundary condition that is defined using a function rather
 than a constant value. In this case, an expression for an analytic function is
 provided for the `function` parameter. Alternatively, the name of a separately
 defined `Function` can be provided. A wide variety of function types 
-[is available](heat_conduction/tutorials/introduction/supplemental02a.md).
+[is available](heat_transfer/tutorials/introduction/supplemental02a.md).
 
 #### Other boundary conditions
 
-A number of [other boundary conditions](heat_conduction/tutorials/introduction/supplemental02b.md)
+A number of [other boundary conditions](heat_transfer/tutorials/introduction/supplemental02b.md)
 are available. Some of these are generic boundary conditions that can be applied
 to any problem, while some are physics-specific.
 
@@ -51,7 +51,7 @@ to any problem, while some are physics-specific.
 Before running the model, consider what the expected solution to this problem
 with only the conduction term should be.
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer02a.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer02a.md)
 
 Now go ahead and run the input and visualize the result to see if it matches
 the behavior you would expect.
@@ -62,15 +62,15 @@ Experiment with different settings for the thermal conductivity of the material
 and the applied boundary conditions. What happens if you change the thermal
 conductivity?
 
-[Click here for the answer.](heat_conduction/tutorials/introduction/answer02b.md)
+[Click here for the answer.](heat_transfer/tutorials/introduction/answer02b.md)
 
 ### Sidebar: 
 
 > For a problem like this, it can be very helpful to plot out values of the solution
 > sampled along a line.
 
-[Click here for the sidebar on plotting along a line.](heat_conduction/tutorials/introduction/therm_step02a.md)
+[Click here for the sidebar on plotting along a line.](heat_transfer/tutorials/introduction/therm_step02a.md)
 
 Once you've answered the questions and run this example we will move on to
-[Step 3](heat_conduction/tutorials/introduction/therm_step03.md), where additional terms will be
+[Step 3](heat_transfer/tutorials/introduction/therm_step03.md), where additional terms will be
 added to the heat equation.

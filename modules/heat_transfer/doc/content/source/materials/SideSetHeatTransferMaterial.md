@@ -56,11 +56,11 @@ The input variables that define these materials with their default values:
 
 Defining conductivity as a space-time dependent function:
 
-!listing modules/heat_conduction/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=Materials/gap_mat
+!listing modules/heat_transfer/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=Materials/gap_mat
 
 Defining conductivity as a temperature dependent function:
 
-!listing modules/heat_conduction/test/tests/sideset_heat_transfer/gap_thermal_ktemp_1D.i block=Materials/gap_mat
+!listing modules/heat_transfer/test/tests/sideset_heat_transfer/gap_thermal_ktemp_1D.i block=Materials/gap_mat
 
 !syntax parameters /Materials/SideSetHeatTransferMaterial
 

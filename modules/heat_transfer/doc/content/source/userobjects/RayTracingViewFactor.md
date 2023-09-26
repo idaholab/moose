@@ -58,7 +58,7 @@ Specifically, the [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/primary_bloc
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/view_factors/view_factor_obstructed.i
+!listing modules/heat_transfer/test/tests/view_factors/view_factor_obstructed.i
 block=UserObjects
 
 !syntax parameters /UserObjects/RayTracingViewFactor

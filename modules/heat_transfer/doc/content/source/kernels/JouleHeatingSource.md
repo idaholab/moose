@@ -27,7 +27,7 @@ This class inherits from the [HeatSource](HeatSource.md) class via
 An example of how to use `JouleHeatingSource` can be found in the
 heat conduction module test `transient_jouleheating.i`.
 
-!listing modules/heat_conduction/test/tests/joule_heating/transient_jouleheating.i block=Kernels/HeatSrc
+!listing modules/heat_transfer/test/tests/joule_heating/transient_jouleheating.i block=Kernels/HeatSrc
 
 !syntax parameters /Kernels/JouleHeatingSource
 

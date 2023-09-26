@@ -47,12 +47,12 @@ of both materials in the direction of the temperature gradient.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/closed_gap_prescribed_pressure.i block=UserObjects/closed
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/closed_gap_prescribed_pressure.i block=UserObjects/closed
 
 `GapFluxModelPressureDependentConduction` must be used in conjunction with the modular gap conductance
 constraint as shown below:
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/closed_gap_prescribed_pressure.i block=Constraints/thermal_contact
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/closed_gap_prescribed_pressure.i block=Constraints/thermal_contact
 
 !syntax parameters /UserObjects/GapFluxModelPressureDependentConduction
 

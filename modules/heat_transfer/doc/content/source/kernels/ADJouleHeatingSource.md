@@ -26,7 +26,7 @@ This class inherits from the [ADKernelValue](Kernel.md) class.
 An example of how to use `ADJouleHeatingSource` can be found in the
 heat conduction module test `transient_ad_jouleheating.i`.
 
-!listing modules/heat_conduction/test/tests/joule_heating/transient_ad_jouleheating.i block=Kernels/HeatSrc
+!listing modules/heat_transfer/test/tests/joule_heating/transient_ad_jouleheating.i block=Kernels/HeatSrc
 
 !syntax parameters /Kernels/ADJouleHeatingSource
 

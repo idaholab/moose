@@ -38,7 +38,7 @@ values for Copper.
 An example of how to use `ADElectricalConductivity` can be found in the
 heat conduction module test `transient_ad_jouleheating.i`.
 
-!listing modules/heat_conduction/test/tests/joule_heating/transient_ad_jouleheating.i block=Materials/sigma
+!listing modules/heat_transfer/test/tests/joule_heating/transient_ad_jouleheating.i block=Materials/sigma
 
 !syntax parameters /Materials/ADElectricalConductivity
 

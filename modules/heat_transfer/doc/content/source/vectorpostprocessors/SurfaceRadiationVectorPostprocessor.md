@@ -11,7 +11,7 @@ The information is obtained from a `GrayLambertSurfaceRadiationBase` or derived
 object.
 
 
-!listing modules/heat_conduction/test/tests/gray_lambert_radiator/gray_lambert_cavity.i start=[./lambert_vpp] end=[../] include-end=true
+!listing modules/heat_transfer/test/tests/gray_lambert_radiator/gray_lambert_cavity.i start=[./lambert_vpp] end=[../] include-end=true
 
 !syntax parameters /VectorPostprocessors/SurfaceRadiationVectorPostprocessor
 

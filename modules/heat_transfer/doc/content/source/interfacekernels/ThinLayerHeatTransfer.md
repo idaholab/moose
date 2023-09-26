@@ -16,29 +16,29 @@ where the $+$ and $-$ indices indicate the primary and neighbor side of the boun
 
 An example below is used to verify the thin layer heat transfer model. With the interface approach, heat transfer in the thin layer is solved at the interface. Its solution is compared against the case where a thin domain is explicitly represented in the finite element domain.
 
-!media media/heat_conduction/two_bl_mesh.png
+!media media/heat_transfer/two_bl_mesh.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:two_bl_mesh
        caption=Finite element mesh used for thin layer heat transfer using interfacekernel.
 
-!media media/heat_conduction/two_bl_temp.png
+!media media/heat_transfer/two_bl_temp.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:two_bl_temp
        caption=Temperature field for thin layer heat transfer using interfacekernel.
 
-!media media/heat_conduction/three_bl_mesh.png
+!media media/heat_transfer/three_bl_mesh.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:three_bl_mesh
        caption=Finite element mesh used for thin layer heat transfer using a thin domain.
 
-!media media/heat_conduction/three_bl_temp.png
+!media media/heat_transfer/three_bl_temp.png
        style=width:650px;margin-left:70px;float:center;
        id=fig:three_bl_temp
        caption=Temperature field for thin layer heat transfer using a thin domain.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/thin_layer_heat_transfer/transient_2d.i
+!listing modules/heat_transfer/test/tests/thin_layer_heat_transfer/transient_2d.i
  block=InterfaceKernels
 
 !syntax parameters /InterfaceKernels/ThinLayerHeatTransfer

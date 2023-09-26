@@ -80,7 +80,7 @@ module by using the [ReflectRayBC.md].
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/view_factors/view_factor_2d.i
+!listing modules/heat_transfer/test/tests/view_factors/view_factor_2d.i
 block=UserObjects
 
 !syntax parameters /UserObjects/ViewFactorRayStudy

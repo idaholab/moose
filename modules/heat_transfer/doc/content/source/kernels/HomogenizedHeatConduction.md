@@ -33,7 +33,7 @@ See [!cite](hales15homogenization) and [!cite](SONG2006710) for more details.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/homogenization/heatConduction2D.i block=Kernels/heat_rhs_x
+!listing modules/heat_transfer/test/tests/homogenization/heatConduction2D.i block=Kernels/heat_rhs_x
 
 !syntax parameters /Kernels/HomogenizedHeatConduction
 

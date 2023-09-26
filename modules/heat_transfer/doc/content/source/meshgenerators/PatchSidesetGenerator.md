@@ -37,7 +37,7 @@ axis and will have a single element in 1 (2) directions for 3 (2)-dimensional pr
 
 ## Example Input Syntax
 
-!listing modules/heat_conduction/test/tests/generate_radiation_patch/generate_radiation_patch.i start=[patch] end=[] include-end=true
+!listing modules/heat_transfer/test/tests/generate_radiation_patch/generate_radiation_patch.i start=[patch] end=[] include-end=true
 
 !syntax parameters /Mesh/PatchSidesetGenerator
 

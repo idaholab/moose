@@ -70,15 +70,15 @@ In cases where the heat source weighting factor, [eq:primary_interfaceJH] and [e
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/interface_heating
+!listing modules/heat_transfer/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/interface_heating
 
 `ADInterfaceJouleHeatingConstraint` should be used in conjunction with the modular gap conductance constraint, shown here,
 
-!listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/electrical_contact
+!listing modules/heat_transfer/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/electrical_contact
 
 and the pressure-dependent gap flux conduction user object, as shown below:
 
-!listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=UserObjects/closed_electric
+!listing modules/heat_transfer/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=UserObjects/closed_electric
 
 !syntax parameters /Constraints/ADInterfaceJouleHeatingConstraint
 

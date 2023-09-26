@@ -9,7 +9,7 @@ userobject provided by `view_factor_object_name`.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/gray_lambert_radiator/gray_lambert_cavity_automatic_vf.i
+!listing modules/heat_transfer/test/tests/gray_lambert_radiator/gray_lambert_cavity_automatic_vf.i
 block=Postprocessors
 
 

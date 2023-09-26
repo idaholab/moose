@@ -20,7 +20,7 @@ Two-dimensional Cartesian geometries are not restricted to be in or parallel to 
 
 ## Example Input syntax
 
-!listing modules/heat_conduction/test/tests/heat_conduction/2d_quadrature_gap_heat_transfer/nonmatching.i block=ThermalContact
+!listing modules/heat_transfer/test/tests/heat_conduction/2d_quadrature_gap_heat_transfer/nonmatching.i block=ThermalContact
 
 !syntax parameters /BCs/GapHeatTransfer
 

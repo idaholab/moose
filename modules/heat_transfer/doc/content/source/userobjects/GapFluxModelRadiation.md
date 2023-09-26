@@ -47,12 +47,12 @@ whichever surface has the larger radius.
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/modular_gap_heat_transfer_mortar_displaced_radiation.i block=UserObjects/radiation
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/modular_gap_heat_transfer_mortar_displaced_radiation.i block=UserObjects/radiation
 
 `GapFluxModelRadiation` must be used in conjunction with the modular gap conductance
 constraint as shown below:
 
-!listing modules/heat_conduction/test/tests/gap_heat_transfer_mortar/modular_gap_heat_transfer_mortar_displaced_radiation.i block=Constraints/ced
+!listing modules/heat_transfer/test/tests/gap_heat_transfer_mortar/modular_gap_heat_transfer_mortar_displaced_radiation.i block=Constraints/ced
 
 !syntax parameters /UserObjects/GapFluxModelRadiation
 

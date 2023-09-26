@@ -4,12 +4,12 @@
 
 ## Description
 
-The material model AnisoHeatConductionMaterial is used to model a material with anisotropic thermal properties. The thermal conductivity $k$ is represented as a rank two tensor:  
+The material model AnisoHeatConductionMaterial is used to model a material with anisotropic thermal properties. The thermal conductivity $k$ is represented as a rank two tensor:
 \begin{equation}
   \begin{bmatrix}
   k_{11} & k_{12} & k_{13}\\
-  k_{21} & k_{22} & k_{23}\\ 
-  k_{31} & k_{32} & k_{33}\\ 
+  k_{21} & k_{22} & k_{23}\\
+  k_{31} & k_{32} & k_{33}\\
   \end{bmatrix}
   \label{eq:aeqn}
 \end{equation}

@@ -19,7 +19,7 @@ This postprocessor is useful for ensuring conservative transfers when Robin boun
 
 ## Example Input File Syntax
 
-!listing modules/heat_conduction/test/tests/postprocessors/convective_ht_side_integral.i
+!listing modules/heat_transfer/test/tests/postprocessors/convective_ht_side_integral.i
 block=Postprocessors
 
 

@@ -32,11 +32,11 @@ where the $+$ and $-$ indices indicate the primary and neighbor side of the boun
 
 Using material properties generated from [SideSetHeatTransferMaterial](SideSetHeatTransferMaterial.md):
 
-!listing modules/heat_conduction/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=InterfaceKernels/gap
+!listing modules/heat_transfer/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=InterfaceKernels/gap
 
 Using bulk gap temperature (for convection) as auxiliary variable:
 
-!listing modules/heat_conduction/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=InterfaceKernels/gap_var
+!listing modules/heat_transfer/test/tests/sideset_heat_transfer/gap_thermal_1D.i block=InterfaceKernels/gap_var
 
 !syntax parameters /InterfaceKernels/SideSetHeatTransferKernel
 

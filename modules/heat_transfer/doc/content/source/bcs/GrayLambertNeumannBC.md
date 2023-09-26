@@ -27,7 +27,7 @@ spatially flat. The heat flux at location $\vec{x}$ on sideset $i$ is computed b
 where $\sigma$ is the Stefan-Boltzmann constat, $\epsilon_i$ the emissivity of sideset $i$, and
 $H_i$ the average irradiation into sideset $i$.
 
-!listing modules/heat_conduction/test/tests/gray_lambert_radiator/coupled_heat_conduction.i
+!listing modules/heat_transfer/test/tests/gray_lambert_radiator/coupled_heat_conduction.i
 block=BCs
 
 !syntax parameters /BCs/GrayLambertNeumannBC

@@ -34,7 +34,7 @@ values for Copper.
 An example of how to use `ElectricalConductivity` can be found in the
 heat conduction module test `transient_jouleheating.i`.
 
-!listing modules/heat_conduction/test/tests/joule_heating/transient_jouleheating.i block=Materials/sigma
+!listing modules/heat_transfer/test/tests/joule_heating/transient_jouleheating.i block=Materials/sigma
 
 !syntax parameters /Materials/ElectricalConductivity
 
