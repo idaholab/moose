@@ -1,22 +1,27 @@
-T_in = 300.         # K
-m_dot_in = 1e-4     # kg/s
-press = 1e5         # Pa
+T_in = 300. # K
+m_dot_in = 1e-2 # kg/s
+press = 10e5 # Pa
 
 # core parameters
-core_length = 1.    # m
-core_n_elems = 10
-core_dia = ${units 2. cm -> m}
-core_pitch = ${units 8.7 cm -> m}
+core_length = 1. # m
+core_n_elems = 25
+core_dia = '${units 2. cm -> m}'
+core_pitch = '${units 8.7 cm -> m}'
+A_core = '${fparse core_pitch^2 - 0.25 *pi * core_dia^2}'
+P_wet_core = '${fparse 4*core_pitch + pi * core_dia}'
+Dh_core = '${fparse 4 * A_core / P_wet_core}'
 
-tot_power = 100       # W
+tot_power = 2000 # W
 
 [GlobalParams]
   initial_p = ${press}
-  initial_vel = 0
+  initial_vel = 0.0001
   initial_T = ${T_in}
+  gravity_vector = '0 0 0'
 
-  rdg_slope_reconstruction = full
-  closures = simple_closures
+  rdg_slope_reconstruction = minmod
+  scaling_factor_1phase = '1 1e-2 1e-4'
+  closures = thm_closures
   fp = he
 []
 
@@ -31,8 +36,8 @@ tot_power = 100       # W
 []
 
 [Closures]
-  [simple_closures]
-    type = Closures1PhaseSimple
+  [thm_closures]
+    type = Closures1PhaseTHM
   []
 []
 
@@ -50,7 +55,6 @@ tot_power = 100       # W
     type = TotalPower
     power = ${tot_power}
   []
-
   [inlet]
     type = InletMassFlowRateTemperature1Phase
     input = 'core_chan:in'
@@ -64,9 +68,9 @@ tot_power = 100       # W
     orientation = '0 0 1'
     length = ${core_length}
     n_elems = ${core_n_elems}
-    A = ${fparse core_pitch * core_pitch - pi * core_dia * core_dia / 4.}
-    D_h = ${fparse (4 * core_pitch * core_pitch - pi * core_dia * core_dia) / (4 * core_pitch + pi * core_dia)}
-    f = 1.6
+    roughness = .0001
+    A = '${A_core}'
+    D_h = ${Dh_core}
   []
 
   [core_hs]
@@ -75,7 +79,6 @@ tot_power = 100       # W
     orientation = '0 0 1'
     length = ${core_length}
     n_elems = ${core_n_elems}
-
     names = 'block'
     widths = '${fparse core_dia / 2.}'
     materials = 'steel'
@@ -94,8 +97,7 @@ tot_power = 100       # W
     flow_channel = core_chan
     hs = core_hs
     hs_side = outer
-    P_hf = ${fparse pi * core_dia}
-    Hw = 1.36
+    P_hf = '${fparse pi * core_dia}'
   []
 
   [outlet]
@@ -105,18 +107,65 @@ tot_power = 100       # W
   []
 []
 
+[Postprocessors]
+  [power_to_coolant]
+    type = ADHeatRateConvection1Phase
+    block = core_chan
+    P_hf = '${fparse pi *core_dia}'
+  []
+
+  [core_T_out]
+    type = SideAverageValue
+    boundary = core_chan:out
+    variable = T
+  []
+
+  [core_p_in]
+    type = SideAverageValue
+    boundary = core_chan:in
+    variable = p
+  []
+
+  [core_p_out]
+    type = SideAverageValue
+    boundary = core_chan:out
+    variable = p
+  []
+
+  [core_delta_p]
+    type = ParsedPostprocessor
+    pp_names = 'core_p_in core_p_out'
+    function = 'core_p_in - core_p_out'
+  []
+[]
+
+[Preconditioning]
+  [pc]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Transient
   start_time = 0
-  end_time = 1000
-  dt = 10
+
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 10
+  []
+  end_time = 5000
 
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
-  nl_max_its = 5
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  nl_max_its = 25
+
 []
 
 [Outputs]

@@ -27,37 +27,37 @@ Figure 1 shows the diagram of the modeled system.
 The tables below list its physical parameters.
 
 !table id=primary-loop-parameters caption=Primary loop parameters
-| Parameter | Value (and unit) |
-| :- | :- |
-| Pressure | 10 kPa |
-| Temperature | 300 K |
-| Mass flow rate | 0.1 g/s |
-| Fluid | helium |
+| Parameter      | Value (and unit) |
+| :------------- | :--------------- |
+| Pressure       | 1 MPa            |
+| Temperature    | 300 K            |
+| Mass flow rate | 0.01 kg/s        |
+| Fluid          | helium           |
 
 
 !table id=core-parameters caption=Core parameters
-| Parameter | Value and unit |
-| :- | :- |
-| Shape | Heating rod inside a square flow channel |
-| Core length | 1 m |
-| Side width | 8.7 cm |
-| Rod diameter | 2. cm |
+| Parameter    | Value and unit                           |
+| :----------- | :--------------------------------------- |
+| Shape        | Heating rod inside a square flow channel |
+| Core length  | 1 m                                      |
+| Side width   | 8.7 cm                                   |
+| Rod diameter | 2. cm                                    |
 
 
 !table id=hx-parameters caption=Heat exchanger parameters
-| Parameter | Value and unit |
-| :- | :- |
-| Inner diameter | 10 cm |
-| Wall thickness | 5 mm |
-| Outer diameter | 50 cm |
-| Length | 1 m |
+| Parameter      | Value and unit |
+| :------------- | :------------- |
+| Inner diameter | 12 cm          |
+| Wall thickness | 5 mm           |
+| Outer diameter | 50 cm          |
+| Length         | 1.5 m          |
 
 
 !table id=secondary-loop-parameters caption=Secondary loop parameters
-| Parameter | Value and unit |
-| :- | :- |
-| Mass flow rate | 1 kg/s |
-| Fluid | Liquid water |
+| Parameter      | Value and unit |
+| :------------- | :------------- |
+| Mass flow rate | 1 kg/s         |
+| Fluid          | Liquid water   |
 
 
 
