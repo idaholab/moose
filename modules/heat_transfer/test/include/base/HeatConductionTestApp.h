@@ -10,19 +10,8 @@
 #pragma once
 
 #include "MooseApp.h"
+#include "HeatTransferTestApp.h"
 
-class HeatConductionTestApp : public MooseApp
+class HeatTransferTestApp : public HeatConductionTestApp
 {
-public:
-  HeatConductionTestApp(InputParameters parameters);
-
-  static InputParameters validParams();
-
-  virtual ~HeatConductionTestApp();
-
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags(Factory & factory);
-};
+}
