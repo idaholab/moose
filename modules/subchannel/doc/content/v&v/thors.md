@@ -36,7 +36,7 @@ THORS bundle 3A simulates the Fast Flux Test Facility and Clinch River Breeder R
 | Power profile (---) | Uniform |
 | Pin power (kW/m) | $33$ |
 
- Run~$101$ was chosen to validate Pronghorn-SC performance. The THORS experiment measured the temperatures at the exit of selected subchannels. There is a subchannel index correspondence between the experiment and the model, as follows: 43(37), 42(36), 17(20), 16(10), 3(4), 6(1), 8(14) and 28(28). Where the number outside the parentheses refers to the Pronghorn-SC model and the number inside the parentheses refers to the experimental convention. Pronghorn-SC has no capablility to model triangular assemblies within circular ducts. The experimental circular duct is approximated with a hexagonal duct.
+ Run~$101$ was chosen to validate Pronghorn-SC performance. The THORS experiment measured the temperatures at the exit of selected subchannels. There is a subchannel index correspondence between the experiment and the model, as follows: 43(37), 42(36), 17(20), 16(10), 3(4), 6(1), 8(14) and 28(28). Where the number outside the parentheses refers to the Pronghorn-SC model and the number inside the parentheses refers to the experimental convention. Pronghorn-SC has currently no capablility to model triangular assemblies within circular ducts. Hence, the experimental circular duct is approximated with a hexagonal duct.
 
 ## Results for central blockage
 
