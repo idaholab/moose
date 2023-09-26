@@ -43,6 +43,7 @@ private:
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const NodeArg &, const StateArg &) const override final { return 0; }
 };
 
 template <typename T>
