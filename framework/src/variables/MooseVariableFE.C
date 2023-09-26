@@ -899,7 +899,7 @@ MooseVariableFE<OutputType>::computeSolution(const Elem * const elem,
                                              Solution & dot_local_soln) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
   std::vector<ADReal> dof_values;
   std::vector<ADReal> dof_values_dot;
   dof_values.reserve(dof_indices.size());
@@ -924,7 +924,7 @@ MooseVariableFE<OutputType>::computeSolution(const Elem * const elem,
             dof_values_dot.back(), dof_index, _ad_real_dummy);
       }
       else
-        dof_values_dot.push_back((*_sys.solutionUDot())(dof_index));
+        dof_values_dot.push_back((*this->_sys.solutionUDot())(dof_index));
     }
   }
 
