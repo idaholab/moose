@@ -1,6 +1,6 @@
 #
 # Initial single block thermal input
-# https://mooseframework.inl.gov/modules/heat_conduction/tutorials/introduction/therm_step01.html
+# https://mooseframework.inl.gov/modules/heat_transfer/tutorials/introduction/therm_step01.html
 #
 
 [Mesh]

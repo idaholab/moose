@@ -1,6 +1,6 @@
 [Tests]
   issues = '#18791'
-  design = 'modules/heat_conduction/tutorials/introduction/index.md'
+  design = 'modules/heat_transfer/tutorials/introduction/index.md'
   [heat_conduction_tutorial]
     requirement = 'The system shall run a series of basic problems for thermal
                    transport in a solid '

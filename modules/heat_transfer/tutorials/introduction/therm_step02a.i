@@ -1,6 +1,6 @@
 #
 # Single block thermal input with a line value sampler
-# https://mooseframework.inl.gov/modules/heat_conduction/tutorials/introduction/therm_step02.html
+# https://mooseframework.inl.gov/modules/heat_transfer/tutorials/introduction/therm_step02.html
 #
 
 [Mesh]

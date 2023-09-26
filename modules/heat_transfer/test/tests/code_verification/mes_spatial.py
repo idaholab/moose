@@ -6,8 +6,8 @@ import os
 def run_each_test(testName, hyperConvergent=False, refinementNo=5):
 
     # Look for an executable
-    if os.path.isfile('../../../heat_conduction-opt'):
-        executable = '../../../heat_conduction-opt'
+    if os.path.isfile('../../../heat_transfer-opt'):
+        executable = '../../../heat_transfer-opt'
     else:
         executable = '../../../../combined/combined-opt'
 

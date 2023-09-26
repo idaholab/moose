@@ -1,6 +1,6 @@
 #
 # Single block thermal input with time derivative term
-# https://mooseframework.inl.gov/modules/heat_conduction/tutorials/introduction/therm_step03.html
+# https://mooseframework.inl.gov/modules/heat_transfer/tutorials/introduction/therm_step03.html
 #
 
 [Mesh]
