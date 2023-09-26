@@ -38,7 +38,7 @@ TriInterWrapperMeshGenerator::validParams()
   params.addRequiredParam<Real>("side_bypass",
                                 "Extra size of the bypass for the side assemblies [m]");
   params.addParam<bool>(
-      "tight_side_bypass", false, "Whether the side bypass shape follows the assemblies");
+      "tight_side_bypass", false, "Whether the side bypass shape follows the hexagonal shape of the assemblies");
   return params;
 }
 
