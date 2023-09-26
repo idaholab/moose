@@ -47,7 +47,7 @@ Figure [fig:thors_val] presents the exit temperature distribution, expressed as 
     id=fig:thors_val
     caption= Exit temperature profile ($C_T = 1$).
 
-Thus far, the turbulent modeling parameter $C_T$ has been calibrated only for square lattice, bare fuel pin assemblies. As such, in the above example $C_T$ was arbitarily set to be equal to $1$. As a reminder $C_T$ is a tuning parameter that affects the amount of momentum mixing. Higher $C_T$ means more turbulent momentum mixing and flatter velocity profiles. For $C_T = 10$ the code calculation is presented in Figure [fig:thors_val2]. This calculation presents a better agreement with the experimental results, which suggests that the presence of a blockage induces mixing.
+Thus far, the turbulent modeling parameter $C_T$ has been calibrated only for square lattice, bare fuel pin assemblies. As such, in the above example $C_T$ was arbitarily set to be equal to $1$. As a reminder $C_T$ is a tuning parameter that affect turbulent momentum cross flows. Lerger values of $C_T$ will lead to higher cross flows. Higher $C_T$ means more turbulent momentum mixing and flatter velocity profiles. For $C_T = 10$ the code calculation is presented in Figure [fig:thors_val2]. This calculation presents a better agreement with the experimental results, which suggests that the presence of a blockage induces mixing.
 
 !media figures/FFM-3A2.png
     style=width:60%;margin-bottom:2%;margin:auto;
