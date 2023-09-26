@@ -1,9 +1,9 @@
 Applications:
-    heat_conduction:
-        exe_directory: ${MOOSE_DIR}/modules/heat_conduction
+    heat_transfer:
+        exe_directory: ${MOOSE_DIR}/modules/heat_transfer
         app_types:
             - HeatConductionApp
-        content_directory: ${MOOSE_DIR}/modules/heat_conduction/doc/content
+        content_directory: ${MOOSE_DIR}/modules/heat_transfer/doc/content
         unregister:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
@@ -18,21 +18,21 @@ Documents:
     configuration_management_plan: sqa/inl_records.md#configuration_management_plan
     asset_management_plan: sqa/inl_records.md#asset_management_plan
     verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
-    software_requirements_specification: sqa/heat_conduction_srs.md
-    software_design_description: sqa/heat_conduction_sdd.md
-    software_test_plan: sqa/heat_conduction_stp.md
-    requirements_traceability_matrix: sqa/heat_conduction_rtm.md
-    verification_validation_report: sqa/heat_conduction_vvr.md
-    failure_analysis_report: sqa/heat_conduction_far.md
-    software_library_list: sqa/heat_conduction_sll.md
+    software_requirements_specification: sqa/heat_transfer_srs.md
+    software_design_description: sqa/heat_transfer_sdd.md
+    software_test_plan: sqa/heat_transfer_stp.md
+    requirements_traceability_matrix: sqa/heat_transfer_rtm.md
+    verification_validation_report: sqa/heat_transfer_vvr.md
+    failure_analysis_report: sqa/heat_transfer_far.md
+    software_library_list: sqa/heat_transfer_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
 
 Requirements:
-    heat_conduction:
+    heat_transfer:
         directories:
-            - ${MOOSE_DIR}/modules/heat_conduction
+            - ${MOOSE_DIR}/modules/heat_transfer
         log_duplicate_requirement: WARNING
         log_testable: WARNING

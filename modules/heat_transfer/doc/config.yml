@@ -1,6 +1,6 @@
 Content:
     - framework/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/ray_tracing/doc/content
 
 Renderer:
@@ -10,16 +10,16 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Heat Conduction Module
         repo: https://github.com/idaholab/moose
-        home: /modules/heat_conduction/index.md
+        home: /modules/heat_transfer/index.md
     MooseDocs.extensions.appsyntax:
-        executable: ${MOOSE_DIR}/modules/heat_conduction
+        executable: ${MOOSE_DIR}/modules/heat_transfer
         remove:
             framework: !include framework/doc/remove.yml
         unregister:
             framework: !include framework/doc/unregister.yml
         includes:
             - framework/include
-            - modules/heat_conduction/include
+            - modules/heat_transfer/include
             - modules/ray_tracing/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
@@ -29,8 +29,8 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
-        reports: !include modules/heat_conduction/doc/sqa_reports.yml
+        reports: !include modules/heat_transfer/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
-            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
