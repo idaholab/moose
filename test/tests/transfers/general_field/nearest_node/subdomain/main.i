@@ -110,7 +110,5 @@
     variable = from_sub_elem
     from_blocks = 1
     to_blocks = 1
-    # Value conflicts search triggers a greedy search which creates a diff
-    search_value_conflicts = false
   []
 []
