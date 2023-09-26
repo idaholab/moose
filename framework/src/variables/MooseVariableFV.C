@@ -51,6 +51,11 @@ MooseVariableFV<OutputType>::validParams()
                                       "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
+  // Just evaluating finite volume variables at an arbitrary location in a cell requires a layer of
+  // ghosting since we will use two term expansions
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
