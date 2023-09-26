@@ -680,30 +680,27 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       else
       {
         auto & val = values_ptr->second;
+
+        // Look for value conflicts
+        if (detectConflict(val.interp,
+                           incoming_vals[val_offset].first,
+                           val.distance,
+                           incoming_vals[val_offset].second))
+        {
+          // Keep track of distance and value
+          const auto p = point_requests[val_offset] - _to_positions[problem_id];
+          registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
+        }
+
         // We adopt values that are, in order of priority
         // - valid
         // - closest distance
         // - the smallest rank with the same distance
-        // If conflict search is on, we register the overlap, but selection rules stay the same
         if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
-             ((val.pid > pid || _search_value_conflicts) &&
+             ((val.pid > pid) &&
               MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second))))
         {
-          // Keep track of overlaps
-          if (detectConflict(val.interp,
-                             incoming_vals[val_offset].first,
-                             val.distance,
-                             incoming_vals[val_offset].second))
-          {
-            // Keep track of distance and value
-            const auto p = point_requests[val_offset] - _to_positions[problem_id];
-            registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
-
-            // We could have been let in the loop by the conflict search
-            if (val.pid < pid)
-              continue;
-          }
           val.interp = incoming_vals[val_offset].first;
           val.pid = pid;
           val.distance = incoming_vals[val_offset].second;
