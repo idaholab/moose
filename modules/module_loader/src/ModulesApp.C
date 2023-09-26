@@ -34,8 +34,8 @@
 #ifdef GEOCHEMISTRY_ENABLED
 #include "GeochemistryApp.h"
 #endif
-#ifdef HEAT_CONDUCTION_ENABLED
-#include "HeatConductionApp.h"
+#ifdef HEAT_TRANSFER_ENABLED
+#include "HeatTransferApp.h"
 #endif
 #ifdef LEVEL_SET_ENABLED
 #include "LevelSetApp.h"
@@ -136,8 +136,8 @@ ModulesApp::registerObjects(Factory & factory)
   FunctionalExpansionToolsApp::registerObjects(factory);
 #endif
 
-#ifdef HEAT_CONDUCTION_ENABLED
-  HeatConductionApp::registerObjects(factory);
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::registerObjects(factory);
 #endif
 
 #ifdef LEVEL_SET_ENABLED
@@ -227,8 +227,8 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
 #endif
 
-#ifdef HEAT_CONDUCTION_ENABLED
-  HeatConductionApp::associateSyntax(syntax, action_factory);
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef LEVEL_SET_ENABLED
@@ -314,8 +314,8 @@ ModulesApp::registerExecFlags(Factory & factory)
   FluidPropertiesApp::registerExecFlags(factory);
 #endif
 
-#ifdef HEAT_CONDUCTION_ENABLED
-  HeatConductionApp::registerExecFlags(factory);
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::registerExecFlags(factory);
 #endif
 
 #ifdef LEVEL_SET_ENABLED
@@ -412,8 +412,8 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   GeochemistryApp::registerAll(f, af, s);
 #endif
 
-#ifdef HEAT_CONDUCTION_ENABLED
-  HeatConductionApp::registerAll(f, af, s);
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::registerAll(f, af, s);
 #endif
 
 #ifdef LEVEL_SET_ENABLED
