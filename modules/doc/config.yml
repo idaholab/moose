@@ -11,7 +11,7 @@ Content:
     - modules/fsi/doc/content
     - modules/functional_expansion_tools/doc/content
     - modules/geochemistry/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/level_set/doc/content
     - modules/misc/doc/content
     - modules/navier_stokes/doc/content
@@ -173,7 +173,7 @@ Extensions:
             electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
-            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
             level_set: !include modules/level_set/doc/sqa_level_set.yml
             misc: !include modules/misc/doc/sqa_misc.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
