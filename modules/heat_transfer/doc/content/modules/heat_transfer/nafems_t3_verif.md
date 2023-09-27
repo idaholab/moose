@@ -4,7 +4,7 @@
 
 A NAFEMS one-dimensional transient heat conduction problem
 [!citep](nafems_std_bench) was created and run
-using the heat conduction module in MOOSE. A description of the problem and a
+using the heat transfer module in MOOSE. A description of the problem and a
 summary of the results follows.
 
 ### Model
@@ -60,7 +60,7 @@ $36.6^{\circ}\textsf{C}$.
 ## Results
 
 The table below summarizes the temperature solutions for this problem using
-the heat conduction module of MOOSE. The values in parentheses are the
+the heat transfer module of MOOSE. The values in parentheses are the
 difference between the MOOSE result and the target solution in percentages.
 
 !table id=table:nafems_t3_results caption=Summary of Results

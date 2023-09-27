@@ -36,7 +36,7 @@ temperature is imposed on the bottom boundary.
 
 ## Simulation
 
-The heat conduction module of [!ac](MOOSE) is capable of performing the desired simulation.
+The heat transfer module of [!ac](MOOSE) is capable of performing the desired simulation.
 The values in [tutorial03-snow-values] provide the numeric values to be used for the simulation,
 which will solve for nine hours of simulation time.
 
@@ -118,7 +118,7 @@ Finally, the output method is defined. In this case the ExodusII format is enabl
 
 ### Simulation Execution
 
-Executing the simulation is straightforward, simply execute the heat conduction module executable
+Executing the simulation is straightforward, simply execute the heat transfer module executable
 with the input file included using the "-i" option as follows.
 
 ```

@@ -16,7 +16,7 @@ q = \mathbf{J} \cdot \mathbf{E} = (\sigma_{elec} \nabla \phi) \cdot \nabla \phi
 
 where $\phi$ is the electrostatic potential and $\sigma_{elec}$ is the
 electrical conductivity of the material. $\sigma_{elec}$ is defined as an
-`ADMaterialProperty`. Within the heat conduction module, this property could
+`ADMaterialProperty`. Within the heat transfer module, this property could
 currently be provided by [ADElectricalConductivity](ADElectricalConductivity.md).
 
 This class inherits from the [ADKernelValue](Kernel.md) class.
@@ -24,7 +24,7 @@ This class inherits from the [ADKernelValue](Kernel.md) class.
 ## Example Input File Syntax
 
 An example of how to use `ADJouleHeatingSource` can be found in the
-heat conduction module test `transient_ad_jouleheating.i`.
+heat transfer module test `transient_ad_jouleheating.i`.
 
 !listing modules/heat_transfer/test/tests/joule_heating/transient_ad_jouleheating.i block=Kernels/HeatSrc
 

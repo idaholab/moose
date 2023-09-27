@@ -104,7 +104,7 @@ System.
 
 ## Practice: Run
 
-Executing the simulation is straightforward, simply execute the heat conduction module executable
+Executing the simulation is straightforward, simply execute the heat transfer module executable
 with the input file included using the "-i" option as follows.
 
 ```

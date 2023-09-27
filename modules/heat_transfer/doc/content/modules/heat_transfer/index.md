@@ -1,7 +1,7 @@
 # Heat Transfer Module
 
 Heat is transferred by three mechanisms: conduction, convection, and radiation.
-The heat conduction module provides various implementations of the heat conduction
+The heat transfer module provides various implementations of the heat conduction
 equation, as well as associated boundary/interface conditions, including radiation
 between gray, diffuse surfaces and provisions to couple temperature fields to
 fluid domains through boundary conditions.

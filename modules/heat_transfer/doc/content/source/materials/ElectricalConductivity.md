@@ -32,7 +32,7 @@ values for Copper.
 ## Example Input File Syntax
 
 An example of how to use `ElectricalConductivity` can be found in the
-heat conduction module test `transient_jouleheating.i`.
+heat transfer module test `transient_jouleheating.i`.
 
 !listing modules/heat_transfer/test/tests/joule_heating/transient_jouleheating.i block=Materials/sigma
 
