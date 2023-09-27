@@ -1,7 +1,7 @@
 [Tests]
   design = 'Parser.md'
 
-  [./param_substitution_cli]
+  [param_substitution_cli]
     type = 'Exodiff'
     input = 'param_substitution.i'
 
@@ -11,9 +11,9 @@
 
     issues = '#5649'
     requirement = 'The system shall support parameter substitution in input files using command line variable expressions.'
-  [../]
+  []
 
-  [./param_substitution_in_file]
+  [param_substitution_in_file]
     type = 'Exodiff'
     input = 'param_substitution_in_file.i'
 
@@ -22,9 +22,9 @@
 
     issues = '#5649'
     requirement = 'The system shall support parameter substitution in input files using variable expressions from within the same input file.'
-  [../]
+  []
 
-  [./unit_conversion]
+  [unit_conversion]
     type = 'CSVDiff'
     input = 'unit_conversion.i'
 
@@ -32,5 +32,17 @@
 
     issues = '#14827'
     requirement = 'The system shall support unit conversion in input files using variable expressions.'
-  [../]
+  []
+
+  [debug_units]
+    type = 'RunApp'
+    input = 'unit_conversion.i'
+    cli_args = 'Problem/solve=false'
+
+    method = dbg
+    expect_out = 'unit_conversion\.i:27:5: Unit conversion 1 J\/mol -> 1\.0364269656262175e-05 eV\/at'
+
+    issues = '#25362'
+    requirement = 'The system shall report the unit conversions performed at parse time when running in debug mode.'
+  []
 []
