@@ -35,7 +35,7 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
 }
 
 ADReal
-PINSFVMomentumDiffusion::computeStrongResidual(const bool pupulate_a_coeffs)
+PINSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
   using namespace Moose::FV;
 
@@ -69,7 +69,7 @@ PINSFVMomentumDiffusion::computeStrongResidual(const bool pupulate_a_coeffs)
   // Compute face superficial velocity gradient
   auto dudn = _var.gradient(makeCDFace(*_face_info), state) * _face_info->normal();
 
-  if (pupulate_a_coeffs)
+  if (populate_a_coeffs)
   {
     if (has_elem)
     {

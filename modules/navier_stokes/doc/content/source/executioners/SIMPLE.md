@@ -8,7 +8,7 @@ This executioner is based on the algorithm proposed by [!cite](patankar1983calcu
 is based on the splitting of operators and successive correction for the momentum and pressure fields.
 The formulation implemented in MOOSE has been presented in [!cite](jasak1996error) and [!cite](juretic2005error).
 See also the examples and derivations in [!cite](moukalled2016finite).
-The concept relies on deriving a pressure equations using the discretized form of the momentum
+The concept relies on deriving a pressure equation using the discretized form of the momentum
 equations together with the incompressibility constraint. Let's take the steady-state incompressible Navier-Stokes equations
 in the following form:
 
@@ -18,7 +18,8 @@ in the following form:
 !equation id=continuity-eq
 \nabla \cdot \left(\rho \vec{u}\right) = 0.
 
-Where $\vec{u}$ denotes the velocity, $p$ the pressure, $\rho$ the density, and $\mu_\text{eff}$ the dynamic viscosity.
+Where $\vec{u}$ denotes the velocity, $p$ the pressure, $\rho$ the density, and $\mu_\text{eff}$ the effective dynamic viscosity
+which potentially includes the contributions of eddy viscosity derived from turbulence models.
 Term $\vec{G}$ expresses a volumetric source term which can be potentially velocity-dependent.
 As a first step, we assume that we have a guess for the pressure field therefore the gradient is known. Furthermore, we assume that
 the advecting velocity field is known from the previous iteration. By explicitly showing the iteration index,
@@ -31,11 +32,11 @@ the advecting velocity field is known from the previous iteration. By explicitly
 \nabla \cdot \left(\rho \vec{u}^n\right) = 0.
 
 At this point, we should note that the finite volume discretization in MOOSE uses a collocated formulation which has an advantage
-of being flexible for nonstructured meshes. However, in certain scenarios it can exhibit numerical pressure checker-boarding
+of being flexible for unstructured meshes. However, in certain scenarios it can exhibit numerical pressure checker-boarding
 due to the discretization of the pressure gradient and continuity terms. A common approach for tackling this issue is the
-utilization of the Rhie-Chow interpoaltion method (See [!cite](rhie1983numerical) and [!cite](moukalled2016finite) for a detailed
-explanation. This means that the face velocities (or face fluxes) are determined using pressure corrections. As we will see
-later, due to this behavior, the iteration between pressure and velocity will in face will be an iteration between
+utilization of the Rhie-Chow interpolation method (See [!cite](rhie1983numerical) and [!cite](moukalled2016finite) for a detailed
+explanation). This means that the face velocities (or face fluxes) are determined using pressure corrections. As we will see
+later, due to this behavior, the iteration between pressure and velocity will in fact be an iteration between
 pressure and face velocity. Nevertheless, to keep this in mind we add a subscript to the advecting velocity in our formulation:
 
 !equation id=momentum-eq-rc
@@ -49,9 +50,9 @@ that result in contributions to the diagonal of a soon-to-be-generated system ma
 everything else. With this in mind, we can rewrite the equation the following, semi-discretized way:
 
 !equation id=momentum-eq-semi-discretized
-A\vec{u}^n + H(\vec{u}^{n}) = -\nabla p^{n-1},
+A(\vec{u}^{n-1})\vec{u}^n + H(\vec{u}^{n}) = -\nabla p^{n-1},
 
-where $A(\vec{u}^{n-1})$ is the diagonal contribution, and $H(\vec{u}^{n})$ includes the offdiagonal contributions
+where $A(\vec{u}^{n-1})$ is the diagonal contribution, and $H(\vec{u}^{n})$ includes the off-diagonal contributions
 multiplied by the solution together with any additional volumetric source and sink terms (i.e. the discretized forms of $\vec{G}$).
 One can solve this equation to obtain a new guess for the velocity field. This guess, however, will not respect the
 continuity equation, therefore we need to correct it. For this, a pressure equation is derived from the following formulation:
@@ -59,7 +60,7 @@ continuity equation, therefore we need to correct it. For this, a pressure equat
 !equation id=pressure-eq-start
 A\vec{u}^n + H(\vec{u}^{n}) = -\nabla p^n.
 
-By applying the inverse of the diagonal operator (very cheap process computationally), we arrive to the following expression:
+By applying the inverse of the diagonal operator (a very cheap process computationally), we arrive to the following expression:
 
 !equation id=pressure-eq-ainv
 \vec{u}^n + A^{-1}H(\vec{u}^{n}) = -A^{-1}\nabla p^n,
@@ -110,7 +111,7 @@ especially useful for advection-dominated systems.
 
 The setup of a problem with the segregated solver in MOOSE is slightly different compared to
 conventional monolithic solvers. In this section, we highlight the main differences.
-For setting up a simulation with the SIMPLE algorithms, we need three systems in MOOSE:
+For setting up a 2D simulation with the SIMPLE algorithms, we need three systems in MOOSE:
 one for each momentum component and another for the pressure. The different systems
 can be created within the `Problem` block:
 
@@ -118,7 +119,7 @@ can be created within the `Problem` block:
          remove=Problem/error_on_jacobian_nonzero_reallocation
 
 It is visible that we requested that MOOSE keeps previous solution iterates as well. This is necessary to
-facilitate the relaxation processes mentioned in the overview. Next, we create variable and assign them to the
+facilitate the relaxation processes mentioned in the overview. Next, we create variables and assign them to the
 given systems.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Variables

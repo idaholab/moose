@@ -65,7 +65,15 @@ public:
 
   bool segregated() const override { return true; };
 
-  /// Update the momentum system-related information
+  /**
+   * Update the momentum system-related information
+   * @param momentum_systems Pointers to the momentum systems which are solved for the momentum
+   * vector components
+   * @param momentum_system_numbers The numbers of these systems
+   * @param pressure_gradient_tag The tag which is associated with the pressure gradient kernels.
+   * This is needed for separating the pressure contibution from other terms in the momentum
+   * systems.
+   */
   void linkMomentumSystem(std::vector<NonlinearSystemBase *> momentum_systems,
                           const std::vector<unsigned int> & momentum_system_numbers,
                           const TagID & pressure_gradient_tag);
@@ -77,12 +85,12 @@ public:
   void computeHbyA(bool verbose);
 
 protected:
-  /// Populatethe face values of the H/A
+  /// Populate the face values of the H/A field
   void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                     const std::vector<unsigned int> & var_nums);
   /**
    * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
-   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix
+   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the off-diagonal part of the system matrix
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor step.
    */

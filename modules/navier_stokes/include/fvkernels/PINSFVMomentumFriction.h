@@ -27,7 +27,8 @@ protected:
   ADReal computeSegregatedContribution() override;
 
   /// Computes the friction coefficient which gets multiplied by the velocity
-  ADReal computeCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+  ADReal computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
+                                     const Moose::StateArg & state);
 
   /// Darcy coefficient
   const Moose::Functor<ADRealVectorValue> * const _cL;

@@ -23,6 +23,7 @@
 #include <petscksp.h>
 
 registerMooseObject("NavierStokesApp", SIMPLE);
+
 InputParameters
 SIMPLE::validParams()
 {
@@ -34,7 +35,7 @@ SIMPLE::validParams()
   /*
    * The names of the different systems in the segregated solver
    */
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addRequiredParam<std::vector<NonlinearSystemName>>(
       "momentum_systems", "The nonlinear system(s) for the momentum equation(s).");
   params.addRequiredParam<NonlinearSystemName>("pressure_system",
                                                "The nonlinear system for the pressure equation.");
@@ -44,10 +45,10 @@ SIMPLE::validParams()
                                        "The nonlinear system for the solid energy equation.");
   params.addParam<std::vector<std::string>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
-  params.addParam<std::string>("pressure_gradient_tag",
-                               "pressure_momentum_kernels",
-                               "The name of the tags associated with the kernels in the momentum "
-                               "equations which are not related to the pressure gradient.");
+  params.addParam<TagName>("pressure_gradient_tag",
+                           "pressure_momentum_kernels",
+                           "The name of the tags associated with the kernels in the momentum "
+                           "equations which are not related to the pressure gradient.");
 
   /*
    * Relaxation parameters for the different system
@@ -56,20 +57,24 @@ SIMPLE::validParams()
       "pressure_variable_relaxation",
       1.0,
       "0.0<pressure_variable_relaxation<=1.0",
-      "The relaxation which should be used for the pressure variable.");
+      "The relaxation which should be used for the pressure variable (=1 for no relaxation).");
   params.addRangeCheckedParam<Real>(
       "momentum_equation_relaxation",
       1.0,
       "0.0<momentum_equation_relaxation<=1.0",
-      "The relaxation which should be used for the momentum equation.");
-  params.addRangeCheckedParam<Real>("energy_equation_relaxation",
-                                    1.0,
-                                    "0.0<energy_equation_relaxation<=1.0",
-                                    "The relaxation which should be used for the energy equation.");
-  params.addParam<std::vector<Real>>(
-      "passive_scalar_equation_relaxation",
-      std::vector<Real>(),
-      "The relaxation which should be used for the passive scalar equations.");
+      "The relaxation which should be used for the momentum equation. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+  params.addRangeCheckedParam<Real>(
+      "energy_equation_relaxation",
+      1.0,
+      "0.0<energy_equation_relaxation<=1.0",
+      "The relaxation which should be used for the energy equation. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+  params.addParam<std::vector<Real>>("passive_scalar_equation_relaxation",
+                                     std::vector<Real>(),
+                                     "The relaxation which should be used for the passive scalar "
+                                     "equations. (=1 for no relaxation, "
+                                     "diagonal dominance will still be enforced)");
 
   /*
    * Petsc options for every equations in the system
@@ -263,7 +268,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _has_energy_system(isParamValid("energy_system")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
-    _momentum_system_names(getParam<std::vector<std::string>>("momentum_systems")),
+    _momentum_system_names(getParam<std::vector<NonlinearSystemName>>("momentum_systems")),
     _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
     _energy_sys_number(_has_energy_system
                            ? _problem.nlSysNum(getParam<NonlinearSystemName>("energy_system"))
@@ -278,7 +283,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _solid_energy_system(_has_solid_energy_system
                              ? &_problem.getNonlinearSystemBase(_solid_energy_sys_number)
                              : nullptr),
-    _pressure_tag_name(getParam<std::string>("pressure_gradient_tag")),
+    _pressure_tag_name(getParam<TagName>("pressure_gradient_tag")),
     _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name)),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
@@ -321,7 +326,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   // set up the corresponding system numbers
   if (_has_passive_scalar_systems)
   {
-    const auto passive_scalar_system_names =
+    const auto & passive_scalar_system_names =
         getParam<std::vector<std::string>>("passive_scalar_systems");
     if (passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
       paramError("passive_scalar_equation_relaxation",
@@ -561,8 +566,9 @@ SIMPLE::constrainSystem(SparseMatrix<Number> & mx,
                         const Real desired_value,
                         const dof_id_type dof_id)
 {
-  // Solve the system and update current local solution
-  // Get diagonal
+  // Modify the given matrix and right hand side. We use the matrix diagonal
+  // to enforce the constraint instead of 1, to make sure we don't mess up the matrix conditioning
+  // too much.
   if (dof_id >= mx.row_start() && dof_id < mx.row_stop())
   {
     Real diag = mx(dof_id, dof_id);
@@ -641,9 +647,9 @@ SIMPLE::solveMomentumPredictor()
   // of dofs
   auto zero_solution = _momentum_systems[0]->system().current_local_solution->zero_clone();
 
-  // If we use a segregated approach between momentum components as well, we need to solve
-  // the other equations. Luckily, the system matrix is exactly the same so we only need
-  // to compute right hand sides.
+  // Solve the momentum equations.
+  // TO DO: These equations are VERY similar. If we can store the differences (things comping from
+  // BCs for example) separately, it is enough to construct one matrix.
   for (const auto system_i : index_range(_momentum_systems))
   {
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
@@ -678,12 +684,11 @@ SIMPLE::solveMomentumPredictor()
     // norms in the linear solve
     KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
     // Solve this component. We don't update the ghosted solution yet, that will come at the end
-    // of the corrector step Setting the lineat tolerances and maximum iteration counts
+    // of the corrector step. Also setting the linear tolerances and maximum iteration counts.
     _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
     momentum_solver.set_solver_configuration(_momentum_ls_control);
 
     // We solve the equation
-    // TO DO: Add options to this function in Libmesh to accept absolute tolerance
     momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
 
@@ -719,7 +724,7 @@ SIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentNonlinearSystem(_pressure_sys_number);
 
-  // We will need some members from the implocot nonlinear system
+  // We will need some members from the implicit nonlinear system
   NonlinearImplicitSystem & pressure_system =
       libMesh::cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
 
@@ -752,7 +757,7 @@ SIMPLE::solvePressureCorrector()
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
-  // Setting the lineat tolerances and maximum iteration counts
+  // Setting the linear tolerances and maximum iteration counts
   _pressure_ls_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
   pressure_solver.set_solver_configuration(_pressure_ls_control);
 
@@ -825,7 +830,7 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
-  // Setting the lineat tolerances and maximum iteration counts
+  // Setting the linear tolerances and maximum iteration counts
   solver_config.real_valued_data["abs_tol"] = absolute_tol * norm_factor;
   linear_solver.set_solver_configuration(solver_config);
 
@@ -885,7 +890,7 @@ SIMPLE::solveSolidEnergySystem()
   // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(se_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
-  // Setting the lineat tolerances and maximum iteration counts
+  // Setting the linear tolerances and maximum iteration counts
   _solid_energy_ls_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
   se_solver.set_solver_configuration(_solid_energy_ls_control);
 
@@ -894,7 +899,7 @@ SIMPLE::solveSolidEnergySystem()
 
   if (_print_fields)
   {
-    _console << " solid eneregy rhs " << std::endl;
+    _console << " Solid energy rhs " << std::endl;
     rhs.print();
     _console << " Solid temperature " << std::endl;
     solution.print();
@@ -1057,7 +1062,7 @@ SIMPLE::execute()
 
         iteration_counter++;
 
-        // Solve the momentum predictor step
+        // Solve the passive scalar equations
         for (auto system_i : index_range(_passive_scalar_systems))
           passive_scalar_residuals[system_i] =
               solveAdvectedSystem(_passive_scalar_system_numbers[system_i],

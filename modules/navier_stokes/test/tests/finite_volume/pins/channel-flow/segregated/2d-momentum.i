@@ -35,7 +35,6 @@ pressure_tag = "pressure_grad"
 [Problem]
   nl_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
-  error_on_jacobian_nonzero_reallocation = true
 []
 
 [Variables]

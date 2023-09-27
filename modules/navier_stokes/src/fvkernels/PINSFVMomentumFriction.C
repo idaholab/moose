@@ -44,8 +44,8 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
 }
 
 ADReal
-PINSFVMomentumFriction::computeCoefficient(const Moose::ElemArg & elem_arg,
-                                           const Moose::StateArg & state)
+PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
+                                                    const Moose::StateArg & state)
 {
   ADReal coefficient = 0.0;
   if (_use_Darcy_friction_model)
@@ -62,7 +62,7 @@ PINSFVMomentumFriction::computeSegregatedContribution()
   const auto & elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
 
-  return raw_value(computeCoefficient(elem_arg, state)) * _u_functor(elem_arg, state);
+  return raw_value(computeFrictionWCoefficient(elem_arg, state)) * _u_functor(elem_arg, state);
 }
 
 void
@@ -71,7 +71,7 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
   const auto elem_arg = makeElemArg(&elem);
   const auto state = determineState();
 
-  ADReal friction_term = computeCoefficient(elem_arg, state);
+  ADReal friction_term = computeFrictionWCoefficient(elem_arg, state);
 
   const auto coefficient = friction_term * _assembly.elementVolume(&elem);
 

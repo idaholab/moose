@@ -44,7 +44,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 }
 
 ADReal
-INSFVMomentumDiffusion::computeStrongResidual(const bool pupulate_a_coeffs)
+INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
   const auto state = determineState();
   const auto dudn = gradUDotNormal(state);
@@ -60,7 +60,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool pupulate_a_coeffs)
                            *_face_info,
                            true);
 
-  if (pupulate_a_coeffs)
+  if (populate_a_coeffs)
   {
     if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)

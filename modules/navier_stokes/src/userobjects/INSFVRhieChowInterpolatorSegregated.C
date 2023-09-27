@@ -38,8 +38,8 @@ INSFVRhieChowInterpolatorSegregated::validParams()
   params.addClassDescription("Computes H/A and 1/A together with face velocities for segregated "
                              "momentum-pressure equations.");
 
-  // We diable the execution of this, should only provide functions
-  // for the executioner
+  // We disable the execution of this, should only provide functions
+  // for the SIMPLE executioner
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_NONE);
   exec_enum = {EXEC_NONE};
@@ -68,7 +68,6 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         _moose_mesh,
         blockIDs())),
     _face_velocity(_moose_mesh, _sub_ids, "face_values")
-
 {
   // Register the elemental/face functors which will be queried in the pressure equation
   for (const auto tid : make_range(libMesh::n_threads()))
@@ -170,9 +169,9 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
     if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
         (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
     {
-      // On internal face we just use the interpoalted H/A and the pressure face gradient
+      // On internal face we just use the interpolated H/A and the pressure face gradient
       // So u_f = -(H/A)_f - (1/A)_f*grad(p)_f
-      // Notice the (-) sign on H/A which comes from the face that we use the Jacobian/Residual
+      // Notice the (-) sign on H/A which is because we use the Jacobian/Residual
       // computations and we get -H instead of H.
       if (_u->isInternalFace(*fi))
       {
@@ -261,7 +260,6 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
     _momentum_implicit_systems[system_i]->update();
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
-    // _momentum_implicit_systems[system_i]->solution->print();
   }
 }
 
@@ -388,7 +386,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     auto active_local_end =
         _mesh.evaluable_elements_end(momentum_system->get_dof_map(), var_nums[system_i]);
 
-    const Moose::StateArg & state = Moose::currentState();
+    const auto & state = Moose::currentState();
     for (auto it = active_local_begin; it != active_local_end; ++it)
     {
       const Elem * elem = *it;
@@ -422,7 +420,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     }
 
     // We need to subtract the contribution of the pressure gradient from the residual (right hand
-    // side). We plug working_vector=0 in here to ge the right hand side contribution
+    // side). We plug working_vector=0 in here to get the right hand side contribution
     _fe_problem.computeResidualTag(*working_vector, HbyA, _pressure_gradient_tag);
 
     // Now we reorganize the association between tags and vectors to make sure

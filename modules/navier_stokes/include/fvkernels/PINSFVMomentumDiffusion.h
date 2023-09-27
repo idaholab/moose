@@ -27,7 +27,7 @@ protected:
    * @param populate_a_coeffs Boolean to let the function know that it should also populate the
    *                          a coefficients in a monolithic RC approach
    */
-  virtual ADReal computeStrongResidual(const bool pupulate_a_coeffs) override;
+  virtual ADReal computeStrongResidual(const bool populate_a_coeffs) override;
 
   /// the porosity
   const Moose::Functor<ADReal> & _eps;

@@ -23,13 +23,20 @@
 class InputParameters;
 class FEProblemBase;
 
+/**
+ * Solver configuration class used with the linear solvers in a SIMPLE solver.
+ */
 class SIMPLESolverConfiguration : public libMesh::SolverConfiguration
 {
+  /**
+   * Override this to make sure the PETSc options are not overwritten in the linear solver
+   */
   virtual void configure_solver() override {}
 };
 
 /**
- * Something informative will come here eventually
+ * Executioner set up to solve a thermal-hydraulics problem using the SIMPLE algorithm.
+ * It utilizes segregated linearized systems which are solved using a fixed-point iteration.
  */
 class SIMPLE : public Executioner
 {
@@ -87,7 +94,7 @@ protected:
    * Juretic, Franjo. Error analysis in finite volume CFD. Diss.
    * Imperial College London (University of London), 2005.
    *
-   * @param rhs_in The unrelaxed right hand side
+   * @param rhs_in The unrelaxed right hand side that needs to be relaxed
    * @param solution_in The solution
    * @param diff_diagonal The diagonal correction used for the corresponding system matrix
    */
@@ -105,8 +112,8 @@ protected:
   /// @return The normalized residual norm of the pressure equation.
   Real solvePressureCorrector();
 
-  /// Solve the an equation which contains an advection term that depends
-  /// on the solution of the Navier-Stokes equations.
+  /// Solve an equation which contains an advection term that depends
+  /// on the solution of the segregated Navier-Stokes equations.
   /// @param system_num The number of the system which is solved
   /// @param system Reference to the system which is solved
   /// @param relaxation_factor The relaxation factor for matrix relaxation
@@ -133,7 +140,7 @@ protected:
   void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
 
   /**
-   * Implicitly constraint the system by adding a factor*(u-u_desired) to it at a desired dof
+   * Implicitly constrain the system by adding a factor*(u-u_desired) to it at a desired dof
    * value. To make sure the conditioning of the matrix does not change significantly, factor
    * is chosen to be the diagonal component of the matrix coefficients for a given dof.
    * @param mx The matrix of the system which needs to be constrained
@@ -166,18 +173,18 @@ protected:
   int & _time_step;
   Real & _time;
 
-  /// Boolean for easy check if an energy system shall be solved or not
+  /// Boolean for easy check if a fluid energy system shall be solved or not
   const bool _has_energy_system;
 
-  /// Boolean for easy check if an solid energy system shall be solved or not
+  /// Boolean for easy check if a solid energy system shall be solved or not
   const bool _has_solid_energy_system;
 
-  /// Boolean for easy check if an passive scalar systems shall be solved or not
+  /// Boolean for easy check if a passive scalar systems shall be solved or not
   const bool _has_passive_scalar_systems;
 
   /// The names of the momentum systems. If only one provided we assume that the
   /// simulation is monolithic in terms of the momentum components.
-  const std::vector<std::string> _momentum_system_names;
+  const std::vector<NonlinearSystemName> _momentum_system_names;
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
@@ -217,7 +224,7 @@ private:
 
   /// The name of the vector tag which corresponds to the pressure gradient terms in the
   /// momentum equation
-  const std::string _pressure_tag_name;
+  const TagName _pressure_tag_name;
 
   /// The ID of the tag which corresponds to the pressure gradient terms in the
   /// momentum equation
