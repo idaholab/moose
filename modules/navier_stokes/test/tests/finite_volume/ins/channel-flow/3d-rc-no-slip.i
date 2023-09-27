@@ -13,16 +13,15 @@ velocity_interp_method='rc'
     ymax = 1
     zmin = -1
     zmax = 1
-    nx = 15
-    ny = 3
-    nz = 3
+    nx = 20
+    ny = 4
+    nz = 4
     elem_type = TET4
   []
 []
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  face_interp_method = 'skewness-corrected'
 []
 
 [UserObjects]
