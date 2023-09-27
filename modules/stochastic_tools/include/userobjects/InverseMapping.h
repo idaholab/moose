@@ -64,9 +64,4 @@ protected:
   /// Input parameters for the surrogate models. If no surrogates are given,
   /// we assume that these are the coordinates in the latent space
   const std::vector<Real> & _input_parameters;
-
-private:
-  /// A temporary solution vector which holds the reconstructed data. It is used to build the
-  /// dof-to-dof connections between the collected data and the reconstructed equivalents.
-  std::unordered_map<unsigned int, std::unique_ptr<NumericVector<Number>>> _temporary_solutions;
 };
