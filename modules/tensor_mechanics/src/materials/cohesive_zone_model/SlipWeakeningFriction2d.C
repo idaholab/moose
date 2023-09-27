@@ -58,11 +58,11 @@ SlipWeakeningFriction2d::SlipWeakeningFriction2d(const InputParameters & paramet
     _ini_shear_sts(coupledValue("ini_shear_sts"))
 {
 
-    //only works for small strain
-    if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")){
-      mooseError("SlipWeakening only works for small strain!");
-    }
-
+  // only works for small strain
+  if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+  {
+    mooseError("SlipWeakening only works for small strain!");
+  }
 }
 
 void
