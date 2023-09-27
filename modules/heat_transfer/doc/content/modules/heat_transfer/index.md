@@ -1,4 +1,4 @@
-# Heat Conduction Module
+# Heat Transfer Module
 
 Heat is transferred by three mechanisms: conduction, convection, and radiation.
 The heat conduction module provides various implementations of the heat conduction
@@ -8,9 +8,9 @@ fluid domains through boundary conditions.
 
 ## Tutorial Problems
 
-A [tutorial](modules/heat_transfer/tutorials/introduction/index.md) for the Heat Conduction module is available to show the steps for setting up a basic model.
+A [tutorial](modules/heat_transfer/tutorials/introduction/index.md) for the Heat Transfer module is available to show the steps for setting up a basic model.
 
-## Basic Theory of Heat Conduction
+## Basic Theory of Heat Transfer
 
 The heat conduction equation describes the diffusion of heat in a solid or stationary fluid:
 
@@ -187,7 +187,7 @@ The implementation of the net radiation method in MOOSE relies on the following 
 
 ## Gap Heat Transfer
 
-There are multiple approaches in the Heat Conduction module for modeling heat
+There are multiple approaches in the Heat Transfer module for modeling heat
 transfer across a gap:
 
 - [ModularGapConductanceConstraint.md] uses the mortar finite element method and

@@ -1,4 +1,4 @@
-!template load file=sqa/module_sdd.md.template category=heat_transfer module=Heat Conduction
+!template load file=sqa/module_sdd.md.template category=heat_transfer module=Heat Transfer
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits
@@ -14,7 +14,7 @@ Specific details unique to the module are outlined in this document.
 The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
 as well as the dependencies and limitations of the [ray tracing module](ray_tracing_sdd.md#dependencies-and-limitations).
-The Heat Conduction module does not support modeling heat transfer due to convection,
+The Heat Transfer module does not support modeling heat transfer due to convection,
 e.g. bulk fluid motion. The Navier-Stokes module must be used for that purpose.
 !template-end!
 

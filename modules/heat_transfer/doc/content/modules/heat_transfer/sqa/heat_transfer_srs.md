@@ -1,15 +1,15 @@
-!template load file=sqa/module_srs.md.template category=heat_transfer module=Heat Conduction
+!template load file=sqa/module_srs.md.template category=heat_transfer module=Heat Transfer
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The [!ac](MOOSE) Heat Conduction module purpose is to model heat transfer due to
+The [!ac](MOOSE) Heat Transfer module purpose is to model heat transfer due to
 conduction and radiation.
 !! system-purpose-finish
 !template-end!
 
 !template! item key=system-scope
 !! system-scope-begin
-The Heat Conduction module models volumetric heat transfer mechanisms due to
+The Heat Transfer module models volumetric heat transfer mechanisms due to
 conduction and body sources/sinks. Additionally surface to surface conduction
 and radiation may also be modeled.
 !! system-scope-finish
