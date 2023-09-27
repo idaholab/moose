@@ -38,6 +38,7 @@ MultiAppUserObjectTransfer2::validParams()
   //  MultiAppUserObjectTransfer2 does not need source variable since it query values from user
   //  objects
   params.suppressParameter<std::vector<VariableName>>("source_variable");
+  params.set<std::vector<VariableName>>("source_variable") = std::vector<VariableName>{};
   params.addRequiredParam<UserObjectName>(
       "user_object",
       "The UserObject you want to transfer values from.  Note: This might be a "
