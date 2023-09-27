@@ -26,9 +26,10 @@ FVScalarLagrangeMultiplierInterface::FVScalarLagrangeMultiplierInterface(
     const InputParameters & params)
   : FVInterfaceKernel(params),
     _lambda_var(*getScalarVar("lambda", 0)),
-    _lambda(adCoupledScalarValue("lambda")),
-    _lambda_assembly(_subproblem.assembly(_tid, _lambda_var.sys().number()))
+    _lambda(adCoupledScalarValue("lambda"))
 {
+  if (_var1.sys().number() != _var2.sys().number())
+    mooseError(this->type(), " does not support multiple nonlinear systems!");
 }
 
 void
@@ -39,20 +40,17 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
   const auto var_elem_num = _elem_is_one ? var1().number() : var2().number();
   const auto var_neigh_num = _elem_is_one ? var2().number() : var1().number();
 
-  auto & assembly_elem = _elem_is_one ? _assembly1 : _assembly2;
-  auto & assembly_neigh = _elem_is_one ? _assembly2 : _assembly1;
-
   const auto r =
       MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
 
   // Primal residual
-  addResidual(r, var_elem_num, assembly_elem, false);
-  addResidual(-r, var_neigh_num, assembly_neigh, true);
+  addResidual(r, var_elem_num, false);
+  addResidual(-r, var_neigh_num, true);
 
   // LM residual. We may not have any actual ScalarKernels in our simulation so we need to manually
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
-  addResiduals(_lambda_assembly,
+  addResiduals(_assembly,
                std::array<Real, 1>{{lm_r}},
                _lambda_var.dofIndices(),
                _lambda_var.scalingFactor());
@@ -71,20 +69,17 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
   const auto elem_scaling_factor = _elem_is_one ? var1().scalingFactor() : var2().scalingFactor();
   const auto neigh_scaling_factor = _elem_is_one ? var2().scalingFactor() : var1().scalingFactor();
 
-  auto & assembly_elem = _elem_is_one ? _assembly1 : _assembly2;
-  auto & assembly_neigh = _elem_is_one ? _assembly2 : _assembly1;
-
   // Primal
   const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
   addResidualsAndJacobian(
-      assembly_elem, std::array<ADReal, 1>{{primal_r}}, elem_dof_indices, elem_scaling_factor);
+      _assembly, std::array<ADReal, 1>{{primal_r}}, elem_dof_indices, elem_scaling_factor);
   addResidualsAndJacobian(
-      assembly_neigh, std::array<ADReal, 1>{{-primal_r}}, neigh_dof_indices, neigh_scaling_factor);
+      _assembly, std::array<ADReal, 1>{{-primal_r}}, neigh_dof_indices, neigh_scaling_factor);
 
   // LM
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  addResidualsAndJacobian(_lambda_assembly,
+  addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{lm_r}},
                           _lambda_var.dofIndices(),
                           _lambda_var.scalingFactor());

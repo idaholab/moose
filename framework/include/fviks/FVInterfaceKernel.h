@@ -100,14 +100,10 @@ protected:
   const std::set<SubdomainID> & sub2() const { return _subdomain2; }
 
   /**
-   * @return The system associated with the first variable
+   * @return The system associated with this object. Either an undisplaced or displaced nonlinear
+   * system
    */
-  const SystemBase & sys() const { return _sys1; }
-
-  /**
-   * @return The system associated with the second variable
-   */
-  const SystemBase & sys2() const { return _sys2; }
+  const SystemBase & sys() const { return _var1.sys(); }
 
   /**
    * @return Whether the \p FaceInfo element is on the 1st side of the interface
@@ -137,16 +133,13 @@ protected:
   /**
    * Process the provided residual given \p var_num and whether this is on the neighbor side
    */
-  void addResidual(Real resid, unsigned int var_num, Assembly & assembly, bool neighbor);
+  void addResidual(Real resid, unsigned int var_num, bool neighbor);
 
   using TaggingInterface::addJacobian;
   /**
    * Process the derivatives for the provided residual and dof index
    */
-  void addJacobian(const ADReal & resid,
-                   dof_id_type dof_index,
-                   Assembly & assembly,
-                   Real scaling_factor);
+  void addJacobian(const ADReal & resid, dof_id_type dof_index, Real scaling_factor);
 
   /**
    * @return A structure that contains information about the face info element and skewness
@@ -199,23 +192,11 @@ protected:
   /// The SubProblem
   SubProblem & _subproblem;
 
-  /// the system object for variable 1
-  SystemBase & _sys1;
-
-  /// the system object for variable 2
-  SystemBase & _sys2;
-
-  /// Variable on one side of the interface
   MooseVariableFV<Real> & _var1;
-
-  /// Variable on the other side of the interface
   MooseVariableFV<Real> & _var2;
 
-  /// The Assembly object for system 1
-  Assembly & _assembly1;
-
-  /// The Assembly object for system 2
-  Assembly & _assembly2;
+  /// The Assembly object
+  Assembly & _assembly;
 
 private:
   std::set<SubdomainID> _subdomain1;
