@@ -59,4 +59,5 @@ sh $SCRIPT_DIR/update_and_rebuild_petsc.sh $* \
   --download-strumpack=0 \
   --download-hypre=git://https://github.com/hypre-space/hypre.git \
   --with-64-bit-indices=0 \
+  --with-cxx-dialect=C++11 \
 exit 0

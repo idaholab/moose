@@ -32,6 +32,6 @@
     type = JSONDiff
     input = poly_reg_vec.i
     jsondiff = 'poly_reg_vec_out.json'
-    requirement = 'The sytem shall be able to create polynomial regression surrogate with vector-type response.'
+    requirement = 'The system shall be able to create polynomial regression surrogate with vector-type response.'
   []
 []

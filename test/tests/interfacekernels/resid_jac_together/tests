@@ -5,7 +5,7 @@
     exodiff = jump_out.e
     design = 'systems/NonlinearSystem.md'
     issues = '#23487'
-    requirement = "The sytem shall be able to compute the residual and the Jacobian of each "
+    requirement = "The system shall be able to compute the residual and the Jacobian of each "
                   "interface kernel together."
   []
 []

@@ -7357,7 +7357,6 @@ FEProblemBase::checkUserObjects()
     names.insert(obj->name());
 
   // See if all referenced blocks are covered
-  mesh_subdomains.insert(Moose::ANY_BLOCK_ID);
   std::set<SubdomainID> difference;
   std::set_difference(user_objects_blocks.begin(),
                       user_objects_blocks.end(),
@@ -7409,8 +7408,6 @@ FEProblemBase::checkDependMaterialsHelper(
     // Add zero material properties specific to this block and unrestricted
     block_supplied_props.insert(_zero_block_material_props[it.first].begin(),
                                 _zero_block_material_props[it.first].end());
-    block_supplied_props.insert(_zero_block_material_props[Moose::ANY_BLOCK_ID].begin(),
-                                _zero_block_material_props[Moose::ANY_BLOCK_ID].end());
 
     // Error check to make sure all properties consumed by materials are supplied on this block
     std::set<std::string> difference;

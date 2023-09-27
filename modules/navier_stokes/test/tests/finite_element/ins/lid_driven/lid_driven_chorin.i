@@ -10,75 +10,73 @@
     ny = 40
     elem_type = QUAD4
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 99
     nodes = '0'
     input = gen
-  [../]
+  []
 []
 
 [Variables]
   # x-velocity
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 
   # y-velocity
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 
   # x-star velocity
-  [./u_star]
+  [u_star]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 
   # y-star velocity
-  [./v_star]
+  [v_star]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0.0
-    [../]
-  [../]
+    []
+  []
 
   # Pressure
-  [./p]
+  [p]
     order = FIRST
     family = LAGRANGE
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
-
-
 [Kernels]
-  [./x_chorin_predictor]
+  [x_chorin_predictor]
     type = INSChorinPredictor
     variable = u_star
     u = u
@@ -87,9 +85,9 @@
     v_star = v_star
     component = 0
     predictor_type = 'new'
-  [../]
+  []
 
-  [./y_chorin_predictor]
+  [y_chorin_predictor]
     type = INSChorinPredictor
     variable = v_star
     u = u
@@ -98,100 +96,100 @@
     v_star = v_star
     component = 1
     predictor_type = 'new'
-  [../]
+  []
 
-  [./x_chorin_corrector]
+  [x_chorin_corrector]
     type = INSChorinCorrector
     variable = u
     u_star = u_star
     v_star = v_star
     pressure = p
     component = 0
-  [../]
+  []
 
-  [./y_chorin_corrector]
+  [y_chorin_corrector]
     type = INSChorinCorrector
     variable = v
     u_star = u_star
     v_star = v_star
     pressure = p
     component = 1
-  [../]
+  []
 
-  [./chorin_pressure_poisson]
+  [chorin_pressure_poisson]
     type = INSChorinPressurePoisson
     variable = p
     u_star = u_star
     v_star = v_star
-  [../]
+  []
 []
 
 [BCs]
-  [./u_no_slip]
+  [u_no_slip]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
-  [./u_lid]
+  [u_lid]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 'top'
     value = 100.0
-  [../]
+  []
 
-  [./v_no_slip]
+  [v_no_slip]
     type = DirichletBC
     variable = v
     preset = false
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
   # Make u_star satsify all the same variables as the real velocity.
-  [./u_star_no_slip]
+  [u_star_no_slip]
     type = DirichletBC
     variable = u_star
     preset = false
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
-  [./u_star_lid]
+  [u_star_lid]
     type = DirichletBC
     variable = u_star
     preset = false
     boundary = 'top'
     value = 100.0
-  [../]
+  []
 
-  [./v_star_no_slip]
+  [v_star_no_slip]
     type = DirichletBC
     variable = v_star
     preset = false
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
   # With solid walls everywhere, we specify dp/dn=0, i.e the
   # "natural BC" for pressure.  Technically the problem still
   # solves without pinning the pressure somewhere, but the pressure
   # bounces around a lot during the solve, possibly because of
   # the addition of arbitrary constants.
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     preset = false
     boundary = '99'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     # rho = 1000    # kg/m^3
@@ -202,46 +200,44 @@
     # Dummy parameters
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  1'
-  [../]
+  []
 []
 
 [Preconditioning]
-#active = 'FDP_Newton'
-#active = 'SMP_PJFNK'
-active = 'SMP_Newton'
+  #active = 'FDP_Newton'
+  #active = 'SMP_PJFNK'
+  active = 'SMP_Newton'
 
-[./FDP_Newton]
-type = FDP
-full = true
+  [FDP_Newton]
+    type = FDP
+    full = true
 
-solve_type = 'NEWTON'
+    solve_type = 'NEWTON'
 
-#petsc_options_iname = '-mat_fd_coloring_err'
-#petsc_options_value = '1.e-10'
-[../]
+    #petsc_options_iname = '-mat_fd_coloring_err'
+    #petsc_options_value = '1.e-10'
+  []
 
-# For some reason, nonlinear convergence with JFNK is poor, but it
-# seems to be OK for SMP_Newton.  This may indicate a a scaling issue
-# in the JFNK case....
-[./SMP_PJFNK]
-  type = SMP
-  full = true
+  # For some reason, nonlinear convergence with JFNK is poor, but it
+  # seems to be OK for SMP_Newton.  This may indicate a a scaling issue
+  # in the JFNK case....
+  [SMP_PJFNK]
+    type = SMP
+    full = true
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+    #Preconditioned JFNK (default)
+    solve_type = 'PJFNK'
 
+  []
 
-[../]
+  [SMP_Newton]
+    type = SMP
+    full = true
 
-[./SMP_Newton]
-  type = SMP
-  full = true
+    solve_type = 'NEWTON'
 
-  solve_type = 'NEWTON'
-
-[../]
+  []
 []
-
 
 [Executioner]
   type = Transient

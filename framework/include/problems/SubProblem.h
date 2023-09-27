@@ -205,7 +205,7 @@ public:
   virtual unsigned int numMatrixTags() const { return _matrix_tag_name_to_tag_id.size(); }
 
   /**
-   * Return all matrix tags in the sytem, where a tag is represented by a map from name to ID
+   * Return all matrix tags in the system, where a tag is represented by a map from name to ID
    */
   virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
 

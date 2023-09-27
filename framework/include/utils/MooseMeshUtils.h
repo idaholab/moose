@@ -103,18 +103,6 @@ SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase 
  *
  * @param mesh The mesh
  * @param subdomain_name The names of the subdomains
- * @param mesh_subdomains All the subdomain IDs that exist on the mesh
- * @return The subdomain ids from the passed subdomain names.
- */
-std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
-                                               const std::vector<SubdomainName> & subdomain_name,
-                                               const std::set<SubdomainID> & mesh_subdomains);
-
-/**
- * Get the associated subdomainIDs for the subdomain names that are passed in.
- *
- * @param mesh The mesh
- * @param subdomain_name The names of the subdomains
  * @return The subdomain ids from the passed subdomain names.
  */
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,

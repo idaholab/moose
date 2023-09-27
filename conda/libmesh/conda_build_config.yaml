@@ -1,5 +1,5 @@
 moose_petsc:
-  - moose-petsc 3.19.3.884.g08c1f94318e build_0
+  - moose-petsc 3.19.3.884.g08c1f94318e build_1
 
 moose_libmesh_vtk:
   - moose-libmesh-vtk 9.2.6 build_4

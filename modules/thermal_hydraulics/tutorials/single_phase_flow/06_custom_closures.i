@@ -29,9 +29,9 @@ ht_blocks = 'core_chan hx/pri hx/sec'
 
 [GlobalParams]
   initial_p = ${press}
-  initial_vel = 0
+  initial_vel = 1
   initial_T = ${T_in}
-  initial_vel_x = 0
+  initial_vel_x = 1
   initial_vel_y = 0
   initial_vel_z = 0
 
@@ -402,8 +402,8 @@ ht_blocks = 'core_chan hx/pri hx/sec'
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-7
   nl_max_its = 5
 []
 

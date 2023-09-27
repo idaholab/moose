@@ -1,0 +1,32 @@
+[Tests]
+  design = 'FunctorSmoother.md'
+  issues = '#25452'
+  [smoother]
+    requirement = 'The system shall be able to'
+    [face]
+      type = CSVDiff
+      input = test.i
+      csvdiff = 'face_smooth_line_0001.csv'
+      cli_args = 'Outputs/file_base=face_smooth FunctorMaterials/smooth/smoothing_technique=face_average'
+      detail = "use the average of the values of a functor on an element's face to compute the "
+               "element value, which can be smoother, and"
+    []
+    [neighbors]
+      type = CSVDiff
+      input = test.i
+      csvdiff = 'layer_elem_line_0001.csv'
+      cli_args = 'Outputs/file_base=layer_elem FunctorMaterials/smooth/smoothing_technique=layered_elem_average'
+      detail = "use the average of the values of a functor at an element's neighbors to compute the "
+               "element value, which can be smoother, and"
+    []
+    [checkerboard]
+      type = CSVDiff
+      input = test.i
+      csvdiff = 'checker_line_0001.csv'
+      cli_args = 'Outputs/file_base=checker FunctorMaterials/smooth/smoothing_technique=remove_checkerboard'
+      detail = "use a heuristic based on a functor's value on an element and the maximum values on "
+               "the element's neighbors to compute a new element value that removes a checkerboard "
+               "pattern."
+    []
+  []
+[]

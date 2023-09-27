@@ -168,31 +168,10 @@ getBoundaryIDSet(const MeshBase & mesh,
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_name)
 {
-  std::set<subdomain_id_type> mesh_subdomains;
-  mesh.subdomain_ids(mesh_subdomains);
-  return getSubdomainIDs(mesh, subdomain_name, mesh_subdomains);
-}
-
-std::vector<subdomain_id_type>
-getSubdomainIDs(const MeshBase & mesh,
-                const std::vector<SubdomainName> & subdomain_name,
-                const std::set<SubdomainID> & mesh_subdomains)
-{
   std::vector<SubdomainID> ids(subdomain_name.size());
 
   for (unsigned int i = 0; i < subdomain_name.size(); i++)
-  {
-    if (subdomain_name[i] == "ANY_BLOCK_ID")
-    {
-      ids.assign(mesh_subdomains.begin(), mesh_subdomains.end());
-      if (i)
-        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a "
-                     "logic error.");
-      break;
-    }
-
     ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], mesh);
-  }
 
   return ids;
 }
@@ -271,7 +250,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                std::vector<ExtraElementIDName> extra_ids)
 {
   // check block restriction
-  const bool block_restricted = block_ids.find(Moose::ANY_BLOCK_ID) == block_ids.end();
+  const bool block_restricted = !block_ids.empty();
   // get element id name of interest in recursive parsing algorithm
   ExtraElementIDName id_name = extra_ids.back();
   extra_ids.pop_back();

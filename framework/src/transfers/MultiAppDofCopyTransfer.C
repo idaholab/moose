@@ -72,7 +72,7 @@ MultiAppDofCopyTransfer::initialSetup()
     to_problem = &getToMultiApp()->appProblemBase(getToMultiApp()->firstLocalApp());
   }
 
-  // Convert block names to block IDs, fill with ANY_BLOCK_ID if unspecified
+  // Convert block names to block IDs, fill with all blocks if unspecified
   if (_has_block_restrictions)
   {
     const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
@@ -93,7 +93,7 @@ MultiAppDofCopyTransfer::initialSetup()
         _from_blocks = {Moose::INVALID_BLOCK_ID};
     }
     else
-      _from_blocks = {Moose::ANY_BLOCK_ID};
+      _from_blocks = from_problem->mesh().meshSubdomains();
 
     const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
     for (const auto & b : to_block_names)
@@ -113,7 +113,7 @@ MultiAppDofCopyTransfer::initialSetup()
         _from_blocks = {Moose::INVALID_BLOCK_ID};
     }
     else
-      _to_blocks = {Moose::ANY_BLOCK_ID};
+      _to_blocks = to_problem->mesh().meshSubdomains();
   }
 
   // Forbid block restriction on nodal variables as currently not supported
@@ -204,21 +204,13 @@ MultiAppDofCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & fr
       // Examine block restriction
       if (_has_block_restrictions)
       {
-        if (std::find(_from_blocks.begin(), _from_blocks.end(), Moose::ANY_BLOCK_ID) ==
-            _from_blocks.end())
-        {
-          SubdomainID from_block = from_elem->subdomain_id();
-          if (std::find(_from_blocks.begin(), _from_blocks.end(), from_block) == _from_blocks.end())
-            continue;
-        }
+        SubdomainID from_block = from_elem->subdomain_id();
+        if (std::find(_from_blocks.begin(), _from_blocks.end(), from_block) == _from_blocks.end())
+          continue;
 
-        if (std::find(_to_blocks.begin(), _to_blocks.end(), Moose::ANY_BLOCK_ID) ==
-            _to_blocks.end())
-        {
-          SubdomainID to_block = to_elem->subdomain_id();
-          if (std::find(_to_blocks.begin(), _to_blocks.end(), to_block) == _to_blocks.end())
-            continue;
-        }
+        SubdomainID to_block = to_elem->subdomain_id();
+        if (std::find(_to_blocks.begin(), _to_blocks.end(), to_block) == _to_blocks.end())
+          continue;
       }
 
       transferDofObject(to_elem, from_elem, to_var, from_var, to_solution, from_solution);

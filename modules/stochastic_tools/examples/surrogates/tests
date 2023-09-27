@@ -3,7 +3,7 @@
   issues = '#14933'
 
   [train]
-    requirement = "The sytem shall test syntax for training surrogate models for a heat conduction problem using "
+    requirement = "The system shall test syntax for training surrogate models for a heat conduction problem using "
     [nearest_point]
       type = CheckFiles
       input = nearest_point_training.i
@@ -49,7 +49,7 @@
     []
   []
   [evaluate_uniform]
-    requirement = "The sytem shall check syntax for evaluating surrogate models with uniform distribution for a heat conduction problem using "
+    requirement = "The system shall check syntax for evaluating surrogate models with uniform distribution for a heat conduction problem using "
     [nearest_point]
       type = RunApp
       input = nearest_point_uniform.i

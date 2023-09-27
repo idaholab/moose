@@ -49,7 +49,7 @@
   [transient_mesh]
     design = "ParameterMeshOptimization.md ElementOptimizationSourceFunctionInnerProduct.md ParameterMeshFunction.md  ReporterTimePointSource.md"
     issues = '#22995'
-    requirement = 'The sytem shall be able to perform force-inversion optimization with time-dependent parameter and outputs with spatial linear interpolation by '
+    requirement = 'The system shall be able to perform force-inversion optimization with time-dependent parameter and outputs with spatial linear interpolation by '
     [source_mesh]
       type = CheckFiles
       input = source_mesh.i

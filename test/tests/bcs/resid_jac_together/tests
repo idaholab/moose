@@ -5,7 +5,7 @@
     exodiff = diffusion_reaction_out.e
     design = 'systems/NonlinearSystem.md'
     issues = '#23487'
-    requirement = "The sytem shall be able to compute the residual and the Jacobian of each nodal BC "
+    requirement = "The system shall be able to compute the residual and the Jacobian of each nodal BC "
                   "and integrated BC together."
   []
 []

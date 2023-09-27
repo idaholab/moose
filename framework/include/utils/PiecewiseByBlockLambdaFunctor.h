@@ -129,7 +129,7 @@ PiecewiseByBlockLambdaFunctor<T>::PiecewiseByBlockLambdaFunctor(
 template <typename T>
 template <typename PolymorphicLambda>
 void
-PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
+PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & libmesh_dbg_var(mesh),
                                              const std::set<SubdomainID> & block_ids,
                                              PolymorphicLambda my_lammy)
 {
@@ -153,16 +153,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
   };
 
   for (const auto block_id : block_ids)
-  {
-    if (block_id == Moose::ANY_BLOCK_ID)
-    {
-      const auto & inner_block_ids = mesh.meshSubdomains();
-      for (const auto inner_block_id : inner_block_ids)
-        add_lammy(inner_block_id);
-    }
-    else
-      add_lammy(block_id);
-  }
+    add_lammy(block_id);
 }
 
 template <typename T>

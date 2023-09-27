@@ -64,12 +64,6 @@ param3 = '${fparse mesh1}'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Controls]
-  [stochastic]
-    type = SamplerReceiver
-  []
-[]
-
 [Outputs]
   console = 'false'
 []
