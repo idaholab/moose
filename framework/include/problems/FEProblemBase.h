@@ -851,13 +851,15 @@ public:
    * @param name Name for the object to be created
    * @param parameters InputParameters for the object
    * @param threaded Whether or not to create n_threads copies of the object
+   * @param var_param_name The name of the parameter on the object which holds the primary variable.
    * @return A vector of shared_ptrs to the added objects
    */
   template <typename T>
   std::vector<std::shared_ptr<T>> addObject(const std::string & type,
                                             const std::string & name,
                                             InputParameters & parameters,
-                                            const bool threaded = true);
+                                            const bool threaded = true,
+                                            const std::string & var_param_name = "variable");
 
   // Postprocessors /////
   virtual void addPostprocessor(const std::string & pp_name,
@@ -2295,7 +2297,9 @@ protected:
    *
    * This is needed due to header includes/forward declaration issues
    */
-  void addObjectParamsHelper(InputParameters & params, const std::string & object_name);
+  void addObjectParamsHelper(InputParameters & params,
+                             const std::string & object_name,
+                             const std::string & var_param_name = "variable");
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
@@ -2585,12 +2589,13 @@ std::vector<std::shared_ptr<T>>
 FEProblemBase::addObject(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters,
-                         const bool threaded)
+                         const bool threaded,
+                         const std::string & var_param_name)
 {
   parallel_object_only();
 
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
-  addObjectParamsHelper(parameters, name);
+  addObjectParamsHelper(parameters, name, var_param_name);
 
   const auto n_threads = threaded ? libMesh::n_threads() : 1;
   std::vector<std::shared_ptr<T>> objects(n_threads);

@@ -2929,18 +2929,10 @@ FEProblemBase::addFVInterfaceKernel(const std::string & fv_ik_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  /// Checking the nonlinear system number of variable1
-  /// If variable1 and variable2 live on different systems, the interface kernel
-  /// is added to the system of variable1 alone. Another interface kernel needs to be
-  /// created with flipped variables for the system of variable2
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable1", name), true).first
-          ? determineNonlinearSystem(parameters.varName("variable1", name), true).second
-          : (unsigned int)0;
-
-  /// This is set because the Attribute system filters IKs based on this
-  parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  addObject<FVInterfaceKernel>(fv_ik_name, name, parameters);
+  /// We assume that variable1 and variable2 can live on different systems, in this case
+  /// the user needs to create two interface kernels with flipped variables and parameters
+  addObject<FVInterfaceKernel>(
+      fv_ik_name, name, parameters, /*threaded=*/true, /*variable_param_name=*/"variable1");
 }
 
 // InterfaceKernels ////
@@ -3567,21 +3559,21 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::string & object_name)
+FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
+                                     const std::string & object_name,
+                                     const std::string & var_param_name)
 {
-  const bool system_already_set = parameters.get<SystemBase *>("_sys");
   const auto nl_sys_num =
-      parameters.isParamValid("variable") &&
-              determineNonlinearSystem(parameters.varName("variable", object_name)).first
-          ? determineNonlinearSystem(parameters.varName("variable", object_name)).second
+      parameters.isParamValid(var_param_name) &&
+              determineNonlinearSystem(parameters.varName(var_param_name, object_name)).first
+          ? determineNonlinearSystem(parameters.varName(var_param_name, object_name)).second
           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    if (!system_already_set)
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
   }
   else
   {
@@ -3593,8 +3585,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::st
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    if (!system_already_set)
-      parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 }
 

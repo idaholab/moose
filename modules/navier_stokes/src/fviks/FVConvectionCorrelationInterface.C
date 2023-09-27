@@ -37,7 +37,8 @@ FVConvectionCorrelationInterface::FVConvectionCorrelationInterface(const InputPa
     _htc(getFunctor<ADReal>("h")),
     _bulk_distance(getParam<Real>("bulk_distance")),
     _use_wall_cell(getParam<bool>("wall_cell_is_bulk")),
-    _pl(mesh().getPointLocator())
+    _pl(mesh().getPointLocator()),
+    _var1_is_fluid("wraps_" + var1().name() == _temp_fluid.functorName())
 {
   if (!_use_wall_cell && (_bulk_distance < 0))
     mooseError(
@@ -51,9 +52,8 @@ FVConvectionCorrelationInterface::computeQpResidual()
   // If variable1 is fluid and variable 1 is on elem or
   // if variable2 is fluid and variable 2 is on elem
   // the fluid element will be elem otherwise it is the neighbor
-  bool var1_is_fluid = ("wraps_" + var1().name() == _temp_fluid.functorName());
   const Elem * elem_on_fluid_side =
-      (elemIsOne() && var1_is_fluid) || (!elemIsOne() && !var1_is_fluid)
+      (elemIsOne() && _var1_is_fluid) || (!elemIsOne() && !_var1_is_fluid)
           ? &_face_info->elem()
           : _face_info->neighborPtr();
 
@@ -77,11 +77,11 @@ FVConvectionCorrelationInterface::computeQpResidual()
   mooseAssert(bulk_elem,
               "The element at bulk_distance from the wall was not found in the mesh. "
               "Increase the number of ghost layers with the 'ghost_layers' parameter.");
-  mooseAssert((var1_is_fluid ? var1() : var2()).hasBlocks(bulk_elem->subdomain_id()),
+  mooseAssert((_var1_is_fluid ? var1() : var2()).hasBlocks(bulk_elem->subdomain_id()),
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
-  const auto fluid_side = singleSidedFaceArg(var1_is_fluid ? var1() : var2(), _face_info);
-  const auto solid_side = singleSidedFaceArg(var1_is_fluid ? var2() : var1(), _face_info);
+  const auto fluid_side = singleSidedFaceArg(_var1_is_fluid ? var1() : var2(), _face_info);
+  const auto solid_side = singleSidedFaceArg(_var1_is_fluid ? var2() : var1(), _face_info);
 
   const auto bulk_elem_arg = makeElemArg(bulk_elem);
 

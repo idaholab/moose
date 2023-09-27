@@ -35,4 +35,7 @@ protected:
 
   /// libmesh object to find points in the mesh
   std::unique_ptr<PointLocatorBase> _pl;
+
+  /// Boolean to see if variable1 is the fluid
+  const bool _var1_is_fluid;
 };

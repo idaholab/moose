@@ -188,8 +188,11 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
 
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
-  addResidual(_elem_is_one ? r : -r, _var1.number(), _elem_is_one ? false : true);
-  if (_var1.sys().number() == _var2.sys().number())
+  // If the two variables belong to two different nonlinear systems, we only contribute to the one
+  // which is being assembled right now
+  if (_var1.sys().number() == _subproblem.currentNlSysNum())
+    addResidual(_elem_is_one ? r : -r, _var1.number(), _elem_is_one ? false : true);
+  if (_var2.sys().number() == _subproblem.currentNlSysNum())
     addResidual(_elem_is_one ? -r : r, _var2.number(), _elem_is_one ? true : false);
 }
 
@@ -206,11 +209,14 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  addResidualsAndJacobian(_assembly,
-                          std::array<ADReal, 1>{{_elem_is_one ? r : -r}},
-                          _elem_is_one ? _var1.dofIndices() : _var1.dofIndicesNeighbor(),
-                          _var1.scalingFactor());
-  if (_var1.sys().number() == _var2.sys().number())
+  // If the two variables belong to two different nonlinear systems, we only contribute to the one
+  // which is being assembled right now
+  if (_var1.sys().number() == _subproblem.currentNlSysNum())
+    addResidualsAndJacobian(_assembly,
+                            std::array<ADReal, 1>{{_elem_is_one ? r : -r}},
+                            _elem_is_one ? _var1.dofIndices() : _var1.dofIndicesNeighbor(),
+                            _var1.scalingFactor());
+  if (_var2.sys().number() == _subproblem.currentNlSysNum())
     addResidualsAndJacobian(_assembly,
                             std::array<ADReal, 1>{{_elem_is_one ? -r : r}},
                             _elem_is_one ? _var2.dofIndicesNeighbor() : _var2.dofIndices(),
