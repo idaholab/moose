@@ -22,7 +22,7 @@ Note the adopted coordinate convention defines the global fault surface as x-z p
 
 The example input file for the ```Mesh``` section is given below:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Mesh
          id=input-block-0
          caption=Mesh Generation: Input File.
@@ -65,19 +65,19 @@ One ```Action```, ```TensorMechanics/Master```, and two kernels ```InertiaForce`
 
 The input file defining both kernels are given below, note in 2D formulation, “plane strain” needs to be set:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/2D_slipweakening/tpv2052D.i 
+!listing moose/modules/tensor_mechanics/test/tests/2D_slipweakening/tpv2052D.i 
          block=Modules
          id=input-block-1
          caption=StressDivergenceTensors Kernels: Input File (2D)
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Modules
          id=input-block-2
          caption=StressDivergenceTensors Kernels: Input File (3D)
 
 The inertia force kernel is given as follows, with the assumption of small strain, we set ```use_displaced_mesh``` to ```false```:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Kernels
          id=input-block-3
          caption=InertiaForce Kernels: Input File
@@ -114,7 +114,7 @@ Where $\sigma_{t}$ and $\sigma_{t - \Delta t}$ are stress tensor from current/la
 
 To utilize the kernel, allocate it inside ```[Kernels]``` section of input file:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Kernels
          id=input-block-4
          caption=StiffPropDamping: Input File
@@ -123,14 +123,14 @@ To utilize the kernel, allocate it inside ```[Kernels]``` section of input file:
 
 All the quantities passed as variable input into the material kernel are defined as aux-variables. The code for defining aux variables residuals (```resid, resid_slipweakening```), displacements (```disp_slipweakening```), velocity (```vel_slipweakening```), spatial distribution of static friction coefficient (```mu_s```) and initial shear stress along strike direction (```ini_shear_stress```) is given below:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=AuxVariables
          id=input-block-5
          caption=AuxVariables: Input File
 
 Two Aux Kernels ```CopyValueAux``` ```ComputeValueRate``` are defined to pass/store data ```coupled```, data time change ```coupledDot``` to aux variables. Below provides the input file:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=AuxKernels
          id=input-block-6
          caption=AuxKernels: Input File
@@ -141,12 +141,12 @@ Notice ```TIMESTEP_BEGIN``` option makes all the aux kernel operations executed 
 
 The time integration is handled using ```CentralDifference``` explicit time integrator with ```lumped``` mass solve type, the corresponding code is here:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Executioner
          id=input-block-7
          caption=CentralDifference: Input File
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Outputs
          id=input-block-8
          caption=Output: Input File
@@ -163,28 +163,28 @@ caption=ResidualEvaluationUserObject: Source File*
 
 To execute the ```ResidualEvaluationUserObject```, in the input file we add the following code block:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Problem
          id=input-block-9
          caption=Problem: Input File
 
 This allocates the tag vector. The tag vector needs to link with the action block ```[TensorMechanics]```, which automatically set up stress divergence term:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Modules
          id=input-block-10
          caption=Add "extra_vector_tags" in the Action `[TensorMechanics]`: Input File
 
 ```ResidualEvaluationUserObject``` is called in ```[UserObjects]```:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=UserObjects
          id=input-block-11
          caption=UserObject: Input File
 
 The block executes ```ResidualEvaluationUserObject``` at ```TIMESTEP_END``` but before the execuation of ```[AuxKernels]```. After retrieving the force vector, in the ```[AuxKernels]```, we assign it to pre-defined restoration force aux variable using ```TagVectorAux```:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=AuxKernels
          id=input-block-12
          caption=TagVectorAux: Input File
@@ -196,7 +196,7 @@ Then the variable ```resid_x, resid_y, resid_z``` will pass stored value to ```r
 
 Isotropic, linear elastic material is used for simplicity, but users are free to adopt other material types. The input file for this part is given below as an example:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Materials
          id=input-block-13
          caption=Materials: Input File
@@ -342,7 +342,7 @@ The spatial distribution of $T_1^o$:
 
 We then have them defined in the input file within ```[Functions]``` section:
 
-!listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
+!listing moose/modules/tensor_mechanics/test/tests/3D_slipweakening/tpv2053D.i
          block=Functions
          id=input-block-14
          caption=”InitialStrikeShearStress” and “StaticFricCoeffMus" Example

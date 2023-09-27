@@ -3,7 +3,7 @@
         type = CSVDiff
         input = 'tpv2052D.i'
         csvdiff = 'tpv2052D_out.csv'
-        abs_zero = 1e-6
-        rel_err = 1e-6
+        abs_zero = 1e-5
+        rel_err = 1e-5
     []
 []

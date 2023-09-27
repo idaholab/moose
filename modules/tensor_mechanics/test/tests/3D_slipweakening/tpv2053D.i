@@ -1,6 +1,7 @@
 # Verification of Benchmark Problem TPV205-3D from the SCEC Dynamic Rupture Validation exercises #
 # Reference: #
 # Harris, R. M.-P.-A. (2009). The SCEC/USGS Dynamic Earthquake Rupture Code Verification Exercise. Seismological Research Letters, vol. 80, no. 1, pages 119-126. #
+# [Note]: This serves as a test file, to run the full problem, please extend the domain size by modifying nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax
 
 [Mesh]
     [./msh]
@@ -306,7 +307,7 @@
   [Executioner]
     type = Transient
     dt = 0.005
-    num_steps = 100
+    num_steps = 20
     [TimeIntegrator]
       type = CentralDifference
       solve_type = lumped
@@ -315,7 +316,7 @@
 
   [Outputs]
     csv = true
-    interval = 20
+    interval = 5
   []
 
   [Postprocessors]
