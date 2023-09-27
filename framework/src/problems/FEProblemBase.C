@@ -176,7 +176,7 @@ FEProblemBase::validParams()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
   params.addParam<bool>("allow_initial_conditions_with_restart",
-                        true,
+                        false,
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
@@ -6033,16 +6033,12 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 {
   // vector tags
   {
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
     _fe_vector_tags.clear();
 
     for (const auto & residual_vector_tag : residual_vector_tags)
-      // We filter out tags which do not have associated vectors in the current nonlinear
-      // system. This is essential to be able to use system-dependent residual tags.
-      if (_current_nl_sys->hasVector(residual_vector_tag._id))
-        _fe_vector_tags.insert(residual_vector_tag._id);
+      _fe_vector_tags.insert(residual_vector_tag._id);
 
     setCurrentResidualVectorTags(_fe_vector_tags);
   }

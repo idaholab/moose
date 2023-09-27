@@ -20,7 +20,7 @@
                "Outputs/file_base='harmonic'"
   []
   [diffusion-multisystem]
-    issues = '#22356 #8780'
+    issues = '#25599'
     design = 'FVDiffusionInterface.md Problem/index.md'
     requirement = 'The system shall be able to solve a block-restricted diffusion problem where the variables live on different nonlinear systems.'
     type = Exodiff

@@ -43,16 +43,20 @@ FVConvectionCorrelationInterface::FVConvectionCorrelationInterface(const InputPa
     mooseError(
         "The bulk distance should be specified or 'wall_cell_is_bulk' should be set to true for "
         "the FVTwoVarConvectionCorrelationInterface");
-  if ("wraps_" + var1().name() != _temp_fluid.functorName())
-    paramError(NS::T_fluid, "variable1 must be equal to T_fluid parameter.");
-  if ("wraps_" + var2().name() != _temp_solid.functorName())
-    paramError(NS::T_solid, "variable2 must be equal to T_solid parameter.");
 }
 
 ADReal
 FVConvectionCorrelationInterface::computeQpResidual()
 {
-  const Elem * current_elem = elemIsOne() ? &_face_info->elem() : _face_info->neighborPtr();
+  // If variable1 is fluid and variable 1 is on elem or
+  // if variable2 is fluid and variable 2 is on elem
+  // the fluid element will be elem otherwise it is the neighbor
+  bool var1_is_fluid = ("wraps_" + var1().name() == _temp_fluid.functorName());
+  const Elem * elem_on_fluid_side =
+      (elemIsOne() && var1_is_fluid) || (!elemIsOne() && !var1_is_fluid)
+          ? &_face_info->elem()
+          : _face_info->neighborPtr();
+
   const Elem * bulk_elem;
   const auto state = determineState();
   if (!_use_wall_cell)
@@ -60,29 +64,31 @@ FVConvectionCorrelationInterface::computeQpResidual()
     Point p = _face_info->faceCentroid();
     Point du = Point(MetaPhysicL::raw_value(_normal));
     du *= _bulk_distance;
-    if (elemIsOne())
+    // The normal always points outwards from the elem (towards the neighbor)
+    if (elem_on_fluid_side == &_face_info->elem())
       p -= du;
     else
       p += du;
     bulk_elem = (*_pl)(p);
   }
   else
-    bulk_elem = current_elem;
+    bulk_elem = elem_on_fluid_side;
 
   mooseAssert(bulk_elem,
               "The element at bulk_distance from the wall was not found in the mesh. "
               "Increase the number of ghost layers with the 'ghost_layers' parameter.");
-  mooseAssert(var1().hasBlocks(bulk_elem->subdomain_id()),
+  mooseAssert((var1_is_fluid ? var1() : var2()).hasBlocks(bulk_elem->subdomain_id()),
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
-  const auto face_arg_side1 = singleSidedFaceArg(var1(), _face_info);
-  const auto face_arg_side2 = singleSidedFaceArg(var2(), _face_info);
+  const auto fluid_side = singleSidedFaceArg(var1_is_fluid ? var1() : var2(), _face_info);
+  const auto solid_side = singleSidedFaceArg(var1_is_fluid ? var2() : var1(), _face_info);
+
   const auto bulk_elem_arg = makeElemArg(bulk_elem);
 
   /// We make sure that the gradient*normal part is addressed
   auto multipler =
       _normal * (_face_info->faceCentroid() - bulk_elem->vertex_average()) > 0 ? 1 : -1;
 
-  return multipler * _htc(face_arg_side1, state) *
-         (_temp_fluid(bulk_elem_arg, state) - _temp_solid(face_arg_side2, state));
+  return multipler * _htc(fluid_side, state) *
+         (_temp_fluid(bulk_elem_arg, state) - _temp_solid(solid_side, state));
 }

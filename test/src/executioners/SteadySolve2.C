@@ -117,12 +117,11 @@ SteadySolve2::execute()
     for (unsigned int i = 0; i < _number_of_iterations; i++)
     {
       converged = converged && solve(_first_nl_sys) && solve(_second_nl_sys);
-    }
-
-    if (!converged)
-    {
-      _console << "Aborting as solve did not converge" << std::endl;
-      break;
+      if (!converged)
+      {
+        _console << "Aborting as solve did not converge" << std::endl;
+        break;
+      }
     }
 
     _problem.computeIndicators();
