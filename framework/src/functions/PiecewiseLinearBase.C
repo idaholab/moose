@@ -18,7 +18,7 @@ PiecewiseLinearBase::validParams()
 }
 
 PiecewiseLinearBase::PiecewiseLinearBase(const InputParameters & parameters)
-  : PiecewiseTabularBase(parameters), _linear_interp(nullptr)
+  : PiecewiseTabularBase(parameters), _linear_interp(nullptr), _interpolation_created(false)
 {
 }
 

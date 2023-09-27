@@ -23,16 +23,16 @@ public:
   MessageFromInput(const InputParameters & parameters);
   virtual ~MessageFromInput();
 
-  // Required implementation of a pure virtual function (not used)
+  /// Required implementation of a pure virtual function (not used)
   virtual void initialize() override{};
 
-  // Required implementation of a pure virtual function (not used)
+  /// Required implementation of a pure virtual function (not used)
   virtual void finalize() override{};
 
-  // Print out the message
+  /// Print out the message
   virtual void execute() override;
 
 private:
-  // hold the message from the input file
+  /// hold the message from the input file
   const std::string _input_message;
 };
