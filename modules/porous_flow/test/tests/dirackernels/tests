@@ -244,7 +244,7 @@
     cli_args = "DiracKernels/pls/point_file='' DiracKernels/pls/line_base='.1 0 0' DiracKernels/pls/line_length=42 DiracKernels/pls/line_direction='0 0 1'"
     expect_err = 'length causes end point.*to lie outside the mesh'
     threading = '!pthreads'
-    requirement = 'PorousFlowPolyLineSink shall abort with an error if the line base, direction, and length cause the line to exit the mesh domain."'
+    requirement = 'PorousFlowPolyLineSink shall abort with an error if the line base, direction, and length cause the line to exit the mesh domain.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
