@@ -98,22 +98,19 @@ class TaggingExtension(command.CommandExtension):
                 for entry in key_list_regex:
                     regex_replace=f"'{entry}':"
                     tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
-                    # add relative link from built from the path at the end of the tagging entry
+                    # add relative link built from the path at the end of the tagging entry
                     if (entry == 'path'):
-                        path_value = tag_dict_str.split("path: ")[1].split(',')[0]
+                        path_value = tag_dict_str.split("path: ")[1].split(',')[0].replace("'", "")
 
-                        # Split at the first modules/ (usually moose/modules/)
-                        if 'modules/' in path_value:
-                            path_value = path_value.split('modules/', 1)[1]
-                        else:
-                            # splitting at content is dangerous, same named paged within two different modules/xxx/doc/content
+                        if 'content/' in path_value:
+                            # splitting at content is dangerous, same named pages within two different modules/xxx/doc/content
                             # could be mixed together
                             path_value = path_value.split('content/')[1]
 
                         # Use a single / to indicate that it's a local link
                         link_value = '/' + path_value.replace('.md', '.html')
                         index = tag_dict_str.find(', key_vals')
-                        tag_dict_str = tag_dict_str[:index] + ', link: "' + link_value + tag_dict_str[index:]
+                        tag_dict_str = tag_dict_str[:index] + ', link: "' + link_value + '"' + tag_dict_str[index:]
                 tag_dict_str=re.sub("'",'"', tag_dict_str)
                 # Downstream js cannot handle double quotes
                 tag_dict_str=re.sub("\"\"",'"', tag_dict_str)
