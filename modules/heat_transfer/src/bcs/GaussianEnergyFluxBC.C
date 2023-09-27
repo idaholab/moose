@@ -29,7 +29,6 @@ GaussianEnergyFluxBC::beamParams()
   params.addParam<FunctionName>("x_beam_coord", 0, beam_coord_doc("x"));
   params.addParam<FunctionName>("y_beam_coord", 0, beam_coord_doc("y"));
   params.addParam<FunctionName>("z_beam_coord", 0, beam_coord_doc("z"));
-  params.addClassDescription("Describes an incoming heat flux beam with a Gaussian profile");
   return params;
 }
 
@@ -38,6 +37,7 @@ GaussianEnergyFluxBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params += GaussianEnergyFluxBC::beamParams();
+  params.addClassDescription("Describes an incoming heat flux beam with a Gaussian profile");
   return params;
 }
 

@@ -1,9 +1,9 @@
-# GaussianEnergyFluxBC
+# FVGaussianEnergyFluxBC
 
-!syntax description /BCs/GaussianEnergyFluxBC
+!syntax description /FVBCs/FVGaussianEnergyFluxBC
 
-This boundary condition is the finite element analog of
-[FVGaussianEnergyFluxBC.md]. It computes an influx of energy from a beam
+This boundary condition is the finite volume analog of
+[GaussianEnergyFluxBC.md]. It computes an influx of energy from a beam
 (e.g. laser) with a Gaussian spatial profile. The flux is given by
 
 \begin{equation}
@@ -18,8 +18,8 @@ the beam. This functional form of the beam flux is taken from
 the flux indicates that the flux is incoming. This class assumes that the beam
 impinges perpendicular to the surface.
 
-!syntax parameters /BCs/GaussianEnergyFluxBC
+!syntax parameters /FVBCs/FVGaussianEnergyFluxBC
 
-!syntax inputs /BCs/GaussianEnergyFluxBC
+!syntax inputs /FVBCs/FVGaussianEnergyFluxBC
 
-!syntax children /BCs/GaussianEnergyFluxBC
+!syntax children /FVBCs/FVGaussianEnergyFluxBC

@@ -18,6 +18,7 @@ FVGaussianEnergyFluxBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params += GaussianEnergyFluxBC::beamParams();
+  params.addClassDescription("Describes an incoming heat flux beam with a Gaussian profile");
   return params;
 }
 
