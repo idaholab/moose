@@ -42,7 +42,7 @@ ThermalSensitivity::computeQpProperties()
 {
   const Real thermal_compliance =
       0.5 * _thermal_conductivity[_qp] * _grad_temperature[_qp] * _grad_temperature[_qp];
-  _sensitivity[_qp] = -_dTdp[_qp] * thermal_compliance;
+  _sensitivity[_qp] = -_dTdp[_qp] * thermal_compliance / _thermal_conductivity[_qp];
 
   // C_e (rho_e) = A_c rho^{1/p} + B_c; A_c = (C_i - C_{i+1})/(rho_i^{1/p} - rho_{i+1}^{1/p}); B_c =
   // C_i - A_c rho_i^{1/p}

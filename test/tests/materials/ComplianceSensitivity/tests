@@ -68,4 +68,10 @@
     method = 'opt'
     valgrind = 'none'
   []
+  [thermal_test]
+    type = 'Exodiff'
+    input = 'thermal_test.i'
+    exodiff = 'thermal_test_out.e'
+    requirement = 'The system shall be able to compute a thermal compliance minimization problem.'
+  []
 []
