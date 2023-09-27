@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADKernelValue.h"
+#include "INSADObjectTracker.h"
 
 /**
  * Subtracts the mesh velocity from the convection term in the Navier-Stokes momentum equation
