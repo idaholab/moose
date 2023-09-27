@@ -10,6 +10,7 @@
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
 #include "RelationshipManager.h"
+#include "AddVariableAction.h"
 
 #include "libmesh/fe.h"
 
@@ -44,9 +45,11 @@ commonAdaptivityParams()
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
-  params.addParam<bool>("disable_lagrange_p_refinement",
-                        false,
-                        "Whether to disable p-refinement of Lagrange variables.");
+  const auto families_enum = AddVariableAction::getNonlinearVariableFamilies();
+  MultiMooseEnum disable_p_refinement_for_families(families_enum.getRawNames());
+  params.addParam<MultiMooseEnum>("disable_p_refinement_for_families",
+                                  disable_p_refinement_for_families,
+                                  "What families we should disable p-refinement for.");
   return params;
 }
 }
@@ -153,6 +156,6 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.doingPRefinement(true, getParam<bool>("disable_lagrange_p_refinement"));
+      adapt.doingPRefinement(true, getParam<MultiMooseEnum>("disable_p_refinement_for_families"));
   }
 }

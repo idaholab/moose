@@ -388,10 +388,10 @@ Adaptivity::isAdaptivityDue()
 
 void
 Adaptivity::doingPRefinement(const bool doing_p_refinement,
-                             const bool disable_lagrange_p_refinement)
+                             const MultiMooseEnum & disable_p_refinement_for_families)
 {
   _p_refinement_flag = doing_p_refinement;
-  _fe_problem.doingPRefinement(doing_p_refinement, disable_lagrange_p_refinement);
+  _fe_problem.doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 #endif // LIBMESH_ENABLE_AMR

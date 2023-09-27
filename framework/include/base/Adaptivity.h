@@ -32,6 +32,7 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseEnum;
+class MultiMooseEnum;
 
 // Forward declare classes in libMesh
 namespace libMesh
@@ -131,9 +132,10 @@ public:
   /**
    * Indicate whether the kind of adaptivity we're doing is p-refinement
    * @param doing_p_refinement Whether we're doing p-refinement
-   * @param disable_lagrange_p_refinement Whether to disable p-refinement of Lagrange variables
+   * @param disable_p_refinement_for_families Families to disable p-refinement for
    */
-  void doingPRefinement(bool doing_p_refinement, bool disable_lagrange_p_refinement);
+  void doingPRefinement(bool doing_p_refinement,
+                        const MultiMooseEnum & disable_p_refinement_for_families);
 
   /**
    * Adapts the mesh based on the error estimator used

@@ -25,6 +25,7 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/string_to_enum.h"
 
 #include <regex>
 
@@ -1276,19 +1277,23 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 
 void
 SubProblem::doingPRefinement(const bool doing_p_refinement,
-                             const bool disable_lagrange_p_refinement)
+                             const MultiMooseEnum & disable_p_refinement_for_families_enum)
 {
   mesh().doingPRefinement(doing_p_refinement);
 
   if (doing_p_refinement)
   {
+    std::vector<FEFamily> disable_families(disable_p_refinement_for_families_enum.size());
+    for (const auto i : index_range(disable_families))
+      disable_families[i] =
+          Utility::string_to_enum<FEFamily>(disable_p_refinement_for_families_enum[i]);
+
     for (const auto tid : make_range(libMesh::n_threads()))
       for (const auto s : make_range(numNonlinearSystems()))
-        assembly(tid, s).havePRefinement(disable_lagrange_p_refinement);
+        assembly(tid, s).havePRefinement(disable_families);
 
-    if (disable_lagrange_p_refinement)
-    {
-      auto & eq = es();
+    auto & eq = es();
+    for (const auto family : disable_families)
       for (const auto i : make_range(eq.n_systems()))
       {
         auto & system = eq.get_system(i);
@@ -1296,11 +1301,10 @@ SubProblem::doingPRefinement(const bool doing_p_refinement,
         for (const auto vg : make_range(system.n_variable_groups()))
         {
           const auto & var_group = system.variable_group(vg);
-          if (var_group.type().family == LAGRANGE)
+          if (var_group.type().family == family)
             dof_map.should_p_refine(vg, false);
         }
       }
-    }
 
     _have_p_refinement = true;
   }

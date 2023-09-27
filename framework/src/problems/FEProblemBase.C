@@ -8257,9 +8257,9 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
 
 void
 FEProblemBase::doingPRefinement(const bool doing_p_refinement,
-                                const bool disable_lagrange_p_refinement)
+                                const MultiMooseEnum & disable_p_refinement_for_families)
 {
-  SubProblem::doingPRefinement(doing_p_refinement, disable_lagrange_p_refinement);
+  SubProblem::doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
   if (_displaced_problem)
-    _displaced_problem->doingPRefinement(doing_p_refinement, disable_lagrange_p_refinement);
+    _displaced_problem->doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }

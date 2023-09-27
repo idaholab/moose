@@ -923,9 +923,10 @@ public:
   /**
    * Indicate whether the kind of adaptivity we're doing is p-refinement
    * @param doing_p_refinement Whether we're doing p-refinement
-   * @param disable_lagrange_p_refinement Whether to disable p-refinement of Lagrange variables
+   * @param disable_p_refinement_for_families Families to disable p-refinement for
    */
-  virtual void doingPRefinement(bool doing_p_refinement, bool disable_lagrange_p_refinement);
+  virtual void doingPRefinement(bool doing_p_refinement,
+                                const MultiMooseEnum & disable_p_refinement_for_families);
 
   /**
    * @returns whether the kind of adaptivity we're doing is p-refinement

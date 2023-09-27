@@ -1835,15 +1835,14 @@ public:
 
   /**
    * Indicate that we have p-refinement. This method will perform the following tasks:
-   * - Disable p-refinement as requested by the user with \p disable_lagrange_p_refinement
+   * - Disable p-refinement as requested by the user with \p disable_p_refinement_for_families
    * -.Disable p-refinement of Lagrange helper types that we use for getting things like the
    *   physical locations of quadrature points and JxW. (Don't worry, we still use the element
    *   p-level when initializing the quadrature rule attached to the Lagrange helper so the number
    *   of quadrature points reflects the element p-level)
-   * @param disable_lagrange_p_refinement Indicate whether we should disable p-refinement of
-   * Lagrange FE objects
+   * @param disable_p_refinement_for_families Families that we should disable p-refinement for
    */
-  void havePRefinement(bool disable_lagrange_p_refinement);
+  void havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for_families);
 
 private:
   /**
