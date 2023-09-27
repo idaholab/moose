@@ -27,7 +27,7 @@ FVOnlyAddDiffusionToOneSideOfInterface::FVOnlyAddDiffusionToOneSideOfInterface(
     const InputParameters & params)
   : FVInterfaceKernel(params), _coeff2(getFunctor<ADReal>("coeff2"))
 {
-  if (_var1.sys().number() != _var2.sys().number())
+  if (var1().sys().number() != var2().sys().number())
     mooseError(this->type(), " does not support multiple nonlinear systems!");
 }
 

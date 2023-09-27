@@ -28,7 +28,7 @@ FVScalarLagrangeMultiplierInterface::FVScalarLagrangeMultiplierInterface(
     _lambda_var(*getScalarVar("lambda", 0)),
     _lambda(adCoupledScalarValue("lambda"))
 {
-  if (_var1.sys().number() != _var2.sys().number())
+  if (var1().sys().number() != var2().sys().number())
     mooseError(this->type(), " does not support multiple nonlinear systems!");
 }
 

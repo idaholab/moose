@@ -100,12 +100,6 @@ protected:
   const std::set<SubdomainID> & sub2() const { return _subdomain2; }
 
   /**
-   * @return The system associated with this object. Either an undisplaced or displaced nonlinear
-   * system
-   */
-  const SystemBase & sys() const { return _var1.sys(); }
-
-  /**
    * @return Whether the \p FaceInfo element is on the 1st side of the interface
    */
   virtual bool elemIsOne() const { return _elem_is_one; }

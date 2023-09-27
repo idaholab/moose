@@ -204,13 +204,6 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 {
   setupData(fi);
 
-  const auto & elem_dof_indices = _elem_is_one ? _var1.dofIndices() : _var2.dofIndices();
-  const auto & neigh_dof_indices =
-      _elem_is_one ? _var2.dofIndicesNeighbor() : _var1.dofIndicesNeighbor();
-
-  mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
-              "We're currently built to use CONSTANT MONOMIALS");
-
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   addResidualsAndJacobian(_assembly,
