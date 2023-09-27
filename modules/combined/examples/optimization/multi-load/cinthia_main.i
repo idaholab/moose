@@ -1,6 +1,4 @@
-
-
-# This example is intended to reproduce a 2D example with opposing horizontal 
+# This example is intended to reproduce a 2D example with opposing horizontal
 # loads (see [1]). This test has an undefined solution if reguar SIMP is applied.
 # Using multi-loads SIMP, on the other hand, generates a structure that optimizes
 # the response to both loads individually,
@@ -65,7 +63,7 @@ Emin = 1.0e-6
   [mat_den]
     family = MONOMIAL
     order = CONSTANT
-#    initial_condition = 0.25
+    #    initial_condition = 0.25
   []
   [sensitivity_one]
     family = MONOMIAL

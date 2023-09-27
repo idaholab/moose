@@ -1,4 +1,3 @@
-
 power = 1.0
 E0 = 1.0
 Emin = 1.0e-6
@@ -28,7 +27,7 @@ Emin = 1.0e-6
     type = ExtraNodesetGenerator
     input = left_load
     new_boundary = right_load
-    coord = '150 150 0' 
+    coord = '150 150 0'
   []
   [left_support]
     type = ExtraNodesetGenerator

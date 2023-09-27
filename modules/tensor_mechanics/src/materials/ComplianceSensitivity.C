@@ -9,7 +9,7 @@
 
 #include "ComplianceSensitivity.h"
 
-registerMooseObject("troutApp", ComplianceSensitivity);
+registerMooseObject("TensorMechanicsApp", ComplianceSensitivity);
 
 InputParameters
 ComplianceSensitivity::validParams()

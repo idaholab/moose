@@ -9,7 +9,7 @@
 
 #include "ADRobinBC.h"
 
-registerMooseObject("troutApp", ADRobinBC);
+registerMooseObject("OptimizationApp", ADRobinBC);
 
 InputParameters
 ADRobinBC::validParams()
@@ -17,7 +17,7 @@ ADRobinBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription("Imposes robin the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=u$.");
-  params.addParam<Real>("coef", 1.0, "Coefficent multiplier for the robin bc term.");
+  params.addParam<Real>("coef", 1.0, "Coefficient multiplier for the robin bc term.");
   return params;
 }
 

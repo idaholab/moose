@@ -10,7 +10,7 @@
 #include "DensityUpdate.h"
 #include <algorithm>
 
-registerMooseObject("troutApp", DensityUpdate);
+registerMooseObject("OptimizationApp", DensityUpdate);
 
 InputParameters
 DensityUpdate::validParams()

@@ -11,7 +11,7 @@
 #include "MooseError.h"
 #include <algorithm>
 
-registerMooseObject("troutApp", SensitivityFilter);
+registerMooseObject("OptimizationApp", SensitivityFilter);
 
 InputParameters
 SensitivityFilter::validParams()

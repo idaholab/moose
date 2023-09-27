@@ -9,7 +9,7 @@
 
 #include "CostSensitivity.h"
 
-registerMooseObject("troutApp", CostSensitivity);
+registerMooseObject("OptimizationApp", CostSensitivity);
 
 InputParameters
 CostSensitivity::validParams()
@@ -39,7 +39,4 @@ CostSensitivity::computeQpProperties()
 {
   _sensitivity[_qp] = _current_elem->volume() * _cost[_qp] +
                       _current_elem->volume() * _design_density[_qp] * _dcostdrho[_qp];
-
-  // C_e (rho_e) = A_c rho^{1/p} + B_c; A_c = (C_i - C_{i+1})/(rho_i^{1/p} - rho_{i+1}^{1/p}); B_c =
-  // C_i - A_c rho_i^{1/p}
 }

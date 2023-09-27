@@ -11,7 +11,7 @@
 #include "Transient.h"
 #include <algorithm>
 
-registerMooseObject("troutApp", DensityUpdateTwoConstraints);
+registerMooseObject("OptimizationApp", DensityUpdateTwoConstraints);
 
 InputParameters
 DensityUpdateTwoConstraints::validParams()

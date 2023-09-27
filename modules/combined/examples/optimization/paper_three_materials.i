@@ -1,5 +1,5 @@
 vol_frac = 0.4
-cost_frac = 0.3 
+cost_frac = 0.3
 
 power = 4
 
@@ -83,16 +83,6 @@ C3 = 1.0
   []
 []
 
-# [ICs]
-#   [mat_den]
-#     type = RandomIC
-#     seed = 0
-#     variable = mat_den
-#     max = '${fparse vol_frac+0.25}'
-#     min = '${fparse vol_frac-0.25}'
-#   []
-# []
-
 [AuxKernels]
   [Cost]
     type = MaterialRealAux
@@ -110,12 +100,6 @@ C3 = 1.0
 []
 
 [BCs]
-  # [no_x]
-  #   type = DirichletBC
-  #   variable = disp_x
-  #   boundary = hold
-  #   value = 0.0
-  # []
   [no_y]
     type = DirichletBC
     variable = disp_y
@@ -145,13 +129,6 @@ C3 = 1.0
     gravity_value = -1e-3
     mass = 1
   []
-  # [push_right]
-  #   type = NodalGravity
-  #   variable = disp_y
-  #   boundary = push_right
-  #   gravity_value = -1e-3
-  #   mass = 1
-  # []
 []
 [Materials]
   [elasticity_tensor]
