@@ -176,7 +176,7 @@ FEProblemBase::validParams()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
   params.addParam<bool>("allow_initial_conditions_with_restart",
-                        false,
+                        true,
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
@@ -2929,7 +2929,25 @@ FEProblemBase::addFVInterfaceKernel(const std::string & fv_ik_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
+  const auto nl_sys_num1 =
+      determineNonlinearSystem(parameters.varName("variable1", name), true).first
+          ? determineNonlinearSystem(parameters.varName("variable1", name), true).second
+          : (unsigned int)0;
+
+  const auto nl_sys_num2 =
+      determineNonlinearSystem(parameters.varName("variable2", name), true).first
+          ? determineNonlinearSystem(parameters.varName("variable2", name), true).second
+          : (unsigned int)0;
+
+  parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num1].get();
   addObject<FVInterfaceKernel>(fv_ik_name, name, parameters);
+
+  // if (nl_sys_num1 != nl_sys_num2)
+  // {
+  //   InputParameters params2 = parameters;
+  //   params2.set<SystemBase *>("_sys") = _nl[nl_sys_num2].get();
+  //   addObject<FVInterfaceKernel>(fv_ik_name, name + "_var2", params2);
+  // }
 }
 
 // InterfaceKernels ////
@@ -3558,6 +3576,7 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::string & object_name)
 {
+  const bool system_already_set = parameters.get<SystemBase *>("_sys");
   const auto nl_sys_num =
       parameters.isParamValid("variable") &&
               determineNonlinearSystem(parameters.varName("variable", object_name)).first
@@ -3568,7 +3587,8 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::st
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    if (!system_already_set)
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
   }
   else
   {
@@ -3580,7 +3600,8 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::st
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    if (!system_already_set)
+      parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 }
 
@@ -6019,12 +6040,16 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 {
   // vector tags
   {
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
     _fe_vector_tags.clear();
 
     for (const auto & residual_vector_tag : residual_vector_tags)
-      _fe_vector_tags.insert(residual_vector_tag._id);
+      // We filter out tags which do not have associated vectors in the current nonlinear
+      // system. This is essential to be able to use system-dependent residual tags.
+      if (_current_nl_sys->hasVector(residual_vector_tag._id))
+        _fe_vector_tags.insert(residual_vector_tag._id);
 
     setCurrentResidualVectorTags(_fe_vector_tags);
   }
