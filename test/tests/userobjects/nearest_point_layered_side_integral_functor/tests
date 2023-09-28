@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'nearest_point_layered_side_integral_functor.i'
+    csvdiff = 'nearest_point_layered_side_integral_functor_out_test_vpp_0000.csv'
+    requirement = 'The system shall compute layered side integrals of a functor that are computed from the closest values for a list of points.'
+    design = 'NearestPointLayeredSideIntegralFunctor.md'
+    issues = '#25106'
+  []
+[]

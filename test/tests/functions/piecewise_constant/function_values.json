@@ -1,0 +1,26 @@
+{
+  "the_data": {
+    "some_key": {
+      "some_other_key": [
+        0.0,
+        5.0,
+        7.0
+      ]
+    },
+    "random_other_key": 2.0,
+    "the_key_not_used": 2,
+    "second_key": {
+      "some_other_key": [
+        1.0,
+        -1.0,
+        10.0
+      ]
+    }
+  },
+  "direct_key": 3,
+  "direct_vector_key": [
+    0,
+    1,
+    2
+  ]
+}

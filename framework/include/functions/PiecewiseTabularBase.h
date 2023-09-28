@@ -24,6 +24,9 @@ public:
 
   PiecewiseTabularBase(const InputParameters & parameters);
 
+  /// Needed to load data from user objects that are not available at construction
+  void initialSetup() override;
+
 protected:
   /// function value scale factor
   const Real & _scale_factor;
@@ -33,13 +36,22 @@ protected:
   const bool _has_axis;
   ///@}
 
+  /// Returns whether the raw data has been loaded already
+  bool isRawDataLoaded() const { return _raw_data_loaded; };
+
 private:
   /// Reads data from supplied CSV file.
   void buildFromFile();
+
+  /// Reads data from supplied JSON reader.
+  void buildFromJSON();
 
   /// Builds data from 'x' and 'y' parameters.
   void buildFromXandY();
 
   /// Builds data from 'xy_data' parameter.
   void buildFromXY();
+
+  /// Boolean to keep track of whether the data has been loaded
+  bool _raw_data_loaded;
 };

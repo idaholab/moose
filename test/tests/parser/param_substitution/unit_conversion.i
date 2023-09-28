@@ -4,8 +4,8 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Problem]
@@ -18,18 +18,18 @@
 []
 
 [Postprocessors]
-  [./km_to_m]
+  [km_to_m]
     type = FunctionValuePostprocessor
-    function = ${units 1 km -> m}
-  [../]
-  [./Jmol_to_eVat]
+    function = '${units 1 km -> m}'
+  []
+  [Jmol_to_eVat]
     type = FunctionValuePostprocessor
-    function = ${units 1 J/mol -> eV/at}
-  [../]
-  [./mW]
+    function = '${units 1 J/mol -> eV/at}'
+  []
+  [mW]
     type = FunctionValuePostprocessor
-    function = ${units 3 mW}
-  [../]
+    function = '${units 3 mW}'
+  []
 []
 
 [Outputs]

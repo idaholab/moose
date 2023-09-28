@@ -1,16 +1,48 @@
 [Tests]
-  issues = '#2272'
+  issues = '#2272 #25058'
   design = 'source/functions/PiecewiseConstant.md'
-  [./piecewise_constant]
+  [piecewise_constant]
     type = 'Exodiff'
     input = 'piecewise_constant.i'
     exodiff = 'piecewise_constant_out.e'
-    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and returns an explicit value from the supplied data when queried (i.e., linear interpolation is not performed)."
-  [../]
-  [./piecewise_constant_simple]
+    requirement = "The system shall include an object that creates a function based on x- and y-data "
+                  "pairs and returns an explicit value from the supplied data when queried (i.e., "
+                  "linear interpolation is not performed)."
+  []
+  [piecewise_constant_simple]
     type = 'CSVDiff'
     input = 'piecewise_constant_simple.i'
     csvdiff = 'piecewise_constant_simple_out.csv'
-    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and returns an explicit value from the supplied data when queried (i.e., linear interpolation is not performed) in a simple simulation, with both negative and positive values."
-  [../]
+    requirement = "The system shall include an object that creates a function based on x- and y-data "
+                  "pairs and returns an explicit value from the supplied data when queried (i.e., "
+                  "linear interpolation is not performed) in a simple simulation, with both negative "
+                  "and positive values."
+  []
+  [piecewise_constant_from_json]
+    type = CSVDiff
+    input = 'piecewise_constant_json.i'
+    csvdiff = 'piecewise_constant_json_out.csv'
+    requirement = "The system shall be able to compute a piecewise constant function based on x- and "
+                  "y-data loaded from a JSON file."
+  []
+
+  [errors]
+    requirement = "The system shall error if"
+    [param_meant_for_file]
+      type = RunException
+      input = 'piecewise_constant_simple.i'
+      cli_args = 'Functions/left/x_title=hello'
+      expect_err = "A parameter was passed for an option using data from a CSV file but the "
+                   "\'data_file\' parameter has not been set"
+      detail = 'parameters meant for loading data from file are passed for a function loading data differently,'
+    []
+    [param_meant_for_json]
+      type = RunException
+      input = 'piecewise_constant_simple.i'
+      cli_args = 'Functions/left/x_keys=hello'
+      expect_err = "A parameter was passed for a JSON input option but the \'json_uo\' parameter has "
+                   "not been set"
+      detail = 'or if parameters meant for loading data from JSON are passed for a function loading data differently.'
+    []
+  []
 []

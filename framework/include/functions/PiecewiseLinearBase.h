@@ -44,4 +44,7 @@ protected:
 
   /// helper object to perform the linear interpolation of the function data
   std::unique_ptr<LinearInterpolation> _linear_interp;
+
+  /// Whether the interpolation has been created
+  bool _interpolation_created;
 };

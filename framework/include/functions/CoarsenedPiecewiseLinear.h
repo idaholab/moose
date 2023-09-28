@@ -12,8 +12,8 @@
 #include "PiecewiseLinearBase.h"
 
 /**
- * Function class that reads in a list of (x,y) value pairs representing a pointwise defined
- * function sililar to PiecewiseLinear. In addition this Function object performs a point reduction
+ * Function class that reads in a list of (x,y) value pairs representing a point-wise defined
+ * function similar to PiecewiseLinear. In addition this Function object performs a point reduction
  * of the tabulated data upon initialization resulting in the evaluation of a simplified function
  * with fewer data points.
  */
@@ -23,4 +23,10 @@ public:
   static InputParameters validParams();
 
   CoarsenedPiecewiseLinear(const InputParameters & parameters);
+
+  /// Needed to process data loaded from user objects that are not available at construction
+  void initialSetup() override;
+
+  /// Builds the coarse linear interpolation from the fine raw data
+  void buildCoarsenedGrid();
 };
