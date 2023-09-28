@@ -33,7 +33,4 @@ protected:
 
   /// The Lagrange Multiplier value
   const ADVariableValue & _lambda;
-
-  /// Lambda assembly
-  Assembly & _lambda_assembly;
 };

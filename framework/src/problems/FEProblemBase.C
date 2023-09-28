@@ -3563,7 +3563,6 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const bool system_already_set = parameters.get<SystemBase *>("_sys");
   const auto nl_sys_num =
       parameters.isParamValid(var_param_name) &&
               determineNonlinearSystem(parameters.varName(var_param_name, object_name)).first
@@ -3574,8 +3573,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    if (!system_already_set)
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
   }
   else
   {
@@ -3587,8 +3585,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    if (!system_already_set)
-      parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 }
 

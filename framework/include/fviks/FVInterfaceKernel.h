@@ -127,16 +127,13 @@ protected:
   /**
    * Process the provided residual given \p var_num and whether this is on the neighbor side
    */
-  void addResidual(Real resid, unsigned int var_num, Assembly & assembly, bool neighbor);
+  void addResidual(Real resid, unsigned int var_num, bool neighbor);
 
   using TaggingInterface::addJacobian;
   /**
    * Process the derivatives for the provided residual and dof index
    */
-  void addJacobian(const ADReal & resid,
-                   dof_id_type dof_index,
-                   Assembly & assembly,
-                   Real scaling_factor);
+  void addJacobian(const ADReal & resid, dof_id_type dof_index, Real scaling_factor);
 
   /**
    * @return A structure that contains information about the face info element and skewness
@@ -192,22 +189,13 @@ protected:
   MooseVariableFV<Real> & _var1;
   MooseVariableFV<Real> & _var2;
 
-  /// the system object for variable 2
-  SystemBase & _sys2;
-
-  /// Variable on one side of the interface
-  MooseVariableFV<Real> & _var1;
-
-  /// Variable on the other side of the interface
-  MooseVariableFV<Real> & _var2;
-
-  /// The Assembly object for system 1
-  Assembly & _assembly1;
-
-  /// The Assembly object for system 2
-  Assembly & _assembly2;
+  /// The Assembly object
+  Assembly & _assembly;
 
 private:
+  MooseVariableFV<Real> & _var1;
+  MooseVariableFV<Real> & _var2;
+
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
 
