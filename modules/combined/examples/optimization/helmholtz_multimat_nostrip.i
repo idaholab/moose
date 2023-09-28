@@ -207,7 +207,7 @@ Et = 1.0 # w
     type = ADRobinBC
     variable = Dc
     boundary = 'bottom_bottom right_bottom left_bottom top_top right_top left_top'
-    coef = 10
+    coefficient = 10
   []
 []
 

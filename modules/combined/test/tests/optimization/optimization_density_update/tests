@@ -1,5 +1,6 @@
 [Tests]
-    issues = '#1'
+    issues = '#25602'
+    design = 'DensityUpdate.md'
     [top_opt_2d]
       type = 'Exodiff'
       input = 'top_opt_2d.i'

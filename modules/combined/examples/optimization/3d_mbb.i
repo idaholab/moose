@@ -138,13 +138,13 @@ power = 2
     type = ADRobinBC
     variable = Dc
     boundary = 'left top front back'
-    coef = 10
+    coefficient = 10
   []
   [boundary_penalty_right]
     type = ADRobinBC
     variable = Dc
     boundary = 'right'
-    coef = 10
+    coefficient = 10
   []
 []
 [NodalKernels]

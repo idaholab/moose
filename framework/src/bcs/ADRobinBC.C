@@ -9,19 +9,26 @@
 
 #include "ADRobinBC.h"
 
-registerMooseObject("MooseTestApp", ADRobinBC);
+registerMooseObject("MooseApp", ADRobinBC);
 
 InputParameters
 ADRobinBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
+  params.addClassDescription("Imposes the Robin integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=u$.");
+  params.addParam<Real>(
+      "coefficient", 1.0, "Coefficient multiplier for the Robin boundary condition term.");
   return params;
 }
 
-ADRobinBC::ADRobinBC(const InputParameters & parameters) : ADIntegratedBC(parameters) {}
+ADRobinBC::ADRobinBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters), _coef(getParam<Real>("coefficient"))
+{
+}
 
 ADReal
 ADRobinBC::computeQpResidual()
 {
-  return _test[_i][_qp] * 2. * _u[_qp];
+  return _coef * _test[_i][_qp] * _u[_qp];
 }

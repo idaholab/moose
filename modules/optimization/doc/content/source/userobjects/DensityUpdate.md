@@ -15,7 +15,7 @@ fraction as inputs.
 
 An example of how to use the `DensityUpdate` class in an input file:
 
-listing test/tests/materials/ComplianceSensitivity/2d_mbb.i block=UserObjects/update
+listing test/tests/materials/compliance_sensitivity/2d_mbb.i block=UserObjects/update
 
 
 !syntax parameters /UserObjects/DensityUpdate

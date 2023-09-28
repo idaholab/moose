@@ -228,7 +228,7 @@ Et = 1.0 # w
     variable = Dc
     boundary = 'bottom_bottom right_bottom left_bottom top_top right_top left_top left_middle '
                'right_middle'
-    coef = 10
+    coefficient = 10
   []
 []
 

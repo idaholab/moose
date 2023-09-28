@@ -3,25 +3,34 @@ E0 = 1e5
 Emin = 1e-4
 power = 2
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   [MeshGenerator]
     type = GeneratedMeshGenerator
-    dim = 2
-    nx = 40
-    ny = 20
+    dim = 3
+    nx = 24
+    ny = 12
+    nz = 12
     xmin = 0
     xmax = 20
     ymin = 0
     ymax = 10
+    zmin = 0
+    zmax = 10
   []
-  [node]
+  [middle_bottom_left_edge]
     type = ExtraNodesetGenerator
     input = MeshGenerator
     new_boundary = pull
-    nodes = 0
+    coord = '0 0 5'
+  []
+[]
+
+[Variables]
+  [Dc]
+    initial_condition = -1.0
   []
 []
 
@@ -37,19 +46,27 @@ power = 2
       execute_on = LINEAR
     []
   []
+
   [compliance]
     family = MONOMIAL
     order = CONSTANT
   []
-  [Dc]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = -1.0
-  []
+
   [mat_den]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = ${vol_frac}
+  []
+  [Dc_elem]
+    family = MONOMIAL
+    order = CONSTANT
+    initial_condition = -1.0
+    [AuxKernel]
+      type = SelfAux
+      variable = Dc_elem
+      v = Dc
+      execute_on = 'TIMESTEP_END'
+    []
   []
 []
 
@@ -58,6 +75,23 @@ power = 2
     strain = SMALL
     add_variables = true
     incremental = false
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = FunctionDiffusion
+    variable = Dc
+    function = 0.05
+  []
+  [potential]
+    type = Reaction
+    variable = Dc
+  []
+  [source]
+    type = CoupledForce
+    variable = Dc
+    v = sensitivity
   []
 []
 
@@ -74,7 +108,18 @@ power = 2
     boundary = right
     value = 0.0
   []
-
+  [no_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = right
+    value = 0.0
+  []
+  [boundary_penalty]
+    type = ADRobinBC
+    variable = Dc
+    boundary = 'left top front back'
+    coefficient = 10
+  []
 []
 [NodalKernels]
   [pull]
@@ -121,30 +166,15 @@ power = 2
     full = true
   []
 []
+
 [UserObjects]
-  [rad_avg]
-    type = RadialAverage
-    radius = 0.5
-    weights = constant
-    prop_name = sensitivity
-    execute_on = TIMESTEP_END
-    force_preaux = true
-    execution_order_group = -1
-  []
   [update]
     type = DensityUpdate
-    density_sensitivity = Dc
+    density_sensitivity = Dc_elem
     design_density = mat_den
     power = ${power}
     volume_fraction = ${vol_frac}
     execute_on = TIMESTEP_BEGIN
-  []
-  [calc_sense]
-    type = SensitivityFilter
-    density_sensitivity = Dc
-    design_density = mat_den
-    filter_UO = rad_avg
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -154,10 +184,9 @@ power = 2
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu'
   nl_abs_tol = 1e-10
-
-  start_time = 0.0
+  line_search = none
   dt = 1.0
-  num_steps = 100
+  num_steps = 10
 []
 
 [Outputs]

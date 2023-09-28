@@ -3,33 +3,35 @@ E0 = 1
 Emin = 1e-8
 power = 3
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
   [MeshGenerator]
     type = GeneratedMeshGenerator
-    dim = 2
-    nx = 150
-    ny = 50
+    dim = 3
+    nx = 30
+    ny = 10
+    nz = 10
     xmin = 0
     xmax = 30
     ymin = 0
     ymax = 10
+    zmin = 0
+    zmax = 10
   []
   [node]
     type = ExtraNodesetGenerator
     input = MeshGenerator
     new_boundary = hold_y
-    nodes = 0
+    coord = '0 0 0; 0 0 10'
   []
   [push]
     type = ExtraNodesetGenerator
     input = node
     new_boundary = push
-    coord = '30 10 0'
+    coord = '30 10 5'
   []
-
 []
 
 [Variables]
@@ -37,13 +39,14 @@ power = 3
   []
   [disp_y]
   []
+  [disp_z]
+  []
   [Dc]
     initial_condition = -1.0
   []
 []
 
 [AuxVariables]
-
   [sensitivity]
     family = MONOMIAL
     order = FIRST
@@ -69,6 +72,17 @@ power = 3
       variable = Dc_elem
       v = Dc
       execute_on = 'TIMESTEP_END'
+    []
+  []
+  [mat_den_nodal]
+    family = L2_LAGRANGE
+    order = FIRST
+    initial_condition = ${vol_frac}
+    [AuxKernel]
+      type = SelfAux
+      execute_on = TIMESTEP_END
+      variable = mat_den_nodal
+      v = mat_den
     []
   []
 []
@@ -112,14 +126,14 @@ power = 3
   [boundary_penalty]
     type = ADRobinBC
     variable = Dc
-    boundary = 'left top'
-    coef = 10
+    boundary = 'left top front back'
+    coefficient = 10
   []
   [boundary_penalty_right]
     type = ADRobinBC
     variable = Dc
     boundary = 'right'
-    coef = 10
+    coefficient = 10
   []
 []
 [NodalKernels]
@@ -190,7 +204,7 @@ power = 3
   l_max_its = 200
   start_time = 0.0
   dt = 1.0
-  num_steps = 70
+  num_steps = 30
 []
 
 [Outputs]

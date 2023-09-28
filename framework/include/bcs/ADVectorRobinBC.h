@@ -9,20 +9,18 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
+#include "ADVectorIntegratedBC.h"
 
-class ADRobinBC;
-
-/**
- *
- */
-class ADRobinBC : public ADIntegratedBC
+class ADVectorRobinBC : public ADVectorIntegratedBC
 {
 public:
   static InputParameters validParams();
-  ADRobinBC(const InputParameters & parameters);
+
+  ADVectorRobinBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual();
+  ADReal computeQpResidual() override;
+
+  // Coefficient to be applied to the Robin boundary condition
   const Real _coef;
 };

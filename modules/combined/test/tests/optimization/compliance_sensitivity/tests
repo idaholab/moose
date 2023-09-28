@@ -1,5 +1,6 @@
 [Tests]
-  issues = '#1'
+  issues = '#25602'
+  design = 'DensityUpdate.md DensityUpdateTwoConstraints.md'
   requirement = 'The system shall be able to compute the compliance sensitivty correctly for a '
   [2d_mbb]
     type = 'CSVDiff'
@@ -31,7 +32,6 @@
     heavy = true
   []
   [2d_mbb_cs2]
-    issues = '#3'
     type = 'CSVDiff'
     input = '2d_mbb_ComplianceSensitivity2.i'
     csvdiff = '2d_mbb_ComplianceSensitivity2_out.csv'

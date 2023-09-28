@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#25602'
+  design = 'DensityUpdate.md'
+  [2d_mbb]
+    type = RunApp
+    input = '2d_mbb.i'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check single material topology optimization "
+                  "problem of a bridge structure."
+  []
+  [2d_mbb_pde]
+    type = RunApp
+    input = '2d_mbb_pde.i'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check single material topology optimization "
+                  "problem of a bridge structure using a partial differential equation to filter "
+                  "displacement compliance sensitivities."
+  []
+  [2d_mbb_pde_amr]
+    type = RunApp
+    input = '2d_mbb_pde_amr.i'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check single material topology optimization "
+                  "problem of a bridge structure using a partial differential equation to filter "
+                  "displacement compliance sensitivities and using adaptive mesh refinement to "
+                  "better define interfaces between void and material."
+  []
+  [helmholtz_multimat_nostrip]
+    type = RunApp
+    input = 'helmholtz_multimat_nostrip.i'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check a multimaterial topology optimization "
+                  "problem of a bridge structure using a partial differential equation to filter "
+                  "displacement compliance sensitivities with multiple mesh blocks."
+  []
+  [helmholtz_multimat_strip]
+    type = RunApp
+    input = 'helmholtz_multimat_strip.i'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check a multimaterial topology optimization "
+                  "problem of a bridge structure using a partial differential equation to filter "
+                  "displacement compliance sensitivities with multiple mesh blocks in which one of "
+                  "them is not optimized."
+  []
+  [three_materials]
+    type = RunApp
+    input = 'three_materials.i'
+    design = 'DensityUpdateTwoConstraints.md'
+    check_input = True
+    method = opt
+    requirement = "The system shall be able to syntax check a multimaterial topology optimization "
+                  "problem of a structure with cost and volume fraction constraints using an ordered "
+                  "SIMP approach."
+  []
+[]

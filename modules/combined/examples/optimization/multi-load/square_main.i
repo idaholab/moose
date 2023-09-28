@@ -225,11 +225,11 @@ Emin = 1.0e-6
 [MultiApps]
   [sub_app_one]
     type = TransientMultiApp
-    input_files = cinthia_subapp_one.i
+    input_files = square_subapp_one.i
   []
   [sub_app_two]
     type = TransientMultiApp
-    input_files = cinthia_subapp_two.i
+    input_files = square_subapp_two.i
   []
 []
 

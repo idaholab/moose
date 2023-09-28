@@ -130,6 +130,7 @@ C3 = 1.0
     mass = 1
   []
 []
+
 [Materials]
   [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor

@@ -109,7 +109,7 @@ power = 2
     type = ADRobinBC
     variable = Dc
     boundary = 'left top'
-    coef = 10
+    coefficient = 10
   []
 []
 [NodalKernels]

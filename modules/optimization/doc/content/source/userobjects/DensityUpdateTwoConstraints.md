@@ -16,7 +16,7 @@ sensitivity variable as inputs.
 
 An example of how to use the `DensityUpdateTwoConstraints` class in an input file:
 
-listing test/tests/materials/ComplianceSensitivity/2d_mmb_2material_cost_initial.i block=UserObjects/update
+listing test/tests/materials/compliance_sensitivity/2d_mmb_2material_cost_initial.i block=UserObjects/update
 
 
 !syntax parameters /UserObjects/DensityUpdateTwoConstraints
