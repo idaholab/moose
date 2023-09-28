@@ -435,7 +435,28 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
       _solid_energy_linear_control.int_valued_data["max_its"] =
           getParam<unsigned int>("solid_energy_l_max_its");
     }
+    else
+      checkDependentParameterError("solid_energy_system",
+                                   {"solid_energy_petsc_options",
+                                    "solid_energy_petsc_options_iname",
+                                    "solid_energy_petsc_options_value",
+                                    "solid_energy_l_tol",
+                                    "solid_energy_l_abs_tol",
+                                    "solid_energy_l_max_its",
+                                    "solid_energy_absolute_tolerance"},
+                                   false);
   }
+  else
+    checkDependentParameterError("energy_system",
+                                 {"energy_petsc_options",
+                                  "energy_petsc_options_iname",
+                                  "energy_petsc_options_value",
+                                  "energy_l_tol",
+                                  "energy_l_abs_tol",
+                                  "energy_l_max_its",
+                                  "energy_absolute_tolerance",
+                                  "energy_equation_relaxation"},
+                                 false);
 
   if (_has_passive_scalar_systems)
   {
@@ -456,8 +477,32 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _passive_scalar_linear_control.int_valued_data["max_its"] =
         getParam<unsigned int>("passive_scalar_l_max_its");
   }
+  else
+    checkDependentParameterError("passive_scalar_system",
+                                 {"passive_scalar_petsc_options",
+                                  "passive_scalar_petsc_options_iname",
+                                  "passive_scalar_petsc_options_value",
+                                  "passive_scalar_l_tol",
+                                  "passive_scalar_l_abs_tol",
+                                  "passive_scalar_l_max_its",
+                                  "passive_scalar_equation_relaxation",
+                                  "passive_scalar_absolute_tolerance"},
+                                 false);
 
   _time = 0;
+}
+
+void
+SIMPLE::checkDependentParameterError(const std::string & main_parameter,
+                                     const std::vector<std::string> & dependent_parameters,
+                                     const bool should_be_defined)
+{
+  for (const auto & param : dependent_parameters)
+    if (parameters().isParamSetByUser(param) == !should_be_defined)
+      paramError(param,
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
 }
 
 void

@@ -218,6 +218,10 @@ protected:
   INSFVRhieChowInterpolatorSegregated * _rc_uo;
 
 private:
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
+                                    const bool should_be_defined);
+
   bool _last_solve_converged;
 
   /// The name of the vector tag which corresponds to the pressure gradient terms in the
