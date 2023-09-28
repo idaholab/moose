@@ -59,7 +59,7 @@ protected:
 
 private:
   /// Serialize on the root processor of the subapplication and transfer the result to the main application
-  void transferToSubAppRoot(NonlinearSystemBase & app_nl_system,
+  void transferToSubAppRoot(FEProblemBase & app_problem,
                             SolutionContainer & solution_container,
                             const dof_id_type global_i);
 
@@ -69,7 +69,7 @@ private:
    * In this case, we will serialize the first two on rank 1, the second two on rank
    * 2 and the last one on rank 3.
    */
-  void transferInParallel(NonlinearSystemBase & app_nl_system,
+  void transferInParallel(FEProblemBase & app_problem,
                           SolutionContainer & solution_container,
                           const dof_id_type global_i);
 
@@ -86,6 +86,11 @@ private:
   /// setting, we use the same approach for batch-restore as well, which might be a little
   /// wasteful if the execution of the subapps is very fast (usually not the case).
   void initializeInBatchMode();
+
+  /// Return the system which contains the given variable. It can either be a flavor of
+  /// a nonlinear system or the auxiliary system.
+  /// @param vname The name of the variable whose system is queried
+  SystemBase & getSystem(FEProblemBase & app_problem, const VariableName & vname);
 
   /// User-selected switch that determines if we want to serialize on the root of the subapp
   /// only or distribute the solutions between all the ranks of the subapp.

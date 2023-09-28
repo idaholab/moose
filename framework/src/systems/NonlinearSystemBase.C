@@ -2888,20 +2888,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 }
 
 void
-NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
-{
-  AllLocalDofIndicesThread aldit(_fe_problem, {var_name});
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  Threads::parallel_reduce(elem_range, aldit);
-
-  // Gather the dof indices across procs to get all the dof indices for var_name
-  aldit.dofIndicesSetUnion();
-
-  const auto & all_dof_indices = aldit.getDofIndices();
-  _var_all_dof_indices.assign(all_dof_indices.begin(), all_dof_indices.end());
-}
-
-void
 NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   _nl_matrix_tags.clear();

@@ -52,7 +52,7 @@ protected:
 
   /// Links to the MooseVariables from the nonlinear system whose dof numbering
   /// we need to populate the variables in (variables_to_fill)
-  std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
+  std::vector<MooseVariableFieldBase *> _variable_to_reconstruct;
 
   /// Link to the mapping object which provides the inverse mapping function
   VariableMappingBase * _mapping;

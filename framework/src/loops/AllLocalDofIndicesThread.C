@@ -23,7 +23,7 @@
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
 
-AllLocalDofIndicesThread::AllLocalDofIndicesThread(FEProblemBase & problem,
+AllLocalDofIndicesThread::AllLocalDofIndicesThread(SubProblem & problem,
                                                    std::vector<std::string> vars,
                                                    bool include_semilocal)
   : ParallelObject(problem.comm()),
