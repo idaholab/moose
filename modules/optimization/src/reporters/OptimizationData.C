@@ -269,7 +269,7 @@ template <typename T>
 void
 OptimizationDataTempl<T>::readMeasurementsFromInput()
 {
-  if (this->template getParam<std::vector<std::string>>("file_variable_weights").size())
+  if (!this->template getParam<std::vector<std::string>>("file_variable_weights").empty())
     this->paramError(
         "measurement_values",
         "file_variable_weights cannot be used with measurement data read from the input "
