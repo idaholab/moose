@@ -35,6 +35,6 @@ FVDivergence::computeQpResidual()
 {
   const auto face =
       makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
-  RealVectorValue vector = _vector_field(face, determineState());
+  const auto vector = _vector_field(face, determineState());
   return -1.0 * (vector * _normal);
 }

@@ -76,7 +76,7 @@ public:
    */
   void linkMomentumSystem(std::vector<NonlinearSystemBase *> momentum_systems,
                           const std::vector<unsigned int> & momentum_system_numbers,
-                          const TagID & pressure_gradient_tag);
+                          const TagID pressure_gradient_tag);
 
   /**
    * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
@@ -97,7 +97,7 @@ protected:
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
 
   /**
-   * We hold on to the raw values of the HbyA vectors so that we can easily reconstruct the
+   * We hold on to the cell-based HbyA vectors so that we can easily reconstruct the
    * cell velocities as well. This vector might be either of size 1 or DIM depending on if we
    * segregate the velocity components as well.
    */

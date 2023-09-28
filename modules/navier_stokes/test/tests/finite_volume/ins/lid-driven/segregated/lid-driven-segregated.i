@@ -133,12 +133,6 @@ pressure_tag = "pressure_grad"
     boundary = 'left right top bottom'
     function = 0
   []
-  [zero-grad-pressure]
-    type = FVFunctionNeumannBC
-    variable = pressure
-    boundary = 'left right top bottom'
-    function = 0.0
-  []
 []
 
 [Executioner]

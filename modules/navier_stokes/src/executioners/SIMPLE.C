@@ -43,7 +43,7 @@ SIMPLE::validParams()
                                        "The nonlinear system for the energy equation.");
   params.addParam<NonlinearSystemName>("solid_energy_system",
                                        "The nonlinear system for the solid energy equation.");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<NonlinearSystemName>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
   params.addParam<TagName>("pressure_gradient_tag",
                            "pressure_momentum_kernels",
@@ -327,7 +327,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   if (_has_passive_scalar_systems)
   {
     const auto & passive_scalar_system_names =
-        getParam<std::vector<std::string>>("passive_scalar_systems");
+        getParam<std::vector<NonlinearSystemName>>("passive_scalar_systems");
     if (passive_scalar_system_names.size() != _passive_scalar_equation_relaxation.size())
       paramError("passive_scalar_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
@@ -353,9 +353,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   Moose::PetscSupport::processPetscPairs(
       momentum_petsc_pair_options, _problem.mesh().dimension(), _momentum_petsc_options);
 
-  _momentum_ls_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
-  _momentum_ls_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
-  _momentum_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("momentum_l_max_its");
+  _momentum_linear_control.real_valued_data["rel_tol"] = getParam<Real>("momentum_l_tol");
+  _momentum_linear_control.real_valued_data["abs_tol"] = getParam<Real>("momentum_l_abs_tol");
+  _momentum_linear_control.int_valued_data["max_its"] =
+      getParam<unsigned int>("momentum_l_max_its");
 
   const auto & pressure_petsc_options = getParam<MultiMooseEnum>("pressure_petsc_options");
   const auto & pressure_petsc_pair_options = getParam<MooseEnumItem, std::string>(
@@ -364,9 +365,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   Moose::PetscSupport::processPetscPairs(
       pressure_petsc_pair_options, _problem.mesh().dimension(), _pressure_petsc_options);
 
-  _pressure_ls_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
-  _pressure_ls_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
-  _pressure_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("pressure_l_max_its");
+  _pressure_linear_control.real_valued_data["rel_tol"] = getParam<Real>("pressure_l_tol");
+  _pressure_linear_control.real_valued_data["abs_tol"] = getParam<Real>("pressure_l_abs_tol");
+  _pressure_linear_control.int_valued_data["max_its"] =
+      getParam<unsigned int>("pressure_l_max_its");
 
   if (_has_energy_system)
   {
@@ -377,9 +379,9 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     Moose::PetscSupport::processPetscPairs(
         energy_petsc_pair_options, _problem.mesh().dimension(), _energy_petsc_options);
 
-    _energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
-    _energy_ls_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
-    _energy_ls_control.int_valued_data["max_its"] = getParam<unsigned int>("energy_l_max_its");
+    _energy_linear_control.real_valued_data["rel_tol"] = getParam<Real>("energy_l_tol");
+    _energy_linear_control.real_valued_data["abs_tol"] = getParam<Real>("energy_l_abs_tol");
+    _energy_linear_control.int_valued_data["max_its"] = getParam<unsigned int>("energy_l_max_its");
 
     // We only allow the solve for a solid energy system if we already solve for the fluid energy
     if (_has_solid_energy_system)
@@ -394,10 +396,11 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
                                              _problem.mesh().dimension(),
                                              _solid_energy_petsc_options);
 
-      _solid_energy_ls_control.real_valued_data["rel_tol"] = getParam<Real>("solid_energy_l_tol");
-      _solid_energy_ls_control.real_valued_data["abs_tol"] =
+      _solid_energy_linear_control.real_valued_data["rel_tol"] =
+          getParam<Real>("solid_energy_l_tol");
+      _solid_energy_linear_control.real_valued_data["abs_tol"] =
           getParam<Real>("solid_energy_l_abs_tol");
-      _solid_energy_ls_control.int_valued_data["max_its"] =
+      _solid_energy_linear_control.int_valued_data["max_its"] =
           getParam<unsigned int>("solid_energy_l_max_its");
     }
   }
@@ -414,10 +417,11 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
                                            _problem.mesh().dimension(),
                                            _passive_scalar_petsc_options);
 
-    _passive_scalar_ls_control.real_valued_data["rel_tol"] = getParam<Real>("passive_scalar_l_tol");
-    _passive_scalar_ls_control.real_valued_data["abs_tol"] =
+    _passive_scalar_linear_control.real_valued_data["rel_tol"] =
+        getParam<Real>("passive_scalar_l_tol");
+    _passive_scalar_linear_control.real_valued_data["abs_tol"] =
         getParam<Real>("passive_scalar_l_abs_tol");
-    _passive_scalar_ls_control.int_valued_data["max_its"] =
+    _passive_scalar_linear_control.int_valued_data["max_its"] =
         getParam<unsigned int>("passive_scalar_l_max_its");
   }
 
@@ -685,8 +689,8 @@ SIMPLE::solveMomentumPredictor()
     KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
     // Solve this component. We don't update the ghosted solution yet, that will come at the end
     // of the corrector step. Also setting the linear tolerances and maximum iteration counts.
-    _momentum_ls_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
-    momentum_solver.set_solver_configuration(_momentum_ls_control);
+    _momentum_linear_control.real_valued_data["abs_tol"] = _momentum_l_abs_tol * norm_factor;
+    momentum_solver.set_solver_configuration(_momentum_linear_control);
 
     // We solve the equation
     momentum_solver.solve(mmat, mmat, solution, rhs);
@@ -758,8 +762,8 @@ SIMPLE::solvePressureCorrector()
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
   // Setting the linear tolerances and maximum iteration counts
-  _pressure_ls_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
-  pressure_solver.set_solver_configuration(_pressure_ls_control);
+  _pressure_linear_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
+  pressure_solver.set_solver_configuration(_pressure_linear_control);
 
   if (_pin_pressure)
     constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
@@ -891,8 +895,8 @@ SIMPLE::solveSolidEnergySystem()
   KSPSetNormType(se_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
   // Setting the linear tolerances and maximum iteration counts
-  _solid_energy_ls_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
-  se_solver.set_solver_configuration(_solid_energy_ls_control);
+  _solid_energy_linear_control.real_valued_data["abs_tol"] = _solid_energy_l_abs_tol * norm_factor;
+  se_solver.set_solver_configuration(_solid_energy_linear_control);
 
   se_solver.solve(mat, mat, solution, rhs);
   se_system.update();
@@ -1008,7 +1012,7 @@ SIMPLE::execute()
             solveAdvectedSystem(_energy_sys_number,
                                 *_energy_system,
                                 _energy_equation_relaxation,
-                                _energy_ls_control,
+                                _energy_linear_control,
                                 _energy_l_abs_tol);
 
         if (_has_solid_energy_system)
@@ -1041,7 +1045,7 @@ SIMPLE::execute()
     }
 
     // Now we solve for the passive scalar equations, they should not influence the solution of the
-    // system above. The reason why we need more than one iterations is due to the matrix relaxation
+    // system above. The reason why we need more than one iteration is due to the matrix relaxation
     // which can be used to stabilize the equations
     if (_has_passive_scalar_systems)
     {
@@ -1068,7 +1072,7 @@ SIMPLE::execute()
               solveAdvectedSystem(_passive_scalar_system_numbers[system_i],
                                   *_passive_scalar_systems[system_i],
                                   _passive_scalar_equation_relaxation[system_i],
-                                  _passive_scalar_ls_control,
+                                  _passive_scalar_linear_control,
                                   _passive_scalar_l_abs_tol);
 
         _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;

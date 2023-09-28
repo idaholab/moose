@@ -104,8 +104,7 @@ protected:
 
   /// Solve a momentum predictor step with a fixed pressure field
   /// @return A vector for the normalized residual norms of the momentum equations.
-  ///         For monolithic cases the length of the vector is 1, while for split cases
-  ///         the length equals the dimensionality of the domain.
+  ///         The length of the vector equals the dimensionality of the domain.
   std::vector<Real> solveMomentumPredictor();
 
   /// Solve a pressure corrector step.
@@ -182,8 +181,7 @@ protected:
   /// Boolean for easy check if a passive scalar systems shall be solved or not
   const bool _has_passive_scalar_systems;
 
-  /// The names of the momentum systems. If only one provided we assume that the
-  /// simulation is monolithic in terms of the momentum components.
+  /// The names of the momentum systems.
   const std::vector<NonlinearSystemName> _momentum_system_names;
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
@@ -279,35 +277,35 @@ private:
   Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
 
   /// Options for the linear solver of the momentum equation
-  SIMPLESolverConfiguration _momentum_ls_control;
+  SIMPLESolverConfiguration _momentum_linear_control;
 
   /// Absolute linear tolerance for the momentum equation(s). We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _momentum_l_abs_tol;
 
   /// Options for the linear solver of the pressure equation
-  SIMPLESolverConfiguration _pressure_ls_control;
+  SIMPLESolverConfiguration _pressure_linear_control;
 
   /// Absolute linear tolerance for the pressure equation. We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _pressure_l_abs_tol;
 
   /// Options for the linear solver of the energy equation
-  SIMPLESolverConfiguration _energy_ls_control;
+  SIMPLESolverConfiguration _energy_linear_control;
 
   /// Absolute linear tolerance for the energy equations. We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
 
   /// Options for the linear solver of the solid energy equation
-  SIMPLESolverConfiguration _solid_energy_ls_control;
+  SIMPLESolverConfiguration _solid_energy_linear_control;
 
   /// Absolute linear tolerance for the solid energy equations. We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _solid_energy_l_abs_tol;
 
   /// Options for the linear solver of the passive scalar equation(s)
-  SIMPLESolverConfiguration _passive_scalar_ls_control;
+  SIMPLESolverConfiguration _passive_scalar_linear_control;
 
   /// Absolute linear tolerance for the passive scalar equation(s). We need to store this, because
   /// it needs to be scaled with a representative flux.

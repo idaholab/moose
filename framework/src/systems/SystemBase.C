@@ -1221,6 +1221,8 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
 
+  // Copying the solutions backward so the current solution will become the old, and the old will
+  // become older. The same applies to the nonlinear iterates.
   for (const auto iteration_index : index_range(_solution_states))
   {
     const auto states = _solution_states[iteration_index].size();

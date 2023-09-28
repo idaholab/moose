@@ -85,7 +85,7 @@ void
 INSFVRhieChowInterpolatorSegregated::linkMomentumSystem(
     std::vector<NonlinearSystemBase *> momentum_systems,
     const std::vector<unsigned int> & momentum_system_numbers,
-    const TagID & pressure_gradient_tag)
+    const TagID pressure_gradient_tag)
 {
   _momentum_systems = momentum_systems;
   _momentum_system_numbers = momentum_system_numbers;
@@ -278,7 +278,6 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
       // extrapolated HbyA values.
       if (_u->isInternalFace(*fi))
       {
-        RealVectorValue HbyA;
         const Elem * elem = fi->elemPtr();
         const Elem * neighbor = fi->neighborPtr();
         for (auto comp_index : make_range(_dim))
@@ -288,7 +287,6 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
           const auto dof_index_neighbor =
               neighbor->dof_number(system_number, var_nums[comp_index], 0);
 
-          _HbyA[fi->id()](comp_index) = 0.0;
           interpolate(Moose::FV::InterpMethod::Average,
                       _HbyA[fi->id()](comp_index),
                       (*raw_hbya[comp_index])(dof_index_elem),
