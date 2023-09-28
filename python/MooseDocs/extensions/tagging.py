@@ -28,11 +28,11 @@ Example Tag command in *.md:
 
 Example output tag dictionary for multiple pages, names, and key:value pairs:
 {data:
-[{name: "heatconduction", path: "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", key_vals: {keyheat: "valheat", key: "val", key1: "val1"}},
-{name: "index", path: "moose/modules/doc/content/index.md", key_vals: {key1: "val1", keya: "val"}},
-{name: "index2", path: "moose/modules/doc/content/index2.md", key_vals: {key1: "val1", keya: "val", thing1: "thing2"}},
-{name: "geochem", path: "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", key_vals: {keyg: "valg", keychem: "valuechem"}},
-{name: "vortex", path: "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", key_vals: {keyvor: "valvor", key: "val", key1: "val1"}}]
+[{name: "heatconduction", path: "/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", link: "/heat_conduction/doc/content/modules/heat_conduction/index.html", key_vals: {keyheat: "valheat", key: "val", key1: "val1"}},
+ {name: "index", path: "moose/modules/doc/content/index.md", link: "/doc/content/index.html", key_vals: {key1: "val1", keya: "val"}},
+ {name: "index2", path: "moose/modules/doc/content/index2.md", link: "/doc/content/index2.html", key_vals: {key1: "val1", keya: "val", thing1: "thing2"}},
+ {name: "geochem", path: "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", link: "/geochemistry/doc/content/modules/geochemistry/index.html", key_vals: {keyg: "valg", keychem: "valuechem"}},
+ {name: "vortex", path: "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", link: "/level_set/doc/content/modules/level_set/example_vortex.html", key_vals: {keyvor: "valvor", key: "val", key1: "val1"}}]
 }
 """
 
@@ -98,6 +98,19 @@ class TaggingExtension(command.CommandExtension):
                 for entry in key_list_regex:
                     regex_replace=f"'{entry}':"
                     tag_dict_str=re.sub(regex_replace,entry+':', tag_dict_str)
+                    # add relative link built from the path at the end of the tagging entry
+                    if (entry == 'path'):
+                        path_value = tag_dict_str.split("path: ")[1].split(',')[0].replace("'", "")
+
+                        if 'content/' in path_value:
+                            # splitting at content is dangerous, same named pages within two different modules/xxx/doc/content
+                            # could be mixed together
+                            path_value = path_value.split('content/')[1]
+
+                        # Use a single / to indicate that it's a local link
+                        link_value = '/' + path_value.replace('.md', '.html')
+                        index = tag_dict_str.find(', key_vals')
+                        tag_dict_str = tag_dict_str[:index] + ', link: "' + link_value + '"' + tag_dict_str[index:]
                 tag_dict_str=re.sub("'",'"', tag_dict_str)
                 # Downstream js cannot handle double quotes
                 tag_dict_str=re.sub("\"\"",'"', tag_dict_str)
