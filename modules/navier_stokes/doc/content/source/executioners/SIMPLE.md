@@ -26,7 +26,7 @@ the advecting velocity field is known from the previous iteration. By explicitly
 [!eqref](momentum-eq) and [!eqref](continuity-eq) become:
 
 !equation id=momentum-eq-iteration
-\nabla \cdot \left(\rho \vec{u}^{n-1} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}.
+\nabla \cdot \left(\rho \vec{u}^{n-1} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
 
 !equation id=continuity-eq-iteration
 \nabla \cdot \left(\rho \vec{u}^n\right) = 0.
@@ -40,7 +40,7 @@ later, due to this behavior, the iteration between pressure and velocity will in
 pressure and face velocity. Nevertheless, to keep this in mind we add a subscript to the advecting velocity in our formulation:
 
 !equation id=momentum-eq-rc
-\nabla \cdot \left(\rho \vec{u}^{n-1}_{RC} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}.
+\nabla \cdot \left(\rho \vec{u}^{n-1}_{RC} \otimes \vec{u}^n\right) - \nabla \cdot \left(\mu_\text{eff} \nabla\vec{u}^n\right) = -\nabla p^{n-1} + \vec{G}(\vec{u}^{n-1},\vec{u}^{n}).
 
 !equation id=continuity-eq-rc
 \nabla \cdot \left(\rho \vec{u}^n_{RC}\right) = 0.
@@ -116,7 +116,6 @@ one for each momentum component and another for the pressure. The different syst
 can be created within the `Problem` block:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/segregated/2d/2d-segregated-velocity.i block=Problem
-         remove=Problem/error_on_jacobian_nonzero_reallocation
 
 It is visible that we requested that MOOSE keeps previous solution iterates as well. This is necessary to
 facilitate the relaxation processes mentioned in the overview. Next, we create variables and assign them to the

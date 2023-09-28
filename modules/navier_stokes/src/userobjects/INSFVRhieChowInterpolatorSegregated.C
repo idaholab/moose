@@ -17,6 +17,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
+#include "SIMPLE.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -79,6 +80,9 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
     paramError("velocity_interp_method",
                "Segregated momentum-pressure solvers do not allow average interpolation methods!");
+
+  if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()))
+    mooseError(this->name(), " should only be used with a segregated thermal-hydraulics solver!");
 }
 
 void
@@ -148,14 +152,14 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
 }
 
 VectorValue<ADReal>
-INSFVRhieChowInterpolatorSegregated::getVelocity(const Moose::FV::InterpMethod libmesh_dbg_var(m),
+INSFVRhieChowInterpolatorSegregated::getVelocity(const Moose::FV::InterpMethod m,
                                                  const FaceInfo & fi,
                                                  const Moose::StateArg & /*time*/,
                                                  const THREAD_ID /*tid*/
 ) const
 {
-  mooseAssert(m == Moose::FV::InterpMethod::RhieChow,
-              "Segregated solution algorithms only support Rhie-Chow interpolation!");
+  if (m != Moose::FV::InterpMethod::RhieChow)
+    mooseError("Segregated solution algorithms only support Rhie-Chow interpolation!");
   return _face_velocity.evaluate(&fi);
 }
 
@@ -349,6 +353,9 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
     NumericVector<Number> & solution = *(momentum_system->solution);
     PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
+    mooseAssert(mmat,
+                "The matrices used in the segregated INSFVRhieChow objects need to be convertable "
+                "to PetscMAtrix!");
 
     if (verbose)
     {
@@ -356,15 +363,17 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
       mmat->print();
     }
 
-    std::unique_ptr<NumericVector<Number>> Ainv = current_local_solution.zero_clone();
+    auto Ainv = current_local_solution.zero_clone();
     PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
 
     mmat->get_diagonal(*Ainv_petsc);
 
-    std::unique_ptr<NumericVector<Number>> working_vector =
-        momentum_system->current_local_solution->zero_clone();
+    auto working_vector = momentum_system->current_local_solution->zero_clone();
     PetscVector<Number> * working_vector_petsc =
         dynamic_cast<PetscVector<Number> *>(working_vector.get());
+    mooseAssert(working_vector_petsc,
+                "The vectors used in the segregated INSFVRhieChow objects need to be convertable "
+                "to PetscVectors!");
 
     *working_vector_petsc = 1.0;
     Ainv_petsc->pointwise_divide(*working_vector_petsc, *Ainv_petsc);

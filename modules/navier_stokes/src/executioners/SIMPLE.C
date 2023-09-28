@@ -76,6 +76,10 @@ SIMPLE::validParams()
                                      "equations. (=1 for no relaxation, "
                                      "diagonal dominance will still be enforced)");
 
+  params.addParamNamesToGroup("pressure_variable_relaxation momentum_equation_relaxation "
+                              "energy_equation_relaxation passive_scalar_equation_relaxation",
+                              "Relaxation");
+
   /*
    * Petsc options for every equations in the system
    */
@@ -134,6 +138,15 @@ SIMPLE::validParams()
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
       "energy equation");
 
+  params.addParamNamesToGroup(
+      "momentum_petsc_options momentum_petsc_options_iname momentum_petsc_options_value "
+      "pressure_petsc_options pressure_petsc_options_iname pressure_petsc_options_value "
+      "energy_petsc_options energy_petsc_options_iname energy_petsc_options_value "
+      "solid_energy_petsc_options solid_energy_petsc_options_iname "
+      "solid_energy_petsc_options_value passive_scalar_petsc_options "
+      "passive_scalar_petsc_options_iname passive_scalar_petsc_options_value",
+      "PETSc Control");
+
   /*
    * Iteration tolerances for the different equations
    */
@@ -165,6 +178,17 @@ SIMPLE::validParams()
                                             1000,
                                             "0<num_iterations",
                                             "The number of momentum-pressure iterations needed.");
+
+  params.addRangeCheckedParam<unsigned int>(
+      "num_iterations",
+      1000,
+      "0<num_iterations",
+      "The number of momentum-pressure-(other fields) iterations needed.");
+
+  params.addParamNamesToGroup(
+      "momentum_absolute_tolerance pressure_absolute_tolerance energy_absolute_tolerance "
+      "solid_energy_absolute_tolerance passive_scalar_absolute_tolerance num_iterations",
+      "Nonlinear Iteration");
   /*
    * Linear iteration tolerances for the different equations
    */
@@ -240,22 +264,30 @@ SIMPLE::validParams()
       "passive_scalar_l_max_its",
       10000,
       "The maximum allowed iterations in the linear solver of the passive scalar equation.");
-  params.addRangeCheckedParam<unsigned int>(
-      "num_iterations",
-      1000,
-      "0<num_iterations",
-      "The number of momentum-pressure-(other fields) iterations needed.");
 
-  params.addParam<bool>(
-      "print_fields",
-      false,
-      "Use this to print the coupling and solution fields and matrices throughout the iteration.");
+  params.addParamNamesToGroup(
+      "momentum_l_tol momentum_l_abs_tol momentum_l_max_its pressure_l_tol pressure_l_abs_tol "
+      "pressure_l_max_its solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its "
+      "energy_l_tol energy_l_abs_tol energy_l_max_its passive_scalar_l_tol "
+      "passive_scalar_l_abs_tol passive_scalar_l_max_its",
+      "Linear Iteration");
+
+  /*
+   * Pressure pin parameters for enclosed flows
+   */
 
   params.addParam<bool>(
       "pin_pressure", false, "If the pressure field needs to be pinned at a point.");
   params.addParam<Real>(
       "pressure_pin_value", 0, "The value which needs to be enforced for the pressure.");
   params.addParam<Point>("pressure_pin_point", "The point where the pressure needs to be pinned.");
+
+  params.addParamNamesToGroup("pin_pressure pressure_pin_value pressure_pin_point", "Pressure Pin");
+
+  params.addParam<bool>(
+      "print_fields",
+      false,
+      "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
   return params;
 }
@@ -458,7 +490,7 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
   matrix.get_diagonal(diff_diagonal);
 
   // Create a copy of the diagonal for later use and cast it
-  std::unique_ptr<NumericVector<Number>> original_diagonal = diff_diagonal.clone();
+  auto original_diagonal = diff_diagonal.clone();
 
   // We cache the inverse of the relaxation parameter because doing divisions might
   // be more expensive for every row
@@ -918,6 +950,18 @@ SIMPLE::solveSolidEnergySystem()
 void
 SIMPLE::execute()
 {
+  if (_app.isRecovering())
+  {
+    _console << "\nCannot recover SIMPLE solves!\nExiting...\n" << std::endl;
+    return;
+  }
+
+  if (_problem.adaptivity().isOn())
+  {
+    _console << "\nCannot use SIMPLE solves with mesh adaptivity!\nExiting...\n" << std::endl;
+    return;
+  }
+
   _problem.timestepSetup();
 
   _time_step = 0;
@@ -1089,6 +1133,8 @@ SIMPLE::execute()
 
   {
     TIME_SECTION("final", 1, "Executing Final Objects")
+    _problem.execMultiApps(EXEC_FINAL);
+    _problem.finalizeMultiApps();
     _problem.postExecute();
     _problem.execute(EXEC_FINAL);
     _time = _time_step;
