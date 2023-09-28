@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/tensor_mechanics_srs.md
     software_design_description: sqa/tensor_mechanics_sdd.md
     software_test_plan: sqa/tensor_mechanics_stp.md
-    requirements_traceablity_matrix: sqa/tensor_mechanics_rtm.md
+    requirements_traceability_matrix: sqa/tensor_mechanics_rtm.md
     verification_validation_report: sqa/tensor_mechanics_vvr.md
     failure_analysis_report: sqa/tensor_mechanics_far.md
     software_library_list: sqa/tensor_mechanics_sll.md

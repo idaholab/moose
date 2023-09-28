@@ -19,7 +19,7 @@ Documents:
     software_requirements_specification: sqa/stochastic_tools_srs.md
     software_design_description: sqa/stochastic_tools_sdd.md
     software_test_plan: sqa/stochastic_tools_stp.md
-    requirements_traceablity_matrix: sqa/stochastic_tools_rtm.md
+    requirements_traceability_matrix: sqa/stochastic_tools_rtm.md
     verification_validation_report: sqa/stochastic_tools_vvr.md
     failure_analysis_report: sqa/stochastic_tools_far.md
     software_library_list: sqa/stochastic_tools_sll.md

@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/heat_conduction_srs.md
     software_design_description: sqa/heat_conduction_sdd.md
     software_test_plan: sqa/heat_conduction_stp.md
-    requirements_traceablity_matrix: sqa/heat_conduction_rtm.md
+    requirements_traceability_matrix: sqa/heat_conduction_rtm.md
     verification_validation_report: sqa/heat_conduction_vvr.md
     failure_analysis_report: sqa/heat_conduction_far.md
     software_library_list: sqa/heat_conduction_sll.md

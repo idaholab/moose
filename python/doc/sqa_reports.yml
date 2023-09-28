@@ -9,7 +9,7 @@ Documents:
     software_requirements_specification: sqa/python_srs.md
     software_design_description: sqa/python_sdd.md
     software_test_plan: sqa/python_stp.md
-    requirements_traceablity_matrix: sqa/python_rtm.md
+    requirements_traceability_matrix: sqa/python_rtm.md
     verification_validation_report: sqa/python_vvr.md
     failure_analysis_report: sqa/python_far.md
     software_library_list: sqa/python_sll.md

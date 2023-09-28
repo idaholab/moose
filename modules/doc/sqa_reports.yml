@@ -300,7 +300,7 @@ Documents:
     software_requirements_specification: sqa/moose_srs.md
     software_design_description: sqa/moose_sdd.md
     software_test_plan: sqa/moose_stp.md
-    requirements_traceablity_matrix: sqa/moose_rtm.md
+    requirements_traceability_matrix: sqa/moose_rtm.md
     verification_validation_report: sqa/moose_vvr.md
     failure_analysis_report: sqa/moose_far.md
     software_library_list: sqa/moose_sll.md

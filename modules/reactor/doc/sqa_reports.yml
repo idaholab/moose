@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/reactor_srs.md
     software_design_description: sqa/reactor_sdd.md
     software_test_plan: sqa/reactor_stp.md
-    requirements_traceablity_matrix: sqa/reactor_rtm.md
+    requirements_traceability_matrix: sqa/reactor_rtm.md
     verification_validation_report: sqa/reactor_vvr.md
     failure_analysis_report: sqa/reactor_far.md
     software_library_list: sqa/reactor_sll.md

@@ -18,7 +18,7 @@ Documents:
     software_requirements_specification: sqa/ray_tracing_srs.md
     software_design_description: sqa/ray_tracing_sdd.md
     software_test_plan: sqa/ray_tracing_stp.md
-    requirements_traceablity_matrix: sqa/ray_tracing_rtm.md
+    requirements_traceability_matrix: sqa/ray_tracing_rtm.md
     verification_validation_report: sqa/ray_tracing_vvr.md
     failure_analysis_report: sqa/ray_tracing_far.md
     software_library_list: sqa/ray_tracing_sll.md

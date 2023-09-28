@@ -13,7 +13,7 @@ Documents:
     software_requirements_specification: sqa/fsi_srs.md
     software_design_description: sqa/fsi_sdd.md
     software_test_plan: sqa/fsi_stp.md
-    requirements_traceablity_matrix: sqa/fsi_rtm.md
+    requirements_traceability_matrix: sqa/fsi_rtm.md
     verification_validation_plan: sqa/fsi_vvr.md
     log_safety_software_determination: WARNING
     log_quality_level_determination: WARNING

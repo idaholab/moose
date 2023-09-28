@@ -24,7 +24,7 @@ Documents:
     software_requirements_specification: sqa/framework_srs.md
     software_design_description: sqa/framework_sdd.md
     software_test_plan: sqa/framework_stp.md
-    requirements_traceablity_matrix: sqa/framework_rtm.md
+    requirements_traceability_matrix: sqa/framework_rtm.md
     verification_validation_report: sqa/framework_vvr.md
     failure_analysis_report: sqa/framework_far.md
     software_library_list: sqa/framework_sll.md

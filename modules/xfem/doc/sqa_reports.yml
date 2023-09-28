@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/xfem_srs.md
     software_design_description: sqa/xfem_sdd.md
     software_test_plan: sqa/xfem_stp.md
-    requirements_traceablity_matrix: sqa/xfem_rtm.md
+    requirements_traceability_matrix: sqa/xfem_rtm.md
     verification_validation_report: sqa/xfem_vvr.md
     failure_analysis_report: sqa/xfem_far.md
     software_library_list: sqa/xfem_sll.md

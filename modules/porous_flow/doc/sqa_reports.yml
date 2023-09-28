@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/porous_flow_srs.md
     software_design_description: sqa/porous_flow_sdd.md
     software_test_plan: sqa/porous_flow_stp.md
-    requirements_traceablity_matrix: sqa/porous_flow_rtm.md
+    requirements_traceability_matrix: sqa/porous_flow_rtm.md
     verification_validation_report: sqa/porous_flow_vvr.md
     failure_analysis_report: sqa/porous_flow_far.md
     software_library_list: sqa/porous_flow_sll.md
