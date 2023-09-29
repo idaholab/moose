@@ -182,44 +182,23 @@ protected:
   T & declareRecoverableData(const std::string & data_name, Args &&... args);
 
   /**
-   * Declare a piece of data as "restartable".
-   * This means that in the event of a restart this piece of data
-   * will be restored back to its previous value.
-   *
-   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
-   *
-   * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param object_name A supplied name for the object that is declaring this data.
-   * @param args Arguments to forward to the constructor of the data
+   * @return The name of restartable data for the system with name \p system_name,
+   * the \p object with name restartable_name, and the data with name \p data_name.
    */
-  template <typename T, typename... Args>
-  T & declareRestartableDataWithObjectName(const std::string & data_name,
-                                           const std::string & object_name,
-                                           Args &&... args);
+  static std::string restartableName(const std::string & system_name,
+                                     const std::string & restartable_name,
+                                     const std::string & data_name);
 
   /**
-   * Declare a piece of data as "restartable".
-   * This means that in the event of a restart this piece of data
-   * will be restored back to its previous value.
-   *
-   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
-   *
-   * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param object_name A supplied name for the object that is declaring this data.
-   * @param context Context pointer that will be passed to the load and store functions
-   * @param args Arguments to forward to the constructor of the data
+   * @return The name of restartable data for the system that this object belongs to,
+   * the \p object with name restartable_name, and the data with name \p data_name.
    */
-  template <typename T, typename... Args>
-  T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
-                                                      const std::string & object_name,
-                                                      void * context,
-                                                      Args &&... args);
+  std::string restartableName(const std::string & restartable_name,
+                              const std::string & data_name) const;
 
   /**
-   * Gets the name of a piece of restartable data given a data name, adding
-   * the system name and object name prefix.
-   *
-   * This should only be used in this interface and in testing.
+   * @return The name of restartable data for the system that this object belongs to,
+   * this object, and the data with name \p data_name.
    */
   std::string restartableName(const std::string & data_name) const;
 
@@ -316,34 +295,6 @@ Restartable::declareRestartableDataHelper(const std::string & data_name,
       registerRestartableDataOnApp(std::move(data_ptr), _restartable_tid));
 
   return restartable_data_ref;
-}
-
-template <typename T, typename... Args>
-T &
-Restartable::declareRestartableDataWithObjectName(const std::string & data_name,
-                                                  const std::string & object_name,
-                                                  Args &&... args)
-{
-  return declareRestartableDataWithObjectNameWithContext<T>(
-      data_name, object_name, nullptr, std::forward<Args>(args)...);
-}
-
-template <typename T, typename... Args>
-T &
-Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
-                                                             const std::string & object_name,
-                                                             void * context,
-                                                             Args &&... args)
-{
-  std::string old_name = _restartable_name;
-
-  _restartable_name = object_name;
-
-  T & value = declareRestartableDataWithContext<T>(data_name, context, std::forward<Args>(args)...);
-
-  _restartable_name = old_name;
-
-  return value;
 }
 
 template <typename T, typename... Args>
