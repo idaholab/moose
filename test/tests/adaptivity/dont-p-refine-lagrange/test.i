@@ -74,10 +74,17 @@
   []
 []
 
+[Postprocessors]
+  [avg]
+    type = ElementAverageValue
+    variable = u
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
