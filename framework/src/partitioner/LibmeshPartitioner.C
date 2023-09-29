@@ -149,18 +149,17 @@ LibmeshPartitioner::prepareBlocksForSubdomainPartitioner(
   subdomain_partitioner.chunks.clear();
 
   // Insert each chunk
-  if (_subdomain_blocks.size() != 0)
-    for (const auto & group : _subdomain_blocks)
-    {
-      const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, group);
-      for (const auto id : subdomain_ids)
-        if (!mesh_subdomain_ids.count(id))
-          paramError("blocks", "The block ", id, " was not found on the mesh");
+  for (const auto & group : _subdomain_blocks)
+  {
+    const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, group);
+    for (const auto id : subdomain_ids)
+      if (!mesh_subdomain_ids.count(id))
+        paramError("blocks", "The block ", id, " was not found on the mesh");
 
-      std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
+    std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
 
-      subdomain_partitioner.chunks.push_back(subdomain_ids_set);
-    }
+    subdomain_partitioner.chunks.push_back(subdomain_ids_set);
+  }
 }
 
 void

@@ -160,20 +160,20 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
 
     // off-diagonal entries from the coupled_groups parameters
     if (isParamValid("coupled_groups"))
-    for (const auto & coupled_group :
-         getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
-    {
-      std::vector<NonlinearVariableName> vars;
-      MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
-      for (unsigned int j : index_range(vars))
-        for (unsigned int k = j + 1; k < vars.size(); ++k)
-        {
-          const unsigned int row = _nl.getVariable(0, vars[j]).number();
-          const unsigned int column = _nl.getVariable(0, vars[k]).number();
-          (*cm)(row, column) = 1;
-          (*cm)(column, row) = 1;
-        }
-    }
+      for (const auto & coupled_group :
+           getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
+      {
+        std::vector<NonlinearVariableName> vars;
+        MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
+        for (unsigned int j : index_range(vars))
+          for (unsigned int k = j + 1; k < vars.size(); ++k)
+          {
+            const unsigned int row = _nl.getVariable(0, vars[j]).number();
+            const unsigned int column = _nl.getVariable(0, vars[k]).number();
+            (*cm)(row, column) = 1;
+            (*cm)(column, row) = 1;
+          }
+      }
   }
   else
   {

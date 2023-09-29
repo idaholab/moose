@@ -515,12 +515,12 @@ FEProblemBase::createTagVectors()
   if (isParamValid("extra_tag_matrices"))
   {
     auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
-  for (const auto nl_sys_num : index_range(matrices))
-    for (auto & matrix : matrices[nl_sys_num])
-    {
-      auto tag = addMatrixTag(matrix);
-      _nl[nl_sys_num]->addMatrix(tag);
-    }
+    for (const auto nl_sys_num : index_range(matrices))
+      for (auto & matrix : matrices[nl_sys_num])
+      {
+        auto tag = addMatrixTag(matrix);
+        _nl[nl_sys_num]->addMatrix(tag);
+      }
   }
 }
 

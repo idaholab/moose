@@ -91,17 +91,19 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
     setParserFeatureFlags(_func_F[i]);
 
     // add the constant expressions
+    auto constant_names = isParamValid("constant_names")
+                              ? getParam<std::vector<std::vector<std::string>>>("constant_names")
+                              : std::vector<std::vector<std::string>>{};
+    auto constant_expressions =
+        isParamValid("constant_expressions")
+            ? getParam<std::vector<std::vector<std::string>>>("constant_expressions")
+            : std::vector<std::vector<std::string>>{};
+
+    if (constant_names.size() != constant_expressions.size())
+      paramError("constant_names", "Must be same length as constant_expressions");
+
     if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-    {
-      auto constant_names = getParam<std::vector<std::vector<std::string>>>("constant_names");
-      auto constant_expressions =
-          getParam<std::vector<std::vector<std::string>>>("constant_expressions");
-
-      if (constant_names.size() != constant_expressions.size())
-        paramError("constant_names", "Must be same length as constant_expressions");
-
       addFParserConstants(_func_F[i], constant_names[i], constant_expressions[i]);
-    }
 
     // parse function
     if (_func_F[i]->Parse(_function[i], variables) >= 0)

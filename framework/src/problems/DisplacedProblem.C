@@ -34,7 +34,7 @@ DisplacedProblem::validParams()
       "A Problem object for providing access to the displaced finite element "
       "mesh and associated variables.");
   params.addPrivateParam<MooseMesh *>("mesh");
-  params.addPrivateParam<std::vector<std::string>>("displacements");
+  params.addPrivateParam<std::vector<std::string>>("displacements", {});
   return params;
 }
 

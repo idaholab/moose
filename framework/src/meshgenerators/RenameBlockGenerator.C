@@ -23,11 +23,39 @@ RenameBlockGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
 
-  params.addRequiredParam<std::vector<SubdomainName>>(
+  params.addDeprecatedParam<std::vector<SubdomainID>>(
+      "old_block_id",
+      "Elements with this block number will be given the new_block_number or "
+      "new_block_name.  You must supply either old_block_id or old_block_name.  "
+      "You may supply a vector of old_block_id, in which case the new_block "
+      "information must also be a vector.",
+      "Use 'old_block' instead of 'old_block_id'.");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "old_block_name",
+      "Elements with this block name will be given the new_block_number or "
+      "new_block_name.  You must supply either old_block_id or old_block_name.  "
+      "You may supply a vector of old_block_name, in which case the new_block "
+      "information must also be a vector.",
+      "Use 'old_block' instead of 'old_block_name'.");
+  params.addDeprecatedParam<std::vector<SubdomainID>>(
+      "new_block_id",
+      "Elements with the old block number (or name) will be given this block "
+      "number.  If the old blocks are named, their names will be passed onto the "
+      "newly numbered blocks.",
+      "Use 'new_block' instead of 'new_block_id'.");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "new_block_name",
+      "Elements with the old block number (or name) will be given this block "
+      "name.  No change of block ID is performed, unless multiple old blocks are "
+      "given the same name, in which case they are all given the first old block "
+      "number.",
+      "Use 'new_block' instead of 'new_block_name'.");
+
+  params.addParam<std::vector<SubdomainName>>(
       "old_block",
       "Elements with these block ID(s)/name(s) will be given the new block information specified "
       "in 'new_block'");
-  params.addRequiredParam<std::vector<SubdomainName>>(
+  params.addParam<std::vector<SubdomainName>>(
       "new_block",
       "The new block ID(s)/name(s) to be given by the elements defined in 'old_block'.");
 
@@ -41,20 +69,59 @@ RenameBlockGenerator::validParams()
 RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters), _input(getMesh("input"))
 {
+  if (isParamValid("old_block_id") && isParamValid("old_block_name"))
+    paramError("old_block_id",
+               "Cannot use in combination with 'old_block_name'. Please use 'old_block' "
+               "instead; 'old_block_id' and 'old_block_name' are deprecated.");
+  if (isParamValid("new_block_id") && isParamValid("new_block_name"))
+    paramError("new_block_id",
+               "Cannot use in combination with 'new_block_name'. Please use 'new_block' "
+               "instead; 'new_block_id' and 'new_block_name' are deprecated.");
 
   if (isParamValid("old_block"))
   {
+    if (isParamValid("old_block_id"))
+      paramError("old_block_id",
+                 "Cannot use with 'old_block'. Use only 'old_block'; 'old_block_id' is "
+                 "deprecated.");
+    if (isParamValid("old_block_name"))
+      paramError("old_block_name",
+                 "Cannot use with 'old_block'. Use only 'old_block'; 'old_block_name' is "
+                 "deprecated.");
     _old_block = getParam<std::vector<SubdomainName>>("old_block");
     _old_block_param_name = "old_block";
   }
+  else if (isParamValid("old_block_id"))
+  {
+    for (const auto id : getParam<std::vector<SubdomainID>>("old_block_id"))
+      _old_block.push_back(std::to_string(id));
+    _old_block_param_name = "old_block_id";
+  }
   else
-    paramError("old_block", "No valid 'old_block' name is provided.");
+  {
+    _old_block = getParam<std::vector<SubdomainName>>("old_block_name");
+    _old_block_param_name = "old_block_name";
+  }
 
   std::string new_block_param_name;
   if (isParamValid("new_block"))
   {
+    if (isParamValid("new_block_id"))
+      paramError("new_block_id",
+                 "Cannot use with 'new_block'. Use only 'new_block'; 'new_block_id' is "
+                 "deprecated.");
+    if (isParamValid("new_block_name"))
+      paramError("new_block_name",
+                 "Cannot use with 'new_block'. Use only 'new_block'; 'new_block_name' is "
+                 "deprecated.");
     _new_block = getParam<std::vector<SubdomainName>>("new_block");
     new_block_param_name = "new_block";
+  }
+  else if (isParamValid("new_block_id"))
+  {
+    for (const auto id : getParam<std::vector<SubdomainID>>("new_block_id"))
+      _new_block.push_back(std::to_string(id));
+    new_block_param_name = "new_block_id";
   }
   else
   {

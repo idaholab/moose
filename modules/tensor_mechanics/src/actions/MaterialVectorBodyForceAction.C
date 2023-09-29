@@ -20,8 +20,8 @@ MaterialVectorBodyForceAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription("Set up volumetric body force kernels");
 
-  params.addParam<std::vector<SubdomainName>>(
-      "block", "The block ids where the body force will be applied");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "The block ids where the body force will be applied");
 
   params.addParam<std::vector<VariableName>>(
       "displacements",

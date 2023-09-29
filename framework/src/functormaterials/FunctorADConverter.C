@@ -36,6 +36,7 @@ template <typename T>
 FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & parameters)
   : FunctorMaterial(parameters)
 {
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   auto reg_props_in = getParam<std::vector<MooseFunctorName>>("reg_props_in");
   auto ad_props_out = getParam<std::vector<MooseFunctorName>>("ad_props_out");
   auto ad_props_in = getParam<std::vector<MooseFunctorName>>("ad_props_in");

@@ -65,7 +65,6 @@ XFEMAction::validParams()
                                   "The CrackFrontDefinition user object name (only "
                                   "needed if 'use_crack_tip_enrichment=true')");
   params.addParam<std::vector<VariableName>>("displacements",
-                                             {},
                                              "Names of displacement variables (only "
                                              "needed if 'use_crack_tip_enrichment=true')");
   params.addParam<std::vector<VariableName>>("enrichment_displacements",

@@ -39,7 +39,8 @@ GeochemicalModelDefinition::validParams()
       "database, the sorbing sites (if any) and the decoupled redox states that are in "
       "disequilibrium (if any).");
   params.addParam<std::vector<std::string>>(
-      "equilibrium_minerals", {},
+      "equilibrium_minerals",
+      {},
       "A list of minerals that are in equilibrium with the aqueous solution.  All members of this "
       "list must be in the 'minerals' section of the database file");
   params.addParam<std::vector<std::string>>(

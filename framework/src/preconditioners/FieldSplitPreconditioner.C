@@ -67,12 +67,14 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
 
       // off-diagonal entries
       std::vector<std::vector<unsigned int>> off_diag(n_vars);
-      for (const auto i : index_range(off_diag_rows))
-      {
-        unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
-        unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
-        (*cm)(row, column) = 1;
-      }
+      if (off_diag_rows.size() * off_diag_columns.size() != 0 &&
+          off_diag_rows.size() == off_diag_columns.size())
+        for (const auto i : index_range(off_diag_rows))
+        {
+          unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
+          unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
+          (*cm)(row, column) = 1;
+        }
     }
   }
   else
