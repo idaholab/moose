@@ -1,12 +1,25 @@
 Content:
     - framework/doc/content
     - modules/fusion/doc/content
+    - modules/thermal_hydraulics/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/heat_conduction/doc/content
+    - modules/misc/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/ray_tracing/doc/content
+    - modules/rdg/doc/content
+    - modules/solid_properties/doc/content
+    - infrastructure:
+        root_dir: modules/doc/content
+        content:
+          - application_usage/command_line_usage.md
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
 Extensions:
     MooseDocs.extensions.navigation:
-        name: Fusion
+        name: MOOSE Fusion Module
         repo: https://github.com/idaholab/moose
         home: /modules/fusion
     MooseDocs.extensions.appsyntax:
@@ -19,4 +32,6 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.template:
+        active: True
     MooseDocs.extensions.sqa: disable
