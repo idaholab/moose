@@ -2781,12 +2781,15 @@ MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, st
   suffix.insert(0, "_");
 
   const auto [it, inserted] = _restartable_meta_data.emplace(name, MetaDataEntry{});
-  if (!inserted)
-    mooseError("The restartable data map '", name, "' is already registered");
-
   auto & entry = it->second;
-  entry.suffix = suffix;
-  entry.reader = std::make_unique<RestartableDataReader>(*this, entry.map);
+  if (inserted)
+  {
+    entry.suffix = suffix;
+    entry.reader = std::make_unique<RestartableDataReader>(*this, entry.map);
+  }
+
+  mooseAssert(entry.suffix == suffix, "Inconsistent suffix");
+  mooseAssert(entry.reader, "Reader not set");
 }
 
 const std::string &
