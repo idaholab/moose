@@ -10,6 +10,7 @@ application.
 - [Fluid Properties](modules/fluid_properties/index.md)
 - [Fluid-Structure Interaction](modules/fsi/index.md)
 - [Functional Expansion Tools](modules/functional_expansion_tools/index.md)
+- [Fusion](modules/fusion/index.md)
 - [Geochemistry](modules/geochemistry/index.md)
 - [Heat Transfer](modules/heat_transfer/index.md)
 - [Level Set](modules/level_set/index.md)

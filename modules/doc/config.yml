@@ -177,6 +177,7 @@ Extensions:
             electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
+            fusion: !include modules/fusion/doc/sqa_fusion.yml
             heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
             level_set: !include modules/level_set/doc/sqa_level_set.yml
             misc: !include modules/misc/doc/sqa_misc.yml
