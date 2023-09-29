@@ -367,14 +367,14 @@ RestartableDataReader::restoreLateData(std::unique_ptr<RestartableDataValue> val
                args...);
   };
 
-if (currentData(tid).hasData(value->name()))
-  error("This value has already been delcared and it does not make sense to declare it again");
+  if (currentData(tid).hasData(value->name()))
+    error("This value has already been delcared and it does not make sense to declare it again");
 
-const auto & header = getHeader(value->name(), tid);
-if (header.has_context)
-  error("This type cannot be restored late because it requires a context");
+  const auto & header = getHeader(value->name(), tid);
+  if (header.has_context)
+    error("This type cannot be restored late because it requires a context");
 
-auto & added_value = currentData(tid).addData(std::move(value));
-deserializeValue(*_streams.data, added_value, header);
-return added_value;
+  auto & added_value = currentData(tid).addData(std::move(value));
+  deserializeValue(*_streams.data, added_value, header);
+  return added_value;
 }
