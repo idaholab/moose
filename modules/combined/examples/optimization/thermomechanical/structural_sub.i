@@ -1,46 +1,58 @@
-power = 2
-E0 = 1.0
-Emin = 1.0e-6
+vol_frac = 0.4
+
+power = 2.0
+
+E0 = 1.0e-6
+E1 = 1.0
+
+rho0 = 0.0
+rho1 = 1.0
+
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Mesh]
-  # final_generator = 'MoveRight'
-  [Bottom]
+  [MeshGenerator]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 80
+    nx = 40
     ny = 40
     xmin = 0
-    xmax = 150
+    xmax = 40
     ymin = 0
-    ymax = 75
+    ymax = 40
   []
-  [left_load]
+  [node]
     type = ExtraNodesetGenerator
-    input = Bottom
-    new_boundary = left_load
-    coord = '37.5 75 0'
+    input = MeshGenerator
+    new_boundary = hold
+    nodes = 0
   []
-  [right_load]
+  [push_left]
     type = ExtraNodesetGenerator
-    input = left_load
-    new_boundary = right_load
-    coord = '112.5 75 0'
+    input = node
+    new_boundary = push_left
+    coord = '16 0 0'
   []
-  [left_support]
+  [push_center]
     type = ExtraNodesetGenerator
-    input = right_load
-    new_boundary = left_support
-    coord = '0 0 0'
+    input = push_left
+    new_boundary = push_center
+    coord = '24 0 0'
   []
-  [right_support]
-    type = ExtraNodesetGenerator
-    input = left_support
-    new_boundary = right_support
-    coord = '150 0 0'
+  [extra]
+    type = SideSetsFromBoundingBoxGenerator
+    input = push_center
+    bottom_left = '-0.01 17.999  0'
+    top_right = '5 22.001  0'
+    boundary_new = n1
+    boundaries_old = left
+  []
+  [dirichlet_bc]
+    type = SideSetsFromNodeSetsGenerator
+    input = extra
   []
 []
 
@@ -54,33 +66,13 @@ Emin = 1.0e-6
 [AuxVariables]
   [Dc]
     family = MONOMIAL
-    order = SECOND
-    initial_condition = -1.0
-  []
-  [Cc]
-    family = MONOMIAL
-    order = CONSTANT
+    order = FIRST
     initial_condition = -1.0
   []
   [mat_den]
     family = MONOMIAL
-    order = CONSTANT
-    initial_condition = 0.1
-  []
-  [sensitivity_var]
-    family = MONOMIAL
-    order = SECOND
-    initial_condition = -1.0
-  []
-[]
-
-[AuxKernels]
-  [sensitivity_kernel]
-    type = MaterialRealAux
-    property = sensitivity
-    variable = sensitivity_var
-    check_boundary_restricted = false
-    execute_on = 'TIMESTEP_END'
+    order = FIRST
+    initial_condition = ${vol_frac}
   []
 []
 
@@ -96,19 +88,13 @@ Emin = 1.0e-6
   [no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = left_support
+    boundary = hold
     value = 0.0
   []
-  [no_x]
+  [no_x_symm]
     type = DirichletBC
     variable = disp_x
-    boundary = left_support
-    value = 0.0
-  []
-  [no_y_right]
-    type = DirichletBC
-    variable = disp_y
-    boundary = right_support
+    boundary = right
     value = 0.0
   []
 []
@@ -117,8 +103,15 @@ Emin = 1.0e-6
   [push_left]
     type = NodalGravity
     variable = disp_y
-    boundary = left_load
-    gravity_value = -1e-3
+    boundary = push_left
+    gravity_value = -1.0e-3
+    mass = 1
+  []
+  [push_center]
+    type = NodalGravity
+    variable = disp_y
+    boundary = push_center
+    gravity_value = -1.0e-3
     mass = 1
   []
 []
@@ -132,15 +125,15 @@ Emin = 1.0e-6
   []
   [E_phys]
     type = DerivativeParsedMaterial
-    # Emin + (density^penal) * (E0 - Emin)
-    expression = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    expression = "A1:=(${E0}-${E1})/(${rho0}^${power}-${rho1}^${power}); "
+                 "B1:=${E0}-A1*${rho0}^${power}; E1:=A1*mat_den^${power}+B1; E1"
     coupled_variables = 'mat_den'
     property_name = E_phys
   []
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
-    prop_values = 0.0
+    prop_values = 0.3
   []
   [stress]
     type = ComputeLinearElasticStress
@@ -162,31 +155,30 @@ Emin = 1.0e-6
 [UserObjects]
   [rad_avg]
     type = RadialAverage
-    radius = 3
+    radius = 1.2
     weights = linear
     prop_name = sensitivity
+    execute_on = TIMESTEP_END
     force_preaux = true
-    execute_on = 'TIMESTEP_END'
   []
-  # No SIMP optimization in subapp
   [calc_sense]
     type = SensitivityFilter
     density_sensitivity = Dc
     design_density = mat_den
     filter_UO = rad_avg
+    execute_on = TIMESTEP_END
     force_postaux = true
-    execute_on = 'TIMESTEP_END'
   []
 []
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-12
   dt = 1.0
-  num_steps = 25
+  num_steps = 500
 []
 
 [Outputs]
@@ -201,7 +193,7 @@ Emin = 1.0e-6
 [Postprocessors]
   [mesh_volume]
     type = VolumePostprocessor
-    execute_on = 'initial timestep_end'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [total_vol]
     type = ElementIntegralVariablePostprocessor
@@ -216,7 +208,6 @@ Emin = 1.0e-6
   [sensitivity]
     type = ElementIntegralMaterialProperty
     mat_prop = sensitivity
-    execute_on = 'TIMESTEP_BEGIN TIMESTEP_END NONLINEAR'
   []
   [objective]
     type = ElementIntegralMaterialProperty

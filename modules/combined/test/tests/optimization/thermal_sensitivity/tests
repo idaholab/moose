@@ -1,5 +1,6 @@
 [Tests]
-  issues = '#5'
+  issues = '#25602'
+  design = 'ThermalCompliance.md ThermalSensitivity.md'
   requirement = 'The system shall be able to minimize the thermal compliance for a '
   [2d_root]
     type = 'CSVDiff'

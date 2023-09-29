@@ -18,7 +18,7 @@ power = 3
 
 Next we define the mesh and add the necessary nodesets.
 
-!listing test/tests/optimization/compliance_sensitivity/2d_mbb.i
+!listing examples/optimization/compliance_sensitivity/2d_mbb.i
          block=Mesh id=mesh_block
          caption=MBB `Mesh` block
 
@@ -27,7 +27,7 @@ constant, negative value that is needed for the sensitivity variable `Dc`. It
 needs to be negative for the first density update. The second initial condition
 is setting the material density to the initial value of `vol_frac`.
 
-!listing test/tests/optimization/compliance_sensitivity/2d_mbb.i
+!listing examples/optimization/compliance_sensitivity/2d_mbb.i
          block=AuxVariables id=aux_var_block
          caption=MBB `AuxVariables` block
 
@@ -36,7 +36,7 @@ density altered young's modulus material. The material follows the form `E =
 Emin + (density^penal) * (E0 - Emin)`. The second material is the compliance
 sensitivity, which is used for updating the density field.
 
-!listing test/tests/optimization/compliance_sensitivity/2d_mbb.i
+!listing examples/optimization/compliance_sensitivity/2d_mbb.i
          block=Materials id=mat_block
          caption=MBB `Materials` block
 
@@ -47,6 +47,6 @@ minimum size of a feature in the structure. Finally is the `DensityUpdate`
 object that updates the density field based on the sensitivity and the keeps the
 volume constraint satisfied.
 
-!listing test/tests/optimization/compliance_sensitivity/2d_mbb.i
+!listing examples/optimization/compliance_sensitivity/2d_mbb.i
          block=UserObjects id=uo_block
          caption=MBB `UserObjects` block

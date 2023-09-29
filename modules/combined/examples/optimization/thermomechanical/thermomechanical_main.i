@@ -1,54 +1,54 @@
-# This example is intended to reproduce a 2D example with opposing horizontal
-# loads (see [1]). This test has an undefined solution if reguar SIMP is applied.
-# Using multi-loads SIMP, on the other hand, generates a structure that optimizes
-# the response to both loads individually,
-# [1]. Lat. Am. j. solids struct. 12 (5), May 2015
-# Topological derivative-based topology optimization of structures subject to multiple load-cases
+vol_frac = 0.4
 
-vol_frac = 0.5
+power = 2.0
 
-power = 1.0
-E0 = 1.0
-Emin = 1.0e-6
+E0 = 1.0e-6
+E1 = 1.0
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Mesh]
-  [Bottom]
+  [MeshGenerator]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 100
-    ny = 100
+    nx = 40
+    ny = 40
     xmin = 0
-    xmax = 150
+    xmax = 40
     ymin = 0
-    ymax = 150
+    ymax = 40
   []
-  [left_load]
+  [node]
     type = ExtraNodesetGenerator
-    input = Bottom
-    new_boundary = left_load
-    coord = '0 150 0'
+    input = MeshGenerator
+    new_boundary = hold
+    nodes = 0
   []
-  [right_load]
+  [push_left]
     type = ExtraNodesetGenerator
-    input = left_load
-    new_boundary = right_load
-    coord = '150 150 0'
+    input = node
+    new_boundary = push_left
+    coord = '16 0 0'
   []
-  [left_support]
+  [push_center]
     type = ExtraNodesetGenerator
-    input = right_load
-    new_boundary = left_support
-    coord = '0 0 0'
+    input = push_left
+    new_boundary = push_center
+    coord = '24 0 0'
   []
-  [right_support]
-    type = ExtraNodesetGenerator
-    input = left_support
-    new_boundary = right_support
-    coord = '150 0 0'
+  [extra]
+    type = SideSetsFromBoundingBoxGenerator
+    input = push_center
+    bottom_left = '-0.01 17.999  0'
+    top_right = '5 22.001  0'
+    boundary_new = n1
+    boundaries_old = left
+  []
+  [dirichlet_bc]
+    type = SideSetsFromNodeSetsGenerator
+    input = extra
   []
 []
 
@@ -62,32 +62,23 @@ Emin = 1.0e-6
 [AuxVariables]
   [mat_den]
     family = MONOMIAL
-    order = CONSTANT
+    order = FIRST
+    initial_condition = 0.02
   []
   [sensitivity_one]
     family = MONOMIAL
-    order = SECOND
+    order = FIRST
     initial_condition = -1.0
   []
   [sensitivity_two]
     family = MONOMIAL
-    order = SECOND
+    order = FIRST
     initial_condition = -1.0
   []
   [total_sensitivity]
     family = MONOMIAL
-    order = SECOND
+    order = FIRST
     initial_condition = -1.0
-  []
-[]
-
-[ICs]
-  [mat_den]
-    type = RandomIC
-    seed = 7
-    variable = mat_den
-    max = '${fparse vol_frac+0.35}'
-    min = '${fparse vol_frac-0.35}'
   []
 []
 
@@ -95,7 +86,7 @@ Emin = 1.0e-6
   [total_sensitivity]
     type = ParsedAux
     variable = total_sensitivity
-    expression = '0.5*sensitivity_one + 0.5*sensitivity_two'
+    expression = '(1-1.0e-7)*sensitivity_one + 1.0e-7*sensitivity_two'
     coupled_variables = 'sensitivity_one sensitivity_two'
     execute_on = 'LINEAR TIMESTEP_END'
   []
@@ -113,25 +104,13 @@ Emin = 1.0e-6
   [no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = left_support
+    boundary = hold
     value = 0.0
   []
-  [no_x]
+  [no_x_symm]
     type = DirichletBC
     variable = disp_x
-    boundary = left_support
-    value = 0.0
-  []
-  [no_y_right]
-    type = DirichletBC
-    variable = disp_y
-    boundary = right_support
-    value = 0.0
-  []
-  [no_x_right]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right_support
+    boundary = right
     value = 0.0
   []
 []
@@ -146,7 +125,7 @@ Emin = 1.0e-6
   [E_phys]
     type = DerivativeParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    expression = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    expression = '${E1} + (mat_den ^ ${power}) * (${E1}-${E0})'
     coupled_variables = 'mat_den'
     property_name = E_phys
   []
@@ -168,6 +147,7 @@ Emin = 1.0e-6
 []
 
 [UserObjects]
+  # We do filtering in the subapps
   [update]
     type = DensityUpdate
     density_sensitivity = total_sensitivity
@@ -183,18 +163,18 @@ Emin = 1.0e-6
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-8
   dt = 1.0
-  num_steps = 10
+  num_steps = 2
 []
 
 [Outputs]
-  exodus = true
   [out]
     type = CSV
     execute_on = 'TIMESTEP_END'
   []
   print_linear_residuals = false
+  exodus = true
 []
 
 [Postprocessors]
@@ -221,16 +201,16 @@ Emin = 1.0e-6
 [MultiApps]
   [sub_app_one]
     type = TransientMultiApp
-    input_files = square_subapp_one.i
+    input_files = structural_sub.i
   []
   [sub_app_two]
     type = TransientMultiApp
-    input_files = square_subapp_two.i
+    input_files = thermal_sub.i
   []
 []
 
 [Transfers]
-  # First SUB-APP
+  # First SUB-APP: STRUCTURAL
   # To subapp densities
   [subapp_one_density]
     type = MultiAppCopyTransfer
@@ -245,7 +225,7 @@ Emin = 1.0e-6
     source_variable = Dc # sensitivity_var
     variable = sensitivity_one # Here
   []
-  # Second SUB-APP
+  # Second SUB-APP: HEAT CONDUCTIVITY
   # To subapp densities
   [subapp_two_density]
     type = MultiAppCopyTransfer
@@ -257,7 +237,7 @@ Emin = 1.0e-6
   [subapp_two_sensitivity]
     type = MultiAppCopyTransfer
     from_multi_app = sub_app_two
-    source_variable = Dc # sensitivity_var
+    source_variable = Tc # sensitivity_var
     variable = sensitivity_two # Here
   []
 []
