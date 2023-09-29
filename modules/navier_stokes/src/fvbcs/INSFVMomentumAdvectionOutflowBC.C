@@ -47,13 +47,10 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
 }
 
 ADReal
-INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
+INSFVMomentumAdvectionOutflowBC::computeAdvectedQuantity(const Moose::FaceArg & boundary_face,
+                                                         const Moose::StateArg & state)
 {
   using namespace Moose::FV;
-
-  const auto boundary_face = singleSidedFaceArg();
-  const auto state = determineState();
-  ADRealVectorValue v(_rc_uo.getVelocity(InterpMethod::RhieChow, *_face_info, state, _tid));
 
   const auto rho_boundary = _rho(boundary_face, state);
   const auto eps_boundary = epsFunctor()(boundary_face, state);
@@ -64,7 +61,18 @@ INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
   // degrees of freedom as well
   auto var_boundary = _var(boundary_face, state);
 
-  return _normal * v * rho_boundary / eps_boundary * var_boundary;
+  return rho_boundary / eps_boundary * var_boundary;
+}
+
+ADReal
+INSFVMomentumAdvectionOutflowBC::computeSegregatedContribution()
+{
+  const auto boundary_face = singleSidedFaceArg();
+  const auto state = determineState();
+  return _normal *
+         _rc_uo.getVelocity(
+             Moose::FV::InterpMethod::RhieChow, *_face_info, determineState(), _tid) *
+         computeAdvectedQuantity(boundary_face, state);
 }
 
 void
@@ -89,19 +97,16 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
 
   const auto & elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? _face_info->elem()
                                                                        : _face_info->neighbor();
-  const auto rho_boundary = _rho(boundary_face, state);
-  const auto eps_boundary = epsFunctor()(boundary_face, state);
 
   // This will tend to be an extrapolated boundary for the velocity in which case, when using two
   // term expansion, this boundary value will actually be a function of more than just the degree of
   // freedom at the cell centroid adjacent to the face, e.g. it can/will depend on surrounding cell
   // degrees of freedom as well
-  auto var_boundary = _var(boundary_face, state);
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  ADReal a = var_boundary.derivatives()[dof_number];
-  a *= _normal * v * rho_boundary / eps_boundary;
+  const auto advected_quant = computeAdvectedQuantity(boundary_face, state);
+  ADReal a = advected_quant.derivatives()[dof_number] * _normal * v;
 
-  const auto strong_resid = _normal * v * rho_boundary / eps_boundary * var_boundary;
+  const auto strong_resid = _normal * v * advected_quant;
 
   _rc_uo.addToA((_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? &fi.elem() : fi.neighborPtr(),
                 _index,

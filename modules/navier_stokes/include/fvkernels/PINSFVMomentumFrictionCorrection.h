@@ -20,11 +20,6 @@ public:
   void gatherRCData(const FaceInfo & fi) override final;
 
 protected:
-  /**
-   * Routine to compute this object's strong residual (e.g. not multipled by area).
-   */
-  ADReal computeStrongResidual();
-
   /// Darcy coefficient
   const Moose::Functor<ADRealVectorValue> * const _cL;
   /// Forchheimer coefficient

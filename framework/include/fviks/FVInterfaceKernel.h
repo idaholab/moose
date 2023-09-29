@@ -193,9 +193,6 @@ protected:
   Assembly & _assembly;
 
 private:
-  MooseVariableFV<Real> & _var1;
-  MooseVariableFV<Real> & _var2;
-
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
 

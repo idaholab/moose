@@ -49,9 +49,16 @@ PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputPa
     mooseError("At least one friction model needs to be specified.");
 }
 
-ADReal
-PINSFVMomentumFrictionCorrection::computeStrongResidual()
+void
+PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
 {
+  if (skipForBoundary(fi))
+    return;
+
+  _face_info = &fi;
+  _normal = fi.normal();
+  _face_type = fi.faceType(_var.name());
+
   using namespace Moose::FV;
 
   const auto elem_face = elemArg();
@@ -118,40 +125,26 @@ PINSFVMomentumFrictionCorrection::computeStrongResidual()
   // Compute face superficial velocity gradient
   auto dudn = _var.gradient(makeCDFace(*_face_info), state) * _face_info->normal();
 
-  return -diff_face * dudn;
-}
-
-void
-PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
-{
-  if (skipForBoundary(fi))
-    return;
-
-  _face_info = &fi;
-  _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
-
-  using namespace Moose::FV;
-
-  // Compute face superficial velocity gradient
-  auto strong_residual = computeStrongResidual();
-
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
     // A gradient is a linear combination of degrees of freedom so it's safe to straight-up index
     // into the derivatives vector at the dof we care about
-    ADReal ae = strong_residual.derivatives()[dof_number];
+    ADReal ae = dudn.derivatives()[dof_number];
+    ae *= -diff_face;
     _rc_uo.addToA(&fi.elem(), _index, ae * (fi.faceArea() * fi.faceCoord()));
   }
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
-    ADReal an = -strong_residual.derivatives()[dof_number];
+    ADReal an = dudn.derivatives()[dof_number];
+    an *= diff_face;
     _rc_uo.addToA(fi.neighborPtr(), _index, an * (fi.faceArea() * fi.faceCoord()));
   }
 
-  addResidualAndJacobian(strong_residual * (fi.faceArea() * fi.faceCoord()));
+  const auto strong_resid = -diff_face * dudn;
+
+  addResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
 }

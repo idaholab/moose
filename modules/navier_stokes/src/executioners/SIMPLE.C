@@ -564,6 +564,7 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
     Real new_diagonal = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     diff_diagonal.set(row_i, new_diagonal);
   }
+  diff_diagonal.close();
 
   // Time to modify the diagonal of the matrix
   for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
@@ -573,7 +574,6 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
   diff_diagonal.add(-1.0, *original_diagonal);
-  diff_diagonal.close();
 }
 
 void
@@ -636,9 +636,10 @@ SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
   A_times_average_solution->add(*A_times_solution);
 
   // Since use the l2 norm of the solution vectors in the linear solver, we will
-  // make this consistent and use the l2 norm of the vector
-  // TODO: Would be nice to see if we can do l1 norms in the linear solve
-  return (A_times_average_solution->l2_norm() + 1e-14);
+  // make this consistent and use the l2 norm of the vector. We add a small number to
+  // avoid normalizing with 0.
+  // TODO: Would be nice to see if we can do l1 norms in the linear solve.
+  return (A_times_average_solution->l2_norm() + libMesh::TOLERANCE * libMesh::TOLERANCE);
 }
 
 void

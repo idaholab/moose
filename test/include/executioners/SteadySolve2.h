@@ -42,4 +42,5 @@ private:
   const unsigned int _first_nl_sys;
   const unsigned int _second_nl_sys;
   bool _last_solve_converged;
+  unsigned int _number_of_iterations;
 };

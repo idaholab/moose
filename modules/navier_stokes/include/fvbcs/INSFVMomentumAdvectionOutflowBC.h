@@ -36,6 +36,13 @@ protected:
 
   ADReal computeSegregatedContribution() override;
 
+  /// Computes the advected quantity which is then used on gatherRCData
+  /// and computeSegregatedContribution
+  /// @param boundary_face The boundary face argument
+  /// @param state The state (time, nonolinar iterate) argument
+  ADReal computeAdvectedQuantity(const Moose::FaceArg & boundary_face,
+                                 const Moose::StateArg & state);
+
   /// x-velocity
   const Moose::Functor<ADReal> & _u;
   /// y-velocity

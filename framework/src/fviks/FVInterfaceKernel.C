@@ -98,7 +98,6 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     ADFunctorInterface(this),
     _tid(getParam<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-
     _var1(_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("variable1"))
               .sys()
               .getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
