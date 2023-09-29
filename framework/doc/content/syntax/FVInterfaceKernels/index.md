@@ -28,6 +28,7 @@ side. So making use of the `subdomain` parameters, we provide a protected method
 called `elemIsOne()` that returns a boolean indicating whether the
 `FaceInfo::elem` side of the interface corresponds to the `subdomain1` side of
 the interface. This allows the developer to write code like the following:
+
 ```
 FVFooInterface::FVFooInterface(const InputParameters & params)
   : FVInterfaceKernel(params),
@@ -47,5 +48,16 @@ FVFooInterface::computeQpResidual()
   /// Code that uses coef_elem and coef_neighbor
 }
 ```
+
 and have confidence that they have good data in `coef_elem` and `coef_neighbor`
 and have clarity about what is happening in their code.
+
+!alert! note
+When using an FVInterfaceKernel which connects variables that belong to different nonlinear systems,
+create two kernels with flipped variable and material property parameters. The reason behind this
+is that the interface kernel will only contribute to the system which `variable1` belongs to.
+For an example, see:
+
+!listing /test/tests/fviks/diffusion/multisystem.i
+
+!alert-end!
