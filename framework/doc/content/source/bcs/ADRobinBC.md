@@ -4,7 +4,7 @@
 
 ## Description
 
-`ADRobinBC` imposes a Robin boundary condition on a surface. `ADRobinBC` is
+`ADRobinBC` imposes a Robin boundary condition on a boundary. `ADRobinBC` is
 an integrated boundary condition that allows for the combination of
 Dirichlet and Neumann boundary conditions.
 

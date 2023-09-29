@@ -41,12 +41,10 @@ SensitivityFilter::execute()
   // Find the current element in the filter
   auto filter_iter = _filter.find(_current_elem->id());
 
-  // If the element is not found in the filter, throw an error
-  if (filter_iter == _filter.end())
-  {
-    mooseError("Could not find the element in the filter. Check that RadialAverage UserObject ran "
-               "before this object.");
-  }
+  // Assert the element is found in the filter
+  mooseAssert(filter_iter != _filter.end(),
+              "An element could not be found in the filter. Check that a RadialAverage user object "
+              "has run before this object.");
 
   // Get the quadrature point values from the filter
   std::vector<Real> qp_vals = filter_iter->second;

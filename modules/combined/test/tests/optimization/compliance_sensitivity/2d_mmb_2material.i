@@ -117,13 +117,6 @@ rho2 = 1.0
     coupled_variables = 'mat_den'
     property_name = E_phys
   []
-  # [E_phys]
-  #   type = DerivativeParsedMaterial
-  #   # Emin + (density^penal) * (E0 - Emin)
-  #   expression = 'A1:=(${E0}-${E1})/(${rho0}^${power}-${rho1}^${power}); B1:=${E0}-A1*${rho0}^${power}; A1*mat_den^${power}+B1'
-  #   coupled_variables = 'mat_den'
-  #   property_name = E_phys
-  # []
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio

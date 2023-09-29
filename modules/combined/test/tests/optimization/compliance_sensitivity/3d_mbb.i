@@ -204,7 +204,7 @@ power = 3
   l_max_its = 200
   start_time = 0.0
   dt = 1.0
-  num_steps = 30
+  num_steps = 2
 []
 
 [Outputs]

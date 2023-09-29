@@ -4,7 +4,7 @@
 
 ## Description
 
-`ADVectorRobinBC` imposes a Robin boundary condition on a surface.
+`ADVectorRobinBC` imposes a Robin boundary condition on a boundary.
 `ADVectorRobinBC` is
 a vector integrated boundary condition that allows for the combination of
 Dirichlet and Neumann boundary conditions.

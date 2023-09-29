@@ -27,7 +27,7 @@ problems. The extent to which the one particular subapp drives the optimization 
 depends on the weights used to obtain a total or overall sensitivity, which is used in
 the density update process.
 
-!listing examples/optimization/thermomechanical/thermomechanical.i
+!listing examples/optimization/thermomechanical/thermomechanical_main.i
          block=UserObjects id=bc_var_block_c
          caption=MBB Density update in main app
 

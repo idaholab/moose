@@ -5,7 +5,7 @@ example will be covered here [2D Topology Optimization with Radial Average Filte
 
 In this example, the mesh block is 3D.
 
-!listing examples/optimization/compliance_sensitivity/3d_mbb.i
+!listing examples/optimization/3d_mbb.i
          block=Mesh id=mesh_var_block
          caption=MBB `Mesh` block
 

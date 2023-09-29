@@ -13,7 +13,7 @@ of 0.0.
 Cost and Young's modulus are defined as interpolated quantities across the three
 materials:
 
-!listing examples/optimization/thermomechanical/three_materials.i
+!listing examples/optimization/three_materials.i
          block=Materials id=bc_var_block_a
          caption=MBB Material interpolation for multimaterial optimization
 
@@ -21,8 +21,8 @@ The optimization process and the enforcement of volume and cost constraints
 are driven by the `DensityUpdateTwoConstraints`, radial average, and
 sensitivity filter user objects:
 
-!listing examples/optimization/thermomechanical/three_materials.i
-         block=UserObjects id=bc_var_block_a
+!listing examples/optimization/three_materials.i
+         block=UserObjects id=bc_var_block_b
          caption=MBB User objects for multimaterial optimization
 
 

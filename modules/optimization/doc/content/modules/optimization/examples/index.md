@@ -14,4 +14,4 @@ Regardless of which type of inversion problem you are trying to solve, it is rec
 
 Solid Isotropic Material Penalization (SIMP) examples typically require mechanical or thermal physics to meaningfully leverage
 the optimization module's capabilities. Some SIMP examples, including those that combine multiple loads, multiple materials, and
-multiple physics are availble in the combined module (see [Combined Module](combined/index.md))
+multiple physics are availble in the MOOSE combined module.

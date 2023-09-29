@@ -149,16 +149,6 @@ Et = 1.0 # w
   []
 []
 
-# [ICs]
-#   [mat_den]
-#     type = RandomIC
-#     seed = 4
-#     variable = mat_den
-#     max = '${fparse vol_frac+0.15}'
-#     min = '${fparse vol_frac-0.15}'
-#   []
-# []
-
 [Kernels]
   [diffusion]
     type = FunctionDiffusion

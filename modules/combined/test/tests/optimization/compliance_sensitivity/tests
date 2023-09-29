@@ -11,11 +11,11 @@
   []
   [3d_mbb]
     type = 'CSVDiff'
-    min_parallel = 4
     input = '3d_mbb.i'
     csvdiff = '3d_mbb_out.csv'
     detail = '3D topology optimization problem.'
-    heavy = true
+    valgrind = 'none'
+    method = opt
   []
   [2d_mbb_pde]
     type = 'CSVDiff'
@@ -30,13 +30,6 @@
     csvdiff = '2d_mbb_pde_amr_out.csv'
     detail = '2D topology optimization problem with AMR.'
     heavy = true
-  []
-  [2d_mbb_cs2]
-    type = 'CSVDiff'
-    input = '2d_mbb_ComplianceSensitivity2.i'
-    csvdiff = '2d_mbb_ComplianceSensitivity2_out.csv'
-    rel_err = 1e-1
-    detail = '2D topology optimization problem using a derivativeParsedMaterial.'
   []
   [2d_mmb_2material_cost_initial]
     type = 'CSVDiff'

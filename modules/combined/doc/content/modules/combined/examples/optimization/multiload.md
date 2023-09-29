@@ -22,14 +22,14 @@ with different load application points:
          caption=MBB Application point one
 
 !listing examples/optimization/multi-load/single_subapp_two.i
-         block=UserObjects id=bc_var_block_a
+         block=UserObjects id=bc_var_block_b
          caption=MBB Application point two
 
 Filtering of sensitivities takes place in the subapps with the main application being responsible for
 performing the optimization process.
 
 !listing examples/optimization/multi-load/single_main.i
-         block=UserObjects id=bc_var_block_a
+         block=UserObjects id=bc_var_block_c
          caption=MBB Density update in main application
 
 
