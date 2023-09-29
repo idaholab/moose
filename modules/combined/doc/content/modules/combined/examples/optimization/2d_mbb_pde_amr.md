@@ -28,6 +28,6 @@ not `0` or `1`. This helps to create a "sharp" interface between the void and
 the solid elements, without having to refine the entire mesh.
 
 
-!listing test/tests/optimization/ComplianceSensitivity/2d_mbb_pde_amr.i
+!listing test/tests/optimization/compliance_sensitivity/2d_mbb_pde_amr.i
          block=Adaptivity id=bc_var_block
          caption=MBB `Adaptivity` block

@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#25602'
+  design = 'DensityUpdate.md DensityUpdateTwoConstraints.md'
+  [simp]
+    type = Exodiff
+    input = 2d.i
+    exodiff = '2d_out.e'
+    rel_err = 1.0e-4
+    requirement = 'The system shall be able to run a diffusion problem through the density update '
+                  'machinery with filtered fake sensitivities to optimize the material distribution '
+                  'applying a bisection algorithm.'
+  []
+  [simp_restricted]
+    type = Exodiff
+    input = 2d.i
+    exodiff = '2d_out.e'
+    rel_err = 1.0e-4
+    cli_args = 'UserObjects/update/block=1'
+    requirement = 'The system shall be able to run a diffusion problem through the density update '
+                  'machinery with filtered fake sensitivities to optimize the material distribution '
+                  'applying a bisection algorithm to a block restricted system.'
+  []
+  [simp_multi]
+    type = Exodiff
+    input = 2d_twoconstraints.i
+    exodiff = '2d_twoconstraints_out.e'
+    rel_err = 1.0e-4
+    requirement = 'The system shall be able to run a diffusion problem through the density update '
+                  'for multiple materials, volume constraint, and cost constraint machinery with '
+                  'filtered fake sensitivities to optimize the material distribution applying a '
+                  'bisection algorithm.'
+  []
+  [simp_multi_restricted]
+    type = Exodiff
+    input = 2d_twoconstraints.i
+    exodiff = '2d_twoconstraints_out.e'
+    rel_err = 1.0e-4
+    cli_args = 'UserObjects/update/block=1'
+    requirement = 'The system shall be able to run a diffusion problem through the density update '
+                  'for multiple materials, volume constraint, and cost constraint machinery with '
+                  'filtered fake sensitivities to optimize the material distribution applying a '
+                  'bisection algorithm to a block restricted system.'
+  []
+[]
