@@ -172,6 +172,20 @@ SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 }
 
 void
+SystemBase::setVariableGlobalDoFs(const std::string & var_name)
+{
+  AllLocalDofIndicesThread aldit(_subproblem, {var_name});
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  Threads::parallel_reduce(elem_range, aldit);
+
+  // Gather the dof indices across procs to get all the dof indices for var_name
+  aldit.dofIndicesSetUnion();
+
+  const auto & all_dof_indices = aldit.getDofIndices();
+  _var_all_dof_indices.assign(all_dof_indices.begin(), all_dof_indices.end());
+}
+
+void
 SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 {
   if (vars_to_be_zeroed.size() > 0)

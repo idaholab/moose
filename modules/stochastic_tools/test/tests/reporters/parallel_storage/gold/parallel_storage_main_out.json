@@ -6,7 +6,7 @@
             "type": "ParallelSolutionStorage",
             "values": {
                 "parallel_solution_storage": {
-                    "type": "std::map<VariableName, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > >, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > > > > >"
+                    "type": "std::map<VariableName, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>>>>>, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>>>>>>>>"
                 }
             }
         }
@@ -36,6 +36,30 @@
                                 7.815745318556828,
                                 4.884840824098017,
                                 0.0
+                            ]
+                        ]
+                    },
+                    "u_aux": {
+                        "0": [
+                            [
+                                0.0,
+                                7.941599636995927,
+                                8.87196856546515,
+                                9.465939258815688,
+                                9.911331447624589,
+                                10.271186285706786,
+                                10.574886595338745
+                            ]
+                        ],
+                        "1": [
+                            [
+                                0.0,
+                                3.9078726592784143,
+                                7.479120421960269,
+                                10.933453848356242,
+                                14.313987983557256,
+                                17.640684668861915,
+                                20.925097895820514
                             ]
                         ]
                     },

@@ -44,12 +44,12 @@ Will generate a mesh that looks like:
 
 Alternatively, the same displacement vectors can be supplied in a file with the `positions_file` option. The above mesh can equivalently be generated with the following.
 
-!listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate_from_file.i
+!listing test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate_from_file.i
          block=Mesh
 
 where the `positions.txt` file contains the floating point triplets.
 
-!listing moose/test/tests/meshgenerators/combiner_generator/positions.txt
+!listing test/tests/meshgenerators/combiner_generator/positions.txt
 
 The same restrictions on `positions` also apply to the number of entries in `position_file`.
 

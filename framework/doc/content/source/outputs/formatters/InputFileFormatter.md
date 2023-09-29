@@ -134,4 +134,4 @@ disabled invalid parameters.
 []
 ```
 
-!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i caption=Input file used to show to formatting
+!listing stork/test/tests/kernels/simple_diffusion/simple_diffusion.i caption=Input file used to show to formatting

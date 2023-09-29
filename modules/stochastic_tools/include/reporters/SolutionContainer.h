@@ -40,9 +40,26 @@ public:
    */
   const std::unique_ptr<NumericVector<Number>> & getSolution(unsigned int local_i) const;
 
+  /**
+   * Return the type of the system whose solution is collected
+   */
+  const MooseEnum & systemType() const { return _system_type; }
+
+  /**
+   * Return the number of the nonlinear system whose solution is collected
+   */
+  unsigned int nonlinearSystemNumber() const { return _nonlinear_system_number; }
+
 protected:
   /// Dynamic container for solution vectors. We store pointers to make sure that the change in size
   /// comes with little overhead. This is a reference because we need it to be restartable for
   /// stochastic runs in batch mode.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _accumulated_solutions;
+
+  /// Enum to switch between collecting the solution vectors of auxiliary and nonlinear
+  /// systems
+  const MooseEnum _system_type;
+
+  /// The nonlinear system's number whose solution shall be collected
+  const unsigned int _nonlinear_system_number;
 };

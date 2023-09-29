@@ -21,7 +21,7 @@ namespace libMesh
 class System;
 class DofMap;
 }
-class FEProblemBase;
+class SubProblem;
 
 /**
  * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed
@@ -30,7 +30,7 @@ class FEProblemBase;
 class AllLocalDofIndicesThread : public ParallelObject
 {
 public:
-  AllLocalDofIndicesThread(FEProblemBase & problem,
+  AllLocalDofIndicesThread(SubProblem & problem,
                            std::vector<std::string> vars,
                            bool include_semilocal = false);
   // Splitting Constructor
@@ -45,7 +45,7 @@ public:
   void dofIndicesSetUnion();
 
 protected:
-  FEProblemBase & _problem;
+  SubProblem & _problem;
   System * _sys;
   std::vector<unsigned int> _var_numbers;
 

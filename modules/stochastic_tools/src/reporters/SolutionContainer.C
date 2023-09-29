@@ -19,6 +19,13 @@ SolutionContainer::validParams()
   params.addClassDescription(
       "Class responsible for collecting distributed solution vectors into a container. We append "
       "a new distributed solution vector (containing all variables) at every execution.");
+  MooseEnum system_type("nonlinear aux", "nonlinear");
+  params.addParam<MooseEnum>(
+      "system", system_type, "The system whose solution should be collected.");
+  params.addParam<NonlinearSystemName>(
+      "nonlinear_system_name",
+      "nl0",
+      "Option to select which nonlinear system's solution shall be stored.");
   return params;
 }
 
@@ -26,7 +33,10 @@ SolutionContainer::SolutionContainer(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _accumulated_solutions(
         declareRestartableData<std::vector<std::unique_ptr<NumericVector<Number>>>>(
-            "accumulated_solution"))
+            "accumulated_solution")),
+    _system_type(getParam<MooseEnum>("system")),
+    _nonlinear_system_number(
+        _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {
 }
 
@@ -50,6 +60,15 @@ void
 SolutionContainer::execute()
 {
   // Clone the current solution and append it to the vector
-  auto cloned_solution = _fe_problem.getNonlinearSystemBase().solution().clone();
-  _accumulated_solutions.push_back(std::move(cloned_solution));
+  if (_system_type == "nonlinear")
+  {
+    auto cloned_solution =
+        _fe_problem.getNonlinearSystemBase(_nonlinear_system_number).solution().clone();
+    _accumulated_solutions.push_back(std::move(cloned_solution));
+  }
+  else
+  {
+    auto cloned_solution = _fe_problem.systemBaseAuxiliary().solution().clone();
+    _accumulated_solutions.push_back(std::move(cloned_solution));
+  }
 }

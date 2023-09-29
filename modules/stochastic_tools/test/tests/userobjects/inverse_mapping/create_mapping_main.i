@@ -19,7 +19,7 @@
     type = MonteCarlo
     num_rows = 8
     distributions = 'S_dist D_dist'
-    execute_on = initial
+    execute_on = PRE_MULTIAPP_SETUP
     min_procs_per_row = 2
   []
 []
@@ -29,18 +29,27 @@
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
-    mode = batch-restore
+    mode = batch-reset
     min_procs_per_app = 2
   []
 []
 
 [Trainers]
-  [polyreg]
+  [polyreg_v]
     type = PolynomialRegressionTrainer
     sampler = sample
     regression_type = ols
     max_degree = 1
     response = reduced_solutions/v_pod_mapping
+    response_type = vector_real
+    execute_on = FINAL
+  []
+  [polyreg_v_aux]
+    type = PolynomialRegressionTrainer
+    sampler = sample
+    regression_type = ols
+    max_degree = 1
+    response = reduced_solutions/v_aux_pod_mapping
     response_type = vector_real
     execute_on = FINAL
   []
@@ -50,8 +59,8 @@
   [pod_mapping]
     type = PODMapping
     solution_storage = parallel_storage
-    variables = "v"
-    num_modes_to_compute = '10'
+    variables = "v v_aux"
+    num_modes_to_compute = '8 8'
     extra_slepc_options = "-svd_monitor_all"
   []
 []
@@ -72,12 +81,30 @@
     variables = 'v'
     serialize_on_root = false
   []
+  [solution_transfer_aux]
+    type = SerializedSolutionTransfer
+    parallel_storage = parallel_storage
+    from_multi_app = worker
+    sampler = sample
+    solution_container = solution_storage_aux
+    variables = 'v_aux'
+    serialize_on_root = false
+  []
+[]
+
+[Controls]
+  [cmd_line]
+    type = MultiAppSamplerControl
+    multi_app = worker
+    sampler = sample
+    param_names = 'S D'
+  []
 []
 
 [Reporters]
   [parallel_storage]
     type = ParallelSolutionStorage
-    variables = 'v'
+    variables = 'v v_aux'
     outputs = none
   []
   [reduced_solutions]
@@ -85,7 +112,7 @@
     sampler = sample
     parallel_storage = parallel_storage
     mapping = pod_mapping
-    variables = "v"
+    variables = "v v_aux"
     execute_on = timestep_end # To make sure the trainer sees the results on FINAL
   []
 []
@@ -100,10 +127,9 @@
     mappings = pod_mapping
     execute_on = FINAL
   []
-
   [rom]
     type = SurrogateTrainerOutput
-    trainers = polyreg
+    trainers = 'polyreg_v polyreg_v_aux'
     execute_on = FINAL
   []
 []

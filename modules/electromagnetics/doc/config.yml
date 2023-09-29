@@ -22,7 +22,7 @@ Extensions:
     MooseDocs.extensions.sqa: disable
     MooseDocs.extensions.tagging:
         active: True
-        js_file: index-93b559a6.js
+        js_file: index-6fae072b.js
         allowed_keys:
             - example_type
             - simulation_type

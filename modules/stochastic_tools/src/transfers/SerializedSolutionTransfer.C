@@ -92,7 +92,6 @@ SerializedSolutionTransfer::execute()
     if (getFromMultiApp()->hasLocalApp(i))
     {
       FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-      NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
       // Converting the local indexing to global sample indices
       const unsigned int local_i = i - _sampler_ptr->getLocalRowBegin();
@@ -101,9 +100,9 @@ SerializedSolutionTransfer::execute()
       // need to participate in the transfer or if we would like to distribute the
       // data among every processor of the subapplication
       if (_serialize_on_root)
-        transferToSubAppRoot(nl, *_solution_container[local_i], i);
+        transferToSubAppRoot(app_problem, *_solution_container[local_i], i);
       else
-        transferInParallel(nl, *_solution_container[local_i], i);
+        transferInParallel(app_problem, *_solution_container[local_i], i);
     }
   }
 }
@@ -116,51 +115,51 @@ SerializedSolutionTransfer::executeFromMultiapp()
   if (getFromMultiApp()->hasLocalApp(_app_index))
   {
     FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
-    NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
     // Here we have to branch out based on if only the root processors
     // need to participate in the transfer or if we would like to distribute the
     // data among every processor of the subapplication
     if (_serialize_on_root)
-      transferToSubAppRoot(nl, *_solution_container[0], _global_index);
+      transferToSubAppRoot(app_problem, *_solution_container[0], _global_index);
     else
-      transferInParallel(nl, *_solution_container[0], _global_index);
+      transferInParallel(app_problem, *_solution_container[0], _global_index);
   }
 }
 
 void
-SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_system,
+SerializedSolutionTransfer::transferInParallel(FEProblemBase & app_problem,
                                                SolutionContainer & solution_container,
                                                const dof_id_type global_i)
 {
-  // We need to go through this communicator because the multiapp's
-  // communicator is not necessarily the communicator of the underlying MooseObject.
-
-  const auto & comm = app_nl_system.comm();
-  dof_id_type num_entries = _sampler_ptr->getNumberOfLocalRows();
-  comm.sum(num_entries);
-
-  // We shall distribute the samples on the given application between its processors.
-  // Only using a linear partitioning here for the sake of simplicity.
-  dof_id_type new_local_entries_begin;
-  dof_id_type new_local_entries_end;
-  dof_id_type num_new_local_entries;
-
-  MooseUtils::linearPartitionItems(num_entries,
-                                   comm.size(),
-                                   comm.rank(),
-                                   num_new_local_entries,
-                                   new_local_entries_begin,
-                                   new_local_entries_end);
-
   unsigned int local_app_index = global_i - _sampler_ptr->getLocalRowBegin();
 
   // Looping over the variables to extract the corresponding solution values
   // and copy them into the container.
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
   {
+    SystemBase & system = getSystem(app_problem, _variable_names[var_i]);
+
+    // We need to go through this communicator because the multiapp's
+    // communicator is not necessarily the communicator of the underlying MooseObject.
+    const auto & comm = system.comm();
+    dof_id_type num_entries = _sampler_ptr->getNumberOfLocalRows();
+    comm.sum(num_entries);
+
+    // We shall distribute the samples on the given application between its processors.
+    // Only using a linear partitioning here for the sake of simplicity.
+    dof_id_type new_local_entries_begin;
+    dof_id_type new_local_entries_end;
+    dof_id_type num_new_local_entries;
+
+    MooseUtils::linearPartitionItems(num_entries,
+                                     comm.size(),
+                                     comm.rank(),
+                                     num_new_local_entries,
+                                     new_local_entries_begin,
+                                     new_local_entries_end);
+
     // Getting the corresponding DoF indices for the variable.
-    app_nl_system.setVariableGlobalDoFs(_variable_names[var_i]);
+    system.setVariableGlobalDoFs(_variable_names[var_i]);
 
     for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
          ++solution_i)
@@ -174,7 +173,7 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
           ->localize(serialized_solution.get_values(),
                      (local_app_index >= new_local_entries_begin &&
                       local_app_index < new_local_entries_end)
-                         ? app_nl_system.getVariableGlobalDoFs()
+                         ? system.getVariableGlobalDoFs()
                          : std::vector<dof_id_type>());
 
       if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
@@ -184,15 +183,17 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
 }
 
 void
-SerializedSolutionTransfer::transferToSubAppRoot(NonlinearSystemBase & app_nl_system,
+SerializedSolutionTransfer::transferToSubAppRoot(FEProblemBase & app_problem,
                                                  SolutionContainer & solution_container,
                                                  const dof_id_type global_i)
 {
   // Looping over the variables to extract the corresponding solution values
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
   {
+    SystemBase & system = getSystem(app_problem, _variable_names[var_i]);
+
     // Getting the corresponding DoF indices for the variable.
-    app_nl_system.setVariableGlobalDoFs(_variable_names[var_i]);
+    system.setVariableGlobalDoFs(_variable_names[var_i]);
 
     for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
          ++solution_i)
@@ -202,11 +203,18 @@ SerializedSolutionTransfer::transferToSubAppRoot(NonlinearSystemBase & app_nl_sy
       // In this case we always serialize on the root processor of the application.
       solution_container.getSolution(solution_i)
           ->localize(serialized_solution.get_values(),
-                     getFromMultiApp()->isRootProcessor() ? app_nl_system.getVariableGlobalDoFs()
+                     getFromMultiApp()->isRootProcessor() ? system.getVariableGlobalDoFs()
                                                           : std::vector<dof_id_type>());
 
       if (getFromMultiApp()->isRootProcessor())
         _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
     }
   }
+}
+
+SystemBase &
+SerializedSolutionTransfer::getSystem(FEProblemBase & app_problem, const VariableName & vname)
+{
+  auto & variable = app_problem.getVariable(_tid, vname);
+  return variable.sys();
 }
