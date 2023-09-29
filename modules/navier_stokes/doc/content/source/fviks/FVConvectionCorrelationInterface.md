@@ -10,6 +10,10 @@ with $q_s$ the surface convective heat flux, $h_{correlation}$ the heat transfer
 defined by the correlation as a material property and $T_{solid/fluid}$ the temperature of the
 adjacent solid and fluid.
 
+!alert note
+This kernel supports interfaces between variables which belong to different nonlinear systems.
+For instructions on how to set these cases up, visit the [FVInterfaceKernels syntax page](syntax/FVInterfaceKernels/index.md).
+
 ## Example input file syntax
 
 In this example, a cold fluid is flowing next to a centrally-heated solid region. The heat diffuses

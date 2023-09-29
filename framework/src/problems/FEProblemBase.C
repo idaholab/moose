@@ -2929,7 +2929,10 @@ FEProblemBase::addFVInterfaceKernel(const std::string & fv_ik_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  addObject<FVInterfaceKernel>(fv_ik_name, name, parameters);
+  /// We assume that variable1 and variable2 can live on different systems, in this case
+  /// the user needs to create two interface kernels with flipped variables and parameters
+  addObject<FVInterfaceKernel>(
+      fv_ik_name, name, parameters, /*threaded=*/true, /*variable_param_name=*/"variable1");
 }
 
 // InterfaceKernels ////
@@ -3556,12 +3559,14 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addObjectParamsHelper(InputParameters & parameters, const std::string & object_name)
+FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
+                                     const std::string & object_name,
+                                     const std::string & var_param_name)
 {
   const auto nl_sys_num =
-      parameters.isParamValid("variable") &&
-              determineNonlinearSystem(parameters.varName("variable", object_name)).first
-          ? determineNonlinearSystem(parameters.varName("variable", object_name)).second
+      parameters.isParamValid(var_param_name) &&
+              determineNonlinearSystem(parameters.varName(var_param_name, object_name)).first
+          ? determineNonlinearSystem(parameters.varName(var_param_name, object_name)).second
           : (unsigned int)0;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
