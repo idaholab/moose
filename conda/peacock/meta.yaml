@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.09.15" %}
+{% set version = "2023.10.17" %}
 
 package:
   name: moose-peacock
@@ -16,15 +16,13 @@ build:
   number: 0
 
 requirements:
-  run:
+  build:
     - {{ moose_mpich }}
-    - python
-    - trame <=2.5.0
-    - pyaml
-    - numpy
-    - paraview
+  run:
     - pandas
+    - matplotlib
     - pyqt
+    - vtk
   # Python min/max constraints
   run_constrained:
     - python <{{3.11}}

@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 3 %}
+{% set build = 4 %}
 {% set version = "2023.09.06" %}
 {% set vtk_friendly_version = "9.2" %}
 
@@ -33,6 +33,7 @@ requirements:
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - libpng
+    - zlib
   run:
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}

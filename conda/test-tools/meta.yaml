@@ -3,7 +3,7 @@
 #   tools/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.08.31" %}
+{% set version = "2023.10.12" %}
 
 package:
   name: moose-test-tools
@@ -21,7 +21,7 @@ requirements:
     - setuptools
   run:
     - numpy
-    - matplotlib
+    - matplotlib-base
     - pandas
     - pyyaml
     - lxml
@@ -31,6 +31,7 @@ requirements:
     - pylatexenc
     - jinja2
     - mako
+    - mock
     - yaml
     - setuptools
     - graphviz
@@ -43,6 +44,7 @@ requirements:
     - pyflakes
     - python
     - xmltodict
+    - zfp 0.5.5
 
 test:
   commands:
@@ -57,6 +59,8 @@ test:
     - skimage
     - sympy
     - jinja2
+    - mako
+    - mock
     - deepdiff
     - pylint
     - psycopg2

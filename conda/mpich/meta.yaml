@@ -6,8 +6,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 11 %}
-{% set version = "4.0.2" %}
+{% set build = 0 %}
+{% set version = "4.0.3" %}
 
 # permanent
 {% set strbuild = "build_" + build|string %}
@@ -33,13 +33,6 @@ requirements:
     - mpich-mpicc {{ version }}
     - mpich-mpicxx {{ version }}
     - mpich-mpifort {{ version }}
-    - {{ moose_hdf5 }}
-    - {{ moose_krb5 }}
-    - {{ moose_icu }}
-    - {{ moose_libclang }}
-    - {{ moose_libclang13 }}
-    - {{ moose_clangcc }}       # [osx]
-    - {{ moose_clangxx }}       # [osx]
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}

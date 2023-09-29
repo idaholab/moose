@@ -1,0 +1,127 @@
+# This recipe is designed to help integrate changes
+# throughout the stack. Make your changes here first,
+# try to build, theninstall it. If it works, record the
+# packages in play and apply the version/build_strings
+# to production recipes.
+{% set build = 0 %}
+{% set version = "4.0.3" %}
+
+# permanent
+{% set strbuild = "build_" + build|string %}
+
+package:
+  name: everything
+  version: {{ version }}
+
+source:
+  - path: .
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: True                    # [win]
+  pin_depends: strict
+  run_exports:
+    - {{ pin_subpackage('everything', max_pin='x.x') }}
+
+requirements:
+  build:
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
+    - clang-format 14
+
+  run:
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
+    - libgfortran
+    - libgfortran5
+    - hdf5 1.* mpi_mpich*
+    - krb5
+    - icu
+    - cmake
+    - make
+    - libtool
+    - autoconf
+    - automake 1.16.5
+    - m4
+    - zfp 0.5.5
+    - bison 3.4
+    - mpi 1.0 mpich
+    - pandas
+    - vtk
+    - matplotlib
+    - pyqt
+    - qt
+    - pkg-config
+    - libpng
+    - packaging
+    - setuptools <60
+    - beautifulsoup4
+    - livereload
+    - pybtex
+    - mock
+    - pylatexenc
+    - python
+    - clang-tools
+    - numpy
+    - matplotlib
+    - pandas
+    - pyyaml
+    - lxml
+    - scikit-image
+    - sympy
+    - deepdiff
+    - pylatexenc
+    - jinja2
+    - mako
+    - yaml
+    - setuptools
+    - graphviz
+    - pylint
+    - psycopg2
+    - pycobertura
+    - tabulate
+    - gitpython
+    - packaging
+    - pyflakes
+    - python
+    - xmltodict
+    - libclang
+    - libclang13
+    - vtk
+    - ld64                             # [osx]
+    - clang                            # [osx]
+    - clangxx                          # [osx]
+    - libxt-devel-cos7-x86_64          # [linux]
+    - libsm-devel-cos7-x86_64          # [linux]
+    - libx11-devel-cos7-x86_64         # [linux]
+    - libice-devel-cos7-x86_64         # [linux]
+    - libxext-devel-cos7-x86_64        # [linux]
+    - mesa-libgl-devel-cos7-x86_64     # [linux]
+    - xorg-x11-proto-devel-cos7-x86_64 # [linux]
+    - libglu                           # [linux]
+    - mesalib                          # [linux]
+    - python 3.10
+    - clang-format 14
+  # Python min/max constraints
+  run_constrained:
+    - python <{{3.11}}
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'A top-level package designed to control environment variables related to conda-forge provided MPICH'
+  description: |
+    MPICH is a high performance and widely portable implementation of the
+    Message Passing Interface (MPI) standard.
+  doc_url: http://www.mpich.org/documentation/guides
+  dev_url: https://wiki.mpich.org/mpich/index.php/Main_Page
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour

@@ -1,0 +1,54 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#   tools/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set version = "2023.10.12" %}
+
+package:
+  name: moose-docs
+  version: {{ version }}
+
+source:
+  path: ../moose-docs
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - {{ moose_python }}
+    - setuptools
+  run:
+    - beautifulsoup4
+    - livereload
+    - pybtex
+    - pandas
+    - pylatexenc
+    - python
+    - matplotlib-base
+    - jinja2
+
+test:
+  imports:
+    - bs4
+    - livereload
+    - pybtex
+    - pylatexenc
+    - pandas
+    - matplotlib
+    - jinja2
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: >
+    This superficial module (moose-docs) acts as a top-level module designed to provide all
+    dependencies required in order to build documentation using MooseDocs.
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
+    - loganharbour

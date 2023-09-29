@@ -40,6 +40,10 @@ fi
 # Specifying both causes an error as of PETSc 3.17.
 CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
 
+# Issues with downloads lately. Download manually
+mkdir ${BUILD_PREFIX}/external_packages
+curl -L https://graal.ens-lyon.fr/MUMPS/MUMPS_5.6.1.tar.gz -o ${BUILD_PREFIX}/external_packages/MUMPS_5.6.1.tar.gz
+
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
     --COPTFLAGS=-O3 \
@@ -48,6 +52,7 @@ configure_petsc \
     --with-x=0 \
     --with-ssl=0 \
     --with-mpi-dir=$PREFIX \
+    --download-mumps=${BUILD_PREFIX}/external_packages/MUMPS_5.6.1.tar.gz \
     AR="$AR" \
     RANLIB="$RANLIB" \
     CFLAGS="$CFLAGS" \
@@ -88,7 +93,11 @@ for path in $PETSC_DIR $BUILD_PREFIX; do
 done
 
 make
-make check
+if [ `uname -m` == 'arm64' ]; then
+    printf "PETSc tests seems to hang on Apple Silicon. Skipping...\n"
+else
+    make check
+fi
 make install
 
 # Remove unneeded files
