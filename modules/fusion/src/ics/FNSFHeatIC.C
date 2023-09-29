@@ -12,7 +12,7 @@
 
 using namespace FNSF;
 
-registerMooseObject("MooseApp", FNSFHeatIC);
+registerMooseObject("FusionApp", FNSFHeatIC);
 
 std::pair<int, int>
 index_xi_depth(Real xi,

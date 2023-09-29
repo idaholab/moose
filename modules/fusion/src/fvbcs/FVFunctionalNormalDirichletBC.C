@@ -10,7 +10,7 @@
 #include "FVFunctionalNormalDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", FVFunctionalNormalDirichletBC);
+registerMooseObject("FusionApp", FVFunctionalNormalDirichletBC);
 
 InputParameters
 FVFunctionalNormalDirichletBC::validParams()

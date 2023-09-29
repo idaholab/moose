@@ -14,12 +14,12 @@ using namespace FNSF;
 
 /*
  * This class is the base for:
- * - FNSFHeatSource 
+ * - FNSFHeatSource
  * - FNSFTritiumSource
- * 
+ *
  * So, does not need to be registered explicitly.
  */
-// registerMooseObject("MooseApp", FNSFSource);
+// registerMooseObject("FusionApp", FNSFSource);
 
 std::pair<int, int>
 FNSFSource::index_xi_depth(Real xi,

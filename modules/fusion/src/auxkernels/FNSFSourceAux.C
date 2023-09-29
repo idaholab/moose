@@ -12,7 +12,7 @@
 
 using namespace FNSF;
 
-registerMooseObject("MooseApp", FNSFSourceAux);
+registerMooseObject("FusionApp", FNSFSourceAux);
 
 std::pair<int, int>
 FNSFSourceAux::index_xi_depth(Real xi,
