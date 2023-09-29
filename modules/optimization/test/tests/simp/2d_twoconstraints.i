@@ -95,6 +95,19 @@ vol_frac = 0.2
     prop_names = cost_sensitivity
     outputs = 'exodus'
   []
+  [cost_sensitivity_parsed]
+    type = DerivativeParsedMaterial
+    expression = "if(mat_den<0.2,1.0,0.5)"
+    coupled_variables = 'mat_den'
+    property_name = cost_sensitivity_parsed
+  []
+  [cc]
+    type = CostSensitivity
+    design_density = mat_den
+    cost = cost_sensitivity_parsed
+    outputs = 'exodus'
+    declare_suffix = 'for_testing'
+  []
 []
 
 [BCs]
