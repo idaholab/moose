@@ -368,7 +368,7 @@ RestartableDataReader::restoreLateData(std::unique_ptr<RestartableDataValue> val
   };
 
   if (currentData(tid).hasData(value->name()))
-    error("This value has already been delcared and it does not make sense to declare it again");
+    error("This value has already been declared and it does not make sense to declare it again");
 
   const auto & header = getHeader(value->name(), tid);
   if (header.has_context)
