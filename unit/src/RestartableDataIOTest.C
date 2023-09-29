@@ -121,7 +121,7 @@ TEST_F(RestartableDataIOTest, readWrite)
       }
       catch (const std::exception & err)
       {
-        const auto pos = std::string(err.what()).find("already declared");
+        const auto pos = std::string(err.what()).find("already been declared");
         ASSERT_TRUE(pos != std::string::npos);
       }
     }
