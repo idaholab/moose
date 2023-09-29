@@ -65,18 +65,14 @@ template <typename T>
 void
 LoadModelDataAction<T>::load(const T & object)
 {
-  // Create the object that will load in data
-  RestartableDataReader reader(_app, _app.getRestartableDataMap(object.modelMetaDataName()));
-  reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-
   // Read the supplied file
   const std::string folder = object.getModelDataFileName();
   try
   {
-    object.getMooseApp().loadRestartableMetaData(name, folder, false);
+    object.getMooseApp().loadRestartableMetaData(object.modelMetaDataName(), folder, false);
   }
   catch (...)
   {
-    paramError("filename", "The supplied file '", filename, "' failed to load.");
+    paramError("filename", "The supplied restart folder '", folder, "' failed to load.");
   }
 }

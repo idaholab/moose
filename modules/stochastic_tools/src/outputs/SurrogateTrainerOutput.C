@@ -40,6 +40,6 @@ SurrogateTrainerOutput::output()
       const SurrogateTrainerBase & trainer = getSurrogateTrainerByName(surrogate_name);
       const auto folder =
           RestartableDataIO::restartableDataFolder(this->filename() + "_" + surrogate_name);
-      _app.writeRestartableMetaData(name, folder);
+      _app.writeRestartableMetaData(trainer.modelMetaDataName(), folder);
     }
 }
