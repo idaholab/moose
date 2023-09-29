@@ -68,6 +68,7 @@ template <typename T>
 const T &
 LateRestartableDataRestorer::restore(const std::string & name, const THREAD_ID tid /* = 0 */)
 {
+  static_assert(std::is_default_constructible_v<T>, "Must be default constructible");
   std::unique_ptr<RestartableDataValue> T_data =
       std::make_unique<RestartableData<T>>(name, nullptr);
   auto & value = restore(std::move(T_data), tid);
