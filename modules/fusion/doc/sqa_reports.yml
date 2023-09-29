@@ -1,0 +1,30 @@
+Applications:
+    fusion:
+        exe_directory: ${MOOSE_DIR}/modules/fusion
+        content_directory: ${MOOSE_DIR}/modules/fusion/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/fusion_srs.md
+    software_design_description: sqa/fusion_sdd.md
+    software_test_plan: sqa/fusion_stp.md
+    requirements_traceablity_matrix: sqa/fusion_rtm.md
+    verification_validation_report: sqa/fusion_vvr.md
+    failure_analysis_report: sqa/fusion_far.md
+    software_library_list: sqa/fusion_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    fusion:
+        directories:
+            - ${MOOSE_DIR}/modules/fusion/test
+        log_default: WARNING
+        show_warning: false
