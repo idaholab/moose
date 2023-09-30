@@ -5,6 +5,10 @@
 The diffusive flux is obtained from a two point gradient, and the diffusivity is
 interpolated to the interface.
 
+!alert note
+This kernel supports interfaces between variables which belong to different nonlinear systems.
+For instructions on how to set these cases up, visit the [FVInterfaceKernels syntax page](syntax/FVInterfaceKernels/index.md).
+
 ## Example input file syntax
 
 In this example, two diffusion problems with a source terms are solved on each side

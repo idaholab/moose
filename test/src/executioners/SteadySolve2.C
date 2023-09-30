@@ -27,6 +27,10 @@ SteadySolve2::validParams()
                                                "The first nonlinear system to solve");
   params.addRequiredParam<NonlinearSystemName>("second_nl_sys_to_solve",
                                                "The second nonlinear system to solve");
+  params.addRangeCheckedParam<unsigned int>("number_of_iterations",
+                                            1,
+                                            "number_of_iterations>0",
+                                            "The number of iterations between the two systems.");
   return params;
 }
 
@@ -37,7 +41,8 @@ SteadySolve2::SteadySolve2(const InputParameters & parameters)
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
     _first_nl_sys(_problem.nlSysNum(getParam<NonlinearSystemName>("first_nl_sys_to_solve"))),
-    _second_nl_sys(_problem.nlSysNum(getParam<NonlinearSystemName>("second_nl_sys_to_solve")))
+    _second_nl_sys(_problem.nlSysNum(getParam<NonlinearSystemName>("second_nl_sys_to_solve"))),
+    _number_of_iterations(getParam<unsigned int>("number_of_iterations"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -107,12 +112,16 @@ SteadySolve2::execute()
       return _problem.nlConverged(sys_num);
     };
 
-    const bool converged = solve(_first_nl_sys) && solve(_second_nl_sys);
+    bool converged = true;
 
-    if (!converged)
+    for (unsigned int i = 0; i < _number_of_iterations; i++)
     {
-      _console << "Aborting as solve did not converge" << std::endl;
-      break;
+      converged = converged && solve(_first_nl_sys) && solve(_second_nl_sys);
+      if (!converged)
+      {
+        _console << "Aborting as solve did not converge" << std::endl;
+        break;
+      }
     }
 
     _problem.computeIndicators();

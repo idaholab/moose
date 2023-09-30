@@ -19,4 +19,12 @@
                "FVInterfaceKernels/interface/coeff_interp_method=harmonic "
                "Outputs/file_base='harmonic'"
   []
+  [diffusion-multisystem]
+    issues = '#25599'
+    design = 'FVDiffusionInterface.md Problem/index.md'
+    requirement = 'The system shall be able to solve a block-restricted diffusion problem where the variables live on different nonlinear systems.'
+    type = Exodiff
+    input = multisystem.i
+    exodiff = 'multisystem_out.e'
+  []
 []

@@ -100,12 +100,6 @@ protected:
   const std::set<SubdomainID> & sub2() const { return _subdomain2; }
 
   /**
-   * @return The system associated with this object. Either an undisplaced or displaced nonlinear
-   * system
-   */
-  const SystemBase & sys() const { return _sys; }
-
-  /**
    * @return Whether the \p FaceInfo element is on the 1st side of the interface
    */
   virtual bool elemIsOne() const { return _elem_is_one; }
@@ -192,16 +186,13 @@ protected:
   /// The SubProblem
   SubProblem & _subproblem;
 
-  /// the system object
-  SystemBase & _sys;
+  MooseVariableFV<Real> & _var1;
+  MooseVariableFV<Real> & _var2;
 
   /// The Assembly object
   Assembly & _assembly;
 
 private:
-  MooseVariableFV<Real> & _var1;
-  MooseVariableFV<Real> & _var2;
-
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
 
