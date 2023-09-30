@@ -15,7 +15,7 @@ assumed to be 1.7324e-7 kg/m$^3$/Pa [!cite](richard), but this may be set to
 a user-defined value. Slightly increasing the partial derivative of density
 with respect to pressure may improve convergence of compressible flow equations
 without significantly affecting the physical accuracy of the density estimation
-[!cite](scarlat). In the absense of the pressure dependence, the uncertainty
+[!cite](scarlat). In the absence of the pressure dependence, the uncertainty
 on density is $\pm$2% [!cite](richard).
 
 Viscosity, isobaric specific heat, and thermal conductivity are calculated

@@ -102,15 +102,36 @@ class TaggingExtension(command.CommandExtension):
                     if (entry == 'path'):
                         path_value = tag_dict_str.split("path: ")[1].split(',')[0].replace("'", "")
 
+                        # splitting the path is dangerous, even at content/, as more than one tagged page could have
+                        # the same name.
                         if 'content/' in path_value:
-                            # splitting at content is dangerous, same named pages within two different modules/xxx/doc/content
-                            # could be mixed together
-                            path_value = path_value.split('content/')[1]
+                            path_value_cut = path_value.split('content/')[1]
+                        else:
+                            path_value_cut = path_value.split('/')[-1]
 
-                        # Use a single / to indicate that it's a local link
-                        link_value = '/' + path_value.replace('.md', '.html')
+                        # Find the relative path from the filter page (assumed at filter/index.html)
+                        # Check that there is no ambiguity
+                        target_page = self.translator.findPages(path_value_cut)
+                        filter_page = self.translator.findPages("filter/index.html")
+                        if len(target_page) != 1:
+                            LOG.warning(str(len(target_page)) + " pages found after truncating address when "
+                                        "tagging for page initially at address: " + path_value)
+                        if len(filter_page) != 1:
+                            LOG.warning(str(len(filter_page)) + " pages have been found for the filter page "
+                                        "when building tagged pages relative links")
+                        # we did not find the pages, cannot search for their relative path
+                        # do the next best thing
+                        if (len(target_page) == 0 or len(filter_page) == 0):
+                            link_value = '/' + path_value_cut.replace('.md', '.html')
+                        else:
+                            target_page = target_page[0]
+                            filter_page = filter_page[0]
+                            link_value = target_page.relativeDestination(filter_page)
+
+                        # Insert the link into the dictionary string
                         index = tag_dict_str.find(', key_vals')
                         tag_dict_str = tag_dict_str[:index] + ', link: "' + link_value + '"' + tag_dict_str[index:]
+
                 tag_dict_str=re.sub("'",'"', tag_dict_str)
                 # Downstream js cannot handle double quotes
                 tag_dict_str=re.sub("\"\"",'"', tag_dict_str)
@@ -119,6 +140,7 @@ class TaggingExtension(command.CommandExtension):
                 else:
                     replace_str += "," + tag_dict_str
 
+        # Replace the dummy tag dictionary in the JS file with the collected dictionary from parsing the pages
         replace_str = "{data:[" + replace_str + "]}"
 
         # Find the javascript file with error checking
