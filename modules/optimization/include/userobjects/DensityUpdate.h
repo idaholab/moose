@@ -12,6 +12,10 @@
 #include "ElementUserObject.h"
 #include "MooseTypes.h"
 
+/**
+ * Element user object that performs SIMP optimization using a bisection algorithm using a volume
+ * constraint.
+ */
 class DensityUpdate : public ElementUserObject
 {
 public:
@@ -26,13 +30,17 @@ public:
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
+  /// The sytem mesh
   const MooseMesh & _mesh;
+  /// The name of the pseudo-density variable
   const VariableName _design_density_name;
+  /// The elasticity compliance sensitivity name
   const VariableName _density_sensitivity_name;
-
+  /// The pseudo-density variable
   MooseVariable & _design_density;
+  /// The filtered density sensitivity variable
   const MooseVariable & _density_sensitivity;
-
+  /// The volume fraction to be enforced
   const Real _volume_fraction;
 
 private:
@@ -49,9 +57,15 @@ private:
     }
   };
 
+  /**
+   * Gathers element date necessary to perform the bisection algorithm for optimization
+   */
   void gatherElementData();
+
+  /**
+   * Performs the optimility criterion loop (bisection)
+   */
   void performOptimCritLoop();
-  void computePhysDensity();
 
   Real computeUpdatedDensity(Real current_density, Real dc, Real lmid);
 

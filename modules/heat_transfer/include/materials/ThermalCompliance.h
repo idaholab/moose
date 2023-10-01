@@ -13,6 +13,11 @@
 #include "DerivativeMaterialInterface.h"
 #include "MathUtils.h"
 
+/**
+ * Computes heat conduction compliance.
+ * This material can be used to monitor the thermal
+ * compliance of a system that is being optimized.
+ */
 class ThermalCompliance : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -23,7 +28,12 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
+  /// Temperature gradient vector
   const VariableGradient & _grad_temperature;
+
+  /// Thermal conductivity material (parsed)
   const MaterialProperty<Real> & _thermal_conductivity;
+
+  /// Generated thermal compliance material
   MaterialProperty<Real> & _thermal_compliance;
 };

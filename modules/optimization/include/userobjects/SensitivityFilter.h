@@ -12,6 +12,11 @@
 #include "ElementUserObject.h"
 #include "RadialAverage.h"
 
+/**
+ * Element user object that filters the objective function sensitivities via a radial average user
+ * objects. This object can be used to apply a Solid Isotropic Material Penalization (SIMP) to
+ * optimization.
+ */
 class SensitivityFilter : public ElementUserObject
 {
 public:
@@ -25,8 +30,12 @@ public:
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
+  /// Radial average user object
   const RadialAverage::Result & _filter;
+  /// Sensititivity with respect to density
   MooseVariable & _density_sensitivity;
+  /// Pseudo-density variable name
   const VariableName _design_density_name;
+  /// The pseudo-density variable
   const MooseVariable & _design_density;
 };
