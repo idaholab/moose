@@ -601,6 +601,30 @@ InputParameters::checkParams(const std::string & parsing_syntax)
 }
 
 bool
+InputParameters::isRangeChecked(const std::string & param_name) const
+{
+  const auto name = checkForRename(param_name);
+  return !_params.find(name)->second._range_function.empty();
+}
+
+std::string
+InputParameters::rangeCheckedFunction(const std::string & param_name) const
+{
+  const auto name = checkForRename(param_name);
+  return _params.at(name)._range_function;
+}
+
+bool
+InputParameters::hasDefault(const std::string & param_name) const
+{
+  const auto name = checkForRename(param_name);
+  if (hasDefaultCoupledValue(name))
+    return true;
+  // If it has a default, it's already valid
+  return isParamValid(name);
+}
+
+bool
 InputParameters::hasCoupledValue(const std::string & coupling_name) const
 {
   return _coupled_vars.find(coupling_name) != _coupled_vars.end();
