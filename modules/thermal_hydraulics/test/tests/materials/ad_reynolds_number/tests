@@ -1,5 +1,8 @@
 [Tests]
+  design = 'ADReynoldsNumberMaterial.md'
+  issues = '#19682'
   [test]
+    requirement = 'The system shall compute the Reynolds number as a material property.'
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'

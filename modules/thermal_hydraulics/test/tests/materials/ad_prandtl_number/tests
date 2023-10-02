@@ -1,5 +1,8 @@
 [Tests]
-  [test]
+  design = 'ADPrandtlNumberMaterial.md'
+  issues = '#19682'
+  [ad_Pr]
+    requirement = "The system shall compute the Prandlt number as a material property."
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
