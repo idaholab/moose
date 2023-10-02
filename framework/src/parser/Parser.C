@@ -1419,6 +1419,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(MooseFunctorName, string);
         setscalar(MaterialName, string);
         setscalar(DistributionName, string);
+        setscalar(PhysicsName, string);
         setscalar(PositionsName, string);
         setscalar(SamplerName, string);
         setscalar(TagName, string);
@@ -1494,6 +1495,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(CLIArgString, string);
+        setvector(PhysicsName, string);
         setvector(PositionsName, string);
         setvector(TimesName, string);
         setvector(ReporterValueName, string);

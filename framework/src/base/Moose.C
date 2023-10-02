@@ -489,6 +489,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddReporterAction", "Reporters/*");
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
 
+  registerSyntax("AddPhysicsAction", "Physics/*");
+  syntax.registerSyntaxType("Physics/*", "PhysicsName");
+
   registerSyntax("AddPositionsAction", "Positions/*");
   syntax.registerSyntaxType("Positions/*", "PositionsName");
 
