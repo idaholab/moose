@@ -30,16 +30,16 @@ public:
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
-  /// The sytem mesh
+  /// The system mesh
   const MooseMesh & _mesh;
   /// The name of the pseudo-density variable
   const VariableName _design_density_name;
   /// The elasticity compliance sensitivity name
   const VariableName _density_sensitivity_name;
   /// The pseudo-density variable
-  MooseVariable & _design_density;
+  MooseWritableVariable * _design_density;
   /// The filtered density sensitivity variable
-  const MooseVariable & _density_sensitivity;
+  const MooseWritableVariable * _density_sensitivity;
   /// The volume fraction to be enforced
   const Real _volume_fraction;
 
@@ -63,7 +63,7 @@ private:
   void gatherElementData();
 
   /**
-   * Performs the optimility criterion loop (bisection)
+   * Performs the optimality criterion loop (bisection)
    */
   void performOptimCritLoop();
 

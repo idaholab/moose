@@ -8,7 +8,7 @@ points. Considering the optimization of a problem with the separate effect of th
 of accounting for its simultaneous application, can yield a final optimized system whose
 material distribution is a lot different from a simple concomitant approach. In the extreme case,
 having two loads acting on the same point in opposing directions would yield an ill-defined
-optimized structure if such loads are considered to be concomitant. However, the indenpendent
+optimized structure if such loads are considered to be concomitant. However, the independent
 combination of each of the load's sensitivities would yield a structure that is optimized to
 reduce the compliance under such weighting.
 

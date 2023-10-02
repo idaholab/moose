@@ -33,12 +33,14 @@ DensityUpdate::DensityUpdate(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _density_sensitivity_name(getParam<VariableName>("density_sensitivity")),
-    _design_density(writableVariable("design_density")),
-    _density_sensitivity(_subproblem.getStandardVariable(_tid, _density_sensitivity_name)),
+    _design_density(&writableVariable("design_density")),
+    _density_sensitivity(&_subproblem.getStandardVariable(_tid, _density_sensitivity_name)),
     _volume_fraction(getParam<Real>("volume_fraction")),
     _lower_bound(getParam<Real>("bisection_lower_bound")),
     _upper_bound(getParam<Real>("bisection_upper_bound"))
 {
+  if (!dynamic_cast<MooseVariableFE<Real> *>(_design_density))
+    paramError("design_density", "Design density must be a finite element variable");
 }
 
 void
@@ -58,7 +60,7 @@ DensityUpdate::execute()
   if (elem_data_iter != _elem_data_map.end())
   {
     ElementData & elem_data = elem_data_iter->second;
-    _design_density.setNodalValue(elem_data.new_density);
+    dynamic_cast<MooseVariableFE<Real> *>(_design_density)->setNodalValue(elem_data.new_density);
   }
   else
   {
@@ -72,33 +74,19 @@ DensityUpdate::gatherElementData()
   _elem_data_map.clear();
   _total_allowable_volume = 0;
 
-  if (blockRestricted())
-  {
-    for (const auto & sub_id : blockIDs())
-      for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
-      {
-        dof_id_type elem_id = elem->id();
-        ElementData data = ElementData(_design_density.getElementalValue(elem),
-                                       _density_sensitivity.getElementalValue(elem),
-                                       elem->volume(),
-                                       0);
-        _elem_data_map[elem_id] = data;
-        _total_allowable_volume += elem->volume();
-      }
-  }
-  else
-  {
-    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+  for (const auto & sub_id : blockIDs())
+    for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
     {
       dof_id_type elem_id = elem->id();
-      ElementData data = ElementData(_design_density.getElementalValue(elem),
-                                     _density_sensitivity.getElementalValue(elem),
-                                     elem->volume(),
-                                     0);
+      ElementData data = ElementData(
+          dynamic_cast<MooseVariableFE<Real> *>(_design_density)->getElementalValue(elem),
+          dynamic_cast<const MooseVariableFE<Real> *>(_density_sensitivity)
+              ->getElementalValue(elem),
+          elem->volume(),
+          0);
       _elem_data_map[elem_id] = data;
       _total_allowable_volume += elem->volume();
     }
-  }
 
   _communicator.sum(_total_allowable_volume);
   _total_allowable_volume *= _volume_fraction;

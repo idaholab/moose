@@ -63,10 +63,10 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
     _density_sensitivity_name(getParam<VariableName>("density_sensitivity")),
     _cost_density_sensitivity_name(getParam<VariableName>("cost_density_sensitivity")),
     _cost_name(getParam<VariableName>("cost")),
-    _design_density(writableVariable("design_density")),
-    _density_sensitivity(_subproblem.getStandardVariable(_tid, _density_sensitivity_name)),
+    _design_density(&writableVariable("design_density")),
+    _density_sensitivity(&_subproblem.getStandardVariable(_tid, _density_sensitivity_name)),
     _cost_density_sensitivity(
-        _subproblem.getStandardVariable(_tid, _cost_density_sensitivity_name)),
+        &_subproblem.getStandardVariable(_tid, _cost_density_sensitivity_name)),
     _cost(_subproblem.getStandardVariable(_tid, _cost_name)),
     _volume_fraction(getParam<Real>("volume_fraction")),
     _cost_fraction(getParam<Real>("cost_fraction")),
@@ -101,6 +101,21 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
       paramError("weight_mechanical_thermal",
                  "This parameter needs to be provided when including thermal sensitivity.");
   }
+
+  auto transient = dynamic_cast<Transient *>(_app.getExecutioner());
+
+  if (!transient && _adaptive_move)
+    paramError("adaptive_move", "Cannot find a transient executioner for adaptive bisection move.");
+
+  if (!dynamic_cast<MooseVariableFE<Real> *>(_design_density))
+    paramError("design_density", "Design density must be a finite element variable");
+
+  if (!dynamic_cast<const MooseVariableFE<Real> *>(_density_sensitivity))
+    paramError("density_sensitivity", "Design sensitivity must be a finite element variable");
+
+  if (!dynamic_cast<const MooseVariableFE<Real> *>(_cost_density_sensitivity))
+    paramError("cost_density_sensitivity",
+               "Cost density sensitivity must be a finite element variable");
 }
 
 void
@@ -120,7 +135,7 @@ DensityUpdateTwoConstraints::execute()
   if (elem_data_iter != _elem_data_map.end())
   {
     ElementData & elem_data = elem_data_iter->second;
-    _design_density.setNodalValue(elem_data.new_density);
+    _design_density->setNodalValue(elem_data.new_density);
   }
   else
   {
@@ -131,39 +146,21 @@ DensityUpdateTwoConstraints::execute()
 void
 DensityUpdateTwoConstraints::gatherElementData()
 {
-  // Create parallel-consistent data structures constaining compliance and cost sensitivities.
+  // Create parallel-consistent data structures constraining compliance and cost sensitivities.
   _elem_data_map.clear();
   _total_allowable_volume = 0;
   _total_allowable_cost = 0;
 
-  if (blockRestricted())
-  {
-    for (const auto & sub_id : blockIDs())
-      for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
-      {
-        dof_id_type elem_id = elem->id();
-        ElementData data = ElementData(_design_density.getElementalValue(elem),
-                                       _density_sensitivity.getElementalValue(elem),
-                                       _cost_density_sensitivity.getElementalValue(elem),
-                                       isParamValid("thermal_sensitivity")
-                                           ? _thermal_sensitivity->getElementalValue(elem)
-                                           : 0.0,
-                                       _cost.getElementalValue(elem),
-                                       elem->volume(),
-                                       0);
-        _elem_data_map[elem_id] = data;
-        _total_allowable_volume += elem->volume();
-      }
-  }
-  else
-  {
-    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+  for (const auto & sub_id : blockIDs())
+    for (const auto & elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(sub_id))
     {
       dof_id_type elem_id = elem->id();
       ElementData data = ElementData(
-          _design_density.getElementalValue(elem),
-          _density_sensitivity.getElementalValue(elem),
-          _cost_density_sensitivity.getElementalValue(elem),
+          dynamic_cast<MooseVariableFE<Real> *>(_design_density)->getElementalValue(elem),
+          dynamic_cast<const MooseVariableFE<Real> *>(_density_sensitivity)
+              ->getElementalValue(elem),
+          dynamic_cast<const MooseVariableFE<Real> *>(_cost_density_sensitivity)
+              ->getElementalValue(elem),
           isParamValid("thermal_sensitivity") ? _thermal_sensitivity->getElementalValue(elem) : 0.0,
           _cost.getElementalValue(elem),
           elem->volume(),
@@ -171,7 +168,7 @@ DensityUpdateTwoConstraints::gatherElementData()
       _elem_data_map[elem_id] = data;
       _total_allowable_volume += elem->volume();
     }
-  }
+
   _communicator.sum(_total_allowable_volume);
   _communicator.sum(_total_allowable_cost);
 
@@ -271,14 +268,9 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
   // Control adaptivity
   const Real alpha = 0.96;
 
+  // Adaptive move (takes the transient time step as SIMP iteration number)
   if (_adaptive_move)
-  {
-    auto transient = dynamic_cast<Transient *>(_app.getExecutioner());
-    if (transient)
-      move = std::max(MathUtils::pow(alpha, transient->getTime()) * move, move_min);
-    else
-      mooseError("Cannot find a transient executioner for adaptive bisection move.");
-  }
+    move = std::max(MathUtils::pow(alpha, _t) * move, move_min);
 
   Real denominator = lmid + cmid * cost + cmid * current_density * cost_sensitivity;
 
@@ -286,7 +278,7 @@ DensityUpdateTwoConstraints::computeUpdatedDensity(Real current_density,
   const Real damping = 1.0;
 
   Real updated_density = std::max(
-      1.0e-5,
+      0.0,
       std::max(
           current_density - move,
           std::min(1.0,

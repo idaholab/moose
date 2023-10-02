@@ -14,7 +14,7 @@
 
 /**
  * Element user object that performs SIMP optimization using a bisection algorithm applying a volume
- * constraint and a cost constaint.
+ * constraint and a cost constraint.
  */
 class DensityUpdateTwoConstraints : public ElementUserObject
 {
@@ -30,7 +30,7 @@ public:
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
-  /// The sytem mesh
+  /// The system mesh
   const MooseMesh & _mesh;
   /// The name of the pseudo-density variable
   const VariableName _design_density_name;
@@ -39,11 +39,12 @@ protected:
   const VariableName _cost_density_sensitivity_name;
   const VariableName _cost_name;
   /// The pseudo-density variable
-  MooseVariable & _design_density;
+
+  MooseWritableVariable * _design_density;
   /// The filtered density sensitivity variable (elasticity)
-  const MooseVariable & _density_sensitivity;
+  const MooseWritableVariable * _density_sensitivity;
   /// The filtered density sensitivity variable (cost)
-  const MooseVariable & _cost_density_sensitivity;
+  const MooseWritableVariable * _cost_density_sensitivity;
   /// The cost variable
   const MooseVariable & _cost;
   /// The volume fraction to be enforced
@@ -83,7 +84,7 @@ private:
    */
   void gatherElementData();
   /**
-   * Performs the optimility criterion loop (bisection)
+   * Performs the optimality criterion loop (bisection)
    */
   void performOptimCritLoop();
 

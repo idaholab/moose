@@ -15,7 +15,7 @@
 
 /**
  * Computes heat conduction compliance derivative with respect to a variable contained in a parsed
- * material. This material can be used to optimizate a system thermal compliance objective function
+ * material. This material can be used to optimize a system thermal compliance objective function
  * via the Solid Isotropic Material Penalization (SIMP) approach.
  */
 class ThermalSensitivity : public DerivativeMaterialInterface<Material>

@@ -33,4 +33,6 @@ protected:
   const MaterialPropertyName _design_density_name;
   /// Derivative of elasticity modulus with respect to pseudo-density
   const MaterialProperty<Real> & _dEdp;
+  /// Young's modulus of the material
+  const MaterialProperty<Real> & _youngs_modulus;
 };

@@ -32,8 +32,8 @@ public:
 protected:
   /// Radial average user object
   const RadialAverage::Result & _filter;
-  /// Sensititivity with respect to density
-  MooseVariable & _density_sensitivity;
+  /// Sensitivity with respect to density
+  MooseWritableVariable & _density_sensitivity;
   /// Pseudo-density variable name
   const VariableName _design_density_name;
   /// The pseudo-density variable

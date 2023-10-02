@@ -29,7 +29,8 @@ ComplianceSensitivity::ComplianceSensitivity(const InputParameters & parameters)
     _design_density(coupledValue("design_density")),
     _design_density_name(coupledName("design_density", 0)),
     _dEdp(getMaterialPropertyDerivativeByName<Real>(
-        getParam<MaterialPropertyName>("youngs_modulus"), _design_density_name))
+        getParam<MaterialPropertyName>("youngs_modulus"), _design_density_name)),
+    _youngs_modulus(getMaterialProperty<Real>(getParam<MaterialPropertyName>("youngs_modulus")))
 {
 }
 
@@ -38,5 +39,5 @@ ComplianceSensitivity::computeQpProperties()
 {
   // Call the parent class's method to compute the strain energy density
   StrainEnergyDensity::computeQpProperties();
-  _sensitivity[_qp] = -_dEdp[_qp] * _strain_energy_density[_qp];
+  _sensitivity[_qp] = -_dEdp[_qp] * _strain_energy_density[_qp] / _youngs_modulus[_qp];
 }

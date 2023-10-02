@@ -9,7 +9,7 @@
 
 #include "ThermalSensitivity.h"
 
-registerMooseObject("HeatConductionApp", ThermalSensitivity);
+registerMooseObject("HeatTransferApp", ThermalSensitivity);
 
 InputParameters
 ThermalSensitivity::validParams()
