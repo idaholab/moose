@@ -114,13 +114,13 @@ class TaggingExtension(command.CommandExtension):
                         target_page = self.translator.findPages(path_value_cut)
                         filter_page = self.translator.findPages("filter/index.html")
                         if len(target_page) != 1:
-                            LOG.warning(str(len(target_page)) + " pages found after truncating address when "
-                                        "tagging for page initially at address: " + path_value)
+                            LOG.error(str(len(target_page)) + " pages found after truncating address when "
+                                      "tagging for page initially at address: " + path_value)
                         if len(filter_page) != 1:
                             LOG.warning(str(len(filter_page)) + " pages have been found for the filter page "
-                                        "when building tagged pages relative links")
-                        # we did not find the pages, cannot search for their relative path
-                        # do the next best thing
+                                        "when building relative links for tagged pages!")
+                        # We did not find the pages, thus cannot search for their relative path
+                        # So we simply take the full path value and use it to create the link
                         if (len(target_page) == 0 or len(filter_page) == 0):
                             link_value = '/' + path_value_cut.replace('.md', '.html')
                         else:
