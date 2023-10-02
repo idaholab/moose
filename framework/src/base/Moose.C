@@ -93,6 +93,7 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
+  registerMooseObjectTask("add_physics",                  Physics,                false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
@@ -270,6 +271,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_recover_file_base)"
                            "(check_copy_nodal_vars)"
                            "(setup_mesh)"
+                           "(add_physics)"
                            "(add_geometric_rm)"
                            "(add_partitioner)"
                            "(add_mesh_generator)"
