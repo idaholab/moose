@@ -107,6 +107,7 @@
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
 #include "Checkpoint.h"
+#include "PhysicsBase.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -2199,6 +2200,12 @@ FEProblemBase::neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid)
   _all_materials.neighborSubdomainSetup(subdomain, tid);
 }
 
+PhysicsBase *
+FEProblemBase::getPhysics(const std::string & name) const //, THREAD_ID tid
+{
+  return dynamic_cast<PhysicsBase *>(_physics.getActiveObject(name, 0).get());
+};
+
 void
 FEProblemBase::addFunction(const std::string & type,
                            const std::string & name,
@@ -2440,6 +2447,27 @@ FEProblemBase::determineNonlinearSystem(const std::string & var_name,
   }
 
   return std::make_pair(var_in_nl, var_in_nl ? nl_map_it->second : libMesh::invalid_uint);
+}
+
+void
+FEProblemBase::addPhysics(const std::string & physics_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  parallel_object_only();
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    const auto & disp_names = _displaced_problem->getDisplacementVarNames();
+    parameters.set<std::vector<VariableName>>("displacements") =
+        std::vector<VariableName>(disp_names.begin(), disp_names.end());
+  }
+  else
+    parameters.set<SubProblem *>("_subproblem") = this;
+
+  std::shared_ptr<PhysicsBase> physics =
+      _factory.create<PhysicsBase>(physics_name, name, parameters, 0);
+  _physics.addObject(physics, 0);
 }
 
 void
