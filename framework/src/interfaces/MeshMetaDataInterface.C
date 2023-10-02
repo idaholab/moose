@@ -49,7 +49,7 @@ MeshMetaDataInterface::getMeshPropertyInternal(const std::string & data_name,
                                                const std::string & generator_name) const
 {
   return _meta_data_app.getRestartableMetaData(
-      meshPropertyName(data_name, generator_name), MooseApp::MESH_META_DATA, 0);
+      meshPropertyName(data_name, generator_name), MooseApp::MESH_META_DATA_NAME, 0);
 }
 
 MeshMetaDataInterface::HasMeshProperty
@@ -61,7 +61,7 @@ MeshMetaDataInterface::hasMeshPropertyInternal(const std::string & data_name,
   const auto name = meshPropertyName(data_name, generator_name);
 
   if (const auto query_data =
-          _meta_data_app.queryRestartableMetaData(name, MooseApp::MESH_META_DATA))
+          _meta_data_app.queryRestartableMetaData(name, MooseApp::MESH_META_DATA_NAME))
   {
     if (query_data->typeId() == type)
       return HAS_LOADED;
@@ -76,7 +76,7 @@ MeshMetaDataInterface::hasMeshPropertyInternal(const std::string & data_name,
                          query_data->type(),
                          "'");
   }
-  else if (_meta_data_app.getLateRestartableDataRestorer(MooseApp::MESH_META_DATA)
+  else if (_meta_data_app.getLateRestartableDataRestorer(MooseApp::MESH_META_DATA_NAME)
                .isRestorable(name, type))
     return HAS_NOT_LOADED;
 

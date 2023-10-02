@@ -442,7 +442,7 @@ MeshGenerator::declareMeshProperty(const std::string & data_name, Args &&... arg
   auto new_T_value =
       std::make_unique<RestartableData<T>>(full_name, nullptr, std::forward<Args>(args)...);
   auto value =
-      &_app.registerRestartableData(std::move(new_T_value), 0, false, MooseApp::MESH_META_DATA);
+      &_app.registerRestartableData(std::move(new_T_value), 0, false, MooseApp::MESH_META_DATA_NAME);
   mooseAssert(value->declared(), "Should be declared");
 
   RestartableData<T> * T_value = dynamic_cast<RestartableData<T> *>(value);

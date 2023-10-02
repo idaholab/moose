@@ -600,7 +600,7 @@ MooseApp::MooseApp(InputParameters parameters)
   // file early during the simulation setup so that they are available to Actions and other objects
   // that need them during the setup process. Most of the restartable data isn't made available
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
-  registerRestartableDataMapName(MooseApp::MESH_META_DATA, MooseApp::MESH_META_DATA_SUFFIX);
+  registerRestartableDataMap(MooseApp::MESH_META_DATA_NAME);
 
   if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
     mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
@@ -1857,8 +1857,8 @@ MooseApp::possiblyLoadCheckpointMetaData(const RestartableDataMapName & name,
                                          const std::filesystem::path & checkpoint_folder_base,
                                          const bool retain_reader)
 {
-  const auto & map_name = getRestartableDataMapName(name);
-  const auto meta_data_folder_base = checkpointMetaDataFolderBase(checkpoint_folder_base, map_name);
+  const auto suffix = getRestartableDataMapIOSuffix(name);
+  const auto meta_data_folder_base = checkpointMetaDataFolderBase(checkpoint_folder_base, suffix);
   if (RestartableDataReader::isAvailable(meta_data_folder_base))
     loadRestartableMetaData(name, meta_data_folder_base, retain_reader);
 }
@@ -1913,8 +1913,8 @@ std::vector<std::filesystem::path>
 MooseApp::writeCheckpointMetaData(const RestartableDataMapName & name,
                                   const std::filesystem::path & checkpoint_folder_base)
 {
-  const auto & map_name = getRestartableDataMapName(name);
-  const auto meta_data_folder_base = checkpointMetaDataFolderBase(checkpoint_folder_base, map_name);
+  const auto suffix = getRestartableDataMapIOSuffix(name);
+  const auto meta_data_folder_base = checkpointMetaDataFolderBase(checkpoint_folder_base, suffix);
   return writeRestartableMetaData(name, meta_data_folder_base);
 }
 
@@ -2761,8 +2761,7 @@ MooseApp::checkMetaDataIntegrity() const
   }
 }
 
-const RestartableDataMapName MooseApp::MESH_META_DATA = "MeshMetaData";
-const RestartableDataMapName MooseApp::MESH_META_DATA_SUFFIX = "mesh";
+const RestartableDataMapName MooseApp::MESH_META_DATA_NAME = "mesh";
 
 const RestartableDataMap *
 MooseApp::queryRestartableDataMap(const RestartableDataMapName & name) const
@@ -2774,31 +2773,26 @@ MooseApp::queryRestartableDataMap(const RestartableDataMapName & name) const
 }
 
 void
-MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix)
+MooseApp::registerRestartableDataMap(const RestartableDataMapName & name)
 {
-  if (!suffix.empty())
-    std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
-  suffix.insert(0, "_");
-
   const auto [it, inserted] = _restartable_meta_data.emplace(name, MetaDataEntry{});
-  auto & entry = it->second;
-  if (inserted)
-  {
-    entry.suffix = suffix;
-    entry.reader = std::make_unique<RestartableDataReader>(*this, entry.map);
-  }
+  if (!inserted)
+    mooseError(
+        "MooseApp::registerRestartableMetaDataMapName: The map '", name, "' is already registered");
 
-  mooseAssert(entry.suffix == suffix, "Inconsistent suffix");
-  mooseAssert(entry.reader, "Reader not set");
+  auto & entry = it->second;
+  entry.reader = std::make_unique<RestartableDataReader>(*this, entry.map);
 }
 
-const std::string &
-MooseApp::getRestartableDataMapName(const RestartableDataMapName & name) const
+std::string
+MooseApp::getRestartableDataMapIOSuffix(const RestartableDataMapName & name) const
 {
-  const auto it = _restartable_meta_data.find(name);
-  if (it == _restartable_meta_data.end())
-    mooseError("MooseApp::getRestartableDataMapName: The name '", name, "' is not registered");
-  return it->second.suffix;
+  if (queryRestartableDataMap(name) == nullptr)
+    mooseError("MooseApp::getRestartableDataMapIOSuffix: The name '", name, "' is not registered");
+  std::string suffix = name;
+  std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+  suffix.insert(0, "_");
+  return suffix;
 }
 
 LateRestartableDataRestorer &

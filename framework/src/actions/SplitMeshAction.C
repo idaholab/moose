@@ -99,7 +99,7 @@ SplitMeshAction::act()
   // Write mesh metadata
   if (processor_id() == 0)
   {
-    const auto filenames = _app.writeCheckpointMetaData(MooseApp::MESH_META_DATA, fname);
+    const auto filenames = _app.writeCheckpointMetaData(MooseApp::MESH_META_DATA_NAME, fname);
     Moose::out << "Mesh meta data written into "
                << std::filesystem::absolute(filenames[0].parent_path()) << "." << std::endl;
   }

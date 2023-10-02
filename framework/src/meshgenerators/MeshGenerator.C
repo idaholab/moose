@@ -312,7 +312,7 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
 const RestartableDataValue *
 MeshGenerator::queryMeshProperty(const std::string & data_name) const
 {
-  return _app.queryRestartableMetaData(meshPropertyName(data_name), MooseApp::MESH_META_DATA);
+  return _app.queryRestartableMetaData(meshPropertyName(data_name), MooseApp::MESH_META_DATA_NAME);
 }
 
 RestartableDataValue *

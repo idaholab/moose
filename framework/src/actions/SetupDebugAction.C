@@ -105,7 +105,7 @@ SetupDebugAction::act()
   if (getParam<bool>("show_mesh_meta_data"))
   {
     _console << "Mesh meta data:\n";
-    if (const auto map = std::as_const(_app).queryRestartableDataMap(MooseApp::MESH_META_DATA))
+    if (const auto map = std::as_const(_app).queryRestartableDataMap(MooseApp::MESH_META_DATA_NAME))
       for (const auto & data : *map)
         _console << " " << data.name() << std::endl;
   }

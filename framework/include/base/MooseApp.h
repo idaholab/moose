@@ -86,8 +86,8 @@ public:
     std::vector<PostprocessorName> sub_transformed_pps;
   };
 
-  static const RestartableDataMapName MESH_META_DATA;
-  static const std::string MESH_META_DATA_SUFFIX;
+  /// The name used for registering mesh meta data as restartable meta data
+  static const RestartableDataMapName MESH_META_DATA_NAME;
 
   static InputParameters validParams();
 
@@ -745,15 +745,13 @@ public:
    * This should be called in the constructor of an application.
    *
    * @param name A key to use for accessing the data object
-   * @param suffix The suffix to use when appending to checkpoint output, if not supplied the
-   *               given name is used to generate the suffix (MyMetaData -> _mymetadata)
    */
-  void registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix = "");
+  void registerRestartableDataMap(const RestartableDataMapName & name);
 
   /**
-   * @return The output name for the restartable data with name \p name
+   * @return The input/output name for the restartable data with name \p name
    */
-  const std::string & getRestartableDataMapName(const RestartableDataMapName & name) const;
+  std::string getRestartableDataMapIOSuffix(const RestartableDataMapName & name) const;
 
   /**
    * Return a reference to the recoverable data object
@@ -1447,8 +1445,6 @@ private:
   {
     /// The map that stores the data
     RestartableDataMap map;
-    /// The suffix for the data (used in the folder name when storing/loading)
-    std::string suffix;
     /// The reader, used to load data later if needed
     std::unique_ptr<RestartableDataReader> reader;
   };
