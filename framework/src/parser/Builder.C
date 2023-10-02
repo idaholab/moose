@@ -1087,6 +1087,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setfpath(FileName);
         setfpath(MeshFileName);
         setfpath(FileNameNoExtension);
+        setscalar(PhysicsName, string);
         setscalar(OutFileBase, string);
         setscalar(VariableName, string);
         setscalar(NonlinearVariableName, string);
@@ -1179,6 +1180,7 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(CLIArgString, string);
+        setvector(PhysicsName, string);
         setvector(PositionsName, string);
         setvector(TimesName, string);
         setvector(ReporterValueName, string);
