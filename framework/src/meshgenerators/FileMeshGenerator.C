@@ -114,7 +114,8 @@ FileMeshGenerator::generate()
     mesh->read(file_name);
 
     // Load the meta data if it is available
-    _app.possiblyLoadCheckpointMetaData(MooseApp::MESH_META_DATA_NAME, (std::string)file_name, true);
+    _app.possiblyLoadCheckpointMetaData(
+        MooseApp::MESH_META_DATA_NAME, (std::string)file_name, true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

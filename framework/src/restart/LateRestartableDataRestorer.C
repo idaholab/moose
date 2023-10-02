@@ -24,10 +24,8 @@ LateRestartableDataRestorer::isRestorable(const std::string & name,
   return _reader.isLateRestorable(name, type, tid);
 }
 
-const RestartableDataValue &
-LateRestartableDataRestorer::restore(std::unique_ptr<RestartableDataValue> value,
-                                     const THREAD_ID tid)
+void
+LateRestartableDataRestorer::restore(const std::string & name, const THREAD_ID tid /* = 0 */)
 {
-  mooseAssert(value, "Not set");
-  return _reader.restoreLateData(std::move(value), tid, {});
+  _reader.restoreLateData(name, tid, {});
 }

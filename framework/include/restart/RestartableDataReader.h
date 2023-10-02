@@ -87,9 +87,7 @@ public:
    *
    * To be used by only the LateRestartableDataRestorer.
    */
-  const RestartableDataValue & restoreLateData(std::unique_ptr<RestartableDataValue> value,
-                                               const THREAD_ID tid,
-                                               const RestoreLateDataKey);
+  void restoreLateData(const std::string & name, const THREAD_ID tid, const RestoreLateDataKey);
 
   ///@{
   /*

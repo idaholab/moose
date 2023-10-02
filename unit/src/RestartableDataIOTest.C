@@ -49,10 +49,13 @@ TEST_F(RestartableDataIOTest, readWrite)
 {
   const auto data = basicData();
 
+  // For use in a test with context
+  const std::string with_context_name = "with_context";
+  const unsigned int dummy_context = 0;
+
   // Streams we're going to use on both sides
   auto header_stream = std::make_unique<std::stringstream>();
   auto data_stream = std::make_unique<std::stringstream>();
-
   {
     // Fill the map that we're storing
     RestartableDataMap rdm;
@@ -68,6 +71,13 @@ TEST_F(RestartableDataIOTest, readWrite)
     {
       EXPECT_FALSE(val.stored());
       EXPECT_FALSE(val.loaded());
+    }
+
+    // Declare a value with context for use later
+    {
+      std::unique_ptr<RestartableDataValue> rdv =
+          std::make_unique<RestartableData<unsigned int>>(with_context_name, &dummy_context);
+      rdm.addData(std::move(rdv));
     }
 
     // And write
@@ -116,12 +126,12 @@ TEST_F(RestartableDataIOTest, readWrite)
 
       try
       {
-        late_restorer.restore<unsigned int>(name);
+        late_restorer.restore(name);
         FAIL();
       }
       catch (const std::exception & err)
       {
-        const auto pos = std::string(err.what()).find("already been declared");
+        const auto pos = std::string(err.what()).find("already been loaded");
         ASSERT_TRUE(pos != std::string::npos);
       }
     }
@@ -142,9 +152,43 @@ TEST_F(RestartableDataIOTest, readWrite)
         ASSERT_TRUE(pos != std::string::npos);
       }
 
-      auto & val = late_restorer.restore<unsigned int>(name);
+      try
+      {
+        late_restorer.restore(name);
+        FAIL();
+      }
+      catch (const std::exception & err)
+      {
+        const auto pos = std::string(err.what()).find("not been declared");
+        ASSERT_TRUE(pos != std::string::npos);
+      }
+
+      std::unique_ptr<RestartableDataValue> rdv =
+          std::make_unique<RestartableData<unsigned int>>(name, nullptr);
+      const auto & val = dynamic_cast<RestartableData<unsigned int> &>(*rdv).get();
+      rdm.addData(std::move(rdv));
+
+      EXPECT_FALSE(val == info.value);
+      late_restorer.restore(name);
       EXPECT_EQ(val, info.value);
     }
+
+  // Try loading later with a context
+  {
+    std::unique_ptr<RestartableDataValue> rdv =
+        std::make_unique<RestartableData<unsigned int>>(with_context_name, nullptr);
+    rdm.addData(std::move(rdv));
+  }
+  try
+  {
+    late_restorer.restore(with_context_name);
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    const auto pos = std::string(err.what()).find("requires a context");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
 
   // Clear and make sure we can't do this anymore
   reader.clear();

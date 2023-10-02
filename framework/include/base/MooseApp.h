@@ -735,9 +735,13 @@ public:
   ///@}
 
   /**
-   * @return The read-only restartable data map for the meta data with name \p name, if any
+   * @return The read-only restartable data map with the given conditions
+   *
+   * @param name The metadata name (if any; if empty, the standard restartable data)
+   * @param tid The thread id
    */
-  const RestartableDataMap * queryRestartableDataMap(const RestartableDataMapName & name) const;
+  const RestartableDataMap * queryRestartableDataMap(const RestartableDataMapName & meta_name = "",
+                                                     const THREAD_ID tid = 0) const;
 
   /**
    * Reserve a location for storing custom RestartableDataMap objects.
@@ -760,7 +764,7 @@ public:
   const DataNames & getRecoverableData() const { return _recoverable_data_names; }
 
   /**
-   * Gets the late restatable data restorer for thread \p tid and meta name \p metaname (if any)
+   * Gets the late restatable data restorer for meta name \p metaname (if any)
    *
    * This is used to load restartable data after the initial restore
    */
@@ -1434,9 +1438,13 @@ private:
   RestartableDataMap & getRestartableDataMap(const RestartableDataMapName & name);
 
   /**
-   * @return The restartable data map for the meta data with name \p name, if any
+   * @return The restartable data map with the given conditions
+   *
+   * @param name The metadata name (if any; if empty, the standard restartable data)
+   * @param tid The thread id
    */
-  RestartableDataMap * queryRestartableDataMap(const RestartableDataMapName & name);
+  RestartableDataMap * queryRestartableDataMap(const RestartableDataMapName & name = "",
+                                               const THREAD_ID tid = 0);
 
   /**
    * Struct for storing meta data

@@ -46,12 +46,9 @@ public:
   }
 
   /**
-   * Lately restores the value with name \p name on thread \p tid
-   *
-   * @return The value
+   * Restores the declared data with the name \p name on thread \p tid
    */
-  template <typename T>
-  const T & restore(const std::string & name, const THREAD_ID tid = 0);
+  void restore(const std::string & name, const THREAD_ID tid = 0);
 
 private:
   /**
@@ -63,16 +60,3 @@ private:
   /// The reader object
   RestartableDataReader & _reader;
 };
-
-template <typename T>
-const T &
-LateRestartableDataRestorer::restore(const std::string & name, const THREAD_ID tid /* = 0 */)
-{
-  static_assert(std::is_default_constructible_v<T>, "Must be default constructible");
-  std::unique_ptr<RestartableDataValue> T_data =
-      std::make_unique<RestartableData<T>>(name, nullptr);
-  auto & value = restore(std::move(T_data), tid);
-  auto T_value = dynamic_cast<const RestartableData<T> *>(&value);
-  mooseAssert(T_value, "Bad cast");
-  return T_value->get();
-}

@@ -81,3 +81,41 @@ Restartable::restartableName(const std::string & data_name) const
 {
   return restartableName(_restartable_name, data_name);
 }
+
+Restartable::HasRestartableData
+Restartable::hasRestartableData(const std::string & full_name, const std::type_info & type) const
+{
+  // TODO: Add a check that we only call this when we actually have data headers to read.
+  // It's not a good idea to allow it to be called in constructors because it'll likely
+  // always return false in them because the headers aren't even read yet
+  if (const auto map = _restartable_app.queryRestartableDataMap(_metaname, _restartable_tid))
+  {
+    if (const auto data = map->findData(full_name))
+    {
+      if (data->typeId() == type)
+        return HasRestartableData::HAS_DATA_LOADED;
+
+      mooseError("While querying for restartable data '",
+                 full_name,
+                 "' of type '",
+                 MooseUtils::prettyCppType(type),
+                 "', said data was found with differing type '",
+                 MooseUtils::prettyCppType(data->typeId()),
+                 "'");
+    }
+
+    // Data doesn't exist, but it might be restorable late
+    if (_restartable_app.getLateRestartableDataRestorer(_metaname).isRestorable(
+            full_name, type, _restartable_tid))
+      return HasRestartableData::HAS_DATA_RESTORABLE;
+  }
+
+  return HasRestartableData::MISSING_DATA;
+}
+
+void
+Restartable::restoreLateValue(const std::string & full_name)
+{
+  auto & restorer = _restartable_app.getLateRestartableDataRestorer(_metaname);
+  restorer.restore(full_name, _restartable_tid);
+}

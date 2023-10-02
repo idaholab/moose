@@ -350,31 +350,32 @@ RestartableDataReader::isSameType(const RestartableDataReader::HeaderEntry & hea
   return header_entry.type == type.name();
 }
 
-const RestartableDataValue &
-RestartableDataReader::restoreLateData(std::unique_ptr<RestartableDataValue> value,
+void
+RestartableDataReader::restoreLateData(const std::string & name,
                                        const THREAD_ID tid,
                                        const RestoreLateDataKey)
 {
-  mooseAssert(value, "Not set");
+  auto & map = currentData(tid);
+  auto value = map.findData(name);
 
-  const auto error = [&value](auto... args)
+  const auto error = [&name, &value](const auto & message)
   {
-    mooseError("Failed to restore late restartable data '",
-               value->name(),
-               "' of type '",
-               value->type(),
-               "':\n\n",
-               args...);
+    std::stringstream err;
+    err << "Failed to restore late restartable data '" << name << "'";
+    if (value)
+      err << " of type '" << value->type() << "'";
+    err << ":\n\n" << message;
+    mooseError(err.str());
   };
 
-  if (currentData(tid).hasData(value->name()))
-    error("This value has already been declared and it does not make sense to declare it again");
+  if (!value)
+    error("This value has not been declared");
+  if (value->loaded())
+    error("This value has already been loaded");
 
-  const auto & header = getHeader(value->name(), tid);
+  const auto & header = getHeader(name, tid);
   if (header.has_context)
     error("This type cannot be restored late because it requires a context");
 
-  auto & added_value = currentData(tid).addData(std::move(value));
-  deserializeValue(*_streams.data, added_value, header);
-  return added_value;
+  deserializeValue(*_streams.data, *value, header);
 }

@@ -1684,9 +1684,11 @@ MooseApp::getRestartableDataMap(const RestartableDataMapName & name)
 }
 
 RestartableDataMap *
-MooseApp::queryRestartableDataMap(const RestartableDataMapName & name)
+MooseApp::queryRestartableDataMap(const RestartableDataMapName & meta_name /* = "" */,
+                                  const THREAD_ID tid /* = 0 */)
 {
-  return const_cast<RestartableDataMap *>(std::as_const(*this).queryRestartableDataMap(name));
+  return const_cast<RestartableDataMap *>(
+      std::as_const(*this).queryRestartableDataMap(meta_name, tid));
 }
 
 void
@@ -2764,9 +2766,14 @@ MooseApp::checkMetaDataIntegrity() const
 const RestartableDataMapName MooseApp::MESH_META_DATA_NAME = "mesh";
 
 const RestartableDataMap *
-MooseApp::queryRestartableDataMap(const RestartableDataMapName & name) const
+MooseApp::queryRestartableDataMap(const RestartableDataMapName & meta_name /* = "" */,
+                                  const THREAD_ID tid /* = 0 */) const
 {
-  const auto it = _restartable_meta_data.find(name);
+  if (meta_name.empty() && tid <= _restartable_data.size())
+    return &_restartable_data[tid];
+  if (tid != 0)
+    mooseError("MooseApp::queryRestartableDataMap(): Restartable meta data is not threaded");
+  const auto it = _restartable_meta_data.find(meta_name);
   if (it == _restartable_meta_data.end())
     return nullptr;
   return &it->second.map;

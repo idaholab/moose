@@ -1,0 +1,31 @@
+[Tests]
+  design = 'Restartable.md'
+  issues = '#23352'
+
+  [store]
+    type = 'RunApp'
+    input = 'late_restart_load.i'
+    allow_test_objects = true
+    cli_args = 'UserObjects/test/test_method=store
+                Outputs/checkpoint=true'
+    requirement = 'The system shall support the storing of a value that can be loaded after initialization in a later execution'
+  []
+  [load]
+    type = 'RunApp'
+    input = 'late_restart_load.i'
+    allow_test_objects = true
+    cli_args = 'UserObjects/test/test_method=load
+                Problem/restart_file_base=late_restart_load_out_cp/LATEST'
+    prereq = store
+    requirement = 'The system shall support the loading of a restarted value after initialization'
+  []
+  [load_no_store]
+    type = 'RunException'
+    input = 'late_restart_load.i'
+    allow_test_objects = true
+    cli_args = 'UserObjects/test/test_method=load_no_restart'
+    expect_err = 'Failed to find restartable data \'UserObjects/test/value\''
+    prereq = store
+    requirement = 'The system shall report a reasonable error when failing to load a restarted value after initialization that does not exist'
+  []
+[]
