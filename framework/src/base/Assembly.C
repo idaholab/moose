@@ -3441,7 +3441,8 @@ Assembly::addCachedResiduals(GlobalDataKey, const std::vector<VectorTag> & tags)
   }
 }
 
-void Assembly::clearCachedResiduals(GlobalDataKey)
+void
+Assembly::clearCachedResiduals(GlobalDataKey)
 {
   for (const auto & vector_tag : _residual_vector_tags)
     clearCachedResiduals(vector_tag);
@@ -3755,7 +3756,8 @@ Assembly::elementVolume(const Elem * elem) const
   return vol;
 }
 
-void Assembly::addCachedJacobian(GlobalDataKey)
+void
+Assembly::addCachedJacobian(GlobalDataKey)
 {
   if (!_subproblem.checkNonlocalCouplingRequirement())
   {
@@ -3809,7 +3811,8 @@ Assembly::addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseV
                        jvar.dofIndices());
 }
 
-void Assembly::addJacobian(GlobalDataKey)
+void
+Assembly::addJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
@@ -3821,7 +3824,8 @@ void Assembly::addJacobian(GlobalDataKey)
     addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
-void Assembly::addJacobianNonlocal(GlobalDataKey)
+void
+Assembly::addJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -3842,7 +3846,8 @@ void Assembly::addJacobianNonlocal(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianNeighbor(GlobalDataKey)
+void
+Assembly::addJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3879,7 +3884,8 @@ void Assembly::addJacobianNeighbor(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianNeighborLowerD(GlobalDataKey)
+void
+Assembly::addJacobianNeighborLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3956,7 +3962,8 @@ void Assembly::addJacobianNeighborLowerD(GlobalDataKey)
   }
 }
 
-void Assembly::addJacobianLowerD(GlobalDataKey)
+void
+Assembly::addJacobianLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3992,7 +3999,8 @@ void Assembly::addJacobianLowerD(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobian(GlobalDataKey)
+void
+Assembly::cacheJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     cacheJacobianCoupledVarPair(*it.first, *it.second);
@@ -4021,7 +4029,8 @@ Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
                          tag);
 }
 
-void Assembly::cacheJacobianNonlocal(GlobalDataKey)
+void
+Assembly::cacheJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -4042,7 +4051,8 @@ void Assembly::cacheJacobianNonlocal(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobianNeighbor(GlobalDataKey)
+void
+Assembly::cacheJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4079,7 +4089,8 @@ void Assembly::cacheJacobianNeighbor(GlobalDataKey)
   }
 }
 
-void Assembly::cacheJacobianMortar(GlobalDataKey)
+void
+Assembly::cacheJacobianMortar(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4383,7 +4394,8 @@ Assembly::addJacobianNeighborTags(SparseMatrix<Number> & jacobian,
         jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, GlobalDataKey{}, tag);
 }
 
-void Assembly::addJacobianScalar(GlobalDataKey)
+void
+Assembly::addJacobianScalar(GlobalDataKey)
 {
   for (const auto & it : _cm_ss_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
@@ -4419,7 +4431,8 @@ Assembly::cacheJacobian(numeric_index_type i,
       cacheJacobian(i, j, value, LocalDataKey{}, tag);
 }
 
-void Assembly::setCachedJacobian(GlobalDataKey)
+void
+Assembly::setCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
@@ -4438,7 +4451,8 @@ void Assembly::setCachedJacobian(GlobalDataKey)
   clearCachedJacobian();
 }
 
-void Assembly::zeroCachedJacobian(GlobalDataKey)
+void
+Assembly::zeroCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
@@ -4741,11 +4755,24 @@ Assembly::havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for
 
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   const FEType helper_type(helper_order, LAGRANGE);
-  auto process_fe = [&helper_type, &disable_families](auto & unique_helper_container,
-                                                      auto & helper_container,
-                                                      const unsigned int num_dimensionalities,
-                                                      const bool user_added_helper_type,
-                                                      auto & fe_container)
+  auto process_fe =
+      [&disable_families](const unsigned int num_dimensionalities, auto & fe_container)
+  {
+    if (!disable_families.empty())
+      for (const auto dim : make_range(num_dimensionalities))
+      {
+        auto fe_container_it = fe_container.find(dim);
+        if (fe_container_it != fe_container.end())
+          for (auto & [fe_type, fe_ptr] : fe_container_it->second)
+            if (disable_families.count(fe_type.family))
+              fe_ptr->add_p_level_in_reinit(false);
+      }
+  };
+  auto process_fe_and_helpers = [process_fe, &helper_type](auto & unique_helper_container,
+                                                           auto & helper_container,
+                                                           const unsigned int num_dimensionalities,
+                                                           const bool user_added_helper_type,
+                                                           auto & fe_container)
   {
     unique_helper_container.resize(num_dimensionalities);
     for (const auto dim : make_range(num_dimensionalities))
@@ -4767,42 +4794,43 @@ Assembly::havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for
         delete fe_it->second;
         fe_container_dim.erase(fe_it);
       }
-
-      if (!disable_families.empty())
-      {
-        auto & fe_container_dim = libmesh_map_find(fe_container, dim);
-        for (auto & [fe_type, fe_ptr] : fe_container_dim)
-          if (disable_families.count(fe_type.family))
-            fe_ptr->add_p_level_in_reinit(false);
-      }
     }
+
+    process_fe(num_dimensionalities, fe_container);
   };
 
-  process_fe(_unique_fe_helper,
-             _holder_fe_helper,
-             _mesh_dimension + 1,
-             _user_added_fe_of_helper_type,
-             _fe);
-  process_fe(_unique_fe_face_helper,
-             _holder_fe_face_helper,
-             _mesh_dimension + 1,
-             _user_added_fe_face_of_helper_type,
-             _fe_face);
-  process_fe(_unique_fe_face_neighbor_helper,
-             _holder_fe_face_neighbor_helper,
-             _mesh_dimension + 1,
-             _user_added_fe_face_neighbor_of_helper_type,
-             _fe_face_neighbor);
-  process_fe(_unique_fe_neighbor_helper,
-             _holder_fe_neighbor_helper,
-             _mesh_dimension + 1,
-             _user_added_fe_neighbor_of_helper_type,
-             _fe_neighbor);
-  process_fe(_unique_fe_lower_helper,
-             _holder_fe_lower_helper,
-             _mesh_dimension,
-             _user_added_fe_lower_of_helper_type,
-             _fe_lower);
+  // Handle scalar field families
+  process_fe_and_helpers(_unique_fe_helper,
+                         _holder_fe_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_of_helper_type,
+                         _fe);
+  process_fe_and_helpers(_unique_fe_face_helper,
+                         _holder_fe_face_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_face_of_helper_type,
+                         _fe_face);
+  process_fe_and_helpers(_unique_fe_face_neighbor_helper,
+                         _holder_fe_face_neighbor_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_face_neighbor_of_helper_type,
+                         _fe_face_neighbor);
+  process_fe_and_helpers(_unique_fe_neighbor_helper,
+                         _holder_fe_neighbor_helper,
+                         _mesh_dimension + 1,
+                         _user_added_fe_neighbor_of_helper_type,
+                         _fe_neighbor);
+  process_fe_and_helpers(_unique_fe_lower_helper,
+                         _holder_fe_lower_helper,
+                         _mesh_dimension,
+                         _user_added_fe_lower_of_helper_type,
+                         _fe_lower);
+  // Handle vector field families
+  process_fe(_mesh_dimension + 1, _vector_fe);
+  process_fe(_mesh_dimension + 1, _vector_fe_face);
+  process_fe(_mesh_dimension + 1, _vector_fe_neighbor);
+  process_fe(_mesh_dimension + 1, _vector_fe_face_neighbor);
+  process_fe(_mesh_dimension, _vector_fe_lower);
 
   helpersRequestData();
 
