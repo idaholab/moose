@@ -37,7 +37,7 @@ public:
   PhysicsBase(const InputParameters & parameters);
 
 protected:
-  bool isTransient() const { return _is_transient; }
+  bool isTransient() const;
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
@@ -45,6 +45,7 @@ protected:
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem() { return *_problem; }
+  virtual FEProblemBase & getProblem() const { return *_problem; }
   /// Get the mesh for this physics
   /// This could be set by a component
   /// NOTE: hopefully we will not need this
@@ -56,7 +57,7 @@ private:
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
-  bool _is_transient;
+  MooseEnum _is_transient;
 
   /// The Factory associated with the MooseApp
   Factory * _factory;

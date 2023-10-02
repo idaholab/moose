@@ -17,11 +17,11 @@ PhysicsBase::validParams()
   params += BlockRestrictable::validParams();
   params.addClassDescription("Creates all the objects necessary to solve a particular physics");
 
-  MooseEnum transient_options("true false same_as_executioner", "same_as_executioner");
+  MooseEnum transient_options("true false same_as_problem", "same_as_problem");
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
-  params.transferParam<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "blocks");
+  params.transferParam<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "block");
 
   return params;
 }
@@ -41,6 +41,19 @@ PhysicsBase::validParams()
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     BlockRestrictable(this),
-    _is_transient(getParam<bool>("transient"))
+    _is_transient(getParam<MooseEnum>("transient"))
 {
+  if (_is_transient == "true" && !getProblem().isTransient())
+    paramError("transient", "We cannot solve a physics as transient in a steady problem");
+}
+
+bool
+PhysicsBase::isTransient() const
+{
+  if (_is_transient == "true")
+    return true;
+  else if (_is_transient == "false")
+    return false;
+  else
+    return getProblem().isTransient();
 }
