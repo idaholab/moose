@@ -35,8 +35,13 @@ public:
 
   PhysicsBase(const InputParameters & parameters);
 
+protected:
+  bool isTransient() const { return _is_transient; }
+
 private:
   void addFEKernels() const {};
+
+  bool _is_transient;
 
   /// Needed to create every object
   friend class AddPhysicsAction;
