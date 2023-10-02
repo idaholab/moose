@@ -20,7 +20,7 @@ Closures1PhaseTHM::validParams()
   InputParameters params = Closures1PhaseBase::validParams();
 
   MooseEnum wall_htc_closure("dittus_boelter=0 kazimi_carelli=1 lyon=2 mikityuk=3 schad=4 "
-                             "weisman=5 wolf_mccarthy=6 Gnielinski=7",
+                             "weisman=5 wolf_mccarthy=6 gnielinski=7",
                              "dittus_boelter");
   params.addParam<MooseEnum>(
       "wall_htc_closure", wall_htc_closure, "Heat transfer coefficient closure");
