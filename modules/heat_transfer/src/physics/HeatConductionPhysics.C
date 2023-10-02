@@ -16,7 +16,8 @@ InputParameters
 HeatConductionPhysics::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
-  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(), "diffusivity");
+  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
+                                             "thermal_conductivity");
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addClassDescription("Add the heat conduction physics");
 
