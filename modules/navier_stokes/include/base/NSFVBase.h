@@ -215,7 +215,7 @@ protected:
                       const std::string & object_name,
                       const std::string & size_source_explanation) const;
 
-  /// Returns thet list of block names
+  /// Returns the list of block names
   virtual std::vector<SubdomainName> getBlocks() const = 0;
 
   /// Returns the factory

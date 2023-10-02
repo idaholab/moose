@@ -20,8 +20,23 @@ PhysicsBase::validParams()
   MooseEnum transient_options("true false same_as_executioner", "same_as_executioner");
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
+
+  params.transfer_param<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "blocks");
+
   return params;
 }
+
+// InputParameters
+// PhysicsBase::selectParams(const InputParameters & parameters,
+//                           std::vector<std::string> & params_to_keep)
+// {
+//   InputParameters params = emptyInputParameters();
+//   for (const auto & param : params_to_keep)
+//     if (!parameters.have_parameter(param))
+//       mooseError(
+//           "Cannot transfer parameter", param, "because it does not exist in the source object");
+//   // params += parameters;
+// }
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
