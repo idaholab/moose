@@ -14,6 +14,7 @@ InputParameters
 PhysicsBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription("Creates all the objects necessary to solve a particular physics");
 
   MooseEnum transient_options("true false same_as_executioner", "same_as_executioner");
@@ -23,6 +24,8 @@ PhysicsBase::validParams()
 }
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _is_transient(getParam<bool>("transient"))
+  : GeneralUserObject(parameters),
+    BlockRestrictable(this),
+    _is_transient(getParam<bool>("transient"))
 {
 }

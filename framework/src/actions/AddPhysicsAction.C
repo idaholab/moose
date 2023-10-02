@@ -13,8 +13,6 @@
 
 registerMooseAction("MooseApp", AddPhysicsAction, "add_physics");
 
-// TODO: Find a way to de-register a physics that does NOT use one of these actions
-
 // To create the variables
 registerMooseAction("MooseApp", AddPhysicsAction, "add_variable");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_ic");
@@ -73,6 +71,8 @@ AddPhysicsAction::act()
     _physics = _problem->getPhysics(_name);
 
     // Retrieve additional actions from the physics
+
+    // TODO: Find a way to de-register a physics that does NOT use one of these actions
   }
   // else if (_current_task == "add_variable")
   //   for (const auto [type, name, params] : getInfo(_physics->getVariables()))

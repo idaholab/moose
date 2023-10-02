@@ -26,5 +26,5 @@ public:
 
 private:
   /// Pointer to the physics to retrieve the other objects needed
-  const PhysicsBase * _physics;
+  PhysicsBase * _physics;
 };

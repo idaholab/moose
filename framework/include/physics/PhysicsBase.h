@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "BlockRestrictable.h"
 
 class Kernel;
 class FVKernel;
@@ -28,7 +29,7 @@ class FVInterfaceKernel;
  * - utilities for passing and verifying parameters from the Physics block to MOOSE objects
  * - utilities for debugging
  */
-class PhysicsBase : public GeneralUserObject
+class PhysicsBase : public GeneralUserObject, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -38,10 +39,29 @@ public:
 protected:
   bool isTransient() const { return _is_transient; }
 
+  /// Get the factory for this physics
+  /// The factory lets you get the parameters for objects
+  virtual Factory & getFactory() { return *_factory; }
+  /// Get the problem for this physics
+  /// Useful to add objects to the simulation
+  virtual FEProblemBase & getProblem() { return *_problem; }
+  /// Get the mesh for this physics
+  /// This could be set by a component
+  /// NOTE: hopefully we will not need this
+  // virtual const MooseMesh & getMesh() const override { return *_mesh; }
+
 private:
   void addFEKernels() const {};
+  void addNonlinearVariables() const {};
 
+  /// Whether the physics is to be solved as a transient. It can be advantageous to solve
+  /// some physics directly to steady state
   bool _is_transient;
+
+  /// The Factory associated with the MooseApp
+  Factory * _factory;
+  /// Convenience reference to a problem this action works on
+  std::shared_ptr<FEProblemBase> _problem;
 
   /// Needed to create every object
   friend class AddPhysicsAction;
