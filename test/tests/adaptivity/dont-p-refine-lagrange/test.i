@@ -4,8 +4,8 @@
     dim = 2
     dx = '1 1'
     dy = '1 1'
-    ix = '5 5'
-    iy = '5 5'
+    ix = '2 2'
+    iy = '2 2'
     subdomain_id = '0 0
                     0 1'
   []
@@ -32,14 +32,6 @@
 
 [AuxVariables]
   [test][]
-[]
-
-[ICs]
-  [test]
-    variable = test
-    type = FunctionIC
-    function = 'x + y'
-  []
 []
 
 [Kernels]
