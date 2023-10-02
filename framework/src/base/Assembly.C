@@ -402,7 +402,11 @@ Assembly::buildVectorLowerDFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
+  if (ending_dim < dim)
+    return;
+  for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
@@ -423,7 +427,11 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   // Build an FE object for this type for each dimension up to the dimension of
   // the current mesh minus one (because this is for lower-dimensional
   // elements!)
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+  unsigned int dim = ((type.family == LAGRANGE_VEC) || (type.family == MONOMIAL_VEC)) ? 0 : 2;
+  const auto ending_dim = cast_int<unsigned int>(_mesh_dimension - 1);
+  if (ending_dim < dim)
+    return;
+  for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
@@ -4536,7 +4544,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::fePhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorLowerDFE(type);
   return _vector_fe_shape_data_lower[type]->_phi;
 }
 
@@ -4544,7 +4552,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::feDualPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorDualLowerDFE(type);
   return _vector_fe_shape_data_dual_lower[type]->_phi;
 }
 
@@ -4552,7 +4560,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorLowerDFE(type);
   return _vector_fe_shape_data_lower[type]->_grad_phi;
 }
 
@@ -4560,7 +4568,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradDualPhiLower<VectorValue<Real>>(FEType type) const
 {
-  buildVectorFE(type);
+  buildVectorDualLowerDFE(type);
   return _vector_fe_shape_data_dual_lower[type]->_grad_phi;
 }
 
