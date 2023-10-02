@@ -21,7 +21,7 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
-  params.transfer_param<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "blocks");
+  params.transferParam<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "blocks");
 
   return params;
 }

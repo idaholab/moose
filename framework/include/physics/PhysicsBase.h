@@ -51,8 +51,8 @@ protected:
   // virtual const MooseMesh & getMesh() const override { return *_mesh; }
 
 private:
-  void addFEKernels() const {};
-  void addNonlinearVariables() const {};
+  virtual void addFEKernels(){};
+  virtual void addNonlinearVariables(){};
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
