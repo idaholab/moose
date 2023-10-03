@@ -9,10 +9,10 @@ arbitrarily high-order reconstructions. It does, on the other hand, support
 arbitrarily high-order discontinuous Galerkin bases. In that vein we have
 implemented and tested a hybrid CG-DG scheme. A nice advantage of the hybrid
 CG-DG scheme is that it is intrinsically LBB stable, allowing equal polynomial
-order bases for the velocity and pressure. Additionally, because the velocity is
-discretized with a DG scheme, the momentum advection flux can be naturally
-upwinded without a complex upwinding scheme like as Streamline-Upwind
-Petrov-Galerkin (SUPG) (see [cgfe.md]).
+order bases for the velocity and pressure [!citep](pandare2016hybrid).
+Additionally, because the velocity is discretized with a DG scheme, the momentum
+advection flux can be naturally upwinded without a complex upwinding scheme like
+as Streamline-Upwind Petrov-Galerkin (SUPG) (see [cgfe.md]).
 
 In the following we run through an example of a hybrid CG-DG input, in which we
 are using the scheme to solve a lid driven cavity problem with a Reynolds number
@@ -29,7 +29,22 @@ We next introduce the variables. `u` is the x-velocity component while `v` is
 the y-velocity component. Note that we use a `MONOMIAL` basis but we could just
 as well have used `L2_LAGRANGE` or `L2_HIERARCHIC`. Note that the default basis
 order is 1 or `FIRST`. Similarly the default `family` is `LAGRANGE` so the
-`pressure` variable is implicitly `LAGRANGE`.
+`pressure` variable is implicitly `LAGRANGE`. We note that a `MONOMIAL` basis
+does not have the cross-terms that `L2_LAGRANGE` or `L2_HIERARCHIC` bases do for
+non-simplicial elements; consequently for non-simplicial elements it is less
+expensive to solve while having a worse error constant. Additionally, a
+`MONOMIAL` basis has worse conditioning than `L2_LAGRANGE` or `L2_HIERARCHIC`
+although that difference may not be appreciable until high polynomial
+orders. As a reference in this test case, the condition number with a
+5x5 mesh is 741 with a `MONOMIAL` basis for velocity and 265 for
+`L2_HIERARCHIC` and `L2_LAGRANGE`. We note also that there is no
+limitation on the family pairings for the hybrid CG-DG scheme so long as the
+pressure variable is continuous and the velocity variable is
+discontinuous. Finally, error convergence rates in the L2 norm for an equal order basis
+of degree $n$ will be $n + 1$ for velocity and $n$ for pressure. The same
+convergence rates will be observed with a basis of degree $n$ for velocity and
+$n - 1$ for pressure: $n + 1$ in the L2 norm for velocity and $n$ in the L2 norm
+for pressure.
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Variables
 
