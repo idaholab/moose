@@ -729,11 +729,13 @@ public:
    *   (1) A local parameter must exist with the same name as common parameter
    *   (2) Common parameter must valid
    *   (3) Local parameter must be invalid OR not have been set from its default
+   *   (except if override_default is set)
    *   (4) Both cannot be private
    */
   void applyParameter(const InputParameters & common,
                       const std::string & common_name,
-                      bool allow_private = false);
+                      bool allow_private = false,
+                      bool override_default = false);
   // END APPLY PARAMETER METHODS
 
   /**
