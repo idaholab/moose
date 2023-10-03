@@ -43,6 +43,9 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
     BlockRestrictable(this),
     _is_transient(getParam<MooseEnum>("transient"))
 {
+  _problem = getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+  _factory = &_app.getFactory();
+
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
 }

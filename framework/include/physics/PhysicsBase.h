@@ -62,7 +62,7 @@ private:
   /// The Factory associated with the MooseApp
   Factory * _factory;
   /// Convenience reference to a problem this action works on
-  std::shared_ptr<FEProblemBase> _problem;
+  FEProblemBase * _problem;
 
   /// Needed to create every object
   friend class AddPhysicsAction;
