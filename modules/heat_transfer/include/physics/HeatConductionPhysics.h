@@ -31,4 +31,5 @@ public:
 private:
   void addNonlinearVariables() override;
   void addFEKernels() override;
+  void addFEBCs() override;
 };

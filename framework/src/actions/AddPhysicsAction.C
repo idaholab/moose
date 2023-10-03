@@ -105,9 +105,9 @@ AddPhysicsAction::act()
   // else if (_current_task == "add_fv_ik")
   //   for (const auto [type, name, params] : getInfo(_physics->getFVInterfaceKernels()))
   //     _problem->addKernel(type, name, params);
-  // else if (_current_task == "add_bc")
-  //   for (const auto [type, name, params] : getInfo(_physics->getFEBCs()))
-  //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_bc")
+    _physics->addFEBCs();
+
   // else if (_current_task == "add_nodal_bc")
   //   for (const auto [type, name, params] : getInfo(_physics->getNodalBCs()))
   //     _problem->addKernel(type, name, params);
