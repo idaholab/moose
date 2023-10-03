@@ -84,9 +84,9 @@ WCNSFVScalarFluxBC::isInflow() const
   else if (_scalar_flux_pp)
     return *_scalar_flux_pp >= 0;
 
-  mooseError("Either mdot_pp or velocity_pp or scalar_flux_pp need to be provided OR this function "
-             "must be "
-             "overridden in derived classes if other input parameter combinations are valid. "
-             "Neither mdot_pp nor velocity_pp are provided.");
+  mooseError(
+      "Either mdot_pp or velocity_pp or scalar_flux_pp need to be provided OR this function "
+      "must be overridden in derived classes if other input parameter combinations are valid. "
+      "Neither mdot_pp nor velocity_pp are provided.");
   return true;
 }

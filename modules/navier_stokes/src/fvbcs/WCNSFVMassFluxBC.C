@@ -42,7 +42,7 @@ WCNSFVMassFluxBC::computeQpResidual()
 
   if (!isInflow())
   {
-    auto fa = singleSidedFaceArg();
+    const auto fa = singleSidedFaceArg();
     return varVelocity(state) * _normal * _rho(fa, state);
   }
 

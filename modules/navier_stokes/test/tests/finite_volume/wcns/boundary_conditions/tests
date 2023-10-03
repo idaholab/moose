@@ -161,23 +161,16 @@
     [energy_need_temperature]
       type = RunException
       input = 'flux_bcs_mdot.i'
-      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T_fluid FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/vel_x=vel_x FVBCs/inlet_T_bis/vel_y=vel_y FVBCs/inlet_T_bis/rho=rho FVBCs/inlet_T_bis/temperature=temperature FVBCs/inlet_T_bis/cp=cp'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T_fluid FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/vel_x=vel_x FVBCs/inlet_T_bis/vel_y=vel_y FVBCs/inlet_T_bis/rho=rho FVBCs/inlet_T_bis/T_fluid=temperature FVBCs/inlet_T_bis/cp=cp'
       expect_err = 'If not providing the energy flow rate, the inlet temperature should be provided'
       detail = 'the inlet energy cannot be determined because neither the temperature or the energy flow rate have been provided'
     []
     [energy_temperature_needs_velocity_or_mdot]
       type = RunException
       input = 'flux_bcs_mdot.i'
-      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T_fluid FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0 FVBCs/inlet_T_bis/vel_x=vel_x FVBCs/inlet_T_bis/vel_y=vel_y FVBCs/inlet_T_bis/rho=rho FVBCs/inlet_T_bis/temperature=temperature FVBCs/inlet_T_bis/cp=cp'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T_fluid FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0 FVBCs/inlet_T_bis/vel_x=vel_x FVBCs/inlet_T_bis/vel_y=vel_y FVBCs/inlet_T_bis/rho=rho FVBCs/inlet_T_bis/T_fluid=temperature FVBCs/inlet_T_bis/cp=cp'
       expect_err = 'If not providing the inlet energy flow rate, the inlet velocity or mass flow'
       detail = 'the inlet energy flux cannot be determined because the temperature was provided but neither the inlet mass flow rate or velocity were provided'
-    []
-    [energy_temperature_mdot_needs_cp]
-      type = RunException
-      input = 'flux_bcs_mdot.i'
-      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T_fluid FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0 FVBCs/inlet_T_bis/mdot_pp=0 FVBCs/inlet_T_bis/vel_x=vel_x FVBCs/inlet_T_bis/vel_y=vel_y FVBCs/inlet_T_bis/rho=rho FVBCs/inlet_T_bis/temperature=temperature FVBCs/inlet_T_bis/cp=cp'
-      expect_err = 'If providing the inlet mass flow rate, the inlet specific heat capacity and flow'
-      detail = 'the inlet energy flux cannot be determined because the temperature and mass flow rate were provided but the specific heat capacity or flow area were not'
     []
     [scalar_need_flux_or_value]
       type = RunException

@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
   WCNSFVFluxBCBase(const InputParameters & params);
 
-  ///@{ in residual and jacobian setup we check if the area is zeri
+  ///@{ in residual and jacobian setup we check if the area is zero
   void residualSetup() override;
   void jacobianSetup() override;
   ///@}
@@ -34,17 +34,17 @@ protected:
    */
   void checkForInternalDirection() const;
 
-  /// true if a boundary is an inflow boundary, false of outflow
+  /// true if a boundary is an inflow boundary, false if outflow
   virtual bool isInflow() const;
 
   /// computes the inflow massflux
-  ADReal inflowMassFlux(Moose::StateArg state) const;
+  ADReal inflowMassFlux(const Moose::StateArg & state) const;
 
   /// computes the inflow speed
-  ADReal inflowSpeed(Moose::StateArg state) const;
+  ADReal inflowSpeed(const Moose::StateArg & state) const;
 
   /// returns the velocity vector (vel_x, vel_y, vel_z)
-  ADRealVectorValue varVelocity(Moose::StateArg state) const;
+  ADRealVectorValue varVelocity(const Moose::StateArg & state) const;
 
   /// Scaling factor
   const Real _scaling_factor;

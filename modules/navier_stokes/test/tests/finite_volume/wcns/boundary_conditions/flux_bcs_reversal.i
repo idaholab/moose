@@ -235,7 +235,7 @@ inlet_velocity = 0.1
   [inlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T_fluid
-    temperature = T_fluid
+    T_fluid = T_fluid
     boundary = 'left'
     temperature_pp = 'inlet_T'
     mdot_pp = 'inlet_mdot'
@@ -295,7 +295,7 @@ inlet_velocity = 0.1
   [outlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T_fluid
-    temperature = T_fluid
+    T_fluid = T_fluid
     boundary = 'right'
     temperature_pp = 'inlet_T'
     mdot_pp = 'outlet_mdot'

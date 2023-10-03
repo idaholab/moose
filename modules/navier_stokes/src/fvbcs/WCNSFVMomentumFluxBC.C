@@ -46,8 +46,8 @@ WCNSFVMomentumFluxBC::computeQpResidual()
 
   if (!isInflow())
   {
-    auto fa = singleSidedFaceArg();
-    auto vel_vec = varVelocity(state);
+    const auto fa = singleSidedFaceArg();
+    const auto vel_vec = varVelocity(state);
     return vel_vec * _normal * _rho(fa, state) * vel_vec(_index);
   }
 

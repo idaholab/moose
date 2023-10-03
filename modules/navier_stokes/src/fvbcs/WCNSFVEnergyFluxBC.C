@@ -26,7 +26,7 @@ WCNSFVEnergyFluxBC::validParams()
   params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
   params.addParam<PostprocessorName>("temperature_pp", "Postprocessor with the inlet temperature");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
-  params.addRequiredParam<MooseFunctorName>("temperature", "temperature functor");
+  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "temperature functor");
   return params;
 }
 
@@ -36,7 +36,7 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
                                                    : nullptr),
     _energy_pp(isParamValid("energy_pp") ? &getPostprocessorValue("energy_pp") : nullptr),
     _cp(getFunctor<ADReal>(NS::cp)),
-    _temperature(getFunctor<ADReal>("temperature"))
+    _temperature(getFunctor<ADReal>(NS::T_fluid))
 {
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     paramError("variable",
@@ -57,7 +57,7 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
       mooseError("If not providing the inlet energy flow rate, the inlet velocity or mass flow "
                  "should be provided");
     if (_mdot_pp && !_area_pp)
-      mooseError("If providing the inlet mass flow rate, the inlet specific heat capacity and flow"
+      mooseError("If providing the inlet mass flow rate, the flow"
                  " area should be provided as well");
   }
   else if (!_area_pp)
@@ -72,7 +72,7 @@ WCNSFVEnergyFluxBC::computeQpResidual()
 
   if (!isInflow())
   {
-    auto fa = singleSidedFaceArg();
+    const auto fa = singleSidedFaceArg();
     return varVelocity(state) * _normal * _rho(fa, state) * _cp(fa, state) *
            _temperature(fa, state);
   }

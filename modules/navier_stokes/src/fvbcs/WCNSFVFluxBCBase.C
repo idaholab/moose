@@ -79,7 +79,7 @@ WCNSFVFluxBCBase::isInflow() const
 }
 
 ADRealVectorValue
-WCNSFVFluxBCBase::varVelocity(Moose::StateArg state) const
+WCNSFVFluxBCBase::varVelocity(const Moose::StateArg & state) const
 {
   const auto boundary_face = singleSidedFaceArg();
 
@@ -92,7 +92,7 @@ WCNSFVFluxBCBase::varVelocity(Moose::StateArg state) const
 }
 
 ADReal
-WCNSFVFluxBCBase::inflowMassFlux(Moose::StateArg state) const
+WCNSFVFluxBCBase::inflowMassFlux(const Moose::StateArg & state) const
 {
   checkForInternalDirection();
   if (_mdot_pp)
@@ -103,7 +103,7 @@ WCNSFVFluxBCBase::inflowMassFlux(Moose::StateArg state) const
 }
 
 ADReal
-WCNSFVFluxBCBase::inflowSpeed(Moose::StateArg state) const
+WCNSFVFluxBCBase::inflowSpeed(const Moose::StateArg & state) const
 {
   checkForInternalDirection();
   const ADRealVectorValue incoming_vector = !_direction_specified_by_user ? _normal : _direction;

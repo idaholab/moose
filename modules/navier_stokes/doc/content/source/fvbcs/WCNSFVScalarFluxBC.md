@@ -7,7 +7,7 @@ The flux for scalar quantity $c$ is:
 !equation
 \phi = v c = \dfrac{\dot{m} c}{\rho A}
 
-with $\phi$ the scalar quantity flux, $\rho$ the density, $\v$ the fluid velocity,
+with $\phi$ the scalar quantity flux, $\rho$ the density, $v$ the fluid speed,
 $c$ the inlet value of the scalar quantity, $\dot{m}$ the mass flow rate and $A$ the inlet area.
 
 There are three options for specifying the scalar flux:
@@ -25,6 +25,18 @@ There are three options for specifying the scalar flux:
 This boundary condition works with postprocessors, which may be replaced by constant
 values in the input. The intended use case for this boundary condition is to be receiving its value from
 a coupled application, using a [Receiver.md] postprocessor.
+
+## Determining Flow Direction
+
+The `isInflow()` method is used to determine if the boundary is an inflow boundary.
+The user must at least set one of the following parameters [!param](/FVBCs/WCNSFVScalarFluxBC/scalar_flux_pp), [!param](/FVBCs/WCNSFVScalarFluxBC/mdot_pp), or [!param](/FVBCs/WCNSFVScalarFluxBC/velocity_pp). The code checks the parameters in the following order:
+
+
+  -  if [!param](/FVBCs/WCNSFVScalarFluxBC/mdot_pp) is provided, [!param](/FVBCs/WCNSFVScalarFluxBC/mdot_pp) $>0$ indicates inflow,
+
+  -  else if [!param](/FVBCs/WCNSFVScalarFluxBC/velocity_pp) is provided, [!param](/FVBCs/WCNSFVScalarFluxBC/velocity_pp) $>0$ indicates inflow,
+
+  -  else if [!param](/FVBCs/WCNSFVScalarFluxBC/scalar_flux_pp) is provided, [!param](/FVBCs/WCNSFVScalarFluxBC/scalar_flux_pp) $>0$ indicates inflow.
 
 ## Example input syntax
 
