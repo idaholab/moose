@@ -28,12 +28,12 @@ a pressure pin, the pressure is only defined up to a constant).
 We next introduce the variables. `u` is the x-velocity component while `v` is
 the y-velocity component. Note that we use a `MONOMIAL` basis but we could just
 as well have used `L2_LAGRANGE` or `L2_HIERARCHIC`. Note that the default basis
-order is 1 or `FIRST`. Similarly the default `family` is `LAGRANGE` so the the
+order is 1 or `FIRST`. Similarly the default `family` is `LAGRANGE` so the
 `pressure` variable is implicitly `LAGRANGE`.
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Variables
 
-We next add the `Kernels` block which adds the parts of the finite element weak
+We then add the `Kernels` block which adds the parts of the finite element weak
 form terms that are integrated over element volumes. The first three kernels
 comprise the x-momentum equation advection, diffusion, and pressure terms and
 are of type [ADConservativeAdvection.md], [MatDiffusion.md], and
@@ -85,15 +85,15 @@ performing a steady-state calculation as indicated by `type = Steady`. Because
 the Jacobian is completely accurate we use `solve_type = NEWTON` instead of
 `solve_type = PJFNK`. In this case we are solving with a direct solver via
 `-pc_type lu`. More sophisticated preconditioning techniques can be constructed
-using field splits.
+using [field splits](syntax/Preconditioning/index.md).
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Executioner
 
-We request Exodus output in the `Outputs` block
+We request [Exodus.md] output in the `Outputs` block
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Outputs
 
-Finally, we define a `ParsedPostprocessor` which prints the Reynolds number to
+Finally, we define a [ParsedPostprocessor.md] which prints the Reynolds number to
 console output
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/cg-dg-hybrid/lid-driven/hybrid-cg-dg.i block=Postprocessors

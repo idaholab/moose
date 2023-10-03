@@ -7,7 +7,7 @@
     test_case = TestVortexHybridP2P1
     method = '!dbg'
     min_parallel = 4
-    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes, using a hybrid CG-DG scheme with first order Lagrange pressure and second order monomial velocity, with Dirichlet boundary conditions for the velocity, and demonstrate thrid order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes, using a hybrid CG-DG scheme with first order Lagrange pressure and second order monomial velocity, with Dirichlet boundary conditions for the velocity, and demonstrate third order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
     required_python_packages = 'pandas matplotlib'
     installation_type = 'in_tree'
   []
