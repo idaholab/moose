@@ -85,7 +85,6 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _us(libMesh::n_threads(), nullptr),
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
-    _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys"))
 {
   if (!_p)

@@ -46,7 +46,7 @@ INSFVSymmetryVelocityBC::computeSegregatedContribution()
   const auto state_old = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
 
   const auto normal = use_elem ? _face_info->normal() : Point(-_face_info->normal());
-  const Point & cell_centroid =
+  const auto & cell_centroid =
       use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
 
   ADRealVectorValue vel_C;

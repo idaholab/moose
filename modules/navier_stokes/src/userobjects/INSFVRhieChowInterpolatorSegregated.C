@@ -52,8 +52,8 @@ INSFVRhieChowInterpolatorSegregated::validParams()
 INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
     const InputParameters & params)
   : RhieChowInterpolatorBase(params),
-    _HbyA(_moose_mesh, _sub_ids, "HbyA"),
-    _Ainv(_moose_mesh, _sub_ids, "Ainv", false),
+    _HbyA(_moose_mesh, blockIDs(), "HbyA"),
+    _Ainv(_moose_mesh, blockIDs(), "Ainv", false),
     _vel(std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
         name(),
         [this](const auto & r, const auto & t) -> ADRealVectorValue
@@ -68,7 +68,7 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
         blockIDs())),
-    _face_velocity(_moose_mesh, _sub_ids, "face_values")
+    _face_velocity(_moose_mesh, blockIDs(), "face_values")
 {
   // Register the elemental/face functors which will be queried in the pressure equation
   for (const auto tid : make_range(libMesh::n_threads()))

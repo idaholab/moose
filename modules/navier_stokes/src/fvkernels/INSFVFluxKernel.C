@@ -30,56 +30,28 @@ void
 INSFVFluxKernel::computeResidual(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-  {
-    if (skipForBoundary(fi))
-      return;
-
-    _face_info = &fi;
-    _normal = fi.normal();
-    _face_type = fi.faceType(_var.name());
-
-    addResidual(
-        MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeSegregatedContribution()));
-  }
+    FVFluxKernel::computeResidual(fi);
 }
+
 void
 INSFVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-    computeResidualAndJacobian(fi);
+    FVFluxKernel::computeJacobian(fi);
 }
+
 void
 INSFVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-  {
-    if (skipForBoundary(fi))
-      return;
-
-    _face_info = &fi;
-    _normal = fi.normal();
-    _face_type = fi.faceType(_var.name());
-
-    addResidualAndJacobian(fi.faceArea() * fi.faceCoord() * computeSegregatedContribution());
-  }
+    FVFluxKernel::computeResidualAndJacobian(fi);
 }
 
-void
-INSFVFluxKernel::addResidual(const Real residual)
+ADReal
+INSFVFluxKernel::computeQpResidual()
 {
-  auto process_residual = [this](const Real residual)
-  {
-    prepareVectorTag(_assembly, _var.number());
-    _local_re(0) = residual;
-    accumulateTaggedLocalResidual();
-  };
-
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    process_residual(residual);
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    process_residual(-residual);
+  mooseAssert(_rc_uo.segregated(), "We should not get here if we are not segregated!");
+  return computeSegregatedContribution();
 }
 
 void

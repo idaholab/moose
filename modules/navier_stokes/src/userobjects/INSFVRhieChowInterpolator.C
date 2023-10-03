@@ -97,7 +97,7 @@ INSFVRhieChowInterpolator::validParams()
 INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & params)
   : RhieChowInterpolatorBase(params),
     _vel(libMesh::n_threads()),
-    _a(_moose_mesh, _sub_ids, "a", /*extrapolated_boundary*/ true),
+    _a(_moose_mesh, blockIDs(), "a", /*extrapolated_boundary*/ true),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
@@ -235,8 +235,8 @@ void
 INSFVRhieChowInterpolator::insfvSetup()
 {
   _elem_range =
-      std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(_sub_ids),
-                                       _mesh.active_local_subdomain_set_elements_end(_sub_ids));
+      std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(blockIDs()),
+                                       _mesh.active_local_subdomain_set_elements_end(blockIDs()));
 }
 
 void
@@ -338,7 +338,7 @@ INSFVRhieChowInterpolator::finalize()
   {
     for (const auto * const elem :
          as_range(_mesh.active_not_local_elements_begin(), _mesh.active_not_local_elements_end()))
-      if (_sub_ids.count(elem->subdomain_id()))
+      if (blockIDs().count(elem->subdomain_id()))
         pull_requests[elem->processor_id()].push_back(elem->id());
   }
   else

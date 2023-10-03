@@ -37,10 +37,7 @@ public:
   void addResidualAndJacobian(const ADReal & residual);
 
 protected:
-  ADReal computeQpResidual() override final
-  {
-    mooseError("INSFVFluxBCs must implement gatherRCData and not computeQpResidual");
-  }
+  ADReal computeQpResidual() override final;
 
   /// Compute the contribution which goes into the residual of the segregated system. This
   /// needs to accomodate the different linearization approaches needed to get the suitable

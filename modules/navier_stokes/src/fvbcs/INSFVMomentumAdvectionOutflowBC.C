@@ -50,8 +50,6 @@ ADReal
 INSFVMomentumAdvectionOutflowBC::computeAdvectedQuantity(const Moose::FaceArg & boundary_face,
                                                          const Moose::StateArg & state)
 {
-  using namespace Moose::FV;
-
   const auto rho_boundary = _rho(boundary_face, state);
   const auto eps_boundary = epsFunctor()(boundary_face, state);
 
@@ -59,7 +57,7 @@ INSFVMomentumAdvectionOutflowBC::computeAdvectedQuantity(const Moose::FaceArg & 
   // term expansion, this boundary value will actually be a function of more than just the degree of
   // freedom at the cell centroid adjacent to the face, e.g. it can/will depend on surrounding cell
   // degrees of freedom as well
-  auto var_boundary = _var(boundary_face, state);
+  const auto var_boundary = _var(boundary_face, state);
 
   return rho_boundary / eps_boundary * var_boundary;
 }
@@ -104,7 +102,7 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
   // degrees of freedom as well
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const auto advected_quant = computeAdvectedQuantity(boundary_face, state);
-  ADReal a = advected_quant.derivatives()[dof_number] * _normal * v;
+  const auto a = advected_quant.derivatives()[dof_number] * _normal * v;
 
   const auto strong_resid = _normal * v * advected_quant;
 

@@ -124,9 +124,6 @@ protected:
   /// All the thread copies of the z-velocity variable
   std::vector<MooseVariableFVReal *> _ws;
 
-  /// The subdomain ids this object operates on
-  const std::set<SubdomainID> _sub_ids;
-
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 

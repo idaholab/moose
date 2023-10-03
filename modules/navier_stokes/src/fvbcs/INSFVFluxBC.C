@@ -29,65 +29,28 @@ void
 INSFVFluxBC::computeResidual(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-  {
-    _face_info = &fi;
-    _normal = fi.normal();
-    _face_type = fi.faceType(_var.name());
-
-    if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      _normal = -_normal;
-
-    if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-      mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
-                 fi.faceCentroid());
-    else if (_face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-      mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
-                 "with the relevant finite volume variable. Its centroid: ",
-                 fi.faceCentroid());
-
-    auto r =
-        MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeSegregatedContribution());
-
-    if (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-      prepareVectorTag(_assembly, _var.number());
-    else if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      prepareVectorTagNeighbor(_assembly, _var.number());
-
-    _local_re(0) = r;
-    accumulateTaggedLocalResidual();
-  }
+    FVFluxBC::computeResidual(fi);
 }
 
 void
 INSFVFluxBC::computeJacobian(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-  {
-    _face_info = &fi;
-    _normal = fi.normal();
-    _face_type = fi.faceType(_var.name());
-
-    if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      _normal = -_normal;
-
-    ADReal r = fi.faceArea() * fi.faceCoord() * computeSegregatedContribution();
-
-    const auto & dof_indices = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                                   ? _var.dofIndices()
-                                   : _var.dofIndicesNeighbor();
-
-    mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
-
-    addResidualsAndJacobian(
-        _assembly, std::array<ADReal, 1>{{r}}, dof_indices, _var.scalingFactor());
-  }
+    FVFluxBC::computeJacobian(fi);
 }
 
 void
 INSFVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
-    computeJacobian(fi);
+    FVFluxBC::computeResidualAndJacobian(fi);
+}
+
+ADReal
+INSFVFluxBC::computeQpResidual()
+{
+  mooseAssert(_rc_uo.segregated(), "We should not get here if we are not segregated!");
+  return computeSegregatedContribution();
 }
 
 void
