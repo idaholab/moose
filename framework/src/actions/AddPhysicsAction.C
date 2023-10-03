@@ -27,7 +27,7 @@ registerMooseAction("MooseApp", AddPhysicsAction, "add_scalar_kernel");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_interface_kernel");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_fv_ik");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_bc");
-registerMooseAction("MooseApp", AddPhysicsAction, "add_nodal_bc");
+// registerMooseAction("MooseApp", AddPhysicsAction, "add_nodal_bc");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_fv_bc");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_periodic_bc");
 
@@ -36,7 +36,7 @@ registerMooseAction("MooseApp", AddPhysicsAction, "add_function");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_user_object");
 
 // To help form part of the equations or to output spatially dependent quantities
-registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_variable");
+// registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_variable");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_kernel");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_material");
 
@@ -48,7 +48,7 @@ registerMooseAction("MooseApp", AddPhysicsAction, "add_output");
 
 // To solve the equations
 registerMooseAction("MooseApp", AddPhysicsAction, "add_preconditioning");
-registerMooseAction("MooseApp", AddPhysicsAction, "add_executioner");
+registerMooseAction("MooseApp", AddPhysicsAction, "setup_executioner");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_executor");
 
 InputParameters
@@ -74,9 +74,11 @@ AddPhysicsAction::act()
 
     // TODO: Find a way to de-register a physics that does NOT use one of these actions
   }
-  // else if (_current_task == "add_variable")
-  //   for (const auto [type, name, params] : getInfo(_physics->getVariables()))
-  //     _problem->addKernel(type, name, params);
+  else
+    mooseAssert(_physics, "Physics should have been created as it must be the first action to run");
+
+  if (_current_task == "add_variable")
+    _physics->addNonlinearVariables();
   // else if (_current_task == "add_ic")
   //   for (const auto [type, name, params] : getInfo(_physics->getInitialConditions()))
   //     _problem->addBoundaryCondition(type, name, params);

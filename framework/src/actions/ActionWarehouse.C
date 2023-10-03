@@ -148,8 +148,9 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
       {
         const std::string & base = mparams.get<std::string>("_moose_base");
 
-        if (!_syntax.verifyMooseObjectTask(base, task))
-          mooseError("Task ", task, " is not registered to build ", base, " derived objects");
+        // We ll need a setup_physics task to do this?
+        // if (!_syntax.verifyMooseObjectTask(base, task))
+        //   mooseError("Task ", task, " is not registered to build ", base, " derived objects");
       }
       else
         mooseError("Unable to locate registered base parameter for ", moa->getMooseObjectType());
