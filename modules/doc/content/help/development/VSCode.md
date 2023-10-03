@@ -70,7 +70,7 @@ The following settings are recommended to pass the MOOSE GitHub CI pre-checks:
         "${env.CONDA_PREFIX}/**",
         "/usr/include/**"
     ],
-    "workbench.editorAssociations": {
+    "files.associations": {
         "*.C": "cpp",
         "*.h": "cpp"
     },
