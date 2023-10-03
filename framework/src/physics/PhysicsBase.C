@@ -10,6 +10,9 @@
 #include "PhysicsBase.h"
 #include "MooseUtils.h"
 
+// Discretizations can be created by the Physics
+#include "ContinuousGalerkin.h"
+
 InputParameters
 PhysicsBase::validParams()
 {
@@ -21,22 +24,13 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
-  params.transferParam<std::vector<SubdomainName>>(BlockRestrictable::validParams(), "block");
+  // Discretization
+  params.addParam<DiscretizationName>("discretization",
+                                      "Shorthand parameter for specifying a spatial discretization "
+                                      "strategy for the Physics at hand");
 
   return params;
 }
-
-// InputParameters
-// PhysicsBase::selectParams(const InputParameters & parameters,
-//                           std::vector<std::string> & params_to_keep)
-// {
-//   InputParameters params = emptyInputParameters();
-//   for (const auto & param : params_to_keep)
-//     if (!parameters.have_parameter(param))
-//       mooseError(
-//           "Cannot transfer parameter", param, "because it does not exist in the source object");
-//   // params += parameters;
-// }
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
@@ -68,4 +62,30 @@ PhysicsBase::checkParamsBothSetOrNotSet(std::string param1, std::string param2) 
     paramError(param1,
                "Parameters " + param1 + " and " + param2 +
                    " must be either both set or both unset");
+}
+
+void
+PhysicsBase::addDiscretization(const InputParameters & params)
+{
+  mooseAssert(!_discretization, "The discretization should not already exist");
+  std::string discretization_type;
+  if (isParamValid("discretization"))
+    discretization_type = getParam<DiscretizationName>("discretization");
+  else
+    discretization_type = params.get<std::string>("_type");
+
+  // Process potential short names
+  if (discretization_type == "cgfe")
+    discretization_type = "ContinuousGalerkin";
+
+  // Generate some default parameters if using a short-hand name
+  const InputParameters & discr_params =
+      isParamValid("discretization") ? getFactory().getValidParams(discretization_type) : params;
+
+  if (discretization_type == "ContinuousGalerkin")
+    _discretization = std::make_unique<ContinuousGalerkin>(discr_params);
+  else
+    paramError("discretization",
+               "Unrecognized discretization. You need to override addDiscretization() in your "
+               "derived class to enable it");
 }

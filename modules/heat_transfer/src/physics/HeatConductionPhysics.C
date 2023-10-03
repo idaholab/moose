@@ -46,6 +46,7 @@ HeatConductionPhysics::validParams()
 HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
   : PhysicsBase(parameters), _temperature_name(getParam<VariableName>("temperature_name"))
 {
+  // Parameter checking
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("heat_flux_boundaries",
                                                               "boundary_heat_fluxes");
   checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("fixed_temperature_boundaries",
@@ -159,4 +160,11 @@ HeatConductionPhysics::addNonlinearVariables()
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   getProblem().addVariable(variable_type, _temperature_name, params);
+}
+
+void
+HeatConductionPhysics::createDiscretizedPhysics()
+{
+  if (_discretization->name() == "ContinuousGalerkin")
+    _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
 }

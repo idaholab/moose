@@ -11,6 +11,7 @@
 
 #include "GeneralUserObject.h"
 #include "BlockRestrictable.h"
+#include "PhysicsDiscretization.h"
 
 class Kernel;
 class FVKernel;
@@ -58,24 +59,36 @@ protected:
   template <typename T>
   void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
 
+  /// Working with the discretization
+  // void setDiscretization(PhysicsDiscretization * disc) { _discretization = disc; }
+  PhysicsDiscretization * getDiscretization() { return _discretization.get(); }
+
 private:
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
-  virtual void addNonlinearVariables(){};
-  virtual void addFEKernels(){};
-  virtual void addFEBCs(){};
+  /// We keep these private for now, may become public soon
+  virtual void addNonlinearVariables() {}
+  virtual void addFEKernels() {}
+  virtual void addFEBCs() {}
+  virtual void addDiscretization(const InputParameters & params);
+  virtual void createDiscretizedPhysics() = 0;
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
   MooseEnum _is_transient;
 
-  /// The Factory associated with the MooseApp
+  /// Pointer to the Factory associated with the MooseApp
   Factory * _factory;
-  /// Convenience reference to a problem this action works on
+  /// Pointer to the problem this physics works with
   FEProblemBase * _problem;
+  /// Point to the discretization object
+  std::unique_ptr<PhysicsDiscretization> _discretization;
+  /// Pointer to the discretized physics object
+  std::unique_ptr<PhysicsBase> _discretized_physics;
 
   /// Needed to create every object
   friend class AddPhysicsAction;
+  friend class AddPhysicsDiscretizationAction;
 };
 
 template <typename T, typename S>
