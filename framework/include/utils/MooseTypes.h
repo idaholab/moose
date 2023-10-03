@@ -1014,6 +1014,9 @@ DerivativeStringClass(ReporterValueName);
 /// Name of a Physics object
 DerivativeStringClass(PhysicsName);
 
+/// Name of a Physics Discretization object
+DerivativeStringClass(DiscretizationName);
+
 /// Name of a Positions object
 DerivativeStringClass(PositionsName);
 

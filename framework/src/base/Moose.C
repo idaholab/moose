@@ -292,6 +292,7 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_default)"
                            "(create_problem_complete)"
                            "(add_physics)"
+                           "(add_physics_discretization)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
