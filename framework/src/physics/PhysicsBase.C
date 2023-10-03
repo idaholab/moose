@@ -60,3 +60,12 @@ PhysicsBase::isTransient() const
   else
     return getProblem().isTransient();
 }
+
+void
+PhysicsBase::checkParamsBothSetOrNotSet(std::string param1, std::string param2) const
+{
+  if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
+    paramError(param1,
+               "Parameters " + param1 + " and " + param2 +
+                   " must be either both set or both unset");
+}

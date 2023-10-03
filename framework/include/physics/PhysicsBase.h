@@ -51,9 +51,19 @@ protected:
   /// NOTE: hopefully we will not need this
   // virtual const MooseMesh & getMesh() const override { return *_mesh; }
 
+  /// Utilities to handle parameters
+  void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
+  template <typename T, typename S>
+  void checkVectorParamsSameLength(std::string param1, std::string param2) const;
+  template <typename T>
+  void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
+
 private:
-  virtual void addFEKernels(){};
+  /// The default implementation of these routines will do nothing as we do not expect all Physics
+  /// to be defining an object of every type
   virtual void addNonlinearVariables(){};
+  virtual void addFEKernels(){};
+  virtual void addFEBCs(){};
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
@@ -67,3 +77,41 @@ private:
   /// Needed to create every object
   friend class AddPhysicsAction;
 };
+
+template <typename T, typename S>
+void
+PhysicsBase::checkVectorParamsSameLength(std::string param1, std::string param2) const
+{
+  checkParamsBothSetOrNotSet(param1, param2);
+  if (!parameters().have_parameter<std::vector<T>>(param1))
+    paramError("Parameter ",
+               param1,
+               " is not defined with type ",
+               MooseUtils::prettyCppType<T>(),
+               ". Check your code.");
+  if (!parameters().have_parameter<std::vector<S>>(param2))
+    paramError("Parameter ",
+               param2,
+               " is not defined with type ",
+               MooseUtils::prettyCppType<S>(),
+               ". Check your code.");
+  if (isParamValid(param1))
+    if (getParam<std::vector<T>>(param1).size() != getParam<std::vector<S>>(param2).size())
+      paramError(param1,
+                 "Vector parameters " + param1 + " and " + param2 +
+                     " must be the same length if set");
+}
+
+template <typename T>
+void
+PhysicsBase::checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const
+{
+  std::set<std::string> unique_params;
+  for (const auto & param : param_vec)
+
+    for (const auto & value : getParam<std::vector<T>>(param))
+      if (!unique_params.insert(value).second)
+        mooseError("Item " + value + "specified in vector parameter " + param +
+                   " is also present in one or more of these other parameters " +
+                   Moose::stringify(param_vec) + ". This is disallowed");
+}

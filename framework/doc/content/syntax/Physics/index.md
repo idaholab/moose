@@ -1,13 +1,14 @@
 # Physics system
 
+A Physics can be tied to a discretization.
 ## Implementing your own Physics
 
-## Interaction with Components
+### Interaction with components
 
 ### Advice on implementation
 
-Use as much parameter checking as you can. [PhysicsBase.md] defined utilities such as the ones below
-that let you check that the user inputs to your physics are correct.
+- Use as much parameter checking as you. [PhysicsBase.md] defined utilities such as the ones below
+  that let you check that the user inputs to your physics are correct.
 
 ```
   void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
