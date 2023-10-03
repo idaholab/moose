@@ -86,16 +86,7 @@ HeatConductionPhysics::addFEKernels()
 void
 HeatConductionPhysics::addFEBCs()
 {
-  if (isParamValid("insulated_boundaries"))
-  {
-    const std::string bc_type = "NeumannBC";
-    InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.set<std::vector<BoundaryName>>("boundaries") =
-        getParam<std::vector<BoundaryName>>("insulated_boundaries");
-    getProblem().addBoundaryCondition(
-        bc_type, name() + "_" + _temperature_name + "_insulated_bc", params);
-  }
+  // We dont need to add anything for insulated boundaries, 0 flux is the default boundary condition
   if (isParamValid("heat_flux_boundaries"))
   {
     const std::string bc_type = "FunctorNeumannBC";
@@ -109,7 +100,7 @@ HeatConductionPhysics::addFEBCs()
     if (std::set<MooseFunctorName>(boundary_heat_fluxes.begin(), boundary_heat_fluxes.end())
             .size() == 1)
     {
-      params.set<std::vector<BoundaryName>>("boundaries") = heat_flux_boundaries;
+      params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
       params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
       getProblem().addBoundaryCondition(
           bc_type, name() + "_" + _temperature_name + "_heat_flux_bc_all", params);
@@ -118,11 +109,43 @@ HeatConductionPhysics::addFEBCs()
     {
       for (const auto i : index_range(heat_flux_boundaries))
       {
-        params.set<std::vector<BoundaryName>>("boundaries") = {heat_flux_boundaries[i]};
+        params.set<std::vector<BoundaryName>>("boundary") = {heat_flux_boundaries[i]};
         params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[i];
         getProblem().addBoundaryCondition(bc_type,
                                           name() + "_" + _temperature_name + "_heat_flux_bc_" +
                                               heat_flux_boundaries[i],
+                                          params);
+      }
+    }
+  }
+  if (isParamValid("fixed_temperature_boundaries"))
+  {
+    const std::string bc_type = "FunctorDirichletBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+
+    const auto & temperature_boundaries =
+        getParam<std::vector<BoundaryName>>("fixed_temperature_boundaries");
+    const auto & boundary_temperatures =
+        getParam<std::vector<MooseFunctorName>>("boundary_temperatures");
+    // Optimization if all the same
+    if (std::set<MooseFunctorName>(boundary_temperatures.begin(), boundary_temperatures.end())
+            .size() == 1)
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
+      params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
+      getProblem().addBoundaryCondition(
+          bc_type, name() + "_" + _temperature_name + "_dirichlet_bc_all", params);
+    }
+    else
+    {
+      for (const auto i : index_range(temperature_boundaries))
+      {
+        params.set<std::vector<BoundaryName>>("boundary") = {temperature_boundaries[i]};
+        params.set<MooseFunctorName>("functor") = boundary_temperatures[i];
+        getProblem().addBoundaryCondition(bc_type,
+                                          name() + "_" + _temperature_name + "_dirichlet_bc_" +
+                                              temperature_boundaries[i],
                                           params);
       }
     }
