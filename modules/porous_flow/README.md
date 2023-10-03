@@ -45,7 +45,7 @@ You may optionally use `./run_tests -j8` if your system has 8 available cores (o
 
 ## Contributing
 
-You are free to contribute to PorousFlow, and the process is described [here](https://mooseframework.inl.gov/framework_development/contributing.html).  MOOSE has strict quality control standards.
+You are free to contribute to PorousFlow, and the process is described [here](https://mooseframework.inl.gov/framework/contributing.html).  MOOSE has strict quality control standards.
 
 ## Contact
 
