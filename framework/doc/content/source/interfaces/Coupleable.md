@@ -146,8 +146,7 @@ process. These functions can be found here:
 ## Writing directly to coupled variables
 
 Element- and nodal user objects as well AuxKernels may obtain a writable reference to a MOOSE field variable
-through the `Coupleable::writableVariable` function. The returned variable reference provides a `setNodalValue`
-method that can be used to set the nodal or elemental DOF value(s) of the variable.
+through the `Coupleable::writableVariable` function. The returned variable reference provides a `setDofValue` (for FE and FV variables) and `setNodalvalue` (only for FE variables) methods that can be used to set the nodal or elemental DOF value(s) of the variable.
 
 `Coupleable::writableVariable` enforces compatibility between the calling object type and the family of the
 requested variable. I.e. nodal user objects and AuxKernels may only obtain references to nodal variables, and

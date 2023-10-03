@@ -27,5 +27,5 @@ public:
   virtual void threadJoin(const UserObject &) override {}
 
 protected:
-  MooseVariable & _v;
+  MooseWritableVariable & _v;
 };
