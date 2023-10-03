@@ -451,10 +451,9 @@ class TestInputListing(MooseDocsTestCase):
     CODE.append('[Tests]\n[]\n')
     TEXT.append('link=False remove=test')
 
-    # Test 2: Extract `[diff]` block, indent 2 spaces, add `[AuxKernels]` & `[]` as header & footer
-    CODE.append(extractContent(FILE[2], opts={'start': 'diff', 'end': '[]', 'include-end': True,
-                                              'header': '[AuxKernels]', 'footer': '[]'}))
-    TEXT.append('block=Kernels/diff indent=2 header=[AuxKernels] footer=[]')
+    # Test 2: Extract `[Kernels/diff]` block
+    CODE.append(extractContent(FILE[2], opts={'start': '[Kernels]', 'end': '[BCs]'}))
+    TEXT.append('block=Kernels/diff')
 
     # Test 3: Remove `issues` & `design` parameters
     CODE.append(extractContent(FILE[3], opts={'end': 'exodiff', 'include-end': True})
