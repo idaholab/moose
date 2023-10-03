@@ -68,6 +68,9 @@ protected:
   /// Mass/amount unit
   std::string _munit;
 
+  /// Are the variables FV type
+  bool _is_fv;
+
   /// List of phases tracked by Thermochimica
   std::vector<std::string> _phases;
 
