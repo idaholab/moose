@@ -35,7 +35,7 @@ coefficient `Hw` need to be supplied.
 +Note:+ Heat transfer is optional, so defining a wall heat transfer coefficient on blocks that
 do not have wall heat transfer linked to them makes no sense.
 
-In our tutorial we will define the custom closures on the primary side if the heat exchanger.
+In our tutorial we will define the custom closures on the primary side of the heat exchanger.
 
 To use the custom closure set, we create a closures object of the class [Closures1PhaseNone.md],
 which does not create any of its own Materials:
@@ -58,9 +58,9 @@ For our custom closure set, we choose the following expression for the friction 
 !equation
 f_D = a + b Re^c
 
-where $f_D$ is the Darcy friction factor, $Re$ is the Reynolds number, and $a$, $b$, and $c$ are constant coefficients with $a = 1$, $b = 0.1$ and $c = -0.5$.
+where $f_D$ is the Darcy friction factor, $Re$ is the Reynolds number, and $a$, $b$, and $c$ are constant coefficients with $a = 1$, $b = 0.1$, and $c = -0.5$.
 
- The first step is to define the Reynolds number using an [ADReynoldsNumberMaterial](ADReynoldsNumberMaterial.md) block, then the expression for the friction factor is implemented using a [ADParsedMaterial](ParsedMaterial.md). Note that these materials are defined only on the block where the custom closures are used. They are defined by the other closure set on the other components.
+The first step is to define the Reynolds number using an [ADReynoldsNumberMaterial.md], and then the expression for the friction factor is implemented using an [ADParsedMaterial](ParsedMaterial.md). Note that these materials are defined only on the block where the custom closures are used. They are defined by the other closure set on the other components.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          start=Re_mat
@@ -72,7 +72,7 @@ For the heat transfer, the following expression for Nusselt number is used:
 !equation
 Nu = 0.03 Re^{0.9} Pr^{0.5}.
 
-To accomplish this, we define the Prandlt number using an [ADPrandtlNumberMaterial](ADPrandtlNumberMaterial.md) block. The Nusselt number is defined using an [ADParsedMaterial](ParsedMaterial.md), and the heat transfer coefficient is set using an [ADConvectiveHeatTransferCoefficientMaterial](ADConvectiveHeatTransferCoefficientMaterial.md) block. Again, the block is restricted to the `hx/pri` block to avoid conflicting with the other closure set.
+To accomplish this, we define the Prandtl number using an [ADPrandtlNumberMaterial.md] block. The Nusselt number is defined using an [ADParsedMaterial](ParsedMaterial.md), and the heat transfer coefficient is set using an [ADConvectiveHeatTransferCoefficientMaterial.md] block. Again, the block is restricted to the `hx/pri` block to avoid conflicting with the other closure set.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          start=Pr_mat

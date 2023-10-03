@@ -66,7 +66,7 @@ material to it. The number of radial element in this block will be `3`.
 ## Heat Source
 
 Our heating will be given by the specified total power parameter. For this, we need to include
-[TotalPower](components/TotalPower.md) component and link it with another component -- [HeatSourceFromTotalPower](components/HeatSourceFromTotalPower.md).
+[TotalPower.md] component and link it with another component -- [HeatSourceFromTotalPower.md].
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/total_power
@@ -82,7 +82,7 @@ done via the `hs` and `regions` parameters.  The link to the `TotalPower` compon
 
 ## Heat Transfer
 
-To exchange heat between a flow channel and heat structure, we use the [HeatTransferFromHeatStructure1Phase](components/HeatTransferFromHeatStructure1Phase.md)
+To exchange heat between a flow channel and heat structure, we use the [HeatTransferFromHeatStructure1Phase.md]
 component.  We need to specify the `flow_channel` parameter which takes the name of the connected
 flow channel, `hs` parameter which is the name of the heat structure component, `hs_side` parameter
 which is the side of the heat structure and can be either `inner` or `outer`.

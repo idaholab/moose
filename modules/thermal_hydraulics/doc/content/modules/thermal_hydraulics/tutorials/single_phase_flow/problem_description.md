@@ -1,14 +1,17 @@
 # Introduction
 
-!media thermal_hydraulics/tutorials/single_phase_flow/step-05.png
-       style=width:33%;float:right;margin-left:40px
-       caption=Diagram of the system
-       id=fig-model
+
 
 In this tutorial, we will build a simple model of system with a primary loop and secondary side.
 In the primary loop, we will be circulating helium using a pump.
 We will be adding heat in the core section and removing it in the heat exchanger section.
 The secondary side will be running liquid water.
+
+
+!media thermal_hydraulics/tutorials/single_phase_flow/step-05.png
+       style=width:40%;
+       caption=Diagram of the system
+       id=fig-model
 
 We will gradually build the model step by step introducing the following basic concepts:
 

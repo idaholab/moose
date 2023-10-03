@@ -29,8 +29,7 @@ press = 10e5 # Pa
 It is a good habit to include the units we are assuming in case our input file will be used by
 other people.
 
-!alert note
-+Note:+ THM is using SI units: `kg`, `m`, `s`, `K`.
++Note: THM is using SI units: `kg`, `m`, `s`, `K`.+
 
 
 ## Fluid Properties
@@ -49,7 +48,7 @@ To do so, we will put the following block inside the `[FluidProperties]` block.
 ## Closures
 
 Closure relations are provided through objects created in a `[Closures]` block.
-We define a set of closures of type [Closures1PhaseTHM](source/closures/Closures1PhaseTHM.md)  with default options, which will be used by our flow channel component:
+We define a set of closures of type [Closures1PhaseTHM.md] with default options, which will be used by our flow channel component:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Closures
@@ -63,7 +62,7 @@ etc., and intangible pieces that add physics, like boundary conditions or source
 They are like LEGO bricks which when put together they build up the overall simulation.
 
 
-The first component we introduce is the [FlowChannel1Phase](source/components/FlowChannel1Phase.md) component which represents a channel
+The first component we introduce is the [FlowChannel1Phase.md] component which represents a channel
 with single-phase flow.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
@@ -168,7 +167,7 @@ or at different mesh entities like nodes or elements.
 There can also be postprocessors that are not associated with any mesh entities (like a
 postprocessor to output time step size, etc.).
 
-In our model, we will add the following postprocessors to compute the pressure drop accros the flow channel:
+In our model, we will add the following postprocessors to compute the pressure drop across the flow channel:
 
 1. `core_p_in` for monitoring core outlet pressure
 
@@ -182,14 +181,14 @@ In our model, we will add the following postprocessors to compute the pressure d
             block=Postprocessors/core_p_out
             link=False
 
-2. `core_delta_p` for monitoring the core pressure drop
+1. `core_delta_p` for monitoring the core pressure drop
 
    !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
             block=Postprocessors/core_delta_p
             link=False
 
 The first postprocessors are of [SideAverageValue](postprocessors/SideAverageValue.md) type which means they are computed on a side.
-The side is specified via the `boundary` parameter and both postprocessors operate on the
+The side is specified via the `boundary` parameter, and both postprocessors operate on the
 temperature variable `p`. Then we use a [ParsedPostProcessor](postprocessors/ParsedPostprocessor.md) to compute the difference.
 
 
