@@ -16,10 +16,12 @@ InputParameters
 HeatConductionPhysics::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
+  params.addClassDescription("Add the heat conduction physics");
+
   params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
                                              "thermal_conductivity");
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
-  params.addClassDescription("Add the heat conduction physics");
+  params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
 
   return params;
 }
@@ -33,10 +35,20 @@ void
 HeatConductionPhysics::addFEKernels()
 {
   {
-    const std::string kernel_type = "HeatConduction";
+    const std::string kernel_type = "ADHeatConduction";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
+    params.applyParameter(
+        parameters(), "thermal_conductivity", /*private=*/true, /*override_default=*/true);
     getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_conduction", params);
+  }
+  if (isParamValid("heat_source_var"))
+  {
+    const std::string kernel_type = "ADCoupledForce";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+    params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
+    getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_source", params);
   }
   if (isTransient())
   {
@@ -50,7 +62,7 @@ HeatConductionPhysics::addFEKernels()
 void
 HeatConductionPhysics::addNonlinearVariables()
 {
-  const std::string variable_type = "MooseVariableFE";
+  const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

@@ -35,10 +35,9 @@
   type = Steady
 []
 
-[Functions]
+[AuxVariables]
   [Q]
-    type = ParsedFunction
-    expression = 'x + y'
+    initial_condition = 100
   []
 []
 
