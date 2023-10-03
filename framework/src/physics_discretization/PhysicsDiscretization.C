@@ -24,26 +24,29 @@ PhysicsDiscretization::validParams()
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<std::vector<VariableName>>(
       "variables",
+      {},
       "Variables used in the Physics. If unspecified, will be pulled in from the Physics");
   params.addParam<std::vector<MooseEnum>>(
-      "family", families, "Specifies the family of FE shape functions to use for this variable");
+      "family", {families}, "Specifies the family of FE shape functions to use for this variable");
   params.addParam<std::vector<MooseEnum>>("order",
-                                          orders,
+                                          {orders},
                                           "Specifies the order of the FE shape function to use "
                                           "for this variable (additional orders not listed are "
                                           "allowed)");
   params.addParam<std::vector<Real>>("scaling",
+                                     {1},
                                      "Specifies a scaling factor to apply to this variable. This "
                                      "is used for manual scaling of variables");
+  params.registerBase("discretization");
+
   return params;
 }
 
 PhysicsDiscretization::PhysicsDiscretization(const InputParameters & parameters)
   : MooseObject(parameters),
     _var_names(getParam<std::vector<VariableName>>("variables")),
-    _var_families(getParam<std::vector<MooseEnum>>("scaling")),
+    _var_families(getParam<std::vector<MooseEnum>>("family")),
     _var_orders(getParam<std::vector<MooseEnum>>("order")),
     _var_scalings(getParam<std::vector<Real>>("scaling"))
 {
-  // InputParametersUtils::chec
 }
