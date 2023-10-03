@@ -36,6 +36,9 @@ INL_DOCUMENTS = ['safety_software_determination',
                  'user_manual',
                  'theory_manual']
 
+# List of deprecated document names to ease application patching (provided in 'deprecated_name' : 'new_name' pairs)
+DEPRECATED_DOCUMENTS = {'requirements_traceablity_matrix' : 'requirements_traceability_matrix'}
+
 def get_documents(required_docs=INL_DOCUMENTS, **kwargs):
     """
     Build SQA document dictionary from the provided directories.

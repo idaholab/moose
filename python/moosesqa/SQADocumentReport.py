@@ -13,7 +13,7 @@ import logging
 import glob
 import mooseutils
 from .SQAReport import SQAReport
-from .get_documents import get_documents, INL_DOCUMENTS
+from .get_documents import get_documents, INL_DOCUMENTS, DEPRECATED_DOCUMENTS
 from .check_documents import check_documents
 
 class SQADocumentReport(SQAReport):
@@ -22,8 +22,11 @@ class SQADocumentReport(SQAReport):
     """
     def __init__(self, **kwargs):
         kwargs.setdefault('required_documents', INL_DOCUMENTS)
+        kwargs.setdefault('deprecated_documents', DEPRECATED_DOCUMENTS)
         self.working_dirs = kwargs.pop('working_dirs', None)
         self.required_documents = kwargs.pop('required_documents', None)
+        self.deprecated_documents = kwargs.pop('deprecated_documents', None)
+        self.valid_deprecations = dict()
 
         self._documents = dict()
         for name in self.required_documents:
@@ -31,6 +34,15 @@ class SQADocumentReport(SQAReport):
             if doc is not None:
                 doc = mooseutils.eval_path(doc)
             self._documents[name] = doc
+
+        # Check for deprecated document names and add to documents dict under new name
+        # Mark deprecated document name for entry into the log (see check_documents)
+        for dep_name, new_name in self.deprecated_documents.items():
+            doc = kwargs.pop(dep_name, None)
+            if doc is not None:
+                doc = mooseutils.eval_path(doc)
+                self.valid_deprecations[dep_name] = new_name
+                self._documents[new_name] = doc
 
         super().__init__(**kwargs)
         if self.working_dirs is None: self.working_dirs = [mooseutils.git_root_dir()]
@@ -42,5 +54,5 @@ class SQADocumentReport(SQAReport):
     def execute(self, **kwargs):
         """Determine the status"""
         file_list = SQAReport._getFiles(self.working_dirs)
-        logger = check_documents(self.documents, file_list, **kwargs)
+        logger = check_documents(self.documents, self.valid_deprecations, file_list, **kwargs)
         return logger

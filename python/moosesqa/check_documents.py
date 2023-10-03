@@ -14,7 +14,7 @@ import collections
 import mooseutils
 from .LogHelper import LogHelper
 
-def check_documents(documents, file_list=None, **kwargs):
+def check_documents(documents, deprecations, file_list=None, **kwargs):
     """
     Tool for checking SQA document deficiencies
     """
@@ -32,6 +32,14 @@ def check_documents(documents, file_list=None, **kwargs):
     elif file_list is None:
         root = mooseutils.git_root_dir()
         file_list = mooseutils.git_ls_files(root, recurse_submodules=False)
+
+    # If deprecation adjustments occurred, report them as warnings
+    if len(deprecations) != 0:
+        for old_name, new_name in deprecations.items():
+            log_key = "log_" + new_name
+            logger.setLevel(log_key, logging.WARNING)
+            msg = "The document name '{}' has been deprecated, please use '{}' instead in sqa_reports.yml.".format(old_name, new_name)
+            logger.log(log_key, msg)
 
     # Perform document checks
     for doc in documents:
