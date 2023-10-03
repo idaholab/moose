@@ -206,8 +206,8 @@ class Shape {
 public:
   Shape(int x=0, int y=0): _x(x), _y(y) {}  // Constructor
   virtual ~Shape() {} // Destructor
-  virtual float area()=0;  // Pure Virtual Function
-  void printPosition();    // Body appears elsewhere
+  virtual float area() const = 0;  // Pure Virtual Function
+  void printPosition() const;    // Body appears elsewhere
 
 protected:
   // Coordinates at the centroid of the shape
@@ -231,9 +231,7 @@ public:
     _height(height)
   {}
 
-  virtual ~Rectangle() {}
-
-  virtual float area() { return _width * _height; }
+  virtual float area() const override { return _width * _height; }
 
 protected:
   int _width;
@@ -255,9 +253,7 @@ public:
     _radius(radius)
   {}
 
-  virtual ~Circle() {}
-
-  virtual float area() { return PI * _radius * _radius; }
+  virtual float area() const override { return PI * _radius * _radius; }
 protected:
   int _radius;
   const double PI = 3.14159265359;
@@ -321,6 +317,32 @@ void printInformation(const Shape & shape)
 // 12
 // (10, 10)
 // 28.274
+```
+
+!---
+
+## Summary
+
+Templates
+
+- compile-time polymorphism
+- slower to compile
+- must be instantiated to be compiled
+
+
+Classes
+
+- run-time polymorphism: routine calls forwarded to derived classes
+- slower execution due to cost of virtual table searches
+- easier to develop with, somewhat more readable
+
+
+Both enable better code re-use, lower duplication. They are used for different purposes,
+but both concepts can be combined! For example:
+
+```
+// class template
+template<typename T> class A { };
 ```
 
 !---

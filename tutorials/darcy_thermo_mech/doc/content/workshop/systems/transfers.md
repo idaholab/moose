@@ -16,9 +16,9 @@ each sub-application should be able to solve on its own.
 ## Field Transfers
 
 Fields can be transferred between applications using a variety of interpolation algorithms.
-- The source field is evaluated at the destination points (generally nodes or element centroids).
-- The evaluations are then put into the receiving `AuxVariable` field named `variable`.
 - The direction of the transfer is specified by giving the `from_multi_app` or `to_multi_app` parameter.
+- The source field is evaluated at the destination points (generally nodes or element centroids, depending on the receiving variable type).
+- The evaluations are then put into the receiving `AuxVariable` field specified by the `variable` parameter.
 - `GeneralField` versions of each transfer are implemented using a different algorithm and may be preferred as they support more features.
 
 !listing multiapp_mesh_function_transfer/exec_on_mismatch.i block=Transfers
@@ -36,11 +36,13 @@ Fields can be transferred between applications using a variety of interpolation 
 
 !---
 
-## Postprocessor Transfer
+## Scalar number Transfer
 
-A Postprocessor transfer allows a transfer of scalar values between applications
+A Postprocessor or a scalar variable transfer allows a transfer of scalar values between applications
 
 - When transferring to a `MultiApp`, the value can either be put into a `Postprocessor` value or can be put into a constant `AuxVariable` field
-- When transferring from a `MultiApp` to the parent application, the value can be interpolated from all the sub-apps into an auxiliary field
+  - for example, the main app variable value at the position of the child application can be stored in a postprocessor
+- When transferring from a `MultiApp` to the parent application, the `Postprocessor` values from all the sub-apps can be interpolated to form an auxiliary field
+  on the parent application
 
 !listing multiapp_postprocessor_transfer/parent.i block=Transfers

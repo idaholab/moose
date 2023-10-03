@@ -32,8 +32,8 @@ list of thermodynamic properties and their corresponding names in the interfaces
 | `T` | $T$ | Temperature |
 | `v` | $v$ | Specific volume |
 
-!syntax list /Modules/FluidProperties objects=True actions=False subsystems=False
+!syntax list /FluidProperties objects=True actions=False subsystems=False
 
-!syntax list /Modules/FluidProperties objects=False actions=False subsystems=True
+!syntax list /FluidProperties objects=False actions=False subsystems=True
 
-!syntax list /Modules/FluidProperties objects=False actions=True subsystems=False
+!syntax list /FluidProperties objects=False actions=True subsystems=False
