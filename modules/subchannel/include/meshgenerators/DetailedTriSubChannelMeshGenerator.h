@@ -18,7 +18,7 @@
 #include "SubChannelEnums.h"
 
 /**
- * Mesh generator that builds a 3D mesh representing quadrilateral subchannels
+ * Mesh generator that builds a 3D mesh representing triangular subchannels
  */
 class DetailedTriSubChannelMeshGenerator : public MeshGenerator
 {
@@ -63,7 +63,7 @@ protected:
   /// Number of rods
   unsigned int _nrods;
   /// fuel rods that are belonging to each ring
-  std::vector<std::vector<Real>> _pins_in_rings;
+  std::vector<std::vector<unsigned int>> _pins_in_rings;
   /// map inner and outer rings
   std::map<unsigned int, Real> _orientation_map;
   /// number of subchannels
