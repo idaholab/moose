@@ -43,12 +43,12 @@ wasp_CXXFLAGS  += -I$(WASP_DIR)/include
 wasp_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 
 hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
-	$(CXX) -std=c++17 $(wasp_CXXFLAGS) -g $(CXXFLAGS) $(wasp_LDFLAGS) $< parse.cc lex.cc braceexpr.cc -o $@
+	$(CXX) -std=c++17 $(wasp_CXXFLAGS) -g $(CXXFLAGS) $< parse.cc lex.cc braceexpr.cc -o $@ $(wasp_LDFLAGS)
 
 bindings: hit.so
 
 hit.so: parse.cc lex.cc braceexpr.cc
-	$(CXX) -std=c++17 $(wasp_CXXFLAGS) -w -fPIC -lstdc++ -shared $(wasp_LDFLAGS) -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@
+	$(CXX) -std=c++17 $(wasp_CXXFLAGS) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS)
 
 $(HITCPP): hit.pyx chit.pxd
 	$(cython) -o $@ --cplus $<
