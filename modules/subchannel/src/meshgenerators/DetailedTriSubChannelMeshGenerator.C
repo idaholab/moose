@@ -107,13 +107,12 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
 
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    _chan_to_pin_map[i].reserve(3);
     _subchannel_position[i].reserve(3);
     for (unsigned int j = 0; j < 3; j++)
     {
       _subchannel_position.at(i).push_back(0.0);
     }
-  } // i
+  }
 
   // create the subchannels
   k = 0; // initialize the subchannel counter index
@@ -140,11 +139,8 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
         avg_coor_y = 0.5 * (_pin_position[_pins_in_rings[i][j]](1) +
                             _pin_position[_pins_in_rings[i][j + 1]](1));
       }
-
       dist0 = 1.0e+5;
-
       _chan_to_pin_map[k].push_back(_pins_in_rings[i - 1][0]);
-
       for (unsigned int l = 0; l < _pins_in_rings[i - 1].size(); l++)
       {
         dist = std::sqrt(pow(_pin_position[_pins_in_rings[i - 1][l]](0) - avg_coor_x, 2) +
@@ -154,17 +150,14 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
         {
           _chan_to_pin_map[k][2] = _pins_in_rings[i - 1][l];
           dist0 = dist;
-        } // if
-      }   // l
-
+        }
+      }
       _subch_type[k] = EChannelType::CENTER;
       _orientation_map.insert(std::make_pair(k, 0.0));
       k = k + 1;
-
-    } // for j
+    }
 
     // find the closest rod at front ring
-
     for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
       if (j == _pins_in_rings[i].size() - 1)
@@ -185,23 +178,19 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
         avg_coor_y = 0.5 * (_pin_position[_pins_in_rings[i][j]](1) +
                             _pin_position[_pins_in_rings[i][j + 1]](1));
       }
-
       // if the outermost ring, set the edge subchannels first... then the corner subchannels
       if (i == _n_rings - 1)
       {
         // add  edges
         _subch_type[k] = EChannelType::EDGE; // an edge subchannel is created
         k = k + 1;
-
         if (j % i == 0)
         {
-
           // corner subchannel
           _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
           // corner subchannel-dummy added to hinder array size violations
           // _chan_to_pin_map[k].push_back(_pins_in_rings[i][j]);
           _subch_type[k] = EChannelType::CORNER;
-
           k = k + 1;
         }
         // if not the outer most ring
@@ -218,15 +207,17 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
           {
             _chan_to_pin_map[k][2] = _pins_in_rings[i + 1][l];
             dist0 = dist;
-          } // if
-        }   // l
-
+          }
+        }
         _subch_type[k] = EChannelType::CENTER;
         _orientation_map.insert(std::make_pair(k, libMesh::pi));
         k = k + 1;
-      } // if
-    }   // for j
-  }     // for i
+      }
+    }
+  }
+
+  for (auto & pin : _chan_to_pin_map)
+    pin.shrink_to_fit();
 
   // set the subchannel positions
   Real _duct_to_pin_gap =
@@ -673,8 +664,7 @@ DetailedTriSubChannelMeshGenerator::generate()
 
         // Determine orientation of current subchannel
         auto subchannel_rods = getSubChannelRods(i);
-        Point subchannel_side =
-            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+        Point subchannel_side = getRodPosition(subchannel_rods[0]);
         Point base_center_orientation = {1, 1};
 
         // Get rotation angle for current subchannel

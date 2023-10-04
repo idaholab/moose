@@ -1,0 +1,11 @@
+[Tests]
+  # Regression check for THORS model
+  [THORS_FFM-5B]
+    type = Exodiff
+    input = FFM-5B.i
+    exodiff = 'FFM-5B_out.e'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+[]
