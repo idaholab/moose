@@ -9,25 +9,25 @@
 
 #pragma once
 
-#include "PhysicsBase.h"
+#include "HeatConductionPhysics.h"
 
 /**
- * Creates all the objects needed to solve the heat conduction equations
+ * Creates all the objects needed to solve the heat conduction equations with CG
  */
-class HeatConductionPhysics : public PhysicsBase
+class HeatConductionFE : public HeatConductionPhysics
 {
 public:
   static InputParameters validParams();
 
-  HeatConductionPhysics(const InputParameters & parameters);
+  HeatConductionFE(const InputParameters & parameters);
 
   /// GeneralUO not the right base class probably
   virtual void initialize() override{};
   virtual void execute() override{};
   virtual void finalize() override{};
 
-  const VariableName & _temperature_name;
-
 private:
-  void createDiscretizedPhysics() override;
+  void addNonlinearVariables() override;
+  void addFEKernels() override;
+  void addFEBCs() override;
 };

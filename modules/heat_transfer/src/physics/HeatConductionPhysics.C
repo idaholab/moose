@@ -9,6 +9,7 @@
 
 #include "HeatConductionPhysics.h"
 #include "ADHeatConduction.h"
+#include "HeatConductionFE.h"
 
 registerMooseObject("HeatConductionApp", HeatConductionPhysics);
 
@@ -56,115 +57,10 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
 }
 
 void
-HeatConductionPhysics::addFEKernels()
-{
-  {
-    const std::string kernel_type = "ADHeatConduction";
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(
-        parameters(), "thermal_conductivity", /*private=*/true, /*override_default=*/true);
-    getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_conduction", params);
-  }
-  if (isParamValid("heat_source_var"))
-  {
-    const std::string kernel_type = "ADCoupledForce";
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
-    getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_source", params);
-  }
-  if (isTransient())
-  {
-    const std::string kernel_type = "HeatConductionTimeDerivative";
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-    // TODO add C_p
-    getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_time", params);
-  }
-}
-
-void
-HeatConductionPhysics::addFEBCs()
-{
-  // We dont need to add anything for insulated boundaries, 0 flux is the default boundary condition
-  if (isParamValid("heat_flux_boundaries"))
-  {
-    const std::string bc_type = "FunctorNeumannBC";
-    InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-
-    const auto & heat_flux_boundaries = getParam<std::vector<BoundaryName>>("heat_flux_boundaries");
-    const auto & boundary_heat_fluxes =
-        getParam<std::vector<MooseFunctorName>>("boundary_heat_fluxes");
-    // Optimization if all the same
-    if (std::set<MooseFunctorName>(boundary_heat_fluxes.begin(), boundary_heat_fluxes.end())
-            .size() == 1)
-    {
-      params.set<std::vector<BoundaryName>>("boundary") = heat_flux_boundaries;
-      params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[0];
-      getProblem().addBoundaryCondition(
-          bc_type, name() + "_" + _temperature_name + "_heat_flux_bc_all", params);
-    }
-    else
-    {
-      for (const auto i : index_range(heat_flux_boundaries))
-      {
-        params.set<std::vector<BoundaryName>>("boundary") = {heat_flux_boundaries[i]};
-        params.set<MooseFunctorName>("functor") = boundary_heat_fluxes[i];
-        getProblem().addBoundaryCondition(bc_type,
-                                          name() + "_" + _temperature_name + "_heat_flux_bc_" +
-                                              heat_flux_boundaries[i],
-                                          params);
-      }
-    }
-  }
-  if (isParamValid("fixed_temperature_boundaries"))
-  {
-    const std::string bc_type = "FunctorDirichletBC";
-    InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_name;
-
-    const auto & temperature_boundaries =
-        getParam<std::vector<BoundaryName>>("fixed_temperature_boundaries");
-    const auto & boundary_temperatures =
-        getParam<std::vector<MooseFunctorName>>("boundary_temperatures");
-    // Optimization if all the same
-    if (std::set<MooseFunctorName>(boundary_temperatures.begin(), boundary_temperatures.end())
-            .size() == 1)
-    {
-      params.set<std::vector<BoundaryName>>("boundary") = temperature_boundaries;
-      params.set<MooseFunctorName>("functor") = boundary_temperatures[0];
-      getProblem().addBoundaryCondition(
-          bc_type, name() + "_" + _temperature_name + "_dirichlet_bc_all", params);
-    }
-    else
-    {
-      for (const auto i : index_range(temperature_boundaries))
-      {
-        params.set<std::vector<BoundaryName>>("boundary") = {temperature_boundaries[i]};
-        params.set<MooseFunctorName>("functor") = boundary_temperatures[i];
-        getProblem().addBoundaryCondition(bc_type,
-                                          name() + "_" + _temperature_name + "_dirichlet_bc_" +
-                                              temperature_boundaries[i],
-                                          params);
-      }
-    }
-  }
-}
-
-void
-HeatConductionPhysics::addNonlinearVariables()
-{
-  // TODO Do not create it if it already exists
-  const std::string variable_type = "MooseVariable";
-  InputParameters params = getFactory().getValidParams(variable_type);
-  getProblem().addVariable(variable_type, _temperature_name, params);
-}
-
-void
 HeatConductionPhysics::createDiscretizedPhysics()
 {
-  // if (_discretization->name() == "ContinuousGalerkin")
-  //   _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
+  std::cout << getDiscretization().type() << std::endl;
+  std::cout << getDiscretization().name() << std::endl;
+  if (getDiscretization().type() == "ContinuousGalerkin")
+    _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
 }
