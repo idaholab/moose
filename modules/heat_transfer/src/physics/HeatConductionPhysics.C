@@ -165,6 +165,6 @@ HeatConductionPhysics::addNonlinearVariables()
 void
 HeatConductionPhysics::createDiscretizedPhysics()
 {
-  if (_discretization->name() == "ContinuousGalerkin")
-    _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
+  // if (_discretization->name() == "ContinuousGalerkin")
+  //   _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
 }
