@@ -48,6 +48,15 @@
     requirement = 'The system shall support refinement of TRI6 mesh elements.'
   [../]
 
+  [./test_tri7_refine]
+    type = 'Exodiff'
+    input = 'high_order_elems.i'
+    exodiff = 'high_order_elems_tri7_refine_out.e'
+    cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TRI7 Variables/u/order=THIRD Outputs/file_base=high_order_elems_tri7_refine_out'
+
+    requirement = 'The system shall support refinement of TRI7 mesh elements.'
+  [../]
+
   # 3D elements
 
   [./test_hex8_refine]
