@@ -83,7 +83,8 @@ PhysicsBase::addDiscretization(const InputParameters & params)
       isParamValid("discretization") ? getFactory().getValidParams(discretization_type) : params;
 
   if (discretization_type == "ContinuousGalerkin")
-    _discretization = std::make_unique<ContinuousGalerkin>(discr_params);
+    _discretization = getFactory().create<ContinuousGalerkin>(
+        discretization_type, discretization_type, discr_params, 0);
   else
     paramError("discretization",
                "Unrecognized discretization. You need to override addDiscretization() in your "

@@ -122,6 +122,7 @@ Factory::create(const std::string & obj_name,
   // call the function pointer to build the object
   auto obj = it->second->build(params);
 
+  // when creating the problem, add it to the action warehouse
   auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
   if (fep)
     _app.actionWarehouse().problemBase() = fep;
