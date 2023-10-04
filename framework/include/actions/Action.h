@@ -267,7 +267,7 @@ protected:
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
 
-  /// The current action (even though we have seperate instances for each action)
+  /// The current action (even though we have separate instances for each action)
   const std::string & _current_task;
 
   std::shared_ptr<MooseMesh> & _mesh;

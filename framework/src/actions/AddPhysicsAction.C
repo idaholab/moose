@@ -13,6 +13,12 @@
 
 registerMooseAction("MooseApp", AddPhysicsAction, "add_physics");
 
+// TODO
+// - add a meta action that happens before add_physics and registers AddPhysicsAction to
+// the ones actually used by each physics, on a per-object basis if possible? so no risk to addFV
+// for both a FE and FV physics
+// - make the add_variables for physics happen after the variables block
+
 // To create the variables
 registerMooseAction("MooseApp", AddPhysicsAction, "add_variable");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_ic");
