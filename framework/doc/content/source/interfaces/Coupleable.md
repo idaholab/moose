@@ -159,3 +159,6 @@ variable in the system may at most be written to by a single object on any given
 The user object and aux kernel thread loops check if an executed object has any writable variable references, and
 if so, will insert those variables into the aux solution vector. This obviates the need for using the
 [`ProjectionAux`](ProjectionAux.md) kernel.
+
+!alert warning
+`Coupleable::writableVariable` can let users write to both FE / FV from AuxKernels and UserObjects but one must exercise caution about whether Nodal or Elemental type AuxKernels / UOs are used as the quadrature would depend on this choice and might lead to segfault if a FV variable values are set using `setDofValue` function for non-zero values of `_qp` .

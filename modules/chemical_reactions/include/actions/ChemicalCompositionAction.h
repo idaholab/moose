@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AddVariableAction.h"
 #include "AddFunctionAction.h"
 
 /**

@@ -850,7 +850,7 @@ Coupleable::coupledArrayValues(const std::string & var_name) const
 MooseWritableVariable &
 Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
 {
-  auto * var = dynamic_cast<MooseWritableVariable *>(getVar(var_name, comp));
+  auto * var = getVarHelper<MooseWritableVariable>(var_name, comp);
 
   const auto * aux = dynamic_cast<const AuxKernel *>(this);
   const auto * euo = dynamic_cast<const ElementUserObject *>(this);
