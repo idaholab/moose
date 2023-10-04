@@ -84,12 +84,12 @@ AddPhysicsAction::act()
     mooseAssert(_physics, "Physics should have been created as it must be the first action to run");
 
   if (_current_task == "add_variable")
-    _physics->addNonlinearVariables();
+    _physics->PhysicsBase::addNonlinearVariables();
   // else if (_current_task == "add_ic")
   //   for (const auto [type, name, params] : getInfo(_physics->getInitialConditions()))
   //     _problem->addBoundaryCondition(type, name, params);
   else if (_current_task == "add_kernel")
-    _physics->addFEKernels();
+    _physics->PhysicsBase::addFEKernels();
   // else if (_current_task == "add_nodal_kernel")
   //   for (const auto [type, name, params] : getInfo(_physics->getNodalKernels()))
   //     _problem->addKernel(type, name, params);
