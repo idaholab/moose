@@ -9,9 +9,6 @@
 
 #include "HeatConductionPhysics.h"
 #include "ADHeatConduction.h"
-#include "HeatConductionFE.h"
-
-registerMooseObject("HeatConductionApp", HeatConductionPhysics);
 
 InputParameters
 HeatConductionPhysics::validParams()
@@ -54,15 +51,4 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
                                                               "boundary_temperatures");
   checkVectorParamsNoOverlap<BoundaryName>(
       {"heat_flux_boundaries", "insulated_boundaries", "fixed_temperature_boundaries"});
-}
-
-void
-HeatConductionPhysics::createDiscretizedPhysics()
-{
-  if (getDiscretization().type() == "ContinuousGalerkin")
-    _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
-
-  // Need to pass along the attributes.
-  // TODO: This isnt a good idea
-  _discretized_physics->setDiscretization(getDiscretization());
 }

@@ -9,7 +9,7 @@
 
 [Physics]
   [hc]
-    type = HeatConductionPhysics
+    type = HeatConductionFE
     temperature_name = 'T'
     heat_source_var = 'Q'
 
@@ -24,10 +24,6 @@
     boundary_temperatures = '300'
 
     # Discretization
-    # discretization = 'cgfe'
-    [Discretization]
-      type = ContinuousGalerkin
-    []
   []
 []
 

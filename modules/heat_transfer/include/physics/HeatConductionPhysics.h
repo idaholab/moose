@@ -26,8 +26,6 @@ public:
   virtual void execute() override{};
   virtual void finalize() override{};
 
+protected:
   const VariableName & _temperature_name;
-
-private:
-  void createDiscretizedPhysics() override;
 };
