@@ -28,6 +28,14 @@ ContinuousGalerkin::validParams()
   params.addParam<std::vector<MooseEnum>>(
       "family", {families}, "Specifies the family of FE shape functions to use for this variable");
 
+  // TODO
+  // This should not be necessary, as these params should already have been added
+  params.set<std::string>("_name") = "ContinuousGalerkin";
+  params.set<std::string>("_type") = "ContinuousGalerkin";
+  params.addParam<std::string>("_object_name", "ContinuousGalerking");
+  params.addParam<bool>("enable", true, "");
+  params.addParam<std::vector<std::string>>("control_tags", {});
+
   return params;
 }
 

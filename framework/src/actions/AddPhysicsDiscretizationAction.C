@@ -37,11 +37,6 @@ AddPhysicsDiscretizationAction::act()
     physics_name.replace(0, 8, "");
 
     // Add type from detected type
-    // TODO: This should not be necessary
-    _moose_object_pars.set<std::string>("_type") = getParam<std::string>("type");
-    _moose_object_pars.set<std::string>("_object_name") = "discretization_" + physics_name;
-    _moose_object_pars.set<bool>("enable") = true;
-
     auto physics = _problem->getPhysics(physics_name);
     physics->addDiscretization(_moose_object_pars);
     physics->createDiscretizedPhysics();
