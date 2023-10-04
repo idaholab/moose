@@ -46,6 +46,7 @@ const std::set<int> TRACEABLE_ELEMTYPES = {HEX8,
                                            TET10,
                                            TRI3,
                                            TRI6,
+                                           TRI7,
                                            EDGE2,
                                            EDGE3,
                                            EDGE4,
@@ -646,6 +647,7 @@ atVertexOnSide(const Elem * elem, const Point & point, const unsigned short side
       return atVertexOnSideTempl<Quad4>(elem, point, side);
     case TRI3:
     case TRI6:
+    case TRI7:
       return atVertexOnSideTempl<Tri3>(elem, point, side);
     case TET4:
     case TET10:

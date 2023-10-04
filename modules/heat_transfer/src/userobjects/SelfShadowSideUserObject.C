@@ -182,6 +182,7 @@ SelfShadowSideUserObject::addTriangles(const SideIDType & id)
       break;
 
     case libMesh::TRI6:
+    case libMesh::TRI7:
       _triangles.emplace_back(cse.node_ref(0), cse.node_ref(3), cse.node_ref(5), id);
       _triangles.emplace_back(cse.node_ref(3), cse.node_ref(1), cse.node_ref(4), id);
       _triangles.emplace_back(cse.node_ref(4), cse.node_ref(2), cse.node_ref(5), id);
