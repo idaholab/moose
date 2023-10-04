@@ -9,6 +9,7 @@
 
 #include "HeatConductionPhysics.h"
 #include "ADHeatConduction.h"
+#include "HeatConductionTimeDerivative.h"
 
 InputParameters
 HeatConductionPhysics::validParams()
@@ -16,10 +17,16 @@ HeatConductionPhysics::validParams()
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Add the heat conduction physics");
 
-  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
-                                             "thermal_conductivity");
   params.addParam<VariableName>("temperature_name", "T", "Variable name for the temperature");
   params.addParam<VariableName>("heat_source_var", "Variable providing the heat source");
+
+  // Material properties
+  params.transferParam<MaterialPropertyName>(ADHeatConduction::validParams(),
+                                             "thermal_conductivity");
+  params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
+                                             "specific_heat");
+  params.transferParam<MaterialPropertyName>(HeatConductionTimeDerivative::validParams(),
+                                             "density_name");
 
   // Boundary conditions
   params.addParam<std::vector<BoundaryName>>("heat_flux_boundaries",

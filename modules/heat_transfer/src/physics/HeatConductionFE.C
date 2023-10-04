@@ -33,7 +33,7 @@ HeatConductionFE::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.applyParameter(
-        parameters(), "thermal_conductivity", /*private=*/true, /*override_default=*/true);
+        parameters(), "thermal_conductivity", /*private=*/false, /*override_default=*/true);
     getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_conduction", params);
   }
   if (isParamValid("heat_source_var"))
@@ -46,10 +46,13 @@ HeatConductionFE::addFEKernels()
   }
   if (isTransient())
   {
-    const std::string kernel_type = "HeatConductionTimeDerivative";
+    const std::string kernel_type = "ADHeatConductionTimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    // TODO add C_p
+    params.applyParameter(
+        parameters(), "density_name", /*private=*/false, /*override_default=*/true);
+    params.applyParameter(
+        parameters(), "specific_heat", /*private=*/false, /*override_default=*/true);
     getProblem().addKernel(kernel_type, name() + "_" + _temperature_name + "_time", params);
   }
 }
