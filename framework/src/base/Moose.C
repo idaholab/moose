@@ -94,7 +94,6 @@ addActionTypes(Syntax & syntax)
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
   registerMooseObjectTask("add_physics",                  Physics,                false);
-  registerMooseObjectTask("add_physics_discretization",   Discretization,         false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
@@ -293,7 +292,6 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_default)"
                            "(create_problem_complete)"
                            "(add_physics)"
-                           "(add_physics_discretization)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -493,9 +491,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddPhysicsAction", "Physics/*");
   syntax.registerSyntaxType("Physics/*", "PhysicsName");
-
-  registerSyntax("AddPhysicsDiscretizationAction", "Physics/*/Discretization");
-  syntax.registerSyntaxType("Physics/*/Discretization", "DiscretizationName");
 
   registerSyntax("AddPositionsAction", "Positions/*");
   syntax.registerSyntaxType("Positions/*", "PositionsName");

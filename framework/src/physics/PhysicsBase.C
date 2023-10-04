@@ -10,9 +10,6 @@
 #include "PhysicsBase.h"
 #include "MooseUtils.h"
 
-// Discretizations can be created by the Physics
-#include "ContinuousGalerkin.h"
-
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 
@@ -26,11 +23,6 @@ PhysicsBase::validParams()
   MooseEnum transient_options("true false same_as_problem", "same_as_problem");
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
-
-  // Discretization
-  params.addParam<DiscretizationName>("discretization",
-                                      "Shorthand parameter for specifying a spatial discretization "
-                                      "strategy for the Physics at hand");
 
   return params;
 }
@@ -80,31 +72,4 @@ PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_i
                "but it's already defined as auxiliary");
   else
     return false;
-}
-
-void
-PhysicsBase::addDiscretization(const InputParameters & params)
-{
-  mooseAssert(!_discretization, "The discretization should not already exist");
-  std::string discretization_type;
-  if (isParamValid("discretization"))
-    discretization_type = getParam<DiscretizationName>("discretization");
-  else
-    discretization_type = params.get<std::string>("_type");
-
-  // Process potential short names
-  if (discretization_type == "cgfe")
-    discretization_type = "ContinuousGalerkin";
-
-  // Generate some default parameters if using a short-hand name
-  const InputParameters & discr_params =
-      isParamValid("discretization") ? getFactory().getValidParams(discretization_type) : params;
-
-  if (discretization_type == "ContinuousGalerkin")
-    _discretization = getFactory().create<ContinuousGalerkin>(
-        discretization_type, discretization_type, discr_params, 0);
-  else
-    paramError("discretization",
-               "Unrecognized discretization. You need to override addDiscretization() in your "
-               "derived class to enable it");
 }

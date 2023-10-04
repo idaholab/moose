@@ -76,13 +76,6 @@ AddPhysicsAction::act()
     _problem->addPhysics(_type, _name, _moose_object_pars);
     _physics = _problem->getPhysics(_name);
 
-    // Add the add_physics_discretization action if needed
-    if (_moose_object_pars.isParamSetByUser("discretization"))
-    {
-      _physics->addDiscretization(_moose_object_pars); // params wont be used
-      _physics->createDiscretizedPhysics();
-    }
-
     // Retrieve additional actions from the physics
 
     // TODO: Find a way to de-register a physics that does NOT use one of these actions
@@ -91,12 +84,12 @@ AddPhysicsAction::act()
     mooseAssert(_physics, "Physics should have been created as it must be the first action to run");
 
   if (_current_task == "add_variable")
-    _physics->PhysicsBase::addNonlinearVariables();
+    _physics->addNonlinearVariables();
   // else if (_current_task == "add_ic")
   //   for (const auto [type, name, params] : getInfo(_physics->getInitialConditions()))
   //     _problem->addBoundaryCondition(type, name, params);
   else if (_current_task == "add_kernel")
-    _physics->PhysicsBase::addFEKernels();
+    _physics->addFEKernels();
   // else if (_current_task == "add_nodal_kernel")
   //   for (const auto [type, name, params] : getInfo(_physics->getNodalKernels()))
   //     _problem->addKernel(type, name, params);
