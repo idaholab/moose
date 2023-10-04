@@ -126,8 +126,14 @@ HeatConductionFE::addFEBCs()
 void
 HeatConductionFE::addNonlinearVariables()
 {
-  // TODO Do not create it if it already exists
+  if (nonLinearVariableExists(_temperature_name, true))
+    return;
+
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
+
+  // Use the parameters defined in the discretization
+  getDiscretization().setVariableParams(_temperature_name, params);
+
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

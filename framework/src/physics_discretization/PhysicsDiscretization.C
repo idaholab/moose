@@ -49,4 +49,24 @@ PhysicsDiscretization::PhysicsDiscretization(const InputParameters & parameters)
     _var_orders(getParam<std::vector<MooseEnum>>("order")),
     _var_scalings(getParam<std::vector<Real>>("scaling"))
 {
+  // Check no duplicate
+  // Check same size
+}
+
+void
+PhysicsDiscretization::setVariableParams(const VariableName & name, InputParameters & params) const
+{
+  // Check if any parameters were passed for it
+  auto index = std::numeric_limits<unsigned int>::max();
+  for (const auto i : index_range(_var_names))
+    if (_var_names[i] == name)
+      index = i;
+
+  // Variable did not appear in the discretization object
+  if (index == std::numeric_limits<unsigned int>::max())
+    return;
+
+  params.set<MooseEnum>("family") = _var_families[index];
+  params.set<MooseEnum>("order") = _var_orders[index];
+  params.set<Real>("scaling") = _var_scalings[index];
 }

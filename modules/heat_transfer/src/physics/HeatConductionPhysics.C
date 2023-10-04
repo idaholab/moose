@@ -59,8 +59,10 @@ HeatConductionPhysics::HeatConductionPhysics(const InputParameters & parameters)
 void
 HeatConductionPhysics::createDiscretizedPhysics()
 {
-  std::cout << getDiscretization().type() << std::endl;
-  std::cout << getDiscretization().name() << std::endl;
   if (getDiscretization().type() == "ContinuousGalerkin")
     _discretized_physics = std::make_unique<HeatConductionFE>(parameters());
+
+  // Need to pass along the attributes.
+  // TODO: This isnt a good idea
+  _discretized_physics->setDiscretization(getDiscretization());
 }

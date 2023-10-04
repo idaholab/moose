@@ -76,6 +76,13 @@ AddPhysicsAction::act()
     _problem->addPhysics(_type, _name, _moose_object_pars);
     _physics = _problem->getPhysics(_name);
 
+    // Add the add_physics_discretization action if needed
+    if (_moose_object_pars.isParamSetByUser("discretization"))
+    {
+      _physics->addDiscretization(_moose_object_pars); // params wont be used
+      _physics->createDiscretizedPhysics();
+    }
+
     // Retrieve additional actions from the physics
 
     // TODO: Find a way to de-register a physics that does NOT use one of these actions

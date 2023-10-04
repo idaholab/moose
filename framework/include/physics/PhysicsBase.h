@@ -55,12 +55,13 @@ protected:
   /// Get the discretization object
   virtual PhysicsDiscretization & getDiscretization() { return *_discretization; }
 
-  /// Utilities to handle parameters
+  /// Utilities to check parameters
   void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
   template <typename T, typename S>
   void checkVectorParamsSameLength(std::string param1, std::string param2) const;
   template <typename T>
   void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
+  bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
   // TODO once design validated, make private, use a setter
   /// Pointer to the discretized physics object

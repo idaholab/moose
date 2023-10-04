@@ -30,6 +30,8 @@ public:
   /// Getter for the variables' scaling in the discretization
   std::vector<Real> getVariableScalings() const { return _var_scalings; }
 
+  void setVariableParams(const VariableName & name, InputParameters & params) const;
+
 private:
   /// Vector of the variable names
   std::vector<VariableName> _var_names;
