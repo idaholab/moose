@@ -94,6 +94,7 @@ TEST(CompileTimeDerivativesTest, evaluate)
   CTD_EVALTEST(cos(x), -10, 10, 0.72)
   CTD_EVALTEST(tan(x), -10, 10, 0.72)
   CTD_EVALTEST(exp(x), -2, 2, 0.1)
+  CTD_EVALTEST(erf(x), -2, 2, 0.1)
   CTD_EVALTEST(log(x), 0.1, 10, 0.1)
   CTD_EVALTEST(tanh(x), -10, 10, 0.1)
   CTD_EVALTEST(sinh(x), -4, 4, 0.1)
@@ -146,6 +147,7 @@ TEST(CompileTimeDerivativesTest, finitedifference)
   test(cos(x), -3, 3, 0.21);
   test(tan(x), -10, 10, 0.2, 1e-7);
   test(exp(x), -2, 2, 0.2);
+  test(erf(x), -2, 2, 0.2);
   test(log(x), 0.1, 3, 0.1);
   test(tanh(x), -10, 10, 0.2, 1e-7);
   test(sinh(x), -4, 4, 0.2);

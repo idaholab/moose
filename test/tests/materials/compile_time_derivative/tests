@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    issues = '#24872'
+    design = 'CompileTimeDerivativesMaterial.md'
+    requirement = 'The system to construct compile time derivative materials shall correctly evaluate all derivatives of a given expression.'
+  []
+[]

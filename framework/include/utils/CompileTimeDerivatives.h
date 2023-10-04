@@ -699,15 +699,26 @@ CT_OPERATORS_BINARY_MIX(int)
   class CTF##name : public CTUnary<T>                                                              \
   {                                                                                                \
   public:                                                                                          \
-    CTF##name(T arg) : CTUnary<T>(arg) {}                                                          \
-    auto operator()() const { return std::name(_arg()); }                                          \
+    CTF##name(T arg) : CTUnary<T>(arg)                                                             \
+    {                                                                                              \
+    }                                                                                              \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      return std::name(_arg());                                                                    \
+    }                                                                                              \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
       return derivative;                                                                           \
     }                                                                                              \
-    std::string print() const { return #name "(" + _arg.print() + ")"; }                           \
-    constexpr static int precedence() { return 2; }                                                \
+    std::string print() const                                                                      \
+    {                                                                                              \
+      return #name "(" + _arg.print() + ")";                                                       \
+    }                                                                                              \
+    constexpr static int precedence()                                                              \
+    {                                                                                              \
+      return 2;                                                                                    \
+    }                                                                                              \
     using typename CTUnary<T>::O;                                                                  \
     using CTUnary<T>::_arg;                                                                        \
   };                                                                                               \
@@ -744,15 +755,26 @@ CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag
   class CTF##name : public CTBinary<L, R>                                                          \
   {                                                                                                \
   public:                                                                                          \
-    CTF##name(L left, R right) : CTBinary<L, R>(left, right) {}                                    \
-    auto operator()() const { return std::name(_left(), _right()); }                               \
+    CTF##name(L left, R right) : CTBinary<L, R>(left, right)                                       \
+    {                                                                                              \
+    }                                                                                              \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      return std::name(_left(), _right());                                                         \
+    }                                                                                              \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
       return derivative;                                                                           \
     }                                                                                              \
-    std::string print() const { return #name "(" + _left.print() + ", " + _right.print() + ")"; }  \
-    constexpr static int precedence() { return 2; }                                                \
+    std::string print() const                                                                      \
+    {                                                                                              \
+      return #name "(" + _left.print() + ", " + _right.print() + ")";                              \
+    }                                                                                              \
+    constexpr static int precedence()                                                              \
+    {                                                                                              \
+      return 2;                                                                                    \
+    }                                                                                              \
     using typename CTBinary<L, R>::O;                                                              \
     using CTBinary<L, R>::_left;                                                                   \
     using CTBinary<L, R>::_right;                                                                  \

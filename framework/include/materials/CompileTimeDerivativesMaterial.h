@@ -61,16 +61,6 @@ num_derivatives()
   return factorial<N + M - 1>() / (factorial<N>() * factorial<M - 1>());
 }
 
-// Debug output
-template <std::size_t... ints>
-void
-print_sequence(std::index_sequence<ints...>)
-{
-  std::cout << "( ";
-  ((std::cout << ints << ' '), ...);
-  std::cout << ")\n";
-}
-
 /**
  * Merge two index sequences into one
  */
@@ -153,25 +143,6 @@ total_derivatives()
   // we compute derivatives of orders 0 up to and including N, and subtract 1 for
   // the 0th order derivative (underived original function)
   return details::total_derivatives<M>(std::make_index_sequence<N + 1>{}) - 1;
-}
-
-template <std::size_t Nmax, std::size_t I>
-constexpr void
-loop(std::index_sequence<> int_seq)
-{
-}
-template <std::size_t Nmax, std::size_t I, std::size_t first, std::size_t... tail>
-constexpr void
-loop(std::index_sequence<first, tail...> int_seq)
-{
-  if constexpr (is_sorted(int_seq))
-  {
-    std::cout << I << ' ';
-    details::print_sequence(int_seq);
-    loop<Nmax, I + 1>(details::increment<Nmax>(int_seq));
-  }
-  else
-    loop<Nmax, I>(details::increment<Nmax>(int_seq));
 }
 
 // shim for C++20 std::type_identity
