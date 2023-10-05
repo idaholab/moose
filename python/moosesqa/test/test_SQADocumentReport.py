@@ -44,5 +44,12 @@ class TestSQADocumentReport(unittest.TestCase):
         self.assertIn('log_rtm: 0', r)
         self.assertIn('log_google: 1', r)
 
+        # WARNING with deprecated doc
+        reporter = SQADocumentReport(required_documents=['rtm', 'google'], deprecated_documents={'goggle' : 'google'}, rtm='moose_rtm.md', goggle='https://www.google.com')
+        r = reporter.getReport()
+        self.assertEqual(reporter.status, SQAReport.Status.WARNING)
+        self.assertIn('log_rtm: 0', r)
+        self.assertIn('log_google: 1', r)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
