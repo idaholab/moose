@@ -73,6 +73,7 @@ private:
 
   using FunctorBase<VectorValue<T>>::evaluateDot;
   DotType evaluateDot(const FaceArg & face_arg, const StateArg & state) const override;
+  DotType evaluateDot(const ElemArg & elem_arg, const StateArg & state) const override;
 
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
   /// supplies one component functor during construction
@@ -198,5 +199,12 @@ typename VectorCompositeFunctor<T>::DotType
 VectorCompositeFunctor<T>::evaluateDot(const FaceArg & face_arg, const StateArg & state) const
 {
   return {_x_comp.dot(face_arg, state), _y_comp.dot(face_arg, state), _z_comp.dot(face_arg, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::DotType
+VectorCompositeFunctor<T>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
+{
+  return {_x_comp.dot(elem_arg, state), _y_comp.dot(elem_arg, state), _z_comp.dot(elem_arg, state)};
 }
 }
