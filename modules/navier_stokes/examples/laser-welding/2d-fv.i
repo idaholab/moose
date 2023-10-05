@@ -3,7 +3,7 @@ endtime=${fparse 3 * period} # s
 timestep=${fparse period / 100} # s
 surfacetemp=2700 # K
 bottomtemp=2700 # K
-sb=5.67e-8 # W/(m^2 K^4)
+# sb=5.67e-8 # W/(m^2 K^4)
 advected_interp_method='upwind'
 velocity_interp_method='rc'
 rho='rho'
@@ -38,10 +38,30 @@ cp='cp'
   []
 []
 
+[Problem]
+  # extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation'
+  extra_tag_vectors = 'e_time e_advection e_conduction e_laser'
+[]
+
 [AuxVariables]
   [mu_out]
     type = MooseVariableFVReal
   []
+  [e_time]
+    type = MooseVariableFVReal
+  []
+  [e_advection]
+    type = MooseVariableFVReal
+  []
+  [e_conduction]
+    type = MooseVariableFVReal
+  []
+  [e_laser]
+    type = MooseVariableFVReal
+  []
+  # [e_radiation]
+  #   type = MooseVariableFVReal
+  # []
 []
 
 [AuxKernels]
@@ -51,6 +71,41 @@ cp='cp'
     variable = mu_out
     execute_on = timestep_end
   []
+  [e_time]
+    variable = e_time
+    vector_tag = e_time
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  [e_advection]
+    variable = e_advection
+    vector_tag = e_advection
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  [e_conduction]
+    variable = e_conduction
+    vector_tag = e_conduction
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  [e_laser]
+    variable = e_laser
+    vector_tag = e_laser
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  # [e_radiation]
+  #   variable = e_radiation
+  #   vector_tag = e_radiation
+  #   v = T
+  #   execute_on = 'timestep_end'
+  #   type = TagVectorAux
+  # []
 []
 
 [Variables]
@@ -175,17 +230,20 @@ cp='cp'
     rho = ${rho}
     cp = ${cp}
     use_displaced_mesh = true
+    extra_vector_tags = 'e_time'
   []
   [temperature_advection]
     type = INSFVEnergyAdvection
     variable = T
     use_displaced_mesh = true
+    extra_vector_tags = 'e_advection'
   []
   [temperature_conduction]
     type = FVDiffusion
     coeff = 'k'
     variable = T
     use_displaced_mesh = true
+    extra_vector_tags = 'e_conduction'
   []
 []
 
@@ -220,21 +278,22 @@ cp='cp'
     use_displaced_mesh = true
   []
   # energy boundary conditions
-  [T_cold]
-    type = FVDirichletBC
-    variable = T
-    boundary = 'bottom'
-    value = '${bottomtemp}'
-  []
-  [radiation_flux]
-    type = FVFunctorRadiativeBC
-    variable = T
-    boundary = 'top'
-    emissivity = '1'
-    Tinfinity = 300
-    stefan_boltzmann_constant = ${sb}
-    use_displaced_mesh = true
-  []
+  # [T_cold]
+  #   type = FVDirichletBC
+  #   variable = T
+  #   boundary = 'bottom'
+  #   value = '${bottomtemp}'
+  # []
+  # [radiation_flux]
+  #   type = FVFunctorRadiativeBC
+  #   variable = T
+  #   boundary = 'top'
+  #   emissivity = '1'
+  #   Tinfinity = 300
+  #   stefan_boltzmann_constant = ${sb}
+  #   use_displaced_mesh = true
+  #   extra_vector_tags = 'e_radiation'
+  # []
   [weld_flux]
     type = FVGaussianEnergyFluxBC
     variable = T
@@ -245,6 +304,7 @@ cp='cp'
     y_beam_coord = 0
     z_beam_coord = 0
     use_displaced_mesh = true
+    extra_vector_tags = 'e_laser'
   []
 []
 
@@ -347,8 +407,38 @@ cp='cp'
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Debug]
   show_var_residual_norms = true
+[]
+
+[Postprocessors]
+  [laser_flux]
+    type = VectorSum
+    vector = 'e_laser'
+  []
+  [volume_rho_cp_dT]
+    type = VectorSum
+    vector = 'e_time'
+  []
+  [conduction]
+    type = VectorSum
+    vector = 'e_conduction'
+  []
+  [advection]
+    type = VectorSum
+    vector = 'e_advection'
+  []
+  [advection_plus_conduction]
+    type = ParsedPostprocessor
+    function = 'advection + conduction'
+    pp_names = 'conduction advection'
+  []
+  [total_sum]
+    type = ParsedPostprocessor
+    function = 'laser_flux + volume_rho_cp_dT + advection_plus_conduction'
+    pp_names = 'laser_flux volume_rho_cp_dT advection_plus_conduction'
+  []
 []
