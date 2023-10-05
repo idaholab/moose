@@ -3,7 +3,7 @@ endtime=${fparse 3 * period} # s
 timestep=${fparse period / 100} # s
 surfacetemp=2700 # K
 bottomtemp=2700 # K
-# sb=5.67e-8 # W/(m^2 K^4)
+sb=5.67e-8 # W/(m^2 K^4)
 advected_interp_method='upwind'
 velocity_interp_method='rc'
 rho='rho'
@@ -39,8 +39,7 @@ cp='cp'
 []
 
 [Problem]
-  # extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation'
-  extra_tag_vectors = 'e_time e_advection e_conduction e_laser'
+  extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation'
 []
 
 [AuxVariables]
@@ -59,9 +58,9 @@ cp='cp'
   [e_laser]
     type = MooseVariableFVReal
   []
-  # [e_radiation]
-  #   type = MooseVariableFVReal
-  # []
+  [e_radiation]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -99,13 +98,13 @@ cp='cp'
     execute_on = 'timestep_end'
     type = TagVectorAux
   []
-  # [e_radiation]
-  #   variable = e_radiation
-  #   vector_tag = e_radiation
-  #   v = T
-  #   execute_on = 'timestep_end'
-  #   type = TagVectorAux
-  # []
+  [e_radiation]
+    variable = e_radiation
+    vector_tag = e_radiation
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
 []
 
 [Variables]
@@ -131,7 +130,7 @@ cp='cp'
   [T]
     type = FunctionIC
     variable = T
-    function = '2700 + ((${surfacetemp} - ${bottomtemp}) / .35e-3) * y'
+    function = '${surfacetemp} + ((${surfacetemp} - ${bottomtemp}) / .35e-3) * y'
   []
 []
 
@@ -280,22 +279,22 @@ cp='cp'
     use_displaced_mesh = true
   []
   # energy boundary conditions
-  # [T_cold]
-  #   type = FVDirichletBC
-  #   variable = T
-  #   boundary = 'bottom'
-  #   value = '${bottomtemp}'
-  # []
-  # [radiation_flux]
-  #   type = FVFunctorRadiativeBC
-  #   variable = T
-  #   boundary = 'top'
-  #   emissivity = '1'
-  #   Tinfinity = 300
-  #   stefan_boltzmann_constant = ${sb}
-  #   use_displaced_mesh = true
-  #   extra_vector_tags = 'e_radiation'
-  # []
+  [T_cold]
+    type = FVDirichletBC
+    variable = T
+    boundary = 'bottom'
+    value = '${bottomtemp}'
+  []
+  [radiation_flux]
+    type = FVFunctorRadiativeBC
+    variable = T
+    boundary = 'top'
+    emissivity = '1'
+    Tinfinity = 300
+    stefan_boltzmann_constant = ${sb}
+    use_displaced_mesh = true
+    extra_vector_tags = 'e_radiation'
+  []
   [weld_flux]
     type = FVGaussianEnergyFluxBC
     variable = T
@@ -438,9 +437,13 @@ cp='cp'
     function = 'advection + conduction'
     pp_names = 'conduction advection'
   []
+  [radiation]
+    type = VectorSum
+    vector = 'e_radiation'
+  []
   [total_sum]
     type = ParsedPostprocessor
-    function = 'laser_flux + volume_rho_cp_dT + advection_plus_conduction'
-    pp_names = 'laser_flux volume_rho_cp_dT advection_plus_conduction'
+    function = 'laser_flux + volume_rho_cp_dT + advection_plus_conduction + radiation'
+    pp_names = 'laser_flux volume_rho_cp_dT advection_plus_conduction radiation'
   []
 []
