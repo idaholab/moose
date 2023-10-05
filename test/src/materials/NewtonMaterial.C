@@ -58,13 +58,14 @@ NewtonMaterial::computeQpProperties()
   // NestedSolve class will always evaluate the residual for the initial guess (and will return a
   // success state if the initial guess was exact).
   if (getParam<unsigned int>("max_iterations") > 0)
-    _nested_solve.nonlinear(_p[_qp],
-                            // Functor to compute residual and jacobian. The initial guess is not
-                            // used here as it (_p) is directly coupled in the discrete material.
-                            [&](const Real & /*guess*/, Real & r, Real & j)
-                            {
-                              _discrete->computePropertiesAtQp(_qp);
-                              r = _f[_qp];
-                              j = _f_prime[_qp];
-                            });
+    _nested_solve.nonlinear(
+        _p[_qp],
+        // Lambda function to compute residual and jacobian. The initial guess is not
+        // used here as it (_p) is directly coupled in the discrete material.
+        [&](const Real & /*guess*/, Real & r, Real & j)
+        {
+          _discrete->computePropertiesAtQp(_qp);
+          r = _f[_qp];
+          j = _f_prime[_qp];
+        });
 }

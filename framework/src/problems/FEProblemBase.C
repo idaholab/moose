@@ -7649,7 +7649,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     }
     else if (_n_nl_pingpong > _n_max_nl_pingpong)
     {
-      oss << "Diverged due to maximum non linear residual pingpong achieved" << '\n';
+      oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
     }
   }

@@ -187,12 +187,12 @@ protected:
   bool isConverged(Real r0_square, Real r_square, bool acceptable);
 
 private:
-  /// Build a suitable Eigen adaptor functor
-  template <bool store_redidual_norm, typename R, typename J>
+  /// Build a suitable Eigen adaptor functors to interface between moose and Eigen types
+  template <bool store_residual_norm, typename R, typename J>
   auto make_adaptor(R & residual, J & jacobian);
-  template <bool store_redidual_norm, typename R, typename J>
+  template <bool store_residual_norm, typename R, typename J>
   auto make_real_adaptor(R & residual, J & jacobian);
-  template <bool store_redidual_norm, typename R, typename J>
+  template <bool store_residual_norm, typename R, typename J>
   auto make_realvector_adaptor(R & residual, J & jacobian);
 };
 
@@ -532,7 +532,7 @@ struct CorrespondingJacobianTempl<typename Eigen::Matrix<ADReal, N, 1>>
  * Adaptor functor for Eigen::Matrix based residual and Jacobian types. No type conversion
  * required.
  */
-template <bool is_ad, typename R, typename J, bool store_redidual_norm>
+template <bool is_ad, typename R, typename J, bool store_residual_norm>
 class DynamicMatrixEigenAdaptorFunctor
 {
   using V = typename NestedSolveTempl<is_ad>::DynamicVector;
@@ -545,7 +545,7 @@ public:
   int operator()(V & guess, V & residual)
   {
     _residual_lambda(guess, residual);
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       _residual_norm = NestedSolveTempl<is_ad>::normSquare(residual);
     return 0;
   }
@@ -557,7 +557,7 @@ public:
 
   const Real & getResidualNorm()
   {
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       return _residual_norm;
   }
 
@@ -572,7 +572,7 @@ private:
  * Adaptor functor for scalar Real valued residual and Jacobian types. Picks the single scalar
  * component.
  */
-template <bool is_ad, typename R, typename J, bool store_redidual_norm>
+template <bool is_ad, typename R, typename J, bool store_residual_norm>
 class RealEigenAdaptorFunctor
 {
   using V = typename NestedSolveTempl<is_ad>::DynamicVector;
@@ -585,7 +585,7 @@ public:
   int operator()(V & guess, V & residual)
   {
     _residual_lambda(guess(0), residual(0));
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       _residual_norm = NestedSolveTempl<is_ad>::normSquare(residual(0));
     return 0;
   }
@@ -597,7 +597,7 @@ public:
 
   const Real & getResidualNorm()
   {
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       return _residual_norm;
   }
 
@@ -612,7 +612,7 @@ private:
  * Adaptor functor for MOOSE RealVectorValue/RankTwoTensor residual and Jacobian types. Performs
  * type conversion.
  */
-template <bool is_ad, typename R, typename J, bool store_redidual_norm>
+template <bool is_ad, typename R, typename J, bool store_residual_norm>
 class RealVectorEigenAdaptorFunctor
 {
   using V = typename NestedSolveTempl<is_ad>::DynamicVector;
@@ -630,7 +630,7 @@ public:
     residual(0) = residual_moose(0);
     residual(1) = residual_moose(1);
     residual(2) = residual_moose(2);
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       _residual_norm = NestedSolveTempl<is_ad>::normSquare(residual);
     return 0;
   }
@@ -646,7 +646,7 @@ public:
 
   const Real & getResidualNorm()
   {
-    if constexpr (store_redidual_norm)
+    if constexpr (store_residual_norm)
       return _residual_norm;
   }
 
@@ -660,28 +660,28 @@ private:
 } // namespace NestedSolveInternal
 
 template <bool is_ad>
-template <bool store_redidual_norm, typename R, typename J>
+template <bool store_residual_norm, typename R, typename J>
 auto
 NestedSolveTempl<is_ad>::make_adaptor(R & residual_lambda, J & jacobian_lambda)
 {
-  return NestedSolveInternal::DynamicMatrixEigenAdaptorFunctor<is_ad, R, J, store_redidual_norm>(
+  return NestedSolveInternal::DynamicMatrixEigenAdaptorFunctor<is_ad, R, J, store_residual_norm>(
       residual_lambda, jacobian_lambda);
 }
 template <bool is_ad>
-template <bool store_redidual_norm, typename R, typename J>
+template <bool store_residual_norm, typename R, typename J>
 auto
 NestedSolveTempl<is_ad>::make_real_adaptor(R & residual_lambda, J & jacobian_lambda)
 {
-  return NestedSolveInternal::RealEigenAdaptorFunctor<is_ad, R, J, store_redidual_norm>(
+  return NestedSolveInternal::RealEigenAdaptorFunctor<is_ad, R, J, store_residual_norm>(
       residual_lambda, jacobian_lambda);
 }
 
 template <bool is_ad>
-template <bool store_redidual_norm, typename R, typename J>
+template <bool store_residual_norm, typename R, typename J>
 auto
 NestedSolveTempl<is_ad>::make_realvector_adaptor(R & residual_lambda, J & jacobian_lambda)
 {
-  return NestedSolveInternal::RealVectorEigenAdaptorFunctor<is_ad, R, J, store_redidual_norm>(
+  return NestedSolveInternal::RealVectorEigenAdaptorFunctor<is_ad, R, J, store_residual_norm>(
       residual_lambda, jacobian_lambda);
 }
 

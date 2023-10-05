@@ -29,13 +29,13 @@ NestedSolveTempl<is_ad>::validParams()
   params.addParam<unsigned int>(
       "min_iterations",
       minIterationsDefault(),
-      "Minimum number of non linear iterations to execute before accepting convergence");
+      "Minimum number of nonlinear iterations to execute before accepting convergence");
   params.addParam<unsigned int>(
-      "max_iterations", maxIterationsDefault(), "Maximum number of non linear iterations");
+      "max_iterations", maxIterationsDefault(), "Maximum number of nonlinear iterations");
   params.addParam<Real>("acceptable_multiplier",
                         acceptableMultiplierDefault(),
                         "Factor applied to relative and absolute "
-                        "tolerance for acceptable convergence if "
+                        "tolerance for acceptable nonlinear convergence if "
                         "iterations are no longer making progress");
   return params;
 }

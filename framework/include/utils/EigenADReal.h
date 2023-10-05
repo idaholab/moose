@@ -101,7 +101,6 @@ struct gebp_kernel<ADReal, ADReal, Index, DataMapper, 1, 1, ConjugateLhs, Conjug
       strideB = depth;
 
     for (Index i = 0; i < rows; ++i)
-    {
       for (Index j = 0; j < cols; ++j)
       {
         const ADReal * A = blockA + i * strideA + offsetA;
@@ -112,7 +111,6 @@ struct gebp_kernel<ADReal, ADReal, Index, DataMapper, 1, 1, ConjugateLhs, Conjug
           acc1 += A[k] * B[k];
         res(i, j) += acc1 * alpha;
       }
-    }
   }
 };
 
