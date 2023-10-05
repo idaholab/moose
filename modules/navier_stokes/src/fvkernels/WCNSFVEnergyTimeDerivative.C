@@ -22,12 +22,17 @@ WCNSFVEnergyTimeDerivative::validParams()
 
   params.addRequiredParam<MooseFunctorName>(NS::time_deriv(NS::density),
                                             "The time derivative of the density material property");
+  params.addParam<MooseFunctorName>(
+      NS::time_deriv(NS::cp),
+      0,
+      "The time derivative of the constant pressure specific heat capacity");
   return params;
 }
 
 WCNSFVEnergyTimeDerivative::WCNSFVEnergyTimeDerivative(const InputParameters & params)
   : INSFVEnergyTimeDerivative(params),
-    _rho_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::density))))
+    _rho_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::density)))),
+    _cp_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::cp))))
 {
 }
 
@@ -37,5 +42,7 @@ WCNSFVEnergyTimeDerivative::computeQpResidual()
   const auto & elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
   return INSFVEnergyTimeDerivative::computeQpResidual() +
-         _rho_dot(elem_arg, state) * _cp(elem_arg, state) * _var(elem_arg, state);
+         (_rho_dot(elem_arg, state) * _cp(elem_arg, state) +
+          _cp_dot(elem_arg, state) * _rho(elem_arg, state)) *
+             _var(elem_arg, state);
 }

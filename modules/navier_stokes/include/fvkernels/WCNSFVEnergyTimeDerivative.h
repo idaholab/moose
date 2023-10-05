@@ -26,4 +26,7 @@ protected:
 
   /// Functor for the time derivative of density, material property or variable
   const Moose::Functor<ADReal> & _rho_dot;
+
+  /// Functor for the time derivative of the constant pressure specific heat capacity
+  const Moose::Functor<ADReal> & _cp_dot;
 };

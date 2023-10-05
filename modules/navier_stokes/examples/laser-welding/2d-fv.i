@@ -225,10 +225,12 @@ cp='cp'
   []
   # energy equation
   [temperature_time]
-    type = INSFVEnergyTimeDerivative
+    type = WCNSFVEnergyTimeDerivative
     variable = T
     rho = ${rho}
     cp = ${cp}
+    drho_dt = drho_dt
+    dcp_dt = dcp_dt
     use_displaced_mesh = true
     extra_vector_tags = 'e_time'
   []

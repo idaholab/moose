@@ -42,11 +42,6 @@ AriaLaserWeld304LStainlessSteelFunctorMaterial::validParams()
   params.addParam<Real>("Tbound1", 0, "The first temperature bound");
   params.addParam<Real>("Tbound2", 170, "The second temperature bound");
   params.addRequiredParam<MooseFunctorName>(NS::temperature, "The temperature in K");
-  params.addParam<MooseFunctorName>(NS::mu, NS::mu, "The name of the viscosity material property");
-  params.addParam<MooseFunctorName>(NS::k, NS::k, "The name of the thermal conductivity");
-  params.addParam<MooseFunctorName>(NS::cp, NS::cp, "The name of the specific heat capacity");
-  params.addParam<MooseFunctorName>(NS::density, NS::density, "The name of the density");
-  params.addParam<MooseFunctorName>("rc_pressure", "rc_pressure", "The recoil pressure");
   return params;
 }
 
@@ -98,7 +93,12 @@ AriaLaserWeld304LStainlessSteelFunctorMaterial::AriaLaserWeld304LStainlessSteelF
   addFunctorProperty<ADReal>(NS::cp,
                              [this](const auto & r, const auto & t)
                              { return _c_cp0 + _c_cp1 * _temperature(r, t); });
+  addFunctorProperty<ADReal>(NS::time_deriv(NS::cp),
+                             [this](const auto & r, const auto & t)
+                             { return _c_cp1 * _temperature.dot(r, t); });
   addFunctorProperty<ADReal>(NS::density, [this](const auto &, const auto &) { return _c_rho0; });
+  addFunctorProperty<ADReal>(NS::time_deriv(NS::density),
+                             [](const auto &, const auto &) { return 0; });
   addFunctorProperty<ADReal>(
       "rc_pressure",
       [this](const auto & r, const auto & t)
