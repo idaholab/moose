@@ -29,6 +29,36 @@ public:
 protected:
 private:
   void addNonlinearVariables() override;
+  void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
+  void addMaterials() override;
+  void addUserObjects() override;
+  void addPostprocessors() override;
+
+  /// Function adding kernels for the incompressible continuity equation
+  void addINSMassKernels();
+
+  /**
+   * Functions adding kernels for the incompressible momentum equation
+   * If the material properties are not constant, these can be used for
+   * weakly-compressible simulations (except the Boussinesq kernel) as well.
+   */
+  void addINSMomentumTimeKernels();
+  void addINSMomentumViscousDissipationKernels();
+  void addINSMomentumMixingLengthKernels();
+  void addINSMomentumAdvectionKernels();
+  void addINSMomentumPressureKernels();
+  void addINSMomentumGravityKernels();
+  void addINSMomentumBoussinesqKernels();
+  void addINSMomentumFrictionKernels();
+
+  /// Functions which add time kernels for transient, weakly-compressible simulations.
+  void addWCNSMassTimeKernels();
+  void addWCNSMomentumTimeKernels();
+
+  /// The type of the pressure interpolation method
+  // const MooseEnum _pressure_face_interpolation;
+  // /// The type of the face interpolation method for the velocity/momentum
+  // const MooseEnum _momentum_face_interpolation;
 };
