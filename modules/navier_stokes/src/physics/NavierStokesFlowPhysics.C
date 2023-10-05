@@ -21,16 +21,22 @@ NavierStokesFlowPhysics::validParams()
   // If we remove these objects, or change their parameters, these parameters should be updated
   // Downstream actions must either implement all these options, or redefine the parameter with
   // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
+  // We mostly pull the boundary parameters from NSFV Action
 
   params.transferParam<RealVectorValue>(NSFVAction::validParams(), "gravity");
 
-  // Pull the variables from the NSFV Action
+  // Variables
   params.transferParam<std::vector<std::string>>(NSFVAction::validParams(), "velocity_variable");
   params.transferParam<NonlinearVariableName>(NSFVAction::validParams(), "pressure_variable");
   params.transferParam<NonlinearVariableName>(NSFVAction::validParams(),
                                               "fluid_temperature_variable");
 
-  // Pull the boundary parameters from NSFV Action
+  // Most downstream physics implementations are valid for porous media too
+  // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
+  params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
+  params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
+
+  // Boundary conditions are a general concept for fluid flow
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "inlet_boundaries");
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "outlet_boundaries");
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "wall_boundaries");
@@ -46,7 +52,33 @@ NavierStokesFlowPhysics::validParams()
 }
 
 NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & parameters)
-  : PhysicsBase(parameters)
+  : PhysicsBase(parameters),
+    _compressibility(parameters.get<MooseEnum>("compressibility")),
+    _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
+    _porosity_name(parameters.get<MooseFunctorName>("porosity")),
+    _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
+                                        getParam<unsigned short>("porosity_smoothing_layers")
+                                    ? NS::smoothed_porosity
+                                    : _porosity_name),
+    _porosity_smoothing_layers(getParam<unsigned short>("porosity_smoothing_layers")),
+    _velocity_names(
+        isParamValid("velocity_variable")
+            ? getParam<std::vector<std::string>>("velocity_variable")
+            : (_porous_medium_treatment
+                   ? std::vector<std::string>(NS::superficial_velocity_vector,
+                                              NS::superficial_velocity_vector + 3)
+                   : std::vector<std::string>(NS::velocity_vector, NS::velocity_vector + 3))),
+    _pressure_name(isParamValid("pressure_variable")
+                       ? getParam<NonlinearVariableName>("pressure_variable")
+                       : NS::pressure),
+    _fluid_temperature_name(isParamValid("fluid_temperature_variable")
+                                ? getParam<NonlinearVariableName>("fluid_temperature_variable")
+                                : NS::T_fluid),
+    _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
+    _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
+    _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
+    _density_name(parameters.get<MooseFunctorName>("density")),
+    _dynamic_viscosity_name(parameters.get<MooseFunctorName>("dynamic_viscosity"))
 {
   // Parameter checking
   checkVectorParamsSameLength<BoundaryName, MooseEnum>("inlet_boundaries", "momentum_inlet_types");
@@ -55,4 +87,15 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
   checkVectorParamsSameLength<BoundaryName, MooseEnum>("wall_boundaries", "momentum_wall_types");
   checkVectorParamsNoOverlap<BoundaryName>(
       {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
+}
+
+MooseFunctorName
+NavierStokesFlowPhysics::getPorosityFunctorName(bool smoothed) const
+{
+  mooseAssert(!smoothed || !_porosity_smoothing_layers,
+              "Smooth porosity cannot be used without the smoothing treatment turned on");
+  if (smoothed)
+    return _flow_porosity_functor_name;
+  else
+    return _porosity_name;
 }
