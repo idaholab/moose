@@ -99,11 +99,15 @@ protected:
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  template <typename T, typename S>
+  void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
   /// Check that there is no overlap between the items in each vector parameters
   /// Each vector parameter should also have unique items
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
-
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
+                                    const bool should_be_defined) const;
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
@@ -231,6 +235,24 @@ PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
   else if (isParamValid(param1) || isParamValid(param2))
     if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
       checkParamsBothSetOrNotSet(param1, param2);
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const
+{
+  checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
+  if (isParamValid(param1))
+  {
+    const auto value1 = getParam<std::vector<std::vector<T>>>(param1);
+    const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
+    for (const auto index : index_range(value1))
+      if (value1[index].size() != value2[index].size())
+        paramError(
+            param1,
+            "Vector at index " + std::to_string(index) + " of 2D vector parameter " + param1 +
+                " is not the same size as its counterpart from 2D vector parameter " + param2);
+  }
 }
 
 template <typename T>
