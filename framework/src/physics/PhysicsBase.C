@@ -24,6 +24,15 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
+  // Restart parameters
+  // params.addParam<bool>("initialize_variables_from_mesh_file",
+  //                       false,
+  //                       "Determines if the variables that are added by the action are initialized
+  //                       " "from the mesh file (only for Exodus format)");
+  // params.addParam<std::string>(
+  //     "initial_from_file_timestep",
+  //     "LATEST",
+  //     "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   return params;
 }
 
@@ -37,6 +46,9 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
 
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
+
+  // checkSecondParamSetOnlyIfFirstOne("initialize_variables_from_mesh_file",
+  //                                   "initial_from_file_timestep");
 }
 
 bool
@@ -72,4 +84,27 @@ PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_i
                "but it's already defined as auxiliary");
   else
     return false;
+}
+
+void
+PhysicsBase::checkDependentParameterError(const std::string & main_parameter,
+                                          const std::vector<std::string> & dependent_parameters,
+                                          const bool should_be_defined) const
+{
+  for (const auto & param : dependent_parameters)
+    if (parameters().isParamSetByUser(param) == !should_be_defined)
+      paramError(param,
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
+}
+
+void
+PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const
+{
+  // We only set the blocks if we don't have `ANY_BLOCK_ID` defined because the subproblem
+  // (through the mesh) errors out if we use this keyword during the addVariable/Kernel
+  // functions
+  if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
+    params.set<std::vector<SubdomainName>>("block") = blocks;
 }

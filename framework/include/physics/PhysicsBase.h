@@ -53,20 +53,41 @@ protected:
   // virtual const MooseMesh & getMesh() const override { return *_mesh; }
 
   /// Utilities to check parameters
+  /// These will be replaced by being baked into the validParams() logic, one day
   void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
   template <typename T, typename S>
   void checkVectorParamsSameLength(std::string param1, std::string param2) const;
+  template <typename T, typename S>
+  void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
   template <typename T>
   void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
   bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
+                                    const bool should_be_defined) const;
 
 private:
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
   /// We keep these private for now, may become public soon
   virtual void addNonlinearVariables() {}
+  virtual void addInitialConditions(){};
   virtual void addFEKernels() {}
   virtual void addFEBCs() {}
+  virtual void addFVKernels() {}
+  virtual void addFVBCs() {}
+  virtual void addMaterials() {}
+  virtual void addFunctorMaterials() {}
+  virtual void addUserObjects() {}
+  virtual void addPostprocessors() {}
+
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/) {}
+
+  /// Assign the necessary blocks to the input parameters
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /// Checks if the variables created outside of the physics are restricted to the same blocks
+  // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
+  // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
@@ -99,10 +120,32 @@ PhysicsBase::checkVectorParamsSameLength(std::string param1, std::string param2)
                MooseUtils::prettyCppType<S>(),
                ". Check your code.");
   if (isParamValid(param1))
-    if (getParam<std::vector<T>>(param1).size() != getParam<std::vector<S>>(param2).size())
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (size_1 != size_2)
       paramError(param1,
-                 "Vector parameters " + param1 + " and " + param2 +
-                     " must be the same length if set");
+                 "Vector parameters " + param1 + "(size " + std::to_string(size_1) + ") and " +
+                     param2 + "(size " + std::to_string(size_2) + ") must be the same size");
+  }
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const
+{
+  checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
+  if (isParamValid(param1))
+  {
+    const auto value1 = getParam<std::vector<std::vector<T>>>(param1);
+    const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
+    for (const auto index : index_range(value1))
+      if (value1[index].size() != value2[index].size())
+        paramError(
+            param1,
+            "Vector at index " + std::to_string(index) + " of 2D vector parameter " + param1 +
+                " is not the same size as its counterpart from 2D vector parameter " + param2);
+  }
 }
 
 template <typename T>

@@ -85,17 +85,17 @@ AddPhysicsAction::act()
 
   if (_current_task == "add_variable")
     _physics->addNonlinearVariables();
-  // else if (_current_task == "add_ic")
-  //   for (const auto [type, name, params] : getInfo(_physics->getInitialConditions()))
-  //     _problem->addBoundaryCondition(type, name, params);
+  else if (_current_task == "add_ic")
+    _physics->addInitialConditions();
+
   else if (_current_task == "add_kernel")
     _physics->addFEKernels();
   // else if (_current_task == "add_nodal_kernel")
   //   for (const auto [type, name, params] : getInfo(_physics->getNodalKernels()))
   //     _problem->addKernel(type, name, params);
-  // else if (_current_task == "add_fv_kernel")
-  //   for (const auto [type, name, params] : getInfo(_physics->getFVKernels()))
-  //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_fv_kernel")
+    _physics->addFVKernels();
+
   // else if (_current_task == "add_dirac_kernel")
   //   for (const auto [type, name, params] : getInfo(_physics->getDiracKernels()))
   //     _problem->addKernel(type, name, params);
@@ -117,30 +117,34 @@ AddPhysicsAction::act()
   // else if (_current_task == "add_nodal_bc")
   //   for (const auto [type, name, params] : getInfo(_physics->getNodalBCs()))
   //     _problem->addKernel(type, name, params);
-  // else if (_current_task == "add_fv_bc")
-  //   for (const auto [type, name, params] : getInfo(_physics->getFVBCs()))
-  //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_fv_bc")
+    _physics->addFVBCs();
+
   // else if (_current_task == "add_periodic_bc")
   //   for (const auto [type, name, params] : getInfo(_physics->getPeriodicBCs()))
   //     _problem->addKernel(type, name, params);
   // else if (_current_task == "add_function")
   //   for (const auto [type, name, params] : getInfo(_physics->getFunctions()))
   //     _problem->addKernel(type, name, params);
-  // else if (_current_task == "add_user_object")
-  //   for (const auto [type, name, params] : getInfo(_physics->getUserObjects()))
-  //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_user_object")
+    _physics->addUserObjects();
+
   // else if (_current_task == "add_aux_variable")
   //   for (const auto [type, name, params] : getInfo(_physics->getAuxiliaryVariables()))
   //     _problem->addKernel(type, name, params);
   // else if (_current_task == "add_aux_kernel")
   //   for (const auto [type, name, params] : getInfo(_physics->getAuxiliaryKernels()))
   //     _problem->addKernel(type, name, params);
-  // // else if (_current_task == "add_postprocessor")
-  // //   for (const auto [type, name, params] : getInfo(_physics->getPostprocessors()))
-  // //     _problem->addKernel(type, name, params);
-  // // else if (_current_task == "add_vector_postprocessor")
-  // //   for (const auto [type, name, params] : getInfo(_physics->getVectorPostprocessors()))
-  // //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_material")
+    _physics->addMaterials();
+  else if (_current_task == "add_functor_material")
+    _physics->addFunctorMaterials();
+  else if (_current_task == "add_postprocessor")
+    _physics->addPostprocessors();
+
+  // else if (_current_task == "add_vector_postprocessor")
+  //   for (const auto [type, name, params] : getInfo(_physics->getVectorPostprocessors()))
+  //     _problem->addKernel(type, name, params);
   // // else if (_current_task == "add_reporter")
   // //   for (const auto [type, name, params] : getInfo(_physics->getReporters()))
   // //     _problem->addKernel(type, name, params);
@@ -156,4 +160,13 @@ AddPhysicsAction::act()
   // else if (_current_task == "add_executor")
   //   for (const auto [type, name, params] : getInfo(_physics->getExecutors()))
   //     _problem->addKernel(type, name, params);
+}
+
+void
+AddPhysicsAction::addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/)
+{
+  // The physics does not exist at this point. We're going to have to look at parameters of the
+  // physics
+  // mooseAssert(_physics, "Should have a physics");
+  // _physics->addRelationshipManagers(input_rm_type); //, _moose_object_pars);
 }
