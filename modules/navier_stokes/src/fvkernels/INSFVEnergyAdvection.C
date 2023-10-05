@@ -9,6 +9,7 @@
 
 #include "INSFVEnergyAdvection.h"
 #include "INSFVEnergyVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVEnergyAdvection);
 
@@ -19,7 +20,7 @@ INSFVEnergyAdvection::validParams()
   params.addClassDescription("Advects energy, e.g. rho*cp*T. A user may still override what "
                              "quantity is advected, but the default is rho*cp*T");
   params.addParam<MooseFunctorName>(
-      "advected_quantity", "rho_cp_temp", "The heat quantity to advect.");
+      "advected_quantity", NS::enthalpy_density, "The heat quantity to advect.");
   return params;
 }
 

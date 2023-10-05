@@ -90,12 +90,29 @@ AriaLaserWeld304LStainlessSteelFunctorMaterial::AriaLaserWeld304LStainlessSteelF
       });
   addFunctorProperty<ADReal>(
       NS::k, [this](const auto & r, const auto & t) { return _c_k0 + _c_k1 * _temperature(r, t); });
+
   addFunctorProperty<ADReal>(NS::cp,
                              [this](const auto & r, const auto & t)
                              { return _c_cp0 + _c_cp1 * _temperature(r, t); });
+  const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
+                                              [this](const auto & r, const auto & t)
+                                              {
+                                                const auto T = _temperature(r, t);
+                                                return _c_cp0 * T + _c_cp1 * Utility::pow<2>(T) / 2;
+                                              });
+  addFunctorProperty<ADReal>(NS::time_deriv(NS::specific_enthalpy),
+                             [this](const auto & r, const auto & t)
+                             {
+                               const auto T_dot = _temperature.dot(r, t);
+                               return _c_cp0 * T_dot + _c_cp1 * _temperature(r, t) * T_dot;
+                             });
   addFunctorProperty<ADReal>(NS::density, [this](const auto &, const auto &) { return _c_rho0; });
   addFunctorProperty<ADReal>(NS::time_deriv(NS::density),
                              [](const auto &, const auto &) { return 0; });
+  addFunctorProperty<ADReal>(NS::enthalpy_density,
+                             [this, &h](const auto & r, const auto & t)
+                             { return _c_rho0 * h(r, t); });
+
   addFunctorProperty<ADReal>(
       "rc_pressure",
       [this](const auto & r, const auto & t)

@@ -8,7 +8,6 @@ advected_interp_method='upwind'
 velocity_interp_method='rc'
 rho='rho'
 mu='mu'
-cp='cp'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -227,7 +226,7 @@ cp='cp'
     type = INSFVEnergyTimeDerivative
     variable = T
     rho = ${rho}
-    cp = ${cp}
+    dh_dt = dh_dt
     use_displaced_mesh = true
     extra_vector_tags = 'e_time'
   []
