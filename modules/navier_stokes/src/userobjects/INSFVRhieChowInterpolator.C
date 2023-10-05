@@ -463,29 +463,6 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 }
 
 VectorValue<ADReal>
-INSFVRhieChowInterpolator::getVelocity(const Moose::ElemArg & elem_arg,
-                                       const Moose::StateArg & time,
-                                       const THREAD_ID tid,
-                                       const bool subtract_mesh_velocity) const
-{
-  const auto * const u = _us[tid];
-  const MooseVariableFVReal * const v = _v ? _vs[tid] : nullptr;
-  const MooseVariableFVReal * const w = _w ? _ws[tid] : nullptr;
-
-  VectorValue<ADReal> velocity;
-  velocity(0) = (*u)(elem_arg, time);
-  if (v)
-    velocity(1) = (*v)(elem_arg, time);
-  if (w)
-    velocity(2) = (*w)(elem_arg, time);
-
-  if (_disps.size() && subtract_mesh_velocity)
-    velocity -= _disps[tid]->dot(elem_arg, time);
-
-  return velocity;
-}
-
-VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
                                        const Moose::StateArg & time,
