@@ -66,6 +66,21 @@ protected:
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined) const;
 
+  /// Utilities to process and forward parameters
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /// Checks if the variables created outside of the physics are restricted to the same blocks
+  // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
+  // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
+
+  /// Use prefix() to disambiguate names
+  std::string prefix() const { return name() + "_"; }
+
+  /// Dimension of the physics, which we expect for now to be the dimension of the mesh
+  unsigned int _dim;
+
+  /// TODO: see if we can rely on BlockRestrictable instead
+  std::vector<SubdomainName> _blocks;
+
 private:
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
@@ -82,12 +97,6 @@ private:
   virtual void addPostprocessors() {}
 
   virtual void addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/) {}
-
-  /// Assign the necessary blocks to the input parameters
-  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
-  /// Checks if the variables created outside of the physics are restricted to the same blocks
-  // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
-  // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
