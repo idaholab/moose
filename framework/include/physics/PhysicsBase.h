@@ -130,6 +130,21 @@ protected:
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
 
+  /// Utilities to process and forward parameters
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
+  /// Checks if the variables created outside of the physics are restricted to the same blocks
+  // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
+  // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
+
+  /// Use prefix() to disambiguate names
+  std::string prefix() const { return name() + "_"; }
+
+  /// Dimension of the physics, which we expect for now to be the dimension of the mesh
+  unsigned int _dim;
+
+  /// TODO: see if we can rely on BlockRestrictable instead
+  std::vector<SubdomainName> _blocks;
+
 private:
   /// Gathers additional parameters for the relationship managers from the Physics
   /// then calls the parent Action::addRelationshipManagers with those parameters
