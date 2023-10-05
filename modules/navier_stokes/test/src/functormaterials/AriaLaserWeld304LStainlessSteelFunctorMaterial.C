@@ -93,9 +93,6 @@ AriaLaserWeld304LStainlessSteelFunctorMaterial::AriaLaserWeld304LStainlessSteelF
   addFunctorProperty<ADReal>(NS::cp,
                              [this](const auto & r, const auto & t)
                              { return _c_cp0 + _c_cp1 * _temperature(r, t); });
-  addFunctorProperty<ADReal>(NS::time_deriv(NS::cp),
-                             [this](const auto & r, const auto & t)
-                             { return _c_cp1 * _temperature.dot(r, t); });
   addFunctorProperty<ADReal>(NS::density, [this](const auto &, const auto &) { return _c_rho0; });
   addFunctorProperty<ADReal>(NS::time_deriv(NS::density),
                              [](const auto &, const auto &) { return 0; });
