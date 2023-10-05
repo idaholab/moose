@@ -67,6 +67,8 @@ public:
    * @param fi The face that we wish to retrieve the velocity for
    * @param time The time at which to evaluate the velocity
    * @param tid The thread ID
+   * @param subtract_mesh_velocity Whether to subtracet the mesh velocity if running on a displaced
+   * mesh
    * @return The face velocity
    */
   VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
