@@ -1080,6 +1080,9 @@ SIMPLE::execute()
 
       // Solve the pressure corrector
       ns_residuals[momentum_residual.size()] = solvePressureCorrector();
+      // We need this to make sure we evaluate cell gradients for the nonorthogonal correction i
+      // nthe face velocity update
+      _pressure_system.residualSetup();
 
       // Compute the face velocity which is used in the advection terms
       _rc_uo->computeFaceVelocity();
