@@ -1,0 +1,44 @@
+[Tests]
+  design = 'materialInv_diffusion_reaction.md'
+  issues = '#22215'
+
+  [diffusion_reaction]
+    requirement = 'The system shall be able to perform material inversion on a nonlinear diffusion-reaction problem by'
+    [forward_exact]
+      type = CSVDiff
+      input = forward_exact.i
+      csvdiff = forward_exact_csv_sample_0011.csv
+      heavy = True
+
+      detail = 'creating synthetic data, '
+    []
+    [parameter_mesh]
+      type = Exodiff
+      input = parameter_mesh.i
+      exodiff = parameter_mesh_out.e
+      heavy = True
+
+      detail = 'creating a mesh defining parameter space, '
+    []
+    [forward_and_adjoint]
+      type = Exodiff
+      input = forward_and_adjoint.i
+      cli_args = 'Outputs/console=true'
+      exodiff = forward_and_adjoint_out.e
+      prereq = 'diffusion_reaction/forward_exact diffusion_reaction/parameter_mesh'
+      heavy = True
+
+      detail = 'performing a forward and adjoint simulation, and '
+    []
+    [optimize]
+      type = Exodiff
+      input = optimize.i
+      exodiff = optimize_out_forward0.e
+      prereq = diffusion_reaction/forward_and_adjoint
+      heavy = True
+      rel_err = 1e-4
+
+      detail = 'use TAO to perform optimization.'
+    []
+  []
+[]
