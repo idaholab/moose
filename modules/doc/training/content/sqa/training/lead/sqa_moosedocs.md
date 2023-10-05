@@ -153,7 +153,7 @@ Documents:
     software_requirements_specification: sqa/blackbear_srs.md
     software_design_description: sqa/blackbear_sdd.md
     software_test_plan: sqa/blackbear_stp.md
-    requirements_traceablity_matrix: sqa/blackbear_rtm.md
+    requirements_traceability_matrix: sqa/blackbear_rtm.md
     verification_validation_report: sqa/blackbear_vvr.md
     failure_analysis_report: sqa/blackbear_far.md
     safety_software_determination: sqa/inl_records.md#safety_software_determination

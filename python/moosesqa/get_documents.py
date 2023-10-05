@@ -27,7 +27,7 @@ INL_DOCUMENTS = ['safety_software_determination',
                  'verification_validation_plan',
                  'software_requirements_specification',
                  'software_design_description',
-                 'requirements_traceablity_matrix',
+                 'requirements_traceability_matrix',
                  'verification_validation_report',
                  'failure_analysis_report',
                  'communication_and_contact_information',
@@ -35,6 +35,9 @@ INL_DOCUMENTS = ['safety_software_determination',
                  'software_library_list',
                  'user_manual',
                  'theory_manual']
+
+# List of deprecated document names to ease application patching (provided in 'deprecated_name' : 'new_name' pairs)
+DEPRECATED_DOCUMENTS = {'requirements_traceablity_matrix' : 'requirements_traceability_matrix'}
 
 def get_documents(required_docs=INL_DOCUMENTS, **kwargs):
     """

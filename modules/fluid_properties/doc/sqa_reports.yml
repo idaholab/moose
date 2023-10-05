@@ -23,7 +23,7 @@ Documents:
     software_requirements_specification: sqa/fluid_properties_srs.md
     software_design_description: sqa/fluid_properties_sdd.md
     software_test_plan: sqa/fluid_properties_stp.md
-    requirements_traceablity_matrix: sqa/fluid_properties_rtm.md
+    requirements_traceability_matrix: sqa/fluid_properties_rtm.md
     verification_validation_report: sqa/fluid_properties_vvr.md
     failure_analysis_report: sqa/fluid_properties_far.md
     software_library_list: sqa/fluid_properties_sll.md

@@ -20,7 +20,7 @@ Documents:
     software_requirements_specification: sqa/misc_srs.md
     software_design_description: sqa/misc_sdd.md
     software_test_plan: sqa/misc_stp.md
-    requirements_traceablity_matrix: sqa/misc_rtm.md
+    requirements_traceability_matrix: sqa/misc_rtm.md
     verification_validation_report: sqa/misc_vvr.md
     failure_analysis_report: sqa/misc_far.md
     software_library_list: sqa/misc_sll.md

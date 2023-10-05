@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/navier_stokes_srs.md
     software_design_description: sqa/navier_stokes_sdd.md
     software_test_plan: sqa/navier_stokes_stp.md
-    requirements_traceablity_matrix: sqa/navier_stokes_rtm.md
+    requirements_traceability_matrix: sqa/navier_stokes_rtm.md
     verification_validation_report: sqa/navier_stokes_vvr.md
     failure_analysis_report: sqa/navier_stokes_far.md
     software_library_list: sqa/navier_stokes_sll.md

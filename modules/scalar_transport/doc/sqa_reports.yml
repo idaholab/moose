@@ -13,7 +13,7 @@ Documents:
     software_requirements_specification: sqa/scalar_transport_srs.md
     software_design_description: sqa/scalar_transport_sdd.md
     software_test_plan: sqa/scalar_transport_stp.md
-    requirements_traceablity_matrix: sqa/scalar_transport_rtm.md
+    requirements_traceability_matrix: sqa/scalar_transport_rtm.md
     verification_validation_report: sqa/scalar_transport_vvr.md
     failure_analysis_report: sqa/scalar_transport_far.md
     software_library_list: sqa/scalar_transport_sll.md
