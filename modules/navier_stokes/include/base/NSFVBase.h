@@ -293,8 +293,7 @@ protected:
   const MooseFunctorName _porosity_name;
   /// The name of the functor for the smoothed porosity field
   const MooseFunctorName _flow_porosity_functor_name;
-  /// Switch to enable friction correction for the porous medium momentum
-  /// equations
+  /// Switch to enable friction correction for the porous medium momentum equations
   const bool _use_friction_correction;
 
   /// Velocity names in case they are defined externally. For example in a situation when
@@ -528,6 +527,7 @@ NSFVBase<BaseType>::validParams()
                              "How to treat pressure at a porosity interface");
 
   params.addParam<bool>("use_friction_correction",
+                        false,
                         "If friction correction should be applied in the momentum equation.");
 
   params.addParam<Real>(
@@ -974,9 +974,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
                                         parameters.get<unsigned short>("porosity_smoothing_layers")
                                     ? NS::smoothed_porosity
                                     : _porosity_name),
-    _use_friction_correction(parameters.isParamValid("use_friction_correction")
-                                 ? parameters.get<bool>("use_friction_correction")
-                                 : false),
+    _use_friction_correction(parameters.get<bool>("use_friction_correction")),
     _velocity_name(
         parameters.isParamValid("velocity_variable")
             ? parameters.get<std::vector<std::string>>("velocity_variable")
