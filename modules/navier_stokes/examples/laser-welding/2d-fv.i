@@ -39,7 +39,7 @@ cp='cp'
 []
 
 [Problem]
-  extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation'
+  extra_tag_vectors = 'e_time e_advection e_advection_correction e_conduction e_laser e_radiation'
 []
 
 [AuxVariables]
@@ -50,6 +50,9 @@ cp='cp'
     type = MooseVariableFVReal
   []
   [e_advection]
+    type = MooseVariableFVReal
+  []
+  [e_advection_correction]
     type = MooseVariableFVReal
   []
   [e_conduction]
@@ -80,6 +83,13 @@ cp='cp'
   [e_advection]
     variable = e_advection
     vector_tag = e_advection
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  [e_advection_correction]
+    variable = e_advection_correction
+    vector_tag = e_advection_correction
     v = T
     execute_on = 'timestep_end'
     type = TagVectorAux
@@ -236,6 +246,14 @@ cp='cp'
     variable = T
     use_displaced_mesh = true
     extra_vector_tags = 'e_advection'
+  []
+  [temperature_advection_correction]
+    type = INSFVEnergyHeatCapacityGradient
+    variable = T
+    use_displaced_mesh = true
+    extra_vector_tags = 'e_advection_correction'
+    grad_cp = grad_cp
+    rho = ${rho}
   []
   [temperature_conduction]
     type = FVDiffusion
@@ -430,10 +448,9 @@ cp='cp'
     type = VectorSum
     vector = 'e_advection'
   []
-  [advection_plus_conduction]
-    type = ParsedPostprocessor
-    function = 'advection + conduction'
-    pp_names = 'conduction advection'
+  [advection_correction]
+    type = VectorSum
+    vector = 'e_advection_correction'
   []
   [radiation]
     type = VectorSum
@@ -441,7 +458,7 @@ cp='cp'
   []
   [total_sum]
     type = ParsedPostprocessor
-    function = 'laser_flux + volume_rho_cp_dT + advection_plus_conduction + radiation'
-    pp_names = 'laser_flux volume_rho_cp_dT advection_plus_conduction radiation'
+    function = 'laser_flux + volume_rho_cp_dT + advection + advection_correction + conduction + radiation'
+    pp_names = 'laser_flux volume_rho_cp_dT advection advection_correction conduction radiation'
   []
 []

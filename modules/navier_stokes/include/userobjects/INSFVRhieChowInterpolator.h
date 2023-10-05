@@ -75,6 +75,20 @@ public:
                                   const THREAD_ID tid,
                                   bool subtract_mesh_velocity) const override;
 
+  /**
+   * Retrieve an element velocity
+   * @param elem_arg The element that we wish to retrieve the velocity for
+   * @param time The time at which to evaluate the velocity
+   * @param tid The thread ID
+   * @param subtract_mesh_velocity Whether to subtracet the mesh velocity if running on a displaced
+   * mesh
+   * @return The element velocity
+   */
+  VectorValue<ADReal> getVelocity(const Moose::ElemArg & elem_arg,
+                                  const Moose::StateArg & time,
+                                  THREAD_ID tid,
+                                  bool subtract_mesh_velocity) const;
+
   void initialSetup() override;
   void meshChanged() override;
 
