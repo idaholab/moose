@@ -22,12 +22,29 @@ public:
   static InputParameters validParams();
   WCNSFVFluxBCBase(const InputParameters & params);
 
+  ///@{ in residual and jacobian setup we check if the area is zero
+  void residualSetup() override;
+  void jacobianSetup() override;
+  ///@}
+
 protected:
   /**
    * check for improper use on an internal face, e.g. for specific postprocessors used if a user
    * imposes this object on an internal face then the 'direction' parameter must be supplied
    */
   void checkForInternalDirection() const;
+
+  /// true if a boundary is an inflow boundary, false if outflow
+  virtual bool isInflow() const;
+
+  /// computes the inflow massflux
+  ADReal inflowMassFlux(const Moose::StateArg & state) const;
+
+  /// computes the inflow speed
+  ADReal inflowSpeed(const Moose::StateArg & state) const;
+
+  /// returns the velocity vector (vel_x, vel_y, vel_z)
+  ADRealVectorValue varVelocity(const Moose::StateArg & state) const;
 
   /// Scaling factor
   const Real _scaling_factor;
@@ -42,7 +59,7 @@ protected:
   const PostprocessorValue * const _area_pp;
 
   /// Fluid density functor
-  const Moose::Functor<ADReal> * const _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// The direction in which the flow is entering/leaving the domain. This is mainly used for cases
   /// when the orientation of the face cannot be established (boundary on an internal face) or when the flow is
@@ -51,6 +68,12 @@ protected:
 
   /// Flag to store if the flow direction is specified by the user
   const bool _direction_specified_by_user;
+
+  ///@{ Velocity components
+  const Moose::Functor<ADReal> & _vel_x;
+  const Moose::Functor<ADReal> * const _vel_y;
+  const Moose::Functor<ADReal> * const _vel_z;
+  ///@}
 };
 
 inline void

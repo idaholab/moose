@@ -23,6 +23,9 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// override because energy_pp is not considered in base class
+  virtual bool isInflow() const override;
+
   /// Postprocessor with the inlet temperature
   const PostprocessorValue * const _temperature_pp;
 
@@ -30,5 +33,8 @@ protected:
   const PostprocessorValue * const _energy_pp;
 
   /// Fluid specific heat capacity functor
-  const Moose::Functor<ADReal> * const _cp;
+  const Moose::Functor<ADReal> & _cp;
+
+  /// Fluid temperature functor
+  const Moose::Functor<ADReal> & _temperature;
 };

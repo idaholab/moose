@@ -23,9 +23,15 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// override because energy_pp is not considered in base class
+  virtual bool isInflow() const override;
+
   /// Postprocessor with the inlet scalar concentration
   const PostprocessorValue * const _scalar_value_pp;
 
   /// Postprocessor with the inlet scalar flow rate
   const PostprocessorValue * const _scalar_flux_pp;
+
+  /// passive scalar functor
+  const Moose::Functor<ADReal> & _passive_scalar;
 };
