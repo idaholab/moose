@@ -957,8 +957,8 @@ public:
    */
   template <typename T>
   void transferParam(const InputParameters & source_param,
-                     std::string name,
-                     std::string new_description = "");
+                     const std::string & name,
+                     const std::string & new_description = "");
 
   /**
    * Return all the aliased names associated with \p param_name. The returned container will always
@@ -1855,8 +1855,8 @@ InputParameters::have_parameter(std::string_view name_in) const
 template <typename T>
 void
 InputParameters::transferParam(const InputParameters & source_params,
-                               std::string name_in,
-                               std::string new_description)
+                               const std::string & name_in,
+                               const std::string & new_description)
 {
   const auto name = source_params.checkForRename(std::string(name_in));
   if (!source_params.have_parameter<T>(name) && !source_params.hasCoupledValue(name))
@@ -1864,16 +1864,19 @@ InputParameters::transferParam(const InputParameters & source_params,
         "The '",
         name_in,
         "' parameter could not be transferred because it does not exist in the source parameters");
-
-  std::string description =
+  if (name != name_in)
+    mooseWarning("The transferred parameter " + name_in + " is deprecated in favor of " + name +
+                 " in the source parameters. The new name should likely be used for the parameter "
+                 "transfer instead.");
+  const std::string description =
       new_description.empty() ? source_params.getDescription(name) : new_description;
 
   if (source_params.isParamRequired(name))
   {
-    // Use the name_in that was specified in the transfer, not the potentially deprecated name
+    // Use the name_in that was specified in the transfer
     // Check for a variable parameter
     if (source_params.hasCoupledValue(name))
-      addRequiredCoupledVar(name, description);
+      addRequiredCoupledVar(name_in, description);
     // Enums parameters have a default list of options
     else if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
       addRequiredParam<T>(name_in, source_params.get<T>(name), description);
@@ -1889,15 +1892,15 @@ InputParameters::transferParam(const InputParameters & source_params,
     if (source_params.hasCoupledValue(name))
     {
       if (!source_params.hasDefaultCoupledValue(name))
-        addCoupledVar(name, description);
+        addCoupledVar(name_in, description);
       else if (source_params.numberDefaultCoupledValues(name) == 1)
-        addCoupledVar(name, source_params.defaultCoupledValue(name), description);
+        addCoupledVar(name_in, source_params.defaultCoupledValue(name), description);
       else
       {
         std::vector<Real> coupled_values;
         for (const auto i : make_range(source_params.numberDefaultCoupledValues(name)))
           coupled_values.push_back(source_params.defaultCoupledValue(name, i));
-        addCoupledVar(name, coupled_values, description);
+        addCoupledVar(name_in, coupled_values, description);
       }
     }
     else if (source_params.isRangeChecked(name))
@@ -1911,7 +1914,7 @@ InputParameters::transferParam(const InputParameters & source_params,
         addRangeCheckedParam<T>(name_in, source_params.rangeCheckedFunction(name), description);
     }
     else if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
-      addParam<T>(name_in, source_params.get<T>(name), description);
+      addParam<T>(name_in, source_params.get<T>(name_in), description);
     else
     {
       if (source_params.hasDefault(name))
