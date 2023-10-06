@@ -121,7 +121,7 @@ void
 PorousFlowFluidStateBaseMaterialTempl<is_ad>::computeQpProperties()
 {
   _is_initqp = false;
-  // Prepare the derivative vectors
+  // Size pressure and saturation and prepare the derivative vectors
   PorousFlowVariableBaseTempl<is_ad>::computeQpProperties();
 
   // Set the size of all other vectors

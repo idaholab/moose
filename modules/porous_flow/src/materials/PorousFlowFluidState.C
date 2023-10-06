@@ -200,47 +200,47 @@ PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
   // If the material properties are being evaluated at the qps, calculate the gradients as well
   // Note: only nodal properties are evaluated in initQpStatefulProperties(), so no need to check
   // _is_initqp flag for qp properties
-  if (!_nodal_material && !is_ad)
-  {
-    // Derivatives of capillary pressure
-    const Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
-    const Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
-
-    // Gradients of saturation and porepressure in all phases
-    (*_grads_qp)[_qp][_gas_phase_number] =
-        (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar] * _gas_gradp_qp[_qp] +
-        (*_dsaturation_dvar)[_qp][_gas_phase_number][_Zvar[0]] * (*_gradZ_qp[0])[_qp] +
-        (*_dsaturation_dvar)[_qp][_gas_phase_number][_Tvar] * (*_gradT_qp)[_qp];
-    (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
-
-    (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
-    (*_gradp_qp)[_qp][_aqueous_phase_number] =
-        _gas_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
-
-    // Gradients of mass fractions for each component in each phase
-    (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] =
-        _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
-            _gas_gradp_qp[_qp] +
-        _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
-            (*_gradZ_qp[0])[_qp] +
-        _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
-            (*_gradT_qp)[_qp];
-    (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] =
-        -(*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component];
-
-    (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] =
-        _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
-            _gas_gradp_qp[_qp] +
-        _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
-            (*_gradZ_qp[0])[_qp] +
-        _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
-            (*_gradT_qp)[_qp];
-    (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
-        -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
-
-    // Derivatives of gradients wrt variables
+  if (!_nodal_material)
     if constexpr (!is_ad)
     {
+      // Derivatives of capillary pressure
+      const Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
+      const Real d2pc =
+          _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
+
+      // Gradients of saturation and porepressure in all phases
+      (*_grads_qp)[_qp][_gas_phase_number] =
+          (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar] * _gas_gradp_qp[_qp] +
+          (*_dsaturation_dvar)[_qp][_gas_phase_number][_Zvar[0]] * (*_gradZ_qp[0])[_qp] +
+          (*_dsaturation_dvar)[_qp][_gas_phase_number][_Tvar] * (*_gradT_qp)[_qp];
+      (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
+
+      (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
+      (*_gradp_qp)[_qp][_aqueous_phase_number] =
+          _gas_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
+
+      // Gradients of mass fractions for each component in each phase
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] =
+          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
+              _gas_gradp_qp[_qp] +
+          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
+              (*_gradZ_qp[0])[_qp] +
+          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
+              (*_gradT_qp)[_qp];
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] =
+          -(*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component];
+
+      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] =
+          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_pidx] *
+              _gas_gradp_qp[_qp] +
+          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
+              (*_gradZ_qp[0])[_qp] +
+          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
+              (*_gradT_qp)[_qp];
+      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
+          -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
+
+      // Derivatives of gradients wrt variables
       if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
       {
         for (unsigned int ph = 0; ph < _num_phases; ++ph)
@@ -312,7 +312,6 @@ PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
             _grad_Xnacl_qp[_qp];
       }
     }
-  }
 }
 
 template class PorousFlowFluidStateTempl<false>;

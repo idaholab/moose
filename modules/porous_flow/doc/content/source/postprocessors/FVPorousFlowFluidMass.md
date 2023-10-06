@@ -8,8 +8,7 @@ M^{\kappa} = \phi \sum_{\beta} \chi^{\kappa}_{\beta} \rho_{\beta} S_{\beta},
 \end{equation*}
 where all variables are defined in [`nomenclature`](/nomenclature.md).
 
-The fluid component $\kappa$ is specified in the input parameter [!param](/Postprocessors/FVPorousFlowFluidMass/fluid_component)..
-By default, the mass of fluid component $\kappa$ is summed over all fluid phases. The
+The fluid component $\kappa$ is specified in the input parameter [!param](/Postprocessors/FVPorousFlowFluidMass/fluid_component). By default, the mass of fluid component $\kappa$ is summed over all fluid phases. The
 sum can be restricted to only a subset of fluid phases by entering the phase indexes
 in the [!param](/Postprocessors/FVPorousFlowFluidMass/phase) input parameter.
 
