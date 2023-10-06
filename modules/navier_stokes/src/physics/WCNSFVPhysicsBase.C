@@ -22,7 +22,8 @@ WCNSFVPhysicsBase::validParams()
   // If we remove these objects, or change their parameters, these parameters should be updated
 
   // Specify the weakly compressible boundary types
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_inlet_function");
+  params.transferParam<std::vector<std::vector<FunctionName>>>(NSFVAction::validParams(),
+                                                               "momentum_inlet_function");
   params.transferParam<std::vector<PostprocessorName>>(NSFVAction::validParams(), "flux_inlet_pps");
   params.transferParam<std::vector<Point>>(NSFVAction::validParams(), "flux_inlet_directions");
   params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "pressure_function");
@@ -45,4 +46,70 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   // checkVectorParamsSameLengthOrZero<BoundaryName,
   // MooseEnum>("inlet_boundaries",
   //                                                            "flux_inlet_directions");
+}
+
+void
+WCNSFVPhysicsBase::addUserObjects()
+{
+  addRhieChowUserObjects();
+}
+
+void
+WCNSFVPhysicsBase::addRhieChowUserObjects()
+{
+  // This means we are solving for velocity. We dont need external RC coefficients
+  bool has_flow_equations = nonLinearVariableExists(_velocity_names[0], false);
+
+  // First make sure that we only add this object once
+  // Potential cases:
+  // - there is a flow physics, and an advection one (add with flow)
+  // - there is only an advection physics
+  // - there are two advection physics on different blocks
+  if (hasCoupledFlowPhysics())
+    return;
+  if (!hasCoupledFlowPhysics() && has_flow_equations)
+    return;
+
+  const std::string u_names[3] = {"u", "v", "w"};
+  const auto object_type =
+      _porous_medium_treatment ? "PINSFVRhieChowInterpolator" : "INSFVRhieChowInterpolator";
+
+  auto params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+  for (unsigned int d = 0; d < _dim; ++d)
+    params.set<VariableName>(u_names[d]) = _velocity_names[d];
+
+  params.set<VariableName>("pressure") = _pressure_name;
+
+  if (_porous_medium_treatment)
+  {
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    unsigned short smoothing_layers =
+        parameters().isParamValid("porosity_smoothing_layers")
+            ? parameters().template get<unsigned short>("porosity_smoothing_layers")
+            : 0;
+    params.set<unsigned short>("smoothing_layers") = smoothing_layers;
+  }
+
+  if (!has_flow_equations)
+  {
+    checkRhieChowFunctorsDefined();
+    params.set<MooseFunctorName>("a_u") = "ax";
+    params.set<MooseFunctorName>("a_v") = "ay";
+    params.set<MooseFunctorName>("a_w") = "az";
+  }
+
+  params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
+  getProblem().addUserObject(object_type, prefix() + "rhie_chow_interpolator", params);
+}
+
+void
+WCNSFVPhysicsBase::checkRhieChowFunctorsDefined() const
+{
+  if (!getProblem().hasFunctor("ax", /*thread_id=*/0))
+    mooseError("Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
+  if (_dim >= 2 && !getProblem().hasFunctor("ay", /*thread_id=*/0))
+    mooseError("Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
+  if (_dim == 3 && !getProblem().hasFunctor("az", /*thread_id=*/0))
+    mooseError("Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }
