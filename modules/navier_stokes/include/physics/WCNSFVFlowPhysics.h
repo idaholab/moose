@@ -11,6 +11,8 @@
 
 #include "WCNSFVPhysicsBase.h"
 
+class WCNSFVTurbulenceModel;
+
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
  */
@@ -57,8 +59,21 @@ private:
   void addWCNSMassTimeKernels();
   void addWCNSMomentumTimeKernels();
 
+  /// Functions adding boundary conditions for the incompressible simulation.
+  /// These are used for weakly-compressible simulations as well.
+  void addINSInletBC();
+  void addINSOutletBC();
+  void addINSWallsBC();
+
+  /// Add material to define the local speed in porous medium flows
+  void addPorousMediumSpeedMaterial();
+
   /// The type of the pressure interpolation method
   // const MooseEnum _pressure_face_interpolation;
   // /// The type of the face interpolation method for the velocity/momentum
   // const MooseEnum _momentum_face_interpolation;
+
+  bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
+
+  const WCNSFVTurbulenceModel * _turbulence_physics;
 };
