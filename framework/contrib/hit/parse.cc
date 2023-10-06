@@ -144,6 +144,7 @@ Node::Node() : _parent(nullptr)
   const auto & first_child = *root->_children.front();
   _dhi = first_child._dhi;
   _hnv = first_child._hnv;
+  _hnv.set_type(wasp::BLANK_LINE);
   delete root;
 }
 
@@ -281,7 +282,7 @@ Node::vecStrVal()
 NodeType
 Node::type()
 {
-  if (_hnv.data() == "# blankline")
+  if (_hnv.type() == wasp::BLANK_LINE)
     return NodeType::Blank;
   else if (_hnv.type() == wasp::COMMENT)
     return NodeType::Comment;
