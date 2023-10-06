@@ -476,16 +476,23 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   auto * const u = _us[tid];
   MooseVariableFVReal * const v = _v ? _vs[tid] : nullptr;
   MooseVariableFVReal * const w = _w ? _ws[tid] : nullptr;
-
   // Check if skewness-correction is necessary
   const bool correct_skewness = velocitySkewCorrection(tid);
+  auto incorporate_mesh_velocity =
+      [this, tid, subtract_mesh_velocity, &time](const auto & space, auto & velocity)
+  {
+    if (_disps.size() && subtract_mesh_velocity)
+      velocity -= _disps[tid]->dot(space, time);
+  };
 
   if (Moose::FV::onBoundary(*this, fi))
   {
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
     const Moose::FaceArg boundary_face{
         &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
-    return vel(boundary_face, time);
+    auto velocity = vel(boundary_face, time);
+    incorporate_mesh_velocity(boundary_face, velocity);
+    return velocity;
   }
 
   VectorValue<ADReal> velocity;
@@ -499,8 +506,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (w)
     velocity(2) = (*w)(face, time);
 
-  if (_disps.size() && subtract_mesh_velocity)
-    velocity -= _disps[tid]->dot(face, time);
+  incorporate_mesh_velocity(face, velocity);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
