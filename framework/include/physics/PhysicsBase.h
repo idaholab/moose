@@ -54,17 +54,26 @@ protected:
 
   /// Utilities to check parameters
   /// These will be replaced by being baked into the validParams() logic, one day
-  void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
+  /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(std::string param1, std::string param2) const;
+  /// Check that the two vector of vector parameters are the same length
   template <typename T, typename S>
   void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
+  /// Check that there is no overlap between the two vector parameters
   template <typename T>
   void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
   bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check that the dependent parameters all are (or are not) defined when the main parameter is
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined) const;
+  /// Check that two parameters are either both set or both not set
+  void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
+  /// Check if the user commited errors during the definition of block-wise parameters
+  template <typename T>
+  void checkBlockwiseConsistency(const std::string block_param_name,
+                                 const std::vector<std::string> parameter_names);
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;

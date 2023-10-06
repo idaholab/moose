@@ -84,10 +84,9 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    unsigned short smoothing_layers =
-        parameters().isParamValid("porosity_smoothing_layers")
-            ? parameters().template get<unsigned short>("porosity_smoothing_layers")
-            : 0;
+    unsigned short smoothing_layers = parameters().isParamValid("porosity_smoothing_layers")
+                                          ? getParam<unsigned short>("porosity_smoothing_layers")
+                                          : 0;
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
   }
 
