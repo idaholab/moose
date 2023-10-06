@@ -53,9 +53,9 @@ NavierStokesFlowPhysics::validParams()
 
 NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & parameters)
   : PhysicsBase(parameters),
-    _compressibility(parameters.get<MooseEnum>("compressibility")),
+    _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
-    _porosity_name(parameters.get<MooseFunctorName>("porosity")),
+    _porosity_name(getParam<MooseFunctorName>("porosity")),
     _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
                                         getParam<unsigned short>("porosity_smoothing_layers")
                                     ? NS::smoothed_porosity
@@ -77,8 +77,8 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _density_name(parameters.get<MooseFunctorName>("density")),
-    _dynamic_viscosity_name(parameters.get<MooseFunctorName>("dynamic_viscosity"))
+    _density_name(getParam<MooseFunctorName>("density")),
+    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity"))
 {
   // Parameter checking
   checkVectorParamsSameLength<BoundaryName, MooseEnum>("inlet_boundaries", "momentum_inlet_types");
