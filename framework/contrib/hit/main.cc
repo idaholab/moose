@@ -551,13 +551,10 @@ merge(int argc, char ** argv)
   return 0;
 }
 
-// See https://github.com/idaholab/moose/pull/25432#issuecomment-1712796749
 void
 expand(hit::Node & root)
 {
-  std::string render = root.render();
-  std::replace(render.begin(), render.end(), '\n', ' ');
-  std::unique_ptr<hit::Node> new_root(hit::parse("render", render));
+  std::unique_ptr<hit::Node> new_root(hit::parse("render", root.render()));
   for (auto delete_child : root.children())
     delete delete_child;
   for (auto new_child : new_root->children())
