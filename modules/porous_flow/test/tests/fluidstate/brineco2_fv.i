@@ -13,7 +13,7 @@
 []
 
 [Variables]
-  [pgas]
+  [pg]
     type = MooseVariableFVReal
     initial_condition = 20e6
   []
@@ -200,7 +200,7 @@
 [FVKernels]
   [mass0]
     type = FVPorousFlowMassTimeDerivative
-    variable = pgas
+    variable = pg
     fluid_component = 0
   []
   [mass1]
@@ -213,7 +213,7 @@
 [UserObjects]
   [dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pgas z'
+    porous_flow_vars = 'pg z'
     number_fluid_phases = 2
     number_fluid_components = 2
   []
@@ -244,7 +244,7 @@
   []
   [brineco2]
     type = ADPorousFlowFluidState
-    gas_porepressure = pgas
+    gas_porepressure = pg
     z = z
     temperature_unit = Celsius
     xnacl = xnacl
