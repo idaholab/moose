@@ -216,4 +216,12 @@
       cli_args = "Outputs/file_base=ad-rz-displacements-laplace GlobalParams/viscous_form='laplace'"
     []
   []
+  [general_fe_objects_test]
+    type = Exodiff
+    input = unstabilized-velocity-component-objects.i
+    exodiff = unstabilized-velocity-component-objects_out.e
+    requirement = 'The system shall be able to reproduce the unstabilized conical flow results from a stabilized continuous finite element implementation using generic unstabilized objects.'
+    allow_test_objects = true
+    issues = '#24055'
+  []
 []
