@@ -6,10 +6,8 @@ import sympy
 u = 'cos(pi/2 * x) * sin(y)'
 v = 'sin(x) * cos(pi/2 * y)'
 vel = u + '* e_i +' + v + ' * e_j'
-disp_x = '0'
-disp_y = '0'
-# disp_x = 'sin(pi/2 * x) * cos(y) * t'
-# disp_y = 'cos(x) * sin(pi/2 * y) * t'
+disp_x = '2*x*t/(2*t+1)'
+disp_y = '2*y*t/(2*t+1)'
 disp_x_dot = 'diff(disp_x, t)'
 disp_y_dot = 'diff(disp_y, t)'
 vel_d = 'disp_x_dot * e_i + disp_y_dot * e_j'
@@ -34,6 +32,3 @@ mms.print_hit(f_v, 'forcing_v', mu='${mu}', rho='${rho}')
 
 mms.print_hit(e_p, 'exact_p')
 mms.print_hit(f_p, 'forcing_p', rho='${rho}')
-
-mms.print_hit(disp_x, 'exact_disp_x')
-mms.print_hit(disp_y, 'exact_disp_y')

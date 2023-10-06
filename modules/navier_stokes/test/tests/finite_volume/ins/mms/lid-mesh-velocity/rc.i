@@ -170,65 +170,59 @@ rho=1.1
     variable = v
     function = 'exact_v'
   []
-  [pressure]
-    type = FVFunctionDirichletBC
-    boundary = 'left right top bottom'
-    variable = pressure
-    function = 'exact_p'
-  []
 []
 
 [Functions]
-[exact_u]
-  type = ParsedFunction
-  expression = 'sin(y)*cos((1/2)*x*pi)'
-[]
-[exact_rhou]
-  type = ParsedFunction
-  expression = 'rho*sin(y)*cos((1/2)*x*pi)'
-  symbol_names = 'rho'
-  symbol_values = '${rho}'
-[]
-[forcing_u]
-  type = ParsedFunction
-  expression = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
-  symbol_names = 'mu rho'
-  symbol_values = '${mu} ${rho}'
-[]
-[exact_v]
-  type = ParsedFunction
-  expression = 'sin(x)*cos((1/2)*y*pi)'
-[]
-[exact_rhov]
-  type = ParsedFunction
-  expression = 'rho*sin(x)*cos((1/2)*y*pi)'
-  symbol_names = 'rho'
-  symbol_values = '${rho}'
-[]
-[forcing_v]
-  type = ParsedFunction
-  expression = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
-  symbol_names = 'mu rho'
-  symbol_values = '${mu} ${rho}'
-[]
-[exact_p]
-  type = ParsedFunction
-  expression = 'sin(x)*sin(y)'
-[]
-[forcing_p]
-  type = ParsedFunction
-  expression = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
-  symbol_names = 'rho'
-  symbol_values = '${rho}'
-[]
-[exact_disp_x]
-  type = ParsedFunction
-  expression = '0'
-[]
-[exact_disp_y]
-  type = ParsedFunction
-  expression = '0'
-[]
+  [exact_u]
+    type = ParsedFunction
+    expression = 'sin(y)*cos((1/2)*x*pi)'
+  []
+  [exact_rhou]
+    type = ParsedFunction
+    expression = 'rho*sin(y)*cos((1/2)*x*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
+  []
+  [forcing_u]
+    type = ParsedFunction
+    expression = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) + rho*(4*t/(2*t + 1)^2 - 1/2*pi*sin(x)*sin((1/2)*y*pi) - 2/(2*t + 1))*sin(y)*cos((1/2)*x*pi) + rho*(4*t/(2*t + 1)^2 - 1/2*pi*sin(y)*sin((1/2)*x*pi) - 2/(2*t + 1))*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*(4*x*t/(2*t + 1)^2 - 2*x/(2*t + 1) + sin(y)*cos((1/2)*x*pi))*sin(y)*sin((1/2)*x*pi) + rho*(4*y*t/(2*t + 1)^2 - 2*y/(2*t + 1) + sin(x)*cos((1/2)*y*pi))*cos(y)*cos((1/2)*x*pi) + sin(y)*cos(x)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
+  []
+  [exact_v]
+    type = ParsedFunction
+    expression = 'sin(x)*cos((1/2)*y*pi)'
+  []
+  [exact_rhov]
+    type = ParsedFunction
+    expression = 'rho*sin(x)*cos((1/2)*y*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
+  []
+  [forcing_v]
+    type = ParsedFunction
+    expression = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) + rho*(4*t/(2*t + 1)^2 - 1/2*pi*sin(x)*sin((1/2)*y*pi) - 2/(2*t + 1))*sin(x)*cos((1/2)*y*pi) + rho*(4*t/(2*t + 1)^2 - 1/2*pi*sin(y)*sin((1/2)*x*pi) - 2/(2*t + 1))*sin(x)*cos((1/2)*y*pi) + rho*(4*x*t/(2*t + 1)^2 - 2*x/(2*t + 1) + sin(y)*cos((1/2)*x*pi))*cos(x)*cos((1/2)*y*pi) - 1/2*pi*rho*(4*y*t/(2*t + 1)^2 - 2*y/(2*t + 1) + sin(x)*cos((1/2)*y*pi))*sin(x)*sin((1/2)*y*pi) + sin(x)*cos(y)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
+  []
+  [exact_p]
+    type = ParsedFunction
+    expression = 'sin(x)*sin(y)'
+  []
+  [forcing_p]
+    type = ParsedFunction
+    expression = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
+  []
+  [exact_disp_x]
+    type = ParsedFunction
+    expression = '2*t*x'
+  []
+  [exact_disp_y]
+    type = ParsedFunction
+    expression = '2*t*y'
+  []
 []
 
 [Executioner]
@@ -242,6 +236,7 @@ rho=1.1
 
 [Outputs]
   csv = true
+  exodus = true
 []
 
 [Postprocessors]
@@ -249,6 +244,7 @@ rho=1.1
     type = AverageElementSize
     outputs = 'console csv'
     execute_on = 'timestep_end'
+    use_displaced_mesh = true
   []
   [L2u]
     type = ElementL2FunctorError
@@ -256,6 +252,7 @@ rho=1.1
     exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
+    use_displaced_mesh = true
   []
   [L2v]
     approximate = v
@@ -263,6 +260,7 @@ rho=1.1
     type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
+    use_displaced_mesh = true
   []
   [L2p]
     approximate = pressure
@@ -270,5 +268,6 @@ rho=1.1
     type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
+    use_displaced_mesh = true
   []
 []
