@@ -103,6 +103,7 @@ rho=1.1
     rho = ${rho}
     momentum_component = 'x'
     use_displaced_mesh = true
+    boundaries_to_force = 'top bottom left right'
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
@@ -133,6 +134,7 @@ rho=1.1
     rho = ${rho}
     momentum_component = 'y'
     use_displaced_mesh = true
+    boundaries_to_force = 'top bottom left right'
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
