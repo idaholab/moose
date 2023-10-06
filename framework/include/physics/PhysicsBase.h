@@ -108,6 +108,10 @@ protected:
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined) const;
+  /// Check if the user commited errors during the definition of block-wise parameters
+  template <typename T>
+  void checkBlockwiseConsistency(const std::string block_param_name,
+                                 const std::vector<std::string> parameter_names);
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
