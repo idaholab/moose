@@ -124,8 +124,8 @@ velocity_interp_method = 'rc'
   [energy_time]
     type = INSFVEnergyTimeDerivative
     variable = T_fluid
-    cp = ${cp}
     rho = ${rho}
+    dh_dt = dh_dt
   []
   [energy_advection]
     type = INSFVEnergyAdvection

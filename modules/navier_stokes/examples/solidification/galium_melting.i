@@ -256,8 +256,8 @@ Ny = 50
   [T_time]
     type = INSFVEnergyTimeDerivative
     variable = T
-    cp = cp_mixture
     rho = rho_mixture
+    dh_dt = dh_dt
   []
   [energy_advection]
     type = INSFVEnergyAdvection

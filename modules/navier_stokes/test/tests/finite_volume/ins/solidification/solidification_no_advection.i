@@ -74,7 +74,6 @@ N = 10
   [T_time]
     type = INSFVEnergyTimeDerivative
     variable = T
-    cp = ${cp_liquid}
     rho = ${rho_liquid}
   []
   [energy_diffusion]
@@ -115,6 +114,12 @@ N = 10
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'
     phase_1_fraction = fl
+  []
+  [h]
+    type = INSFVEnthalpyMaterial
+    cp = ${cp_liquid}
+    temperature = T
+    rho = ${rho_liquid}
   []
 []
 

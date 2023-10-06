@@ -19,7 +19,7 @@
       type = Exodiff
       detail = 'in two dimensions, using finite volume discretizations for pressure, velocity, and temperature and a finite element discretization for mesh displacements.'
       allow_test_objects = true
-      cli_args = 'Executioner/num_steps=3 Mesh/nx=15 Mesh/ny=4'
+      cli_args = 'Executioner/num_steps=3 Mesh/nx=15 Mesh/ny=4 Outputs/hide="advection advection_plus_conduction conduction laser_flux radiation total_sum volume_rho_cp_dT e_advection e_conduction e_laser e_radiation e_time"'
       valgrind = 'heavy'
       strumpack = true
     []

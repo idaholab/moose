@@ -126,9 +126,10 @@ l = 4
   [temp_time]
     type = WCNSFVEnergyTimeDerivative
     variable = T
-    cp = cp
     rho = rho
     drho_dt = drho_dt
+    h = h
+    dh_dt = dh_dt
   []
   [temp_conduction]
     type = FVDiffusion

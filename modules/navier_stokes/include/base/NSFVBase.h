@@ -1578,7 +1578,6 @@ NSFVBase<BaseType>::addINSEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.template set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.template set<MooseFunctorName>(NS::density) = _density_name;
-  params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   if (_porous_medium_treatment)
   {
@@ -1587,6 +1586,7 @@ NSFVBase<BaseType>::addINSEnergyTimeKernels()
       params.template set<MooseFunctorName>(NS::time_deriv(NS::density)) =
           NS::time_deriv(_density_name);
     params.template set<bool>("is_solid") = false;
+    params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   }
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
@@ -2820,12 +2820,12 @@ NSFVBase<BaseType>::addWCNSEnergyTimeKernels()
   params.template set<MooseFunctorName>(NS::density) = _density_name;
   params.template set<MooseFunctorName>(NS::time_deriv(NS::density)) =
       NS::time_deriv(_density_name);
-  params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   if (_porous_medium_treatment)
   {
     params.template set<MooseFunctorName>(NS::porosity) = _porosity_name;
     params.template set<bool>("is_solid") = false;
+    params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   }
 
   getProblem().addFVKernel(en_kernel_type, kernel_name, params);

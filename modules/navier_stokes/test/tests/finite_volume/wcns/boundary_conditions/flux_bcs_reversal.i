@@ -154,9 +154,10 @@ inlet_velocity = 0.1
   [temp_time]
     type = WCNSFVEnergyTimeDerivative
     variable = T_fluid
-    cp = cp
     rho = rho
     drho_dt = drho_dt
+    dh_dt = dh_dt
+    h = h
   []
   [temp_conduction]
     type = FVDiffusion

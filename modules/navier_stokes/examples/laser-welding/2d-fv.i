@@ -368,11 +368,6 @@ mu='mu'
     prop_names = 'vel'
     prop_values = 'vel_x vel_y 0'
   []
-  [h]
-    type = INSFVEnthalpyMaterial
-    rho = 'rho'
-    temperature = T
-  []
 []
 
 [Preconditioning]
