@@ -84,9 +84,6 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
 void
 WCNSFVFlowPhysics::addNonlinearVariables()
 {
-  // Process parameters necessary to handle block-restriction
-  processMesh();
-
   // Velocities
   for (const auto d : make_range(_dim))
   {
