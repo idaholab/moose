@@ -67,6 +67,8 @@ private:
   /// Add material to define the local speed in porous medium flows
   void addPorousMediumSpeedMaterial();
 
+  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
   /// The type of the pressure interpolation method
   // const MooseEnum _pressure_face_interpolation;
   // /// The type of the face interpolation method for the velocity/momentum

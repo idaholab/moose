@@ -487,3 +487,15 @@ WCNSFVHeatAdvectionPhysics::addMaterials()
 
   getProblem().addMaterial("INSFVEnthalpyMaterial", prefix() + "ins_enthalpy_material", params);
 }
+
+unsigned short
+WCNSFVHeatAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
+  necessary_layers =
+      std::max(necessary_layers, WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded());
+  if (getParam<MooseEnum>("energy_face_interpolation") == "skewness-corrected")
+    necessary_layers = std::max(necessary_layers, (unsigned short)3);
+
+  return necessary_layers;
+}

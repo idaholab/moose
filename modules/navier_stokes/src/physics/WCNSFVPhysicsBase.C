@@ -10,6 +10,7 @@
 #include "WCNSFVPhysicsBase.h"
 #include "NSFVAction.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "RelationshipManager.h"
 
 InputParameters
 WCNSFVPhysicsBase::validParams()
@@ -33,6 +34,8 @@ WCNSFVPhysicsBase::validParams()
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "pressure_face_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_face_interpolation");
+  params.addParam<unsigned short>(
+      "ghost_layers", 2, "Number of layers of elements to ghost near process domain boundaries");
 
   return params;
 }
@@ -41,9 +44,12 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   : NavierStokesFlowPhysics(parameters),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation"))
 {
+  // Adjust number of ghost layers in case what was requested in the parameters was not enough
+  adjustRMGhostLayers();
+
   // Parameter checking
-  // checkVectorParamsSameLengthOrZero<BoundaryName, MooseEnum>("inlet_boundaries",
-  // "flux_inlet_pps");
+  // checkVectorParamsSameLengthOrZero<BoundaryName, PostprocessorName>("inlet_boundaries",
+  //                                                                    "flux_inlet_pps");
   // checkVectorParamsSameLengthOrZero<BoundaryName,
   // MooseEnum>("inlet_boundaries",
   //                                                            "flux_inlet_directions");
@@ -136,8 +142,8 @@ WCNSFVPhysicsBase::addPostprocessors()
     {
       const std::string pp_type = "AreaPostprocessor";
       InputParameters params = getFactory().getValidParams(pp_type);
-      params.template set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
-      params.template set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+      params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
 
       getProblem().addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
     }
@@ -148,4 +154,51 @@ WCNSFVPhysicsBase::rhieChowUOName() const
 {
   return prefix() +
          (_porous_medium_treatment ? +"pins_rhie_chow_interpolator" : "ins_rhie_chow_interpolator");
+}
+
+unsigned short
+WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
+  if (getParam<MooseEnum>("momentum_face_interpolation") == "skewness-corrected" ||
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected" ||
+      (_porous_medium_treatment &&
+       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic"))
+    necessary_layers = std::max(necessary_layers, (unsigned short)3);
+
+  if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
+    necessary_layers =
+        std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
+
+  return necessary_layers;
+}
+
+void
+WCNSFVPhysicsBase::adjustRMGhostLayers()
+{
+  auto & factory = getFactory();
+  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+
+  const auto ghost_layers =
+      std::max(_pars.get<unsigned short>("ghost_layers"), getNumberAlgebraicGhostingLayersNeeded());
+
+  rm_params.set<std::string>("for_whom") = name();
+  rm_params.set<MooseMesh *>("mesh") = &getProblem().mesh();
+  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+      Moose::RelationshipManagerType::COUPLING;
+  rm_params.set<bool>("use_point_neighbors", false);
+  rm_params.set<unsigned short>("layers") = ghost_layers;
+  rm_params.set<bool>("attach_geometric_early") = false;
+  rm_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+  mooseAssert(rm_params.areAllRequiredParamsValid(),
+              "All relationship manager parameters should be valid.");
+
+  auto rm_obj = factory.create<RelationshipManager>(
+      "ElementSideNeighborLayers", name() + "_wcnsfv_ghosting", rm_params);
+
+  // Delete the resources created on behalf of the RM if it ends up not being added to the App.
+  if (!getMooseApp().addRelationshipManager(rm_obj))
+    factory.releaseSharedObjects(*rm_obj);
 }
