@@ -23,6 +23,7 @@ NavierStokesFlowPhysics::validParams()
   // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
   // We mostly pull the boundary parameters from NSFV Action
 
+  params.transferParam<MooseEnum>(NSFVAction::validParams(), "compressibility");
   params.transferParam<RealVectorValue>(NSFVAction::validParams(), "gravity");
 
   // Variables
@@ -34,15 +35,16 @@ NavierStokesFlowPhysics::validParams()
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
   params.transferParam<bool>(NSFVAction::validParams(), "porous_medium_treatment");
+  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
   params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
 
   // Boundary conditions are a general concept for fluid flow
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "inlet_boundaries");
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "outlet_boundaries");
   params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "wall_boundaries");
-  params.transferParam<std::vector<MooseEnum>>(NSFVAction::validParams(), "momentum_inlet_types");
-  params.transferParam<std::vector<MooseEnum>>(NSFVAction::validParams(), "momentum_outlet_types");
-  params.transferParam<std::vector<MooseEnum>>(NSFVAction::validParams(), "momentum_wall_types");
+  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_inlet_types");
+  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_outlet_types");
+  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_wall_types");
 
   // Material properties
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
@@ -60,7 +62,9 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
                                         getParam<unsigned short>("porosity_smoothing_layers")
                                     ? NS::smoothed_porosity
                                     : _porosity_name),
-    _porosity_smoothing_layers(getParam<unsigned short>("porosity_smoothing_layers")),
+    _porosity_smoothing_layers(isParamValid("porosity_smoothing_layers")
+                                   ? getParam<unsigned short>("porosity_smoothing_layers")
+                                   : 0),
     _velocity_names(
         isParamValid("velocity_variable")
             ? getParam<std::vector<std::string>>("velocity_variable")
@@ -81,10 +85,10 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity"))
 {
   // Parameter checking
-  checkVectorParamsSameLength<BoundaryName, MooseEnum>("inlet_boundaries", "momentum_inlet_types");
-  checkVectorParamsSameLength<BoundaryName, MooseEnum>("outlet_boundaries",
-                                                       "momentum_outlet_types");
-  checkVectorParamsSameLength<BoundaryName, MooseEnum>("wall_boundaries", "momentum_wall_types");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "momentum_inlet_types");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("outlet_boundaries",
+                                                        "momentum_outlet_types");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "momentum_wall_types");
   checkVectorParamsNoOverlap<BoundaryName>(
       {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
 }
