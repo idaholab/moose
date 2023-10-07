@@ -33,9 +33,6 @@ public:
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
 protected:
-  /// To interface with components
-  void processMesh();
-
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
 
