@@ -9,6 +9,7 @@
 
 #include "WCNSFVPhysicsBase.h"
 #include "NSFVAction.h"
+#include "INSFVRhieChowInterpolator.h"
 
 InputParameters
 WCNSFVPhysicsBase::validParams()
@@ -31,7 +32,7 @@ WCNSFVPhysicsBase::validParams()
   // Specify the numerical schemes for interpolations of velocity and pressure
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "pressure_face_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_face_interpolation");
+  params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_face_interpolation");
 
   return params;
 }
@@ -62,12 +63,23 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
 
   // First make sure that we only add this object once
   // Potential cases:
-  // - there is a flow physics, and an advection one (add with flow)
-  // - there is only an advection physics
-  // - there are two advection physics on different blocks
-  if (hasCoupledFlowPhysics())
-    return;
-  if (!hasCoupledFlowPhysics() && has_flow_equations)
+  // - there is a flow physics, and an advection one (UO should be added by one)
+  // - there is only an advection physics (UO should be created)
+  // - there are two advection physics on different blocks with set velocities (first one picks)
+  // Counting RC UOs defined on the same blocks seems to be the most fool proof option
+  std::vector<UserObject *> objs;
+  getProblem()
+      .theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(_tid)
+      .queryInto(objs);
+  unsigned int num_rc_uo = 0;
+  for (const auto & obj : objs)
+    if (dynamic_cast<INSFVRhieChowInterpolator *>(obj) &&
+        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == _blocks)
+      num_rc_uo++;
+  if (num_rc_uo)
     return;
 
   const std::string u_names[3] = {"u", "v", "w"};
@@ -99,7 +111,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   }
 
   params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
-  getProblem().addUserObject(object_type, prefix() + "rhie_chow_interpolator", params);
+  getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
 
 void
@@ -116,7 +128,7 @@ WCNSFVPhysicsBase::checkRhieChowFunctorsDefined() const
 void
 WCNSFVPhysicsBase::addPostprocessors()
 {
-  const auto momentum_inlet_types = getParam<std::vector<MooseEnum>>("momentum_inlet_types");
+  const auto momentum_inlet_types = getParam<MultiMooseEnum>("momentum_inlet_types");
 
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
     if (momentum_inlet_types[bc_ind] == "flux-mass" ||
@@ -129,4 +141,11 @@ WCNSFVPhysicsBase::addPostprocessors()
 
       getProblem().addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
     }
+}
+
+std::string
+WCNSFVPhysicsBase::rhieChowUOName() const
+{
+  return prefix() +
+         (_porous_medium_treatment ? +"pins_rhie_chow_interpolator" : "ins_rhie_chow_interpolator");
 }

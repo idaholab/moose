@@ -36,6 +36,9 @@ protected:
   /// Add postprocessors, could be moved up to the base class
   void addPostprocessors() override;
 
+  /// Return the name of the Rhie Chow user object
+  std::string rhieChowUOName() const;
+
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
 
@@ -46,7 +49,7 @@ private:
   /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations
   void addRhieChowUserObjects();
 
-  /// Check whether another Physics object has been specified
+  /// Check whether another flow Physics object has been specified
   bool hasCoupledFlowPhysics() const { return !(!_flow_equations_physics); };
 
   /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
