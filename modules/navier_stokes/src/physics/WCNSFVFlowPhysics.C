@@ -10,6 +10,8 @@
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVAction.h"
 
+registerMooseObject("NavierStokesApp", WCNSFVFlowPhysics);
+
 InputParameters
 WCNSFVFlowPhysics::validParams()
 {
@@ -51,6 +53,8 @@ WCNSFVFlowPhysics::validParams()
   // Spatial discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "mass_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_advection_interpolation");
+  params.transferParam<bool>(NSFVAction::validParams(), "pressure_two_term_bc_expansion");
+  params.transferParam<bool>(NSFVAction::validParams(), "momentum_two_term_bc_expansion");
 
   // Nonlinear solver parameters
   params.transferParam<Real>(NSFVAction::validParams(), "mass_scaling");
@@ -62,16 +66,19 @@ WCNSFVFlowPhysics::validParams()
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters)
 {
-  checkTwoDVectorParamsSameLength<BoundaryName, MooseEnum>("friction_blocks", "friction_types");
-  checkTwoDVectorParamsSameLength<BoundaryName, MooseEnum>("friction_blocks", "friction_coeffs");
+  checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_types");
+  checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_coeffs");
 
-  checkParamsBothSetOrNotSet("pin_pressure", "pin_pressure_type");
-  checkParamsBothSetOrNotSet("pin_pressure", "pin_pressure_value");
-  // checkDependentParameterErrorContains("pin_pressure_type", "point", "pin_pressure_point");
+  checkSecondParamSetOnlyIfFirstOneTrue("pin_pressure", "pinned_pressure_type");
+  checkSecondParamSetOnlyIfFirstOneTrue("pin_pressure", "pinned_pressure_value");
+  if (std::string(getParam<MooseEnum>("pinned_pressure_type")).find("point") != std::string::npos &&
+      !isParamValid("pinned_pressure_point"))
+    paramError("pinned_pressure_point",
+               "This parameter must be set to specify the pinned pressure point");
 
-  checkDependentParameterError("use_friction_correction", {"consistent_scaling"}, true);
-  checkDependentParameterError(
-      "boussinesq_approximation", {"ref_temperature", "thermal_expansion"}, true);
+  checkSecondParamSetOnlyIfFirstOneTrue("use_friction_correction", "consistent_scaling");
+  checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
+  checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "thermal_expansion");
 }
 
 void
@@ -200,13 +207,11 @@ WCNSFVFlowPhysics::addINSMassKernels()
 {
   std::string kernel_type = "INSFVMassAdvection";
   std::string kernel_name = prefix() + "ins_mass_advection";
-  std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
 
   if (_porous_medium_treatment)
   {
     kernel_type = "PINSFVMassAdvection";
     kernel_name = prefix() + "pins_mass_advection";
-    rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
   }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -214,11 +219,153 @@ WCNSFVFlowPhysics::addINSMassKernels()
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("mass_advection_interpolation");
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
+}
+
+void
+WCNSFVFlowPhysics::addINSMomentumTimeKernels()
+{
+  std::string kernel_type = "INSFVMomentumTimeDerivative";
+  std::string kernel_name = prefix() + "ins_momentum_time_";
+
+  if (_porous_medium_treatment)
+  {
+    kernel_type = "PINSFVMomentumTimeDerivative";
+    kernel_name = prefix() + "pins_momentum_time_";
+  }
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+    getProblem().addFVKernel(kernel_type, kernel_name + _velocity_names[d], params);
+  }
+}
+
+void
+WCNSFVFlowPhysics::addWCNSMomentumTimeKernels()
+{
+  const std::string mom_kernel_type = "WCNSFVMomentumTimeDerivative";
+  InputParameters params = getFactory().getValidParams(mom_kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+
+    if (_porous_medium_treatment)
+      getProblem().addFVKernel(
+          mom_kernel_type, prefix() + "pwcns_momentum_" + NS::directions[d] + "_time", params);
+    else
+      getProblem().addFVKernel(
+          mom_kernel_type, prefix() + "wcns_momentum_" + NS::directions[d] + "_time", params);
+  }
+}
+
+void
+WCNSFVFlowPhysics::addINSMomentumAdvectionKernels()
+{
+  std::string kernel_type = "INSFVMomentumAdvection";
+  std::string kernel_name = prefix() + "ins_momentum_advection_";
+
+  if (_porous_medium_treatment)
+  {
+    kernel_type = "PINSFVMomentumAdvection";
+    kernel_name = prefix() + "pins_momentum_advection_";
+  }
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseEnum>("advected_interp_method") =
+      getParam<MooseEnum>("momentum_advection_interpolation");
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+  params.applySpecificParameters(parameters(), INSFVMomentumAdvection::listOfCommonParams());
+
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+  }
+}
+
+void
+WCNSFVFlowPhysics::addINSMomentumViscousDissipationKernels()
+{
+  std::string kernel_type = "INSFVMomentumDiffusion";
+  std::string kernel_name = prefix() + "ins_momentum_diffusion_";
+  std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
+
+  if (_porous_medium_treatment)
+  {
+    kernel_type = "PINSFVMomentumDiffusion";
+    kernel_name = prefix() + "pins_momentum_diffusion_";
+    rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
+  }
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+  }
+}
+
+void
+WCNSFVFlowPhysics::addINSMomentumPressureKernels()
+{
+  std::string kernel_type = "INSFVMomentumPressure";
+  std::string kernel_name = prefix() + "ins_momentum_pressure_";
+
+  if (_porous_medium_treatment)
+  {
+    kernel_type = "PINSFVMomentumPressure";
+    kernel_name = prefix() + "pins_momentum_pressure_";
+  }
+
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, _blocks);
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseFunctorName>("pressure") = _pressure_name;
+  params.set<bool>("correct_skewness") =
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+  }
 }
 
 void
@@ -228,18 +375,16 @@ WCNSFVFlowPhysics::addINSMomentumGravityKernels()
   {
     std::string kernel_type = "INSFVMomentumGravity";
     std::string kernel_name = prefix() + "ins_momentum_gravity_";
-    std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
 
     if (_porous_medium_treatment)
     {
       kernel_type = "PINSFVMomentumGravity";
       kernel_name = prefix() + "pins_momentum_gravity_";
-      rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
     }
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     if (_porous_medium_treatment)
@@ -269,18 +414,16 @@ WCNSFVFlowPhysics::addINSMomentumBoussinesqKernels()
   {
     std::string kernel_type = "INSFVMomentumBoussinesq";
     std::string kernel_name = prefix() + "ins_momentum_boussinesq_";
-    std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
 
     if (_porous_medium_treatment)
     {
       kernel_type = "PINSFVMomentumBoussinesq";
       kernel_name = prefix() + "pins_momentum_boussinesq_";
-      rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
     }
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
@@ -314,7 +457,7 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
     const std::string kernel_type = "PINSFVMomentumFriction";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<UserObjectName>("rhie_chow_user_object") = prefix() + "pins_rhie_chow_interpolator";
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
@@ -359,8 +502,7 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
         else
           assignBlocks(corr_params, _blocks);
         corr_params.set<MooseFunctorName>(NS::density) = _density_name;
-        corr_params.set<UserObjectName>("rhie_chow_user_object") =
-            prefix() + "pins_rhie_chow_interpolator";
+        corr_params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         corr_params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
         corr_params.set<Real>("consistent_scaling") = getParam<Real>("consistent_scaling");
         for (unsigned int d = 0; d < _dim; ++d)
@@ -389,7 +531,7 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
   {
     const std::string kernel_type = "INSFVMomentumFriction";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    params.set<UserObjectName>("rhie_chow_user_object") = prefix() + "ins_rhie_chow_interpolator";
+    params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
@@ -438,7 +580,7 @@ WCNSFVFlowPhysics::addFVBCs()
 void
 WCNSFVFlowPhysics::addINSInletBC()
 {
-  const auto momentum_inlet_types = getParam<std::vector<MooseEnum>>("momentum_inlet_types");
+  const auto momentum_inlet_types = getParam<MultiMooseEnum>("momentum_inlet_types");
   const auto momentum_inlet_functions =
       getParam<std::vector<std::vector<FunctionName>>>("momentum_inlet_function");
 
@@ -489,15 +631,9 @@ WCNSFVFlowPhysics::addINSInletBC()
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         if (_porous_medium_treatment)
-        {
-          params.set<UserObjectName>("rhie_chow_user_object") =
-              prefix() + "pins_rhie_chow_interpolator";
           params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-        }
-        else
-          params.set<UserObjectName>("rhie_chow_user_object") =
-              prefix() + "ins_rhie_chow_interpolator";
 
         if (momentum_inlet_types[bc_ind] == "flux-mass")
         {
@@ -547,7 +683,7 @@ void
 WCNSFVFlowPhysics::addINSOutletBC()
 {
   const auto pressure_functions = getParam<std::vector<FunctionName>>("pressure_function");
-  const auto momentum_outlet_types = getParam<std::vector<MooseEnum>>("pressure_function");
+  const auto momentum_outlet_types = getParam<MultiMooseEnum>("momentum_outlet_types");
 
   const std::string u_names[3] = {"u", "v", "w"};
   for (unsigned int bc_ind = 0; bc_ind < _outlet_boundaries.size(); ++bc_ind)
@@ -562,8 +698,7 @@ WCNSFVFlowPhysics::addINSOutletBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
         params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
-        params.set<UserObjectName>("rhie_chow_user_object") =
-            prefix() + "pins_rhie_chow_interpolator";
+        params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
@@ -583,8 +718,7 @@ WCNSFVFlowPhysics::addINSOutletBC()
         const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
-        params.set<UserObjectName>("rhie_chow_user_object") =
-            prefix() + "ins_rhie_chow_interpolator";
+        params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
@@ -631,7 +765,7 @@ WCNSFVFlowPhysics::addINSOutletBC()
 void
 WCNSFVFlowPhysics::addINSWallsBC()
 {
-  const auto momentum_wall_types = getParam<std::vector<MooseEnum>>("momentum_wall_types");
+  const auto momentum_wall_types = getParam<MultiMooseEnum>("momentum_wall_types");
   const std::string u_names[3] = {"u", "v", "w"};
 
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
@@ -657,13 +791,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
       params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
       params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
-
-      if (_porous_medium_treatment)
-        params.set<UserObjectName>("rhie_chow_user_object") =
-            prefix() + "pins_rhie_chow_interpolator";
-      else
-        params.set<UserObjectName>("rhie_chow_user_object") =
-            prefix() + "ins_rhie_chow_interpolator";
+      params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
       for (unsigned int d = 0; d < _dim; ++d)
         params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
@@ -681,16 +809,10 @@ WCNSFVFlowPhysics::addINSWallsBC()
       const std::string bc_type = "INSFVNaturalFreeSlipBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+      params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
-        if (_porous_medium_treatment)
-          params.set<UserObjectName>("rhie_chow_user_object") =
-              prefix() + "pins_rhie_chow_interpolator";
-        else
-          params.set<UserObjectName>("rhie_chow_user_object") =
-              prefix() + "ins_rhie_chow_interpolator";
-
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
@@ -713,19 +835,13 @@ WCNSFVFlowPhysics::addINSWallsBC()
         if (hasTurbulencePhysics())
           viscosity_name = NS::total_viscosity;
         params.set<MooseFunctorName>(NS::mu) = viscosity_name;
+        params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
 
         for (unsigned int d = 0; d < _dim; ++d)
           params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
-          if (_porous_medium_treatment)
-            params.set<UserObjectName>("rhie_chow_user_object") =
-                prefix() + "pins_rhie_chow_interpolator";
-          else
-            params.set<UserObjectName>("rhie_chow_user_object") =
-                prefix() + "ins_rhie_chow_interpolator";
-
           params.set<NonlinearVariableName>("variable") = _velocity_names[d];
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
@@ -822,6 +938,7 @@ WCNSFVFlowPhysics::addInitialConditions()
       params.set<VariableName>("variable") = _velocity_names[d];
       params.set<FunctionName>("function") = vvalue[d];
 
+      getProblem().addInitialCondition("FunctionIC", prefix() + _velocity_names[d] + "_ic", params);
       // addNSInitialCondition("FunctionIC", prefix() + _velocity_name[d] + "_ic", params);
     }
 
@@ -830,6 +947,7 @@ WCNSFVFlowPhysics::addInitialConditions()
     params.set<VariableName>("variable") = _pressure_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
+    getProblem().addInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
     // addNSInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
   }
 
