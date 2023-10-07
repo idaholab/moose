@@ -10,6 +10,8 @@
 #include "WCNSFVHeatAdvectionPhysics.h"
 #include "NSFVAction.h"
 
+registerMooseObject("NavierStokesApp", WCNSFVHeatAdvectionPhysics);
+
 InputParameters
 WCNSFVHeatAdvectionPhysics::validParams()
 {
@@ -157,19 +159,17 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
 {
   std::string kernel_type = "INSFVEnergyAdvection";
   std::string kernel_name = prefix() + "ins_energy_advection";
-  std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
   if (_porous_medium_treatment)
   {
     kernel_type = "PINSFVEnergyAdvection";
     kernel_name = prefix() + "pins_energy_advection";
-    rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
   }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = getParam<MooseEnum>("energy_advection_method");
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
@@ -296,6 +296,13 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
     getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_mixing_length_diffusion", params);
   else
     getProblem().addFVKernel(kernel_type, prefix() + "ins_energy_mixing_length_diffusion", params);
+}
+
+void
+WCNSFVHeatAdvectionPhysics::addFVBCs()
+{
+  addINSEnergyInletBC();
+  addINSEnergyWallBC();
 }
 
 void
@@ -465,4 +472,17 @@ WCNSFVHeatAdvectionPhysics::addInitialConditions()
 
     // addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
   }
+}
+
+void
+WCNSFVHeatAdvectionPhysics::addMaterials()
+{
+  InputParameters params = getFactory().getValidParams("INSFVEnthalpyMaterial");
+  assignBlocks(params, _blocks);
+
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+  params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+
+  getProblem().addMaterial("INSFVEnthalpyMaterial", prefix() + "ins_enthalpy_material", params);
 }
