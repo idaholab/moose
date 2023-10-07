@@ -36,6 +36,9 @@ protected:
   /// Add postprocessors, could be moved up to the base class
   void addPostprocessors() override;
 
+  void adjustRMGhostLayers();
+  virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
+
   /// Return the name of the Rhie Chow user object
   std::string rhieChowUOName() const;
 

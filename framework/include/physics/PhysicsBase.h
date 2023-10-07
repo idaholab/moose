@@ -118,7 +118,9 @@ private:
   virtual void addUserObjects() {}
   virtual void addPostprocessors() {}
 
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/) {}
+  /// Add any relationship manager needed by the physics, for example for 'ghosting' layers of
+  /// near process boundaries
+  // virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type);
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state

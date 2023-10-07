@@ -978,3 +978,13 @@ WCNSFVFlowPhysics::addInitialConditions()
   //   }
   // }
 }
+
+unsigned short
+WCNSFVFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  unsigned short ghost_layers = WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded();
+  if (_porous_medium_treatment &&
+      getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic")
+    ghost_layers = std::max(ghost_layers, (unsigned short)3);
+  return ghost_layers;
+}

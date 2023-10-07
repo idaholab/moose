@@ -24,8 +24,6 @@ public:
   AddPhysicsAction(const InputParameters & params);
   virtual void act() override;
 
-  void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-
 private:
   /// Pointer to the physics to retrieve the other objects needed
   PhysicsBase * _physics;
