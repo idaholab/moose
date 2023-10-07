@@ -299,6 +299,102 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
 }
 
 void
+WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
+{
+  const auto energy_inlet_types = getParam<std::vector<MooseEnum>>("energy_inlet_types");
+  const auto energy_inlet_function = getParam<std::vector<FunctionName>>("energy_inlet_function");
+
+  unsigned int flux_bc_counter = 0;
+  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+  {
+    if (energy_inlet_types[bc_ind] == "fixed-temperature")
+    {
+      const std::string bc_type = "FVFunctionDirichletBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = energy_inlet_function[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + _inlet_boundaries[bc_ind], params);
+    }
+    else if (energy_inlet_types[bc_ind] == "heatflux")
+    {
+      const std::string bc_type = "FVFunctionNeumannBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = energy_inlet_function[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + _inlet_boundaries[bc_ind], params);
+    }
+    else if (energy_inlet_types[bc_ind] == "flux-mass" ||
+             energy_inlet_types[bc_ind] == "flux-velocity")
+    {
+      const auto flux_inlet_directions = getParam<std::vector<Point>>("flux_inlet_directions");
+      const auto flux_inlet_pps = getParam<std::vector<PostprocessorName>>("flux_inlet_pps");
+
+      const std::string bc_type = "WCNSFVEnergyFluxBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      if (flux_inlet_directions.size())
+        params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
+      if (energy_inlet_types[bc_ind] == "flux-mass")
+      {
+        params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
+        params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+      }
+      else
+        params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
+
+      params.set<PostprocessorName>("temperature_pp") = energy_inlet_function[bc_ind];
+      params.set<MooseFunctorName>(NS::density) = _density_name;
+      params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + _inlet_boundaries[bc_ind], params);
+      flux_bc_counter += 1;
+    }
+  }
+}
+
+void
+WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
+{
+  const auto energy_wall_types = getParam<std::vector<BoundaryName>>("energy_wall_types");
+  const auto energy_wall_function = getParam<std::vector<BoundaryName>>("energy_wall_function");
+
+  for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
+  {
+    if (energy_wall_types[bc_ind] == "fixed-temperature")
+    {
+      const std::string bc_type = "FVFunctionDirichletBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = energy_wall_function[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + _wall_boundaries[bc_ind], params);
+    }
+    else if (energy_wall_types[bc_ind] == "heatflux")
+    {
+      const std::string bc_type = "FVFunctionNeumannBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = energy_wall_function[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+      getProblem().addFVBC(
+          bc_type, _fluid_temperature_name + "_" + _wall_boundaries[bc_ind], params);
+    }
+  }
+}
+
+void
 WCNSFVHeatAdvectionPhysics::addEnthalpyMaterial()
 {
   InputParameters params = getFactory().getValidParams("INSFVEnthalpyMaterial");
@@ -327,14 +423,13 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
     // Now we determine what kind of functor we are dealing with
     else
     {
-      if (getProblem().template hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
-                                                           /*thread_id=*/0))
+      if (getProblem().hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
+                                                  /*thread_id=*/0))
         have_scalar = true;
       else
       {
-        if (getProblem().template hasFunctorWithType<ADRealVectorValue>(
-                _thermal_conductivity_name[i],
-                /*thread_id=*/0))
+        if (getProblem().hasFunctorWithType<ADRealVectorValue>(_thermal_conductivity_name[i],
+                                                               /*thread_id=*/0))
           have_vector = true;
         else
         {
@@ -354,4 +449,20 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
                "The entries on thermal conductivity shall either be scalars of vectors, mixing "
                "them is not supported!");
   return have_vector;
+}
+
+void
+WCNSFVHeatAdvectionPhysics::addInitialConditions()
+{
+
+  InputParameters params = getFactory().getValidParams("FunctionIC");
+  assignBlocks(params, _blocks);
+
+  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
+  {
+    params.set<VariableName>("variable") = _fluid_temperature_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+
+    // addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
+  }
 }
