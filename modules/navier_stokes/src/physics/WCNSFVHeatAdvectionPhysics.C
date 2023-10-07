@@ -71,6 +71,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
 void
 WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
 {
+  // Dont add if the user already defined the variable
   if (nonLinearVariableExists(_fluid_temperature_name, /*error_if_aux=*/true))
     return;
 
