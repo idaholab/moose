@@ -54,26 +54,36 @@ protected:
 
   /// Utilities to check parameters
   /// These will be replaced by being baked into the validParams() logic, one day
+  /// Check in debug mode that this parameter has been added to the validParams
+  template <typename T>
+  void assertParamDefined(const std::string & param1) const;
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
-  void checkVectorParamsSameLength(std::string param1, std::string param2) const;
+  void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  /// Check that this vector parameter (param1) has the same length as the MultiMooseEnum (param2)
+  template <typename T>
+  void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                               const std::string & param2) const;
   /// Check that the two vector of vector parameters are the same length
   template <typename T, typename S>
-  void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
+  void checkTwoDVectorParamsSameLength(const std::string & param1,
+                                       const std::string & param2) const;
   /// Check that there is no overlap between the two vector parameters
   template <typename T>
-  void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
+  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
   bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
   /// Check that the dependent parameters all are (or are not) defined when the main parameter is
   void checkDependentParameterError(const std::string & main_parameter,
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined) const;
   /// Check that two parameters are either both set or both not set
-  void checkParamsBothSetOrNotSet(std::string param1, std::string param2) const;
+  void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
+  void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                             const std::string & param2) const;
   /// Check if the user commited errors during the definition of block-wise parameters
   template <typename T>
-  void checkBlockwiseConsistency(const std::string block_param_name,
-                                 const std::vector<std::string> parameter_names);
+  void checkBlockwiseConsistency(const std::string & block_param_name,
+                                 const std::vector<std::string> parameter_names) const;
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
@@ -83,6 +93,9 @@ protected:
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
+
+  /// TODO: interaction with components
+  void processMesh(){};
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   unsigned int _dim;
@@ -122,35 +135,57 @@ private:
 
 template <typename T, typename S>
 void
-PhysicsBase::checkVectorParamsSameLength(std::string param1, std::string param2) const
+PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
+                                         const std::string & param2) const
 {
   checkParamsBothSetOrNotSet(param1, param2);
-  if (!parameters().have_parameter<std::vector<T>>(param1))
-    paramError("Parameter ",
-               param1,
-               " is not defined with type ",
-               MooseUtils::prettyCppType<T>(),
-               ". Check your code.");
-  if (!parameters().have_parameter<std::vector<S>>(param2))
-    paramError("Parameter ",
-               param2,
-               " is not defined with type ",
-               MooseUtils::prettyCppType<S>(),
-               ". Check your code.");
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+
   if (isParamValid(param1))
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<std::vector<S>>(param2).size();
     if (size_1 != size_2)
       paramError(param1,
-                 "Vector parameters " + param1 + "(size " + std::to_string(size_1) + ") and " +
-                     param2 + "(size " + std::to_string(size_2) + ") must be the same size");
+                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
+                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
   }
+}
+
+template <typename T>
+void
+PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                                     const std::string & param2) const
+{
+  checkParamsBothSetOrNotSet(param1, param2);
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<MultiMooseEnum>(param2);
+
+  if (isParamValid(param1))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<MultiMooseEnum>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
+                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::assertParamDefined(const std::string & param1) const
+{
+  mooseAssert(parameters().have_parameter<T>(param1),
+              "Parameter '" + param1 + "' is not defined with type " +
+                  MooseUtils::prettyCppType<T>() + ". Check your code.");
 }
 
 template <typename T, typename S>
 void
-PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const
+PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
+                                             const std::string & param2) const
 {
   checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
   if (isParamValid(param1))
@@ -159,16 +194,17 @@ PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string par
     const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
     for (const auto index : index_range(value1))
       if (value1[index].size() != value2[index].size())
-        paramError(
-            param1,
-            "Vector at index " + std::to_string(index) + " of 2D vector parameter " + param1 +
-                " is not the same size as its counterpart from 2D vector parameter " + param2);
+        paramError(param1,
+                   "Vector at index " + std::to_string(index) + " of 2D vector parameter '" +
+                       param1 +
+                       "' is not the same size as its counterpart from 2D vector parameter '" +
+                       param2 + "'");
   }
 }
 
 template <typename T>
 void
-PhysicsBase::checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const
+PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const
 {
   std::set<std::string> unique_params;
   for (const auto & param : param_vec)

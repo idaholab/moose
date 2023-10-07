@@ -25,14 +25,14 @@ PhysicsBase::validParams()
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
   // Restart parameters
-  // params.addParam<bool>("initialize_variables_from_mesh_file",
-  //                       false,
-  //                       "Determines if the variables that are added by the action are initialized
-  //                       " "from the mesh file (only for Exodus format)");
-  // params.addParam<std::string>(
-  //     "initial_from_file_timestep",
-  //     "LATEST",
-  //     "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized"
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   return params;
 }
 
@@ -43,12 +43,13 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
 {
   _problem = getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
   _factory = &_app.getFactory();
+  _dim = _problem->mesh().dimension();
 
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
 
-  // checkSecondParamSetOnlyIfFirstOne("initialize_variables_from_mesh_file",
-  //                                   "initial_from_file_timestep");
+  checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
+                                        "initial_from_file_timestep");
 }
 
 bool
@@ -63,12 +64,26 @@ PhysicsBase::isTransient() const
 }
 
 void
-PhysicsBase::checkParamsBothSetOrNotSet(std::string param1, std::string param2) const
+PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
+                                        const std::string & param2) const
 {
   if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
     paramError(param1,
                "Parameters " + param1 + " and " + param2 +
                    " must be either both set or both unset");
+}
+
+void
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                                   const std::string & param2) const
+{
+  mooseAssert(parameters().have_parameter<bool>(param1),
+              "Cannot check if parameter " + param1 +
+                  " is true if it's not a bool parameter of this object");
+  if (!getParam<bool>(param1) && isParamSetByUser(param2))
+    paramError(param2,
+               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
+                   "' is set by the user");
 }
 
 bool
