@@ -21,7 +21,7 @@ WCNSFVPhysicsBase::validParams()
   // spelled the same way and match the evolution of other objects.
   // If we remove these objects, or change their parameters, these parameters should be updated
 
-  // Specify the weakly compressible boundary types
+  // Specify the weakly compressible boundary flux information
   params.transferParam<std::vector<std::vector<FunctionName>>>(NSFVAction::validParams(),
                                                                "momentum_inlet_function");
   params.transferParam<std::vector<PostprocessorName>>(NSFVAction::validParams(), "flux_inlet_pps");
@@ -111,4 +111,22 @@ WCNSFVPhysicsBase::checkRhieChowFunctorsDefined() const
     mooseError("Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
   if (_dim == 3 && !getProblem().hasFunctor("az", /*thread_id=*/0))
     mooseError("Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
+}
+
+void
+WCNSFVPhysicsBase::addPostprocessors()
+{
+  const auto momentum_inlet_types = getParam<std::vector<MooseEnum>>("momentum_inlet_types");
+
+  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+    if (momentum_inlet_types[bc_ind] == "flux-mass" ||
+        momentum_inlet_types[bc_ind] == "flux-velocity")
+    {
+      const std::string pp_type = "AreaPostprocessor";
+      InputParameters params = getFactory().getValidParams(pp_type);
+      params.template set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+      params.template set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+
+      getProblem().addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
+    }
 }
