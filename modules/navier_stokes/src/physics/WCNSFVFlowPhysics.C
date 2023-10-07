@@ -784,3 +784,79 @@ WCNSFVFlowPhysics::addUserObjects()
     getProblem().addUserObject(object_type, prefix() + "ins_mass_pressure_pin", params);
   }
 }
+
+void
+WCNSFVFlowPhysics::addMaterials()
+{
+  if (_porous_medium_treatment)
+    addPorousMediumSpeedMaterial();
+}
+
+void
+WCNSFVFlowPhysics::addPorousMediumSpeedMaterial()
+{
+  InputParameters params = getFactory().getValidParams("PINSFVSpeedFunctorMaterial");
+  assignBlocks(params, _blocks);
+
+  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    params.set<MooseFunctorName>(NS::superficial_velocity_vector[dim_i]) = _velocity_names[dim_i];
+  params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
+
+  getProblem().addMaterial("PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
+}
+
+void
+WCNSFVFlowPhysics::addInitialConditions()
+{
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+
+  InputParameters params = getFactory().getValidParams("FunctionIC");
+  assignBlocks(params, _blocks);
+  auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
+
+  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_velocity"))
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = _velocity_names[d];
+      params.set<FunctionName>("function") = vvalue[d];
+
+      // addNSInitialCondition("FunctionIC", prefix() + _velocity_name[d] + "_ic", params);
+    }
+
+  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_pressure"))
+  {
+    params.set<VariableName>("variable") = _pressure_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
+
+    // addNSInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
+  }
+
+  // if (_has_scalar_equation &&
+  //     (!_app.isRestarting() || parameters().isParamSetByUser("initial_scalar_variables")))
+  // {
+  //   unsigned int ic_counter = 0;
+  //   for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  //   {
+  //     bool initialize_me = true;
+  //     if (_create_scalar_variable.size())
+  //       if (!_create_scalar_variable[name_i])
+  //         initialize_me = false;
+
+  //     if (initialize_me)
+  //     {
+  //       params.set<VariableName>("variable") = _passive_scalar_names[name_i];
+  //       if (parameters().isParamValid("initial_scalar_variables"))
+  //         params.set<FunctionName>("function") =
+  //             getParam<std::vector<FunctionName>>("initial_scalar_variables")[ic_counter];
+  //       else
+  //         params.set<FunctionName>("function") = "0.0";
+
+  //       addNSInitialCondition(
+  //           "FunctionIC", prefix() + _passive_scalar_names[name_i] + "_ic", params);
+  //       ic_counter += 1;
+  //     }
+  //   }
+  // }
+}

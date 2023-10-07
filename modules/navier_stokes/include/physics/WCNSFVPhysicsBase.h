@@ -33,6 +33,8 @@ public:
 protected:
   /// Add user objects: for now mainly the Rhie Chow user object
   virtual void addUserObjects() override;
+  /// Add postprocessors, could be moved up to the base class
+  void addPostprocessors() override;
 
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
@@ -45,7 +47,7 @@ private:
   void addRhieChowUserObjects();
 
   /// Check whether another Physics object has been specified
-  bool hasCoupledFlowPhysics() const { return !(!(_flow_equations_physics)); };
+  bool hasCoupledFlowPhysics() const { return !(!_flow_equations_physics); };
 
   /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
   /// for scalar or temperature advection by auxiliary variables
