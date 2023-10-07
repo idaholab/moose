@@ -20,7 +20,7 @@ Documents:
     software_requirements_specification: sqa/level_set_srs.md
     software_design_description: sqa/level_set_sdd.md
     software_test_plan: sqa/level_set_stp.md
-    requirements_traceablity_matrix: sqa/level_set_rtm.md
+    requirements_traceability_matrix: sqa/level_set_rtm.md
     verification_validation_report: sqa/level_set_vvr.md
     failure_analysis_report: sqa/level_set_far.md
     software_library_list: sqa/level_set_sll.md

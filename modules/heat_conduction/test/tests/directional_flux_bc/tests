@@ -91,7 +91,7 @@
       type = CSVDiff
       input = 3d_elem.i
       csvdiff = 3d_hex27.csv
-      cli_args = 'GlobalParams/elem_type=hex20 GlobalParams/order=second Outputs/file_base=3d_hex27'
+      cli_args = 'GlobalParams/elem_type=hex27 GlobalParams/order=second Outputs/file_base=3d_hex27'
       detail = 'HEX27'
     []
 

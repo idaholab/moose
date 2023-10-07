@@ -25,6 +25,7 @@ WCNSFVScalarFluxBC::validParams()
                                      "Postprocessor with the inlet scalar flow rate");
   params.addParam<PostprocessorName>("scalar_value_pp",
                                      "Postprocessor with the inlet scalar concentration");
+  params.addRequiredParam<MooseFunctorName>("passive_scalar", "passive scalar functor");
   return params;
 }
 
@@ -33,7 +34,8 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
     _scalar_value_pp(isParamValid("scalar_value_pp") ? &getPostprocessorValue("scalar_value_pp")
                                                      : nullptr),
     _scalar_flux_pp(isParamValid("scalar_flux_pp") ? &getPostprocessorValue("scalar_flux_pp")
-                                                   : nullptr)
+                                                   : nullptr),
+    _passive_scalar(getFunctor<ADReal>("passive_scalar"))
 {
   // Density is often set as global parameters so it is not checked
   if (_scalar_flux_pp && (_velocity_pp || _mdot_pp || _scalar_value_pp))
@@ -50,8 +52,8 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
     if (!_velocity_pp && !_mdot_pp)
       mooseError("If not providing the scalar flow rate, the inlet velocity or mass flow "
                  "should be provided");
-    if (_mdot_pp && (!_rho || !_area_pp))
-      mooseError("If providing the inlet mass flow rate, the inlet density and flow "
+    if (_mdot_pp && !_area_pp)
+      mooseError("If providing the inlet mass flow rate, the inlet flow "
                  "area should be provided as well");
   }
   else if (!_area_pp)
@@ -62,33 +64,29 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
 ADReal
 WCNSFVScalarFluxBC::computeQpResidual()
 {
-  if (_area_pp)
-    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
-      mooseError("Surface area is 0");
+  const auto state = determineState();
 
-  if (_scalar_flux_pp)
+  if (!isInflow())
+    return varVelocity(state) * _normal * _passive_scalar(singleSidedFaceArg(), state);
+  else if (_scalar_flux_pp)
     return -_scaling_factor * *_scalar_flux_pp / *_area_pp;
-  else
-  {
-    /*
-     * We assume the following orientation: The supplied mass flow and velocity magnitude need to
-     * be positive if:
-     * 1. No direction parameter is supplied and we want to define an inlet condition (similarly,
-     * if the mass flow/velocity magnitude are negative we define an outlet)
-     * 2. If the fluid flows aligns with the direction parameter specified by the user.
-     * (similarly, if the postprocessor values are negative we assume the fluid flows backwards
-     * with respect to the direction parameter)
-     */
-    checkForInternalDirection();
 
-    const Point incoming_vector = !_direction_specified_by_user ? _face_info->normal() : _direction;
-    const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
-    if (_velocity_pp)
-    {
-      return -_scaling_factor * *_velocity_pp * *_scalar_value_pp * cos_angle;
-    }
-    else
-      return -_scaling_factor * *_mdot_pp / *_area_pp /
-             (*_rho)(singleSidedFaceArg(), determineState()) / cos_angle * *_scalar_value_pp;
-  }
+  return -_scaling_factor * inflowSpeed(state) * (*_scalar_value_pp);
+}
+
+bool
+WCNSFVScalarFluxBC::isInflow() const
+{
+  if (_mdot_pp)
+    return *_mdot_pp >= 0;
+  else if (_velocity_pp)
+    return *_velocity_pp >= 0;
+  else if (_scalar_flux_pp)
+    return *_scalar_flux_pp >= 0;
+
+  mooseError(
+      "Either mdot_pp or velocity_pp or scalar_flux_pp need to be provided OR this function "
+      "must be overridden in derived classes if other input parameter combinations are valid. "
+      "Neither mdot_pp nor velocity_pp are provided.");
+  return true;
 }

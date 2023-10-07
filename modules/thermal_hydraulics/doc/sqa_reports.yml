@@ -22,7 +22,7 @@ Documents:
     software_requirements_specification: sqa/thermal_hydraulics_srs.md
     software_design_description: sqa/thermal_hydraulics_sdd.md
     software_test_plan: sqa/thermal_hydraulics_stp.md
-    requirements_traceablity_matrix: sqa/thermal_hydraulics_rtm.md
+    requirements_traceability_matrix: sqa/thermal_hydraulics_rtm.md
     verification_validation_report: sqa/thermal_hydraulics_vvr.md
     failure_analysis_report: sqa/thermal_hydraulics_far.md
     software_library_list: sqa/thermal_hydraulics_sll.md

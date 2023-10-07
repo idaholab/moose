@@ -13,7 +13,7 @@ Documents:
     software_requirements_specification: sqa/rdg_srs.md
     software_design_description: sqa/rdg_sdd.md
     software_test_plan: sqa/rdg_stp.md
-    requirements_traceablity_matrix: sqa/rdg_rtm.md
+    requirements_traceability_matrix: sqa/rdg_rtm.md
     verification_validation_plan: sqa/rdg_vvr.md
     failure_analysis_report: sqa/rdg_far.md
     software_library_list: sqa/rdg_sll.md

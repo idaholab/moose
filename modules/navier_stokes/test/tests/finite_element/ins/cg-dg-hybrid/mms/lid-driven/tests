@@ -1,0 +1,46 @@
+[Tests]
+  design = 'modules/navier_stokes/index.md'
+  issues = '#24055'
+  [hybrid-p1p1]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestCGDGP1P1
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a hybrid CG-DG scheme with first order Lagrange pressure and first order monomial velocity and demonstrate second order convergence for the velocity and first order convergence for pressure in the L2 error measure.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    installation_type = 'in_tree'
+  []
+  [hybrid-p2p1]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestCGDGP2P1
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a hybrid CG-DG scheme with first order Lagrange pressure and second order monomial velocity and demonstrate third order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
+    method = '!dbg'
+    min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
+    installation_type = 'in_tree'
+  []
+  [hybrid-p2p1-l2-lagrange]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestCGDGP2P1L2Lagrange
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a hybrid CG-DG scheme with first order Lagrange pressure and second order L2 Lagrange velocity and demonstrate third order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
+    method = '!dbg'
+    min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
+    installation_type = 'in_tree'
+    heavy = true
+  []
+  [hybrid-p2p1-l2-hierarchic]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestCGDGP2P1L2Hierarchic
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a hybrid CG-DG scheme with first order Lagrange pressure and second order L2 hierarchic velocity and demonstrate third order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
+    method = '!dbg'
+    min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
+    installation_type = 'in_tree'
+    heavy = true
+  []
+[]

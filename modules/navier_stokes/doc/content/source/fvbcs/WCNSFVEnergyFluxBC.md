@@ -26,6 +26,19 @@ This boundary condition works with postprocessors, which may be replaced by cons
 values in the input. The intended use case for this boundary condition is to be receiving its value from
 a coupled application, using a [Receiver.md] postprocessor.
 
+## Determining Flow Direction
+
+The `isInflow()` method is used to determine if the boundary is an inflow boundary.
+The user must at least set one of the following parameters [!param](/FVBCs/WCNSFVEnergyFluxBC/energy_pp), [!param](/FVBCs/WCNSFVEnergyFluxBC/mdot_pp), or [!param](/FVBCs/WCNSFVEnergyFluxBC/velocity_pp). The code checks the parameters in the following order:
+
+
+  -  if [!param](/FVBCs/WCNSFVEnergyFluxBC/mdot_pp) is provided, [!param](/FVBCs/WCNSFVEnergyFluxBC/mdot_pp) $>0$ indicates inflow,
+
+  -  else if [!param](/FVBCs/WCNSFVEnergyFluxBC/velocity_pp) is provided, [!param](/FVBCs/WCNSFVEnergyFluxBC/velocity_pp) $>0$ indicates inflow,
+
+  -  else if [!param](/FVBCs/WCNSFVEnergyFluxBC/energy_pp) is provided, [!param](/FVBCs/WCNSFVEnergyFluxBC/energy_pp) $>0$ indicates inflow.
+
+
 ## Example input syntax
 
 In this example input, the inlet boundary condition to the energy conservation equation is

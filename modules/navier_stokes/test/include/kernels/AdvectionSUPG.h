@@ -17,14 +17,14 @@
  * This class is responsible for solving the scalar advection
  * equation, possibly with a forcing function.
  */
-class Advection : public INSBase
+class AdvectionSUPG : public INSBase
 {
 public:
   static InputParameters validParams();
 
-  Advection(const InputParameters & parameters);
+  AdvectionSUPG(const InputParameters & parameters);
 
-  virtual ~Advection() {}
+  virtual ~AdvectionSUPG() {}
 
 protected:
   virtual Real computeQpResidual();

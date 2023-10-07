@@ -21,7 +21,7 @@ Documents:
     software_requirements_specification: sqa/phase_field_srs.md
     software_design_description: sqa/phase_field_sdd.md
     software_test_plan: sqa/phase_field_stp.md
-    requirements_traceablity_matrix: sqa/phase_field_rtm.md
+    requirements_traceability_matrix: sqa/phase_field_rtm.md
     verification_validation_report: sqa/phase_field_vvr.md
     failure_analysis_report: sqa/phase_field_far.md
     software_library_list: sqa/phase_field_sll.md

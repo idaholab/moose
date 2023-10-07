@@ -11,7 +11,7 @@ Documents:
     software_requirements_specification: sqa/electromagnetics_srs.md
     software_design_description: sqa/electromagnetics_sdd.md
     software_test_plan: sqa/electromagnetics_stp.md
-    requirements_traceablity_matrix: sqa/electromagnetics_rtm.md
+    requirements_traceability_matrix: sqa/electromagnetics_rtm.md
     verification_validation_report: sqa/electromagnetics_vvr.md
     failure_analysis_report: sqa/electromagnetics_far.md
     software_library_list: sqa/electromagnetics_sll.md

@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Advection.h"
+#include "AdvectionSUPG.h"
 #include "Function.h"
 
-registerMooseObject("NavierStokesTestApp", Advection);
+registerMooseObject("NavierStokesTestApp", AdvectionSUPG);
 
 InputParameters
-Advection::validParams()
+AdvectionSUPG::validParams()
 {
   InputParameters params = INSBase::validParams();
 
@@ -26,7 +26,7 @@ Advection::validParams()
   return params;
 }
 
-Advection::Advection(const InputParameters & parameters)
+AdvectionSUPG::AdvectionSUPG(const InputParameters & parameters)
   : INSBase(parameters),
     _ffn(getFunction("forcing_func")),
     _tau_type(getParam<MooseEnum>("tau_type"))
@@ -34,7 +34,7 @@ Advection::Advection(const InputParameters & parameters)
 }
 
 Real
-Advection::computeQpResidual()
+AdvectionSUPG::computeQpResidual()
 {
   Real tau_val = (_tau_type == "opt" ? tauNodal() : tau());
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -43,7 +43,7 @@ Advection::computeQpResidual()
 }
 
 Real
-Advection::computeQpJacobian()
+AdvectionSUPG::computeQpJacobian()
 {
   Real tau_val = (_tau_type == "opt" ? tauNodal() : tau());
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
