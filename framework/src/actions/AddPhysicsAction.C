@@ -161,12 +161,3 @@ AddPhysicsAction::act()
   //   for (const auto [type, name, params] : getInfo(_physics->getExecutors()))
   //     _problem->addKernel(type, name, params);
 }
-
-void
-AddPhysicsAction::addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/)
-{
-  // The physics does not exist at this point. We're going to have to look at parameters of the
-  // physics
-  // mooseAssert(_physics, "Should have a physics");
-  // _physics->addRelationshipManagers(input_rm_type); //, _moose_object_pars);
-}

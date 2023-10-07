@@ -34,6 +34,8 @@ private:
   void addFVBCs() override;
   void addMaterials() override;
 
+  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
   /**
    * Functions adding kernels for the incompressible / weakly compressible energy equation
    * If the material properties are not constant, some of these can be used for
