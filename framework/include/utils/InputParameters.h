@@ -1860,10 +1860,11 @@ InputParameters::transferParam(const InputParameters & source_params,
 {
   const auto name = source_params.checkForRename(std::string(name_in));
   if (!source_params.have_parameter<T>(name) && !source_params.hasCoupledValue(name))
-    mooseError(
-        "The '",
-        name_in,
-        "' parameter could not be transferred because it does not exist in the source parameters");
+    mooseError("The '",
+               name_in,
+               "' parameter could not be transferred because it does not exist with type '",
+               MooseUtils::prettyCppType<T>(),
+               "' in the source parameters");
   if (name != name_in)
     mooseWarning("The transferred parameter " + name_in + " is deprecated in favor of " + name +
                  " in the source parameters. The new name should likely be used for the parameter "
