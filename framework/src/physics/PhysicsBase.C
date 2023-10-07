@@ -44,6 +44,7 @@ PhysicsBase::validParams()
       "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
   params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
                               "Restart from Exodus");
+
   return params;
 }
 
@@ -136,6 +137,8 @@ PhysicsBase::prepareCopyNodalVariables() const
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
     _app.setExodusFileRestart(true);
+  checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
+                                        "initial_from_file_timestep");
 }
 
 bool
@@ -208,6 +211,19 @@ PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
     paramError(param1,
                "Parameters '" + param1 + "' and '" + param2 +
                    "' must be either both set or both not set.");
+}
+
+void
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                                   const std::string & param2) const
+{
+  mooseAssert(parameters().have_parameter<bool>(param1),
+              "Cannot check if parameter " + param1 +
+                  " is true if it's not a bool parameter of this object");
+  if (!getParam<bool>(param1) && isParamSetByUser(param2))
+    paramError(param2,
+               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
+                   "' is set by the user");
 }
 
 void

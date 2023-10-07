@@ -70,6 +70,7 @@ protected:
     return *_problem;
   }
 
+<<<<<<< HEAD
   /// Tell the app if we want to use Exodus restart
   void prepareCopyNodalVariables() const;
   /// Copy variables from the mesh file
@@ -99,19 +100,20 @@ protected:
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  /// Check that this vector parameter (param1) has the same length as the MultiMooseEnum (param2)
+  template <typename T>
+  void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                               const std::string & param2) const;
   template <typename T, typename S>
   void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
   /// Check that there is no overlap between the items in each vector parameters
   /// Each vector parameter should also have unique items
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
-  void checkDependentParameterError(const std::string & main_parameter,
-                                    const std::vector<std::string> & dependent_parameters,
-                                    const bool should_be_defined) const;
   /// Check if the user commited errors during the definition of block-wise parameters
   template <typename T>
-  void checkBlockwiseConsistency(const std::string block_param_name,
-                                 const std::vector<std::string> parameter_names);
+  void checkBlockwiseConsistency(const std::string & block_param_name,
+                                 const std::vector<std::string> & parameter_names);
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
@@ -142,6 +144,9 @@ protected:
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
+
+  /// TODO: interaction with components
+  void processMesh(){};
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   unsigned int _dim;
@@ -238,10 +243,11 @@ void
 PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
                                          const std::string & param2) const
 {
+  checkParamsBothSetOrNotSet(param1, param2);
   assertParamDefined<std::vector<T>>(param1);
   assertParamDefined<std::vector<S>>(param2);
 
-  if (isParamValid(param1) && isParamValid(param2))
+  if (isParamValid(param1))
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<std::vector<S>>(param2).size();
@@ -256,9 +262,39 @@ PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
       checkParamsBothSetOrNotSet(param1, param2);
 }
 
+template <typename T>
+void
+PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
+                                                     const std::string & param2) const
+{
+  checkParamsBothSetOrNotSet(param1, param2);
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<MultiMooseEnum>(param2);
+
+  if (isParamValid(param1))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<MultiMooseEnum>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
+                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::assertParamDefined(const std::string & param1) const
+{
+  mooseAssert(parameters().have_parameter<T>(param1),
+              "Parameter '" + param1 + "' is not defined with type " +
+                  MooseUtils::prettyCppType<T>() + ". Check your code.");
+}
+
 template <typename T, typename S>
 void
-PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const
+PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
+                                             const std::string & param2) const
 {
   checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
   if (isParamValid(param1))
@@ -267,10 +303,11 @@ PhysicsBase::checkTwoDVectorParamsSameLength(std::string param1, std::string par
     const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
     for (const auto index : index_range(value1))
       if (value1[index].size() != value2[index].size())
-        paramError(
-            param1,
-            "Vector at index " + std::to_string(index) + " of 2D vector parameter " + param1 +
-                " is not the same size as its counterpart from 2D vector parameter " + param2);
+        paramError(param1,
+                   "Vector at index " + std::to_string(index) + " of 2D vector parameter '" +
+                       param1 +
+                       "' is not the same size as its counterpart from 2D vector parameter '" +
+                       param2 + "'");
   }
 }
 
