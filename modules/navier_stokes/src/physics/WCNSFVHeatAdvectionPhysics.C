@@ -18,6 +18,8 @@ WCNSFVHeatAdvectionPhysics::validParams()
   InputParameters params = WCNSFVPhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
+  params.addParam<PhysicsName>("coupled_flow_physics",
+                               "WCNSFVFlowPhysics generating the velocities");
   params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_temperature");
 
   // Material properties
@@ -51,6 +53,7 @@ WCNSFVHeatAdvectionPhysics::validParams()
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_face_interpolation");
+  params.transferParam<bool>(NSFVAction::validParams(), "energy_two_term_bc_expansion");
 
   // Nonlinear equation solver scaling
   params.transferParam<Real>(NSFVAction::validParams(), "energy_scaling");
@@ -67,6 +70,14 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
             : std::vector<std::vector<SubdomainName>>()),
     _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity"))
 {
+  if (isParamValid("coupled_flow_physics"))
+  {
+    _flow_equations_physics = dynamic_cast<WCNSFVFlowPhysics *>(
+        getProblem().getPhysics(getParam<PhysicsName>("coupled_flow_physics")));
+    if (!_flow_equations_physics)
+      paramError("coupled_flow_physics",
+                 "Physics specified does not exist or is of the wrong type");
+  }
 }
 
 void
@@ -83,7 +94,7 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
   assignBlocks(params, blocks());
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
   params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
-  params.set<bool>("two_term_boundary_expansion") = getParam<bool>("energy_two_term_interpolation");
+  params.set<bool>("two_term_boundary_expansion") = getParam<bool>("energy_two_term_bc_expansion");
 
   getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
 }
@@ -98,8 +109,10 @@ WCNSFVHeatAdvectionPhysics::addFVKernels()
 
   addINSEnergyAdvectionKernels();
   addINSEnergyHeatConductionKernels();
-  addINSEnergyAmbientConvection();
-  addINSEnergyExternalHeatSource();
+  if (getParam<std::vector<MooseFunctorName>>("ambient_temperature").size())
+    addINSEnergyAmbientConvection();
+  if (isParamValid("external_heat_source"))
+    addINSEnergyExternalHeatSource();
 }
 
 void
@@ -175,7 +188,10 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
   assignBlocks(params, _blocks);
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") = getParam<MooseEnum>("energy_advection_method");
+  params.set<MooseEnum>("advected_interp_method") =
+      getParam<MooseEnum>("energy_advection_interpolation");
+
+  std::cout << "Using " << rhieChowUOName() << std::endl;
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
 }
@@ -235,8 +251,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAmbientConvection()
       getParam<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks");
   const auto ambient_convection_alpha =
       getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha");
-  const auto ambient_temperature =
-      getParam<std::vector<MooseFunctorName>>("ambient_convection_temperatures");
+  const auto ambient_temperature = getParam<std::vector<MooseFunctorName>>("ambient_temperature");
 
   unsigned int num_convection_blocks = ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
@@ -313,7 +328,7 @@ WCNSFVHeatAdvectionPhysics::addFVBCs()
 void
 WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
 {
-  const auto energy_inlet_types = getParam<std::vector<MooseEnum>>("energy_inlet_types");
+  const auto energy_inlet_types = getParam<MultiMooseEnum>("energy_inlet_types");
   const auto energy_inlet_function = getParam<std::vector<FunctionName>>("energy_inlet_function");
 
   unsigned int flux_bc_counter = 0;
@@ -376,8 +391,8 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
 void
 WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
 {
-  const auto energy_wall_types = getParam<std::vector<BoundaryName>>("energy_wall_types");
-  const auto energy_wall_function = getParam<std::vector<BoundaryName>>("energy_wall_function");
+  const auto energy_wall_types = getParam<MultiMooseEnum>("energy_wall_types");
+  const auto energy_wall_function = getParam<std::vector<FunctionName>>("energy_wall_function");
 
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
   {
@@ -454,7 +469,7 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
   }
 
   if (have_vector && !_porous_medium_treatment)
-    paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
+    paramError("thermal_conductivity", "Cannot use anisotropic diffusion with non-porous flows!");
 
   if (have_vector == have_scalar)
     paramError("thermal_conductivity",
@@ -476,6 +491,7 @@ WCNSFVHeatAdvectionPhysics::addInitialConditions()
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
     // addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
+    getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
   }
 }
 
