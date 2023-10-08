@@ -97,6 +97,8 @@ protected:
   /// Check that a parameter is set only if the first one is set to true
   void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                              const std::string & param2) const;
+  void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
+                                            const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
   template <typename T, typename S>
   void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
@@ -105,7 +107,8 @@ protected:
   void checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
                                                const std::string & param2) const;
   template <typename T, typename S>
-  void checkTwoDVectorParamsSameLength(std::string param1, std::string param2) const;
+  void checkTwoDVectorParamsSameLength(const std::string & param1,
+                                       const std::string & param2) const;
   /// Check that there is no overlap between the items in each vector parameters
   /// Each vector parameter should also have unique items
   template <typename T>
@@ -113,7 +116,7 @@ protected:
   /// Check if the user commited errors during the definition of block-wise parameters
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
-                                 const std::vector<std::string> & parameter_names);
+                                 const std::vector<std::string> & parameter_names) const;
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
@@ -142,17 +145,12 @@ protected:
   // void checkVariableBlockRestrictionConsistency(const std::string & var_name);
   // USE CHECKVARIABLE FROM BLOCKRESITRCATBLE
 
-  /// Use prefix() to disambiguate names
-  std::string prefix() const { return name() + "_"; }
-
-  /// TODO: interaction with components
-  void processMesh(){};
-
-  /// Dimension of the physics, which we expect for now to be the dimension of the mesh
-  unsigned int _dim;
-
-  /// TODO: see if we can rely on BlockRestrictable instead
-  std::vector<SubdomainName> _blocks;
+  /// Routine to help create maps
+  template <typename T, typename C>
+  std::map<T, C> createMapFromVectors(std::vector<T> keys, std::vector<C> values) const;
+  template <typename T>
+  std::map<T, MooseEnum> createMapFromVectorAndMultiMooseEnum(std::vector<T> keys,
+                                                              MultiMooseEnum values) const;
 
 private:
   /// Gathers additional parameters for the relationship managers from the Physics
@@ -282,6 +280,7 @@ PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
   }
 }
 
+<<<<<<< HEAD
 template <typename T>
 void
 PhysicsBase::assertParamDefined(const std::string & param1) const
@@ -291,6 +290,8 @@ PhysicsBase::assertParamDefined(const std::string & param1) const
                   MooseUtils::prettyCppType<T>() + ". Check your code.");
 }
 
+=======
+>>>>>>> ce4b71625f (fixup! Add block consistency checks from NSFVAction at physics level)
 template <typename T, typename S>
 void
 PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
@@ -325,5 +326,64 @@ PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_v
         mooseError("Item '" + value + "' specified in vector parameter '" + param +
                    "' is also present in one or more of the parameters '" +
                    Moose::stringify(param_vec) + "'. This is disallowed.");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::checkBlockwiseConsistency(const std::string & block_param_name,
+                                       const std::vector<std::string> & parameter_names) const
+{
+  const std::vector<std::vector<SubdomainName>> & block_names =
+      getParam<std::vector<std::vector<SubdomainName>>>(block_param_name);
+
+  if (block_names.size())
+  {
+    // We only check block-restrictions if the action is not restricted to `ANY_BLOCK_ID`.
+    // If the users define blocks that are not on the mesh, they will receive errors from the
+    // objects created created by the action
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") == _blocks.end())
+      for (const auto & block_group : block_names)
+        for (const auto & block : block_group)
+          if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+            paramError(block_param_name,
+                       "Block '" + block +
+                           "' is not present in the block restriction of the fluid flow action!");
+
+    for (const auto & param_name : parameter_names)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(param_name);
+      if (block_names.size() != param_vector.size())
+        paramError(param_name,
+                   "The number of entries in '" + param_name + "' (" +
+                       std::to_string(param_vector.size()) +
+                       ") is not the same as the number of blocks"
+                       " (" +
+                       std::to_string(block_names.size()) + ") in '" + block_param_name + "'!");
+    }
+  }
+  else
+  {
+    unsigned int previous_size = 0;
+    for (unsigned int param_i = 0; param_i < parameter_names.size(); ++param_i)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(parameter_names[param_i]);
+      if (param_i == 0)
+      {
+        if (param_vector.size() > 1)
+          paramError(parameter_names[param_i],
+                     "The user should only use one or zero entries in " + parameter_names[param_i] +
+                         " if " + block_param_name + " not defined!");
+        previous_size = param_vector.size();
+      }
+      else
+      {
+        if (previous_size != param_vector.size())
+          paramError(parameter_names[param_i],
+                     "The number of entries in '" + parameter_names[param_i] +
+                         "' is not the same as the number of entries in '" +
+                         parameter_names[param_i - 1] + "'!");
+      }
+    }
   }
 }
