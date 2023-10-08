@@ -83,7 +83,7 @@ protected:
   /// Check if the user commited errors during the definition of block-wise parameters
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
-                                 const std::vector<std::string> parameter_names) const;
+                                 const std::vector<std::string> & parameter_names) const;
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
@@ -216,4 +216,63 @@ PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_v
         mooseError("Item " + value + "specified in vector parameter " + param +
                    " is also present in one or more of these other parameters " +
                    Moose::stringify(param_vec) + ". This is disallowed");
+}
+
+template <typename T>
+void
+PhysicsBase::checkBlockwiseConsistency(const std::string & block_param_name,
+                                       const std::vector<std::string> & parameter_names) const
+{
+  const std::vector<std::vector<SubdomainName>> & block_names =
+      getParam<std::vector<std::vector<SubdomainName>>>(block_param_name);
+
+  if (block_names.size())
+  {
+    // We only check block-restrictions if the action is not restricted to `ANY_BLOCK_ID`.
+    // If the users define blocks that are not on the mesh, they will receive errors from the
+    // objects created created by the action
+    if (std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") == _blocks.end())
+      for (const auto & block_group : block_names)
+        for (const auto & block : block_group)
+          if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+            paramError(block_param_name,
+                       "Block '" + block +
+                           "' is not present in the block restriction of the fluid flow action!");
+
+    for (const auto & param_name : parameter_names)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(param_name);
+      if (block_names.size() != param_vector.size())
+        paramError(param_name,
+                   "The number of entries in '" + param_name + "' (" +
+                       std::to_string(param_vector.size()) +
+                       ") is not the same as the number of blocks"
+                       " (" +
+                       std::to_string(block_names.size()) + ") in '" + block_param_name + "'!");
+    }
+  }
+  else
+  {
+    unsigned int previous_size = 0;
+    for (unsigned int param_i = 0; param_i < parameter_names.size(); ++param_i)
+    {
+      const std::vector<T> & param_vector = getParam<std::vector<T>>(parameter_names[param_i]);
+      if (param_i == 0)
+      {
+        if (param_vector.size() > 1)
+          paramError(parameter_names[param_i],
+                     "The user should only use one or zero entries in " + parameter_names[param_i] +
+                         " if " + block_param_name + " not defined!");
+        previous_size = param_vector.size();
+      }
+      else
+      {
+        if (previous_size != param_vector.size())
+          paramError(parameter_names[param_i],
+                     "The number of entries in '" + parameter_names[param_i] +
+                         "' is not the same as the number of entries in '" +
+                         parameter_names[param_i - 1] + "'!");
+      }
+    }
+  }
 }
