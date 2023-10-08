@@ -36,26 +36,9 @@
 namespace TraceRayTools
 {
 
-const std::set<int> TRACEABLE_ELEMTYPES = {HEX8,
-                                           HEX20,
-                                           HEX27,
-                                           QUAD4,
-                                           QUAD8,
-                                           QUAD9,
-                                           TET4,
-                                           TET10,
-                                           TRI3,
-                                           TRI6,
-                                           TRI7,
-                                           EDGE2,
-                                           EDGE3,
-                                           EDGE4,
-                                           PYRAMID5,
-                                           PYRAMID13,
-                                           PYRAMID14,
-                                           PRISM6,
-                                           PRISM15,
-                                           PRISM18};
+const std::set<int> TRACEABLE_ELEMTYPES = {
+    HEX8, HEX20, HEX27, QUAD4, QUAD8,    QUAD9,     TET4,      TET10,  TRI3,    TRI6,
+    TRI7, EDGE2, EDGE3, EDGE4, PYRAMID5, PYRAMID13, PYRAMID14, PRISM6, PRISM15, PRISM18};
 const std::set<int> ADAPTIVITY_TRACEABLE_ELEMTYPES = {QUAD4, HEX8, TRI3, TET4, EDGE2};
 
 bool

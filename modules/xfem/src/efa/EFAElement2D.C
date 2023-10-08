@@ -27,7 +27,8 @@ EFAElement2D::EFAElement2D(unsigned int eid, unsigned int n_nodes) : EFAElement(
   else if (n_nodes == 3 || n_nodes == 6 || n_nodes == 7)
     _num_edges = 3;
   else
-    EFAError("In EFAelement2D the supported element types are QUAD4, QUAD8, QUAD9, TRI3, TRI6 and TRI7");
+    EFAError(
+        "In EFAelement2D the supported element types are QUAD4, QUAD8, QUAD9, TRI3, TRI6 and TRI7");
   setLocalCoordinates();
   _edges = std::vector<EFAEdge *>(_num_edges, nullptr);
   _edge_neighbors = std::vector<std::vector<EFAElement2D *>>(_num_edges, {nullptr});
@@ -197,7 +198,7 @@ EFAElement2D::setLocalCoordinates()
 
     if (_num_nodes > 6)
     {
-      _local_node_coor[6] = EFAPoint(1/3., 1/3., 0.0);
+      _local_node_coor[6] = EFAPoint(1 / 3., 1 / 3., 0.0);
     }
   }
 }

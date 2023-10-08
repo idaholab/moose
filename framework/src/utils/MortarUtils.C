@@ -263,8 +263,7 @@ projectQPoints3d(const Elem * const msm_elem,
       // erroring simply truncate quadrature point, these points typically have very small
       // contributions to integrals
       auto & qp_back = q_pts.back();
-      if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6 ||
-          primal_elem->type() == TRI7)
+      if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6 || primal_elem->type() == TRI7)
       {
         if (qp_back(0) < -TOLERANCE || qp_back(1) < -TOLERANCE ||
             qp_back(0) + qp_back(1) > (1 + TOLERANCE))
