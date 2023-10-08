@@ -327,7 +327,7 @@ protected:
   /// Energy intlet types (fixed-velocity/mass-flow/momentum-inflow)
   const MultiMooseEnum _energy_inlet_types;
   /// Energy function names at inlet boundaries
-  const std::vector<std::string> _energy_inlet_function;
+  const std::vector<FunctionName> _energy_inlet_function;
   /// Energy wall types (symmetry/heatflux/fixed-temperature)
   const MultiMooseEnum _energy_wall_types;
   /// Energy function names at wall boundaries
@@ -665,9 +665,9 @@ NSFVBase<BaseType>::validParams()
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<FunctionName>>(
       "energy_inlet_function",
-      std::vector<std::string>(),
+      std::vector<FunctionName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
   MultiMooseEnum en_wall_types("fixed-temperature heatflux", "heatflux");
@@ -1000,7 +1000,7 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
     _momentum_outlet_types(parameters.get<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(parameters.get<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(parameters.get<MultiMooseEnum>("energy_inlet_types")),
-    _energy_inlet_function(parameters.get<std::vector<std::string>>("energy_inlet_function")),
+    _energy_inlet_function(parameters.get<std::vector<FunctionName>>("energy_inlet_function")),
     _energy_wall_types(parameters.get<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(parameters.get<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(parameters.get<std::vector<FunctionName>>("pressure_function")),
