@@ -11,6 +11,7 @@
 #include "NSFVAction.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
+#include "WCNSFVFlowPhysics.h"
 
 InputParameters
 WCNSFVPhysicsBase::validParams()
@@ -83,7 +84,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   unsigned int num_rc_uo = 0;
   for (const auto & obj : objs)
     if (dynamic_cast<INSFVRhieChowInterpolator *>(obj) &&
-        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == _blocks)
+        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == blocks())
       num_rc_uo++;
   if (num_rc_uo)
     return;
@@ -152,8 +153,14 @@ WCNSFVPhysicsBase::addPostprocessors()
 std::string
 WCNSFVPhysicsBase::rhieChowUOName() const
 {
-  return prefix() +
-         (_porous_medium_treatment ? +"pins_rhie_chow_interpolator" : "ins_rhie_chow_interpolator");
+  // This could still fail if we have 2 advecting physics
+  if (_flow_equations_physics)
+    return _flow_equations_physics->prefix() + (_porous_medium_treatment
+                                                    ? +"pins_rhie_chow_interpolator"
+                                                    : "ins_rhie_chow_interpolator");
+  else
+    return prefix() + (_porous_medium_treatment ? +"pins_rhie_chow_interpolator"
+                                                : "ins_rhie_chow_interpolator");
 }
 
 unsigned short
@@ -161,9 +168,7 @@ WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
 {
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   if (getParam<MooseEnum>("momentum_face_interpolation") == "skewness-corrected" ||
-      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected" ||
-      (_porous_medium_treatment &&
-       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic"))
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 
   if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
