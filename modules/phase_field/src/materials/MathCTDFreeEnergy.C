@@ -10,24 +10,28 @@
 #include "MathCTDFreeEnergy.h"
 
 registerMooseObject("PhaseFieldApp", MathCTDFreeEnergy);
+registerMooseObject("PhaseFieldApp", ADMathCTDFreeEnergy);
 
+template <bool is_ad>
 InputParameters
-MathCTDFreeEnergy::validParams()
+MathCTDFreeEnergyTempl<is_ad>::validParams()
 {
-  InputParameters params = CompileTimeDerivativesMaterial<1, false, 2>::validParams();
+  InputParameters params = CompileTimeDerivativesMaterial<1, is_ad, 2>::validParams();
   params.addClassDescription("Material that implements the math free energy using the expression "
                              "builder and automatic differentiation");
   params.addRequiredCoupledVar("c", "Concentration variable");
   return params;
 }
 
-MathCTDFreeEnergy::MathCTDFreeEnergy(const InputParameters & parameters)
-  : CompileTimeDerivativesMaterial<1, false, 2>(parameters, {"c"})
+template <bool is_ad>
+MathCTDFreeEnergyTempl<is_ad>::MathCTDFreeEnergyTempl(const InputParameters & parameters)
+  : CompileTimeDerivativesMaterial<1, is_ad, 2>(parameters, {"c"})
 {
 }
 
+template <bool is_ad>
 void
-MathCTDFreeEnergy::computeQpProperties()
+MathCTDFreeEnergyTempl<is_ad>::computeQpProperties()
 {
   const auto & [c] = _refs;
   const auto F = 1.0 / 4.0 * (1.0 + c) * (1.0 + c) * (1.0 - c) * (1.0 - c);

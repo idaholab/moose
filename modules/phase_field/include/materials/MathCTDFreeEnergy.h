@@ -16,13 +16,20 @@
  * Material class that creates the math free energy with the compile time derivatives framework.
  * \f$ F = \frac14 (1 + c)^2 (1 - c)^2 \f$.
  */
-class MathCTDFreeEnergy : public CompileTimeDerivativesMaterial<1, false, 2>
+template <bool is_ad>
+class MathCTDFreeEnergyTempl : public CompileTimeDerivativesMaterial<1, is_ad, 2>
 {
 public:
   static InputParameters validParams();
 
-  MathCTDFreeEnergy(const InputParameters & parameters);
+  MathCTDFreeEnergyTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties();
+
+  using CompileTimeDerivativesMaterial<1, is_ad, 2>::evaluate;
+  using CompileTimeDerivativesMaterial<1, is_ad, 2>::_refs;
 };
+
+typedef MathCTDFreeEnergyTempl<false> MathCTDFreeEnergy;
+typedef MathCTDFreeEnergyTempl<true> ADMathCTDFreeEnergy;

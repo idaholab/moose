@@ -207,7 +207,7 @@ protected:
   void evaluate(const T & F);
 
   const std::string _F_name;
-  MaterialProperty<Real> & _prop_F;
+  GenericMaterialProperty<Real, is_ad> & _prop_F;
 
   /**
    * The names of the coupled variables
@@ -233,7 +233,8 @@ private:
                      const unsigned int & qp,
                      std::index_sequence<Ns...>)
   {
-    return std::make_tuple(CompileTimeDerivatives::makeRef<Ns>(coupledValue(variables[Ns]), qp)...);
+    return std::make_tuple(
+        CompileTimeDerivatives::makeRef<Ns>(coupledGenericValue<is_ad>(variables[Ns]), qp)...);
   }
 
   template <std::size_t I>

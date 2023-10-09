@@ -67,6 +67,14 @@
       detail = "implemented using the compile time derivatives system and applied to a split Cahn-Hilliard "
                "system"
     []
+    [ctd-split-ad]
+      type = 'Exodiff'
+      input = 'MathCTDFreeEnergy_split.i'
+      exodiff = 'MathCTDFreeEnergy_split_out.e'
+      cli_args = 'Materials/free_energy/type=ADMathCTDFreeEnergy Kernels/cres/type=ADSplitCHParsed'
+      detail = "implemented using the compile time derivatives system using automatic differentiation and applied to a split Cahn-Hilliard "
+               "system"
+    []
   []
 
   [RegularSolutionFreeEnergy]

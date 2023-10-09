@@ -45,7 +45,7 @@
   [cres]
     type = SplitCHParsed
     variable = c
-    kappa_name = kappa_c
+    kappa_name = 2.0 # kappa_c - we are not using a mat prop here to support AD+nonAD
     w = w
     f_name = F
   []
@@ -82,8 +82,8 @@
 [Materials]
   [constant]
     type = GenericConstantMaterial
-    prop_names = 'M kappa_c'
-    prop_values = '1.0 2.0'
+    prop_names = 'M'
+    prop_values = '1.0'
   []
   [free_energy]
     type = MathCTDFreeEnergy
