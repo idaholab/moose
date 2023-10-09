@@ -13,7 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseUtils.h"
-
+#include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
 
 #ifdef THERMOCHIMICA_ENABLED
