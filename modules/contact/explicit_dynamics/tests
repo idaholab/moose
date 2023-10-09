@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#0000'
+  design = '/Contact/index.md'
+  [block_penalty]
+    type = 'CSVDiff'
+    input = 'first_test.i'
+    csvdiff = 'first_test_out.csv'
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
+                  'using explicit dynamics.'
+  []
+[]

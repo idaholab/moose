@@ -2788,7 +2788,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   PARALLEL_TRY
   {
     // Add in Jacobian contributions from other Constraints
-    if (_fe_problem._has_constraints)
+    if (_fe_problem._has_constraints && tags.count(systemMatrixTag()))
     {
       // Some constraints need values from the Jacobian
       closeTaggedMatrices(tags);
