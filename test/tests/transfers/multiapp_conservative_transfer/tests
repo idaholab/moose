@@ -13,7 +13,7 @@
     type = RunException
     prereq = 'test'
     input = parent_conservative_transfer.i
-    expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to_postprocessor"
+    expect_err = "execute_on='transfer' is required in the conservative transfer for"
     cli_args ="sub:Postprocessors/to_postprocessor/execute_on='timestep_end'"
     requirement = 'The system shall check execute_on for PP in sub app'
   []
@@ -30,7 +30,7 @@
     prereq = 'subs'
     input = parent_power_density.i
     cli_args ="Postprocessors/from_sub1/execute_on='timestep_end'"
-    expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+from\_sub1"
+    expect_err = "execute_on='transfer' is required in the conservative transfer for"
     requirement = 'The system shall check execute_on for PP in parent app'
   [../]
 
@@ -46,7 +46,7 @@
     prereq = 'nearest_point'
     input = parent_nearest_point.i
     cli_args ="VectorPostprocessors/to_nearest_point/execute_on='timestep_end'"
-    expect_err = "execute\_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to\_nearest\_point"
+    expect_err = "execute_on='transfer' is required in the conservative transfer for"
     requirement = 'The system shall check execute_on for vector PP in parent app'
   [../]
 
