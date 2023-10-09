@@ -70,14 +70,8 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
             : std::vector<std::vector<SubdomainName>>()),
     _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity"))
 {
-  if (isParamValid("coupled_flow_physics"))
-  {
-    _flow_equations_physics = dynamic_cast<WCNSFVFlowPhysics *>(
-        getProblem().getPhysics(getParam<PhysicsName>("coupled_flow_physics")));
-    if (!_flow_equations_physics)
-      paramError("coupled_flow_physics",
-                 "Physics specified does not exist or is of the wrong type");
-  }
+  if (_flow_equations_physics)
+    checkCommonParametersConsistent(_flow_equations_physics->parameters());
 }
 
 void

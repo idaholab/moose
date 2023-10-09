@@ -84,6 +84,10 @@ protected:
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
                                  const std::vector<std::string> & parameter_names) const;
+  /// Check that all shared parameters are consistent: if set (default or user), set to the same value
+  void checkCommonParametersConsistent(const InputParameters & parameters) const;
+  template <typename T>
+  void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
@@ -275,4 +279,27 @@ PhysicsBase::checkBlockwiseConsistency(const std::string & block_param_name,
       }
     }
   }
+}
+
+template <typename T>
+void
+PhysicsBase::warnInconsistent(const InputParameters & other_param,
+                              const std::string & param_name) const
+{
+  bool warn = false;
+  if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
+  {
+    if constexpr (std::is_same_v<MooseEnum, T>)
+    {
+      if (!getParam<T>(param_name).compareCurrent(other_param.get<T>(param_name)))
+        warn = true;
+    }
+    else if (getParam<T>(param_name) != other_param.get<T>(param_name))
+      warn = true;
+  }
+  if (warn)
+    mooseWarning("Parameter " + param_name +
+                 " is inconsistent between this physics and the parameter set for \"" +
+                 other_param.get<std::string>("_object_name") + "\" of type \"" +
+                 other_param.get<std::string>("_type") + "\"");
 }

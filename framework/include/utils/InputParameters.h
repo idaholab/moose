@@ -986,7 +986,7 @@ private:
   void setParameters() {}
 
   /**
-   * Helper that uses overloading to distinguish adding commandline parameters of
+   * Helper that uses overloading to distinguish adding command line parameters of
    * a scalar and a vector kind. Vector parameters are options that may appear multiple
    * times on the command line (like -i).
    */
