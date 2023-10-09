@@ -25,7 +25,9 @@ namespace CompileTimeDerivatives
 class CTBase
 {
 public:
+  /// precedence should reflect C++ operator precedence exactly (higher is binding tighter)
   constexpr static int precedence() { return 0; }
+  /// left/right associative property should reflect C++ operator properties exactly
   constexpr static bool leftAssociative() { return false; }
 };
 class CTNullBase : public CTBase
@@ -93,15 +95,15 @@ class CTNull : public CTNullBase
 {
 public:
   CTNull() {}
-  typedef CTCleanType<T> O;
+  typedef CTCleanType<T> ResultType;
 
-  O operator()() const { return O(0); }
+  ResultType operator()() const { return ResultType(0); }
   std::string print() const { return "0"; }
 
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
 };
 
@@ -114,15 +116,15 @@ class CTOne : public CTOneBase
 {
 public:
   CTOne() {}
-  typedef CTCleanType<T> O;
+  typedef CTCleanType<T> ResultType;
 
-  O operator()() const { return O(1); }
+  ResultType operator()() const { return ResultType(1); }
   std::string print() const { return "1"; }
 
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
 };
 
@@ -147,7 +149,7 @@ public:
     return out;
   }
 
-  typedef typename T::O O;
+  typedef typename T::ResultType ResultType;
 
 protected:
   const T _arg;
@@ -161,9 +163,9 @@ class CTUnaryMinus : public CTUnary<T>
 {
 public:
   CTUnaryMinus(T arg) : CTUnary<T>(arg) {}
-  using typename CTUnary<T>::O;
+  using typename CTUnary<T>::ResultType;
 
-  O operator()() const { return -_arg(); }
+  ResultType operator()() const { return -_arg(); }
   std::string print() const { return this->printParens(this, "-"); }
   constexpr static int precedence() { return 3; }
 
@@ -192,7 +194,8 @@ class CTBinary : public CTBase
 public:
   CTBinary(L left, R right) : _left(left), _right(right) {}
 
-  typedef typename libMesh::CompareTypes<typename L::O, typename R::O>::supertype O;
+  typedef typename libMesh::CompareTypes<typename L::ResultType, typename R::ResultType>::supertype
+      ResultType;
 
   template <typename Self>
   std::string printParens(const Self *, const std::string & op) const
@@ -233,10 +236,10 @@ public:
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
 
-  typedef T O;
+  typedef T ResultType;
 
 protected:
   T _value;
@@ -289,12 +292,12 @@ public:
   auto D() const
   {
     if constexpr (tag == dtag)
-      return CTOne<O>();
+      return CTOne<ResultType>();
     else
-      return CTNull<O>();
+      return CTNull<ResultType>();
   }
 
-  typedef CTCleanType<T> O;
+  typedef CTCleanType<T> ResultType;
 
 protected:
   const T & _ref;
@@ -341,7 +344,6 @@ class CTArrayRef : public CTBase
 {
 public:
   CTArrayRef(const T & arr, const I & idx) : _arr(arr), _idx(idx) {}
-  // CTArrayRef(const CTArrayRef<tag, T, I> & ref) : _arr(ref._arr), _idx(ref._idx) {}
   auto operator()() const { return _arr[_idx]; }
   std::string print() const { return "[a" + printTag<tag>() + "[" + Moose::stringify(_idx) + "]]"; }
 
@@ -349,14 +351,14 @@ public:
   auto D() const
   {
     if constexpr (tag == dtag)
-      return CTOne<O>();
+      return CTOne<ResultType>();
     else
-      return CTNull<O>();
+      return CTNull<ResultType>();
   }
 
   // get the value type returned by operator[]
-  typedef CTCleanType<decltype((static_cast<T>(0))[0])> O;
-  static_assert(!std::is_same_v<O, void>,
+  typedef CTCleanType<decltype((static_cast<T>(0))[0])> ResultType;
+  static_assert(!std::is_same_v<ResultType, void>,
                 "Instantiation of CTArrayRef was attempted for a non-subscriptable type.");
 
 protected:
@@ -382,13 +384,13 @@ class CTAdd : public CTBinary<L, R>
 {
 public:
   CTAdd(L left, R right) : CTBinary<L, R>(left, right) {}
-  using typename CTBinary<L, R>::O;
+  using typename CTBinary<L, R>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     // compile time optimization to skip null terms
     if constexpr (std::is_base_of<CTNullBase, L>::value && std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTNullBase, L>::value)
       return _right();
@@ -420,12 +422,12 @@ class CTSub : public CTBinary<L, R>
 {
 public:
   CTSub(L left, R right) : CTBinary<L, R>(left, right) {}
-  using typename CTBinary<L, R>::O;
+  using typename CTBinary<L, R>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value && std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTNullBase, L>::value)
       return -_right();
@@ -458,15 +460,15 @@ class CTMul : public CTBinary<L, R>
 {
 public:
   CTMul(L left, R right) : CTBinary<L, R>(left, right) {}
-  using typename CTBinary<L, R>::O;
+  using typename CTBinary<L, R>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value || std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value && std::is_base_of<CTOneBase, R>::value)
-      return O(1);
+      return ResultType(1);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value)
       return _right();
@@ -498,15 +500,15 @@ class CTDiv : public CTBinary<L, R>
 {
 public:
   CTDiv(L left, R right) : CTBinary<L, R>(left, right) {}
-  using typename CTBinary<L, R>::O;
+  using typename CTBinary<L, R>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTOneBase, R>::value)
       return _left();
 
     if constexpr (std::is_base_of<CTNullBase, L>::value && !std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     return _left() / _right();
   }
@@ -533,15 +535,15 @@ class CTPow : public CTBinary<L, R>
 {
 public:
   CTPow(L left, R right) : CTBinary<L, R>(left, right) {}
-  using typename CTBinary<L, R>::O;
+  using typename CTBinary<L, R>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value || std::is_base_of<CTNullBase, R>::value)
-      return O(1);
+      return ResultType(1);
 
     if constexpr (std::is_base_of<CTOneBase, R>::value)
       return _left();
@@ -555,7 +557,7 @@ public:
   {
     if constexpr (std::is_base_of<CTNullBase, decltype(_left.template D<dtag>())>::value &&
                   std::is_base_of<CTNullBase, decltype(_right.template D<dtag>())>::value)
-      return CTNull<O>();
+      return CTNull<ResultType>();
 
     else if constexpr (std::is_base_of<CTNullBase, decltype(_left.template D<dtag>())>::value)
       return pow(_left, _right) * _right.template D<dtag>() * log(_left);
@@ -597,15 +599,15 @@ class CTIPow : public CTUnary<B>
 {
 public:
   CTIPow(B base) : CTUnary<B>(base) {}
-  using typename CTUnary<B>::O;
+  using typename CTUnary<B>::ResultType;
 
-  O operator()() const
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, B>::value)
-      return O(0);
+      return ResultType(0);
 
     else if constexpr (std::is_base_of<CTOneBase, B>::value || E == 0)
-      return O(1);
+      return ResultType(1);
 
     else if constexpr (E == 1)
       return _arg();
@@ -625,7 +627,7 @@ public:
       return _arg.template D<dtag>();
 
     else if constexpr (E == 0)
-      return CTNull<O>();
+      return CTNull<ResultType>();
 
     else
       return pow<E - 1>(_arg) * E * _arg.template D<dtag>();
@@ -719,7 +721,7 @@ CT_OPERATORS_BINARY_MIX(int)
     {                                                                                              \
       return 2;                                                                                    \
     }                                                                                              \
-    using typename CTUnary<T>::O;                                                                  \
+    using typename CTUnary<T>::ResultType;                                                         \
     using CTUnary<T>::_arg;                                                                        \
   };                                                                                               \
   template <typename T>                                                                            \
@@ -775,7 +777,7 @@ CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag
     {                                                                                              \
       return 2;                                                                                    \
     }                                                                                              \
-    using typename CTBinary<L, R>::O;                                                              \
+    using typename CTBinary<L, R>::ResultType;                                                     \
     using CTBinary<L, R>::_left;                                                                   \
     using CTBinary<L, R>::_right;                                                                  \
   };                                                                                               \
@@ -825,11 +827,11 @@ public:
   }
   auto operator()() const { return std::sqrt(evalHelper(std::make_index_sequence<N>{})); }
 
-  typedef typename CTSuperType<typename Ds::O...>::type O;
+  typedef typename CTSuperType<typename Ds::ResultType...>::type ResultType;
 
 protected:
   template <int R, std::size_t... Is>
-  O rowMul(std::index_sequence<Is...>, const std::array<O, N> & d) const
+  ResultType rowMul(std::index_sequence<Is...>, const std::array<ResultType, N> & d) const
   {
     return ((_covariance(R, Is) * d[Is]) + ...);
   }
@@ -837,7 +839,7 @@ protected:
   template <std::size_t... Is>
   auto evalHelper(const std::index_sequence<Is...> & is) const
   {
-    const std::array<O, N> d{std::get<Is>(_derivatives)()...};
+    const std::array<ResultType, N> d{std::get<Is>(_derivatives)()...};
     return ((rowMul<Is>(is, d) * d[Is]) + ...);
   }
 

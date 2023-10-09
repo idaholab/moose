@@ -24,23 +24,6 @@
   []
 []
 
-[Preconditioning]
-  active = 'SMP'
-  [PBP]
-    type = PBP
-    solve_order = 'w c'
-    preconditioner = 'AMG ASM'
-    off_diag_row = 'c '
-    off_diag_column = 'w '
-  []
-
-  [SMP]
-    type = SMP
-    off_diag_row = 'w c'
-    off_diag_column = 'c w'
-  []
-[]
-
 [Kernels]
   [cres]
     type = SplitCHParsed
@@ -65,16 +48,9 @@
 
 [BCs]
   [Periodic]
-    [top_bottom]
-      primary = 0
-      secondary = 2
-      translation = '0 30.0 0'
-    []
-
-    [left_right]
-      primary = 1
-      secondary = 3
-      translation = '-30.0 0 0'
+    [all]
+      auto_direction = 'x y'
+      variable = 'c w'
     []
   []
 []
@@ -94,8 +70,8 @@
 
 [Executioner]
   type = Transient
-  scheme = 'BDF2'
-  solve_type = 'PJFNK'
+  scheme = BDF2
+  solve_type = NEWTON
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'

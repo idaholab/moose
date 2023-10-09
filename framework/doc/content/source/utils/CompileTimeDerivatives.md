@@ -1,6 +1,15 @@
 # Compile-time Derivatives
 
-`CompileTimeDerivatives` is a C++ namespace conating classes, functions, and operators to implement mathematical expressions with the ability to perform symbolic automatic differentiation at compile time. It is a replacement for the runtime automatic differentiation in [`ExpressionBuilder`](/ExpressionBuilder.md optional=true) which uses a convoluted process to arrive at compiled mathematical expressions and their derivatives.
+`CompileTimeDerivatives` (CTD) is a C++ namespace containing classes, functions, and operators to implement mathematical expressions with the ability to perform symbolic automatic differentiation at compile time. It is a replacement for the runtime automatic differentiation in [`ExpressionBuilder`](/ExpressionBuilder.md optional=true) which uses a convoluted process to arrive at compiled mathematical expressions and their derivatives.
+
+## Uses
+
+The intended uses for the CTD framework are the implementation of empirical or analytical models with closed form expressions that compute quantities of which derivatives are required. Examples are
+
+1. Thermodynamic free energies, the derivatives of which are chemical potentials, which are required to solve the phase field equations.
+2. A thermal conductivity as a function of temperature, where the derivative w.r.t. temperature is required in the heat transfer equations.
+
+CTD is not meant to replace runtime AD using dual numbers (which computes derivatives w.r.t. degrees of freedom). Any application that requires the construction of symbolic derivatives of equations w.r.t. known coupled variables, can be simplified with CTD.
 
 ## Examples
 
@@ -35,7 +44,7 @@ Evaluate the expression for x=5:
   Moose::out << result() << '\n'; // 125.0
 ```
 
-And evaluate the derivative w.r.t. to `x` at x=5:
+And evaluate the derivative w.r.t. `x` at x=5:
 
 ```
   Moose::out << result.D<dX>()() << '\n'; // 10.0
