@@ -69,7 +69,7 @@ public:
    * @return vapor mass fraction
    */
   Real vaporMassFraction(Real Z0, Real K0, Real K1) const;
-  DualReal vaporMassFraction(const DualReal & Z0, const DualReal & K0, const DualReal & K1) const;
+  ADReal vaporMassFraction(const ADReal & Z0, const ADReal & K0, const ADReal & K1) const;
   Real vaporMassFraction(std::vector<Real> & Zi, std::vector<Real> & Ki) const;
 
 protected:

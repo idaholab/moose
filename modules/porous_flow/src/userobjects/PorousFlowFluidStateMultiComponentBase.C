@@ -13,13 +13,22 @@ InputParameters
 PorousFlowFluidStateMultiComponentBase::validParams()
 {
   InputParameters params = PorousFlowFluidStateFlash::validParams();
+  params.addParam<unsigned int>(
+      "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");
+  params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
   params.addClassDescription("Base class for multiple component fluid state classes");
   return params;
 }
 
 PorousFlowFluidStateMultiComponentBase::PorousFlowFluidStateMultiComponentBase(
     const InputParameters & parameters)
-  : PorousFlowFluidStateFlash(parameters), _pidx(0), _Zidx(1), _Tidx(2), _Xidx(3)
+  : PorousFlowFluidStateFlash(parameters),
+    _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
+    _salt_component(getParam<unsigned int>("salt_component")),
+    _pidx(0),
+    _Zidx(1),
+    _Tidx(2),
+    _Xidx(3)
 {
 }
 

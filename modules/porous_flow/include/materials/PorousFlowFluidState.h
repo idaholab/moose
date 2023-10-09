@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PorousFlowVariableBase.h"
+#include "PorousFlowFluidStateBaseMaterial.h"
 #include "PorousFlowFluidStateMultiComponentBase.h"
 
 class PorousFlowCapillaryPressure;
@@ -43,38 +43,31 @@ class PorousFlowCapillaryPressure;
  * to determine vapor fraction (gas saturation), and subsequently the composition
  * of each phase.
  */
-class PorousFlowFluidState : public PorousFlowVariableBase
+template <bool is_ad>
+class PorousFlowFluidStateTempl : public PorousFlowFluidStateBaseMaterialTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFluidState(const InputParameters & parameters);
+  PorousFlowFluidStateTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
-
-  /// Size material property vectors and initialise with zeros
-  void setMaterialVectorSize() const;
-
-  /**
-   * Calculates all required thermophysical properties and derivatives for each phase
-   * and fluid component
-   */
-  virtual void thermophysicalProperties();
+  virtual void thermophysicalProperties() override;
 
   /// Porepressure
-  const VariableValue & _gas_porepressure;
+  const GenericVariableValue<is_ad> & _gas_porepressure;
   /// Gradient of porepressure (only defined at the qps)
-  const VariableGradient & _gas_gradp_qp;
+  const GenericVariableGradient<is_ad> & _gas_gradp_qp;
   /// Moose variable number of the gas porepressure
   const unsigned int _gas_porepressure_varnum;
   /// PorousFlow variable number of the gas porepressure
   const unsigned int _pvar;
   /// Total mass fraction(s) of the gas component(s) summed over all phases
-  std::vector<const VariableValue *> _Z;
+  std::vector<const GenericVariableValue<is_ad> *> _Z;
   /// Gradient(s) of total mass fraction(s) of the gas component(s) (only defined at the qps)
-  std::vector<const VariableGradient *> _gradZ_qp;
+  std::vector<const GenericVariableGradient<is_ad> *> _gradZ_qp;
   /// Moose variable number of Z
   std::vector<unsigned int> _Z_varnum;
   /// PorousFlow variable number of Z
@@ -84,9 +77,9 @@ protected:
   /// Flag for nodal NaCl mass fraction
   const bool _is_Xnacl_nodal;
   /// Salt mass fraction (kg/kg)
-  const VariableValue & _Xnacl;
+  const GenericVariableValue<is_ad> & _Xnacl;
   /// Gradient of salt mass fraction (only defined at the qps)
-  const VariableGradient & _grad_Xnacl_qp;
+  const GenericVariableGradient<is_ad> & _grad_Xnacl_qp;
   /// Salt mass fraction variable number
   const unsigned int _Xnacl_varnum;
   /// Salt mass fraction PorousFlow variable number
@@ -104,47 +97,15 @@ protected:
   /// Salt component index
   const unsigned int _salt_component;
   /// Temperature
-  const MaterialProperty<Real> & _temperature;
+  const GenericMaterialProperty<Real, is_ad> & _temperature;
   /// Gradient of temperature (only defined at the qps)
-  const MaterialProperty<RealGradient> & _gradT_qp;
+  const GenericMaterialProperty<RealGradient, is_ad> * const _gradT_qp;
   /// Derivative of temperature wrt PorousFlow variables
-  const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
   /// Moose variable number of the temperature
   const unsigned int _temperature_varnum;
   /// PorousFlow variable number of the temperature
   const unsigned int _Tvar;
-  /// Mass fraction matrix
-  MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
-  /// Gradient of the mass fraction matrix (only defined at the qps)
-  MaterialProperty<std::vector<std::vector<RealGradient>>> * _grad_mass_frac_qp;
-  /// Derivative of the mass fraction matrix with respect to the Porous Flow variables
-  MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
-
-  /// Fluid density of each phase
-  MaterialProperty<std::vector<Real>> & _fluid_density;
-  /// Derivative of the fluid density for each phase wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
-  /// Viscosity of each phase
-  MaterialProperty<std::vector<Real>> & _fluid_viscosity;
-  /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
-  /// Enthalpy of each phase
-  MaterialProperty<std::vector<Real>> & _fluid_enthalpy;
-  /// Derivative of the fluid enthalpy for each phase wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_enthalpy_dvar;
-  /// Internal energy of each phase
-  MaterialProperty<std::vector<Real>> & _fluid_internal_energy;
-  /// Derivative of the fluid internal energy for each phase wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_internal_energy_dvar;
-
-  /// Conversion from degrees Celsius to degrees Kelvin
-  const Real _T_c2k;
-  /// Flag to indicate whether to calculate stateful properties
-  bool _is_initqp;
-  /// FluidStateProperties data structure
-  std::vector<FluidStateProperties> _fsp;
-  /// Capillary pressure UserObject
-  const PorousFlowCapillaryPressure & _pc;
   /// Index of derivative wrt pressure
   const unsigned int _pidx;
   /// Index of derivative wrt temperature
@@ -153,4 +114,13 @@ protected:
   const unsigned int _Zidx;
   /// Index of derivative wrt salt mass fraction X
   const unsigned int _Xidx;
+
+#if (is_ad)
+  usingPorousFlowFluidStateBaseMaterialMembers;
+#else
+  usingPorousFlowFluidStateBaseMaterialDerivativeMembers;
+#endif
 };
+
+typedef PorousFlowFluidStateTempl<false> PorousFlowFluidState;
+typedef PorousFlowFluidStateTempl<true> ADPorousFlowFluidState;

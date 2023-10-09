@@ -41,6 +41,13 @@ public:
                                 Real Z,
                                 unsigned int qp,
                                 std::vector<FluidStateProperties> & fsp) const override;
+
+  void thermophysicalProperties(const ADReal & pressure,
+                                const ADReal & temperature,
+                                const ADReal & Xnacl,
+                                const ADReal & Z,
+                                unsigned int qp,
+                                std::vector<FluidStateProperties> & fsp) const override;
   /**
    * Mass fractions of NCG in liquid phase and H2O in gas phase at thermodynamic
    * equilibrium. Calculated using Henry's law (for NCG component), and Raoult's
@@ -51,10 +58,10 @@ public:
    * @param[out] Xncg mass fraction of NCG in liquid (kg/kg)
    * @param[out] Yh2o mass fraction of H2O in gas (kg/kg)
    */
-  void equilibriumMassFractions(const DualReal & pressure,
-                                const DualReal & temperature,
-                                DualReal & Xncg,
-                                DualReal & Yh2o) const;
+  void equilibriumMassFractions(const ADReal & pressure,
+                                const ADReal & temperature,
+                                ADReal & Xncg,
+                                ADReal & Yh2o) const;
 
   /**
    * Mass fractions of NCG and H2O in both phases, as well as derivatives wrt
@@ -66,9 +73,9 @@ public:
    * @param[out] PhaseStateEnum current phase state
    * @param[out] FluidStateMassFractions data structure
    */
-  void massFractions(const DualReal & pressure,
-                     const DualReal & temperature,
-                     const DualReal & Z,
+  void massFractions(const ADReal & pressure,
+                     const ADReal & temperature,
+                     const ADReal & Z,
                      FluidStatePhaseEnum & phase_state,
                      std::vector<FluidStateProperties> & fsp) const;
 
@@ -79,8 +86,8 @@ public:
    * @param temperature temperature (K)
    * @param[out] FluidStateProperties data structure
    */
-  void gasProperties(const DualReal & pressure,
-                     const DualReal & temperature,
+  void gasProperties(const ADReal & pressure,
+                     const ADReal & temperature,
                      std::vector<FluidStateProperties> & fsp) const;
   /**
    * Liquid properties - density, viscosity and enthalpy
@@ -95,8 +102,8 @@ public:
    * @param temperature temperature (K)
    * @param[out] FluidStateProperties data structure
    */
-  void liquidProperties(const DualReal & pressure,
-                        const DualReal & temperature,
+  void liquidProperties(const ADReal & pressure,
+                        const ADReal & temperature,
                         std::vector<FluidStateProperties> & fsp) const;
 
   /**
@@ -111,7 +118,7 @@ public:
    * @param temperature temperature (K)
    * @return liquid density (kg/m^3)
    */
-  DualReal liquidDensity(const DualReal & pressure, const DualReal & temperature) const;
+  ADReal liquidDensity(const ADReal & pressure, const ADReal & temperature) const;
 
   /**
    * Density of the gas phase
@@ -120,9 +127,9 @@ public:
    * @param temperature temperature (K)
    * @return gas density (kg/m^3)
    */
-  DualReal gasDensity(const DualReal & pressure,
-                      const DualReal & temperature,
-                      std::vector<FluidStateProperties> & fsp) const;
+  ADReal gasDensity(const ADReal & pressure,
+                    const ADReal & temperature,
+                    std::vector<FluidStateProperties> & fsp) const;
 
   /**
    * Gas saturation in the two-phase region
@@ -133,10 +140,10 @@ public:
    * @param[out] FluidStateProperties data structure
    * @return gas saturation (-)
    */
-  DualReal saturation(const DualReal & pressure,
-                      const DualReal & temperature,
-                      const DualReal & Z,
-                      std::vector<FluidStateProperties> & fsp) const;
+  ADReal saturation(const ADReal & pressure,
+                    const ADReal & temperature,
+                    const ADReal & Z,
+                    std::vector<FluidStateProperties> & fsp) const;
 
   /**
    * Gas and liquid properties in the two-phase region
@@ -147,9 +154,9 @@ public:
    * @param qp quadpoint for capillary pressure
    * @param[out] FluidStateProperties data structure
    */
-  void twoPhaseProperties(const DualReal & pressure,
-                          const DualReal & temperature,
-                          const DualReal & Z,
+  void twoPhaseProperties(const ADReal & pressure,
+                          const ADReal & temperature,
+                          const ADReal & Z,
                           unsigned int qp,
                           std::vector<FluidStateProperties> & fsp) const;
 
@@ -161,7 +168,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return enthalpy of dissolution (J/kg)
    */
-  DualReal enthalpyOfDissolution(const DualReal & temperature) const;
+  ADReal enthalpyOfDissolution(const ADReal & temperature) const;
 
   virtual Real totalMassFraction(
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const override;
@@ -172,7 +179,7 @@ protected:
    * @param xmol mole fraction
    * @return mass fraction
    */
-  DualReal moleFractionToMassFraction(const DualReal & xmol) const;
+  ADReal moleFractionToMassFraction(const ADReal & xmol) const;
 
   /**
    * Check that the temperature is between the triple and critical values

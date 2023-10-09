@@ -23,6 +23,24 @@ public:
   PorousFlowFluidStateMultiComponentBase(const InputParameters & parameters);
 
   /**
+   * The index of the aqueous fluid component
+   * @return aqueous fluid component number
+   */
+  unsigned int aqueousComponentIndex() const { return _aqueous_fluid_component; };
+
+  /**
+   * The index of the gas fluid component
+   * @return gas fluid component number
+   */
+  unsigned int gasComponentIndex() const { return _gas_fluid_component; };
+
+  /**
+   * The index of the salt component
+   * @return salt component number
+   */
+  unsigned int saltComponentIndex() const { return _salt_component; };
+
+  /**
    * Determines the phase state gven the total mass fraction and equilibrium mass fractions
    *
    * @param Zi total mass fraction
@@ -50,6 +68,13 @@ public:
                                         unsigned int qp,
                                         std::vector<FluidStateProperties> & fsp) const = 0;
 
+  virtual void thermophysicalProperties(const ADReal & pressure,
+                                        const ADReal & temperature,
+                                        const ADReal & Xnacl,
+                                        const ADReal & Z,
+                                        unsigned int qp,
+                                        std::vector<FluidStateProperties> & fsp) const = 0;
+
   /**
    * Total mass fraction of fluid component summed over all phases in the two-phase state
    * for a specified gas saturation
@@ -70,6 +95,12 @@ public:
   unsigned int getXIndex() const { return _Xidx; };
 
 protected:
+  /// Fluid component number of the aqueous component
+  const unsigned int _aqueous_fluid_component;
+  /// Fluid component number of the gas phase
+  unsigned int _gas_fluid_component;
+  /// Salt component index
+  const unsigned int _salt_component;
   /// Index of derivative wrt pressure
   const unsigned int _pidx;
   /// Index of derivative wrt total mass fraction Z

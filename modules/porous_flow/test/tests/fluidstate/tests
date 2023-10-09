@@ -76,6 +76,16 @@
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #24381'
   []
+  [brineco2_fv]
+    type = 'CSVDiff'
+    input = 'brineco2_fv.i'
+    csvdiff = 'brineco2.csv'
+    threading = '!pthreads'
+    prereq = brineco2
+    requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system using FV variables.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818 #21275'
+  []
   [brineco2_2]
     type = 'CSVDiff'
     input = 'brineco2_2.i'
