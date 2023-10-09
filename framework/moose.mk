@@ -63,7 +63,7 @@ ifeq ($(shell uname -s),Darwin)
 endif
 
 #
-# wasp hit, which can override hit
+# wasp
 #
 WASP_DIR            ?= $(MOOSE_DIR)/framework/contrib/wasp/install
 ifeq ($(shell uname -s),Darwin)
@@ -71,13 +71,16 @@ ifeq ($(shell uname -s),Darwin)
 else
 	wasp_LIBS         := $(wildcard $(WASP_DIR)/lib/libwasp*$(lib_suffix))
 endif
-ifneq ($(wasp_LIBS),)
-  wasp_LIBS         := $(notdir $(wasp_LIBS))
-  wasp_LIBS         := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
-  wasp_LIBS         := $(patsubst lib%,-l%,$(wasp_LIBS))
-  libmesh_CXXFLAGS  += -DWASP_ENABLED -I$(WASP_DIR)/include
-  libmesh_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
+wasp_LIBS           := $(notdir $(wasp_LIBS))
+wasp_LIBS           := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
+wasp_LIBS           := $(patsubst lib%,-l%,$(wasp_LIBS))
+ifeq ($(wasp_LIBS),)
+  $(error WASP does not seem to be available. Make sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory, or set WASP_DIR to a valid WASP install)
 endif
+wasp_CXXFLAGS     := -DWASP_ENABLED -I$(WASP_DIR)/include
+wasp_LDFLAGS      := -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
+libmesh_CXXFLAGS  += $(wasp_CXXFLAGS)
+libmesh_LDFLAGS   += $(wasp_LDFLAGS)
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
@@ -130,6 +133,7 @@ else
 	pyhit_LIB          := $(HIT_DIR)/hit.so
 	pyhit_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
+pyhit_COMPILEFLAGS += $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
