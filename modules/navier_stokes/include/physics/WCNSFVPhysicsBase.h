@@ -42,6 +42,9 @@ protected:
   /// Return the name of the Rhie Chow user object
   std::string rhieChowUOName() const;
 
+  /// Checks that the parameters shared between two flow physics are the same
+  void checkCommonParametersConsistent(const InputParameters & parameters) const;
+
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
 

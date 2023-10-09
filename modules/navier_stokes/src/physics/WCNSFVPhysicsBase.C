@@ -54,6 +54,16 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   // checkVectorParamsSameLengthOrZero<BoundaryName,
   // MooseEnum>("inlet_boundaries",
   //                                                            "flux_inlet_directions");
+
+  // Check that flow physics are consistent
+  if (isParamValid("coupled_flow_physics"))
+  {
+    _flow_equations_physics = dynamic_cast<WCNSFVFlowPhysics *>(
+        getProblem().getPhysics(getParam<PhysicsName>("coupled_flow_physics")));
+    if (!_flow_equations_physics)
+      paramError("coupled_flow_physics",
+                 "Physics specified does not exist or is of the wrong type");
+  }
 }
 
 void
@@ -206,4 +216,36 @@ WCNSFVPhysicsBase::adjustRMGhostLayers()
   // Delete the resources created on behalf of the RM if it ends up not being added to the App.
   if (!getMooseApp().addRelationshipManager(rm_obj))
     factory.releaseSharedObjects(*rm_obj);
+}
+
+void
+WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other_params) const
+{
+  // TODO: make warnInconsistent a lambda
+  // Check all the parameters in NavierStokesFlowPhysics
+  warnInconsistent<MooseEnum>(other_params, "compressibilty");
+  warnInconsistent<RealVectorValue>(other_params, "gravity");
+  warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");
+  warnInconsistent<NonlinearVariableName>(other_params, "pressure_variable");
+  warnInconsistent<NonlinearVariableName>(other_params, "fluid_temperature_variable");
+  warnInconsistent<bool>(other_params, "porous_medium_treatment");
+  warnInconsistent<MooseFunctorName>(other_params, "porosity");
+  warnInconsistent<unsigned short>(other_params, "porosity_smoothing_layers");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "inlet_boundaries");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "outlet_boundaries");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "wall_boundaries");
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_inlet_types");
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_outlet_types");
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_wall_types");
+  warnInconsistent<MooseFunctorName>(other_params, "dynamic_viscosity");
+  warnInconsistent<MooseFunctorName>(other_params, "density");
+
+  // Check all the parameters in WCNSFVPhysicsBase
+  warnInconsistent<std::vector<std::vector<FunctionName>>>(other_params, "momentum_inlet_function");
+  warnInconsistent<std::vector<PostprocessorName>>(other_params, "flux_inlet_pps");
+  warnInconsistent<std::vector<Point>>(other_params, "flux_inlet_directions");
+  warnInconsistent<std::vector<FunctionName>>(other_params, "pressure_function");
+  warnInconsistent<MooseEnum>(other_params, "velocity_interpolation");
+  warnInconsistent<MooseEnum>(other_params, "pressure_face_interpolation");
+  warnInconsistent<MooseEnum>(other_params, "momentum_face_interpolation");
 }
