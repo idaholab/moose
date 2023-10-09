@@ -17,12 +17,15 @@ template <typename>
 class NumericVector;
 }
 
-class VectorSum : public GeneralPostprocessor
+/**
+ * Computes the sum of components of the requested tagged vector
+ */
+class TagVectorSum : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  VectorSum(const InputParameters & parameters);
+  TagVectorSum(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;

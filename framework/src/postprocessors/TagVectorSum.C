@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorSum.h"
+#include "TagVectorSum.h"
 
 // MOOSE includes
 #include "NonlinearSystemBase.h"
@@ -16,18 +16,18 @@
 // libMesh includes
 #include "libmesh/numeric_vector.h"
 
-registerMooseObject("MooseApp", VectorSum);
+registerMooseObject("MooseApp", TagVectorSum);
 
 InputParameters
-VectorSum::validParams()
+TagVectorSum::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<TagName>("vector", "The name of the vector to compute the sum for");
-  params.addClassDescription("Computes the sum of components of the requested vector");
+  params.addClassDescription("Computes the sum of components of the requested tagged vector");
   return params;
 }
 
-VectorSum::VectorSum(const InputParameters & parameters)
+TagVectorSum::TagVectorSum(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _vec(_fe_problem.getNonlinearSystemBase().getVector(
         _fe_problem.getVectorTagID(getParam<TagName>("vector"))))
@@ -35,18 +35,18 @@ VectorSum::VectorSum(const InputParameters & parameters)
 }
 
 void
-VectorSum::initialize()
+TagVectorSum::initialize()
 {
 }
 
 void
-VectorSum::execute()
+TagVectorSum::execute()
 {
   _sum = _vec.sum();
 }
 
 PostprocessorValue
-VectorSum::getValue() const
+TagVectorSum::getValue() const
 {
   return _sum;
 }

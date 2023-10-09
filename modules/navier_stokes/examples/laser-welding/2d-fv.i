@@ -449,27 +449,27 @@ mu='mu'
 
 [Postprocessors]
   [laser_flux]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_laser'
   []
   [volume_rho_cp_dT]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_time'
   []
   [conduction]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_conduction'
   []
   [advection]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_advection'
   []
   [mesh_advection]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_mesh_advection'
   []
   [radiation]
-    type = VectorSum
+    type = TagVectorSum
     vector = 'e_radiation'
   []
   [total_sum]

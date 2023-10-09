@@ -25,7 +25,7 @@ INSFVEnthalpyMaterial::validParams()
   params.addParam<MooseFunctorName>(
       NS::cp, NS::cp, "The constant value for the specific heat capacity");
   params.addParam<MooseFunctorName>(
-      NS::enthalpy_density, NS::enthalpy_density, "the name of the enthalpy density");
+      NS::enthalpy_density, NS::enthalpy_density, "the name of the (extensive) enthalpy");
   params.addParam<MooseFunctorName>(
       NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
   return params;
