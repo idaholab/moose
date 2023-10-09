@@ -896,7 +896,8 @@ MooseVariableFE<OutputType>::computeSolution(const Elem * const elem,
                                              Solution & local_soln,
                                              const GradShapes & grad_phi,
                                              GradSolution & grad_local_soln,
-                                             Solution & dot_local_soln) const
+                                             Solution & dot_local_soln,
+                                             GradSolution & grad_dot_local_soln) const
 {
   std::vector<dof_id_type> dof_indices;
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -931,20 +932,29 @@ MooseVariableFE<OutputType>::computeSolution(const Elem * const elem,
   local_soln.resize(n_qp);
   grad_local_soln.resize(n_qp);
   if (computing_dot)
+  {
     dot_local_soln.resize(n_qp);
+    grad_dot_local_soln.resize(n_qp);
+  }
 
   for (const auto qp : make_range(n_qp))
   {
     local_soln[qp] = 0;
     grad_local_soln[qp] = 0;
     if (computing_dot)
+    {
       dot_local_soln[qp] = 0;
+      grad_dot_local_soln[qp] = GradientType{};
+    }
     for (const auto i : index_range(dof_indices))
     {
       local_soln[qp] += dof_values[i] * phi[i][qp];
       grad_local_soln[qp] += dof_values[i] * grad_phi[i][qp];
       if (computing_dot)
+      {
         dot_local_soln[qp] += dof_values_dot[i] * phi[i][qp];
+        grad_dot_local_soln[qp] += dof_values_dot[i] * grad_phi[i][qp];
+      }
     }
   }
 }
@@ -980,7 +990,8 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
                     _current_elem_qp_functor_sln,
                     dphi,
                     _current_elem_qp_functor_gradient,
-                    _current_elem_qp_functor_dot);
+                    _current_elem_qp_functor_dot,
+                    _current_elem_qp_functor_grad_dot);
   }
   if (cache_eligible)
     _current_elem_qp_functor_elem = elem;
@@ -1078,6 +1089,20 @@ MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateAr
 }
 
 template <typename OutputType>
+typename MooseVariableFE<OutputType>::GradientType
+MooseVariableFE<OutputType>::evaluateGradDot(const ElemArg & elem_arg, const StateArg & state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  // We can use whatever we want for the point argument since it won't be used
+  const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
+  evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
+  return _current_elem_qp_functor_grad_dot[0];
+}
+
+template <typename OutputType>
 void
 MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
                                                    const StateArg & state,
@@ -1110,7 +1135,8 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
                     _current_elem_side_qp_functor_sln,
                     dphi,
                     _current_elem_side_qp_functor_gradient,
-                    _current_elem_side_qp_functor_dot);
+                    _current_elem_side_qp_functor_dot,
+                    _current_elem_side_qp_functor_grad_dot);
   }
   if (cache_eligible)
     _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);

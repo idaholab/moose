@@ -115,6 +115,19 @@ public:
   DotType dot(const NodeArg & node, const StateArg & state) const;
   ///@}
 
+  ///@{
+  /**
+   * Same as their \p evaluateGradDot overloads with the same arguments but allows for caching
+   * implementation. These are the methods a user will call in their code
+   */
+  GradientType gradDot(const ElemArg & elem, const StateArg & state) const;
+  GradientType gradDot(const FaceArg & face, const StateArg & state) const;
+  GradientType gradDot(const ElemQpArg & qp, const StateArg & state) const;
+  GradientType gradDot(const ElemSideQpArg & qp, const StateArg & state) const;
+  GradientType gradDot(const ElemPointArg & elem_point, const StateArg & state) const;
+  GradientType gradDot(const NodeArg & node, const StateArg & state) const;
+  ///@}
+
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
   virtual void timestepSetup() override;
@@ -261,6 +274,7 @@ protected:
   {
     mooseError("Gradient at node not implemented for functor " + functorName());
   }
+
   /**
    * Evaluate the functor time derivative with a given element. Some example implementations of
    * this method could compute an element-average or evaluate at the element centroid
@@ -313,6 +327,60 @@ protected:
   virtual DotType evaluateDot(const NodeArg &, const StateArg &) const
   {
     mooseError("Time derivative at node not implemented for functor " + functorName());
+  }
+
+  /**
+   * Evaluate the functor gradient-dot with a given element. Some example implementations of this
+   * method could compute an element-average or evaluate at the element centroid
+   */
+  virtual GradientType evaluateGradDot(const ElemArg &, const StateArg &) const
+  {
+    mooseError("Element gradient-dot not implemented for functor " + functorName());
+  }
+
+  /**
+   * @param face See the \p FaceArg doxygen
+   * @param state See the \p StateArg doxygen
+   * @return The functor gradient-dot evaluated at the requested state and space
+   */
+  virtual GradientType evaluateGradDot(const FaceArg &, const StateArg &) const
+  {
+    mooseError("Face gradient-dot not implemented for functor " + functorName());
+  }
+
+  /**
+   * @param qp See the \p ElemQpArg doxygen
+   * @param state See the \p StateArg doxygen
+   * @return The functor gradient-dot evaluated at the requested state and space
+   */
+  virtual GradientType evaluateGradDot(const ElemQpArg &, const StateArg &) const
+  {
+    mooseError("Element quadrature point gradient-dot not implemented for functor " +
+               functorName());
+  }
+
+  /**
+   * @param side_qp See the \p ElemSideQpArg doxygen
+   * @param state See the \p StateArg doxygen
+   * @return The functor gradient-dot evaluated at the requested state and space
+   */
+  virtual GradientType evaluateGradDot(const ElemSideQpArg &, const StateArg &) const
+  {
+    mooseError("Element side quadrature point gradient-dot not implemented for functor " +
+               functorName());
+  }
+
+  /**
+   * Evaluate the functor gradient-dot with a given element and point
+   */
+  virtual GradientType evaluateGradDot(const ElemPointArg &, const StateArg &) const
+  {
+    mooseError("Element-point gradient-dot not implemented for functor " + functorName());
+  }
+
+  virtual GradientType evaluateGradDot(const NodeArg &, const StateArg &) const
+  {
+    mooseError("Gradient-dot at node not implemented for functor " + functorName());
   }
   ///@}
 
@@ -737,6 +805,48 @@ FunctorBase<T>::dot(const NodeArg & node, const StateArg & state) const
 }
 
 template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const ElemArg & elem, const StateArg & state) const
+{
+  return evaluateGradDot(elem, state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const FaceArg & face, const StateArg & state) const
+{
+  return evaluateGradDot(checkFace(face), state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const ElemQpArg & elem_qp, const StateArg & state) const
+{
+  return evaluateGradDot(elem_qp, state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const ElemSideQpArg & elem_side_qp, const StateArg & state) const
+{
+  return evaluateGradDot(elem_side_qp, state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const ElemPointArg & elem_point, const StateArg & state) const
+{
+  return evaluateGradDot(elem_point, state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const NodeArg & node, const StateArg & state) const
+{
+  return evaluateGradDot(node, state);
+}
+
+template <typename T>
 bool
 FunctorBase<T>::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
 {
@@ -970,6 +1080,33 @@ protected:
   {
     return _wrapped->dot(node, state);
   }
+
+  virtual GradientType evaluateGradDot(const ElemArg & elem, const StateArg & state) const override
+  {
+    return _wrapped->gradDot(elem, state);
+  }
+  virtual GradientType evaluateGradDot(const FaceArg & face, const StateArg & state) const override
+  {
+    return _wrapped->gradDot(face, state);
+  }
+  virtual GradientType evaluateGradDot(const ElemQpArg & qp, const StateArg & state) const override
+  {
+    return _wrapped->gradDot(qp, state);
+  }
+  virtual GradientType evaluateGradDot(const ElemSideQpArg & qp,
+                                       const StateArg & state) const override
+  {
+    return _wrapped->gradDot(qp, state);
+  }
+  virtual GradientType evaluateGradDot(const ElemPointArg & elem_point,
+                                       const StateArg & state) const override
+  {
+    return _wrapped->gradDot(elem_point, state);
+  }
+  virtual GradientType evaluateGradDot(const NodeArg & node, const StateArg & state) const override
+  {
+    return _wrapped->gradDot(node, state);
+  }
   ///@}
 
 private:
@@ -1030,6 +1167,13 @@ private:
   DotType evaluateDot(const ElemSideQpArg &, const StateArg &) const override { return 0; }
   DotType evaluateDot(const ElemPointArg &, const StateArg &) const override { return 0; }
   DotType evaluateDot(const NodeArg &, const StateArg &) const override { return 0; }
+
+  GradientType evaluateGradDot(const ElemArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const FaceArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const ElemQpArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const ElemSideQpArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const ElemPointArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const NodeArg &, const StateArg &) const override { return 0; }
 
 private:
   ValueType _value;

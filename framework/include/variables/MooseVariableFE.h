@@ -689,6 +689,7 @@ protected:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
   using MooseVariableField<OutputType>::evaluateDot;
+  using MooseVariableField<OutputType>::evaluateGradDot;
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
@@ -718,9 +719,12 @@ protected:
   DotType evaluateDot(const ElemArg &, const StateArg &) const override final;
   DotType evaluateDot(const FaceArg &, const StateArg &) const override final;
 
+  GradientType evaluateGradDot(const ElemArg &, const StateArg &) const override final;
+
 private:
   /**
-   * Compute the solution, gradient, and time derivative with provided shape functions
+   * Compute the solution, gradient, time derivative, and gradient of the time derivative with
+   * provided shape functions
    */
   template <typename Shapes, typename Solution, typename GradShapes, typename GradSolution>
   void computeSolution(const Elem * elem,
@@ -730,7 +734,8 @@ private:
                        Solution & local_soln,
                        const GradShapes & grad_phi,
                        GradSolution & grad_local_soln,
-                       Solution & dot_local_soln) const;
+                       Solution & dot_local_soln,
+                       GradSolution & grad_dot_local_soln) const;
 
   /**
    * Evaluate solution and gradient for the \p elem_qp argument
@@ -759,6 +764,9 @@ private:
   /// The values of the time derivative for the \p _current_elem_qp_functor_elem
   mutable std::vector<DotType> _current_elem_qp_functor_dot;
 
+  /// The values of the gradient of the time derivative for the \p _current_elem_qp_functor_elem
+  mutable std::vector<GradientType> _current_elem_qp_functor_grad_dot;
+
   /// Keep track of the current elem-side-qp functor element and side in order to enable local
   /// caching (e.g. if we call evaluate with the same element and side, but just with a different
   /// quadrature point, we can return previously computed results indexed at the different qp
@@ -773,6 +781,10 @@ private:
 
   /// The values of the time derivative for the \p _current_elem_side_qp_functor_elem_side
   mutable std::vector<DotType> _current_elem_side_qp_functor_dot;
+
+  /// The values of the gradient of the time derivative for the \p
+  /// _current_elem_side_qp_functor_elem_side
+  mutable std::vector<GradientType> _current_elem_side_qp_functor_grad_dot;
 };
 
 template <typename OutputType>
