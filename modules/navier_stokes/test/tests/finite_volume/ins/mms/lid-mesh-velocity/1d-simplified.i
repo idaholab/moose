@@ -66,6 +66,14 @@ rho=1.1
     momentum_component = 'x'
     use_displaced_mesh = true
   []
+  [u_mesh_advection]
+    type = INSFVMomentumMeshAdvection
+    variable = u
+    rho = ${rho}
+    momentum_component = 'x'
+    disp_x = disp_x
+    use_displaced_mesh = true
+  []
   [u_forcing]
     type = INSFVBodyForce
     variable = u
@@ -91,7 +99,7 @@ rho=1.1
   []
   [forcing_u]
     type = ParsedFunction
-    expression = 'mu*cos(x) - rho*(-2*x/(2*t + 1) + cos(x))*sin(x) + rho*(-sin(x) - 2/(2*t + 1))*cos(x)'
+    expression = 'mu*cos(x) - rho*(-2*x/(2*t + 1) + cos(x))*sin(x) + rho*(-sin(x) - 2/(2*t + 1))*cos(x) + 2*rho*cos(x)/(2*t + 1)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
   []

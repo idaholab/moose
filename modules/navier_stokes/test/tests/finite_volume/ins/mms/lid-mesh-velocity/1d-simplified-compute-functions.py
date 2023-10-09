@@ -28,7 +28,7 @@ vel = u + '* e_i'
 disp_x_dot = '2*x/(2*t+1)'
 vel_d = 'disp_x_dot * e_i'
 
-f_u, e_u = mms.evaluate('div((vel-vel_d)*rho*u) - div(mu * grad(u))', u, variable='u', vel=vel, disp_x_dot=disp_x_dot, vel_d=vel_d, scalars=['mu', 'rho'])
+f_u, e_u = mms.evaluate('div((vel-vel_d)*rho*u) + rho*u*div(vel_d) - div(mu * grad(u))', u, variable='u', vel=vel, disp_x_dot=disp_x_dot, vel_d=vel_d, scalars=['mu', 'rho'])
 
 mms.print_hit(e_u, 'exact_u')
 mms.print_hit(f_u, 'forcing_u', mu='${mu}', rho='${rho}')
