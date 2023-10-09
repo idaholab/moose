@@ -89,6 +89,17 @@ TEST(CompileTimeDerivativesTest, evaluate)
 
   CTD_EVALTEST(x * (1.0 + x * (3.0 - x * (2.0 + x * (5.0 - x)))), -10, 10, 0.63)
 
+  CTD_EVALTEST(x * -1.0 > x * -2.0, -10, 10, 0.63)
+  CTD_EVALTEST(x * -1.0 < x * -2.0, -10, 10, 0.63)
+  CTD_EVALTEST(x * -1.0 >= x * -2.0, -10, 10, 1)
+  CTD_EVALTEST(x * -1.0 <= x * -2.0, -10, 10, 1)
+  CTD_EVALTEST(0.0 < x, -1, 1, 1)
+  CTD_EVALTEST(0.0 > x, -1, 1, 1)
+  CTD_EVALTEST(0.0 <= x, -1, 1, 1)
+  CTD_EVALTEST(0.0 >= x, -1, 1, 1)
+  CTD_EVALTEST(0.0 == x, -1, 1, 1)
+  CTD_EVALTEST(0.0 != x, -1, 1, 1)
+
   using namespace std;
   CTD_EVALTEST(sin(x), -10, 10, 0.72)
   CTD_EVALTEST(cos(x), -10, 10, 0.72)

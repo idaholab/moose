@@ -527,6 +527,83 @@ public:
   using CTBinary<L, R>::_right;
 };
 
+enum class CTComparisonEnum
+{
+  Less,
+  LessEqual,
+  Greater,
+  GreaterEqual,
+  Equal,
+  Unequal
+};
+
+/**
+ * Binary comparison operator node
+ */
+template <CTComparisonEnum C, typename L, typename R>
+class CTCompare : public CTBinary<L, R>
+{
+public:
+  CTCompare(L left, R right) : CTBinary<L, R>(left, right) {}
+  typedef bool ResultType;
+
+  ResultType operator()() const
+  {
+    if constexpr (C == CTComparisonEnum::Less)
+      return _left() < _right();
+    if constexpr (C == CTComparisonEnum::LessEqual)
+      return _left() <= _right();
+    if constexpr (C == CTComparisonEnum::Greater)
+      return _left() > _right();
+    if constexpr (C == CTComparisonEnum::GreaterEqual)
+      return _left() >= _right();
+    if constexpr (C == CTComparisonEnum::Equal)
+      return _left() == _right();
+    if constexpr (C == CTComparisonEnum::Unequal)
+      return _left() != _right();
+  }
+  std::string print() const
+  {
+    if constexpr (C == CTComparisonEnum::Less)
+      return this->printParens(this, "<");
+    if constexpr (C == CTComparisonEnum::LessEqual)
+      return this->printParens(this, "<=");
+    if constexpr (C == CTComparisonEnum::Greater)
+      return this->printParens(this, ">");
+    if constexpr (C == CTComparisonEnum::GreaterEqual)
+      return this->printParens(this, ">=");
+    if constexpr (C == CTComparisonEnum::Equal)
+      return this->printParens(this, "==");
+    if constexpr (C == CTComparisonEnum::Unequal)
+      return this->printParens(this, "!=");
+  }
+  constexpr static int precedence() { return 9; }
+  constexpr static bool leftAssociative() { return true; }
+
+  template <CTTag dtag>
+  auto D() const
+  {
+    return CTNull<ResultType>();
+  }
+
+  using CTBinary<L, R>::_left;
+  using CTBinary<L, R>::_right;
+};
+
+/// template aliases for the comparison operator nodes
+template <typename L, typename R>
+using CTCompareLess = CTCompare<CTComparisonEnum::Less, L, R>;
+template <typename L, typename R>
+using CTCompareLessEqual = CTCompare<CTComparisonEnum::LessEqual, L, R>;
+template <typename L, typename R>
+using CTCompareGreater = CTCompare<CTComparisonEnum::Greater, L, R>;
+template <typename L, typename R>
+using CTCompareGreaterEqual = CTCompare<CTComparisonEnum::GreaterEqual, L, R>;
+template <typename L, typename R>
+using CTCompareEqual = CTCompare<CTComparisonEnum::Equal, L, R>;
+template <typename L, typename R>
+using CTCompareUnequal = CTCompare<CTComparisonEnum::Unequal, L, R>;
+
 /**
  * Power operator where both base and exponent can be arbitrary operators.
  */
@@ -654,37 +731,51 @@ pow(const B & base)
  * objects, C variables, and number literals.
  */
 #define CT_OPERATOR_BINARY(op, OP)                                                                 \
-  template <typename L,                                                                            \
-            typename R,                                                                            \
+  template <typename L, typename R>                                                                            \
             class = std::enable_if_t<std::is_base_of<CTBase, L>::value &&                          \
                                      std::is_base_of<CTBase, R>::value>>                           \
   auto operator op(const L & left, const R & right)                                                \
   {                                                                                                \
-    return OP(left, right);                                                                        \
+    /* We need a template arguments here because:      */                                          \
+    /* alias template deduction only available with '-std=c++2a' or '-std=gnu++2a'      */         \
+    if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value) \
+    return OP<L, R>(left, right);                                                                  \
   }
 
 #define CT_OPERATOR_BINARY_MIX(op, OP, ot)                                                         \
   template <typename L, class = std::enable_if_t<std::is_base_of<CTBase, L>::value>>               \
   auto operator op(const L & left, const ot & right)                                               \
   {                                                                                                \
-    return OP(left, makeValue(right));                                                             \
+    return OP<L, decltype(makeValue(right))>(left, makeValue(right));                              \
   }                                                                                                \
   template <typename R, class = std::enable_if_t<std::is_base_of<CTBase, R>::value>>               \
   auto operator op(const ot & left, const R & right)                                               \
   {                                                                                                \
-    return OP(makeValue(left), right);                                                             \
+    return OP<decltype(makeValue(left)), R>(makeValue(left), right);                               \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)
 CT_OPERATOR_BINARY(-, CTSub)
 CT_OPERATOR_BINARY(*, CTMul)
 CT_OPERATOR_BINARY(/, CTDiv)
+CT_OPERATOR_BINARY(<, CTCompareLess)
+CT_OPERATOR_BINARY(<=, CTCompareLessEqual)
+CT_OPERATOR_BINARY(>, CTCompareGreater)
+CT_OPERATOR_BINARY(>=, CTCompareGreaterEqual)
+CT_OPERATOR_BINARY(==, CTCompareEqual)
+CT_OPERATOR_BINARY(!=, CTCompareUnequal)
 
 #define CT_OPERATORS_BINARY_MIX(ot)                                                                \
   CT_OPERATOR_BINARY_MIX(+, CTAdd, ot)                                                             \
   CT_OPERATOR_BINARY_MIX(-, CTSub, ot)                                                             \
   CT_OPERATOR_BINARY_MIX(*, CTMul, ot)                                                             \
-  CT_OPERATOR_BINARY_MIX(/, CTDiv, ot)
+  CT_OPERATOR_BINARY_MIX(/, CTDiv, ot)                                                             \
+  CT_OPERATOR_BINARY_MIX(<, CTCompareLess, ot)                                                     \
+  CT_OPERATOR_BINARY_MIX(<=, CTCompareLessEqual, ot)                                               \
+  CT_OPERATOR_BINARY_MIX(>, CTCompareGreater, ot)                                                  \
+  CT_OPERATOR_BINARY_MIX(>=, CTCompareGreaterEqual, ot)                                            \
+  CT_OPERATOR_BINARY_MIX(==, CTCompareEqual, ot)                                                   \
+  CT_OPERATOR_BINARY_MIX(!=, CTCompareUnequal, ot)
 
 // Add entries here to support other types in CTD expressions
 CT_OPERATORS_BINARY_MIX(double)
@@ -701,26 +792,15 @@ CT_OPERATORS_BINARY_MIX(int)
   class CTF##name : public CTUnary<T>                                                              \
   {                                                                                                \
   public:                                                                                          \
-    CTF##name(T arg) : CTUnary<T>(arg)                                                             \
-    {                                                                                              \
-    }                                                                                              \
-    auto operator()() const                                                                        \
-    {                                                                                              \
-      return std::name(_arg());                                                                    \
-    }                                                                                              \
+    CTF##name(T arg) : CTUnary<T>(arg) {}                                                          \
+    auto operator()() const { return std::name(_arg()); }                                          \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
       return derivative;                                                                           \
     }                                                                                              \
-    std::string print() const                                                                      \
-    {                                                                                              \
-      return #name "(" + _arg.print() + ")";                                                       \
-    }                                                                                              \
-    constexpr static int precedence()                                                              \
-    {                                                                                              \
-      return 2;                                                                                    \
-    }                                                                                              \
+    std::string print() const { return #name "(" + _arg.print() + ")"; }                           \
+    constexpr static int precedence() { return 2; }                                                \
     using typename CTUnary<T>::ResultType;                                                         \
     using CTUnary<T>::_arg;                                                                        \
   };                                                                                               \
@@ -752,35 +832,25 @@ CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag
  * possible. The parameters are the function name and the expression that returns the derivative
  * of the function.
  */
-#define CT_SIMPLE_BINARY_FUNCTION(name, derivative)                                                \
+#define CT_SIMPLE_BINARY_FUNCTION_CLASS(name, derivative)                                          \
   template <typename L, typename R>                                                                \
   class CTF##name : public CTBinary<L, R>                                                          \
   {                                                                                                \
   public:                                                                                          \
-    CTF##name(L left, R right) : CTBinary<L, R>(left, right)                                       \
-    {                                                                                              \
-    }                                                                                              \
-    auto operator()() const                                                                        \
-    {                                                                                              \
-      return std::name(_left(), _right());                                                         \
-    }                                                                                              \
+    CTF##name(L left, R right) : CTBinary<L, R>(left, right) {}                                    \
+    auto operator()() const { return std::name(_left(), _right()); }                               \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
       return derivative;                                                                           \
     }                                                                                              \
-    std::string print() const                                                                      \
-    {                                                                                              \
-      return #name "(" + _left.print() + ", " + _right.print() + ")";                              \
-    }                                                                                              \
-    constexpr static int precedence()                                                              \
-    {                                                                                              \
-      return 2;                                                                                    \
-    }                                                                                              \
+    std::string print() const { return #name "(" + _left.print() + ", " + _right.print() + ")"; }  \
+    constexpr static int precedence() { return 2; }                                                \
     using typename CTBinary<L, R>::ResultType;                                                     \
     using CTBinary<L, R>::_left;                                                                   \
     using CTBinary<L, R>::_right;                                                                  \
-  };                                                                                               \
+  };
+#define CT_SIMPLE_BINARY_FUNCTION_FUNC(name)                                                       \
   template <typename L, typename R>                                                                \
   auto name(const L & l, const R & r)                                                              \
   {                                                                                                \
@@ -795,9 +865,11 @@ CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag
       return CTF##name(makeValue(l), makeValue(r));                                                \
   }
 
-CT_SIMPLE_BINARY_FUNCTION(atan2,
-                          (-_left * _right.template D<dtag>() + _left.template D<dtag>() * _right) /
-                              (pow<2>(_left) + pow<2>(_right)))
+CT_SIMPLE_BINARY_FUNCTION_CLASS(atan2,
+                                (-_left * _right.template D<dtag>() +
+                                 _left.template D<dtag>() * _right) /
+                                    (pow<2>(_left) + pow<2>(_right)))
+CT_SIMPLE_BINARY_FUNCTION_FUNC(atan2)
 
 template <typename T, int N, int M>
 class CTMatrix
