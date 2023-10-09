@@ -3,7 +3,7 @@ rho=1.1
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  velocity_interp_method = 'average'
+  velocity_interp_method = 'rc'
 []
 
 [UserObjects]
@@ -37,6 +37,14 @@ rho=1.1
   [disp_x][]
   [pressure]
     type = INSFVPressureVariable
+  []
+[]
+
+[ICs]
+  [pressure]
+    type = FunctionIC
+    function = 'x^3'
+    variable = pressure
   []
 []
 
