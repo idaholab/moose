@@ -1,4 +1,4 @@
-period=.35e-4 # s
+period=.2e-4 # s
 endtime=${fparse 3 * period} # s
 timestep=${fparse period / 100} # s
 surfacetemp=2700 # K
@@ -38,7 +38,7 @@ mu='mu'
 []
 
 [Problem]
-  extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation'
+  extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation e_mesh_advection'
 []
 
 [AuxVariables]
@@ -49,6 +49,9 @@ mu='mu'
     type = MooseVariableFVReal
   []
   [e_advection]
+    type = MooseVariableFVReal
+  []
+  [e_mesh_advection]
     type = MooseVariableFVReal
   []
   [e_conduction]
@@ -79,6 +82,13 @@ mu='mu'
   [e_advection]
     variable = e_advection
     vector_tag = e_advection
+    v = T
+    execute_on = 'timestep_end'
+    type = TagVectorAux
+  []
+  [e_mesh_advection]
+    variable = e_mesh_advection
+    vector_tag = e_mesh_advection
     v = T
     execute_on = 'timestep_end'
     type = TagVectorAux
@@ -190,6 +200,16 @@ mu='mu'
     pressure = pressure
     use_displaced_mesh = true
   []
+  [u_mesh_advection_volumetric]
+    type = INSFVMomentumMeshAdvection
+    variable = vel_x
+    momentum_component = 'x'
+    rho = ${rho}
+    disp_x = disp_x
+    disp_y = disp_y
+    add_to_a = false
+    use_displaced_mesh = true
+  []
   # v equation
   [v_time]
     type = INSFVMomentumTimeDerivative
@@ -221,6 +241,16 @@ mu='mu'
     pressure = pressure
     use_displaced_mesh = true
   []
+  [v_mesh_advection_volumetric]
+    type = INSFVMomentumMeshAdvection
+    variable = vel_y
+    momentum_component = 'y'
+    rho = ${rho}
+    disp_x = disp_x
+    disp_y = disp_y
+    add_to_a = false
+    use_displaced_mesh = true
+  []
   # energy equation
   [temperature_time]
     type = INSFVEnergyTimeDerivative
@@ -242,6 +272,16 @@ mu='mu'
     variable = T
     use_displaced_mesh = true
     extra_vector_tags = 'e_conduction'
+  []
+  [temperature_mesh_advection_volumetric]
+    type = INSFVMeshAdvection
+    variable = T
+    rho = ${rho}
+    disp_x = disp_x
+    disp_y = disp_y
+    advected_quantity = 'h'
+    use_displaced_mesh = true
+    extra_vector_tags = 'e_mesh_advection'
   []
 []
 
@@ -424,10 +464,9 @@ mu='mu'
     type = VectorSum
     vector = 'e_advection'
   []
-  [advection_plus_conduction]
-    type = ParsedPostprocessor
-    function = 'advection + conduction'
-    pp_names = 'conduction advection'
+  [mesh_advection]
+    type = VectorSum
+    vector = 'e_mesh_advection'
   []
   [radiation]
     type = VectorSum
@@ -435,7 +474,7 @@ mu='mu'
   []
   [total_sum]
     type = ParsedPostprocessor
-    function = 'laser_flux + volume_rho_cp_dT + advection_plus_conduction + radiation'
-    pp_names = 'laser_flux volume_rho_cp_dT advection_plus_conduction radiation'
+    function = 'laser_flux + volume_rho_cp_dT + advection + mesh_advection + conduction + radiation'
+    pp_names = 'laser_flux volume_rho_cp_dT advection mesh_advection conduction radiation'
   []
 []
