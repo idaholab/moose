@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Material.h"
+#include "NestedSolve.h"
 
 /**
  * A test object that uses Material to perform a Newton solve of a material property.
@@ -31,11 +32,10 @@ protected:
   void computeQpProperties() override;
 
 private:
-  const Real & _tol;
   const MaterialProperty<Real> & _f;
   const MaterialProperty<Real> & _f_prime;
   MaterialProperty<Real> & _p;
   std::vector<unsigned int> _prop_ids;
-  unsigned int _max_iterations;
   MaterialBase * _discrete;
+  NestedSolve _nested_solve;
 };
