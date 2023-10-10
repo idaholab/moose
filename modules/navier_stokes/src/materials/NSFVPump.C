@@ -128,7 +128,7 @@ NSFVPump::NSFVPump(const InputParameters & parameters)
   {
     _subproblem.addPiecewiseByBlockLambdaFunctor<Real>(
         getParam<MooseFunctorName>("pump_force_name"),
-        [this](const auto & r, const auto & t) -> Real { return raw_value(_rho(r, t)) * 0.0; },
+        [](const auto &, const auto &) -> Real { return 0.0; },
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _subproblem.mesh(),
         missing_blocks,
