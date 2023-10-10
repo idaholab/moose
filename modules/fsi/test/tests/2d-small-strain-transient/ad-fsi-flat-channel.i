@@ -268,6 +268,8 @@
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   line_search = none
+  nl_rel_tol = 1e-50
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]

@@ -38,6 +38,9 @@ INSBase::validParams()
   params.addParam<bool>("transient_term",
                         false,
                         "Whether there should be a transient term in the momentum residuals.");
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
 
   return params;
 }
@@ -88,8 +91,23 @@ INSBase::INSBase(const InputParameters & parameters)
     _alpha(getParam<Real>("alpha")),
     _laplace(getParam<bool>("laplace")),
     _convective_term(getParam<bool>("convective_term")),
-    _transient_term(getParam<bool>("transient_term"))
+    _transient_term(getParam<bool>("transient_term")),
+
+    // Displacements for mesh velocity for ALE simulations
+    _disps_provided(isParamValid("disp_x")),
+    _disp_x_dot(isParamValid("disp_x") ? coupledDot("disp_x") : _zero),
+    _disp_y_dot(isParamValid("disp_y") ? coupledDot("disp_y") : _zero),
+    _disp_z_dot(isParamValid("disp_z") ? coupledDot("disp_z") : _zero)
 {
+}
+
+RealVectorValue
+INSBase::relativeVelocity() const
+{
+  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  if (_disps_provided)
+    U -= RealVectorValue{_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]};
+  return U;
 }
 
 RealVectorValue
@@ -270,7 +288,7 @@ Real
 INSBase::tau()
 {
   Real nu = _mu[_qp] / _rho[_qp];
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = relativeVelocity();
   Real h = _current_elem->hmax();
   Real transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
   return _alpha / std::sqrt(transient_part + (2. * U.norm() / h) * (2. * U.norm() / h) +
@@ -281,7 +299,7 @@ Real
 INSBase::tauNodal()
 {
   Real nu = _mu[_qp] / _rho[_qp];
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = relativeVelocity();
   Real h = _current_elem->hmax();
   Real xi;
   if (nu < std::numeric_limits<Real>::epsilon())
@@ -298,7 +316,7 @@ Real
 INSBase::dTauDUComp(unsigned comp)
 {
   Real nu = _mu[_qp] / _rho[_qp];
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = relativeVelocity();
   Real h = _current_elem->hmax();
   Real transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
   return -_alpha / 2. *

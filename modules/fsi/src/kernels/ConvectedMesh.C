@@ -61,16 +61,17 @@ Real
 ConvectedMesh::computeQpResidual()
 {
   auto test = _test[_i][_qp];
+  const auto U = relativeVelocity();
   if (_supg)
-    test += tau() * _grad_test[_i][_qp] * RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    test += tau() * _grad_test[_i][_qp] * U;
   return test * strongResidual();
 }
 
 Real
 ConvectedMesh::computePGVelocityJacobian(const unsigned short component)
 {
-  return strongResidual() * ((dTauDUComp(component) * _grad_test[_i][_qp] *
-                              RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp])) +
+  const auto U = relativeVelocity();
+  return strongResidual() * ((dTauDUComp(component) * _grad_test[_i][_qp] * U) +
                              (tau() * _grad_test[_i][_qp](component) * _phi[_j][_qp]));
 }
 
@@ -78,8 +79,9 @@ Real
 ConvectedMesh::computeQpJacobian()
 {
   auto test = _test[_i][_qp];
+  const auto U = relativeVelocity();
   if (_supg)
-    test += tau() * _grad_test[_i][_qp] * RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    test += tau() * _grad_test[_i][_qp] * U;
   auto jac = test * -_rho[_qp] *
              RealVectorValue(_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]) *
              _grad_phi[_j][_qp];
@@ -95,8 +97,9 @@ ConvectedMesh::computeQpOffDiagJacobian(unsigned int jvar)
   mooseAssert(jvar != _var.number(), "Making sure I understand how old hand-coded Jacobians work.");
 
   auto test = _test[_i][_qp];
+  const auto U = relativeVelocity();
   if (_supg)
-    test += tau() * _grad_test[_i][_qp] * RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+    test += tau() * _grad_test[_i][_qp] * U;
 
   if (jvar == _disp_x_id)
     return test * -_rho[_qp] * _phi[_j][_qp] * _d_disp_x_dot[_qp] * _grad_u[_qp](0);

@@ -65,13 +65,11 @@ INSMomentumBase::computeQpResidual()
 Real
 INSMomentumBase::computeQpPGResidual()
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = relativeVelocity();
 
-  RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
-  RealVectorValue viscous_term =
-      _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
-  RealVectorValue transient_term =
-      _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
+  const auto convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
+  const auto viscous_term = _laplace ? strongViscousTermLaplace() : strongViscousTermTraction();
+  const auto transient_term = _transient_term ? timeDerivativeTerm() : RealVectorValue(0, 0, 0);
 
   return tau() * U * _grad_test[_i][_qp] *
          ((convective_term + viscous_term + transient_term + strongPressureTerm() +
@@ -109,18 +107,19 @@ INSMomentumBase::computeQpJacobian()
 Real
 INSMomentumBase::computeQpPGJacobian(unsigned comp)
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  const auto U = relativeVelocity();
   RealVectorValue d_U_d_U_comp(0, 0, 0);
   d_U_d_U_comp(comp) = _phi[_j][_qp];
 
-  Real convective_term = _convective_term ? convectiveTerm()(_component) : 0;
-  Real d_convective_term_d_u_comp = _convective_term ? dConvecDUComp(comp)(_component) : 0;
-  Real viscous_term =
+  const Real convective_term = _convective_term ? convectiveTerm()(_component) : 0;
+  const Real d_convective_term_d_u_comp = _convective_term ? dConvecDUComp(comp)(_component) : 0;
+  const Real viscous_term =
       _laplace ? strongViscousTermLaplace()(_component) : strongViscousTermTraction()(_component);
-  Real d_viscous_term_d_u_comp = _laplace ? dStrongViscDUCompLaplace(comp)(_component)
-                                          : dStrongViscDUCompTraction(comp)(_component);
-  Real transient_term = _transient_term ? timeDerivativeTerm()(_component) : 0;
-  Real d_transient_term_d_u_comp = _transient_term ? dTimeDerivativeDUComp(comp)(_component) : 0;
+  const Real d_viscous_term_d_u_comp = _laplace ? dStrongViscDUCompLaplace(comp)(_component)
+                                                : dStrongViscDUCompTraction(comp)(_component);
+  const Real transient_term = _transient_term ? timeDerivativeTerm()(_component) : 0;
+  const Real d_transient_term_d_u_comp =
+      _transient_term ? dTimeDerivativeDUComp(comp)(_component) : 0;
 
   return dTauDUComp(comp) * U * _grad_test[_i][_qp] *
              (convective_term + viscous_term + strongPressureTerm()(_component) +
@@ -182,7 +181,7 @@ INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 
     if (_supg)
     {
-      RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+      const auto U = relativeVelocity();
       jac += tau() * U * _grad_test[_i][_qp] * dStrongPressureDPressure()(_component);
     }
 

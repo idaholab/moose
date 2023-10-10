@@ -87,6 +87,8 @@
     v = vel_y
     pressure = p
     block = 0
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
   [./x_momentum_space]
     type = INSMomentumLaplaceForm
@@ -96,6 +98,8 @@
     pressure = p
     component = 0
     block = 0
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
   [./y_momentum_space]
     type = INSMomentumLaplaceForm
@@ -105,6 +109,8 @@
     pressure = p
     component = 1
     block = 0
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
   [./vel_x_mesh]
     type = ConvectedMesh
@@ -303,6 +309,8 @@
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   line_search = none
+  nl_rel_tol = 1e-50
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
