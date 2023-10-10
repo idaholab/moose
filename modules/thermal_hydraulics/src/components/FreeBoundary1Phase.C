@@ -16,6 +16,7 @@ InputParameters
 FreeBoundary1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
+  params.addClassDescription("Component to create a free flow boundary for single-phase flow.");
   return params;
 }
 
