@@ -84,6 +84,10 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
     _density_name(getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity"))
 {
+  for (const auto d : make_range(_dim))
+    addNonlinearVariable(_velocity_names[d]);
+  addNonlinearVariable(_pressure_name);
+
   // Parameter checking
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "momentum_inlet_types");
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("outlet_boundaries",

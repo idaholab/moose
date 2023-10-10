@@ -70,7 +70,6 @@ protected:
     return *_problem;
   }
 
-<<<<<<< HEAD
   /// Tell the app if we want to use Exodus restart
   void prepareCopyNodalVariables() const;
   /// Copy variables from the mesh file

@@ -141,6 +141,13 @@ PhysicsBase::prepareCopyNodalVariables() const
                                         "initial_from_file_timestep");
 }
 
+void
+PhysicsBase::prepareCopyNodalVariables() const
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    _app.setExodusFileRestart(true);
+}
+
 bool
 PhysicsBase::isTransient() const
 {
@@ -201,6 +208,13 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
   }
+}
+
+void
+PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
+{
+  _blocks.insert(_blocks.end(), blocks.begin(), blocks.end());
+  _dim = _problem->mesh().getBlocksMaxDimension(_blocks);
 }
 
 void
