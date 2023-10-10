@@ -181,11 +181,11 @@ If the above command returns nothing, produces errors, or fewer paths than the 4
 something is wrong. You need to STOP, and figure out how to enable your MPI wrapper before
 proceeding (discussed in the Prerequisites section).
 
-#### Build PETSc and libMesh
+#### Build PETSc, libMesh, and WASP
 
-Build PETSc and libMesh by instructing these libraries to use the downloads directory you created:
+Build PETSc, libMesh, and WASP by instructing these libraries to use the downloads directory you created:
 
-!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects PETSC_ARGS1=--skip-submodule-update PETSC_ARGS2=--with-packages-download-dir=~/projects/downloads LIBMESH_ARGS1=--skip-submodule-update
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects PETSC_ARGS1=--skip-submodule-update PETSC_ARGS2=--with-packages-download-dir=~/projects/downloads LIBMESH_ARGS1=--skip-submodule-update WASP_ARGS1=--skip-submodule-update
 
 Unfortunately, any errors incurred during the above step is going to be beyond the scope of this
 document. Most likely, an error will be related to a missing library by one of the myriad

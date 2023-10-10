@@ -1,3 +1,6 @@
+moose_wasp:
+  moose-wasp 2023.10.06
+
 moose_python:
   - python 3.10
   - python 3.9

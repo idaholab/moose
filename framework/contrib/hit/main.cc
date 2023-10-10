@@ -551,6 +551,16 @@ merge(int argc, char ** argv)
   return 0;
 }
 
+void
+expand(hit::Node & root)
+{
+  std::unique_ptr<hit::Node> new_root(hit::parse("render", root.render()));
+  for (auto delete_child : root.children())
+    delete delete_child;
+  for (auto new_child : new_root->children())
+    root.addChild(new_child->clone());
+}
+
 int
 diff(int argc, char ** argv)
 {
@@ -669,7 +679,7 @@ diff(int argc, char ** argv)
   if (common)
   {
     std::cout << "Common parameters:\n";
-    hit::explode(&common_root);
+    expand(common_root);
     std::cout << common_root.render(4) << "\n\n";
     return 0;
   }
@@ -682,7 +692,7 @@ diff(int argc, char ** argv)
         std::cout << missing_right.str() << '\n';
       else
       {
-        hit::explode(&missing_right_root);
+        expand(missing_right_root);
         std::cout << missing_right_root.render(4) << "\n\n";
       }
       std::cout << color_default;
@@ -695,7 +705,7 @@ diff(int argc, char ** argv)
         std::cout << missing_left.str() << '\n';
       else
       {
-        hit::explode(&missing_left_root);
+        expand(missing_left_root);
         std::cout << missing_left_root.render(4) << "\n\n";
       }
       std::cout << color_default;
@@ -749,7 +759,7 @@ common(int argc, char ** argv)
   hit::Section common_root("");
   for (const auto & param : common_params)
     common_root.addChild(param.second->clone(/*absolute_path = */ true));
-  hit::explode(&common_root);
+  expand(common_root);
   std::cout << common_root.render() << '\n';
 
   return 0;
