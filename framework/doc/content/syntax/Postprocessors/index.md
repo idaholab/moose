@@ -161,7 +161,7 @@ Of course, the type of communication necessary depends on the calculation being 
 [UserObject.md] base class includes helper methods for common parallel communications functions.
 
 The initialize and finalize methods are utilized to aggregate for message passing (MPI) based
-parallelism. For shared memory parallelism the theadJoin method is used. This method is called,
+parallelism. For shared memory parallelism the threadJoin method is used. This method is called,
 like finalize, after execution is complete and includes a single argument. This argument is a
 reference to a UserObject, which is a base class of Postprocessor objects. The purpose of this
 method is to enable the aggregation for the Postprocessor objects that were executed on other

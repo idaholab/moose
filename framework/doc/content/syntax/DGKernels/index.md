@@ -5,9 +5,9 @@
 ## Overview
 
 DGKernels are the kernels defined on internal sides.
-DGKernels are typically for elemental variables, i.e. variables that allows solutions to be discontinous aross element sides.
-DGKernels along with normal kernels allow the definition of weak forms rised from discontinous finite element methods (DFEM).
-DGKernels can be block restricted for calculatons with DFEM on subdomains.
+DGKernels are typically for elemental variables, i.e. variables that allow solutions to be discontinuous across element sides.
+DGKernels along with normal kernels allow the definition of weak forms arising from discontinuous finite element methods (DFEM).
+DGKernels can be block restricted for calculations with DFEM on subdomains.
 Internal sides are visited once during residual or Jacobian evaluations by MOOSE.
 DGKernels handle two pieces of residual, marked as `Element` and `Neighbor`, on an internal side and corresponding four pieces of Jacobian, marked as `ElementElement`, `ElementNeighbor`, `NeighborElement` and `NeighborNeighbor`.
 The normals on internal sides are pointing towards neighboring element from the current element.

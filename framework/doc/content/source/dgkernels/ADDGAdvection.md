@@ -11,7 +11,7 @@ couple distinctions:
   and/or changing spatially. Additionally, the use of a material property as
   opposed to a coupled variable allows more straightforward
   propagation of derivatives for automatic differentiation.
-- A [!param](/DGKernels/ADDGAdvection/advected_quantity) paramter is
+- A [!param](/DGKernels/ADDGAdvection/advected_quantity) parameter is
   available which allows for advecting different quantities than the `variable`
   this object is acting upon
 

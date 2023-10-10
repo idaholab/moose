@@ -2,7 +2,7 @@
 
 ## Description
 
-`VectorBodyForce` is analagous to [`BodyForce`](/BodyForce.md)
+`VectorBodyForce` is analogous to [`BodyForce`](/BodyForce.md)
 except it is applied to vector finite element variables. Instead of taking one
 `function` parameter, the user can pass up to three functions representing the
 individual components of the vector variable. If not supplied by the user,

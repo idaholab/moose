@@ -36,7 +36,7 @@ dynamic size Matrix objects. the `NestedSolve::Value<>` and
 
 Specializations and overloads exist for the `nonlinear` solve API to deal with
 the special cases of 1x1 systems (with the solution,residual, and Jacobians
-being `Real` scalars), and for 3x3 systems (with the solution and residual bein
+being `Real` scalars), and for 3x3 systems (with the solution and residual being
 `RealVectorValues` and Jacobians being `RankTwoTensor` values). The correct
 overload is picked based on the type `T` of the initial `guess` parameter.
 
@@ -67,7 +67,7 @@ multiple solves, and could be a member of the class you are using it in.
 NestedSolve solver;
 ```
 
-Next we set the solution (vector) type. `NestedSolve::Value<>` is a dynamicly
+Next we set the solution (vector) type. `NestedSolve::Value<>` is a dynamically
 sized vector class from the Eigen library. Eigen uses the `<<` operator to
 initialize such a vector (two components in this case).
 
@@ -87,7 +87,7 @@ with three arguments:
 
 1. The first argument is the current guess for the solution and is the _input_ to the functions, it is a vector of length N (or a scalar).
 2. Argument two is a writable reference to the residual vector (of the same size as the current guess), the value of which is to be calculated by the lambda.
-3. This is followed by the Jacobian matrix of the system, the derivative of the resdual vector with respect to the guess/solution.
+3. This is followed by the Jacobian matrix of the system, the derivative of the residual vector with respect to the guess/solution.
 
 ```
 auto compute = [&](const NestedSolve::Value<> & guess,
@@ -127,9 +127,9 @@ if (solver.getState() == NestedSolve::State::NOT_CONVERGED)
 ### Powell's Dogleg method solver
 
 While the previous example used a single lambda to compute residual and Jacobian
-at the same time, we can instead change the code to have sparate lambdas to
+at the same time, we can instead change the code to have separate lambdas to
 allow independent calculation of residual and Jacobian. This facilitates the use
-of solver methods that evaluate the residual more frequantly than the Jacobian,
+of solver methods that evaluate the residual more frequently than the Jacobian,
 such as line search and trust region strategies.
 
 ```

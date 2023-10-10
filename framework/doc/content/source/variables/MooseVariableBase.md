@@ -10,7 +10,7 @@ The current class hierarchy for Moose variables is shown below:
 
 `MooseVariableBase` is the primitive base class from which all variables
 inherit. It includes methods for accessing the variable finite element type and
-order, degress of freedom, scaling factor, name, and associated
+order, degrees of freedom, scaling factor, name, and associated
 [SystemBase](syntax/Systems/index.md). Two classes inherit directly from
 `MooseVariableBase`: [MooseVariableFEBase](MooseVariable.md)
 and [MooseVariableScalar](MooseVariableScalar.md). `MooseVariableScalar` represents a
@@ -180,7 +180,7 @@ template `MooseVariableField<T>` inherit from the
 implemented in `MooseVariableField<T>`. The `ElemQpArg` and `ElemSideQpArg` `evaluate` overloads do
 true on-the-fly computation of the solution based on the information contained
 within the argument, e.g. they perform calls to libMesh `FE::reinit` methods
-after attaching the quadrature rule provided withing the calling argument. The
+after attaching the quadrature rule provided within the calling argument. The
 `ElementType` overload, however, simply queries methods like `adSln()`,
 `slnOld()`, `slnOlder()`, `adSlnNeighbor()`, and `slnOldNeighbor()`. The success
 of this latter overload depends on the fact that the variable has already been

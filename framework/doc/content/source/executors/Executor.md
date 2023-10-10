@@ -146,7 +146,7 @@ FooExecutor::run()
   Result & r = newResult();
   ...
   // When we record an inner/sub executor's result, we give it a label - which
-  // helps identify its placement/role within the executor heirarchy.
+  // helps identify its placement/role within the executor hierarchy.
   r.record("solve1", _inner_solve1->exec());
   r.record("solve2", _inner_solve2->exec());
   ...
@@ -167,7 +167,7 @@ FooExecutor::run()
   Result & r = newResult();
   ...
   // When we record an inner/sub executor's result, we give it a label - which
-  // helps identify its placement/role within the executor heirarchy.
+  // helps identify its placement/role within the executor hierarchy.
   r.record("solve1", _inner_solve1->exec());
   r.record("solve2", _inner_solve2->exec());
 

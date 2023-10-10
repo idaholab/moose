@@ -12,7 +12,7 @@ The Single Matrix Preconditioner (SMP) builds one matrix for preconditioning. As
 \nabla \cdot D(s,T) \nabla s  &= 0 ,
 \end{aligned},
 
-Users can then specify which off-diagonal blokcs of the matrix to use like
+Users can then specify which off-diagonal blocks of the matrix to use like
 
 ```
 off_diag_row    = 's'

@@ -4,7 +4,7 @@ The PointValue Postprocessor samples a field variable at a single point within t
 an error if the point being sampled lies outside of the domain.
 
 !alert warning
-The behavior of the PointValue processor is undefined if using discontinous shape functions
+The behavior of the PointValue processor is undefined if using discontinuous shape functions
 and the sample point lies right on a discontinuity.
 
 !syntax parameters /Postprocessors/PointValue

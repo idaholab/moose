@@ -19,7 +19,7 @@ higher than their parents.
 
 !media framework/adaptivity.png
        caption=Self-similar refinement pattern utilized by MOOSE for adaptivity for 1D linear,
-               2D quadrilatrel, and 3D hexahedron elements.
+               2D quadrilateral, and 3D hexahedron elements.
 
 ## Cycles and Intervals
 

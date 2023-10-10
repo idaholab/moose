@@ -67,7 +67,7 @@ is done to allow the syntax to be consistent regardless of the AuxKernel flavor:
 
 In order to compute properties in the mortar sense, it is necessary to loop over the mortar segment
 mesh to spatially integrate variables. `MortarNodalAuxKernel`s offer this functionality where these "weighted" variables,
-which intervene in the computation of contact constraints and their residuals, can be coupled to generate the desired ouput value. 
+which intervene in the computation of contact constraints and their residuals, can be coupled to generate the desired output value. 
 Therefore, if postprocessing of mortar quantities is required, nodal mortar auxiliary kernels can be employed. 
 Objects inheriting from `MortarNodalAuxKernel` allow for said operations on the mortar lower-dimensional domains featuring similar
 functionality to other nodal auxiliary kernels, including the possibility of computing quantities in an

@@ -13,7 +13,7 @@ where $\vec{u}^\ast$ is the test function, $\vec{u}$ is the finite element solut
 $[\![ \cdot ]\!]$ and $\{\!\!\{ \cdot \}\!\!\}$ are the jump and average of the enclosed quantity on the internal sides.
 
 $\vec{n}(x)$ is a unit norm defined on internal sides denoted by $\Gamma_\text{int}$.
-$\epsilon$ can be 1, -1, and 0, corresponding symmetric, asymetric and incomplete interior penalty methods respectively.
+$\epsilon$ can be 1, -1, and 0, corresponding symmetric, asymmetric and incomplete interior penalty methods respectively.
 The penalty coefficients $\kappa$ are evaluated with the following formulation:
 \begin{equation}
 \vec{\kappa} = \sigma \{\!\!\{ p^2\frac{\vec{D}}{h_\bot} \}\!\!\}, \quad  x\in\Gamma_\text{int},

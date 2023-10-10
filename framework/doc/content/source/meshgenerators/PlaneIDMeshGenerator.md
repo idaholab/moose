@@ -12,11 +12,11 @@ The `PlaneIDMeshGenerator` takes a mesh object and its axial layer structure as 
 This axial plane structure given in [!param](/Mesh/PlaneIDMeshGenerator/plane_coordinates) contains a list of coordinates defining each plane from bottom to top.
 If there are N planes, N+1 coordinate points should be defined here.
 
-If each axial plane is uniformly sub-divided into mutiple layers during the extrusion, distinct extra IDs can be optionally assigned to individual layers in each plane.
+If each axial plane is uniformly sub-divided into multiple layers during the extrusion, distinct extra IDs can be optionally assigned to individual layers in each plane.
 [!param](/Mesh/PlaneIDMeshGenerator/num_ids_per_plane) defines the number of unique IDs in each plane defined in [!param](/Mesh/PlaneIDMeshGenerator/plane_coordinates).
 
 Note that this generator only works for extruded geometries where the concept of axial layer is valid.
-The axis of plane can be specfied using [!param](/Mesh/PlaneIDMeshGenerator/plane_axis).
+The axis of plane can be specified using [!param](/Mesh/PlaneIDMeshGenerator/plane_axis).
 
 ## Example Syntax
 
