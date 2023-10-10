@@ -101,8 +101,8 @@ NSFVPump::NSFVPump(const InputParameters & parameters)
         // Scaling pressure head
         const auto flow_rate_scaling =
             _flow_rate_scaling_bool ? std::sqrt(std::abs(_flow_rate) / _flow_rate_rated) : 1.0;
-        auto rotation_speed_scaling = std::abs(_rotation_speed) / _rotation_speed_rated;
-        auto pressure_head =
+        const auto rotation_speed_scaling = std::abs(_rotation_speed) / _rotation_speed_rated;
+        const auto pressure_head =
             rated_pressure_head * std::pow(flow_rate_scaling * rotation_speed_scaling, 4.0 / 3.0);
 
         // Computing effective volume force
