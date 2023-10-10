@@ -123,6 +123,20 @@
     issues = '#18768'
   []
 
+  [./exodus_discontinuous_iga_1d_test]
+    # Make this an XMLDiff once #21449 is resolved
+    type = Exodiff
+    input = '1d_discontinuous_iga.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = '1d_discontinuous_iga_out.e'
+
+    requirement = 'The system shall have the ability to find continuous PDE solutions on discontinuous Bezier-Bernstein edges from IsoGeometric Analysis meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
   [./exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
