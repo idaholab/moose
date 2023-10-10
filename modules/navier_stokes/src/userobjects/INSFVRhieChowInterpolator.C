@@ -109,10 +109,11 @@ INSFVRhieChowInterpolator::validParams()
           "continuity equations are located.");
       params.addParam<bool>(
           "correct_volumetric_force", false, "Flag to activate volume force corrections.");
-      MooseEnum averaging_method("force-consistent pressure-consistent", "force-consistent");
+      MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
+                                               "force-consistent");
       params.addParam<MooseEnum>(
           "volume_force_correction_method",
-          averaging_method,
+          volume_force_correction_method,
           "The method used for correcting the Rhie-Chow coefficients for a volume force.");
       params.addParam<std::vector<MooseFunctorName>>(
           "volumetric_force_functors",
