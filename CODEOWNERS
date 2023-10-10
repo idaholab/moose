@@ -56,8 +56,9 @@
 /modules/functional_expansion_tools @lindsayad
 /modules/heat_conduction @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud
-/modules/phase_field @dschwen
 /modules/optimization @zachmprince @dschwen
+/modules/phase_field @dschwen
+/modules/porous_flow @cpgr
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel @lindsayad
 /modules/reactor @GiudGiud @loganharbour @roystgnr
