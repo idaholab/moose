@@ -91,10 +91,10 @@ protected:
   const unsigned int _vel_sys_number;
 
   using T::_ad_q_point;
+  using T::_advected_mesh_strong_residual;
   using T::_advective_strong_residual;
   using T::_assembly;
   using T::_boussinesq_strong_residual;
-  using T::_convected_mesh_strong_residual;
   using T::_coord_sys;
   using T::_coupled_force_strong_residual;
   using T::_current_elem;
@@ -109,8 +109,8 @@ protected:
   using T::_grad_p;
   using T::_grad_velocity;
   using T::_gravity_strong_residual;
+  using T::_has_advected_mesh;
   using T::_has_boussinesq;
-  using T::_has_convected_mesh;
   using T::_has_coupled_force;
   using T::_has_gravity;
   using T::_has_transient;
@@ -351,8 +351,8 @@ INSADTauMaterialTempl<T>::computeQpProperties()
   if (_has_boussinesq)
     _momentum_strong_residual[_qp] += _boussinesq_strong_residual[_qp];
 
-  if (_has_convected_mesh)
-    _momentum_strong_residual[_qp] += _convected_mesh_strong_residual[_qp];
+  if (_has_advected_mesh)
+    _momentum_strong_residual[_qp] += _advected_mesh_strong_residual[_qp];
 
   if (_has_coupled_force)
     _momentum_strong_residual[_qp] += _coupled_force_strong_residual[_qp];

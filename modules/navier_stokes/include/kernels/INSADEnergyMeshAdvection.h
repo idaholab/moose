@@ -25,7 +25,7 @@ public:
 protected:
   virtual ADReal precomputeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _temperature_convected_mesh_strong_residual;
+  const ADMaterialProperty<Real> & _temperature_advected_mesh_strong_residual;
 
   friend class INSADMomentumMeshAdvection;
 };
