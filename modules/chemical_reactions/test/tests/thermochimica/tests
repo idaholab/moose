@@ -25,6 +25,18 @@
     required_submodule = 'contrib/thermochimica'
   []
 
+  [MoRuPd]
+    type = Exodiff
+    input = MoRuPd.i
+    exodiff = MoRuPd_out.e
+    design = 'ThermochimicaNodalData.md'
+    issues = '#25661'
+    requirement = 'The system shall be able to use graciously handle a missing element in Thermochimica'
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
   [csv_ic]
     type = Exodiff
     input = csv_ic.i

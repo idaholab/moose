@@ -29,8 +29,7 @@
     input = 'multi_update_var_test.i'
     exodiff = 'out_multi_var.e'
     issues = '#2099'
-    requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
-                  "variables."
+    requirement = "Auxiliary kernel objects shall be capable of writing to multiple coupled variables."
   []
   [multi_update_error]
     type = RunException
@@ -90,6 +89,14 @@
     issues = '#22563'
     allow_deprecated = true
     requirement = "The writing to auxiliary variables shall error out if a constant value is passed in as variable name."
+  []
+
+  [multi_update_fv_test]
+    type = 'Exodiff'
+    input = 'multi_update_fv_test.i'
+    exodiff = 'out_multi_var_fv.e'
+    issues = '#25661'
+    requirement = "Auxiliary kernel objects shall be capable of writing to finite volume coupled variables."
   []
 
   [multi_update_elem_test]

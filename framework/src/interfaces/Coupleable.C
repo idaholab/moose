@@ -847,10 +847,10 @@ Coupleable::coupledArrayValues(const std::string & var_name) const
   return coupledVectorHelper<const ArrayVariableValue *>(var_name, func);
 }
 
-MooseVariable &
+MooseWritableVariable &
 Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
 {
-  auto * var = dynamic_cast<MooseVariable *>(getVar(var_name, comp));
+  auto * var = getVarHelper<MooseWritableVariable>(var_name, comp);
 
   const auto * aux = dynamic_cast<const AuxKernel *>(this);
   const auto * euo = dynamic_cast<const ElementUserObject *>(this);
@@ -920,7 +920,7 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
 }
 
 void
-Coupleable::checkWritableVar(MooseVariable * var)
+Coupleable::checkWritableVar(MooseWritableVariable * var)
 {
   // check block restrictions for compatibility
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);

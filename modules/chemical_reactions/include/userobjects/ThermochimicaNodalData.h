@@ -92,19 +92,19 @@ protected:
   ///@}
 
   /// Writable phase amount variables
-  std::vector<MooseVariable *> _ph;
+  std::vector<MooseWritableVariable *> _ph;
 
   /// Writable species amount variables
-  std::vector<MooseVariable *> _sp;
+  std::vector<MooseWritableVariable *> _sp;
 
   /// Writable vapour pressures for each element
-  std::vector<MooseVariable *> _vp;
+  std::vector<MooseWritableVariable *> _vp;
 
   /// Writable chemical potential variables for each element
-  std::vector<MooseVariable *> _el_pot;
+  std::vector<MooseWritableVariable *> _el_pot;
 
   /// Writable variable for molar amounts of each element in specified phase
-  std::vector<MooseVariable *> _el_ph;
+  std::vector<MooseWritableVariable *> _el_ph;
 
   /// Mass unit for output species
   const enum class OutputMassUnit { MOLES, FRACTION } _output_mass_unit;
