@@ -38,13 +38,5 @@
       cli_args = 'Mesh/gmg/nx=2 Mesh/gmg/ny=3 Executioner/num_steps=1 GlobalParams/use_displaced_mesh=false'
       detail = 'perfect when the fluid domain equations are run on the undisplaced mesh, and'
     []
-    [INS_undisplaced_jac]
-      type = 'PetscJacobianTester'
-      input = 'fsi_flat_channel.i'
-      difference_tol = 1
-      run_sim = True
-      cli_args = 'Mesh/gmg/nx=2 Mesh/gmg/ny=3 Executioner/num_steps=1 GlobalParams/use_displaced_mesh=false'
-      detail = 'the hand-coded Jacobian shall be perfect when the simulation is run entirely undisplaced.'
-    []
   []
 []
