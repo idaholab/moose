@@ -78,7 +78,7 @@ FEProblemSolve::validParams()
   params.addParam<unsigned int>(
       "n_max_nonlinear_pingpong",
       100,
-      "The maximum number of times the non linear residual can ping pong "
+      "The maximum number of times the nonlinear residual can ping pong "
       "before requesting halting the current evaluation and requesting timestep cut");
   params.addParam<bool>(
       "snesmf_reuse_base",

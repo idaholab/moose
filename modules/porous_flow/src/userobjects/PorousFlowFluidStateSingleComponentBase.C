@@ -13,12 +13,17 @@ InputParameters
 PorousFlowFluidStateSingleComponentBase::validParams()
 {
   InputParameters params = PorousFlowFluidStateBase::validParams();
+  params.addParam<unsigned int>("fluid_component", 0, "The fluid component number");
   params.addClassDescription("Base class for single component fluid state classes");
   return params;
 }
 
 PorousFlowFluidStateSingleComponentBase::PorousFlowFluidStateSingleComponentBase(
     const InputParameters & parameters)
-  : PorousFlowFluidStateBase(parameters), _pidx(0), _hidx(1), dT(1.0e-6)
+  : PorousFlowFluidStateBase(parameters),
+    _fluid_component(getParam<unsigned int>("fluid_component")),
+    _pidx(0),
+    _hidx(1),
+    _dT(1.0e-6)
 {
 }

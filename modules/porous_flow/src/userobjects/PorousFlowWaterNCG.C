@@ -70,8 +70,30 @@ PorousFlowWaterNCG::fluidStateName() const
 void
 PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
                                              Real temperature,
-                                             Real /* Xnacl */,
+                                             Real Xnacl,
                                              Real Z,
+                                             unsigned int qp,
+                                             std::vector<FluidStateProperties> & fsp) const
+{
+  // Make AD versions of primary variables then call AD thermophysicalProperties()
+  ADReal p = pressure;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+  ADReal T = temperature;
+  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
+  ADReal Zncg = Z;
+  Moose::derivInsert(Zncg.derivatives(), _Zidx, 1.0);
+  // X is not used, but needed for consistency with PorousFlowFluidState interface
+  ADReal X = Xnacl;
+  Moose::derivInsert(X.derivatives(), _Xidx, 1.0);
+
+  thermophysicalProperties(p, T, X, Zncg, qp, fsp);
+}
+
+void
+PorousFlowWaterNCG::thermophysicalProperties(const ADReal & pressure,
+                                             const ADReal & temperature,
+                                             const ADReal & /* Xnacl */,
+                                             const ADReal & Z,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
@@ -79,21 +101,13 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Check whether the input temperature is within the region of validity
-  checkVariables(temperature);
-
-  // AD versions of primary variables
-  DualReal p = pressure;
-  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
-  DualReal T = temperature;
-  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
-  DualReal Zncg = Z;
-  Moose::derivInsert(Zncg.derivatives(), _Zidx, 1.0);
+  checkVariables(temperature.value());
 
   // Clear all of the FluidStateProperties data
   clearFluidStateProperties(fsp);
 
   FluidStatePhaseEnum phase_state;
-  massFractions(p, T, Zncg, phase_state, fsp);
+  massFractions(pressure, temperature, Z, phase_state, fsp);
 
   switch (phase_state)
   {
@@ -103,7 +117,7 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
       gas.saturation = 1.0;
 
       // Calculate gas properties
-      gasProperties(p, T, fsp);
+      gasProperties(pressure, temperature, fsp);
 
       break;
     }
@@ -111,8 +125,8 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::LIQUID:
     {
       // Calculate the liquid properties
-      const DualReal liquid_pressure = p - _pc.capillaryPressure(1.0, qp);
-      liquidProperties(liquid_pressure, T, fsp);
+      const ADReal liquid_pressure = pressure - _pc.capillaryPressure(1.0, qp);
+      liquidProperties(liquid_pressure, temperature, fsp);
 
       break;
     }
@@ -120,7 +134,7 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::TWOPHASE:
     {
       // Calculate the gas and liquid properties in the two phase region
-      twoPhaseProperties(p, T, Zncg, qp, fsp);
+      twoPhaseProperties(pressure, temperature, Z, qp, fsp);
 
       break;
     }
@@ -130,14 +144,14 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
   liquid.saturation = 1.0 - gas.saturation;
 
   // Save pressures to FluidStateProperties object
-  gas.pressure = p;
-  liquid.pressure = p - _pc.capillaryPressure(liquid.saturation, qp);
+  gas.pressure = pressure;
+  liquid.pressure = pressure - _pc.capillaryPressure(liquid.saturation, qp);
 }
 
 void
-PorousFlowWaterNCG::massFractions(const DualReal & pressure,
-                                  const DualReal & temperature,
-                                  const DualReal & Z,
+PorousFlowWaterNCG::massFractions(const ADReal & pressure,
+                                  const ADReal & temperature,
+                                  const ADReal & Z,
                                   FluidStatePhaseEnum & phase_state,
                                   std::vector<FluidStateProperties> & fsp) const
 {
@@ -145,10 +159,10 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Equilibrium mass fraction of NCG in liquid and H2O in gas phases
-  DualReal Xncg, Yh2o;
+  ADReal Xncg, Yh2o;
   equilibriumMassFractions(pressure, temperature, Xncg, Yh2o);
 
-  DualReal Yncg = 1.0 - Yh2o;
+  ADReal Yncg = 1.0 - Yh2o;
 
   // Determine which phases are present based on the value of Z
   phaseState(Z.value(), Xncg.value(), Yncg.value(), phase_state);
@@ -156,7 +170,7 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
   // The equilibrium mass fractions calculated above are only correct in the two phase
   // state. If only liquid or gas phases are present, the mass fractions are given by
   // the total mass fraction Z.
-  DualReal Xh2o = 0.0;
+  ADReal Xh2o = 0.0;
 
   switch (phase_state)
   {
@@ -166,9 +180,6 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
       Yncg = 0.0;
       Xh2o = 1.0 - Z;
       Yh2o = 0.0;
-      Moose::derivInsert(Xncg.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Xncg.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Xncg.derivatives(), _Zidx, 1.0);
       break;
     }
 
@@ -177,9 +188,6 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
       Xncg = 0.0;
       Yncg = Z;
       Yh2o = 1.0 - Z;
-      Moose::derivInsert(Yncg.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Yncg.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Yncg.derivatives(), _Zidx, 1.0);
       break;
     }
 
@@ -199,30 +207,30 @@ PorousFlowWaterNCG::massFractions(const DualReal & pressure,
 }
 
 void
-PorousFlowWaterNCG::gasProperties(const DualReal & pressure,
-                                  const DualReal & temperature,
+PorousFlowWaterNCG::gasProperties(const ADReal & pressure,
+                                  const ADReal & temperature,
                                   std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  const DualReal psat = _water_fp.vaporPressure(temperature);
+  const ADReal psat = _water_fp.vaporPressure(temperature);
 
-  const DualReal Yncg = gas.mass_fraction[_gas_fluid_component];
-  const DualReal Xncg = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Yncg = gas.mass_fraction[_gas_fluid_component];
+  const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
 
   // NCG density, viscosity and enthalpy calculated using partial pressure
   // Yncg * gas_poreressure (Dalton's law)
-  DualReal ncg_density, ncg_viscosity;
+  ADReal ncg_density, ncg_viscosity;
   _ncg_fp.rho_mu_from_p_T(Yncg * pressure, temperature, ncg_density, ncg_viscosity);
-  DualReal ncg_enthalpy = _ncg_fp.h_from_p_T(Yncg * pressure, temperature);
+  ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(Yncg * pressure, temperature);
 
   // Vapor density, viscosity and enthalpy calculated using partial pressure
   // X1 * psat (Raoult's law)
-  DualReal vapor_density, vapor_viscosity;
+  ADReal vapor_density, vapor_viscosity;
 
   _water_fp.rho_mu_from_p_T((1.0 - Xncg) * psat, temperature, vapor_density, vapor_viscosity);
-  DualReal vapor_enthalpy = _water_fp.h_from_p_T((1.0 - Xncg) * psat, temperature);
+  ADReal vapor_enthalpy = _water_fp.h_from_p_T((1.0 - Xncg) * psat, temperature);
 
   // Density is just the sum of individual component densities
   gas.density = ncg_density + vapor_density;
@@ -239,8 +247,8 @@ PorousFlowWaterNCG::gasProperties(const DualReal & pressure,
 }
 
 void
-PorousFlowWaterNCG::liquidProperties(const DualReal & pressure,
-                                     const DualReal & temperature,
+PorousFlowWaterNCG::liquidProperties(const ADReal & pressure,
+                                     const ADReal & temperature,
                                      std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
@@ -249,19 +257,19 @@ PorousFlowWaterNCG::liquidProperties(const DualReal & pressure,
   // liquid region, assuming they are not affected by the presence of dissolved
   // NCG. Note: the (small) contribution due to derivative of capillary pressure
   // wrt pressure (using the chain rule) is not implemented.
-  DualReal liquid_density, liquid_viscosity;
+  ADReal liquid_density, liquid_viscosity;
   _water_fp.rho_mu_from_p_T(pressure, temperature, liquid_density, liquid_viscosity);
 
   liquid.density = liquid_density;
   liquid.viscosity = liquid_viscosity;
 
   // Enthalpy does include a contribution due to the enthalpy of dissolution
-  const DualReal hdis = enthalpyOfDissolution(temperature);
+  const ADReal hdis = enthalpyOfDissolution(temperature);
 
-  const DualReal water_enthalpy = _water_fp.h_from_p_T(pressure, temperature);
-  const DualReal ncg_enthalpy = _ncg_fp.h_from_p_T(pressure, temperature);
+  const ADReal water_enthalpy = _water_fp.h_from_p_T(pressure, temperature);
+  const ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(pressure, temperature);
 
-  const DualReal Xncg = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
   liquid.enthalpy = (1.0 - Xncg) * water_enthalpy + Xncg * (ncg_enthalpy + hdis);
 
   //  Internal energy of the liquid phase (e = h - pv)
@@ -269,36 +277,36 @@ PorousFlowWaterNCG::liquidProperties(const DualReal & pressure,
   liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
-DualReal
-PorousFlowWaterNCG::liquidDensity(const DualReal & pressure, const DualReal & temperature) const
+ADReal
+PorousFlowWaterNCG::liquidDensity(const ADReal & pressure, const ADReal & temperature) const
 {
   return _water_fp.rho_from_p_T(pressure, temperature);
 }
 
-DualReal
-PorousFlowWaterNCG::gasDensity(const DualReal & pressure,
-                               const DualReal & temperature,
+ADReal
+PorousFlowWaterNCG::gasDensity(const ADReal & pressure,
+                               const ADReal & temperature,
                                std::vector<FluidStateProperties> & fsp) const
 {
   auto & liquid = fsp[_aqueous_phase_number];
   auto & gas = fsp[_gas_phase_number];
 
-  DualReal psat = _water_fp.vaporPressure(temperature);
+  ADReal psat = _water_fp.vaporPressure(temperature);
 
-  const DualReal Yncg = gas.mass_fraction[_gas_fluid_component];
-  const DualReal Xncg = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Yncg = gas.mass_fraction[_gas_fluid_component];
+  const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
 
-  DualReal ncg_density = _ncg_fp.rho_from_p_T(Yncg * pressure, temperature);
-  DualReal vapor_density = _water_fp.rho_from_p_T((1.0 - Xncg) * psat, temperature);
+  ADReal ncg_density = _ncg_fp.rho_from_p_T(Yncg * pressure, temperature);
+  ADReal vapor_density = _water_fp.rho_from_p_T((1.0 - Xncg) * psat, temperature);
 
   // Density is just the sum of individual component densities
   return ncg_density + vapor_density;
 }
 
-DualReal
-PorousFlowWaterNCG::saturation(const DualReal & pressure,
-                               const DualReal & temperature,
-                               const DualReal & Z,
+ADReal
+PorousFlowWaterNCG::saturation(const ADReal & pressure,
+                               const ADReal & temperature,
+                               const ADReal & Z,
                                std::vector<FluidStateProperties> & fsp) const
 {
   auto & gas = fsp[_gas_phase_number];
@@ -311,28 +319,28 @@ PorousFlowWaterNCG::saturation(const DualReal & pressure,
   // at the cost of increased computational expense
 
   // The gas and liquid densities
-  const DualReal gas_density = gasDensity(pressure, temperature, fsp);
-  const DualReal liquid_density = liquidDensity(pressure, temperature);
+  const ADReal gas_density = gasDensity(pressure, temperature, fsp);
+  const ADReal liquid_density = liquidDensity(pressure, temperature);
 
   // Set mass equilibrium constants used in the calculation of vapor mass fraction
-  const DualReal Xncg = liquid.mass_fraction[_gas_fluid_component];
-  const DualReal Yncg = gas.mass_fraction[_gas_fluid_component];
+  const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Yncg = gas.mass_fraction[_gas_fluid_component];
 
-  const DualReal K0 = Yncg / Xncg;
-  const DualReal K1 = (1.0 - Yncg) / (1.0 - Xncg);
-  const DualReal vapor_mass_fraction = vaporMassFraction(Z, K0, K1);
+  const ADReal K0 = Yncg / Xncg;
+  const ADReal K1 = (1.0 - Yncg) / (1.0 - Xncg);
+  const ADReal vapor_mass_fraction = vaporMassFraction(Z, K0, K1);
 
   // The gas saturation in the two phase case
-  const DualReal saturation = vapor_mass_fraction * liquid_density /
-                              (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
+  const ADReal saturation = vapor_mass_fraction * liquid_density /
+                            (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
 
   return saturation;
 }
 
 void
-PorousFlowWaterNCG::twoPhaseProperties(const DualReal & pressure,
-                                       const DualReal & temperature,
-                                       const DualReal & Z,
+PorousFlowWaterNCG::twoPhaseProperties(const ADReal & pressure,
+                                       const ADReal & temperature,
+                                       const ADReal & Z,
                                        unsigned int qp,
                                        std::vector<FluidStateProperties> & fsp) const
 {
@@ -345,36 +353,36 @@ PorousFlowWaterNCG::twoPhaseProperties(const DualReal & pressure,
   gas.saturation = saturation(pressure, temperature, Z, fsp);
 
   // The liquid pressure and properties can now be calculated
-  const DualReal liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
+  const ADReal liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
   liquidProperties(liquid_pressure, temperature, fsp);
 }
 
 void
-PorousFlowWaterNCG::equilibriumMassFractions(const DualReal & pressure,
-                                             const DualReal & temperature,
-                                             DualReal & Xncg,
-                                             DualReal & Yh2o) const
+PorousFlowWaterNCG::equilibriumMassFractions(const ADReal & pressure,
+                                             const ADReal & temperature,
+                                             ADReal & Xncg,
+                                             ADReal & Yh2o) const
 {
   // Equilibrium constants for each component (Henry's law for the NCG
   // component, and Raoult's law for water).
-  const DualReal Kh = _water97_fp.henryConstant(temperature, _ncg_henry);
-  const DualReal psat = _water_fp.vaporPressure(temperature);
+  const ADReal Kh = _water97_fp.henryConstant(temperature, _ncg_henry);
+  const ADReal psat = _water_fp.vaporPressure(temperature);
 
-  const DualReal Kncg = Kh / pressure;
-  const DualReal Kh2o = psat / pressure;
+  const ADReal Kncg = Kh / pressure;
+  const ADReal Kh2o = psat / pressure;
 
   // The mole fractions for the NCG component in the two component
   // case can be expressed in terms of the equilibrium constants only
-  const DualReal xncg = (1.0 - Kh2o) / (Kncg - Kh2o);
-  const DualReal yncg = Kncg * xncg;
+  const ADReal xncg = (1.0 - Kh2o) / (Kncg - Kh2o);
+  const ADReal yncg = Kncg * xncg;
 
   // Convert mole fractions to mass fractions
   Xncg = moleFractionToMassFraction(xncg);
   Yh2o = 1.0 - moleFractionToMassFraction(yncg);
 }
 
-DualReal
-PorousFlowWaterNCG::moleFractionToMassFraction(const DualReal & xmol) const
+ADReal
+PorousFlowWaterNCG::moleFractionToMassFraction(const ADReal & xmol) const
 {
   return xmol * _Mncg / (xmol * _Mncg + (1.0 - xmol) * _Mh2o);
 }
@@ -389,19 +397,19 @@ PorousFlowWaterNCG::checkVariables(Real temperature) const
                    " is outside range 273.16 K <= T <= 647.096 K");
 }
 
-DualReal
-PorousFlowWaterNCG::enthalpyOfDissolution(const DualReal & temperature) const
+ADReal
+PorousFlowWaterNCG::enthalpyOfDissolution(const ADReal & temperature) const
 {
   // Henry's constant
-  const DualReal Kh = _water97_fp.henryConstant(temperature, _ncg_henry);
+  const ADReal Kh = _water97_fp.henryConstant(temperature, _ncg_henry);
 
-  DualReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mncg;
+  ADReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mncg;
 
   // Derivative of enthalpy of dissolution wrt temperature requires the second derivative of
   // Henry's constant wrt temperature. For simplicity, approximate this numerically
   const Real dT = temperature.value() * 1.0e-8;
-  const DualReal t2 = temperature + dT;
-  const DualReal Kh2 = _water97_fp.henryConstant(t2, _ncg_henry);
+  const ADReal t2 = temperature + dT;
+  const ADReal Kh2 = _water97_fp.henryConstant(t2, _ncg_henry);
 
   const Real dhdis_dT =
       (-_R * t2 * t2 * Kh2.derivatives()[_Tidx] / Kh2 / _Mncg - hdis).value() / dT;
@@ -419,8 +427,8 @@ PorousFlowWaterNCG::totalMassFraction(
   checkVariables(temperature);
 
   // As we do not require derivatives, we can simply ignore their initialisation
-  const DualReal p = pressure;
-  const DualReal T = temperature;
+  const ADReal p = pressure;
+  const ADReal T = temperature;
 
   // FluidStateProperties data structure
   std::vector<FluidStateProperties> fsp(_num_phases, FluidStateProperties(_num_components));
@@ -428,11 +436,11 @@ PorousFlowWaterNCG::totalMassFraction(
   auto & gas = fsp[_gas_phase_number];
 
   // Calculate equilibrium mass fractions in the two-phase state
-  DualReal Xncg, Yh2o;
+  ADReal Xncg, Yh2o;
   equilibriumMassFractions(p, T, Xncg, Yh2o);
 
   // Save the mass fractions in the FluidStateMassFractions object to calculate gas density
-  const DualReal Yncg = 1.0 - Yh2o;
+  const ADReal Yncg = 1.0 - Yh2o;
   liquid.mass_fraction[_aqueous_fluid_component] = 1.0 - Xncg;
   liquid.mass_fraction[_gas_fluid_component] = Xncg;
   gas.mass_fraction[_aqueous_fluid_component] = Yh2o;
@@ -442,7 +450,7 @@ PorousFlowWaterNCG::totalMassFraction(
   const Real gas_density = gasDensity(p, T, fsp).value();
 
   // Liquid density
-  const DualReal liquid_pressure = p - _pc.capillaryPressure(1.0 - saturation, qp);
+  const ADReal liquid_pressure = p - _pc.capillaryPressure(1.0 - saturation, qp);
   const Real liquid_density = liquidDensity(liquid_pressure, T).value();
 
   // The total mass fraction of ncg (Z) can now be calculated

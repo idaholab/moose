@@ -37,9 +37,9 @@ PorousFlowVariableBaseTempl<is_ad>::PorousFlowVariableBaseTempl(const InputParam
                                                 "dPorousFlow_porepressure_nodal_dvar")
                                           : &declareProperty<std::vector<std::vector<Real>>>(
                                                 "dPorousFlow_porepressure_qp_dvar")),
-    _gradp_qp((_nodal_material) ? nullptr
-                                : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
-                                      "PorousFlow_grad_porepressure_qp")),
+    _gradp_qp(_nodal_material ? nullptr
+                              : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
+                                    "PorousFlow_grad_porepressure_qp")),
     _dgradp_qp_dgradv((_nodal_material || is_ad)
                           ? nullptr
                           : &declareProperty<std::vector<std::vector<Real>>>(
@@ -58,9 +58,9 @@ PorousFlowVariableBaseTempl<is_ad>::PorousFlowVariableBaseTempl(const InputParam
         : _nodal_material
             ? &declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar")
             : &declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar")),
-    _grads_qp((_nodal_material) ? nullptr
-                                : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
-                                      "PorousFlow_grad_saturation_qp")),
+    _grads_qp(_nodal_material ? nullptr
+                              : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
+                                    "PorousFlow_grad_saturation_qp")),
     _dgrads_qp_dgradv((_nodal_material || is_ad) ? nullptr
                                                  : &declareProperty<std::vector<std::vector<Real>>>(
                                                        "dPorousFlow_grad_saturation_qp_dgradvar")),
