@@ -626,6 +626,15 @@ public:
     return _new_to_deprecated_coupled_vars;
   }
 
+  /// Return whether a parameter has a range check
+  bool isRangeChecked(const std::string & param_name) const;
+
+  /// Return the range check function for any parameter (empty string if it is not range checked)
+  std::string rangeCheckedFunction(const std::string & name) const;
+
+  /// Return whether a parameter has a default
+  bool hasDefault(const std::string & param_name) const;
+
   /**
    * Return whether or not the coupled variable exists
    * @param coupling_name The name of the coupled variable to test for
@@ -938,6 +947,18 @@ public:
    */
   template <typename T>
   bool have_parameter(std::string_view name) const;
+
+  /**
+   * A routine to transfer a parameter from one class' validParams to another
+   * @param source_param The parameters list holding the param we would like to transfer
+   * @param name The name of the parameter to transfer
+   * @param new_description A new description of the parameter. If unspecified, uses the
+   * source_params'
+   */
+  template <typename T>
+  void transferParam(const InputParameters & source_param,
+                     const std::string & name,
+                     const std::string & new_description = "");
 
   /**
    * Return all the aliased names associated with \p param_name. The returned container will always
@@ -1829,4 +1850,83 @@ InputParameters::have_parameter(std::string_view name_in) const
   const auto name = checkForRename(std::string(name_in));
 
   return Parameters::have_parameter<T>(name);
+}
+
+template <typename T>
+void
+InputParameters::transferParam(const InputParameters & source_params,
+                               const std::string & name_in,
+                               const std::string & new_description)
+{
+  const auto name = source_params.checkForRename(std::string(name_in));
+  if (!source_params.have_parameter<T>(name) && !source_params.hasCoupledValue(name))
+    mooseError(
+        "The '",
+        name_in,
+        "' parameter could not be transferred because it does not exist in the source parameters");
+  if (name != name_in)
+    mooseWarning("The transferred parameter " + name_in + " is deprecated in favor of " + name +
+                 " in the source parameters. The new name should likely be used for the parameter "
+                 "transfer instead.");
+  const std::string description =
+      new_description.empty() ? source_params.getDescription(name) : new_description;
+
+  if (source_params.isParamRequired(name))
+  {
+    // Use the name_in that was specified in the transfer
+    // Check for a variable parameter
+    if (source_params.hasCoupledValue(name))
+      addRequiredCoupledVar(name_in, description);
+    // Enums parameters have a default list of options
+    else if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
+      addRequiredParam<T>(name_in, source_params.get<T>(name), description);
+    else if (source_params.isRangeChecked(name))
+      addRequiredRangeCheckedParam<T>(
+          name_in, source_params.rangeCheckedFunction(name), description);
+    else
+      addRequiredParam<T>(name_in, description);
+  }
+  else
+  {
+    // Check for a variable parameter
+    if (source_params.hasCoupledValue(name))
+    {
+      if (!source_params.hasDefaultCoupledValue(name))
+        addCoupledVar(name_in, description);
+      else if (source_params.numberDefaultCoupledValues(name) == 1)
+        addCoupledVar(name_in, source_params.defaultCoupledValue(name), description);
+      else
+      {
+        std::vector<Real> coupled_values;
+        for (const auto i : make_range(source_params.numberDefaultCoupledValues(name)))
+          coupled_values.push_back(source_params.defaultCoupledValue(name, i));
+        addCoupledVar(name_in, coupled_values, description);
+      }
+    }
+    else if (source_params.isRangeChecked(name))
+    {
+      if (source_params.hasDefault(name))
+        addRangeCheckedParam<T>(name_in,
+                                source_params.get<T>(name),
+                                source_params.rangeCheckedFunction(name),
+                                description);
+      else
+        addRangeCheckedParam<T>(name_in, source_params.rangeCheckedFunction(name), description);
+    }
+    else if constexpr (std::is_same_v<MooseEnum, T> || std::is_same_v<MultiMooseEnum, T>)
+      addParam<T>(name_in, source_params.get<T>(name_in), description);
+    else
+    {
+      if (source_params.hasDefault(name))
+        addParam<T>(name_in, source_params.get<T>(name), description);
+      else
+        addParam<T>(name_in, description);
+    }
+  }
+
+  // Copy other attributes
+  if (source_params.isPrivate(name))
+    _params[name_in]._is_private = true;
+  if (source_params.isControllable(name))
+    _params[name_in]._controllable = true;
 }
