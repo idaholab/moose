@@ -43,6 +43,10 @@ public:
 
   bool hasBlocks(SubdomainID sub_id) const override;
 
+  /**
+   * Evaluate the face functor using a FaceInfo argument.
+   * @param fi The object containing the face information
+   */
   ValueType evaluate(const FaceInfo * const fi) const;
 
 private:

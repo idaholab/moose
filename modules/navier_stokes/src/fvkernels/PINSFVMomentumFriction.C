@@ -71,8 +71,6 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
   const auto elem_arg = makeElemArg(&elem);
   const auto state = determineState();
 
-  // ADReal friction_term = computeFrictionWCoefficient(elem_arg, state);
-
   const auto coefficient =
       computeFrictionWCoefficient(elem_arg, state) * _assembly.elementVolume(&elem);
 

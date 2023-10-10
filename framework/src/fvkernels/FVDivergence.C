@@ -15,18 +15,15 @@ InputParameters
 FVDivergence::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addClassDescription(
-      "Computes the residual coming from the divergence of a vector field"
-      "that can be represented as a functor. Furthermore, we assume that this vector field does "
-      "not depend on the solution, therefore the derivatives are not propagated and this term can "
-      "only be used as a source term on a right hand side.");
+  params.addClassDescription("Computes the residual coming from the divergence of a vector field"
+                             "that can be represented as a functor.");
   params.addRequiredParam<MooseFunctorName>(
       "vector_field", "The name of the vector field whose divergence is added to the residual.");
   return params;
 }
 
 FVDivergence::FVDivergence(const InputParameters & params)
-  : FVFluxKernel(params), _vector_field(getFunctor<RealVectorValue>("vector_field"))
+  : FVFluxKernel(params), _vector_field(getFunctor<ADRealVectorValue>("vector_field"))
 {
 }
 

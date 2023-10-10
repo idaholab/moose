@@ -18,9 +18,7 @@
 ///     - Discretized form: $\sum_f \vec{v}_f \vec{S}_f$
 ///
 /// where $\vec{v}$ is a vector field (described by a Moose Functor)
-/// which is independent of the variables. Derivatives in the AD system are not
-/// propagated in this class. Arithmetic weighted averaging is used to
-/// compute $\vec{v}$ on the face.
+/// which is independent of the variables.
 class FVDivergence : public FVFluxKernel
 {
 public:
@@ -31,5 +29,8 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// The vector field whose divergence is added to the residual
-  const Moose::Functor<RealVectorValue> & _vector_field;
+  const Moose::Functor<ADRealVectorValue> & _vector_field;
+
+private:
+  bool _propagate_derivatives;
 };

@@ -205,7 +205,7 @@ protected:
   /// Reference to the nonlinear system corresponding to the pressure equation
   NonlinearSystemBase & _pressure_system;
 
-  /// Pointer to the nonlinear system corresponding to the energy equation
+  /// Pointer to the nonlinear system corresponding to the fluid energy equation
   NonlinearSystemBase * _energy_system;
 
   /// Pointer to the nonlinear system corresponding to the solid energy equation

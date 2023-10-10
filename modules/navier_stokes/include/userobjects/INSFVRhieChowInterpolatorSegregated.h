@@ -124,9 +124,9 @@ protected:
   /// Numbers of the momentum system(s)
   std::vector<unsigned int> _momentum_system_numbers;
 
-  /// Pointers to the implicit system(s) to the momentum system(s)
+  /// Pointers to the momentum equation implicit system(s)
   std::vector<NonlinearImplicitSystem *> _momentum_implicit_systems;
 
-  /// Residual tag corresponding to the pressure graadient contribution
+  /// Residual tag corresponding to the pressure gradient contribution
   TagID _pressure_gradient_tag;
 };

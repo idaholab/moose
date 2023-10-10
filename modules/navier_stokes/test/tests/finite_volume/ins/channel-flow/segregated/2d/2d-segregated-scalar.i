@@ -201,12 +201,6 @@ pressure_tag = "pressure_grad"
     variable = pressure
     function = 1.4
   []
-  [zero-grad-pressure]
-    type = FVFunctionNeumannBC
-    variable = pressure
-    boundary = 'top left bottom'
-    function = 0.0
-  []
   [inlet_scalar_1]
     type = FVDirichletBC
     boundary = 'left'
@@ -272,8 +266,15 @@ pressure_tag = "pressure_grad"
 
 [Outputs]
   exodus = true
-  csv = false
-  perf_graph = false
-  print_nonlinear_residuals = false
-  print_linear_residuals = true
+[]
+
+[Postprocessors]
+  [out1]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_quantity = 'scalar_1'
+    boundary = right
+    execute_on = FINAL
+  []
 []

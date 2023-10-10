@@ -33,6 +33,7 @@ INSFVElementalKernel::computeResidual()
     accumulateTaggedLocalResidual();
   }
 }
+
 void
 INSFVElementalKernel::computeJacobian()
 {
@@ -43,6 +44,7 @@ INSFVElementalKernel::computeJacobian()
     addJacobian(_assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
   }
 }
+
 void
 INSFVElementalKernel::computeResidualAndJacobian()
 {

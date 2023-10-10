@@ -730,7 +730,7 @@ SIMPLE::solveMomentumPredictor()
   auto zero_solution = _momentum_systems[0]->system().current_local_solution->zero_clone();
 
   // Solve the momentum equations.
-  // TO DO: These equations are VERY similar. If we can store the differences (things comping from
+  // TO DO: These equations are VERY similar. If we can store the differences (things coming from
   // BCs for example) separately, it is enough to construct one matrix.
   for (const auto system_i : index_range(_momentum_systems))
   {
@@ -821,7 +821,7 @@ SIMPLE::solvePressureCorrector()
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
-  // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
+  // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
   // so we correct it by multiplying it with (-1)
   auto zero_solution = current_local_solution.zero_clone();
   _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
@@ -890,7 +890,7 @@ SIMPLE::solveAdvectedSystem(const unsigned int system_num,
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
-  // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
+  // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
   // so we correct it by multiplying it with (-1)
   auto zero_solution = current_local_solution.zero_clone();
   _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
@@ -1080,8 +1080,8 @@ SIMPLE::execute()
 
       // Solve the pressure corrector
       ns_residuals[momentum_residual.size()] = solvePressureCorrector();
-      // We need this to make sure we evaluate cell gradients for the nonorthogonal correction i
-      // nthe face velocity update
+      // We need this to make sure we evaluate cell gradients for the nonorthogonal correction in
+      // the face velocity update
       _pressure_system.residualSetup();
 
       // Compute the face velocity which is used in the advection terms
