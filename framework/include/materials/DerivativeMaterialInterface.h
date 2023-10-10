@@ -259,7 +259,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & ba
                                                           const std::vector<VariableName> & c)
 {
   std::vector<SymbolName> symbol_vector(c.begin(), c.end());
-  return declarePropertyDerivative(base, symbol_vector);
+  return declarePropertyDerivative<U, is_ad>(base, symbol_vector);
 }
 
 template <class T>

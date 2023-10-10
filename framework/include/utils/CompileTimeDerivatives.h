@@ -10,6 +10,9 @@
 #pragma once
 
 #include "libmesh/utility.h"
+#include "libmesh/compare_types.h"
+#include "Conversion.h"
+#include <limits>
 
 namespace CompileTimeDerivatives
 {
@@ -21,6 +24,11 @@ namespace CompileTimeDerivatives
  */
 class CTBase
 {
+public:
+  /// precedence should reflect C++ operator precedence exactly (higher is binding tighter)
+  constexpr static int precedence() { return 0; }
+  /// left/right associative property should reflect C++ operator properties exactly
+  constexpr static bool leftAssociative() { return false; }
 };
 class CTNullBase : public CTBase
 {
@@ -29,10 +37,25 @@ class CTOneBase : public CTBase
 {
 };
 
-template <typename T1, typename T2>
-struct CTSuperType
+template <typename T>
+using CTCleanType = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+
+template <typename... Ts>
+struct CTSuperType;
+
+template <typename T>
+struct CTSuperType<T>
 {
-  typedef double type;
+  typedef T type;
+};
+
+template <typename T1, typename T2, typename... Ts>
+struct CTSuperType<T1, T2, Ts...>
+{
+  typedef typename std::conditional<
+      (sizeof...(Ts) > 0),
+      typename CTSuperType<typename libMesh::CompareTypes<T1, T2>::supertype, Ts...>::type,
+      typename libMesh::CompareTypes<T1, T2>::supertype>::type type;
 };
 
 /**
@@ -41,6 +64,17 @@ struct CTSuperType
  * supplied as a template argument. int does the trick.
  */
 using CTTag = int;
+constexpr CTTag CTNoTag = std::numeric_limits<CTTag>::max();
+
+template <CTTag tag>
+std::string
+printTag()
+{
+  if constexpr (tag == CTNoTag)
+    return "";
+  else
+    return Moose::stringify(tag);
+}
 
 template <typename B, typename E>
 auto pow(const B & base, const E & exp);
@@ -61,15 +95,16 @@ class CTNull : public CTNullBase
 {
 public:
   CTNull() {}
-  auto operator()() const { return O(0); }
+  typedef CTCleanType<T> ResultType;
+
+  ResultType operator()() const { return ResultType(0); }
+  std::string print() const { return "0"; }
 
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
-
-  typedef T O;
 };
 
 /**
@@ -81,15 +116,16 @@ class CTOne : public CTOneBase
 {
 public:
   CTOne() {}
-  auto operator()() const { return O(1); }
+  typedef CTCleanType<T> ResultType;
+
+  ResultType operator()() const { return ResultType(1); }
+  std::string print() const { return "1"; }
 
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
-
-  typedef T O;
 };
 
 /**
@@ -101,11 +137,53 @@ class CTUnary : public CTBase
 public:
   CTUnary(T arg) : _arg(arg) {}
 
-  typedef typename T::O O;
+  template <typename Self>
+  std::string printParens(const Self *, const std::string & op) const
+  {
+    std::string out = op;
+    if constexpr (T::precedence() > Self::precedence())
+      out += "(" + _arg.print() + ")";
+    else
+      out += _arg.print();
+
+    return out;
+  }
+
+  typedef typename T::ResultType ResultType;
 
 protected:
   const T _arg;
 };
+
+/**
+ * Unary minus
+ */
+template <typename T>
+class CTUnaryMinus : public CTUnary<T>
+{
+public:
+  CTUnaryMinus(T arg) : CTUnary<T>(arg) {}
+  using typename CTUnary<T>::ResultType;
+
+  ResultType operator()() const { return -_arg(); }
+  std::string print() const { return this->printParens(this, "-"); }
+  constexpr static int precedence() { return 3; }
+
+  template <CTTag dtag>
+  auto D() const
+  {
+    return -_arg.template D<dtag>();
+  }
+
+  using CTUnary<T>::_arg;
+};
+
+template <typename T, class = std::enable_if_t<std::is_base_of<CTBase, T>::value>>
+auto
+operator-(const T & arg)
+{
+  return CTUnaryMinus<T>(arg);
+}
 
 /**
  * Base class for a binary operator/function
@@ -116,7 +194,28 @@ class CTBinary : public CTBase
 public:
   CTBinary(L left, R right) : _left(left), _right(right) {}
 
-  typedef typename CTSuperType<typename L::O, typename R::O>::type O;
+  typedef typename libMesh::CompareTypes<typename L::ResultType, typename R::ResultType>::supertype
+      ResultType;
+
+  template <typename Self>
+  std::string printParens(const Self *, const std::string & op) const
+  {
+    std::string out;
+    if constexpr (L::precedence() > Self::precedence())
+      out = "(" + _left.print() + ")";
+    else
+      out = _left.print();
+
+    out += op;
+
+    if (R::precedence() > Self::precedence() ||
+        (R::precedence() == Self::precedence() && Self::leftAssociative()))
+      out += "(" + _right.print() + ")";
+    else
+      out += _right.print();
+
+    return out;
+  }
 
 protected:
   const L _left;
@@ -126,24 +225,56 @@ protected:
 /**
  * Constant value
  */
-template <typename T>
+template <CTTag tag, typename T>
 class CTValue : public CTBase
 {
 public:
   CTValue(const T value) : _value(value) {}
   auto operator()() const { return _value; }
+  std::string print() const { return Moose::stringify(_value); }
 
   template <CTTag dtag>
   auto D() const
   {
-    return CTNull<O>();
+    return CTNull<ResultType>();
   }
 
-  typedef T O;
+  typedef T ResultType;
 
 protected:
   T _value;
 };
+
+/**
+ * Helper function to build a (potentially tagged) value
+ */
+template <CTTag tag = CTNoTag, typename T>
+auto
+makeValue(T value)
+{
+  return CTValue<tag, T>(value);
+}
+
+template <CTTag start_tag, typename... Values, CTTag... Tags>
+auto
+makeValuesHelper(const std::tuple<Values...> & values, std::integer_sequence<CTTag, Tags...>)
+{
+  if constexpr (start_tag == CTNoTag)
+    return std::make_tuple(CTValue<CTNoTag, Values>(std::get<Tags>(values))...);
+  else
+    return std::make_tuple(CTValue<Tags + start_tag, Values>(std::get<Tags>(values))...);
+}
+
+/**
+ * Helper function to build a list of (potentially tagged) values
+ */
+template <CTTag start_tag = CTNoTag, typename... Ts>
+auto
+makeValues(Ts... values)
+{
+  return makeValuesHelper<start_tag>(std::tuple(values...),
+                                     std::make_integer_sequence<CTTag, sizeof...(values)>{});
+}
 
 /**
  * Variable value, referencing a variable of type T. This object is tagged with a
@@ -154,22 +285,54 @@ class CTRef : public CTBase
 {
 public:
   CTRef(const T & ref) : _ref(ref) {}
-  auto operator()() const { return _ref; }
+  const T & operator()() const { return _ref; }
+  std::string print() const { return "[v" + printTag<tag>() + "]"; }
 
   template <CTTag dtag>
   auto D() const
   {
     if constexpr (tag == dtag)
-      return CTOne<O>();
+      return CTOne<ResultType>();
     else
-      return CTNull<O>();
+      return CTNull<ResultType>();
   }
 
-  typedef T O;
+  typedef CTCleanType<T> ResultType;
 
 protected:
   const T & _ref;
 };
+
+/**
+ * Helper function to build a tagged reference to a variable
+ */
+template <CTTag tag = CTNoTag, typename T>
+auto
+makeRef(const T & ref)
+{
+  return CTRef<tag, T>(ref);
+}
+
+template <CTTag start_tag, typename... Refs, CTTag... Tags>
+auto
+makeRefsHelper(const std::tuple<Refs...> & refs, std::integer_sequence<CTTag, Tags...>)
+{
+  if constexpr (start_tag == CTNoTag)
+    return std::make_tuple(CTRef<CTNoTag, Refs>(std::get<Tags>(refs))...);
+  else
+    return std::make_tuple(CTRef<Tags + start_tag, Refs>(std::get<Tags>(refs))...);
+}
+
+/**
+ * Helper function to build a list of tagged references to variables
+ */
+template <CTTag start_tag = CTNoTag, typename... Ts>
+auto
+makeRefs(const Ts &... refs)
+{
+  return makeRefsHelper<start_tag>(std::tie(refs...),
+                                   std::make_integer_sequence<CTTag, sizeof...(refs)>{});
+}
 
 /**
  * Array variable value, referencing an entry in an indexable container of T types.
@@ -182,22 +345,36 @@ class CTArrayRef : public CTBase
 public:
   CTArrayRef(const T & arr, const I & idx) : _arr(arr), _idx(idx) {}
   auto operator()() const { return _arr[_idx]; }
+  std::string print() const { return "[a" + printTag<tag>() + "[" + Moose::stringify(_idx) + "]]"; }
 
   template <CTTag dtag>
   auto D() const
   {
     if constexpr (tag == dtag)
-      return CTOne<O>();
+      return CTOne<ResultType>();
     else
-      return CTNull<O>();
+      return CTNull<ResultType>();
   }
 
-  typedef typename T::value_type O;
+  // get the value type returned by operator[]
+  typedef CTCleanType<decltype((static_cast<T>(0))[0])> ResultType;
+  static_assert(!std::is_same_v<ResultType, void>,
+                "Instantiation of CTArrayRef was attempted for a non-subscriptable type.");
 
 protected:
   const T & _arr;
   const I & _idx;
 };
+
+/**
+ * Helper function to build a tagged reference to a vector/array entry
+ */
+template <CTTag tag = CTNoTag, typename T, typename I>
+auto
+makeRef(const T & ref, const I & idx)
+{
+  return CTArrayRef<tag, T, I>(ref, idx);
+}
 
 /**
  * Addition operator node
@@ -207,11 +384,13 @@ class CTAdd : public CTBinary<L, R>
 {
 public:
   CTAdd(L left, R right) : CTBinary<L, R>(left, right) {}
-  auto operator()() const
+  using typename CTBinary<L, R>::ResultType;
+
+  ResultType operator()() const
   {
     // compile time optimization to skip null terms
     if constexpr (std::is_base_of<CTNullBase, L>::value && std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTNullBase, L>::value)
       return _right();
@@ -222,6 +401,8 @@ public:
     else
       return _left() + _right();
   }
+  std::string print() const { return this->printParens(this, "+"); }
+  constexpr static int precedence() { return 6; }
 
   template <CTTag dtag>
   auto D() const
@@ -229,7 +410,6 @@ public:
     return _left.template D<dtag>() + _right.template D<dtag>();
   }
 
-  using typename CTBinary<L, R>::O;
   using CTBinary<L, R>::_left;
   using CTBinary<L, R>::_right;
 };
@@ -242,10 +422,12 @@ class CTSub : public CTBinary<L, R>
 {
 public:
   CTSub(L left, R right) : CTBinary<L, R>(left, right) {}
-  auto operator()() const
+  using typename CTBinary<L, R>::ResultType;
+
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value && std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTNullBase, L>::value)
       return -_right();
@@ -256,6 +438,9 @@ public:
     else
       return _left() - _right();
   }
+  std::string print() const { return this->printParens(this, "-"); }
+  constexpr static int precedence() { return 6; }
+  constexpr static bool leftAssociative() { return true; }
 
   template <CTTag dtag>
   auto D() const
@@ -263,7 +448,6 @@ public:
     return _left.template D<dtag>() - _right.template D<dtag>();
   }
 
-  using typename CTBinary<L, R>::O;
   using CTBinary<L, R>::_left;
   using CTBinary<L, R>::_right;
 };
@@ -276,13 +460,15 @@ class CTMul : public CTBinary<L, R>
 {
 public:
   CTMul(L left, R right) : CTBinary<L, R>(left, right) {}
-  auto operator()() const
+  using typename CTBinary<L, R>::ResultType;
+
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value || std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value && std::is_base_of<CTOneBase, R>::value)
-      return O(1);
+      return ResultType(1);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value)
       return _right();
@@ -293,6 +479,8 @@ public:
     else
       return _left() * _right();
   }
+  std::string print() const { return this->printParens(this, "*"); }
+  constexpr static int precedence() { return 5; }
 
   template <CTTag dtag>
   auto D() const
@@ -300,7 +488,6 @@ public:
     return _left.template D<dtag>() * _right + _right.template D<dtag>() * _left;
   }
 
-  using typename CTBinary<L, R>::O;
   using CTBinary<L, R>::_left;
   using CTBinary<L, R>::_right;
 };
@@ -313,16 +500,21 @@ class CTDiv : public CTBinary<L, R>
 {
 public:
   CTDiv(L left, R right) : CTBinary<L, R>(left, right) {}
-  auto operator()() const
+  using typename CTBinary<L, R>::ResultType;
+
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTOneBase, R>::value)
       return _left();
 
     if constexpr (std::is_base_of<CTNullBase, L>::value && !std::is_base_of<CTNullBase, R>::value)
-      return O(0);
+      return ResultType(0);
 
     return _left() / _right();
   }
+  std::string print() const { return this->printParens(this, "/"); }
+  constexpr static int precedence() { return 5; }
+  constexpr static bool leftAssociative() { return true; }
 
   template <CTTag dtag>
   auto D() const
@@ -331,7 +523,6 @@ public:
            _left * _right.template D<dtag>() / (_right * _right);
   }
 
-  using typename CTBinary<L, R>::O;
   using CTBinary<L, R>::_left;
   using CTBinary<L, R>::_right;
 };
@@ -344,31 +535,61 @@ class CTPow : public CTBinary<L, R>
 {
 public:
   CTPow(L left, R right) : CTBinary<L, R>(left, right) {}
-  auto operator()() const
+  using typename CTBinary<L, R>::ResultType;
+
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, L>::value)
-      return O(0);
+      return ResultType(0);
 
     if constexpr (std::is_base_of<CTOneBase, L>::value || std::is_base_of<CTNullBase, R>::value)
-      return O(1);
+      return ResultType(1);
 
     if constexpr (std::is_base_of<CTOneBase, R>::value)
       return _left();
 
     return std::pow(_left(), _right());
   }
+  std::string print() const { return "pow(" + _left.print() + "," + _right.print() + ")"; }
 
   template <CTTag dtag>
   auto D() const
   {
-    return pow(_left, _right) * _right.template D<dtag>() * log(_left) +
-           _right * _left.template D<dtag>() / _left;
+    if constexpr (std::is_base_of<CTNullBase, decltype(_left.template D<dtag>())>::value &&
+                  std::is_base_of<CTNullBase, decltype(_right.template D<dtag>())>::value)
+      return CTNull<ResultType>();
+
+    else if constexpr (std::is_base_of<CTNullBase, decltype(_left.template D<dtag>())>::value)
+      return pow(_left, _right) * _right.template D<dtag>() * log(_left);
+
+    else if constexpr (std::is_base_of<CTNullBase, decltype(_right.template D<dtag>())>::value)
+      return pow(_left, _right) * _right * _left.template D<dtag>() / _left;
+
+    else
+      return pow(_left, _right) *
+             (_right.template D<dtag>() * log(_left) + _right * _left.template D<dtag>() / _left);
   }
 
-  using typename CTBinary<L, R>::O;
   using CTBinary<L, R>::_left;
   using CTBinary<L, R>::_right;
 };
+
+/**
+ * pow(base, exponent) function overload.
+ */
+template <typename B, typename E>
+auto
+pow(const B & base, const E & exp)
+{
+  if constexpr (std::is_base_of<CTBase, B>::value && std::is_base_of<CTBase, E>::value)
+    return CTPow(base, exp);
+  else if constexpr (std::is_base_of<CTBase, E>::value)
+    return CTPow(makeValue(base), exp);
+  else if constexpr (std::is_base_of<CTBase, B>::value)
+    return CTPow(base, makeValue(exp));
+  else
+    return CTPow(makeValue(base), makeValue(exp));
+}
 
 /**
  * Integer exponent power operator.
@@ -378,13 +599,15 @@ class CTIPow : public CTUnary<B>
 {
 public:
   CTIPow(B base) : CTUnary<B>(base) {}
-  auto operator()() const
+  using typename CTUnary<B>::ResultType;
+
+  ResultType operator()() const
   {
     if constexpr (std::is_base_of<CTNullBase, B>::value)
-      return O(0);
+      return ResultType(0);
 
     else if constexpr (std::is_base_of<CTOneBase, B>::value || E == 0)
-      return O(1);
+      return ResultType(1);
 
     else if constexpr (E == 1)
       return _arg();
@@ -395,6 +618,7 @@ public:
     else
       return libMesh::Utility::pow<E>(_arg());
   }
+  std::string print() const { return "pow<" + Moose::stringify(E) + ">(" + _arg.print() + ")"; }
 
   template <CTTag dtag>
   auto D() const
@@ -403,15 +627,27 @@ public:
       return _arg.template D<dtag>();
 
     else if constexpr (E == 0)
-      return CTNull<O>();
+      return CTNull<ResultType>();
 
     else
       return pow<E - 1>(_arg) * E * _arg.template D<dtag>();
   }
 
-  using typename CTUnary<B>::O;
   using CTUnary<B>::_arg;
 };
+
+/**
+ * pow<exponent>(base) template for integer powers.
+ */
+template <int E, typename B>
+auto
+pow(const B & base)
+{
+  if constexpr (std::is_base_of<CTBase, B>::value)
+    return CTIPow<B, E>(base);
+  else
+    return CTIPow<CTValue<CTNoTag, B>, E>(makeValue(base));
+}
 
 /**
  * Macro for implementing a binary math operator overload that works with a mix of CT system
@@ -420,32 +656,40 @@ public:
 #define CT_OPERATOR_BINARY(op, OP)                                                                 \
   template <typename L,                                                                            \
             typename R,                                                                            \
-            class = std::enable_if_t<std::is_base_of<CTBase, L>::value ||                          \
+            class = std::enable_if_t<std::is_base_of<CTBase, L>::value &&                          \
                                      std::is_base_of<CTBase, R>::value>>                           \
   auto operator op(const L & left, const R & right)                                                \
   {                                                                                                \
-    if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value)          \
-      return OP(left, right);                                                                      \
-    else if constexpr (std::is_base_of<CTBase, L>::value)                                          \
-      return OP(left, CTRef<-1, R>(right));                                                        \
-    else if constexpr (std::is_base_of<CTBase, R>::value)                                          \
-      return OP(CTRef<-1, L>(left), right);                                                        \
-  }                                                                                                \
-  template <typename L, typename R, class = std::enable_if_t<!std::is_base_of<CTBase, L>::value>>  \
-  auto operator op(const L && left, const R & right)                                               \
+    return OP(left, right);                                                                        \
+  }
+
+#define CT_OPERATOR_BINARY_MIX(op, OP, ot)                                                         \
+  template <typename L, class = std::enable_if_t<std::is_base_of<CTBase, L>::value>>               \
+  auto operator op(const L & left, const ot & right)                                               \
   {                                                                                                \
-    return OP(CTValue<L>(left), right);                                                            \
+    return OP(left, makeValue(right));                                                             \
   }                                                                                                \
-  template <typename L, typename R, class = std::enable_if_t<!std::is_base_of<CTBase, R>::value>>  \
-  auto operator op(const L & left, const R && right)                                               \
+  template <typename R, class = std::enable_if_t<std::is_base_of<CTBase, R>::value>>               \
+  auto operator op(const ot & left, const R & right)                                               \
   {                                                                                                \
-    return OP(left, CTValue<R>(right));                                                            \
+    return OP(makeValue(left), right);                                                             \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)
 CT_OPERATOR_BINARY(-, CTSub)
 CT_OPERATOR_BINARY(*, CTMul)
 CT_OPERATOR_BINARY(/, CTDiv)
+
+#define CT_OPERATORS_BINARY_MIX(ot)                                                                \
+  CT_OPERATOR_BINARY_MIX(+, CTAdd, ot)                                                             \
+  CT_OPERATOR_BINARY_MIX(-, CTSub, ot)                                                             \
+  CT_OPERATOR_BINARY_MIX(*, CTMul, ot)                                                             \
+  CT_OPERATOR_BINARY_MIX(/, CTDiv, ot)
+
+// Add entries here to support other types in CTD expressions
+CT_OPERATORS_BINARY_MIX(double)
+CT_OPERATORS_BINARY_MIX(float)
+CT_OPERATORS_BINARY_MIX(int)
 
 /**
  * Macro for implementing a simple unary function overload. No function specific optimizations are
@@ -457,20 +701,37 @@ CT_OPERATOR_BINARY(/, CTDiv)
   class CTF##name : public CTUnary<T>                                                              \
   {                                                                                                \
   public:                                                                                          \
-    CTF##name(T arg) : CTUnary<T>(arg) {}                                                          \
-    auto operator()() const { return std::name(_arg()); }                                          \
+    CTF##name(T arg) : CTUnary<T>(arg)                                                             \
+    {                                                                                              \
+    }                                                                                              \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      return std::name(_arg());                                                                    \
+    }                                                                                              \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
       return derivative;                                                                           \
     }                                                                                              \
-    using typename CTUnary<T>::O;                                                                  \
+    std::string print() const                                                                      \
+    {                                                                                              \
+      return #name "(" + _arg.print() + ")";                                                       \
+    }                                                                                              \
+    constexpr static int precedence()                                                              \
+    {                                                                                              \
+      return 2;                                                                                    \
+    }                                                                                              \
+    using typename CTUnary<T>::ResultType;                                                         \
     using CTUnary<T>::_arg;                                                                        \
   };                                                                                               \
   template <typename T>                                                                            \
   auto name(const T & v)                                                                           \
   {                                                                                                \
-    return CTF##name(v);                                                                           \
+    using namespace CompileTimeDerivatives;                                                        \
+    if constexpr (std::is_base_of<CTBase, T>::value)                                               \
+      return CTF##name(v);                                                                         \
+    else                                                                                           \
+      return CTF##name(makeValue(v));                                                              \
   }
 
 CT_SIMPLE_UNARY_FUNCTION(exp, exp(_arg) * _arg.template D<dtag>())
@@ -479,45 +740,131 @@ CT_SIMPLE_UNARY_FUNCTION(sin, cos(_arg) * _arg.template D<dtag>())
 CT_SIMPLE_UNARY_FUNCTION(cos, -1.0 * sin(_arg) * _arg.template D<dtag>())
 CT_SIMPLE_UNARY_FUNCTION(tan, (pow<2>(tan(_arg)) + 1.0) * _arg.template D<dtag>())
 CT_SIMPLE_UNARY_FUNCTION(sqrt, 1.0 / (2.0 * sqrt(_arg)) * _arg.template D<dtag>())
+CT_SIMPLE_UNARY_FUNCTION(tanh, (1.0 - pow<2>(tanh(_arg))) * _arg.template D<dtag>())
+CT_SIMPLE_UNARY_FUNCTION(sinh, cosh(_arg) * _arg.template D<dtag>())
+CT_SIMPLE_UNARY_FUNCTION(cosh, sinh(_arg) * _arg.template D<dtag>())
+CT_SIMPLE_UNARY_FUNCTION(erf,
+                         2.0 * exp(-pow<2>(_arg)) / sqrt(libMesh::pi) * _arg.template D<dtag>())
+CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag>())
 
 /**
- * pow(base, exponent) function overload.
+ * Macro for implementing a simple binary function overload. No function specific optimizations are
+ * possible. The parameters are the function name and the expression that returns the derivative
+ * of the function.
  */
-template <typename B, typename E>
-auto
-pow(const B & base, const E & exp)
+#define CT_SIMPLE_BINARY_FUNCTION(name, derivative)                                                \
+  template <typename L, typename R>                                                                \
+  class CTF##name : public CTBinary<L, R>                                                          \
+  {                                                                                                \
+  public:                                                                                          \
+    CTF##name(L left, R right) : CTBinary<L, R>(left, right)                                       \
+    {                                                                                              \
+    }                                                                                              \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      return std::name(_left(), _right());                                                         \
+    }                                                                                              \
+    template <CTTag dtag>                                                                          \
+    auto D() const                                                                                 \
+    {                                                                                              \
+      return derivative;                                                                           \
+    }                                                                                              \
+    std::string print() const                                                                      \
+    {                                                                                              \
+      return #name "(" + _left.print() + ", " + _right.print() + ")";                              \
+    }                                                                                              \
+    constexpr static int precedence()                                                              \
+    {                                                                                              \
+      return 2;                                                                                    \
+    }                                                                                              \
+    using typename CTBinary<L, R>::ResultType;                                                     \
+    using CTBinary<L, R>::_left;                                                                   \
+    using CTBinary<L, R>::_right;                                                                  \
+  };                                                                                               \
+  template <typename L, typename R>                                                                \
+  auto name(const L & l, const R & r)                                                              \
+  {                                                                                                \
+    using namespace CompileTimeDerivatives;                                                        \
+    if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value)          \
+      return CTF##name(l, r);                                                                      \
+    else if constexpr (std::is_base_of<CTBase, L>::value)                                          \
+      return CTF##name(l, makeValue(r));                                                           \
+    else if constexpr (std::is_base_of<CTBase, R>::value)                                          \
+      return CTF##name(makeValue(l), r);                                                           \
+    else                                                                                           \
+      return CTF##name(makeValue(l), makeValue(r));                                                \
+  }
+
+CT_SIMPLE_BINARY_FUNCTION(atan2,
+                          (-_left * _right.template D<dtag>() + _left.template D<dtag>() * _right) /
+                              (pow<2>(_left) + pow<2>(_right)))
+
+template <typename T, int N, int M>
+class CTMatrix
 {
-  return CTPow(base, exp);
+public:
+  template <typename... Ts>
+  CTMatrix(Ts... a) : _data({a...})
+  {
+    static_assert(sizeof...(a) == N * M, "Invalid number of matrix entries");
+  }
+  T & operator()(std::size_t n, std::size_t m) { return _data[M * n + m]; }
+  const T & operator()(std::size_t n, std::size_t m) const { return _data[M * n + m]; }
+
+protected:
+  std::array<T, N * M> _data;
+};
+
+template <typename... Ds>
+class CTStandardDeviation : public CTBase
+{
+public:
+  static constexpr auto N = sizeof...(Ds);
+
+  CTStandardDeviation(std::tuple<Ds...> derivatives, CTMatrix<Real, N, N> covariance)
+    : _derivatives(derivatives), _covariance(covariance)
+  {
+  }
+  auto operator()() const { return std::sqrt(evalHelper(std::make_index_sequence<N>{})); }
+
+  typedef typename CTSuperType<typename Ds::ResultType...>::type ResultType;
+
+protected:
+  template <int R, std::size_t... Is>
+  ResultType rowMul(std::index_sequence<Is...>, const std::array<ResultType, N> & d) const
+  {
+    return ((_covariance(R, Is) * d[Is]) + ...);
+  }
+
+  template <std::size_t... Is>
+  auto evalHelper(const std::index_sequence<Is...> & is) const
+  {
+    const std::array<ResultType, N> d{std::get<Is>(_derivatives)()...};
+    return ((rowMul<Is>(is, d) * d[Is]) + ...);
+  }
+
+  const std::tuple<Ds...> _derivatives;
+  const CTMatrix<Real, N, N> _covariance;
+};
+
+template <CTTag start_tag, typename T, CTTag... Tags>
+auto
+makeStandardDeviationHelper(const T & f, std::integer_sequence<CTTag, Tags...>)
+{
+  return std::make_tuple(f.template D<Tags + start_tag>()...);
 }
 
 /**
- * pow<exponent>(base) template for integer powers.
+ * Helper function to build a standard deviation object for a function with N parameters with
+ * consecutive tags starting at start_tag, and an NxN covariance matrix for said parameters.
  */
-template <int E, typename B>
+template <CTTag start_tag, typename T, int N>
 auto
-pow(const B & base)
+makeStandardDeviation(const T & f, const CTMatrix<Real, N, N> covariance)
 {
-  return CTIPow<B, E>(base);
-}
-
-/**
- * Helper function to build a tagged reference to a variable
- */
-template <CTTag tag, typename T>
-auto
-makeRef(const T & ref)
-{
-  return CTRef<tag, T>(ref);
-}
-
-/**
- * Helper function to build a tagged reference to a vector/array entry
- */
-template <CTTag tag, typename T, typename I>
-auto
-makeRef(const T & ref, const I & idx)
-{
-  return CTArrayRef<tag, T, I>(ref, idx);
+  return CTStandardDeviation(
+      makeStandardDeviationHelper<start_tag>(f, std::make_integer_sequence<CTTag, N>{}),
+      covariance);
 }
 
 } // namespace CompileTimeDerivatives
