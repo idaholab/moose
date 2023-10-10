@@ -28,9 +28,9 @@ For scaling purposes, the user can provide the following parameters:
 - Rated and actual rotation speed of the pump. The actual rotation speed of the pump is a controllable parameter
 
 To allow the pump to operate in reverse flow conditions, the user must set `enable_negative_rotation = true`.
-The scaling of the model in the negative rotation condition is the same than the positive one.
+The scaling of the model in the negative rotation condition is the same as the positive one.
 However, for negative rotation, the user can provide the homologous pressure head curve via the `pressure_head_function_negative_rotation` function.
-If the same pressure head function than the positive direction wants to be used for negative rotation, the user should set `symmetric_negative_pressure_head = true`.
+If the pressure head function for the positive direction should be used for negative rotation, the user should set `symmetric_negative_pressure_head = true`.
 
 !syntax parameters /Materials/NSFVPump
 

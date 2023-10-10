@@ -195,7 +195,7 @@ private:
   const MooseEnum _volume_force_correction_method;
 
   /// Names of the functors storing the volumetric forces
-  const std::vector<MooseFunctorName> * _volumetric_force_functors;
+  const std::vector<MooseFunctorName> * const _volumetric_force_functors;
 
   /// Values of the functors storing the volumetric forces
   std::vector<const Moose::Functor<Real> *> _volumetric_force;

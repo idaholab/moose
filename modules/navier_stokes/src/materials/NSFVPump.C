@@ -64,7 +64,6 @@ NSFVPump::NSFVPump(const InputParameters & parameters)
             ? &getFunction("pressure_head_function_negative_rotation")
             : nullptr)
 {
-
   // Error checks
   if (!_pressure_head_function && !_pressure_head_function_negative_rotation)
     paramError("pressure_head_function",
