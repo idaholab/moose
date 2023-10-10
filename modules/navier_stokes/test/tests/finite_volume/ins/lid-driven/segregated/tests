@@ -22,5 +22,6 @@
     cli_args = "FVKernels/inactive='' Outputs/file_base='lid-driven-segregated-boussinesq'"
     requirement = 'The system shall be able to solve the incompressible buoyant Navier-Stokes equations with the Boussinesq approximation in a lid-driven cavity using the SIMPLE algorithm.'
     recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
   []
 []

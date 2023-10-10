@@ -289,6 +289,30 @@ SIMPLE::validParams()
       false,
       "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
+  /*
+   * We suppress parameters which are not supported yet
+   */
+  params.suppressParameter<MooseEnum>("fixed_point_algorithm");
+  params.suppressParameter<unsigned int>("fixed_point_min_its");
+  params.suppressParameter<unsigned int>("fixed_point_max_its");
+  params.suppressParameter<bool>("accept_on_max_fixed_point_iteration");
+  params.suppressParameter<bool>("disable_fixed_point_residual_norm_check");
+  params.suppressParameter<Real>("fixed_point_rel_tol");
+  params.suppressParameter<Real>("fixed_point_abs_tol");
+  params.suppressParameter<unsigned int>("fixed_point_min_its");
+  params.suppressParameter<bool>("fixed_point_force_norms");
+  params.suppressParameter<PostprocessorName>("custom_pp");
+  params.suppressParameter<Real>("custom_rel_tol");
+  params.suppressParameter<Real>("custom_abs_tol");
+  params.suppressParameter<bool>("direct_pp_value");
+  params.suppressParameter<Real>("relaxation_factor");
+  params.suppressParameter<std::vector<std::string>>("transformed_variables");
+  params.suppressParameter<std::vector<PostprocessorName>>("transformed_postprocessors");
+  params.suppressParameter<std::vector<std::string>>("relaxed_variables");
+  params.suppressParameter<bool>("auto_advance");
+  params.suppressParameter<unsigned int>("max_xfem_update");
+  params.suppressParameter<bool>("update_xfem_at_timestep_begin");
+
   return params;
 }
 
@@ -508,6 +532,24 @@ SIMPLE::checkDependentParameterError(const std::string & main_parameter,
 void
 SIMPLE::init()
 {
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
+  for (const auto system : _momentum_systems)
+    checkIntegrity(*system);
+
+  checkIntegrity(_pressure_system);
+
+  if (_has_energy_system)
+  {
+    checkIntegrity(*_energy_system);
+    if (_has_solid_energy_system)
+      checkIntegrity(*_solid_energy_system);
+  }
+
+  if (_has_passive_scalar_systems)
+    for (const auto system : _passive_scalar_systems)
+      checkIntegrity(*system);
+
+  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
 
   // Fetch the segregated rhie-chow object and transfer some information about the momentum
@@ -1008,6 +1050,18 @@ SIMPLE::execute()
     return;
   }
 
+  if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _problem.hasMultiApps(EXEC_TIMESTEP_END) ||
+      _problem.hasMultiApps(EXEC_INITIAL) ||
+      _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN) ||
+      _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_END))
+  {
+    _console << "\nCannot use SIMPLE solves with MultiApps set to execute on TIMESTEP_BEGIN, "
+                "TIMESTEP_END, INITIAL, MULTIAPP_FIXED_POINT_BEGIN or "
+                "MULTIAPP_FIXED_POINT_END!\nExiting...\n"
+             << std::endl;
+    return;
+  }
+
   _problem.timestepSetup();
 
   _time_step = 0;
@@ -1182,13 +1236,19 @@ SIMPLE::execute()
 
   {
     TIME_SECTION("final", 1, "Executing Final Objects")
+    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::TO_MULTIAPP);
+    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::BETWEEN_MULTIAPP);
     _problem.execMultiApps(EXEC_FINAL);
+    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::FROM_MULTIAPP);
     _problem.finalizeMultiApps();
     _problem.postExecute();
     _problem.execute(EXEC_FINAL);
     _time = _time_step;
     _problem.outputStep(EXEC_FINAL);
+    _time = _system_time;
   }
+
+  postExecute();
 }
 
 bool
@@ -1207,4 +1267,13 @@ SIMPLE::converged(const std::vector<Real> & residuals, const std::vector<Real> &
       return converged;
   }
   return converged;
+}
+
+void
+SIMPLE::checkIntegrity(NonlinearSystemBase & system)
+{
+  // check to make sure that we don't have any time kernels in this simulation (Steady State)
+  if (system.containsTimeKernel())
+    mooseError("You have specified time kernels in your steady state simulation in system",
+               system.name());
 }

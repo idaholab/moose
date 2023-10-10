@@ -30,7 +30,4 @@ protected:
 
   /// The vector field whose divergence is added to the residual
   const Moose::Functor<ADRealVectorValue> & _vector_field;
-
-private:
-  bool _propagate_derivatives;
 };
