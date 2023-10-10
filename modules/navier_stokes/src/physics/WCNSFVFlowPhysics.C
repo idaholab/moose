@@ -98,7 +98,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
       variable_type = "PINSFVSuperficialVelocityVariable";
 
     auto params = getFactory().getValidParams(variable_type);
-    assignBlocks(params, blocks()); // TODO: check wrt components
+    assignBlocks(params, _blocks); // TODO: check wrt components
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("momentum_scaling")};
     params.set<MooseEnum>("face_interp_method") =
         getParam<MooseEnum>("momentum_advection_interpolation");
@@ -119,7 +119,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
         using_pinsfv_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
 
     auto params = getFactory().getValidParams(pressure_type);
-    assignBlocks(params, blocks()); // TODO: check wrt components
+    assignBlocks(params, _blocks); // TODO: check wrt components
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("mass_scaling")};
     params.set<MooseEnum>("face_interp_method") =
         getParam<MooseEnum>("pressure_face_interpolation");
@@ -147,17 +147,20 @@ void
 WCNSFVFlowPhysics::addFVKernels()
 {
   // Mass equation: time derivative
-  if (_compressibility == "weakly-compressible")
+  if (_compressibility == "weakly-compressible" && isTransient())
     addWCNSMassTimeKernels();
 
   // Mass equation: divergence of momentum
   addINSMassKernels();
 
   // Momentum equation: time derivative
-  if (_compressibility == "incompressible")
-    addINSMomentumTimeKernels();
-  else
-    addWCNSMomentumTimeKernels();
+  if (isTransient())
+  {
+    if (_compressibility == "incompressible")
+      addINSMomentumTimeKernels();
+    else
+      addWCNSMomentumTimeKernels();
+  }
 
   // Momentum equation: momentum advection
   addINSMomentumAdvectionKernels();
@@ -193,7 +196,7 @@ WCNSFVFlowPhysics::addWCNSMassTimeKernels()
   }
 
   InputParameters params = getFactory().getValidParams(mass_kernel_type);
-  assignBlocks(params, blocks());
+  assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   if (_porous_medium_treatment)
@@ -215,7 +218,7 @@ WCNSFVFlowPhysics::addINSMassKernels()
   }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, blocks());
+  assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
@@ -879,7 +882,7 @@ WCNSFVFlowPhysics::addUserObjects()
       // Volume average by default, but we could do inlet or outlet for example
       InputParameters params = getFactory().getValidParams("ElementAverageValue");
       params.set<std::vector<VariableName>>("variable") = {_pressure_name};
-      assignBlocks(params, blocks());
+      assignBlocks(params, _blocks);
       params.set<std::vector<OutputName>>("outputs") = {"none"};
       getProblem().addPostprocessor("ElementAverageValue", "nsfv_pressure_average", params);
     }

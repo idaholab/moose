@@ -70,6 +70,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
             : std::vector<std::vector<SubdomainName>>()),
     _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity"))
 {
+  addNonlinearVariable(_fluid_temperature_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
 }
@@ -85,7 +86,7 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
   processMesh();
 
   auto params = getFactory().getValidParams("INSFVEnergyVariable");
-  assignBlocks(params, blocks());
+  assignBlocks(params, _blocks);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
   params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
   params.set<bool>("two_term_boundary_expansion") = getParam<bool>("energy_two_term_bc_expansion");
@@ -96,10 +97,13 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
 void
 WCNSFVHeatAdvectionPhysics::addFVKernels()
 {
-  if (_compressibility == "incompressible")
-    addINSEnergyTimeKernels();
-  else
-    addWCNSEnergyTimeKernels();
+  if (isTransient())
+  {
+    if (_compressibility == "incompressible")
+      addINSEnergyTimeKernels();
+    else
+      addWCNSEnergyTimeKernels();
+  }
 
   addINSEnergyAdvectionKernels();
   addINSEnergyHeatConductionKernels();
