@@ -12,13 +12,18 @@
 
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
+#include "BlockRestrictable.h"
 
 InputParameters
 PhysicsBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params += BlockRestrictable::validParams();
   params.addClassDescription("Creates all the objects necessary to solve a particular physics");
+
+  params.transferParam<std::vector<SubdomainName>>(
+      BlockRestrictable::validParams(),
+      "block",
+      "Blocks that this Physics is active on. Components can add additional blocks");
 
   MooseEnum transient_options("true false same_as_problem", "same_as_problem");
   params.addParam<MooseEnum>(
@@ -38,10 +43,11 @@ PhysicsBase::validParams()
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    BlockRestrictable(this),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
     _is_transient(getParam<MooseEnum>("transient"))
 {
   _problem = getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+  mooseAssert(_problem, "We should have found a problem in the parameters");
   _factory = &_app.getFactory();
   _dim = _problem->mesh().dimension();
 
@@ -50,6 +56,14 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
 
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
+  prepareCopyNodalVariables();
+}
+
+void
+PhysicsBase::prepareCopyNodalVariables() const
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    _app.setExodusFileRestart(true);
 }
 
 bool
@@ -61,6 +75,13 @@ PhysicsBase::isTransient() const
     return false;
   else
     return getProblem().isTransient();
+}
+
+void
+PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
+{
+  _blocks.insert(_blocks.end(), blocks.begin(), blocks.end());
+  _dim = _problem->mesh().getBlocksMaxDimension(_blocks);
 }
 
 void
@@ -122,4 +143,17 @@ PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainN
   // functions
   if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
+}
+
+void
+PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  {
+    SystemBase & system = getProblem().getNonlinearSystemBase();
+
+    for (const auto & var_name : variables_to_copy)
+      system.addVariableToCopy(
+          var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
+  }
 }

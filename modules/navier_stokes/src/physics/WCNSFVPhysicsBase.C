@@ -94,7 +94,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   unsigned int num_rc_uo = 0;
   for (const auto & obj : objs)
     if (dynamic_cast<INSFVRhieChowInterpolator *>(obj) &&
-        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == blocks())
+        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == _blocks)
       num_rc_uo++;
   if (num_rc_uo)
     return;
