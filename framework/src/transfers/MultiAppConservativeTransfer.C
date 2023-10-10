@@ -153,7 +153,8 @@ MultiAppConservativeTransfer::initialSetup()
     const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
     // Let us check execute_on here. Users need to specify execute_on='transfer' in their input
-    // files for the postprocessors that are used to compute conservative qualities Parent app
+    // files for the postprocessors that are used to compute the quantities to conserve in the
+    // Parent app
     FEProblemBase & parent_problem = multi_app->problemBase();
     std::vector<PostprocessorName> pps_empty;
     // PPs for parent app
@@ -163,7 +164,7 @@ MultiAppConservativeTransfer::initialSetup()
     {
       // Get out all execute_on options for parent app source pp
       auto & execute_on = parent_problem.getUserObjectBase(pp).getExecuteOnEnum();
-      const auto type = parent_problem.getUserObjectBase(pp).type();
+      const auto & type = parent_problem.getUserObjectBase(pp).type();
       // Check if parent app has transfer execute_on
       if (!execute_on.contains(EXEC_TRANSFER))
         mooseError(
@@ -189,7 +190,7 @@ MultiAppConservativeTransfer::initialSetup()
       {
         // Get out of all execute_on options for sub pp
         auto & execute_on = sub_problem.getUserObjectBase(sub_pp).getExecuteOnEnum();
-        const auto type = sub_problem.getUserObjectBase(sub_pp).type();
+        const auto & type = sub_problem.getUserObjectBase(sub_pp).type();
         // Check if sub pp has transfer execute_on
         if (!execute_on.contains(EXEC_TRANSFER))
           mooseError(
@@ -284,7 +285,7 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
   else
     from_adjuster = 0;
 
-  /* Everyone on parent application side should know this value, and use it to scale the solution */
+  /* Everyone on the parent application side should know this value; use it to scale the solution */
   if (_current_direction == FROM_MULTIAPP)
   {
     /* In this case, only one subapp has value, and other subapps' must be zero.
@@ -400,7 +401,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   else
     from_adjuster = 0;
 
-  /* Everyone on parent side should know this value, and use it to scale the solution */
+  /* Everyone on the parent side should know this value; use it to scale the solution */
   if (_current_direction == FROM_MULTIAPP)
   {
     /* In this case, only one subapp has value, and other subapps' must be zero.
