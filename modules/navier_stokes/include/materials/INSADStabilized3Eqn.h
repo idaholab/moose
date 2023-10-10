@@ -9,19 +9,6 @@
 
 #pragma once
 
-#include "InputParameters.h"
-#include "NonlinearSystemBase.h"
-#include "FEProblemBase.h"
-#include "MaterialProperty.h"
-#include "MooseArray.h"
-
-#include "libmesh/elem.h"
-
-#include <vector>
-
-class INSADMaterial;
-class INSAD3Eqn;
-
 #include "INSADTauMaterial.h"
 #include "INSAD3Eqn.h"
 

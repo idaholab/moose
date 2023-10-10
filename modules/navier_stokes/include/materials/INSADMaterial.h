@@ -65,6 +65,9 @@ protected:
   /// The mesh velocity
   ADMaterialProperty<RealVectorValue> & _mesh_velocity;
 
+  /// The relative velocity, e.g. velocity - mesh_velocity
+  ADMaterialProperty<RealVectorValue> & _relative_velocity;
+
   /// Strong residual corresponding to advected mesh term
   ADMaterialProperty<RealVectorValue> & _advected_mesh_strong_residual;
 

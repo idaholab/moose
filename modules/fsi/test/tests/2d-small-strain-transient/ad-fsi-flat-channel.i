@@ -94,7 +94,7 @@
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = vel
-    velocity = vel
+    material_velocity = relative_velocity
     block = 0
   []
   [momentum_mesh]
