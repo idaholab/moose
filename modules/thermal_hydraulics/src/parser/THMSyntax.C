@@ -66,7 +66,6 @@ registerActions(Syntax & syntax)
 
   try
   {
-    syntax.addDependency("THM:add_heat_structure_material", "add_function");
     syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
     syntax.addDependency("THM:add_closures", "setup_mesh");
     syntax.addDependency("THM:init_components", "THM:output_vector_velocity");
@@ -87,7 +86,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_variable", "add_fluid_properties");
     syntax.addDependency("THM:init_components", "THM:add_heat_structure_material");
     syntax.addDependency("THM:init_components", "THM:add_closures");
-    syntax.addDependency("THM:add_variables", "THM:init_components");
+    syntax.addDependency("add_variable", "THM:init_components");
     syntax.addDependency("THM:setup_output", "add_output");
     syntax.addDependency("THM:add_component_moose_objects", "add_material");
     syntax.addDependency("check_output", "THM:add_component_moose_objects");
