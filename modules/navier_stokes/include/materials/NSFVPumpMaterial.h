@@ -14,12 +14,12 @@
 /**
  * This is the material class used to compute phase averaged properties of mixtures
  */
-class NSFVPump : public FunctorMaterial
+class NSFVPumpMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVPump(const InputParameters & parameters);
+  NSFVPumpMaterial(const InputParameters & parameters);
 
 protected:
   /// Function providing the pressure head

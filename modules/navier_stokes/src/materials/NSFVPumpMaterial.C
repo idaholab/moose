@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPump.h"
+#include "NSFVPumpMaterial.h"
 #include "NS.h"
 #include "Function.h"
 
-registerMooseObject("NavierStokesApp", NSFVPump);
+registerMooseObject("NavierStokesApp", NSFVPumpMaterial);
 
 InputParameters
-NSFVPump::validParams()
+NSFVPumpMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Effective pump body force.");
@@ -43,7 +43,7 @@ NSFVPump::validParams()
   return params;
 }
 
-NSFVPump::NSFVPump(const InputParameters & parameters)
+NSFVPumpMaterial::NSFVPumpMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _pressure_head_function(
         isParamValid("pressure_head_function") ? &getFunction("pressure_head_function") : nullptr),

@@ -719,243 +719,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                                correct_skewness,
                                                boundary_elem};
 
-            interp_vf = 0.0;
-            for (const auto i : make_range(_volumetric_force.size()))
-              interp_vf += (*this->_volumetric_force[i])(boundary_face, time);
-          }
-          else
-          {
-            Moose::FaceArg face{
-                &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
-
-            interp_vf = 0.0;
-            for (const auto i : make_range(_volumetric_force.size()))
-              interp_vf += (*this->_volumetric_force[i])(face, time);
-          }
-
-          // Compute the uncorrected interpolated face value
-          // For it to be consistent with the pressure gradient intepolation `uncorrectedAdGradSln`
-          // it should follow the same process than Green Gauss but for a volume force
-
-          Real elem_value = 0.0;
-          Real neigh_value = 0.0;
-
-          // Uncorrected interpolation - Step 1: loop over the faces of the element to compute
-          // face-average cell value
-          for (const auto side : make_range(elem->n_sides()))
-          {
-            const Elem * const loc_neighbor = elem->neighbor_ptr(side);
-            const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, loc_neighbor);
-            const FaceInfo * const fi_loc =
-                _moose_mesh.faceInfo(elem_has_fi ? elem : loc_neighbor,
-                                     elem_has_fi ? side : loc_neighbor->which_neighbor_am_i(elem));
-
-            if (Moose::FV::onBoundary(*this, *fi_loc))
-            {
-              const Elem * const boundary_elem =
-                  hasBlocks(elem->subdomain_id()) ? elem : loc_neighbor;
-              const Moose::FaceArg loc_boundary_face{fi_loc,
-                                                     Moose::FV::LimiterType::CentralDifference,
-                                                     true,
-                                                     correct_skewness,
-                                                     boundary_elem};
-
-              for (const auto i : make_range(_volumetric_force.size()))
-                elem_value += (*this->_volumetric_force[i])(loc_boundary_face, time) *
-                              fi_loc->faceArea() *
-                              (fi_loc->faceCentroid() - elem->vertex_average()).norm() *
-                              (fi_loc->normal() * loc_normal);
-            }
-            else
-            {
-              Moose::FaceArg loc_face{fi_loc,
-                                      Moose::FV::LimiterType::CentralDifference,
-                                      true,
-                                      correct_skewness,
-                                      nullptr};
-
-              for (const auto i : make_range(_volumetric_force.size()))
-                elem_value += (*this->_volumetric_force[i])(loc_face, time) * fi_loc->faceArea() *
-                              (fi_loc->faceCentroid() - elem->vertex_average()).norm() *
-                              (fi_loc->normal() * loc_normal);
-            }
-          }
-          elem_value /= elem->volume();
-
-          // Uncorrected interpolation - Step 2: loop over the face of the neighbor to compute
-          // face-average cell value
-          for (const auto side : make_range(neighbor->n_sides()))
-          {
-            const Elem * const loc_elem = neighbor->neighbor_ptr(side);
-            const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*neighbor, loc_elem);
-            const FaceInfo * const fi_loc =
-                _moose_mesh.faceInfo(elem_has_fi ? neighbor : loc_elem,
-                                     elem_has_fi ? side : loc_elem->which_neighbor_am_i(neighbor));
-
-            if (Moose::FV::onBoundary(*this, *fi_loc))
-            {
-              const Elem * const boundary_elem =
-                  hasBlocks(neighbor->subdomain_id()) ? neighbor : loc_elem;
-              const Moose::FaceArg loc_boundary_face{fi_loc,
-                                                     Moose::FV::LimiterType::CentralDifference,
-                                                     true,
-                                                     correct_skewness,
-                                                     boundary_elem};
-
-              for (const auto i : make_range(_volumetric_force.size()))
-                neigh_value += (*this->_volumetric_force[i])(loc_boundary_face, time) *
-                               fi_loc->faceArea() *
-                               (fi_loc->faceCentroid() - neighbor->vertex_average()).norm() *
-                               (fi_loc->normal() * loc_normal);
-            }
-            else
-            {
-              Moose::FaceArg loc_face{fi_loc,
-                                      Moose::FV::LimiterType::CentralDifference,
-                                      true,
-                                      correct_skewness,
-                                      nullptr};
-
-              for (const auto i : make_range(_volumetric_force.size()))
-                neigh_value += (*this->_volumetric_force[i])(loc_face, time) * fi_loc->faceArea() *
-                               (fi_loc->faceCentroid() - neighbor->vertex_average()).norm() *
-                               (fi_loc->normal() * loc_normal);
-            }
-          }
-          neigh_value /= neighbor->volume();
-
-          // Uncorrected interpolation - Step 3: interpolate element and neighbor reconstructed
-          // values to the face
-          interpolate(Moose::FV::InterpMethod::Average,
-                      uncorrected_interp_vf,
-                      elem_value,
-                      neigh_value,
-                      fi,
-                      true);
-          uncorrected_interp_vf *= fi.gC();
-
-          // Return the flag indicator on which face the volume force correction is inconsistent
-          return std::abs(interp_vf - uncorrected_interp_vf) /
-                             std::abs(interp_vf - uncorrected_interp_vf + 1.0) >
-                         1e-10
-                     ? 1.0
-                     : 0.0;
-        };
-
-        // Volumetric Correction Method #2: volume-based correction
-        // In thery, pressure and velocity cannot be decoupled when a body force is present
-        // Hence, we can de-activate the RC cofficient in faces that have a normal volume force
-        // In the method we mark the faces with a non-zero volume force with recpect to the baseline
-        auto vf_indicator_force_based =
-            [this, &elem, &neighbor, &time, &fi, &correct_skewness](Point & loc_normal)
-        {
-          Real value = 0.0;
-          if (Moose::FV::onBoundary(*this, fi))
-          {
-            const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
-            const Moose::FaceArg loc_boundary_face{&fi,
-                                                   Moose::FV::LimiterType::CentralDifference,
-                                                   true,
-                                                   correct_skewness,
-                                                   boundary_elem};
-
-            for (const auto i : make_range(_volumetric_force.size()))
-              value +=
-                  (*_volumetric_force[i])(loc_boundary_face, time) * (loc_normal * fi.normal());
-          }
-          else
-          {
-            Moose::FaceArg loc_face{
-                &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
-
-            for (const auto i : make_range(_volumetric_force.size()))
-              value += (*_volumetric_force[i])(loc_face, time) * (loc_normal * fi.normal());
-          }
-          if ((std::abs(value) - _baseline_volume_force) > 0)
-            return 1.0;
-          else
-            return 0.0;
-        };
-
-        const Point & elem_centroid = fi.elemCentroid();
-        const Point & neighbor_centroid = fi.neighborCentroid();
-        Real elem_volume = fi.elemVolume();
-        Real neighbor_volume = fi.neighborVolume();
-
-        // Now we need to perform the computations of D
-        const auto elem_a = (*_a_read[tid])(makeElemArg(elem), time);
-
-        mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
-                        UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
-                    "Coordinate systems must be the same between the two elements");
-
-        Real coord;
-        coordTransformFactor(UserObject::_subproblem, elem->subdomain_id(), elem_centroid, coord);
-
-        elem_volume *= coord;
-
-        VectorValue<ADReal> elem_D = 0;
-        for (const auto i : make_range(_dim))
-        {
-          mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
-          elem_D(i) = elem_volume / elem_a(i);
-        }
-
-        VectorValue<ADReal> face_D;
-
-        const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor), time);
-
-        coordTransformFactor(
-            UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
-        neighbor_volume *= coord;
-
-        VectorValue<ADReal> neighbor_D = 0;
-        for (const auto i : make_range(_dim))
-        {
-          mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
-          neighbor_D(i) = neighbor_volume / neighbor_a(i);
-        }
-
-        // We require this to ensure that the correct interpolation weights are used.
-        // This will change once the traditional weights are replaced by the weights
-        // that are used by the skewness-correction.
-        Moose::FV::InterpMethod coeff_interp_method =
-            correct_skewness ? Moose::FV::InterpMethod::SkewCorrectedAverage
-                             : Moose::FV::InterpMethod::Average;
-        Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
-
-        // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-        const auto face_eps = epsilon(tid)(face, time);
-
-        // Perform the pressure correction. We don't use skewness-correction on the pressure since
-        // it only influences the averaged cell gradients which cancel out in the correction
-        // below.
-        for (const auto i : make_range(_dim))
-        {
-          // "Standard" pressure-based RC interpolation
-          velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
-
-          if (_bool_correct_vf)
-          {
-            // To solve the volume force incorrect interpolation, we add back the pressure gradient
-            // to the RC-inconsistent faces regarding the marking method
-            Point loc_direction;
-            loc_direction(i) = 1.0;
-
-            // Get the value of the correction face indicator
-            Real correction_indicator;
-            if (_volume_force_correction_method == "force-consistent")
-              correction_indicator = vf_indicator_force_based(loc_direction);
-            else
-              correction_indicator = vf_indicator_pressure_based(loc_direction);
-
-            // Correct back the velocity
-            velocity(i) +=
-                face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i)) * correction_indicator;
-          }
-        }
-
-        return velocity;
+        for (const auto i : make_range(_volumetric_force.size()))
+          elem_value += (*this->_volumetric_force[i])(loc_boundary_face, time) *
+                        fi_loc->faceArea() *
+                        (fi_loc->faceCentroid() - elem->vertex_average()).norm() *
+                        (fi_loc->normal() * unit_basis_vector);
       }
       else
       {
@@ -965,7 +733,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
         for (const auto i : make_range(_volumetric_force.size()))
           elem_value += (*this->_volumetric_force[i])(loc_face, time) * fi_loc->faceArea() *
                         (fi_loc->faceCentroid() - elem->vertex_average()).norm() *
-                        (fi_loc->normal() * loc_normal);
+                        (fi_loc->normal() * unit_basis_vector);
       }
     }
     elem_value /= elem->volume();
@@ -994,7 +762,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
           neigh_value += (*this->_volumetric_force[i])(loc_boundary_face, time) *
                          fi_loc->faceArea() *
                          (fi_loc->faceCentroid() - neighbor->vertex_average()).norm() *
-                         (fi_loc->normal() * loc_normal);
+                         (fi_loc->normal() * unit_basis_vector);
       }
       else
       {
@@ -1004,7 +772,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
         for (const auto i : make_range(_volumetric_force.size()))
           neigh_value += (*this->_volumetric_force[i])(loc_face, time) * fi_loc->faceArea() *
                          (fi_loc->faceCentroid() - neighbor->vertex_average()).norm() *
-                         (fi_loc->normal() * loc_normal);
+                         (fi_loc->normal() * unit_basis_vector);
       }
     }
     neigh_value /= neighbor->volume();
