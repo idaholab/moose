@@ -437,6 +437,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
     _momentum_systems[system_i]->associateVectorToTag(
         momentum_system->get_vector(_fe_problem.vectorTagName(_pressure_gradient_tag)),
         _pressure_gradient_tag);
+    _momentum_systems[system_i]->setSolution(current_local_solution);
 
     if (verbose)
     {

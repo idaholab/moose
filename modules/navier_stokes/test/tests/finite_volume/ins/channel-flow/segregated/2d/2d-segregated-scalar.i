@@ -266,9 +266,14 @@ pressure_tag = "pressure_grad"
 
 [Outputs]
   exodus = true
+  [csv]
+    type = CSV
+    execute_on = FINAL
+  []
 []
 
 [Postprocessors]
+  inactive = "out1 out2 in1 in2"
   [out1]
     type = VolumetricFlowRate
     vel_x = vel_x
@@ -276,5 +281,33 @@ pressure_tag = "pressure_grad"
     advected_quantity = 'scalar_1'
     boundary = right
     execute_on = FINAL
+    outputs = csv
+  []
+  [in1]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_quantity = 'scalar_1'
+    boundary = left
+    execute_on = FINAL
+    outputs = csv
+  []
+  [out2]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_quantity = 'scalar_2'
+    boundary = right
+    execute_on = FINAL
+    outputs = csv
+  []
+  [in2]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_quantity = 'scalar_2'
+    boundary = left
+    execute_on = FINAL
+    outputs = csv
   []
 []

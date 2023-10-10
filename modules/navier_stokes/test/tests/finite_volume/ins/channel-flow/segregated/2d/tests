@@ -79,6 +79,16 @@
                   "with scalar transport equations in a 2D channel using the SIMPLE algorithm."
     recover = false # we don't support recovery for SIMPLE yet
   []
+  [with-scalar-conservation]
+    type = 'CSVDiff'
+    input = 2d-segregated-scalar.i
+    csvdiff = 2d-segregated-scalar_csv.csv
+    requirement = "The system shall conserve of a passive scalar while solving using the SIMPLE "
+                  "algorithm."
+    cli_args = "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
+               "scalar_2_coupled_source' Postprocessors/inactive=''"
+    recover = false # we don't support recovery for SIMPLE yet
+  []
   [with-scalar-symmetry]
     type = 'Exodiff'
     input = 2d-segregated-scalar.i
