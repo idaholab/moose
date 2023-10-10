@@ -114,8 +114,8 @@ NSFVPump::NSFVPump(const InputParameters & parameters)
         return -rho * gravity * pressure_head * area / volume;
       });
 
-  const auto mesh_blocks = _subproblem.mesh().meshSubdomains();
-  const auto pump_blocks = blockIDs();
+  const auto & mesh_blocks = _subproblem.mesh().meshSubdomains();
+  const auto & pump_blocks = blockIDs();
   std::set<SubdomainID> missing_blocks;
 
   std::set_difference(mesh_blocks.begin(),
