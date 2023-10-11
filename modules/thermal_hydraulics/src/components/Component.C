@@ -117,9 +117,9 @@ Component::checkSetupStatus(const EComponentSetupStatus & status) const
   if (_component_setup_status < status)
     mooseError(name(),
                ": The component setup status (",
-               _component_setup_status,
+               stringify(_component_setup_status),
                ") is less than the required status (",
-               status,
+               stringify(status),
                ")");
 }
 
