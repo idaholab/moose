@@ -76,7 +76,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:integrity_check", "THM:identify_loops");
     syntax.addDependency("THM:integrity_check", "THM:debug_action");
     syntax.addDependency("THM:build_mesh", "THM:init_simulation");
-    syntax.addDependency("add_mesh_generator", "THM:build_mesh");
+    // placeholder dependency: trying to get build_mesh fairly early but after MGs
+    syntax.addDependency("recover_meta_data", "THM:build_mesh");
     syntax.addDependency("THM:setup_mesh", "create_problem_complete");
     syntax.addDependency("add_fluid_properties", "THM:setup_mesh");
     syntax.addDependency("add_elemental_field_variable", "add_fluid_properties");
