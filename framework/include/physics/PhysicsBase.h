@@ -38,6 +38,19 @@ public:
   /// A new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
+  /// The default implementation of these routines will do nothing as we do not expect all Physics
+  /// to be defining an object of every type
+  virtual void addNonlinearVariables() {}
+  virtual void addInitialConditions() {}
+  virtual void addFEKernels() {}
+  virtual void addFEBCs() {}
+  virtual void addFVKernels() {}
+  virtual void addFVBCs() {}
+  virtual void addMaterials() {}
+  virtual void addFunctorMaterials() {}
+  virtual void addUserObjects() {}
+  virtual void addPostprocessors() {}
+
 protected:
   bool isTransient() const;
 
@@ -121,20 +134,6 @@ protected:
   std::vector<SubdomainName> _blocks;
 
 private:
-  /// The default implementation of these routines will do nothing as we do not expect all Physics
-  /// to be defining an object of every type
-  /// We keep these private for now, may become public soon
-  virtual void addNonlinearVariables() {}
-  virtual void addInitialConditions(){};
-  virtual void addFEKernels() {}
-  virtual void addFEBCs() {}
-  virtual void addFVKernels() {}
-  virtual void addFVBCs() {}
-  virtual void addMaterials() {}
-  virtual void addFunctorMaterials() {}
-  virtual void addUserObjects() {}
-  virtual void addPostprocessors() {}
-
   /// Add any relationship manager needed by the physics, for example for 'ghosting' layers of
   /// near process boundaries
   // virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type);

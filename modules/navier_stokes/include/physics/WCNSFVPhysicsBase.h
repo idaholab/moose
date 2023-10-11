@@ -30,12 +30,12 @@ public:
   virtual void execute() override{};
   virtual void finalize() override{};
 
-protected:
   /// Add user objects: for now mainly the Rhie Chow user object
   virtual void addUserObjects() override;
   /// Add postprocessors, could be moved up to the base class
   void addPostprocessors() override;
 
+protected:
   void adjustRMGhostLayers();
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
 
