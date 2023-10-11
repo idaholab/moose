@@ -153,6 +153,7 @@ private:
   /// Needed to create every object
   friend class AddPhysicsAction;
   friend class FileMeshPhysicsComponent;
+  friend class FileMeshFlowComponent;
 };
 
 template <typename T, typename S>

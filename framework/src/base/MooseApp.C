@@ -2484,23 +2484,23 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
     {
       if (rm->attachGeometricEarly())
         mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, mesh));
-      else
-      {
-        // If we have a geometric ghosting functor that can't be attached early, then we have to
-        // prevent the mesh from deleting remote elements
-        moose_mesh.allowRemoteElementRemoval(false);
+      // else
+      // {
+      //   // If we have a geometric ghosting functor that can't be attached early, then we have to
+      //   // prevent the mesh from deleting remote elements
+      //   moose_mesh.allowRemoteElementRemoval(false);
 
-        if (const MeshBase * const moose_mesh_base = moose_mesh.getMeshPtr())
-        {
-          if (moose_mesh_base != &mesh)
-            mooseError("The MooseMesh MeshBase and the MeshBase we're trying to attach "
-                       "relationship managers to are different");
-        }
-        else
-          // The MeshBase isn't attached to the MooseMesh yet, so have to tell it not to remove
-          // remote elements independently
-          mesh.allow_remote_element_removal(false);
-      }
+      //   if (const MeshBase * const moose_mesh_base = moose_mesh.getMeshPtr())
+      //   {
+      //     if (moose_mesh_base != &mesh)
+      //       mooseError("The MooseMesh MeshBase and the MeshBase we're trying to attach "
+      //                  "relationship managers to are different");
+      //   }
+      //   else
+      //     // The MeshBase isn't attached to the MooseMesh yet, so have to tell it not to remove
+      //     // remote elements independently
+      //     mesh.allow_remote_element_removal(false);
+      // }
     }
   }
 }
