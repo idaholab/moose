@@ -21,13 +21,14 @@ FileMeshWCNSFVComponent::validParams()
   params.addClassDescription("Component that creates a Physics object active on it.");
 
   // Choose which physics to turn on
-  params.addParam<bool>("add_flow_equations", "Whether to add equations for mass & momentum");
-  params.addParam<bool>("add_energy_equation", "Whether to add the fluid energy equation");
-  params.addParam<bool>("add_scalar_equations", "Whether to add the scalar advection equations");
+  params.addParam<bool>("add_flow_equations", true, "Whether to add equations for mass & momentum");
+  params.addParam<bool>("add_energy_equation", true, "Whether to add the fluid energy equation");
+  params.addParam<bool>(
+      "add_scalar_equations", false, "Whether to add the scalar advection equations");
 
   // Add parameters from the various physics we want active on the component
-  // params += WCNSFVFlowPhysics::validParams();
-  // params += WCNSFVHeatAdvectionPhysics::validParams();
+  params += WCNSFVFlowPhysics::validParams();
+  params += WCNSFVHeatAdvectionPhysics::validParams();
   // params += WCNSFVScalarAdvectionPhysics::validParams;
   // params += WCNSFVTurbulencePhysics::validParams;
 
@@ -52,27 +53,32 @@ FileMeshWCNSFVComponent::init()
 {
   FileMeshComponent::init();
 
-  // It s either the const_cast or loosing the ability to control Physics parameters
-  // from the component's parameters. We would still be able to use Controls directly on the
-  // objects created by the Physics
-  InputParameters & nonconst_params = const_cast<InputParameters &>(parameters());
-
   // Before this point, we did not have a Problem object, so we could not add the Physics
-  if (true) // getParam<bool>("add_flow_equations"))
+  if (getParam<bool>("add_flow_equations"))
   {
-    getProblem().addPhysics("WCNSFVFlowPhysics", prefix() + "_flow", nonconst_params);
-    _physics_names.push_back(prefix() + "_flow");
+    InputParameters params = getFactory().getValidParams("WCNSFVFlowPhysics");
+    params.applyParameters(parameters());
+    getProblem().addPhysics("WCNSFVFlowPhysics", prefix() + "flow", params);
+    _physics_names.push_back(prefix() + "flow");
   }
   if (getParam<bool>("add_energy_equation"))
   {
-    getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", prefix() + "_energy", nonconst_params);
-    _physics_names.push_back(prefix() + "_energy");
+    InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
+    params.applyParameters(parameters());
+    if (getParam<bool>("add_flow_equations"))
+      params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
+    getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", prefix() + "energy", params);
+    _physics_names.push_back(prefix() + "energy");
   }
-  // if (getParam<bool>("add_scalar_equations"))
-  // {
-  //   getProblem().addPhysics("WCNSFVScalarAdvectionPhysics", prefix() + "_scalar",
-  //   nonconst_params); _physics_names.push_back(prefix() + "_scalar");
-  // }
+  if (getParam<bool>("add_scalar_equations"))
+  {
+    InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
+    params.applyParameters(parameters());
+    if (getParam<bool>("add_flow_equations"))
+      params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
+    getProblem().addPhysics("WCNSFVScalarAdvectionPhysics", prefix() + "scalar", params);
+    _physics_names.push_back(prefix() + "scalar");
+  }
 
   // Keep a handle on the Physics
   for (const auto & physics_name : _physics_names)
@@ -81,4 +87,28 @@ FileMeshWCNSFVComponent::init()
   for (auto physics : _physics)
     // Add block restriction
     physics->addBlocks(getSubdomainNames());
+}
+
+void
+FileMeshWCNSFVComponent::addVariables()
+{
+  for (auto physics : _physics)
+    physics->addNonlinearVariables();
+}
+
+void
+FileMeshWCNSFVComponent::addMooseObjects()
+{
+  // It should not matter that we dont add objects by categories
+  for (auto physics : _physics)
+  {
+    // Rhie Chow user object must be added early
+    physics->addUserObjects();
+    physics->addInitialConditions();
+    physics->addFVKernels();
+    physics->addFVBCs();
+    physics->addMaterials();
+    physics->addFunctorMaterials();
+    physics->addPostprocessors();
+  }
 }

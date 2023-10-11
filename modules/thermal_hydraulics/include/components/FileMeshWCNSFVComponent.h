@@ -27,8 +27,8 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
   // Forward calls to the Physics to build the necessary object
-  virtual void addVariables() override{};
-  virtual void addMooseObjects() override{};
+  virtual void addVariables() override;
+  virtual void addMooseObjects() override;
 
 protected:
   virtual void init() override;
