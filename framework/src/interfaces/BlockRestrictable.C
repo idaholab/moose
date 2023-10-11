@@ -161,6 +161,10 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
           msg << sep << id;
         sep = ", ";
       }
+      std::vector<SubdomainID> valid_ids_vec(valid_ids.begin(), valid_ids.end());
+      auto valid_names = _blk_mesh->getSubdomainNames(valid_ids_vec);
+      msg << "\nBlocks names (resp. ids) that do exist: " << Moose::stringify(valid_names) << " ("
+          << Moose::stringify(valid_ids) << ")";
       moose_object->paramError("block", msg.str());
     }
   }
