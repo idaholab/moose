@@ -39,7 +39,7 @@ public:
 
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction direction) override;
-  virtual bool converged() override;
+  virtual bool nlConverged(unsigned int) override;
   virtual void initialSetup() override;
 
 protected:

@@ -285,7 +285,7 @@ InterWrapper1PhaseProblem::~InterWrapper1PhaseProblem()
 }
 
 bool
-InterWrapper1PhaseProblem::converged()
+InterWrapper1PhaseProblem::nlConverged(unsigned int)
 {
   return _converged;
 }
