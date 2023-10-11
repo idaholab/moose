@@ -31,12 +31,15 @@ public:
   /// Component setup status type
   enum EComponentSetupStatus
   {
-    CREATED,                  ///< only created
-    MESH_PREPARED,            ///< mesh set up
-    INITIALIZED_PRIMARY,      ///< mesh set up, called primary init
-    INITIALIZED_SECONDARY,    ///< mesh set up, called both inits
-    CHECKED                   ///< mesh set up, called both inits, checked
+    CREATED,               ///< only created
+    MESH_PREPARED,         ///< mesh set up
+    INITIALIZED_PRIMARY,   ///< mesh set up, called primary init
+    INITIALIZED_SECONDARY, ///< mesh set up, called both inits
+    CHECKED                ///< mesh set up, called both inits, checked
   };
+
+  /// Return a string for the setup status
+  std::string stringify(EComponentSetupStatus status) const;
 
   /**
    * Get the component name
