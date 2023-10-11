@@ -21,4 +21,28 @@
     valgrind = HEAVY
     requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component, abstracting the flow equation definitions using the Physics system.'
   []
+  # [two_physics]
+  #   type = Exodiff
+  #   input = single_physics.i
+  #   exodiff = single_physics_out.e
+  #   abs_zero = 5e-6
+  #   prereq = 'generate_mesh'
+  #   method = "!dbg"
+  #   installation_type = in_tree
+  #   max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
+  #   valgrind = HEAVY
+  #   requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component, abstracting the flow equation definitions using the Physics system.'
+  # []
+  [two_components_one_physics]
+    type = Exodiff
+    input = two_physics.i
+    exodiff = two_physics_out.e
+    abs_zero = 5e-6
+    prereq = 'generate_mesh'
+    method = "!dbg"
+    installation_type = in_tree
+    max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
+    valgrind = HEAVY
+    requirement = 'The system shall be able to model two components sharing the same Physics.'
+  []
 []
