@@ -75,6 +75,8 @@ WCNSFVPhysicsBase::addUserObjects()
 void
 WCNSFVPhysicsBase::addRhieChowUserObjects()
 {
+  mooseAssert(_dim, "0-dimension not supported");
+
   // This means we are solving for velocity. We dont need external RC coefficients
   bool has_flow_equations = nonLinearVariableExists(_velocity_names[0], false);
 
