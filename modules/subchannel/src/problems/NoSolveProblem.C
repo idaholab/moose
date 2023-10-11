@@ -34,7 +34,7 @@ NoSolveProblem::externalSolve()
 void NoSolveProblem::syncSolutions(Direction /*direction*/) {}
 
 bool
-NoSolveProblem::converged()
+NoSolveProblem::nlConverged(unsigned int)
 {
   return true;
 }

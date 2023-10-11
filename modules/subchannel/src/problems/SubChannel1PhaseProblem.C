@@ -310,7 +310,7 @@ SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
 }
 
 bool
-SubChannel1PhaseProblem::converged()
+SubChannel1PhaseProblem::nlConverged(unsigned int)
 {
   return _converged;
 }
