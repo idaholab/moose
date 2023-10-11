@@ -283,18 +283,6 @@ PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
   }
 }
 
-<<<<<<< HEAD
-template <typename T>
-void
-PhysicsBase::assertParamDefined(const std::string & param1) const
-{
-  mooseAssert(parameters().have_parameter<T>(param1),
-              "Parameter '" + param1 + "' is not defined with type " +
-                  MooseUtils::prettyCppType<T>() + ". Check your code.");
-}
-
-=======
->>>>>>> ce4b71625f (fixup! Add block consistency checks from NSFVAction at physics level)
 template <typename T, typename S>
 void
 PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
