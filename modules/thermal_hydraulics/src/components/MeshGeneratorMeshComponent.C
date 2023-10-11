@@ -55,11 +55,8 @@ MeshGeneratorMeshComponent::buildMesh()
   // auto & mg_sys = _app.getMeshGeneratorSystem();
   // auto mg_mesh = mg_sys.getSavedMesh(_mg_name + "_" + name());
 
-  std::cout << "Building mesh " << std::endl;
-
   // std::vector<std::string> subdomain_names;
   // auto & thm_mesh = mesh();
-
   // // maps from Exodus IDs to THMMesh IDs
   // std::map<int, unsigned int> node_id_map;
   // std::map<int, unsigned int> elem_id_map;

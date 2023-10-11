@@ -9,27 +9,34 @@
 
 #pragma once
 
-#include "FileMeshPhysicsComponent.h"
+#include "FileMeshComponent.h"
 
-class NavierStokesFlowPhysics;
+class WCNSFVPhysicsBase;
 
 /**
- * Create a component with a single Navier Stokes Flow Physics object active on it
+ * Component with Navier Stokes module weakly compressible finite volume Physics objects active
+ * on it
  */
-class FileMeshFlowComponent : public FileMeshPhysicsComponent
+class FileMeshWCNSFVComponent : public FileMeshComponent
 {
 public:
   static InputParameters validParams();
 
-  FileMeshFlowComponent(const InputParameters & parameters);
+  FileMeshWCNSFVComponent(const InputParameters & parameters);
 
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-  // These objects are added by the Physics already
+
+  // Forward calls to the Physics to build the necessary object
   virtual void addVariables() override{};
   virtual void addMooseObjects() override{};
 
 protected:
   virtual void init() override;
+
+  virtual std::vector<SubdomainName> getBlocks() const { return getSubdomainNames(); }
+  virtual Factory & getFactory() { return getMooseApp().getFactory(); }
+  virtual FEProblemBase & getProblem() { return getMooseApp().feProblem(); }
+  virtual const MooseMesh & getMesh() const { return constMesh(); }
 
   // virtual void addNSNonlinearVariable(const std::string & var_type,
   //                                     const std::string & var_name,
@@ -49,8 +56,12 @@ protected:
   // {
   //   getTHMProblem().addSimInitialCondition(type, name, params);
   // }
+  virtual std::string prefix() const { return name() + ":"; }
 
 private:
   /// Physics object that creates the equations on this component
-  std::vector<NavierStokesFlowPhysics *> _physics;
+  std::vector<WCNSFVPhysicsBase *> _physics;
+
+  /// Keeps track of the names of the Physics
+  std::vector<PhysicsName> _physics_names;
 };

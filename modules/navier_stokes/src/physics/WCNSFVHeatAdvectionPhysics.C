@@ -189,8 +189,6 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyAdvectionKernels()
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("energy_advection_interpolation");
 
-  std::cout << "Using " << rhieChowUOName() << std::endl;
-
   getProblem().addFVKernel(kernel_type, kernel_name, params);
 }
 
