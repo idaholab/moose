@@ -21,27 +21,27 @@
     input = left_block_sidesets
     subdomain_id = 1
   []
-  [./lowrig]
+  [lowrig]
     type = SubdomainBoundingBoxGenerator
     input = 'left_block_id'
     block_id = 2
     bottom_left = '0 -1 0'
     top_right = '1 0 0'
-  [../]
-  [./upplef]
+  []
+  [upplef]
     type = SubdomainBoundingBoxGenerator
     input = 'lowrig'
     block_id = 3
     bottom_left = '-1 0 0'
     top_right = '0 1 0'
-  [../]
-  [./upprig]
+  []
+  [upprig]
     type = SubdomainBoundingBoxGenerator
     input = 'upplef'
     block_id = 4
     bottom_left = '0 0 0'
     top_right = '1 1 0'
-  [../]
+  []
   [left]
     type = LowerDBlockFromSidesetGenerator
     input = upprig
@@ -88,16 +88,16 @@
     order = SECOND
     family = SCALAR
   []
-  [./lm1]
+  [lm1]
     order = FIRST
     family = LAGRANGE
     block = secondary_left
-  [../]
-  [./lm2]
+  []
+  [lm2]
     order = FIRST
     family = LAGRANGE
     block = secondary_bottom
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -105,14 +105,14 @@
     order = SECOND
     family = SCALAR
   []
-  [./flux_x]
+  [flux_x]
       order = FIRST
       family = MONOMIAL
-  [../]
-  [./flux_y]
+  []
+  [flux_y]
       order = FIRST
       family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxScalarKernels]
@@ -125,22 +125,22 @@
 []
 
 [AuxKernels]
-  [./flux_x]
+  [flux_x]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_x
     diffusion_variable = u
     component = x
     block = '1 2 3 4'
-  [../]
-  [./flux_y]
+  []
+  [flux_y]
     type = DiffusionFluxAux
     diffusivity = 'conductivity'
     variable = flux_y
     diffusion_variable = u
     component = y
     block = '1 2 3 4'
-  [../]
+  []
 []
 
 [Kernels]
@@ -242,8 +242,8 @@
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       NONZERO               1e-15                   strumpack'
   solve_type = NEWTON
 []
 
