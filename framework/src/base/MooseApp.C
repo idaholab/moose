@@ -1709,8 +1709,6 @@ MooseApp::getCheckpointDirectories() const
 
   // Add the directories added with Outputs/checkpoint=true input syntax
   checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
-  // Add the directories added with the autosave checkpoint input syntax
-  checkpoint_dirs.push_back("autosave_cp");
 
   // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");

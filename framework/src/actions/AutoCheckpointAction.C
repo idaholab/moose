@@ -41,7 +41,7 @@ AutoCheckpointAction::act()
     // If there isn't an existing one, init a new one
     auto cp_params = _factory.getValidParams("Checkpoint");
     cp_params.setParameters("is_autosave", AutosaveType::SYSTEM_AUTOSAVE);
-    cp_params.setParameters("file_base", std::string("autosave"));
-    _problem->addOutput("Checkpoint", "autosave", cp_params);
+    cp_params.set<bool>("_built_by_moose") = true;
+    _problem->addOutput("Checkpoint", "checkpoint", cp_params);
   }
 }
