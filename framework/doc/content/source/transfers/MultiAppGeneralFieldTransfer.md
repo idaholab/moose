@@ -110,7 +110,7 @@ and nodes or centroids for:
 
 !alert note
 Unlike block and boundary restriction which are inclusive (more origin blocks/boundaries specified
-means a larger source), specifiying more `Positions` further restricts the considered source for
+means a larger source), specifying more `Positions` further restricts the considered source for
 a given target point.
 
 !alert note

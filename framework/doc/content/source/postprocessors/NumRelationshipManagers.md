@@ -1,9 +1,9 @@
 # NumRelationshipManagers
 
-The `NumRelationshipManagers` class outputs the total number of relationship mangagers
+The `NumRelationshipManagers` class outputs the total number of relationship managers
 present in the simulation. The type of relationship managers counted can be
 controlled with the `rm_type` parameter. Available options are
-(case-insesitive): 'geometric, 'algebraic', 'coupling', and 'all'. The default
+(case-insensitive): 'geometric, 'algebraic', 'coupling', and 'all'. The default
 is 'all'.
 
 ## Syntax and Description

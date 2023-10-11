@@ -1,6 +1,6 @@
 # The `hit` command
 
-*Hierarchial Input Text* (HIT) is the file format that MOOSE input files (and
+*Hierarchical Input Text* (HIT) is the file format that MOOSE input files (and
 `tests` specs) are built upon. HIT is a key-value pair syntax with multilevel
 block hierarchies. To deal with HIT files we provide the `hit` executable, which
 is automatically built under `framework/contrib/hit`. This command line tool
@@ -107,7 +107,7 @@ list of files to search follow.
 hit format [-i] [-style file] input
 ```
 
-The format subcommand will reformat a valid HIT file into a cannonical form with
+The format subcommand will reformat a valid HIT file into a canonical form with
 a consistent indentation and potentially sorted sections and parameters. The
 name of the file to be formatted is given as the `input` parameter. When
 specifying `-` as the filename the input is taken from stdin.

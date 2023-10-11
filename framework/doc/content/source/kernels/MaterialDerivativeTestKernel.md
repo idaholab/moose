@@ -42,7 +42,7 @@ and `var2 = v`. Then as long as we pass `u` and `v` as coupled variables in the
 `args` parameter of `MaterialDerivativeTestKernel`, we will automatically access
 the correct material property derivatives in our kernel.
 
-This kernel puts a seleted scalar (`Real` type) material property (`material_property`) in the residual vector
+This kernel puts a selected scalar (`Real` type) material property (`material_property`) in the residual vector
 and assembles the Jacobian using the derivatives of the material property as provided by the
 [DerivativeMaterialInterface](/DerivativeMaterialInterface.md).
 

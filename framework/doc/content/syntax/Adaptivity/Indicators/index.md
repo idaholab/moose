@@ -5,7 +5,7 @@ serve to provide a measurement of "error" that are used to inform the
 [syntax/Adaptivity/Markers/index.md]. When creating a custom `Indicator` object the child object
 must override the `computeIndicator` method.
 
-Allthough created for the adaptivity system, indicators can be used stand-alone for computing error
+Although created for the adaptivity system, indicators can be used stand-alone for computing error
 values, since the values computed are simply auxiliary variables, see [AuxVariables/index.md].
 
 

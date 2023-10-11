@@ -55,7 +55,7 @@ The preconditioning matrix $\mathbf{M}$ can be viewed with the PETSc option `-ks
 
 ## Solve Type
 
-The general method in which the nonlinear system is solved is controled by the [!param](/Executioner/Steady/solve_type) parameter. Below is a description of each of the options:
+The general method in which the nonlinear system is solved is controlled by the [!param](/Executioner/Steady/solve_type) parameter. Below is a description of each of the options:
 
 - `PJFNK` is the default solve type. It makes the executioner perform Jacobian-free linear solves at each Newton iteration with the preconditioner built from the preconditioning matrix $\mathbf{M}$. By default, the preconditioning matrix is block-diagonal with each block corresponding to a single MOOSE variable without custom preconditioning, refer to [Preconditioning](/Preconditioning/index.md). Off-diagonal Jacobian terms are ignored. It essentially activates the matrix-free Jacobian-vector products, and the preconditioning matrix.
 - `JFNK` means there is no preconditioning during the Krylov solve. No Jacobian will be assembled. It essentially activates the matrix-free Jacobian-vector products and no preconditioning matrix.

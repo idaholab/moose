@@ -27,7 +27,7 @@ output on `TIMESTEP_END`.
 
 !alert note
 Until October 2018 this Postprocessor defaulted to reporting *virtual memory*.
-This was changed to the more relavant *physical memory* to avoid misleading
+This was changed to the more relevant *physical memory* to avoid misleading
 benchmark results to be generated.
 
 For a VectorPostprocessor that provides detailed per MPI rank memory statistics see

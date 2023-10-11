@@ -19,10 +19,10 @@ Developers should read all sections; users can find [#KSB-parameters] described 
 
 Each `Kernel` object has a +focus+ field variable or spatial variable; its job is to contribute to the
 residual as well as the row of the Jacobian matrix. Herein, as in the source code of `Kernels`, this
-spatial variable will be called `_var`. In a coupled (multi-phyics) weak form, all domain integral terms
+spatial variable will be called `_var`. In a coupled (multi-physics) weak form, all domain integral terms
 containing the test function of `_var` are potential candidates for `Kernel` contributions.
 
-The philosphy of the scalar augmentation class `KernelScalarBase` is to add a focus scalar variable
+The philosophy of the scalar augmentation class `KernelScalarBase` is to add a focus scalar variable
 referred to as `_kappa` to the `Kernel` object so that all terms in the coupled weak form that involve
 `_var`, `_kappa`, and/or their test functions can be assembled in one or multiple class instances.
 This philosophy is similar to how the lower dimensional variable `_lambda` is added to the element faces

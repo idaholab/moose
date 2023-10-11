@@ -62,7 +62,7 @@ Admissible types are:
     block=Mesh/transf
 
 
-Since opposite sides need to have the same number of points, we consider top-bottom edges to have `nx` points, and left-right edges `ny` points. By default they are taken to be equidistant, unless the user specifies a distancing via the parameters `bias_x` or `bias_y`. Different point distributions can propagate on curvilinear edges, generating domains as in Fig. 5. Note that the bias along an edge is implemented as propapagted by the parametrization, so for a parametrized edge $x(r),\ y(r)$ the bias is constructed first for the parameter $r$ and propagated as the parametrized edge is generated. 
+Since opposite sides need to have the same number of points, we consider top-bottom edges to have `nx` points, and left-right edges `ny` points. By default they are taken to be equidistant, unless the user specifies a distancing via the parameters `bias_x` or `bias_y`. Different point distributions can propagate on curvilinear edges, generating domains as in Fig. 5. Note that the bias along an edge is implemented as propagated by the parametrization, so for a parametrized edge $x(r),\ y(r)$ the bias is constructed first for the parameter $r$ and propagated as the parametrized edge is generated. 
 
 
 !syntax parameters /Mesh/TransfiniteMeshGenerator

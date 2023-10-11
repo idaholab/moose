@@ -14,7 +14,7 @@ The performance graph is part of an ecosystem of objects:
 - `PerfGraphInterface`: An interface class for gaining access to the `PerfGraph` for adding timers and pulling timing data
 - [/PerfGraphOutput.md]: Responsible for printing out the graph
 - [/PerfGraphData.md]: `Postprocessor` for outputting time from the graph
-- [/PerfGraphLivePrint.md]: Object responsible for printing performance information duruing the run
+- [/PerfGraphLivePrint.md]: Object responsible for printing performance information during the run
 
 The `PerfGraph` works by utilizing the `TIME_SECTION` macro to specify that the current scope should be timed (see below for more information).  The timed sections are placed in an execution tree and the current "stack" of sections is kept up to date.  When timing starts, a snapshot of both the memory and current time are taken then these are compared when the current scope ends in order to tally time for that section of code.  The `PerfGraphLivePrint` object is watching the stream of what is executing and possibly printing out what is happening if it takes too long (or uses too much memory).  At the end of the run the `PerfGraphOutput` object is responsible for dumping out the relevant information.
 
@@ -25,7 +25,7 @@ The `PerfGraph` works by utilizing the `TIME_SECTION` macro to specify that the 
 
 To use for timing, make sure that your system inherits from `PerfGraphInterface`.  There are a couple of different constructors for `PerfGraphInterface`:
 
-The first one allows you to pass in a `MooseObject*` and *infer* a "prefix" based on the `type()` of the object (the name of the object).  The "prefix" is prependended to the name of the timed sections to give uniform naming from each object
+The first one allows you to pass in a `MooseObject*` and *infer* a "prefix" based on the `type()` of the object (the name of the object).  The "prefix" is prepended to the name of the timed sections to give uniform naming from each object
 
 !listing framework/include/interfaces/PerfGraphInterface.h line=PerfGraphInterface(const MooseObject * moose_object);
 
@@ -39,7 +39,7 @@ The final one is for when your object is NOT a `MooseObject` inherited object.  
 
 ## Logging Levels
 
-The `PerfGraph` relies on loggging "levels" to determine how verbose the output should be.  When timing a section, be sure to set the level appropriately so that users are not inundated with too much noise.  The levels are:
+The `PerfGraph` relies on logging "levels" to determine how verbose the output should be.  When timing a section, be sure to set the level appropriately so that users are not inundated with too much noise.  The levels are:
 
 - 0: Just the "root" - the whole application time
 - 1: Minimal set of the most important routines (residual/jacobian computation, etc.)

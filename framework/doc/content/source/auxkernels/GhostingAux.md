@@ -4,7 +4,7 @@
 
 # Description
 
-`GhostingAux` allows you to visualize what the current algebraic and geomtric ghosting functors (and RelationshipManagers) are going to do.  This is useful in tracking down both under and over-ghosting.
+`GhostingAux` allows you to visualize what the current algebraic and geometric ghosting functors (and RelationshipManagers) are going to do.  This is useful in tracking down both under and over-ghosting.
 
 At any one time it will only show you the ghosted elements for one processor ID.
 
