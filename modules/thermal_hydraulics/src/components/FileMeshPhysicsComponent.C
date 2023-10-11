@@ -17,8 +17,23 @@ FileMeshPhysicsComponent::validParams()
 {
   InputParameters params = FileMeshComponent::validParams();
 
-  params.addClassDescription("Component with a single physics active on it.");
+  params.addClassDescription("Component with Physics objects active on it.");
   params.addParam<std::vector<PhysicsName>>("physics", "Physics object(s) active on the Component");
+
+  // We do not know which flow physics would be active so we cannot have the parameters of the flow
+  // on the component. Parameters are not dynamic, they are known at compile time.
+  // Some flow parameters could be nice to have on the component, such as in order the boundary
+  // condition specifications, the heat source, etc. You quickly start to want all the parameters of
+  // the Physics onto the component, which defeats the purpose of trying to factor out Physics.
+  // Instead we should rely on:
+  // - junctions to create boundary conditions
+
+  // Having the flow parameters on the component would also undesirably lead to the following:
+  // - having nearly a full input file on every flow component
+  // - having to create a new component every time we have a new Physics
+
+  // If you want to do that anyway, look at FileMeshWCNSFVFlowComponent
+
   return params;
 }
 

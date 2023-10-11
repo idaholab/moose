@@ -35,6 +35,9 @@ public:
 
   PhysicsBase(const InputParameters & parameters);
 
+  /// A new blocks to the Physics
+  void addBlocks(const std::vector<SubdomainName> & blocks);
+
 protected:
   bool isTransient() const;
 
@@ -109,8 +112,6 @@ protected:
   /// Add a nonlinear variable to the Physics
   // TODO not the right name!
   void addNonlinearVariable(const VariableName & var_name) { _nl_var_names.push_back(var_name); }
-  /// A new blocks to the Physics
-  void addBlocks(const std::vector<SubdomainName> & blocks);
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   unsigned int _dim;
