@@ -28,9 +28,13 @@ public:
 protected:
   /**
    * Routine to compute this object's strong residual (e.g. not multipled by area). This routine
-   * should also populate the _ae and _an coefficients
+   * can also populate the _ae and _an coefficients
+   * @param populate_a_coeffs Boolean to let the function know that it should also populate the
+   *                          a coefficients in a monolithic RC approach
    */
-  ADReal computeStrongResidual();
+  ADReal computeStrongResidual(const bool populate_a_coeffs);
+
+  virtual ADReal computeSegregatedContribution() override;
 
   /// The dimension of the simulation
   const unsigned int _dim;

@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [block_restricted_simple]
+    type = 'Exodiff'
+    input = 2d-segregated-block.i
+    exodiff = 2d-segregated-block_out.e
+    requirement = 'The system should be able to solve the Navier-Stokes equations with block-restricted variables using the SIMPLE algorithm.'
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+[]

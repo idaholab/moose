@@ -27,6 +27,34 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 }
 
 void
+INSFVFluxKernel::computeResidual(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxKernel::computeResidual(fi);
+}
+
+void
+INSFVFluxKernel::computeJacobian(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxKernel::computeJacobian(fi);
+}
+
+void
+INSFVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxKernel::computeResidualAndJacobian(fi);
+}
+
+ADReal
+INSFVFluxKernel::computeQpResidual()
+{
+  mooseAssert(_rc_uo.segregated(), "We should not get here if we are not segregated!");
+  return computeSegregatedContribution();
+}
+
+void
 INSFVFluxKernel::addResidualAndJacobian(const ADReal & residual)
 {
   auto process_residual = [this](const ADReal & residual, const Elem & elem)

@@ -261,6 +261,17 @@ SubProblem::verifyVectorTags() const
   return true;
 }
 
+void
+SubProblem::selectVectorTagsFromSystem(const SystemBase & system,
+                                       const std::vector<VectorTag> & input_vector_tags,
+                                       std::set<TagID> & selected_tags)
+{
+  selected_tags.clear();
+  for (const auto & vector_tag : input_vector_tags)
+    if (system.hasVector(vector_tag._id))
+      selected_tags.insert(vector_tag._id);
+}
+
 TagID
 SubProblem::addMatrixTag(TagName tag_name)
 {

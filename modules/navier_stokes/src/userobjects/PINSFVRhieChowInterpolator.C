@@ -41,7 +41,7 @@ PINSFVRhieChowInterpolator::validParams()
 PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & params)
   : INSFVRhieChowInterpolator(params),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _smoothed_eps(_moose_mesh, NS::smoothed_porosity),
+    _smoothed_eps(_moose_mesh, NS::smoothed_porosity, /*extrapolated_boundary*/ true),
     _epss(libMesh::n_threads(), nullptr),
     _smoothed_epss(libMesh::n_threads(), nullptr),
     _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
@@ -145,14 +145,14 @@ PINSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) con
   if (&fi.elem() == libMesh::remote_elem)
     return false;
 
-  bool on_us = _sub_ids.count(fi.elem().subdomain_id());
+  bool on_us = blockIDs().count(fi.elem().subdomain_id());
 
   if (fi.neighborPtr())
   {
     if (&fi.neighbor() == libMesh::remote_elem)
       return false;
 
-    on_us = on_us || _sub_ids.count(fi.neighbor().subdomain_id());
+    on_us = on_us || blockIDs().count(fi.neighbor().subdomain_id());
   }
 
   if (!on_us)
@@ -169,10 +169,10 @@ PINSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) con
   // remote. If we are not a boundary face, then at this point we're safe
   //
 
-  if (!Moose::FV::onBoundary(_sub_ids, fi))
+  if (!Moose::FV::onBoundary(blockIDs(), fi))
     return true;
 
-  const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
+  const auto & boundary_elem = (fi.neighborPtr() && blockIDs().count(fi.neighbor().subdomain_id()))
                                    ? fi.neighbor()
                                    : fi.elem();
 

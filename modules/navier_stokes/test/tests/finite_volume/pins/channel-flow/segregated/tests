@@ -1,0 +1,46 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [2d-momentum-pressure]
+    type = 'Exodiff'
+    input = 2d-momentum.i
+    exodiff = 2d-momentum_out.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
+                  "in a 2D channel using the SIMPLE algorithm."
+    abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [2d-momentum-pressure-slip]
+    type = 'Exodiff'
+    input = 2d-momentum.i
+    cli_args = "FVBCs/inactive='no-slip-u no-slip-v' Outputs/file_base='2d-momentum-slip'"
+    exodiff = 2d-momentum-slip.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
+                  "in a 2D channel with slip and symmetry boundary conditions using the SIMPLE "
+                  "algorithm."
+    abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [2d-momentum-friction]
+    type = 'Exodiff'
+    input = 2d-momentum.i
+    cli_args = "FVBCs/inactive='no-slip-u no-slip-v' FVKernels/inactive='' "
+               "Outputs/file_base='2d-momentum-slip-friction'"
+    exodiff = 2d-momentum-slip-friction.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
+                  "in a 2D channel with friction caused by porous media using the SIMPLE algorithm."
+    abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [2d-heated]
+    type = 'Exodiff'
+    input = 2d-heated.i
+    exodiff = 2d-heated_out.e
+    requirement = "The system shall be able to solve the steady-state porous Navier-Stokes problem "
+                  "coupled with both solid and fluid energy equations in a 2D channel using the "
+                  "SIMPLE algorithm."
+    abs_zero = 1e-8
+    recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
+  []
+[]

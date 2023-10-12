@@ -26,7 +26,9 @@ protected:
    * Routine to compute this object's strong residual (e.g. not multiplied by area). This routine
    * should also populate the _ae and _an coefficients
    */
-  virtual ADReal computeStrongResidual();
+  virtual ADReal computeStrongResidual(const bool populate_a_coeffs);
+
+  virtual ADReal computeSegregatedContribution() override;
 
   /// The dynamic viscosity
   const Moose::Functor<ADReal> & _mu;

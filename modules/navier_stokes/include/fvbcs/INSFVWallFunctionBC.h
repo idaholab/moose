@@ -28,6 +28,8 @@ public:
 protected:
   ADReal computeStrongResidual();
 
+  ADReal computeSegregatedContribution() override;
+
   /// the dimension of the simulation
   const unsigned int _dim;
 

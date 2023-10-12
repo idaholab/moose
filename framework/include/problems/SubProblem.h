@@ -878,6 +878,16 @@ public:
    */
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const = 0;
 
+  /**
+   * Select the vector tags which belong to a specific system
+   * @param system Reference to the nonlinear system
+   * @param input_vector_tags A vector of vector tags
+   * @param selected_tags A set which gets populated by the tag-ids that belong to the system
+   */
+  static void selectVectorTagsFromSystem(const SystemBase & system,
+                                         const std::vector<VectorTag> & input_vector_tags,
+                                         std::set<TagID> & selected_tags);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

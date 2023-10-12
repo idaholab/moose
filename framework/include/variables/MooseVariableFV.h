@@ -470,7 +470,6 @@ public:
    */
   virtual void requireQpComputations() {}
 
-protected:
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base
    * implementation we only inspect the face information object for whether there are Dirichlet
@@ -487,6 +486,7 @@ protected:
                                        const Elem * elem,
                                        const Moose::StateArg & state) const;
 
+protected:
   /**
    * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be
    * sure that \p isDirichletBoundaryFace returns true. In the base implementation we only inspect

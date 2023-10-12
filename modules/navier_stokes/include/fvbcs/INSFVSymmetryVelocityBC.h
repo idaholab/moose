@@ -26,6 +26,8 @@ public:
   void gatherRCData(const FaceInfo & fi) override;
 
 protected:
+  ADReal computeSegregatedContribution() override;
+
   /// x-velocity
   const Moose::Functor<ADReal> & _u_functor;
   /// y-velocity
