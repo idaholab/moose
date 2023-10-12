@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADConvectiveHeatTransferCoefficientMaterial.h"
+#include "FlowModelSinglePhase.h"
 #include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADConvectiveHeatTransferCoefficientMaterial);
@@ -16,9 +17,14 @@ InputParameters
 ADConvectiveHeatTransferCoefficientMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addParam<MaterialPropertyName>("Hw",
+                                        FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL,
+                                        "Heat transfer coefficient material property");
   params.addRequiredParam<MaterialPropertyName>("Nu", "Nusselt number");
-  params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
-  params.addRequiredParam<MaterialPropertyName>("k", "Thermal conductivity");
+  params.addParam<MaterialPropertyName>(
+      "D_h", FlowModelSinglePhase::HYDRAULIC_DIAMETER, "Hydraulic diameter");
+  params.addParam<MaterialPropertyName>(
+      "k", FlowModelSinglePhase::THERMAL_CONDUCTIVITY, "Thermal conductivity");
   params.addClassDescription("Computes convective heat transfer coefficient from Nusselt number");
   return params;
 }

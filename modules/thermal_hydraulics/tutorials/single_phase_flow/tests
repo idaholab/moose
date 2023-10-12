@@ -4,59 +4,52 @@
   [tutorial]
     requirement = "The system shall be able to complete the thermal hydraulics tutorial's "
     [01]
-      type = RunApp
+      type = CSVDiff
       input = '01_flow_channel.i'
-      max_parallel = 1
-      recover = false
+      csvdiff = '01_flow_channel_out.csv'
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       detail = 'first step,'
     []
     [02]
       type = CSVDiff
       input = '02_core.i'
       csvdiff = '02_core_out.csv'
-      cli_args = 'Outputs/csv=true'
-      max_parallel = 1
-      recover = false
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       detail = 'second step,'
     []
     [03]
       type = CSVDiff
       input = '03_upper_loop.i'
       csvdiff = '03_upper_loop_out.csv'
-      cli_args = 'Outputs/csv=true Executioner/end_time=100'
-      max_parallel = 1
-      recover = false
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       detail = 'third step,'
     []
     [04]
       type = CSVDiff
       input = '04_loop.i'
       csvdiff = '04_loop_out.csv'
-      cli_args = 'Outputs/csv=true Executioner/end_time=100'
-      max_parallel = 1
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       recover = false
+      max_parallel = 1
       detail = 'fourth step,'
-      rel_err = 2e-5
     []
     [05]
       type = CSVDiff
       input = '05_secondary_side.i'
       csvdiff = '05_secondary_side_out.csv'
-      cli_args = 'Outputs/csv=true Executioner/end_time=100 Executioner/TimeStepper/type=IterationAdaptiveDT'
-      max_parallel = 1
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       recover = false
+      max_parallel = 1
       detail = 'fifth step,'
-      rel_err = 1e-4
     []
     [06]
       type = CSVDiff
       input = '06_custom_closures.i'
       csvdiff = '06_custom_closures_out.csv'
-      cli_args = 'Outputs/csv=true Executioner/end_time=100 Executioner/TimeStepper/type=IterationAdaptiveDT'
-      max_parallel = 1
+      cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       recover = false
+      max_parallel = 1
       detail = 'and sixth step.'
-      rel_err = 1e-5
     []
   []
 []

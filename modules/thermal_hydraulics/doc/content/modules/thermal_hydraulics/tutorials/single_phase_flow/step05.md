@@ -17,7 +17,7 @@ We will define the following heat exchanger parameters:
 
 ```
 # heat exchanger parameters
-hx_dia_inner = ${units 10. cm -> m}
+hx_dia_inner = ${units 12. cm -> m}
 hx_wall_thickness = ${units 5. mm -> m}
 hx_dia_outer = ${units 50. cm -> m}
 hx_radius_wall = ${fparse hx_dia_inner / 2. + hx_wall_thickness}
@@ -86,7 +86,7 @@ function in the top-level `[Functions]` block:
          block=Functions/m_dot_sec_fn
          link=False
 
-In the `[ControlLogic]` block, we bring the function value in using the `GetFunctionValueControl`
+In the [ControlLogic](ControlLogic/index.md) block, we bring the function value in using the [GetFunctionValueControl.md]
 block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
@@ -102,7 +102,7 @@ And then we feed this value back into the system:
 
 ### Alternative Solution
 
-An alternative solution to this is to use a convenience block called `TimeFunctionComponentControl`
+An alternative solution to this is to use a convenience block called [TimeFunctionComponentControl.md]
 which combines these two `ControlLogic` blocks into one.
 It takes three parameters `component`, `parameter`, and `function`.
 
