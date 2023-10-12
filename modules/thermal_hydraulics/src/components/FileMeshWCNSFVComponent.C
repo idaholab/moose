@@ -45,7 +45,7 @@ FileMeshWCNSFVComponent::addRelationshipManagers(Moose::RelationshipManagerType 
 {
   // At this point in the setup, we do not have a problem, so we cannot retrieve a Physics. We can
   // send the default ghosting for the physics, but that's it
-  addRelationshipManagersFromParameters(NavierStokesFlowPhysics::validParams());
+  addRelationshipManagersFromParameters(NavierStokesFlowPhysicsBase::validParams());
 }
 
 void
