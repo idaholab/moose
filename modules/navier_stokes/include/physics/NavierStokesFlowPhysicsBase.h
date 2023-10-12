@@ -14,12 +14,12 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes equations
  */
-class NavierStokesFlowPhysics : public PhysicsBase
+class NavierStokesFlowPhysicsBase : public PhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  NavierStokesFlowPhysics(const InputParameters & parameters);
+  NavierStokesFlowPhysicsBase(const InputParameters & parameters);
 
   /// GeneralUO not the right base class probably
   virtual void initialize() override{};

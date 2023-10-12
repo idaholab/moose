@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "NavierStokesFlowPhysics.h"
+#include "NavierStokesFlowPhysicsBase.h"
 
 class WCNSFVFlowPhysics;
 
@@ -18,7 +18,7 @@ class WCNSFVFlowPhysics;
  * Navier Stokes-based equations
  * Includes incompressible flow (INSFV).
  */
-class WCNSFVPhysicsBase : public NavierStokesFlowPhysics
+class WCNSFVPhysicsBase : public NavierStokesFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
