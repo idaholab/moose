@@ -39,7 +39,20 @@ NodalPatchRecoveryAux::computeValue()
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
-  std::vector<dof_id_type> elem_ids = node_to_elem_pair->second;
+
+  std::vector<dof_id_type> elem_ids;
+  if (blockRestricted())
+    for (auto elem_id : node_to_elem_pair->second)
+    {
+      for (const auto block_id : blockIDs())
+        if (block_id == _mesh.elemPtr(elem_id)->subdomain_id())
+        {
+          elem_ids.push_back(elem_id);
+          continue;
+        }
+    }
+  else
+    elem_ids = node_to_elem_pair->second;
 
   // consider the case for corner node
   if (elem_ids.size() == 1)
@@ -50,7 +63,18 @@ NodalPatchRecoveryAux::computeValue()
       node_to_elem_pair = node_to_elem_map.find(n.id());
       std::vector<dof_id_type> elem_ids_candidate = node_to_elem_pair->second;
       if (elem_ids_candidate.size() > elem_ids.size())
-        elem_ids = elem_ids_candidate;
+      {
+        std::vector<dof_id_type> elem_ids_candidate_restricted;
+        for (const auto elem_candidate_ids : elem_ids_candidate)
+        {
+          for (const auto block_id : blockIDs())
+            if (block_id == _mesh.elemPtr(elem_candidate_ids)->subdomain_id())
+              elem_ids_candidate_restricted.push_back(elem_candidate_ids);
+        }
+
+        if (elem_ids_candidate_restricted.size() > elem_ids.size())
+          elem_ids = elem_ids_candidate_restricted;
+      }
     }
   }
 
