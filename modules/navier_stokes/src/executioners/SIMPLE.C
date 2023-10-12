@@ -426,6 +426,11 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
   _pressure_linear_control.int_valued_data["max_its"] =
       getParam<unsigned int>("pressure_l_max_its");
 
+  if (isParamValid("solid_energy_system") && !_has_energy_system)
+    paramError(
+        "solid_energy_system",
+        "We cannot solve a solid energy system without solving for the fluid energy as well!");
+
   if (_has_energy_system)
   {
     const auto & energy_petsc_options = getParam<MultiMooseEnum>("energy_petsc_options");
@@ -527,6 +532,39 @@ SIMPLE::checkDependentParameterError(const std::string & main_parameter,
                  "This parameter should " + std::string(should_be_defined ? "" : "not") +
                      " be given by the user with the corresponding " + main_parameter +
                      " setting!");
+}
+
+bool
+SIMPLE::hasMultiAppError(const ExecFlagEnum & flags)
+{
+  bool has_error = false;
+  for (const auto & flag : flags)
+    if (_problem.hasMultiApps(flag))
+    {
+      _console << "\nCannot use SIMPLE solves with MultiApps set to execute on " << flag.name()
+               << "!\nExiting...\n"
+               << std::endl;
+      has_error = true;
+    }
+
+  return has_error;
+}
+
+bool
+SIMPLE::hasTransferError(const ExecFlagEnum & flags)
+{
+  for (const auto & flag : flags)
+    if (_problem.getTransfers(flag, MultiAppTransfer::TO_MULTIAPP).size() ||
+        _problem.getTransfers(flag, MultiAppTransfer::FROM_MULTIAPP).size() ||
+        _problem.getTransfers(flag, MultiAppTransfer::BETWEEN_MULTIAPP).size())
+    {
+      _console << "\nCannot use SIMPLE solves with MultiAppTransfers set to execute on "
+               << flag.name() << "!\nExiting...\n"
+               << std::endl;
+      return true;
+    }
+
+  return false;
 }
 
 void
@@ -1050,17 +1088,19 @@ SIMPLE::execute()
     return;
   }
 
-  if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _problem.hasMultiApps(EXEC_TIMESTEP_END) ||
-      _problem.hasMultiApps(EXEC_INITIAL) ||
-      _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN) ||
-      _problem.hasMultiApps(EXEC_MULTIAPP_FIXED_POINT_END))
-  {
-    _console << "\nCannot use SIMPLE solves with MultiApps set to execute on TIMESTEP_BEGIN, "
-                "TIMESTEP_END, INITIAL, MULTIAPP_FIXED_POINT_BEGIN or "
-                "MULTIAPP_FIXED_POINT_END!\nExiting...\n"
-             << std::endl;
+  ExecFlagEnum disabled_flags;
+  disabled_flags.addAvailableFlags(EXEC_TIMESTEP_BEGIN,
+                                   EXEC_TIMESTEP_END,
+                                   EXEC_INITIAL,
+                                   EXEC_MULTIAPP_FIXED_POINT_BEGIN,
+                                   EXEC_MULTIAPP_FIXED_POINT_END,
+                                   EXEC_LINEAR,
+                                   EXEC_NONLINEAR);
+
+  if (hasMultiAppError(disabled_flags))
     return;
-  }
+  if (hasTransferError(disabled_flags))
+    return;
 
   _problem.timestepSetup();
 

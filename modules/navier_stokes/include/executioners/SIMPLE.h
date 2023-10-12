@@ -222,11 +222,17 @@ private:
                                     const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined);
 
+  /// Check for wrong execute on flags in the multiapps
+  bool hasMultiAppError(const ExecFlagEnum & flags);
+
+  /// Check for wrong execute on flags in the transfers
+  bool hasTransferError(const ExecFlagEnum & flags);
+
   /**
    * Check if the system contains a time kernel or not. This is a steady-state executioner so we
    * wanna make sure the user doesn't have kernels that add time-derivatives.
-   * @param system Reference to the system which holds the kernels. This is not const because the
-   *               constainsTimeKernel() routine is not const.
+   * @param system Reference to the system which holds the kernels. This is not const because
+   * the constainsTimeKernel() routine is not const.
    */
   void checkIntegrity(NonlinearSystemBase & system);
 

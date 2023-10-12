@@ -107,6 +107,12 @@ especially useful for advection-dominated systems.
 
 !alert-end!
 
+!alert! note
+
+Currently, this solver only respects the following `execute_on` flags: `INITAL`, `TIMESTEP_BEGIN`, and `FINAL`, other flags are ignored. `MultiApps` and the corresponding `MultiappTransfers` are executed at `FINAL` only.
+
+!alert-end!
+
 ## Example Input Syntax
 
 The setup of a problem with the segregated solver in MOOSE is slightly different compared to

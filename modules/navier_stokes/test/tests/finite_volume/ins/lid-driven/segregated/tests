@@ -7,6 +7,7 @@
     exodiff = 'lid-driven-segregated_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm.'
     recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
   []
   [with-energy]
     type = 'Exodiff'
@@ -14,6 +15,7 @@
     exodiff = 'lid-driven-segregated-energy_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations together with the energy equation in a lid-driven cavity using the SIMPLE algorithm.'
     recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
   []
   [with-buoyancy]
     type = 'Exodiff'
