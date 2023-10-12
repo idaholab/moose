@@ -2476,7 +2476,7 @@ MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
 }
 
 void
-MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
+MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & /*moose_mesh*/)
 {
   for (auto & rm : _relationship_managers)
   {

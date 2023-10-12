@@ -146,7 +146,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
 
       if (mparams.have_parameter<std::string>("_moose_base"))
       {
-        const std::string & base = mparams.get<std::string>("_moose_base");
+        // const std::string & base = mparams.get<std::string>("_moose_base");
 
         // We ll need a setup_physics task to do this?
         // if (!_syntax.verifyMooseObjectTask(base, task))
