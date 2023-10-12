@@ -13,6 +13,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseEigenSystem.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
 #include "LineSearch.h"
 #include "MooseEnum.h"
 
@@ -43,6 +44,12 @@ FEProblem::FEProblem(const InputParameters & parameters)
   // backwards compatibility for AD for objects that depend on initializing derivatives during
   // construction
   setCurrentNonlinearSystem(0);
+
+  for (const auto i : index_range(_linear_sys_names))
+    _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
+
+  if (_num_linear_sys)
+    setCurrentLinearSystem(0);
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 

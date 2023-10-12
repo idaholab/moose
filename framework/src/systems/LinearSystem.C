@@ -101,13 +101,12 @@
 
 #include "petscsnes.h"
 
-LinearSystem::LinearSystem(FEProblemBase & fe_problem, System & sys, const std::string & name)
+LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SystemBase(fe_problem, name, Moose::VAR_LINEAR),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
     _fe_problem(fe_problem),
-    _sys(sys),
+    _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _current_solution(NULL),
-    _residual_ghosted(NULL),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
     _rhs_non_time_tag(-1),
@@ -118,7 +117,7 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, System & sys, const std::
 {
   getRightHandSideNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
-  _system_matrix_tag = _fe_problem.addMatrixTag("SYSTEM");
+  _system_matrix_system_tag = _fe_problem.addMatrixTag("SYSTEM");
 
   // The time matrix tag is not normally used - but must be added to the system
   // in case it is so that objects can have 'time' in their matrix tags by default
@@ -320,9 +319,9 @@ LinearSystem::addTimeIntegrator(const std::string & type,
 }
 
 void
-LinearSystem::addKernel(const std::string & kernel_name,
-                        const std::string & name,
-                        InputParameters & parameters)
+LinearSystem::addLinearKernel(const std::string & kernel_name,
+                              const std::string & name,
+                              InputParameters & parameters)
 {
   // for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   // {
@@ -621,16 +620,16 @@ LinearSystem::setPredictor(std::shared_ptr<Predictor> predictor)
   _predictor = predictor;
 }
 
-void
-LinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
-{
-  SystemBase::subdomainSetup();
+// void
+// LinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
+// {
+//   SystemBase::subdomainSetup();
 
-  // _kernels.subdomainSetup(subdomain, tid);
-  // _nodal_kernels.subdomainSetup(subdomain, tid);
-  // _element_dampers.subdomainSetup(subdomain, tid);
-  // _nodal_dampers.subdomainSetup(subdomain, tid);
-}
+//   // _kernels.subdomainSetup(subdomain, tid);
+//   // _nodal_kernels.subdomainSetup(subdomain, tid);
+//   // _element_dampers.subdomainSetup(subdomain, tid);
+//   // _nodal_dampers.subdomainSetup(subdomain, tid);
+// }
 
 NumericVector<Number> &
 LinearSystem::getRightHandSideTimeVector()
@@ -675,35 +674,7 @@ LinearSystem::getRightHandSideNonTimeVector()
   //   _Re_non_time = &system().add_vector(vector_name, false, GHOSTED);
   // }
 
-  return *_Re_non_time;
-}
-
-void
-LinearSystem::residualSetup()
-{
-  TIME_SECTION("residualSetup", 3);
-
-  SystemBase::residualSetup();
-
-  // for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  // {
-  //   _kernels.residualSetup(tid);
-  //   _nodal_kernels.residualSetup(tid);
-  //   _dirac_kernels.residualSetup(tid);
-  //   if (_doing_dg)
-  //     _dg_kernels.residualSetup(tid);
-  //   _interface_kernels.residualSetup(tid);
-  //   _element_dampers.residualSetup(tid);
-  //   _nodal_dampers.residualSetup(tid);
-  //   _integrated_bcs.residualSetup(tid);
-  // }
-  // _scalar_kernels.residualSetup();
-  // _constraints.residualSetup();
-  // _general_dampers.residualSetup();
-  // _nodal_bcs.residualSetup();
-
-  // _fe_problem.residualSetup();
-  // _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
+  return *_rhs_non_time;
 }
 
 void
@@ -912,10 +883,10 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
 }
 
 void
-LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                          const std::set<TagID> & matrix_tags)
+LinearSystem::computeLinearSystemTagsInternal(const std::set<TagID> & vector_tags,
+                                              const std::set<TagID> & matrix_tags)
 {
-  TIME_SECTION("computeResidualAndJacobianInternal", 3);
+  TIME_SECTION("computeLinearSystemInternal", 3);
 
   // // Make matrix ready to use
   // activeAllMatrixTags();
@@ -992,35 +963,9 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 }
 
 void
-LinearSystem::jacobianSetup()
+LinearSystem::computeSystemMatricesInternal(const std::set<TagID> & tags)
 {
-  SystemBase::jacobianSetup();
-
-  // for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  // {
-  //   _kernels.jacobianSetup(tid);
-  //   _nodal_kernels.jacobianSetup(tid);
-  //   _dirac_kernels.jacobianSetup(tid);
-  //   if (_doing_dg)
-  //     _dg_kernels.jacobianSetup(tid);
-  //   _interface_kernels.jacobianSetup(tid);
-  //   _element_dampers.jacobianSetup(tid);
-  //   _nodal_dampers.jacobianSetup(tid);
-  //   _integrated_bcs.jacobianSetup(tid);
-  // }
-  // _scalar_kernels.jacobianSetup();
-  // _constraints.jacobianSetup();
-  // _general_dampers.jacobianSetup();
-  // _nodal_bcs.jacobianSetup();
-
-  // _fe_problem.jacobianSetup();
-  // _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
-}
-
-void
-LinearSystem::computeSystemMatrixInternal(const std::set<TagID> & tags)
-{
-  TIME_SECTION("computeJacobianInternal", 3);
+  TIME_SECTION("computeSystemMatricesInternal", 3);
 
   _fe_problem.setCurrentNonlinearSystem(number());
 
@@ -1359,15 +1304,15 @@ LinearSystem::computeSystemMatrix(SparseMatrix<Number> & matrix)
 void
 LinearSystem::computeSystemMatrix(SparseMatrix<Number> & matrix, const std::set<TagID> & tags)
 {
-  associateMatrixToTag(jacobian, systemMatrixTag());
+  associateMatrixToTag(matrix, systemMatrixTag());
 
   computeSystemMatrixTags(tags);
 
-  disassociateMatrixFromTag(jacobian, systemMatrixTag());
+  disassociateMatrixFromTag(matrix, systemMatrixTag());
 }
 
 void
-LinearSystem::computeJacobianTags(const std::set<TagID> & tags)
+LinearSystem::computeSystemMatrixTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeSystemMatrixTags", 5);
 
@@ -1375,7 +1320,7 @@ LinearSystem::computeJacobianTags(const std::set<TagID> & tags)
 
   try
   {
-    computeSystemMatrixInternal(tags);
+    computeSystemMatricesInternal(tags);
   }
   catch (MooseException & e)
   {
@@ -1466,6 +1411,33 @@ LinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
   //     }
   //   }
   // }
+}
+
+void
+LinearSystem::serializeSolution()
+{
+  if (_serialized_solution.get())
+  {
+    if (!_serialized_solution->initialized() || _serialized_solution->size() != _sys.n_dofs())
+    {
+      _serialized_solution->clear();
+      _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
+    }
+
+    _current_solution->localize(*_serialized_solution);
+  }
+}
+
+NumericVector<Number> &
+LinearSystem::serializedSolution()
+{
+  if (!_serialized_solution.get())
+  {
+    _serialized_solution = NumericVector<Number>::build(_communicator);
+    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
+  }
+
+  return *_serialized_solution;
 }
 
 void

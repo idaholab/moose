@@ -47,6 +47,7 @@ class AuxiliarySystem;
 class DisplacedProblem;
 class MooseMesh;
 class NonlinearSystemBase;
+class LinearSystem;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
@@ -663,6 +664,20 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
+
+  ///@{
+  /**
+   * Linear system getters
+   */
+  LinearSystem & getLinearSystem(unsigned int sys_num);
+  const LinearSystem & getLinearSystem(unsigned int sys_num) const;
+  void setCurrentLinearSystem(unsigned int nl_sys_num);
+  LinearSystem & currentLinearSystem();
+  const LinearSystem & currentLinearSystem() const;
+
+  virtual const SystemBase & systemBaseLinear(unsigned int sys_num) const;
+  virtual SystemBase & systemBaseLinear(unsigned int sys_num);
+  ///@}
 
   /**
    * Canonical method for adding a non-linear variable
@@ -2081,7 +2096,14 @@ public:
   MooseAppCoordTransform & coordTransform();
 
   virtual std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
+
+  virtual std::size_t numLinearSystems() const override { return _num_linear_sys; }
+
   virtual unsigned int currentNlSysNum() const override;
+
+  /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
@@ -2207,8 +2229,17 @@ protected:
   /// The number of nonlinear systems
   const std::size_t _num_nl_sys;
 
+  /// The linear system names
+  const std::vector<NonlinearSystemName> _linear_sys_names;
+
+  /// The number of linear systems
+  const std::size_t _num_linear_sys;
+
   /// The nonlinear systems
   std::vector<std::shared_ptr<NonlinearSystemBase>> _nl;
+
+  /// The nonlinear systems
+  std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
 
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
@@ -2216,8 +2247,17 @@ protected:
   /// Map from nonlinear variable name to nonlinear system number
   std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
 
+  /// Map from linear system name to number
+  std::map<NonlinearSystemName, unsigned int> _linear_sys_name_to_num;
+
+  /// Map from linear variable name to nonlinear system number
+  std::map<NonlinearVariableName, unsigned int> _linear_var_to_sys_num;
+
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
+
+  /// The current linear system that we are solving
+  LinearSystem * _current_linear_sys;
 
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
@@ -2739,6 +2779,36 @@ FEProblemBase::currentNonlinearSystem() const
   return *_current_nl_sys;
 }
 
+inline LinearSystem &
+FEProblemBase::getLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
+}
+
+inline const LinearSystem &
+FEProblemBase::getLinearSystem(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
+}
+
+inline LinearSystem &
+FEProblemBase::currentLinearSystem()
+{
+  mooseAssert(_current_linear_sys, "The linear system is not currently set");
+  return *_current_linear_sys;
+}
+
+inline const LinearSystem &
+FEProblemBase::currentLinearSystem() const
+{
+  mooseAssert(_current_linear_sys, "The linear system is not currently set");
+  return *_current_linear_sys;
+}
+
 inline Assembly &
 FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
 {
@@ -2769,6 +2839,14 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
   mooseAssert(nl_sys_num < _nl.size(),
               "System number greater than the number of nonlinear systems");
   _current_nl_sys = _nl[nl_sys_num].get();
+}
+
+inline void
+FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  _current_linear_sys = _linear_systems[sys_num].get();
 }
 
 inline void

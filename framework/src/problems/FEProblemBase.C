@@ -36,6 +36,7 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
 #include "Distribution.h"
 #include "Sampler.h"
 #include "PetscSupport.h"
@@ -269,6 +270,9 @@ FEProblemBase::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
+  params.addParam<std::vector<NonlinearSystemName>>(
+      "linear_sys_names", {}, "The linear system names");
+
   params.addParam<bool>("check_uo_aux_state",
                         false,
                         "True to turn on a check that no state presents during the evaluation of "
@@ -336,9 +340,13 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
     _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
+    _linear_sys_names(getParam<std::vector<NonlinearSystemName>>("linear_sys_names")),
     _num_nl_sys(_nl_sys_names.size()),
+    _num_linear_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
+    _linear_systems(_num_nl_sys, nullptr),
     _current_nl_sys(nullptr),
+    _current_linear_sys(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
     _mesh_divisions(/*threaded=*/true),
@@ -430,6 +438,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   for (const auto i : index_range(_nl_sys_names))
     _nl_sys_name_to_num[_nl_sys_names[i]] = i;
+
+  for (const auto i : index_range(_linear_sys_names))
+    _linear_sys_name_to_num[_linear_sys_names[i]] = i;
+
   _nonlocal_cm.resize(_nl_sys_names.size());
   _cm.resize(_nl_sys_names.size());
 
@@ -8137,6 +8149,22 @@ SystemBase &
 FEProblemBase::systemBaseNonlinear(const unsigned int sys_num)
 {
   return *_nl[sys_num];
+}
+
+const SystemBase &
+FEProblemBase::systemBaseLinear(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
+}
+
+SystemBase &
+FEProblemBase::systemBaseLinear(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _linear_systems.size(),
+              "System number greater than the number of linear systems");
+  return *_linear_systems[sys_num];
 }
 
 const SystemBase &

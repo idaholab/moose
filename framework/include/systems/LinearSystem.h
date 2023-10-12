@@ -62,22 +62,22 @@ class DiagonalMatrix;
 class LinearSystem : public SystemBase, public PerfGraphInterface
 {
 public:
-  LinearSystem(FEProblemBase & problem, System & sys, const std::string & name);
+  LinearSystem(FEProblemBase & problem, const std::string & name);
   virtual ~LinearSystem();
 
   virtual void init() override;
 
-  virtual void solve() override;
+  virtual void solve() override{};
   virtual void restoreSolutions() override;
 
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve() = 0;
+  virtual void stopSolve() {}
 
-  virtual LinearSolver<Number> * linearSolver() = 0;
+  virtual LinearSolver<Number> * linearSolver(const unsigned int sys_num) { return nullptr; }
 
-  virtual KSP getKSP() = 0;
+  // virtual KSP getKSP() { return KSP; }
 
   // Setup Functions ////
   virtual void initialSetup() override;
@@ -90,7 +90,7 @@ public:
    * Returns the convergence state
    * @return true if converged, otherwise false
    */
-  virtual bool converged() = 0;
+  virtual bool converged() { return false; }
 
   /**
    * Add a time integrator
@@ -183,7 +183,7 @@ public:
   /**
    * Return a numeric vector that is associated with the nontime tag.
    */
-  NumericVector<Number> & getRightHandSideTimeVector();
+  NumericVector<Number> & getRightHandSideNonTimeVector();
 
   /**
    * Return a right hand side vector that is associated with the residual tag.
@@ -194,9 +194,6 @@ public:
   {
     return _current_solution;
   }
-
-  virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
@@ -241,10 +238,25 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  TagID timeVectorTag() const override { return _time_tag; }
-  TagID nonTimeVectorTag() const override { return _non_time_tag; }
-  TagID rightHandSideVectorTag() const override { return _rhs_tag; }
-  TagID systemMatrixTag() const override { return _system_mx_tag; }
+  TagID timeVectorTag() const override { return _rhs_time_tag; }
+  TagID nonTimeVectorTag() const override { return _rhs_non_time_tag; }
+  TagID rightHandSideVectorTag() const { return _rhs_tag; }
+  TagID systemMatrixTag() const override { return _system_matrix_system_tag; }
+
+  // non-const getters
+  NumericVector<Number> * solutionUDot() override {}
+  NumericVector<Number> * solutionUDotOld() override {}
+  NumericVector<Number> * solutionUDotDot() override {}
+  NumericVector<Number> * solutionUDotDotOld() override {}
+  // const getters
+  const NumericVector<Number> * solutionUDot() const override {}
+  const NumericVector<Number> * solutionUDotOld() const override {}
+  const NumericVector<Number> * solutionUDotDot() const override {}
+  const NumericVector<Number> * solutionUDotDotOld() const override {}
+
+  // serialization
+  virtual void serializeSolution();
+  virtual NumericVector<Number> & serializedSolution() override;
 
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -268,7 +280,7 @@ protected:
   const NumericVector<Number> * _current_solution;
 
   /// Tag for time contribution rhs
-  TagID _time_rhs_tag;
+  TagID _rhs_time_tag;
 
   /// Vector tags to temporarily store all tags associated with the current system.
   std::set<TagID> _vector_tags;
@@ -280,7 +292,7 @@ protected:
   NumericVector<Number> * _rhs_time;
 
   /// Tag for non-time contribution rhs
-  TagID _non_time_rhs_tag;
+  TagID _rhs_non_time_tag;
 
   /// residual vector for non-time contributions
   NumericVector<Number> * _rhs_non_time;
@@ -321,4 +333,8 @@ protected:
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
+
+  /// Serialized version of the solution vector, or nullptr if a
+  /// serialized solution is not needed
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 };
