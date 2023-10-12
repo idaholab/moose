@@ -26,6 +26,8 @@ class NSFVBase : public BaseType
 public:
   static InputParameters validParams();
 
+  static InputParameters commonScalarFieldAdvectionParams();
+
   NSFVBase(const InputParameters & parameters);
 
   ///@{ general public interface functions
@@ -448,6 +450,63 @@ protected:
 
 template <class BaseType>
 InputParameters
+NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "passive_scalar_names",
+      std::vector<NonlinearVariableName>(),
+      "Vector containing the names of the advected scalar variables.");
+
+  params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
+                                             "Initial values of the passive scalar variables.");
+
+  params.addParam<std::vector<MooseFunctorName>>(
+      "passive_scalar_diffusivity",
+      std::vector<MooseFunctorName>(),
+      "Functor names for the diffusivities used for the passive scalar fields.");
+
+  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
+                                     std::vector<Real>(),
+                                     "Schmidt numbers used for the passive scalar fields.");
+
+  params.addParam<std::vector<MooseFunctorName>>(
+      "passive_scalar_source",
+      std::vector<MooseFunctorName>(),
+      "Functor names for the sources used for the passive scalar fields.");
+
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
+      "passive_scalar_coupled_source",
+      std::vector<std::vector<MooseFunctorName>>(),
+      "Coupled variable names for the sources used for the passive scalar fields. If multiple "
+      "sources for each equation are specified, major (outer) ordering by equation.");
+
+  params.addParam<std::vector<std::vector<Real>>>(
+      "passive_scalar_coupled_source_coeff",
+      std::vector<std::vector<Real>>(),
+      "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
+      " sources for each equation are specified, major (outer) ordering by equation.");
+
+  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
+  params.addParam<MultiMooseEnum>(
+      "passive_scalar_inlet_types",
+      ps_inlet_types,
+      "Types for the inlet boundaries for the passive scalar equation.");
+
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "passive_scalar_inlet_function",
+      std::vector<std::vector<std::string>>(),
+      "Functions for inlet boundaries in the passive scalar equations.");
+
+  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
+                              "passive_scalar_schmidt_number passive_scalar_source "
+                              "passive_scalar_coupled_source passive_scalar_coupled_source_coeff",
+                              "Passive scalar control");
+  return params;
+}
+
+template <class BaseType>
+InputParameters
 NSFVBase<BaseType>::validParams()
 {
   InputParameters params = BaseType::validParams();
@@ -730,56 +789,7 @@ NSFVBase<BaseType>::validParams()
   /**
    * Parameters describing the handling of advected scalar fields
    */
-
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "passive_scalar_names",
-      std::vector<NonlinearVariableName>(),
-      "Vector containing the names of the advected scalar variables.");
-
-  params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
-                                             "Initial values of the passive scalar variables.");
-
-  params.addParam<std::vector<MooseFunctorName>>(
-      "passive_scalar_diffusivity",
-      std::vector<MooseFunctorName>(),
-      "Functor names for the diffusivities used for the passive scalar fields.");
-
-  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
-                                     std::vector<Real>(),
-                                     "Schmidt numbers used for the passive scalar fields.");
-
-  params.addParam<std::vector<MooseFunctorName>>(
-      "passive_scalar_source",
-      std::vector<MooseFunctorName>(),
-      "Functor names for the sources used for the passive scalar fields.");
-
-  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "passive_scalar_coupled_source",
-      std::vector<std::vector<MooseFunctorName>>(),
-      "Coupled variable names for the sources used for the passive scalar fields. If multiple "
-      "sources for each equation are specified, major (outer) ordering by equation.");
-
-  params.addParam<std::vector<std::vector<Real>>>(
-      "passive_scalar_coupled_source_coeff",
-      std::vector<std::vector<Real>>(),
-      "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
-      " sources for each equation are specified, major (outer) ordering by equation.");
-
-  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
-  params.addParam<MultiMooseEnum>(
-      "passive_scalar_inlet_types",
-      ps_inlet_types,
-      "Types for the inlet boundaries for the passive scalar equation.");
-
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "passive_scalar_inlet_function",
-      std::vector<std::vector<std::string>>(),
-      "Functions for inlet boundaries in the passive scalar equations.");
-
-  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
-                              "passive_scalar_schmidt_number passive_scalar_source "
-                              "passive_scalar_coupled_source passive_scalar_coupled_source_coeff",
-                              "Passive scalar control");
+  params += NSFVBase<BaseType>::commonScalarFieldAdvectionParams();
 
   /**
    * Parameters allowing the control over numerical schemes for different terms in the
