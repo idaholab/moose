@@ -16,7 +16,7 @@
 InputParameters
 WCNSFVPhysicsBase::validParams()
 {
-  InputParameters params = NavierStokesFlowPhysics::validParams();
+  InputParameters params = NavierStokesFlowPhysicsBase::validParams();
   params.addClassDescription(
       "Base class to define the Navier Stokes incompressible and weakly-compressible equation");
 
@@ -42,7 +42,7 @@ WCNSFVPhysicsBase::validParams()
 }
 
 WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
-  : NavierStokesFlowPhysics(parameters),
+  : NavierStokesFlowPhysicsBase(parameters),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation"))
 {
   // Adjust number of ghost layers in case what was requested in the parameters was not enough
@@ -224,7 +224,7 @@ void
 WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other_params) const
 {
   // TODO: make warnInconsistent a lambda
-  // Check all the parameters in NavierStokesFlowPhysics
+  // Check all the parameters in NavierStokesFlowPhysicsBase
   warnInconsistent<MooseEnum>(other_params, "compressibilty");
   warnInconsistent<RealVectorValue>(other_params, "gravity");
   warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");

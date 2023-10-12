@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesFlowPhysics.h"
+#include "NavierStokesFlowPhysicsBase.h"
 #include "NSFVAction.h"
 
 InputParameters
-NavierStokesFlowPhysics::validParams()
+NavierStokesFlowPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes equation");
@@ -53,7 +53,7 @@ NavierStokesFlowPhysics::validParams()
   return params;
 }
 
-NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & parameters)
+NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -98,7 +98,7 @@ NavierStokesFlowPhysics::NavierStokesFlowPhysics(const InputParameters & paramet
 }
 
 MooseFunctorName
-NavierStokesFlowPhysics::getPorosityFunctorName(bool smoothed) const
+NavierStokesFlowPhysicsBase::getPorosityFunctorName(bool smoothed) const
 {
   mooseAssert(!smoothed || !_porosity_smoothing_layers,
               "Smooth porosity cannot be used without the smoothing treatment turned on");
