@@ -13,27 +13,30 @@ solid block to the flow channel via conjugate heat transfer.
 
 ## Parameters of the Heated Channel
 
-We include the core parameters as named parameters to the top of the input file as follows:
+We include the core parameters as named parameters to the top of the input file so they can be used in the components:
 
 ```
-core_length = 1.    # m
-core_n_elems = 10
-core_dia = ${units 2. cm -> m}
-core_pitch = ${units 8.7 cm -> m}
+core_length = 1. # m
+core_n_elems = 25
+core_dia = '${units 2. cm -> m}'
+core_pitch = '${units 8.7 cm -> m}'
+A_core = '${fparse core_pitch^2 - 0.25 *pi * core_dia^2}'
+P_wet_core = '${fparse 4*core_pitch + pi * core_dia}'
+Dh_core = '${fparse 4 * A_core / P_wet_core}'
 ```
-
 
 For total power used for heating the block, we prescribe a parameter called `tot_power`.
 
 ```
-tot_power = 100       # W
+tot_power = 2000 # W
 ```
+
 
 ## Heat Structure Materials
 
 To set up a heat conduction, we will need to define a solid material used in the block with
 heat conduction.
-To do that, we put the following block into a top-level `[HeatStructureMaterials]` block:
+To do that, we put the following block into a top-level [HeatStructureMaterials](HeatStructureMaterials/index.md) block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=HeatStructureMaterials/steel
@@ -63,7 +66,7 @@ material to it. The number of radial element in this block will be `3`.
 ## Heat Source
 
 Our heating will be given by the specified total power parameter. For this, we need to include
-`TotalPower` component and link it with another component -- `HeatSourceFromTotalPower`.
+[TotalPower.md] component and link it with another component -- [HeatSourceFromTotalPower.md].
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/total_power
@@ -79,13 +82,12 @@ done via the `hs` and `regions` parameters.  The link to the `TotalPower` compon
 
 ## Heat Transfer
 
-To exchange heat between a flow channel and heat structure, we use the `HeatTransferFromHeatStructure1Phase`
+To exchange heat between a flow channel and heat structure, we use the [HeatTransferFromHeatStructure1Phase.md]
 component.  We need to specify the `flow_channel` parameter which takes the name of the connected
 flow channel, `hs` parameter which is the name of the heat structure component, `hs_side` parameter
 which is the side of the heat structure and can be either `inner` or `outer`.
 
-Lastly, we need to specify `P_hf`, which is the heated perimeter, and because we are using `simple`
-closure we need to supply `Hw`, which is a convective wall heat transfer coefficient.
+Lastly, we need to specify `P_hf`, which is the heated perimeter. The heat transfer coefficient `Hw` is calculated by the closure set.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/core_ht

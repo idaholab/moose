@@ -10,6 +10,7 @@
 #include "ADReynoldsNumberMaterial.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
+#include "FlowModelSinglePhase.h"
 #include "MathUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADReynoldsNumberMaterial);
@@ -19,11 +20,16 @@ ADReynoldsNumberMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addRequiredParam<MaterialPropertyName>("Re", "Reynolds number property name");
-  params.addRequiredParam<MaterialPropertyName>("rho", "Density of the phase");
-  params.addRequiredParam<MaterialPropertyName>("vel", "Velocity of the phase");
-  params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
-  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity of the phase");
+  params.addParam<MaterialPropertyName>(
+      "Re", FlowModelSinglePhase::REYNOLDS_NUMBER, "Reynolds number property name");
+  params.addParam<MaterialPropertyName>(
+      "rho", FlowModelSinglePhase::DENSITY, "Density of the phase");
+  params.addParam<MaterialPropertyName>(
+      "vel", FlowModelSinglePhase::VELOCITY, "Velocity of the phase");
+  params.addParam<MaterialPropertyName>(
+      "D_h", FlowModelSinglePhase::HYDRAULIC_DIAMETER, "Hydraulic diameter");
+  params.addParam<MaterialPropertyName>(
+      "mu", FlowModelSinglePhase::DYNAMIC_VISCOSITY, "Dynamic viscosity of the phase");
 
   params.addClassDescription("Computes Reynolds number as a material property");
 

@@ -16,13 +16,22 @@ We add two pipes for the bottom section of the primary loop with a pump in the m
 A pump is a junction-like component that connects to two flow channels corresponding to its inlet and outlet.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
-         start=jct5
-         end=jct6
+         start=jct7
+         end=jct8
          link=False
          max-height=None
 
 The pump component needs 2 more parameters to be specified: reference area `A_ref`, and `head`,
 which is the pump head.
+
+
+Because the system is now closed, we add a simple pressurizer to maintain the system pressure as the fluid heats up. We split the pipe at the top to create a T-junction with a pipe connected to the pressurizer using a [VolumeJunction1Phase.md]. The pressurizer is modeled by prescribing the stagnation pressure with an [InletStagnationPressureTemperature1Phase.md] component.
+
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
+         start=jct4
+         end=jct5
+         link=False
+         max-height=None
 
 ## Control Logic
 

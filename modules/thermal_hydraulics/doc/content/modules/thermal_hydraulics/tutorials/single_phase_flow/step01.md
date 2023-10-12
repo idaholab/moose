@@ -21,16 +21,15 @@ a single location rather then hunting for all the right occurrences.
 This will become very important when input files get large.
 
 ```
-T_in = 300.         # K
-m_dot_in = 1e-4     # kg/s
-press = 1e5         # Pa
+T_in = 300. # K
+m_dot_in = 1e-2 # kg/s
+press = 10e5 # Pa
 ```
 
 It is a good habit to include the units we are assuming in case our input file will be used by
 other people.
 
-!alert note
-+Note:+ THM is using SI units: `kg`, `m`, `s`, `K`.
++Note: THM is using SI units: `kg`, `m`, `s`, `K`.+
 
 
 ## Fluid Properties
@@ -49,7 +48,7 @@ To do so, we will put the following block inside the `[FluidProperties]` block.
 ## Closures
 
 Closure relations are provided through objects created in a `[Closures]` block.
-Here we create a simple set of closures, which will be used by our flow channel component:
+We define a set of closures of type [Closures1PhaseTHM.md] with default options, which will be used by our flow channel component:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Closures
@@ -63,7 +62,7 @@ etc., and intangible pieces that add physics, like boundary conditions or source
 They are like LEGO bricks which when put together they build up the overall simulation.
 
 
-The first component we introduce is the `FlowChannel1Phase` component which represents a channel
+The first component we introduce is the [FlowChannel1Phase.md] component which represents a channel
 with single-phase flow.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
@@ -76,7 +75,7 @@ the `position` parameter.
 The `length` parameter is the length of the channel.
 The `n_elems` parameter describes the number of elements that will be created for the mesh that supports
 the channel.
-The `A`, `D_h`, and `f` are cross-sectional area, hydraulic diameter, and a wall friction factor, respectively.
+The `A` and `D_h` parameters are the cross-sectional area and the hydraulic diameter of the flow channel. Note that the Darcy friction factor `f_D` is calculated by the closure set.
 
 Every flow channel defines a subdomain block with its name and two boundaries.
 They are named `flow_channel_name:in` and `flow_channel_name:out` and refer to the start and the end
@@ -84,7 +83,7 @@ of the flow channel, respectively. This will be useful later for connecting comp
 setting up other objects like postprocessors.
 
 !alert note
-+Note:+ The `flow_channel_name:in` and `flow_channel_name:out` are only refering to the geometry of the channel.
++Note:+ The `flow_channel_name:in` and `flow_channel_name:out` are only referring to the geometry of the channel.
 The actual flow direction will be determined by the physics and the boundary conditions connected to each end,
 i.e. `flow_channel_name:in` can be a flow outlet.
 
@@ -136,7 +135,7 @@ This is the case in this tutorial, so we will do so by including the following p
 
 ```
 initial_p = ${press}
-initial_vel = 0
+initial_vel = 0.0001
 initial_T = ${T_in}
 ```
 
@@ -144,12 +143,8 @@ The `closures` parameter is used to specify the name of a closures object, so
 we pass the name we gave to the closures object we created in the `Closures` block:
 
 ```
-closures = simple_closures
+closures = thm_closures
 ```
-
-Note that the corresponding closures class, [Closures1PhaseSimple.md],
-requires users to specify wall friction factor `f` and wall heat transfer
-coefficient `Hw` (if heating is present) manually as a constant value.
 
 Since we will be using helium gas in almost all flow components, we can place the following in the
 `[GlobalParams]` block as well:
@@ -164,6 +159,39 @@ otherwise.
 !alert note
 +Tip:+ Place the `[GlobalParams]` at the top of the input file for visibility.
 
+## Postprocessors
+
+The [postprocessor system](syntax/Postprocessors/index.md) comes from the MOOSE framework.
+Postprocessors are single `Real` values computed at different locations like blocks, sides, etc.,
+or at different mesh entities like nodes or elements.
+There can also be postprocessors that are not associated with any mesh entities (like a
+postprocessor to output time step size, etc.).
+
+In our model, we will add the following postprocessors to compute the pressure drop across the flow channel:
+
+1. `core_p_in` for monitoring core outlet pressure
+
+   !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
+            block=Postprocessors/core_p_in
+            link=False
+
+1. `core_p_out` for monitoring core outlet pressure
+
+   !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
+            block=Postprocessors/core_p_out
+            link=False
+
+1. `core_delta_p` for monitoring the core pressure drop
+
+   !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
+            block=Postprocessors/core_delta_p
+            link=False
+
+The first postprocessors are of [SideAverageValue](postprocessors/SideAverageValue.md) type which means they are computed on a side.
+The side is specified via the `boundary` parameter, and both postprocessors operate on the
+temperature variable `p`. Then we use a [ParsedPostProcessor](postprocessors/ParsedPostprocessor.md) to compute the difference.
+
+
 ## Executioner
 
 This top-level block describes how the simulation will be executed.
@@ -173,10 +201,10 @@ This top-level block describes how the simulation will be executed.
          link=False
 
 The `Transient` type says that we will be solving multiple time steps starting from `start_time` and
-running until `end_time` with time step size (`dt`) of `0.1`.
+running until `end_time` with time step size (`dt`) of `10`.
 
 The `line_search = basic` and `solve_type = NEWTON` should be always present in this block when
-running a THM-based code.
+running a THM-based code. It is also advised to use the following PETSc options:   `petsc_options_iname = '-pc_type'` and `petsc_options_value = 'lu'`.
 Their exact explanation is beyond the scope of this tutorial.
 
 The `nl_rel_tol`, `nl_abs_tol`, and `nl_max_its` are parameters to decide if the non-linear solver
