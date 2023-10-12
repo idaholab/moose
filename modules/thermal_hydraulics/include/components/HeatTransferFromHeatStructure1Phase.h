@@ -32,17 +32,17 @@ protected:
   virtual void check() const override;
 
   /**
-   * Gets the "master side" (heat structure) boundary name for this connection
+   * Gets the heat structure boundary name for this connection
    *
-   * @return The boundary name of the master side
+   * @return The boundary name of the heat structure side
    */
-  const BoundaryName & getMasterSideName() const;
+  const BoundaryName & getHeatStructureSideName() const;
   /**
-   * Gets the "slave side" (flow channel) nodeset name for this connection
+   * Gets the flow channel nodeset name for this connection
    *
-   * @return The nodeset name for the slave side
+   * @return The nodeset name for the channel side
    */
-  const BoundaryName & getSlaveSideName() const;
+  const BoundaryName & getChannelSideName() const;
 
   /// Mesh alignment
   MeshAlignment _mesh_alignment;

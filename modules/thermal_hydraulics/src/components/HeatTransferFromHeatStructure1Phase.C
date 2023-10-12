@@ -159,7 +159,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   {
     const std::string class_name = "ADHeatFlux3EqnBC";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<BoundaryName>>("boundary") = {getMasterSideName()};
+    params.set<std::vector<BoundaryName>>("boundary") = {getHeatStructureSideName()};
     params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     params.set<UserObjectName>("q_uo") = heat_flux_uo_name;
     params.set<Real>("P_hs_unit") = hs.getUnitPerimeter(_hs_side);
@@ -179,13 +179,13 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     getTHMProblem().addMaterial(class_name, genName(name(), "T_wall_transfer_mat"), params);
   }
 
-  // Transfer the temperature of the solid onto the flow channel as aux varaible for visualization
+  // Transfer the temperature of the solid onto the flow channel as aux variable for visualization
   {
     std::string class_name = "VariableValueTransferAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _T_wall_name;
-    params.set<std::vector<BoundaryName>>("boundary") = {getSlaveSideName()};
-    params.set<BoundaryName>("paired_boundary") = getMasterSideName();
+    params.set<std::vector<BoundaryName>>("boundary") = {getChannelSideName()};
+    params.set<BoundaryName>("paired_boundary") = getHeatStructureSideName();
     params.set<std::vector<VariableName>>("paired_variable") =
         std::vector<VariableName>(1, HeatConductionModel::TEMPERATURE);
     getTHMProblem().addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
@@ -193,13 +193,13 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
 }
 
 const BoundaryName &
-HeatTransferFromHeatStructure1Phase::getMasterSideName() const
+HeatTransferFromHeatStructure1Phase::getHeatStructureSideName() const
 {
   return getHSBoundaryName(this);
 }
 
 const BoundaryName &
-HeatTransferFromHeatStructure1Phase::getSlaveSideName() const
+HeatTransferFromHeatStructure1Phase::getChannelSideName() const
 {
   const FlowChannel1Phase & flow_channel =
       getComponentByName<FlowChannel1Phase>(_flow_channel_name);
