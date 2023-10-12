@@ -41,7 +41,7 @@ virtual void computeQpResidual(RealEigenVector & residual) = 0;
 virtual RealEigenVector computeQpJacobian();
 virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar);
 
-When defining a `computeQpResidual` in a derived class, this function +must+ define the residual in the input arguement (`residual`). This input is already properly sized when called in ArrayKernel.C. `computeQpJacobian` must return a vector defining the on-diagonal terms of the Jacobian. `computeQpOffDiagJacobian` must return a matrix with number of rows equal to the number of components and number of columns being the number of components in `jvar.`
+When defining a `computeQpResidual` in a derived class, this function +must+ define the residual in the input argument (`residual`). This input is already properly sized when called in ArrayKernel.C. `computeQpJacobian` must return a vector defining the on-diagonal terms of the Jacobian. `computeQpOffDiagJacobian` must return a matrix with number of rows equal to the number of components and number of columns being the number of components in `jvar.`
 
 Using [ArrayDiffusion.md] as an example. The `computeQpResidual` function has
 
@@ -140,7 +140,7 @@ m_{n1} & m_{n2} & \dots & m_{nn}
 
 Eigen has some unique features that, when used properly, can significantly impact performance. Here are some recommendations that can improve code performance.
 
-- [Aliasing](http://eigen.tuxfamily.org/dox/group__TopicAliasing.html) is a technique in Eigen that contructs temporary objects when performing matrix multiplications, this is to avoid overriding data that needs to be used later in the computation. For instance `vec = mat * vec` will create a temporary vector for `mat * vec` then assign it to `vec` at the end. However, `vec2 = mat * vec1` does not need this temporary object and assign the result to `vec2` directly, this aliasing can be avoided by doing `vec2.noalias()`. The `noalias()` function should be used with extreme caution since it can cause erroneous results.
+- [Aliasing](http://eigen.tuxfamily.org/dox/group__TopicAliasing.html) is a technique in Eigen that constructs temporary objects when performing matrix multiplications, this is to avoid overriding data that needs to be used later in the computation. For instance `vec = mat * vec` will create a temporary vector for `mat * vec` then assign it to `vec` at the end. However, `vec2 = mat * vec1` does not need this temporary object and assign the result to `vec2` directly, this aliasing can be avoided by doing `vec2.noalias()`. The `noalias()` function should be used with extreme caution since it can cause erroneous results.
 
 - Eigen uses what's known as [expression templates](https://en.wikipedia.org/wiki/Expression_templates), enabling operations to be known at compile time. This allows multiple operations to occur in a single element element loop, providing more compiler optimization and improved cache efficiency. With this in mind, it is often better to write multiple Eigen operations in a single line or assignment. For instance, with the following syntax:
 

@@ -36,10 +36,10 @@ input parameter names):
 
 The three focus spatial variables `_var`, `_secondary_var`, and `_primary_var` are each indicated by the
 name `var` below, and are differentiated by the `mortar_type` flag as one of "Primary". "Secondary", or
-"Lower". In a coupled (multi-phyics) weak form, all interface integral terms containing the test function
+"Lower". In a coupled (multi-physics) weak form, all interface integral terms containing the test function
 of one of these three variables are potential candidates for `MortarConstraint` contributions.
 
-The philosphy of the scalar augmentation class `MortarScalarBase` is to add a single focus scalar variable
+The philosophy of the scalar augmentation class `MortarScalarBase` is to add a single focus scalar variable
 referred to as `_kappa` to the `MortarConstraint` object so that all terms in the coupled weak form that
 involve the spatial variables, scalar variable, and/or their test functions can be assembled in one
 or multiple class instances.

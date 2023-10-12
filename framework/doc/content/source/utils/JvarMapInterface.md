@@ -23,7 +23,7 @@ In case an index into the vector of *all* coupled variables for the current obje
 
 should be used. When called from `computeQpOffDiagJacobian` with the method's
 `jvar` parameter passed in, `mapJvarToCvar` is guaranteed to return a valid index
-into `_coupled_moose_vars`. The off diagonal Jacobian methos is only called for
+into `_coupled_moose_vars`. The off diagonal Jacobian method is only called for
 variable numbers that are found in the `_coupled_moose_vars` vector, and those
 are mapped in the global jvar map which the `JvarMapInterface` classes construct
 automatically.

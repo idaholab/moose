@@ -3,7 +3,7 @@
 To simplify and unify the creation of all simulation objects in MOOSE, all input parameters must be declared and populated through
 a single "InputParameters" object. This ensures that every constructor in MOOSE is uniform and ensures that every object
 can be created through MOOSE's Factory pattern. The InputParameters object is a collection of parameters, each one with
-seperate attributes that can be used to finely control the behavior of the underlying object. For example, parameters can be
+separate attributes that can be used to finely control the behavior of the underlying object. For example, parameters can be
 marked as required or optional, be provided with a default or not, and be used to enhance GUI interfaces that may be used to
 programmatically generate input files for MOOSE.
 
@@ -24,7 +24,7 @@ and corresponding documentation here:
 
 The InputParameters object supports parsed expressions for various bounds checking of the user input so that
 custom logic does not need to be implemented in every end-user object. The range checking expression is always
-the second to last paramter right before the doc string.
+the second to last parameter right before the doc string.
 
 !listing framework/include/utils/InputParameters.h  start=BEGIN RANGE CHECKED PARAMETER METHODS end=END RANGE CHECKED PARAMETER METHODS
 

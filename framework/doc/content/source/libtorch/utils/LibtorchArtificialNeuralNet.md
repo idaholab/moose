@@ -5,7 +5,7 @@
 This class can be used to generate a simple, feedforward artificial neural network (ANN)
 using the underlying objects imported from `libtorch` (C++ API of `pytorch`). +Note:
 to be able to use these capabilities, MOOSE needs to be installed with libtorch support.+ For
-more information, visit the installation instuctions on the MOOSE website.
+more information, visit the installation instructions on the MOOSE website.
 For a more detailed introduction to neural networks, we refer the reader to [!cite](muller1995neural).
 The architecture of a simple feedforward neural network is presented below. The first layer
 from the left to the right are referred to as input and output layers,
@@ -16,7 +16,7 @@ while the layers between them are the hidden layers.
 
 We see that the outputs ($\textbf{y}$) of the neural net can be expressed as function of the
 inputs ($\textbf{x}$) and the corresponding model parameters (weights $w_{i,j}$, organized in
-weight matrics $\textbf{W}$ and biases $b_i$ organized in the bias vector $\textbf{b}$)
+the weight matrix $\textbf{W}$ and biases $b_i$ organized in the bias vector $\textbf{b}$)
 in the following nested form:
 
 !equation id=nn-explicit
@@ -35,7 +35,7 @@ over a training set.
 ## Example usage
 
 To be able to use this neural network, we have to construct one using a name,
-the number of expected input and output neurons, an expected hideen-layer-structure and
+the number of expected input and output neurons, an expected hidden-layer-structure and
 the activation functions for the layers. If no activation function is given,
 `relu` is used for every hidden neuron:
 

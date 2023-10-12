@@ -12,8 +12,6 @@
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
 
-// Forward Declarations
-
 /**
  * Material class that creates the math free energy with the expression builder
  * and uses automatic differentiation to get the derivatives.

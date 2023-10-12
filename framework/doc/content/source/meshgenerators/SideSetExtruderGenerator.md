@@ -33,7 +33,7 @@ SideSetExtruderGenerator is actually a mere wrapper of 4 other generators:
 
 
 As such, the `SideSetExtruderGenerator` is exactly equivalent to the output of a recipe similar to the one below.
-If you are needing to tweak the output of `SideSetExtruderGenerator`, it may be preferrable to use these generators
+If you are needing to tweak the output of `SideSetExtruderGenerator`, it may be preferable to use these generators
 instead. `SideSetExtruderGenerator` uses the default parameters of these sub-generators. 
 
 !listing test/tests/meshgenerators/sideset_extruder_generator/extrude_square.i

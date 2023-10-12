@@ -56,7 +56,7 @@ Two of these objects are shown in the input file below:
 
 !listing test/tests/mortar/periodic_segmental_constraint/penalty_periodic_simple2d.i block=Constraints
 
-The applied macroscale diffusive flux $\sigma$ is applied as the `sigma` vector via an auxillary
+The applied macroscale diffusive flux $\sigma$ is applied as the `sigma` vector via an auxiliary
 scalar. The computed macroscale diffusive gradient $\epsilon$ is assigned in a scalar variable `epsilon`.
 Both of these scalars should have the same number of components as the spatial dimension of $\Omega$.
 The volume integral of the gradient of the primary field will be constrained to $\epsilon$

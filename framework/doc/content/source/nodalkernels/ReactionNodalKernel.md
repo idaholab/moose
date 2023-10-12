@@ -4,9 +4,9 @@
 
 ## Description
 
-The `ReactionNodalKernel` is meant to apply a simple volumetric sink reacton
+The `ReactionNodalKernel` is meant to apply a simple volumetric sink reaction
 term of the form $k*u$ at nodes, where $k$ is an optional user-supplied reaction
-rate coeffiecient and $u$ is the variable that the `ReactionNodalKernel` is
+rate coefficient and $u$ is the variable that the `ReactionNodalKernel` is
 being applied to.
 
 ## Example Syntax

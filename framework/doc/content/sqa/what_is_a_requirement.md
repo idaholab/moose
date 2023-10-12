@@ -1,7 +1,7 @@
 # What is a Requirement?
 
 The "Software Requirement Specification (SRS)" is created from a set of "requirements" that
-must be: correct, complete, consistent, unambiquous, ranked, verifiable,
+must be: correct, complete, consistent, unambiguous, ranked, verifiable,
 modifiable, and traceable [!citep](ieee1998recommended).
 
 Within MOOSE the decision was made that each test is a requirement. This relationship is not

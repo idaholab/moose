@@ -13,7 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseUtils.h"
-
+#include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
 
 #ifdef THERMOCHIMICA_ENABLED
@@ -60,6 +60,7 @@ ChemicalCompositionAction::validParams()
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>(
       "execute_on", exec_enum, "When to execute the ThermochimicaNodalData UO");
+  params.addParam<bool>("is_fv", false, "Should the variables set up by action be of FV type");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -87,6 +88,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _tunit(getParam<MooseEnum>("tunit")),
     _punit(getParam<MooseEnum>("punit")),
     _munit(getParam<MooseEnum>("munit")),
+    _is_fv(getParam<bool>("is_fv")),
     _phases(getParam<std::vector<std::string>>("output_phases")),
     _species(getParam<std::vector<std::string>>("output_species")),
     _output_mass_unit(getParam<MooseEnum>("output_species_unit")),
@@ -407,11 +409,14 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_aux_variable")
   {
-    const std::string aux_var_type = "MooseVariable";
+
+    auto aux_var_type = AddVariableAction::variableType(
+        FEType(Utility::string_to_enum<Order>(_problem->mesh().hasSecondOrderElements() ? "SECOND"
+                                                                                        : "FIRST"),
+               Utility::string_to_enum<FEFamily>("LAGRANGE")),
+        /* is_fv = */ _is_fv,
+        /* is_array = */ false);
     auto params = _factory.getValidParams(aux_var_type);
-    const bool second = _problem->mesh().hasSecondOrderElements();
-    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
-    params.set<MooseEnum>("family") = "LAGRANGE";
 
     for (const auto i : index_range(_elements))
       _problem->addAuxVariable(aux_var_type, _elements[i], params);

@@ -280,7 +280,7 @@ we see exactly what we would expect: values 0--3 corresponding to the $u$
 indices are equivalent to that shown in the previous lldb output whereas the
 values in 4--7, corresponding to the $v$ indices, are equal to the negative of
 that shown in the previous lldb output. In general, the quality of automatic
-differention results are verified with unit testing in MetaPhysicL and using a
+differentiation results are verified with unit testing in MetaPhysicL and using a
 `PetscJacobianTester` in MOOSE which compares the Jacobian produced
 by automatic differentiation against that generated using finite differencing of
 the residuals. The latter test relies on using well-scaled problems; for

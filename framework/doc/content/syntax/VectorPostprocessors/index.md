@@ -28,7 +28,7 @@ Developers are responsible for sizing these vectors as needed.
 ## Output
 
 VPP data can vary depending on the type of data being output. Again, the the "sample over line" example mentioned in the introduction,
-a complete set of values will be generated each time the VPP is executed. The VPP system handles this scenario by creating seperate output
+a complete set of values will be generated each time the VPP is executed. The VPP system handles this scenario by creating separate output
 files for each invocation. The form of the output is as follows:
 
 ```
@@ -48,8 +48,8 @@ separate output files may need to be used. Instead, MOOSE supports an option, wh
 contains_complete_history = true
 ```
 
-By setting this value, you are telling MOOSE that the values in all of the vectors of the given VPP are cummulative. MOOSE will take
-advantage of this information in multiple ways. First, it will turn off writing the output to seperate files and will drop the serial
+By setting this value, you are telling MOOSE that the values in all of the vectors of the given VPP are cumulative. MOOSE will take
+advantage of this information in multiple ways. First, it will turn off writing the output to separate files and will drop the serial
 number from the output filename format altogether. Secondly, it will ignore any changed values in the vectors only outputting the newest
 rows in each vector postprocessor.
 

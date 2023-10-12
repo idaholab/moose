@@ -28,7 +28,7 @@ protected:
   virtual void computeVarValues(std::vector<Real> & values);
 
   unsigned int _n_vars;
-  std::vector<MooseVariable *> _vars;
+  std::vector<MooseWritableVariable *> _vars;
 
   const bool _use_compute_value;
 };

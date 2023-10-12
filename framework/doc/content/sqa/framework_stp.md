@@ -254,7 +254,7 @@ the software. Internet connectivity is not required after installation on the en
 !template! item key=task-responsibilities
 !! task-responsibilities-begin
 The creation and execution of the test cases is part of the change control process, as such the
-associated roles and reponsibilties are minimal.
+associated roles and responsibilities are minimal.
 
 | Task | Responsibility | Role |
 | :- | :- | :- |
