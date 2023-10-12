@@ -12,8 +12,8 @@ Here the slip rate is given as a power law relationship considering backstress t
   \label{eqn:powerLawSlipRate}
   \dot{\gamma}^{\alpha}=\dot{\gamma}_o\left| \frac{\tau ^{\alpha}-\chi ^{\alpha}}{g^{\alpha}} \right|^{1/m}sign\left( \tau ^{\alpha}-\chi ^{\alpha} \right)
 \end{equation}
-The backstress term $\chi^{\alpha}$ of each slip system is solved with the Armstrong-Frederick type hardening-dynamic recovery law [!cite](Frederick2007):
-as a function of the slip increment
+
+In the crystal plasticity finite element model, the main purpose of introducing the "backstress" term is to consider the nonlinear and history-dependent behavior of the crystal. This item can help simulate various complex plastic phenomena in crystals, especially under conditions such as non-uniform strain and cycle loading. The backstress term $\chi^{\alpha}$ of each slip system is solved with the Armstrong-Frederick type hardening-dynamic recovery law [!cite](Frederick2007):
 \begin{equation}
   \label{eqn:backstressEvolution}
   \dot{\chi}^{\alpha}=c_b\dot{\gamma}^{\alpha}-d_b|\dot{\gamma}^{\alpha}|\chi ^{\alpha}
