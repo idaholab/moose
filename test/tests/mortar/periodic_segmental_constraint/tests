@@ -59,6 +59,7 @@
     input = 'periodic_checker2d.i'
     csvdiff = 'periodic_checker2d_out.csv'
     requirement = "Mortar surfaces coupled with scalar variables can handle nonuniform conductivity using Lagrange multipliers."
+    strumpack = true
   []
   [testperiodicsole]
     type = 'CSVDiff'
