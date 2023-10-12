@@ -123,6 +123,7 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   // in case it is so that objects can have 'time' in their matrix tags by default
   _fe_problem.addMatrixTag("TIME");
 
+  // We create a tag for the right hand side, the vector is already in the libmesh system
   _rhs_tag = _fe_problem.addVectorTag("RHS");
 }
 
