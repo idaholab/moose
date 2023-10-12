@@ -754,6 +754,10 @@ public:
                            const std::string & name,
                            InputParameters & parameters);
 
+  virtual void addLinearFVKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
+
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
   virtual void addFVInterfaceKernel(const std::string & fv_ik_name,
@@ -2576,6 +2580,18 @@ private:
   std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
+
+  /**
+   * Determine what linear system the provided variable name lies in
+   * @param var_name The name of the variable we are doing nonlinear system lookups for
+   * @param error_if_not_found Whether to error if the variable name isn't found in any of the
+   * nonlinear systems
+   * @return A pair in which the first member indicates whether the variable was found in the
+   * linear systems and the second member indicates the linear system number in which the
+   * variable was found (or an invalid unsigned integer if not found)
+   */
+  std::pair<bool, unsigned int> determineLinearSystem(const std::string & var_name,
+                                                      bool error_if_not_found = false) const;
 
   /**
    * Checks if the variable of the initial condition is getting restarted and errors for specific

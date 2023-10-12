@@ -35,7 +35,7 @@
 // class NodalBCBase;
 // class DirichletBCBase;
 // class ADDirichletBCBase;
-// class DGKernelBase;
+class LinearFVKernel;
 // class InterfaceKernelBase;
 // class ScalarKernelBase;
 // class DiracKernelBase;
@@ -109,9 +109,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void addLinearKernel(const std::string & kernel_name,
-                               const std::string & name,
-                               InputParameters & parameters);
+  virtual void addLinearFVKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
 
   /**
    * Adds a boundary condition
@@ -232,7 +232,10 @@ public:
   /**
    * Access functions to Warehouses from outside LinearSystem
    */
-  MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
+  MooseObjectTagWarehouse<LinearFVKernel> & getLinearFVKernelWarehouse()
+  {
+    return _linear_fv_kernels;
+  }
   //@}
 
   virtual System & system() override { return _sys; }
@@ -308,7 +311,7 @@ protected:
 
   ///@{
   /// Kernel Storage
-  MooseObjectTagWarehouse<KernelBase> _kernels;
+  MooseObjectTagWarehouse<LinearFVKernel> _linear_fv_kernels;
 
   ///@}
 

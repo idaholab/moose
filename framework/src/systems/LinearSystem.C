@@ -72,6 +72,7 @@
 #include "ConsoleStream.h"
 #include "MooseError.h"
 #include "FVElementalKernel.h"
+#include "LinearFVKernel.h"
 #include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
@@ -320,23 +321,17 @@ LinearSystem::addTimeIntegrator(const std::string & type,
 }
 
 void
-LinearSystem::addLinearKernel(const std::string & kernel_name,
-                              const std::string & name,
-                              InputParameters & parameters)
+LinearSystem::addLinearFVKernel(const std::string & kernel_name,
+                                const std::string & name,
+                                InputParameters & parameters)
 {
-  // for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  // {
-  //   // Create the kernel object via the factory and add to warehouse
-  //   std::shared_ptr<KernelBase> kernel =
-  //       _factory.create<KernelBase>(kernel_name, name, parameters, tid);
-  //   _kernels.addObject(kernel, tid);
-  //   postAddResidualObject(*kernel);
-  // }
-
-  // if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
-  //   _has_save_in = true;
-  // if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
-  //   _has_diag_save_in = true;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // Create the kernel object via the factory and add to warehouse
+    std::shared_ptr<LinearFVKernel> kernel =
+        _factory.create<LinearFVKernel>(kernel_name, name, parameters, tid);
+    _linear_fv_kernels.addObject(kernel, tid);
+  }
 }
 
 void
@@ -1618,7 +1613,7 @@ LinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains)
 bool
 LinearSystem::containsTimeKernel()
 {
-  auto & time_kernels = _kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
+  auto & time_kernels = _linear_fv_kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
 
   return time_kernels.hasActiveObjects();
 }

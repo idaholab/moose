@@ -2529,6 +2529,23 @@ FEProblemBase::determineNonlinearSystem(const std::string & var_name,
   return std::make_pair(var_in_nl, var_in_nl ? nl_map_it->second : libMesh::invalid_uint);
 }
 
+std::pair<bool, unsigned int>
+FEProblemBase::determineLinearSystem(const std::string & var_name,
+                                     const bool error_if_not_found) const
+{
+  auto linear_map_it = _linear_var_to_sys_num.find(var_name);
+  const bool var_in_linear = linear_map_it != _linear_var_to_sys_num.end();
+  if (var_in_linear)
+    mooseAssert(_linear_systems[linear_map_it->second]->hasVariable(var_name),
+                "If the variable is in our FEProblem linear system map, then it must be in the "
+                "linear system we expect");
+  else if (error_if_not_found)
+    mooseError("Unknown variable '", var_name, "'. It does not exist in the linear system(s)!");
+
+  return std::make_pair(var_in_linear,
+                        var_in_linear ? linear_map_it->second : libMesh::invalid_uint);
+}
+
 void
 FEProblemBase::addKernel(const std::string & kernel_name,
                          const std::string & name,
@@ -3000,6 +3017,20 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
     // true
     _reinit_displaced_elem = true;
   addObject<FVKernel>(fv_kernel_name, name, parameters);
+}
+
+void
+FEProblemBase::addLinearFVKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  const auto linear_sys_num =
+      determineLinearSystem(parameters.varName("variable", name), true).second;
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = _linear_systems[linear_sys_num].get();
+
+  _linear_systems[linear_sys_num]->addLinearFVKernel(kernel_name, name, parameters);
 }
 
 void
