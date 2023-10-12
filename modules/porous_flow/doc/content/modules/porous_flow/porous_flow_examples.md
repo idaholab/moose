@@ -19,6 +19,7 @@ The following tutorial and example problems demonstrate the capabilities of the 
 - [modules/porous_flow/ates.md]
 - [modules/porous_flow/natural_convection.md]
 - [modules/porous_flow/solute_tracer_transport.md]
+- [modules/porous_flow/fluidflower.md]
 - [modules/porous_flow/tests.md]
 
 !! example-list-end

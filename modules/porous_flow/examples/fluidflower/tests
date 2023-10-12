@@ -1,0 +1,12 @@
+[Tests]
+  [fluidflower]
+    type = CSVDiff
+    input = 'fluidflower.i'
+    csvdiff = 'fluidflower_csv.csv'
+    cli_args = 'Executioner/end_time=2'
+    threading = '!pthreads'
+    issues = '#24590'
+    design = 'fluidflower.md'
+    requirement = 'The system shall be able to solve a CO2 advection-diffusion problem in a complex heterogeneous geometry.'
+  []
+[]
