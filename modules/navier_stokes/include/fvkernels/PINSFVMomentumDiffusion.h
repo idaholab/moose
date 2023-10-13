@@ -21,7 +21,13 @@ public:
   PINSFVMomentumDiffusion(const InputParameters & params);
 
 protected:
-  ADReal computeStrongResidual() override;
+  /**
+   * Routine to compute this object's strong residual (e.g. not multipled by area). This routine
+   * can also populate the _ae and _an coefficients
+   * @param populate_a_coeffs Boolean to let the function know that it should also populate the
+   *                          a coefficients in a monolithic RC approach
+   */
+  virtual ADReal computeStrongResidual(const bool populate_a_coeffs) override;
 
   /// the porosity
   const Moose::Functor<ADReal> & _eps;

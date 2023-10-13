@@ -64,30 +64,17 @@ INSFVRhieChowInterpolator::listOfCommonParams()
 InputParameters
 INSFVRhieChowInterpolator::validParams()
 {
-  auto params = GeneralUserObject::validParams();
-  params += TaggingInterface::validParams();
-  params += BlockRestrictable::validParams();
+  auto params = RhieChowInterpolatorBase::validParams();
   params += INSFVRhieChowInterpolator::uniqueParams();
+
+  params.addClassDescription(
+      "Computes the Rhie-Chow velocity based on gathered 'a' coefficient data.");
+
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
-  // Avoid uninitialized residual objects
-  params.suppressParameter<bool>("force_preic");
-
-  MooseEnum velocity_interp_method("average rc", "rc");
-  params.addParam<MooseEnum>(
-      "velocity_interp_method",
-      velocity_interp_method,
-      "The interpolation to use for the velocity. Options are "
-      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
-  params.addRequiredParam<VariableName>(NS::pressure, "The pressure variable.");
-  params.addRequiredParam<VariableName>("u", "The x-component of velocity");
-  params.addParam<VariableName>("v", "The y-component of velocity");
-  params.addParam<VariableName>("w", "The z-component of velocity");
-  params.addClassDescription(
-      "Computes the Rhie-Chow velocity based on gathered 'a' coefficient data.");
   params.addParam<MooseFunctorName>(
       "a_u",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
@@ -102,152 +89,23 @@ INSFVRhieChowInterpolator::validParams()
       "a_w",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
-      "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
+      "coefficients for the 'z' component velocity, solved "
+      "via the Navier-Stokes equations.");
   return params;
 }
 
 INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & params)
-  : GeneralUserObject(params),
-    TaggingInterface(this),
-    BlockRestrictable(this),
-    ADFunctorInterface(this),
-    _moose_mesh(UserObject::_subproblem.mesh()),
-    _mesh(_moose_mesh.getMesh()),
-    _dim(blocksMaxDimension()),
+  : RhieChowInterpolatorBase(params),
     _vel(libMesh::n_threads()),
-    _p(dynamic_cast<INSFVPressureVariable *>(
-        &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
-    _u(dynamic_cast<INSFVVelocityVariable *>(
-        &UserObject::_subproblem.getVariable(0, getParam<VariableName>("u")))),
-    _v(isParamValid("v") ? dynamic_cast<INSFVVelocityVariable *>(
-                               &UserObject::_subproblem.getVariable(0, getParam<VariableName>("v")))
-                         : nullptr),
-    _w(isParamValid("w") ? dynamic_cast<INSFVVelocityVariable *>(
-                               &UserObject::_subproblem.getVariable(0, getParam<VariableName>("w")))
-                         : nullptr),
-    _ps(libMesh::n_threads(), nullptr),
-    _us(libMesh::n_threads(), nullptr),
-    _vs(libMesh::n_threads(), nullptr),
-    _ws(libMesh::n_threads(), nullptr),
-    _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
-    _a(_moose_mesh, _sub_ids, "a"),
+    _a(_moose_mesh, blockIDs(), "a", /*extrapolated_boundary*/ true),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
     _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
 {
-  if (!_p)
-    paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
-
-  auto fill_container = [this](const auto & name, auto & container)
-  {
-    for (const auto tid : make_range(libMesh::n_threads()))
-    {
-      auto * const var = static_cast<MooseVariableFVReal *>(
-          &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));
-      container[tid] = var;
-    }
-  };
-
-  auto check_blocks = [this](const auto & var)
-  {
-    const auto & var_blocks = var.blockIDs();
-    const auto & uo_blocks = blockIDs();
-
-    // Error if this UO has any blocks that the variable does not
-    std::set<SubdomainID> uo_blocks_minus_var_blocks;
-    std::set_difference(
-        uo_blocks.begin(),
-        uo_blocks.end(),
-        var_blocks.begin(),
-        var_blocks.end(),
-        std::inserter(uo_blocks_minus_var_blocks, uo_blocks_minus_var_blocks.end()));
-    if (uo_blocks_minus_var_blocks.size() > 0)
-      mooseError("Block restriction of interpolator user object '",
-                 this->name(),
-                 "' (",
-                 Moose::stringify(blocks()),
-                 ") includes blocks not in the block restriction of variable '",
-                 var.name(),
-                 "' (",
-                 Moose::stringify(var.blocks()),
-                 ")");
-
-    // Get the blocks in the variable but not this UO
-    std::set<SubdomainID> var_blocks_minus_uo_blocks;
-    std::set_difference(
-        var_blocks.begin(),
-        var_blocks.end(),
-        uo_blocks.begin(),
-        uo_blocks.end(),
-        std::inserter(var_blocks_minus_uo_blocks, var_blocks_minus_uo_blocks.end()));
-
-    // For each block in the variable but not this UO, error if there is connection
-    // to any blocks on the UO.
-    for (auto & block_id : var_blocks_minus_uo_blocks)
-    {
-      const auto connected_blocks = _moose_mesh.getBlockConnectedBlocks(block_id);
-      std::set<SubdomainID> connected_blocks_on_uo;
-      std::set_intersection(connected_blocks.begin(),
-                            connected_blocks.end(),
-                            uo_blocks.begin(),
-                            uo_blocks.end(),
-                            std::inserter(connected_blocks_on_uo, connected_blocks_on_uo.end()));
-      if (connected_blocks_on_uo.size() > 0)
-        mooseError("Block restriction of interpolator user object '",
-                   this->name(),
-                   "' (",
-                   Moose::stringify(uo_blocks),
-                   ") doesn't match the block restriction of variable '",
-                   var.name(),
-                   "' (",
-                   Moose::stringify(var_blocks),
-                   ")");
-    }
-  };
-
-  fill_container(NS::pressure, _ps);
-  check_blocks(*_p);
-
-  if (!_u)
-    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
-  fill_container("u", _us);
-  check_blocks(*_u);
-  _var_numbers.push_back(_u->number());
-
-  if (_dim >= 2)
-  {
-    if (!_v)
-      mooseError("In two or more dimensions, the v velocity must be supplied and it must be an "
-                 "INSFVVelocityVariable.");
-
-    fill_container("v", _vs);
-    check_blocks(*_v);
-    _var_numbers.push_back(_v->number());
-    if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
-      mooseError("x and y velocity component face interpolation methods do not match");
-  }
-
-  if (_dim >= 3)
-  {
-    if (!_w)
-      mooseError("In three-dimensions, the w velocity must be supplied and it must be an "
-                 "INSFVVelocityVariable.");
-
-    fill_container("w", _ws);
-    check_blocks(*_w);
-    _var_numbers.push_back(_w->number());
-    if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
-      mooseError("x and z velocity component face interpolation methods do not match");
-  }
-
-  if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))
-    mooseError("Different subproblems in INSFVRhieChowInterpolator!");
-
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     _vel[tid] = std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
@@ -266,16 +124,9 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         blockIDs());
   }
 
-  const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
-  if (velocity_interp_method == "average")
-  {
-    _velocity_interp_method = Moose::FV::InterpMethod::Average;
-    if (isParamValid("a_u"))
-      paramError("a_u",
-                 "Rhie Chow coefficients may not be specified for average velocity interpolation");
-  }
-  else if (velocity_interp_method == "rc")
-    _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
+  if (_velocity_interp_method == Moose::FV::InterpMethod::Average && isParamValid("a_u"))
+    paramError("a_u",
+               "Rhie Chow coefficients may not be specified for average velocity interpolation");
 
   if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
     fillARead();
@@ -384,8 +235,8 @@ void
 INSFVRhieChowInterpolator::insfvSetup()
 {
   _elem_range =
-      std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(_sub_ids),
-                                       _mesh.active_local_subdomain_set_elements_end(_sub_ids));
+      std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(blockIDs()),
+                                       _mesh.active_local_subdomain_set_elements_end(blockIDs()));
 }
 
 void
@@ -487,7 +338,7 @@ INSFVRhieChowInterpolator::finalize()
   {
     for (const auto * const elem :
          as_range(_mesh.active_not_local_elements_begin(), _mesh.active_not_local_elements_end()))
-      if (_sub_ids.count(elem->subdomain_id()))
+      if (blockIDs().count(elem->subdomain_id()))
         pull_requests[elem->processor_id()].push_back(elem->id());
   }
   else
@@ -695,13 +546,4 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
 
   return velocity;
-}
-
-bool
-INSFVRhieChowInterpolator::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  if (fi_elem_side)
-    return hasBlocks(fi.elem().subdomain_id());
-  else
-    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }

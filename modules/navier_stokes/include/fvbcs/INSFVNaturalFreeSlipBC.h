@@ -25,4 +25,6 @@ public:
   // A free slip wall boundary condition does not allow any outflow nor does it impose any viscous
   // stress so there is no data to contribute from this object
   void gatherRCData(const FaceInfo &) override {}
+
+  ADReal computeSegregatedContribution() override { return 0.0; }
 };

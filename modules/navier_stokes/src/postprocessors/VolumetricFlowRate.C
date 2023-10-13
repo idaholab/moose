@@ -53,7 +53,7 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _adv_quant(isParamValid("advected_quantity") ? &getFunctor<ADReal>("advected_quantity")
                                                  : nullptr),
     _rc_uo(isParamValid("rhie_chow_user_object")
-               ? &getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object")
+               ? &getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object")
                : nullptr)
 {
   // Check that at most one advected quantity has been provided
@@ -83,12 +83,13 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 void
 VolumetricFlowRate::initialSetup()
 {
-  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow)
+  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
+      !_rc_uo->segregated())
   {
     // We must make sure the A coefficients in the Rhie Chow interpolator are present on
     // both sides of the boundaries so that interpolation coefficients may be computed
     for (const auto bid : boundaryIDs())
-      const_cast<INSFVRhieChowInterpolator *>(_rc_uo)->ghostADataOnBoundary(bid);
+      const_cast<RhieChowInterpolatorBase *>(_rc_uo)->ghostADataOnBoundary(bid);
 
     // On INITIAL, we cannot compute Rhie Chow coefficients on internal surfaces because
     // - the time integrator is not ready to compute time derivatives
@@ -126,6 +127,7 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   // Get face value for velocity
   const auto vel =
       MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, state, _tid));
+
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 

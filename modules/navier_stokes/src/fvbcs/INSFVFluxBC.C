@@ -26,6 +26,34 @@ INSFVFluxBC::INSFVFluxBC(const InputParameters & params)
 }
 
 void
+INSFVFluxBC::computeResidual(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxBC::computeResidual(fi);
+}
+
+void
+INSFVFluxBC::computeJacobian(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxBC::computeJacobian(fi);
+}
+
+void
+INSFVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  if (_rc_uo.segregated())
+    FVFluxBC::computeResidualAndJacobian(fi);
+}
+
+ADReal
+INSFVFluxBC::computeQpResidual()
+{
+  mooseAssert(_rc_uo.segregated(), "We should not get here if we are not segregated!");
+  return computeSegregatedContribution();
+}
+
+void
 INSFVFluxBC::addResidualAndJacobian(const ADReal & residual)
 {
   const auto * const elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)

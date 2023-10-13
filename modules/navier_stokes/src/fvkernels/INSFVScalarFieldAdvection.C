@@ -33,5 +33,6 @@ INSFVScalarFieldAdvection::computeQpResidual()
                                       limiterType(_advected_interp_method),
                                       MetaPhysicL::raw_value(v) * _normal > 0),
                              state);
+
   return _normal * v * var_face;
 }

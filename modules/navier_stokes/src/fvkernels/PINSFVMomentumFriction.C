@@ -43,19 +43,36 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
     mooseError("At least one friction model needs to be specified.");
 }
 
+ADReal
+PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
+                                                    const Moose::StateArg & state)
+{
+  ADReal coefficient = 0.0;
+  if (_use_Darcy_friction_model)
+    coefficient += (*_cL)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
+  if (_use_Forchheimer_friction_model)
+    coefficient += (*_cQ)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
+
+  return coefficient;
+}
+
+ADReal
+PINSFVMomentumFriction::computeSegregatedContribution()
+{
+  const auto & elem_arg = makeElemArg(_current_elem);
+  const auto state = determineState();
+
+  return raw_value(computeFrictionWCoefficient(elem_arg, state)) * _u_functor(elem_arg, state);
+}
+
 void
 PINSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
-  ADReal friction_term = 0;
   const auto elem_arg = makeElemArg(&elem);
   const auto state = determineState();
 
-  if (_use_Darcy_friction_model)
-    friction_term += (*_cL)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
-  if (_use_Forchheimer_friction_model)
-    friction_term += (*_cQ)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
-
-  const auto coefficient = friction_term * _assembly.elementVolume(&elem);
+  const auto coefficient =
+      computeFrictionWCoefficient(elem_arg, state) * _assembly.elementVolume(&elem);
 
   _rc_uo.addToA(&elem, _index, coefficient);
 

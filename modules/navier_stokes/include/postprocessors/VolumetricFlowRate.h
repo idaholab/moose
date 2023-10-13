@@ -13,7 +13,7 @@
 #include "SideIntegralPostprocessor.h"
 #include "MathFVUtils.h"
 
-class INSFVRhieChowInterpolator;
+class RhieChowInterpolatorBase;
 
 /**
  * This postprocessor computes the volumetric flow rate through a boundary, internal or external to
@@ -60,5 +60,5 @@ protected:
   Moose::FV::InterpMethod _velocity_interp_method;
 
   /// The Rhie-Chow interpolation user object
-  const INSFVRhieChowInterpolator * const _rc_uo;
+  const RhieChowInterpolatorBase * const _rc_uo;
 };

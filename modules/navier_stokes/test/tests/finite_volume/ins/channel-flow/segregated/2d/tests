@@ -1,0 +1,107 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [momentum]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity.i
+    exodiff = 2d-segregated-velocity_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "channel using the SIMPLE algorithm with separating the momentum components into "
+                  "different systems."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [rz]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz.i
+    exodiff = 2d-segregated-velocity-rz_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "cylindrical channel using the SIMPLE algorithm."
+    abs_zero = 1e-9
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [slip]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz-slip.i
+    exodiff = 2d-segregated-velocity-rz-slip_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "cylindrical channel with slip boundary conditions using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [slip-with-friction]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity-rz-slip.i
+    exodiff = 2d-segregated-velocity-rz-slip-friction.e
+    cli_args = "FVKernels/inactive='' Outputs/file_base='2d-segregated-velocity-rz-slip-friction'"
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "cylindrical channel with homogenized friction using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-energy]
+    type = 'Exodiff'
+    input = 2d-segregated-energy.i
+    exodiff = 2d-segregated-energy_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together "
+                  "with the energy equation in a 2D channel using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-energy-symmetry]
+    type = 'Exodiff'
+    input = 2d-segregated-energy.i
+    exodiff = 2d-segregated-energy-symmetry.e
+    # We need to force the boundary execution on the bottom surface because the segregated RC will have a
+    # small residual flux crossing the boundary
+    cli_args = "FVBCs/walls-u/boundary=top FVBCs/walls-v/boundary=top FVBCs/inactive='' "
+               "FVKernels/energy_advection/boundaries_to_force=bottom "
+               "FVKernels/inactive=ambient_convection "
+               "Outputs/file_base='2d-segregated-energy-symmetry'"
+    requirement = "The system shall be able to produce a constant solution for temperature in a "
+                  "symmetric 2D channel flow without heat sources using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-energy-symmetry-heated]
+    type = 'Exodiff'
+    input = 2d-segregated-energy.i
+    exodiff = 2d-segregated-energy-symmetry-heated.e
+    # We need to force the boundary execution on the bottom surface because the segregated RC will have a
+    # small residual flux crossing the boundary
+    cli_args = "FVBCs/walls-u/boundary=top FVBCs/walls-v/boundary=top FVBCs/inactive='' "
+               "FVKernels/energy_advection/boundaries_to_force=bottom "
+               "Outputs/file_base='2d-segregated-energy-symmetry-heated'"
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together "
+                  "with the energy equation in a symmetric 2D channel using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-scalar]
+    type = 'Exodiff'
+    input = 2d-segregated-scalar.i
+    exodiff = 2d-segregated-scalar_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem together "
+                  "with scalar transport equations in a 2D channel using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-scalar-conservation]
+    type = 'CSVDiff'
+    input = 2d-segregated-scalar.i
+    csvdiff = 2d-segregated-scalar_csv.csv
+    requirement = "The system shall conserve of a passive scalar while solving using the SIMPLE "
+                  "algorithm."
+    cli_args = "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
+               "scalar_2_coupled_source' Postprocessors/inactive=''"
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+  [with-scalar-symmetry]
+    type = 'Exodiff'
+    input = 2d-segregated-scalar.i
+    exodiff = 2d-segregated-scalar-symmetry.e
+    # We need to force the boundary execution on the bottom surface because the segregated RC will have a
+    # small residual flux crossing the boundary
+    cli_args = "FVBCs/walls-u/boundary=top FVBCs/walls-v/boundary=top FVBCs/inactive='' "
+               "FVKernels/scalar_2_advection/boundaries_to_force=bottom "
+               "FVKernels/scalar_1_advection/boundaries_to_force=bottom "
+               "FVKernels/inactive='scalar_1_src scalar_2_src scalar_1_coupled_source "
+               "scalar_2_coupled_source' Outputs/file_base='2d-segregated-scalar-symmetry'"
+    requirement = "The system shall be able to produce a constant solution for scalar values in a "
+                  "symmetric 2D channel flow without sources using the SIMPLE algorithm."
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+[]

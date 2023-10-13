@@ -35,6 +35,66 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
 {
 }
 
+ADReal
+INSFVSymmetryVelocityBC::computeSegregatedContribution()
+{
+  const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  const auto elem_arg =
+      use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
+
+  const auto state = determineState();
+  const auto state_old = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+
+  const auto normal = use_elem ? _face_info->normal() : Point(-_face_info->normal());
+  const auto & cell_centroid =
+      use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
+
+  ADRealVectorValue vel_C;
+  vel_C(0) = _u_functor(elem_arg, state);
+  if (_dim > 1)
+  {
+    vel_C(1) = _v_functor(elem_arg, state);
+    if (_dim > 2)
+      vel_C(2) = _w_functor(elem_arg, state);
+  }
+
+  ADRealVectorValue vel_C_old;
+  vel_C_old(0) = _u_functor(elem_arg, state_old);
+  if (_dim > 1)
+  {
+    vel_C_old(1) = _v_functor(elem_arg, state_old);
+    if (_dim > 2)
+      vel_C_old(2) = _w_functor(elem_arg, state_old);
+  }
+
+  const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * normal);
+
+  const auto face = singleSidedFaceArg();
+  const auto mu_b = _mu(face, state);
+
+  auto normal_x_normal = outer_product(normal, normal);
+  for (const auto dim_i : make_range(_dim))
+    normal_x_normal(dim_i, dim_i) = 0.0;
+
+  const auto normal_squared = normal(_index) * normal(_index);
+
+  const auto face_flux =
+      _rc_uo.getVelocity(Moose::FV::InterpMethod::RhieChow, *_face_info, state, _tid) * normal;
+
+  ADReal matrix_contribution;
+  ADReal rhs_contribution;
+
+  // First, add the advective flux
+  matrix_contribution = face_flux * (1 - normal_squared) * vel_C(_index);
+  rhs_contribution = face_flux * (normal_x_normal * vel_C_old)(_index);
+
+  // Second, add the diffusive flux
+  matrix_contribution += mu_b / d_perpendicular * normal_squared * vel_C(_index);
+  rhs_contribution += mu_b / d_perpendicular * (normal_x_normal * vel_C_old)(_index);
+
+  return matrix_contribution - rhs_contribution;
+}
+
 void
 INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
 {
