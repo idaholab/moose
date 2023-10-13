@@ -28,48 +28,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-# [AuxVariables]
-#   [mdot]
-#     block = sub_channel
-#   []
-#   [SumWij]
-#     block = sub_channel
-#   []
-#   [P]
-#     block = sub_channel
-#   []
-#   [DP]
-#     block = sub_channel
-#   []
-#   [h]
-#     block = sub_channel
-#   []
-#   [T]
-#     block = sub_channel
-#   []
-#   [Tpin]
-#     block = fuel_pins
-#   []
-#   [Dpin]
-#     block = fuel_pins
-#   []
-#   [rho]
-#     block = sub_channel
-#   []
-#   [mu]
-#     block = sub_channel
-#   []
-#   [S]
-#     block = sub_channel
-#   []
-#   [w_perim]
-#     block = sub_channel
-#   []
-#   [q_prime]
-#     block = fuel_pins
-#   []
-# []
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
@@ -106,6 +64,7 @@ P_out = 4.923e6 # Pa
     variable = q_prime
     power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
+    block = fuel_pins
   []
 
   [T_ic]
