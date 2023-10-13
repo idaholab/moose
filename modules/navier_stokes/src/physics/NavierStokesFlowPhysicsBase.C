@@ -109,3 +109,28 @@ NavierStokesFlowPhysicsBase::getPorosityFunctorName(bool smoothed) const
   else
     return _porosity_name;
 }
+
+void
+NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(
+    const InputParameters & other_params) const
+{
+  // TODO C++20: make warnInconsistent a templated lambda
+  warnInconsistent<MooseEnum>(other_params, "compressibility");
+  warnInconsistent<RealVectorValue>(other_params, "gravity");
+  warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");
+  warnInconsistent<NonlinearVariableName>(other_params, "pressure_variable");
+  warnInconsistent<NonlinearVariableName>(other_params, "fluid_temperature_variable");
+  warnInconsistent<bool>(other_params, "porous_medium_treatment");
+  warnInconsistent<MooseFunctorName>(other_params, "porosity");
+  warnInconsistent<unsigned short>(other_params, "porosity_smoothing_layers");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "inlet_boundaries");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "outlet_boundaries");
+  warnInconsistent<std::vector<BoundaryName>>(other_params, "wall_boundaries");
+
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_inlet_types");
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_outlet_types");
+  warnInconsistent<MultiMooseEnum>(other_params, "momentum_wall_types");
+
+  warnInconsistent<MooseFunctorName>(other_params, "dynamic_viscosity");
+  warnInconsistent<MooseFunctorName>(other_params, "density");
+}
