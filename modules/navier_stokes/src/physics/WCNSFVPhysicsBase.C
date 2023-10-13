@@ -49,11 +49,13 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   adjustRMGhostLayers();
 
   // Parameter checking
-  // checkVectorParamsSameLengthOrZero<BoundaryName, PostprocessorName>("inlet_boundaries",
-  //                                                                    "flux_inlet_pps");
-  // checkVectorParamsSameLengthOrZero<BoundaryName,
-  // MooseEnum>("inlet_boundaries",
-  //                                                            "flux_inlet_directions");
+  checkSecondParamSetOnlyIfFirstOneSet("flux_inlet_pps", "flux_inlet_directions");
+  checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
+                                                             "flux_inlet_directions");
+  checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
+                                             std::vector<FunctionName>,
+                                             PostprocessorName>(
+      "inlet_boundaries", "momentum_inlet_function", "flux_inlet_pps");
 
   // Check that flow physics are consistent
   if (isParamValid("coupled_flow_physics"))
@@ -64,6 +66,8 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
       paramError("coupled_flow_physics",
                  "Physics specified does not exist or is of the wrong type");
   }
+  else
+    _flow_equations_physics = nullptr;
 }
 
 void
@@ -97,7 +101,12 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   for (const auto & obj : objs)
     if (dynamic_cast<INSFVRhieChowInterpolator *>(obj) &&
         dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == _blocks)
+    {
+      std::cout << _blocks.size() << " "
+                << dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks().size() << std::endl;
       num_rc_uo++;
+    }
+
   if (num_rc_uo)
     return;
 
@@ -225,7 +234,7 @@ WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other
 {
   // TODO: make warnInconsistent a lambda
   // Check all the parameters in NavierStokesFlowPhysicsBase
-  warnInconsistent<MooseEnum>(other_params, "compressibilty");
+  warnInconsistent<MooseEnum>(other_params, "compressibility");
   warnInconsistent<RealVectorValue>(other_params, "gravity");
   warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");
   warnInconsistent<NonlinearVariableName>(other_params, "pressure_variable");
