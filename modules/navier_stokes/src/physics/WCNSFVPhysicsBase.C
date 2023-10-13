@@ -99,12 +99,14 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
       .queryInto(objs);
   unsigned int num_rc_uo = 0;
   for (const auto & obj : objs)
-    if (dynamic_cast<INSFVRhieChowInterpolator *>(obj) &&
-        dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks() == _blocks)
+    if (dynamic_cast<INSFVRhieChowInterpolator *>(obj))
     {
-      std::cout << _blocks.size() << " "
-                << dynamic_cast<INSFVRhieChowInterpolator *>(obj)->blocks().size() << std::endl;
-      num_rc_uo++;
+      const auto rc_obj = dynamic_cast<INSFVRhieChowInterpolator *>(obj);
+      if (rc_obj->blocks() == _blocks)
+        num_rc_uo++;
+      // one of the RC user object is defined everywhere
+      else if (rc_obj->blocks().size() == 0 || _blocks.size() == 0)
+        num_rc_uo++;
     }
 
   if (num_rc_uo)
