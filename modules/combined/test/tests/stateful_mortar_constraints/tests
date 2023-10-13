@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#25732'
+  design = 'NodalPatchRecoveryAux.md'
+  [stateful_mortar_npr]
+    type = CSVDiff
+    input = stateful_mortar_npr.i
+    abs_zero = 0.1
+    csvdiff = stateful_mortar_npr_out.csv
+    allow_test_objects = true
+    requirement = "The system shall compute a thermal mortar constraints with a history material "
+                  "property pulled in the form of an auxiliary variable."
+  []
+[]
