@@ -552,6 +552,10 @@ LiquidMetalInterWrapper1PhaseProblem::externalSolve()
         if (_compute_viscosity)
           computeMu(iblock);
 
+        // We must do a global assembly to make sure data is parallel consistent before we do things
+        // like compute L2 norms
+        _aux->solution().close();
+
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
             std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));

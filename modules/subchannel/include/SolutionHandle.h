@@ -61,6 +61,8 @@ public:
 
   Real L2norm() { return _var.sys().system().calculate_norm(_soln, _var.number(), DISCRETE_L2); }
 
+  void close() { _soln.close(); }
+
 private:
   MooseVariableFieldBase & _var;
   NumericVector<Number> & _soln;
