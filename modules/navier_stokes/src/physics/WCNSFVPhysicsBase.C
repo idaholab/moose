@@ -27,12 +27,9 @@ WCNSFVPhysicsBase::validParams()
   // spelled the same way and match the evolution of other objects.
   // If we remove these objects, or change their parameters, these parameters should be updated
 
-  // Specify the weakly compressible boundary flux information
-  params.transferParam<std::vector<std::vector<FunctionName>>>(NSFVAction::validParams(),
-                                                               "momentum_inlet_function");
-  params.transferParam<std::vector<PostprocessorName>>(NSFVAction::validParams(), "flux_inlet_pps");
-  params.transferParam<std::vector<Point>>(NSFVAction::validParams(), "flux_inlet_directions");
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "pressure_function");
+  // Specify the weakly compressible boundary flux information. They are used for specifying in flux
+  // boundary conditions for advection physics in WCNSFV
+  params += NSFVAction::commonMomentumBoundaryFluxesParams();
 
   // Specify the numerical schemes for interpolations of velocity and pressure
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "velocity_interpolation");
