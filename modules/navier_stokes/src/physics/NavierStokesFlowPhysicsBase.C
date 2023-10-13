@@ -23,14 +23,7 @@ NavierStokesFlowPhysicsBase::validParams()
   // a restricted MooseEnum, or place an error in the constructor for unsupported configurations
   // We mostly pull the boundary parameters from NSFV Action
 
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "compressibility");
-  params.transferParam<RealVectorValue>(NSFVAction::validParams(), "gravity");
-
-  // Variables
-  params.transferParam<std::vector<std::string>>(NSFVAction::validParams(), "velocity_variable");
-  params.transferParam<NonlinearVariableName>(NSFVAction::validParams(), "pressure_variable");
-  params.transferParam<NonlinearVariableName>(NSFVAction::validParams(),
-                                              "fluid_temperature_variable");
+  params += NSFVAction::commonNavierStokesFlowParams();
 
   // Most downstream physics implementations are valid for porous media too
   // If yours is not, please remember to disable the 'porous_medium_treatment' parameter
@@ -38,13 +31,8 @@ NavierStokesFlowPhysicsBase::validParams()
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "porosity");
   params.transferParam<unsigned short>(NSFVAction::validParams(), "porosity_smoothing_layers");
 
-  // Boundary conditions are a general concept for fluid flow
-  params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "inlet_boundaries");
-  params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "outlet_boundaries");
-  params.transferParam<std::vector<BoundaryName>>(NSFVAction::validParams(), "wall_boundaries");
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_inlet_types");
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_outlet_types");
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "momentum_wall_types");
+  // Momentum boundary conditions are important for advection problems as well
+  params += NSFVAction::commonMomentumBoundaryTypesParams();
 
   // Material properties
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
@@ -116,7 +104,6 @@ NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(
 {
   // TODO C++20: make warnInconsistent a templated lambda
   warnInconsistent<MooseEnum>(other_params, "compressibility");
-  warnInconsistent<RealVectorValue>(other_params, "gravity");
   warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");
   warnInconsistent<NonlinearVariableName>(other_params, "pressure_variable");
   warnInconsistent<NonlinearVariableName>(other_params, "fluid_temperature_variable");
