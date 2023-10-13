@@ -409,31 +409,7 @@ SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
   CHKERRQ(ierr);
   return 0;
 }
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
-                                                  const T & loc_solution,
-                                                  const unsigned int first_axial_level,
-                                                  const unsigned int last_axial_level,
-                                                  const unsigned int cross_dimension)
-{
-  PetscErrorCode ierr;
-  PetscScalar * xx;
-  ierr = VecGetArray(x, &xx);
-  CHKERRQ(ierr);
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      auto * loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      xx[iz_ind * cross_dimension + i_l] = loc_solution(loc_node);
-    }
-  }
-  ierr = VecRestoreArray(x, &xx);
-  CHKERRQ(ierr);
-  return 0;
-}
+
 template <class T>
 PetscErrorCode
 SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
