@@ -33,6 +33,9 @@ public:
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
 protected:
+  /// Check that the shared parameters are consistent between this object's param and the other's
+  virtual void checkCommonParametersConsistent(const InputParameters & other_params) const;
+
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
 
