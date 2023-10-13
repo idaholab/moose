@@ -17,4 +17,12 @@
     mesh_mode = 'replicated'
     issues = '#23822'
   []
+  [convert_permuted]
+    type = Exodiff
+    input = sphere.i
+    exodiff = sphere_out.e
+    requirement = "The system shall convert a HEX8 mesh into a TET4 mesh with permuted elements"
+    mesh_mode = 'replicated'
+    issues = '#23822'
+  []
 []
