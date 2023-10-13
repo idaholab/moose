@@ -177,6 +177,10 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
       _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
     }
   }
+
+  // We must do a global assembly to make sure data is parallel consistent before we do things
+  // like compute L2 norms
+  _aux->solution().close();
 }
 
 Real
