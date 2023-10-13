@@ -11,6 +11,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/string_to_enum.h"
 
 #include "MooseEnum.h"
 
@@ -41,8 +42,7 @@ ElementGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum elem_types("EDGE2 EDGE3 EDGE4 QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX8 HEX20 HEX27 TET4 TET10 "
-                       "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14");
+  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
 
   params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
 
@@ -72,103 +72,7 @@ ElementGenerator::ElementGenerator(const InputParameters & parameters)
 Elem *
 ElementGenerator::getElemType(const std::string & type)
 {
-  if (type == "EDGE2")
-  {
-    Elem * elem = new Edge2;
-    return elem;
-  }
-  if (type == "EDGE3")
-  {
-    Elem * elem = new Edge3;
-    return elem;
-  }
-  if (type == "EDGE4")
-  {
-    Elem * elem = new Edge4;
-    return elem;
-  }
-  if (type == "QUAD4")
-  {
-    Elem * elem = new Quad4;
-    return elem;
-  }
-  if (type == "QUAD8")
-  {
-    Elem * elem = new Quad8;
-    return elem;
-  }
-  if (type == "QUAD9")
-  {
-    Elem * elem = new Quad9;
-    return elem;
-  }
-  if (type == "TRI3")
-  {
-    Elem * elem = new Tri3;
-    return elem;
-  }
-  if (type == "TRI6")
-  {
-    Elem * elem = new Tri6;
-    return elem;
-  }
-  if (type == "HEX8")
-  {
-    Elem * elem = new Hex8;
-    return elem;
-  }
-  if (type == "HEX20")
-  {
-    Elem * elem = new Hex20;
-    return elem;
-  }
-  if (type == "HEX27")
-  {
-    Elem * elem = new Hex27;
-    return elem;
-  }
-  if (type == "TET4")
-  {
-    Elem * elem = new Tet4;
-    return elem;
-  }
-  if (type == "TET10")
-  {
-    Elem * elem = new Tet10;
-    return elem;
-  }
-  if (type == "PRISM6")
-  {
-    Elem * elem = new Prism6;
-    return elem;
-  }
-  if (type == "PRISM15")
-  {
-    Elem * elem = new Prism15;
-    return elem;
-  }
-  if (type == "PRISM18")
-  {
-    Elem * elem = new Prism18;
-    return elem;
-  }
-  if (type == "PYRAMID5")
-  {
-    Elem * elem = new Pyramid5;
-    return elem;
-  }
-  if (type == "PYRAMID13")
-  {
-    Elem * elem = new Pyramid13;
-    return elem;
-  }
-  if (type == "PYRAMID14")
-  {
-    Elem * elem = new Pyramid14;
-    return elem;
-  }
-
-  mooseError("This element type is not available.");
+  return Elem::build(Utility::string_to_enum<ElemType>(type)).release();
 }
 
 std::unique_ptr<MeshBase>
