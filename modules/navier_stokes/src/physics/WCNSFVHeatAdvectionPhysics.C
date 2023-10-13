@@ -73,6 +73,25 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
   addNonlinearVariable(_fluid_temperature_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
+
+  // Parameter checks
+  checkSecondParamSetOnlyIfFirstOneSet("ambient_convection_blocks", "ambient_convection_alpha");
+  checkSecondParamSetOnlyIfFirstOneSet("ambient_convection_blocks", "ambient_temperature");
+  checkVectorParamsSameLengthIfSet<std::vector<SubdomainName>, MooseFunctorName>(
+      "ambient_convection_blocks", "ambient_convection_alpha");
+  checkVectorParamsSameLengthIfSet<std::vector<SubdomainName>, MooseFunctorName>(
+      "ambient_convection_blocks", "ambient_temperature");
+
+  checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
+  checkVectorParamsSameLengthIfSet<MooseFunctorName, Real>("external_heat_source",
+                                                           "external_heat_source_coeff");
+
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
+  checkVectorParamsSameLength<BoundaryName, FunctionName>("inlet_boundaries",
+                                                          "energy_inlet_function");
+  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "energy_wall_types");
+  checkVectorParamsSameLength<BoundaryName, FunctionName>("wall_boundaries",
+                                                          "energy_wall_function");
 }
 
 void
