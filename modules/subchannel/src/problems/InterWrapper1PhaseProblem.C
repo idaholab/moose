@@ -2964,6 +2964,7 @@ InterWrapper1PhaseProblem::initializeSolution()
       _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
     }
   }
+  _mdot_soln->close();
 }
 
 void
@@ -3055,6 +3056,10 @@ InterWrapper1PhaseProblem::externalSolve()
           computeMu(iblock);
 
         _console << "Done updating thermophysical properties." << std::endl;
+
+        // We must do a global assembly to make sure data is parallel consistent before we do things
+        // like compute L2 norms
+        _aux->solution().close();
 
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
