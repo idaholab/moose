@@ -9,6 +9,16 @@
     issues = "#8062"
     design = "PorousFlowPorosity.md"
   []
+  [constant_poroperm_fv]
+    type = 'Exodiff'
+    input = 'constant_poroperm_fv.i'
+    exodiff = 'constant_poroperm_fv_out.e'
+    threading = '!pthreads'
+    requirement = "The system shall allow the assignment of porosity and permeability from an "
+                  "AuxVariable field using FV variables."
+    issues = "#8062 #21275"
+    design = "PorousFlowPorosity.md"
+  []
   [constant_poroperm2]
     type = 'Exodiff'
     input = 'constant_poroperm2.i'
