@@ -54,7 +54,7 @@ PiecewiseTabularBase::validParams()
   params.addParamNamesToGroup("xy_data x y", "Data from input file");
   params.addParamNamesToGroup(
       "data_file x_index_in_file y_index_in_file x_title y_title xy_in_file_only format",
-      "Data from input file");
+      "Data from CSV file");
   params.addParamNamesToGroup("json_uo x_keys y_keys", "Data from JSON");
   return params;
 }
@@ -82,11 +82,14 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
       (isParamSetByUser("x_index_in_file") || isParamSetByUser("y_index_in_file") ||
        isParamValid("x_title") || isParamValid("y_title") || isParamSetByUser("xy_in_file_only") ||
        isParamSetByUser("format")))
-    mooseError("A parameter was passed for an option using data from a CSV file but the "
-               "'data_file' parameter has not been set. This is not allowed");
+    mooseError(
+        "A parameter was passed for an option using data from a CSV file but the "
+        "'data_file' parameter has not been set. This is not allowed. Please check the parameter "
+        "groups in the documentation for the list of parameters for each data input method.");
   if (!isParamValid("json_uo") && (isParamValid("x_keys") || isParamValid("y_keys")))
     mooseError("A parameter was passed for a JSON input option but the 'json_uo' parameter has not "
-               "been set. This is not allowed");
+               "been set. This is not allowed. Please check the parameter groups in the "
+               "documentation for the list of parameters for each data input method.");
 
   // load the data
   if (isParamValid("data_file"))

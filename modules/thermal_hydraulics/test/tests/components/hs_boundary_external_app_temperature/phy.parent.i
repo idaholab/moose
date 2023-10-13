@@ -1,4 +1,4 @@
-# This tests a transfer of temperature values computed by master app and used by a slave app
+# This tests a transfer of temperature values computed by master app and used by a child app
 # as a heat structure boundary condition
 
 [Mesh]
@@ -72,7 +72,7 @@
   [thm]
     type = TransientMultiApp
     app_type = ThermalHydraulicsApp
-    input_files = phy.slave.i
+    input_files = phy.child.i
     execute_on = 'initial timestep_end'
   []
 []

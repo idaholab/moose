@@ -2,7 +2,7 @@
   [phy:form_loss_1phase]
     type = 'Exodiff'
     input = 'phy.form_loss_1phase.parent.i'
-    exodiff = 'phy.form_loss_1phase.parent_out_slave0.e'
+    exodiff = 'phy.form_loss_1phase.parent_out_child0.e'
     rel_err = 1e-10
     recover = false
   []
