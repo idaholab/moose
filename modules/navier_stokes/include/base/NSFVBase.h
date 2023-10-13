@@ -661,7 +661,7 @@ NSFVBase<BaseType>::validParams()
                                              std::vector<FunctionName>(),
                                              "Functions for boundary pressures at outlets.");
 
-  MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction", "noslip");
+  MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction");
   params.addParam<MultiMooseEnum>(
       "momentum_wall_types", mom_wall_types, "Types of wall boundaries for the momentum equation");
 
