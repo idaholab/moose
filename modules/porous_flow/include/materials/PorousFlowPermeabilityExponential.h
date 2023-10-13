@@ -24,12 +24,13 @@
  * k = B * exp(A * phi)
  * A and B are then converted to AA and BB.
  */
-class PorousFlowPermeabilityExponential : public PorousFlowPermeabilityBase
+template <bool is_ad>
+class PorousFlowPermeabilityExponentialTempl : public PorousFlowPermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityExponential(const InputParameters & parameters);
+  PorousFlowPermeabilityExponentialTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
@@ -44,13 +45,13 @@ protected:
   const RealTensorValue _k_anisotropy;
 
   /// Quadpoint porosity
-  const MaterialProperty<Real> & _porosity_qp;
+  const GenericMaterialProperty<Real, is_ad> & _porosity_qp;
 
   /// d(quadpoint porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dporosity_qp_dvar;
 
   /// d(quadpoint porosity)/d(grad(PorousFlow variable))
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_qp_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_qp_dgradvar;
 
   /// Name of porosity-permeability relationship
   const enum class PoropermFunction { log_k, ln_k, exp_k } _poroperm_function;
@@ -60,4 +61,9 @@ protected:
 
   /// Empirical constant BB in k = k_ijk * BB * exp(AA * phi)
   Real _BB;
+
+  usingPorousFlowPermeabilityBaseMembers;
 };
+
+typedef PorousFlowPermeabilityExponentialTempl<false> PorousFlowPermeabilityExponential;
+typedef PorousFlowPermeabilityExponentialTempl<true> ADPorousFlowPermeabilityExponential;
