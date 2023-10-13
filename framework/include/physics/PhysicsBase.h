@@ -87,18 +87,32 @@ protected:
   template <typename T, typename S>
   void checkTwoDVectorParamsSameLength(const std::string & param1,
                                        const std::string & param2) const;
+  template <typename T, typename S>
+  void checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
+                                                       const std::string & param2) const;
   /// Check that there is no overlap between the two vector parameters
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
   bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
-  /// Check that the dependent parameters all are (or are not) defined when the main parameter is
-  void checkDependentParameterError(const std::string & main_parameter,
-                                    const std::vector<std::string> & dependent_parameters,
-                                    const bool should_be_defined) const;
+  /// Check that the user did not pass an empty vector
+  template <typename T>
+  void checkVectorParamNotEmpty(const std::string & param1) const;
+  /// Check that two vector parameters are the same length if both are set
+  template <typename T, typename S>
+  void checkVectorParamsSameLengthIfSet(const std::string & param1,
+                                        const std::string & param2) const;
+
+  template <typename T, typename S, typename U>
+  void checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
+                                                  const std::string & param2,
+                                                  const std::string & param3) const;
+
   /// Check that two parameters are either both set or both not set
   void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
   void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                              const std::string & param2) const;
+  void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
+                                            const std::string & param2) const;
   /// Check if the user commited errors during the definition of block-wise parameters
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
@@ -161,11 +175,10 @@ void
 PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
                                          const std::string & param2) const
 {
-  checkParamsBothSetOrNotSet(param1, param2);
   assertParamDefined<std::vector<T>>(param1);
   assertParamDefined<std::vector<S>>(param2);
 
-  if (isParamValid(param1))
+  if (isParamValid(param1) && isParamValid(param2))
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<std::vector<S>>(param2).size();
@@ -174,6 +187,10 @@ PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
                  "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
                      param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
   }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
 }
 
 template <typename T>
@@ -181,11 +198,10 @@ void
 PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
                                                      const std::string & param2) const
 {
-  checkParamsBothSetOrNotSet(param1, param2);
   assertParamDefined<std::vector<T>>(param1);
   assertParamDefined<MultiMooseEnum>(param2);
 
-  if (isParamValid(param1))
+  if (isParamValid(param1) && isParamValid(param2))
   {
     const auto size_1 = getParam<std::vector<T>>(param1).size();
     const auto size_2 = getParam<MultiMooseEnum>(param2).size();
@@ -194,6 +210,10 @@ PhysicsBase::checkVectorParamAndMultiMooseEnumLength(const std::string & param1,
                  "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
                      param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
   }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<MultiMooseEnum>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
 }
 
 template <typename T>
@@ -211,7 +231,7 @@ PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
                                              const std::string & param2) const
 {
   checkVectorParamsSameLength<std::vector<T>, std::vector<S>>(param1, param2);
-  if (isParamValid(param1))
+  if (isParamValid(param1) && isParamValid(param2))
   {
     const auto value1 = getParam<std::vector<std::vector<T>>>(param1);
     const auto value2 = getParam<std::vector<std::vector<S>>>(param2);
@@ -223,6 +243,51 @@ PhysicsBase::checkTwoDVectorParamsSameLength(const std::string & param1,
                        "' is not the same size as its counterpart from 2D vector parameter '" +
                        param2 + "'");
   }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkTwoDVectorParamInnerSameLengthAsOneDVector(const std::string & param1,
+                                                             const std::string & param2) const
+{
+  assertParamDefined<std::vector<std::vector<T>>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+  for (const auto & sub_vec_i : index_range(getParam<std::vector<std::vector<T>>>(param1)))
+  {
+    const auto size_1 = getParam<std::vector<std::vector<T>>>(param1)[sub_vec_i].size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector at index " + std::to_string(sub_vec_i) + " (size " +
+                     std::to_string(size_1) +
+                     ") "
+                     " of this parameter should be the same length as parameter '" +
+                     param2 + "' (size " + std::to_string(size_2) + ")");
+  }
+}
+
+template <typename T, typename S, typename U>
+void
+PhysicsBase::checkVectorParamLengthSameAsCombinedOthers(const std::string & param1,
+                                                        const std::string & param2,
+                                                        const std::string & param3) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+  assertParamDefined<std::vector<U>>(param3);
+  const auto size_1 = getParam<std::vector<T>>(param1).size();
+  const auto size_2 = getParam<std::vector<S>>(param2).size();
+  const auto size_3 = getParam<std::vector<U>>(param3).size();
+
+  if (size_1 != size_2 + size_3)
+    paramError(param1,
+               "Vector parameter '" + param1 + "' (size " + std::to_string(size_1) +
+                   ") should be the same size as parameter '" + param2 + "' and '" + param3 +
+                   " combined (total size " + std::to_string(size_2 + size_3) + ")");
 }
 
 template <typename T>
@@ -231,12 +296,43 @@ PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_v
 {
   std::set<std::string> unique_params;
   for (const auto & param : param_vec)
+  {
+    assertParamDefined<std::vector<T>>(param);
 
     for (const auto & value : getParam<std::vector<T>>(param))
       if (!unique_params.insert(value).second)
         mooseError("Item " + value + "specified in vector parameter " + param +
                    " is also present in one or more of these other parameters " +
                    Moose::stringify(param_vec) + ". This is disallowed");
+  }
+}
+
+template <typename T>
+void
+PhysicsBase::checkVectorParamNotEmpty(const std::string & param) const
+{
+  assertParamDefined<std::vector<T>>(param);
+  if (!getParam<std::vector<T>>(param).size())
+    paramError(param, "Parameter '" + param + "' should not be set to an empty vector.");
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkVectorParamsSameLengthIfSet(const std::string & param1,
+                                              const std::string & param2) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Parameter '" + param1 + "' (size " + std::to_string(size_1) + ") and '" + param2 +
+                     "' (size " + std::to_string(size_2) + ") must be the same size if set.");
+  }
 }
 
 template <typename T>
@@ -303,6 +399,7 @@ void
 PhysicsBase::warnInconsistent(const InputParameters & other_param,
                               const std::string & param_name) const
 {
+  assertParamDefined<T>(param_name);
   bool warn = false;
   if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
   {
