@@ -241,16 +241,13 @@ PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
 }
 
 void
-PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
-                                                   const std::string & param2) const
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
+                                                  const std::string & param2) const
 {
-  mooseAssert(parameters().have_parameter<bool>(param1),
-              "Cannot check if parameter " + param1 +
-                  " is true if it's not a bool parameter of this object");
-  if (!getParam<bool>(param1) && isParamSetByUser(param2))
+  if (!isParamSetByUser(param1) && isParamSetByUser(param2))
     paramError(param2,
-               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
-                   "' is set by the user");
+               "Parameter '" + param2 + "' should not be set if parameter '" + param1 +
+                   "' is not specified.");
 }
 
 bool
