@@ -79,6 +79,9 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   checkSecondParamSetOnlyIfFirstOneTrue("use_friction_correction", "consistent_scaling");
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "ref_temperature");
   checkSecondParamSetOnlyIfFirstOneTrue("boussinesq_approximation", "thermal_expansion");
+
+  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment",
+                                        "porosity_interface_pressure_treatment");
 }
 
 void

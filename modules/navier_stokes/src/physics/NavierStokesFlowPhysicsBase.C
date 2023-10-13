@@ -95,6 +95,8 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "momentum_wall_types");
   checkVectorParamsNoOverlap<BoundaryName>(
       {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
+  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
+  checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity_smoothing_layers");
 }
 
 MooseFunctorName

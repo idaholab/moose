@@ -51,6 +51,28 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
     addNonlinearVariable(scalar_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
+
+  // Dont let users pass empty vectors
+  checkVectorParamNotEmpty<NonlinearVariableName>("passive_scalar_names");
+  checkVectorParamNotEmpty<MooseFunctorName>("passive_scalar_diffusivity");
+
+  // These parameters must be passed for every passive scalar at a time
+  checkVectorParamsSameLength<NonlinearVariableName, MooseFunctorName>(
+      "passive_scalar_names", "passive_scalar_diffusivity");
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
+      "passive_scalar_names", "passive_scalar_coupled_source");
+  checkVectorParamsSameLengthIfSet<NonlinearVariableName, Real>("passive_scalar_names",
+                                                                "passive_scalar_scaling");
+  checkVectorParamsSameLength<NonlinearVariableName, std::vector<std::string>>(
+      "passive_scalar_names", "passive_scalar_inlet_function");
+  // checkTwoDVectorParamsSameLength<std::vector<std::string>,
+  // std::string>("passive_scalar_inlet_function",
+  //                                                                "passive_scalar_inlet_types");
+  checkTwoDVectorParamInnerSameLengthAsOneDVector<std::string, BoundaryName>(
+      "passive_scalar_inlet_function", "inlet_boundaries");
+
+  checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
+                                                          "passive_scalar_coupled_source_coeff");
 }
 
 void
