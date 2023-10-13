@@ -20,9 +20,6 @@ WCNSFVScalarAdvectionPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible scalar field advection equation");
 
-  params.addParam<PhysicsName>("coupled_flow_physics",
-                               "WCNSFVFlowPhysics generating the velocities");
-
   params += NSFVAction::commonScalarFieldAdvectionParams();
 
   // Functors can meet that need

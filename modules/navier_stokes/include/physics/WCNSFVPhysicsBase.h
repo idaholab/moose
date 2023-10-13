@@ -43,7 +43,7 @@ protected:
   std::string rhieChowUOName() const;
 
   /// Checks that the parameters shared between two flow physics are the same
-  void checkCommonParametersConsistent(const InputParameters & parameters) const;
+  void checkCommonParametersConsistent(const InputParameters & parameters) const override;
 
   /// The velocity / momentum face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;

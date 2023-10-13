@@ -18,8 +18,6 @@ WCNSFVHeatAdvectionPhysics::validParams()
   InputParameters params = WCNSFVPhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
-  params.addParam<PhysicsName>("coupled_flow_physics",
-                               "WCNSFVFlowPhysics generating the velocities");
   params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_temperature");
 
   // Material properties

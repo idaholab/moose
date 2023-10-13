@@ -20,6 +20,9 @@ WCNSFVPhysicsBase::validParams()
   params.addClassDescription(
       "Base class to define the Navier Stokes incompressible and weakly-compressible equation");
 
+  params.addParam<PhysicsName>("coupled_flow_physics",
+                               "WCNSFVFlowPhysics generating the velocities");
+
   // We pull in parameters from various flow objects. This helps make sure the parameters are
   // spelled the same way and match the evolution of other objects.
   // If we remove these objects, or change their parameters, these parameters should be updated
@@ -232,25 +235,7 @@ WCNSFVPhysicsBase::adjustRMGhostLayers()
 void
 WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other_params) const
 {
-  // TODO: make warnInconsistent a lambda
-  // Check all the parameters in NavierStokesFlowPhysicsBase
-  warnInconsistent<MooseEnum>(other_params, "compressibility");
-  warnInconsistent<RealVectorValue>(other_params, "gravity");
-  warnInconsistent<std::vector<std::string>>(other_params, "velocity_variable");
-  warnInconsistent<NonlinearVariableName>(other_params, "pressure_variable");
-  warnInconsistent<NonlinearVariableName>(other_params, "fluid_temperature_variable");
-  warnInconsistent<bool>(other_params, "porous_medium_treatment");
-  warnInconsistent<MooseFunctorName>(other_params, "porosity");
-  warnInconsistent<unsigned short>(other_params, "porosity_smoothing_layers");
-  warnInconsistent<std::vector<BoundaryName>>(other_params, "inlet_boundaries");
-  warnInconsistent<std::vector<BoundaryName>>(other_params, "outlet_boundaries");
-  warnInconsistent<std::vector<BoundaryName>>(other_params, "wall_boundaries");
-  warnInconsistent<MultiMooseEnum>(other_params, "momentum_inlet_types");
-  warnInconsistent<MultiMooseEnum>(other_params, "momentum_outlet_types");
-  warnInconsistent<MultiMooseEnum>(other_params, "momentum_wall_types");
-  warnInconsistent<MooseFunctorName>(other_params, "dynamic_viscosity");
-  warnInconsistent<MooseFunctorName>(other_params, "density");
-
+  NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(other_params);
   // Check all the parameters in WCNSFVPhysicsBase
   warnInconsistent<std::vector<std::vector<FunctionName>>>(other_params, "momentum_inlet_function");
   warnInconsistent<std::vector<PostprocessorName>>(other_params, "flux_inlet_pps");
