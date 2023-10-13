@@ -20,7 +20,7 @@ HeatRateConvection1Phase::validParams()
   params.addParam<MaterialPropertyName>(
       "T_wall", FlowModelSinglePhase::TEMPERATURE_WALL, "Wall temperature");
   params.addParam<MaterialPropertyName>(
-      "T", FlowModelSinglePhase::TEMPERATURE, "Temperature of the fluid on the slave side");
+      "T", FlowModelSinglePhase::TEMPERATURE, "Temperature of the fluid on the channel side");
   params.addParam<MaterialPropertyName>(
       "Hw", FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL, "Wall heat transfer coefficient");
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");

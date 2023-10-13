@@ -2,7 +2,7 @@
 # Simple heat conduction problem with heat source is solved,
 # to obtain an analytical solution:
 # T(x,t) = 300 + 20t(x-1)^2
-# The temperature is picked up by the slave
+# The temperature is picked up by the child
 # side of the solve, to use as ambiant temperature in a convective BC.
 htc = 100
 
@@ -59,8 +59,8 @@ htc = 100
 
   [source]
     type = BodyForce
-     function = 'source_term'
-     variable = T
+    function = 'source_term'
+    variable = T
   []
 []
 
@@ -97,13 +97,13 @@ htc = 100
 []
 
 [Transfers]
-  [T_to_slave]
+  [T_to_child]
     type = MultiAppNearestNodeTransfer
     to_multi_app = thm
     source_variable = T
     variable = T_ext
   []
-  [htc_to_slave]
+  [htc_to_child]
     type = MultiAppNearestNodeTransfer
     to_multi_app = thm
     source_variable = htc_ext

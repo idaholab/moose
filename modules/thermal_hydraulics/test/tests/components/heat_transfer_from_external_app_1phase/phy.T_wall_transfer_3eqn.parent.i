@@ -1,6 +1,6 @@
 # This tests a temperature transfer using the MultiApp system.  Simple heat
-# conduction problem is solved, then the temperature is picked up by the slave
-# side of the solve, slave side solves and transfers its variables back to the
+# conduction problem is solved, then the temperature is picked up by the child
+# side of the solve, child side solves and transfers its variables back to the
 # master
 
 [Mesh]
@@ -64,13 +64,13 @@
   [thm]
     type = TransientMultiApp
     app_type = ThermalHydraulicsApp
-    input_files = phy.T_wall_transfer_3eqn.slave.i
+    input_files = phy.T_wall_transfer_3eqn.child.i
     execute_on = TIMESTEP_END
   []
 []
 
 [Transfers]
-  [T_to_slave]
+  [T_to_child]
     type = MultiAppNearestNodeTransfer
     to_multi_app = thm
     source_variable = T
