@@ -64,6 +64,7 @@ rod_diameter = 0.00950
     variable = q_prime
     power = 1.0e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
+    block = fuel_pins
   []
 
   [T_ic]
