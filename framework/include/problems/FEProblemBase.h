@@ -2111,6 +2111,11 @@ public:
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
+  unsigned int linearSysNum(const NonlinearSystemName & linear_sys_name) const;
+
+  /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
    */
   bool getFailNextNonlinearConvergenceCheck() const
@@ -2230,11 +2235,11 @@ protected:
   /// The nonlinear system names
   const std::vector<NonlinearSystemName> _nl_sys_names;
 
-  /// The number of nonlinear systems
-  const std::size_t _num_nl_sys;
-
   /// The linear system names
   const std::vector<NonlinearSystemName> _linear_sys_names;
+
+  /// The number of nonlinear systems
+  const std::size_t _num_nl_sys;
 
   /// The number of linear systems
   const std::size_t _num_linear_sys;

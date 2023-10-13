@@ -5840,6 +5840,17 @@ FEProblemBase::nlSysNum(const NonlinearSystemName & nl_sys_name) const
   return nl_sys_num;
 }
 
+unsigned int
+FEProblemBase::linearSysNum(const NonlinearSystemName & linear_sys_name) const
+{
+  std::istringstream ss(linear_sys_name);
+  unsigned int linear_sys_num;
+  if (!(ss >> linear_sys_num) || !ss.eof())
+    linear_sys_num = libmesh_map_find(_linear_sys_name_to_num, linear_sys_name);
+
+  return linear_sys_num;
+}
+
 void
 FEProblemBase::solve(const unsigned int nl_sys_num)
 {

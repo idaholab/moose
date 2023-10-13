@@ -75,7 +75,7 @@ public:
    */
   virtual void stopSolve() {}
 
-  virtual LinearSolver<Number> * linearSolver(const unsigned int sys_num) { return nullptr; }
+  virtual LinearSolver<Number> * linearSolver(const unsigned int /*sys_num*/) { return nullptr; }
 
   // virtual KSP getKSP() { return KSP; }
 
@@ -247,15 +247,15 @@ public:
   TagID systemMatrixTag() const override { return _system_matrix_system_tag; }
 
   // non-const getters
-  NumericVector<Number> * solutionUDot() override {}
-  NumericVector<Number> * solutionUDotOld() override {}
-  NumericVector<Number> * solutionUDotDot() override {}
-  NumericVector<Number> * solutionUDotDotOld() override {}
+  NumericVector<Number> * solutionUDot() override { return nullptr; }
+  NumericVector<Number> * solutionUDotOld() override { return nullptr; }
+  NumericVector<Number> * solutionUDotDot() override { return nullptr; }
+  NumericVector<Number> * solutionUDotDotOld() override { return nullptr; }
   // const getters
-  const NumericVector<Number> * solutionUDot() const override {}
-  const NumericVector<Number> * solutionUDotOld() const override {}
-  const NumericVector<Number> * solutionUDotDot() const override {}
-  const NumericVector<Number> * solutionUDotDotOld() const override {}
+  const NumericVector<Number> * solutionUDot() const override { return nullptr; }
+  const NumericVector<Number> * solutionUDotOld() const override { return nullptr; }
+  const NumericVector<Number> * solutionUDotDot() const override { return nullptr; }
+  const NumericVector<Number> * solutionUDotDotOld() const override { return nullptr; }
 
   // serialization
   virtual void serializeSolution();

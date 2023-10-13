@@ -56,7 +56,7 @@ protected:
    * Will dispatch to computeResidual/computeJacobian/computeResidualAndJacobian based on the
    * derived class
    */
-  virtual void compute(ResidualObject & ro) {}
+  virtual void compute(ResidualObject & /*ro*/) {}
 
   ///@{
   /// Defaults to forwarding to the residual object class
