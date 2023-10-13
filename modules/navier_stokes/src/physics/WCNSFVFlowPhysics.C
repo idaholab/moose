@@ -19,11 +19,8 @@ WCNSFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
-  // Pressure pin parameters
-  params.transferParam<bool>(NSFVAction::validParams(), "pin_pressure");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "pinned_pressure_type");
-  params.transferParam<Point>(NSFVAction::validParams(), "pinned_pressure_point");
-  params.transferParam<PostprocessorName>(NSFVAction::validParams(), "pinned_pressure_value");
+  params += NSFVAction::commonMomentumEquationParams();
+  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "pressure_function");
 
   // Initialization parameters
   params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "initial_velocity");
@@ -36,19 +33,6 @@ WCNSFVFlowPhysics::validParams()
   // Friction correction, a technique to limit oscillations at friction interfaces
   params.transferParam<bool>(NSFVAction::validParams(), "use_friction_correction");
   params.transferParam<Real>(NSFVAction::validParams(), "consistent_scaling");
-
-  // Boussinesq approximation
-  params.transferParam<bool>(NSFVAction::validParams(), "boussinesq_approximation");
-  params.transferParam<Real>(NSFVAction::validParams(), "ref_temperature");
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "thermal_expansion");
-
-  // Volumetric friction terms, mostly used for porous media modeling
-  params.transferParam<std::vector<std::vector<SubdomainName>>>(NSFVAction::validParams(),
-                                                                "friction_blocks");
-  params.transferParam<std::vector<std::vector<std::string>>>(NSFVAction::validParams(),
-                                                              "friction_types");
-  params.transferParam<std::vector<std::vector<std::string>>>(NSFVAction::validParams(),
-                                                              "friction_coeffs");
 
   // Spatial discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "mass_advection_interpolation");

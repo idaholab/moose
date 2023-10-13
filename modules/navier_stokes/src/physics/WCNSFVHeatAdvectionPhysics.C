@@ -18,35 +18,7 @@ WCNSFVHeatAdvectionPhysics::validParams()
   InputParameters params = WCNSFVPhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible energy equation");
 
-  params.transferParam<FunctionName>(NSFVAction::validParams(), "initial_temperature");
-
-  // Material properties
-  params.transferParam<std::vector<std::vector<SubdomainName>>>(NSFVAction::validParams(),
-                                                                "thermal_conductivity_blocks");
-  params.transferParam<std::vector<MooseFunctorName>>(NSFVAction::validParams(),
-                                                      "thermal_conductivity");
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "specific_heat");
-  params.transferParam<bool>(NSFVAction::validParams(), "use_external_enthalpy_material");
-
-  // Boundary conditions
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "energy_inlet_types");
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(),
-                                                  "energy_inlet_function");
-  params.transferParam<MultiMooseEnum>(NSFVAction::validParams(), "energy_wall_types");
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(),
-                                                  "energy_wall_function");
-
-  // Ambient convection
-  params.transferParam<std::vector<std::vector<SubdomainName>>>(NSFVAction::validParams(),
-                                                                "ambient_convection_blocks");
-  params.transferParam<std::vector<MooseFunctorName>>(NSFVAction::validParams(),
-                                                      "ambient_convection_alpha");
-  params.transferParam<std::vector<MooseFunctorName>>(NSFVAction::validParams(),
-                                                      "ambient_temperature");
-
-  // Heat source directly in the fluid
-  params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "external_heat_source");
-  params.transferParam<Real>(NSFVAction::validParams(), "external_heat_source_coeff");
+  params += NSFVAction::commonFluidEnergyEquationParams();
 
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "energy_advection_interpolation");
@@ -79,10 +51,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
       "ambient_convection_blocks", "ambient_convection_alpha");
   checkVectorParamsSameLengthIfSet<std::vector<SubdomainName>, MooseFunctorName>(
       "ambient_convection_blocks", "ambient_temperature");
-
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
-  checkVectorParamsSameLengthIfSet<MooseFunctorName, Real>("external_heat_source",
-                                                           "external_heat_source_coeff");
 
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
   checkVectorParamsSameLength<BoundaryName, FunctionName>("inlet_boundaries",
