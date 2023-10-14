@@ -120,3 +120,15 @@ Here are some important details about how brace-expressions are evaluated:
 
 See the [CommandLine.md] object for information on how input parameters can be
 changed on the command line.
+
+## Includes
+
+Other input files may be included using the following syntax:
+
+```
+!input path/to/input.i
+```
+
+This can be used in any arbitrary nested context in an input file and included files
+can include other included files. The only requirement is that the included files
+must contain a set of syntatically complete blocks or parameters.
