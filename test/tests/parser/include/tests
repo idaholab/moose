@@ -1,6 +1,6 @@
 [Tests]
   issues = '#9755 #20125'
-  design = 'InputParameters.md'
+  design = 'Parser.md'
 
   [include]
     type = Exodiff
