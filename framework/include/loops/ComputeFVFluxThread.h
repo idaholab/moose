@@ -979,6 +979,9 @@ void
 ComputeFVFluxJacobianThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
+  // FV objects do not store their Jacobian data in TaggingInterface data structures; instead they
+  // add into the cache directly. So we do not need the same cache calls for the Jacobian that we
+  // need for the residual
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -1042,6 +1045,9 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
   // TODO: do we need both calls - or just the neighbor one? - confirm this
   this->_subproblem.SubProblem::cacheResidual(_tid);
   this->_subproblem.SubProblem::cacheResidualNeighbor(_tid);
+  // FV objects do not store their Jacobian data in TaggingInterface data structures; instead they
+  // add into the cache directly. So we do not need the same cache calls for the Jacobian that we
+  // need for the residual
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

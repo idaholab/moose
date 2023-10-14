@@ -3,7 +3,7 @@
 !syntax description /Kernels/INSADMomentumMeshAdvection
 
 `INSADMomentumMeshAdvection` implements the corresponding weak form for the components of
-the term:
+the term representing the contribution of the mesh displacement to the conservation of momentum:
 
 \begin{equation}
 -\rho \left(\frac{\partial\vec{d_m}}{\partial t} \cdot \nabla\right) \vec{u}

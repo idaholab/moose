@@ -1570,6 +1570,10 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     ComputeResidualThread cr(_fe_problem, tags);
     Threads::parallel_reduce(elem_range, cr);
 
+    // We pass face information directly to FV residual objects for their evaluation. Consequently
+    // we must make sure to do separate threaded loops for 1) undisplaced face information objects
+    // and undisplaced residual objects and 2) displaced face information objects and displaced
+    // residual objects
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     if (_fe_problem.haveFV())
     {

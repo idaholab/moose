@@ -2899,6 +2899,10 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
                            InputParameters & parameters)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+    // FVElementalKernels are computed in the historically finite element threaded loops. They rely
+    // on Assembly data like _current_elem. When we call reinit on the FEProblemBase we will only
+    // reinit the DisplacedProblem and its associated Assembly objects if we mark this boolean as
+    // true
     _reinit_displaced_elem = true;
   addObject<FVKernel>(fv_kernel_name, name, parameters);
 }

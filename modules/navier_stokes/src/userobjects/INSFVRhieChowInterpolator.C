@@ -110,21 +110,25 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 {
   _displaced = dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem));
 
-  if (isParamValid("disp_x"))
+  auto process_displacement = [this](const auto & disp_name, auto & disp_container)
   {
-    _disp_xs.resize(libMesh::n_threads());
-    fillContainer("disp_x", _disp_xs);
-    checkBlocks(*_disp_xs[0]);
-  }
+    if (!_displaced)
+      paramError(disp_name,
+                 "Displacement provided but we are not running on the displaced mesh. If you "
+                 "really want this object to run on the displaced mesh, then set "
+                 "'use_displaced_mesh = true', otherwise remove this displacement parameter");
+    disp_container.resize(libMesh::n_threads());
+    fillContainer(disp_name, disp_container);
+    checkBlocks(*disp_container[0]);
+  };
+
+  if (isParamValid("disp_x"))
+    process_displacement("disp_x", _disp_xs);
 
   if (_dim >= 2)
   {
     if (isParamValid("disp_y"))
-    {
-      _disp_ys.resize(libMesh::n_threads());
-      fillContainer("disp_y", _disp_ys);
-      checkBlocks(*_disp_ys[0]);
-    }
+      process_displacement("disp_y", _disp_ys);
     else if (isParamValid("disp_x"))
       paramError("disp_y", "If 'disp_x' is provided, then 'disp_y' must be as well");
   }
@@ -132,11 +136,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
   if (_dim >= 3)
   {
     if (isParamValid("disp_z"))
-    {
-      _disp_zs.resize(libMesh::n_threads());
-      fillContainer("disp_z", _disp_zs);
-      checkBlocks(*_disp_zs[0]);
-    }
+      process_displacement("disp_z", _disp_zs);
     else if (isParamValid("disp_x"))
       paramError("disp_z", "If 'disp_x' is provided, then 'disp_z' must be as well");
   }

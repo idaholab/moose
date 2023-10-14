@@ -276,6 +276,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   Threads::parallel_reduce(node_range, udmt);
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
+
+  // The mesh has changed. Face information normals, areas, etc. must be re-calculated
   _mesh.finiteVolumeInfoDirty();
   for (auto & disp_nl : _displaced_nl)
     disp_nl->update(false);

@@ -23,6 +23,12 @@ public:
 
   GaussianEnergyFluxBC(const InputParameters & params);
 
+  /**
+   * Computes the beam flux given data from a flux object and the current integration point in the
+   * domain, e.g. the location of a quadrature point in physical space for a finite element flux
+   * object or the location of a face center for a finite volume flux object. The flux object should
+   * have _x_beam_coord, _y_beam_coord, _z_beam_coord, _t, _P0, and _R data members
+   */
   template <typename T, typename PointType>
   static ADReal beamFlux(const T & flux_obj, const PointType & flux_obj_location);
 

@@ -111,8 +111,7 @@ private:
   /// Functors that return evaluations at an arbitrary physical point in an element
   std::unordered_map<SubdomainID, ElemPointFn> _elem_point_functor;
 
-  /// Functors that return element average values (or cell centroid values or whatever the
-  /// implementer wants to return for a given element argument)
+  /// Functors that return nodal values
   std::unordered_map<SubdomainID, NodeFn> _node_functor;
 
   /// The mesh that this functor operates on

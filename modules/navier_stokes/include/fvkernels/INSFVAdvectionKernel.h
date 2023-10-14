@@ -45,9 +45,6 @@ protected:
 
   /// The Rhie-Chow user object that provides us with the velocity
   const RhieChowInterpolatorBase & _rc_vel_provider;
-
-  /// Optional mesh velocity
-  const Moose::Functor<ADRealVectorValue> * const _mesh_velocity;
 };
 
 inline ADRealVectorValue

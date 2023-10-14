@@ -987,7 +987,7 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
   else
     // These evaluations are not eligible for caching, e.g. maybe this is a single point quadrature
     // rule evaluation at an arbitrary point and we don't want those evaluations to potentially be
-    // re-used when this function is called with a standard quadrature rule
+    // re-used when this function is called with a standard quadrature rule or a different point
     _current_elem_qp_functor_elem = nullptr;
 }
 
@@ -1017,10 +1017,7 @@ MooseVariableFE<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg &
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
-  const auto qp = elem_qp_arg.qp;
-  mooseAssert(qp < _current_elem_qp_functor_sln.size(),
-              "The requested " << qp << " is outside our solution size");
-  return _current_elem_qp_functor_sln[qp];
+  return _current_elem_qp_functor_sln[0];
 }
 
 template <typename OutputType>
@@ -1037,10 +1034,7 @@ MooseVariableFE<OutputType>::evaluate(const ElemPointArg & elem_point_arg,
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_point_arg.elem, /*qp=*/0, &qrule, elem_point_arg.point};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
-  const auto qp = elem_qp_arg.qp;
-  mooseAssert(qp < _current_elem_qp_functor_sln.size(),
-              "The requested " << qp << " is outside our solution size");
-  return _current_elem_qp_functor_sln[qp];
+  return _current_elem_qp_functor_sln[0];
 }
 
 template <typename OutputType>
@@ -1080,10 +1074,7 @@ MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateAr
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
-  const auto qp = elem_qp_arg.qp;
-  mooseAssert(qp < _current_elem_qp_functor_dot.size(),
-              "The requested " << qp << " is outside our solution size");
-  return _current_elem_qp_functor_dot[qp];
+  return _current_elem_qp_functor_dot[0];
 }
 
 template <typename OutputType>
@@ -1124,6 +1115,9 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
   if (cache_eligible)
     _current_elem_side_qp_functor_elem_side = std::make_pair(elem, side);
   else
+    // These evaluations are not eligible for caching, e.g. maybe this is a single point quadrature
+    // rule evaluation at an arbitrary point and we don't want those evaluations to potentially be
+    // re-used when this function is called with a standard quadrature rule or a different point
     _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
 }
 
@@ -1187,10 +1181,7 @@ MooseVariableFE<OutputType>::evaluateDot(const FaceArg & face_arg, const StateAr
   const ElemSideQpArg elem_side_qp_arg{
       face_arg.fi->elemPtr(), face_arg.fi->elemSideID(), /*qp=*/0, &qrule, Point(0, 0, 0)};
   evaluateOnElementSide(elem_side_qp_arg, state, /*cache_eligible=*/false);
-  const auto qp = elem_side_qp_arg.qp;
-  mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
-              "The requested " << qp << " is outside our solution size");
-  return _current_elem_side_qp_functor_dot[qp];
+  return _current_elem_side_qp_functor_dot[0];
 }
 
 template <>
@@ -1207,8 +1198,7 @@ typename MooseVariableFE<RealEigenVector>::ValueType
 MooseVariableFE<RealEigenVector>::evaluate(const ElemSideQpArg &, const StateArg &) const
 {
   mooseError("MooseVariableFE::evaluate(ElemSideQpArg &, const StateArg &) overload not "
-             "implemented for "
-             "array variables");
+             "implemented for array variables");
 }
 
 template <>

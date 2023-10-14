@@ -14,7 +14,7 @@
 class InputParameters;
 
 /**
- * A parent class for slip/no-slip wall boundary conditions
+ * A parent class for boundary conditions for freely moving surfaces
  */
 class INSFVFreeSurfaceBC : public INSFVFluxBC
 {

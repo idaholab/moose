@@ -32,9 +32,7 @@ INSFVAdvectionKernel::validParams()
 
 INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   : FVFluxKernel(params),
-    _rc_vel_provider(getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object")),
-    _mesh_velocity(isParamValid("mesh_velocity") ? &getFunctor<ADRealVectorValue>("mesh_velocity")
-                                                 : nullptr)
+    _rc_vel_provider(getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object"))
 {
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
