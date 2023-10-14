@@ -126,7 +126,7 @@ changed on the command line.
 Other input files may be included using the following syntax:
 
 ```
-!input path/to/input.i
+!include path/to/input.i
 ```
 
 This can be used in any arbitrary nested context in an input file and included files
