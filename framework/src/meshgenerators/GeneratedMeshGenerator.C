@@ -29,9 +29,7 @@ GeneratedMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum elem_types(
-      "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
-      "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
+  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
 
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
