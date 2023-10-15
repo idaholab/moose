@@ -220,7 +220,7 @@ Node::getNodeView()
 const std::string &
 Node::filename()
 {
-  return _dhi->stream_name();
+  return _hnv.node_pool()->stream_name();
 }
 
 int
@@ -921,8 +921,14 @@ parse(const std::string & fname, const std::string & input)
     throw ParseError(input_errors.str());
 
   std::unique_ptr<Node> root(new Section(interpreter, interpreter->root()));
-  std::size_t starting_line = 0;
-  buildHITTree(interpreter, interpreter->root(), root.get(), starting_line);
+
+  // avoid calling recursive method to build hit node tree with empty input
+  if (!interpreter->root().is_null())
+  {
+    std::string starting_file = interpreter->root().node_pool()->stream_name();
+    std::size_t starting_line = interpreter->root().line();
+    buildHITTree(interpreter, interpreter->root(), root.get(), starting_file, starting_line);
+  }
 
   return root.release();
 }
@@ -1185,21 +1191,20 @@ void
 buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
              wasp::HITNodeView hnv_parent,
              Node * hit_parent,
+             std::string & previous_file,
              std::size_t & previous_line)
 {
   if (hnv_parent.is_null())
     return;
 
-  for (std::size_t i = 0, count = hnv_parent.child_count(); i < count; i++)
+  for (const auto & hnv_child : hnv_parent)
   {
-    // wasp nodeview child will be stored in node if one is created and added
-    auto hnv_child = hnv_parent.child_at(i);
-
     // create and add comment node as terminal leaf but do not recurse deeper
     if (hnv_child.type() == wasp::COMMENT)
     {
       // add blank line if needed between previous node line and this node line
-      if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+      if (hnv_child.node_pool()->stream_name() == previous_file &&
+          hnv_child.line() > previous_line + 1)
         hit_parent->addChild(new Blank());
 
       auto hit_child = new Comment(interpreter, hnv_child);
@@ -1213,17 +1218,20 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
         hit_child->setInline(false);
         hit_parent->addChild(hit_child);
       }
+      previous_file = hnv_child.node_pool()->stream_name();
       previous_line = hnv_child.last_line();
     }
     // create and add field node as a combined leaf but do not recurse deeper
     else if (hnv_child.type() == wasp::KEYED_VALUE || hnv_child.type() == wasp::ARRAY)
     {
       // add blank line if needed between previous node line and this node line
-      if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+      if (hnv_child.node_pool()->stream_name() == previous_file &&
+          hnv_child.line() > previous_line + 1)
         hit_parent->addChild(new Blank());
 
       auto hit_child = new Field(interpreter, hnv_child);
       hit_parent->addChild(hit_child);
+      previous_file = hnv_child.node_pool()->stream_name();
       previous_line = hnv_child.last_line();
     }
     // section handling is dependant on if specification is explode or normal
@@ -1238,7 +1246,7 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       {
         if (Node * hit_child = hit_parent->find(hnv_child.name()))
         {
-          buildHITTree(interpreter, hnv_child, hit_child, previous_line);
+          buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
           explode_section_found = true;
         }
       }
@@ -1247,13 +1255,16 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       if (!explode_section_found)
       {
         // add blank line if needed between previous node line and this node line
-        if (previous_line != 0 && hnv_child.line() > previous_line + 1)
+        if (hnv_child.node_pool()->stream_name() == previous_file &&
+            hnv_child.line() > previous_line + 1)
           hit_parent->addChild(new Blank());
 
         auto hit_child = new Section(interpreter, hnv_child);
         hit_parent->addChild(hit_child);
+        previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.line();
-        buildHITTree(interpreter, hnv_child, hit_child, previous_line);
+        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
+        previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.last_line();
       }
     }

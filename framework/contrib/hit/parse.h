@@ -679,6 +679,7 @@ public:
 void buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
                   wasp::HITNodeView hnv_parent,
                   Node * hit_parent,
+                  std::string & previous_file,
                   std::size_t & previous_line);
 
 } // namespace hit
