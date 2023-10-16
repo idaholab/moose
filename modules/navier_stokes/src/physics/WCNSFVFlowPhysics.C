@@ -50,6 +50,10 @@ WCNSFVFlowPhysics::validParams()
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters)
 {
+  for (const auto d : make_range(_dim))
+    saveNonlinearVariableName(_velocity_names[d]);
+  saveNonlinearVariableName(_pressure_name);
+
   checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_types");
   checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_coeffs");
 

@@ -79,10 +79,6 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _boundary_condition_information_complete(getParam<bool>("boundary_conditions_all_set"))
 {
-  for (const auto d : make_range(_dim))
-    addNonlinearVariable(_velocity_names[d]);
-  addNonlinearVariable(_pressure_name);
-
   // Parameter checking
   if (_boundary_condition_information_complete)
   {
