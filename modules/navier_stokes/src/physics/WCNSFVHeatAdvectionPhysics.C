@@ -40,7 +40,7 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
             : std::vector<std::vector<SubdomainName>>()),
     _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity"))
 {
-  addNonlinearVariable(_fluid_temperature_name);
+  saveNonlinearVariableName(_fluid_temperature_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
 
