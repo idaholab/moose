@@ -10,6 +10,8 @@
 #include "FileMeshWCNSFVComponent.h"
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVHeatAdvectionPhysics.h"
+#include "WCNSFVScalarAdvectionPhysics.h"
+#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", FileMeshWCNSFVComponent);
 
@@ -29,14 +31,17 @@ FileMeshWCNSFVComponent::validParams()
   // Add parameters from the various physics we want active on the component
   params += WCNSFVFlowPhysics::validParams();
   params += WCNSFVHeatAdvectionPhysics::validParams();
-  // params += WCNSFVScalarAdvectionPhysics::validParams;
+  params += WCNSFVScalarAdvectionPhysics::validParams();
   // params += WCNSFVTurbulencePhysics::validParams;
 
   return params;
 }
 
 FileMeshWCNSFVComponent::FileMeshWCNSFVComponent(const InputParameters & parameters)
-  : FileMeshComponent(parameters)
+  : FileMeshComponent(parameters),
+    _has_flow_physics(getParam<bool>("add_flow_equations")),
+    _has_heat_physics(getParam<bool>("add_energy_equation")),
+    _has_scalar_physics(getParam<bool>("add_scalar_equations"))
 {
 }
 
@@ -54,14 +59,17 @@ FileMeshWCNSFVComponent::init()
   FileMeshComponent::init();
 
   // Before this point, we did not have a Problem object, so we could not add the Physics
-  if (getParam<bool>("add_flow_equations"))
+  if (_has_flow_physics)
   {
     InputParameters params = getFactory().getValidParams("WCNSFVFlowPhysics");
     params.applyParameters(parameters());
-    getProblem().addPhysics("WCNSFVFlowPhysics", prefix() + "flow", params);
-    _physics_names.push_back(prefix() + "flow");
+    const PhysicsName physics_name = prefix() + "flow";
+    getProblem().addPhysics("WCNSFVFlowPhysics", physics_name, params);
+    _physics_names.push_back(physics_name);
+    _flow_physics = dynamic_cast<WCNSFVFlowPhysics *>(getProblem().getPhysics(physics_name));
+    _physics.push_back(_flow_physics);
   }
-  if (getParam<bool>("add_energy_equation"))
+  if (_has_heat_physics)
   {
     InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
     params.applyParameters(parameters());
@@ -70,7 +78,7 @@ FileMeshWCNSFVComponent::init()
     getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", prefix() + "energy", params);
     _physics_names.push_back(prefix() + "energy");
   }
-  if (getParam<bool>("add_scalar_equations"))
+  if (_has_scalar_physics)
   {
     InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
     params.applyParameters(parameters());
@@ -80,13 +88,28 @@ FileMeshWCNSFVComponent::init()
     _physics_names.push_back(prefix() + "scalar");
   }
 
-  // Keep a handle on the Physics
-  for (const auto & physics_name : _physics_names)
-    _physics.push_back(dynamic_cast<WCNSFVPhysicsBase *>(getProblem().getPhysics(physics_name)));
-
   for (auto physics : _physics)
     // Add block restriction
     physics->addBlocks(getSubdomainNames());
+}
+
+void
+FileMeshWCNSFVComponent::setupMesh()
+{
+  // Add connections for planned inlet and outlet
+  const auto inlet_boundaries = getParam<std::vector<BoundaryName>>("inlet_boundaries");
+  const auto outlet_boundaries = getParam<std::vector<BoundaryName>>("outlet_boundaries");
+
+  // For now we only need the boundary ids. The need for more Connection information may increase as
+  // we add more types of junction techniques
+  for (const auto i : index_range(inlet_boundaries))
+    _connections[FileMeshComponentConnection::EEndType::IN].push_back(
+        Connection(constMesh().getBoundaryID(inlet_boundaries[i])));
+  for (const auto i : index_range(outlet_boundaries))
+    _connections[FileMeshComponentConnection::EEndType::OUT].push_back(
+        Connection(constMesh().getBoundaryID(outlet_boundaries[i])));
+
+  FileMeshComponent::setupMesh();
 }
 
 void
@@ -111,4 +134,40 @@ FileMeshWCNSFVComponent::addMooseObjects()
     physics->addFunctorMaterials();
     physics->addPostprocessors();
   }
+}
+
+bool
+FileMeshWCNSFVComponent::hasPhysics(const PhysicsName & phys_name) const
+{
+  if (phys_name == "flow")
+    return hasFlowPhysics();
+  else if (phys_name == "energy")
+    return hasFluidEnergyPhysics();
+  else if (phys_name == "scalar")
+    return hasScalarAdvectionPhysics();
+  else
+    mooseError("Short Physics name '", phys_name, "' not recognized");
+}
+
+WCNSFVPhysicsBase *
+FileMeshWCNSFVComponent::getPhysics(const PhysicsName & phys_name) const
+{
+  auto physics = dynamic_cast<WCNSFVPhysicsBase *>(getProblem().getPhysics(prefix() + phys_name));
+  if (!physics)
+    mooseError("Physics " + prefix() + phys_name + " is not derived from WCNSFVPhysicsBase");
+  return physics;
+}
+
+VariableName
+FileMeshWCNSFVComponent::getVariableName(const std::string & short_name) const
+{
+  if (hasFlowPhysics())
+    return _flow_physics->getFlowVariableName("short_name");
+  else if (hasFluidEnergyPhysics())
+    return _energy_physics->getFlowVariableName("short_name");
+  else if (hasScalarAdvectionPhysics())
+    return _scalar_physics->getFlowVariableName("short_name");
+  else
+    mooseError("No Physics object to provide the true variable name for the short name: ",
+               short_name);
 }
