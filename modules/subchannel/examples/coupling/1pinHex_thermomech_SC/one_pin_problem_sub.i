@@ -96,7 +96,7 @@ T_in = 588.5
   []
 []
 
- [Materials]
+[Materials]
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
@@ -115,13 +115,11 @@ T_in = 588.5
     type = ComputeStrainIncrementBasedStress
     block = 0
   []
-
   [heat_conductor]
     type = HeatConductionMaterial
     thermal_conductivity = 1.0
     block = 0
   []
-
   [density]
     type = Density
     block = 0

@@ -84,7 +84,6 @@ P_out = 2.0e5 # Pa
   n_blocks = 1
   P_out = 2.0e5
   CT = 1.0
-  enforce_uniform_pressure = false
   compute_density = false
   compute_viscosity = false
   compute_power = true
@@ -219,7 +218,7 @@ P_out = 2.0e5 # Pa
     type = FullSolveMultiApp
     input_files = wrapper.i # seperate file for multiapps due to radial power profile
     execute_on = 'timestep_end'
-    positions = '0   0   0'
+    positions = '0   0   0' #center of assembly
     bounding_box_padding = '10.0 10.0 10.0'
   []
 

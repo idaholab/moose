@@ -21,8 +21,12 @@ n_ax = 10
 # System variables
 T_in = 660
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
-  [2d_fuel_element]
+  [bisonMesh]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
     num_sectors_per_side = '${n_az} ${n_az} ${n_az} ${n_az} ${n_az} ${n_az}'
@@ -33,14 +37,15 @@ T_in = 660
     duct_sizes = '${fparse duct_inside / 2 / f}'
     duct_intervals = '${n_radial}'
     duct_block_ids = '2'
-    interface_boundary_names = 'inside'
+    # interface_boundary_names = 'inside'
     external_boundary_name = 'outside'
   []
 
   [extrude]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
+    # type = FancyExtruderGenerator
     direction = '0 0 1'
-    input = 2d_fuel_element
+    input = bisonMesh
     heights = '${height}'
     num_layers = '${n_ax}'
   []
@@ -88,14 +93,16 @@ T_in = 660
     transform = ROTATE
     vector_value = '30 0 0'
   []
+
+  coord_type = XYZ
 []
 
 [Functions]
   [volumetric_heat_rate]
     type = ParsedFunction
-    value = '1.0*H'
-    vars = 'H'
-    vals = '${height}'
+    expression = '1.0*H'
+    symbol_names = 'H'
+    symbol_values = '${height}'
   []
 []
 
@@ -103,6 +110,19 @@ T_in = 660
   [temperature]
     order = FIRST
     family = LAGRANGE
+  []
+[]
+
+[Modules/TensorMechanics/Master]
+  add_variables = true
+  strain = SMALL
+  incremental = true
+  generate_output = 'stress_xx stress_yy stress_xy'
+  temperature = temperature
+
+  [block0]
+    eigenstrain_names = eigenstrain
+    block = wrapper
   []
 []
 
@@ -141,10 +161,33 @@ T_in = 660
 []
 
 [Materials]
+  [elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block =  wrapper
+    bulk_modulus = 0.333333333333e6
+    poissons_ratio = 0.0
+  []
+  [thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    block =  wrapper
+    temperature = temperature
+    stress_free_temperature = ${T_in}
+    thermal_expansion_coeff = 1e-5
+    eigenstrain_name = eigenstrain
+  []
+  [stress]
+    type = ComputeStrainIncrementBasedStress
+    block = wrapper
+  []
   [heat_conductor]
     type = HeatConductionMaterial
     thermal_conductivity = 1.0
-    block = wrapper
+    block =  wrapper
+  []
+  [density]
+    type = Density
+    block =  wrapper
+    density = 1.0
   []
 []
 
@@ -165,6 +208,27 @@ T_in = 660
     variable = temperature
     boundary = 'outside'
     value = ${fparse T_in+10}
+  []
+
+  [no_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 'inlet outlet'
+    value = 0.0
+  []
+
+  [no_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 'inlet outlet'
+    value = 0.0
+  []
+
+  [no_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 'inlet'
+    value = 0.0
   []
 []
 
@@ -190,10 +254,6 @@ T_in = 660
     direction = z
     execute_on = 'TIMESTEP_END'
   []
-[]
-
-[Problem]
-  coord_type = XYZ
 []
 
 [Executioner]
