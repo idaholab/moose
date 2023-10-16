@@ -345,14 +345,16 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
     return SolveState::SUCCESS;
   }
 
-  // two initial guesses
-  auto ak = initialGuess(effective_trial_stress);
-  auto bk = initialGuess(0.0);
-  if (ak == bk)
-    mooseError("The update model must return a non-zero initialGuess!");
+  // two initial guesses (no and 100% inelastic strain)
+  auto ak = 0.0;
+  auto bk = 1.0;
 
   const auto fak0 = computeResidual(effective_trial_stress, ak);
   const auto fbk0 = computeResidual(effective_trial_stress, bk);
+
+  if (fak0 * fbk0 > 0)
+    mooseException("Regula falsi solve cannot start, dt is likely too large");
+
   GenericReal<is_ad> fak = fak0;
   GenericReal<is_ad> fbk = fbk0;
 
@@ -366,12 +368,19 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
 
     mooseAssert(fbk != fak, "Division by zero in secant update");
     const auto ck = (ak * fbk - bk * fak) / (fbk - fak);
+    const auto fck = computeResidual(effective_trial_stress, ck);
 
     // do fak and fbk have the same sign?
-    if (fak * fbk > 0)
+    if (fak * fck > 0)
+    {
       ak = ck;
-    else
+      fak = fck;
+    }
+    else if (fbk * fck > 0)
+    {
       bk = ck;
+      fbk = fck;
+    }
 
     // delta x tolerance check
     if (std::abs(ak - bk) < _deltax_tolerance)
@@ -403,8 +412,6 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
       return SolveState::EXCEEDED_ITERATIONS;
 
     _iteration++;
-    fak = computeResidual(effective_trial_stress, ak);
-    fbk = computeResidual(effective_trial_stress, bk);
   }
 }
 
