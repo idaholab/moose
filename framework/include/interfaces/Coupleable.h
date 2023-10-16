@@ -842,7 +842,7 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
-   * Returns second derivative of a coupled variable
+   * Returns second spatial derivatives of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableSecond containing the second derivative of the coupled variable
@@ -852,7 +852,7 @@ protected:
                                                unsigned int comp = 0) const;
 
   /**
-   * Returns an old second derivative from previous time step of a coupled variable
+   * Returns an old second spatial derivatives from previous time step of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableSecond containing the old second derivative of the coupled
