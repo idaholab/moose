@@ -108,8 +108,8 @@ QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 {
   Real offset_x = (_nx - 2) * _pitch / 2.0;
   Real offset_y = (_ny - 2) * _pitch / 2.0;
-  unsigned int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
-  unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
+  unsigned int i = (p(0) + offset_x) / _pitch;
+  unsigned int j = (p(1) + offset_y) / _pitch;
   return j * (_nx - 1) + i;
 }
 
@@ -118,15 +118,8 @@ QuadSubChannelMesh::pinIndex(const Point & p) const
 {
   Real offset_x = (_nx - 2) * _pitch / 2.0;
   Real offset_y = (_ny - 2) * _pitch / 2.0;
-  int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
-  int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
-
-  i = std::max(0, i);
-  i = std::min(i, (int)(_nx - 2));
-
-  j = std::max(0, j);
-  j = std::min(j, (int)(_ny - 2));
-
+  unsigned int i = (p(0) + offset_x) / _pitch;
+  unsigned int j = (p(1) + offset_y) / _pitch;
   return j * (_nx - 1) + i;
 }
 
