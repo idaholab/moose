@@ -942,9 +942,10 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
   bool pass = true;
 
   // walk over all children of root node context and build document symbols
-  for (auto itr = view_root.begin(); itr != view_root.end(); itr.next())
+  for (const auto i : make_range(view_root.child_count()))
   {
-    wasp::HITNodeView view_child = itr.get();
+    // walk must be index based to catch file include and skip its children
+    wasp::HITNodeView view_child = view_root.child_at(i);
 
     // get child name / detail / line / column / last_line / last_column
     std::string name = view_child.name();
@@ -994,12 +995,17 @@ bool
 MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                              wasp::DataObject & data_parent)
 {
+  // return without adding any children if parent node is file include type
+  if (wasp::is_nested_file(view_parent))
+    return true;
+
   bool pass = true;
 
   // walk over all children of this node context and build document symbols
-  for (auto itr = view_parent.begin(); itr != view_parent.end(); itr.next())
+  for (const auto i : make_range(view_parent.child_count()))
   {
-    wasp::HITNodeView view_child = itr.get();
+    // walk must be index based to catch file include and skip its children
+    wasp::HITNodeView view_child = view_parent.child_at(i);
 
     // get child name / detail / line / column / last_line / last_column
     std::string name = view_child.name();
