@@ -106,4 +106,104 @@ computeSpeed(const ADRealVectorValue & velocity)
   // avoid this failure mode.
   return isZero(velocity) ? 1e-42 : velocity.norm();
 }
+
+/// Bounded element maps for wall treatement
+std::map<const Elem *, bool> _wall_bounded;
+std::map<const Elem *, bool> *
+getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
+                       const FEProblemBase & _fe_problem,
+                       const SubProblem & _subproblem)
+{
+
+  if (_wall_bounded.size() > 0)
+    return &_wall_bounded;
+
+  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
+  {
+    auto wall_bounded = false;
+    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    {
+      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
+      for (const BoundaryName & name : _wall_boundary_name)
+      {
+        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
+        for (BoundaryID side_id : side_bnds)
+        {
+          if (side_id == wall_id)
+            wall_bounded = true;
+        }
+      }
+    }
+    _wall_bounded[elem] = wall_bounded;
+  }
+  return &_wall_bounded;
+}
+
+/// Bounded element face distances for wall treatement
+std::map<const Elem *, std::vector<Real>> _dist;
+std::map<const Elem *, std::vector<Real>> *
+getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
+                const FEProblemBase & _fe_problem,
+                const SubProblem & _subproblem)
+{
+
+  if (_dist.size() > 0)
+    return &_dist;
+
+  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
+  {
+    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    {
+      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
+      for (const BoundaryName & name : _wall_boundary_name)
+      {
+        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
+        for (BoundaryID side_id : side_bnds)
+        {
+          if (side_id == wall_id)
+          {
+            const FaceInfo * const fi = _subproblem.mesh().faceInfo(elem, i_side);
+            Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
+            _dist[elem].push_back(dist);
+          }
+        }
+      }
+    }
+  }
+  return &_dist;
+}
+
+/// Bounded element face normals for wall treatement
+std::map<const Elem *, std::vector<Point>> _normal;
+std::map<const Elem *, std::vector<Point>> *
+getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
+                     const FEProblemBase & _fe_problem,
+                     const SubProblem & _subproblem)
+{
+
+  if (_dist.size() > 0)
+    return &_normal;
+
+  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
+  {
+    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    {
+      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
+      for (const BoundaryName & name : _wall_boundary_name)
+      {
+        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
+        for (BoundaryID side_id : side_bnds)
+        {
+          if (side_id == wall_id)
+          {
+            const FaceInfo * const fi = _subproblem.mesh().faceInfo(elem, i_side);
+            _normal[elem].push_back(fi->normal());
+          }
+        }
+      }
+    }
+  }
+  return &_normal;
+}
+
 }

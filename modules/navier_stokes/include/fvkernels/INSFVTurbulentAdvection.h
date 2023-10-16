@@ -21,6 +21,8 @@ public:
   static InputParameters validParams();
   INSFVTurbulentAdvection(const InputParameters & params);
 
+  bool hasMaterialTimeDerivative() const override { return false; }
+
 protected:
   ADReal computeQpResidual() override;
   void computeResidual(const FaceInfo & fi) override;

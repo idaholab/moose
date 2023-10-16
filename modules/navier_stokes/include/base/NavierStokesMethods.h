@@ -14,6 +14,8 @@
 #include "MooseUtils.h"
 #include "ADReal.h"
 #include "metaphysicl/raw_type.h"
+#include "FEProblemBase.h"
+#include "SubProblem.h"
 
 namespace NS
 {
@@ -105,4 +107,31 @@ using MooseUtils::isZero;
  * Compute the speed (velocity norm) given the supplied velocity
  */
 ADReal computeSpeed(const ADRealVectorValue & velocity);
+
+/**
+ * Map marking wall bounded elements
+ */
+extern std::map<const Elem *, bool> _wall_bounded;
+std::map<const Elem *, bool> *
+getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
+                       const FEProblemBase & _fe_problem,
+                       const SubProblem & _subproblem);
+
+/**
+ * Map storing wall ditance for near-wall marked elements
+ */
+extern std::map<const Elem *, std::vector<Real>> _dist;
+std::map<const Elem *, std::vector<Real>> *
+getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
+                const FEProblemBase & _fe_problem,
+                const SubProblem & _subproblem);
+
+/**
+ * Map storing faces normals for wall bounded elements
+ */
+extern std::map<const Elem *, std::vector<Point>> _normal;
+std::map<const Elem *, std::vector<Point>> *
+getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
+                     const FEProblemBase & _fe_problem,
+                     const SubProblem & _subproblem);
 }

@@ -85,7 +85,7 @@ protected:
   static constexpr int _MAX_ITERS_U_TAU{50};
 
   /// Relative tolerance to find the friction velocity
-  static constexpr Real _REL_TOLERANCE{1e-6};
+  static constexpr Real _REL_TOLERANCE{1e-4};
 
   /// -- Constants of the method
 
@@ -109,4 +109,12 @@ protected:
 
   /// -- Damping values for nonlinear iterations
   Real _damper;
+
+  /// Maps for wall bounded elements
+  std::map<const Elem *, bool> _wall_bounded;
+  std::map<const Elem *, std::vector<Real>> _dist;
+  std::map<const Elem *, std::vector<Point>> _normal;
+
+  /// Map of all viscosity values
+  std::map<const Elem *, Real> _mu_t_old;
 };

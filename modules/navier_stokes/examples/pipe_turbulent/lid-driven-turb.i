@@ -127,14 +127,14 @@ C_mu = 0.09
     type = INSFVTurbulentAdvection
     variable = TKE
     rho = ${rho}
-    # walls = 'left top right bottom'
+    walls = 'left top right bottom'
   []
   [TKE_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKE
     coeff = 'mu_t'
     scaling_coef = ${sigma_k}
-    # walls = 'left top right bottom'
+    walls = 'left top right bottom'
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
@@ -155,14 +155,14 @@ C_mu = 0.09
     type = INSFVTurbulentAdvection
     variable = TKED
     rho = ${rho}
-    # walls = 'left top right bottom'
+    walls = 'left top right bottom'
   []
   [TKED_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKED
     coeff = 'mu_t'
     scaling_coef = ${sigma_eps}
-    # walls = 'left top right bottom'
+    walls = 'left top right bottom'
   []
   [TKED_source_sink]
     type = INSFVTKEDSourceSink
@@ -188,7 +188,7 @@ C_mu = 0.09
   []
   [mu_t]
     type = MooseVariableFVReal
-    initial_condition = 1.0
+    initial_condition = 0.001
   []
 []
 
@@ -212,7 +212,7 @@ C_mu = 0.09
     wall_treatement = false
     walls = 'left top right bottom'
     non_equilibrium_treatement = false
-    rf = 0.5
+    rf = 0.0
     execute_on = 'TIMESTEP_END'
   []
 []
@@ -274,7 +274,7 @@ C_mu = 0.09
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'lu        NONZERO               0.9'
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-4
   nl_max_its = 2000
   line_search = none
 []

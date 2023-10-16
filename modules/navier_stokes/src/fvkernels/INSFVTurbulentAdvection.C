@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVTurbulentAdvection.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", INSFVTurbulentAdvection);
 
@@ -27,37 +28,14 @@ INSFVTurbulentAdvection::INSFVTurbulentAdvection(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
-  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
-  {
-    auto wall_bounded = false;
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
-    {
-      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : _wall_boundary_names)
-      {
-        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-        {
-          if (side_id == wall_id)
-            wall_bounded = true;
-        }
-      }
-    }
-    _wall_bounded[elem] = wall_bounded;
-  }
+  _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem));
 }
 
 ADReal
 INSFVTurbulentAdvection::computeQpResidual()
 {
-  const auto v =
-      _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, determineState(), _tid);
+  const auto v = _rc_vel_provider.getVelocity(
+      _velocity_interp_method, *_face_info, determineState(), _tid, false);
   const auto var_face = _var(makeFace(*_face_info,
                                       limiterType(_advected_interp_method),
                                       MetaPhysicL::raw_value(v) * _normal > 0),
@@ -145,31 +123,8 @@ INSFVTurbulentAdvection::computeJacobian(const FaceInfo & fi)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidualAndJacobian(r, _var.dofIndices()[0], _vector_tags, _matrix_tags);
-#else
-    auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
-    {
-      // jacobian contribution of the residual for the elem element to the elem element's DOF:
-      // d/d_elem (residual_elem)
-      computeJacobianType(Moose::ElementElement, residual);
-
-      mooseAssert(
-          (_face_type == FaceInfo::VarFaceNeighbors::ELEM) ==
-              (_var.dofIndicesNeighbor().size() == 0),
-          "If the variable is only defined on the elem hand side of the face, then that "
-          "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
-          "the variable is defined on both sides of the face, then it should have a non-zero "
-          "number of degrees of freedom on the neighbor/neighbor element");
-
-      // only add residual to neighbor if the variable is defined there.
-      if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-        // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
-        // d/d_neighbor (residual_elem)
-        computeJacobianType(Moose::ElementNeighbor, residual);
-    };
-    _assembly.processJacobian(r, _var.dofIndices()[0], _matrix_tags, element_functor);
-#endif
+    addResidualsAndJacobian(
+        _assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
   }
 
   if ((_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
@@ -189,25 +144,9 @@ INSFVTurbulentAdvection::computeJacobian(const FaceInfo & fi)
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidualAndJacobian(
-        neighbor_r, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
-#else
-    auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
-    {
-      // only add residual to elem if the variable is defined there.
-      if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-        // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
-        // d/d_elem (residual_neighbor)
-        computeJacobianType(Moose::NeighborElement, residual);
-
-      // jacobian contribution of the residual for the neighbor element to the neighbor element's
-      // DOF: d/d_neighbor (residual_neighbor)
-      computeJacobianType(Moose::NeighborNeighbor, residual);
-    };
-
-    _assembly.processJacobian(
-        neighbor_r, _var.dofIndicesNeighbor()[0], _matrix_tags, neighbor_functor);
-#endif
+    addResidualsAndJacobian(_assembly,
+                            std::array<ADReal, 1>{{neighbor_r}},
+                            _var.dofIndicesNeighbor(),
+                            _var.scalingFactor());
   }
 }
