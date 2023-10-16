@@ -1,3 +1,3 @@
-time,elemental_err,nodal_err,u_err
-0,0,0,0
-1,0,0,0
+time,dot_err,elemental_err,grad_dot_err,grad_err,nodal_err,u_err
+0,0,0,0,0,0,0
+1,0,0,0,0,0,0

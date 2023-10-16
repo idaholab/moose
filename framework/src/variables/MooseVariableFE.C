@@ -1061,6 +1061,18 @@ MooseVariableFE<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
 }
 
 template <typename OutputType>
+typename MooseVariableFE<OutputType>::GradientType
+MooseVariableFE<OutputType>::evaluateGradient(const ElemArg & elem_arg,
+                                              const StateArg & state) const
+{
+  const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
+  // We can use whatever we want for the point argument since it won't be used
+  const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
+  evaluateOnElement(elem_qp_arg, state, /*cache_eligible=*/false);
+  return _current_elem_qp_functor_gradient[0];
+}
+
+template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
 {

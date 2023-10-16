@@ -712,6 +712,7 @@ protected:
   GradientType evaluateGradient(const ElemQpArg & elem_qp, const StateArg & state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 const StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemArg &, const StateArg &) const override final;
 
   DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
