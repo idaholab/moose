@@ -2363,7 +2363,7 @@ NSFVBase<BaseType>::addINSInletBC()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.template set<NonlinearVariableName>("variable") = _velocity_name[d];
-        params.template set<FunctionName>("function") =
+        params.template set<MooseFunctorName>("functor") =
             _momentum_inlet_function[velocity_pressure_counter][d];
 
         getProblem().addFVBC(bc_type, _velocity_name[d] + "_" + _inlet_boundaries[bc_ind], params);
