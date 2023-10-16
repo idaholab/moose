@@ -96,7 +96,7 @@ KKSCHBulk::computeGradDFDCons(PFFunctionType type)
       return res;
 
     case Jacobian:
-      // the non linear variable is c, but the free energy only contains the
+      // the nonlinear variable is c, but the free energy only contains the
       // phase concentrations. Equation (23) in the KKS paper gives the chain-
       // rule derivative dca/dc
       /* Real dcadc = _second_derivative_Fb[_qp]

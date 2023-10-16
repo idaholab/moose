@@ -12,6 +12,7 @@
       input = 'recompute.i'
       exodiff = 'recompute_out.e'
 
+      abs_zero = 1e-6
       detail = 'for a simple monomial expression, and'
     []
 

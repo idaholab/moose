@@ -4,7 +4,7 @@
 
 The `CoefTimeDerivative` kernel implements the time derivative term multiplied by a scalar coefficient.
 
-This class inherents from the `TimeDerivative` class. 
+This class inherits from the `TimeDerivative` class. 
 
 ## Example Syntax
 

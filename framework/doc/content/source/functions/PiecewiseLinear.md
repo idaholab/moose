@@ -6,7 +6,7 @@
 
 The `PiecewiseLinear` function performs linear interpolations between user-provided
 pairs of x-y data.  The x-y data can be provided in three ways. The first way is through
-a combination of the `x` and `y` paramaters, which are lists of the x and y coordinates
+a combination of the `x` and `y` parameters, which are lists of the x and y coordinates
 of the data points that make up the function.  The second way is in the `xy_data`
 parameter, which is a list of pairs of x-y data that make up the points of the
 function.  This allows for the function data to be specified in columns by inserting line

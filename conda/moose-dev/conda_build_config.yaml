@@ -2,7 +2,7 @@ moose_libmesh:
   - moose-libmesh 2023.09.06 build_3
 
 moose_wasp:
-  - moose-wasp 2023.08.31
+  - moose-wasp 2023.10.06
 
 moose_tools:
   - moose-tools 2023.08.31

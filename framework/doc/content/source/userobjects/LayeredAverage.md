@@ -27,7 +27,7 @@ The thicknesses of the layers can be set in three different, and separate, ways:
 - a vector of bounding domains may be specified using the [!param](/UserObjects/LayeredAverage/layer_bounding_block).
   The minimum and maximum coordinates along specified direction, which sets the thickness for each layer,
   are then obtained by looking at the maximum coordinate in the specified bounding block (to set the layers' minimum)
-  and the minimum coordinate in the bounding blocks (set the layers's maximum).
+  and the minimum coordinate in the bounding blocks (to set the layers' maximum).
 
 
 The layers may be restricted to elements in certain subdomains using the

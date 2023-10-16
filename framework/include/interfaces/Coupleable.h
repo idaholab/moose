@@ -33,6 +33,10 @@ template <typename T>
 class DenseVector;
 }
 
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseWritableVariable;
+
 /**
  * Interface for objects that needs coupling capabilities
  *
@@ -492,16 +496,17 @@ protected:
 
   /**
    * Returns a *writable* MooseVariable object for a nodal or elemental variable. Use
-   * var.setNodalValue(val[, idx]) in both cases (!) to set the solution DOF values. Only one object
-   * can obtain a writable reference in a simulation. Note that the written values will not ba
-   * available in the same system loop! E.g. values written using this API by a nodal AuxKernel will
-   * not be updated for other nodal AuxKernels during the same iteration over all nodes.
+   * var.setNodalValue(val[, idx]) in both cases (!) to set the solution DOF values. Only one
+   * object can obtain a writable reference in a simulation. Note that the written values will
+   * not ba available in the same system loop! E.g. values written using this API by a nodal
+   * AuxKernel will not be updated for other nodal AuxKernels during the same iteration over all
+   * nodes.
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a MooseVariable for the coupled variable
+   * @return Reference to a MooseWritableVariable for the coupled variable
    * @see Kernel::value
    */
-  MooseVariable & writableVariable(const std::string & var_name, unsigned int comp = 0);
+  MooseWritableVariable & writableVariable(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns a *writable* reference to a coupled variable for writing to multiple
@@ -517,7 +522,7 @@ protected:
   /**
    * Checks that the passed in variable is only accessed writable by one object in a given subdomain
    */
-  void checkWritableVar(MooseVariable * var);
+  void checkWritableVar(MooseWritableVariable * var);
 
   /**
    * Returns an old value from previous time step  of a coupled variable
@@ -1679,7 +1684,7 @@ private:
                                                    Moose::OLDER_SOLUTION_TAG};
 
   /// keep a set of allocated writable variable references to make sure only one object can obtain them per thread
-  std::vector<std::set<MooseVariable *>> _writable_coupled_variables;
+  std::vector<std::set<MooseWritableVariable *>> _writable_coupled_variables;
 };
 
 template <typename T>

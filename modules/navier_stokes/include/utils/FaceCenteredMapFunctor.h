@@ -43,6 +43,12 @@ public:
 
   bool hasBlocks(SubdomainID sub_id) const override;
 
+  /**
+   * Evaluate the face functor using a FaceInfo argument.
+   * @param fi The object containing the face information
+   */
+  ValueType evaluate(const FaceInfo * const fi) const;
+
 private:
   /// The mesh that this functor lives on
   const MooseMesh & _mesh;
@@ -53,7 +59,6 @@ private:
 
   ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override final;
   ValueType evaluate(const FaceArg & face, const StateArg & state) const override final;
-  ValueType evaluate(const FaceInfo * const fi) const;
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;

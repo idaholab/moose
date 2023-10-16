@@ -40,7 +40,6 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
   _num_phases = 2;
   _num_components = 1;
   _gas_phase_number = 1 - _aqueous_phase_number;
-  _gas_fluid_component = 1 - _aqueous_fluid_component;
 
   // Check that _aqueous_phase_number is <= total number of phases
   if (_aqueous_phase_number >= _num_phases)
@@ -48,9 +47,9 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
                "This value is larger than the possible number of phases ",
                _num_phases);
 
-  // Check that _aqueous_fluid_component is <= total number of fluid components
-  if (_aqueous_fluid_component >= _num_components)
-    paramError("liquid_fluid_component",
+  // Check that _fluid_component is <= total number of fluid components
+  if (_fluid_component >= _num_components)
+    paramError("fluid_component",
                "This value is larger than the possible number of fluid components",
                _num_components);
 
@@ -67,36 +66,56 @@ void
 PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
                                                Real enthalpy,
                                                unsigned int qp,
+                                               std::vector<FluidStateProperties> & fsp) const
+{
+  // AD versions of primary variables
+  ADReal p = pressure;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+  ADReal h = enthalpy;
+  Moose::derivInsert(h.derivatives(), _hidx, 1.0);
+
+  thermophysicalProperties(p, h, qp, fsp);
+}
+
+void
+PorousFlowWaterVapor::thermophysicalProperties(const ADReal & pressure,
+                                               const ADReal & enthalpy,
+                                               unsigned int qp,
+                                               std::vector<FluidStateProperties> & fsp) const
+{
+  FluidStatePhaseEnum phase_state;
+
+  thermophysicalProperties(pressure, enthalpy, qp, phase_state, fsp);
+}
+
+void
+PorousFlowWaterVapor::thermophysicalProperties(const ADReal & pressure,
+                                               const ADReal & enthalpy,
+                                               unsigned int qp,
                                                FluidStatePhaseEnum & phase_state,
                                                std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  // AD versions of primary variables
-  DualReal p = pressure;
-  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
-  DualReal h = enthalpy;
-  Moose::derivInsert(h.derivatives(), _hidx, 1.0);
-
-  DualReal Tsat = 0.0;
-  DualReal hl = 0.0;
-  DualReal hv = 0.0;
+  ADReal Tsat = 0.0;
+  ADReal hl = 0.0;
+  ADReal hv = 0.0;
 
   // Determine the phase state of the system
-  if (p.value() >= _p_triple && p.value() <= _p_critical)
+  if (pressure.value() >= _p_triple && pressure.value() <= _p_critical)
   {
     // Saturation temperature at the given pressure
-    Tsat = _water_fp.vaporTemperature(p);
+    Tsat = _water_fp.vaporTemperature(pressure);
 
     // Enthalpy of saturated liquid and saturated vapor
-    hl = _water_fp.h_from_p_T(p, Tsat - dT);
-    hv = _water_fp.h_from_p_T(p, Tsat + dT);
+    hl = _water_fp.h_from_p_T(pressure, Tsat - _dT);
+    hv = _water_fp.h_from_p_T(pressure, Tsat + _dT);
 
-    if (h.value() < hl)
+    if (enthalpy.value() < hl.value())
       phase_state = FluidStatePhaseEnum::LIQUID;
 
-    else if (h.value() >= hl && h.value() <= hv)
+    else if (enthalpy.value() >= hl.value() && enthalpy.value() <= hv.value())
       phase_state = FluidStatePhaseEnum::TWOPHASE;
 
     else // h > hv
@@ -105,7 +124,7 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
   else // p.value() > _p_critical
   {
     // Check whether the phase point is in the liquid or vapor state
-    const DualReal T = _water_fp.T_from_p_h(p, h);
+    const ADReal T = _water_fp.T_from_p_h(pressure, enthalpy);
 
     if (T.value() <= _T_critical)
       phase_state = FluidStatePhaseEnum::LIQUID;
@@ -121,33 +140,35 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
   {
     case FluidStatePhaseEnum::GAS:
     {
-      gas.pressure = p + _pc.capillaryPressure(0.0, qp);
+      gas.pressure = pressure + _pc.capillaryPressure(0.0, qp);
       gas.saturation = 1.0;
 
-      const DualReal T = _water_fp.T_from_p_h(gas.pressure, h);
+      const ADReal T = _water_fp.T_from_p_h(gas.pressure, enthalpy);
 
       gas.temperature = T;
       liquid.temperature = T;
 
       gas.density = _water_fp.rho_from_p_T(gas.pressure, T);
       gas.viscosity = _water_fp.mu_from_p_T(gas.pressure, T);
-      gas.enthalpy = h;
+      gas.enthalpy = enthalpy;
       gas.internal_energy = _water_fp.e_from_p_T(gas.pressure, T);
+      gas.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }
 
     case FluidStatePhaseEnum::LIQUID:
     {
-      const DualReal T = _water_fp.T_from_p_h(p, h);
+      const ADReal T = _water_fp.T_from_p_h(pressure, enthalpy);
 
-      liquid.pressure = p;
+      liquid.pressure = pressure;
       liquid.temperature = T;
-      liquid.density = _water_fp.rho_from_p_T(p, T);
-      liquid.viscosity = _water_fp.mu_from_p_T(p, T);
-      liquid.enthalpy = h;
-      liquid.internal_energy = _water_fp.e_from_p_T(p, T);
+      liquid.density = _water_fp.rho_from_p_T(pressure, T);
+      liquid.viscosity = _water_fp.mu_from_p_T(pressure, T);
+      liquid.enthalpy = enthalpy;
+      liquid.internal_energy = _water_fp.e_from_p_T(pressure, T);
       liquid.saturation = 1.0;
+      liquid.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }
@@ -155,39 +176,42 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::TWOPHASE:
     {
       // Latent heat of vaporization
-      const DualReal hvl = hv - hl;
+      const ADReal hvl = hv - hl;
 
       // Vapor quality
-      const DualReal X = (h - hl) / hvl;
+      const ADReal X = (enthalpy - hl) / hvl;
 
       // Perturbed saturation temperature to ensure that the correct
       // phase properties are calculated
-      const DualReal Tsatl = Tsat - dT;
-      const DualReal Tsatv = Tsat + dT;
+      const ADReal Tsatl = Tsat - _dT;
+      const ADReal Tsatv = Tsat + _dT;
 
       // Density
-      const DualReal rhol = _water_fp.rho_from_p_T(p, Tsatl);
-      const DualReal rhov = _water_fp.rho_from_p_T(p, Tsatv);
+      const ADReal rhol = _water_fp.rho_from_p_T(pressure, Tsatl);
+      const ADReal rhov = _water_fp.rho_from_p_T(pressure, Tsatv);
 
       // Vapor (gas) saturation
-      const DualReal satv = X * rhol / (rhov + X * (rhol - rhov));
+      const ADReal satv = X * rhol / (rhov + X * (rhol - rhov));
 
       gas.temperature = Tsat;
       gas.density = rhov;
-      gas.viscosity = _water_fp.mu_from_p_T(p, Tsatv);
+      gas.viscosity = _water_fp.mu_from_p_T(pressure, Tsatv);
       gas.enthalpy = hv;
-      gas.internal_energy = _water_fp.e_from_p_T(p, Tsatv);
+      gas.internal_energy = _water_fp.e_from_p_T(pressure, Tsatv);
       gas.saturation = satv;
 
       liquid.temperature = Tsat;
       liquid.density = rhol;
-      liquid.viscosity = _water_fp.mu_from_p_T(p, Tsatl);
+      liquid.viscosity = _water_fp.mu_from_p_T(pressure, Tsatl);
       liquid.enthalpy = hl;
-      liquid.internal_energy = _water_fp.e_from_p_T(p, Tsatl);
+      liquid.internal_energy = _water_fp.e_from_p_T(pressure, Tsatl);
       liquid.saturation = 1.0 - satv;
 
-      liquid.pressure = p;
-      gas.pressure = p + _pc.capillaryPressure(liquid.saturation, qp);
+      liquid.pressure = pressure;
+      gas.pressure = pressure + _pc.capillaryPressure(liquid.saturation, qp);
+
+      gas.mass_fraction[_fluid_component] = 1.0;
+      liquid.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }

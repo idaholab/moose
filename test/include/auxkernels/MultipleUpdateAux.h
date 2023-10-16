@@ -31,8 +31,8 @@ protected:
   const bool _deprecated;
 
   /// current API
-  MooseVariable * _var1;
-  MooseVariable * _var2;
+  MooseWritableVariable * _var1;
+  MooseWritableVariable * _var2;
 
   /// deprectated API
   VariableValue * _dvar1;

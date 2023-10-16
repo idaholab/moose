@@ -381,25 +381,9 @@ PatchSidesetGenerator::sidesetNameHelper(const std::string & base_name) const
 Elem *
 PatchSidesetGenerator::boundaryElementHelper(MeshBase & mesh, libMesh::ElemType type) const
 {
-  switch (type)
-  {
-    case 0:
-      return mesh.add_elem(new libMesh::Edge2);
-    case 1:
-      return mesh.add_elem(new libMesh::Edge3);
-    case 2:
-      return mesh.add_elem(new libMesh::Edge4);
-    case 3:
-      return mesh.add_elem(new libMesh::Tri3);
-    case 4:
-      return mesh.add_elem(new libMesh::Tri6);
-    case 5:
-      return mesh.add_elem(new libMesh::Quad4);
-    case 6:
-      return mesh.add_elem(new libMesh::Quad8);
-    case 7:
-      return mesh.add_elem(new libMesh::Quad9);
-    default:
-      mooseError("Unsupported element type (libMesh elem_type enum): ", type);
-  }
+  std::unique_ptr<Elem> elem = libMesh::Elem::build(type);
+  if (elem->dim() < 3)
+    return mesh.add_elem(std::move(elem));
+
+  mooseError("Unsupported element type (libMesh elem_type enum): ", type);
 }

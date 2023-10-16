@@ -50,11 +50,11 @@ export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 !template load file=installation/clone_moose.md.template PATH=~/projects
 !style-end!
 
-## PETSc and libMesh
+## PETSc, libMesh, and WASP
 
 !style! halign=left
-MOOSE requires several support libraries in order to build or run properly. Both of these libraries
-(PETSc and libMesh) can be built using our supplied scripts:
+MOOSE requires several support libraries in order to build or run properly. These libraries
+(PETSc, libMesh, and WASP) can be built using our supplied scripts:
 !style-end!
 
 !template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects

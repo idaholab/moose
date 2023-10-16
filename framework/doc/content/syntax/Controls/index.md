@@ -154,11 +154,11 @@ Thus their controllable parameter `point` can be set by controls simultaneously 
 !listing test/tests/controls/tag_based_naming_access/param.i
          block=Controls
          id=controls_tags_use
-         caption=Example of usinging the tagged controllable parameters.
+         caption=Example of using the tagged controllable parameters.
 
 !alert note
 The tag name does not include the object name although the tag name is added by an object.
-To access a controllable parameter, the sytax is `tag/object/name`.
+To access a controllable parameter, the syntax is `tag/object/name`.
 Internally, MOOSE adds the input block name as a special tag name.
 
 ## Controllable Parameters Added by Actions id=controllable_params_added_by_actions

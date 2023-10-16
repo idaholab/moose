@@ -13,14 +13,23 @@
 #include "PorousFlowDictator.h"
 
 /**
- * Postprocessor produces the mass of a given fluid component in a region
+ * Postprocessor produces the mass of a given fluid component in a region.
+ *
+ * This Postprocessor is templated to work with both AD and non-AD FE
+ * variables, as well as FV variables. For the FE case, the Postprocessor
+ * is lumped to the nodes (like the time derivative kernel). For this reason,
+ * the fluid mass for the FE case is computed in computeIntegral() using a
+ * nodal sum. The FV case is much simpler, so the fluid mass is computed in
+ * computeQpIntegral(), which is called through the base
+ * ElementIntegralPostprocessor::computeIntegral().
  */
-class PorousFlowFluidMass : public ElementIntegralPostprocessor
+template <bool is_ad>
+class PorousFlowFluidMassTempl : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFluidMass(const InputParameters & parameters);
+  PorousFlowFluidMassTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeIntegral() override;
@@ -39,15 +48,18 @@ protected:
   /// Value of total strain calculated by a Tensor Mechanics strain calculator, if it exists, otherwise nullptr
   const MaterialProperty<RankTwoTensor> * const _total_strain;
   /// Porosity
-  const MaterialProperty<Real> & _porosity;
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
   /// Phase density (kg/m^3)
-  const MaterialProperty<std::vector<Real>> & _fluid_density;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density;
   /// Phase saturation (-)
-  const MaterialProperty<std::vector<Real>> & _fluid_saturation;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_saturation;
   /// Mass fraction of each fluid component in each phase
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fraction;
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_fraction;
   /// Saturation threshold - only fluid mass at saturations below this are calculated
   const Real _saturation_threshold;
   /// The variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;
 };
+
+typedef PorousFlowFluidMassTempl<false> PorousFlowFluidMass;
+typedef PorousFlowFluidMassTempl<true> ADPorousFlowFluidMass;

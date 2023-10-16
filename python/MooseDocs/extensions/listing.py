@@ -170,7 +170,13 @@ class InputListingCommand(FileListingCommand):
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
-            out.append(str(node.render()))
+            # This render doesn't include the parents (if any), but...
+            # we want the parents. There's zero editing capability in pyhit,
+            # so we're going to lazily replace the name with the full path :/
+            render = str(node.render())
+            if node.parent != hit:
+                render = render.replace(f'[{node.name}]', f'[{node.fullpath.strip("/")}]', 1)
+            out.append(render)
         return pyhit.parse('\n'.join(out)) if out else hit
 
     @staticmethod

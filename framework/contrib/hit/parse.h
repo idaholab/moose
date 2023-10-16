@@ -8,12 +8,8 @@
 #include <typeinfo>
 #include <vector>
 
-#ifdef WASP_ENABLED
 #include "wasphit/HITInterpreter.h"
 #include "wasphit/HITNodeView.h"
-#else
-#include "lex.h"
-#endif
 
 /// The hit namespace provides functions and objects used for interpreting and manipulating
 /// hit formatted inputs.  The hit language syntax is defined by the following context free
@@ -80,9 +76,7 @@ enum class NodeType
   Comment, /// Represents comments that are not directly part of the actual hit document.
   Field,   /// Represents field-value pairs (i.e. paramname=val).
   Blank,   /// Represents a blank line
-#ifdef WASP_ENABLED
-  Other,   /// Represents any other type of node
-#endif
+  Other, /// Represents any other type of node
 };
 
 /// Traversal order for walkers. Determines if the walker on a node is executed before or
@@ -151,7 +145,9 @@ std::string pathJoin(const std::vector<std::string> & paths);
 class Node
 {
 public:
-#ifdef WASP_ENABLED
+  /// constructs a Node with no aguments which is used for Blank nodes
+  Node();
+
   /// constructs a Node from wasp interpreter shared pointer and nodeview
   Node(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
 
@@ -163,17 +159,12 @@ public:
 
   /// constructs a Node from comment text - is_inline is currently unused
   Node(const std::string & comment, bool is_inline);
-#else
-  Node(NodeType t);
-#endif
 
   virtual ~Node();
   void remove();
 
-#ifdef WASP_ENABLED
   /// getNodeView returns a copy of the underlying wasp::HITNodeView wrapped by this Node
   wasp::HITNodeView getNodeView();
-#endif
 
   /// type returns the type of the node (e.g. one of Field, Section, Comment, etc.)
   NodeType type();
@@ -185,11 +176,6 @@ public:
   /// fullpath returns the full hit path to this node (including all parent sections
   /// recursively) starting from the tree's root node.
   std::string fullpath();
-#ifndef WASP_ENABLED
-  /// tokens returns all raw lexer tokens that this node was generated from.  This can be useful
-  /// for determining locations in the original file of different tree nodes/elements.
-  std::vector<Token> & tokens();
-#endif
   /// line returns the line number of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
   int line();
@@ -234,25 +220,17 @@ public:
   /// managing the memory/deallocation of the returned clone node.
   virtual Node * clone(bool absolute_path = false) = 0;
 
-#ifdef WASP_ENABLED
   /// setOverridePath supplies this Node with an alternative string to use
   /// rather than its regular name in all calls to the path requester method
   void setOverridePath(const std::string & override_path) { _override_path = override_path; }
-#endif
 
   /// render builds an hit syntax/text that is equivalent to the hit tree starting at this
   /// node (and downward) - i.e. parsing this function's returned string would yield a node tree
   /// identical to this nodes tree downward.  indent is the indent level using indent_text as the
   /// indent string (repeated once for each level).  maxlen is the maximum line length before
   /// breaking string values.
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-#ifdef WASP_ENABLED
-                             ,
-                             int parent_newline_count = 0
-#endif
-  );
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0);
 
   /// walk does a depth-first traversal of the hit tree starting at this node (it
   /// doesn't visit any nodes that require traversing this node's parent) calling the passed
@@ -294,17 +272,10 @@ public:
   }
 
 protected:
-#ifdef WASP_ENABLED
   std::shared_ptr<wasp::DefaultHITInterpreter> _dhi;
   wasp::HITNodeView _hnv;
-#else
-  NodeType _type;
-#endif
 
 private:
-#ifndef WASP_ENABLED
-  Node * findInner(const std::string & path, const std::string & prefix);
-#endif
 
   template <typename T>
   T paramInner(Node *)
@@ -312,11 +283,7 @@ private:
     throw Error("unsupported c++ type '" + std::string(typeid(T).name()) + "'");
   }
 
-#ifdef WASP_ENABLED
   std::string _override_path;
-#else
-  std::vector<Token> _toks;
-#endif
   Node * _parent = nullptr;
   std::vector<Node *> _children;
 };
@@ -420,57 +387,38 @@ Node::paramInner(Node * n)
 class Comment : public Node
 {
 public:
-#ifndef WASP_ENABLED
-  static const bool Inline = true;
-  static const bool Block = false;
-#endif
-
   Comment(const std::string & text, bool is_inline);
 
-#ifdef WASP_ENABLED
   /// constructs a Node from wasp interpreter shared pointer and nodeview
   Comment(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
-#endif
 
   void setText(const std::string & text);
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-#ifdef WASP_ENABLED
-                             ,
-                             int parent_newline_count = 0
-#endif
-                             ) override;
+  /// override the value of the is_inline flag setting for this comment
+  void setInline(bool is_inline);
+
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+
   virtual Node * clone(bool absolute_path = false) override;
 
 private:
-#ifndef WASP_ENABLED
-  std::string _text;
-#endif
   bool _isinline;
 };
 
-#ifndef WASP_ENABLED
 /// Blank represents a blank line in the input.  It aids in correctly re-rendering parsed input.
 class Blank : public Node
 {
 public:
-  Blank() : Node(NodeType::Blank) {}
+  Blank() : Node() {}
   virtual std::string render(int /*indent = 0*/,
                              const std::string & /*indent_text = default_indent*/,
-                             int /*maxlen = 0*/
-#ifdef WASP_ENABLED
-                             ,
-                             int /*parent_newline_count = 0*/
-#endif
-                             ) override
+                             int /*maxlen = 0*/) override
   {
     return "\n";
   }
   virtual Node * clone(bool /*absolute_path = false*/) override { return new Blank(); };
 };
-#endif
 
 /// Section represents a hit section including the section header path and all entries inside
 /// the section (e.g. fields/parameters, subsections, etc.).
@@ -479,30 +427,18 @@ class Section : public Node
 public:
   Section(const std::string & path);
 
-#ifdef WASP_ENABLED
   /// constructs a Node from wasp interpreter shared pointer and nodeview
   Section(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
 
   void clearLegacyMarkers();
-#endif
 
   /// path returns the hit path located in the section's header i.e. the section's name.
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-#ifdef WASP_ENABLED
-                             ,
-                             int parent_newline_count = 0
-#endif
-                             ) override;
-  virtual Node * clone(bool absolute_path = false) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
 
-private:
-#ifndef WASP_ENABLED
-  std::string _path;
-#endif
+  virtual Node * clone(bool absolute_path = false) override;
 };
 
 /// Field represents the field-value pairs or parameters that provide the meat content of hit
@@ -523,22 +459,15 @@ public:
 
   Field(const std::string & field, Kind k, const std::string & val);
 
-#ifdef WASP_ENABLED
   /// constructs a Node from wasp interpreter shared pointer and nodeview
   Field(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
-#endif
 
   /// path returns the hit Field name (i.e. content before the "=")
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0,
-                             const std::string & indent_text = default_indent,
-                             int maxlen = 0
-#ifdef WASP_ENABLED
-                             ,
-                             int parent_newline_count = 0
-#endif
-                             ) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+
   virtual Node * clone(bool absolute_path = false) override;
 
   /// kind returns the semantic type of the value stored in this field (e.g. Int, Bool, Float,
@@ -565,11 +494,6 @@ public:
 
 private:
   Kind _kind;
-#ifndef WASP_ENABLED
-  std::string _path;
-  std::string _field;
-  std::string _val;
-#endif
 };
 
 /// parse is *the* function in the hit namespace.  It takes the given hit input text and
@@ -750,12 +674,12 @@ public:
   TraversalOrder traversalOrder() override { return TraversalOrder::AfterChildren; }
 };
 
-#ifdef WASP_ENABLED
 /// recursively constructs the hit node tree at the end of the parse method
 /// using the root of the data processed by the wasp interpreter
 void buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
                   wasp::HITNodeView hnv_parent,
-                  Node * hit_parent);
-#endif
+                  Node * hit_parent,
+                  std::string & previous_file,
+                  std::size_t & previous_line);
 
 } // namespace hit

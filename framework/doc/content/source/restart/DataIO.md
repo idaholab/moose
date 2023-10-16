@@ -11,7 +11,7 @@ several key capabilities in the MOOSE framework including:
 
 ## What is stateful data?
 
-Stateful data is any value, container of values, or complex data structure that cannont be recomputed from other available
+Stateful data is any value, container of values, or complex data structure that cannot be recomputed from other available
 information such as coupled values or field variables. Additionally, it's not any data that is not directly owned by your object.
 
 Here are a couple of examples to consider before defining a dataLoad/dataStore routine:

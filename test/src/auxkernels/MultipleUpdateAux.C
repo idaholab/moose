@@ -52,8 +52,14 @@ MultipleUpdateAux::computeValue()
   }
   else
   {
-    _var1->setNodalValue(_nl_u[_qp] + 10.0, _qp);
-    _var2->setNodalValue(_nl_u[_qp] + 200.0, _qp);
+    /*
+      For NodalKernels the index _qp is always 0 and the computeValue method is executed on each
+      node but when using ElementalKernels the computeValue method is executed on each quadrature
+      point of an element. For this reason, in multi_update_fv_test.i input file, the quadrature is
+      set to Constant order since for FV variables there's only one DOF value locally.
+    */
+    _var1->setDofValue(_nl_u[_qp] + 10.0, _qp);
+    _var2->setDofValue(_nl_u[_qp] + 200.0, _qp);
   }
   return -3.33;
 }

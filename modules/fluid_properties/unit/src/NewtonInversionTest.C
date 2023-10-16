@@ -52,7 +52,7 @@ TEST(NewtonInversion, NewtonSolve)
   Real soln = 2;
   EXPECT_NEAR(y, soln, tol);
 
-  // Test non linear function (f2)
+  // Test nonlinear function (f2)
   auto func2 = [&](Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
   { function_f2(x1, x2, z, dzdx1, dzdx2); };
 

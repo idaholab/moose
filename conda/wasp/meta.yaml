@@ -1,12 +1,13 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose-dev/*
+#   pyhit/*
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2023.08.31" %}
+{% set version = "2023.10.06" %}
 
 package:
   name: moose-wasp

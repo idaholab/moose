@@ -16,7 +16,7 @@ with the same name as the postprocessor that you wish to load when loading from 
 ## Example Input File Syntax
 
 In this example, the value of the Receiver 'pp' in the subapp 'quad' is being populated by
-the value of a variable 'parent_aux' in the main appplication.
+the value of a variable 'parent_aux' in the main application.
 
 !listing test/tests/transfers/multiapp_variable_value_sample_transfer/pp_sub.i block=Postprocessors caption='Snippet from the subapp showing the Receiver'
 

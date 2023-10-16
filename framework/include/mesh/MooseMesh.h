@@ -54,6 +54,15 @@ class BoundingBox;
 // Useful typedefs
 typedef StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
 
+// List of supported geometrical elements
+const std::string LIST_GEOM_ELEM = "EDGE EDGE2 EDGE3 EDGE4 "
+                                   "QUAD QUAD4 QUAD8 QUAD9 "
+                                   "TRI TRI3 TRI6 "
+                                   "HEX HEX8 HEX20 HEX27 "
+                                   "TET TET4 TET10 "
+                                   "PRISM PRISM6 PRISM15 PRISM18 "
+                                   "PYRAMID PYRAMID5 PYRAMID13 PYRAMID14";
+
 /**
  * Helper object for holding qp mapping info.
  */

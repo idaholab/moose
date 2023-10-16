@@ -4,7 +4,7 @@ The `NodalNormals` system is used to define the outward-facing normal of a bound
 The system is mostly used through the [AddNodalNormalsAction.md].
 
 The nodal normals are stored in auxiliary Lagrange variables named `nodal_normal_x`/`y`/`z`.
-They may be of first or second order to accomodate both mesh orders.
+They may be of first or second order to accommodate both mesh orders.
 
 The nodal normals on boundaries are computed in two steps:
 - first a [NodalNormalsPreprocessor.md] populates the `nodal_normal_x`/`y`/`z` variables with the local quadrature weight times the gradient of the shape function

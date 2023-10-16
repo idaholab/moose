@@ -1,7 +1,7 @@
 # AreaPostprocessor
 
 The AreaPostprocesor is a SidePostprocessor that computes the area or dimension - 1 "volume" of a given side of the mesh. This
-postprocessor may be applied to one or more boundaries simulatenously, the latter case produces a total area is output.
+postprocessor may be applied to one or more boundaries simultaneously, the latter case produces a total area is output.
 
 # Description and Syntax
 

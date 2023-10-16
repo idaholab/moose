@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef WASP_ENABLED
-
 #pragma once
 
 #include "MooseApp.h"
@@ -214,10 +212,6 @@ private:
    * @return - true if the gathering of text edits completed successfully
    */
   bool gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextEdits,
-                                         int start_line,
-                                         int start_character,
-                                         int end_line,
-                                         int end_character,
                                          int tab_size,
                                          bool insert_spaces);
 
@@ -276,5 +270,3 @@ private:
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
 };
-
-#endif

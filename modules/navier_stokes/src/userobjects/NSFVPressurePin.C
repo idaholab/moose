@@ -37,7 +37,7 @@ NSFVPressurePin::validParams()
   params.suppressParameter<bool>("force_preic");
 
   params.addParam<NonlinearVariableName>("variable", NS::pressure, "Pressure variable");
-  params.addParam<PostprocessorName>("phi0", "Pressure pin value");
+  params.addParam<PostprocessorName>("phi0", "0", "Pressure pin value");
   MooseEnum pin_types("point-value average");
   params.addRequiredParam<MooseEnum>("pin_type", pin_types, "How to pin the pressure");
   params.addParam<Point>(

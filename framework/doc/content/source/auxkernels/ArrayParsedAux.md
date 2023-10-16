@@ -5,7 +5,7 @@
 ## Overview
 
 This auxiliary kernel is meant to emulate the behavior and syntax of [ParsedAux.md] for array variables.
-Using [!param](/AuxKernels/ArrayParsedAux/expression), one can define a general parsed function dependent on array variabls, scalar field variables, mesh coordinates, and time:
+Using [!param](/AuxKernels/ArrayParsedAux/expression), one can define a general parsed function dependent on array variables, scalar field variables, mesh coordinates, and time:
 
 !equation
 u_i = f(v_{1,i}, v_{2,i},..., w_1, w_2,..., x, y, z, t), \quad i=1,...,n,

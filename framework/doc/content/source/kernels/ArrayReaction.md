@@ -20,7 +20,7 @@ When it is a diagonal matrix, it can be represented by a vector.
 In such a case, the components are not coupled with this array reaction kernel.
 If all elements of the diffusion coefficient vector are the same, we can use a scalar reaction coefficient.
 Thus this kernel gives users an option to set the type of diffusion coefficient with a parameter named as *reaction_coefficient_type*.
-Users can set it to *scalar*, *array* or *full* cooresponding to scalar, diagonal matrix and full matrix respectively.
+Users can set it to *scalar*, *array* or *full* corresponding to scalar, diagonal matrix and full matrix respectively.
 Its default value is *array*.
 
 The local Jacobian can be found in the following equation:

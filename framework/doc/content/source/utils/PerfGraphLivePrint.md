@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `PerfGraphLivePrint` (PGLP) object is responsible for printing information to the screen as a code is executing.  To perform this action PGLP is executing on a separate thread from the main thread.  This thread will be refered to as the "print thread".  The main thread keeps track of what is executing using the `TIME_SECTION` macro as part of [/PerfGraph.md].  PGLP then reads this information and decides whether or not to print information about what is currently happening.
+The `PerfGraphLivePrint` (PGLP) object is responsible for printing information to the screen as a code is executing.  To perform this action PGLP is executing on a separate thread from the main thread.  This thread will be referred to as the "print thread".  The main thread keeps track of what is executing using the `TIME_SECTION` macro as part of [/PerfGraph.md].  PGLP then reads this information and decides whether or not to print information about what is currently happening.
 
 By default, PGLP prints information any time a section takes longer than one second to execute.  It will print out the "live print message" at that point, then it will print a single `.` for every second until the section ends.  When the section ends, both the memory and the time will be printed. By default, the total memory used (by the simulation at this point) and the increment in time (e.g. the time for this section only) are printed.
 
@@ -12,7 +12,7 @@ The PGLP primarily works by waking up every second and inspecting what the progr
 
 ## Objects/Data Structures Used By PerfGraphLivePrint
 
-The PGLP utilizes several different objects and datastructures for reading the current state of the execution and for storing the current state of what's been printed.
+The PGLP utilizes several different objects and data structures for reading the current state of the execution and for storing the current state of what's been printed.
 
 ### PerfGraphSectionInfo
 
@@ -64,13 +64,13 @@ I want to take a moment and talk about locking and `condition_variable`.  Usuall
 
 ### Destructing
 
-As mentioned above, the PGLP is looping until the `PerfGraph` signals that it is destructing.  The `_destructing` variable in `PerfGraph` is guarded by a mutex that is also utilized when checking the predicate of the condition variable mentioned above.  This is done because we don't want to accidentally miss the destructing signal and wait for 1 more second - delaying the ending of the program.  That could be hugely detrimental to a run that is running thousands of cases (like a stocahstic sampling or even just running tests).
+As mentioned above, the PGLP is looping until the `PerfGraph` signals that it is destructing.  The `_destructing` variable in `PerfGraph` is guarded by a mutex that is also utilized when checking the predicate of the condition variable mentioned above.  This is done because we don't want to accidentally miss the destructing signal and wait for 1 more second - delaying the ending of the program.  That could be hugely detrimental to a run that is running thousands of cases (like a stochastic sampling or even just running tests).
 
 One more small detail about destructing is that the value of it needs to be captured _before_ capturing the value of the end of the execution list.  This is to make sure that the final end of the execution list is available for the last run-through of the PGLP... so that everything can be completely printed.
 
 ## Printing
 
-After making it past the condition variable mentioned above, the PGLP then needs to read the execution list, build the print stack, and decide if anythig should be printed.
+After making it past the condition variable mentioned above, the PGLP then needs to read the execution list, build the print stack, and decide if anything should be printed.
 
 The simplest case is that the execution is still in the "same place" - meaning that the execution list is has not been changed.  In that case, either the current sections live print message needs to be printed or dots need to be printed.
 

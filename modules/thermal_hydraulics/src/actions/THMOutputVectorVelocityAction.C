@@ -18,6 +18,7 @@ InputParameters
 THMOutputVectorVelocityAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Lets the user specify the variable type for the velocity output");
   params.addParam<bool>(
       "velocity_as_vector", true, "True for vector-valued velocity, false for scalar velocity.");
   return params;

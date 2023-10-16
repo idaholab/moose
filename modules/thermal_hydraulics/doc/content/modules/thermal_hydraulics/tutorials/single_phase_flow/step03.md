@@ -55,6 +55,7 @@ To build the upper part of the loop, we define a global parameter for the pipe d
 ```
 # pipe parameters
 pipe_dia = ${units 10. cm -> m}
+A_pipe = '${fparse 0.25 * pi * pipe_dia^2}'
 ```
 
 This dimension is shared by all the pipes.
@@ -71,36 +72,8 @@ upper part of the loop
 
 In the heat exchanger section, we only build the primary side and connect it to
 [HeatTransferFromSpecifiedTemperature1Phase](HeatTransferFromSpecifiedTemperature1Phase.md).
-This component requires the `T_wall` parameter -- wall temperature and `Hw` convective wall
-heat transfer coefficient (this is a requirement of [Closures1PhaseSimple.md]).
+This component requires the `T_wall` parameter. The heat transfer coefficient will be calculated by the closure set using the correlation provided in the `wall_htc_closure` in the closure set object.
 Using a simplified secondary side is a good first step when building a heat exchanger model.
-
-
-## Postprocessors
-
-The [postprocessor system](syntax/Postprocessors/index.md) comes from the MOOSE framework.
-Postprocessors are single `Real` values computed at different locations like blocks, sides, etc.,
-or at different mesh entities like nodes or elements.
-There can also be postprocessors that are not associated with any mesh entities (like a
-postprocessor to output time step size, etc.).
-
-In our model, we will add the two following postprocessors:
-
-1. `core_T_out` for monitoring core outlet temperature
-
-   !listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
-            block=Postprocessors/core_T_out
-            link=False
-
-2. `hx_pri_T_out` for monitoring heat exchanger outlet temperature
-
-   !listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
-            block=Postprocessors/hx_pri_T_out
-            link=False
-
-Both postprocessors are of `SideAverageValue` type which means they are computed on a side.
-The side is specified via the `boundary` parameter and both postprocessors operate on the
-temperature variable `T`.
 
 
 ## Notes

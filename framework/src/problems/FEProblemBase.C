@@ -6006,13 +6006,9 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
   _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-  _fe_vector_tags.clear();
-
-  for (const auto & residual_vector_tag : residual_vector_tags)
-    // We filter out tags which do not have associated vectors in the current nonlinear
-    // system. This is essential to be able to use system-dependent residual tags.
-    if (_current_nl_sys->hasVector(residual_vector_tag._id))
-      _fe_vector_tags.insert(residual_vector_tag._id);
+  // We filter out tags which do not have associated vectors in the current nonlinear
+  // system. This is essential to be able to use system-dependent residual tags.
+  selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 }
@@ -6024,12 +6020,12 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 {
   // vector tags
   {
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-    _fe_vector_tags.clear();
-
-    for (const auto & residual_vector_tag : residual_vector_tags)
-      _fe_vector_tags.insert(residual_vector_tag._id);
+    // We filter out tags which do not have associated vectors in the current nonlinear
+    // system. This is essential to be able to use system-dependent residual tags.
+    selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
 
     setCurrentResidualVectorTags(_fe_vector_tags);
   }
@@ -7649,7 +7645,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     }
     else if (_n_nl_pingpong > _n_max_nl_pingpong)
     {
-      oss << "Diverged due to maximum non linear residual pingpong achieved" << '\n';
+      oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
     }
   }

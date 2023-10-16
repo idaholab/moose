@@ -41,9 +41,9 @@ MOOSE input file syntax basically works like this:
 ...
 ```
 
-Note that single `'` and double `"` quotes can be interchangably to quote strings (as long as
-the start quote and end quote character are the same) and are functionally equivalent. They do
-however behave differently when auto-formatting input files with [`hit format`](hit.md).
+Note that single `'` and double `"` quotes can be used interchangeably to quote strings (as long
+as the start quote and end quote character are the same) and are functionally equivalent. They
+do however behave differently when auto-formatting input files with [`hit format`](hit.md).
 Single quotes strings will not be reformatted, while double quoted strings are reindented
 and reflowed.
 
@@ -120,3 +120,15 @@ Here are some important details about how brace-expressions are evaluated:
 
 See the [CommandLine.md] object for information on how input parameters can be
 changed on the command line.
+
+## Includes
+
+Other input files may be included using the following syntax:
+
+```
+!include path/to/input.i
+```
+
+This can be used in any arbitrary nested context in an input file and included files
+can include other included files. The only requirement is that the included files
+must contain a set of syntatically complete blocks or parameters.

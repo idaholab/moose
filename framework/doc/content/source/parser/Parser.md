@@ -26,6 +26,10 @@ of different formats. The registration itself occurs in [Moose.C](Moose.md).
 
 See [Brace Expressions](input_syntax.md optional=True)
 
+## Includes
+
+See [Includes](input_syntax.md optional=True)
+
 ## Active/Inactive block parameters
 
 The Parser supports the ability to selectively activate or deactivate individual blocks

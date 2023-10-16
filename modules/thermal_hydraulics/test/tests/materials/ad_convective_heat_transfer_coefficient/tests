@@ -1,7 +1,21 @@
 [Tests]
-  [test]
-    type = 'CSVDiff'
-    input = 'test.i'
-    csvdiff = 'test_out.csv'
+  design = 'ADConvectiveHeatTransferCoefficientMaterial.md'
+  issues = '#19682'
+  [conv_htc]
+    requirement = "The system shall compute the heat transfer coefficient as a function of the "
+                  "Nusselt number:"
+    [test]
+      type = 'CSVDiff'
+      input = 'test.i'
+      csvdiff = 'test_out.csv'
+      detail = "using the default name "
+    []
+    [test_name]
+      type = 'CSVDiff'
+      input = 'test.i'
+      csvdiff = 'test_out.csv'
+      cli_args = 'Materials/Hw_material/Hw=Hw_1 Postprocessors/Hw/mat_prop=Hw_1'
+      detail = "using a name provided in the input file."
+    []
   []
 []

@@ -15,6 +15,8 @@ InputParameters
 SolidWall::validParams()
 {
   InputParameters params = FlowBoundary::validParams();
+  params.addClassDescription(
+      "Adds the boundary condition for a wall. This component is deprecated.");
   return params;
 }
 

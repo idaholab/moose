@@ -6,7 +6,7 @@ This user object may load data sorted in four different ways. The read modes are
 [!param](/UserObjects/PropertyReadFile/read_type) parameter.
 
 - In +element+ mode, the file read contains [!param](/UserObjects/PropertyReadFile/nprop) values for each element in the mesh.
-- In +grain+/+voronoi+ mode, a Voronoi tessellation with [!param](/UserObjects/PropertyReadFile/nvoronoi) random centers is either created randomly or read from the first columns of the `CSV` file, depending on the [!param](/UserObjects/PropertyReadFile/use_random_voronoi) parameter. The file read should still contain [!param](/UserObjects/PropertyReadFile/nprop) columns, even though 1-3 columns may be used for the Voronoi tesselation positions.
+- In +grain+/+voronoi+ mode, a Voronoi tessellation with [!param](/UserObjects/PropertyReadFile/nvoronoi) random centers is either created randomly or read from the first columns of the `CSV` file, depending on the [!param](/UserObjects/PropertyReadFile/use_random_voronoi) parameter. The file read should still contain [!param](/UserObjects/PropertyReadFile/nprop) columns, even though 1-3 columns may be used for the Voronoi tessellation positions.
 - In +block+ mode, the file read contains [!param](/UserObjects/PropertyReadFile/nprop) values for each block in the mesh. [!param](/UserObjects/PropertyReadFile/nblock) is the number of blocks in the mesh.
 - In +node+ mode, the file read contains [!param](/UserObjects/PropertyReadFile/nprop) values for each node in the mesh.
 

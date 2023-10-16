@@ -8,7 +8,7 @@ The `ElementCentroidPositions` may be block-restricted to limit the gathering of
 to certain subdomains.
 
 !alert note
-The `ElementCentroidPositions`, when used in conjonction with a [TransientMultiApp.md]
+The `ElementCentroidPositions`, when used in conjunction with a [TransientMultiApp.md]
 enables creating the same subapps as the [CentroidMultiApp.md], except that it is not limited to transients.
 
 !syntax parameters /Positions/ElementCentroidPositions

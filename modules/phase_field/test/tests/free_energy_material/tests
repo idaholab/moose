@@ -60,6 +60,30 @@
                'variable names and corresponding parser symbol names (which are input parameter '
                'names)'
     []
+    [ctd-split]
+      type = 'Exodiff'
+      input = 'MathCTDFreeEnergy_split.i'
+      exodiff = 'MathCTDFreeEnergy_split_out.e'
+      detail = "implemented using the compile time derivatives system and applied to a split Cahn-Hilliard "
+               "system"
+    []
+    [ctd-split-ad]
+      type = 'Exodiff'
+      input = 'MathCTDFreeEnergy_split.i'
+      exodiff = 'MathCTDFreeEnergy_split_out.e'
+      cli_args = 'Materials/free_energy/type=ADMathCTDFreeEnergy Kernels/cres/type=ADSplitCHParsed'
+      detail = "implemented using the compile time derivatives system using automatic differentiation and applied to a split Cahn-Hilliard "
+               "system"
+    []
+    [ctd-split-ad-jac]
+      type = 'PetscJacobianTester'
+      input = 'MathCTDFreeEnergy_split.i'
+      cli_args = 'Executioner/num_steps=1 Materials/free_energy/type=ADMathCTDFreeEnergy Kernels/cres/type=ADSplitCHParsed'
+      detail = "implemented using the compile time derivatives system using automatic differentiation, with correct dual number derivative entries"
+      ratio_tol = 1e-8
+      difference_tol = 2e-6
+      heavy = true
+    []
   []
 
   [RegularSolutionFreeEnergy]

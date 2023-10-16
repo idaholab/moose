@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [porous_block_restricted_simple]
+    type = 'Exodiff'
+    input = empty-block-segregated.i
+    exodiff = empty-block-segregated_out.e
+    requirement = 'The system should be able to solve the porous Navier-Stokes equations with block-restricted variables using the SIMPLE algorithm.'
+    mesh_mode = REPLICATED # because the bounding box generator does not work with distributed
+    recover = false # we don't support recovery for SIMPLE yet
+  []
+[]

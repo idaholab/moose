@@ -58,7 +58,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 }
 
 ADReal
-INSFVMixingLengthReynoldsStress::computeStrongResidual()
+INSFVMixingLengthReynoldsStress::computeStrongResidual(const bool populate_a_coeffs)
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
@@ -105,25 +105,34 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   const ADReal rho = _rho(face, state);
 
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (populate_a_coeffs)
   {
-    const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
-    // norm_strain_rate is a linear combination of degrees of freedom so it's safe to straight-up
-    // index into the derivatives vector at the dof we care about
-    _ae = norm_strain_rate.derivatives()[dof_number];
-    _ae *= -rho * eddy_diff;
-  }
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
-    _an = norm_strain_rate.derivatives()[dof_number];
-    _an *= rho * eddy_diff;
+    if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+        _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    {
+      const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
+      // norm_strain_rate is a linear combination of degrees of freedom so it's safe to straight-up
+      // index into the derivatives vector at the dof we care about
+      _ae = norm_strain_rate.derivatives()[dof_number];
+      _ae *= -rho * eddy_diff;
+    }
+    if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+        _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    {
+      const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
+      _an = norm_strain_rate.derivatives()[dof_number];
+      _an *= rho * eddy_diff;
+    }
   }
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * rho * eddy_diff * norm_strain_rate;
+}
+
+ADReal
+INSFVMixingLengthReynoldsStress::computeSegregatedContribution()
+{
+  return computeStrongResidual(false);
 }
 
 void
@@ -136,7 +145,7 @@ INSFVMixingLengthReynoldsStress::gatherRCData(const FaceInfo & fi)
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
 
-  addResidualAndJacobian(computeStrongResidual() * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(computeStrongResidual(true) * (fi.faceArea() * fi.faceCoord()));
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

@@ -95,27 +95,38 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
+  // Make AD versions of primary variables then call AD thermophysicalProperties()
+  ADReal p = pressure;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+  ADReal T = temperature;
+  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
+  ADReal Zco2 = Z;
+  Moose::derivInsert(Zco2.derivatives(), _Zidx, 1.0);
+  ADReal X = Xnacl;
+  Moose::derivInsert(X.derivatives(), _Xidx, 1.0);
+
+  thermophysicalProperties(p, T, X, Zco2, qp, fsp);
+}
+
+void
+PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
+                                             const ADReal & temperature,
+                                             const ADReal & Xnacl,
+                                             const ADReal & Z,
+                                             unsigned int qp,
+                                             std::vector<FluidStateProperties> & fsp) const
+{
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Check whether the input temperature is within the region of validity
-  checkVariables(pressure, temperature);
-
-  // AD versions of primary variables
-  DualReal p = pressure;
-  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
-  DualReal T = temperature;
-  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
-  DualReal Zco2 = Z;
-  Moose::derivInsert(Zco2.derivatives(), _Zidx, 1.0);
-  DualReal X = Xnacl;
-  Moose::derivInsert(X.derivatives(), _Xidx, 1.0);
+  checkVariables(pressure.value(), temperature.value());
 
   // Clear all of the FluidStateProperties data
   clearFluidStateProperties(fsp);
 
   FluidStatePhaseEnum phase_state;
-  massFractions(p, T, X, Zco2, phase_state, fsp);
+  massFractions(pressure, temperature, Xnacl, Z, phase_state, fsp);
 
   switch (phase_state)
   {
@@ -125,7 +136,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
       gas.saturation = 1.0;
 
       // Calculate gas properties
-      gasProperties(p, T, fsp);
+      gasProperties(pressure, temperature, fsp);
 
       break;
     }
@@ -133,8 +144,8 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::LIQUID:
     {
       // Calculate the liquid properties
-      const DualReal liquid_pressure = p - _pc.capillaryPressure(1.0, qp);
-      liquidProperties(liquid_pressure, T, X, fsp);
+      const ADReal liquid_pressure = pressure - _pc.capillaryPressure(1.0, qp);
+      liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       break;
     }
@@ -142,7 +153,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::TWOPHASE:
     {
       // Calculate the gas and liquid properties in the two phase region
-      twoPhaseProperties(p, T, X, Zco2, qp, fsp);
+      twoPhaseProperties(pressure, temperature, Xnacl, Z, qp, fsp);
 
       break;
     }
@@ -152,28 +163,28 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
   liquid.saturation = 1.0 - gas.saturation;
 
   // Save pressures to FluidStateProperties object
-  gas.pressure = p;
-  liquid.pressure = p - _pc.capillaryPressure(liquid.saturation, qp);
+  gas.pressure = pressure;
+  liquid.pressure = pressure - _pc.capillaryPressure(liquid.saturation, qp);
 }
 
 void
-PorousFlowBrineCO2::massFractions(const DualReal & pressure,
-                                  const DualReal & temperature,
-                                  const DualReal & Xnacl,
-                                  const DualReal & Z,
+PorousFlowBrineCO2::massFractions(const ADReal & pressure,
+                                  const ADReal & temperature,
+                                  const ADReal & Xnacl,
+                                  const ADReal & Z,
                                   FluidStatePhaseEnum & phase_state,
                                   std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  DualReal Xco2 = 0.0;
-  DualReal Yh2o = 0.0;
-  DualReal Yco2 = 0.0;
+  ADReal Xco2 = 0.0;
+  ADReal Yh2o = 0.0;
+  ADReal Yco2 = 0.0;
 
   // If the amount of CO2 is less than the smallest solubility, then all CO2 will
   // be dissolved, and the equilibrium mass fractions do not need to be computed
-  if (Z < _Zmin)
+  if (Z.value() < _Zmin)
     phase_state = FluidStatePhaseEnum::LIQUID;
 
   else
@@ -190,7 +201,7 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
   // The equilibrium mass fractions calculated above are only correct in the two phase
   // state. If only liquid or gas phases are present, the mass fractions are given by
   // the total mass fraction z
-  DualReal Xh2o = 0.0;
+  ADReal Xh2o = 0.0;
 
   switch (phase_state)
   {
@@ -200,13 +211,6 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
       Yco2 = 0.0;
       Xh2o = 1.0 - Z;
       Yh2o = 0.0;
-      Moose::derivInsert(Xco2.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Xco2.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Xco2.derivatives(), _Xidx, 0.0);
-      Moose::derivInsert(Xco2.derivatives(), _Zidx, 1.0);
-      Moose::derivInsert(Yco2.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _Xidx, 0.0);
       break;
     }
 
@@ -215,13 +219,6 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
       Xco2 = 0.0;
       Yco2 = Z;
       Yh2o = 1.0 - Z;
-      Moose::derivInsert(Xco2.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Xco2.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Xco2.derivatives(), _Xidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _pidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _Tidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _Xidx, 0.0);
-      Moose::derivInsert(Yco2.derivatives(), _Zidx, 1.0);
       break;
     }
 
@@ -242,18 +239,18 @@ PorousFlowBrineCO2::massFractions(const DualReal & pressure,
 }
 
 void
-PorousFlowBrineCO2::gasProperties(const DualReal & pressure,
-                                  const DualReal & temperature,
+PorousFlowBrineCO2::gasProperties(const ADReal & pressure,
+                                  const ADReal & temperature,
                                   std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Gas density, viscosity and enthalpy are approximated with pure CO2 - no correction due
   // to the small amount of water vapor is made
-  DualReal co2_density, co2_viscosity;
+  ADReal co2_density, co2_viscosity;
   _co2_fp.rho_mu_from_p_T(pressure, temperature, co2_density, co2_viscosity);
 
-  DualReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
+  ADReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
 
   // Save the values to the FluidStateProperties object. Note that derivatives wrt z are 0
   gas.density = co2_density;
@@ -265,37 +262,37 @@ PorousFlowBrineCO2::gasProperties(const DualReal & pressure,
 }
 
 void
-PorousFlowBrineCO2::liquidProperties(const DualReal & pressure,
-                                     const DualReal & temperature,
-                                     const DualReal & Xnacl,
+PorousFlowBrineCO2::liquidProperties(const ADReal & pressure,
+                                     const ADReal & temperature,
+                                     const ADReal & Xnacl,
                                      std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
 
   // The liquid density includes the density increase due to dissolved CO2
-  const DualReal brine_density = _brine_fp.rho_from_p_T_X(pressure, temperature, Xnacl);
+  const ADReal brine_density = _brine_fp.rho_from_p_T_X(pressure, temperature, Xnacl);
 
   // Mass fraction of CO2 in liquid phase
-  const DualReal Xco2 = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Xco2 = liquid.mass_fraction[_gas_fluid_component];
 
   // The liquid density
-  const DualReal co2_partial_density = partialDensityCO2(temperature);
+  const ADReal co2_partial_density = partialDensityCO2(temperature);
 
-  const DualReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
+  const ADReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
 
   // Assume that liquid viscosity is just the brine viscosity
-  const DualReal liquid_viscosity = _brine_fp.mu_from_p_T_X(pressure, temperature, Xnacl);
+  const ADReal liquid_viscosity = _brine_fp.mu_from_p_T_X(pressure, temperature, Xnacl);
 
   // Liquid enthalpy (including contribution due to the enthalpy of dissolution)
-  const DualReal brine_enthalpy = _brine_fp.h_from_p_T_X(pressure, temperature, Xnacl);
+  const ADReal brine_enthalpy = _brine_fp.h_from_p_T_X(pressure, temperature, Xnacl);
 
   // Enthalpy of CO2
-  const DualReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
+  const ADReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
 
   // Enthalpy of dissolution
-  const DualReal hdis = enthalpyOfDissolution(temperature);
+  const ADReal hdis = enthalpyOfDissolution(temperature);
 
-  const DualReal liquid_enthalpy = (1.0 - Xco2) * brine_enthalpy + Xco2 * (co2_enthalpy + hdis);
+  const ADReal liquid_enthalpy = (1.0 - Xco2) * brine_enthalpy + Xco2 * (co2_enthalpy + hdis);
 
   // Save the values to the FluidStateProperties object
   liquid.density = liquid_density;
@@ -306,11 +303,11 @@ PorousFlowBrineCO2::liquidProperties(const DualReal & pressure,
   liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
-DualReal
-PorousFlowBrineCO2::saturation(const DualReal & pressure,
-                               const DualReal & temperature,
-                               const DualReal & Xnacl,
-                               const DualReal & Z,
+ADReal
+PorousFlowBrineCO2::saturation(const ADReal & pressure,
+                               const ADReal & temperature,
+                               const ADReal & Xnacl,
+                               const ADReal & Z,
                                std::vector<FluidStateProperties> & fsp) const
 {
   auto & gas = fsp[_gas_phase_number];
@@ -323,38 +320,38 @@ PorousFlowBrineCO2::saturation(const DualReal & pressure,
   // at the cost of increased computational expense
 
   // Gas density
-  const DualReal gas_density = _co2_fp.rho_from_p_T(pressure, temperature);
+  const ADReal gas_density = _co2_fp.rho_from_p_T(pressure, temperature);
 
   // Approximate liquid density as saturation isn't known yet
-  const DualReal brine_density = _brine_fp.rho_from_p_T_X(pressure, temperature, Xnacl);
+  const ADReal brine_density = _brine_fp.rho_from_p_T_X(pressure, temperature, Xnacl);
 
   // Mass fraction of CO2 in liquid phase
-  const DualReal Xco2 = liquid.mass_fraction[_gas_fluid_component];
+  const ADReal Xco2 = liquid.mass_fraction[_gas_fluid_component];
 
   // The liquid density
-  const DualReal co2_partial_density = partialDensityCO2(temperature);
+  const ADReal co2_partial_density = partialDensityCO2(temperature);
 
-  const DualReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
+  const ADReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
 
-  const DualReal Yco2 = gas.mass_fraction[_gas_fluid_component];
+  const ADReal Yco2 = gas.mass_fraction[_gas_fluid_component];
 
   // Set mass equilibrium constants used in the calculation of vapor mass fraction
-  const DualReal K0 = Yco2 / Xco2;
-  const DualReal K1 = (1.0 - Yco2) / (1.0 - Xco2);
-  const DualReal vapor_mass_fraction = vaporMassFraction(Z, K0, K1);
+  const ADReal K0 = Yco2 / Xco2;
+  const ADReal K1 = (1.0 - Yco2) / (1.0 - Xco2);
+  const ADReal vapor_mass_fraction = vaporMassFraction(Z, K0, K1);
 
   // The gas saturation in the two phase case
-  const DualReal saturation = vapor_mass_fraction * liquid_density /
-                              (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
+  const ADReal saturation = vapor_mass_fraction * liquid_density /
+                            (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
 
   return saturation;
 }
 
 void
-PorousFlowBrineCO2::twoPhaseProperties(const DualReal & pressure,
-                                       const DualReal & temperature,
-                                       const DualReal & Xnacl,
-                                       const DualReal & Z,
+PorousFlowBrineCO2::twoPhaseProperties(const ADReal & pressure,
+                                       const ADReal & temperature,
+                                       const ADReal & Xnacl,
+                                       const ADReal & Z,
                                        unsigned int qp,
                                        std::vector<FluidStateProperties> & fsp) const
 {
@@ -367,19 +364,19 @@ PorousFlowBrineCO2::twoPhaseProperties(const DualReal & pressure,
   gas.saturation = saturation(pressure, temperature, Xnacl, Z, fsp);
 
   // The liquid pressure and properties can now be calculated
-  const DualReal liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
+  const ADReal liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
   liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 }
 
 void
-PorousFlowBrineCO2::equilibriumMassFractions(const DualReal & pressure,
-                                             const DualReal & temperature,
-                                             const DualReal & Xnacl,
-                                             DualReal & Xco2,
-                                             DualReal & Yh2o) const
+PorousFlowBrineCO2::equilibriumMassFractions(const ADReal & pressure,
+                                             const ADReal & temperature,
+                                             const ADReal & Xnacl,
+                                             ADReal & Xco2,
+                                             ADReal & Yh2o) const
 {
   // Mole fractions at equilibrium
-  DualReal xco2, yh2o;
+  ADReal xco2, yh2o;
   equilibriumMoleFractions(pressure, temperature, Xnacl, xco2, yh2o);
 
   // The mass fraction of H2O in gas (assume no salt in gas phase) and derivatives
@@ -387,21 +384,21 @@ PorousFlowBrineCO2::equilibriumMassFractions(const DualReal & pressure,
   Yh2o = yh2o * _Mh2o / (yh2o * _Mh2o + (1.0 - yh2o) * _Mco2);
 
   // NaCl molality (mol/kg)
-  const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
+  const ADReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // The molality of CO2 in 1kg of H2O
-  const DualReal mco2 = xco2 * (2.0 * mnacl + _invMh2o) / (1.0 - xco2);
+  const ADReal mco2 = xco2 * (2.0 * mnacl + _invMh2o) / (1.0 - xco2);
   // The mass fraction of CO2 in brine is then
-  const DualReal denominator = (1.0 + mnacl * _Mnacl + mco2 * _Mco2);
+  const ADReal denominator = (1.0 + mnacl * _Mnacl + mco2 * _Mco2);
   Xco2 = mco2 * _Mco2 / denominator;
 }
 
 void
-PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const DualReal & pressure,
-                                                const DualReal & temperature,
-                                                const DualReal & co2_density,
-                                                DualReal & fco2,
-                                                DualReal & fh2o) const
+PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const ADReal & pressure,
+                                                const ADReal & temperature,
+                                                const ADReal & co2_density,
+                                                ADReal & fco2,
+                                                ADReal & fh2o) const
 {
   if (temperature.value() > 373.15)
     mooseError(name(),
@@ -409,42 +406,42 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const DualReal & pressure,
                "fugacityCoefficientsHighTemp() instead");
 
   // Need pressure in bar
-  const DualReal pbar = pressure * 1.0e-5;
+  const ADReal pbar = pressure * 1.0e-5;
 
   // Molar volume in cm^3/mol
-  const DualReal V = _Mco2 / co2_density * 1.0e6;
+  const ADReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
-  const DualReal aCO2 = 7.54e7 - 4.13e4 * temperature;
+  const ADReal aCO2 = 7.54e7 - 4.13e4 * temperature;
   const Real bCO2 = 27.8;
   const Real aCO2H2O = 7.89e7;
   const Real bH2O = 18.18;
 
-  const DualReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = std::pow(temperature, 1.5);
 
   // The fugacity coefficients for H2O and CO2
-  auto lnPhi = [V, aCO2, bCO2, t15, this](DualReal a, DualReal b)
+  auto lnPhi = [V, aCO2, bCO2, t15, this](ADReal a, ADReal b)
   {
     return std::log(V / (V - bCO2)) + b / (V - bCO2) -
            2.0 * a / (_Rbar * t15 * bCO2) * std::log((V + bCO2) / V) +
            aCO2 * b / (_Rbar * t15 * bCO2 * bCO2) * (std::log((V + bCO2) / V) - bCO2 / (V + bCO2));
   };
 
-  const DualReal lnPhiH2O = lnPhi(aCO2H2O, bH2O) - std::log(pbar * V / (_Rbar * temperature));
-  const DualReal lnPhiCO2 = lnPhi(aCO2, bCO2) - std::log(pbar * V / (_Rbar * temperature));
+  const ADReal lnPhiH2O = lnPhi(aCO2H2O, bH2O) - std::log(pbar * V / (_Rbar * temperature));
+  const ADReal lnPhiCO2 = lnPhi(aCO2, bCO2) - std::log(pbar * V / (_Rbar * temperature));
 
   fh2o = std::exp(lnPhiH2O);
   fco2 = std::exp(lnPhiCO2);
 }
 
 void
-PorousFlowBrineCO2::fugacityCoefficientsHighTemp(const DualReal & pressure,
-                                                 const DualReal & temperature,
-                                                 const DualReal & co2_density,
-                                                 const DualReal & xco2,
-                                                 const DualReal & yh2o,
-                                                 DualReal & fco2,
-                                                 DualReal & fh2o) const
+PorousFlowBrineCO2::fugacityCoefficientsHighTemp(const ADReal & pressure,
+                                                 const ADReal & temperature,
+                                                 const ADReal & co2_density,
+                                                 const ADReal & xco2,
+                                                 const ADReal & yh2o,
+                                                 ADReal & fco2,
+                                                 ADReal & fh2o) const
 {
   if (temperature.value() <= 373.15)
     mooseError(name(),
@@ -455,45 +452,45 @@ PorousFlowBrineCO2::fugacityCoefficientsHighTemp(const DualReal & pressure,
   fco2 = fugacityCoefficientCO2HighTemp(pressure, temperature, co2_density, xco2, yh2o);
 }
 
-DualReal
-PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const DualReal & pressure,
-                                                   const DualReal & temperature,
-                                                   const DualReal & co2_density,
-                                                   const DualReal & xco2,
-                                                   const DualReal & yh2o) const
+ADReal
+PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const ADReal & pressure,
+                                                   const ADReal & temperature,
+                                                   const ADReal & co2_density,
+                                                   const ADReal & xco2,
+                                                   const ADReal & yh2o) const
 {
   // Need pressure in bar
-  const DualReal pbar = pressure * 1.0e-5;
+  const ADReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
-  const DualReal V = _Mco2 / co2_density * 1.0e6;
+  const ADReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
-  const DualReal yco2 = 1.0 - yh2o;
-  const DualReal xh2o = 1.0 - xco2;
+  const ADReal yco2 = 1.0 - yh2o;
+  const ADReal xh2o = 1.0 - xco2;
 
-  const DualReal aCO2 = 8.008e7 - 4.984e4 * temperature;
-  const DualReal aH2O = 1.337e8 - 1.4e4 * temperature;
+  const ADReal aCO2 = 8.008e7 - 4.984e4 * temperature;
+  const ADReal aH2O = 1.337e8 - 1.4e4 * temperature;
   const Real bCO2 = 28.25;
   const Real bH2O = 15.7;
-  const DualReal KH2OCO2 = 1.427e-2 - 4.037e-4 * temperature;
-  const DualReal KCO2H2O = 0.4228 - 7.422e-4 * temperature;
-  const DualReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
-  const DualReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
+  const ADReal KH2OCO2 = 1.427e-2 - 4.037e-4 * temperature;
+  const ADReal KCO2H2O = 0.4228 - 7.422e-4 * temperature;
+  const ADReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
+  const ADReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
 
-  const DualReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
-  const DualReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
+  const ADReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
+  const ADReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
 
-  const DualReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
-  const DualReal bmix = yh2o * bH2O + yco2 * bCO2;
+  const ADReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
+  const ADReal bmix = yh2o * bH2O + yco2 * bCO2;
 
-  const DualReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = std::pow(temperature, 1.5);
 
-  DualReal lnPhiH2O = bH2O / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
-                      std::log(pbar * (V - bmix) / (_Rbar * temperature));
-  DualReal term3 = (2.0 * yh2o * aH2O + yco2 * (aH2OCO2 + aCO2H2O) -
-                    yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
-                    xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O)) /
-                   amix;
+  ADReal lnPhiH2O = bH2O / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
+                    std::log(pbar * (V - bmix) / (_Rbar * temperature));
+  ADReal term3 = (2.0 * yh2o * aH2O + yco2 * (aH2OCO2 + aCO2H2O) -
+                  yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
+                  xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O)) /
+                 amix;
   term3 -= bH2O / bmix;
   term3 *= amix / (bmix * _Rbar * t15) * std::log(V / (V + bmix));
   lnPhiH2O += term3;
@@ -501,140 +498,138 @@ PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const DualReal & pressure,
   return std::exp(lnPhiH2O);
 }
 
-DualReal
-PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(const DualReal & pressure,
-                                                   const DualReal & temperature,
-                                                   const DualReal & co2_density,
-                                                   const DualReal & xco2,
-                                                   const DualReal & yh2o) const
+ADReal
+PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(const ADReal & pressure,
+                                                   const ADReal & temperature,
+                                                   const ADReal & co2_density,
+                                                   const ADReal & xco2,
+                                                   const ADReal & yh2o) const
 {
   // Need pressure in bar
-  const DualReal pbar = pressure * 1.0e-5;
+  const ADReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
-  const DualReal V = _Mco2 / co2_density * 1.0e6;
+  const ADReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
-  const DualReal yco2 = 1.0 - yh2o;
-  const DualReal xh2o = 1.0 - xco2;
+  const ADReal yco2 = 1.0 - yh2o;
+  const ADReal xh2o = 1.0 - xco2;
 
-  const DualReal aCO2 = 8.008e7 - 4.984e4 * temperature;
-  const DualReal aH2O = 1.337e8 - 1.4e4 * temperature;
+  const ADReal aCO2 = 8.008e7 - 4.984e4 * temperature;
+  const ADReal aH2O = 1.337e8 - 1.4e4 * temperature;
   const Real bCO2 = 28.25;
   const Real bH2O = 15.7;
-  const DualReal KH2OCO2 = 1.427e-2 - 4.037e-4 * temperature;
-  const DualReal KCO2H2O = 0.4228 - 7.422e-4 * temperature;
-  const DualReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
-  const DualReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
+  const ADReal KH2OCO2 = 1.427e-2 - 4.037e-4 * temperature;
+  const ADReal KCO2H2O = 0.4228 - 7.422e-4 * temperature;
+  const ADReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
+  const ADReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
 
-  const DualReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
-  const DualReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
+  const ADReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
+  const ADReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
 
-  const DualReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
-  const DualReal bmix = yh2o * bH2O + yco2 * bCO2;
+  const ADReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
+  const ADReal bmix = yh2o * bH2O + yco2 * bCO2;
 
-  const DualReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = std::pow(temperature, 1.5);
 
-  DualReal lnPhiCO2 = bCO2 / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
-                      std::log(pbar * (V - bmix) / (_Rbar * temperature));
+  ADReal lnPhiCO2 = bCO2 / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
+                    std::log(pbar * (V - bmix) / (_Rbar * temperature));
 
-  DualReal term3 = (2.0 * yco2 * aCO2 + yh2o * (aH2OCO2 + aCO2H2O) -
-                    yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
-                    xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kCO2H2O - kH2OCO2)) /
-                   amix;
+  ADReal term3 = (2.0 * yco2 * aCO2 + yh2o * (aH2OCO2 + aCO2H2O) -
+                  yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
+                  xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kCO2H2O - kH2OCO2)) /
+                 amix;
 
   lnPhiCO2 += (term3 - bCO2 / bmix) * amix / (bmix * _Rbar * t15) * std::log(V / (V + bmix));
 
   return std::exp(lnPhiCO2);
 }
 
-DualReal
-PorousFlowBrineCO2::activityCoefficientH2O(const DualReal & temperature,
-                                           const DualReal & xco2) const
+ADReal
+PorousFlowBrineCO2::activityCoefficientH2O(const ADReal & temperature, const ADReal & xco2) const
 {
   if (temperature.value() <= 373.15)
     return 1.0;
   else
   {
-    const DualReal Tref = temperature - 373.15;
-    const DualReal xh2o = 1.0 - xco2;
-    const DualReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
+    const ADReal Tref = temperature - 373.15;
+    const ADReal xh2o = 1.0 - xco2;
+    const ADReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
 
     return std::exp((Am - 2.0 * Am * xh2o) * xco2 * xco2);
   }
 }
 
-DualReal
-PorousFlowBrineCO2::activityCoefficientCO2(const DualReal & temperature,
-                                           const DualReal & xco2) const
+ADReal
+PorousFlowBrineCO2::activityCoefficientCO2(const ADReal & temperature, const ADReal & xco2) const
 {
   if (temperature.value() <= 373.15)
     return 1.0;
   else
   {
-    const DualReal Tref = temperature - 373.15;
-    const DualReal xh2o = 1.0 - xco2;
-    const DualReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
+    const ADReal Tref = temperature - 373.15;
+    const ADReal xh2o = 1.0 - xco2;
+    const ADReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
 
     return std::exp(2.0 * Am * xco2 * xh2o * xh2o);
   }
 }
 
-DualReal
-PorousFlowBrineCO2::activityCoefficient(const DualReal & pressure,
-                                        const DualReal & temperature,
-                                        const DualReal & Xnacl) const
+ADReal
+PorousFlowBrineCO2::activityCoefficient(const ADReal & pressure,
+                                        const ADReal & temperature,
+                                        const ADReal & Xnacl) const
 {
   // Need pressure in bar
-  const DualReal pbar = pressure * 1.0e-5;
+  const ADReal pbar = pressure * 1.0e-5;
   // Need NaCl molality (mol/kg)
-  const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
+  const ADReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
-  const DualReal lambda = -0.411370585 + 6.07632013e-4 * temperature + 97.5347708 / temperature -
-                          0.0237622469 * pbar / temperature +
-                          0.0170656236 * pbar / (630.0 - temperature) +
-                          1.41335834e-5 * temperature * std::log(pbar);
+  const ADReal lambda = -0.411370585 + 6.07632013e-4 * temperature + 97.5347708 / temperature -
+                        0.0237622469 * pbar / temperature +
+                        0.0170656236 * pbar / (630.0 - temperature) +
+                        1.41335834e-5 * temperature * std::log(pbar);
 
-  const DualReal xi = 3.36389723e-4 - 1.9829898e-5 * temperature +
-                      2.12220830e-3 * pbar / temperature -
-                      5.24873303e-3 * pbar / (630.0 - temperature);
+  const ADReal xi = 3.36389723e-4 - 1.9829898e-5 * temperature +
+                    2.12220830e-3 * pbar / temperature -
+                    5.24873303e-3 * pbar / (630.0 - temperature);
 
   return std::exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
 }
 
-DualReal
-PorousFlowBrineCO2::activityCoefficientHighTemp(const DualReal & temperature,
-                                                const DualReal & Xnacl) const
+ADReal
+PorousFlowBrineCO2::activityCoefficientHighTemp(const ADReal & temperature,
+                                                const ADReal & Xnacl) const
 {
   // Need NaCl molality (mol/kg)
-  const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
+  const ADReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
-  const DualReal T2 = temperature * temperature;
-  const DualReal T3 = temperature * T2;
+  const ADReal T2 = temperature * temperature;
+  const ADReal T3 = temperature * T2;
 
-  const DualReal lambda = 2.217e-4 * temperature + 1.074 / temperature + 2648.0 / T2;
-  const DualReal xi = 1.3e-5 * temperature - 20.12 / temperature + 5259.0 / T2;
+  const ADReal lambda = 2.217e-4 * temperature + 1.074 / temperature + 2648.0 / T2;
+  const ADReal xi = 1.3e-5 * temperature - 20.12 / temperature + 5259.0 / T2;
 
   return (1.0 - mnacl / _invMh2o) * std::exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
 }
 
-DualReal
-PorousFlowBrineCO2::equilibriumConstantH2O(const DualReal & temperature) const
+ADReal
+PorousFlowBrineCO2::equilibriumConstantH2O(const ADReal & temperature) const
 {
   // Uses temperature in Celsius
-  const DualReal Tc = temperature - _T_c2k;
-  const DualReal Tc2 = Tc * Tc;
-  const DualReal Tc3 = Tc2 * Tc;
-  const DualReal Tc4 = Tc3 * Tc;
+  const ADReal Tc = temperature - _T_c2k;
+  const ADReal Tc2 = Tc * Tc;
+  const ADReal Tc3 = Tc2 * Tc;
+  const ADReal Tc4 = Tc3 * Tc;
 
-  DualReal logK0H2O;
+  ADReal logK0H2O;
 
   if (Tc <= 99.0)
     logK0H2O = -2.209 + 3.097e-2 * Tc - 1.098e-4 * Tc2 + 2.048e-7 * Tc3;
 
   else if (Tc > 99.0 && Tc < 109.0)
   {
-    const DualReal Tint = (Tc - 99.0) / 10.0;
-    const DualReal Tint2 = Tint * Tint;
+    const ADReal Tint = (Tc - 99.0) / 10.0;
+    const ADReal Tint2 = Tint * Tint;
     logK0H2O = -0.0204026 + 0.0152513 * Tint + 0.417565 * Tint2 - 0.278636 * Tint * Tint2;
   }
 
@@ -644,23 +639,23 @@ PorousFlowBrineCO2::equilibriumConstantH2O(const DualReal & temperature) const
   return std::pow(10.0, logK0H2O);
 }
 
-DualReal
-PorousFlowBrineCO2::equilibriumConstantCO2(const DualReal & temperature) const
+ADReal
+PorousFlowBrineCO2::equilibriumConstantCO2(const ADReal & temperature) const
 {
   // Uses temperature in Celsius
-  const DualReal Tc = temperature - _T_c2k;
-  const DualReal Tc2 = Tc * Tc;
-  const DualReal Tc3 = Tc2 * Tc;
+  const ADReal Tc = temperature - _T_c2k;
+  const ADReal Tc2 = Tc * Tc;
+  const ADReal Tc3 = Tc2 * Tc;
 
-  DualReal logK0CO2;
+  ADReal logK0CO2;
 
   if (Tc <= 99.0)
     logK0CO2 = 1.189 + 1.304e-2 * Tc - 5.446e-5 * Tc2;
 
   else if (Tc > 99.0 && Tc < 109.0)
   {
-    const DualReal Tint = (Tc - 99.0) / 10.0;
-    const DualReal Tint2 = Tint * Tint;
+    const ADReal Tint = (Tc - 99.0) / 10.0;
+    const ADReal Tint2 = Tint * Tint;
     logK0CO2 = 1.9462 + 2.25692e-2 * Tint - 9.49577e-3 * Tint2 - 6.77721e-3 * Tint * Tint2;
   }
 
@@ -671,11 +666,11 @@ PorousFlowBrineCO2::equilibriumConstantCO2(const DualReal & temperature) const
 }
 
 void
-PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
-                                             const DualReal & temperature,
-                                             const DualReal & Xnacl,
-                                             DualReal & xco2,
-                                             DualReal & yh2o) const
+PorousFlowBrineCO2::equilibriumMoleFractions(const ADReal & pressure,
+                                             const ADReal & temperature,
+                                             const ADReal & Xnacl,
+                                             ADReal & xco2,
+                                             ADReal & yh2o) const
 {
   if (temperature.value() <= _Tlower)
   {
@@ -687,10 +682,10 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
     const Real Tint = (temperature.value() - _Tlower) / 10.0;
 
     // Equilibrium mole fractions and derivatives at the lower temperature
-    DualReal Tlower = _Tlower;
+    ADReal Tlower = _Tlower;
     Moose::derivInsert(Tlower.derivatives(), _Tidx, 1.0);
 
-    DualReal xco2_lower, yh2o_lower;
+    ADReal xco2_lower, yh2o_lower;
     equilibriumMoleFractionsLowTemp(pressure, Tlower, Xnacl, xco2_lower, yh2o_lower);
 
     const Real dxco2_dT_lower = xco2_lower.derivatives()[_Tidx];
@@ -789,11 +784,11 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
 }
 
 void
-PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(const DualReal & pressure,
-                                                    const DualReal & temperature,
-                                                    const DualReal & Xnacl,
-                                                    DualReal & xco2,
-                                                    DualReal & yh2o) const
+PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(const ADReal & pressure,
+                                                    const ADReal & temperature,
+                                                    const ADReal & Xnacl,
+                                                    ADReal & xco2,
+                                                    ADReal & yh2o) const
 {
   if (temperature.value() > 373.15)
     mooseError(name(),
@@ -801,62 +796,62 @@ PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(const DualReal & pressure,
                "equilibriumMoleFractions() instead");
 
   // CO2 density and derivatives wrt pressure and temperature
-  const DualReal co2_density = _co2_fp.rho_from_p_T(pressure, temperature);
+  const ADReal co2_density = _co2_fp.rho_from_p_T(pressure, temperature);
 
   // Assume infinite dilution (yh20 = 0 and xco2 = 0) in low temperature regime
-  DualReal A, B;
+  ADReal A, B;
   funcABLowTemp(pressure, temperature, co2_density, A, B);
 
   // As the activity coefficient for CO2 in brine used in this regime isn't a 'true'
   // activity coefficient, we instead calculate the molality of CO2 in water, then
   // correct it for brine, and then calculate the mole fractions.
   // The mole fraction in pure water is
-  const DualReal yh2ow = (1.0 - B) / (1.0 / A - B);
-  const DualReal xco2w = B * (1.0 - yh2ow);
+  const ADReal yh2ow = (1.0 - B) / (1.0 / A - B);
+  const ADReal xco2w = B * (1.0 - yh2ow);
 
   // Molality of CO2 in pure water
-  const DualReal mco2w = xco2w * _invMh2o / (1.0 - xco2w);
+  const ADReal mco2w = xco2w * _invMh2o / (1.0 - xco2w);
   // Molality of CO2 in brine is then calculated using gamma
-  const DualReal gamma = activityCoefficient(pressure, temperature, Xnacl);
-  const DualReal mco2 = mco2w / gamma;
+  const ADReal gamma = activityCoefficient(pressure, temperature, Xnacl);
+  const ADReal mco2 = mco2w / gamma;
 
   // Need NaCl molality (mol/kg)
-  const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
+  const ADReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // Mole fractions of CO2 and H2O in liquid and gas phases
-  const DualReal total_moles = 2.0 * mnacl + _invMh2o + mco2;
+  const ADReal total_moles = 2.0 * mnacl + _invMh2o + mco2;
   xco2 = mco2 / total_moles;
   yh2o = A * (1.0 - xco2 - 2.0 * mnacl / total_moles);
 }
 
 void
-PorousFlowBrineCO2::funcABLowTemp(const DualReal & pressure,
-                                  const DualReal & temperature,
-                                  const DualReal & co2_density,
-                                  DualReal & A,
-                                  DualReal & B) const
+PorousFlowBrineCO2::funcABLowTemp(const ADReal & pressure,
+                                  const ADReal & temperature,
+                                  const ADReal & co2_density,
+                                  ADReal & A,
+                                  ADReal & B) const
 {
   if (temperature.value() > 373.15)
     mooseError(name(),
                ": funcABLowTemp() is not valid for T > 373.15K. Use funcABHighTemp() instead");
 
   // Pressure in bar
-  const DualReal pbar = pressure * 1.0e-5;
+  const ADReal pbar = pressure * 1.0e-5;
 
   // Reference pressure and partial molar volumes
   const Real pref = 1.0;
   const Real vCO2 = 32.6;
   const Real vH2O = 18.1;
 
-  const DualReal delta_pbar = pbar - pref;
-  const DualReal Rt = _Rbar * temperature;
+  const ADReal delta_pbar = pbar - pref;
+  const ADReal Rt = _Rbar * temperature;
 
   // Equilibrium constants
-  const DualReal K0H2O = equilibriumConstantH2O(temperature);
-  const DualReal K0CO2 = equilibriumConstantCO2(temperature);
+  const ADReal K0H2O = equilibriumConstantH2O(temperature);
+  const ADReal K0CO2 = equilibriumConstantCO2(temperature);
 
   // Fugacity coefficients
-  DualReal phiH2O, phiCO2;
+  ADReal phiH2O, phiCO2;
   fugacityCoefficientsLowTemp(pressure, temperature, co2_density, phiCO2, phiH2O);
 
   A = K0H2O / (phiH2O * pbar) * std::exp(delta_pbar * vH2O / Rt);
@@ -892,19 +887,19 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
   const Real Rt = _Rbar * temperature;
 
   // Equilibrium constants
-  // Use dummy DualReal temperature as derivatives aren't required
-  const DualReal T = temperature;
+  // Use dummy ADReal temperature as derivatives aren't required
+  const ADReal T = temperature;
   Real K0H2O = equilibriumConstantH2O(T).value();
   Real K0CO2 = equilibriumConstantCO2(T).value();
 
   // Fugacity coefficients
-  // Use dummy DualReal variables as derivatives aren't required
-  const DualReal p = pressure;
-  const DualReal rhoco2 = co2_density;
-  const DualReal x = xco2;
-  const DualReal y = yh2o;
+  // Use dummy ADReal variables as derivatives aren't required
+  const ADReal p = pressure;
+  const ADReal rhoco2 = co2_density;
+  const ADReal x = xco2;
+  const ADReal y = yh2o;
 
-  DualReal phiH2O, phiCO2;
+  ADReal phiH2O, phiCO2;
   fugacityCoefficientsHighTemp(p, T, rhoco2, x, y, phiCO2, phiH2O);
 
   // Activity coefficients
@@ -912,8 +907,8 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
   const Real gammaCO2 = activityCoefficientCO2(T, x).value();
 
   // Activity coefficient for CO2 in brine
-  // Use dummy DualReal Xnacl as derivatives aren't required
-  const DualReal X = Xnacl;
+  // Use dummy ADReal Xnacl as derivatives aren't required
+  const ADReal X = Xnacl;
   const Real gamma = activityCoefficientHighTemp(T, X).value();
 
   A = K0H2O * gammaH2O / (phiH2O.value() * pbar) * std::exp(delta_pbar * vH2O / Rt);
@@ -1023,13 +1018,13 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
   xco2 = x;
 }
 
-DualReal
-PorousFlowBrineCO2::partialDensityCO2(const DualReal & temperature) const
+ADReal
+PorousFlowBrineCO2::partialDensityCO2(const ADReal & temperature) const
 {
   // This correlation uses temperature in C
-  const DualReal Tc = temperature - _T_c2k;
+  const ADReal Tc = temperature - _T_c2k;
   // The parial molar volume
-  const DualReal V = 37.51 - 9.585e-2 * Tc + 8.74e-4 * Tc * Tc - 5.044e-7 * Tc * Tc * Tc;
+  const ADReal V = 37.51 - 9.585e-2 * Tc + 8.74e-4 * Tc * Tc - 5.044e-7 * Tc * Tc * Tc;
 
   return 1.0e6 * _Mco2 / V;
 }
@@ -1042,9 +1037,9 @@ PorousFlowBrineCO2::totalMassFraction(
   checkVariables(pressure, temperature);
 
   // As we do not require derivatives, we can simply ignore their initialisation
-  const DualReal p = pressure;
-  const DualReal T = temperature;
-  const DualReal X = Xnacl;
+  const ADReal p = pressure;
+  const ADReal T = temperature;
+  const ADReal X = Xnacl;
 
   // FluidStateProperties data structure
   std::vector<FluidStateProperties> fsp(_num_phases, FluidStateProperties(_num_components));
@@ -1052,11 +1047,11 @@ PorousFlowBrineCO2::totalMassFraction(
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Calculate equilibrium mass fractions in the two-phase state
-  DualReal Xco2, Yh2o;
+  ADReal Xco2, Yh2o;
   equilibriumMassFractions(p, T, X, Xco2, Yh2o);
 
   // Save the mass fractions in the FluidStateMassFractions object
-  const DualReal Yco2 = 1.0 - Yh2o;
+  const ADReal Yco2 = 1.0 - Yh2o;
   liquid.mass_fraction[_aqueous_fluid_component] = 1.0 - Xco2;
   liquid.mass_fraction[_gas_fluid_component] = Xco2;
   gas.mass_fraction[_aqueous_fluid_component] = Yh2o;
@@ -1066,61 +1061,60 @@ PorousFlowBrineCO2::totalMassFraction(
   gasProperties(pressure, temperature, fsp);
 
   // Liquid properties
-  const DualReal liquid_saturation = 1.0 - saturation;
-  const DualReal liquid_pressure = p - _pc.capillaryPressure(liquid_saturation, qp);
+  const ADReal liquid_saturation = 1.0 - saturation;
+  const ADReal liquid_pressure = p - _pc.capillaryPressure(liquid_saturation, qp);
   liquidProperties(liquid_pressure, T, X, fsp);
 
   // The total mass fraction of ncg (z) can now be calculated
-  const DualReal Z = (saturation * gas.density * Yco2 + liquid_saturation * liquid.density * Xco2) /
-                     (saturation * gas.density + liquid_saturation * liquid.density);
+  const ADReal Z = (saturation * gas.density * Yco2 + liquid_saturation * liquid.density * Xco2) /
+                   (saturation * gas.density + liquid_saturation * liquid.density);
 
   return Z.value();
 }
 
-DualReal
-PorousFlowBrineCO2::henryConstant(const DualReal & temperature, const DualReal & Xnacl) const
+ADReal
+PorousFlowBrineCO2::henryConstant(const ADReal & temperature, const ADReal & Xnacl) const
 {
   // Henry's constant for dissolution in water
-  const DualReal Kh_h2o = _brine_fp.henryConstant(temperature, _co2_henry);
+  const ADReal Kh_h2o = _brine_fp.henryConstant(temperature, _co2_henry);
 
   // The correction to salt is obtained through the salting out coefficient
   const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};
 
   // Need temperature in Celsius
-  const DualReal Tc = temperature - _T_c2k;
+  const ADReal Tc = temperature - _T_c2k;
 
-  DualReal kb = 0.0;
+  ADReal kb = 0.0;
   for (unsigned int i = 0; i < b.size(); ++i)
     kb += b[i] * std::pow(Tc, i);
 
   // Need salt mass fraction in molality
-  const DualReal xmol = Xnacl / (1.0 - Xnacl) / _Mnacl;
+  const ADReal xmol = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // Henry's constant and its derivative wrt temperature and salt mass fraction
   return Kh_h2o * std::pow(10.0, xmol * kb);
 }
 
-DualReal
-PorousFlowBrineCO2::enthalpyOfDissolutionGas(const DualReal & temperature,
-                                             const DualReal & Xnacl) const
+ADReal
+PorousFlowBrineCO2::enthalpyOfDissolutionGas(const ADReal & temperature, const ADReal & Xnacl) const
 {
   // Henry's constant
-  const DualReal Kh = henryConstant(temperature, Xnacl);
+  const ADReal Kh = henryConstant(temperature, Xnacl);
 
-  DualReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mco2;
+  ADReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mco2;
 
   // Derivative of enthalpy of dissolution wrt temperature and xnacl requires the second
   // derivatives of Henry's constant. For simplicity, approximate these numerically
   const Real dT = temperature.value() * 1.0e-8;
-  const DualReal T2 = temperature + dT;
-  const DualReal Kh2 = henryConstant(T2, Xnacl);
+  const ADReal T2 = temperature + dT;
+  const ADReal Kh2 = henryConstant(T2, Xnacl);
 
   const Real dhdis_dT =
       (-_R * T2 * T2 * Kh2.derivatives()[_Tidx] / Kh2 / _Mco2 - hdis).value() / dT;
 
   const Real dX = Xnacl.value() * 1.0e-8;
-  const DualReal X2 = Xnacl + dX;
-  const DualReal Kh3 = henryConstant(temperature, X2);
+  const ADReal X2 = Xnacl + dX;
+  const ADReal Kh3 = henryConstant(temperature, X2);
 
   const Real dhdis_dX =
       (-_R * temperature * temperature * Kh3.derivatives()[_Tidx] / Kh3 / _Mco2 - hdis).value() /
@@ -1131,11 +1125,11 @@ PorousFlowBrineCO2::enthalpyOfDissolutionGas(const DualReal & temperature,
   return hdis;
 }
 
-DualReal
-PorousFlowBrineCO2::enthalpyOfDissolution(const DualReal & temperature) const
+ADReal
+PorousFlowBrineCO2::enthalpyOfDissolution(const ADReal & temperature) const
 {
   // Linear fit to model of Duan and Sun (2003) (in kJ/mol)
-  const DualReal delta_h = -58.3533 + 0.134519 * temperature;
+  const ADReal delta_h = -58.3533 + 0.134519 * temperature;
 
   // Convert to J/kg
   return delta_h * 1000.0 / _Mco2;

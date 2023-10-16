@@ -44,7 +44,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 }
 
 ADReal
-INSFVMomentumDiffusion::computeStrongResidual()
+INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
   const auto state = determineState();
   const auto dudn = gradUDotNormal(state);
@@ -60,21 +60,24 @@ INSFVMomentumDiffusion::computeStrongResidual()
                            *_face_info,
                            true);
 
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (populate_a_coeffs)
   {
-    const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
-    // A gradient is a linear combination of degrees of freedom so it's safe to straight-up index
-    // into the derivatives vector at the dof we care about
-    _ae = dudn.derivatives()[dof_number];
-    _ae *= -face_mu;
-  }
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
-    _an = dudn.derivatives()[dof_number];
-    _an *= face_mu;
+    if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+        _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    {
+      const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
+      // A gradient is a linear combination of degrees of freedom so it's safe to straight-up index
+      // into the derivatives vector at the dof we care about
+      _ae = dudn.derivatives()[dof_number];
+      _ae *= -face_mu;
+    }
+    if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+        _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    {
+      const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
+      _an = dudn.derivatives()[dof_number];
+      _an *= face_mu;
+    }
   }
 
   return -face_mu * dudn;
@@ -90,7 +93,7 @@ INSFVMomentumDiffusion::gatherRCData(const FaceInfo & fi)
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
 
-  addResidualAndJacobian(computeStrongResidual() * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(computeStrongResidual(true) * (fi.faceArea() * fi.faceCoord()));
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
@@ -98,4 +101,10 @@ INSFVMomentumDiffusion::gatherRCData(const FaceInfo & fi)
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     _rc_uo.addToA(fi.neighborPtr(), _index, _an * (fi.faceArea() * fi.faceCoord()));
+}
+
+ADReal
+INSFVMomentumDiffusion::computeSegregatedContribution()
+{
+  return computeStrongResidual(false);
 }

@@ -39,7 +39,9 @@ public:
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
    */
-  CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
+  CellCenteredMapFunctor(const MooseMesh & mesh,
+                         const std::string & name,
+                         const bool extrapolated_boundary);
 
   /**
    * Use this constructor if you want to potentially restrict this object to a specified set of
@@ -47,7 +49,8 @@ public:
    */
   CellCenteredMapFunctor(const MooseMesh & mesh,
                          const std::set<SubdomainID> & sub_ids,
-                         const std::string & name);
+                         const std::string & name,
+                         const bool extrapolated_boundary);
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
@@ -73,6 +76,8 @@ private:
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
 
+  const bool _extrapolated_boundary;
+
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;
   GradientType evaluateGradient(const FaceArg & face, const StateArg & state) const override;
@@ -80,18 +85,21 @@ private:
 
 template <typename T, typename Map>
 CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
-                                                       const std::string & name)
-  : Moose::FunctorBase<T>(name), _mesh(mesh)
+                                                       const std::string & name,
+                                                       const bool extrapolated_boundary)
+  : Moose::FunctorBase<T>(name), _mesh(mesh), _extrapolated_boundary(extrapolated_boundary)
 {
 }
 
 template <typename T, typename Map>
 CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
                                                        const std::set<SubdomainID> & sub_ids,
-                                                       const std::string & name)
+                                                       const std::string & name,
+                                                       const bool extrapolated_boundary)
   : Moose::FunctorBase<T>(name),
     _mesh(mesh),
-    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
+    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids),
+    _extrapolated_boundary(extrapolated_boundary)
 {
 }
 
@@ -181,6 +189,8 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, const StateArg & 
   {
     const auto elem_arg = face.makeElem();
     const auto elem_value = (*this)(elem_arg, state);
+    if (!_extrapolated_boundary)
+      return elem_value;
     // Two term expansion
     return elem_value + this->gradient(elem_arg, state) * (fi.faceCentroid() - fi.elemCentroid());
   }
@@ -189,6 +199,9 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, const StateArg & 
     mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
     const auto neighbor_arg = face.makeNeighbor();
     const auto neighbor_value = (*this)(neighbor_arg, state);
+    if (!_extrapolated_boundary)
+      return neighbor_value;
+
     // Two term expansion
     return neighbor_value +
            this->gradient(neighbor_arg, state) * (fi.faceCentroid() - fi.neighborCentroid());
@@ -214,12 +227,12 @@ typename CellCenteredMapFunctor<T, Map>::GradientType
 CellCenteredMapFunctor<T, Map>::evaluateGradient(const ElemArg & elem_arg,
                                                  const StateArg & state) const
 {
-  return Moose::FV::greenGaussGradient(elem_arg, state, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(elem_arg, state, *this, _extrapolated_boundary, _mesh);
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::GradientType
 CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, const StateArg & state) const
 {
-  return Moose::FV::greenGaussGradient(face, state, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(face, state, *this, _extrapolated_boundary, _mesh);
 }

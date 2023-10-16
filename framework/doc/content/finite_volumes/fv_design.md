@@ -9,7 +9,7 @@ within each mesh element/cell. Because of this, much of MOOSE's use of libMesh
 for FE is not relevant for FV.  This document gives an overview of how FV is
 similar and different from FE with respect to implementation in MOOSE and
 explains why FV is designed and implemented in its current form.  In order to
-fully enable taking advantage of perfomance opportunities and to simplify the
+fully enable taking advantage of performance opportunities and to simplify the
 FV method implementation in MOOSE, a new set of FV-specific systems was built
 along-side the MOOSE FE infrastructure.  As a new set of systems being created
 after MOOSE has received powerful automatic differentiation (AD) support, the
@@ -35,7 +35,7 @@ have shared their entire interface/API with FE variables - which would be a
 poor choice because of so many non-overlapping API needs between the two (e.g.
 no shape and test function related functions are needed for FV variables).  So
 a new field-variable intermediate class was introduced to the variable class
-heirarchy to facilitate appropriately separate APIs while allowing common
+hierarchy to facilitate appropriately separate APIs while allowing common
 operations to be performed on all field variables.
 
 ## FV Kernels
@@ -108,7 +108,7 @@ Similar reasoning to decisions about the FV kernel system motivated the
 creation of a separate FV boundary condition system as well.  While FV
 flux/integrated boundary conditions are somewhat similar to FE integrated BCs,
 they still lack test/weight functions.  FV Dirichlet BCs, however must be
-implemented completedly differently than in FE and strongly motivate the
+implemented completely differently than in FE and strongly motivate the
 creation of a separate FV BC system.
 
 Dirichlet boundary conditions (BCs) in an FV method cannot be created by
@@ -120,7 +120,7 @@ implemented as a weak BC.  To do this, the normal flux kernel terms are
 applied at the mesh boundary faces.  Since flux kernels are calculated using
 information from cells on both sides of the face, we use the desired Dirichlet
 BC value to extrapolate a "ghost" cell value for the side of the face that has
-no actuall mesh cell.  Other necessary cell properties are also
+no actual mesh cell.  Other necessary cell properties are also
 reflected/mirrored from the existing cell.  A design was chosen that allows
 handling ghost-element creation and use by existing flux kernels automatically
 for enforcement of Dirichlet BCs.  This procedure results in the Dirichlet BC
@@ -180,7 +180,7 @@ down the assembly process due to the fact that additional face gradients need to
 
 On regular, orthogonal grids, the face gradient $\nabla \phi_f$ can be computed
 using a simple linear interpolation between neighboring cell gradients,
-e.g. between $\nabla \phi_C$ and $\nabla \phi_F$. However, on non-orthgonal
+e.g. between $\nabla \phi_C$ and $\nabla \phi_F$. However, on non-orthogonal
 grids, some correction has to be made. The correction implemented is that shown
 in section 9.4 of [!cite](moukalled2016finite):
 
@@ -206,4 +206,4 @@ gradient.
 * FV functionality does NOT work with mesh displacements yet. See
   [idaholab/moose#15064](https://github.com/idaholab/moose/issues/15064)
 
-* Have not tested vector-FV varaibles - they almost certainly don't work (yet).
+* Have not tested vector-FV variables - they almost certainly don't work (yet).

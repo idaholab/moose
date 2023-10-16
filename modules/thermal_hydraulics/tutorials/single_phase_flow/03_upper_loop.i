@@ -1,30 +1,40 @@
-T_in = 300.         # K
-m_dot_in = 1e-4     # kg/s
-press = 1e5         # Pa
+T_in = 300. # K
+m_dot_in = 1e-2 # kg/s
+press = 10e5 # Pa
 
 # core parameters
-core_length = 1.    # m
-core_n_elems = 10
-core_dia = ${units 2. cm -> m}
-core_pitch = ${units 8.7 cm -> m}
+core_length = 1. # m
+core_n_elems = 25
+core_dia = '${units 2. cm -> m}'
+core_pitch = '${units 8.7 cm -> m}'
+A_core = '${fparse core_pitch^2 - 0.25 *pi * core_dia^2}'
+P_wet_core = '${fparse 4*core_pitch + pi * core_dia}'
+Dh_core = '${fparse 4 * A_core / P_wet_core}'
 
 # pipe parameters
-pipe_dia = ${units 10. cm -> m}
+pipe_dia = '${units 10. cm -> m}'
+A_pipe = '${fparse 0.25 * pi * pipe_dia^2}'
 
-tot_power = 100     # W
+tot_power = 2000 # W
 
 [GlobalParams]
   initial_p = ${press}
-  initial_vel = 1
+  initial_vel = 0.0001
   initial_T = ${T_in}
-  initial_vel_x = 1
+  initial_vel_x = 0
   initial_vel_y = 0
   initial_vel_z = 0
+  gravity_vector = '0 0 0'
 
-  rdg_slope_reconstruction = full
-  closures = simple_closures
+  rdg_slope_reconstruction = minmod
+  scaling_factor_1phase = '1 1e-2 1e-4'
+  scaling_factor_rhoV = 1
+  scaling_factor_rhouV = 1e-2
+  scaling_factor_rhovV = 1e-2
+  scaling_factor_rhowV = 1e-2
+  scaling_factor_rhoEV = 1e-4
+  closures = thm_closures
   fp = he
-  f = 0.4
 []
 
 [FluidProperties]
@@ -38,8 +48,8 @@ tot_power = 100     # W
 []
 
 [Closures]
-  [simple_closures]
-    type = Closures1PhaseSimple
+  [thm_closures]
+    type = Closures1PhaseTHM
   []
 []
 
@@ -57,32 +67,46 @@ tot_power = 100     # W
     type = TotalPower
     power = ${tot_power}
   []
-
   [inlet]
     type = InletMassFlowRateTemperature1Phase
-    input = 'core_chan:in'
+    input = 'up_pipe_1:in'
     m_dot = ${m_dot_in}
     T = ${T_in}
   []
 
-  [core_chan]
+  [up_pipe_1]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
+    length = 0.5
+    n_elems = 15
+    A = ${A_pipe}
+    D_h = ${pipe_dia}
+  []
+
+  [jct1]
+    type = JunctionParallelChannels1Phase
+    position = '0 0 0.5'
+    connections = 'up_pipe_1:out core_chan:in'
+    volume = 1e-5
+  []
+  [core_chan]
+    type = FlowChannel1Phase
+    position = '0 0 0.5'
+    orientation = '0 0 1'
     length = ${core_length}
     n_elems = ${core_n_elems}
-    A = ${fparse core_pitch * core_pitch - pi * core_dia * core_dia / 4.}
-    D_h = ${core_dia}
-    f = 1.6
+    roughness = .0001
+    A = '${A_core}'
+    D_h = ${Dh_core}
   []
 
   [core_hs]
     type = HeatStructureCylindrical
-    position = '0 0 0'
+    position = '0 0 0.5'
     orientation = '0 0 1'
     length = ${core_length}
     n_elems = ${core_n_elems}
-
     names = 'block'
     widths = '${fparse core_dia / 2.}'
     materials = 'steel'
@@ -101,32 +125,29 @@ tot_power = 100     # W
     flow_channel = core_chan
     hs = core_hs
     hs_side = outer
-    P_hf = ${fparse pi * core_dia}
-    Hw = 1.36
-  []
-
-  [jct1]
-    type = JunctionParallelChannels1Phase
-    position = '0 0 1'
-    connections = 'core_chan:out up_pipe:in'
-    volume = 1e-3
-  []
-
-  [up_pipe]
-    type = FlowChannel1Phase
-    position = '0 0 1'
-    orientation = '0 0 1'
-    length = 1
-    n_elems = 10
-    A = ${fparse pi * pipe_dia * pipe_dia / 4.}
-    D_h = ${pipe_dia}
+    P_hf = '${fparse pi * core_dia}'
   []
 
   [jct2]
-    type = VolumeJunction1Phase
-    position = '0 0 2'
-    connections = 'up_pipe:out top_pipe:in'
-    volume = 1e-3
+    type = JunctionParallelChannels1Phase
+    position = '0 0 1.5'
+    connections = 'core_chan:out up_pipe_2:in'
+    volume = 1e-5
+  []
+
+  [up_pipe_2]
+    type = FlowChannel1Phase
+    position = '0 0 1.5'
+    orientation = '0 0 1'
+    length = 0.5
+    n_elems = 10
+    A = ${A_pipe}
+    D_h = ${pipe_dia}
+  []
+
+  [jct3]
+    type = JunctionOneToOne1Phase
+    connections = 'up_pipe_2:out top_pipe:in'
   []
 
   [top_pipe]
@@ -135,63 +156,96 @@ tot_power = 100     # W
     orientation = '1 0 0'
     length = 1
     n_elems = 10
-    A = ${fparse pi * pipe_dia * pipe_dia / 4.}
+    A = ${A_pipe}
     D_h = ${pipe_dia}
   []
 
-  [jct3]
-    type = VolumeJunction1Phase
+  [jct4]
+    type = JunctionOneToOne1Phase
+    connections = 'top_pipe:out down_pipe_1:in'
+  []
+
+  [down_pipe_1]
+    type = FlowChannel1Phase
     position = '1 0 2'
-    connections = 'top_pipe:out cooling_pipe:in'
-    volume = 1e-3
+    orientation = '0 0 -1'
+    length = 0.25
+    A = ${A_pipe}
+    n_elems = 5
+  []
+
+  [jct5]
+    type = JunctionOneToOne1Phase
+    connections = 'down_pipe_1:out cooling_pipe:in'
   []
 
   [cooling_pipe]
     type = FlowChannel1Phase
-    position = '1 0 2'
+    position = '1 0 1.75'
     orientation = '0 0 -1'
-    length = 1
-    n_elems = 10
-    A = ${fparse pi * pipe_dia * pipe_dia / 4.}
-    D_h = ${pipe_dia}
+    length = 1.5
+    n_elems = 25
+    A = ${A_pipe}
   []
 
   [cold_wall]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = cooling_pipe
     T_wall = 300
-    Hw = 0.97
+    P_hf = '${fparse pi * pipe_dia}'
   []
 
-  [jct4]
-    type = VolumeJunction1Phase
-    position = '1 0 1'
-    connections = 'cooling_pipe:out down_pipe:in'
-    volume = 1e-3
+  [jct6]
+    type = JunctionOneToOne1Phase
+    connections = 'cooling_pipe:out down_pipe_2:in'
   []
 
-  [down_pipe]
+  [down_pipe_2]
     type = FlowChannel1Phase
-    position = '1 0 1'
+    position = '1 0 0.25'
     orientation = '0 0 -1'
-    length = 1
+    length = 0.25
     n_elems = 10
-    A = ${fparse pi * pipe_dia * pipe_dia / 4.}
+    A = ${A_pipe}
     D_h = ${pipe_dia}
   []
 
   [outlet]
     type = Outlet1Phase
-    input = 'down_pipe:out'
+    input = 'down_pipe_2:out'
     p = ${press}
   []
 []
 
 [Postprocessors]
+  [power_to_coolant]
+    type = ADHeatRateConvection1Phase
+    block = core_chan
+    P_hf = '${fparse pi *core_dia}'
+  []
+
   [core_T_out]
     type = SideAverageValue
     boundary = core_chan:out
     variable = T
+  []
+
+  [core_p_in]
+    type = SideAverageValue
+    boundary = core_chan:in
+    variable = p
+  []
+
+  [core_p_out]
+    type = SideAverageValue
+    boundary = core_chan:out
+    variable = p
+  []
+
+  [core_delta_p]
+    type = ParsedPostprocessor
+    pp_names = 'core_p_in core_p_out'
+    function = 'core_p_in - core_p_out'
   []
 
   [hx_pri_T_out]
@@ -201,18 +255,33 @@ tot_power = 100     # W
   []
 []
 
+[Preconditioning]
+  [pc]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Transient
   start_time = 0
-  end_time = 1000
-  dt = 10
+
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 1
+  []
+  end_time = 500
 
   line_search = basic
   solve_type = NEWTON
 
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-5
-  nl_max_its = 5
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  nl_max_its = 25
+
 []
 
 [Outputs]

@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#9755 #20125'
+  design = 'Parser.md'
+
+  [include]
+    type = Exodiff
+    input = include.i
+    exodiff = include_out.e
+
+    requirement = 'The system shall support including other input files in an input file'
+  []
+[]

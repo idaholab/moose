@@ -2,13 +2,13 @@
 
 ## Description
 
-The `AnisotropicDiffusion` kernel implements anistropic diffusion term on a domain ($\Omega$) given in its strong form as
+The `AnisotropicDiffusion` kernel implements anisotropic diffusion term on a domain ($\Omega$) given in its strong form as
 
 \begin{equation}
 \nabla\cdot -\widetilde{k} \nabla u = 0 \in \Omega,
 \end{equation}
 where $\widetilde{k}$ is the anisotropic
-diffusion coefficient. Diffusion is anistropic if the diffusion rate varies with
+diffusion coefficient. Diffusion is anisotropic if the diffusion rate varies with
 direction. The corresponding weak form, using inner-product notation, is given by
 
 \begin{equation}
@@ -31,12 +31,12 @@ For a constant diffusion coefficient, the Jacobian is given by
 
 The `AnisotropicDiffusion` kernel may be used in a variety of physical models, including steady-state
 and time-dependent diffusion, advection-diffusion-reaction, etc. A kernel block demonstrating the
-`AnistropicDiffusion` syntax in a steady-state anistropic diffusion problem can be found below:
+`AnistropicDiffusion` syntax in a steady-state anisotropic diffusion problem can be found below:
 
 !listing test/tests/kernels/anisotropic_diffusion/aniso_diffusion.i block=Kernels
 
 !alert note
-The anistropic diffusion coefficient $\widetilde{k}$ is a three-dimensional tensor supplied through a
+The anisotropic diffusion coefficient $\widetilde{k}$ is a three-dimensional tensor supplied through a
 string with nine space separated real values. The entries correspond to $xx$, $xy$, $xz$, $yx$, $yy$,
 $yz$, $zx$, $zy$, and $zz$, respectively. Also, this problem is 2-dimensional so the corresponding
 $zx$, $zy$, and $zz$ terms are zero.

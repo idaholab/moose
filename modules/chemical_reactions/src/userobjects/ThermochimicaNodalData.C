@@ -188,9 +188,9 @@ ThermochimicaNodalData::execute()
         mooseError("Failed to get index of phase '", _ph_names[i], "'");
       // Convert from 1-based (fortran) to 0-based (c++) indexing
       if (index - 1 < 0)
-        _ph[i]->setNodalValue(0.0, _qp);
+        _ph[i]->setDofValue(0.0, _qp);
       else
-        _ph[i]->setNodalValue(moles_phase[index - 1], _qp);
+        _ph[i]->setDofValue(moles_phase[index - 1], _qp);
     }
 
     auto db_phases = Thermochimica::getPhaseNamesSystem();
@@ -258,9 +258,9 @@ ThermochimicaNodalData::execute()
           _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
 
       if (idbg == 0)
-        _sp[i]->setNodalValue(fraction, _qp);
+        _sp[i]->setDofValue(fraction, _qp);
       else if (idbg == 1)
-        _sp[i]->setNodalValue(0.0, _qp);
+        _sp[i]->setDofValue(0.0, _qp);
 #ifndef NDEBUG
       else
         mooseError("Failed to get phase speciation for phase '",
@@ -278,10 +278,10 @@ ThermochimicaNodalData::execute()
         auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
 
         if (idbg == 0)
-          _el_pot[i]->setNodalValue(potential, _qp);
+          _el_pot[i]->setDofValue(potential, _qp);
         else if (idbg == 1)
           // element not present, just leave this at 0 for now
-          _el_pot[i]->setNodalValue(0.0, _qp);
+          _el_pot[i]->setDofValue(0.0, _qp);
         else if (idbg == -1)
           Moose::out << "getoutputchempot " << idbg << "\n";
       }
@@ -294,9 +294,9 @@ ThermochimicaNodalData::execute()
         libmesh_ignore(moles);
 
         if (idbg == 0)
-          _vp[i]->setNodalValue(fraction * pressure, _qp);
+          _vp[i]->setDofValue(fraction * pressure, _qp);
         else if (idbg == 1)
-          _vp[i]->setNodalValue(0.0, _qp);
+          _vp[i]->setDofValue(0.0, _qp);
 #ifndef NDEBUG
         else
           mooseError("Failed to get vapor pressure for phase '",
@@ -315,9 +315,9 @@ ThermochimicaNodalData::execute()
                                                                    _phase_element_pairs[i].first);
 
         if (idbg == 0)
-          _el_ph[i]->setNodalValue(moles, _qp);
+          _el_ph[i]->setDofValue(moles, _qp);
         else if (idbg == 1)
-          _el_ph[i]->setNodalValue(0.0, _qp);
+          _el_ph[i]->setDofValue(0.0, _qp);
 #ifndef NDEBUG
         else
           mooseError("Failed to get moles of element '",
