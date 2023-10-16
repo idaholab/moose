@@ -41,8 +41,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 {
   // strip prefix from document uri if it exists to get parse file path
   std::string parse_file_path = document_path;
-  if (parse_file_path.rfind(wasp::lsp::m_uri_prefix, 0) == 0)
-    parse_file_path.erase(0, std::string(wasp::lsp::m_uri_prefix).size());
+  pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // copy parent application parameters and modify to set up input check
   InputParameters app_params = _moose_app.parameters();
