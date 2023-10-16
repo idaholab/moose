@@ -108,8 +108,6 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
 {
-  _displaced = dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem));
-
   auto process_displacement = [this](const auto & disp_name, auto & disp_container)
   {
     if (!_displaced)

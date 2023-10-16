@@ -146,6 +146,9 @@ protected:
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
 
+  /// Whether this object is operating on the displaced mesh
+  const bool _displaced;
+
 private:
   /// A unity functor used in the epsilon virtual method
   const Moose::ConstantFunctor<ADReal> _unity_functor{1};
