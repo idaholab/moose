@@ -66,4 +66,7 @@ protected:
   const MooseFunctorName _density_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
+
+  /// Whether we can check the boundary conditions
+  bool _boundary_condition_information_complete;
 };
