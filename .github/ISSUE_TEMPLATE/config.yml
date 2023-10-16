@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Questions
     url: https://github.com/idaholab/moose/discussions
-    about: Ask questions and discuss with other MOOSE community members
+    about: Ask general questions about MOOSE and discuss with other MOOSE community members.

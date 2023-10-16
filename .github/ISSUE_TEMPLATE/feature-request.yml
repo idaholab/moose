@@ -16,14 +16,14 @@ body:
     description: |
       A concise description (design) of the feature or enhancement.
   validations:
-    required: false
+    required: true
 - type: textarea
   attributes:
     label: Impact
     description: |
       Will the enhancement change existing APIs or add something new?
   validations:
-    required: false
+    required: true
 - type: markdown
   attributes:
     value: >
