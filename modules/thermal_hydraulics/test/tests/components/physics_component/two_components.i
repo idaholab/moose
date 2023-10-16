@@ -24,7 +24,11 @@ p_outlet = 0
     type = FileMeshWCNSFVComponent
     file = rectangle.e
     position = '0 0 0'
-    physics = 'flow'
+    verbose = true
+
+    add_flow_equations = true
+    add_energy_equation = false
+    add_scalar_equations = false
 
     inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
@@ -34,20 +38,38 @@ p_outlet = 0
     momentum_wall_types = 'noslip symmetry'
 
     outlet_boundaries = 'comp1:right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 'f1'
+    # momentum_outlet_types = 'fixed-pressure'
+    # pressure_function = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
 
     mass_advection_interpolation = 'upwind'
     momentum_advection_interpolation = 'upwind'
+
+    # The junction adds more boundary conditions
+    boundary_conditions_all_set = false
+  []
+  [join]
+    type = FileMeshComponentFlowJunction
+    connections = 'comp1:right:out comp2:left:in'
+    junction_technique = 'stitching'
   []
   [comp2]
     type = FileMeshWCNSFVComponent
     file = rectangle.e
-    position = '2 0 0'
-    physics = 'flow'
+    position = '10 0 0'
+    verbose = true
+
+    add_flow_equations = true
+    add_energy_equation = false
+    add_scalar_equations = false
+
+    # Rename the variables for now
+    # We may want to prefix variable names later
+    # We will have to connect all the fields
+    velocity_variable = 'u v'
+    pressure_variable = 'p'
 
     inlet_boundaries = 'comp2:left'
     momentum_inlet_types = 'fixed-velocity'
@@ -65,25 +87,28 @@ p_outlet = 0
 
     mass_advection_interpolation = 'upwind'
     momentum_advection_interpolation = 'upwind'
+
+    # The junction adds more boundary conditions
+    boundary_conditions_all_set = false
   []
 []
 
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'rho mu'
-    prop_values = '1  1'
+    prop_names = 'rho mu total_viscosity'
+    prop_values = '1  1 1'
   []
 []
 
-[AuxKernels]
-  [speed]
-    type = ParsedAux
-    variable = 'velocity_norm'
-    coupled_variables = 'superficial_vel_x superficial_vel_y porosity'
-    expression = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / porosity'
-  []
-[]
+# [AuxKernels]
+#   [speed]
+#     type = ParsedAux
+#     variable = 'velocity_norm'
+#     coupled_variables = 'superficial_vel_x superficial_vel_y porosity'
+#     expression = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / porosity'
+#   []
+# []
 
 [Executioner]
   type = Steady
@@ -92,10 +117,11 @@ p_outlet = 0
   petsc_options_value = 'lu       NONZERO               mumps'
   line_search = 'none'
   nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-5
   automatic_scaling = true
   off_diagonals_in_auto_scaling = true
   verbose = true
-  scaling_group_variables = 'superficial_vel_x superficial_vel_y'
+  # scaling_group_variables = 'superficial_vel_x superficial_vel_y'
 []
 
 [Debug]
@@ -109,11 +135,11 @@ p_outlet = 0
     variable = pressure
     boundary = 'comp1:left'
   []
-  [outlet-u]
-    type = SideAverageValue
-    variable = superficial_vel_x
-    boundary = 'comp1:right'
-  []
+  # [outlet-u]
+  #   type = SideAverageValue
+  #   variable = superficial_vel_x
+  #   boundary = 'comp1:right'
+  # []
 []
 
 [Outputs]
