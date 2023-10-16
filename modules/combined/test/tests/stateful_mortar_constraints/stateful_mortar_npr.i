@@ -23,7 +23,6 @@ order = FIRST
     input = plank
     subdomain_id = 1
   []
-
   [block]
     type = GeneratedMeshGenerator
     dim = 2

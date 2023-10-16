@@ -37,6 +37,8 @@ protected:
   std::vector<const ADVariableValue *> _disp_primary;
   ///@}
 
+  /// Old stress variable (possibly nodally recovered property) on secondary surface
   const VariableValue & _stress_old;
+  /// Old stress variable (possibly nodally recovered property) on primary surface
   const VariableValue & _stress_neighbor_old;
 };
