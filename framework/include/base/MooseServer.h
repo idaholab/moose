@@ -254,6 +254,13 @@ private:
                                        wasp::DataObject & data_parent);
 
   /**
+   * Get document symbol kind value that client may use for outline icon.
+   * @param symbol_node - node that will be added to symbol tree for kind
+   * @return - enumerated kind value that client may use for outline icon
+   */
+  int getDocumentSymbolKind(wasp::HITNodeView symbol_node);
+
+  /**
    * Read from connection into object - specific to this server's connection.
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully

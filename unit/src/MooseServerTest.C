@@ -70,7 +70,37 @@ protected:
     {
       si.moveToChildAt(indices.back());
       indices.push_back(-1);
-      paths_stream << si.getPath() << "\n";
+
+      std::string symbol_name;
+      std::string symbol_detail;
+      int symbol_kind;
+      bool symbol_deprecated;
+      int symbol_start_line;
+      int symbol_start_character;
+      int symbol_end_line;
+      int symbol_end_character;
+      int symbol_selection_start_line;
+      int symbol_selection_start_character;
+      int symbol_selection_end_line;
+      int symbol_selection_end_character;
+
+      EXPECT_TRUE(si.dissectCurrentSymbol(symbol_name,
+                                          symbol_detail,
+                                          symbol_kind,
+                                          symbol_deprecated,
+                                          symbol_start_line,
+                                          symbol_start_character,
+                                          symbol_end_line,
+                                          symbol_end_character,
+                                          symbol_selection_start_line,
+                                          symbol_selection_start_character,
+                                          symbol_selection_end_line,
+                                          symbol_selection_end_character));
+
+      paths_stream << std::setw(34) << std::left << si.getPath() << " detail: " << std::setw(13)
+                   << std::left << symbol_detail << " kind: " << std::setw(2) << std::right
+                   << symbol_kind << "\n";
+
       if (si.getChildSize() == 0)
       {
         while (indices.back() + 1 == (int)si.getChildSize() && si.moveToParent())
@@ -484,93 +514,93 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
   // expected paths with zero-based lines and columns - note variable u twice
 
   std::string paths_expect = R"INPUT(
-/Mesh (1:0)
-/Mesh/[ (1:0)
-/Mesh/decl (1:1)
-/Mesh/] (1:5)
-/Mesh/type (2:2)
-/Mesh/type/decl (2:2)
-/Mesh/type/= (2:7)
-/Mesh/type/value (2:9)
-/Mesh/dim (3:2)
-/Mesh/dim/decl (3:2)
-/Mesh/dim/= (3:6)
-/Mesh/dim/value (3:8)
-/Mesh/term (4:0)
-/Variables (5:0)
-/Variables/[ (5:0)
-/Variables/decl (5:1)
-/Variables/] (5:10)
-/Variables/u (6:2)
-/Variables/u/[ (6:2)
-/Variables/u/decl (6:3)
-/Variables/u/] (6:4)
-/Variables/u/order (7:4)
-/Variables/u/order/decl (7:4)
-/Variables/u/order/= (7:10)
-/Variables/u/order/value (7:12)
-/Variables/u/family (8:4)
-/Variables/u/family/decl (8:4)
-/Variables/u/family/= (8:11)
-/Variables/u/family/value (8:13)
-/Variables/u/term (9:2)
-/Variables/u (10:2)
-/Variables/u/[ (10:2)
-/Variables/u/decl (10:3)
-/Variables/u/] (10:4)
-/Variables/u/order (11:4)
-/Variables/u/order/decl (11:4)
-/Variables/u/order/= (11:10)
-/Variables/u/order/value (11:12)
-/Variables/u/family (12:4)
-/Variables/u/family/decl (12:4)
-/Variables/u/family/= (12:11)
-/Variables/u/family/value (12:13)
-/Variables/u/term (13:2)
-/Variables/term (14:0)
-/BCs (15:0)
-/BCs/[ (15:0)
-/BCs/decl (15:1)
-/BCs/] (15:4)
-/BCs/all (16:2)
-/BCs/all/[ (16:2)
-/BCs/all/decl (16:3)
-/BCs/all/] (16:6)
-/BCs/all/type (17:4)
-/BCs/all/type/decl (17:4)
-/BCs/all/type/= (17:9)
-/BCs/all/type/value (17:11)
-/BCs/all/boundary (18:4)
-/BCs/all/boundary/decl (18:4)
-/BCs/all/boundary/= (18:13)
-/BCs/all/boundary/' (18:15)
-/BCs/all/boundary/value (18:16)
-/BCs/all/boundary/value (18:21)
-/BCs/all/boundary/' (18:26)
-/BCs/all/variable (19:4)
-/BCs/all/variable/decl (19:4)
-/BCs/all/variable/= (19:13)
-/BCs/all/variable/value (19:15)
-/BCs/all/term (20:2)
-/BCs/term (21:0)
-/Executioner (22:0)
-/Executioner/[ (22:0)
-/Executioner/decl (22:1)
-/Executioner/] (22:12)
-/Executioner/type (23:2)
-/Executioner/type/decl (23:2)
-/Executioner/type/= (23:7)
-/Executioner/type/value (23:9)
-/Executioner/term (24:0)
-/Problem (25:0)
-/Problem/[ (25:0)
-/Problem/decl (25:1)
-/Problem/] (25:8)
-/Problem/solve (26:2)
-/Problem/solve/decl (26:2)
-/Problem/solve/= (26:8)
-/Problem/solve/value (26:10)
-/Problem/term (27:0)
+/Mesh (1:0)                        detail: GeneratedMesh kind: 23
+/Mesh/[ (1:0)                      detail:               kind:  7
+/Mesh/decl (1:1)                   detail:               kind:  7
+/Mesh/] (1:5)                      detail:               kind:  7
+/Mesh/type (2:2)                   detail:               kind: 26
+/Mesh/type/decl (2:2)              detail:               kind:  7
+/Mesh/type/= (2:7)                 detail:               kind:  7
+/Mesh/type/value (2:9)             detail:               kind: 26
+/Mesh/dim (3:2)                    detail:               kind: 16
+/Mesh/dim/decl (3:2)               detail:               kind:  7
+/Mesh/dim/= (3:6)                  detail:               kind:  7
+/Mesh/dim/value (3:8)              detail:               kind: 16
+/Mesh/term (4:0)                   detail:               kind:  7
+/Variables (5:0)                   detail:               kind: 23
+/Variables/[ (5:0)                 detail:               kind:  7
+/Variables/decl (5:1)              detail:               kind:  7
+/Variables/] (5:10)                detail:               kind:  7
+/Variables/u (6:2)                 detail:               kind: 23
+/Variables/u/[ (6:2)               detail:               kind:  7
+/Variables/u/decl (6:3)            detail:               kind:  7
+/Variables/u/] (6:4)               detail:               kind:  7
+/Variables/u/order (7:4)           detail:               kind: 20
+/Variables/u/order/decl (7:4)      detail:               kind:  7
+/Variables/u/order/= (7:10)        detail:               kind:  7
+/Variables/u/order/value (7:12)    detail:               kind: 15
+/Variables/u/family (8:4)          detail:               kind: 20
+/Variables/u/family/decl (8:4)     detail:               kind:  7
+/Variables/u/family/= (8:11)       detail:               kind:  7
+/Variables/u/family/value (8:13)   detail:               kind: 15
+/Variables/u/term (9:2)            detail:               kind:  7
+/Variables/u (10:2)                detail:               kind: 23
+/Variables/u/[ (10:2)              detail:               kind:  7
+/Variables/u/decl (10:3)           detail:               kind:  7
+/Variables/u/] (10:4)              detail:               kind:  7
+/Variables/u/order (11:4)          detail:               kind: 20
+/Variables/u/order/decl (11:4)     detail:               kind:  7
+/Variables/u/order/= (11:10)       detail:               kind:  7
+/Variables/u/order/value (11:12)   detail:               kind: 15
+/Variables/u/family (12:4)         detail:               kind: 20
+/Variables/u/family/decl (12:4)    detail:               kind:  7
+/Variables/u/family/= (12:11)      detail:               kind:  7
+/Variables/u/family/value (12:13)  detail:               kind: 15
+/Variables/u/term (13:2)           detail:               kind:  7
+/Variables/term (14:0)             detail:               kind:  7
+/BCs (15:0)                        detail:               kind: 23
+/BCs/[ (15:0)                      detail:               kind:  7
+/BCs/decl (15:1)                   detail:               kind:  7
+/BCs/] (15:4)                      detail:               kind:  7
+/BCs/all (16:2)                    detail: VacuumBC      kind: 23
+/BCs/all/[ (16:2)                  detail:               kind:  7
+/BCs/all/decl (16:3)               detail:               kind:  7
+/BCs/all/] (16:6)                  detail:               kind:  7
+/BCs/all/type (17:4)               detail:               kind: 26
+/BCs/all/type/decl (17:4)          detail:               kind:  7
+/BCs/all/type/= (17:9)             detail:               kind:  7
+/BCs/all/type/value (17:11)        detail:               kind: 26
+/BCs/all/boundary (18:4)           detail:               kind: 18
+/BCs/all/boundary/decl (18:4)      detail:               kind:  7
+/BCs/all/boundary/= (18:13)        detail:               kind:  7
+/BCs/all/boundary/' (18:15)        detail:               kind:  7
+/BCs/all/boundary/value (18:16)    detail:               kind: 15
+/BCs/all/boundary/value (18:21)    detail:               kind: 15
+/BCs/all/boundary/' (18:26)        detail:               kind:  7
+/BCs/all/variable (19:4)           detail:               kind: 20
+/BCs/all/variable/decl (19:4)      detail:               kind:  7
+/BCs/all/variable/= (19:13)        detail:               kind:  7
+/BCs/all/variable/value (19:15)    detail:               kind: 15
+/BCs/all/term (20:2)               detail:               kind:  7
+/BCs/term (21:0)                   detail:               kind:  7
+/Executioner (22:0)                detail: Transient     kind: 23
+/Executioner/[ (22:0)              detail:               kind:  7
+/Executioner/decl (22:1)           detail:               kind:  7
+/Executioner/] (22:12)             detail:               kind:  7
+/Executioner/type (23:2)           detail:               kind: 26
+/Executioner/type/decl (23:2)      detail:               kind:  7
+/Executioner/type/= (23:7)         detail:               kind:  7
+/Executioner/type/value (23:9)     detail:               kind: 26
+/Executioner/term (24:0)           detail:               kind:  7
+/Problem (25:0)                    detail:               kind: 23
+/Problem/[ (25:0)                  detail:               kind:  7
+/Problem/decl (25:1)               detail:               kind:  7
+/Problem/] (25:8)                  detail:               kind:  7
+/Problem/solve (26:2)              detail:               kind: 17
+/Problem/solve/decl (26:2)         detail:               kind:  7
+/Problem/solve/= (26:8)            detail:               kind:  7
+/Problem/solve/value (26:10)       detail:               kind: 17
+/Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 
   EXPECT_EQ(paths_expect, "\n" + paths_actual.str());
@@ -720,95 +750,95 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
   // expected paths with zero-based lines and columns - note bad bcs boundary
 
   std::string paths_expect = R"INPUT(
-/Mesh (1:0)
-/Mesh/[ (1:0)
-/Mesh/decl (1:1)
-/Mesh/] (1:5)
-/Mesh/type (2:2)
-/Mesh/type/decl (2:2)
-/Mesh/type/= (2:7)
-/Mesh/type/value (2:9)
-/Mesh/dim (3:2)
-/Mesh/dim/decl (3:2)
-/Mesh/dim/= (3:6)
-/Mesh/dim/value (3:8)
-/Mesh/term (4:0)
-/Variables (5:0)
-/Variables/[ (5:0)
-/Variables/decl (5:1)
-/Variables/] (5:10)
-/Variables/u (6:2)
-/Variables/u/[ (6:2)
-/Variables/u/decl (6:3)
-/Variables/u/] (6:4)
-/Variables/u/order (7:4)
-/Variables/u/order/decl (7:4)
-/Variables/u/order/= (7:10)
-/Variables/u/order/value (7:12)
-/Variables/u/family (8:4)
-/Variables/u/family/decl (8:4)
-/Variables/u/family/= (8:11)
-/Variables/u/family/value (8:13)
-/Variables/u/term (9:2)
-/Variables/v (10:2)
-/Variables/v/[ (10:2)
-/Variables/v/decl (10:3)
-/Variables/v/] (10:4)
-/Variables/v/order (11:4)
-/Variables/v/order/decl (11:4)
-/Variables/v/order/= (11:10)
-/Variables/v/order/value (11:12)
-/Variables/v/family (12:4)
-/Variables/v/family/decl (12:4)
-/Variables/v/family/= (12:11)
-/Variables/v/family/value (12:13)
-/Variables/v/term (13:2)
-/Variables/term (14:0)
-/BCs (15:0)
-/BCs/[ (15:0)
-/BCs/decl (15:1)
-/BCs/] (15:4)
-/BCs/all (16:2)
-/BCs/all/[ (16:2)
-/BCs/all/decl (16:3)
-/BCs/all/] (16:6)
-/BCs/all/type (17:4)
-/BCs/all/type/decl (17:4)
-/BCs/all/type/= (17:9)
-/BCs/all/type/value (17:11)
-/BCs/all/boundary (18:4)
-/BCs/all/boundary/decl (18:4)
-/BCs/all/boundary/= (18:13)
-/BCs/all/boundary/' (18:15)
-/BCs/all/boundary/value (18:16)
-/BCs/all/boundary/value (18:21)
-/BCs/all/boundary/value (18:27)
-/BCs/all/boundary/value (18:31)
-/BCs/all/boundary/' (18:37)
-/BCs/all/variable (19:4)
-/BCs/all/variable/decl (19:4)
-/BCs/all/variable/= (19:13)
-/BCs/all/variable/value (19:15)
-/BCs/all/term (20:2)
-/BCs/term (21:0)
-/Executioner (22:0)
-/Executioner/[ (22:0)
-/Executioner/decl (22:1)
-/Executioner/] (22:12)
-/Executioner/type (23:2)
-/Executioner/type/decl (23:2)
-/Executioner/type/= (23:7)
-/Executioner/type/value (23:9)
-/Executioner/term (24:0)
-/Problem (25:0)
-/Problem/[ (25:0)
-/Problem/decl (25:1)
-/Problem/] (25:8)
-/Problem/solve (26:2)
-/Problem/solve/decl (26:2)
-/Problem/solve/= (26:8)
-/Problem/solve/value (26:10)
-/Problem/term (27:0)
+/Mesh (1:0)                        detail: GeneratedMesh kind: 23
+/Mesh/[ (1:0)                      detail:               kind:  7
+/Mesh/decl (1:1)                   detail:               kind:  7
+/Mesh/] (1:5)                      detail:               kind:  7
+/Mesh/type (2:2)                   detail:               kind: 26
+/Mesh/type/decl (2:2)              detail:               kind:  7
+/Mesh/type/= (2:7)                 detail:               kind:  7
+/Mesh/type/value (2:9)             detail:               kind: 26
+/Mesh/dim (3:2)                    detail:               kind: 16
+/Mesh/dim/decl (3:2)               detail:               kind:  7
+/Mesh/dim/= (3:6)                  detail:               kind:  7
+/Mesh/dim/value (3:8)              detail:               kind: 16
+/Mesh/term (4:0)                   detail:               kind:  7
+/Variables (5:0)                   detail:               kind: 23
+/Variables/[ (5:0)                 detail:               kind:  7
+/Variables/decl (5:1)              detail:               kind:  7
+/Variables/] (5:10)                detail:               kind:  7
+/Variables/u (6:2)                 detail:               kind: 23
+/Variables/u/[ (6:2)               detail:               kind:  7
+/Variables/u/decl (6:3)            detail:               kind:  7
+/Variables/u/] (6:4)               detail:               kind:  7
+/Variables/u/order (7:4)           detail:               kind: 20
+/Variables/u/order/decl (7:4)      detail:               kind:  7
+/Variables/u/order/= (7:10)        detail:               kind:  7
+/Variables/u/order/value (7:12)    detail:               kind: 15
+/Variables/u/family (8:4)          detail:               kind: 20
+/Variables/u/family/decl (8:4)     detail:               kind:  7
+/Variables/u/family/= (8:11)       detail:               kind:  7
+/Variables/u/family/value (8:13)   detail:               kind: 15
+/Variables/u/term (9:2)            detail:               kind:  7
+/Variables/v (10:2)                detail:               kind: 23
+/Variables/v/[ (10:2)              detail:               kind:  7
+/Variables/v/decl (10:3)           detail:               kind:  7
+/Variables/v/] (10:4)              detail:               kind:  7
+/Variables/v/order (11:4)          detail:               kind: 20
+/Variables/v/order/decl (11:4)     detail:               kind:  7
+/Variables/v/order/= (11:10)       detail:               kind:  7
+/Variables/v/order/value (11:12)   detail:               kind: 15
+/Variables/v/family (12:4)         detail:               kind: 20
+/Variables/v/family/decl (12:4)    detail:               kind:  7
+/Variables/v/family/= (12:11)      detail:               kind:  7
+/Variables/v/family/value (12:13)  detail:               kind: 15
+/Variables/v/term (13:2)           detail:               kind:  7
+/Variables/term (14:0)             detail:               kind:  7
+/BCs (15:0)                        detail:               kind: 23
+/BCs/[ (15:0)                      detail:               kind:  7
+/BCs/decl (15:1)                   detail:               kind:  7
+/BCs/] (15:4)                      detail:               kind:  7
+/BCs/all (16:2)                    detail: VacuumBC      kind: 23
+/BCs/all/[ (16:2)                  detail:               kind:  7
+/BCs/all/decl (16:3)               detail:               kind:  7
+/BCs/all/] (16:6)                  detail:               kind:  7
+/BCs/all/type (17:4)               detail:               kind: 26
+/BCs/all/type/decl (17:4)          detail:               kind:  7
+/BCs/all/type/= (17:9)             detail:               kind:  7
+/BCs/all/type/value (17:11)        detail:               kind: 26
+/BCs/all/boundary (18:4)           detail:               kind: 18
+/BCs/all/boundary/decl (18:4)      detail:               kind:  7
+/BCs/all/boundary/= (18:13)        detail:               kind:  7
+/BCs/all/boundary/' (18:15)        detail:               kind:  7
+/BCs/all/boundary/value (18:16)    detail:               kind: 15
+/BCs/all/boundary/value (18:21)    detail:               kind: 15
+/BCs/all/boundary/value (18:27)    detail:               kind: 15
+/BCs/all/boundary/value (18:31)    detail:               kind: 15
+/BCs/all/boundary/' (18:37)        detail:               kind:  7
+/BCs/all/variable (19:4)           detail:               kind: 20
+/BCs/all/variable/decl (19:4)      detail:               kind:  7
+/BCs/all/variable/= (19:13)        detail:               kind:  7
+/BCs/all/variable/value (19:15)    detail:               kind: 15
+/BCs/all/term (20:2)               detail:               kind:  7
+/BCs/term (21:0)                   detail:               kind:  7
+/Executioner (22:0)                detail: Transient     kind: 23
+/Executioner/[ (22:0)              detail:               kind:  7
+/Executioner/decl (22:1)           detail:               kind:  7
+/Executioner/] (22:12)             detail:               kind:  7
+/Executioner/type (23:2)           detail:               kind: 26
+/Executioner/type/decl (23:2)      detail:               kind:  7
+/Executioner/type/= (23:7)         detail:               kind:  7
+/Executioner/type/value (23:9)     detail:               kind: 26
+/Executioner/term (24:0)           detail:               kind:  7
+/Problem (25:0)                    detail:               kind: 23
+/Problem/[ (25:0)                  detail:               kind:  7
+/Problem/decl (25:1)               detail:               kind:  7
+/Problem/] (25:8)                  detail:               kind:  7
+/Problem/solve (26:2)              detail:               kind: 17
+/Problem/solve/decl (26:2)         detail:               kind:  7
+/Problem/solve/= (26:8)            detail:               kind:  7
+/Problem/solve/value (26:10)       detail:               kind: 17
+/Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 
   EXPECT_EQ(paths_expect, "\n" + paths_actual.str());

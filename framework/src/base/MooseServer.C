@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include <functional>
 
 MooseServer::MooseServer(MooseApp & moose_app)
@@ -955,24 +956,16 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
     // walk must be index based to catch file include and skip its children
     wasp::HITNodeView view_child = view_root.child_at(i);
 
-    // get child name / detail / line / column / last_line / last_column
+    // set up name, zero based line and column range, kind, and detail info
     std::string name = view_child.name();
+    int line = view_child.line() - 1;
+    int column = view_child.column() - 1;
+    int last_line = view_child.last_line() - 1;
+    int last_column = view_child.last_column();
+    int symbol_kind = getDocumentSymbolKind(view_child);
     std::string detail = !view_child.first_child_by_name("type").is_null()
                              ? view_child.first_child_by_name("type").last_as_string()
                              : "";
-    int line = view_child.line();
-    int column = view_child.column();
-    int last_line = view_child.last_line();
-    int last_column = view_child.last_column();
-
-    // according to the protocol line and column number are zero based
-    line--;
-    column--;
-    last_line--;
-    last_column--;
-
-    // according to the protocol last_column is right AFTER last character
-    last_column++;
 
     // build document symbol object from node child info and push to array
     documentSymbols.push_back(wasp::DataObject());
@@ -981,7 +974,7 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
                                                  errors,
                                                  name,
                                                  detail,
-                                                 1,
+                                                 symbol_kind,
                                                  false,
                                                  line,
                                                  column,
@@ -1015,24 +1008,16 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
     // walk must be index based to catch file include and skip its children
     wasp::HITNodeView view_child = view_parent.child_at(i);
 
-    // get child name / detail / line / column / last_line / last_column
+    // set up name, zero based line and column range, kind, and detail info
     std::string name = view_child.name();
+    int line = view_child.line() - 1;
+    int column = view_child.column() - 1;
+    int last_line = view_child.last_line() - 1;
+    int last_column = view_child.last_column();
+    int symbol_kind = getDocumentSymbolKind(view_child);
     std::string detail = !view_child.first_child_by_name("type").is_null()
                              ? view_child.first_child_by_name("type").last_as_string()
                              : "";
-    int line = view_child.line();
-    int column = view_child.column();
-    int last_line = view_child.last_line();
-    int last_column = view_child.last_column();
-
-    // according to the protocol line and column number are zero based
-    line--;
-    column--;
-    last_line--;
-    last_column--;
-
-    // according to the protocol last_column is right AFTER last character
-    last_column++;
 
     // build document symbol object from node child info and push to array
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
@@ -1040,7 +1025,7 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                                  errors,
                                                  name,
                                                  detail,
-                                                 1,
+                                                 symbol_kind,
                                                  false,
                                                  line,
                                                  column,
@@ -1056,4 +1041,45 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
   }
 
   return pass;
+}
+
+int
+MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
+{
+  auto is_boolean = [](const std::string & value)
+  {
+    bool convert;
+    std::istringstream iss(MooseUtils::toLower(value));
+    return (iss >> std::boolalpha >> convert && !iss.fail());
+  };
+  auto is_number = [](const std::string & value)
+  {
+    double convert;
+    std::istringstream iss(value);
+    return (iss >> convert && iss.eof());
+  };
+  int symbol_kind;
+  if (symbol_node.type() == wasp::OBJECT)
+    symbol_kind = wasp::lsp::m_symbol_kind_struct;
+  else if (symbol_node.type() == wasp::ARRAY)
+    symbol_kind = wasp::lsp::m_symbol_kind_array;
+  else if (symbol_node.type() == wasp::KEYED_VALUE || symbol_node.type() == wasp::VALUE)
+    if ((symbol_node.type() == wasp::KEYED_VALUE && symbol_node.name() == std::string("type")) ||
+        (symbol_node.type() == wasp::VALUE && symbol_node.parent().name() == std::string("type")))
+      symbol_kind = wasp::lsp::m_symbol_kind_type_param;
+    else if (is_boolean(symbol_node.last_as_string()))
+      symbol_kind = wasp::lsp::m_symbol_kind_boolean;
+    else if (is_number(symbol_node.last_as_string()))
+      symbol_kind = wasp::lsp::m_symbol_kind_number;
+    else if (symbol_node.type() == wasp::KEYED_VALUE)
+      symbol_kind = wasp::lsp::m_symbol_kind_key;
+    else
+      symbol_kind = wasp::lsp::m_symbol_kind_string;
+  else if (symbol_node.type() == wasp::FILE)
+    symbol_kind = wasp::lsp::m_symbol_kind_file;
+  else if (symbol_node.is_decorative())
+    symbol_kind = wasp::lsp::m_symbol_kind_property;
+  else
+    symbol_kind = wasp::lsp::m_symbol_kind_null;
+  return symbol_kind;
 }
