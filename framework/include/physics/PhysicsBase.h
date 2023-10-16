@@ -140,6 +140,9 @@ protected:
   // TODO not the right name!
   void addNonlinearVariable(const VariableName & var_name) { _nl_var_names.push_back(var_name); }
 
+  /// Whether to output additional information
+  const bool _verbose;
+
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   unsigned int _dim;
 

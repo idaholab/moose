@@ -29,6 +29,8 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
+  params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
+
   // Restart parameters
   params.addParam<bool>("initialize_variables_from_mesh_file",
                         false,
@@ -43,6 +45,7 @@ PhysicsBase::validParams()
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
+    _verbose(getParam<bool>("verbose")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _is_transient(getParam<MooseEnum>("transient"))
 {
