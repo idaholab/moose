@@ -106,7 +106,9 @@ NSFVPumpMaterial::NSFVPumpMaterial(const InputParameters & parameters)
             rated_pressure_head * std::pow(flow_rate_scaling * rotation_speed_scaling, 4.0 / 3.0);
 
         // Computing effective volume force
-        mooseAssert(_rho.isConstant(), "The density must be a constant in order for the pump force to not contain derivative information.");
+        mooseAssert(_rho.isConstant(),
+                    "The density must be a constant in order for the pump force to not contain "
+                    "derivative information.");
         const auto rho = raw_value(_rho(r, t));
         const Real gravity = _gravity.norm();
         const auto area = _area_rated(r, t);
