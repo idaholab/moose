@@ -34,13 +34,13 @@ AutoCheckpointAction::act()
 
       // Take the first checkpoint object, since we only need to/should make one object the autosave
       _app.getOutputWarehouse().getOutputs<Checkpoint>()[0]->setAutosaveFlag(
-          AutosaveType::MODIFIED_EXISTING);
+          CheckpointType::USER_AND_SYSTEM_CREATED);
       return;
     }
 
     // If there isn't an existing one, init a new one
     auto cp_params = _factory.getValidParams("Checkpoint");
-    cp_params.setParameters("is_autosave", AutosaveType::SYSTEM_AUTOSAVE);
+    cp_params.setParameters("checkpoint_type", CheckpointType::SYSTEM_CREATED);
     cp_params.set<bool>("_built_by_moose") = true;
     _problem->addOutput("Checkpoint", "checkpoint", cp_params);
   }

@@ -16,16 +16,19 @@
 #include <filesystem>
 
 /**
- * Shortcut for determining what type of autosave this checkpoint is.
- * NONE: Not an autosave checkpoint
- * MODIFIED_EXISTING: We took an existing checkpoint and enabled autosave checks on it.
- * SYSTEM_AUTOSAVE: These checkpoints run in the background and output only when sent a signal.
+ * Enumerated type for determining what type of checkpoint this is.
+ * USER_CREATED: Checkpoint is requested by the user in the input file.
+ * SYSTEM_CREATED: This type of checkpoint is created automatically by the
+ *   system for the purpose of writing checkpoints at regularly scheduled
+ *   walltime intervals or when sent a signal.
+ * USER_AND_SYSTEM_CREATED: Checkpoint is requested by the user, and modified
+ *   by the system to also output at walltime intervals or when sent a signal.
  */
-enum AutosaveType : unsigned short
+enum CheckpointType : unsigned short
 {
-  NONE,
-  MODIFIED_EXISTING,
-  SYSTEM_AUTOSAVE
+  USER_CREATED,
+  SYSTEM_CREATED,
+  USER_AND_SYSTEM_CREATED
 };
 
 class MaterialPropertyStorage;
@@ -77,7 +80,7 @@ public:
   virtual void outputStep(const ExecFlagType & type) override;
 
   /// Sets the autosave flag manually if the object has already been initialized.
-  void setAutosaveFlag(AutosaveType flag) { _is_autosave = flag; }
+  void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }
 
 protected:
   /**
@@ -93,7 +96,7 @@ private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
-  AutosaveType _is_autosave;
+  CheckpointType _checkpoint_type;
 
   /// Max no. of output files to store
   unsigned int _num_files;

@@ -36,7 +36,7 @@ Checkpoint::validParams()
   // Controls whether the checkpoint will actually run. Should only ever be changed by the
   // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
   // is received.
-  params.addPrivateParam<AutosaveType>("is_autosave", NONE);
+  params.addPrivateParam<CheckpointType>("checkpoint_type", USER_CREATED);
 
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
@@ -57,7 +57,7 @@ Checkpoint::validParams()
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
-    _is_autosave(getParam<AutosaveType>("is_autosave")),
+    _checkpoint_type(getParam<CheckpointType>("checkpoint_type")),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
@@ -159,8 +159,8 @@ Checkpoint::shouldOutput()
   // _current_execute_flag (see Output::shouldOutput), ensuring that we wait
   // until the end of the timestep to write, preventing the output of an
   // unconverged solution.
-  if (parent_should_output &&
-      (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output)))
+  if (parent_should_output && (_checkpoint_type == SYSTEM_CREATED ||
+                               (_checkpoint_type == USER_AND_SYSTEM_CREATED && !should_output)))
   {
     // If this is a pure system-created autosave through AutoCheckpointAction,
     // then sync across processes and only output one time per signal received.
