@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FileMeshComponent.h"
+#include "FileMeshComponentConnection.h"
 #include "THMMesh.h"
 #include "MooseUtils.h"
 #include "libmesh/exodusII_io.h"
@@ -229,4 +230,19 @@ FileMeshComponent::getBoundaryInfo(const BoundaryName & boundary_name) const
                ": No boundary info exists for the boundary '",
                boundary_name,
                "' on this component.");
+}
+
+const std::vector<FileMeshComponent::Connection> &
+FileMeshComponent::getConnections(FileMeshComponentConnection::EEndType end_type) const
+{
+  checkSetupStatus(MESH_PREPARED);
+  mooseAssert(_connections.size(), "Connections map cannot be empty here");
+
+  std::map<FileMeshComponentConnection::EEndType, std::vector<Connection>>::const_iterator it =
+      _connections.find(end_type);
+  if (it != _connections.end())
+    return it->second;
+  else
+    mooseError(
+        "Invalid end type (", Moose::stringify(end_type), "). It was not found on this component.");
 }

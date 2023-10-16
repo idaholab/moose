@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeometricalComponent.h"
+#include "FileMeshComponentConnection.h"
 
 /**
  * Loads a mesh from an ExodusII file without adding physics.
@@ -20,6 +21,16 @@ public:
   static InputParameters validParams();
 
   FileMeshComponent(const InputParameters & parameters);
+
+  /// Structure for storing connection data
+  struct Connection
+  {
+    // TODO Keep track of the connection type?
+    /// Boundary id of this connection
+    unsigned int _boundary_id;
+
+    Connection(unsigned int bc_id) : _boundary_id(bc_id) {}
+  };
 
   /**
    * Returns true if this component has the supplied boundary
@@ -38,6 +49,10 @@ public:
    */
   const std::vector<std::tuple<dof_id_type, unsigned short int>> &
   getBoundaryInfo(const BoundaryName & boundary_name) const;
+
+  /// Get all the connections of this component
+  const std::vector<FileMeshComponent::Connection> &
+  getConnections(FileMeshComponentConnection::EEndType end_type) const;
 
 protected:
   virtual void setupMesh() override;
@@ -61,4 +76,10 @@ protected:
 
   /// Map of boundary name to list of tuples of element and side IDs for that boundary
   std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>> _boundary_info;
+
+  /// Map of boundary name to list of nodes
+  std::map<BoundaryName, Node *> _boundary_nodes;
+
+  /// Map of end type to a list of connections
+  std::map<FileMeshComponentConnection::EEndType, std::vector<Connection>> _connections;
 };
