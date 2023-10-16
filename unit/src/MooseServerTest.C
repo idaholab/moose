@@ -300,11 +300,39 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close].is_bool());
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close].to_bool());
+  EXPECT_EQ(7u, server_capabilities.size());
 
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change].is_int());
-  EXPECT_EQ(1, server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change].to_int());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync].is_object());
+  const auto & text_doc_sync_caps = *(server_capabilities[wasp::lsp::m_text_doc_sync].to_object());
+  EXPECT_EQ(2u, text_doc_sync_caps.size());
+
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_open_close].is_bool());
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_open_close].to_bool());
+
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_change].is_int());
+  EXPECT_EQ(wasp::lsp::m_change_full, text_doc_sync_caps[wasp::lsp::m_change].to_int());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_completion_provider].is_object());
+  const auto & comp_caps = *(server_capabilities[wasp::lsp::m_completion_provider].to_object());
+  EXPECT_EQ(1u, comp_caps.size());
+
+  EXPECT_TRUE(comp_caps[wasp::lsp::m_resolve_provider].is_bool());
+  EXPECT_FALSE(comp_caps[wasp::lsp::m_resolve_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_symbol_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_symbol_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_format_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_format_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_definition_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_definition_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_references_provider].is_bool());
+  EXPECT_FALSE(server_capabilities[wasp::lsp::m_references_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].is_bool());
+  EXPECT_FALSE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
 
   // build initialized notification which takes no extra parameters
 

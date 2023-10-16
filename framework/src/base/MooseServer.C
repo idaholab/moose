@@ -34,6 +34,15 @@ MooseServer::MooseServer(MooseApp & moose_app)
   server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
   server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
   server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
+
+  // notify completion, symbol, formatting, definition capabilities support
+  server_capabilities[wasp::lsp::m_completion_provider] = wasp::DataObject();
+  server_capabilities[wasp::lsp::m_completion_provider][wasp::lsp::m_resolve_provider] = false;
+  server_capabilities[wasp::lsp::m_doc_symbol_provider] = true;
+  server_capabilities[wasp::lsp::m_doc_format_provider] = true;
+  server_capabilities[wasp::lsp::m_definition_provider] = true;
+  server_capabilities[wasp::lsp::m_references_provider] = false;
+  server_capabilities[wasp::lsp::m_hover_provider] = false;
 }
 
 bool
