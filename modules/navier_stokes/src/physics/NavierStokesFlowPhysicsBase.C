@@ -38,6 +38,12 @@ NavierStokesFlowPhysicsBase::validParams()
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "dynamic_viscosity");
   params.transferParam<MooseFunctorName>(NSFVAction::validParams(), "density");
 
+  params.addParam<bool>(
+      "boundary_conditions_all_set",
+      true,
+      "Whether all boundary conditions have been set using the parameters or "
+      "whether additional information may be passed by other objects (THM junctions)");
+
   return params;
 }
 
@@ -70,17 +76,22 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
     _density_name(getParam<MooseFunctorName>("density")),
-    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity"))
+    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _boundary_condition_information_complete(getParam<bool>("boundary_conditions_all_set"))
 {
   for (const auto d : make_range(_dim))
     addNonlinearVariable(_velocity_names[d]);
   addNonlinearVariable(_pressure_name);
 
   // Parameter checking
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "momentum_inlet_types");
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("outlet_boundaries",
-                                                        "momentum_outlet_types");
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "momentum_wall_types");
+  if (_boundary_condition_information_complete)
+  {
+    checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries",
+                                                          "momentum_inlet_types");
+    checkVectorParamAndMultiMooseEnumLength<BoundaryName>("outlet_boundaries",
+                                                          "momentum_outlet_types");
+    checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "momentum_wall_types");
+  }
   checkVectorParamsNoOverlap<BoundaryName>(
       {"inlet_boundaries", "outlet_boundaries", "wall_boundaries"});
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");

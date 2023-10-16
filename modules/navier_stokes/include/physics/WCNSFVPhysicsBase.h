@@ -36,6 +36,10 @@ protected:
   /// Add postprocessors, could be moved up to the base class
   void addPostprocessors() override;
 
+  /// Convenience routine to be able to retrieve the actual variable names from their default names
+  VariableName getFlowVariableName(const std::string & default_name) const;
+
+protected:
   void adjustRMGhostLayers();
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
 
