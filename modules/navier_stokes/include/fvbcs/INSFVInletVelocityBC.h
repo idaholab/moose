@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVFunctionDirichletBC.h"
+#include "FVFunctorDirichletBC.h"
 #include "INSFVFlowBC.h"
 
 /**
  * A class for velocity inlet boundary conditions
  */
-class INSFVInletVelocityBC : public FVFunctionDirichletBC, public INSFVFlowBC
+class INSFVInletVelocityBC : public FVADFunctorDirichletBC, public INSFVFlowBC
 {
 public:
   static InputParameters validParams();
