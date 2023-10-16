@@ -31,6 +31,7 @@ PhysicsBase::validParams()
   MooseEnum pc_options("default none", "none");
   params.addParam<MooseEnum>(
       "preconditioning", pc_options, "Which preconditioning to use for this Physics");
+
   params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
 
   // Restart parameters
