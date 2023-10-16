@@ -54,8 +54,9 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
 
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
-  checkVectorParamsSameLength<BoundaryName, FunctionName>("inlet_boundaries",
-                                                          "energy_inlet_function");
+  if (_boundary_condition_information_complete)
+    checkVectorParamsSameLength<BoundaryName, FunctionName>("inlet_boundaries",
+                                                            "energy_inlet_function");
   checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "energy_wall_types");
   checkVectorParamsSameLength<BoundaryName, FunctionName>("wall_boundaries",
                                                           "energy_wall_function");
@@ -314,7 +315,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
   const auto energy_inlet_function = getParam<std::vector<FunctionName>>("energy_inlet_function");
 
   unsigned int flux_bc_counter = 0;
-  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < energy_inlet_types.size(); ++bc_ind)
   {
     if (energy_inlet_types[bc_ind] == "fixed-temperature")
     {
@@ -376,7 +377,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyWallBC()
   const auto energy_wall_types = getParam<MultiMooseEnum>("energy_wall_types");
   const auto energy_wall_function = getParam<std::vector<FunctionName>>("energy_wall_function");
 
-  for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < energy_wall_types.size(); ++bc_ind)
   {
     if (energy_wall_types[bc_ind] == "fixed-temperature")
     {

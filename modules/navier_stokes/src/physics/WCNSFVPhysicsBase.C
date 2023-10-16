@@ -52,10 +52,11 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   checkSecondParamSetOnlyIfFirstOneSet("flux_inlet_pps", "flux_inlet_directions");
   checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
                                                              "flux_inlet_directions");
-  checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
-                                             std::vector<FunctionName>,
-                                             PostprocessorName>(
-      "inlet_boundaries", "momentum_inlet_function", "flux_inlet_pps");
+  if (_boundary_condition_information_complete)
+    checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
+                                               std::vector<FunctionName>,
+                                               PostprocessorName>(
+        "inlet_boundaries", "momentum_inlet_function", "flux_inlet_pps");
 
   // Check that flow physics are consistent
   if (isParamValid("coupled_flow_physics"))
@@ -112,6 +113,9 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   if (num_rc_uo)
     return;
 
+  if (_verbose)
+    _console << prefix() << " creating Rhie Chow user-object" << std::endl;
+
   const std::string u_names[3] = {"u", "v", "w"};
   const auto object_type =
       _porous_medium_treatment ? "PINSFVRhieChowInterpolator" : "INSFVRhieChowInterpolator";
@@ -160,7 +164,7 @@ WCNSFVPhysicsBase::addPostprocessors()
 {
   const auto momentum_inlet_types = getParam<MultiMooseEnum>("momentum_inlet_types");
 
-  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < momentum_inlet_types.size(); ++bc_ind)
     if (momentum_inlet_types[bc_ind] == "flux-mass" ||
         momentum_inlet_types[bc_ind] == "flux-velocity")
     {
@@ -243,4 +247,21 @@ WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other
   warnInconsistent<MooseEnum>(other_params, "velocity_interpolation");
   warnInconsistent<MooseEnum>(other_params, "pressure_face_interpolation");
   warnInconsistent<MooseEnum>(other_params, "momentum_face_interpolation");
+}
+
+VariableName
+WCNSFVPhysicsBase::getFlowVariableName(const std::string & short_name) const
+{
+  if (short_name == NS::pressure)
+    return getPressureName();
+  else if (short_name == NS::velocity_x && _dim > 0)
+    return getVelocityNames()[0];
+  else if (short_name == NS::velocity_y && _dim > 1)
+    return getVelocityNames()[1];
+  else if (short_name == NS::velocity_z && _dim > 2)
+    return getVelocityNames()[2];
+  else if (short_name == NS::temperature)
+    return getTemperatureName();
+  else
+    mooseError("Short Variable name '", short_name, "' not recognized.");
 }

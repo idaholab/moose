@@ -93,7 +93,12 @@ WCNSFVFlowPhysics::addNonlinearVariables()
         getParam<bool>("momentum_two_term_bc_expansion");
 
     for (unsigned int d = 0; d < _dim; ++d)
+    {
+      if (_verbose)
+        _console << "Creating variable " << _velocity_names[d] << " on blocks "
+                 << Moose::stringify(_blocks) << std::endl;
       getProblem().addVariable(variable_type, _velocity_names[d], params);
+    }
   }
 
   // Pressure
@@ -106,7 +111,7 @@ WCNSFVFlowPhysics::addNonlinearVariables()
         using_pinsfv_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
 
     auto params = getFactory().getValidParams(pressure_type);
-    assignBlocks(params, _blocks); // TODO: check wrt components
+    assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("mass_scaling")};
     params.set<MooseEnum>("face_interp_method") =
         getParam<MooseEnum>("pressure_face_interpolation");
@@ -126,6 +131,9 @@ WCNSFVFlowPhysics::addNonlinearVariables()
           getParam<bool>("allow_two_term_expansion_on_bernoulli_faces");
     }
 
+    if (_verbose)
+      _console << "Creating variable " << _pressure_name << " on blocks "
+               << Moose::stringify(_blocks) << std::endl;
     getProblem().addVariable(pressure_type, _pressure_name, params);
   }
 }
@@ -576,7 +584,7 @@ WCNSFVFlowPhysics::addINSInletBC()
 
   unsigned int flux_bc_counter = 0;
   unsigned int velocity_pressure_counter = 0;
-  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < momentum_inlet_types.size(); ++bc_ind)
   {
     if (momentum_inlet_types[bc_ind] == "fixed-velocity")
     {
@@ -587,7 +595,7 @@ WCNSFVFlowPhysics::addINSInletBC()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
-        params.set<FunctionName>("function") =
+        params.set<MooseFunctorName>("functor") =
             momentum_inlet_functions[velocity_pressure_counter][d];
 
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _inlet_boundaries[bc_ind], params);
@@ -676,9 +684,8 @@ WCNSFVFlowPhysics::addINSOutletBC()
   const auto momentum_outlet_types = getParam<MultiMooseEnum>("momentum_outlet_types");
 
   const std::string u_names[3] = {"u", "v", "w"};
-  for (unsigned int bc_ind = 0; bc_ind < _outlet_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < momentum_outlet_types.size(); ++bc_ind)
   {
-
     if (momentum_outlet_types[bc_ind] == "zero-gradient" ||
         momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
     {
@@ -758,7 +765,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
   const auto momentum_wall_types = getParam<MultiMooseEnum>("momentum_wall_types");
   const std::string u_names[3] = {"u", "v", "w"};
 
-  for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < momentum_wall_types.size(); ++bc_ind)
   {
     if (momentum_wall_types[bc_ind] == "noslip")
     {
