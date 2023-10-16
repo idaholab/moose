@@ -27,7 +27,7 @@
 #include "ADFunctorInterface.h"
 #include "FaceArgInterface.h"
 
-// Forward declerations
+// Forward declarations
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
