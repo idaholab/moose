@@ -67,7 +67,7 @@ mu='mu'
 
 [AuxKernels]
   [mu_out]
-    type = FunctorElementalAux
+    type = FunctorAux
     functor = mu
     variable = mu_out
     execute_on = timestep_end

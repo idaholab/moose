@@ -47,17 +47,17 @@ N = 10
     execute_on = 'TIMESTEP_END'
   []
   [rho_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'rho_mixture'
     variable = 'density'
   []
   [th_cond_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'k_mixture'
     variable = 'th_cond'
   []
   [cp_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'cp_mixture'
     variable = 'cp_var'
   []

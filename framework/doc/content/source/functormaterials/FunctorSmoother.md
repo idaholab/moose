@@ -22,7 +22,7 @@ The elemental value of the smoothed functor is equal to the average of the curre
 that are the furthest from the current functor element value.
 The logic behind this heuristic is to average neighboring checkerboard values.
 
-The value of the smoothed functor on elements can be visualized using a [FunctorElementalAux.md].
+The value of the smoothed functor on elements can be visualized using a [FunctorAux.md].
 
 !alert note
 No volume or area weighting is currently implemented in the `FunctorSmoother`. Feel free to experiment

@@ -89,27 +89,27 @@ Ny = 50
     execute_on = 'TIMESTEP_END'
   []
   [rho_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'rho_mixture'
     variable = 'density'
   []
   [th_cond_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'k_mixture'
     variable = 'th_cond'
   []
   [cp_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'cp_mixture'
     variable = 'cp_var'
   []
   [darcy_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'Darcy_coefficient'
     variable = 'darcy_coef'
   []
   [fch_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'Forchheimer_coefficient'
     variable = 'fch_coef'
   []

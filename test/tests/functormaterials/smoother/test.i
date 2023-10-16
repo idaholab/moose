@@ -30,7 +30,7 @@
     execute_on = 'TIMESTEP_BEGIN'
   []
   [smooth]
-    type = FunctorElementalAux
+    type = FunctorAux
     variable = smooth
     functor = 'smoothed_functor'
     execute_on = 'TIMESTEP_END'

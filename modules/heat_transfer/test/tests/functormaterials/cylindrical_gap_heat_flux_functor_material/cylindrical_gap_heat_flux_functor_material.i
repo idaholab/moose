@@ -23,19 +23,19 @@
 
 [AuxKernels]
   [q_cond_kern]
-    type = FunctorElementalAux
+    type = FunctorAux
     variable = q_cond
     functor = conduction_heat_flux
     execute_on = 'INITIAL'
   []
   [q_rad_kern]
-    type = FunctorElementalAux
+    type = FunctorAux
     variable = q_rad
     functor = radiation_heat_flux
     execute_on = 'INITIAL'
   []
   [q_total_kern]
-    type = FunctorElementalAux
+    type = FunctorAux
     variable = q_total
     functor = total_heat_flux
     execute_on = 'INITIAL'

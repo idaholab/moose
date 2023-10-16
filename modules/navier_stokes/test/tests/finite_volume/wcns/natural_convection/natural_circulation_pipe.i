@@ -148,13 +148,13 @@ gamma = 1.4
 
 [AuxKernels]
   [rho_var_aux]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = rho_var
     functor = rho
   []
 
   [cp_var_aux]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = cp_var
     functor = cp
   []
