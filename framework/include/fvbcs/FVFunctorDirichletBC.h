@@ -24,6 +24,9 @@ public:
 private:
   /// The value for this BC
   const Moose::Functor<GenericReal<is_ad>> & _functor;
+
+  /// Whether to evaluate the functor on the other side
+  bool _use_other_side;
 };
 
 typedef FVFunctorDirichletBCTempl<false> FVFunctorDirichletBC;

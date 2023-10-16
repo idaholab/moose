@@ -20,12 +20,17 @@ FVFunctorDirichletBCTempl<is_ad>::validParams()
   params.addClassDescription("Uses the value of a functor to set a Dirichlet boundary value.");
   params.addRequiredParam<MooseFunctorName>(
       "functor", "The name of the functor whose value is imposed on the boundary");
+  params.addParam<bool>("functor_defined_on_other_side",
+                        false,
+                        "Whether to evaluate the functor on the other side of the boundary");
   return params;
 }
 
 template <bool is_ad>
 FVFunctorDirichletBCTempl<is_ad>::FVFunctorDirichletBCTempl(const InputParameters & parameters)
-  : FVDirichletBCBase(parameters), _functor(getFunctor<GenericReal<is_ad>>("functor"))
+  : FVDirichletBCBase(parameters),
+    _functor(getFunctor<GenericReal<is_ad>>("functor")),
+    _use_other_side(getParam<bool>("functor_defined_on_other_side"))
 {
 }
 
@@ -33,5 +38,16 @@ template <bool is_ad>
 ADReal
 FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
 {
-  return _functor(singleSidedFaceArg(&fi), determineState());
+  auto sfa = singleSidedFaceArg(&fi);
+  if (!_use_other_side)
+    return _functor(sfa, determineState());
+  else if (fi.elemPtr() == sfa.face_side)
+    return _functor({&fi, Moose::FV::LimiterType::Upwind, true, false, fi.neighborPtr()},
+                    determineState());
+  else
+    return _functor({&fi, Moose::FV::LimiterType::Upwind, true, false, fi.elemPtr()},
+                    determineState());
 }
+
+template class FVFunctorDirichletBCTempl<false>;
+template class FVFunctorDirichletBCTempl<true>;
