@@ -7,8 +7,6 @@
     heated_length = 1.0
     rod_diameter = 0.01
     pitch = 0.012
-    spacer_z = '0 0.2 0.4 0.6 0.8'
-    spacer_k = '0.1 0.1 0.1 0.1 0.10'
   []
 []
 
