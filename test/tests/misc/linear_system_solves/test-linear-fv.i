@@ -7,24 +7,22 @@
 [Problem]
   linear_sys_names = 'u_sys'
   error_on_jacobian_nonzero_reallocation = true
+  solve = false
 []
 
 [Variables]
   [u]
-    type = MooseVariableFVReal
-    nl_sys = 'u'
+    type = MooseLinearVariableFVReal
+    linear_sys = 'u_sys'
   []
 []
 
 [FVKernels]
-  [force]
-    type = FVBodyForce
-    variable = u
-  []
 []
 
 [Executioner]
-  type = LinearPicardSolve
+  type = LinearPicardSteady
+  linear_sys_to_solve = u_sys
 []
 
 [Outputs]

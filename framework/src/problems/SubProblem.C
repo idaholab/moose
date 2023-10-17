@@ -762,25 +762,29 @@ SubProblem::getAxisymmetricRadialCoord() const
   return mesh().getAxisymmetricRadialCoord();
 }
 
-template <typename T>
+template <typename T, typename T2>
 MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
                               const std::vector<T> & nls,
+                              const std::vector<T2> & linear_systems,
                               const SystemBase & aux) const
 {
   // Eventual return value
   MooseVariableFEBase * var = nullptr;
 
   const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  const auto [var_in_linear, linear_sys_num] = determineLinearSystem(var_name);
 
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
   {
     if (var_in_nl)
       var = &(nls[nl_sys_num]->getVariable(tid, var_name));
+    else if (var_in_linear)
+      var = &(linear_systems[linear_sys_num]->getVariable(tid, var_name));
     else if (aux.hasVariable(var_name))
       var = &(aux.getVariable(tid, var_name));
     else
@@ -789,19 +793,25 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
   else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && var_in_nl &&
            nls[nl_sys_num]->hasVariable(var_name))
     var = &(nls[nl_sys_num]->getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_LINEAR && var_in_linear &&
+           linear_systems[linear_sys_num]->hasVariable(var_name))
+    var = &(nls[nl_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else
   {
     std::string expected_var_type_string =
-        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
-    mooseError("No ",
-               expected_var_type_string,
-               " variable named ",
-               var_name,
-               " found. "
-               "Did you specify an auxiliary variable when you meant to specify a nonlinear "
-               "variable (or vice-versa)?");
+        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR
+             ? "nonlinear"
+             : (expected_var_type == Moose::VarKindType::VAR_LINEAR ? "linear" : "auxiliary"));
+    mooseError(
+        "No ",
+        expected_var_type_string,
+        " variable named ",
+        var_name,
+        " found. "
+        "Did you specify an auxiliary variable when you meant to specify a nonlinear or linear "
+        "variable (or vice-versa)?");
   }
 
   // Now make sure the var found has the expected field type.
@@ -1327,6 +1337,7 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
                               const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                              const std::vector<std::shared_ptr<LinearSystem>> & linear_systems,
                               const SystemBase & aux) const;
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
@@ -1334,4 +1345,5 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
                               const std::vector<std::unique_ptr<DisplacedSystem>> & nls,
+                              const std::vector<std::shared_ptr<LinearSystem>> & linear_systems,
                               const SystemBase & aux) const;

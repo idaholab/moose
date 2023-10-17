@@ -2496,6 +2496,7 @@ FEProblemBase::addVariable(const std::string & var_type,
   logAdd("Variable", var_name, var_type);
   if (should_be_linear)
   {
+    params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_LINEAR;
     const auto & linear_sys_name = params.get<NonlinearSystemName>("linear_sys");
     std::istringstream ss(linear_sys_name);
     unsigned int linear_sys_num;
@@ -2511,6 +2512,7 @@ FEProblemBase::addVariable(const std::string & var_type,
   }
   else
   {
+    params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
     const auto & nl_sys_name = params.get<NonlinearSystemName>("nl_sys");
     std::istringstream ss(nl_sys_name);
     unsigned int nl_sys_num;
@@ -5253,6 +5255,9 @@ FEProblemBase::hasVariable(const std::string & var_name) const
   for (auto & nl : _nl)
     if (nl->hasVariable(var_name))
       return true;
+  for (auto & sys : _linear_systems)
+    if (sys->hasVariable(var_name))
+      return true;
   if (_aux->hasVariable(var_name))
     return true;
 
@@ -5265,7 +5270,8 @@ FEProblemBase::getVariable(const THREAD_ID tid,
                            Moose::VarKindType expected_var_type,
                            Moose::VarFieldType expected_var_field_type) const
 {
-  return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, _nl, *_aux);
+  return getVariableHelper(
+      tid, var_name, expected_var_type, expected_var_field_type, _nl, _linear_systems, *_aux);
 }
 
 MooseVariable &
@@ -7847,6 +7853,12 @@ FEProblemBase::getVariableNames()
   {
     const std::vector<VariableName> & nl_var_names = nl->getVariableNames();
     names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
+  }
+
+  for (auto & sys : _linear_systems)
+  {
+    const std::vector<VariableName> & var_names = sys->getVariableNames();
+    names.insert(names.end(), var_names.begin(), var_names.end());
   }
 
   const std::vector<VariableName> & aux_var_names = _aux->getVariableNames();

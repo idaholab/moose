@@ -36,6 +36,11 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
       _fv_vars_by_number[tmp_var->number()] = tmp_var;
       _fv_vars_by_name[var_name] = tmp_var;
     }
+    else if (auto * tmp_var = dynamic_cast<MooseLinearVariableFVReal *>(raw_var))
+    {
+      _linear_fv_vars_by_number[tmp_var->number()] = tmp_var;
+      _linear_fv_vars_by_name[var_name] = tmp_var;
+    }
     else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(raw_var))
     {
       _vector_vars_by_number[tmp_var->number()] = tmp_var;

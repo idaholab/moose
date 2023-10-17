@@ -389,6 +389,10 @@ private:
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
 
+  std::pair<bool, unsigned int>
+  determineLinearSystem(const std::string & var_name,
+                        bool error_if_not_found = false) const override;
+
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };

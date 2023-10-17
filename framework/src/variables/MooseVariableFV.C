@@ -63,17 +63,18 @@ template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _solution(this->_sys.currentSolution()),
-    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly->template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi(this->_assembly->template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face(this->_assembly->template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face(
+        this->_assembly->template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _phi_face_neighbor(
-        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly->template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_face_neighbor(
-        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly->template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_neighbor(this->_assembly->template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly->template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
@@ -83,9 +84,9 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               : true)
 {
   _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
-      *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
+      *this, _sys, _tid, Moose::ElementType::Element, this->_assembly->elem());
   _neighbor_data = std::make_unique<MooseVariableDataFV<OutputType>>(
-      *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
+      *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly->neighbor());
 
   if (this->isParamValid("face_interp_method"))
   {

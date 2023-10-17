@@ -468,8 +468,13 @@ DisplacedProblem::getVariable(const THREAD_ID tid,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type) const
 {
-  return getVariableHelper(
-      tid, var_name, expected_var_type, expected_var_field_type, _displaced_nl, *_displaced_aux);
+  return getVariableHelper(tid,
+                           var_name,
+                           expected_var_type,
+                           expected_var_field_type,
+                           _displaced_nl,
+                           std::vector<std::shared_ptr<LinearSystem>>(),
+                           *_displaced_aux);
 }
 
 MooseVariable &
@@ -1272,6 +1277,13 @@ DisplacedProblem::determineNonlinearSystem(const std::string & var_name,
                                            const bool error_if_not_found) const
 {
   return _mproblem.determineNonlinearSystem(var_name, error_if_not_found);
+}
+
+std::pair<bool, unsigned int>
+DisplacedProblem::determineLinearSystem(const std::string & var_name,
+                                        const bool error_if_not_found) const
+{
+  return _mproblem.determineLinearSystem(var_name, error_if_not_found);
 }
 
 Assembly &

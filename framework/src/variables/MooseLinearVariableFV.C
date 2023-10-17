@@ -473,7 +473,8 @@ MooseLinearVariableFV<OutputType>::evaluateDot(const ElemArg &, const StateArg &
 
 template <>
 ADReal
-MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & /*state*/) const
+MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
+                                         const StateArg & libmesh_dbg_var(state)) const
 {
   const Elem * const elem = elem_arg.elem;
   mooseAssert(state.state == 0,
