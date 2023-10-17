@@ -1,0 +1,24 @@
+[Tests]
+  design = 'Functors/index.md'
+  issues = '#25758'
+  [functor_integration]
+    requirement = 'The system shall be able to compute using the functor system including'
+    [integral]
+      type = CSVDiff
+      input = '3d_dirichlet.i'
+      csvdiff = '3d_dirichlet_out.csv'
+      detail = 'boundary integrals and'
+    []
+    [average]
+      type = CSVDiff
+      input = '3d_dirichlet.i'
+      csvdiff = 'average.csv'
+      detail = 'boundary averages.'
+      cli_args = "Postprocessors/reference_top/type=SideAverageValue
+                  Postprocessors/reference_left/type=SideAverageValue
+                  Postprocessors/computed_top/compute_average=true
+                  Postprocessors/computed_left/compute_average=true
+                  Outputs/file_base=average"
+    []
+  []
+[]
