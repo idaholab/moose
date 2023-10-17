@@ -1,5 +1,3 @@
-power = 2.0
-
 vol_frac = 0.2
 
 [Mesh]
@@ -110,7 +108,6 @@ vol_frac = 0.2
     type = DensityUpdate
     density_sensitivity = Dc
     design_density = mat_den
-    power = ${power}
     volume_fraction = ${vol_frac}
     execute_on = TIMESTEP_BEGIN
   []

@@ -224,7 +224,6 @@ C3 = 1.0
     cost = Cost
     cost_fraction = ${cost_frac}
     design_density = mat_den
-    power = ${power}
     volume_fraction = ${vol_frac}
 
     bisection_lower_bound = 0

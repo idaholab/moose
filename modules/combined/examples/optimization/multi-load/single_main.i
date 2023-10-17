@@ -152,7 +152,6 @@ Emin = 1.0e-6
     type = DensityUpdate
     density_sensitivity = total_sensitivity
     design_density = mat_den
-    power = ${power}
     volume_fraction = ${vol_frac}
     execute_on = MULTIAPP_FIXED_POINT_BEGIN
   []

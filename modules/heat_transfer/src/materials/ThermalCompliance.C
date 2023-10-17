@@ -9,7 +9,7 @@
 
 #include "ThermalCompliance.h"
 
-registerMooseObject("HeatConductionApp", ThermalCompliance);
+registerMooseObject("HeatTransferApp", ThermalCompliance);
 
 InputParameters
 ThermalCompliance::validParams()

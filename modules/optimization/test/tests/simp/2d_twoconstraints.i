@@ -1,4 +1,3 @@
-power = 2.0
 cost_frac = 0.3
 vol_frac = 0.2
 
@@ -150,7 +149,6 @@ vol_frac = 0.2
     cost = Cost
     cost_fraction = ${cost_frac}
     design_density = mat_den
-    power = ${power}
     volume_fraction = ${vol_frac}
     bisection_lower_bound = 0
     bisection_upper_bound = 1.0e16

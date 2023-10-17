@@ -183,7 +183,6 @@ power = 2
     type = DensityUpdate
     density_sensitivity = Dc_elem
     design_density = mat_den
-    power = ${power}
     volume_fraction = ${vol_frac}
     execute_on = TIMESTEP_BEGIN
     force_postaux = true
