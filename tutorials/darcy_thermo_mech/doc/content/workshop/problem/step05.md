@@ -15,19 +15,19 @@ Initially, only the steady heat conduction equation is considered:
 -\nabla \cdot k \nabla T = 0
 
 This is another diffusion-type term that depends on the thermal conductivity, $k$. This term is
-implemented in the MOOSE heat conduction module as `ADHeatConduction`.
+implemented in the MOOSE heat transfer module as `ADHeatConduction`.
 
 !---
 
 ## ADHeatConduction.h
 
-!listing heat_conduction/include/kernels/ADHeatConduction.h
+!listing heat_transfer/include/kernels/ADHeatConduction.h
 
 !---
 
 ## ADHeatConduction.C
 
-!listing heat_conduction/src/kernels/ADHeatConduction.C
+!listing heat_transfer/src/kernels/ADHeatConduction.C
 
 !---
 
@@ -76,7 +76,7 @@ To create a time-dependent problem add in the time derivative:
 !equation
 C \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
 
-The time term exists in the heat conduction module as `ADHeatConductionTimeDerivative`, thus
+The time term exists in the heat transfer module as `ADHeatConductionTimeDerivative`, thus
 only an update to the input file is required to run the transient case.
 
 !!end-steady
@@ -85,13 +85,13 @@ only an update to the input file is required to run the transient case.
 
 ## ADHeatConductionTimeDerivative.h
 
-!listing heat_conduction/include/kernels/ADHeatConductionTimeDerivative.h
+!listing heat_transfer/include/kernels/ADHeatConductionTimeDerivative.h
 
 !---
 
 ## ADHeatConductionTimeDerivative.C
 
-!listing heat_conduction/src/kernels/ADHeatConductionTimeDerivative.C
+!listing heat_transfer/src/kernels/ADHeatConductionTimeDerivative.C
 
 !---
 

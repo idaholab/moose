@@ -3,7 +3,7 @@ Content:
     - modules/thermal_hydraulics/doc/content
     - modules/thermal_hydraulics/test/doc/content
     - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/misc/doc/content
     - modules/navier_stokes/doc/content
     - modules/ray_tracing/doc/content
@@ -38,7 +38,7 @@ Extensions:
             - framework/include
             - modules/thermal_hydraulics/include
             - modules/fluid_properties/include
-            - modules/heat_conduction/include
+            - modules/heat_transfer/include
             - modules/misc/include
             - modules/navier_stokes/include
             - modules/ray_tracing/include
@@ -67,7 +67,7 @@ Extensions:
             framework: !include framework/doc/sqa_framework.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
-            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
             misc: !include modules/misc/doc/sqa_misc.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml

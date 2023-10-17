@@ -1,0 +1,9 @@
+directories:
+    - ${MOOSE_DIR}/modules/heat_transfer/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+    - ray_tracing
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/heat_transfer/doc/sqa_reports.yml

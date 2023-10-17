@@ -2,7 +2,7 @@ Content:
     - framework/doc/content
     - modules/navier_stokes/doc/content
     - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/ray_tracing/doc/content
 
 Renderer:
@@ -23,7 +23,7 @@ Extensions:
             - framework/include
             - modules/navier_stokes/include
             - modules/fluid_properties/include
-            - modules/heat_conduction/include
+            - modules/heat_transfer/include
             - modules/ray_tracing/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml

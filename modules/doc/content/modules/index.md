@@ -11,7 +11,7 @@ application.
 - [Fluid-Structure Interaction](modules/fsi/index.md)
 - [Functional Expansion Tools](modules/functional_expansion_tools/index.md)
 - [Geochemistry](modules/geochemistry/index.md)
-- [Heat Conduction](modules/heat_conduction/index.md)
+- [Heat Transfer](modules/heat_transfer/index.md)
 - [Level Set](modules/level_set/index.md)
 - [Misc](modules/misc/index.md)
 - [Navier-Stokes](modules/navier_stokes/index.md)

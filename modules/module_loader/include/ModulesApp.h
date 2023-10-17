@@ -35,6 +35,9 @@
 #ifdef HEAT_CONDUCTION_ENABLED
 #include "HeatConductionApp.h"
 #endif
+#ifdef HEAT_TRANSFER_ENABLED
+#include "HeatTransferApp.h"
+#endif
 #ifdef LEVEL_SET_ENABLED
 #include "LevelSetApp.h"
 #endif
@@ -135,8 +138,8 @@ ModulesApp::registerAllObjects(Factory & f, ActionFactory & af, Syntax & s)
   GeochemistryApp::registerAll(f, af, s);
 #endif
 
-#ifdef HEAT_CONDUCTION_ENABLED
-  HeatConductionApp::registerAll(f, af, s);
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::registerAll(f, af, s);
 #endif
 
 #ifdef LEVEL_SET_ENABLED

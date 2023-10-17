@@ -85,7 +85,7 @@ of snow subjected to radiative cooling at the surface and internal heating due t
 
 ## Practice: Simulation
 
-The heat conduction module is capable of performing this simulation, thus only an input file is
+The heat transfer module is capable of performing this simulation, thus only an input file is
 needed to simulate this problem.
 
 !---
@@ -171,11 +171,11 @@ System.
 
 ## Practice: Run
 
-Executing the simulation is straightforward, simply execute the heat conduction module executable
+Executing the simulation is straightforward, simply execute the heat transfer module executable
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_conduction/heat_conduction-opt -i 2d_main.i
+~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 2d_main.i
 ```
 
 !---

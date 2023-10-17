@@ -1,0 +1,38 @@
+Applications:
+    heat_transfer:
+        exe_directory: ${MOOSE_DIR}/modules/heat_transfer
+        app_types:
+            - HeatConductionApp
+        content_directory: ${MOOSE_DIR}/modules/heat_transfer/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_stub_files: WARNING
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/heat_transfer_srs.md
+    software_design_description: sqa/heat_transfer_sdd.md
+    software_test_plan: sqa/heat_transfer_stp.md
+    requirements_traceability_matrix: sqa/heat_transfer_rtm.md
+    verification_validation_report: sqa/heat_transfer_vvr.md
+    failure_analysis_report: sqa/heat_transfer_far.md
+    software_library_list: sqa/heat_transfer_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+
+Requirements:
+    heat_transfer:
+        directories:
+            - ${MOOSE_DIR}/modules/heat_transfer
+        log_duplicate_requirement: WARNING
+        log_testable: WARNING
