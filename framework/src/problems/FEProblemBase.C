@@ -2484,22 +2484,46 @@ FEProblemBase::addVariable(const std::string & var_type,
   if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ false))
     return;
 
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  const bool should_be_linear = params.isParamValid("linear_sys");
+  const bool should_be_nonlinear = params.isParamSetByUser("nl_sys");
+  if (should_be_linear && should_be_nonlinear)
+    mooseError("'linear_sys' and 'nl_sys' should not be both used for a parameter!");
 
-  const auto & nl_sys_name = params.get<NonlinearSystemName>("nl_sys");
-  std::istringstream ss(nl_sys_name);
-  unsigned int nl_sys_num;
-  if (!(ss >> nl_sys_num) || !ss.eof())
-    nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") =
+      should_be_linear ? Moose::VarKindType::VAR_LINEAR : Moose::VarKindType::VAR_NONLINEAR;
 
   logAdd("Variable", var_name, var_type);
-  _nl[nl_sys_num]->addVariable(var_type, var_name, params);
-  if (_displaced_problem)
-    // MooseObjects need to be unique so change the name here
-    _displaced_problem->addVariable(var_type, var_name, params, nl_sys_num);
+  if (should_be_linear)
+  {
+    const auto & linear_sys_name = params.get<NonlinearSystemName>("linear_sys");
+    std::istringstream ss(linear_sys_name);
+    unsigned int linear_sys_num;
+    if (!(ss >> linear_sys_num) || !ss.eof())
+      linear_sys_num = libmesh_map_find(_linear_sys_name_to_num, linear_sys_name);
 
-  _nl_var_to_sys_num[var_name] = nl_sys_num;
+    _linear_systems[linear_sys_num]->addVariable(var_type, var_name, params);
+    if (_displaced_problem)
+      // MooseObjects need to be unique so change the name here
+      _displaced_problem->addVariable(var_type, var_name, params, linear_sys_num);
+
+    _linear_var_to_sys_num[var_name] = linear_sys_num;
+  }
+  else
+  {
+    const auto & nl_sys_name = params.get<NonlinearSystemName>("nl_sys");
+    std::istringstream ss(nl_sys_name);
+    unsigned int nl_sys_num;
+    if (!(ss >> nl_sys_num) || !ss.eof())
+      nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
+
+    _nl[nl_sys_num]->addVariable(var_type, var_name, params);
+    if (_displaced_problem)
+      // MooseObjects need to be unique so change the name here
+      _displaced_problem->addVariable(var_type, var_name, params, nl_sys_num);
+
+    _nl_var_to_sys_num[var_name] = nl_sys_num;
+  }
 }
 
 std::pair<bool, unsigned int>

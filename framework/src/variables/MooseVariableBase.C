@@ -69,6 +69,9 @@ MooseVariableBase::validParams()
                                        "nl0",
                                        "If this variable is a nonlinear variable, this is the "
                                        "nonlinear system to which it should be added.");
+  params.addParam<NonlinearSystemName>("linear_sys",
+                                       "If this variable is a linear variable, this is the "
+                                       "linear system to which it should be added.");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
