@@ -20,6 +20,9 @@
 template <typename>
 class MooseVariableFV;
 
+template <typename>
+class MooseLinearVariableFV;
+
 namespace Moose
 {
 namespace FV
@@ -125,5 +128,10 @@ loopOverElemFaceInfo(const Elem & elem,
 template <typename OutputType>
 std::tuple<const Elem *, const Elem *, bool>
 determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var);
+
+template <typename OutputType>
+std::tuple<const Elem *, const Elem *, bool>
+determineElemOneAndTwo(const FaceInfo & fi, const MooseLinearVariableFV<OutputType> & var);
+
 }
 }
