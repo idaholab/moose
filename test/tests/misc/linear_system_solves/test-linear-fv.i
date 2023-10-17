@@ -14,10 +14,11 @@
   [u]
     type = MooseLinearVariableFVReal
     linear_sys = 'u_sys'
+    initial_condition = 1.0
   []
 []
 
-[FVKernels]
+[LinearFVKernels]
 []
 
 [Executioner]

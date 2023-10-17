@@ -97,6 +97,7 @@
 #include "FVKernel.h"
 #include "FVTimeKernel.h"
 #include "MooseVariableFV.h"
+#include "MooseLinearVariableFV.h"
 #include "FVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
 #include "Reporter.h"
@@ -3183,6 +3184,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         ic = _factory.create<ArrayInitialCondition>(ic_name, name, parameters, tid);
       else if (dynamic_cast<MooseVariableFVReal *>(&var))
         ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
+      else if (dynamic_cast<MooseLinearVariableFVReal *>(&var))
+        ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       else
         mooseError("Your FE variable in initial condition ",
                    name,
@@ -5292,6 +5295,9 @@ FEProblemBase::getActualFieldVariable(const THREAD_ID tid, const std::string & v
   for (auto & nl : _nl)
     if (nl->hasVariable(var_name))
       return nl->getActualFieldVariable<Real>(tid, var_name);
+  for (auto & sys : _linear_systems)
+    if (sys->hasVariable(var_name))
+      return sys->getActualFieldVariable<Real>(tid, var_name);
   if (_aux->hasVariable(var_name))
     return _aux->getActualFieldVariable<Real>(tid, var_name);
 
@@ -5304,6 +5310,9 @@ FEProblemBase::getVectorVariable(const THREAD_ID tid, const std::string & var_na
   for (auto & nl : _nl)
     if (nl->hasVariable(var_name))
       return nl->getFieldVariable<RealVectorValue>(tid, var_name);
+  for (auto & sys : _linear_systems)
+    if (sys->hasVariable(var_name))
+      return sys->getFieldVariable<RealVectorValue>(tid, var_name);
   if (_aux->hasVariable(var_name))
     return _aux->getFieldVariable<RealVectorValue>(tid, var_name);
 
@@ -5316,6 +5325,9 @@ FEProblemBase::getArrayVariable(const THREAD_ID tid, const std::string & var_nam
   for (auto & nl : _nl)
     if (nl->hasVariable(var_name))
       return nl->getFieldVariable<RealEigenVector>(tid, var_name);
+  for (auto & sys : _linear_systems)
+    if (sys->hasVariable(var_name))
+      return sys->getFieldVariable<RealEigenVector>(tid, var_name);
   if (_aux->hasVariable(var_name))
     return _aux->getFieldVariable<RealEigenVector>(tid, var_name);
 
@@ -5327,6 +5339,9 @@ FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
   for (auto & nl : _nl)
     if (nl->hasScalarVariable(var_name))
+      return true;
+  for (auto & sys : _linear_systems)
+    if (sys->hasScalarVariable(var_name))
       return true;
   if (_aux->hasScalarVariable(var_name))
     return true;
@@ -5340,6 +5355,9 @@ FEProblemBase::getScalarVariable(const THREAD_ID tid, const std::string & var_na
   for (auto & nl : _nl)
     if (nl->hasScalarVariable(var_name))
       return nl->getScalarVariable(tid, var_name);
+  for (auto & sys : _linear_systems)
+    if (sys->hasScalarVariable(var_name))
+      return sys->getScalarVariable(tid, var_name);
   if (_aux->hasScalarVariable(var_name))
     return _aux->getScalarVariable(tid, var_name);
 
@@ -5350,8 +5368,11 @@ System &
 FEProblemBase::getSystem(const std::string & var_name)
 {
   const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  const auto [var_in_linear, linear_sys_num] = determineLinearSystem(var_name);
   if (var_in_nl)
     return _nl[nl_sys_num]->system();
+  else if (var_in_linear)
+    return _linear_systems[linear_sys_num]->system();
   else if (_aux->hasVariable(var_name))
     return _aux->system();
   else
