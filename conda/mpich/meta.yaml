@@ -57,6 +57,7 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
+    - {{ moose_libarchive}}     # [linux]
     - cmake
     - make
     - libtool
@@ -66,9 +67,10 @@ requirements:
     - zfp 0.5.5
     - bison 3.4
     - mpi 1.0 mpich
-  # Python min/max constraints
+  # Python min/max constraints.
   run_constrained:
     - python <{{3.11}}
+    - clang-format ==14
 
 test:
   commands:

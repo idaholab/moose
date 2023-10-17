@@ -20,8 +20,10 @@ requirements:
     - {{ moose_python }}
     - setuptools
   run:
+    - {{ moose_libclang }}
+    - {{ moose_libclang13 }}
     - beautifulsoup4
-    - clang-tools 14
+    - clang-format 14
     - deepdiff
     - gitpython
     - graphviz

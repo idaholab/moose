@@ -33,80 +33,72 @@ requirements:
     - clang-format 14
 
   run:
-    - mpich {{ version }}
+    - autoconf
+    - automake 1.16.5
+    - beautifulsoup4
+    - bison 3.4
+    - clang-format 14
+    - clang                            # [osx]
+    - clang-tools
+    - clangxx                          # [osx]
+    - cmake
+    - deepdiff
+    - gitpython
+    - graphviz
+    - hdf5 1.14* mpi_mpich*
+    - icu
+    - jinja2
+    - krb5
+    - ld64                             # [osx]
+    - libclang
+    - libclang13
+    - libgfortran
+    - libgfortran5
+    - libglu                           # [linux]
+    - libice-devel-cos7-x86_64         # [linux]
+    - libpng
+    - libsm-devel-cos7-x86_64          # [linux]
+    - libtool
+    - libx11-devel-cos7-x86_64         # [linux]
+    - libxext-devel-cos7-x86_64        # [linux]
+    - libxt-devel-cos7-x86_64          # [linux]
+    - livereload
+    - lxml
+    - m4
+    - make
+    - mako
+    - matplotlib
+    - mesa-libgl-devel-cos7-x86_64     # [linux]
+    - mesalib                          # [linux]
+    - mock
+    - mpi 1.0 mpich
     - mpich-mpicc {{ version }}
     - mpich-mpicxx {{ version }}
     - mpich-mpifort {{ version }}
-    - libgfortran
-    - libgfortran5
-    - hdf5 1.* mpi_mpich*
-    - krb5
-    - icu
-    - cmake
-    - make
-    - libtool
-    - autoconf
-    - automake 1.16.5
-    - m4
-    - zfp 0.5.5
-    - bison 3.4
-    - mpi 1.0 mpich
-    - pandas
-    - vtk
-    - matplotlib
-    - pyqt
-    - qt
-    - pkg-config
-    - libpng
-    - packaging
-    - setuptools <60
-    - beautifulsoup4
-    - livereload
-    - pybtex
-    - mock
-    - pylatexenc
-    - python
-    - clang-tools
+    - mpich {{ version }}
     - numpy
-    - matplotlib
-    - pandas
-    - pyyaml
-    - lxml
-    - scikit-image
-    - sympy
-    - deepdiff
-    - pylatexenc
-    - jinja2
-    - mako
-    - yaml
-    - setuptools
-    - graphviz
-    - pylint
-    - psycopg2
-    - pycobertura
-    - tabulate
-    - gitpython
     - packaging
+    - pandas
+    - pkg-config
+    - psycopg2
+    - pybtex
+    - pycobertura
     - pyflakes
-    - python
-    - xmltodict
-    - libclang
-    - libclang13
-    - vtk
-    - ld64                             # [osx]
-    - clang                            # [osx]
-    - clangxx                          # [osx]
-    - libxt-devel-cos7-x86_64          # [linux]
-    - libsm-devel-cos7-x86_64          # [linux]
-    - libx11-devel-cos7-x86_64         # [linux]
-    - libice-devel-cos7-x86_64         # [linux]
-    - libxext-devel-cos7-x86_64        # [linux]
-    - mesa-libgl-devel-cos7-x86_64     # [linux]
-    - xorg-x11-proto-devel-cos7-x86_64 # [linux]
-    - libglu                           # [linux]
-    - mesalib                          # [linux]
+    - pylatexenc
+    - pylint
+    - pyqt
     - python 3.10
-    - clang-format 14
+    - pyyaml
+    - qt
+    - scikit-image
+    - setuptools <60
+    - sympy
+    - tabulate
+    - vtk
+    - xmltodict
+    - xorg-x11-proto-devel-cos7-x86_64 # [linux]
+    - yaml
+    - zfp 0.5.5
   # Python min/max constraints
   run_constrained:
     - python <{{3.11}}

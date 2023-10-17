@@ -1,6 +1,16 @@
 moose_mpich:
   - moose-mpich 4.0.3 build_0
 
+moose_libclang:
+  - libclang 14.0.6 default_h7634d5b_1                      # [linux]
+  - libclang 14.0.6 default_hdb78580_1                      # [not arm64 and osx]
+  - libclang 14.0.6 default_h5dc8d65_1                      # [arm64]
+
+moose_libclang13:
+  - libclang13 14.0.6 default_h9986a30_1                    # [linux]
+  - libclang13 14.0.6 default_h953c2e9_1                    # [not arm64 and osx]
+  - libclang13 14.0.6 default_hc7183e1_1                    # [arm64]
+
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
 setuptools:

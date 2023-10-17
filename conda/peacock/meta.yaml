@@ -19,6 +19,8 @@ requirements:
   build:
     - {{ moose_mpich }}
   run:
+    - {{ moose_libclang }}
+    - {{ moose_libclang13 }}
     - pandas
     - matplotlib
     - pyqt
