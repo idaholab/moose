@@ -44,7 +44,7 @@ require_total = 82
 [geochemistry]
 require_total = 96
 
-[heat_conduction]
+[heat_transfer]
 require_total = 87
 
 [level_set]
