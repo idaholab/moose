@@ -24,7 +24,7 @@
 #include <functional>
 
 /**
- * A material property that is evaluated on-the-fly via calls to various overloads of \p operator()
+ * A functor property that is evaluated on-the-fly via calls to various overloads of \p operator()
  */
 template <typename T>
 class BoundaryIntegralFunctor : public Moose::FunctorBase<T>
@@ -141,7 +141,7 @@ BoundaryIntegralFunctor<T>::evaluate(const Moose::FaceArg & face,
                                      const Moose::StateArg & time) const
 {
   using namespace Moose::FV;
-  auto binfo = _mesh.getMesh().get_boundary_info();
+  auto & binfo = _mesh.getMesh().get_boundary_info();
 
   // Compute the surface integral
   T sum = 0;
@@ -201,4 +201,78 @@ BoundaryIntegralFunctor<T>::evaluate(const Moose::NodeArg & /*node_arg*/,
                                      const Moose::StateArg & /*time*/) const
 {
   mooseError("ElemPointArg argument is not implemented for the BoundaryIntegralFunctor");
+}
+
+/**
+ * A functor that is evaluated on-the-fly via calls to various overloads of \p operator()
+ */
+template <typename T>
+class BoundaryAverageFunctor : public BoundaryIntegralFunctor<T>
+{
+public:
+  BoundaryAverageFunctor(const std::string & name,
+                         const Moose::FunctorEnvelope<T> & functor,
+                         const std::set<ExecFlagType> & clearance_schedule,
+                         const MooseMesh & mesh,
+                         const BoundaryID boundary_id);
+
+  virtual ~BoundaryAverageFunctor() = default;
+
+  using typename Moose::FunctorBase<T>::FunctorType;
+  using typename Moose::FunctorBase<T>::ValueType;
+  using typename Moose::FunctorBase<T>::FunctorReturnType;
+  using BoundaryIntegralFunctor<T>::hasBlocks;
+  using BoundaryIntegralFunctor<T>::subdomainErrorMessage;
+  using BoundaryIntegralFunctor<T>::_mesh;
+  using BoundaryIntegralFunctor<T>::_bid;
+  using BoundaryIntegralFunctor<T>::_functor;
+
+protected:
+  ValueType evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const override;
+};
+
+template <typename T>
+BoundaryAverageFunctor<T>::BoundaryAverageFunctor(const std::string & name,
+                                                  const Moose::FunctorEnvelope<T> & functor,
+                                                  const std::set<ExecFlagType> & clearance_schedule,
+                                                  const MooseMesh & mesh,
+                                                  const BoundaryID boundary_id)
+  : BoundaryIntegralFunctor<T>(name, functor, clearance_schedule, mesh, boundary_id)
+{
+}
+
+template <typename T>
+typename BoundaryAverageFunctor<T>::ValueType
+BoundaryAverageFunctor<T>::evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const
+{
+  using namespace Moose::FV;
+  auto & binfo = _mesh.getMesh().get_boundary_info();
+
+  // Compute the surface integral
+  T sum = 0;
+  T area = 0;
+  for (const auto & [elem_id, side_id, bc_id] :
+       binfo.build_side_list(libMesh::BoundaryInfo::BCTupleSortBy::BOUNDARY_ID))
+  {
+    if (bc_id != _bid)
+      continue;
+    const auto elem = _mesh.elemPtr(elem_id);
+    const auto fi = _mesh.faceInfo(elem, side_id);
+    mooseAssert(fi, "We should have a face info");
+    Moose::FaceArg face_arg = {fi, Moose::FV::LimiterType::CentralDifference, true, true, nullptr};
+    sum += _functor(face_arg, time) * fi->faceArea() * fi->faceCoord();
+    area += fi->faceArea() * fi->faceCoord();
+  }
+
+  if (face.face_side)
+  {
+    const auto sub_id = face.face_side->subdomain_id();
+    if (!hasBlocks(sub_id))
+      subdomainErrorMessage(sub_id);
+
+    return sum / area;
+  }
+  mooseAssert(this->isInternalFace(*face.fi),
+              "If we did not have a face side, then we must be an internal face");
+  return sum / area;
 }
