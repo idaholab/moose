@@ -521,11 +521,11 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
 /Mesh/type (2:2)                   detail:               kind: 26
 /Mesh/type/decl (2:2)              detail:               kind:  7
 /Mesh/type/= (2:7)                 detail:               kind:  7
-/Mesh/type/value (2:9)             detail:               kind: 26
+/Mesh/type/value (2:9)             detail:               kind: 15
 /Mesh/dim (3:2)                    detail:               kind: 16
 /Mesh/dim/decl (3:2)               detail:               kind:  7
 /Mesh/dim/= (3:6)                  detail:               kind:  7
-/Mesh/dim/value (3:8)              detail:               kind: 16
+/Mesh/dim/value (3:8)              detail:               kind: 15
 /Mesh/term (4:0)                   detail:               kind:  7
 /Variables (5:0)                   detail:               kind: 23
 /Variables/[ (5:0)                 detail:               kind:  7
@@ -569,7 +569,7 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
 /BCs/all/type (17:4)               detail:               kind: 26
 /BCs/all/type/decl (17:4)          detail:               kind:  7
 /BCs/all/type/= (17:9)             detail:               kind:  7
-/BCs/all/type/value (17:11)        detail:               kind: 26
+/BCs/all/type/value (17:11)        detail:               kind: 15
 /BCs/all/boundary (18:4)           detail:               kind: 18
 /BCs/all/boundary/decl (18:4)      detail:               kind:  7
 /BCs/all/boundary/= (18:13)        detail:               kind:  7
@@ -590,7 +590,7 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
 /Executioner/type (23:2)           detail:               kind: 26
 /Executioner/type/decl (23:2)      detail:               kind:  7
 /Executioner/type/= (23:7)         detail:               kind:  7
-/Executioner/type/value (23:9)     detail:               kind: 26
+/Executioner/type/value (23:9)     detail:               kind: 15
 /Executioner/term (24:0)           detail:               kind:  7
 /Problem (25:0)                    detail:               kind: 23
 /Problem/[ (25:0)                  detail:               kind:  7
@@ -599,7 +599,7 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
 /Problem/solve (26:2)              detail:               kind: 17
 /Problem/solve/decl (26:2)         detail:               kind:  7
 /Problem/solve/= (26:8)            detail:               kind:  7
-/Problem/solve/value (26:10)       detail:               kind: 17
+/Problem/solve/value (26:10)       detail:               kind: 15
 /Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 
@@ -757,11 +757,11 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
 /Mesh/type (2:2)                   detail:               kind: 26
 /Mesh/type/decl (2:2)              detail:               kind:  7
 /Mesh/type/= (2:7)                 detail:               kind:  7
-/Mesh/type/value (2:9)             detail:               kind: 26
+/Mesh/type/value (2:9)             detail:               kind: 15
 /Mesh/dim (3:2)                    detail:               kind: 16
 /Mesh/dim/decl (3:2)               detail:               kind:  7
 /Mesh/dim/= (3:6)                  detail:               kind:  7
-/Mesh/dim/value (3:8)              detail:               kind: 16
+/Mesh/dim/value (3:8)              detail:               kind: 15
 /Mesh/term (4:0)                   detail:               kind:  7
 /Variables (5:0)                   detail:               kind: 23
 /Variables/[ (5:0)                 detail:               kind:  7
@@ -805,7 +805,7 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
 /BCs/all/type (17:4)               detail:               kind: 26
 /BCs/all/type/decl (17:4)          detail:               kind:  7
 /BCs/all/type/= (17:9)             detail:               kind:  7
-/BCs/all/type/value (17:11)        detail:               kind: 26
+/BCs/all/type/value (17:11)        detail:               kind: 15
 /BCs/all/boundary (18:4)           detail:               kind: 18
 /BCs/all/boundary/decl (18:4)      detail:               kind:  7
 /BCs/all/boundary/= (18:13)        detail:               kind:  7
@@ -828,7 +828,7 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
 /Executioner/type (23:2)           detail:               kind: 26
 /Executioner/type/decl (23:2)      detail:               kind:  7
 /Executioner/type/= (23:7)         detail:               kind:  7
-/Executioner/type/value (23:9)     detail:               kind: 26
+/Executioner/type/value (23:9)     detail:               kind: 15
 /Executioner/term (24:0)           detail:               kind:  7
 /Problem (25:0)                    detail:               kind: 23
 /Problem/[ (25:0)                  detail:               kind:  7
@@ -837,7 +837,7 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
 /Problem/solve (26:2)              detail:               kind: 17
 /Problem/solve/decl (26:2)         detail:               kind:  7
 /Problem/solve/= (26:8)            detail:               kind:  7
-/Problem/solve/value (26:10)       detail:               kind: 17
+/Problem/solve/value (26:10)       detail:               kind: 15
 /Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 

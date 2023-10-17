@@ -1046,40 +1046,37 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
 int
 MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
 {
-  auto is_boolean = [](const std::string & value)
+  // lambdas that check if parameter is a boolean or number for symbol kind
+  auto is_boolean = [](wasp::HITNodeView symbol_node)
   {
     bool convert;
-    std::istringstream iss(MooseUtils::toLower(value));
+    std::istringstream iss(MooseUtils::toLower(symbol_node.last_as_string()));
     return (iss >> std::boolalpha >> convert && !iss.fail());
   };
-  auto is_number = [](const std::string & value)
+  auto is_number = [](wasp::HITNodeView symbol_node)
   {
     double convert;
-    std::istringstream iss(value);
+    std::istringstream iss(symbol_node.last_as_string());
     return (iss >> convert && iss.eof());
   };
-  int symbol_kind;
+
+  // set up document symbol kind value that client may use for outline icon
   if (symbol_node.type() == wasp::OBJECT)
-    symbol_kind = wasp::lsp::m_symbol_kind_struct;
-  else if (symbol_node.type() == wasp::ARRAY)
-    symbol_kind = wasp::lsp::m_symbol_kind_array;
-  else if (symbol_node.type() == wasp::KEYED_VALUE || symbol_node.type() == wasp::VALUE)
-    if ((symbol_node.type() == wasp::KEYED_VALUE && symbol_node.name() == std::string("type")) ||
-        (symbol_node.type() == wasp::VALUE && symbol_node.parent().name() == std::string("type")))
-      symbol_kind = wasp::lsp::m_symbol_kind_type_param;
-    else if (is_boolean(symbol_node.last_as_string()))
-      symbol_kind = wasp::lsp::m_symbol_kind_boolean;
-    else if (is_number(symbol_node.last_as_string()))
-      symbol_kind = wasp::lsp::m_symbol_kind_number;
-    else if (symbol_node.type() == wasp::KEYED_VALUE)
-      symbol_kind = wasp::lsp::m_symbol_kind_key;
-    else
-      symbol_kind = wasp::lsp::m_symbol_kind_string;
+    return wasp::lsp::m_symbol_kind_struct;
   else if (symbol_node.type() == wasp::FILE)
-    symbol_kind = wasp::lsp::m_symbol_kind_file;
-  else if (symbol_node.is_decorative())
-    symbol_kind = wasp::lsp::m_symbol_kind_property;
+    return wasp::lsp::m_symbol_kind_file;
+  else if (symbol_node.type() == wasp::ARRAY)
+    return wasp::lsp::m_symbol_kind_array;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && symbol_node.name() == std::string("type"))
+    return wasp::lsp::m_symbol_kind_type_param;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && is_boolean(symbol_node))
+    return wasp::lsp::m_symbol_kind_boolean;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && is_number(symbol_node))
+    return wasp::lsp::m_symbol_kind_number;
+  else if (symbol_node.type() == wasp::KEYED_VALUE)
+    return wasp::lsp::m_symbol_kind_key;
+  else if (symbol_node.type() == wasp::VALUE)
+    return wasp::lsp::m_symbol_kind_string;
   else
-    symbol_kind = wasp::lsp::m_symbol_kind_null;
-  return symbol_kind;
+    return wasp::lsp::m_symbol_kind_property;
 }
