@@ -1,4 +1,46 @@
 [Tests]
+  [exception_backstress_test_0]
+    type = 'CSVDiff'
+    input = 'exception_backstress.i'
+    csvdiff = 'exception_backstress_out_0.csv'
+    rel_err = 1.0
+    abs_zero = 1e-7
+    cli_args = 'Materials/trial_xtalpl/c_bs=1.0e4 '
+               'Materials/trial_xtalpl/c_bs=1.0e2 '
+               'Outputs/file_base=exception_backstress_out_0'
+    allow_warnings = true
+    issues = '#25757'
+    requirement = 'The material-based crystal plasticity model shall compute the backstress stress.'
+    design = '/CrystalPlasticityKalidindiBackstressUpdate.md'
+  []  
+  [exception_backstress_test_1]
+    type = 'CSVDiff'
+    input = 'exception_backstress.i'
+    csvdiff = 'exception_backstress_out_1.csv'
+    rel_err = 1.0
+    abs_zero = 1e-7
+    cli_args = 'Materials/trial_xtalpl/c_bs=0.0 '
+               'Materials/trial_xtalpl/c_bs=1.0e2 '
+               'Outputs/file_base=exception_backstress_out_1'
+    allow_warnings = true
+    issues = '#25757'
+    requirement = 'The material-based crystal plasticity model shall compute the backstress stress.'
+    design = '/CrystalPlasticityKalidindiBackstressUpdate.md'
+  [] 
+  [exception_backstress_test_2]
+    type = 'CSVDiff'
+    input = 'exception_backstress.i'
+    csvdiff = 'exception_backstress_out_2.csv'
+    rel_err = 1.0
+    abs_zero = 1e-7
+    cli_args = 'Materials/trial_xtalpl/c_bs=1.0e4 '
+               'Materials/trial_xtalpl/c_bs=0.0 '
+               'Outputs/file_base=exception_backstress_out_2'
+    allow_warnings = true
+    issues = '#25757'
+    requirement = 'The material-based crystal plasticity model shall compute the backstress stress.'
+    design = '/CrystalPlasticityKalidindiBackstressUpdate.md'
+  [] 
   [update_model_test]
     type = 'Exodiff'
     input = 'update_method_test.i'

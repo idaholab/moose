@@ -18,7 +18,7 @@
    \dot{\gamma}^\alpha = \dot{\gamma}_o * |(\tau^\alpha - \chi^\alpha) / g^\alpha|^M * sgn(\tau^\alpha - \chi^\alpha)
 
    Armstrong-Frederick backstress term:
-   \dot{\chi}^\alpha = h * \dot{\gamma}^\alpha - r * |\dot{\gamma}^\alpha| * \chi^\alpha
+   \dot{\chi}^\alpha = c_{bs} * \dot{\gamma}^\alpha - d_{bs} * |\dot{\gamma}^\alpha| * \chi^\alpha
 
    Reference: https://github.com/ngrilli/c_pfor_am/blob/main/src/materials/CrystalPlasticityDislocationUpdate.C
 */
@@ -27,14 +27,14 @@
 
 #include "CrystalPlasticityKalidindiUpdate.h"
 
-class CrystalPlasticityKalidindiBackstress;
+class CrystalPlasticityKalidindiBackstressUpdate;
 
-class CrystalPlasticityKalidindiBackstress : public CrystalPlasticityKalidindiUpdate
+class CrystalPlasticityKalidindiBackstressUpdate : public CrystalPlasticityKalidindiUpdate
 {
 public:
   static InputParameters validParams();
 
-  CrystalPlasticityKalidindiBackstress(const InputParameters & parameters);
+  CrystalPlasticityKalidindiBackstressUpdate(const InputParameters & parameters);
 
 protected:
   /**
@@ -77,16 +77,21 @@ protected:
    */
   virtual bool updateStateVariables() override;
 
-  // This function updates the backstress
+  /*
+    Update of the Armstrong-Frederick backstress term.
+    Reference: Armstrong, P.J., Frederick, C.O., 1966.
+    G.E.G.B. Report RD/B/N. Central Electricity Generating Board.
+    Backstress term modified in this function.
+  */
   virtual void ArmstrongFrederickBackstressUpdate();
 
-  const Real _h;
-  const Real _h_D;
+  const Real _c_bs;
+  const Real _d_bs;
 
   // Backstress for each slip system
   MaterialProperty<std::vector<Real>> & _backstress;
   const MaterialProperty<std::vector<Real>> & _backstress_old;
-  std::vector<Real> _backstress_increment;
+  MaterialProperty<std::vector<Real>> & _backstress_increment;
 
   std::vector<Real> _previous_substep_backstress;
   std::vector<Real> _backstress_before_update;

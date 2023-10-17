@@ -1,11 +1,15 @@
 [GlobalParams]
-  displacements = 'ux uy uz'
+  displacements = 'ux uy'
 []
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  elem_type = HEX8
+  dim = 2
+  nx = 10
+  ny = 10
+  xmax = 10
+  ymax = 10
+  elem_type = QUAD4
 []
 
 [AuxVariables]
@@ -13,7 +17,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./fp_zz]
+  [./fp_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -21,7 +25,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e_zz]
+  [./e_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -33,41 +37,61 @@
    order = CONSTANT
    family = MONOMIAL
   [../]
-  [./backstress]
+  [./backstress_0]
    order = CONSTANT
    family = MONOMIAL
   [../]
+  [./backstress_1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./backstress_2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./backstress_3]
+    order = CONSTANT
+    family = MONOMIAL
+  [../] 
+  [./backstress_4]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./backstress_5]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]    
 []
 
 [Modules/TensorMechanics/Master/all]
   strain = FINITE
   add_variables = true
-  generate_output = stress_zz
+  generate_output = stress_yy
 []
 
 [AuxKernels]
-  [./fp_zz]
+  [./fp_yy]
     type = RankTwoAux
-    variable = fp_zz
+    variable = fp_yy
     rank_two_tensor = plastic_deformation_gradient
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
   [../]
   [./pk2]
    type = RankTwoAux
    variable = pk2
    rank_two_tensor = second_piola_kirchhoff_stress
-   index_j = 2
-   index_i = 2
+   index_j = 1
+   index_i = 1
    execute_on = timestep_end
   [../]
-  [./e_zz]
+  [./e_yy]
     type = RankTwoAux
-    variable = e_zz
+    variable = e_yy
     rank_two_tensor = total_lagrangian_strain
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
   [../]
   [./gss]
@@ -84,12 +108,47 @@
    index = 0
    execute_on = timestep_end
   [../]
-  [./backstress]
+  [./backstress_0]
    type = MaterialStdVectorAux
-   variable = backstress
+   variable = backstress_0
    property = backstress
    index = 0
    execute_on = timestep_end
+  [../]
+  [./backstress_1]
+   type = MaterialStdVectorAux
+   variable = backstress_1
+   property = backstress
+   index = 1
+   execute_on = timestep_end
+  [../]
+  [./backstress_2]
+    type = MaterialStdVectorAux
+    variable = backstress_2
+    property = backstress
+    index = 2
+    execute_on = timestep_end
+  [../]
+  [./backstress_3]
+  type = MaterialStdVectorAux
+  variable = backstress_3
+  property = backstress
+  index = 3
+  execute_on = timestep_end
+  [../]
+  [./backstress_4]
+    type = MaterialStdVectorAux
+    variable = backstress_4
+    property = backstress
+    index = 4
+    execute_on = timestep_end
+  [../]
+  [./backstress_5]
+  type = MaterialStdVectorAux
+  variable = backstress_5
+  property = backstress
+  index = 5
+  execute_on = timestep_end
   [../]
 []
 
@@ -106,16 +165,10 @@
     boundary = left
     value = 0
   [../]
-  [./symmz]
-    type = DirichletBC
-    variable = uz
-    boundary = back
-    value = 0
-  [../]
   [./tdisp]
     type = FunctionDirichletBC
-    variable = uz
-    boundary = front
+    variable = uy
+    boundary = top
     function = '0.1*t'
   [../]
 []
@@ -130,45 +183,48 @@
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
     tan_mod_type = exact
-    rtol = 1e-6 # Constitutive stress residual relative tolerance
-    maxiter_state_variable = 50 # Maximum number of iterations for stress update
 
-    maximum_substep_iteration = 25 # Maximum number of substep iteration
+    # rtol = 1e-6 # Constitutive stress residual relative tolerance
+    # maxiter_state_variable = 50 # Maximum number of iterations for stress update
+    # maximum_substep_iteration = 25 # Maximum number of substep iteration
 
     use_line_search = true
   [../]
   [./trial_xtalpl]
-    type = CrystalPlasticityKalidindiBackstress
+    type = CrystalPlasticityKalidindiBackstressUpdate # CrystalPlasticityKalidindiUpdate
     crystal_lattice_type = FCC
     number_slip_systems = 12 
     slip_sys_file_name = input_slip_sys.txt
 
+    gss_initial = 30.8
+    t_sat = 148
+    # h = 180
     slip_increment_tolerance = 0.1 # Maximum allowable slip in an increment
     stol = 0.1 # Constitutive internal state variable relative change tolerance
     resistance_tol = 0.1
 
     # https://www.sciencedirect.com/science/article/pii/S0921509317300898
-    h = 1.0e4
-    h_D = 1.0e2
+    c_bs = 1.0e4 # 1.0e4
+    d_bs = 1.0e2 # 1.0e2
   [../]
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [./stress_yy]
     type = ElementAverageValue
-    variable = stress_zz
+    variable = stress_yy
   [../]
   [./pk2]
    type = ElementAverageValue
    variable = pk2
   [../]
-  [./fp_zz]
+  [./fp_yy]
     type = ElementAverageValue
-    variable = fp_zz
+    variable = fp_yy
   [../]
-  [./e_zz]
+  [./e_yy]
     type = ElementAverageValue
-    variable = e_zz
+    variable = e_yy
   [../]
   [./gss]
     type = ElementAverageValue
@@ -178,9 +234,34 @@
    type = ElementAverageValue
    variable = slip_increment
   [../]
-  [./backstress]
+  [./backstress_0]
     type = ElementAverageValue
-    variable = backstress
+    variable = backstress_0
+  [../]
+  [./backstress_1]
+    type = ElementAverageValue
+    variable = backstress_1
+  [../]
+  [./backstress_2]
+    type = ElementAverageValue
+    variable = backstress_2
+  [../]
+  [./backstress_3]
+    type = ElementAverageValue
+    variable = backstress_3
+  [../]
+  [./backstress_4]
+    type = ElementAverageValue
+    variable = backstress_4
+  [../]
+  [./backstress_5]
+    type = ElementAverageValue
+    variable = backstress_5
+  [../]
+  [./run_time]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
   [../]
 []
 
@@ -202,26 +283,17 @@
   nl_max_its = 20 # Max number of nonlinear iterations
 
   start_time = 0.0
-  num_steps = 100
-  dtmin = 0.1e-6
+  # end_time = 1.0
+  num_steps = 3
+  dt = 0.025
 
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.01 # Initial time step.  In this simulation it changes.
-    optimal_iterations = 30 # Time step will adapt to maintain this number of nonlinear iterations
-    iteration_window = 5
-  [../]
+  dtmin = 0.1e-6
+  dtmax = 0.1
 []
 
 [Outputs]
-  [my_exodus]
-    file_base = ./ex_backstress_tensile/out_backstress_tensile
-    interval = 10
-    type = Nemesis
-    additional_execute_on = 'FINAL'
-  [../]
+  file_base = 'exception_backstress_out'
   [./csv]
-    file_base = ./csv_backstress_tensile/out_backstress_tensile
     type = CSV
   [../]
 []

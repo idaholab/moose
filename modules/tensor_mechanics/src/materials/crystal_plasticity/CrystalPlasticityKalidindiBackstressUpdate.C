@@ -18,38 +18,38 @@
    \dot{\gamma}^\alpha = \dot{\gamma}_o * |(\tau^\alpha - \chi^\alpha) / g^\alpha|^M * sgn(\tau^\alpha - \chi^\alpha)
 
    Armstrong-Frederick backstress term:
-   \dot{\chi}^\alpha = h * \dot{\gamma}^\alpha - r * |\dot{\gamma}^\alpha| * \chi^\alpha
+   \dot{\chi}^\alpha = c_{bs} * \dot{\gamma}^\alpha - d_{bs} * |\dot{\gamma}^\alpha| * \chi^\alpha
 
    Reference: https://github.com/ngrilli/c_pfor_am/blob/main/src/materials/CrystalPlasticityDislocationUpdate.C
 */
 
-#include "CrystalPlasticityKalidindiBackstress.h"
+#include "CrystalPlasticityKalidindiBackstressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", CrystalPlasticityKalidindiBackstress);
+registerMooseObject("TensorMechanicsApp", CrystalPlasticityKalidindiBackstressUpdate);
  
 InputParameters
-CrystalPlasticityKalidindiBackstress::validParams()
+CrystalPlasticityKalidindiBackstressUpdate::validParams()
 {
   InputParameters params = CrystalPlasticityKalidindiUpdate::validParams();
   params.addClassDescription("Kalidindi version of homogeneous crystal plasticity considering backstress term.");
-  params.addParam<Real>("h",0.0,"Direct hardening coefficient for backstress");
-  params.addParam<Real>("h_D",0.0,"Dynamic recovery coefficient for backstress");
+  params.addRequiredRangeCheckedParam<Real>("c_bs","c_bs>=0.0","Direct hardening coefficient for backstress");
+  params.addRequiredRangeCheckedParam<Real>("d_bs","d_bs>=0.0","Dynamic recovery coefficient for backstress");
 
   return params;
 }
 
-CrystalPlasticityKalidindiBackstress::CrystalPlasticityKalidindiBackstress(
+CrystalPlasticityKalidindiBackstressUpdate::CrystalPlasticityKalidindiBackstressUpdate(
     const InputParameters & parameters)
   : CrystalPlasticityKalidindiUpdate(parameters),
 
     // Backstress parameters
-    _h(getParam<Real>("h")),
-    _h_D(getParam<Real>("h_D")),
+    _c_bs(getParam<Real>("c_bs")),
+    _d_bs(getParam<Real>("d_bs")),
 
     // Backstress variable
-    _backstress(declareProperty<std::vector<Real>>("backstress")),
-    _backstress_old(getMaterialPropertyOld<std::vector<Real>>("backstress")),
-    _backstress_increment(_number_slip_systems, 0.0),
+    _backstress(declareProperty<std::vector<Real>>(_base_name + "backstress")),
+    _backstress_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "backstress")),
+    _backstress_increment(declareProperty<std::vector<Real>>(_base_name + "backstress_increment")),
 
     // resize local caching vectors used for substepping
     _previous_substep_backstress(_number_slip_systems, 0.0),
@@ -58,9 +58,9 @@ CrystalPlasticityKalidindiBackstress::CrystalPlasticityKalidindiBackstress(
 }
 
 void
-CrystalPlasticityKalidindiBackstress::initQpStatefulProperties()
+CrystalPlasticityKalidindiBackstressUpdate::initQpStatefulProperties()
 {
-  // Initialize _tua, schmit tensor, g^\alpha, gamma^\alpha
+  // Initialize _tua, schmid tensor, g^\alpha, gamma^\alpha
   CrystalPlasticityKalidindiUpdate::initQpStatefulProperties();
 
   // Initialize the backstress size
@@ -70,7 +70,7 @@ CrystalPlasticityKalidindiBackstress::initQpStatefulProperties()
 }
 
 void
-CrystalPlasticityKalidindiBackstress::setInitialConstitutiveVariableValues()
+CrystalPlasticityKalidindiBackstressUpdate::setInitialConstitutiveVariableValues()
 {
   CrystalPlasticityKalidindiUpdate::setInitialConstitutiveVariableValues();
 
@@ -79,7 +79,7 @@ CrystalPlasticityKalidindiBackstress::setInitialConstitutiveVariableValues()
 }
 
 void
-CrystalPlasticityKalidindiBackstress::setSubstepConstitutiveVariableValues()
+CrystalPlasticityKalidindiBackstressUpdate::setSubstepConstitutiveVariableValues()
 {
   CrystalPlasticityKalidindiUpdate::setSubstepConstitutiveVariableValues();
 
@@ -87,7 +87,7 @@ CrystalPlasticityKalidindiBackstress::setSubstepConstitutiveVariableValues()
 }
 
 bool
-CrystalPlasticityKalidindiBackstress::calculateSlipRate()
+CrystalPlasticityKalidindiBackstressUpdate::calculateSlipRate()
 {
   // Difference between RSS and backstress temporary variable for each slip system
   Real effective_stress;
@@ -114,7 +114,7 @@ CrystalPlasticityKalidindiBackstress::calculateSlipRate()
 }
 
 void
-CrystalPlasticityKalidindiBackstress::calculateConstitutiveSlipDerivative(
+CrystalPlasticityKalidindiBackstressUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
   Real effective_stress;
@@ -133,30 +133,36 @@ CrystalPlasticityKalidindiBackstress::calculateConstitutiveSlipDerivative(
 }
 
 bool
-CrystalPlasticityKalidindiBackstress::areConstitutiveStateVariablesConverged()
+CrystalPlasticityKalidindiBackstressUpdate::areConstitutiveStateVariablesConverged()
 {
-  return isConstitutiveStateVariableConverged(_slip_resistance[_qp],
-                                              _slip_resistance_before_update,
-                                              _previous_substep_slip_resistance,
-                                              _resistance_tol);                                        
+  if (isConstitutiveStateVariableConverged(_slip_resistance[_qp],
+                                           _slip_resistance_before_update,
+                                           _previous_substep_slip_resistance,
+                                           _resistance_tol) &&
+      isConstitutiveStateVariableConverged(_backstress[_qp],
+                                           _backstress_before_update,
+                                           _previous_substep_backstress,
+                                           _rel_state_var_tol))
+    return true;
+  return false;                      
 }
 
 void
-CrystalPlasticityKalidindiBackstress::updateSubstepConstitutiveVariableValues()
+CrystalPlasticityKalidindiBackstressUpdate::updateSubstepConstitutiveVariableValues()
 {
   _previous_substep_slip_resistance = _slip_resistance[_qp];
   _previous_substep_backstress = _backstress[_qp];
 }
 
 void
-CrystalPlasticityKalidindiBackstress::cacheStateVariablesBeforeUpdate()
+CrystalPlasticityKalidindiBackstressUpdate::cacheStateVariablesBeforeUpdate()
 {
   _slip_resistance_before_update = _slip_resistance[_qp];
   _backstress_before_update = _backstress[_qp];
 }
 
 void
-CrystalPlasticityKalidindiBackstress::calculateStateVariableEvolutionRateComponent()
+CrystalPlasticityKalidindiBackstressUpdate::calculateStateVariableEvolutionRateComponent()
 {
   CrystalPlasticityKalidindiUpdate::calculateStateVariableEvolutionRateComponent();
   
@@ -164,44 +170,30 @@ CrystalPlasticityKalidindiBackstress::calculateStateVariableEvolutionRateCompone
 }
 
 bool
-CrystalPlasticityKalidindiBackstress::updateStateVariables()
+CrystalPlasticityKalidindiBackstressUpdate::updateStateVariables()
 {
   // Now perform the check to see if the slip system should be updated
-  for (const auto i : make_range(_number_slip_systems))
+  if (CrystalPlasticityKalidindiUpdate::updateStateVariables())
   {
-    _slip_resistance_increment[i] *= _substep_dt;
-    if (_previous_substep_slip_resistance[i] < _zero_tol && _slip_resistance_increment[i] < 0.0)
-      _slip_resistance[_qp][i] = _previous_substep_slip_resistance[i];
-    else
-      _slip_resistance[_qp][i] =
-          _previous_substep_slip_resistance[i] + _slip_resistance_increment[i];
-
-    if (_slip_resistance[_qp][i] < 0.0)
-      return false;
+    // now update backstress variable, which can be positive or negative
+    for (const auto i : make_range(_number_slip_systems))
+    { 
+      _backstress_increment[_qp][i] *= _substep_dt;
+      _backstress[_qp][i] = _previous_substep_backstress[i] + _backstress_increment[_qp][i];
+    }
+    return true;
   }
 
-  // Backstress: can be both positive or negative
-  for (const auto i : make_range(_number_slip_systems))
-  { 
-    _backstress_increment[i] *= _substep_dt;
-    _backstress[_qp][i] = _previous_substep_backstress[i] + _backstress_increment[i];
-  }
-
-  return true;
+  return false;
 }
 
-/*
-   Update of the Armstrong-Frederick backstress term.
-   Reference: Armstrong, P.J., Frederick, C.O., 1966.
-   G.E.G.B. Report RD/B/N. Central Electricity Generating Board.
-   Backstress term modified in this function.
-*/
 void
-CrystalPlasticityKalidindiBackstress::ArmstrongFrederickBackstressUpdate()
+CrystalPlasticityKalidindiBackstressUpdate::ArmstrongFrederickBackstressUpdate()
 {
+  _backstress_increment[_qp].resize(_number_slip_systems, 0.0);
   for (const auto i : make_range(_number_slip_systems)) 
   {
-    _backstress_increment[i] = _h * _slip_increment[_qp][i];
-    _backstress_increment[i] -= _h_D * _backstress[_qp][i] * std::abs(_slip_increment[_qp][i]);  
+    _backstress_increment[_qp][i] = _c_bs * _slip_increment[_qp][i];
+    _backstress_increment[_qp][i] -= _d_bs * _backstress[_qp][i] * std::abs(_slip_increment[_qp][i]);  
   }
 }
