@@ -120,6 +120,32 @@ protected:
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(node, state));
   }
+
+  GradientType evaluateGradDot(const ElemArg & elem, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(elem, state));
+  }
+  GradientType evaluateGradDot(const FaceArg & face, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(face, state));
+  }
+  GradientType evaluateGradDot(const ElemQpArg & qp, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(qp, state));
+  }
+  GradientType evaluateGradDot(const ElemSideQpArg & qp, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(qp, state));
+  }
+  GradientType evaluateGradDot(const ElemPointArg & elem_point,
+                               const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(elem_point, state));
+  }
+  GradientType evaluateGradDot(const NodeArg & node, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor.gradDot(node, state));
+  }
   ///@}
 
 private:

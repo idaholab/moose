@@ -88,6 +88,18 @@ private:
   {
     return _vector.gradient(face, state).row(_component);
   }
+
+  using FunctorBase<T>::evaluateGradDot;
+  GradientType evaluateGradDot(const ElemArg & elem_arg,
+                               const StateArg & state) const override final
+  {
+    return _vector.gradDot(elem_arg, state).row(_component);
+  }
+
+  GradientType evaluateGradDot(const FaceArg & face, const StateArg & state) const override final
+  {
+    return _vector.gradDot(face, state).row(_component);
+  }
 };
 
 template <typename T>
