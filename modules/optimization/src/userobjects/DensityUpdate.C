@@ -19,7 +19,6 @@ DensityUpdate::validParams()
   params.addClassDescription(
       "Compute updated densities based on sensitivities using an optimality criteria method to "
       "keep the volume constraint satisified.");
-  params.addRequiredParam<Real>("power", "Penalty power for SIMP method.");
   params.addRequiredCoupledVar("design_density", "Design density variable name.");
   params.addRequiredParam<VariableName>("density_sensitivity",
                                         "Name of the density_sensitivity variable.");

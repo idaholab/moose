@@ -14,7 +14,7 @@
 #include "MathUtils.h"
 
 /**
- * Computes the cost sensitivity for SIMP optimization algorithms that consider a constraint, in
+ * Computes the cost sensitivity for SIMP optimization algorithms that consider a cost constraint, in
  * addition to a volume constraint.
  */
 class CostSensitivity : public DerivativeMaterialInterface<Material>

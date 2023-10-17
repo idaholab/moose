@@ -1,7 +1,7 @@
 # 2D MBB Beam with a PDE Filter
 
 In this example we will go over using a PDE filter instead of a convolution type
-filter. For larger problems this method may scale better depending on processor
+filter (see [!cite](pde_filter)). For larger problems this method may scale better depending on processor
 counts and filter radius size. Only new material not covered in the previous
 example will be covered here [2D Topology Optimization with Radial Average Filter](examples/optimization/2d_mbb.md).
 

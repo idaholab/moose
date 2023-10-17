@@ -53,6 +53,8 @@ protected:
   const Real _cost_fraction;
   // Relative tolerance used to stop the two-variable bisection method.
   const Real _relative_tolerance;
+  // Weights to solve a dual physics problem, e.g. a thermomechanical one.
+  std::vector<Real> _weight_values;
 
 private:
   struct ElementData

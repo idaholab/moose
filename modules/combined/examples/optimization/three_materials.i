@@ -225,16 +225,11 @@ C3 = 1.0
     design_density = mat_den
     power = ${power}
     volume_fraction = ${vol_frac}
-
     bisection_lower_bound = 0
     bisection_upper_bound = 1.0e16 # 100
-
-    # moves of 0.5 typically drive solution to "black and white"
     bisection_move = 0.05
     adaptive_move = true
-
     relative_tolerance = 1.0e-3
-
     execute_on = TIMESTEP_BEGIN
   []
   # Provides Dc

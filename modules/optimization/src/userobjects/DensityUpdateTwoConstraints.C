@@ -20,7 +20,6 @@ DensityUpdateTwoConstraints::validParams()
   params.addClassDescription(
       "Compute updated densities based on sensitivities using an optimality criteria method to "
       "keep the volume and cost constraints satisified.");
-  params.addRequiredParam<Real>("power", "Penalty power for SIMP method.");
   params.addParam<Real>(
       "relative_tolerance",
       1.0e-3,
@@ -90,9 +89,8 @@ DensityUpdateTwoConstraints::DensityUpdateTwoConstraints(const InputParameters &
 
     if (isParamValid("weight_mechanical_thermal"))
     {
-      const std::vector<Real> & weight_values =
-          getParam<std::vector<Real>>("weight_mechanical_thermal");
-      if (weight_values.size() != 2)
+      _weight_values = getParam<std::vector<Real>>("weight_mechanical_thermal");
+      if (_weight_values.size() != 2)
         paramError("weight_mechanical_thermal",
                    "Weighing of sensitivities is only available for the mechanical compliance and "
                    "the thermal compliances problems, respectively.");
@@ -207,16 +205,13 @@ DensityUpdateTwoConstraints::performOptimCritLoop()
     // Loop over all elements
     for (auto && [id, elem_data] : _elem_data_map)
     {
-      const std::vector<Real> & weight_values =
-          getParam<std::vector<Real>>("weight_mechanical_thermal");
-
       // Compute the updated density for the current element
       Real new_density = computeUpdatedDensity(
           elem_data.old_density,
-          elem_data.sensitivity * (isParamValid("thermal_sensitivity") ? weight_values[0] : 1.0),
+          elem_data.sensitivity * (isParamValid("thermal_sensitivity") ? _weight_values[0] : 1.0),
           elem_data.cost_sensitivity,
           elem_data.thermal_sensitivity *
-              (isParamValid("thermal_sensitivity") ? weight_values[1] : 1.0),
+              (isParamValid("thermal_sensitivity") ? _weight_values[1] : 1.0),
           elem_data.cost,
           lmid,
           cmid);

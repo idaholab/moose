@@ -4,8 +4,13 @@
 
 ## Overview
 
-This material creates a thermal compliance material based on temperature gradients and
-thermal conductivities. The resulting material can be used for analysis purposes and for
+This material creates a thermal compliance, $K$, material based on temperature gradients and
+thermal conductivities using the equation:
+
+!equation
+E=\frac{1}{2}\nabla T \dot K \dot \nabla T
+
+The resulting material can be used for analysis purposes and for
 setting up topology optimization Solid Isotropic Material Penalization-type of problems.
 
 ## Example Input File Syntax

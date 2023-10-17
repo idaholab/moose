@@ -2,15 +2,17 @@
 
 We employ here a multi-app scheme similar to that employed in
 [Thermal and mechanical optimization](combined/examples/optimization/thermomechanical.md).
-In this case, however, we solve similar physics in the subapps. In fact, there is only a slight
-difference between: The single load in each of them are located at different material
-points. Considering the optimization of a problem with the separate effect of the loads, instead
+In this example, each subapp is solving the same mechanics problem with a different applied load.
+The sensitivity of the structure to each load is computed separately and used in a
+global optimization algorithm. Considering the optimization of a problem with
+the separate effect of the loads, instead
 of accounting for its simultaneous application, can yield a final optimized system whose
-material distribution is a lot different from a simple concomitant approach. In the extreme case,
-having two loads acting on the same point in opposing directions would yield an ill-defined
+material distribution is a significantly different from a simple concomitant approach
+(see [!cite](bendsoe2003topology)). In the extreme case,
+having two loads acting on the same point in opposite directions would yield an ill-defined
 optimized structure if such loads are considered to be concomitant. However, the independent
 combination of each of the load's sensitivities would yield a structure that is optimized to
-reduce the compliance under such weighting.
+reduce the compliance under the desired load sensitivity weighting.
 
 In this example, we consider a bridge-like structure on which two vertical loads are applied.
 The multiapp approach sends the updated pseudo-densities to the subapps, whereas said subapps

@@ -6,19 +6,9 @@ example will be covered here [2D Topology Optimization with Radial Average Filte
 The main addition for this example is showing an effective indicator for
 adaptive mesh refinement, which is the `mat_den_nodal` variable below.. In the `AuxVariables` block there is a new variable.
 
-```
-  [mat_den_nodal]
-    family = L2_LAGRANGE
-    order = FIRST
-    initial_condition = ${vol_frac}
-    [AuxKernel]
-      type = SelfAux
-      execute_on = TIMESTEP_END
-      variable = mat_den_nodal
-      v = mat_den
-    []
-  []
-```
+!listing examples/optimization/2d_mbb_pde_amr.i
+         block=AuxVariables/mat_den_nodal id=mat_den
+         caption=Nodal material density variable definitions
 
 The `mat_den_nodal` variable works better than using the `mat_den` variable for
 the indicator. Using the `ValueJumpIndicator` on the `mat_den_nodal` variable
@@ -26,7 +16,6 @@ and refining the mesh where the indicator is greater than a small threshold
 (0.1), will result in a mesh that is refined in the areas where the material is
 not `0` or `1`. This helps to create a "sharp" interface between the void and
 the solid elements, without having to refine the entire mesh.
-
 
 !listing examples/optimization/2d_mbb_pde_amr.i
          block=Adaptivity id=bc_var_block

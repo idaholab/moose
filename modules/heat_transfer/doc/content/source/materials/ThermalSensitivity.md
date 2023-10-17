@@ -4,8 +4,9 @@
 
 ## Overview
 
-This material takes a [`DerivativeParsedMaterial`](/DerivativeParsedMaterial.md) and uses its
-derivative with respect to a variable. Such a variable can be a pseudo-density which is
+TThis material takes a [`DerivativeParsedMaterial`](/DerivativeParsedMaterial.md) and uses its
+derivative with respect to the [!param](/Materials/ThermalSensitivity/design_density) variable.
+The 'design_density' can be a pseudo-density which is
 employed to solve a solid isotropic material penalization (SIMP) topology optimization
 problem. This sensitivity is intended to optimize a thermal compliance objective function.
 

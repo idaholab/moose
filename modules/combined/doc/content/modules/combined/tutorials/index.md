@@ -14,7 +14,7 @@ use SIMP to optimize single and multiple material problems. Additionally, we can
 various conditions, whether they be various loads acting on a single system or various physics
 acting on the same mesh domain.
 
-All the following examples employ SIMP topology optimization:
+All the following examples employ SIMP topology optimization (see, e.g., [!cite](sigmund200199)):
 
 - [Two-dimensional mechanical bridge with radial average filtering](combined/examples/optimization/2d_mbb.md)
 - [Two-dimensional mechanical bridge with Helmholtz, PDE filtering](combined/examples/optimization/2d_mbb_pde.md)

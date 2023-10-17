@@ -2,7 +2,8 @@
 
 In addition to establish a maximum volume fraction and optimize the distribution
 of material over the domain, one can optimize multiple materials within the same
-domain and assign, additionally, individual cost to each of them. This allows to
+domain and assign, additionally, individual cost to each of them
+(see [!cite](tavakoli2014alternating)). This allows to
 enforce another constraint: The total cost over the domain.
 
 This approach uses the object `DensityUpdateTwoConstraints`, which allows multiple

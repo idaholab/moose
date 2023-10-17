@@ -1,8 +1,9 @@
 # 2D MBB Beam with a Convolution Filter
 
 In this example we will go through the general setup of a topology optimization
-problem.  The problem is to find the optimal material distribution in a 2D
-domain that minimizes the compliance of the structure.  We will first define the
+problem using solid isotropic material penalization (SIMP), see [!cite](sigmund200199).
+The problem is to find the optimal material distribution in a 2D
+domain that minimizes the compliance of the structure. We will first define the
 problem parameters. Below is a list of the parameters that we will use in this
 example corresponding to the volume fraction, Young's modulus of the material,
 and the penalization power. We will go over the material that is needed for the
@@ -42,7 +43,8 @@ sensitivity, which is used for updating the density field.
 
 The final block is the `UserObjects` block.  This block contains the main
 optimization functionality. First is the `RadialAverage` and `SensitivityFilter` objects that filter the
-sensitivity to prevent checkerboarding. The radius of the filter sets the
+sensitivity to prevent checkerboarding (see [!cite](sigmund2007)).
+The radius of the filter sets the
 minimum size of a feature in the structure. Finally is the `DensityUpdate`
 object that updates the density field based on the sensitivity and the keeps the
 volume constraint satisfied.

@@ -34,7 +34,5 @@ ThermalCompliance::ThermalCompliance(const InputParameters & parameters)
 void
 ThermalCompliance::computeQpProperties()
 {
-  const Real thermal_compliance =
-      0.5 * _thermal_conductivity[_qp] * _grad_temperature[_qp] * _grad_temperature[_qp];
-  _thermal_compliance[_qp] = thermal_compliance;
+  _thermal_compliance[_qp] =  0.5 * _thermal_conductivity[_qp] * _grad_temperature[_qp] * _grad_temperature[_qp];
 }
