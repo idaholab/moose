@@ -70,6 +70,11 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         blockIDs())),
     _face_velocity(_moose_mesh, blockIDs(), "face_values")
 {
+  if (_displaced)
+    paramError("use_displaced_mesh",
+               "The segregated Rhie-Chow user object does not currently support operation on a "
+               "displaced mesh");
+
   // Register the elemental/face functors which will be queried in the pressure equation
   for (const auto tid : make_range(libMesh::n_threads()))
   {
@@ -155,8 +160,8 @@ VectorValue<ADReal>
 INSFVRhieChowInterpolatorSegregated::getVelocity(const Moose::FV::InterpMethod m,
                                                  const FaceInfo & fi,
                                                  const Moose::StateArg & /*time*/,
-                                                 const THREAD_ID /*tid*/
-) const
+                                                 const THREAD_ID /*tid*/,
+                                                 const bool /*subtract_mesh_velocity*/) const
 {
   if (m != Moose::FV::InterpMethod::RhieChow)
     mooseError("Segregated solution algorithms only support Rhie-Chow interpolation!");

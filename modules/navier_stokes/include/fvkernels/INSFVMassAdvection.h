@@ -21,7 +21,8 @@ public:
   INSFVMassAdvection(const InputParameters & params);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
+  virtual bool hasMaterialTimeDerivative() const override { return false; }
 
   /// Density
   const Moose::Functor<ADReal> & _rho;

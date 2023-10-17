@@ -113,7 +113,7 @@ hot_temp=310
     coupled_variables = 'T'
   []
   [rho_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = 'rho'
     variable = 'rho_out'
     execute_on = 'initial timestep_end'

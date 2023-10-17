@@ -508,3 +508,23 @@ AttribInterfaces::isEqual(const Attribute & other) const
   auto a = dynamic_cast<const AttribInterfaces *>(&other);
   return a && (a->_val == _val);
 }
+
+void
+AttribDisplaced::initFrom(const MooseObject * obj)
+{
+  _val = obj->parameters().have_parameter<bool>("use_displaced_mesh") &&
+         obj->getParam<bool>("use_displaced_mesh");
+}
+
+bool
+AttribDisplaced::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribDisplaced *>(&other);
+  return a && (a->_val == _val);
+}
+
+bool
+AttribDisplaced::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}

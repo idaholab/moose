@@ -179,6 +179,11 @@ public:
   bool isArray() const { return _is_array; }
 
 protected:
+  /**
+   * @returns whether we should insert derivatives
+   */
+  bool doDerivatives() const;
+
   /// System this variable is part of
   SystemBase & _sys;
 

@@ -2,7 +2,9 @@
 
 !syntax description /BCs/INSADVaporRecoilPressureMomentumFluxBC
 
-This object adds a flux to the Navier-Stokes momentum equation of the form
+This object is the finite element analog of
+[INSFVVaporRecoilPressureMomentumFluxBC.md]. It adds a flux to the Navier-Stokes
+momentum equation of the form
 
 \begin{equation}
 \hat{n} p_r

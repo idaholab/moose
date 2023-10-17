@@ -26,4 +26,7 @@ protected:
 
   /// Functor for the time derivative of density, material property or variable
   const Moose::Functor<ADReal> & _rho_dot;
+
+  /// The specific enthalpy
+  const Moose::Functor<ADReal> & _h;
 };

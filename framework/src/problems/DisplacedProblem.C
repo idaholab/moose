@@ -176,6 +176,11 @@ DisplacedProblem::init()
     _eq.init();
   }
 
+  /// Get face types properly set for variables
+  for (auto & nl : _displaced_nl)
+    nl->update(/*update_libmesh_system=*/false);
+  _displaced_aux->update(/*update_libmesh_system=*/false);
+
   _mesh.meshChanged();
 }
 
@@ -271,6 +276,12 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   Threads::parallel_reduce(node_range, udmt);
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
+
+  // The mesh has changed. Face information normals, areas, etc. must be re-calculated
+  _mesh.finiteVolumeInfoDirty();
+  for (auto & disp_nl : _displaced_nl)
+    disp_nl->update(false);
+  _displaced_aux->update(false);
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -916,27 +927,6 @@ DisplacedProblem::addResidualLower(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::cacheResidual(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheResidual(Assembly::GlobalDataKey{},
-                                                   currentResidualVectorTags());
-}
-
-void
-DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
-                                                           currentResidualVectorTags());
-}
-
-void
-DisplacedProblem::addCachedResidual(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals(Assembly::GlobalDataKey{},
-                                                        currentResidualVectorTags());
-}
-
-void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
   if (_displaced_nl[currentNlSysNum()]->hasVector(
@@ -1007,27 +997,9 @@ DisplacedProblem::addJacobianLowerD(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::cacheJacobian(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheJacobian(Assembly::GlobalDataKey{});
-}
-
-void
 DisplacedProblem::cacheJacobianNonlocal(THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
-}
-
-void
-DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
-}
-
-void
-DisplacedProblem::addCachedJacobian(THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->addCachedJacobian(Assembly::GlobalDataKey{});
 }
 
 void
@@ -1261,6 +1233,26 @@ DisplacedProblem::customSetup(const ExecFlagType & exec_type)
 }
 
 void
+DisplacedProblem::residualSetup()
+{
+  SubProblem::residualSetup();
+
+  for (auto & nl : _displaced_nl)
+    nl->residualSetup();
+  _displaced_aux->residualSetup();
+}
+
+void
+DisplacedProblem::jacobianSetup()
+{
+  SubProblem::jacobianSetup();
+
+  for (auto & nl : _displaced_nl)
+    nl->jacobianSetup();
+  _displaced_aux->jacobianSetup();
+}
+
+void
 DisplacedProblem::haveADObjects(const bool have_ad_objects)
 {
   _have_ad_objects = have_ad_objects;
@@ -1322,4 +1314,22 @@ bool
 DisplacedProblem::safeAccessTaggedVectors() const
 {
   return _mproblem.safeAccessTaggedVectors();
+}
+
+void
+DisplacedProblem::needFV()
+{
+  _mproblem.needFV();
+}
+
+bool
+DisplacedProblem::haveFV() const
+{
+  return _mproblem.haveFV();
+}
+
+bool
+DisplacedProblem::hasNonlocalCoupling() const
+{
+  return _mproblem.hasNonlocalCoupling();
 }

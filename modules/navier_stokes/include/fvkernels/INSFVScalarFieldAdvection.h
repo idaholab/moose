@@ -22,5 +22,6 @@ public:
   INSFVScalarFieldAdvection(const InputParameters & params);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
+  virtual bool hasMaterialTimeDerivative() const override { return true; }
 };

@@ -2,8 +2,9 @@
 
 !syntax description /BCs/FunctionRadiativeBC
 
-This boundary condition computes the radiative heat flux from a boundary where the
-emissivity function is provided through a Function.
+This boundary condition is the finite element analog of
+[FVFunctorRadiativeBC.md]. It computes the radiative heat flux from a boundary
+where the emissivity function is provided through a Function.
 
 \begin{equation}
  \sigma F_e (T_\infty^4-T_s^4)

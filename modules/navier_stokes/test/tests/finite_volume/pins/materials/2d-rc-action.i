@@ -39,7 +39,7 @@ advected_interp_method = 'upwind'
 
 [AuxKernels]
   [speed]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = 'speed_output'
     functor = 'speed'
   []

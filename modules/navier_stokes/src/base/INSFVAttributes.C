@@ -13,6 +13,7 @@
 #include "INSFVNoSlipWallBC.h"
 #include "INSFVSlipWallBC.h"
 #include "INSFVSymmetryBC.h"
+#include "INSFVFreeSurfaceBC.h"
 #include "INSFVMomentumResidualObject.h"
 
 void
@@ -25,6 +26,7 @@ AttribINSFVBCs::initFrom(const MooseObject * obj)
   _val |= (unsigned int)INSFVBCs::INSFVNoSlipWallBC          * (dynamic_cast<const INSFVNoSlipWallBC *>(obj) != nullptr);
   _val |= (unsigned int)INSFVBCs::INSFVSlipWallBC            * (dynamic_cast<const INSFVSlipWallBC *>(obj) != nullptr);
   _val |= (unsigned int)INSFVBCs::INSFVSymmetryBC            * (dynamic_cast<const INSFVSymmetryBC *>(obj) != nullptr);
+  _val |= (unsigned int)INSFVBCs::INSFVFreeSurfaceBC         * (dynamic_cast<const INSFVFreeSurfaceBC *>(obj) != nullptr);
   // clang-format on
 }
 

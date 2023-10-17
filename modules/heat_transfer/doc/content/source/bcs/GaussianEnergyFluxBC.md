@@ -2,8 +2,9 @@
 
 !syntax description /BCs/GaussianEnergyFluxBC
 
-This boundary condition computes an influx of energy from a beam (e.g. laser) with a
-Gaussian spatial profile. The flux is given by
+This boundary condition is the finite element analog of
+[FVGaussianEnergyFluxBC.md]. It computes an influx of energy from a beam
+(e.g. laser) with a Gaussian spatial profile. The flux is given by
 
 \begin{equation}
 -\frac{2P_0}{\pi R^2}\exp{\frac{-2r_p^2}{R^2}}

@@ -1582,8 +1582,7 @@ FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 void
 FEProblemBase::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual(Assembly::GlobalDataKey{},
-                                                           currentResidualVectorTags());
+  SubProblem::cacheResidual(tid);
   if (_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -1591,8 +1590,7 @@ FEProblemBase::cacheResidual(THREAD_ID tid)
 void
 FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
-                                                                   currentResidualVectorTags());
+  SubProblem::cacheResidualNeighbor(tid);
   if (_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -1600,9 +1598,7 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(Assembly::GlobalDataKey{},
-                                                                currentResidualVectorTags());
-
+  SubProblem::addCachedResidual(tid);
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
 }
@@ -1700,21 +1696,15 @@ FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*
 void
 FEProblemBase::cacheJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobian(Assembly::GlobalDataKey{});
-  if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
+  SubProblem::cacheJacobian(tid);
   if (_displaced_problem)
-  {
     _displaced_problem->cacheJacobian(tid);
-    if (_has_nonlocal_coupling)
-      _displaced_problem->cacheJacobianNonlocal(tid);
-  }
 }
 
 void
 FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
+  SubProblem::cacheJacobianNeighbor(tid);
   if (_displaced_problem)
     _displaced_problem->cacheJacobianNeighbor(tid);
 }
@@ -1722,7 +1712,7 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedJacobian(Assembly::GlobalDataKey{});
+  SubProblem::addCachedJacobian(tid);
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(tid);
 }
@@ -2223,17 +2213,12 @@ FEProblemBase::addFunction(const std::string & type,
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
-    auto add_functor = [this, &name, tid](const auto & cast_functor)
-    {
-      this->addFunctor(name, cast_functor, tid);
-      if (_displaced_problem)
-        _displaced_problem->addFunctor(name, cast_functor, tid);
-    };
-
     if (auto * const functor = dynamic_cast<Moose::FunctorBase<Real> *>(func.get()))
-      add_functor(*functor);
-    else if (auto * const functor = dynamic_cast<Moose::FunctorBase<ADReal> *>(func.get()))
-      add_functor(*functor);
+    {
+      this->addFunctor(name, *functor, tid);
+      if (_displaced_problem)
+        _displaced_problem->addFunctor(name, *functor, tid);
+    }
     else
       mooseError("Unrecognized function functor type");
   }
@@ -2913,6 +2898,12 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+    // FVElementalKernels are computed in the historically finite element threaded loops. They rely
+    // on Assembly data like _current_elem. When we call reinit on the FEProblemBase we will only
+    // reinit the DisplacedProblem and its associated Assembly objects if we mark this boolean as
+    // true
+    _reinit_displaced_elem = true;
   addObject<FVKernel>(fv_kernel_name, name, parameters);
 }
 
@@ -3210,6 +3201,36 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+void
+FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+
+  auto add_functor_materials = [&](const auto & parameters, const auto & name)
+  {
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      // Create the general Block/Boundary MaterialBase object
+      std::shared_ptr<MaterialBase> material =
+          _factory.create<MaterialBase>(functor_material_name, name, parameters, tid);
+
+      _all_materials.addObject(material, tid);
+      _materials.addObject(material, tid);
+    }
+  };
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  add_functor_materials(parameters, name);
+  if (_displaced_problem)
+  {
+    auto disp_params = parameters;
+    disp_params.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    add_functor_materials(disp_params, name + "_displaced");
+  }
 }
 
 void
@@ -8059,6 +8080,12 @@ void
 FEProblemBase::residualSetup()
 {
   SubProblem::residualSetup();
+  // We need to setup all the nonlinear systems other than our current one which actually called
+  // this method (so we have to make sure we don't go in a circle)
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (i != currentNlSysNum())
+      _nl[i]->residualSetup();
+  // We don't setup the aux sys because that's been done elsewhere
   if (_displaced_problem)
     _displaced_problem->residualSetup();
 }
@@ -8067,6 +8094,12 @@ void
 FEProblemBase::jacobianSetup()
 {
   SubProblem::jacobianSetup();
+  // We need to setup all the nonlinear systems other than our current one which actually called
+  // this method (so we have to make sure we don't go in a circle)
+  for (const auto i : make_range(numNonlinearSystems()))
+    if (i != currentNlSysNum())
+      _nl[i]->jacobianSetup();
+  // We don't setup the aux sys because that's been done elsewhere
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
 }
@@ -8075,13 +8108,6 @@ MooseAppCoordTransform &
 FEProblemBase::coordTransform()
 {
   return mesh().coordTransform();
-}
-
-void
-FEProblemBase::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
-{
-  for (auto & assembly : _assembly[tid])
-    assembly->reinitFVFace(fi);
 }
 
 unsigned int

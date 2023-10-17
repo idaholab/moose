@@ -22,6 +22,6 @@ protected:
 
   /// the density
   const Moose::Functor<ADReal> & _rho;
-  /// the heat conductivity
-  const Moose::Functor<ADReal> & _cp;
+  /// The time derivative of the specific enthalpy
+  const Moose::Functor<ADReal> & _h_dot;
 };

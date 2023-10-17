@@ -1578,7 +1578,6 @@ NSFVBase<BaseType>::addINSEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.template set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.template set<MooseFunctorName>(NS::density) = _density_name;
-  params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   if (_porous_medium_treatment)
   {
@@ -1587,6 +1586,7 @@ NSFVBase<BaseType>::addINSEnergyTimeKernels()
       params.template set<MooseFunctorName>(NS::time_deriv(NS::density)) =
           NS::time_deriv(_density_name);
     params.template set<bool>("is_solid") = false;
+    params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   }
 
   getProblem().addFVKernel(kernel_type, kernel_name, params);
@@ -1611,13 +1611,16 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::addINSMassKernels()
 {
-  std::string kernel_type = "INSFVMassAdvection";
+  std::string kernel_type =
+      (_compressibility == "incompressible") ? "INSFVMassAdvection" : "WCNSFVMassAdvection";
+  ;
   std::string kernel_name = prefix() + "ins_mass_advection";
   std::string rhie_chow_name = prefix() + "ins_rhie_chow_interpolator";
 
   if (_porous_medium_treatment)
   {
-    kernel_type = "PINSFVMassAdvection";
+    kernel_type =
+        (_compressibility == "incompressible") ? "PINSFVMassAdvection" : "PWCNSFVMassAdvection";
     kernel_name = prefix() + "pins_mass_advection";
     rhie_chow_name = prefix() + "pins_rhie_chow_interpolator";
   }
@@ -2817,12 +2820,12 @@ NSFVBase<BaseType>::addWCNSEnergyTimeKernels()
   params.template set<MooseFunctorName>(NS::density) = _density_name;
   params.template set<MooseFunctorName>(NS::time_deriv(NS::density)) =
       NS::time_deriv(_density_name);
-  params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   if (_porous_medium_treatment)
   {
     params.template set<MooseFunctorName>(NS::porosity) = _porosity_name;
     params.template set<bool>("is_solid") = false;
+    params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   }
 
   getProblem().addFVKernel(en_kernel_type, kernel_name, params);

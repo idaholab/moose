@@ -49,6 +49,7 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _boussinesq_strong_residual(declareADProperty<RealVectorValue>("boussinesq_strong_residual")),
     _coupled_force_strong_residual(
         declareADProperty<RealVectorValue>("coupled_force_strong_residual")),
+    _mesh_velocity(declareADProperty<RealVectorValue>("mesh_velocity")),
     _convected_mesh_strong_residual(
         declareADProperty<RealVectorValue>("convected_mesh_strong_residual")),
     // _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
@@ -212,12 +213,13 @@ INSADMaterial::computeQpProperties()
 
   if (_has_convected_mesh)
   {
-    ADRealVectorValue disp_dot((*_disp_x_dot)[_qp]);
+    _mesh_velocity[_qp](0) = (*_disp_x_dot)[_qp];
     if (_disp_y_dot)
-      disp_dot(1) = (*_disp_y_dot)[_qp];
+      _mesh_velocity[_qp](1) = (*_disp_y_dot)[_qp];
     if (_disp_z_dot)
-      disp_dot(2) = (*_disp_z_dot)[_qp];
-    _convected_mesh_strong_residual[_qp] = -_rho[_qp] * _grad_velocity[_qp].left_multiply(disp_dot);
+      _mesh_velocity[_qp](2) = (*_disp_z_dot)[_qp];
+    _convected_mesh_strong_residual[_qp] =
+        -_rho[_qp] * _grad_velocity[_qp].left_multiply(_mesh_velocity[_qp]);
   }
 
   if (_has_coupled_force)

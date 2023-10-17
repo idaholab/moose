@@ -58,7 +58,7 @@ forch=1.1
 
 [AuxKernels]
   [eps_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = eps_out
     functor = porosity
     execute_on = 'timestep_end'

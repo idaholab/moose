@@ -121,17 +121,17 @@ flux=10
 
 [AuxKernels]
   [k]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = k
     functor = 'k_mat'
   []
   [k_s]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = k_s
     functor = 'k_s_mat'
   []
   [kappa_s]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = kappa_s
     functor = 'kappa_s_mat'
   []

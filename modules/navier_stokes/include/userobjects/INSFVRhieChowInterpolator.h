@@ -12,6 +12,7 @@
 #include "RhieChowInterpolatorBase.h"
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
+#include "VectorCompositeFunctor.h"
 
 #include <unordered_map>
 #include <set>
@@ -66,12 +67,15 @@ public:
    * @param fi The face that we wish to retrieve the velocity for
    * @param time The time at which to evaluate the velocity
    * @param tid The thread ID
+   * @param subtract_mesh_velocity Whether to subtract the mesh velocity if running on a displaced
+   * mesh
    * @return The face velocity
    */
   VectorValue<ADReal> getVelocity(const Moose::FV::InterpMethod m,
                                   const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  const THREAD_ID tid) const override;
+                                  const THREAD_ID tid,
+                                  bool subtract_mesh_velocity) const override;
 
   void initialSetup() override;
   void meshChanged() override;
@@ -93,6 +97,12 @@ public:
    */
   void pullAllNonlocal() { _pull_all_nonlocal = true; }
 
+  /**
+   * Whether central differencing face interpolations of velocity should include a skewness
+   * correction
+   */
+  bool velocitySkewCorrection(THREAD_ID tid) const;
+
 protected:
   /**
    * perform the setup of this object
@@ -101,6 +111,18 @@ protected:
 
   /// A functor for computing the (non-RC corrected) velocity
   std::vector<std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>> _vel;
+
+  /// All the thread copies of the x-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_xs;
+
+  /// All the thread copies of the y-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_ys;
+
+  /// All the thread copies of the z-displacement variable
+  std::vector<MooseVariableField<Real> *> _disp_zs;
+
+  /// A functor for computing the displacement
+  std::vector<std::unique_ptr<Moose::VectorCompositeFunctor<ADReal>>> _disps;
 
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;
@@ -187,4 +209,11 @@ inline bool
 INSFVRhieChowInterpolator::needAComputation() const
 {
   return !_a_data_provided && _velocity_interp_method == Moose::FV::InterpMethod::RhieChow;
+}
+
+inline bool
+INSFVRhieChowInterpolator::velocitySkewCorrection(const THREAD_ID tid) const
+{
+  const auto * const u = _us[tid];
+  return (u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 }

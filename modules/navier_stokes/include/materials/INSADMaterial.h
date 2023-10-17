@@ -62,6 +62,9 @@ protected:
   /// Strong residual corresponding to coupled force term
   ADMaterialProperty<RealVectorValue> & _coupled_force_strong_residual;
 
+  /// The mesh velocity
+  ADMaterialProperty<RealVectorValue> & _mesh_velocity;
+
   /// Strong residual corresponding to convected mesh term
   ADMaterialProperty<RealVectorValue> & _convected_mesh_strong_residual;
 

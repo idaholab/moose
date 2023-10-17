@@ -28,6 +28,5 @@ AddFunctorMaterialAction::AddFunctorMaterialAction(const InputParameters & param
 void
 AddFunctorMaterialAction::act()
 {
-  // Functor materials are still materials in the back-end, for now
-  _problem->addMaterial(_type, _name, _moose_object_pars);
+  _problem->addFunctorMaterial(_type, _name, _moose_object_pars);
 }

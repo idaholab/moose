@@ -32,6 +32,8 @@ FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & par
     _tinf(getFunction("Tinfinity")),
     _eps_boundary(getParam<Real>("boundary_emissivity"))
 {
+  if (!isParamValid("temperature"))
+    _var.requireQpComputations();
 }
 
 ADReal

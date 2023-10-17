@@ -1,6 +1,6 @@
-# FunctorElementalAux
+# FunctorAux
 
-!syntax description /AuxKernels/FunctorElementalAux
+!syntax description /AuxKernels/FunctorAux
 
 ## Overview
 
@@ -14,17 +14,17 @@ parameter is `false`.
 
 !alert note
 The version of this auxiliary kernel for automatic differentiation (AD) functors
-(in particular AD material properties) is `ADFunctorElementalAux`.
+(in particular AD material properties) is `FunctorAux`.
 
 ## Example input syntax
 
-In this example, we use `FunctorElementalAux` to convert some material properties functors, defined by the fluid
+In this example, we use `FunctorAux` to convert some material properties functors, defined by the fluid
 properties material, to auxiliary variables, to examine them in an Exodus output.
 
 !listing modules/navier_stokes/test/tests/finite_volume/wcns/materials/functorfluidprops.i block=AuxKernels
 
-!syntax parameters /AuxKernels/FunctorElementalAux
+!syntax parameters /AuxKernels/FunctorAux
 
-!syntax inputs /AuxKernels/FunctorElementalAux
+!syntax inputs /AuxKernels/FunctorAux
 
-!syntax children /AuxKernels/FunctorElementalAux
+!syntax children /AuxKernels/FunctorAux
