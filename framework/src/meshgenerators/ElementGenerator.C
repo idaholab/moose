@@ -15,26 +15,6 @@
 
 #include "MooseEnum.h"
 
-#include "libmesh/edge_edge2.h"
-#include "libmesh/edge_edge3.h"
-#include "libmesh/edge_edge4.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad8.h"
-#include "libmesh/face_quad9.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/face_tri6.h"
-#include "libmesh/cell_hex8.h"
-#include "libmesh/cell_hex20.h"
-#include "libmesh/cell_hex27.h"
-#include "libmesh/cell_tet4.h"
-#include "libmesh/cell_tet10.h"
-#include "libmesh/cell_prism6.h"
-#include "libmesh/cell_prism15.h"
-#include "libmesh/cell_prism18.h"
-#include "libmesh/cell_pyramid5.h"
-#include "libmesh/cell_pyramid13.h"
-#include "libmesh/cell_pyramid14.h"
-
 registerMooseObject("MooseApp", ElementGenerator);
 
 InputParameters
