@@ -2,6 +2,11 @@
 
 Welcome to MOOSE! This page describes some helpful ways to start developing with MOOSE.
 
+!alert! note
+If you arrived here directly, be sure to complete one of the "Getting Started" instruction
+sets (such as [Linux and MacOS](installation/index.md)).
+!alert-end!
+
 ## Create an Application id=create-an-app
 
 !style! halign=left
