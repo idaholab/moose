@@ -110,7 +110,7 @@ private:
 
   /**
    * Get all object parameters using requested object path to collection.
-   * @param valid_params - collection for filling action input parameters
+   * @param valid_params - collection for filling object input parameters
    * @param object_type - type of object where autocomplete was requested
    * @param obj_act_tasks - tasks to verify object type with valid syntax
    */
@@ -252,6 +252,19 @@ private:
    */
   bool traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                        wasp::DataObject & data_parent);
+
+  /**
+   * Get completion item kind value that client may use for icon in list.
+   * @param valid_params - valid parameters used for completion item kind
+   * @param param_name - name of input parameter for completion item kind
+   * @param clean_type - type to decide if reference completion item kind
+   * @param is_param - boolean denoting if kind is for parameter or value
+   * @return - enumerated kind value that client may use for icon in list
+   */
+  int getCompletionItemKind(const InputParameters & valid_params,
+                            const std::string & param_name,
+                            const std::string & clean_type,
+                            bool is_param);
 
   /**
    * Get document symbol kind value that client may use for outline icon.

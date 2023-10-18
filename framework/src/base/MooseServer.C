@@ -415,6 +415,12 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     // remove any array prefixes from basic type string and leave base type
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
 
+    // prepare clean cpp type string to be used for key to find input paths
+    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+    // decide completion item kind that client may use to display list icon
+    int complete_kind = getCompletionItemKind(valid_params, param_name, clean_type, true);
+
     // default value for completion to be built using parameter information
     std::string default_value;
 
@@ -484,7 +490,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
                                              request_line,
                                              request_char,
                                              embed_text,
-                                             1,
+                                             complete_kind,
                                              "",
                                              doc_string,
                                              false,
@@ -538,17 +544,20 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
     {
       std::string doc_string;
       std::string embed_text;
+      int complete_kind;
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
         doc_string = "           custom user named block";
         embed_text = "[block_name]\n  \n[]";
+        complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
         doc_string = "           application named block";
         embed_text = "[" + subblock_name + "]\n  \n[]";
+        complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
       // add subblock name, insert text, and description to completion list
@@ -562,7 +571,7 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                                request_line,
                                                request_char,
                                                embed_text,
-                                               1,
+                                               complete_kind,
                                                "",
                                                doc_string,
                                                false,
@@ -594,6 +603,12 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
   // remove any array prefixes from basic type string and replace with base
   pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
+
+  // prepare clean cpp type string to be used for a key to find input paths
+  pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+  // decide completion item kind that client may use to display a list icon
+  int complete_kind = getCompletionItemKind(valid_params, param_name, clean_type, false);
 
   // map used to gather options and descriptions for value completion items
   std::map<std::string, std::string> options_and_descs;
@@ -661,9 +676,6 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
       }
     }
 
-    // prepare clean cpp type string to be used for key finding input paths
-    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
-
     // check for input lookup paths that are associated with parameter type
     const auto & input_path_iter = _type_to_input_paths.find(clean_type);
 
@@ -708,7 +720,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              replace_line_end,
                                              replace_char_end,
                                              option,
-                                             1,
+                                             complete_kind,
                                              "",
                                              dscrpt,
                                              false,
@@ -1041,6 +1053,36 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
   }
 
   return pass;
+}
+
+int
+MooseServer::getCompletionItemKind(const InputParameters & valid_params,
+                                   const std::string & param_name,
+                                   const std::string & clean_type,
+                                   bool is_param)
+{
+  // set up completion item kind value that client may use for icon in list
+  auto associated_types = _check_app->syntax().getAssociatedTypes();
+  if (is_param && valid_params.isParamRequired(param_name))
+    return wasp::lsp::m_comp_kind_event;
+  else if (param_name == "active" || param_name == "inactive")
+    return wasp::lsp::m_comp_kind_class;
+  else if (clean_type == "bool")
+    return wasp::lsp::m_comp_kind_interface;
+  else if (valid_params.have_parameter<MooseEnum>(param_name) ||
+           valid_params.have_parameter<MultiMooseEnum>(param_name) ||
+           valid_params.have_parameter<ExecFlagEnum>(param_name) ||
+           valid_params.have_parameter<std::vector<MooseEnum>>(param_name))
+    return is_param ? wasp::lsp::m_comp_kind_enum : wasp::lsp::m_comp_kind_enum_member;
+  else if (param_name == "type")
+    return wasp::lsp::m_comp_kind_type_param;
+  else if (std::find_if(associated_types.begin(),
+                        associated_types.end(),
+                        [&](const auto & entry)
+                        { return entry.second == clean_type; }) != associated_types.end())
+    return wasp::lsp::m_comp_kind_reference;
+  else
+    return is_param ? wasp::lsp::m_comp_kind_keyword : wasp::lsp::m_comp_kind_value;
 }
 
 int
