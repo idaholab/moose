@@ -15,6 +15,7 @@
 #include "InputParameterWarehouse.h"
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
+#include "ADFunctorInterface.h"
 
 class THMProblem;
 class THMMesh;
@@ -23,7 +24,10 @@ class ThermalHydraulicsApp;
 /**
  * Base class for THM components
  */
-class Component : public THMObject, public LoggingInterface, public NamingInterface
+class Component : public THMObject,
+                  public LoggingInterface,
+                  public NamingInterface,
+                  public ADFunctorInterface
 {
 public:
   Component(const InputParameters & parameters);
