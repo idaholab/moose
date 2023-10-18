@@ -35,10 +35,6 @@ SideSetsFromBoundingBoxGenerator::validParams()
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(
       "top_right", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addDeprecatedParam<subdomain_id_type>(
-      "block_id",
-      "Subdomain id to set for inside/outside the bounding box",
-      "The parameter 'block_id' is not used.");
   params.addRequiredParam<BoundaryName>(
       "boundary_new", "Boundary on specified block within the bounding box to assign");
   params.addParam<bool>("boundary_id_overlap",
@@ -81,8 +77,6 @@ std::unique_ptr<MeshBase>
 SideSetsFromBoundingBoxGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  if (!mesh->is_replicated())
-    mooseError("SideSetsFromBoundingBoxGenerator is not implemented for distributed meshes");
 
   // construct the FE object so we can compute normals of faces
   setup(*mesh);
@@ -91,8 +85,6 @@ SideSetsFromBoundingBoxGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   boundary_info.build_node_list_from_side_list();
 
-  bool found_element = false;
-  bool found_side_sets = false;
   const bool inside = (_location == "INSIDE");
 
   // Attempt to get the new boundary id from the name
@@ -108,8 +100,12 @@ SideSetsFromBoundingBoxGenerator::generate()
     boundary_info.nodeset_name(boundary_id_new) = _boundary_names[0];
   }
 
+  // Boundaries do not need to overlap
   if (!_boundary_id_overlap)
   {
+    bool found_element = false;
+    bool found_side_sets = false;
+
     // Request to compute normal vectors
     const std::vector<Point> & face_normals = _fe_face->get_normals();
 
@@ -124,7 +120,7 @@ SideSetsFromBoundingBoxGenerator::generate()
       {
         found_element = true;
         // loop over sides of elements within bounding box
-        for (const auto & side : make_range(elem->n_sides()))
+        for (const auto side : make_range(elem->n_sides()))
         {
           _fe_face->reinit(elem, side);
           // We'll just use the normal of the first qp
@@ -141,17 +137,17 @@ SideSetsFromBoundingBoxGenerator::generate()
         }
       }
     }
-    if (!found_element && inside)
-      mooseError("No elements found within the bounding box");
 
-    if (!found_element && !inside)
-      mooseError("No elements found outside the bounding box");
+    comm().max(found_element);
+    if (!found_element)
+      mooseError("No elements found ", inside ? "within" : "outside", " the bounding box");
 
+    comm().max(found_side_sets);
     if (!found_side_sets)
       mooseError("No side sets found on active elements within the bounding box");
   }
-
-  else if (_boundary_id_overlap)
+  // Boundaries need to overlap
+  else
   {
     if (_included_boundary_ids.size() < 2)
       mooseError("boundary_id_old out of bounds: ",
@@ -161,14 +157,14 @@ SideSetsFromBoundingBoxGenerator::generate()
     bool found_node = false;
 
     // Loop over the elements and assign node set id to nodes within the bounding box
-    for (auto node = mesh->active_nodes_begin(); node != mesh->active_nodes_end(); ++node)
+    for (const auto node : mesh->active_node_ptr_range())
     {
       // check if nodes are inside of bounding box
-      if (_bounding_box.contains_point(**node) == inside)
+      if (_bounding_box.contains_point(*node) == inside)
       {
         // read out boundary ids for nodes
         std::vector<boundary_id_type> node_boundary_ids;
-        boundary_info.boundary_ids(*node, node_boundary_ids);
+        boundary_info.boundary_ids(node, node_boundary_ids);
 
         // sort boundary ids on node and sort boundary ids provided in input file
         std::sort(node_boundary_ids.begin(), node_boundary_ids.end());
@@ -181,12 +177,13 @@ SideSetsFromBoundingBoxGenerator::generate()
                           _included_boundary_ids.begin(),
                           _included_boundary_ids.end()))
         {
-          boundary_info.add_node(*node, boundary_id_new);
+          boundary_info.add_node(node, boundary_id_new);
           found_node = true;
         }
       }
     }
 
+    comm().max(found_node);
     if (!found_node)
       mooseError("No nodes found within the bounding box");
   }
