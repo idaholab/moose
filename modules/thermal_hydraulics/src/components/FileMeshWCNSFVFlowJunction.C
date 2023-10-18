@@ -31,6 +31,9 @@ FileMeshWCNSFVFlowJunction::validParams()
   params.addRequiredParam<MultiMooseEnum>("junction_techniques",
                                           junction_techniques,
                                           "How to join the Physics on file mesh components");
+  // Junction techniques should realistically be a vector of vector of MooseEnum: connection &
+  // variable options
+  // Let the stitching be its own boolean parameter
 
   return params;
 }
@@ -95,6 +98,14 @@ FileMeshWCNSFVFlowJunction::addMooseObjects()
   if (_junction_techniques.contains("boundary_average_values") ||
       _junction_techniques.contains("boundary_integral_values"))
   {
+    addComponentConnectionFunctors("flow", NS::pressure, true);
+    addComponentConnectionFunctors("flow", NS::velocity_x, false);
+    if (getConnectedComponent(0).dimension() > 1)
+      addComponentConnectionFunctors("flow", NS::velocity_y, false);
+    if (getConnectedComponent(0).dimension() > 2)
+      addComponentConnectionFunctors("flow", NS::velocity_z, false);
+    addComponentConnectionFunctors("energy", NS::temperature, false);
+    // addComponentConnectionFunctors("scalar", false);
   }
 
   // Add dirichlet BCs to force continuity
@@ -180,7 +191,7 @@ FileMeshWCNSFVFlowJunction::getConnectedComponent(unsigned int connection_index)
   return getComponentByName<FileMeshWCNSFVComponent>(comp_name);
 }
 
-const MooseFunctorName &
+const MooseFunctorName
 FileMeshWCNSFVFlowJunction::getConnectionFunctorName(unsigned int connection_index,
                                                      const PhysicsName & physics_name,
                                                      const VariableName & var_name,
@@ -212,5 +223,68 @@ FileMeshWCNSFVFlowJunction::getConnectionFunctorName(unsigned int connection_ind
       return var_name + "_average";
     else if (_junction_techniques.contains("boundary_integral_values"))
       return var_name + "_integral";
+  }
+  mooseError("Should not have reached here");
+}
+
+void
+FileMeshWCNSFVFlowJunction::addComponentConnectionFunctors(const PhysicsName & physics_name,
+                                                           const VariableName & default_var,
+                                                           const bool from_primary_side)
+{
+  // TODO Parameterize
+  const std::set<ExecFlagType> clearance_schedule({EXEC_LINEAR});
+
+  /// Need connection functors for all connection boundaries
+  for (const auto & conn_i : index_range(_connections))
+  {
+    // Avoid adding functors that wont be used
+    if (from_primary_side && conn_i == 0)
+      continue;
+    else if (conn_i > 0)
+      continue;
+
+    const auto & boundary_name = _boundary_names[conn_i];
+    const auto & variable_name =
+        getConnectedComponent(conn_i).getPhysics(physics_name)->getFlowVariableName(default_var);
+    std::string integration_type = "_integral_";
+    std::string functor_name = "";
+    if (_junction_techniques.contains("boundary_average_values"))
+    {
+      integration_type = "_average_";
+      functor_name = variable_name + integration_type + boundary_name;
+      // TODO make average
+      _boundary_real_functors.push_back(std::make_unique<BoundaryIntegralFunctor<Real>>(
+          functor_name,
+          getFunctor<Real>("variable"),
+          clearance_schedule,
+          getTHMProblem().mesh(),
+          getTHMProblem().mesh().getBoundaryID(boundary_name)));
+      _boundary_adreal_functors.push_back(std::make_unique<BoundaryIntegralFunctor<ADReal>>(
+          functor_name,
+          getFunctor<ADReal>("variable"),
+          clearance_schedule,
+          getTHMProblem().mesh(),
+          getTHMProblem().mesh().getBoundaryID(boundary_name)));
+    }
+    else
+    {
+      functor_name = variable_name + integration_type + boundary_name;
+      _boundary_real_functors.push_back(std::make_unique<BoundaryIntegralFunctor<Real>>(
+          functor_name,
+          getFunctor<Real>("variable"),
+          clearance_schedule,
+          getTHMProblem().mesh(),
+          getTHMProblem().mesh().getBoundaryID(boundary_name)));
+      _boundary_adreal_functors.push_back(std::make_unique<BoundaryIntegralFunctor<ADReal>>(
+          functor_name,
+          getFunctor<ADReal>("variable"),
+          clearance_schedule,
+          getTHMProblem().mesh(),
+          getTHMProblem().mesh().getBoundaryID(boundary_name)));
+    }
+    // TODO check threading
+    getTHMProblem().addFunctor(functor_name, *_boundary_real_functors[conn_i], 0);
+    getTHMProblem().addFunctor(functor_name, *_boundary_adreal_functors[conn_i], 0);
   }
 }

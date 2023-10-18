@@ -47,11 +47,11 @@ FileMeshComponentJunction::setupMesh()
 
     if (hasComponentByName<FileMeshComponent>(comp_name))
     {
-      const FileMeshComponent & comp = getComponentByName<FileMeshComponent>(comp_name);
-      for (auto && conn : comp.getConnections(connection._end_type))
-        for (const auto node_id :
-             mesh().nodeSetNodes().at(mesh().getBoundaryID(connection._boundary_name)))
-          boundary_info.add_node(node_id, boundary_id);
+      // const FileMeshComponent & comp = getComponentByName<FileMeshComponent>(comp_name);
+      // for (auto && conn : comp.getConnections(connection._end_type))
+      for (const auto node_id :
+           mesh().nodeSetNodes().at(mesh().getBoundaryID(connection._boundary_name)))
+        boundary_info.add_node(node_id, boundary_id);
     }
   }
 
