@@ -404,9 +404,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     std::string dirty_type = valid_params.type(param_name);
     std::string clean_type = MooseUtils::prettyCppType(dirty_type);
     std::string basic_type = JsonSyntaxTree::basicCppType(clean_type);
-    bool is_require = valid_params.isParamRequired(param_name);
-    std::string doc_string =
-        (is_require ? "(REQUIRED) " : "           ") + valid_params.getDocString(param_name);
+    std::string doc_string = valid_params.getDocString(param_name);
     MooseUtils::escape(doc_string);
 
     // use basic type to decide if parameter is array and quotes are needed
@@ -549,13 +547,13 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
-        doc_string = "           custom user named block";
+        doc_string = "custom user named block";
         embed_text = "[block_name]\n  \n[]";
         complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
-        doc_string = "           application named block";
+        doc_string = "application named block";
         embed_text = "[" + subblock_name + "]\n  \n[]";
         complete_kind = wasp::lsp::m_comp_kind_struct;
       }
