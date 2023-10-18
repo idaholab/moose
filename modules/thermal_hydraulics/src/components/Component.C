@@ -250,6 +250,6 @@ Component::stringify(EComponentSetupStatus status) const
     case CHECKED:
       return "component fully set up and checked";
     default:
-      mooseAssert(false, "Should not reach here");
+      mooseError("Should not reach here");
   }
 }
