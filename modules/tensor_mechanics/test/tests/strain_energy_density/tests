@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#10972'
+  issues = '#10972 #25602'
   [incr_elas]
     type = 'CSVDiff'
     input = 'incr_model.i'
@@ -20,6 +20,14 @@
     requirement = 'The system shall be capable of informing a user when they incorrectly choose not to '
                   'use the incremental strain energy density formulation with an incremental '
                   'material model.'
+  []
+  [incr_model_sensitivity]
+    type = 'Exodiff'
+    input = 'incr_model_sensitivity.i'
+    exodiff = 'incr_model_sensitivity_out.e'
+    design = 'ComplianceSensitivity.md'
+    abs_zero = 1.0e-6
+    requirement = 'The system shall be able to create a compliance sensitivity material.'
   []
   [tot_elas]
     type = 'CSVDiff'
