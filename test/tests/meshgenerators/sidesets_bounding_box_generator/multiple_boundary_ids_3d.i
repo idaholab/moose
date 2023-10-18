@@ -5,7 +5,6 @@
     nx = 10
     ny = 10
     nz = 10
-    #parallel_type = replicated
   []
 
   [./createNewSidesetOne]

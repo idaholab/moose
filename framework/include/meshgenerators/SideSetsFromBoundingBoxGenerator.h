@@ -29,16 +29,10 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// ID location (inside of outside of box)
-  MooseEnum _location;
-
-  /// List of boundary names to select
-  std::vector<BoundaryName> _boundaries_old;
-
-  /// New boundary to assign
-  BoundaryName _boundary_new;
+  const MooseEnum _location;
 
   /// Bounding box for testing element centroids against
-  BoundingBox _bounding_box;
+  const BoundingBox _bounding_box;
 
   /// Flag to determine if the provided boundaries need to overlap
   const bool _boundary_id_overlap;
