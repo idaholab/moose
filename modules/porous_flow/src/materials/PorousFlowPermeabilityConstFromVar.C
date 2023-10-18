@@ -10,9 +10,11 @@
 #include "PorousFlowPermeabilityConstFromVar.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityConstFromVar);
+registerMooseObject("PorousFlowApp", ADPorousFlowPermeabilityConstFromVar);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPermeabilityConstFromVar::validParams()
+PorousFlowPermeabilityConstFromVarTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowPermeabilityBase::validParams();
   params.addRequiredCoupledVar("perm_xx", "The xx component of the permeability tensor");
@@ -29,9 +31,10 @@ PorousFlowPermeabilityConstFromVar::validParams()
   return params;
 }
 
-PorousFlowPermeabilityConstFromVar::PorousFlowPermeabilityConstFromVar(
+template <bool is_ad>
+PorousFlowPermeabilityConstFromVarTempl<is_ad>::PorousFlowPermeabilityConstFromVarTempl(
     const InputParameters & parameters)
-  : PorousFlowPermeabilityBase(parameters),
+  : PorousFlowPermeabilityBaseTempl<is_ad>(parameters),
     _perm_xx(coupledValue("perm_xx")),
     _perm_xy(coupledValue("perm_xy")),
     _perm_xz(coupledValue("perm_xz")),
@@ -44,23 +47,31 @@ PorousFlowPermeabilityConstFromVar::PorousFlowPermeabilityConstFromVar(
 {
 }
 
+template <bool is_ad>
 void
-PorousFlowPermeabilityConstFromVar::computeQpProperties()
+PorousFlowPermeabilityConstFromVarTempl<is_ad>::computeQpProperties()
 {
-  RealTensorValue permeability(_perm_xx[_qp],
-                               _perm_xy[_qp],
-                               _perm_xz[_qp],
-                               _perm_yx[_qp],
-                               _perm_yy[_qp],
-                               _perm_yz[_qp],
-                               _perm_zx[_qp],
-                               _perm_zy[_qp],
-                               _perm_zz[_qp]);
+  const RealTensorValue permeability(_perm_xx[_qp],
+                                     _perm_xy[_qp],
+                                     _perm_xz[_qp],
+                                     _perm_yx[_qp],
+                                     _perm_yy[_qp],
+                                     _perm_yz[_qp],
+                                     _perm_zx[_qp],
+                                     _perm_zy[_qp],
+                                     _perm_zz[_qp]);
 
   _permeability_qp[_qp] = permeability;
-  (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
-  (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
 
-  for (const auto i : make_range(Moose::dim))
-    (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
+  if (!is_ad)
+  {
+    (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
+    (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
+
+    for (const auto i : make_range(Moose::dim))
+      (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
+  }
 }
+
+template class PorousFlowPermeabilityConstFromVarTempl<false>;
+template class PorousFlowPermeabilityConstFromVarTempl<true>;

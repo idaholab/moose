@@ -28,11 +28,7 @@ protected:
   /// Constant value of permeability tensor
   const RealTensorValue _input_permeability;
 
-  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dgradvar;
-  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dvar;
-  using PorousFlowPermeabilityBaseTempl<is_ad>::_num_var;
-  using PorousFlowPermeabilityBaseTempl<is_ad>::_permeability_qp;
-  using PorousFlowPermeabilityBaseTempl<is_ad>::_qp;
+  usingPorousFlowPermeabilityBaseMembers;
 };
 
 typedef PorousFlowPermeabilityConstTempl<false> PorousFlowPermeabilityConst;
