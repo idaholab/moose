@@ -26,6 +26,12 @@ public:
   virtual void execute() override{};
   virtual void finalize() override{};
 
+  /// Get the names of the advected scalar quantity variables
+  const std::vector<NonlinearVariableName> & getAdvectedScalarNames() const
+  {
+    return _passive_scalar_names;
+  }
+
 protected:
 private:
   void addNonlinearVariables() override;

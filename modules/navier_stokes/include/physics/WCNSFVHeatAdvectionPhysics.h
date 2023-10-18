@@ -26,6 +26,10 @@ public:
   virtual void execute() override{};
   virtual void finalize() override{};
 
+  /// Get the name of the specific heat material property
+  const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
+  const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
+
 protected:
 private:
   void addNonlinearVariables() override;
