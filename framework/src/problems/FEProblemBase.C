@@ -1031,6 +1031,10 @@ FEProblemBase::initialSetup()
   for (auto & nl : _nl)
     nl->initialSetup();
 
+  // Call initialSetup on the linear systems
+  for (auto & sys : _linear_systems)
+    sys->initialSetup();
+
   // Auxilary variable initialSetup calls
   _aux->initialSetup();
 
