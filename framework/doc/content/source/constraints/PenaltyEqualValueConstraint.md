@@ -9,7 +9,7 @@ which eliminates the need to supply Lagrange multipliers.
 
 See [EqualValueConstraint](/EqualValueConstraint.md) for exact enforcement using Lagrange multipliers.
 
-!listing test/tests/mortar/continuity-3d-non-conforming/continuity_penalty_sphere_hex8.i block=Constraints
+!listing test/tests/mortar/continuity-3d-non-conforming/continuity_penalty_sphere_hex.i block=Constraints
 
 !syntax description /Constraints/PenaltyEqualValueConstraint
 
