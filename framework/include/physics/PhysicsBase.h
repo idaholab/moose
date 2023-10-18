@@ -41,11 +41,13 @@ public:
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
   virtual void addNonlinearVariables() {}
+  virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}
   virtual void addFEKernels() {}
   virtual void addFEBCs() {}
   virtual void addFVKernels() {}
   virtual void addFVBCs() {}
+  virtual void addAuxiliaryKernels() {}
   virtual void addMaterials() {}
   virtual void addFunctorMaterials() {}
   virtual void addUserObjects() {}
@@ -121,6 +123,10 @@ protected:
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>
   void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
+  /// Error messages for parameter checks
+  void errorDependentParameter(const std::string & param1,
+                               const std::string & value_not_set,
+                               std::vector<std::string> dependent_params) const;
 
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
@@ -405,6 +411,8 @@ PhysicsBase::warnInconsistent(const InputParameters & other_param,
                               const std::string & param_name) const
 {
   assertParamDefined<T>(param_name);
+  mooseAssert(other_param.have_parameter<T>(param_name),
+              "This should have been a parameter from the parameters being compared");
   bool warn = false;
   if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
   {

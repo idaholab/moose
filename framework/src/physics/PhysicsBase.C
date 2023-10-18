@@ -136,6 +136,19 @@ PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_i
 }
 
 void
+PhysicsBase::errorDependentParameter(const std::string & param1,
+                                     const std::string & value_not_set,
+                                     std::vector<std::string> dependent_params) const
+{
+  for (const auto & dependent_param : dependent_params)
+    if (isParamSetByUser(dependent_param))
+      paramError(dependent_param,
+                 "Parameter '" + dependent_param +
+                     "' should not be set by the user if parameter '" + param1 +
+                     "' has not been set to '" + value_not_set + "'");
+}
+
+void
 PhysicsBase::assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const
 {
   // We only set the blocks if we don't have `ANY_BLOCK_ID` defined because the subproblem
