@@ -153,8 +153,8 @@ h_conv = 50
   [energy_time]
     type = INSFVEnergyTimeDerivative
     variable = T
-    cp = ${cp}
     rho = ${rho}
+    dh_dt = dh_dt
     block = 0
   []
   [temp_conduction]
@@ -171,8 +171,8 @@ h_conv = 50
   [solid_energy_time]
     type = INSFVEnergyTimeDerivative
     variable = Ts
-    cp = ${cp_s}
     rho = ${rho_s}
+    dh_dt = dh_solid_dt
     block = 1
   []
   [solid_temp_conduction]
@@ -261,7 +261,9 @@ h_conv = 50
     type = INSFVEnthalpyMaterial
     temperature = 'Ts'
     rho = ${rho_s}
+    cp = ${cp_s}
     block = 1
+    h = h_solid
   []
 []
 

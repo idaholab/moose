@@ -70,6 +70,7 @@ protected:
   using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const Moose::StateArg &)>;
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const Moose::StateArg &)>;
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const Moose::StateArg &)>;
+  using NodeFn = std::function<T(const Moose::NodeArg &, const Moose::StateArg &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const override;
@@ -78,6 +79,7 @@ protected:
                      const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::ElemPointArg & elem_point,
                      const Moose::StateArg & time) const override;
+  ValueType evaluate(const Moose::NodeArg & node_arg, const Moose::StateArg & time) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
@@ -108,6 +110,9 @@ private:
 
   /// Functors that return evaluations at an arbitrary physical point in an element
   std::unordered_map<SubdomainID, ElemPointFn> _elem_point_functor;
+
+  /// Functors that return nodal values
+  std::unordered_map<SubdomainID, NodeFn> _node_functor;
 
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
@@ -150,6 +155,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & libmesh_dbg_var(m
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
     _elem_point_functor.emplace(block_id, my_lammy);
+    _node_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -277,6 +283,19 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
     subdomainErrorMessage(elem->subdomain_id());
 
   return it->second(elem_point_arg, time);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
+                                           const Moose::StateArg & time) const
+{
+  mooseAssert(node_arg.node, "The node must be non-null in functor material properties");
+  auto it = _node_functor.find(node_arg.subdomain_id);
+  if (it == _node_functor.end())
+    subdomainErrorMessage(node_arg.subdomain_id);
+
+  return it->second(node_arg, time);
 }
 
 template <typename T>

@@ -17,7 +17,6 @@ INSADVaporRecoilPressureMomentumFluxBC::validParams()
   InputParameters params = ADVectorIntegratedBC::validParams();
   params.addClassDescription("Vapor recoil pressure momentum flux");
   params.addParam<MaterialPropertyName>("rc_pressure_name", "rc_pressure", "The recoil pressure");
-  params.addCoupledVar("temperature", "The temperature on which the recoil pressure depends");
   return params;
 }
 

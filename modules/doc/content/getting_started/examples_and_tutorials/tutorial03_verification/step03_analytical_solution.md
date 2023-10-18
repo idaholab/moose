@@ -30,7 +30,7 @@ the opposite boundary.
 
 ## Simulation
 
-The heat conduction module of [!ac](MOOSE) is capable of performing a simulation of the above problem
+The heat transfer module of [!ac](MOOSE) is capable of performing a simulation of the above problem
 without modification. The values presented in [tutorial03-analytical-values] were selected for the
 simulation and a duration of 1 second shall be utilized.
 
@@ -51,10 +51,10 @@ The following instructions assumes that there is a working version of [!ac](MOOS
 on the system, for information on getting it setup please refer to the
 [install instructions](getting_started/installation/index.md).
 
-The simulation to be performed relies on the heat conduction module, thus it is necessary to compile
+The simulation to be performed relies on the heat transfer module, thus it is necessary to compile
 that specific module. It is assumed that [!ac](MOOSE) was cloned into a directory named "projects"
 within the home directory. With this assumption, the following commands will compile and test
-the heat conduction module executable.
+the heat transfer module executable.
 
 ```bash
 cd ~/projects/moose/modules/heat_conduction
@@ -122,12 +122,12 @@ Finally, the output method is defined. In this case the ExodusII and CSV format 
 
 ### Simulation Execution
 
-Executing the simulation is straightforward, simply execute the heat conduction module executable
+Executing the simulation is straightforward, simply execute the heat transfer module executable
 with the input file included using the "-i" option as follows.
 
 ```
 cd ~/projects/moose/tutorials/tutorial03_verification/step03_analytical
-~/projects/moose/modules/heat_conduction/heat_conduction-opt -i 1d_analytical.i
+~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 1d_analytical.i
 ```
 
 When complete an output file will be produced with the name "1d_analytical_out.e", this file

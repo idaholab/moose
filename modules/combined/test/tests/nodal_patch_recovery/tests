@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#25732'
+  design = 'NodalPatchRecoveryAux.md'
+  [npr_with_lower_domains]
+    type = CSVDiff
+    abs_zero = 0.1
+    input = npr_with_lower_domains.i
+    csvdiff = npr_with_lower_domains_out.csv
+    requirement = "The system shall compute the recovered nodal value of a variable with nodes "
+                  "connected to blocks that do not host such a variable."
+  []
+[]

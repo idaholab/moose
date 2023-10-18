@@ -16,12 +16,18 @@ InputParameters
 INSFVEnthalpyMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription("This is the material class used to compute enthalpy for "
-                             "the incompressible/weakly-compressible finite-volume implementation "
-                             "of the Navier-Stokes equations.");
+  params.addClassDescription(
+      "This is the material class used to compute enthalpy for the "
+      "incompressible/weakly-compressible finite-volume implementation of the Navier-Stokes "
+      "equations. Note that this class assumes that cp is a constant");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   params.addRequiredParam<MooseFunctorName>("temperature", "the temperature");
-  params.addParam<MooseFunctorName>(NS::cp, NS::cp, "the name of the specific heat capacity");
+  params.addParam<MooseFunctorName>(
+      NS::cp, NS::cp, "The constant value for the specific heat capacity");
+  params.addParam<MooseFunctorName>(
+      NS::enthalpy_density, NS::enthalpy_density, "the name of the (extensive) enthalpy");
+  params.addParam<MooseFunctorName>(
+      NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
   return params;
 }
 
@@ -31,11 +37,22 @@ INSFVEnthalpyMaterial::INSFVEnthalpyMaterial(const InputParameters & parameters)
     _temperature(getFunctor<ADReal>("temperature")),
     _cp(getFunctor<ADReal>(NS::cp))
 {
-  addFunctorProperty<ADReal>("rho_cp_temp",
-                             [this](const auto & r, const auto & t) -> ADReal
-                             { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
+  const auto & rho_h =
+      addFunctorProperty<ADReal>(NS::enthalpy_density,
+                                 [this](const auto & r, const auto & t)
+                                 { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
+
+  const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
+                                              [this](const auto & r, const auto & t)
+                                              { return _cp(r, t) * _temperature(r, t); });
+
+  addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
+                             [this](const auto & r, const auto & t)
+                             { return _cp(r, t) * _temperature.dot(r, t); });
+
+  addFunctorProperty<ADReal>(
+      "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
 
   addFunctorProperty<ADReal>("cp_temp",
-                             [this](const auto & r, const auto & t) -> ADReal
-                             { return _cp(r, t) * _temperature(r, t); });
+                             [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
 }

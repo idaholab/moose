@@ -19,10 +19,10 @@ class TestClassDatabase(unittest.TestCase):
         """
         cls.database = build_class_database(['${MOOSE_DIR}/framework/src',
                                              '${MOOSE_DIR}/test/src',
-                                             '${MOOSE_DIR}/modules/heat_conduction/src'],
+                                             '${MOOSE_DIR}/modules/heat_transfer/src'],
                                             ['${MOOSE_DIR}/framework/include',
                                              '${MOOSE_DIR}/test/include',
-                                             '${MOOSE_DIR}/modules/heat_conduction/include'],
+                                             '${MOOSE_DIR}/modules/heat_transfer/include'],
                                             ['${MOOSE_DIR}/test/tests'])
 
     def testBasic(self):
@@ -48,7 +48,7 @@ class TestClassDatabaseEmptyInput(unittest.TestCase):
         info = database['Diffusion']
         self.assertEqual(info.header, 'framework/include/kernels/Diffusion.h')
         self.assertEqual(info.source, 'framework/src/kernels/Diffusion.C')
-        self.assertIn('modules/heat_conduction/include/kernels/HeatConduction.h', info.children)
+        self.assertIn('modules/heat_transfer/include/kernels/HeatConduction.h', info.children)
         self.assertIn('test/tests/mesh/named_entities/named_entities_test_xda.i', info.inputs)
 
 

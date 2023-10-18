@@ -5,7 +5,7 @@ Content:
     - modules/navier_stokes/doc/content
     - modules/thermal_hydraulics/doc/content
     - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/rdg/doc/content
     - modules/ray_tracing/doc/content
     - modules/solid_properties/doc/content

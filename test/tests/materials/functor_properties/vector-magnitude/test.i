@@ -22,7 +22,7 @@
 
 [AuxKernels]
   [mag]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = mag
     functor = mat_mag
   []

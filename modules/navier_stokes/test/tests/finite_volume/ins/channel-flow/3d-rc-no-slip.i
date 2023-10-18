@@ -21,8 +21,6 @@ velocity_interp_method='rc'
 []
 
 [GlobalParams]
-  # retain behavior at time of test creation
-  two_term_boundary_expansion = false
   rhie_chow_user_object = 'rc'
 []
 
@@ -43,11 +41,9 @@ velocity_interp_method='rc'
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
   []
   [w]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
   []
   [pressure]
     type = INSFVPressureVariable
@@ -107,7 +103,7 @@ velocity_interp_method='rc'
 
   [w_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = w
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}

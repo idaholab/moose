@@ -51,6 +51,11 @@ MooseVariableFV<OutputType>::validParams()
                                       "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
+  // Just evaluating finite volume variables at an arbitrary location in a cell requires a layer of
+  // ghosting since we will use two term expansions
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
@@ -763,6 +768,30 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & sta
                 "We must be either Dirichlet, extrapolated, or internal");
     return Moose::FV::interpolate(*this, face, state);
   }
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
+{
+  const auto & node_to_elem_map = this->_mesh.nodeToElemMap();
+  const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
+  ValueType sum = 0;
+  Real total_weight = 0;
+  mooseAssert(elem_ids.size(), "There should always be at least one element connected to a node");
+  for (const auto elem_id : elem_ids)
+  {
+    const Elem * const elem = this->_mesh.queryElemPtr(elem_id);
+    mooseAssert(elem, "We should have this element available");
+    if (!this->hasBlocks(elem->subdomain_id()))
+      continue;
+    const ElemPointArg elem_point{
+        elem, *node_arg.node, _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage};
+    const auto weight = 1 / (*node_arg.node - elem->vertex_average()).norm();
+    sum += weight * (*this)(elem_point, state);
+    total_weight += weight;
+  }
+  return sum / total_weight;
 }
 
 template <typename OutputType>

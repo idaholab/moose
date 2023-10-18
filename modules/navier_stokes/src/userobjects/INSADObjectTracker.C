@@ -116,8 +116,9 @@ INSADObjectTracker::getParams(const SubdomainID sub_id) const
 {
   auto map_it = _block_id_to_params.find(sub_id);
   if (map_it == _block_id_to_params.end())
-    mooseError("The requested sub_id is not a key in INSADObjectTracker::_block_id_to_params. "
-               "Please contact a Moose developer to fix this bug.");
+    mooseError("The requested sub_id is not a key in INSADObjectTracker::_block_id_to_params. Make "
+               "sure that your INSAD residual objects have block restrictions that are covered by "
+               "INSADMaterial (and derived) material objects");
 
   return map_it->second;
 }

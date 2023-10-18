@@ -9,6 +9,7 @@
 
 #include "GenericFunctorMaterial.h"
 #include "Function.h"
+#include "MathUtils.h"
 
 registerMooseObject("MooseApp", GenericFunctorMaterial);
 registerMooseObject("MooseApp", ADGenericFunctorMaterial);
@@ -77,12 +78,23 @@ GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(const InputParam
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))
+  {
     addFunctorProperty<GenericReal<is_ad>>(
         _prop_names[i],
-        [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
-          return (*_functors[i])(r, t);
-        },
+        [this, i](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return (*_functors[i])(r, t); },
         clearance_schedule);
+    addFunctorProperty<GenericReal<is_ad>>(
+        MathUtils::timeDerivName(_prop_names[i]),
+        [this, i](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _functors[i]->dot(r, t); },
+        clearance_schedule);
+    addFunctorProperty<GenericRealVectorValue<is_ad>>(
+        MathUtils::gradName(MathUtils::timeDerivName(_prop_names[i])),
+        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad>
+        { return _functors[i]->gradDot(r, t); },
+        clearance_schedule);
+  }
 }
 
 template class GenericFunctorMaterialTempl<false>;

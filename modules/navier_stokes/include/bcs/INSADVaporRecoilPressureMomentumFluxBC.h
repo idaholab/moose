@@ -11,6 +11,10 @@
 
 #include "ADVectorIntegratedBC.h"
 
+/**
+ * A class that imparts a surface recoil force on the momentum equation due to liquid phase
+ * evaporation
+ */
 class INSADVaporRecoilPressureMomentumFluxBC : public ADVectorIntegratedBC
 {
 public:

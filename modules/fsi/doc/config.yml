@@ -4,7 +4,7 @@ Content:
     - modules/tensor_mechanics/doc/content
     - modules/fluid_properties/doc/content
     - modules/navier_stokes/doc/content
-    - modules/heat_conduction/doc/content
+    - modules/heat_transfer/doc/content
     - modules/ray_tracing/doc/content
 
 Renderer:
@@ -37,5 +37,5 @@ Extensions:
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
-            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            heat_transfer: !include modules/heat_transfer/doc/sqa_heat_transfer.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml

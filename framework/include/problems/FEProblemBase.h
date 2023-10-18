@@ -737,16 +737,19 @@ public:
                                             ConstBndNodeRange & bnd_node_range);
 
   // Materials /////
-  virtual void addMaterial(const std::string & kernel_name,
+  virtual void addMaterial(const std::string & material_name,
                            const std::string & name,
                            InputParameters & parameters);
   virtual void addMaterialHelper(std::vector<MaterialWarehouse *> warehouse,
-                                 const std::string & kernel_name,
+                                 const std::string & material_name,
                                  const std::string & name,
                                  InputParameters & parameters);
-  virtual void addInterfaceMaterial(const std::string & kernel_name,
+  virtual void addInterfaceMaterial(const std::string & material_name,
                                     const std::string & name,
                                     InputParameters & parameters);
+  void addFunctorMaterial(const std::string & functor_material_name,
+                          const std::string & name,
+                          InputParameters & parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -2030,12 +2033,6 @@ public:
   MooseAppCoordTransform & coordTransform();
 
   std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
-
-  /**
-   * reinitialize the finite volume assembly data for the provided face and thread
-   */
-  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
-
   unsigned int currentNlSysNum() const override;
 
   /**
@@ -2102,6 +2099,11 @@ public:
    * Indicate that we have p-refinement
    */
   void havePRefinement();
+
+  virtual void needFV() override { _have_fv = true; }
+  virtual bool haveFV() const override { return _have_fv; }
+
+  virtual bool hasNonlocalCoupling() const override { return _has_nonlocal_coupling; }
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2531,6 +2533,9 @@ private:
   /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
   /// called
   std::vector<VectorTag> _current_residual_vector_tags;
+
+  /// Whether we are performing some calculations with finite volume discretizations
+  bool _have_fv = false;
 };
 
 using FVProblemBase = FEProblemBase;

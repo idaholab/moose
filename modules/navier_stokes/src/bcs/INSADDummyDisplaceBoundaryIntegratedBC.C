@@ -17,7 +17,7 @@ INSADDummyDisplaceBoundaryIntegratedBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription(
       "This object adds Jacobian entries for the boundary displacement dependence on the velocity");
-  params.addRequiredCoupledVar("velocity", "The velocity at which to displace");
+  params.addRequiredParam<MooseFunctorName>("velocity", "The velocity at which to displace");
   params.addRequiredParam<unsigned short>(
       "component", "What component of velocity/displacement this object is acting on.");
   return params;
@@ -26,7 +26,7 @@ INSADDummyDisplaceBoundaryIntegratedBC::validParams()
 INSADDummyDisplaceBoundaryIntegratedBC::INSADDummyDisplaceBoundaryIntegratedBC(
     const InputParameters & parameters)
   : ADIntegratedBC(parameters),
-    _velocity(adCoupledVectorValue("velocity")),
+    _velocity(getFunctor<ADRealVectorValue>("velocity")),
     _component(getParam<unsigned short>("component"))
 {
 }
@@ -34,5 +34,7 @@ INSADDummyDisplaceBoundaryIntegratedBC::INSADDummyDisplaceBoundaryIntegratedBC(
 ADReal
 INSADDummyDisplaceBoundaryIntegratedBC::computeQpResidual()
 {
-  return 0 * _velocity[_qp](_component);
+  const Moose::ElemSideQpArg elem_side_qp = {
+      _current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
+  return 0 * _velocity(elem_side_qp, determineState())(_component);
 }

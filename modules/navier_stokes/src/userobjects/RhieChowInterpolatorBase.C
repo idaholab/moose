@@ -85,72 +85,16 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _us(libMesh::n_threads(), nullptr),
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys"))
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _displaced(dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem)))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
-
-  auto check_blocks = [this](const auto & var)
-  {
-    const auto & var_blocks = var.blockIDs();
-    const auto & uo_blocks = blockIDs();
-
-    // Error if this UO has any blocks that the variable does not
-    std::set<SubdomainID> uo_blocks_minus_var_blocks;
-    std::set_difference(
-        uo_blocks.begin(),
-        uo_blocks.end(),
-        var_blocks.begin(),
-        var_blocks.end(),
-        std::inserter(uo_blocks_minus_var_blocks, uo_blocks_minus_var_blocks.end()));
-    if (uo_blocks_minus_var_blocks.size() > 0)
-      mooseError("Block restriction of interpolator user object '",
-                 this->name(),
-                 "' (",
-                 Moose::stringify(blocks()),
-                 ") includes blocks not in the block restriction of variable '",
-                 var.name(),
-                 "' (",
-                 Moose::stringify(var.blocks()),
-                 ")");
-
-    // Get the blocks in the variable but not this UO
-    std::set<SubdomainID> var_blocks_minus_uo_blocks;
-    std::set_difference(
-        var_blocks.begin(),
-        var_blocks.end(),
-        uo_blocks.begin(),
-        uo_blocks.end(),
-        std::inserter(var_blocks_minus_uo_blocks, var_blocks_minus_uo_blocks.end()));
-
-    // For each block in the variable but not this UO, error if there is connection
-    // to any blocks on the UO.
-    for (auto & block_id : var_blocks_minus_uo_blocks)
-    {
-      const auto connected_blocks = _moose_mesh.getBlockConnectedBlocks(block_id);
-      std::set<SubdomainID> connected_blocks_on_uo;
-      std::set_intersection(connected_blocks.begin(),
-                            connected_blocks.end(),
-                            uo_blocks.begin(),
-                            uo_blocks.end(),
-                            std::inserter(connected_blocks_on_uo, connected_blocks_on_uo.end()));
-      if (connected_blocks_on_uo.size() > 0)
-        mooseError("Block restriction of interpolator user object '",
-                   this->name(),
-                   "' (",
-                   Moose::stringify(uo_blocks),
-                   ") doesn't match the block restriction of variable '",
-                   var.name(),
-                   "' (",
-                   Moose::stringify(var_blocks),
-                   ")");
-    }
-  };
-  check_blocks(*_p);
+  checkBlocks(*_p);
 
   if (!_u)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");
-  check_blocks(*_u);
+  checkBlocks(*_u);
   _var_numbers.push_back(_u->number());
 
   if (_dim >= 2)
@@ -158,7 +102,7 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     if (!_v)
       mooseError("In two or more dimensions, the v velocity must be supplied and it must be an "
                  "INSFVVelocityVariable.");
-    check_blocks(*_v);
+    checkBlocks(*_v);
     _var_numbers.push_back(_v->number());
   }
 
@@ -167,32 +111,22 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     if (!_w)
       mooseError("In three-dimensions, the w velocity must be supplied and it must be an "
                  "INSFVVelocityVariable.");
-    check_blocks(*_w);
+    checkBlocks(*_w);
     _var_numbers.push_back(_w->number());
   }
 
-  auto fill_container = [this](const auto & name, auto & container)
-  {
-    for (const auto tid : make_range(libMesh::n_threads()))
-    {
-      auto * const var = static_cast<MooseVariableFVReal *>(
-          &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));
-      container[tid] = var;
-    }
-  };
-
-  fill_container(NS::pressure, _ps);
-  fill_container("u", _us);
+  fillContainer(NS::pressure, _ps);
+  fillContainer("u", _us);
 
   if (_dim >= 2)
   {
-    fill_container("v", _vs);
+    fillContainer("v", _vs);
     if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
       mooseError("x and y velocity component face interpolation methods do not match");
 
     if (_dim >= 3)
     {
-      fill_container("w", _ws);
+      fillContainer("w", _ws);
       if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
         mooseError("x and z velocity component face interpolation methods do not match");
     }

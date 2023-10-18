@@ -151,6 +151,7 @@ private:
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
   using ElemPointArg = Moose::ElemPointArg;
+  using NodeArg = Moose::NodeArg;
 
   template <typename R>
   ValueType evaluateHelper(const R & r, const Moose::StateArg & state) const;
@@ -162,6 +163,7 @@ private:
                      const Moose::StateArg & state) const override final;
   ValueType evaluate(const ElemPointArg & elem_point,
                      const Moose::StateArg & state) const override final;
+  ValueType evaluate(const NodeArg & node, const Moose::StateArg & state) const override final;
 
   template <typename R>
   GradientType evaluateGradientHelper(const R & r, const Moose::StateArg & state) const;
@@ -176,6 +178,8 @@ private:
                                 const Moose::StateArg & state) const override final;
   GradientType evaluateGradient(const ElemPointArg & elem_point,
                                 const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const NodeArg & node,
+                                const Moose::StateArg & state) const override final;
 
   template <typename R>
   DotType evaluateDotHelper(const R & r, const Moose::StateArg & state) const;
@@ -186,6 +190,7 @@ private:
                       const Moose::StateArg & state) const override final;
   DotType evaluateDot(const ElemPointArg & elem_point,
                       const Moose::StateArg & state) const override final;
+  DotType evaluateDot(const NodeArg & node, const Moose::StateArg & state) const override final;
 };
 
 template <typename U>

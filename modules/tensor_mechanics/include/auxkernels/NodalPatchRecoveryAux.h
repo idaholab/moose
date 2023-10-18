@@ -20,6 +20,12 @@ public:
 
   NodalPatchRecoveryAux(const InputParameters & parameters);
 
+  /**
+   * Block restrict elements on which to perform the variable/property nodal recovery.
+   */
+  void blockRestrictElements(std::vector<dof_id_type> & elem_ids,
+                             const std::vector<dof_id_type> & node_to_elem_pair_elems) const;
+
 protected:
   virtual Real computeValue() override;
 

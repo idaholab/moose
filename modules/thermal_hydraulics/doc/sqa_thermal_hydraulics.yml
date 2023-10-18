@@ -5,7 +5,7 @@ specs:
 dependencies:
     - framework
     - fluid_properties
-    - heat_conduction
+    - heat_transfer
     - navier_stokes
     - misc
     - ray_tracing

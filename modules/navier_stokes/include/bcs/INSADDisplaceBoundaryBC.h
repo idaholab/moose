@@ -25,12 +25,16 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// The velocity vector at the node
-  const ADRealVectorValue & _velocity;
+  /// The velocity
+  const Moose::Functor<ADRealVectorValue> & _velocity;
 
   /// The previous timestep value of the displacement
   const Real & _u_old;
 
   /// What component of velocity/displacement this object is acting on
   const unsigned short _component;
+
+  /// The subdomain ID along which the boundary nodeset, that this object is acting on, is
+  /// associated with
+  const SubdomainID _sub_id;
 };

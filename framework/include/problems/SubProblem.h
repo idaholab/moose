@@ -106,10 +106,10 @@ public:
   virtual bool isTransient() const = 0;
 
   /// marks this problem as including/needing finite volume functionality.
-  void needFV() { _have_fv = true; }
+  virtual void needFV() = 0;
 
   /// returns true if this problem includes/needs finite volume functionality.
-  bool haveFV() const { return _have_fv; }
+  virtual bool haveFV() const = 0;
 
   /**
    * Whether or not the user has requested default ghosting ot be on.
@@ -332,9 +332,9 @@ public:
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
   virtual void addResidualLower(THREAD_ID tid) = 0;
 
-  virtual void cacheResidual(THREAD_ID tid) = 0;
-  virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedResidual(THREAD_ID tid) = 0;
+  virtual void cacheResidual(THREAD_ID tid);
+  virtual void cacheResidualNeighbor(THREAD_ID tid);
+  virtual void addCachedResidual(THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
@@ -352,9 +352,9 @@ public:
                                    const std::set<TagID> & tags,
                                    THREAD_ID tid) = 0;
 
-  virtual void cacheJacobian(THREAD_ID tid) = 0;
-  virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedJacobian(THREAD_ID tid) = 0;
+  virtual void cacheJacobian(THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(THREAD_ID tid);
+  virtual void addCachedJacobian(THREAD_ID tid);
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
@@ -888,6 +888,16 @@ public:
                                          const std::vector<VectorTag> & input_vector_tags,
                                          std::set<TagID> & selected_tags);
 
+  /**
+   * reinitialize the finite volume assembly data for the provided face and thread
+   */
+  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+
+  /**
+   * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
+   */
+  virtual bool hasNonlocalCoupling() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -1049,8 +1059,6 @@ private:
 
   /// Map of vector tag TagName to TagID
   std::map<TagName, TagID> _vector_tags_name_map;
-
-  bool _have_fv = false;
 
   ///@{ Helper functions for checking MaterialProperties
   std::string restrictionSubdomainCheckName(SubdomainID check_id);

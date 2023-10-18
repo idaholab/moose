@@ -788,6 +788,7 @@ public:
   {
     // Blessed classes
     friend class Assembly;
+    friend class SubProblem;
     friend class FEProblemBase;
     friend class DisplacedProblem;
     friend class ComputeMortarFunctor;
