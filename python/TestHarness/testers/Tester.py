@@ -366,7 +366,7 @@ class Tester(MooseObject):
         self.outfile.close()
         self.errfile.close()
 
-    def runCommand(self, cmd, cwd, timer, options):
+    def runCommand(self, timer, options):
         """
         Helper method for running external (sub)processes as part of the tester's execution.  This
         uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
@@ -407,10 +407,7 @@ class Tester(MooseObject):
         if needed. The run method is responsible to call the start+stop methods on timer to record
         the time taken to run the actual test.  start+stop can be called multiple times.
         """
-        cmd = self.getCommand(options)
-        cwd = self.getTestDir()
-
-        self.runCommand(cmd, cwd, timer, options)
+        self.runCommand(timer, options)
 
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """

@@ -55,7 +55,7 @@ class SignalTester(RunApp):
             os.kill(pid,signal.SIGUSR1)
             break
 
-    def runCommand(self, cmd, cwd, timer, options):
+    def runCommand(self, timer, options):
         """
         Helper method for running external (sub)processes as part of the tester's execution.  This
         uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
