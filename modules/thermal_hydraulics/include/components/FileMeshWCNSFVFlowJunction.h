@@ -38,5 +38,12 @@ private:
                                              const std::string & bc_type,
                                              bool add_first_bc);
 
+  /// Get the connected component for WCNSFV flow
   const FileMeshWCNSFVComponent & getConnectedComponent(unsigned int connection_index) const;
+
+  /// Get the connection functor for WCNSFV flow
+  const MooseFunctorName & getConnectionFunctorName(unsigned int connection_index,
+                                                    const PhysicsName & physics_name,
+                                                    const VariableName & var_name,
+                                                    bool from_primary_side) const;
 };

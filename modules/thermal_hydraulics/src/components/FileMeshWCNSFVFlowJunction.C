@@ -26,7 +26,8 @@ FileMeshWCNSFVFlowJunction::validParams()
 
   // Belongs on a base class
   // There may be more than one physics to join!
-  MultiMooseEnum junction_techniques("stitching boundary_values boundary_average_values");
+  MultiMooseEnum junction_techniques(
+      "stitching boundary_values boundary_average_values boundary_integral_values");
   params.addRequiredParam<MultiMooseEnum>("junction_techniques",
                                           junction_techniques,
                                           "How to join the Physics on file mesh components");
@@ -39,6 +40,10 @@ FileMeshWCNSFVFlowJunction::FileMeshWCNSFVFlowJunction(const InputParameters & p
     _junction_uo_name(genName(name(), "junction_uo")),
     _junction_techniques(getParam<MultiMooseEnum>("junction_techniques"))
 {
+  if (_junction_techniques.contains("boundary_values") &&
+      _junction_techniques.contains("boundary_average_values"))
+    paramError("junctions_techniques",
+               "Incompatible options boundary_values and boundary_average_values passed");
 }
 
 void
@@ -69,18 +74,6 @@ FileMeshWCNSFVFlowJunction::init()
 {
   FileMeshComponentJunction::init();
   mooseAssert(_connections.size(), "Should have a connection");
-
-  if (_junction_techniques.contains("boundary_average_values"))
-  {
-    // Create a functor to average the value of one to set the other
-    // Pressure
-
-    // Velocity
-
-    // Temperature
-
-    // Scalars
-  }
 }
 
 void
@@ -98,9 +91,17 @@ FileMeshWCNSFVFlowJunction::check() const
 void
 FileMeshWCNSFVFlowJunction::addMooseObjects()
 {
-  if (_junction_techniques.contains("boundary_values"))
+  // Add functors for connections
+  if (_junction_techniques.contains("boundary_average_values") ||
+      _junction_techniques.contains("boundary_integral_values"))
   {
-    // Add dirichlet BCs to force continuity
+  }
+
+  // Add dirichlet BCs to force continuity
+  if (_junction_techniques.contains("boundary_values") ||
+      _junction_techniques.contains("boundary_average_values") ||
+      _junction_techniques.contains("boundary_integral_values"))
+  {
     // Set the outlet of one to be the inlet of the other and vice-versa
     // We cannot mix combinations of fully developed and not-fully developed BCs
     connectVariableWithBoundaryConditions("flow", NS::pressure, "FVADFunctorDirichletBC", true);
@@ -151,7 +152,8 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
         if (add_first_bc)
         {
           params.set<NonlinearVariableName>("variable") = variable_name;
-          params.set<MooseFunctorName>("functor") = other_variable_name;
+          params.set<MooseFunctorName>("functor") =
+              getConnectionFunctorName(conn_i, physics_name, variable_name, add_first_bc);
           getMooseApp().feProblem().addFVBC(
               bc_type, name() + ":" + variable_name + "_" + _connections[0]._boundary_name, params);
         }
@@ -159,7 +161,8 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
         else
         {
           params.set<NonlinearVariableName>("variable") = other_variable_name;
-          params.set<MooseFunctorName>("functor") = variable_name;
+          params.set<MooseFunctorName>("functor") =
+              getConnectionFunctorName(conn_i, physics_name, variable_name, add_first_bc);
           getMooseApp().feProblem().addFVBC(bc_type,
                                             name() + ":" + other_variable_name + "_" +
                                                 _connections[0]._boundary_name,
@@ -175,4 +178,39 @@ FileMeshWCNSFVFlowJunction::getConnectedComponent(unsigned int connection_index)
 {
   const auto comp_name = _connections[connection_index]._component_name;
   return getComponentByName<FileMeshWCNSFVComponent>(comp_name);
+}
+
+const MooseFunctorName &
+FileMeshWCNSFVFlowJunction::getConnectionFunctorName(unsigned int connection_index,
+                                                     const PhysicsName & physics_name,
+                                                     const VariableName & var_name,
+                                                     bool from_primary_side) const
+{
+  if (from_primary_side)
+  {
+    // We need to get the name of the functor that was created for connecting
+    if (_junction_techniques.contains("boundary_values"))
+      return getConnectedComponent(connection_index)
+          .getPhysics(physics_name)
+          ->getFlowVariableName(var_name);
+    else if (_junction_techniques.contains("boundary_average_values"))
+      return getConnectedComponent(connection_index)
+                 .getPhysics(physics_name)
+                 ->getFlowVariableName(var_name) +
+             "_average_" + _boundary_names[connection_index];
+    else if (_junction_techniques.contains("boundary_integral_values"))
+      return getConnectedComponent(connection_index)
+                 .getPhysics(physics_name)
+                 ->getFlowVariableName(var_name) +
+             "_integral_" + _boundary_names[connection_index];
+  }
+  else
+  {
+    if (_junction_techniques.contains("boundary_values"))
+      return var_name;
+    else if (_junction_techniques.contains("boundary_average_values"))
+      return var_name + "_average";
+    else if (_junction_techniques.contains("boundary_integral_values"))
+      return var_name + "_integral";
+  }
 }
