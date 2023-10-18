@@ -6,6 +6,7 @@
 the term:
 
 \begin{equation}
+\label{convection}
 -\rho \left(\frac{\partial\vec{d_m}}{\partial t} \cdot \nabla\right) \vec{u}
 \end{equation}
 
