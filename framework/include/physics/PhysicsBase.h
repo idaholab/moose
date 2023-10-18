@@ -137,6 +137,10 @@ protected:
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>
   void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
+  /// Error messages for parameter checks
+  void errorDependentParameter(const std::string & param1,
+                               const std::string & value_not_set,
+                               const std::vector<std::string> & dependent_params) const;
   // END: parameter checking utilities
 
   /// Check whether a nonlinear variable already exists
@@ -477,6 +481,8 @@ PhysicsBase::warnInconsistent(const InputParameters & other_param,
                               const std::string & param_name) const
 {
   assertParamDefined<T>(param_name);
+  mooseAssert(other_param.have_parameter<T>(param_name),
+              "This should have been a parameter from the parameters being compared");
   bool warn = false;
   if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
   {
