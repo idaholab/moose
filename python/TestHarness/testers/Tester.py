@@ -308,14 +308,11 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def runCommand(self, cmd, cwd, timer, options):
+    def spawnSubprocessFromOptions(self, timer, options):
         """
-        Helper method for running external (sub)processes as part of the tester's execution.  This
-        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
-        be the same timer passed to the run method.  Results from running the subprocess is stored
-        in the tester's output and exit_code fields.
+        Spawns a subprocess based on given options, sets output and error files,
+        and starts timer.
         """
-
         cmd = self.getCommand(options)
         cwd = self.getTestDir()
 
@@ -325,7 +322,7 @@ class Tester(MooseObject):
             timer.start()
             self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
             timer.stop()
-            return
+            return 1
 
         self.process = None
         try:
@@ -349,10 +346,18 @@ class Tester(MooseObject):
         self.errfile = e
 
         timer.start()
-        process.wait()
+        return 0
+
+    def finishAndCleanupSubprocess(self, timer):
+        """
+        Waits for the current subproccess to finish, stops the timer, and
+        cleans up.
+        """
+        self.process.wait()
+
         timer.stop()
 
-        self.exit_code = process.poll()
+        self.exit_code = self.process.poll()
         self.outfile.flush()
         self.errfile.flush()
 
@@ -360,6 +365,20 @@ class Tester(MooseObject):
         self.joined_out = util.readOutput(self.outfile, self.errfile, self)
         self.outfile.close()
         self.errfile.close()
+
+    def runCommand(self, cmd, cwd, timer, options):
+        """
+        Helper method for running external (sub)processes as part of the tester's execution.  This
+        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
+        be the same timer passed to the run method.  Results from running the subprocess is stored
+        in the tester's output and exit_code fields.
+        """
+
+        exit_code = self.spawnSubprocessFromOptions(timer, options)
+        if exit_code: # Something went wrong
+            return
+
+        self.finishAndCleanupSubprocess(timer)
 
     def killCommand(self):
         """
