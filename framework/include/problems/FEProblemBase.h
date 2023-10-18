@@ -2595,8 +2595,9 @@ private:
    * linear systems and the second member indicates the linear system number in which the
    * variable was found (or an invalid unsigned integer if not found)
    */
-  std::pair<bool, unsigned int> determineLinearSystem(const std::string & var_name,
-                                                      bool error_if_not_found = false) const;
+  std::pair<bool, unsigned int>
+  determineLinearSystem(const std::string & var_name,
+                        bool error_if_not_found = false) const override;
 
   /**
    * Checks if the variable of the initial condition is getting restarted and errors for specific
