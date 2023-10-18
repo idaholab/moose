@@ -137,7 +137,10 @@ protected:
   /// Return the list of nonlinear variables in this physics
   std::vector<VariableName> nonlinearVariableNames() const { return _nl_var_names; };
   /// Keep track of the name of a nonlinear variable defined in the Physics
-  void saveNonlinearVariableName(const VariableName & var_name) { _nl_var_names.push_back(var_name); }
+  void saveNonlinearVariableName(const VariableName & var_name)
+  {
+    _nl_var_names.push_back(var_name);
+  }
 
   /// Whether to output additional information
   const bool _verbose;

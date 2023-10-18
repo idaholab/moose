@@ -37,7 +37,7 @@ FileMeshWCNSFVFlowJunction::validParams()
 FileMeshWCNSFVFlowJunction::FileMeshWCNSFVFlowJunction(const InputParameters & params)
   : FileMeshComponentJunction(params),
     _junction_uo_name(genName(name(), "junction_uo")),
-    _junction_techniques(getParam<MultiMooseEnum>("junction_technique"))
+    _junction_techniques(getParam<MultiMooseEnum>("junction_techniques"))
 {
 }
 
@@ -125,7 +125,6 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
   const auto & base_comp = getConnectedComponent(0);
 
   // If the physics does not exist, we skip adding the connection
-  // TODO: Check that all the Physics defined on all the components match
   if (base_comp.hasPhysics(physics_name))
   {
     const auto variable_name = base_comp.getPhysics(physics_name)->getFlowVariableName(var_name);

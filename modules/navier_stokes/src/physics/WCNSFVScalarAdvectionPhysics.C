@@ -45,7 +45,7 @@ WCNSFVScalarAdvectionPhysics::WCNSFVScalarAdvectionPhysics(const InputParameters
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names"))
 {
   for (const auto & scalar_name : _passive_scalar_names)
-      saveNonlinearVariableName(scalar_name);
+    saveNonlinearVariableName(scalar_name);
   if (_flow_equations_physics)
     checkCommonParametersConsistent(_flow_equations_physics->parameters());
 

@@ -40,6 +40,9 @@ public:
     /// End type for the connection
     const EEndType _end_type;
 
+    // Additional information we could consider adding:
+    // - boundary direction for flux boundary conditions
+
     Connection(const BoundaryName & boundary_name,
                const std::string & component_name,
                const EEndType & end_type)

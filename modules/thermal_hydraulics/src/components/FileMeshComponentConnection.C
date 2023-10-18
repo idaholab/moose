@@ -46,15 +46,10 @@ FileMeshComponentConnection::setupMesh()
       _boundary_names.push_back(connection._boundary_name);
 
       const FileMeshComponent & comp = getComponentByName<FileMeshComponent>(comp_name);
-      std::cout << Moose::stringify(connection._end_type) << std::endl;
       for (auto && conn : comp.getConnections(connection._end_type))
       {
         // copy info from the connection
-        // _positions.push_back(conn._position);
-        // _nodes.push_back(conn._node->id());
-        // _normals.push_back(conn._normal);
         _boundary_ids.push_back(conn._boundary_id);
-        // _directions.push_back(comp.getDirection()); // this will be matched to the BC direction
       }
     }
     else

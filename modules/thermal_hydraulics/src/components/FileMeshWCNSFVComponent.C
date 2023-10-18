@@ -65,6 +65,8 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     const PhysicsName physics_name = prefix() + "flow";
     getProblem().addPhysics("WCNSFVFlowPhysics", physics_name, params);
+
+    // Keep track of new physics
     _physics_names.push_back(physics_name);
     _flow_physics = dynamic_cast<WCNSFVFlowPhysics *>(getProblem().getPhysics(physics_name));
     _physics.push_back(_flow_physics);
@@ -75,8 +77,14 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
-    getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", prefix() + "energy", params);
-    _physics_names.push_back(prefix() + "energy");
+    const PhysicsName physics_name = prefix() + "energy";
+    getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", physics_name, params);
+
+    // Keep track of new physics
+    _physics_names.push_back(physics_name);
+    _energy_physics =
+        dynamic_cast<WCNSFVHeatAdvectionPhysics *>(getProblem().getPhysics(physics_name));
+    _physics.push_back(_energy_physics);
   }
   if (_has_scalar_physics)
   {
@@ -84,8 +92,14 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
-    getProblem().addPhysics("WCNSFVScalarAdvectionPhysics", prefix() + "scalar", params);
-    _physics_names.push_back(prefix() + "scalar");
+    const PhysicsName physics_name = prefix() + "scalar";
+    getProblem().addPhysics("WCNSFVScalarAdvectionPhysics", physics_name, params);
+
+    // Keep track of new physics
+    _physics_names.push_back(physics_name);
+    _scalar_physics =
+        dynamic_cast<WCNSFVScalarAdvectionPhysics *>(getProblem().getPhysics(physics_name));
+    _physics.push_back(_scalar_physics);
   }
 
   for (auto physics : _physics)
@@ -159,15 +173,16 @@ FileMeshWCNSFVComponent::getPhysics(const PhysicsName & phys_name) const
 }
 
 VariableName
-FileMeshWCNSFVComponent::getVariableName(const std::string & short_name) const
+FileMeshWCNSFVComponent::getVariableName(const std::string & default_name) const
 {
   if (hasFlowPhysics())
-    return _flow_physics->getFlowVariableName("short_name");
+    return _flow_physics->getFlowVariableName(default_name);
   else if (hasFluidEnergyPhysics())
-    return _energy_physics->getFlowVariableName("short_name");
+    return _energy_physics->getFlowVariableName(default_name);
   else if (hasScalarAdvectionPhysics())
-    return _scalar_physics->getFlowVariableName("short_name");
+    return _scalar_physics->getFlowVariableName(default_name);
   else
-    mooseError("No Physics object to provide the true variable name for the short name: ",
-               short_name);
+    mooseError(
+        "No Physics object to provide the true variable name for the default variable name: ",
+        default_name);
 }
