@@ -18,6 +18,7 @@ InputParameters
 Component::validParams()
 {
   InputParameters params = THMObject::validParams();
+  params += ADFunctorInterface::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
@@ -35,6 +36,7 @@ Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
     LoggingInterface(getCheckedPointerParam<THMProblem *>("_thm_problem")->log()),
     NamingInterface(),
+    ADFunctorInterface(this),
 
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
