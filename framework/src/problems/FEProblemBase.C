@@ -5756,7 +5756,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 }
 
 bool
-FEProblemBase::converged(const unsigned int nl_sys_num)
+FEProblemBase::nlConverged(const unsigned int nl_sys_num)
 {
   if (_solve)
     return _nl[nl_sys_num]->converged();

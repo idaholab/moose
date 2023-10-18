@@ -76,7 +76,7 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool converged(unsigned int nl_sys_num) override;
+  virtual bool nlConverged(unsigned int nl_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**

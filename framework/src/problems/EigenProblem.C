@@ -616,7 +616,7 @@ EigenProblem::init()
 }
 
 bool
-EigenProblem::converged(unsigned int)
+EigenProblem::nlConverged(unsigned int)
 {
   return _nl_eigen->converged();
 }
