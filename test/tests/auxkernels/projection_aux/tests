@@ -52,7 +52,7 @@
       cli_args = "Outputs/file_base=2d_quadratic
                   AuxVariables/base_elem/order=SECOND
                   AuxVariables/base_nodal/order=SECOND
-                  ICs/active='quadratic_elem quadratic_nodal'"
+                  ICs/active='cubic_elem cubic_nodal'"
       detail = "a quadratic variation to all variable families supported in 2d at various orders,"
     []
     [2d_constant_tri]
@@ -83,7 +83,7 @@
                   Mesh/elem_type=TRI6
                   AuxVariables/base_elem/order=SECOND
                   AuxVariables/base_nodal/order=SECOND
-                  ICs/active='quadratic_elem quadratic_nodal'"
+                  ICs/active='cubic_elem cubic_nodal'"
       detail = "a quadratic variation to all variable families supported in 2d at various orders on "
                "a triangle mesh,"
     []
@@ -95,7 +95,7 @@
                   Mesh/elem_type=TRI7
                   AuxVariables/base_elem/order=THIRD
                   AuxVariables/base_nodal/order=THIRD
-                  ICs/active='quadratic_elem quadratic_nodal'"
+                  ICs/active='cubic_elem cubic_nodal'"
       detail = "a cubic variation to all variable families supported in 2d at various orders on "
                "a triangle mesh,"
     []
