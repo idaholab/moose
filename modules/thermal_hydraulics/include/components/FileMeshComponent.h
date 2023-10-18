@@ -54,6 +54,9 @@ public:
   const std::vector<FileMeshComponent::Connection> &
   getConnections(FileMeshComponentConnection::EEndType end_type) const;
 
+  /// Get the component dimension (and not the whole mesh's)
+  unsigned int dimension() const;
+
 protected:
   virtual void setupMesh() override;
 
@@ -68,6 +71,10 @@ protected:
   /// Is the file readable?
   const bool _file_is_readable;
 
+  /// Map of end type to a list of connections
+  std::map<FileMeshComponentConnection::EEndType, std::vector<Connection>> _connections;
+
+private:
   /// Translation vector for the file mesh
   const Point & _position;
 
@@ -80,6 +87,6 @@ protected:
   /// Map of boundary name to list of nodes
   std::map<BoundaryName, Node *> _boundary_nodes;
 
-  /// Map of end type to a list of connections
-  std::map<FileMeshComponentConnection::EEndType, std::vector<Connection>> _connections;
+  /// Dimension of the file mesh
+  unsigned int _dimension;
 };

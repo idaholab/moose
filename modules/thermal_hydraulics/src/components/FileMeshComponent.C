@@ -206,6 +206,9 @@ FileMeshComponent::buildMesh()
   // the fact that it gets called later.
   boundary_info.build_node_list_from_side_list();
 
+  // Keep track of the dimension of this particular component as opposed to the whole mesh
+  _dimension = exio_helper.num_dim;
+
   return subdomain_names;
 }
 
@@ -245,4 +248,11 @@ FileMeshComponent::getConnections(FileMeshComponentConnection::EEndType end_type
   else
     mooseError(
         "Invalid end type (", Moose::stringify(end_type), "). It was not found on this component.");
+}
+
+unsigned int
+FileMeshComponent::dimension() const
+{
+  checkSetupStatus(MESH_PREPARED);
+  return _dimension;
 }

@@ -14,10 +14,11 @@
 /**
  * Base class for flow junctions
  */
-class FileMeshComponentFlowJunction : public FileMeshComponentJunction
+class FileMeshWCNSFVFlowJunction : public FileMeshComponentJunction
 {
 public:
-  FileMeshComponentFlowJunction(const InputParameters & params);
+  FileMeshWCNSFVFlowJunction(const InputParameters & params);
+  static InputParameters validParams();
 
 protected:
   virtual void setupMesh() override;
@@ -28,7 +29,7 @@ protected:
   /// Name of junction user object name, if any
   const std::string _junction_uo_name;
   /// How to make the components match
-  const MooseEnum _junction_technique;
+  const MultiMooseEnum _junction_techniques;
 
 private:
   // Connect the variables on both sides with the same type of boundary condition
@@ -37,6 +38,5 @@ private:
                                              const std::string & bc_type,
                                              bool add_first_bc);
 
-public:
-  static InputParameters validParams();
+  const FileMeshWCNSFVComponent & getConnectedComponent(unsigned int connection_index) const;
 };

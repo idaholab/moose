@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FileMeshComponentFlowJunction.h"
+#include "FileMeshWCNSFVFlowJunction.h"
 #include "FileMeshComponent.h"
 #include "FileMeshWCNSFVComponent.h"
 #include "THMMesh.h"
@@ -16,35 +16,36 @@
 
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("ThermalHydraulicsApp", FileMeshComponentFlowJunction);
+registerMooseObject("ThermalHydraulicsApp", FileMeshWCNSFVFlowJunction);
 
 InputParameters
-FileMeshComponentFlowJunction::validParams()
+FileMeshWCNSFVFlowJunction::validParams()
 {
   InputParameters params = FileMeshComponentJunction::validParams();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
 
   // Belongs on a base class
   // There may be more than one physics to join!
-  MooseEnum junction_techniques("stitching boundary_values boundary_average_values");
-  params.addRequiredParam<MooseEnum>(
-      "junction_technique", junction_techniques, "How to join the Physics on file mesh components");
+  MultiMooseEnum junction_techniques("stitching boundary_values boundary_average_values");
+  params.addRequiredParam<MultiMooseEnum>("junction_techniques",
+                                          junction_techniques,
+                                          "How to join the Physics on file mesh components");
 
   return params;
 }
 
-FileMeshComponentFlowJunction::FileMeshComponentFlowJunction(const InputParameters & params)
+FileMeshWCNSFVFlowJunction::FileMeshWCNSFVFlowJunction(const InputParameters & params)
   : FileMeshComponentJunction(params),
     _junction_uo_name(genName(name(), "junction_uo")),
-    _junction_technique(getParam<MooseEnum>("junction_technique"))
+    _junction_techniques(getParam<MultiMooseEnum>("junction_technique"))
 {
 }
 
 void
-FileMeshComponentFlowJunction::setupMesh()
+FileMeshWCNSFVFlowJunction::setupMesh()
 {
   FileMeshComponentJunction::setupMesh();
-  if (_junction_technique == "stitching")
+  if (_junction_techniques.contains("stitching"))
   {
     // The mesh contains all the components already, but the components are not stitched together
     THMMesh & comp_meshes = mesh();
@@ -64,12 +65,12 @@ FileMeshComponentFlowJunction::setupMesh()
 }
 
 void
-FileMeshComponentFlowJunction::init()
+FileMeshWCNSFVFlowJunction::init()
 {
   FileMeshComponentJunction::init();
   mooseAssert(_connections.size(), "Should have a connection");
 
-  if (_junction_technique == "boundary_average_values")
+  if (_junction_techniques.contains("boundary_average_values"))
   {
     // Create a functor to average the value of one to set the other
     // Pressure
@@ -83,46 +84,45 @@ FileMeshComponentFlowJunction::init()
 }
 
 void
-FileMeshComponentFlowJunction::check() const
+FileMeshWCNSFVFlowJunction::check() const
 {
   FileMeshComponentJunction::check();
 
   for (const auto & comp_name : _connected_component_names)
     checkComponentOfTypeExistsByName<FileMeshComponent>(comp_name);
+  if (!_junction_techniques.contains("stitching"))
+    for (const auto i : index_range(_connections))
+      getConnectedComponent(i).hasBoundary(_connections[i]._boundary_name);
 }
 
 void
-FileMeshComponentFlowJunction::addMooseObjects()
+FileMeshWCNSFVFlowJunction::addMooseObjects()
 {
-  if (_junction_technique == "stitching" || _junction_technique == "boundary_values")
+  if (_junction_techniques.contains("boundary_values"))
   {
     // Add dirichlet BCs to force continuity
     // Set the outlet of one to be the inlet of the other and vice-versa
     // We cannot mix combinations of fully developed and not-fully developed BCs
     connectVariableWithBoundaryConditions("flow", NS::pressure, "FVADFunctorDirichletBC", true);
     connectVariableWithBoundaryConditions("flow", NS::velocity_x, "INSFVInletVelocityBC", false);
-    if (constMesh().dimension() > 1)
+    if (constMesh().dimension() > 1 && getConnectedComponent(0).dimension() > 1)
       connectVariableWithBoundaryConditions("flow", NS::velocity_y, "INSFVInletVelocityBC", false);
-    // if (constMesh().dimension() > 2)
-    //   connectVariableWithBoundaryConditions("flow", NS::velocity_z,
-    //   "INSFVInletVelocityBC",false);
+    if (constMesh().dimension() > 2 && getConnectedComponent(0).dimension() > 2)
+      connectVariableWithBoundaryConditions("flow", NS::velocity_z, "INSFVInletVelocityBC", false);
     connectVariableWithBoundaryConditions(
         "energy", NS::temperature, "FVADFunctorDirichletBC", false);
-    connectVariableWithBoundaryConditions("scalar", "scalar", "FVADFunctorDirichletBC", false);
+    // connectVariableWithBoundaryConditions("scalar", "scalar", "FVADFunctorDirichletBC", false);
   }
 }
 
 void
-FileMeshComponentFlowJunction::connectVariableWithBoundaryConditions(
-    const PhysicsName & physics_name,
-    const VariableName & var_name,
-    const std::string & bc_type,
-    bool add_first_bc)
+FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsName & physics_name,
+                                                                  const VariableName & var_name,
+                                                                  const std::string & bc_type,
+                                                                  bool add_first_bc)
 {
   // The first component of the connections will be connected to every other
-  const auto comp_name = _connections[0]._component_name;
-  const FileMeshWCNSFVComponent & base_comp =
-      getComponentByName<FileMeshWCNSFVComponent>(comp_name);
+  const auto & base_comp = getConnectedComponent(0);
 
   // If the physics does not exist, we skip adding the connection
   // TODO: Check that all the Physics defined on all the components match
@@ -148,7 +148,7 @@ FileMeshComponentFlowJunction::connectVariableWithBoundaryConditions(
         params.set<bool>("functor_defined_on_other_side") = true;
 
         // we cannot add dirichlet BCs on both sides, it would create an infinite recursion
-        // Add boundary condition on one side
+        // Add boundary condition on one side on the junction
         if (add_first_bc)
         {
           params.set<NonlinearVariableName>("variable") = variable_name;
@@ -156,7 +156,7 @@ FileMeshComponentFlowJunction::connectVariableWithBoundaryConditions(
           getMooseApp().feProblem().addFVBC(
               bc_type, name() + ":" + variable_name + "_" + _connections[0]._boundary_name, params);
         }
-        // Add boundary condition on the other side
+        // Add boundary condition on the other side of the junction
         else
         {
           params.set<NonlinearVariableName>("variable") = other_variable_name;
@@ -169,4 +169,11 @@ FileMeshComponentFlowJunction::connectVariableWithBoundaryConditions(
       }
     }
   }
+}
+
+const FileMeshWCNSFVComponent &
+FileMeshWCNSFVFlowJunction::getConnectedComponent(unsigned int connection_index) const
+{
+  const auto comp_name = _connections[connection_index]._component_name;
+  return getComponentByName<FileMeshWCNSFVComponent>(comp_name);
 }
