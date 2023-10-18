@@ -32,6 +32,7 @@ public:
   static InputParameters commonMomentumBoundaryFluxesParams();
   static InputParameters commonFluidEnergyEquationParams();
   static InputParameters commonScalarFieldAdvectionParams();
+  static InputParameters commonTurbulenceParams();
 
   NSFVBase(const InputParameters & parameters);
 
@@ -733,6 +734,46 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
 
 template <class BaseType>
 InputParameters
+NSFVBase<BaseType>::commonTurbulenceParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  /**
+   * Parameter controlling the turbulence handling used for the equations.
+   */
+  params.addParam<std::vector<BoundaryName>>(
+      "mixing_length_walls",
+      std::vector<BoundaryName>(),
+      "Walls where the mixing length model should be utilized.");
+
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  params.addParam<ExecFlagEnum>("mixing_length_aux_execute_on",
+                                exec_enum,
+                                "When the mixing length aux kernels should be executed.");
+
+  params.addParam<MooseFunctorName>(
+      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
+  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, "'Escudier' model parameter");
+  params.addParam<MooseFunctorName>(
+      "mixing_length_delta",
+      1.0,
+      "Tunable parameter related to the thickness of the boundary layer."
+      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
+      "retrieved.");
+  params.addRangeCheckedParam<Real>("turbulent_prandtl",
+                                    1,
+                                    "turbulent_prandtl > 0",
+                                    "Turbulent Prandtl number for energy turbulent diffusion");
+
+  params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
+                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
+                              "Turbulence");
+
+  return params;
+}
+
+template <class BaseType>
+InputParameters
 NSFVBase<BaseType>::validParams()
 {
   InputParameters params = BaseType::validParams();
@@ -751,6 +792,12 @@ NSFVBase<BaseType>::validParams()
   params.addParam<bool>(
       "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
 
+  MooseEnum turbulence_type("mixing-length none", "none");
+  params.addParam<MooseEnum>(
+      "turbulence_handling",
+      turbulence_type,
+      "The way additional diffusivities are determined in the turbulent regime.");
+
   params.addParam<bool>("initialize_variables_from_mesh_file",
                         false,
                         "Determines if the variables that are added by the action are initialized "
@@ -760,12 +807,6 @@ NSFVBase<BaseType>::validParams()
       "LATEST",
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
-
-  MooseEnum turbulence_type("mixing-length none", "none");
-  params.addParam<MooseEnum>(
-      "turbulence_handling",
-      turbulence_type,
-      "The way additional diffusivities are determined in the turbulent regime.");
 
   params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
   params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
@@ -839,6 +880,11 @@ NSFVBase<BaseType>::validParams()
    * Parameters describing the handling of advected scalar fields
    */
   params += NSFVBase<BaseType>::commonScalarFieldAdvectionParams();
+
+  /**
+   * Parameters describing the handling of turbulence
+   */
+  params += NSFVBase<BaseType>::commonTurbulenceParams();
 
   /**
    * Parameters allowing the control over numerical schemes for different terms in the
@@ -964,37 +1010,6 @@ NSFVBase<BaseType>::validParams()
       "The number of geometric/algebraic/coupling layers to ghost.");
 
   params.addParamNamesToGroup("ghost_layers", "Parallel Execution Tuning");
-
-  /**
-   * Parameter controlling the turbulence handling used for the equations.
-   */
-  params.addParam<std::vector<BoundaryName>>(
-      "mixing_length_walls",
-      std::vector<BoundaryName>(),
-      "Walls where the mixing length model should be utilized.");
-
-  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
-  params.addParam<ExecFlagEnum>("mixing_length_aux_execute_on",
-                                exec_enum,
-                                "When the mixing length aux kernels should be executed.");
-
-  params.addParam<MooseFunctorName>(
-      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
-  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, "'Escudier' model parameter");
-  params.addParam<MooseFunctorName>(
-      "mixing_length_delta",
-      1.0,
-      "Tunable parameter related to the thickness of the boundary layer."
-      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
-      "retrieved.");
-  params.addRangeCheckedParam<Real>("turbulent_prandtl",
-                                    1,
-                                    "turbulent_prandtl > 0",
-                                    "Turbulent Prandtl number for energy turbulent diffusion");
-
-  params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
-                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
-                              "Turbulence");
 
   // Create input parameter groups
   params.addParamNamesToGroup("dynamic_viscosity density thermal_expansion "
