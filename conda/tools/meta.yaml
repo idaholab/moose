@@ -53,7 +53,7 @@ requirements:
 
 test:
   commands:
-    - git clang-format -h
+    - clang-format -h
     - dot -V
     - pg_config --help
   imports:

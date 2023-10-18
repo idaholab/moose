@@ -3,11 +3,7 @@
 # try to build, theninstall it. If it works, record the
 # packages in play and apply the version/build_strings
 # to production recipes.
-{% set build = 0 %}
 {% set version = "4.0.3" %}
-
-# permanent
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: everything
@@ -17,15 +13,12 @@ source:
   - path: .
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
-  skip: True                    # [win]
+  number: 0
   pin_depends: strict
-  run_exports:
-    - {{ pin_subpackage('everything', max_pin='x.x') }}
 
 requirements:
   build:
+    - {{ moose_python }}
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
     - mpich-mpicxx {{ version }}
