@@ -53,13 +53,18 @@ WCNSFVHeatAdvectionPhysics::WCNSFVHeatAdvectionPhysics(const InputParameters & p
       "ambient_convection_blocks", "ambient_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
 
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
   if (_boundary_condition_information_complete)
+  {
+    checkVectorParamAndMultiMooseEnumLength<BoundaryName>("inlet_boundaries", "energy_inlet_types");
     checkVectorParamsSameLength<BoundaryName, FunctionName>("inlet_boundaries",
                                                             "energy_inlet_function");
-  checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "energy_wall_types");
-  checkVectorParamsSameLength<BoundaryName, FunctionName>("wall_boundaries",
-                                                          "energy_wall_function");
+    checkVectorParamAndMultiMooseEnumLength<BoundaryName>("wall_boundaries", "energy_wall_types");
+    checkVectorParamsSameLength<BoundaryName, FunctionName>("wall_boundaries",
+                                                            "energy_wall_function");
+  }
+  if (isParamValid("energy_wall_types"))
+    checkVectorParamAndMultiMooseEnumLength<FunctionName>("energy_wall_function",
+                                                          "energy_wall_types");
 }
 
 void
@@ -78,6 +83,9 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
   params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
   params.set<bool>("two_term_boundary_expansion") = getParam<bool>("energy_two_term_bc_expansion");
 
+  if (_verbose)
+    _console << "Creating variable " << _fluid_temperature_name << " on blocks "
+             << Moose::stringify(_blocks) << std::endl;
   getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
 }
 
@@ -443,9 +451,14 @@ WCNSFVHeatAdvectionPhysics::processThermalConductivity()
           have_vector = true;
         else
         {
-          paramError("thermal_conductivity",
-                     "We only allow functor of type ADReal or ADRealVectorValue for thermal "
-                     "conductivity!");
+          if (getProblem().hasFunctor(_thermal_conductivity_name[i], 0))
+            paramError("thermal_conductivity",
+                       "We only allow functor of type ADReal or ADRealVectorValue for thermal "
+                       "conductivity! Functor with name '" +
+                           _thermal_conductivity_name[i] + "' is of the wrong type.");
+          else
+            paramError("thermal_conductivity",
+                       "No functor with name '" + _thermal_conductivity_name[i] + "' defined");
         }
       }
     }

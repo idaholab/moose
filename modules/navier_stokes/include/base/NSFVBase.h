@@ -637,7 +637,7 @@ NSFVBase<BaseType>::commonFluidEnergyEquationParams()
       std::vector<FunctionName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux", "heatflux");
+  MultiMooseEnum en_wall_types("fixed-temperature heatflux");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
@@ -717,7 +717,7 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
-  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
+  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity");
   params.addParam<MultiMooseEnum>(
       "passive_scalar_inlet_types",
       ps_inlet_types,
