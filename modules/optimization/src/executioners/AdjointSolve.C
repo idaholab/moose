@@ -52,6 +52,11 @@ AdjointSolve::solve()
   if (_inner_solve && !_inner_solve->solve())
     return false;
 
+  // enforce PETSc options are passed to the adjoint solve as well, as set in the user file
+  auto & petsc_options = _problem.getPetscOptions();
+  auto & pars = _problem.solverParams();
+  Moose::PetscSupport::petscSetOptions(petsc_options, pars);
+
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT_TIMESTEP_BEGIN))
   {
