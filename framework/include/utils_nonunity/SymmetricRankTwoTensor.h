@@ -143,9 +143,6 @@ private:
       const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12);
 
 public:
-  /// Copy assignment operator must be defined if used
-  SymmetricRankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T> & a) = default;
-
   /// Copy constructor from TensorValue<T>
   explicit SymmetricRankTwoTensorTempl(const TensorValue<T> & a);
 
