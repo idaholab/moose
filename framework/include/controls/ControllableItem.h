@@ -46,22 +46,19 @@ public:
    * Connects the supplied item with this item to allow for multiple parameters to be changed by
    * one.
    */
-  void connect(ControllableItem * item, bool type_check = true);
+  void connect(ControllableItem * item);
 
   /**
    * Set the value(s) of the controlled parameters stored in this class.
-   *
-   * The 'skip_type_check' flag allows this object to work with ControllableParameter that
-   * can store values of varying types.
    */
   template <typename T>
-  void set(const T & value, bool type_check = true);
+  void set(const T & value);
 
   /**
    * Return a copy of all values for this "item".
    */
   template <typename T>
-  std::vector<T> get(bool type_check = true) const;
+  std::vector<T> get() const;
 
   /**
    * Return true if the template argument is valid for ALL items.
@@ -128,44 +125,36 @@ protected:
 
 template <typename T>
 void
-ControllableItem::set(const T & value, bool type_check /*=true*/)
+ControllableItem::set(const T & value)
 {
   for (auto & pair : _pairs)
   {
-    libMesh::Parameters::Parameter<T> * param =
-        dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
-    if (type_check && param == nullptr)
+    if (auto param = dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second))
+    {
+      param->set() = value;
+      _changed = true;
+    }
+    else
       mooseError("Failed to set the '",
                  pair.first,
                  "' parameter the supplied template argument must be of type '",
                  pair.second->type(),
                  "'.");
-    else if (param != nullptr)
-    {
-      param->set() = value;
-      _changed = true;
-    }
   }
 }
 
 template <typename T>
 std::vector<T>
-ControllableItem::get(bool type_check /*=true*/) const
+ControllableItem::get() const
 {
   std::vector<T> output;
   output.reserve(_pairs.size());
   for (const auto & pair : _pairs)
   {
-    libMesh::Parameters::Parameter<T> * param =
-        dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
-    if (type_check && param == nullptr)
-      mooseError("Failed to get the '",
-                 pair.first,
-                 "' parameter the supplied template argument must be of type '",
-                 pair.second->type(),
-                 "'.");
-    else if (param != nullptr)
+    if (const auto param = dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second))
       output.push_back(param->get());
+    else
+      mooseError("Mismatched types in ControllableItem");
   }
   return output;
 }

@@ -92,36 +92,28 @@ protected:
   /**
    * Obtain the value of a controllable parameter given input file syntax or actual name.
    * @param name The name of the parameter to retrieve a value.
-   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share
-   * the given name but have varying values.
    *
    * @return A copy of the first parameter that matches the given name.
    */
   template <typename T>
-  T getControllableValue(const std::string & name, bool warn_when_values_differ = true);
+  T getControllableValue(const std::string & name);
 
   template <typename T>
-  T getControllableValueByName(const std::string & name, bool warn_when_values_differ = true);
+  T getControllableValueByName(const std::string & name);
 
   template <typename T>
-  T getControllableValueByName(const std::string & object_name,
-                               const std::string & param_name,
-                               bool warn_when_values_differ = true);
+  T getControllableValueByName(const std::string & object_name, const std::string & param_name);
 
   template <typename T>
-  T getControllableValueByName(const MooseObjectName & object_name,
-                               const std::string & param_name,
-                               bool warn_when_values_differ = true);
+  T getControllableValueByName(const MooseObjectName & object_name, const std::string & param_name);
 
   template <typename T>
   T getControllableValueByName(const std::string & tag,
                                const std::string & object_name,
-                               const std::string & param_name,
-                               bool warn_when_values_differ = true);
+                               const std::string & param_name);
 
   template <typename T>
-  T getControllableValueByName(const MooseObjectParameterName & desired,
-                               bool warn_when_values_differ = true);
+  T getControllableValueByName(const MooseObjectParameterName & desired);
   ///@}
 
   ///@{
@@ -129,8 +121,6 @@ protected:
    * Set the value(s) of a controllable parameter of class given input file syntax or actual name.
    * @param name The name of the parameter to retrieve a value.
    * @param value The value to set all matching parameters to.
-   * @param warn_when_values_diff When true, produce a warning if multiple controllable values share
-   *                              the given name but have varying values.
    */
   template <typename T>
   void setControllableValue(const std::string & name, const T & value);
@@ -165,61 +155,56 @@ private:
 
 template <typename T>
 T
-Control::getControllableValue(const std::string & name, bool warn_when_values_differ)
+Control::getControllableValue(const std::string & name)
 {
-  return getControllableValueByName<T>(getParam<std::string>(name), warn_when_values_differ);
+  return getControllableValueByName<T>(getParam<std::string>(name));
 }
 
 template <typename T>
 T
-Control::getControllableValueByName(const std::string & name, bool warn_when_values_differ)
+Control::getControllableValueByName(const std::string & name)
 {
   MooseObjectParameterName desired(name);
   ControllableParameter helper = getControllableParameterByName(desired);
-  return helper.get<T>(true, warn_when_values_differ)[0];
+  return helper.get<T>()[0];
 }
 
 template <typename T>
 T
-Control::getControllableValueByName(const std::string & object_name,
-                                    const std::string & param_name,
-                                    bool warn_when_values_differ)
+Control::getControllableValueByName(const std::string & object_name, const std::string & param_name)
 {
   MooseObjectParameterName desired(MooseObjectName(object_name), param_name);
   ControllableParameter helper = getControllableParameterByName(desired);
-  return helper.get<T>(true, warn_when_values_differ)[0];
+  return helper.get<T>()[0];
 }
 
 template <typename T>
 T
 Control::getControllableValueByName(const MooseObjectName & object_name,
-                                    const std::string & param_name,
-                                    bool warn_when_values_differ)
+                                    const std::string & param_name)
 {
   MooseObjectParameterName desired(object_name, param_name);
   ControllableParameter helper = getControllableParameterByName(desired);
-  return helper.get<T>(true, warn_when_values_differ)[0];
+  return helper.get<T>()[0];
 }
 
 template <typename T>
 T
 Control::getControllableValueByName(const std::string & tag,
                                     const std::string & object_name,
-                                    const std::string & param_name,
-                                    bool warn_when_values_differ)
+                                    const std::string & param_name)
 {
   MooseObjectParameterName desired(tag, object_name, param_name);
   ControllableParameter helper = getControllableParameterByName(desired);
-  return helper.get<T>(true, warn_when_values_differ)[0];
+  return helper.get<T>()[0];
 }
 
 template <typename T>
 T
-Control::getControllableValueByName(const MooseObjectParameterName & desired,
-                                    bool warn_when_values_differ)
+Control::getControllableValueByName(const MooseObjectParameterName & desired)
 {
   ControllableParameter helper = getControllableParameterByName(desired);
-  return helper.get<T>(true, warn_when_values_differ)[0];
+  return helper.get<T>()[0];
 }
 
 template <typename T>

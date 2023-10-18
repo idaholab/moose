@@ -109,7 +109,7 @@ MultiAppSamplerControl::execute()
   if (_orig_args.empty())
   {
     _orig_args = getControllableValueByName<std::vector<CLIArgString>>(
-        "MultiApp", _multi_app->name(), "cli_args", true);
+        "MultiApp", _multi_app->name(), "cli_args");
     if (_orig_args.size() == 0)
       _orig_args.push_back("");
     else if (_param_names.size())

@@ -51,13 +51,13 @@ public:
    * @param value The value to change the parameters to.
    */
   template <typename T>
-  void set(const T & value, bool type_check = true);
+  void set(const T & value);
 
   /**
    * Return a copy of the values of the given type.
    */
   template <typename T>
-  std::vector<T> get(bool type_check = true, bool warn_when_values_difffer = false) const;
+  std::vector<T> get() const;
 
   /**
    * Check size() and the type of the stored items, i.e., there must be items with the given type.
@@ -85,25 +85,25 @@ private:
 
 template <typename T>
 void
-ControllableParameter::set(const T & value, bool type_check /*=true*/)
+ControllableParameter::set(const T & value)
 {
   for (ControllableItem * item : _items)
-    item->set<T>(value, type_check);
+    item->set<T>(value);
 }
 
 template <typename T>
 std::vector<T>
-ControllableParameter::get(bool type_check /*=true*/, bool warn_when_values_differ) const
+ControllableParameter::get() const
 {
   std::vector<T> output;
   for (const ControllableItem * const item : _items)
   {
-    std::vector<T> local = item->get<T>(type_check);
+    std::vector<T> local = item->get<T>();
     output.insert(output.end(), local.begin(), local.end());
   }
 
   // Produce a warning, if the flag is true, when multiple parameters have different values
-  if (warn_when_values_differ && _items.size() > 1)
+  if (_items.size() > 1)
   {
     // The first parameter to test against
     const T value0 = output[0];

@@ -21,11 +21,11 @@ ControllableItem::ControllableItem(const MooseObjectParameterName & name,
 ControllableItem::ControllableItem() {}
 
 void
-ControllableItem::connect(ControllableItem * item, bool type_check)
+ControllableItem::connect(ControllableItem * item)
 {
   for (const auto & pair : item->_pairs)
   {
-    if (type_check && type() != pair.second->type())
+    if (type() != pair.second->type())
       mooseError("The master parameter (",
                  name(),
                  ") has a type '",
@@ -78,7 +78,7 @@ ControllableItem::name() const
 ControllableAlias::ControllableAlias(const MooseObjectParameterName & name, ControllableItem * item)
   : ControllableItem(), _name(name)
 {
-  connect(item, false);
+  connect(item);
 }
 
 const MooseObjectParameterName &
