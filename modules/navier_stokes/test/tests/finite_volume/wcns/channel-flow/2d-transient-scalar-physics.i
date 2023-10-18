@@ -58,7 +58,7 @@ inlet_v = 0.001
   [passive_scalar]
     type = WCNSFVScalarAdvectionPhysics
     compressibility = 'weakly-compressible'
-    # porous_medium_treatment = true
+    porous_medium_treatment = false
 
     block = 0
 
@@ -82,6 +82,25 @@ inlet_v = 0.001
     passive_scalar_inlet_function = '${inlet_temp}'
 
     passive_scalar_advection_interpolation = 'average'
+  []
+  [turbulence]
+    type = WCNSFVTurbulencePhysics
+    compressibility = 'weakly-compressible'
+    porous_medium_treatment = true
+
+    block = 0
+
+    coupled_flow_physics = flow
+    scalar_advection_physics = passive_scalar
+
+    velocity_variable = 'vel_x vel_y'
+
+    density = 'rho'
+    dynamic_viscosity = 'mu'
+
+    inlet_boundaries = 'left'
+    momentum_inlet_types = 'fixed-velocity'
+    momentum_inlet_function = '${inlet_v} 0'
   []
 []
 
