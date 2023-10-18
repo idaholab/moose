@@ -47,6 +47,12 @@ Checkpoint::validParams()
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
 
+  // Since it only makes sense to write checkpoints at the end of time steps,
+  // change the default value of execute_on to TIMESTEP_END
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum = {EXEC_TIMESTEP_END};
+  params.suppressParameter<ExecFlagEnum>("execute_on");
+
   return params;
 }
 
@@ -56,6 +62,14 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
+  // Prevent the checkpoint from executing at any time other than TIMESTEP_END
+  const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+  if (!(execute_on.size() == 1 && execute_on.contains(EXEC_TIMESTEP_END)))
+    paramError("execute_on",
+               "The checkpoint system may only be used with execute_on = ",
+               "TIMESTEP_END, not '",
+               execute_on,
+               "'.");
 }
 
 std::string
@@ -105,14 +119,21 @@ Checkpoint::outputStep(const ExecFlagType & type)
 bool
 Checkpoint::shouldOutput()
 {
+  const bool parent_should_output = FileOutput::shouldOutput();
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
   bool should_output =
-      (onInterval() || _current_execute_flag == EXEC_FINAL) ? FileOutput::shouldOutput() : false;
+      (onInterval() || _current_execute_flag == EXEC_FINAL) ? parent_should_output : false;
 
-  // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
-  // as the autosave and that checkpoint isn't on its interval, then output.
-  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output))
+  // If this is either a auto-created checkpoint, or if its an existing
+  // checkpoint acting as the autosave and that checkpoint isn't on its
+  // interval, then output.
+  // parent_should_output ensures that we output only when _execute_on contains
+  // _current_execute_flag (see Output::shouldOutput), ensuring that we wait
+  // until the end of the timestep to write, preventing the output of an
+  // unconverged solution.
+  if (parent_should_output &&
+      (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output)))
   {
     // If this is a pure system-created autosave through AutoCheckpointAction,
     // then sync across processes and only output one time per signal received.

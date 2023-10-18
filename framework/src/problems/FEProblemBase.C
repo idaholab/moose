@@ -8025,6 +8025,10 @@ FEProblemBase::addOutput(const std::string & object_type,
     if (_app.getParam<bool>("show_input") && parameters.get<bool>("output_screen"))
       parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
   }
+  // Need this because Checkpoint::validParams changes the default value of
+  // execute_on
+  else if (object_type == "Checkpoint")
+    exclude.push_back("execute_on");
 
   // Apply the common parameters loaded with Outputs input syntax
   const InputParameters * common = output_warehouse.getCommonParameters();
