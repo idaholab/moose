@@ -124,7 +124,7 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
 
   if (_porous_medium_treatment)
   {
@@ -154,7 +154,7 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyTimeKernels()
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
 
   if (_porous_medium_treatment)
   {
@@ -295,7 +295,7 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
   params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
   params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
