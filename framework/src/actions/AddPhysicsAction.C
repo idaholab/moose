@@ -42,7 +42,7 @@ registerMooseAction("MooseApp", AddPhysicsAction, "add_function");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_user_object");
 
 // To help form part of the equations or to output spatially dependent quantities
-// registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_variable");
+registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_variable");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_aux_kernel");
 registerMooseAction("MooseApp", AddPhysicsAction, "add_material");
 
@@ -129,12 +129,10 @@ AddPhysicsAction::act()
   else if (_current_task == "add_user_object")
     _physics->addUserObjects();
 
-  // else if (_current_task == "add_aux_variable")
-  //   for (const auto [type, name, params] : getInfo(_physics->getAuxiliaryVariables()))
-  //     _problem->addKernel(type, name, params);
-  // else if (_current_task == "add_aux_kernel")
-  //   for (const auto [type, name, params] : getInfo(_physics->getAuxiliaryKernels()))
-  //     _problem->addKernel(type, name, params);
+  else if (_current_task == "add_aux_variable")
+    _physics->addAuxiliaryVariables();
+  else if (_current_task == "add_aux_kernel")
+    _physics->addAuxiliaryKernels();
   else if (_current_task == "add_material")
     _physics->addMaterials();
   else if (_current_task == "add_functor_material")

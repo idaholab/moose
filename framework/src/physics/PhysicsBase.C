@@ -282,16 +282,17 @@ PhysicsBase::checkRequiredTasks() const
                    Moose::stringify(registered_tasks));
 }
 
-PhysicsBase::checkDependentParameterError(const std::string & main_parameter,
-                                          const std::vector<std::string> & dependent_parameters,
-                                          const bool should_be_defined) const
+void
+PhysicsBase::errorDependentParameter(const std::string & param1,
+                                     const std::string & value_not_set,
+                                     const std::vector<std::string> & dependent_params) const
 {
-  for (const auto & param : dependent_parameters)
-    if (parameters().isParamSetByUser(param) == !should_be_defined)
-      paramError(param,
-                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
-                     " be given by the user with the corresponding " + main_parameter +
-                     " setting!");
+  for (const auto & dependent_param : dependent_params)
+    if (isParamSetByUser(dependent_param))
+      paramError(dependent_param,
+                 "Parameter '" + dependent_param +
+                     "' should not be set by the user if parameter '" + param1 +
+                     "' has not been set to '" + value_not_set + "'");
 }
 
 void
