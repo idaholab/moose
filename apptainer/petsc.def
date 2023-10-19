@@ -54,17 +54,19 @@ From: {{ APPTAINER_FROM }}
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     PETSC_DIR={{ PETSC_DIR }}
 {%- if PETSC_ALT is defined %}
-    # PETSC_ALT set; using alt script
+    # PETSC_ALT set; using alt script and use container cmake
     PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc_alt.sh
+    DOWNLOAD_CMAKE=
 {%- else %}
-    # PETSC_ALT not set; using standard script
+    # PETSC_ALT not set; using standard script and download cmake
     PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc.sh
+    DOWNLOAD_CMAKE=--download-cmake
 {%- endif %}
 
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}/moose
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} ${PETSC_BUILD_SCRIPT} {{ PETSC_OPTIONS }}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} ${PETSC_BUILD_SCRIPT} ${DOWNLOAD_CMAKE} {{ PETSC_OPTIONS }}
 
 {%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
