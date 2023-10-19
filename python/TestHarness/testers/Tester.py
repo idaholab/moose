@@ -308,12 +308,19 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def spawnSubprocessFromOptions(self, timer, options):
+    def spawnSubprocessFromOptions(self, timer, options, shell_linux=True, shell_windows=True):
         """
         Spawns a subprocess based on given options, sets output and error files,
         and starts timer.
         """
         cmd = self.getCommand(options)
+        cmd_linux = cmd
+        cmd_windows = cmd
+        if not shell_linux:
+            cmd_linux = cmd_linux.split(" ")
+        if not shell_windows:
+            cmd_windows = cmd_windows.split(" ")
+
         cwd = self.getTestDir()
 
         # Verify that the working directory is available right before we execute.
@@ -332,11 +339,11 @@ class Tester(MooseObject):
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
             if platform.system() == "Windows":
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                process = subprocess.Popen(cmd_windows, stdout=f, stderr=e, close_fds=False,
+                                           shell=shell_windows, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
             else:
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=True, preexec_fn=os.setsid, cwd=cwd)
+                process = subprocess.Popen(cmd_linux, stdout=f, stderr=e, close_fds=False,
+                                           shell=shell_linux, preexec_fn=os.setsid, cwd=cwd)
         except:
             print("Error in launching a new task", cmd)
             raise
