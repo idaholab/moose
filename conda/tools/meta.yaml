@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.08.31" %}
+{% set version = "2023.10.19" %}
 
 package:
   name: moose-tools
@@ -20,24 +20,62 @@ requirements:
     - {{ moose_python }}
     - setuptools
   run:
-    - {{ moose_test_tools }}
     - beautifulsoup4
+    - {{ clang_tools }}
+    - deepdiff
+    - gitpython
+    - graphviz
+    - jinja2
     - livereload
-    - pybtex
+    - lxml
+    - mako
+    - matplotlib-base
     - mock
+    - numpy
+    - packaging
+    - pandas
+    - psycopg2
+    - pybtex
+    - pycobertura
+    - pyflakes
     - pylatexenc
+    - pylint
     - python
-    - clang-tools
+    - pyyaml
+    - scikit-image
+    - setuptools
+    - sympy
+    - tabulate
+    - xmltodict
+    - yaml
 
 test:
   commands:
-    - git clang-format -h
+    - clang-format --version
+    - dot -V
+    - pg_config --help
   imports:
     - bs4
+    - deepdiff
+    - git
+    - jinja2
     - livereload
-    - pybtex
+    - lxml
+    - matplotlib
     - mock
+    - numpy
+    - pandas
+    - psycopg2
+    - pybtex
+    - pycobertura
+    - pyflakes
     - pylatexenc
+    - pylint
+    - skimage
+    - sympy
+    - tabulate
+    - xmltodict
+    - yaml
 
 about:
   home: https://mooseframework.org/
