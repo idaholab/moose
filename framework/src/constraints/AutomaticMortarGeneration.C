@@ -952,6 +952,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         case QUAD4:
           return {{0, 1, 2, 3}};
         case TRI6:
+        case TRI7:
           switch (sub_elem)
           {
             case 0:
@@ -1032,8 +1033,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
        * Step 1.1: Linearize secondary face elements
        *
        * For first order face elements (Tri3 and Quad4) elements are simply linearized around center
-       * For second order face elements (Tri6 and Quad9), elements are sub-divided into four first
-       * order elements then each of the sub-elements is linearized around their respective centers
+       * For second order (Tri6 and Quad9) and third order (Tri7) face elements, elements are
+       * sub-divided into four first order elements then each of the sub-elements is linearized
+       * around their respective centers
        * For Quad8 elements, they are sub-divided into one quad and four triangle elements and each
        * sub-element is linearized around their respective centers
        */
@@ -1080,6 +1082,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           query_pt = {{center_point(0), center_point(1), center_point(2)}};
           break;
         case TRI6:
+        case TRI7:
           center_point = mortar_segment_helper[1]->center();
           query_pt = {{center_point(0), center_point(1), center_point(2)}};
           break;

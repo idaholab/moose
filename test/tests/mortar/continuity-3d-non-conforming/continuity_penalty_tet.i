@@ -1,5 +1,5 @@
 [Mesh]
-  second_order = true
+  second_order = false
   [left_block]
     type = GeneratedMeshGenerator
     dim = 3
@@ -12,7 +12,7 @@
     ymax = .5
     zmin = 0
     zmax = .5
-    elem_type = TET10
+    elem_type = TET4
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -37,7 +37,7 @@
     ymax = .5
     zmin = 0
     zmax = .5
-    elem_type = TET10
+    elem_type = TET4
   []
   [right_block_id]
     type = SubdomainIDGenerator
@@ -118,19 +118,10 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [T]
     block = '1 2'
-    order = SECOND
-  []
-  [lambda]
-    block = 'secondary'
-    family = LAGRANGE
-    order = SECOND
+    order = FIRST
   []
 []
 
@@ -165,15 +156,15 @@
 [Functions]
   [forcing_function]
     type = ParsedFunction
-    expression= 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    expression = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
   []
   [exact_soln_primal]
     type = ParsedFunction
-    expression= 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    expression = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
   []
   [exact_soln_lambda]
     type = ParsedFunction
-    expression= 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
+    expression = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
   []
 []
 
@@ -183,14 +174,13 @@
 
 [Constraints]
   [mortar]
-    type = EqualValueConstraint
+    type = PenaltyEqualValueConstraint
     primary_boundary = 'rb_left'
     secondary_boundary = 'lb_right'
     primary_subdomain = '11'
     secondary_subdomain = '12'
-    variable = lambda
     secondary_variable = T
-    delta = .1
+    penalty_value = 1.0e5
   []
 []
 
@@ -204,9 +194,9 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
-  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
@@ -214,13 +204,6 @@
 []
 
 [Postprocessors]
-  [L2lambda]
-    type = ElementL2Error
-    variable = lambda
-    function = exact_soln_lambda
-    execute_on = 'timestep_end'
-    block = 'secondary'
-  []
   [L2u]
     type = ElementL2Error
     variable = T

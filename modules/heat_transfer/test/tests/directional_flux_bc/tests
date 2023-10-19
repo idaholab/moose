@@ -56,6 +56,13 @@
       cli_args = 'GlobalParams/elem_type=tri6 GlobalParams/order=second Outputs/file_base=2d_tri6'
       detail = 'TRI6'
     []
+    [tri7]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_tri7.csv
+      cli_args = 'GlobalParams/elem_type=tri7 GlobalParams/order=third Outputs/file_base=2d_tri7'
+      detail = 'TRI7'
+    []
 
     [tet4]
       type = CSVDiff

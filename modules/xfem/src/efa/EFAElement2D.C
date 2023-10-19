@@ -24,10 +24,11 @@ EFAElement2D::EFAElement2D(unsigned int eid, unsigned int n_nodes) : EFAElement(
 {
   if (n_nodes == 4 || n_nodes == 8 || n_nodes == 9)
     _num_edges = 4;
-  else if (n_nodes == 3 || n_nodes == 6)
+  else if (n_nodes == 3 || n_nodes == 6 || n_nodes == 7)
     _num_edges = 3;
   else
-    EFAError("In EFAelement2D the supported element types are QUAD4, QUAD8, QUAD9, TRI3 and TRI6");
+    EFAError(
+        "In EFAelement2D the supported element types are QUAD4, QUAD8, QUAD9, TRI3, TRI6 and TRI7");
   setLocalCoordinates();
   _edges = std::vector<EFAEdge *>(_num_edges, nullptr);
   _edge_neighbors = std::vector<std::vector<EFAElement2D *>>(_num_edges, {nullptr});
@@ -173,13 +174,13 @@ EFAElement2D::setLocalCoordinates()
   else
   {
     /*
-      TRI6: 2
+      TRI7: 2
             o
             | \
             |   \
           5 o     o 4
-            |       \
-            |         \
+            |  o    \
+            |  6      \
             o-----o-----o
             0     3     1
     */
@@ -193,6 +194,11 @@ EFAElement2D::setLocalCoordinates()
       _local_node_coor[3] = EFAPoint(0.5, 0.0, 0.0);
       _local_node_coor[4] = EFAPoint(0.5, 0.5, 0.0);
       _local_node_coor[5] = EFAPoint(0.0, 0.5, 0.0);
+    }
+
+    if (_num_nodes > 6)
+    {
+      _local_node_coor[6] = EFAPoint(1 / 3., 1 / 3., 0.0);
     }
   }
 }

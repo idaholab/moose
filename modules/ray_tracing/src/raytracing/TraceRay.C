@@ -36,6 +36,7 @@
 #include "libmesh/face_quad9.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_tri6.h"
+#include "libmesh/face_tri7.h"
 #include "libmesh/enum_to_string.h"
 #include "libmesh/mesh.h"
 
@@ -194,6 +195,15 @@ TraceRay::exitsElem(const Elem * elem,
       break;
     case TRI6:
       intersected = exitsElem<Tri6, Tri3>(elem,
+                                          incoming_side,
+                                          intersection_point,
+                                          intersected_side,
+                                          intersected_extrema,
+                                          intersection_distance,
+                                          normals);
+      break;
+    case TRI7:
+      intersected = exitsElem<Tri7, Tri3>(elem,
                                           incoming_side,
                                           intersection_point,
                                           intersected_side,

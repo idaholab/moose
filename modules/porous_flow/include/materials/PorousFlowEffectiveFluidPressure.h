@@ -17,32 +17,36 @@
  * and other similar places.  This class computes
  * effective fluid pressure = sum_{phases}Saturation_{phase}*Porepressure_{phase}
  */
-class PorousFlowEffectiveFluidPressure : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowEffectiveFluidPressureTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowEffectiveFluidPressure(const InputParameters & parameters);
+  PorousFlowEffectiveFluidPressureTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
   /// Quadpoint or nodal porepressure of each phase
-  const MaterialProperty<std::vector<Real>> & _porepressure;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _porepressure;
 
   /// d(porepressure)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dporepressure_dvar;
 
   /// Quadpoint or nodal saturation of each phase
-  const MaterialProperty<std::vector<Real>> & _saturation;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation;
 
   /// d(saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 
   /// Computed effective fluid pressure (at quadpoints or nodes)
-  MaterialProperty<Real> & _pf;
+  GenericMaterialProperty<Real, is_ad> & _pf;
 
   /// d(_pf)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real>> & _dpf_dvar;
+  MaterialProperty<std::vector<Real>> * const _dpf_dvar;
 };
+
+typedef PorousFlowEffectiveFluidPressureTempl<false> PorousFlowEffectiveFluidPressure;
+typedef PorousFlowEffectiveFluidPressureTempl<true> ADPorousFlowEffectiveFluidPressure;
