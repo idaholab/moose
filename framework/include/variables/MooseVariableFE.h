@@ -698,16 +698,22 @@ protected:
   using NodeArg = Moose::NodeArg;
   using ElemPointArg = Moose::ElemPointArg;
 
+  /**
+   * A common method that both evaluate(FaceArg) and evaluateDot(FaceArg) can call. A value
+   * evaluation vs dot evaluation is delineated via the passed-in \p cache_data, e.g. if the
+   * passed-in cache data is the sln data member then this will return a value evaluation and if the
+   * cache data is the dot data member then this will return a dot evaluation
+   */
+  ValueType
+  faceEvaluate(const FaceArg &, const StateArg &, const std::vector<ValueType> & cache_data) const;
+
   ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,
                      const StateArg & state) const override final;
   ValueType evaluate(const ElemArg &, const StateArg &) const override final;
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override final;
   ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
-  ValueType evaluate(const FaceArg &, const StateArg &) const override final
-  {
-    mooseError("Face info functor overload not yet implemented for finite element variables");
-  }
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final;
 
   GradientType evaluateGradient(const ElemQpArg & elem_qp, const StateArg & state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,

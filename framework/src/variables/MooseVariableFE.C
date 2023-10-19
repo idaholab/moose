@@ -1033,6 +1033,52 @@ MooseVariableFE<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg &
 
 template <typename OutputType>
 typename MooseVariableFE<OutputType>::ValueType
+MooseVariableFE<OutputType>::faceEvaluate(const FaceArg & face_arg,
+                                          const StateArg & state,
+                                          const std::vector<ValueType> & cache_data) const
+{
+  const QMonomial qrule(face_arg.fi->elem().dim() - 1, CONSTANT);
+  auto side_evaluate =
+      [this, &qrule, &state, &cache_data](const Elem * const elem, const unsigned int side)
+  {
+    // We can use whatever we want for the point argument since it won't be used
+    const ElemSideQpArg elem_side_qp_arg{elem, side, /*qp=*/0, &qrule, Point(0, 0, 0)};
+    evaluateOnElementSide(elem_side_qp_arg, state, /*cache_eligible=*/false);
+    return cache_data[0];
+  };
+
+  const auto continuity = this->getContinuity();
+  const bool on_elem = !face_arg.face_side || (face_arg.face_side == face_arg.fi->elemPtr());
+  const bool on_neighbor =
+      !face_arg.face_side || (face_arg.face_side == face_arg.fi->neighborPtr());
+  if (on_neighbor)
+    mooseAssert(
+        face_arg.fi->neighborPtr(),
+        "If we are signaling we should evaluate on the neighbor, we better have a neighbor");
+
+  // Only do multiple evaluations if we are not continuous and we are on an internal face
+  if ((continuity != C_ZERO && continuity != C_ONE) && on_elem && on_neighbor)
+    return (side_evaluate(face_arg.fi->elemPtr(), face_arg.fi->elemSideID()) +
+            side_evaluate(face_arg.fi->neighborPtr(), face_arg.fi->neighborSideID())) /
+           2;
+  else if (on_elem)
+    return side_evaluate(face_arg.fi->elemPtr(), face_arg.fi->elemSideID());
+  else if (on_neighbor)
+    return side_evaluate(face_arg.fi->neighborPtr(), face_arg.fi->neighborSideID());
+  else
+    mooseError(
+        "Attempted to evaluate a moose finite element variable on a face where it is not defined");
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::ValueType
+MooseVariableFE<OutputType>::evaluate(const FaceArg & face_arg, const StateArg & state) const
+{
+  return faceEvaluate(face_arg, state, _current_elem_side_qp_functor_sln);
+}
+
+template <typename OutputType>
+typename MooseVariableFE<OutputType>::ValueType
 MooseVariableFE<OutputType>::evaluate(const ElemPointArg & elem_point_arg,
                                       const StateArg & state) const
 {
@@ -1214,12 +1260,7 @@ MooseVariableFE<OutputType>::evaluateDot(const FaceArg & face_arg, const StateAr
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
-  const QMonomial qrule(face_arg.fi->elem().dim() - 1, CONSTANT);
-  // We can use whatever we want for the point argument since it won't be used
-  const ElemSideQpArg elem_side_qp_arg{
-      face_arg.fi->elemPtr(), face_arg.fi->elemSideID(), /*qp=*/0, &qrule, Point(0, 0, 0)};
-  evaluateOnElementSide(elem_side_qp_arg, state, /*cache_eligible=*/false);
-  return _current_elem_side_qp_functor_dot[0];
+  return faceEvaluate(face_arg, state, _current_elem_side_qp_functor_dot);
 }
 
 template <>
