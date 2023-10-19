@@ -78,3 +78,5 @@
 /scripts/update_and_rebuild_petsc_alt.sh @cticenhour @milljm @loganharbour
 /scripts/configure_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr
 /scripts/update_and_rebuild_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr
+
+/test @lindsayad
