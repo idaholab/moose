@@ -1,0 +1,18 @@
+[Tests]
+  design = 'Functors/index.md'
+  issues = '#19420'
+  [exo]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to accurately evaluate a finite element variable through the functor system in a finite volume Dirichlet boundary condition.'
+  []
+  [jac]
+    type = PetscJacobianTester
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    input = test.i
+    run_sim = True
+    requirement = 'The system shall compute the correct Jacobian when evaluating a finite element variable through the functor system in a finite volume Dirichlet boundary condition.'
+  []
+[]
