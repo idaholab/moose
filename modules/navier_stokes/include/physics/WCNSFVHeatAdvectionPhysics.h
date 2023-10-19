@@ -10,6 +10,7 @@
 #pragma once
 
 #include "WCNSFVPhysicsBase.h"
+#include "NS.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
