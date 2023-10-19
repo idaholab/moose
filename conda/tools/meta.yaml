@@ -21,7 +21,8 @@ requirements:
     - setuptools
   run:
     - beautifulsoup4
-    - {{ clang_tools }}
+    - {{ clang_format }}
+    - clang-tools
     - deepdiff
     - gitpython
     - graphviz

@@ -1,5 +1,5 @@
-clang_tools:
-  - clang-tools 14
+clang_format:
+  - clang-format 14
 
 moose_python:
   - python 3.10
