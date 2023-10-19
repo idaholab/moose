@@ -305,7 +305,10 @@ LinearSystem::computeSystemMatrixTags(const std::set<TagID> & tags)
   }
 }
 
-void LinearSystem::updateActive(THREAD_ID /*tid*/) {}
+void
+LinearSystem::updateActive(THREAD_ID /*tid*/)
+{
+}
 
 void
 LinearSystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,

@@ -184,7 +184,7 @@ coordTransformFactorRZGeneral(const P & point,
 }
 
 inline void
-computeFaceInfoFaceCoord(FaceInfo & fi,
+computeFiniteVolumeCoords(FaceInfo & fi,
                          const Moose::CoordinateSystemType coord_type,
                          const unsigned int rz_radial_coord = libMesh::invalid_uint)
 {

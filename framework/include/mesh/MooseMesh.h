@@ -40,6 +40,7 @@ class RelationshipManager;
 class MooseVariableBase;
 class MooseAppCoordTransform;
 class MooseUnits;
+class LinearSystem;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1167,6 +1168,8 @@ public:
    */
   void cacheFaceInfoVariableOwnership() const;
 
+  void cacheLinearFVDoFs(const LinearSystem & system);
+
   /**
    * Cache the DoF indices for FV variables on each element. These indices are used to speed up the
    * setup loops of finite volume systems.
@@ -1280,6 +1283,8 @@ public:
    * @return whether the finite volume information is dirty
    */
   bool isFiniteVolumeInfoDirty() const { return _finite_volume_info_dirty; }
+
+  bool cachedLinearFVDoFs() { return _linear_finite_volume_dofs_cached; }
 
   /**
    * @return the coordinate transformation object that describes how to transform this problem's
