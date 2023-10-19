@@ -13,9 +13,9 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-enum class ExplicitDynamicsContactModel
-{
-  FRICTIONLESS
+enum class ExplicitDynamicsContactModel {
+      FRICTIONLESS,
+      FRICTIONLESS_ITERATION
 };
 
 /**
@@ -23,6 +23,7 @@ enum class ExplicitDynamicsContactModel
  * contact.
  */
 class ExplicitDynamicsContactAction : public Action
+
 {
 public:
   static InputParameters validParams();

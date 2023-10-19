@@ -35,6 +35,7 @@ ExplicitDynamicsContactConstraint::validParams()
 {
   InputParameters params = NodeFaceConstraint::validParams();
   params += ExplicitDynamicsContactAction::commonParameters();
+  params += TwoMaterialPropertyInterface::validParams();
 
   params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addParam<BoundaryName>("secondary", "The secondary boundary");
@@ -42,59 +43,41 @@ ExplicitDynamicsContactConstraint::validParams()
                                         "An integer corresponding to the direction "
                                         "the variable this constraint acts on. (0 for x, "
                                         "1 for y, 2 for z)");
-
   params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-
   params.addCoupledVar("secondary_gap_offset", "offset to the gap distance from secondary side");
   params.addCoupledVar("mapped_primary_gap_offset",
                        "offset to the gap distance mapped from primary side");
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
-  params.addParam<Real>("penalty_multiplier",
-                        1.0,
-                        "The growth factor for the penalty applied at the end of each augmented "
-                        "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
       "capture_tolerance", 0, "Normal distance from surface within which nodes are captured");
-
   params.addParam<Real>("tension_release",
                         0.0,
                         "Tension release threshold.  A node in contact "
                         "will not be released if its tensile load is below "
                         "this value.  No tension release if negative.");
-
   params.addParam<bool>(
       "normalize_penalty",
       false,
       "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
-  params.addParam<unsigned int>("stick_lock_iterations",
-                                std::numeric_limits<unsigned int>::max(),
-                                "Number of times permitted to switch between sticking and slipping "
-                                "in a solution before locking node in a sticked state.");
-  params.addParam<Real>("stick_unlock_factor",
-                        1.5,
-                        "Factor by which frictional capacity must be "
-                        "exceeded to permit stick-locked node to slip "
-                        "again.");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
-
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation "
       "using a node on face, primary/secondary algorithm, and multiple options "
       "for the physical behavior on the interface and the mathematical "
       "formulation for constraint enforcement");
-
+  params.addParam<MaterialPropertyName>(
+      "wave_speed", 0.0, "The wave speed used to solve the impact problem node-wise.");
   return params;
 }
 
@@ -103,16 +86,14 @@ Threads::spin_mutex ExplicitDynamicsContactConstraint::_contact_set_mutex;
 ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _tension_release(getParam<Real>("tension_release")),
     _capture_tolerance(getParam<Real>("capture_tolerance")),
-    _stick_lock_iterations(getParam<unsigned int>("stick_lock_iterations")),
-    _stick_unlock_factor(getParam<Real>("stick_unlock_factor")),
     _update_stateful_data(true),
-    _residual_copy(_sys.residualGhosted()),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
     _var_objects(3, nullptr),
@@ -125,8 +106,8 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
-    _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
-    _print_contact_nodes(getParam<bool>("print_contact_nodes"))
+    _print_contact_nodes(getParam<bool>("print_contact_nodes")),
+    _wave_speed(getMaterialProperty<Real>("wave_speed"))
 {
   _overwrite_secondary_residual = false;
 
@@ -160,9 +141,6 @@ ExplicitDynamicsContactConstraint::timestepSetup()
   {
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
-
-    if (_contact_linesearch)
-      _contact_linesearch->reset();
   }
 }
 
@@ -190,14 +168,13 @@ ExplicitDynamicsContactConstraint::updateContactStatefulData(bool beginning_of_s
       else if (pinfo->_mech_status_old == PenetrationInfo::MS_NO_CONTACT &&
                pinfo->_mech_status != PenetrationInfo::MS_NO_CONTACT)
       {
+        mooseWarning("Previous step did not converge. Check results");
         // The penetration info object could be based on a bad state so delete it
-        delete pinfo;
-        pinfo = nullptr;
-        continue;
+        // delete pinfo;
+        // pinfo = nullptr;
+        // continue;
       }
 
-      pinfo->_locked_this_step = 0;
-      pinfo->_stick_locked_this_step = 0;
       pinfo->_starting_elem = pinfo->_elem;
       pinfo->_starting_side_num = pinfo->_side_num;
       pinfo->_starting_closest_point_ref = pinfo->_closest_point_ref;
@@ -241,14 +218,6 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
                                                        PenetrationInfo * pinfo,
                                                        bool update_contact_set)
 {
-  // Build up residual vector
-  RealVectorValue res_vec;
-  for (unsigned int i = 0; i < _mesh_dimension; ++i)
-  {
-    dof_id_type dof_number = node.dof_number(0, _vars[i], 0);
-    res_vec(i) = _residual_copy(dof_number) / _var_objects[i]->scalingFactor();
-  }
-
   RealVectorValue distance_vec(node - pinfo->_closest_point);
   if (distance_vec.norm() != 0)
     distance_vec += gapOffset(node) * pinfo->_normal * distance_vec.unit() * distance_vec.unit();
@@ -265,10 +234,6 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
   {
     newly_captured = true;
     pinfo->capture();
-
-    // Increment the lock count every time the node comes back into contact from not being in
-    // contact.
-    ++pinfo->_locked_this_step;
   }
 
   if (!pinfo->isCaptured())
@@ -283,15 +248,15 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
       // pinfo->_contact_force = -pinfo->_normal * (pinfo->_normal * res_vec);
       pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
-
+    case ExplicitDynamicsContactModel::FRICTIONLESS_ITERATION:
+      solveImpactEquations(node, pinfo);
+      break;
     default:
       mooseError("Invalid or unavailable contact model");
       break;
   }
 
-  // Release (TODO: Revise lines until end of routine)
-  if (update_contact_set && pinfo->isCaptured() && !newly_captured && _tension_release >= 0.0 &&
-      (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
+  if (update_contact_set && pinfo->isCaptured() && !newly_captured && _tension_release >= 0.0)
   {
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(node);
     if (-contact_pressure >= _tension_release)
@@ -300,6 +265,12 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
       pinfo->_contact_force.zero();
     }
   }
+}
+
+void
+ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & /*node*/,
+                                                        PenetrationInfo * /*pinfo*/)
+{
 }
 
 Real
@@ -384,7 +355,7 @@ ExplicitDynamicsContactConstraint::getCoupledVarComponent(unsigned int var_num,
 void
 ExplicitDynamicsContactConstraint::residualEnd()
 {
-  if (_component == 0 && (_print_contact_nodes || _contact_linesearch))
+  if (_component == 0 && (_print_contact_nodes))
   {
     _communicator.set_union(_current_contact_state);
     if (_print_contact_nodes)
@@ -396,8 +367,7 @@ ExplicitDynamicsContactConstraint::residualEnd()
         _console << "Changed contact state. " << _current_contact_state.size()
                  << " nodes in contact.\n";
     }
-    if (_contact_linesearch)
-      _contact_linesearch->insertSet(_current_contact_state);
+
     _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
   }

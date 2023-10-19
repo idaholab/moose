@@ -12,16 +12,16 @@
 // MOOSE includes
 #include "NodeFaceConstraint.h"
 #include "PenetrationLocator.h"
+#include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
-class ContactLineSearchBase;
 enum class ExplicitDynamicsContactModel;
 
 /**
- * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an
- * interface.
+ * A ExplicitDynamicsContactConstraint does mechanical contact for explicit dynamics simulations.
  */
-class ExplicitDynamicsContactConstraint : public NodeFaceConstraint
+class ExplicitDynamicsContactConstraint : public NodeFaceConstraint,
+                                          public TwoMaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
@@ -80,6 +80,22 @@ public:
   virtual bool addCouplingEntriesToJacobian() override { return false; }
 
 protected:
+  /**
+   * Determine "Lagrange multipliers" from the iterative solution of the impact problem.
+   * @param node The number of the variable to be checked
+   * @param pinfo The component index computed in this routine
+   */
+  void solveImpactEquations(const Node & node, PenetrationInfo * pinfo);
+
+  const std::set<BoundaryID> getBoundaryIDs() const
+  {
+    std::set<BoundaryID> result;
+    result.insert(_primary);
+    result.insert(_secondary);
+
+    return result;
+  }
+
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real gapOffset(const Node & node);
   Real nodalArea(const Node & node);
@@ -91,19 +107,13 @@ protected:
 
   const Real _tension_release;
   const Real _capture_tolerance;
-  const unsigned int _stick_lock_iterations;
-  const Real _stick_unlock_factor;
   bool _update_stateful_data;
-
-  NumericVector<Number> & _residual_copy;
-  //  std::map<Point, PenetrationInfo *> _point_to_info;
 
   const unsigned int _mesh_dimension;
 
   std::vector<unsigned int> _vars;
   std::vector<MooseVariable *> _var_objects;
 
-  /// gap offset from either secondary, primary or both
   const bool _has_secondary_gap_offset;
   const MooseVariable * const _secondary_gap_offset_var;
   const bool _has_mapped_primary_gap_offset;
@@ -113,7 +123,6 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
 
-  ContactLineSearchBase * _contact_linesearch;
   std::set<dof_id_type> _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 
@@ -121,4 +130,6 @@ protected:
   static Threads::spin_mutex _contact_set_mutex;
 
   const static unsigned int _no_iterations;
+
+  const MaterialProperty<Real> & _wave_speed;
 };
