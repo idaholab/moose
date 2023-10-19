@@ -6,7 +6,6 @@
 {#- Optional jinja arguments                                                                  -#}
 {#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
-{#- MOOSE_TEST_TOOLS_VERSION: The version to pin moose-test-tools to (if any)                 -#}
 {#- DEV_CONTAINER: Set to anything to add development packages                                -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 
@@ -68,13 +67,9 @@ From: {{ APPTAINER_FROM }}
     if [ -n "$CONDA_ALT_CHANNEL" ]; then
         conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
-    {% if DEV_CONTAINER is defined %}
-    # DEV_CONTAINER is set, installing moose-tools
+
+    # Create list of Conda Packages to install
     MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
-    {% else %}
-    # DEV_CONTAINER is not set, installing moose-test-tools
-    MAMBA_PACKAGES="moose-test-tools=${MOOSE_TEST_TOOLS_VERSION}"
-    {% endif -%}
     # Install packages
     mamba create -yq -n ${MOOSE_MAMBA_ENV} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
 
