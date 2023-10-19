@@ -101,12 +101,6 @@ From: {{ APPTAINER_FROM }}
         export MOOSE_DIR=${MOOSE_DIR_REAL}
     fi
 
-{%- if MOOSE_SKIP_DOCS is not defined %}
-    # These are needed for documentation and will be removed later
-    EXTRA_DOC_PACKAGES="livereload pybtex beautifulsoup4"
-    mamba install -yq $EXTRA_DOC_PACKAGES
-{%- endif %}
-
 {%- if EXTRA_MAMBA_PACKAGES is defined %}
     # Install extra mamba packages
     mamba install -yq {{ EXTRA_MAMBA_PACKAGES }}
@@ -157,11 +151,6 @@ From: {{ APPTAINER_FROM }}
     set -e
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
-
-{%- if MOOSE_SKIP_DOCS is not defined %}
-    # Remove the packages that were for only documentation
-    mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
-{%- endif %}
 
 {%- if BINARY_NAME == 'moose-combined' %}
     # Create moose-opt symlink to combined-opt
