@@ -14,6 +14,7 @@
 #include "libmesh/function_base.h"
 #include "libmesh/cell_prism6.h"
 #include "libmesh/cell_prism18.h"
+#include "libmesh/cell_prism21.h"
 #include "libmesh/cell_hex8.h"
 #include "libmesh/cell_hex27.h"
 #include "libmesh/face_quad4.h"
@@ -625,6 +626,73 @@ AdvancedExtruderGenerator::generate()
               swapNodesInElem(*new_elem, 6, 12);
               swapNodesInElem(*new_elem, 7, 13);
               swapNodesInElem(*new_elem, 8, 14);
+              isFlipped = true;
+            }
+
+            break;
+          }
+          case TRI7:
+          {
+            new_elem = std::make_unique<Prism21>();
+            new_elem->set_node(0) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(1) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(2) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(3) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(4) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(5) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(6) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(7) =
+                mesh->node_ptr(elem->node_ptr(4)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(8) =
+                mesh->node_ptr(elem->node_ptr(5)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(9) =
+                mesh->node_ptr(elem->node_ptr(0)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(10) =
+                mesh->node_ptr(elem->node_ptr(1)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(11) =
+                mesh->node_ptr(elem->node_ptr(2)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(12) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(13) =
+                mesh->node_ptr(elem->node_ptr(4)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(14) =
+                mesh->node_ptr(elem->node_ptr(5)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(15) =
+                mesh->node_ptr(elem->node_ptr(3)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(16) =
+                mesh->node_ptr(elem->node_ptr(4)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(17) =
+                mesh->node_ptr(elem->node_ptr(5)->id() + ((2 * current_layer + 1) * orig_nodes));
+            new_elem->set_node(18) =
+                mesh->node_ptr(elem->node_ptr(6)->id() + (2 * current_layer * orig_nodes));
+            new_elem->set_node(19) =
+                mesh->node_ptr(elem->node_ptr(6)->id() + ((2 * current_layer + 2) * orig_nodes));
+            new_elem->set_node(20) =
+                mesh->node_ptr(elem->node_ptr(6)->id() + ((2 * current_layer + 1) * orig_nodes));
+
+            if (elem->neighbor_ptr(0) == remote_elem)
+              new_elem->set_neighbor(1, const_cast<RemoteElem *>(remote_elem));
+            if (elem->neighbor_ptr(1) == remote_elem)
+              new_elem->set_neighbor(2, const_cast<RemoteElem *>(remote_elem));
+            if (elem->neighbor_ptr(2) == remote_elem)
+              new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
+
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(*new_elem, 0, 3);
+              swapNodesInElem(*new_elem, 1, 4);
+              swapNodesInElem(*new_elem, 2, 5);
+              swapNodesInElem(*new_elem, 6, 12);
+              swapNodesInElem(*new_elem, 7, 13);
+              swapNodesInElem(*new_elem, 8, 14);
+              swapNodesInElem(*new_elem, 18, 19);
               isFlipped = true;
             }
 

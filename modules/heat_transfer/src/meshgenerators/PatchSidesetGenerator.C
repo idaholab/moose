@@ -23,16 +23,6 @@
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/enum_elem_type.h"
 
-// libmesh elem types
-#include "libmesh/edge_edge2.h"
-#include "libmesh/edge_edge3.h"
-#include "libmesh/edge_edge4.h"
-#include "libmesh/face_tri3.h"
-#include "libmesh/face_tri6.h"
-#include "libmesh/face_quad4.h"
-#include "libmesh/face_quad8.h"
-#include "libmesh/face_quad9.h"
-
 #include <set>
 #include <limits>
 #include "libmesh/mesh_tools.h"

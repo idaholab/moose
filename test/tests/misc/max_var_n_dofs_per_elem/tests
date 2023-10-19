@@ -29,14 +29,19 @@
     cli_args = 'Mesh/dim=2 Mesh/elem_type=tri3 Outputs/file_base=triangles'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI3 elem shall be 3"
   [../]
-  [./triangles_high_order]
+  [./triangles_second_order]
     type = 'CSVDiff'
     input = 'max_var_n_dofs_per_elem.i'
-    csvdiff = 'triangles_high_order.csv'
-    cli_args = 'Mesh/dim=2 Mesh/elem_type=tri6 Variables/u/order=SECOND Outputs/file_base=triangles_high_order'
+    csvdiff = 'triangles_second_order.csv'
+    cli_args = 'Mesh/dim=2 Mesh/elem_type=tri6 Variables/u/order=SECOND Outputs/file_base=triangles_second_order'
     requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI6 elem shall be 6"
-    design = "MaxVarNDofsPerElem.md"
-    issues = "#5658"
+  [../]
+  [./triangles_third_order]
+    type = 'CSVDiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    csvdiff = 'triangles_third_order.csv'
+    cli_args = 'Mesh/dim=2 Mesh/elem_type=tri7 Variables/u/order=THIRD Outputs/file_base=triangles_third_order'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI7 elem shall be 7"
   [../]
   [./3d]
     type = 'CSVDiff'

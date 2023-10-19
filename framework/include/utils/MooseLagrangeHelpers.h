@@ -62,6 +62,30 @@ fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
       }
     }
 
+      // Lagrange cubics
+    case THIRD:
+    {
+      libmesh_assert_less(i, 4);
+
+      switch (i)
+      {
+        case 0:
+          return 9. / 16. * (1. / 9. - xi * xi) * (xi - 1.);
+
+        case 1:
+          return -9. / 16. * (1. / 9. - xi * xi) * (xi + 1.);
+
+        case 2:
+          return 27. / 16. * (1. - xi * xi) * (1. / 3. - xi);
+
+        case 3:
+          return 27. / 16. * (1. - xi * xi) * (1. / 3. + xi);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
     default:
       mooseError("Unsupported order");
   }
@@ -112,6 +136,30 @@ fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi
       }
     }
 
+      // Lagrange cubic shape function derivatives
+    case THIRD:
+    {
+      libmesh_assert_less(i, 4);
+
+      switch (i)
+      {
+        case 0:
+          return -9. / 16. * (3. * xi * xi - 2. * xi - 1. / 9.);
+
+        case 1:
+          return -9. / 16. * (-3. * xi * xi - 2. * xi + 1. / 9.);
+
+        case 2:
+          return 27. / 16. * (3. * xi * xi - 2. / 3. * xi - 1.);
+
+        case 3:
+          return 27. / 16. * (-3. * xi * xi - 2. / 3. * xi + 1.);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
     default:
       mooseError("Unsupported order");
   }
@@ -127,7 +175,7 @@ fe_lagrange_2D_shape(const ElemType type,
 {
   switch (order)
   {
-    // linear Lagrange shape functions
+      // linear Lagrange shape functions
     case FIRST:
     {
       switch (type)
@@ -154,6 +202,7 @@ fe_lagrange_2D_shape(const ElemType type,
         case TRI3:
         case TRISHELL3:
         case TRI6:
+        case TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -182,7 +231,7 @@ fe_lagrange_2D_shape(const ElemType type,
       }
     }
 
-    // quadratic Lagrange shape functions
+      // quadratic Lagrange shape functions
     case SECOND:
     {
       switch (type)
@@ -233,6 +282,7 @@ fe_lagrange_2D_shape(const ElemType type,
                   fe_lagrange_1D_shape(SECOND, i1[i], eta));
         }
         case TRI6:
+        case TRI7:
         {
           const T zeta1 = p(0);
           const T zeta2 = p(1);
@@ -259,6 +309,53 @@ fe_lagrange_2D_shape(const ElemType type,
 
             case 5:
               return 4. * zeta2 * zeta0;
+
+            default:
+              mooseError("Invalid shape function index i = ", i);
+          }
+        }
+
+        default:
+          mooseError("Unsupported 2D element type");
+      }
+    }
+
+      // "cubic" (one cubic bubble) Lagrange shape functions
+    case THIRD:
+    {
+      switch (type)
+      {
+        case TRI7:
+        {
+          const T zeta1 = p(0);
+          const T zeta2 = p(1);
+          const T zeta0 = 1. - zeta1 - zeta2;
+          const T bubble_27th = zeta0 * zeta1 * zeta2;
+
+          libmesh_assert_less(i, 7);
+
+          switch (i)
+          {
+            case 0:
+              return 2. * zeta0 * (zeta0 - 0.5) + 3. * bubble_27th;
+
+            case 1:
+              return 2. * zeta1 * (zeta1 - 0.5) + 3. * bubble_27th;
+
+            case 2:
+              return 2. * zeta2 * (zeta2 - 0.5) + 3. * bubble_27th;
+
+            case 3:
+              return 4. * zeta0 * zeta1 - 12. * bubble_27th;
+
+            case 4:
+              return 4. * zeta1 * zeta2 - 12. * bubble_27th;
+
+            case 5:
+              return 4. * zeta2 * zeta0 - 12. * bubble_27th;
+
+            case 6:
+              return 27. * bubble_27th;
 
             default:
               mooseError("Invalid shape function index i = ", i);
@@ -329,6 +426,7 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
         case TRI3:
         case TRISHELL3:
         case TRI6:
+        case TRI7:
         {
           libmesh_assert_less(i, 3);
 
@@ -502,6 +600,7 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
         }
 
         case TRI6:
+        case TRI7:
         {
           libmesh_assert_less(i, 6);
 
@@ -567,6 +666,100 @@ fe_lagrange_2D_shape_deriv(const ElemType type,
 
                 case 5:
                   return 4. * zeta2 * dzeta0deta + 4 * zeta0 * dzeta2deta;
+
+                default:
+                  mooseError("Invalid shape function index i = ", i);
+              }
+            }
+            default:
+              mooseError("ERROR: Invalid derivative index j = ", j);
+          }
+        }
+
+        default:
+          mooseError("ERROR: Unsupported 2D element type");
+      }
+    }
+
+      // "cubic" (one cubic bubble) Lagrange shape functions
+    case THIRD:
+    {
+      switch (type)
+      {
+        case TRI7:
+        {
+          libmesh_assert_less(i, 7);
+
+          const T zeta1 = p(0);
+          const T zeta2 = p(1);
+          const T zeta0 = 1. - zeta1 - zeta2;
+
+          const T dzeta0dxi = -1.;
+          const T dzeta1dxi = 1.;
+          const T dzeta2dxi = 0.;
+          const T dbubbledxi = zeta2 * (1. - 2. * zeta1 - zeta2);
+
+          const T dzeta0deta = -1.;
+          const T dzeta1deta = 0.;
+          const T dzeta2deta = 1.;
+          const T dbubbledeta = zeta1 * (1. - zeta1 - 2. * zeta2);
+
+          switch (j)
+          {
+            case 0:
+            {
+              switch (i)
+              {
+                case 0:
+                  return (4. * zeta0 - 1.) * dzeta0dxi + 3. * dbubbledxi;
+
+                case 1:
+                  return (4. * zeta1 - 1.) * dzeta1dxi + 3. * dbubbledxi;
+
+                case 2:
+                  return (4. * zeta2 - 1.) * dzeta2dxi + 3. * dbubbledxi;
+
+                case 3:
+                  return 4. * zeta1 * dzeta0dxi + 4. * zeta0 * dzeta1dxi - 12. * dbubbledxi;
+
+                case 4:
+                  return 4. * zeta2 * dzeta1dxi + 4. * zeta1 * dzeta2dxi - 12. * dbubbledxi;
+
+                case 5:
+                  return 4. * zeta2 * dzeta0dxi + 4 * zeta0 * dzeta2dxi - 12. * dbubbledxi;
+
+                case 6:
+                  return 27. * dbubbledxi;
+
+                default:
+                  mooseError("Invalid shape function index i = ", i);
+              }
+            }
+
+            case 1:
+            {
+              switch (i)
+              {
+                case 0:
+                  return (4. * zeta0 - 1.) * dzeta0deta + 3. * dbubbledeta;
+
+                case 1:
+                  return (4. * zeta1 - 1.) * dzeta1deta + 3. * dbubbledeta;
+
+                case 2:
+                  return (4. * zeta2 - 1.) * dzeta2deta + 3. * dbubbledeta;
+
+                case 3:
+                  return 4. * zeta1 * dzeta0deta + 4. * zeta0 * dzeta1deta - 12. * dbubbledeta;
+
+                case 4:
+                  return 4. * zeta2 * dzeta1deta + 4. * zeta1 * dzeta2deta - 12. * dbubbledeta;
+
+                case 5:
+                  return 4. * zeta2 * dzeta0deta + 4 * zeta0 * dzeta2deta - 12. * dbubbledeta;
+
+                case 6:
+                  return 27. * dbubbledeta;
 
                 default:
                   mooseError("Invalid shape function index i = ", i);

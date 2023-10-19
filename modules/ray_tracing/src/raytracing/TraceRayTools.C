@@ -36,25 +36,9 @@
 namespace TraceRayTools
 {
 
-const std::set<int> TRACEABLE_ELEMTYPES = {HEX8,
-                                           HEX20,
-                                           HEX27,
-                                           QUAD4,
-                                           QUAD8,
-                                           QUAD9,
-                                           TET4,
-                                           TET10,
-                                           TRI3,
-                                           TRI6,
-                                           EDGE2,
-                                           EDGE3,
-                                           EDGE4,
-                                           PYRAMID5,
-                                           PYRAMID13,
-                                           PYRAMID14,
-                                           PRISM6,
-                                           PRISM15,
-                                           PRISM18};
+const std::set<int> TRACEABLE_ELEMTYPES = {
+    HEX8, HEX20, HEX27, QUAD4, QUAD8,    QUAD9,     TET4,      TET10,  TRI3,    TRI6,
+    TRI7, EDGE2, EDGE3, EDGE4, PYRAMID5, PYRAMID13, PYRAMID14, PRISM6, PRISM15, PRISM18};
 const std::set<int> ADAPTIVITY_TRACEABLE_ELEMTYPES = {QUAD4, HEX8, TRI3, TET4, EDGE2};
 
 bool
@@ -608,21 +592,17 @@ withinEdge(const Elem * elem,
   switch (elem->type())
   {
     case HEX8:
-      return withinEdgeTempl<Hex8>(elem, point, extrema, tolerance);
-    case TET4:
-      return withinEdgeTempl<Tet4>(elem, point, extrema, tolerance);
-    case PYRAMID5:
-      return withinEdgeTempl<Pyramid5>(elem, point, extrema, tolerance);
-    case PRISM6:
-      return withinEdgeTempl<Prism6>(elem, point, extrema, tolerance);
     case HEX20:
     case HEX27:
       return withinEdgeTempl<Hex8>(elem, point, extrema, tolerance);
+    case TET4:
     case TET10:
       return withinEdgeTempl<Tet4>(elem, point, extrema, tolerance);
+    case PYRAMID5:
     case PYRAMID13:
     case PYRAMID14:
       return withinEdgeTempl<Pyramid5>(elem, point, extrema, tolerance);
+    case PRISM6:
     case PRISM15:
     case PRISM18:
       return withinEdgeTempl<Prism6>(elem, point, extrema, tolerance);
@@ -641,30 +621,25 @@ atVertexOnSide(const Elem * elem, const Point & point, const unsigned short side
   switch (elem->type())
   {
     case HEX8:
-      return atVertexOnSideTempl<Hex8>(elem, point, side);
-    case TET4:
-      return atVertexOnSideTempl<Tet4>(elem, point, side);
-    case PYRAMID5:
-      return atVertexOnSideTempl<Pyramid5>(elem, point, side);
-    case PRISM6:
-      return atVertexOnSideTempl<Prism6>(elem, point, side);
-    case QUAD4:
-      return atVertexOnSideTempl<Quad4>(elem, point, side);
-    case TRI3:
-      return atVertexOnSideTempl<Tri3>(elem, point, side);
     case HEX20:
     case HEX27:
       return atVertexOnSideTempl<Hex8>(elem, point, side);
+    case QUAD4:
     case QUAD8:
     case QUAD9:
       return atVertexOnSideTempl<Quad4>(elem, point, side);
+    case TRI3:
     case TRI6:
+    case TRI7:
       return atVertexOnSideTempl<Tri3>(elem, point, side);
+    case TET4:
     case TET10:
       return atVertexOnSideTempl<Tet4>(elem, point, side);
+    case PYRAMID5:
     case PYRAMID13:
     case PYRAMID14:
       return atVertexOnSideTempl<Pyramid5>(elem, point, side);
+    case PRISM6:
     case PRISM15:
     case PRISM18:
       return atVertexOnSideTempl<Prism6>(elem, point, side);
@@ -719,21 +694,17 @@ withinEdgeOnSide(const Elem * const elem,
   switch (elem->type())
   {
     case HEX8:
-      return withinEdgeOnSideTempl<Hex8>(elem, point, side, extrema);
-    case TET4:
-      return withinEdgeOnSideTempl<Tet4>(elem, point, side, extrema);
-    case PYRAMID5:
-      return withinEdgeOnSideTempl<Pyramid5>(elem, point, side, extrema);
-    case PRISM6:
-      return withinEdgeOnSideTempl<Prism6>(elem, point, side, extrema);
     case HEX20:
     case HEX27:
       return withinEdgeOnSideTempl<Hex8>(elem, point, side, extrema);
+    case TET4:
     case TET10:
       return withinEdgeOnSideTempl<Tet4>(elem, point, side, extrema);
+    case PYRAMID5:
     case PYRAMID13:
     case PYRAMID14:
       return withinEdgeOnSideTempl<Pyramid5>(elem, point, side, extrema);
+    case PRISM6:
     case PRISM15:
     case PRISM18:
       return withinEdgeOnSideTempl<Prism6>(elem, point, side, extrema);
