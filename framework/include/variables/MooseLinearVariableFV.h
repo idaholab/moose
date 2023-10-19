@@ -723,11 +723,13 @@ MooseLinearVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point,
 }
 
 template <typename OutputType>
-typename MooseLinearVariableFV<OutputType>::GradientType
-MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
-                                                    const StateArg & state) const
+typename MooseLinearVariableFV<OutputType>::ValueType
+MooseLinearVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  return adGradSln(qp_arg.elem, state, false);
+  return (*this)(ElemPointArg{elem_qp.elem,
+                              elem_qp.point,
+                              _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage},
+                 state);
 }
 
 template <typename OutputType>
@@ -739,6 +741,14 @@ MooseLinearVariableFV<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
                               elem_side_qp.point,
                               _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage},
                  state);
+}
+
+template <typename OutputType>
+typename MooseLinearVariableFV<OutputType>::GradientType
+MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
+                                                    const StateArg & state) const
+{
+  return adGradSln(qp_arg.elem, state, false);
 }
 
 template <typename OutputType>

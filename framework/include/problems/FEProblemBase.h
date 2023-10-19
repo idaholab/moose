@@ -2235,20 +2235,11 @@ protected:
   /// The nonlinear system names
   const std::vector<NonlinearSystemName> _nl_sys_names;
 
-  /// The linear system names
-  const std::vector<NonlinearSystemName> _linear_sys_names;
-
   /// The number of nonlinear systems
   const std::size_t _num_nl_sys;
 
-  /// The number of linear systems
-  const std::size_t _num_linear_sys;
-
   /// The nonlinear systems
   std::vector<std::shared_ptr<NonlinearSystemBase>> _nl;
-
-  /// The nonlinear systems
-  std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
 
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
@@ -2256,14 +2247,23 @@ protected:
   /// Map from nonlinear variable name to nonlinear system number
   std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
 
+  /// The current nonlinear system that we are solving
+  NonlinearSystemBase * _current_nl_sys;
+
+  /// The linear system names
+  const std::vector<NonlinearSystemName> _linear_sys_names;
+
+  /// The number of linear systems
+  const std::size_t _num_linear_sys;
+
+  /// The nonlinear systems
+  std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
+
   /// Map from linear system name to number
   std::map<NonlinearSystemName, unsigned int> _linear_sys_name_to_num;
 
   /// Map from linear variable name to nonlinear system number
   std::map<NonlinearVariableName, unsigned int> _linear_var_to_sys_num;
-
-  /// The current nonlinear system that we are solving
-  NonlinearSystemBase * _current_nl_sys;
 
   /// The current linear system that we are solving
   LinearSystem * _current_linear_sys;

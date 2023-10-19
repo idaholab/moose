@@ -1471,6 +1471,29 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 }
 
 void
+SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
+{
+  if (!_subproblem.haveFV())
+    return;
+
+  // prepare a vector of MooseVariables from names
+  std::vector<const MooseVariableFieldBase *> moose_vars;
+  for (auto & v : vars)
+  {
+    // first make sure this is not a scalar variable
+    if (hasScalarVariable(v))
+      mooseError("Variable ", v, " is a scalar variable");
+
+    // now make sure this is a standard variable [not array/vector]
+    if (getVariable(0, v).fieldType() != 0)
+      mooseError("Variable ", v, " not a standard field variable [either VECTOR or ARRAY].");
+    moose_vars.push_back(static_cast<MooseVariableFieldBase *>(&getVariable(0, v)));
+  }
+
+  _mesh.cacheVarIndicesByFace(moose_vars);
+}
+
+void
 SystemBase::addScalingVector()
 {
   addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
