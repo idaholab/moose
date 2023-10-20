@@ -19,7 +19,7 @@ to both start and end points.
 
 ## Example Input Syntax
 
-!listing test/tests/second_order_elements/diffusion_2d_quad8.i block=UserObjects
+!listing test/tests/high_order_elements/diffusion_2d.i block=UserObjects
 
 !syntax parameters /UserObjects/LineSegmentCutUserObject
 

@@ -20,7 +20,7 @@ cut_data.
 
 ## Example Input Syntax
 
-!listing test/tests/second_order_elements/square_branch_quad9_2d.i block=UserObjects
+!listing test/tests/high_order_elements/square_branch_2d.i block=UserObjects
 
 !syntax parameters /UserObjects/LineSegmentCutSetUserObject
 

@@ -3,24 +3,36 @@
   issues = '#8709'
   [./diffusion_2d_tri6]
     type = Exodiff
-    input = diffusion_2d_tri6.i
+    input = diffusion_2d.i
     exodiff = 'diffusion_2d_tri6_out.e diffusion_2d_tri6_out.e-s002'
+    cli_args = 'Outputs/file_base=diffusion_2d_tri6_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 2D using TRI6 elements.'
   [../]
+  [./diffusion_2d_tri7]
+    type = Exodiff
+    input = diffusion_2d.i
+    exodiff = 'diffusion_2d_tri7_out.e diffusion_2d_tri7_out.e-s002'
+    cli_args = 'GlobalParams/order=THIRD Mesh/elem_type=TRI7 Outputs/file_base=diffusion_2d_tri7_out'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with third-order elements in 2D using TRI7 elements.'
+  [../]
   [./diffusion_2d_quad8]
     type = Exodiff
-    input = diffusion_2d_quad8.i
+    input = diffusion_2d.i
     exodiff = 'diffusion_2d_quad8_out.e diffusion_2d_quad8_out.e-s002'
+    cli_args = 'Mesh/elem_type=QUAD8 Outputs/file_base=diffusion_2d_quad8_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 2D using QUAD8 elements.'
   [../]
   [./diffusion_2d_quad9]
     type = Exodiff
-    input = diffusion_2d_quad9.i
+    input = diffusion_2d.i
     exodiff = 'diffusion_2d_quad9_out.e diffusion_2d_quad9_out.e-s002'
+    cli_args = 'Mesh/elem_type=QUAD9 Outputs/file_base=diffusion_2d_quad9_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 2D using QUAD9 elements.'
@@ -35,50 +47,66 @@
   [../]
   [./diffusion_3d_tet10]
     type = Exodiff
-    input = diffusion_3d_tet10.i
+    input = diffusion_3d.i
     exodiff = 'diffusion_3d_tet10_out.e'
+    cli_args = 'Outputs/file_base=diffusion_3d_tet10_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 3D using TET10 elements when the XFEM cutting plane is prescribed using a level set field.'
   [../]
   [./diffusion_3d_hex20]
     type = Exodiff
-    input = diffusion_3d_hex20.i
+    input = diffusion_3d.i
     exodiff = 'diffusion_3d_hex20_out.e'
+    cli_args = 'Mesh/ny=4 Mesh/elem_type=HEX20 Outputs/file_base=diffusion_3d_hex20_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 3D using HEX20 elements when the XFEM cutting plane is prescribed using a level set field.'
   [../]
   [./diffusion_3d_hex27]
     type = Exodiff
-    input = diffusion_3d_hex27.i
+    input = diffusion_3d.i
     exodiff = 'diffusion_3d_hex27_out.e'
+    cli_args = 'Mesh/ny=4 Mesh/elem_type=HEX27 Outputs/file_base=diffusion_3d_hex27_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 3D using HEX27 elements when the XFEM cutting plane is prescribed using a level set field.'
   [../]
   [./square_branch_quad8_2d]
     type = Exodiff
-    input = square_branch_quad8_2d.i
+    input = square_branch_2d.i
     exodiff = 'square_branch_quad8_2d_out.e square_branch_quad8_2d_out.e-s002 square_branch_quad8_2d_out.e-s003'
+    cli_args = 'Modules/TensorMechanics/Master/all/planar_formulation=PLANE_STRAIN '
+               'Mesh/elem_type=QUAD8 Outputs/file_base=square_branch_quad8_2d_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using QUAD8 elements.'
   [../]
   [./square_branch_quad9_2d]
     type = Exodiff
-    input = square_branch_quad9_2d.i
+    input = square_branch_2d.i
     exodiff = 'square_branch_quad9_2d_out.e square_branch_quad9_2d_out.e-s002 square_branch_quad9_2d_out.e-s003'
+    cli_args = 'Mesh/elem_type=QUAD9 Outputs/file_base=square_branch_quad9_2d_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using QUAD9 elements.'
   [../]
   [./square_branch_tri6_2d]
     type = Exodiff
-    input = square_branch_tri6_2d.i
+    input = square_branch_2d.i
     exodiff = 'square_branch_tri6_2d_out.e square_branch_tri6_2d_out.e-s002 square_branch_tri6_2d_out.e-s003'
+    cli_args = 'Outputs/file_base=square_branch_tri6_2d_out'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting second-order elements in 2D using TRI6 elements.'
+  [../]
+  [./square_branch_tri7_2d]
+    type = Exodiff
+    input = square_branch_2d.i
+    exodiff = 'square_branch_tri7_2d_out.e square_branch_tri7_2d_out.e-s002 square_branch_tri7_2d_out.e-s003'
+    cli_args = 'GlobalParams/order=THIRD Mesh/elem_type=TRI7 Outputs/file_base=square_branch_tri7_2d_out'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall permit modeling of branching of discontinuities represented with XFEM by sequentially cutting third-order elements in 2D using TRI7 elements.'
   [../]
 []
