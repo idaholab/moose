@@ -5872,6 +5872,8 @@ FEProblemBase::init()
 
   for (auto & nl : _nl)
     nl->update();
+  for (auto & sys : _linear_systems)
+    sys->update();
   _aux->update();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
