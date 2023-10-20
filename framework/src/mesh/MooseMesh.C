@@ -16,10 +16,7 @@
 #include "PointListAdaptor.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
-<<<<<<< HEAD
-=======
 #include "LinearSystem.h"
-    >>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "SubProblem.h"
@@ -64,8 +61,8 @@
 #include "libmesh/ghost_point_neighbors.h"
 #include "libmesh/fe_type.h"
 
-    static const int GRAIN_SIZE =
-        1; // the grain_size does not have much influence on our execution speed
+static const int GRAIN_SIZE =
+    1; // the grain_size does not have much influence on our execution speed
 
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
@@ -3598,25 +3595,14 @@ MooseMesh::buildFiniteVolumeInfo() const
       _face_info.push_back(&fi);
   }
 
-<<<<<<< HEAD
   for (auto & ei : _elem_to_elem_info)
     if (ei.second.elem()->processor_id() == this->processor_id())
       _elem_info.push_back(&ei.second);
-=======
-  computeFiniteVolumeCoords();
-
-  cacheVarIndicesByFace();
->>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
 }
 
 const FaceInfo *
 MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 {
-<<<<<<< HEAD
-=======
-  // buildFiniteVolumeInfo();
-
->>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
   auto it = _elem_side_to_face_info.find(std::make_pair(elem, side));
 
   if (it == _elem_side_to_face_info.end())
@@ -3701,42 +3687,22 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-<<<<<<< HEAD
 MooseMesh::cacheFaceInfoVariableOwnership() const
 {
   mooseAssert(
       !Threads::in_threads,
       "Performing writes to faceInfo variable association maps. This must be done unthreaded!");
-=======
-MooseMesh::cacheVarIndicesByFace() const
-{
->>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
 
   std::vector<const MooseVariableFieldBase *> moose_vars;
 
   for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
   {
     const auto & nl_variables = _app.feProblem().getNonlinearSystemBase(i).getVariables(0);
-<<<<<<< HEAD
-=======
-
->>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
     for (const auto & var : nl_variables)
       if (var->fieldType() == 0)
         moose_vars.push_back(var);
   }
 
-<<<<<<< HEAD
-=======
-  for (const auto i : make_range(_app.feProblem().numLinearSystems()))
-  {
-    const auto & linear_variables = _app.feProblem().getLinearSystem(i).getVariables(0);
-    for (const auto & var : linear_variables)
-      if (var->fieldType() == 0)
-        moose_vars.push_back(var);
-  }
-
->>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
   const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
   for (const auto & var : aux_variables)
     if (var->fieldType() == 0)

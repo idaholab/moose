@@ -5847,6 +5847,8 @@ FEProblemBase::init()
       nl->turnOffJacobian();
     nl->init();
   }
+  for (auto & sys : _linear_systems)
+    sys->init();
   _aux->init();
 
   // Build the mortar segment meshes, if they haven't been already, for a couple reasons:

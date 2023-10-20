@@ -1172,7 +1172,7 @@ public:
   void cacheVarIndicesByFace() const;
 >>>>>>> 11c7a862f4 (Move variable dof faceownership caching from SystemBase to MooseMesh. (#25722))
 
-  void cacheLinearFVDoFs(const LinearSystem & system);
+  void cacheFVElementalDoFs() const;
 
   /**
    * Cache the DoF indices for FV variables on each element. These indices are used to speed up the
