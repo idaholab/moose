@@ -874,12 +874,15 @@ MooseServer::addLocationsToList(
   // walk over set of nodes with locations to add and build definition list
   for (const auto & location_nodes_iter : location_nodes)
   {
-    // add zero based line and column range of each node to definition list
+    // prepend file:// scheme onto location node path to get definition uri
+    auto location_uri = wasp::lsp::m_uri_prefix + location_nodes_iter.node_pool()->stream_name();
+
+    // add file uri and zero based line and column range to definition list
     definitionLocations.push_back(wasp::DataObject());
     wasp::DataObject * location = definitionLocations.back().to_object();
     pass &= wasp::lsp::buildLocationObject(*location,
                                            errors,
-                                           document_path,
+                                           location_uri,
                                            location_nodes_iter.line() - 1,
                                            location_nodes_iter.column() - 1,
                                            location_nodes_iter.last_line() - 1,
