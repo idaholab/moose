@@ -102,12 +102,6 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
-
-  if (_use_displaced_mesh && _displacements.empty())
-    mooseError("ADKernel ",
-               name(),
-               "has been asked to act on the displaced mesh, but no displacements have been "
-               "coupled in. Your Jacobian will be wrong without that coupling");
 }
 
 template <typename T>
