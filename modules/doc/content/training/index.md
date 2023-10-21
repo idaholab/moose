@@ -9,6 +9,10 @@ Upcoming MOOSE related training:
   - [Details](more_detail/2023_10_23-26_idaho_falls.md)
   - *Invitation Only*
 
+- [MOOSE Training (2024 January 16-17, MIT)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+
+- [BISON Training (2024 January 18-19, MIT)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+
 - [MOOSE Training (2024 April 2-4, Oregon State University)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
   - [Details](more_detail/2024_04_02-04_OSU.md)
