@@ -34,6 +34,7 @@ namespace Mortar
  * if \p primal_elem is a secondary face element and the primary element index if \p primal_elem is
  * a primary face element
  * @param qrule_msm The rule that governs quadrature on the mortar segment element
+ * @param boundary_offset Offset vector between primary and secondary side; only used on primary.
  * @param q_pts The output of this function. This will correspond to the the (reference space)
  * quadrature points that we wish to evaluate shape functions, etc., at on the primal element
  */
@@ -41,6 +42,7 @@ void projectQPoints3d(const Elem * msm_elem,
                       const Elem * primal_elem,
                       unsigned int sub_elem_index,
                       const QBase & qrule_msm,
+                      const RealVectorValue boundary_offset,
                       std::vector<Point> & q_pts);
 
 /**
@@ -87,6 +89,7 @@ loopOverMortarSegments(
   const auto secondary_boundary_id = primary_secondary_boundary_id_pair.second;
 
   const RealVectorValue boundary_offset = amg.getBoundaryOffset();
+  const RealVectorValue no_offset = RealVectorValue();
 
   // For 3D mortar get index for retrieving sub-element info
   unsigned int secondary_sub_elem_index = 0, primary_sub_elem_index = 0;
@@ -170,9 +173,14 @@ loopOverMortarSegments(
                          msinfo.secondary_elem,
                          secondary_sub_elem_index,
                          *qrule_msm,
+                         no_offset,
                          secondary_xi_pts);
-        projectQPoints3d(
-            msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule_msm, primary_xi_pts);
+        projectQPoints3d(msm_elem,
+                         msinfo.primary_elem,
+                         primary_sub_elem_index,
+                         *qrule_msm,
+                         boundary_offset,
+                         primary_xi_pts);
       }
 
       // If edge dropping case we need JxW on the msm to compute dual shape functions
