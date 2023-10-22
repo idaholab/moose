@@ -1,6 +1,12 @@
 [Tests]
   design = 'Constraints/index.md EqualValueConstraint.md PenaltyEqualValueConstraint.md'
   issues = '#13080 #21329'
+  [3d_nonconforming]
+    type = 'Exodiff'
+    input = '3d_nonconforming.i'
+    exodiff = '3d_nonconforming_out.e'
+    requirement = 'Allow offset of the two blocks for a mortaring surface in 3d on nonconforming meshes.'
+  []
   [continuity_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'

@@ -102,8 +102,8 @@ MortarConsumerInterface::validParams()
       "boundary_offset",
       RealVectorValue(),
       "Vector for tangential offset in order to align the primary and secondary boundaries "
-      "such that the projection using the normal vector will connect the two sides. Points "
-      "FROM 1 TO 2");
+      "such that the projection using the normal vector will connect the two sides. Convention: "
+      "the offset vector points from primary surface towards secondary surface.");
 
   return params;
 }

@@ -1095,20 +1095,28 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         case TRI3:
         case QUAD4:
           center_point = mortar_segment_helper[0]->center();
-          query_pt = {{center_point(0), center_point(1), center_point(2)}};
+          query_pt = {{center_point(0) - _boundary_offset(0),
+                       center_point(1) - _boundary_offset(1),
+                       center_point(2) - _boundary_offset(2)}};
           break;
         case TRI6:
         case TRI7:
           center_point = mortar_segment_helper[1]->center();
-          query_pt = {{center_point(0), center_point(1), center_point(2)}};
+          query_pt = {{center_point(0) - _boundary_offset(0),
+                       center_point(1) - _boundary_offset(1),
+                       center_point(2) - _boundary_offset(2)}};
           break;
         case QUAD8:
           center_point = mortar_segment_helper[4]->center();
-          query_pt = {{center_point(0), center_point(1), center_point(2)}};
+          query_pt = {{center_point(0) - _boundary_offset(0),
+                       center_point(1) - _boundary_offset(1),
+                       center_point(2) - _boundary_offset(2)}};
           break;
         case QUAD9:
           center_point = secondary_side_elem->point(8);
-          query_pt = {{center_point(0), center_point(1), center_point(2)}};
+          query_pt = {{center_point(0) - _boundary_offset(0),
+                       center_point(1) - _boundary_offset(1),
+                       center_point(2) - _boundary_offset(2)}};
           break;
         default:
           mooseError(
@@ -1139,9 +1147,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto r : make_range(result_set.size()))
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - center_point).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
-                    "Lower-dimensional element squared distance verification failed.");
+        mooseAssert(
+            std::abs((_mesh.point(ret_index[r]) - (center_point - _boundary_offset)).norm_sq() -
+                     out_dist_sqr[r]) <= TOLERANCE,
+            "Lower-dimensional element squared distance verification failed.");
 
         // Get list of elems connected to node
         std::vector<const Elem *> & node_elems =
@@ -1190,7 +1199,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           for (auto iv : make_range(sub_elem_nodes.size()))
           {
             const auto n = sub_elem_nodes[iv];
-            primary_sub_elem[iv] = primary_elem_candidate->point(n);
+            primary_sub_elem[iv] = primary_elem_candidate->point(n) + _boundary_offset;
           }
 
           // Loop through secondary sub-elements
