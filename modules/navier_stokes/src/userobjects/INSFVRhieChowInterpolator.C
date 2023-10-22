@@ -52,13 +52,27 @@ INSFVRhieChowInterpolator::uniqueParams()
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
   params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
+  params.addParam<bool>(
+      "correct_volumetric_force", false, "Flag to activate volume force corrections.");
+  MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
+                                           "force-consistent");
+  params.addParam<MooseEnum>(
+      "volume_force_correction_method",
+      volume_force_correction_method,
+      "The method used for correcting the Rhie-Chow coefficients for a volume force.");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "volumetric_force_functors", "The names of the functors with the volumetric force sources.");
   return params;
 }
 
 std::vector<std::string>
 INSFVRhieChowInterpolator::listOfCommonParams()
 {
-  return {"pull_all_nonlocal_a", "mass_momentum_system"};
+  return {"pull_all_nonlocal_a",
+          "mass_momentum_system",
+          "correct_volumetric_force",
+          "volume_force_correction_method",
+          "volumetric_force_functors"};
 }
 
 InputParameters
@@ -93,26 +107,6 @@ INSFVRhieChowInterpolator::validParams()
   params.addParam<VariableName>("disp_x", "The x-component of displacement");
   params.addParam<VariableName>("disp_y", "The y-component of displacement");
   params.addParam<VariableName>("disp_z", "The z-component of displacement");
-  params.addParam<bool>(
-      "pull_all_nonlocal_a",
-      false,
-      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
-      "means elements that we have access to (this may not be all the elements in the mesh if the "
-      "mesh is distributed) but that we do not own.");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
-  params.addParam<bool>(
-      "correct_volumetric_force", false, "Flag to activate volume force corrections.");
-  MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
-                                           "force-consistent");
-  params.addParam<MooseEnum>(
-      "volume_force_correction_method",
-      volume_force_correction_method,
-      "The method used for correcting the Rhie-Chow coefficients for a volume force.");
-  params.addParam<std::vector<MooseFunctorName>>(
-      "volumetric_force_functors", "The names of the functors with the volumetric force sources.");
   return params;
 }
 
