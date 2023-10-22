@@ -37,6 +37,7 @@ public:
    * @param debug whether to output mortar segment mesh exodus file for debugging purposes
    * @param correct_edge_dropping edge dropping treatment selection
    * @param minimum_projection_angle minimum projection angle allowed for building mortar segment
+   * @param boundary_offset tanget vector to align primary and secondary boundaries
    * mesh
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
@@ -46,7 +47,8 @@ public:
                              bool periodic,
                              const bool debug,
                              const bool correct_edge_dropping,
-                             const Real minimum_projection_angle);
+                             const Real minimum_projection_angle,
+                            const RealVectorValue boundary_offset);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

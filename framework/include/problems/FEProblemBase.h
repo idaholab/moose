@@ -1564,7 +1564,8 @@ public:
       bool periodic,
       const bool debug,
       const bool correct_edge_dropping,
-      const Real minimum_projection_angle);
+      const Real minimum_projection_angle,
+      const RealVectorValue boundary_offset);
 
   /**
    * Return the undisplaced or displaced mortar generation object associated with the provided

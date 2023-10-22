@@ -7282,7 +7282,8 @@ FEProblemBase::createMortarInterface(
     bool periodic,
     const bool debug,
     const bool correct_edge_dropping,
-    const Real minimum_projection_angle)
+    const Real minimum_projection_angle,
+    const RealVectorValue boundary_offset)
 {
   _has_mortar = true;
 
@@ -7294,7 +7295,8 @@ FEProblemBase::createMortarInterface(
                                               periodic,
                                               debug,
                                               correct_edge_dropping,
-                                              minimum_projection_angle);
+                                              minimum_projection_angle,
+                                              boundary_offset);
   else
     return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
                                               primary_secondary_subdomain_pair,
@@ -7303,7 +7305,8 @@ FEProblemBase::createMortarInterface(
                                               periodic,
                                               debug,
                                               correct_edge_dropping,
-                                              minimum_projection_angle);
+                                              minimum_projection_angle,
+                                              boundary_offset);
 }
 
 const AutomaticMortarGeneration &

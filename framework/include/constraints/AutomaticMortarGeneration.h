@@ -74,7 +74,8 @@ public:
                             bool periodic,
                             const bool debug,
                             const bool correct_edge_dropping,
-                            const Real minimum_projection_angle);
+                            const Real minimum_projection_angle,
+                            const RealVectorValue boundary_offset);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -181,6 +182,11 @@ public:
    */
   std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
   getNodalTangents(const Elem & secondary_elem) const;
+
+  /**
+   * returns the boundary offset vector between primary and secondary side
+   */
+  RealVectorValue getBoundaryOffset() const { return _boundary_offset; };
 
   /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
@@ -503,6 +509,9 @@ private:
   /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
+
+  /// Tangential vector offset between primary and secondary side
+  const RealVectorValue _boundary_offset;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

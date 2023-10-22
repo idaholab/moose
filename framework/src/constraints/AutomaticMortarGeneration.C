@@ -219,7 +219,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     bool periodic,
     const bool debug,
     const bool correct_edge_dropping,
-    const Real minimum_projection_angle)
+    const Real minimum_projection_angle,
+    const RealVectorValue boundary_offset)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -228,7 +229,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _periodic(periodic),
     _distributed(!_mesh.is_replicated()),
     _correct_edge_dropping(correct_edge_dropping),
-    _minimum_projection_angle(minimum_projection_angle)
+    _minimum_projection_angle(minimum_projection_angle),
+    _boundary_offset(boundary_offset)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -474,7 +476,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
       new_nodes.push_back(_mortar_segment_mesh->add_point(
-          secondary_elem->point(n), secondary_elem->node_id(n), secondary_elem->processor_id()));
+          secondary_elem->point(n) - _boundary_offset, secondary_elem->node_id(n), secondary_elem->processor_id()));
       Node * const new_node = new_nodes.back();
       new_node->set_unique_id(new_node->id() + node_unique_id_offset);
     }
@@ -562,7 +564,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Determine physical location of new point to be inserted.
     Point new_pt(0);
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
-      new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * secondary_elem->point(n);
+      new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * (secondary_elem->point(n) - _boundary_offset);
 
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = _secondary_elems_to_mortar_segments[secondary_elem->id()];
@@ -640,7 +642,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Store z-component of left and right secondary node cross products with the nodal normal.
     for (unsigned int nid = 0; nid < 2; ++nid)
-      secondary_node_cps[nid] = normal.cross(secondary_elem->point(nid) - new_pt)(2);
+      secondary_node_cps[nid] = normal.cross((secondary_elem->point(nid) - _boundary_offset) - new_pt)(2);
 
     for (MooseIndex(primary_node_neighbors) mnn = 0; mnn < primary_node_neighbors.size(); ++mnn)
     {
@@ -1915,7 +1917,9 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
       // Data structure for performing Nanoflann searches.
       std::array<Real, 3> query_pt = {
-          {(*secondary_node)(0), (*secondary_node)(1), (*secondary_node)(2)}};
+          {(*secondary_node)(0) - _boundary_offset(0), 
+           (*secondary_node)(1) - _boundary_offset(1),
+           (*secondary_node)(2) - _boundary_offset(2)}};
 
       // The number of results we want to get.  We'll look for a
       // "few" nearest nodes, hopefully that is enough to let us
@@ -1944,7 +1948,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann'sFss
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
+        mooseAssert(std::abs((_mesh.point(ret_index[r]) - (*secondary_node - _boundary_offset)).norm_sq() -
                              out_dist_sqr[r]) <= TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
@@ -1976,7 +1980,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                  ++n)
               x2 +=
                   Moose::fe_lagrange_1D_shape(order, n, xi2_dn) * primary_elem_candidate->point(n);
-            const auto u = x2 - (*secondary_node);
+            const auto u = x2 - (*secondary_node - _boundary_offset);
             const auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
             if (std::abs(F) < _newton_tolerance)
@@ -2037,7 +2041,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
               std::vector<Real> secondary_node_neighbor_cps(2), primary_node_neighbor_cps(2);
 
               // Figure out which secondary side neighbor is on the "left" and which is on the
-              // "right".
+              // "right". By crossing n and the tangent pointing from the secondary_node to the
+              // opposite corner node.
               for (MooseIndex(secondary_node_neighbors) nn = 0;
                    nn < secondary_node_neighbors.size();
                    ++nn)
@@ -2046,7 +2051,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                 Point opposite = (secondary_neigh->node_ptr(0) == secondary_node)
                                      ? secondary_neigh->point(1)
                                      : secondary_neigh->point(0);
-                Point cp = nodal_normal.cross(opposite - *secondary_node);
+                Point cp = nodal_normal.cross(opposite - (*secondary_node)); // don't offset this cross product
                 secondary_node_neighbor_cps[nn] = cp(2);
               }
 
@@ -2059,7 +2064,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                 Point opposite = (primary_neigh->node_ptr(0) == primary_node)
                                      ? primary_neigh->point(1)
                                      : primary_neigh->point(0);
-                Point cp = nodal_normal.cross(opposite - *secondary_node);
+                Point cp = nodal_normal.cross(opposite - (*secondary_node - _boundary_offset));
                 primary_node_neighbor_cps[nn] = cp(2);
               }
 
@@ -2214,7 +2219,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
         continue;
 
       // Data structure for performing Nanoflann searches.
-      Real query_pt[3] = {(*primary_node)(0), (*primary_node)(1), (*primary_node)(2)};
+      Real query_pt[3] = {(*primary_node)(0) + _boundary_offset(0),
+                          (*primary_node)(1) + _boundary_offset(1), 
+                          (*primary_node)(2) + _boundary_offset(2)};
 
       // The number of results we want to get.  We'll look for a
       // "few" nearest nodes, hopefully that is enough to let us
@@ -2242,7 +2249,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() -
+        mooseAssert(std::abs((_mesh.point(ret_index[r]) - (*primary_node + _boundary_offset)).norm_sq() -
                              out_dist_sqr[r]) <= TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
@@ -2290,7 +2297,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
               normals += phi * nodal_normals[n];
             }
 
-            const auto u = x1 - (*primary_node);
+            const auto u = x1 - (*primary_node + _boundary_offset);
 
             const auto F = u(0) * normals(1) - u(1) * normals(0);
 

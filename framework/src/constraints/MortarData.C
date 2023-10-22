@@ -26,7 +26,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                   bool periodic,
                                   const bool debug,
                                   const bool correct_edge_dropping,
-                                  const Real minimum_projection_angle)
+                                  const Real minimum_projection_angle,
+                                  const RealVectorValue boundary_offset)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -71,7 +72,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                                             periodic,
                                                             debug,
                                                             correct_edge_dropping,
-                                                            minimum_projection_angle));
+                                                            minimum_projection_angle,
+                                                            boundary_offset));
     if (inserted)
       it->second.initOutput();
   }
