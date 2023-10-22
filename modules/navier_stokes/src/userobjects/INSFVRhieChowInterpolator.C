@@ -554,6 +554,8 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (w)
     velocity(2) = (*w)(face, time);
 
+  incorporate_mesh_velocity(face, velocity);
+
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
       std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi, time)))
