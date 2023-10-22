@@ -60,6 +60,13 @@ Control::getExecuteOptions()
   return execute_on;
 }
 
+bool
+Control::hasControllableParameterByName(const std::string & name) const
+{
+  MooseObjectParameterName param_name(name);
+  return !_input_parameter_warehouse.getControllableParameter(param_name).empty();
+}
+
 ControllableParameter
 Control::getControllableParameterByName(const std::string & param_name)
 {
