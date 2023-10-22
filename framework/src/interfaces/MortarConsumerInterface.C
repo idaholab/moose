@@ -98,6 +98,13 @@ MortarConsumerInterface::validParams()
       "second order mortar with finite volume primal variables, because in order for the method to "
       "be second order we must use cell gradients, which couples in the neighbor cells.");
 
+  params.addParam<RealVectorValue>(
+      "boundary_offset",
+      RealVectorValue(),
+      "Vector for tangential offset in order to align the primary and secondary boundaries "
+      "such that the projection using the normal vector will connect the two sides. Points "
+      "FROM 1 TO 2");
+
   return params;
 }
 
@@ -140,7 +147,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<bool>("periodic"),
       moose_object->getParam<bool>("debug_mesh"),
       moose_object->getParam<bool>("correct_edge_dropping"),
-      moose_object->getParam<Real>("minimum_projection_angle"));
+      moose_object->getParam<Real>("minimum_projection_angle"),
+      moose_object->getParam<RealVectorValue>("boundary_offset"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),

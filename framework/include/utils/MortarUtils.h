@@ -86,6 +86,8 @@ loopOverMortarSegments(
   const auto primary_boundary_id = primary_secondary_boundary_id_pair.first;
   const auto secondary_boundary_id = primary_secondary_boundary_id_pair.second;
 
+  const RealVectorValue boundary_offset = amg.getBoundaryOffset();
+
   // For 3D mortar get index for retrieving sub-element info
   unsigned int secondary_sub_elem_index = 0, primary_sub_elem_index = 0;
   if (amg.dim() == 3)

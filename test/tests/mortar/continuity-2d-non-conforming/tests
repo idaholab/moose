@@ -1,6 +1,12 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080 #15215'
+  [2d_nonconforming]
+    type = 'Exodiff'
+    input = '2d_nonconforming.i'
+    exodiff = '2d_nonconforming_out.e'
+    requirement = 'Allow offset of the two blocks for a mortaring surface in 2d on nonconforming meshes.'
+  []
   [soln-continuity]
     type = 'Exodiff'
     input = 'soln-continuity.i'
