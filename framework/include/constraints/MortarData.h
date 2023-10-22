@@ -48,7 +48,7 @@ public:
                              const bool debug,
                              const bool correct_edge_dropping,
                              const Real minimum_projection_angle,
-                            const RealVectorValue boundary_offset);
+                             const RealVectorValue boundary_offset);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
