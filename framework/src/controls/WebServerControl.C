@@ -7,15 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "WebServerControl.h"
 
-// Contribs
-#include "http.h"
 #include "minijson.h"
-
-// C++
-#include <thread>
 
 registerMooseObject("MooseApp", WebServerControl);
 
@@ -28,84 +22,16 @@ WebServerControl::validParams()
   params.addRequiredParam<unsigned int>(
       "port",
       "The port to utilize.  Note that normally you don't have access to ports lower than 1024");
-  params.addRequiredParam<std::string>(
-      "parameter",
-      "The input parameter(s) to control. Specify a single parameter name and all "
-      "parameters in all objects matching the name will be updated");
   return params;
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
   : Control(parameters),
+    _currently_waiting(false),
     _port(getParam<unsigned int>("port")),
-    _server(std::make_unique<HttpServer>()),
-    _currently_waiting(false)
+    _server(),
+    _server_thread(startServer())
 {
-  // Only want to start the server on the root node (for now?)
-  if (processor_id() == 0)
-  {
-    // Whether or not the Control is waiting on external input
-    _server->when("/waiting")
-        ->requested(
-            [this](const HttpRequest & /*req*/)
-            {
-              auto cw = this->_currently_waiting.load();
-
-              // _console << "Currently waiting: " << cw << std::endl;
-
-              miniJson::Json::_object res_json;
-              res_json["waiting"] = cw;
-
-              return HttpResponse{200, res_json};
-            });
-
-    // Set the controlled value
-    _server->when("/set_controllable")
-        ->posted(
-            [this](const HttpRequest & req)
-            {
-              auto msg = req.json().toObject();
-              auto value = msg["value"].toDouble();
-
-              // _console << "Setting controlled value to: " << value << std::endl;
-
-              setControllableValue<Real>("parameter", value);
-
-              return HttpResponse{201};
-            });
-
-    // Get any Postprocessor value
-    _server->when("/get_pp")->posted(
-        [this](const HttpRequest & req)
-        {
-          auto req_json = req.json().toObject();
-
-          auto pp_name = req_json["pp"].toString();
-          auto value = getPostprocessorValueByName(pp_name);
-
-          // _console << "Sending back PP " << pp_name << " value of " << value << std::endl;
-
-          miniJson::Json::_object res_json;
-          res_json["value"] = value;
-
-          return HttpResponse{200, res_json};
-        });
-
-    // Call to tell execution to continue
-    _server->when("/continue")
-        ->requested(
-            [this](const HttpRequest & /*req*/)
-            {
-              //_console << "Continuing execution" << std::endl;
-
-              this->_currently_waiting.store(false);
-
-              return HttpResponse{201};
-            });
-
-    _server_thread =
-        std::make_unique<std::thread>([this] { this->_server->startListening(this->_port); });
-  }
 }
 
 WebServerControl::~WebServerControl()
@@ -113,9 +39,173 @@ WebServerControl::~WebServerControl()
   if (processor_id() == 0)
   {
     // Kill the server
-    _server->shutdown();
+    _server.shutdown();
     _server_thread->join();
   }
+}
+
+std::unique_ptr<std::thread>
+WebServerControl::startServer()
+{
+  // Only start the server on the root node
+  if (processor_id() == 0)
+  {
+    // Helper for returning an error response
+    const auto error = [](const std::string & error)
+    {
+      miniJson::Json::_object response;
+      response["error"] = error;
+      return HttpResponse{400, response};
+    };
+
+    const auto get_name = [&error](const auto & msg, const std::string & description)
+    {
+      using result = std::variant<std::string, HttpResponse>;
+      const auto name_it = msg.find("name");
+      if (name_it == msg.end())
+        return result(error("The entry 'name' is missing which should contain the name of the " +
+                            description));
+      const auto & name_json = name_it->second;
+      if (!name_json.isString())
+        return result(error("The entry 'name' which should contain the name of the " + description +
+                            " must be a string"));
+      return result(name_json.toString());
+    };
+
+    const auto require_waiting = [this, &error]()
+    {
+      using result = std::optional<HttpResponse>;
+      std::cerr << this->_currently_waiting.load() << std::endl;
+      if (!this->_currently_waiting.load())
+        return result(error("This control is not currently waiting for data"));
+      return result{};
+    };
+
+    const auto require_parameters = [&error](const auto & msg, const std::set<std::string> & params)
+    {
+      using result = std::optional<HttpResponse>;
+      for (const auto & key_value_pair : msg)
+        if (!params.count(key_value_pair.first))
+          return result(error("The key '" + key_value_pair.first + "' is unused"));
+      return result{};
+    };
+
+    // Create the endpoint for checking whether or not the control is waiting
+    _server.when("/waiting")
+        ->requested(
+            [this](const HttpRequest & /*req*/)
+            {
+              miniJson::Json::_object res_json;
+              res_json["waiting"] = this->_currently_waiting.load();
+              return HttpResponse{200, res_json};
+            });
+
+    // Get any Postprocessor value
+    _server.when("/get/postprocessor")
+        ->posted(
+            [this, &error, &get_name, &require_waiting, &require_parameters](
+                const HttpRequest & req)
+            {
+              const auto & msg = req.json().toObject();
+
+              // Get the postprocessor name
+              const auto name_result = get_name(msg, "postprocessor to retrieve");
+              if (const auto response = std::get_if<HttpResponse>(&name_result))
+                return *response;
+              const auto & name = std::get<std::string>(name_result);
+
+              // Should only have a name and a value
+              if (const auto response = require_parameters(msg, {"name"}))
+                return *response;
+              // Should be waiting for data
+              if (const auto response = require_waiting())
+                return *response;
+              // Postprocessor should exist
+              if (!this->hasPostprocessorByName(name))
+                return error("The postprocessor '" + name + "' was not found");
+
+              miniJson::Json::_object res_json;
+              res_json["value"] = getPostprocessorValueByName(name);
+              return HttpResponse{200, res_json};
+            });
+
+    // Create the endpoint for setting a controllable value
+    _server.when("/set/controllable")
+        ->posted(
+            [this, &error, &get_name, &require_waiting, &require_parameters](
+                const HttpRequest & req)
+            {
+              const auto & msg = req.json().toObject();
+
+              // Get the parameter name
+              const auto name_result = get_name(msg, "name of the parameter to control");
+              if (const auto response = std::get_if<HttpResponse>(&name_result))
+                return *response;
+              const auto & name = std::get<std::string>(name_result);
+              // Get the parameter value
+              const auto value_it = msg.find("value");
+              if (value_it == msg.end())
+                return error(
+                    "The entry 'value' is missing which should contain the value of the parameter");
+              const auto & value = value_it->second;
+
+              // Should only have a name and a value
+              if (const auto response = require_parameters(msg, {"name", "value"}))
+                return *response;
+              // Should be waiting for data
+              if (const auto response = require_waiting())
+                return *response;
+              // Parameter should exist
+              if (!this->hasControllableParameterByName(name))
+                return error("The controllable parameter '" + name + "' was not found");
+
+              // Will be modifying _real_data or _vec_real_data
+              std::lock_guard<std::mutex> lock(this->_data_mutex);
+
+              // Real parameter value
+              if (value.isNumber())
+              {
+                _real_data[name] = value.toDouble();
+              }
+              // Array, currently only std::vector<Real>
+              else if (value.isArray())
+              {
+                const auto & array_value = value.toArray();
+
+                std::vector<Real> real_values(array_value.size());
+                for (const auto i : index_range(array_value))
+                {
+                  if (!array_value[i].isNumber())
+                    return error("The " + std::to_string(i) + "-th value is not a number.");
+                  real_values[i] = array_value[i].toDouble();
+                }
+
+                _vec_real_data[name] = std::move(real_values);
+              }
+
+              return HttpResponse{201};
+            });
+
+    // Create the endpoint for telling the control to continue
+    _server.when("/continue")
+        ->requested(
+            [this, &error](const HttpRequest &)
+            {
+              if (this->_currently_waiting.load())
+              {
+                this->_currently_waiting.store(false);
+                return HttpResponse{201};
+              }
+
+              // Not currently waiting
+              return error("The control is not currently waiting");
+            });
+
+    return std::make_unique<std::thread>([this] { this->_server.startListening(this->_port); });
+  }
+
+  // No server other than on rank zero
+  return nullptr;
 }
 
 void
@@ -134,4 +224,36 @@ WebServerControl::execute()
 
   // All processes need to wait
   _communicator.barrier();
+
+  // Broadcast all of the data that we have received
+  comm().broadcast(_real_data);
+  comm().broadcast(_vec_real_data);
+
+  // Helper for setting values from the data maps
+  const auto set_values = [this](const auto & value_map)
+  {
+    for (const auto & [name, value] : value_map)
+    {
+      try
+      {
+        setControllableValueByName(name, value);
+      }
+      catch (...)
+      {
+        mooseError("Error setting '",
+                   MooseUtils::prettyCppType(&value),
+                   "' typed value for parameter '",
+                   name,
+                   "'; it is likely that the parameter has a different type");
+      }
+    }
+  };
+
+  // Set all of the data that we have
+  set_values(_real_data);
+  set_values(_vec_real_data);
+
+  // Done with these
+  _real_data.clear();
+  _vec_real_data.clear();
 }

@@ -76,6 +76,11 @@ protected:
   /// A list of controls that are required to run before this control may run
   std::vector<std::string> _depends_on;
 
+  /**
+   * @return True if a controllable parameter exists with the name \p name
+   */
+  bool hasControllableParameterByName(const std::string & name) const;
+
   ///@{
   /**
    * Direct access to the ControllableParameter object.
