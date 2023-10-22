@@ -34,6 +34,6 @@ private:
   /// Postprocessor that gives the uniform value of pressure on the boundary
   const PostprocessorValue * const _pp_value;
 
-  /// Switch to turn on/off the BC
-  const bool & _switch;
+  /// Face limiter
+  const Real & _face_limiter;
 };

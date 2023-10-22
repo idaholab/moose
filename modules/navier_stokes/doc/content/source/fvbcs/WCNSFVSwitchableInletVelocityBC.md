@@ -18,15 +18,19 @@ This boundary condition works with postprocessors, which may be replaced by cons
 values in the input. The intended use case for this boundary condition is to be receiving its value from
 a coupled application, using a [Receiver.md] postprocessor.
 
-The `switch` parameter is a boolean that is used to turn the boundary condition on/off.
+The `enable` parameter is a boolean that is used to turn the boundary condition on/off.
 The parameter is controllable during runtime and can be controlled via a `BoolFunctionControl`.
 
 The switch works as follows:
 
-- If `switch = true`: the boundary condition is applied as described above.
+- If `enable = true`: the boundary condition is applied as described above.
 
-- If `switch = false`: the boundary condition is not applied and a single sided extrapolation to the boundary
+- If `enable = false`: the boundary condition is not applied and a single sided extrapolation to the boundary
   is applied from internal extrapolation. The user can expect second order convergence.
+
+In both cases, the interpolated value at the face is contoled by `face_limiter`.
+By default, `face_limiter = 1.0`.
+`face_limiter` value is controllable during runtime.
 
 !alert note
 Specifying the inlet velocity using a `WCNSFVSwitchableInletVelocityBC` will not preserve

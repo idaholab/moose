@@ -16,7 +16,7 @@ inlet_temp = 300
 outlet_pressure = 1e5
 inlet_velocity = 0.001
 
-end_time = 2.0
+end_time = 3.0
 switch_time = 1.0
 
 [Mesh]
@@ -174,7 +174,8 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    switch = true
+    enable = true
+    face_limiter = 1.0
   []
   [outlet_u]
     type = WCNSFVSwitchableInletVelocityBC
@@ -183,8 +184,9 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    switch = false
+    enable = false
     scaling_factor = -1.0
+    face_limiter = 1.0
   []
 
   [inlet_v]
@@ -218,14 +220,16 @@ switch_time = 1.0
     variable = pressure
     boundary = 'right'
     function = ${outlet_pressure}
-    switch = true
+    enable = true
+    face_limiter = 1.0
   []
   [inlet_p]
     type = INSFVSwitchableOutletPressureBC
     variable = pressure
     boundary = 'left'
     function = ${outlet_pressure}
-    switch = false
+    enable = false
+    face_limiter = 1.0
   []
 
   # Walls
@@ -246,37 +250,65 @@ switch_time = 1.0
 [Functions]
   [func_coef]
     type = ParsedFunction
-    expression = 'if(t<${switch_time}, 1, 0)'
+    expression = 'if(t<${switch_time} | t>2.0*${switch_time}, 1, 0)'
   []
   [func_coef_comp]
     type = ParsedFunction
-    expression = 'if(t<${switch_time}, 0, 1)'
+    expression = 'if(t<${switch_time} | t>2.0*${switch_time}, 0, 1)'
+  []
+  [mass_flux_and_pressure_test_scaling]
+    type = ParsedFunction
+    expression = 't'
   []
 []
 
 [Controls]
   [func_control_u_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_u/switch'
+    parameter = 'FVBCs/inlet_u/enable'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_u_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_u/switch'
+    parameter = 'FVBCs/outlet_u/enable'
     function = 'func_coef_comp'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_p/switch'
+    parameter = 'FVBCs/outlet_p/enable'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_p/switch'
+    parameter = 'FVBCs/inlet_p/enable'
     function = 'func_coef_comp'
+    execute_on = 'initial timestep_begin'
+  []
+  [func_control_limiter_u_inlet]
+    type = RealFunctionControl
+    parameter = 'FVBCs/inlet_u/face_limiter'
+    function = 'mass_flux_and_pressure_test_scaling'
+    execute_on = 'initial timestep_begin'
+  []
+  [func_control_limiter_u_outlet]
+    type = RealFunctionControl
+    parameter = 'FVBCs/outlet_u/face_limiter'
+    function = 'mass_flux_and_pressure_test_scaling'
+    execute_on = 'initial timestep_begin'
+  []
+  [func_control_limiter_p_outlet]
+    type = RealFunctionControl
+    parameter = 'FVBCs/outlet_p/face_limiter'
+    function = 'mass_flux_and_pressure_test_scaling'
+    execute_on = 'initial timestep_begin'
+  []
+  [func_control_limiter_p_inlet]
+    type = RealFunctionControl
+    parameter = 'FVBCs/inlet_p/face_limiter'
+    function = 'mass_flux_and_pressure_test_scaling'
     execute_on = 'initial timestep_begin'
   []
 []

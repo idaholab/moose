@@ -40,6 +40,6 @@ protected:
   /// Fluid density functor
   const Moose::Functor<ADReal> * const _rho;
 
-  /// Switch to turn on/off the BC
-  const bool & _switch;
+  /// Face limiter
+  const Real & _face_limiter;
 };

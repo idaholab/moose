@@ -14,12 +14,16 @@ applying a `INSFVSwitchableOutletPressureBC` for the pressure, no `FVBCs` should
 for the velocity on the same `boundary`. In this way a zero viscous flux is
 implicitly applied for the velocity on the `boundary`.
 
-The switch works as follows:
+The enable works as follows:
 
-- If `switch = true`: the boundary condition is applied as described above.
+- If `enable = true`: the boundary condition is applied as described above.
 
-- If `switch = false`: the boundary condition is not applied and a single sided extrapolation to the boundary
+- If `enable = false`: the boundary condition is not applied and a single sided extrapolation to the boundary
   is applied from internal extrapolation. The user can expect second order convergence.
+
+In both cases, the interpolated value at the face is contoled by `face_limiter`.
+By default, `face_limiter = 1.0`.
+`face_limiter` value is controllable during runtime.
 
 !syntax parameters /FVBCs/INSFVSwitchableOutletPressureBC
 

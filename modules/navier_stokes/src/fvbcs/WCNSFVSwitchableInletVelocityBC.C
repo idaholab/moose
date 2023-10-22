@@ -33,8 +33,8 @@ WCNSFVSwitchableInletVelocityBC::validParams()
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
   params.addParam<PostprocessorName>("area_pp", "Inlet area as a postprocessor");
 
-  params.addParam<bool>("switch", true, "A switch to turn the boudnary condition on/off.");
-  params.declareControllable("switch");
+  params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
+  params.declareControllable("face_limiter");
 
   return params;
 }
@@ -47,7 +47,7 @@ WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputPara
     _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
     _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
     _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
-    _switch(getParam<bool>("switch"))
+    _face_limiter(getParam<Real>("face_limiter"))
 {
   if (!dynamic_cast<INSFVVelocityVariable *>(&_var))
     paramError("variable",
@@ -66,21 +66,27 @@ WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputPara
 ADReal
 WCNSFVSwitchableInletVelocityBC::boundaryValue(const FaceInfo & fi) const
 {
-  if (_switch)
+  /// Enable is a parameter coming from MooseObject
+  /// It allows to enable/disable an object
+  /// The user can think of enable as an on/off switch for the boundary condition
+  /// In this case, if enable is true, we activate the boundary condition
+  /// Otherwise, we perform a restricted face internal interpolation
+  if (_enabled)
   {
     if (_area_pp)
       if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
         mooseError("Surface area is 0");
 
     if (_velocity_pp)
-      return _scaling_factor * (*_velocity_pp);
+      return _scaling_factor * (*_velocity_pp) * _face_limiter;
     else
     {
       ADReal rho = (*_rho)(singleSidedFaceArg(&fi), determineState());
 
-      return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho);
+      return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho) * _face_limiter;
     }
   }
   else
-    return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState());
+    return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
+           _face_limiter;
 }

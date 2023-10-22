@@ -26,8 +26,8 @@ INSFVSwitchableOutletPressureBC::validParams()
   params.addParam<MooseFunctorName>("functor", "The boundary pressure as an AD functor");
   params.addParam<PostprocessorName>("postprocessor", "The boundary pressure as a postprocessor");
 
-  params.addParam<bool>("switch", true, "A switch to turn the boudnary condition on/off.");
-  params.declareControllable("switch");
+  params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
+  params.declareControllable("face_limiter");
 
   return params;
 }
@@ -38,7 +38,7 @@ INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputPara
     _functor(isParamValid("functor") ? &getFunctor<ADReal>("functor") : nullptr),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _pp_value(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : nullptr),
-    _switch(getParam<bool>("switch"))
+    _face_limiter(getParam<Real>("face_limiter"))
 {
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
     paramError("variable",
@@ -55,15 +55,21 @@ INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputPara
 ADReal
 INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
-  if (_switch)
+  /// Enable is a parameter coming from MooseObject
+  /// It allows to enable/disable an object
+  /// The user can think of enable as an on/off switch for the boundary condition
+  /// In this case, if enable is true, we activate the boundary condition
+  /// Otherwise, we perform a restricted face internal interpolation
+  if (_enabled)
   {
     if (_functor)
-      return (*_functor)(singleSidedFaceArg(&fi), determineState()) * _switch;
+      return (*_functor)(singleSidedFaceArg(&fi), determineState()) * _face_limiter;
     else if (_function)
-      return _function->value(_t, fi.faceCentroid()) * _switch;
+      return _function->value(_t, fi.faceCentroid()) * _face_limiter;
     else
-      return *_pp_value * _switch;
+      return *_pp_value * _face_limiter;
   }
   else
-    return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState());
+    return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
+           _face_limiter;
 }
