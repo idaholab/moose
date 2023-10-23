@@ -13,30 +13,33 @@ p_outlet = 0
 []
 
 [Physics]
-  [flow]
-    type = WCNSFVFlowPhysics
-    compressibility = 'incompressible'
-    porous_medium_treatment = true
+  [NavierStokes]
+    [WCNSFVFlowPhysics]
+      [flow]
+        compressibility = 'incompressible'
+        porous_medium_treatment = true
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '${u_inlet} 0 0'
-    initial_pressure = '${p_outlet}'
+        initial_velocity = '${u_inlet} 0 0'
+        initial_pressure = '${p_outlet}'
 
-    mass_advection_interpolation = 'upwind'
-    momentum_advection_interpolation = 'upwind'
+        mass_advection_interpolation = 'upwind'
+        momentum_advection_interpolation = 'upwind'
 
-    inlet_boundaries = 'comp1:left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'f1 f1'
+        inlet_boundaries = 'comp1:left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = 'f1 f1'
 
-    wall_boundaries = 'comp1:top comp1:bottom'
-    momentum_wall_types = 'noslip symmetry'
+        wall_boundaries = 'comp1:top comp1:bottom'
+        momentum_wall_types = 'noslip symmetry'
 
-    outlet_boundaries = 'comp1:right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 'f1'
+        outlet_boundaries = 'comp1:right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = 'f1'
+      []
+    []
   []
 []
 
