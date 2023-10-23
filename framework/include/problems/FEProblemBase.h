@@ -84,7 +84,6 @@ class VectorPostprocessor;
 class Function;
 class MooseAppCoordTransform;
 class MortarUserObject;
-class PhysicsBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -583,10 +582,6 @@ public:
    */
   Moose::PetscSupport::PetscOptions & getPetscOptions() { return _petsc_options; }
 
-  // Physics
-  // TODO add threads
-  PhysicsBase * getPhysics(const std::string & name) const;
-
   // Function /////
   virtual void
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
@@ -648,9 +643,6 @@ public:
    */
   virtual void
   addVariable(const std::string & var_type, const std::string & var_name, InputParameters & params);
-
-  virtual void
-  addPhysics(const std::string & var_type, const std::string & var_name, InputParameters & params);
 
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
@@ -2183,9 +2175,6 @@ protected:
   /// The Assembly objects. The first index corresponds to the thread ID and the second index
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
-
-  /// physics
-  MooseObjectWarehouse<PhysicsBase> _physics;
 
   /// functions
   MooseObjectWarehouse<Function> _functions;

@@ -93,7 +93,6 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
-  registerMooseObjectTask("add_physics",                  Physics,                false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
@@ -213,6 +212,7 @@ addActionTypes(Syntax & syntax)
   registerTask("copy_nodal_aux_vars", true);
   registerTask("setup_postprocessor_data", false);
   registerTask("setup_time_steppers", true);
+  registerTask("init_physics", false);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -291,7 +291,7 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
-                           "(add_physics)"
+                           "(init_physics)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
@@ -488,9 +488,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddReporterAction", "Reporters/*");
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
-
-  registerSyntax("AddPhysicsAction", "Physics/*");
-  syntax.registerSyntaxType("Physics/*", "PhysicsName");
 
   registerSyntax("AddPositionsAction", "Positions/*");
   syntax.registerSyntaxType("Positions/*", "PositionsName");

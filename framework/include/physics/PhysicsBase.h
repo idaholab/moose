@@ -9,7 +9,11 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "Action.h"
+
+// We include these headers for all the derived classes that will be building objects
+#include "FEProblemBase.h"
+#include "Factory.h"
 
 class Kernel;
 class FVKernel;
@@ -28,42 +32,78 @@ class FVInterfaceKernel;
  * - utilities for passing and verifying parameters from the Physics block to MOOSE objects
  * - utilities for debugging
  */
-class PhysicsBase : public GeneralUserObject
+class PhysicsBase : public Action
 {
 public:
   static InputParameters validParams();
 
   PhysicsBase(const InputParameters & parameters);
 
+  /// Forwards from the action tasks to the implemented addXYZ() in the derived classes
+  void act() override;
+
   /// A new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
+  // The routines below are public to be accessible by components
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
   virtual void addNonlinearVariables() {}
   virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}
   virtual void addFEKernels() {}
-  virtual void addFEBCs() {}
   virtual void addFVKernels() {}
+  virtual void addNodalKernels() {}
+  virtual void addDiracKernels() {}
+  virtual void addDGKernels() {}
+  virtual void addScalarKernels() {}
+  virtual void addInterfaceKernels() {}
+  virtual void addFVInterfaceKernels() {}
+  virtual void addFEBCs() {}
   virtual void addFVBCs() {}
+  virtual void addNodalBCs() {}
+  virtual void addPeriodicBCs() {}
+  virtual void addFunctions() {}
   virtual void addAuxiliaryKernels() {}
   virtual void addMaterials() {}
   virtual void addFunctorMaterials() {}
   virtual void addUserObjects() {}
   virtual void addPostprocessors() {}
+  virtual void addVectorPostprocessors() {}
+  virtual void addReporters() {}
+  virtual void addOutputs() {}
+  virtual void addPreconditioning() {}
+  virtual void addExecutioner() {}
+  virtual void addExecutors() {}
+
+  /// Provide additional parameters for the relationship managers
+  virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
+
+  /// Get a Physics from the ActionWarehouse with the requested type and name
+  template <typename T>
+  const T * getCoupledPhysics(const PhysicsName & phys_name) const;
 
 protected:
   bool isTransient() const;
+  unsigned int dimension() const;
 
   // TODO : Remove virtual
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  virtual Factory & getFactory() { return *_factory; }
+  virtual Factory & getFactory() { return _factory; }
+  virtual Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
-  virtual FEProblemBase & getProblem() { return *_problem; }
-  virtual FEProblemBase & getProblem() const { return *_problem; }
+  virtual FEProblemBase & getProblem()
+  {
+    mooseAssert(_problem, "Requesting the problem too early");
+    return *_problem;
+  }
+  virtual FEProblemBase & getProblem() const
+  {
+    mooseAssert(_problem, "Requesting the problem too early");
+    return *_problem;
+  }
   /// Get the mesh for this physics
   /// This could be set by a component
   /// NOTE: hopefully we will not need this
@@ -151,35 +191,52 @@ protected:
   /// Whether to output additional information
   const bool _verbose;
 
-  /// Dimension of the physics, which we expect for now to be the dimension of the mesh
-  unsigned int _dim;
-
   // The block restrictable interface is not adapted to keeping track of a growing list of blocks as
   // we add more parameters
   std::vector<SubdomainName> _blocks;
 
 private:
-  /// Add any relationship manager needed by the physics, for example for 'ghosting' layers of
-  /// near process boundaries
-  // virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type);
+  /// Gathers additional parameters for the relationship managers from the Physics
+  /// then calls the parent Action::addRelationshipManagers with those parameters
+  using Action::addRelationshipManagers;
+  void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
+  /// Process some parameters that require the problem to be created. Executed on init_physics
+  void initializePhysics();
 
   /// Whether the physics is to be solved as a transient. It can be advantageous to solve
   /// some physics directly to steady state
   MooseEnum _is_transient;
 
-  /// Pointer to the Factory associated with the MooseApp
-  Factory * _factory;
-  /// Pointer to the problem this physics works with
-  FEProblemBase * _problem;
-
   /// Vector of the nonlinear variables in the Physics
   std::vector<VariableName> _nl_var_names;
+
+  /// Dimension of the physics, which we expect for now to be the dimension of the mesh
+  /// NOTE: this is not known at construction time, which is a huge bummer
+  unsigned int _dim;
 
   /// Needed to create every object
   friend class AddPhysicsAction;
   friend class FileMeshPhysicsComponent;
   friend class FileMeshFlowComponent;
 };
+
+template <typename T>
+const T *
+PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
+{
+  auto all_T_physics = _awh.getActions<T>();
+  for (auto physics : all_T_physics)
+  {
+    if (physics->name() == phys_name)
+      return physics;
+  }
+  mooseError("Requested Physics '",
+             phys_name,
+             "' does not exist or is not of type '",
+             MooseUtils::prettyCppType<T>(),
+             "'");
+}
 
 template <typename T, typename S>
 void
@@ -425,8 +482,8 @@ PhysicsBase::warnInconsistent(const InputParameters & other_param,
       warn = true;
   }
   if (warn)
-    mooseWarning("Parameter " + param_name +
-                 " is inconsistent between this physics and the parameter set for \"" +
-                 other_param.get<std::string>("_object_name") + "\" of type \"" +
-                 other_param.get<std::string>("_type") + "\"");
+    mooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" + name() +
+                 "\" of type \"" + type() + "\" and the parameter set for \"" +
+                 other_param.get<std::string>("_action_name") + "\" of type \"" +
+                 other_param.get<std::string>("action_type") + "\"");
 }
