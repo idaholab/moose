@@ -16,6 +16,8 @@
 #include "PointListAdaptor.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
+#include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
@@ -1280,6 +1282,22 @@ MooseMesh::ownedFaceInfoEnd()
       _face_info.end(),
       _face_info.end(),
       libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
+}
+
+MooseMesh::elem_info_iterator
+MooseMesh::ownedElemInfoBegin()
+{
+  return elem_info_iterator(_elem_info.begin(),
+                            _elem_info.end(),
+                            Predicates::NotNull<std::vector<const ElemInfo *>::iterator>());
+}
+
+MooseMesh::elem_info_iterator
+MooseMesh::ownedElemInfoEnd()
+{
+  return elem_info_iterator(_elem_info.end(),
+                            _elem_info.end(),
+                            Predicates::NotNull<std::vector<const ElemInfo *>::iterator>());
 }
 
 // default begin() accessor
@@ -3339,6 +3357,8 @@ MooseMesh::buildFiniteVolumeInfo() const
   if (!_finite_volume_info_dirty)
     return;
 
+  // mooseError("Lemme see the stack");
+
   mooseAssert(!Threads::in_threads,
               "This routine has not been implemented for threads. Please query this routine before "
               "a threaded region or contact a MOOSE developer to discuss.");
@@ -3363,6 +3383,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_side_to_face_info.clear();
 
   _elem_to_elem_info.clear();
+  _elem_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3375,6 +3396,8 @@ MooseMesh::buildFiniteVolumeInfo() const
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
     _elem_to_elem_info.emplace(elem->id(), elem);
+
+  _linear_finite_volume_dofs_cached = false;
 
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
@@ -3445,13 +3468,21 @@ MooseMesh::buildFiniteVolumeInfo() const
         (fi.neighborPtr() && (fi.neighborPtr()->processor_id() == this->processor_id())))
       _face_info.push_back(&fi);
   }
+
+  for (auto & ei : _elem_to_elem_info)
+    if (ei.second.elem()->processor_id() == this->processor_id())
+      _elem_info.push_back(&ei.second);
+
+  computeFiniteVolumeCoords();
+
+  cacheVarIndicesByFace();
+
+  cacheFVElementalDoFs();
 }
 
 const FaceInfo *
 MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 {
-  buildFiniteVolumeInfo();
-
   auto it = _elem_side_to_face_info.find(std::make_pair(elem, side));
 
   if (it == _elem_side_to_face_info.end())
@@ -3470,10 +3501,10 @@ MooseMesh::elemInfo(const dof_id_type id) const
 }
 
 void
-MooseMesh::computeFaceInfoFaceCoords()
+MooseMesh::computeFiniteVolumeCoords() const
 {
   if (_finite_volume_info_dirty)
-    mooseError("Trying to compute face-info coords when the information is dirty");
+    mooseError("Trying to compute face- and elem-info coords when the information is dirty");
 
   for (auto & fi : _all_face_info)
   {
@@ -3484,6 +3515,10 @@ MooseMesh::computeFaceInfoFaceCoords()
     coordTransformFactor(
         *this, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
   }
+
+  for (auto & ei : _elem_to_elem_info)
+    coordTransformFactor(
+        *this, ei.second.subdomain_id(), ei.second.centroid(), ei.second.coordFactor());
 }
 
 MooseEnum
@@ -3521,9 +3556,30 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars)
+MooseMesh::cacheVarIndicesByFace() const
 {
-  buildFiniteVolumeInfo();
+  std::vector<const MooseVariableFieldBase *> moose_vars;
+
+  for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
+  {
+    const auto & nl_variables = _app.feProblem().getNonlinearSystemBase(i).getVariables(0);
+    for (const auto & var : nl_variables)
+      if (var->fieldType() == 0)
+        moose_vars.push_back(var);
+  }
+
+  for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+  {
+    const auto & linear_variables = _app.feProblem().getLinearSystem(i).getVariables(0);
+    for (const auto & var : linear_variables)
+      if (var->fieldType() == 0)
+        moose_vars.push_back(var);
+  }
+
+  const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
+  for (const auto & var : aux_variables)
+    if (var->fieldType() == 0)
+      moose_vars.push_back(var);
 
   for (FaceInfo & face : _all_face_info)
   {
@@ -3565,6 +3621,79 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase 
         else
           mooseError("Should never get here");
       }
+    }
+  }
+}
+
+void
+MooseMesh::cacheFVElementalDoFs() const
+{
+  const unsigned int num_eqs = _app.feProblem().es().n_systems();
+
+  for (auto & elem_info : _elem_to_elem_info)
+  {
+    std::vector<std::vector<dof_id_type>> dof_vector(num_eqs);
+
+    for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
+      if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
+      {
+        auto & sys = _app.feProblem().getNonlinearSystemBase(i);
+        std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables());
+        const auto & variables = sys.getVariables(0);
+        for (const auto & var : variables)
+        {
+          if (var->isFV())
+          {
+            std::vector<dof_id_type> indices;
+            var->sys().system().get_dof_map().dof_indices(elem_info.second.elem(), indices);
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            system_var_dofs.push_back(indices[0]);
+          }
+          else
+            system_var_dofs.push_back(libMesh::DofObject::invalid_id);
+        }
+        dof_vector[sys.number()] = system_var_dofs;
+      }
+
+    for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+      if (_app.feProblem().getLinearSystem(i).nFVVariables())
+      {
+        auto & sys = _app.feProblem().getLinearSystem(i);
+        std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables());
+        const auto & variables = sys.getVariables(0);
+        for (const auto & var : variables)
+        {
+          if (var->isFV())
+          {
+            std::vector<dof_id_type> indices;
+            var->sys().system().get_dof_map().dof_indices(elem_info.second.elem(), indices);
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            system_var_dofs.push_back(indices[0]);
+          }
+          else
+            system_var_dofs.push_back(libMesh::DofObject::invalid_id);
+        }
+        dof_vector[sys.number()] = system_var_dofs;
+      }
+
+    if (_app.feProblem().getAuxiliarySystem().nFVVariables())
+    {
+      auto & sys = _app.feProblem().getAuxiliarySystem();
+      std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables());
+      const auto & aux_variables = sys.getVariables(0);
+      for (const auto & var : aux_variables)
+      {
+        if (var->isFV())
+        {
+          std::vector<dof_id_type> indices;
+          var->sys().system().get_dof_map().dof_indices(elem_info.second.elem(), indices);
+          mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+          system_var_dofs.push_back(indices[0]);
+        }
+        else
+          system_var_dofs.push_back(libMesh::DofObject::invalid_id);
+      }
+      dof_vector[sys.number()] = system_var_dofs;
     }
   }
 }
