@@ -16,7 +16,6 @@
 #include "PointListAdaptor.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
-#include "LinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "SubProblem.h"

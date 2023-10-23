@@ -40,7 +40,6 @@ class RelationshipManager;
 class MooseVariableBase;
 class MooseAppCoordTransform;
 class MooseUnits;
-class LinearSystem;
 
 // libMesh forward declarations
 namespace libMesh
