@@ -13,6 +13,10 @@
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysics.h"
 
+// Register the actions for the objects created in this base class
+// registerMooseAction("NavierStokesApp", WCNSFVPhysicsBase, "add_user_object");
+// TODO: does not work, parent class tasks are not inherited
+
 InputParameters
 WCNSFVPhysicsBase::validParams()
 {
@@ -45,9 +49,6 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
   : NavierStokesFlowPhysicsBase(parameters),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation"))
 {
-  // Adjust number of ghost layers in case what was requested in the parameters was not enough
-  adjustRMGhostLayers();
-
   // Parameter checking
   checkSecondParamSetOnlyIfFirstOneSet("flux_inlet_pps", "flux_inlet_directions");
   checkVectorParamsSameLengthIfSet<PostprocessorName, Point>("flux_inlet_pps",
@@ -60,13 +61,8 @@ WCNSFVPhysicsBase::WCNSFVPhysicsBase(const InputParameters & parameters)
 
   // Check that flow physics are consistent
   if (isParamValid("coupled_flow_physics"))
-  {
-    _flow_equations_physics = dynamic_cast<WCNSFVFlowPhysics *>(
-        getProblem().getPhysics(getParam<PhysicsName>("coupled_flow_physics")));
-    if (!_flow_equations_physics)
-      paramError("coupled_flow_physics",
-                 "Physics specified does not exist or is of the wrong type");
-  }
+    _flow_equations_physics =
+        getCoupledPhysics<WCNSFVFlowPhysics>(getParam<PhysicsName>("coupled_flow_physics"));
   else
     _flow_equations_physics = nullptr;
 }
@@ -80,7 +76,7 @@ WCNSFVPhysicsBase::addUserObjects()
 void
 WCNSFVPhysicsBase::addRhieChowUserObjects()
 {
-  mooseAssert(_dim, "0-dimension not supported");
+  mooseAssert(dimension(), "0-dimension not supported");
 
   // This means we are solving for velocity. We dont need external RC coefficients
   bool has_flow_equations = nonLinearVariableExists(_velocity_names[0], false);
@@ -96,7 +92,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
       .theWarehouse()
       .query()
       .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(_tid)
+      .condition<AttribThread>(0)
       .queryInto(objs);
   unsigned int num_rc_uo = 0;
   for (const auto & obj : objs)
@@ -122,7 +118,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
 
   auto params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
-  for (unsigned int d = 0; d < _dim; ++d)
+  for (unsigned int d = 0; d < dimension(); ++d)
     params.set<VariableName>(u_names[d]) = _velocity_names[d];
 
   params.set<VariableName>("pressure") = _pressure_name;
@@ -130,7 +126,7 @@ WCNSFVPhysicsBase::addRhieChowUserObjects()
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    unsigned short smoothing_layers = parameters().isParamValid("porosity_smoothing_layers")
+    unsigned short smoothing_layers = isParamValid("porosity_smoothing_layers")
                                           ? getParam<unsigned short>("porosity_smoothing_layers")
                                           : 0;
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
@@ -153,9 +149,9 @@ WCNSFVPhysicsBase::checkRhieChowFunctorsDefined() const
 {
   if (!getProblem().hasFunctor("ax", /*thread_id=*/0))
     mooseError("Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
-  if (_dim >= 2 && !getProblem().hasFunctor("ay", /*thread_id=*/0))
+  if (dimension() >= 2 && !getProblem().hasFunctor("ay", /*thread_id=*/0))
     mooseError("Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
-  if (_dim == 3 && !getProblem().hasFunctor("az", /*thread_id=*/0))
+  if (dimension() == 3 && !getProblem().hasFunctor("az", /*thread_id=*/0))
     mooseError("Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }
 
@@ -205,34 +201,21 @@ WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
   return necessary_layers;
 }
 
-void
-WCNSFVPhysicsBase::adjustRMGhostLayers()
+InputParameters
+WCNSFVPhysicsBase::getAdditionalRMParams() const
 {
-  auto & factory = getFactory();
-  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+  unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
+  necessary_layers = std::max(necessary_layers, getNumberAlgebraicGhostingLayersNeeded());
+  if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
+    necessary_layers =
+        std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
 
-  const auto ghost_layers =
-      std::max(_pars.get<unsigned short>("ghost_layers"), getNumberAlgebraicGhostingLayersNeeded());
+  // Just an object that has a ghost_layers parameter
+  const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  params.template set<unsigned short>("ghost_layers") = necessary_layers;
 
-  rm_params.set<std::string>("for_whom") = name();
-  rm_params.set<MooseMesh *>("mesh") = &getProblem().mesh();
-  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-      Moose::RelationshipManagerType::COUPLING;
-  rm_params.set<bool>("use_point_neighbors", false);
-  rm_params.set<unsigned short>("layers") = ghost_layers;
-  rm_params.set<bool>("attach_geometric_early") = false;
-  rm_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-  mooseAssert(rm_params.areAllRequiredParamsValid(),
-              "All relationship manager parameters should be valid.");
-
-  auto rm_obj = factory.create<RelationshipManager>(
-      "ElementSideNeighborLayers", name() + "_wcnsfv_ghosting", rm_params);
-
-  // Delete the resources created on behalf of the RM if it ends up not being added to the App.
-  if (!getMooseApp().addRelationshipManager(rm_obj))
-    factory.releaseSharedObjects(*rm_obj);
+  return params;
 }
 
 void
@@ -254,11 +237,11 @@ WCNSFVPhysicsBase::getFlowVariableName(const std::string & short_name) const
 {
   if (short_name == NS::pressure)
     return getPressureName();
-  else if (short_name == NS::velocity_x && _dim > 0)
+  else if (short_name == NS::velocity_x && dimension() > 0)
     return getVelocityNames()[0];
-  else if (short_name == NS::velocity_y && _dim > 1)
+  else if (short_name == NS::velocity_y && dimension() > 1)
     return getVelocityNames()[1];
-  else if (short_name == NS::velocity_z && _dim > 2)
+  else if (short_name == NS::velocity_z && dimension() > 2)
     return getVelocityNames()[2];
   else if (short_name == NS::temperature)
     return getTemperatureName();

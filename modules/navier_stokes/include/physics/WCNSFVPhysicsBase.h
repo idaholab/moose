@@ -25,12 +25,6 @@ public:
 
   WCNSFVPhysicsBase(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
-protected:
   /// Add user objects: for now mainly the Rhie Chow user object
   virtual void addUserObjects() override;
   /// Add postprocessors, could be moved up to the base class
@@ -40,7 +34,7 @@ protected:
   VariableName getFlowVariableName(const std::string & default_name) const;
 
 protected:
-  void adjustRMGhostLayers();
+  InputParameters getAdditionalRMParams() const override;
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
 
   /// Return the name of the Rhie Chow user object

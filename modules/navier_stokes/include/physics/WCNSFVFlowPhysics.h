@@ -23,11 +23,6 @@ public:
 
   WCNSFVFlowPhysics(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
 protected:
 private:
   void addNonlinearVariables() override;

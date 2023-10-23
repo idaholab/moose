@@ -12,7 +12,11 @@
 #include "WCNSFVHeatAdvectionPhysics.h"
 #include "WCNSFVScalarAdvectionPhysics.h"
 
-registerMooseObject("NavierStokesApp", WCNSFVTurbulencePhysics);
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variable");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_material");
 
 InputParameters
 WCNSFVTurbulencePhysics::validParams()
@@ -46,22 +50,16 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
 {
   if (isParamValid("heat_advection_physics"))
   {
-    _fluid_energy_physics = dynamic_cast<WCNSFVHeatAdvectionPhysics *>(
-        getProblem().getPhysics(getParam<PhysicsName>("heat_advection_physics")));
-    if (!_fluid_energy_physics)
-      paramError("heat_advection_physics",
-                 "Physics specified does not exist or is of the wrong type");
+    _fluid_energy_physics = getCoupledPhysics<WCNSFVHeatAdvectionPhysics>(
+        getParam<PhysicsName>("heat_advection_physics"));
     checkCommonParametersConsistent(_fluid_energy_physics->parameters());
   }
   else
     _fluid_energy_physics = nullptr;
   if (isParamValid("scalar_advection_physics"))
   {
-    _scalar_advection_physics = dynamic_cast<WCNSFVScalarAdvectionPhysics *>(
-        getProblem().getPhysics(getParam<PhysicsName>("scalar_advection_physics")));
-    if (!_scalar_advection_physics)
-      paramError("scalar_advection_physics",
-                 "Physics specified does not exist or is of the wrong type");
+    _scalar_advection_physics = getCoupledPhysics<WCNSFVScalarAdvectionPhysics>(
+        getParam<PhysicsName>("scalar_advection_physics"));
     checkCommonParametersConsistent(_scalar_advection_physics->parameters());
   }
   else
@@ -128,10 +126,10 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
       kernel_name = prefix() + "pins_momentum_mixing_length_reynolds_stress_";
 
     params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-    for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
-    for (unsigned int d = 0; d < _dim; ++d)
+    for (unsigned int d = 0; d < dimension(); ++d)
     {
       params.set<NonlinearVariableName>("variable") = _velocity_names[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
@@ -157,7 +155,7 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
     params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
     params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
-    for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
     if (_porous_medium_treatment)
@@ -180,7 +178,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
-    for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
     const auto & passive_scalar_names = _scalar_advection_physics->getAdvectedScalarNames();
@@ -236,7 +234,7 @@ WCNSFVTurbulencePhysics::addMaterials()
     InputParameters params = getFactory().getValidParams("MixingLengthTurbulentViscosityMaterial");
     assignBlocks(params, _blocks);
 
-    for (unsigned int d = 0; d < _dim; ++d)
+    for (unsigned int d = 0; d < dimension(); ++d)
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
     params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;

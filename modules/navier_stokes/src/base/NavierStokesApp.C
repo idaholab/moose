@@ -49,6 +49,13 @@ NavierStokesApp::registerApps()
 static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
+  // Physics syntax (sharing parameters)
+  registerSyntax("WCNSFVFlowPhysics", "Physics/NavierStokes/WCNSFVFlowPhysics/*");
+  registerSyntax("WCNSFVHeatAdvectionPhysics", "Physics/NavierStokes/WCNSFVHeatAdvectionPhysics/*");
+  registerSyntax("WCNSFVScalarAdvectionPhysics",
+                 "Physics/NavierStokes/WCNSFVScalarAdvectionPhysics/*");
+  registerSyntax("WCNSFVTurbulencePhysics", "Physics/NavierStokes/WCNSFVTurbulencePhysics/*");
+
   // Create the syntax
   registerSyntax("CNSAction", "Modules/CompressibleNavierStokes");
   registerSyntax("INSAction", "Modules/IncompressibleNavierStokes");
