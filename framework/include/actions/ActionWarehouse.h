@@ -27,6 +27,7 @@ class MooseMesh;
 class Syntax;
 class ActionFactory;
 class FEProblem;
+class PhysicsBase;
 
 /**
  * Storage for action instances.
@@ -122,6 +123,18 @@ public:
     if (!p)
       mooseError("Action with name being ", name, " does not exist");
     return *p;
+  }
+  template <class T>
+  T * getPhysics(const std::string & name)
+  {
+    auto physics = const_cast<T *>(&getAction<T>(name));
+    if (!dynamic_cast<PhysicsBase *>(physics))
+      mooseError("The Physics requested of type '",
+                 MooseUtils::prettyCppType<T>(),
+                 "' and name '",
+                 name,
+                 "' is not derived from the PhysicsBase class");
+    return physics;
   }
 
   /**
