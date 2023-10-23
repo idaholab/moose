@@ -139,7 +139,7 @@
     input = 'continuity_penalty_sphere_hex.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
     cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
-               'Outputs/file_base=continuity_penalty_sphere_hex20_out'
+               'Outputs/file_base=continuity_penalty_sphere_hex20_out -pc_type lu'
     requirement = 'The system shall be able to produce the expected result for a solution continuity '
                   'test case using the penalty-based mortar method on a HEX20 mesh with curved '
                   'geometry, e.g. the primal variable values across the mortar interface shall be '
@@ -153,7 +153,7 @@
     input = 'continuity_penalty_sphere_hex.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
     cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
-               'Constraints/mortar/type=ADPenaltyEqualValueConstraint Outputs/file_base=continuity_penalty_sphere_hex20_out'
+               'Constraints/mortar/type=ADPenaltyEqualValueConstraint Outputs/file_base=continuity_penalty_sphere_hex20_out -pc_type lu'
     requirement = 'The system shall be able to produce the same result using the penalty-based '
                   'mortar method with and without automatic differentiation.'
     map = False
