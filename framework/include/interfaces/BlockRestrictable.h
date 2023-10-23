@@ -104,14 +104,19 @@ public:
   /**
    * Return the block subdomain ids for this object
    * Note, if this is not block restricted, this function returns all mesh subdomain ids.
-   * @return a set of SudomainIDs that are valid for this object
+   * @return a set of SubdomainIDs that are valid for this object
    */
   const virtual std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Return the largest mesh dimension of the elements in the blocks for this object
    */
-  unsigned int blocksMaxDimension() const { return _blk_dim; }
+  unsigned int blocksMaxDimension() const
+  {
+    mooseAssert(_blk_dim != std::numeric_limits<unsigned int>::max(),
+                "Block restriction not initialized");
+    return _blk_dim;
+  }
 
   /**
    * Test if the supplied block name is valid for this object
