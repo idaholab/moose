@@ -21,11 +21,6 @@ public:
 
   HeatConductionPhysics(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
 protected:
   const VariableName & _temperature_name;
 };

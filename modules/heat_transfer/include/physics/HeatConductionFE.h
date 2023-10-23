@@ -21,11 +21,6 @@ public:
 
   HeatConductionFE(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
 private:
   void addNonlinearVariables() override;
   void addFEKernels() override;

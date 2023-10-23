@@ -9,7 +9,10 @@
 
 #include "HeatConductionFE.h"
 
-registerMooseObject("HeatConductionApp", HeatConductionFE);
+// Register the actions for the objects actually used
+registerMooseAction("HeatTransferApp", HeatConductionFE, "add_kernel");
+registerMooseAction("HeatTransferApp", HeatConductionFE, "add_bc");
+registerMooseAction("HeatTransferApp", HeatConductionFE, "add_variable");
 
 InputParameters
 HeatConductionFE::validParams()
