@@ -96,11 +96,11 @@ Applications:
         remove:
             - framework/doc/remove.yml
 
-    heat_conduction:
+    heat_transfer:
         exe_directory: modules/combined
         app_types:
             - HeatConductionApp
-        content_directory: modules/heat_conduction/doc/content
+        content_directory: modules/heat_transfer/doc/content
         unregister:
             - framework/doc/unregister.yml
         remove:
@@ -383,9 +383,9 @@ Requirements:
         directories:
             - modules/functional_expansion_tools
 
-    heat_conduction:
+    heat_transfer:
         directories:
-            - modules/heat_conduction
+            - modules/heat_transfer
 
     geochemistry:
         directories:

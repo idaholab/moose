@@ -70,6 +70,6 @@
 []
 
 [Problem]
-  register_objects_from = 'HeatConductionApp'
-  library_path = '../../../../../heat_conduction/lib'
+  register_objects_from = 'HeatTransferApp'
+  library_path = '../../../../../heat_transfer/lib'
 []

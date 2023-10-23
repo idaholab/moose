@@ -21,17 +21,19 @@
  * permeability tensor can be given. If they are not provided, they will be
  * initialised to zero.
  */
-class PorousFlowPermeabilityConstFromVar : public PorousFlowPermeabilityBase
+template <bool is_ad>
+class PorousFlowPermeabilityConstFromVarTempl : public PorousFlowPermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityConstFromVar(const InputParameters & parameters);
+  PorousFlowPermeabilityConstFromVarTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
 
   /// Permeability components
+  /// Note: these can only be constant (Real constant Monomial auxvariables) so no AD version
   const VariableValue & _perm_xx;
   const VariableValue & _perm_xy;
   const VariableValue & _perm_xz;
@@ -41,4 +43,9 @@ protected:
   const VariableValue & _perm_zx;
   const VariableValue & _perm_zy;
   const VariableValue & _perm_zz;
+
+  usingPorousFlowPermeabilityBaseMembers;
 };
+
+typedef PorousFlowPermeabilityConstFromVarTempl<false> PorousFlowPermeabilityConstFromVar;
+typedef PorousFlowPermeabilityConstFromVarTempl<true> ADPorousFlowPermeabilityConstFromVar;

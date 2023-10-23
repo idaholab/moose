@@ -54,13 +54,13 @@ rho=1
 
 [AuxKernels]
   [ax_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = ax
     variable = ax_out
     execute_on = timestep_end
   []
   [ay_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = ay
     variable = ay_out
     execute_on = timestep_end

@@ -65,6 +65,4 @@ FVKernel::FVKernel(const InputParameters & params)
   : ResidualObject(params), BlockRestrictable(this), ADFunctorInterface(this)
 {
   _subproblem.haveADObjects(true);
-  if (getParam<bool>("use_displaced_mesh"))
-    paramError("use_displaced_mesh", "FV kernels do not yet support displaced mesh");
 }

@@ -33,5 +33,14 @@ protected:
   MaterialProperty<std::vector<std::vector<RealTensorValue>>> * const _dpermeability_qp_dgradvar;
 };
 
+#define usingPorousFlowPermeabilityBaseMembers                                                     \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dgradvar;                        \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dvar;                            \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_num_var;                                          \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_permeability_qp;                                  \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_qp;                                               \
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_dictator;                                         \
+  using Coupleable::coupledValue
+
 typedef PorousFlowPermeabilityBaseTempl<false> PorousFlowPermeabilityBase;
 typedef PorousFlowPermeabilityBaseTempl<true> ADPorousFlowPermeabilityBase;

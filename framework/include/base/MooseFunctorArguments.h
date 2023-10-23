@@ -80,7 +80,6 @@ struct ElemPointArg
  */
 struct FaceArg
 {
-public:
   /// a face information object which defines our location in space
   const FaceInfo * fi;
 
@@ -130,6 +129,17 @@ public:
                l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.face_side) <
            std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.face_side);
   }
+};
+
+struct NodeArg
+{
+  /// The node which defines our location in space
+  const Node * node;
+  /// Indicates what subdomain this argument should be associated with. This removes ambiguity when
+  /// this argument is used to evaluate functors at the intersection of different blocks
+  SubdomainID subdomain_id;
+
+  Point getPoint() const { return *node; }
 };
 
 /**
@@ -200,6 +210,7 @@ struct ElemSideQpArg
  * equivalent); a state of 1 indicates the most-recent "old" time or the most recent previous
  * nonlinear iteration, etc.
  */
+
 struct StateArg
 {
   /**

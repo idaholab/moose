@@ -14,7 +14,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "PerfGraphInterface.h"
 
-#include "libmesh/explicit_system.h"
+#include "libmesh/system.h"
 #include "libmesh/transient_system.h"
 
 // Forward declarations
@@ -143,7 +143,7 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
-  virtual ExplicitSystem & sys() { return _sys; }
+  virtual System & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
@@ -180,7 +180,7 @@ protected:
 
   FEProblemBase & _fe_problem;
 
-  ExplicitSystem & _sys;
+  System & _sys;
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

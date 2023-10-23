@@ -76,17 +76,17 @@ sb=5.67e-8
     variable = vel
     use_displaced_mesh = true
   []
-  [mesh]
-    type = INSADMeshConvection
+  [momentum_advection]
+    type = INSADMomentumAdvection
+    variable = vel
+    use_displaced_mesh = true
+  []
+  [momentum_mesh_advection]
+    type = INSADMomentumMeshAdvection
     variable = vel
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    use_displaced_mesh = true
-  []
-  [momentum_convection]
-    type = INSADMomentumAdvection
-    variable = vel
     use_displaced_mesh = true
   []
   [momentum_viscous]
@@ -107,14 +107,22 @@ sb=5.67e-8
     velocity = vel
     use_displaced_mesh = true
   []
+  [temperature_time]
+    type = INSADHeatConductionTimeDerivative
+    variable = T
+    use_displaced_mesh = true
+  []
   [temperature_advection]
     type = INSADEnergyAdvection
     variable = T
     use_displaced_mesh = true
   []
-  [temperature_time]
-    type = INSADHeatConductionTimeDerivative
+  [temperature_mesh_advection]
+    type = INSADEnergyMeshAdvection
     variable = T
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     use_displaced_mesh = true
   []
   [temperature_conduction]
@@ -193,6 +201,7 @@ sb=5.67e-8
     variable = 'disp_x'
     velocity = 'vel'
     component = 0
+    associated_subdomain = 0
   []
   [displace_y_top]
     type = INSADDisplaceBoundaryBC
@@ -200,6 +209,7 @@ sb=5.67e-8
     variable = 'disp_y'
     velocity = 'vel'
     component = 1
+    associated_subdomain = 0
   []
   [displace_z_top]
     type = INSADDisplaceBoundaryBC
@@ -207,6 +217,7 @@ sb=5.67e-8
     variable = 'disp_z'
     velocity = 'vel'
     component = 2
+    associated_subdomain = 0
   []
   [displace_x_top_dummy]
     type = INSADDummyDisplaceBoundaryIntegratedBC
@@ -243,16 +254,19 @@ sb=5.67e-8
     type = AriaLaserWeld304LStainlessSteel
     temperature = T
     beta = 1e7
+    use_displaced_mesh = true
   []
   [steel_boundary]
     type = AriaLaserWeld304LStainlessSteelBoundary
     boundary = 'front'
     temperature = T
+    use_displaced_mesh = true
   []
   [const]
     type = GenericConstantMaterial
     prop_names = 'abs sb_constant'
     prop_values = '1 ${sb}'
+    use_displaced_mesh = true
   []
 []
 

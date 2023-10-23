@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Functors/index.md'
+  issues = '#16809 #19420'
+  [analytic]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall be able to evaluate functors at nodes, element centers, and quadrature points, and match an expected analytic solution.'
+  []
+[]

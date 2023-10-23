@@ -83,7 +83,7 @@ for some of the individual physics modules as listed below.
 - [Combined](modules/combined/tutorials/index.md) (coupling models from multiple modules)
 - [Contact](modules/contact/tutorials/index.md)
 - [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
-- [Heat Conduction](modules/heat_conduction/tutorials/introduction/index.md)
+- [Heat Transfer](modules/heat_transfer/tutorials/introduction/index.md)
 - [Level Set](modules/level_set/level_set_examples.md)
 - [Porous Flow](modules/porous_flow/porous_flow_examples.md)
 - [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)

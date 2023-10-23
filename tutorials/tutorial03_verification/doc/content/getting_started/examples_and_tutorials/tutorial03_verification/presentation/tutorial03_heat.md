@@ -42,7 +42,7 @@ the details of which are not not necessary for this tutorial.
 ## Practice: Kernel Objects
 
 In MOOSE, volume terms are represent by `Kernel` objects and added within the `[Kernels]` input
-block. For this problem the necessary objects exist within the heat conduction module.
+block. For this problem the necessary objects exist within the heat transfer module.
 
 $\lparen \phi_i, \rho(\vec{x}) c(\vec{x})\frac{\partial T_h}{\partial t} \rparen\implies$ `HeatConductionTimeDerivative`
 

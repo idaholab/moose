@@ -197,13 +197,13 @@ def build_hit(expr, name, **kwargs):
 
     root = pyhit.Node(None, name)
     root['type'] = 'ParsedFunction'
-    root['value'] = "'{}'".format(str(fparser(expr)))
+    root['expression'] = "'{}'".format(str(fparser(expr)))
 
     if kwargs:
         pvars = ' '.join(kwargs.keys())
         pvals = ' '.join([str(v) for v in kwargs.values()])
-        root['vars'] = "'{}'".format(pvars)
-        root['vals'] = "'{}'".format(pvals)
+        root['symbol_names'] = "'{}'".format(pvars)
+        root['symbol_values'] = "'{}'".format(pvals)
 
     return root
 

@@ -62,7 +62,7 @@ velocity_interp_method = 'rc'
     variable = has_porosity_jump_face
   []
   [porosity_out]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = porosity_out
     functor = porosity
     execute_on = 'initial timestep_end'

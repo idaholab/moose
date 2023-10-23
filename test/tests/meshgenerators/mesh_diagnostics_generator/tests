@@ -164,6 +164,15 @@
 
       detail = 'triangle elements of second order,'
     []
+    [tri_third_order]
+      type = 'RunException'
+      input = 'detect_amr_tri.i'
+      mesh_mode = replicated
+      cli_args = 'Mesh/cut_one/elem_type=TRI7 Mesh/diag/search_for_adaptivity_nonconformality=ERROR --mesh-only'
+      expect_err = 'Number of non-conformal nodes likely due to mesh refinement detected by heuristic: 1'
+
+      detail = 'triangle elements of third order,'
+    []
     [tri_two_levels_across]
       type = 'RunApp'
       input = 'detect_amr_tri.i'

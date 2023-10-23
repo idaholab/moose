@@ -28,12 +28,12 @@
 
 [AuxKernels]
   [cp_aux]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = cp_mixture
     variable = cp
   []
   [k_aux]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     functor = k_mixture
     variable = k
   []

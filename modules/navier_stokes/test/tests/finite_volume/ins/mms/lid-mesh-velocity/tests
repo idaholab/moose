@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#15640'
+  design = 'navier_stokes/insfv.md'
+  [rc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestMeshAdvection
+    requirement = 'The system shall be able to subtract the time rate of change of mesh displacements from the velocity field in order to compute the correct rate of momentum advection in an Abritrary Lagrangian Eulerian simulation.'
+    method = '!dbg'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+  []
+[]

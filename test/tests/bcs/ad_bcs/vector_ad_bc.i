@@ -6,31 +6,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADVectorDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = ADVectorFunctionDirichletBC
     variable = u
     boundary = left
     function_x = '1'
     function_y = '1'
-  [../]
-  [./right]
+  []
+  [right]
     type = ADVectorRobinBC
     variable = u
     boundary = right
-  [../]
+    coefficient = 2.0
+  []
 []
 
 [Executioner]

@@ -23,7 +23,7 @@
 #include "FsiTestApp.h"
 #include "FunctionalExpansionToolsTestApp.h"
 #include "GeochemistryTestApp.h"
-#include "HeatConductionTestApp.h"
+#include "HeatTransferTestApp.h"
 #include "LevelSetTestApp.h"
 #include "MiscTestApp.h"
 #include "NavierStokesTestApp.h"
@@ -75,7 +75,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     FsiTestApp::registerAll(f, af, s, use_test_objs);
     FunctionalExpansionToolsTestApp::registerAll(f, af, s, use_test_objs);
     GeochemistryTestApp::registerAll(f, af, s, use_test_objs);
-    HeatConductionTestApp::registerAll(f, af, s, use_test_objs);
+    HeatTransferTestApp::registerAll(f, af, s, use_test_objs);
     LevelSetTestApp::registerAll(f, af, s, use_test_objs);
     MiscTestApp::registerAll(f, af, s, use_test_objs);
     NavierStokesTestApp::registerAll(f, af, s, use_test_objs);

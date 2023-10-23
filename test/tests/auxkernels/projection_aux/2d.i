@@ -32,12 +32,12 @@
     variable = base_nodal
     function = 3+3*x-y
   []
-  [quadratic_elem]
+  [cubic_elem]
     type = FunctionIC
     variable = base_elem
     function = 2+2*x*x-3*y*y*y
   []
-  [quadratic_nodal]
+  [cubic_nodal]
     type = FunctionIC
     variable = base_nodal
     function = 3+3*x*x-4*y*y*y

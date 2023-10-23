@@ -104,11 +104,11 @@ System.
 
 ## Practice: Run
 
-Executing the simulation is straightforward, simply execute the heat conduction module executable
+Executing the simulation is straightforward, simply execute the heat transfer module executable
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_conduction/heat_conduction-opt -i 1d_analytical.i
+~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 1d_analytical.i
 ```
 
 !---

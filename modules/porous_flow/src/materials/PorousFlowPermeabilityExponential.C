@@ -10,9 +10,11 @@
 #include "PorousFlowPermeabilityExponential.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityExponential);
+registerMooseObject("PorousFlowApp", ADPorousFlowPermeabilityExponential);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPermeabilityExponential::validParams()
+PorousFlowPermeabilityExponentialTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowPermeabilityBase::validParams();
   MooseEnum poroperm_function("log_k ln_k exp_k", "exp_k");
@@ -37,19 +39,24 @@ PorousFlowPermeabilityExponential::validParams()
   return params;
 }
 
-PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(
+template <bool is_ad>
+PorousFlowPermeabilityExponentialTempl<is_ad>::PorousFlowPermeabilityExponentialTempl(
     const InputParameters & parameters)
-  : PorousFlowPermeabilityBase(parameters),
-    _A(getParam<Real>("A")),
-    _B(getParam<Real>("B")),
+  : PorousFlowPermeabilityBaseTempl<is_ad>(parameters),
+    _A(this->template getParam<Real>("A")),
+    _B(this->template getParam<Real>("B")),
     _k_anisotropy(parameters.isParamValid("k_anisotropy")
-                      ? getParam<RealTensorValue>("k_anisotropy")
+                      ? this->template getParam<RealTensorValue>("k_anisotropy")
                       : RealTensorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)),
-    _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_qp_dgradvar(
-        getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
-    _poroperm_function(getParam<MooseEnum>("poroperm_function").getEnum<PoropermFunction>())
+    _porosity_qp(this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_qp")),
+    _dporosity_qp_dvar(is_ad ? nullptr
+                             : &this->template getMaterialProperty<std::vector<Real>>(
+                                   "dPorousFlow_porosity_qp_dvar")),
+    _dporosity_qp_dgradvar(is_ad ? nullptr
+                                 : &this->template getMaterialProperty<std::vector<RealGradient>>(
+                                       "dPorousFlow_porosity_qp_dgradvar")),
+    _poroperm_function(this->template getParam<MooseEnum>("poroperm_function")
+                           .template getEnum<PoropermFunction>())
 {
   switch (_poroperm_function)
   {
@@ -73,21 +80,29 @@ PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(
   _dictator.usePermDerivs(true);
 }
 
+template <bool is_ad>
 void
-PorousFlowPermeabilityExponential::computeQpProperties()
+PorousFlowPermeabilityExponentialTempl<is_ad>::computeQpProperties()
 {
   _permeability_qp[_qp] = _k_anisotropy * _BB * std::exp(_porosity_qp[_qp] * _AA);
 
-  (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
-  for (unsigned int v = 0; v < _num_var; ++v)
-    (*_dpermeability_qp_dvar)[_qp][v] = _AA * _permeability_qp[_qp] * _dporosity_qp_dvar[_qp][v];
-
-  (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+  if constexpr (!is_ad)
   {
-    (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
+    (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
     for (unsigned int v = 0; v < _num_var; ++v)
-      (*_dpermeability_qp_dgradvar)[_qp][i][v] =
-          _AA * _permeability_qp[_qp] * _dporosity_qp_dgradvar[_qp][v](i);
+      (*_dpermeability_qp_dvar)[_qp][v] =
+          _AA * _permeability_qp[_qp] * (*_dporosity_qp_dvar)[_qp][v];
+
+    (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
+    for (const auto i : make_range(Moose::dim))
+    {
+      (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
+      for (unsigned int v = 0; v < _num_var; ++v)
+        (*_dpermeability_qp_dgradvar)[_qp][i][v] =
+            _AA * _permeability_qp[_qp] * (*_dporosity_qp_dgradvar)[_qp][v](i);
+    }
   }
 }
+
+template class PorousFlowPermeabilityExponentialTempl<false>;
+template class PorousFlowPermeabilityExponentialTempl<true>;

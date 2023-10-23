@@ -154,9 +154,10 @@ inlet_velocity = 0.1
   [temp_time]
     type = WCNSFVEnergyTimeDerivative
     variable = T_fluid
-    cp = cp
     rho = rho
     drho_dt = drho_dt
+    dh_dt = dh_dt
+    h = h
   []
   [temp_conduction]
     type = FVDiffusion
@@ -391,8 +392,8 @@ inlet_velocity = 0.1
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k drho_dt rho'
-    prop_values = '${cp} ${k} 0 1980'
+    prop_names = 'cp k rho'
+    prop_values = '${cp} ${k} 1980'
   []
   #[rho]
   #  type = RhoFromPTFunctorMaterial

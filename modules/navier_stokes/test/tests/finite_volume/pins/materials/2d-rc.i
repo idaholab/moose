@@ -69,7 +69,7 @@ velocity_interp_method = 'rc'
 
 [AuxKernels]
   [speed]
-    type = ADFunctorElementalAux
+    type = FunctorAux
     variable = 'speed_output'
     functor = 'speed'
   []

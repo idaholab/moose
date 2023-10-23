@@ -18,19 +18,26 @@
  * where k_ijk is a tensor providing the anisotropy, and k0 is a scalar
  * variable.
  */
-class PorousFlowPermeabilityTensorFromVar : public PorousFlowPermeabilityBase
+template <bool is_ad>
+class PorousFlowPermeabilityTensorFromVarTempl : public PorousFlowPermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityTensorFromVar(const InputParameters & parameters);
+  PorousFlowPermeabilityTensorFromVarTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
 
   /// Permeability components
+  /// Note: these can only be constant (Real constant Monomial auxvariables) so no AD version
   const VariableValue & _perm;
 
   /// Tensor multiplier k_ijk
   const RealTensorValue _k_anisotropy;
+
+  usingPorousFlowPermeabilityBaseMembers;
 };
+
+typedef PorousFlowPermeabilityTensorFromVarTempl<false> PorousFlowPermeabilityTensorFromVar;
+typedef PorousFlowPermeabilityTensorFromVarTempl<true> ADPorousFlowPermeabilityTensorFromVar;

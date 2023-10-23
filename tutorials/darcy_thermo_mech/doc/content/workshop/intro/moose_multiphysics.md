@@ -122,7 +122,7 @@ Contact\\
 Electromagnetics\\
 Fluid Structure Interaction (FSI)\\
 Geochemistry\\
-Heat Conduction\\
+Heat Transfer\\
 Level Set\\
 Navier Stokes\\
 Peridynamics\\

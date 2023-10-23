@@ -17,7 +17,8 @@ enum class INSFVBCs
   INSFVFullyDevelopedFlowBC = 1 << 2,
   INSFVNoSlipWallBC = 1 << 3,
   INSFVSlipWallBC = 1 << 4,
-  INSFVSymmetryBC = 1 << 5
+  INSFVSymmetryBC = 1 << 5,
+  INSFVFreeSurfaceBC = 1 << 6
 };
 
 #define clonefunc(T)                                                                               \

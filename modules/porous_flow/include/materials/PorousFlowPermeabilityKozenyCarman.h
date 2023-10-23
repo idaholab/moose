@@ -25,12 +25,13 @@
  * A = f * d^2
  * where f is a scalar constant and d is grain diameter.
  */
-class PorousFlowPermeabilityKozenyCarman : public PorousFlowPermeabilityBase
+template <bool is_ad>
+class PorousFlowPermeabilityKozenyCarmanTempl : public PorousFlowPermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityKozenyCarman(const InputParameters & parameters);
+  PorousFlowPermeabilityKozenyCarmanTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
@@ -57,17 +58,22 @@ protected:
   const RealTensorValue _k_anisotropy;
 
   /// Quadpoint porosity
-  const MaterialProperty<Real> & _porosity_qp;
+  const GenericMaterialProperty<Real, is_ad> & _porosity_qp;
 
   /// d(quadpoint porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dporosity_qp_dvar;
 
   /// d(quadpoint porosity)/d(grad(PorousFlow variable))
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_qp_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_qp_dgradvar;
 
   /// Name of porosity-permeability relationship
   const enum class PoropermFunction { kozeny_carman_fd2, kozeny_carman_phi0 } _poroperm_function;
 
   /// Multiplying factor in k = k_ijk * A * phi^n / (1 - phi)^m
   Real _A;
+
+  usingPorousFlowPermeabilityBaseMembers;
 };
+
+typedef PorousFlowPermeabilityKozenyCarmanTempl<false> PorousFlowPermeabilityKozenyCarman;
+typedef PorousFlowPermeabilityKozenyCarmanTempl<true> ADPorousFlowPermeabilityKozenyCarman;

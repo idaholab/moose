@@ -290,6 +290,7 @@ restrictPointToFace(Point & p, const Elem * side, std::vector<const Node *> & of
 
     case TRI3:
     case TRI6:
+    case TRI7:
     {
       // The reference triangle is isosceles
       // and is bound by xi=0, eta=0, and xi+eta=1.

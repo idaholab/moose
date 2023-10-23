@@ -1179,6 +1179,54 @@ SubProblem::getCoordSystem(SubdomainID sid) const
   return mesh().getCoordSystem(sid);
 }
 
+void
+SubProblem::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
+{
+  for (const auto nl : make_range(numNonlinearSystems()))
+    assembly(tid, nl).reinitFVFace(fi);
+}
+
+void
+SubProblem::cacheResidual(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum())
+      .cacheResidual(Assembly::GlobalDataKey{}, currentResidualVectorTags());
+}
+
+void
+SubProblem::cacheResidualNeighbor(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum())
+      .cacheResidualNeighbor(Assembly::GlobalDataKey{}, currentResidualVectorTags());
+}
+
+void
+SubProblem::addCachedResidual(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum())
+      .addCachedResiduals(Assembly::GlobalDataKey{}, currentResidualVectorTags());
+}
+
+void
+SubProblem::cacheJacobian(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum()).cacheJacobian(Assembly::GlobalDataKey{});
+  if (hasNonlocalCoupling())
+    assembly(tid, currentNlSysNum()).cacheJacobianNonlocal(Assembly::GlobalDataKey{});
+}
+
+void
+SubProblem::cacheJacobianNeighbor(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum()).cacheJacobianNeighbor(Assembly::GlobalDataKey{});
+}
+
+void
+SubProblem::addCachedJacobian(THREAD_ID tid)
+{
+  assembly(tid, currentNlSysNum()).addCachedJacobian(Assembly::GlobalDataKey{});
+}
+
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(THREAD_ID tid,
                               const std::string & var_name,

@@ -101,9 +101,9 @@ class TestMMS(unittest.TestCase):
 
         self.assertIn('[force]', n)
         self.assertIn('type = ParsedFunction', n)
-        self.assertIn("value = '6*x*a*k'", n)
-        self.assertIn("vars = 'a k'", n)
-        self.assertIn("vals = '42 1.0'", n)
+        self.assertIn("expression = '6*x*a*k'", n)
+        self.assertIn("symbol_names = 'a k'", n)
+        self.assertIn("symbol_values = '42 1.0'", n)
 
 
 if __name__ == '__main__':

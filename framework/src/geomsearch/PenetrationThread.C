@@ -766,6 +766,7 @@ PenetrationThread::getSideCornerNodes(const Elem * side, std::vector<const Node 
 
     case TRI3:
     case TRI6:
+    case TRI7:
     {
       corner_nodes.push_back(side->node_ptr(2));
       break;
@@ -846,6 +847,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point & p,
 
     case TRI3:
     case TRI6:
+    case TRI7:
     {
       if ((local_node_indices[0] == 0) && (local_node_indices[1] == 1))
       {
@@ -994,6 +996,7 @@ PenetrationThread::restrictPointToFace(Point & p, const Node *& closest_node, co
 
     case TRI3:
     case TRI6:
+    case TRI7:
     {
       if (eta < 0.0)
       {
@@ -1423,6 +1426,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(
 
     case TRI3:
     case TRI6:
+    case TRI7:
     {
       if (eta < -smooth_limit)
       {
