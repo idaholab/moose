@@ -42,7 +42,7 @@ INSFVMixingLengthReynoldsStress::validParams()
 
 INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputParameters & params)
   : INSFVFluxKernel(params),
-    _dim(_subproblem.mesh().dimension()),
+    _dim(blocksMaxDimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
     _u(getFunctor<ADReal>("u")),
     _v(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),

@@ -147,6 +147,7 @@ unsigned int
 PhysicsBase::dimension() const
 {
   mooseAssert(_mesh, "We dont have a mesh yet");
+  mooseAssert(_dim < 4, "Dimension has not been set yet");
   return _dim;
 }
 
