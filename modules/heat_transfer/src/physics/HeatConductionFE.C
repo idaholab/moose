@@ -10,10 +10,10 @@
 #include "HeatConductionFE.h"
 
 // Register the actions for the objects actually used
+registerPhysicsBaseTasks("HeatTransferApp", HeatConductionFE);
 registerMooseAction("HeatTransferApp", HeatConductionFE, "add_kernel");
 registerMooseAction("HeatTransferApp", HeatConductionFE, "add_bc");
 registerMooseAction("HeatTransferApp", HeatConductionFE, "add_variable");
-registerPhysicsBaseTasks("HeatTransferApp", HeatConductionFE);
 registerMooseAction("HeatTransferApp", HeatConductionFE, "add_preconditioning");
 
 InputParameters
