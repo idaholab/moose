@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVAction.h"
+#include "Executioner.h"
 
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
@@ -19,6 +20,7 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_materials");
 registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_check_copy_nodal_vars");
 registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_copy_nodal_vars");
+registerMooseAction("NavierStokesApp", NSFVAction, "setup_executioner_complete");
 
 InputParameters
 NSFVAction::validParams()
@@ -71,6 +73,12 @@ NSFVAction::act()
 
   if (_current_task == "navier_stokes_copy_nodal_vars")
     copyNSNodalVariables();
+
+  if (_current_task == "setup_executioner_complete")
+  {
+    if (!_app.getExecutioner()->parameters().isParamSetByUser("residual_and_jacobian_together"))
+      setResidualAndJacobianTogether();
+  }
 }
 
 void

@@ -235,6 +235,7 @@ addActionTypes(Syntax & syntax)
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
   registerTask("setup_variable_complete", false);
+  registerTask("setup_executioner_complete", false);
   registerTask("ready_to_init", true);
 
   // Output related actions
@@ -292,6 +293,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
+                           "(setup_executioner_complete)"
                            "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"

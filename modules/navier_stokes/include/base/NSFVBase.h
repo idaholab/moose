@@ -91,6 +91,9 @@ protected:
   /// Function adding kernels for the incompressible continuity equation
   void addINSMassKernels();
 
+  /// Function for setting joint residual and Jacobian computation in NS solves
+  void setResidualAndJacobianTogether();
+
   /**
    * Functions adding kernels for the incompressible momentum equation
    * If the material properties are not constant, these can be used for
@@ -1302,6 +1305,13 @@ NSFVBase<BaseType>::copyNSNodalVariables()
               parameters().template get<std::string>("initial_from_file_timestep"));
       }
   }
+}
+
+template <class BaseType>
+void
+NSFVBase<BaseType>::setResidualAndJacobianTogether()
+{
+  getProblem().getNonlinearSystemBase().residualAndJacobianTogether();
 }
 
 template <class BaseType>
