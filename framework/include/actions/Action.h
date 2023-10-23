@@ -161,6 +161,11 @@ public:
 
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
+  inline bool isParamSetByUser(const std::string & name) const
+  {
+    return _pars.isParamSetByUser(name);
+  }
+
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
   /**
