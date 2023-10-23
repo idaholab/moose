@@ -29,9 +29,9 @@ public:
 
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
-  // Forward calls to the Physics to build the necessary object
-  virtual void addVariables() override;
-  virtual void addMooseObjects() override;
+  // The objects are added by the Physics Action already
+  virtual void addVariables() override {}
+  virtual void addMooseObjects() override {}
 
   /// Whether flow physics are defined on this component
   bool hasFlowPhysics() const { return _has_flow_physics; }
@@ -56,6 +56,10 @@ protected:
   virtual FEProblemBase & getProblem() { return getMooseApp().feProblem(); }
   virtual FEProblemBase & getProblem() const { return getMooseApp().feProblem(); }
   virtual const MooseMesh & getMesh() const { return constMesh(); }
+
+  void addPhysics(const std::string & action_name,
+                  const std::string & physics_name,
+                  InputParameters & params);
 
   // virtual void addNSNonlinearVariable(const std::string & var_type,
   //                                     const std::string & var_name,

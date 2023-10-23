@@ -11,6 +11,7 @@
 #include "WCNSFVFlowPhysics.h"
 #include "WCNSFVHeatAdvectionPhysics.h"
 #include "WCNSFVScalarAdvectionPhysics.h"
+#include "WCNSFVTurbulencePhysics.h"
 #include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", FileMeshWCNSFVComponent);
@@ -32,7 +33,7 @@ FileMeshWCNSFVComponent::validParams()
   params += WCNSFVFlowPhysics::validParams();
   params += WCNSFVHeatAdvectionPhysics::validParams();
   params += WCNSFVScalarAdvectionPhysics::validParams();
-  // params += WCNSFVTurbulencePhysics::validParams;
+  params += WCNSFVTurbulencePhysics::validParams();
 
   return params;
 }
@@ -61,44 +62,46 @@ FileMeshWCNSFVComponent::init()
   // Before this point, we did not have a Problem object, so we could not add the Physics
   if (_has_flow_physics)
   {
-    InputParameters params = getFactory().getValidParams("WCNSFVFlowPhysics");
+    InputParameters params = getMooseApp().getActionFactory().getValidParams("WCNSFVFlowPhysics");
     params.applyParameters(parameters());
     const PhysicsName physics_name = prefix() + "flow";
-    getProblem().addPhysics("WCNSFVFlowPhysics", physics_name, params);
+    addPhysics("WCNSFVFlowPhysics", physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
-    _flow_physics = dynamic_cast<WCNSFVFlowPhysics *>(getProblem().getPhysics(physics_name));
+    _flow_physics = getMooseApp().actionWarehouse().getPhysics<WCNSFVFlowPhysics>(physics_name);
     _physics.push_back(_flow_physics);
   }
   if (_has_heat_physics)
   {
-    InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
+    InputParameters params =
+        getMooseApp().getActionFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
     const PhysicsName physics_name = prefix() + "energy";
-    getProblem().addPhysics("WCNSFVHeatAdvectionPhysics", physics_name, params);
+    addPhysics("WCNSFVHeatAdvectionPhysics", physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
     _energy_physics =
-        dynamic_cast<WCNSFVHeatAdvectionPhysics *>(getProblem().getPhysics(physics_name));
+        getMooseApp().actionWarehouse().getPhysics<WCNSFVHeatAdvectionPhysics>(physics_name);
     _physics.push_back(_energy_physics);
   }
   if (_has_scalar_physics)
   {
-    InputParameters params = getFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
+    InputParameters params =
+        getMooseApp().getActionFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
     const PhysicsName physics_name = prefix() + "scalar";
-    getProblem().addPhysics("WCNSFVScalarAdvectionPhysics", physics_name, params);
+    addPhysics("WCNSFVScalarAdvectionPhysics", physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
     _scalar_physics =
-        dynamic_cast<WCNSFVScalarAdvectionPhysics *>(getProblem().getPhysics(physics_name));
+        getMooseApp().actionWarehouse().getPhysics<WCNSFVScalarAdvectionPhysics>(physics_name);
     _physics.push_back(_scalar_physics);
   }
 
@@ -126,30 +129,6 @@ FileMeshWCNSFVComponent::setupMesh()
   FileMeshComponent::setupMesh();
 }
 
-void
-FileMeshWCNSFVComponent::addVariables()
-{
-  for (auto physics : _physics)
-    physics->addNonlinearVariables();
-}
-
-void
-FileMeshWCNSFVComponent::addMooseObjects()
-{
-  // It should not matter that we dont add objects by categories
-  for (auto physics : _physics)
-  {
-    // Rhie Chow user object must be added early
-    physics->addUserObjects();
-    physics->addInitialConditions();
-    physics->addFVKernels();
-    physics->addFVBCs();
-    physics->addMaterials();
-    physics->addFunctorMaterials();
-    physics->addPostprocessors();
-  }
-}
-
 bool
 FileMeshWCNSFVComponent::hasPhysics(const PhysicsName & phys_name) const
 {
@@ -166,7 +145,8 @@ FileMeshWCNSFVComponent::hasPhysics(const PhysicsName & phys_name) const
 WCNSFVPhysicsBase *
 FileMeshWCNSFVComponent::getPhysics(const PhysicsName & phys_name) const
 {
-  auto physics = dynamic_cast<WCNSFVPhysicsBase *>(getProblem().getPhysics(prefix() + phys_name));
+  auto physics =
+      getMooseApp().actionWarehouse().getPhysics<WCNSFVPhysicsBase>(prefix() + phys_name);
   if (!physics)
     mooseError("Physics " + prefix() + phys_name + " is not derived from WCNSFVPhysicsBase");
   return physics;
@@ -185,4 +165,16 @@ FileMeshWCNSFVComponent::getVariableName(const std::string & default_name) const
     mooseError(
         "No Physics object to provide the true variable name for the default variable name: ",
         default_name);
+}
+
+void
+FileMeshWCNSFVComponent::addPhysics(const std::string & action_name,
+                                    const std::string & physics_name,
+                                    InputParameters & params)
+{
+  // Add the Physics/Action to be created. All the tasks associated with this
+  // action will be run
+  auto action_factory = getMooseApp().getActionFactory();
+  std::shared_ptr<Action> ptr = action_factory.create(action_name, physics_name, params);
+  getMooseApp().actionWarehouse().addActionBlock(ptr);
 }

@@ -11,6 +11,8 @@
 
 #include "FileMeshComponent.h"
 
+class PhysicsBase;
+
 /**
  * Create a component with a single Physics object active on it
  */
