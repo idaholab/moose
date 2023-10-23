@@ -46,7 +46,9 @@ WCNSFVTurbulencePhysics::validParams()
 }
 
 WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & parameters)
-  : WCNSFVPhysicsBase(parameters), _turbulence_model(getParam<MooseEnum>("turbulence_model"))
+  : WCNSFVPhysicsBase(parameters),
+    _turbulence_model(getParam<MooseEnum>("turbulence_model")),
+    _mixing_length_name(prefix() + "mixing_length")
 {
   if (isParamValid("heat_advection_physics"))
   {
@@ -73,7 +75,8 @@ WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & paramet
                              "mixing_length_aux_execute_on",
                              "mixing_length_walls",
                              "von_karman_const",
-                             "von_karman_const_0"});
+                             "von_karman_const_0",
+                             "mixing_length_two_term_bc_expansion"});
 }
 
 void
@@ -90,11 +93,14 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
   {
     auto params = getFactory().getValidParams("MooseVariableFVReal");
     assignBlocks(params, _blocks);
-    params.set<bool>("two_term_boundary_expansion") =
-        getParam<bool>("mixing_length_two_term_bc_expansion");
+    if (isParamValid("mixing_length_two_term_bc_expansion"))
+      params.set<bool>("two_term_boundary_expansion") =
+          getParam<bool>("mixing_length_two_term_bc_expansion");
 
-    getProblem().addVariable("MooseVariableFVReal", NS::mixing_length, params);
-    // addNSAuxVariable("MooseVariableFVReal", NS::mixing_length, params);
+    if (_verbose)
+      _console << "Creating auxiliary variable " << _mixing_length_name << " on blocks "
+               << Moose::stringify(_blocks) << std::endl;
+    getProblem().addAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
   }
 }
 
@@ -119,7 +125,7 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+    params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
 
     std::string kernel_name = prefix() + "ins_momentum_mixing_length_reynolds_stress_";
     if (_porous_medium_treatment)
@@ -151,7 +157,7 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<MooseFunctorName>(NS::specific_enthalpy) =
         _fluid_energy_physics->getSpecificEnthalpyName();
-    params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+    params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
     params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
     params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
@@ -176,7 +182,7 @@ WCNSFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
     const std::string kernel_type = "INSFVMixingLengthScalarDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
-    params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+    params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
 
     for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
       params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
@@ -207,7 +213,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     const std::string ml_kernel_type = "WallDistanceMixingLengthAux";
     InputParameters ml_params = getFactory().getValidParams(ml_kernel_type);
     assignBlocks(ml_params, _blocks);
-    ml_params.set<AuxVariableName>("variable") = NS::mixing_length;
+    ml_params.set<AuxVariableName>("variable") = _mixing_length_name;
     ml_params.set<std::vector<BoundaryName>>("walls") =
         getParam<std::vector<BoundaryName>>("mixing_length_walls");
     if (parameters().isParamValid("mixing_length_aux_execute_on"))
@@ -237,7 +243,7 @@ WCNSFVTurbulencePhysics::addMaterials()
     for (unsigned int d = 0; d < dimension(); ++d)
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
-    params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+    params.set<MooseFunctorName>(NS::mixing_length) = _mixing_length_name;
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
 

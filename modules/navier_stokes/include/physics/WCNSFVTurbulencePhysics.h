@@ -40,8 +40,15 @@ private:
   void addFluidEnergyTurbulenceKernels();
   void addScalarAdvectionTurbulenceKernels();
 
+  /// Turbulence model to create the equation(s) for
   const MooseEnum _turbulence_model;
 
+  /// The heat advection physics to add turbulent mixing for
   const WCNSFVHeatAdvectionPhysics * _fluid_energy_physics;
+  /// The scalar advection physics to add turbulent mixing for
   const WCNSFVScalarAdvectionPhysics * _scalar_advection_physics;
+
+private:
+  /// Name of the mixing length auxiliary variable
+  const VariableName _mixing_length_name;
 };
