@@ -67,6 +67,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
     syntax.addDependency("THM:add_closures", "setup_mesh");
     syntax.addDependency("THM:init_components", "THM:output_vector_velocity");
+    // Need to get auxvariables created by components using the add_aux_variable task
+    syntax.addDependency("add_aux_variable", "THM:init_components");
     syntax.addDependency("THM:debug_action", "setup_mesh");
     syntax.addDependency("THM:init_simulation", "THM:add_component");
     syntax.addDependency("add_mesh_generator", "THM:add_component");
