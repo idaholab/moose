@@ -66,6 +66,9 @@
 /modules/solid_properties @joshuahansel
 /modules/stochastic_tools @zachmprince
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
+/modules/tensor_mechanics/*/lagrangian @bwspenc @dschwen @jiangwen84 @hugary1995
+/modules/tensor_mechanics/*/materials/cohesive_zone_model @bwspenc @dschwen @jiangwen84 @hugary1995
+/modules/tensor_mechanics/*/interfacekernels @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/thermal_hydraulics @joshuahansel
 /modules/xfem @bwspenc @jiangwen84
 
