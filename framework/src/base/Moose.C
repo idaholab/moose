@@ -222,6 +222,7 @@ addActionTypes(Syntax & syntax)
   registerTask("copy_nodal_aux_vars", true);
   registerTask("setup_postprocessor_data", false);
   registerTask("setup_time_steppers", true);
+  registerTask("init_physics", false);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);

@@ -56,7 +56,8 @@ protected:
 
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  Factory & getFactory() const { return _factory; }
+  virtual Factory & getFactory() { return _factory; }
+  virtual Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()
@@ -70,6 +71,10 @@ protected:
     return *_problem;
   }
 
+  /// Get the mesh for this physics
+  /// This could be set by a component
+  /// NOTE: hopefully we will not need this
+  // virtual const MooseMesh & getMesh() const override { return *_mesh; }
   /// Tell the app if we want to use Exodus restart
   void prepareCopyNodalVariables() const;
   /// Copy variables from the mesh file
@@ -495,8 +500,8 @@ PhysicsBase::warnInconsistent(const InputParameters & other_param,
       warn = true;
   }
   if (warn)
-    mooseWarning("Parameter " + param_name +
-                 " is inconsistent between this physics and the parameter set for \"" +
-                 other_param.get<std::string>("_object_name") + "\" of type \"" +
-                 other_param.get<std::string>("_type") + "\"");
+    mooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" + name() +
+                 "\" of type \"" + type() + "\" and the parameter set for \"" +
+                 other_param.get<std::string>("_action_name") + "\" of type \"" +
+                 other_param.get<std::string>("action_type") + "\"");
 }
