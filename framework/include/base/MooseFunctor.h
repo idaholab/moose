@@ -649,15 +649,29 @@ FunctorBase<T>::checkFace(const Moose::FaceArg & face) const
   }
 
   if (check_elem_def && !hasFaceSide(*fi, true))
-    mooseError(
-        _functor_name,
-        " is not defined on the element side of the face information, but a face argument producer "
-        "(e.g. residual object, postprocessor, etc.) has requested evaluation there");
+  {
+    std::string additional_message = "It is not defined on the neighbor side either.";
+    if (hasFaceSide(*fi, false))
+      additional_message = "It is however defined on the neighbor side.";
+    additional_message += " Face centroid: " + Moose::stringify(fi->faceCentroid());
+    mooseError(_functor_name,
+               " is not defined on the element side of the face information, but a face argument "
+               "producer "
+               "(e.g. residual object, postprocessor, etc.) has requested evaluation there.\n",
+               additional_message);
+  }
   if (check_neighbor_def && !hasFaceSide(*fi, false))
+  {
+    std::string additional_message = "It is not defined on the element side either.";
+    if (hasFaceSide(*fi, true))
+      additional_message = "It is however defined on the element side.";
+    additional_message += " Face centroid: " + Moose::stringify(fi->faceCentroid());
     mooseError(
         _functor_name,
         " is not defined on the neighbor side of the face information, but a face argument "
-        "producer (e.g. residual object, postprocessor, etc.) has requested evaluation there");
+        "producer (e.g. residual object, postprocessor, etc.) has requested evaluation there.\n",
+        additional_message);
+  }
 
   return ret_face;
 }
