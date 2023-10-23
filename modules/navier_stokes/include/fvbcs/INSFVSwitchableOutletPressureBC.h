@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "FVFunctionDirichletBC.h"
-#include "INSFVFullyDevelopedFlowBC.h"
+#include "INSFVOutletPressureBC.h"
 
 /**
  * A class for setting the value of the pressure at an outlet of the system.
  * It may not be used with a mean/pinned-pressure approach
  */
-class INSFVSwitchableOutletPressureBC : public FVDirichletBCBase, public INSFVFullyDevelopedFlowBC
+class INSFVSwitchableOutletPressureBC : public INSFVOutletPressureBC
 {
 public:
   static InputParameters validParams();
@@ -25,14 +24,8 @@ public:
   ADReal boundaryValue(const FaceInfo & /* fi */) const override;
 
 private:
-  /// AD Functor that gives the distribution of pressure on the boundary
-  const Moose::Functor<ADReal> * const _functor;
-
-  /// Regular function that gives the distribution of pressure on the boundary
-  const Function * const _function;
-
-  /// Postprocessor that gives the uniform value of pressure on the boundary
-  const PostprocessorValue * const _pp_value;
+  /// Boolean switch to turn boudnary condition on/off
+  const bool & _switch_bc;
 
   /// Face limiter
   const Real & _face_limiter;

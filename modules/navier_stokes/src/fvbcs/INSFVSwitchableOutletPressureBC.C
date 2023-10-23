@@ -16,15 +16,12 @@ registerMooseObject("NavierStokesApp", INSFVSwitchableOutletPressureBC);
 InputParameters
 INSFVSwitchableOutletPressureBC::validParams()
 {
-  InputParameters params = FVDirichletBCBase::validParams();
-  params += INSFVFullyDevelopedFlowBC::validParams();
+  InputParameters params = INSFVOutletPressureBC::validParams();
 
   params.addClassDescription("Adds switchable pressure-outlet boundary condition");
 
-  // Value may be specified by a AD functor (typically a variable), a function or a postprocessor
-  params.addParam<FunctionName>("function", "The boundary pressure as a regular function");
-  params.addParam<MooseFunctorName>("functor", "The boundary pressure as an AD functor");
-  params.addParam<PostprocessorName>("postprocessor", "The boundary pressure as a postprocessor");
+  params.addParam<bool>("switch", true, "Switch on (true) / off (false) for boundary condition.");
+  params.declareControllable("switch");
 
   params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
   params.declareControllable("face_limiter");
@@ -33,11 +30,8 @@ INSFVSwitchableOutletPressureBC::validParams()
 }
 
 INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputParameters & params)
-  : FVDirichletBCBase(params),
-    INSFVFullyDevelopedFlowBC(params),
-    _functor(isParamValid("functor") ? &getFunctor<ADReal>("functor") : nullptr),
-    _function(isParamValid("function") ? &getFunction("function") : nullptr),
-    _pp_value(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : nullptr),
+  : INSFVOutletPressureBC(params),
+    _switch_bc(getParam<bool>("switch")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
@@ -55,20 +49,8 @@ INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputPara
 ADReal
 INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
-  /// Enable is a parameter coming from MooseObject
-  /// It allows to enable/disable an object
-  /// The user can think of enable as an on/off switch for the boundary condition
-  /// In this case, if enable is true, we activate the boundary condition
-  /// Otherwise, we perform a restricted face internal interpolation
-  if (_enabled)
-  {
-    if (_functor)
-      return (*_functor)(singleSidedFaceArg(&fi), determineState()) * _face_limiter;
-    else if (_function)
-      return _function->value(_t, fi.faceCentroid()) * _face_limiter;
-    else
-      return *_pp_value * _face_limiter;
-  }
+  if (_switch_bc)
+    return INSFVOutletPressureBC::boundaryValue(fi) * _face_limiter;
   else
     return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
            _face_limiter;

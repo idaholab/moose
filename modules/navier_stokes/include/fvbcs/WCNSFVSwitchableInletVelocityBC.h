@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "FVDirichletBCBase.h"
-#include "INSFVFlowBC.h"
+#include "WCNSFVInletVelocityBC.h"
 
 /**
  * Dirichlet boundary conditions for the velocity, set from either a velocity postprocessor
  * or a mass flow rate divided by density and surface
  */
-class WCNSFVSwitchableInletVelocityBC : public FVDirichletBCBase, public INSFVFlowBC
+class WCNSFVSwitchableInletVelocityBC : public WCNSFVInletVelocityBC
 {
 public:
   static InputParameters validParams();
@@ -25,20 +24,8 @@ public:
 protected:
   ADReal boundaryValue(const FaceInfo & fi) const override;
 
-  /// Scaling factor
-  const Real _scaling_factor;
-
-  /// Postprocessor with the inlet velocity
-  const PostprocessorValue * const _velocity_pp;
-
-  /// Postprocessor with the inlet mass flow rate
-  const PostprocessorValue * const _mdot_pp;
-
-  /// Postprocessor with the inlet area
-  const PostprocessorValue * const _area_pp;
-
-  /// Fluid density functor
-  const Moose::Functor<ADReal> * const _rho;
+  /// Boolean switch to turn boudnary condition on/off
+  const bool & _switch_bc;
 
   /// Face limiter
   const Real & _face_limiter;

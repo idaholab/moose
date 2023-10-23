@@ -16,22 +16,13 @@ registerMooseObject("NavierStokesApp", WCNSFVSwitchableInletVelocityBC);
 InputParameters
 WCNSFVSwitchableInletVelocityBC::validParams()
 {
-  InputParameters params = FVDirichletBCBase::validParams();
-  params += INSFVFlowBC::validParams();
+  InputParameters params = WCNSFVInletVelocityBC::validParams();
 
   params.addClassDescription("Adds switchable inlet-velocity boundary condition"
                              "for weakly compressible flows.");
 
-  params.addParam<Real>("scaling_factor", 1, "To scale the velocity");
-
-  // Two different ways to input velocity
-  // 1) Postprocessor with the velocity value directly
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity");
-
-  // 2) Postprocessors with an inlet mass flow rate
-  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
-  params.addParam<MooseFunctorName>(NS::density, "Density functor");
-  params.addParam<PostprocessorName>("area_pp", "Inlet area as a postprocessor");
+  params.addParam<bool>("switch", true, "Switch on (true) / off (false) for boundary condition.");
+  params.declareControllable("switch");
 
   params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
   params.declareControllable("face_limiter");
@@ -40,13 +31,8 @@ WCNSFVSwitchableInletVelocityBC::validParams()
 }
 
 WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputParameters & params)
-  : FVDirichletBCBase(params),
-    INSFVFlowBC(params),
-    _scaling_factor(getParam<Real>("scaling_factor")),
-    _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
-    _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
-    _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
-    _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
+  : WCNSFVInletVelocityBC(params),
+    _switch_bc(getParam<bool>("switch")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
   if (!dynamic_cast<INSFVVelocityVariable *>(&_var))
@@ -66,26 +52,8 @@ WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputPara
 ADReal
 WCNSFVSwitchableInletVelocityBC::boundaryValue(const FaceInfo & fi) const
 {
-  /// Enable is a parameter coming from MooseObject
-  /// It allows to enable/disable an object
-  /// The user can think of enable as an on/off switch for the boundary condition
-  /// In this case, if enable is true, we activate the boundary condition
-  /// Otherwise, we perform a restricted face internal interpolation
-  if (_enabled)
-  {
-    if (_area_pp)
-      if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
-        mooseError("Surface area is 0");
-
-    if (_velocity_pp)
-      return _scaling_factor * (*_velocity_pp) * _face_limiter;
-    else
-    {
-      ADReal rho = (*_rho)(singleSidedFaceArg(&fi), determineState());
-
-      return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho) * _face_limiter;
-    }
-  }
+  if (_switch_bc)
+    return WCNSFVInletVelocityBC::boundaryValue(fi) * _face_limiter;
   else
     return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
            _face_limiter;

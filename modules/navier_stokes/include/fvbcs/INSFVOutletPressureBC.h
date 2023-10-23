@@ -24,7 +24,7 @@ public:
 
   ADReal boundaryValue(const FaceInfo & /* fi */) const override;
 
-private:
+protected:
   /// AD Functor that gives the distribution of pressure on the boundary
   const Moose::Functor<ADReal> * const _functor;
 
