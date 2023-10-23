@@ -15,6 +15,7 @@ class WCNSFVPhysicsBase;
 class WCNSFVFlowPhysics;
 class WCNSFVHeatAdvectionPhysics;
 class WCNSFVScalarAdvectionPhysics;
+class WCNSFVTurbulencePhysics;
 
 /**
  * Component with Navier Stokes module weakly compressible finite volume Physics objects active
@@ -30,11 +31,13 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
   /// Whether flow physics are defined on this component
-  bool hasFlowPhysics() const { return _has_flow_physics; }
+  bool hasFlowPhysics() const { return !(!_flow_physics); }
   /// Whether temperature advection physics are defined on this component
-  bool hasFluidEnergyPhysics() const { return _has_heat_physics; }
+  bool hasFluidEnergyPhysics() const { return !(!_energy_physics); }
   /// Whether scalar advection physics are defined on this component
-  bool hasScalarAdvectionPhysics() const { return _has_scalar_physics; }
+  bool hasScalarAdvectionPhysics() const { return !(_scalar_physics); }
+  /// Whether a flow turbulence physics is defined on this component
+  bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
   /// General form for convenience. Uses short names (flow/energy/scalar)
   bool hasPhysics(const PhysicsName & phys_name) const;
 
@@ -61,11 +64,6 @@ private:
   WCNSFVHeatAdvectionPhysics * _energy_physics;
   /// Scalar advection physics
   WCNSFVScalarAdvectionPhysics * _scalar_physics;
-
-  /// Whether flow physics are defined on this component
-  const bool _has_flow_physics;
-  /// Whether temperature advection physics are defined on this component
-  const bool _has_heat_physics;
-  /// Whether scalar advection physics are defined on this component
-  const bool _has_scalar_physics;
+  /// Turbulence physics
+  WCNSFVTurbulencePhysics * _turbulence_physics;
 };

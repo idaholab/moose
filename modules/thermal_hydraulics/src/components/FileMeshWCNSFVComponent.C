@@ -42,10 +42,7 @@ FileMeshWCNSFVComponent::validParams()
 }
 
 FileMeshWCNSFVComponent::FileMeshWCNSFVComponent(const InputParameters & parameters)
-  : FileMeshPhysicsComponent(parameters),
-    _has_flow_physics(getParam<bool>("add_flow_equations")),
-    _has_heat_physics(getParam<bool>("add_energy_equation")),
-    _has_scalar_physics(getParam<bool>("add_scalar_equations"))
+  : FileMeshPhysicsComponent(parameters)
 {
 }
 
@@ -63,7 +60,7 @@ FileMeshWCNSFVComponent::init()
   FileMeshComponent::init();
 
   // Before this point, we did not have a Problem object, so we could not add the Physics
-  if (_has_flow_physics)
+  if (getParam<bool>("add_flow_equations"))
   {
     InputParameters params = getMooseApp().getActionFactory().getValidParams("WCNSFVFlowPhysics");
     params.applyParameters(parameters());
@@ -75,7 +72,7 @@ FileMeshWCNSFVComponent::init()
     _flow_physics = getMooseApp().actionWarehouse().getPhysics<WCNSFVFlowPhysics>(physics_name);
     _physics.push_back(_flow_physics);
   }
-  if (_has_heat_physics)
+  if (getParam<bool>("add_energy_equation"))
   {
     InputParameters params =
         getMooseApp().getActionFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
@@ -91,7 +88,7 @@ FileMeshWCNSFVComponent::init()
         getMooseApp().actionWarehouse().getPhysics<WCNSFVHeatAdvectionPhysics>(physics_name);
     _physics.push_back(_energy_physics);
   }
-  if (_has_scalar_physics)
+  if (getParam<bool>("add_scalar_equations"))
   {
     InputParameters params =
         getMooseApp().getActionFactory().getValidParams("WCNSFVHeatAdvectionPhysics");
@@ -106,6 +103,22 @@ FileMeshWCNSFVComponent::init()
     _scalar_physics =
         getMooseApp().actionWarehouse().getPhysics<WCNSFVScalarAdvectionPhysics>(physics_name);
     _physics.push_back(_scalar_physics);
+  }
+  if (isParamSetByUser("turbulence_model"))
+  {
+    const auto physics_type = "WCNSFVTurbulencePhysics";
+    InputParameters params = getMooseApp().getActionFactory().getValidParams(physics_type);
+    params.applyParameters(parameters());
+    if (getParam<bool>("add_flow_equations"))
+      params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
+    const PhysicsName physics_name = prefix() + "turbulence";
+    addPhysics(physics_type, physics_name, params);
+
+    // Keep track of new physics
+    _physics_names.push_back(physics_name);
+    _turbulence_physics =
+        getMooseApp().actionWarehouse().getPhysics<WCNSFVTurbulencePhysics>(physics_name);
+    _physics.push_back(_turbulence_physics);
   }
 
   for (auto physics : _physics)
@@ -141,6 +154,8 @@ FileMeshWCNSFVComponent::hasPhysics(const PhysicsName & phys_name) const
     return hasFluidEnergyPhysics();
   else if (phys_name == "scalar")
     return hasScalarAdvectionPhysics();
+  else if (phys_name == "turbulence")
+    return hasTurbulencePhysics();
   else
     mooseError("Short Physics name '", phys_name, "' not recognized");
 }
@@ -158,6 +173,7 @@ FileMeshWCNSFVComponent::getPhysics(const PhysicsName & phys_name) const
 VariableName
 FileMeshWCNSFVComponent::getVariableName(const std::string & default_name) const
 {
+  // TODO this isnt very robust to variations (for example scalar & flow in the same simulation)
   if (hasFlowPhysics())
     return _flow_physics->getFlowVariableName(default_name);
   else if (hasFluidEnergyPhysics())
