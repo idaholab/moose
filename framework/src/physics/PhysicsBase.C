@@ -15,6 +15,8 @@
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
 
+// registerMooseAction("MooseApp", PhysicsBase, "init_physics");
+
 InputParameters
 PhysicsBase::validParams()
 {
@@ -138,20 +140,15 @@ PhysicsBase::prepareCopyNodalVariables() const
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
     _app.setExodusFileRestart(true);
+
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
-}
-
-void
-PhysicsBase::prepareCopyNodalVariables() const
-{
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    _app.setExodusFileRestart(true);
 }
 
 bool
 PhysicsBase::isTransient() const
 {
+  mooseAssert(_problem, "We dont have a problem yet");
   if (_is_transient == "true")
     return true;
   else if (_is_transient == "false")
@@ -209,13 +206,6 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
   }
-}
-
-void
-PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
-{
-  _blocks.insert(_blocks.end(), blocks.begin(), blocks.end());
-  _dim = _problem->mesh().getBlocksMaxDimension(_blocks);
 }
 
 void
