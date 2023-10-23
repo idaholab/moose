@@ -18,7 +18,6 @@
     method = "!dbg"
     installation_type = in_tree
     max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
-    valgrind = HEAVY
     requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component, abstracting the flow equation definitions using the Physics system.'
   []
   # [two_physics]
@@ -30,7 +29,6 @@
   #   method = "!dbg"
   #   installation_type = in_tree
   #   max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
-  #   valgrind = HEAVY
   #   requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component, abstracting the flow equation definitions using the Physics system.'
   # []
   [two_components_one_physics]
@@ -42,7 +40,6 @@
     method = "!dbg"
     installation_type = in_tree
     max_parallel = 4 # https://github.com/idaholab/moose/issues/24503
-    valgrind = HEAVY
     requirement = 'The system shall be able to model two components sharing the same Physics.'
   []
 []

@@ -51,9 +51,9 @@ p_outlet = 0
     boundary_conditions_all_set = false
   []
   [join]
-    type = FileMeshComponentFlowJunction
+    type = FileMeshWCNSFVFlowJunction
     connections = 'comp1:right:out comp2:left:in'
-    junction_technique = 'stitching'
+    junction_techniques = 'stitching boundary_values'
   []
   [comp2]
     type = FileMeshWCNSFVComponent
@@ -100,15 +100,6 @@ p_outlet = 0
     prop_values = '1  1 1'
   []
 []
-
-# [AuxKernels]
-#   [speed]
-#     type = ParsedAux
-#     variable = 'velocity_norm'
-#     coupled_variables = 'superficial_vel_x superficial_vel_y porosity'
-#     expression = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / porosity'
-#   []
-# []
 
 [Executioner]
   type = Steady
