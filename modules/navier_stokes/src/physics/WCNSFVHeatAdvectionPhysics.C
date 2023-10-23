@@ -8,9 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVHeatAdvectionPhysics.h"
+#include "WCNSFVFlowPhysics.h"
 #include "NSFVAction.h"
 
-registerMooseObject("NavierStokesApp", WCNSFVHeatAdvectionPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_ic");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_material");
+
+// TODO fix inheritance and remove
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_user_object");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "init_physics");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_geometric_rm");
 
 InputParameters
 WCNSFVHeatAdvectionPhysics::validParams()
@@ -291,7 +300,7 @@ WCNSFVHeatAdvectionPhysics::addWCNSEnergyMixingLengthKernels()
   params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
-  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+  for (unsigned int dim_i = 0; dim_i < dimension(); ++dim_i)
     params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_names[dim_i];
 
   if (_porous_medium_treatment)
@@ -472,7 +481,6 @@ WCNSFVHeatAdvectionPhysics::addInitialConditions()
     params.set<VariableName>("variable") = _fluid_temperature_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-    // addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
     getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
   }
 }

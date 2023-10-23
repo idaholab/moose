@@ -21,11 +21,6 @@ public:
 
   WCNSFVScalarAdvectionPhysics(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
   /// Get the names of the advected scalar quantity variables
   const std::vector<NonlinearVariableName> & getAdvectedScalarNames() const
   {

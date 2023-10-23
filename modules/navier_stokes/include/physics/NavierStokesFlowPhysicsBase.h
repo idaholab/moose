@@ -21,11 +21,6 @@ public:
 
   NavierStokesFlowPhysicsBase(const InputParameters & parameters);
 
-  /// GeneralUO not the right base class probably
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
   /// To interface with other Physics
   std::vector<std::string> getVelocityNames() const { return _velocity_names; }
   NonlinearVariableName getPressureName() const { return _pressure_name; }

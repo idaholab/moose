@@ -11,7 +11,15 @@
 #include "NSFVAction.h"
 #include "WCNSFVFlowPhysics.h"
 
-registerMooseObject("NavierStokesApp", WCNSFVScalarAdvectionPhysics);
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_bc");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_ic");
+
+// TODO fix inheritance and remove
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_user_object");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "init_physics");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_geometric_rm");
 
 InputParameters
 WCNSFVScalarAdvectionPhysics::validParams()
@@ -243,9 +251,9 @@ WCNSFVScalarAdvectionPhysics::addScalarInletBC()
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
         params.set<MooseFunctorName>(NS::velocity_x) = _velocity_names[0];
-        if (_dim > 1)
+        if (dimension() > 1)
           params.set<MooseFunctorName>(NS::velocity_y) = _velocity_names[1];
-        if (_dim > 2)
+        if (dimension() > 2)
           params.set<MooseFunctorName>(NS::velocity_z) = _velocity_names[2];
 
         getProblem().addFVBC(bc_type,
@@ -285,7 +293,7 @@ WCNSFVScalarAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
   unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
   necessary_layers =
       std::max(necessary_layers, WCNSFVPhysicsBase::getNumberAlgebraicGhostingLayersNeeded());
-  if (getParam<MooseEnum>("scalar_face_interpolation") == "skewness-corrected")
+  if (getParam<MooseEnum>("passive_scalar_face_interpolation") == "skewness-corrected")
     necessary_layers = std::max(necessary_layers, (unsigned short)3);
 
   return necessary_layers;
