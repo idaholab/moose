@@ -19,6 +19,7 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "JsonSyntaxTree.h"
+#include "FileLineInfo.h"
 #include "pcrecpp.h"
 #include "hit.h"
 #include "waspcore/utils.h"
@@ -746,6 +747,8 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
                                                int line,
                                                int character)
 {
+  Factory & factory = _check_app->getFactory();
+
   // return without any definition locations added when parser root is null
   if (!_check_app || !_check_app->parser()._root ||
       _check_app->parser()._root->getNodeView().is_null())
@@ -759,6 +762,36 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
   // return without any definition locations added when node not value type
   if (request_context.type() != wasp::VALUE)
     return true;
+
+  // get name of parameter node parent of value and value string from input
+  std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
+  std::string val_string = request_context.last_as_string();
+
+  // add source code location if type parameter with registered object name
+  if (param_name == "type" && factory.isRegistered(val_string))
+  {
+    // get file path and line number of source code registering object type
+    FileLineInfo file_line_info = factory.getLineInfo(val_string);
+
+    // return without any definition locations added if file cannot be read
+    if (!file_line_info.isValid() ||
+        !MooseUtils::checkFileReadable(file_line_info.file(), false, false, false))
+      return true;
+
+    // add file scheme prefix to front of file path to build definition uri
+    auto location_uri = wasp::lsp::m_uri_prefix + file_line_info.file();
+
+    // add file uri and zero based line and column range to definition list
+    definitionLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = definitionLocations.back().to_object();
+    return wasp::lsp::buildLocationObject(*location,
+                                          errors,
+                                          location_uri,
+                                          file_line_info.line() - 1,
+                                          0,
+                                          file_line_info.line() - 1,
+                                          1000);
+  }
 
   // get object context and value of type parameter for request if provided
   wasp::HITNodeView object_context = request_context;
@@ -777,16 +810,15 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
   // get set of global parameters, action parameters, and object parameters
   getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
 
-  // set used to gather nodes with locations used by custom sort comparator
-  std::set<wasp::HITNodeView,
-           std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>>
-      location_nodes(
-          [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
-          { return (l.line() < r.line() || (l.line() == r.line() && l.column() < r.column())); });
-
-  // get value string from input and name of parameter node parent of value
-  std::string val_string = request_context.last_as_string();
-  std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
+  // set used to gather nodes from input lookups custom sorted by locations
+  SortedLocationNodes location_nodes(
+      [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
+      {
+        const std::string & l_file = l.node_pool()->stream_name();
+        const std::string & r_file = r.node_pool()->stream_name();
+        return (l_file < r_file || (l_file == r_file && l.line() < r.line()) ||
+                (l_file == r_file && l.line() == r.line() && l.column() < r.column()));
+      });
 
   // gather all lookup path nodes matching value if parameter name is valid
   for (const auto & valid_params_iter : valid_params)
@@ -799,7 +831,7 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
       pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
 
       // get set of nodes from associated path lookups matching input value
-      getAllLocationNodes(location_nodes, clean_type, val_string);
+      getInputLookupDefinitionNodes(location_nodes, clean_type, val_string);
       break;
     }
   }
@@ -810,16 +842,13 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
     location_nodes.insert(request_context.parent().first_child_by_name("decl"));
 
   // add locations to definition list using lookups or parameter declarator
-  return addLocationsToList(definitionLocations, location_nodes);
+  return addLocationNodesToList(definitionLocations, location_nodes);
 }
 
 void
-MooseServer::getAllLocationNodes(
-    std::set<wasp::HITNodeView,
-             std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
-        location_nodes,
-    const std::string & clean_type,
-    const std::string & val_string)
+MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
+                                           const std::string & clean_type,
+                                           const std::string & val_string)
 {
   Syntax & syntax = _check_app->syntax();
 
@@ -863,18 +892,15 @@ MooseServer::getAllLocationNodes(
 }
 
 bool
-MooseServer::addLocationsToList(
-    wasp::DataArray & definitionLocations,
-    const std::set<wasp::HITNodeView,
-                   std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
-        location_nodes)
+MooseServer::addLocationNodesToList(wasp::DataArray & definitionLocations,
+                                    const SortedLocationNodes & location_nodes)
 {
   bool pass = true;
 
   // walk over set of nodes with locations to add and build definition list
   for (const auto & location_nodes_iter : location_nodes)
   {
-    // prepend file:// scheme onto location node path to get definition uri
+    // add file scheme prefix to front of file path to build definition uri
     auto location_uri = wasp::lsp::m_uri_prefix + location_nodes_iter.node_pool()->stream_name();
 
     // add file uri and zero based line and column range to definition list

@@ -13,6 +13,7 @@
 #include "MooseApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "pcrecpp.h"
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
 #include "wasplsp/SymbolIterator.h"
@@ -207,6 +208,9 @@ protected:
   void format_locations(const wasp::DataArray & locations_array,
                         std::ostringstream & locations_stream) const
   {
+    std::string uri_pattern = "(" + std::string(wasp::lsp::m_uri_prefix) + ")(/.*/framework/)(.*)";
+    std::string uri_replace = "\\1...absolute.../framework/\\3";
+
     std::size_t locations_size = locations_array.size();
 
     for (std::size_t i = 0; i < locations_size; i++)
@@ -225,6 +229,10 @@ protected:
                                                    location_start_character,
                                                    location_end_line,
                                                    location_end_character));
+
+      // remove machine specific parts from absolute path for source code uri
+
+      pcrecpp::RE(uri_pattern).Replace(uri_replace, &location_uri);
 
       locations_stream << "document_uri: \"" << location_uri << "\""
                        << "    definition_start: [" << location_start_line << "."
@@ -1424,11 +1432,66 @@ label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind:
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
 }
 
-TEST_F(MooseServerTest, DocumentDefinitionRequest)
+TEST_F(MooseServerTest, DefinitionObjectTypeSource)
+{
+  // definition test parameters - on Transient.C defined object type Transient
+
+  int request_id = 11;
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int line = 30;
+  int character = 9;
+
+  // build definition request with the test parameters
+
+  wasp::DataObject definition_request;
+  std::stringstream definition_errors;
+
+  EXPECT_TRUE(wasp::lsp::buildDefinitionRequest(
+      definition_request, definition_errors, request_id, doc_uri, line, character));
+
+  EXPECT_TRUE(definition_errors.str().empty());
+
+  // handle the built definition request with the moose_server
+
+  wasp::DataObject definition_response;
+
+  EXPECT_TRUE(moose_server->handleDefinitionRequest(definition_request, definition_response));
+
+  EXPECT_TRUE(moose_server->getErrors().empty());
+
+  // check the dissected values of the moose_server definition response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray locations_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectLocationsResponse(
+      definition_response, response_errors, response_id, locations_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(1u, locations_array.size());
+
+  std::ostringstream locations_actual;
+
+  format_locations(locations_array, locations_actual);
+
+  // expected locations with zero-based lines and columns
+
+  std::string locations_expect = R"INPUT(
+document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    definition_start: [38.0]    definition_end: [38.1000]
+)INPUT";
+
+  EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
+}
+
+TEST_F(MooseServerTest, DefinitionInputFileLookups)
 {
   // definition test parameters - on AuxVariables defined displacements disp_x
 
-  int request_id = 11;
+  int request_id = 12;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 26;
   int character = 21;
@@ -1485,7 +1548,7 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // references test parameters
 
-  int request_id = 12;
+  int request_id = 13;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 0;
   int character = 0;
@@ -1582,7 +1645,7 @@ type = Transient
 
   // formatting test parameters
 
-  int request_id = 13;
+  int request_id = 14;
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1718,7 +1781,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 14;
+  int request_id = 15;
 
   // build shutdown request with the test parameters
 

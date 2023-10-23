@@ -40,6 +40,13 @@ public:
 
 private:
   /**
+   * SortedLocationNodes - type alias for set of nodes sorted by location
+   */
+  using SortedLocationNodes =
+      std::set<wasp::HITNodeView,
+               std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>>;
+
+  /**
    * Parse document for diagnostics - specific to this server implemention.
    * @param diagnosticsList - data array of diagnostics data objects to fill
    * @return - true if completed successfully - does not indicate parse fail
@@ -194,12 +201,9 @@ private:
    * @param clean_type - cpp type string used for key finding input paths
    * @param val_string - specified value used for gathering input lookups
    */
-  void getAllLocationNodes(
-      std::set<wasp::HITNodeView,
-               std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
-          location_nodes,
-      const std::string & clean_type,
-      const std::string & val_string);
+  void getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
+                                     const std::string & clean_type,
+                                     const std::string & val_string);
 
   /**
    * Add locations of lookups or parameter declarator to definition list.
@@ -207,11 +211,8 @@ private:
    * @param location_nodes - set of nodes that have locations to be added
    * @return - true if filling of location objects completed successfully
    */
-  bool addLocationsToList(
-      wasp::DataArray & definitionLocations,
-      const std::set<wasp::HITNodeView,
-                     std::function<bool(const wasp::HITNodeView &, const wasp::HITNodeView &)>> &
-          location_nodes);
+  bool addLocationNodesToList(wasp::DataArray & definitionLocations,
+                              const SortedLocationNodes & location_nodes);
 
   /**
    * Gather references locations - specific to this server implemention.
