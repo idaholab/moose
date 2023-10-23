@@ -26,81 +26,86 @@ inlet_v = 0.001
 []
 
 [Physics]
-  [flow]
-    type = WCNSFVFlowPhysics
-    compressibility = 'weakly-compressible'
-    # porous_medium_treatment = true
+  [NavierStokes]
+    [WCNSFVFlowPhysics]
+      [flow]
+        compressibility = 'weakly-compressible'
+        # porous_medium_treatment = true
 
-    block = 0
+        block = 0
 
-    velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '${inlet_v} 1e-15 0'
-    initial_pressure = '${outlet_pressure}'
+        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_pressure = '${outlet_pressure}'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${inlet_v} 0'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip noslip'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip noslip'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = '${outlet_pressure}'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
-  []
-  [passive_scalar]
-    type = WCNSFVScalarAdvectionPhysics
-    compressibility = 'weakly-compressible'
-    porous_medium_treatment = false
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
+    [WCNSFVScalarAdvectionPhysics]
+      [passive_scalar]
+        compressibility = 'weakly-compressible'
+        porous_medium_treatment = false
 
-    block = 0
+        block = 0
 
-    coupled_flow_physics = flow
+        coupled_flow_physics = flow
 
-    velocity_variable = 'vel_x vel_y'
-    passive_scalar_names = 'c1'
+        velocity_variable = 'vel_x vel_y'
+        passive_scalar_names = 'c1'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    passive_scalar_diffusivity = '3'
-    passive_scalar_coupled_source = '4'
-    passive_scalar_coupled_source_coeff = '1'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
+        passive_scalar_diffusivity = '3'
+        passive_scalar_coupled_source = '4'
+        passive_scalar_coupled_source_coeff = '1'
 
-    initial_scalar_variables = '1'
+        initial_scalar_variables = '1'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
-    passive_scalar_inlet_types = 'fixed-value'
-    passive_scalar_inlet_function = '${inlet_temp}'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${inlet_v} 0'
+        passive_scalar_inlet_types = 'fixed-value'
+        passive_scalar_inlet_function = '${inlet_temp}'
 
-    passive_scalar_advection_interpolation = 'average'
-  []
-  [turbulence]
-    type = WCNSFVTurbulencePhysics
-    compressibility = 'weakly-compressible'
-    porous_medium_treatment = true
+        passive_scalar_advection_interpolation = 'average'
+      []
+    []
+    # [WCNSFVTurbulencePhysics]
+    #   [turbulence]
+    #     compressibility = 'weakly-compressible'
+    #     porous_medium_treatment = true
 
-    block = 0
+    #     block = 0
 
-    coupled_flow_physics = flow
-    scalar_advection_physics = passive_scalar
+    #     coupled_flow_physics = flow
+    #     scalar_advection_physics = passive_scalar
 
-    velocity_variable = 'vel_x vel_y'
+    #     velocity_variable = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+    #     density = 'rho'
+    #     dynamic_viscosity = 'mu'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+    #     inlet_boundaries = 'left'
+    #     momentum_inlet_types = 'fixed-velocity'
+    #     momentum_inlet_function = '${inlet_v} 0'
+    #   []
+    # []
   []
 []
 
