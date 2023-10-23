@@ -1497,16 +1497,16 @@ MooseApp::run()
     return;
   }
 
-  try
-  {
-    TIME_SECTION("setup", 2, "Setting Up");
-    setupOptions();
-    runInputFile();
-  }
-  catch (std::exception & err)
-  {
-    mooseError(err.what());
-  }
+  // try
+  // {
+  // TIME_SECTION("setup", 2, "Setting Up");
+  setupOptions();
+  runInputFile();
+  // }
+  // catch (std::exception & err)
+  // {
+  //   mooseError(err.what());
+  // }
 
   if (!_check_input)
   {
