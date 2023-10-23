@@ -2455,9 +2455,6 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
-    const auto & disp_names = _displaced_problem->getDisplacementVarNames();
-    parameters.set<std::vector<VariableName>>("displacements") =
-        std::vector<VariableName>(disp_names.begin(), disp_names.end());
     _reinit_displaced_elem = true;
   }
   else
@@ -2558,9 +2555,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
-    const auto & disp_names = _displaced_problem->getDisplacementVarNames();
-    parameters.set<std::vector<VariableName>>("displacements") =
-        std::vector<VariableName>(disp_names.begin(), disp_names.end());
     _reinit_displaced_face = true;
   }
   else

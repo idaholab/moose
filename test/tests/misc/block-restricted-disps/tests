@@ -1,0 +1,9 @@
+[Tests]
+  design = 'DisplacedProblem.md'
+  issues = '#25804'
+  [run]
+    type = RunApp
+    input = test.i
+    requirement = 'The system shall be able to run a kernel on the displaced mesh with blocks that are a superset of the displacement variable blocks.'
+  []
+[]
