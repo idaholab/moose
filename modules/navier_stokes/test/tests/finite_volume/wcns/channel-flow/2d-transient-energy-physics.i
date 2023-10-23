@@ -26,86 +26,91 @@ inlet_v = 0.001
 []
 
 [Physics]
-  [flow]
-    type = WCNSFVFlowPhysics
-    compressibility = 'weakly-compressible'
-    # porous_medium_treatment = true
+  [NavierStokes]
+    [WCNSFVFlowPhysics]
+      [flow]
+        compressibility = 'weakly-compressible'
+        # porous_medium_treatment = true
 
-    velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '${inlet_v} 1e-15 0'
-    initial_pressure = '${outlet_pressure}'
+        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_pressure = '${outlet_pressure}'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${inlet_v} 0'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip noslip'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip noslip'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = '${outlet_pressure}'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
-  []
-  [energy]
-    type = WCNSFVHeatAdvectionPhysics
-    compressibility = 'weakly-compressible'
-    # porous_medium_treatment = true
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
+    [WCNSFVHeatAdvectionPhysics]
+      [energy]
+        compressibility = 'weakly-compressible'
+        # porous_medium_treatment = true
 
-    coupled_flow_physics = flow
+        coupled_flow_physics = flow
 
-    velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
+        thermal_conductivity = 'k'
+        specific_heat = 'cp'
 
-    initial_temperature = '${inlet_temp}'
+        initial_temperature = '${inlet_temp}'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
-    energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '${inlet_temp}'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${inlet_v} 0'
+        energy_inlet_types = 'fixed-temperature'
+        energy_inlet_function = '${inlet_temp}'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip noslip'
-    energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip noslip'
+        energy_wall_types = 'heatflux heatflux'
+        energy_wall_function = '0 0'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_function = '${outlet_pressure}'
 
-    external_heat_source = 'power_density'
+        external_heat_source = 'power_density'
 
-    energy_advection_interpolation = 'average'
-  []
-  [turbulence]
-    type = WCNSFVTurbulencePhysics
-    compressibility = 'weakly-compressible'
-    porous_medium_treatment = true
+        energy_advection_interpolation = 'average'
+      []
+    []
+    [WCNSFVTurbulencePhysics]
+      [turbulence]
+        compressibility = 'weakly-compressible'
+        porous_medium_treatment = true
 
-    block = 0
+        block = 0
 
-    coupled_flow_physics = flow
-    heat_advection_physics = energy
+        coupled_flow_physics = flow
+        heat_advection_physics = energy
 
-    velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_function = '${inlet_v} 0'
+      []
+    []
   []
 []
 
