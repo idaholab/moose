@@ -2,6 +2,16 @@
 u_inlet = 1
 p_outlet = 0
 
+[AuxVariables]
+  [porosity]
+    type = MooseVariableFVReal
+    initial_condition = 0.5
+  []
+  [velocity_norm]
+    type = MooseVariableFVReal
+  []
+[]
+
 [Functions]
   [f1]
     type = ConstantFunction
@@ -17,19 +27,19 @@ p_outlet = 0
     verbose = true
 
     add_flow_equations = true
-    add_energy_equation = true
+    add_energy_equation = false
     add_scalar_equations = false
 
     inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = 'f1 f1'
-    energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '300'
+    # energy_inlet_types = 'fixed-temperature'
+    # energy_inlet_function = '300'
 
     wall_boundaries = 'comp1:top comp1:bottom'
     momentum_wall_types = 'noslip symmetry'
-    energy_wall_types = 'heatflux'
-    energy_wall_function = '1'
+    # energy_wall_types = 'heatflux'
+    # energy_wall_function = '1'
 
     outlet_boundaries = 'comp1:right'
     # momentum_outlet_types = 'fixed-pressure'
@@ -56,7 +66,7 @@ p_outlet = 0
     verbose = true
 
     add_flow_equations = true
-    add_energy_equation = true
+    add_energy_equation = false
     add_scalar_equations = false
 
     # Rename the variables for now
@@ -72,8 +82,8 @@ p_outlet = 0
 
     wall_boundaries = 'comp2:top comp2:bottom'
     momentum_wall_types = 'noslip symmetry'
-    energy_wall_types = 'heatflux'
-    energy_wall_function = '0'
+    # energy_wall_types = 'heatflux'
+    # energy_wall_function = '0'
 
     outlet_boundaries = 'comp2:right'
     momentum_outlet_types = 'fixed-pressure'

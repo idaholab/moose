@@ -112,7 +112,6 @@ p_outlet = 0
   automatic_scaling = true
   off_diagonals_in_auto_scaling = true
   verbose = true
-  # scaling_group_variables = 'superficial_vel_x superficial_vel_y'
 []
 
 [Debug]
