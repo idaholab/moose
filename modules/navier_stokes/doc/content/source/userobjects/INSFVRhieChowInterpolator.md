@@ -38,6 +38,24 @@ to pull 'a' coefficient data for all elements they have access to (which may not
 be all the elements in the mesh if the mesh is distributed) from the processes
 that own the 'a' coefficient data.
 
+### Correcting for non-velocity-dependent volume forces
+
+The standard Rhie-Chow interpolation may introduce oscillatory errors in the velocity
+field under block-localized volume forces that do not depend on velocity, e.g., a pump force.
+
+The user can activate the correction for body forces by setting `correct_volumetric_force = true`.
+Then, the list of the names of the functors representing the body forces must be defined under
+the `volumetric_force_functors` parameter.
+Finally, the user can select two possible methods for correcting for volume force under the
+`volume_force_correction_method` parameter:
+
+-  `pressure-consistent`, which deactivates the Rhie-Chow correaction on faces in which the pressure
+  correction is inconsistent due to the volume forces
+-  `force-consistent`, which deactivates the Rhie-Chow correction in the regions with localized
+  volume forces since the pressure-velocity system is alredy linked by the volume force in these regions.
+
+The latter method is the default and is generally preferred due to its lower computational cost.
+
 !syntax parameters /UserObjects/INSFVRhieChowInterpolator
 
 !syntax inputs /UserObjects/INSFVRhieChowInterpolator

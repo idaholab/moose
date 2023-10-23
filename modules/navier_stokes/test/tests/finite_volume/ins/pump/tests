@@ -1,0 +1,49 @@
+[Tests]
+  design = 'NSFVPumpMaterial.md INSFVPump.md INSFVRhieChowInterpolator.md'
+  issues = '#24775 #24776'
+  [pump_loop]
+    type = 'CSVDiff'
+    input = 'pump_loop.i'
+    csvdiff = 'pump_loop_out.csv'
+    requirement = 'The system shall maintain the correct flow and maximum speed (no oscillations) with one forward rotating pump.'
+    rel_err = 1.0E-7
+    mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+    recover = false
+  []
+  [pump_loop_negative_rotation]
+    type = 'CSVDiff'
+    input = 'pump_loop_negative_rotation.i'
+    csvdiff = 'pump_loop_negative_rotation_out.csv'
+    requirement = 'The system shall maintain the correct flow and maximum speed (no oscillations) with one backwards rotating pump.'
+    rel_err = 1.0E-7
+    mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+    recover = false
+  []
+  [pump_and_counterpump_loop]
+    type = 'CSVDiff'
+    input = 'pump_and_counterpump_loop.i'
+    csvdiff = 'pump_and_counterpump_loop_out.csv'
+    requirement = 'The system shall maintain the correct flow and maximum speed (no oscillations) with two competing pumps.'
+    rel_err = 1.0E-7
+    mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+    recover = false
+  []
+  [pump_as_volume_force_loop_pressure_corrected]
+    type = 'CSVDiff'
+    input = 'pump_as_volume_force_loop_pressure_corrected.i'
+    csvdiff = 'pump_as_volume_force_loop_pressure_corrected_out.csv'
+    requirement = 'The system shall maintain the correct flow and maximum speed (no oscillations) with a body force correction to Rhie-Chow computed by examining the difference between two different kinds of body force interpolation to faces.'
+    rel_err = 1.0E-7
+    mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+    recover = false
+  []
+  [pump_as_volume_force_loop_force_corrected]
+    type = 'CSVDiff'
+    input = 'pump_as_volume_force_loop_force_corrected.i'
+    csvdiff = 'pump_as_volume_force_loop_force_corrected_out.csv'
+    requirement = 'The system shall maintain the correct flow and maximum speed (no oscillations) with a body force correction to Rhie-Chow computed by checking for a non-zero body force face interpolation.'
+    rel_err = 1.0E-7
+    mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
+    recover = false
+  []
+[]
