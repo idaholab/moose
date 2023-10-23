@@ -32,7 +32,7 @@ void
 INSFVVaporRecoilPressureMomentumFluxBC::gatherRCData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   const auto strong_resid =
       fi.normal()(_index) * _rc_pressure(singleSidedFaceArg(), determineState());
   addResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));

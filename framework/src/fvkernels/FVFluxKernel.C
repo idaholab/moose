@@ -125,7 +125,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   // residual contributions for a flux kernel go to both neighboring faces.
@@ -170,7 +170,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   const ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   // The fancy face type if condition checks here are because we might

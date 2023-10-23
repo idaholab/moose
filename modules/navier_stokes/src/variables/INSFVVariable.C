@@ -16,6 +16,7 @@
 #include "MooseApp.h"
 #include "TheWarehouse.h"
 #include "INSFVAttributes.h"
+#include "SystemBase.h"
 
 InputParameters
 INSFVVariable::validParams()
@@ -31,7 +32,7 @@ INSFVVariable::INSFVVariable(const InputParameters & params)
 bool
 INSFVVariable::isFullyDevelopedFlowFace(const FaceInfo & fi) const
 {
-  const auto & face_type = fi.faceType(this->name());
+  const auto & face_type = fi.faceType(std::make_pair(this->number(), this->sys().number()));
 
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
               "I'm concerned that if you're calling this method with a FaceInfo that doesn't have "

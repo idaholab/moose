@@ -3535,7 +3535,8 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase 
     {
       // get the variable, its name, and its domain of definition
       const MooseVariableFieldBase * const var = moose_vars[j];
-      const auto & var_name = var->name();
+      const std::pair<unsigned int, unsigned int> var_sys =
+          std::make_pair(var->number(), var->sys().number());
       std::set<SubdomainID> var_subdomains = var->blockIDs();
 
       /**
@@ -3551,16 +3552,16 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase 
       bool var_defined_neighbor =
           var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
       if (var_defined_elem && var_defined_neighbor)
-        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+        face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::BOTH;
       else if (!var_defined_elem && !var_defined_neighbor)
-        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+        face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::NEITHER;
       else
       {
         // this is a boundary face for this variable, set elem or neighbor
         if (var_defined_elem)
-          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
+          face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::ELEM;
         else if (var_defined_neighbor)
-          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+          face.faceType(var_sys) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
         else
           mooseError("Should never get here");
       }

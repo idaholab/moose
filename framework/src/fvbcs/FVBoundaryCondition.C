@@ -96,7 +96,7 @@ FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
 bool
 FVBoundaryCondition::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(_var.name());
+  const auto ft = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else

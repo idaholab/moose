@@ -81,7 +81,7 @@ PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
 ADReal
 PINSFVFunctorBC::computeQpResidual()
 {
-  const auto ft = _face_info->faceType(_var.name());
+  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
   const auto & elem = out_of_elem ? _face_info->elem() : _face_info->neighbor();
@@ -121,7 +121,7 @@ void
 PINSFVFunctorBC::gatherRCData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   _computing_rc_data = true;
   // Fill-in the coefficient _a (but without multiplication by A)
