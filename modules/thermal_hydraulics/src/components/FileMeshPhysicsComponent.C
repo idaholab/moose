@@ -43,15 +43,6 @@ FileMeshPhysicsComponent::FileMeshPhysicsComponent(const InputParameters & param
 }
 
 void
-FileMeshPhysicsComponent::addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/)
-{
-  // TODO: We ll just add late relationship managers
-  // At this point in the setup, we do not have a problem, so we cannot retrieve a Physics. We can
-  // send the default ghosting for the physics, but that's it.
-  addRelationshipManagersFromParameters(PhysicsBase::validParams());
-}
-
-void
 FileMeshPhysicsComponent::init()
 {
   FileMeshComponent::init();
@@ -61,7 +52,5 @@ FileMeshPhysicsComponent::init()
     _physics.push_back(getMooseApp().actionWarehouse().getPhysics<PhysicsBase>(physics_name));
 
   for (auto physics : _physics)
-  {
     physics->addBlocks(getSubdomainNames());
-  }
 }

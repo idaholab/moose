@@ -19,9 +19,12 @@ registerMooseObject("ThermalHydraulicsApp", FileMeshWCNSFVComponent);
 InputParameters
 FileMeshWCNSFVComponent::validParams()
 {
-  InputParameters params = FileMeshComponent::validParams();
+  InputParameters params = FileMeshPhysicsComponent::validParams();
 
   params.addClassDescription("Component that creates a Physics object active on it.");
+
+  // Physics are hardcoded
+  params.suppressParameter<std::vector<PhysicsName>>("physics");
 
   // Choose which physics to turn on
   params.addParam<bool>("add_flow_equations", true, "Whether to add equations for mass & momentum");
@@ -39,7 +42,7 @@ FileMeshWCNSFVComponent::validParams()
 }
 
 FileMeshWCNSFVComponent::FileMeshWCNSFVComponent(const InputParameters & parameters)
-  : FileMeshComponent(parameters),
+  : FileMeshPhysicsComponent(parameters),
     _has_flow_physics(getParam<bool>("add_flow_equations")),
     _has_heat_physics(getParam<bool>("add_energy_equation")),
     _has_scalar_physics(getParam<bool>("add_scalar_equations"))

@@ -14,7 +14,9 @@
 class PhysicsBase;
 
 /**
- * Create a component with a single Physics object active on it
+ * Create a component with externally-defined Physics object active on it
+ * Also serves as a base class for Components hard-coding Physics objects active
+ * on themselves.
  */
 class FileMeshPhysicsComponent : public FileMeshComponent
 {
@@ -23,7 +25,6 @@ public:
 
   FileMeshPhysicsComponent(const InputParameters & parameters);
 
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
   // These objects are added by the Physics already
   virtual void addVariables() override{};
   virtual void addMooseObjects() override{};
@@ -34,28 +35,14 @@ protected:
   virtual std::vector<SubdomainName> getBlocks() const { return getSubdomainNames(); }
   virtual Factory & getFactory() { return getMooseApp().getFactory(); }
   virtual FEProblemBase & getProblem() { return getMooseApp().feProblem(); }
+  virtual FEProblemBase & getProblem() const { return getMooseApp().feProblem(); }
   virtual const MooseMesh & getMesh() const { return constMesh(); }
-  // virtual void addNSNonlinearVariable(const std::string & var_type,
-  //                                     const std::string & var_name,
-  //                                     InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(true, var_type, var_name, params);
-  // }
-  // virtual void addNSAuxVariable(const std::string & var_type,
-  //                               const std::string & var_name,
-  //                               InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(false, var_type, var_name, params);
-  // }
-  // virtual void addNSInitialCondition(const std::string & type,
-  //                                    const std::string & name,
-  //                                    InputParameters & params)
-  // {
-  //   getTHMProblem().addSimInitialCondition(type, name, params);
-  // }
+
   virtual std::string prefix() const { return name() + ":"; }
 
-private:
+  // TODO: Register the variable information to the simulation
+  //       Register the variable initial condition information in the simulation
+
   /// Physics object that creates the equations on this component
   std::vector<PhysicsBase *> _physics;
 };

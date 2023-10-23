@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FileMeshComponent.h"
+#include "FileMeshPhysicsComponent.h"
 
 class WCNSFVPhysicsBase;
 class WCNSFVFlowPhysics;
@@ -20,7 +20,7 @@ class WCNSFVScalarAdvectionPhysics;
  * Component with Navier Stokes module weakly compressible finite volume Physics objects active
  * on it
  */
-class FileMeshWCNSFVComponent : public FileMeshComponent
+class FileMeshWCNSFVComponent : public FileMeshPhysicsComponent
 {
 public:
   static InputParameters validParams();
@@ -28,10 +28,6 @@ public:
   FileMeshWCNSFVComponent(const InputParameters & parameters);
 
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-
-  // The objects are added by the Physics Action already
-  virtual void addVariables() override {}
-  virtual void addMooseObjects() override {}
 
   /// Whether flow physics are defined on this component
   bool hasFlowPhysics() const { return _has_flow_physics; }
@@ -51,40 +47,11 @@ protected:
   virtual void init() override;
   virtual void setupMesh() override;
 
-  virtual std::vector<SubdomainName> getBlocks() const { return getSubdomainNames(); }
-  virtual Factory & getFactory() { return getMooseApp().getFactory(); }
-  virtual FEProblemBase & getProblem() { return getMooseApp().feProblem(); }
-  virtual FEProblemBase & getProblem() const { return getMooseApp().feProblem(); }
-  virtual const MooseMesh & getMesh() const { return constMesh(); }
-
   void addPhysics(const std::string & action_name,
                   const std::string & physics_name,
                   InputParameters & params);
 
-  // virtual void addNSNonlinearVariable(const std::string & var_type,
-  //                                     const std::string & var_name,
-  //                                     InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(true, var_type, var_name, params);
-  // }
-  // virtual void addNSAuxVariable(const std::string & var_type,
-  //                               const std::string & var_name,
-  //                               InputParameters & params)
-  // {
-  //   getTHMProblem().addSimVariable(false, var_type, var_name, params);
-  // }
-  // virtual void addNSInitialCondition(const std::string & type,
-  //                                    const std::string & name,
-  //                                    InputParameters & params)
-  // {
-  //   getTHMProblem().addSimInitialCondition(type, name, params);
-  // }
-  virtual std::string prefix() const { return name() + ":"; }
-
 private:
-  /// Physics object that creates the equations on this component
-  std::vector<WCNSFVPhysicsBase *> _physics;
-
   /// Keeps track of the names of the Physics
   std::vector<PhysicsName> _physics_names;
 
