@@ -1427,6 +1427,31 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) con
   }
 }
 
+const VariableValue &
+Coupleable::coupledArrayDotDu(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
+    return _default_value_zero;
+  }
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if(!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDuDotDu();
+    return var->duDotDu();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDuDotDuNeighbor();
+    return var->duDotDuNeighbor();
+  }
+}
+
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp) const
 {

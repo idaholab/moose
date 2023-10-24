@@ -1085,6 +1085,17 @@ protected:
                                                 unsigned int comp = 0) const;
 
   /**
+   * Time derivative of a coupled array variable with respect to the coefficients
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+
+  virtual const VariableValue & coupledArrayDotDu(const std::string & var_name,
+                                                  unsigned int comp = 0) const;
+
+  /**
    * Returns nodal values of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
