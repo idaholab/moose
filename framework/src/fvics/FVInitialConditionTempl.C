@@ -25,6 +25,10 @@ FVInitialConditionTempl<T>::FVInitialConditionTempl(const InputParameters & para
     _base_var(_sys.getActualFieldVariable<T>(parameters.get<THREAD_ID>("_tid"),
                                              parameters.get<VariableName>("variable")))
 {
+  if (!_base_var.isFV())
+    mooseError("A finite volume initial condition has been defined for variable '",
+               _base_var.name(),
+               "' whereas the variable itself is not a finite volume variable!");
 }
 
 template <typename T>
