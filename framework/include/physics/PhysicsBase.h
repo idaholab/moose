@@ -46,6 +46,7 @@ public:
   void addBlocks(const std::vector<SubdomainName> & blocks);
 
   // The routines below are public to be accessible by components
+  // TODO: make private, components not using them
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
   virtual void addNonlinearVariables() {}
@@ -82,6 +83,18 @@ public:
   /// Get a Physics from the ActionWarehouse with the requested type and name
   template <typename T>
   const T * getCoupledPhysics(const PhysicsName & phys_name) const;
+
+  /// Utilities to merge two Physics of the same type together
+  /// Check that parameters are compatible for a merge with another Physics
+  virtual bool checkParametersMergeable(const InputParameters & /*param*/, bool /*warn*/) const
+  {
+    mooseError("Not implemented");
+  }
+  /// Merge these parameters into existing parameters of this Physics
+  virtual void mergeParameters(const InputParameters & /*params*/)
+  {
+    mooseError("Not implemented");
+  }
 
 protected:
   bool isTransient() const;
@@ -162,12 +175,15 @@ protected:
   /// Check that all shared parameters are consistent: if set (default or user), set to the same value
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>
+  bool parameterConsistent(const InputParameters & other_param,
+                           const std::string & param_name,
+                           bool warn) const;
+  template <typename T>
   void warnInconsistent(const InputParameters & parameters, const std::string & param_name) const;
   /// Error messages for parameter checks
   void errorDependentParameter(const std::string & param1,
                                const std::string & value_not_set,
                                std::vector<std::string> dependent_params) const;
-
   /// Utilities to process and forward parameters
   void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks) const;
   /// Checks if the variables created outside of the physics are restricted to the same blocks
@@ -463,27 +479,37 @@ PhysicsBase::checkBlockwiseConsistency(const std::string & block_param_name,
 }
 
 template <typename T>
-void
-PhysicsBase::warnInconsistent(const InputParameters & other_param,
-                              const std::string & param_name) const
+bool
+PhysicsBase::parameterConsistent(const InputParameters & other_param,
+                                 const std::string & param_name,
+                                 bool warn) const
 {
   assertParamDefined<T>(param_name);
   mooseAssert(other_param.have_parameter<T>(param_name),
               "This should have been a parameter from the parameters being compared");
-  bool warn = false;
+  bool consistent = true;
   if (parameters().isParamValid(param_name) && other_param.isParamValid(param_name))
   {
     if constexpr (std::is_same_v<MooseEnum, T>)
     {
       if (!getParam<T>(param_name).compareCurrent(other_param.get<T>(param_name)))
-        warn = true;
+        consistent = false;
     }
     else if (getParam<T>(param_name) != other_param.get<T>(param_name))
-      warn = true;
+      consistent = false;
   }
-  if (warn)
+  if (warn && !consistent)
     mooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" + name() +
                  "\" of type \"" + type() + "\" and the parameter set for \"" +
                  other_param.get<std::string>("_action_name") + "\" of type \"" +
                  other_param.get<std::string>("action_type") + "\"");
+  return consistent;
+}
+
+template <typename T>
+void
+PhysicsBase::warnInconsistent(const InputParameters & other_param,
+                              const std::string & param_name) const
+{
+  parameterConsistent<T>(other_param, param_name, true);
 }

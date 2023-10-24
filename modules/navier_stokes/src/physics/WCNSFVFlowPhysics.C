@@ -970,3 +970,26 @@ WCNSFVFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
     ghost_layers = std::max(ghost_layers, (unsigned short)3);
   return ghost_layers;
 }
+
+bool
+WCNSFVFlowPhysics::checkParametersMergeable(const InputParameters & other_params, bool warn) const
+{
+  bool consistent = WCNSFVPhysicsBase::checkParametersMergeable(other_params, warn);
+  // These parameters must be consistent because they cannot be concatenated
+  consistent =
+      (consistent &&
+       parameterConsistent<std::vector<FunctionName>>(other_params, "initial_velocity", warn) &&
+       parameterConsistent<FunctionName>(other_params, "initial_pressure", warn) &&
+       parameterConsistent<MooseEnum>(
+           other_params, "porosity_interface_pressure_treatment", warn) &&
+       parameterConsistent<bool>(other_params, "use_friction_correction", warn) &&
+       parameterConsistent<Real>(other_params, "consistent_scaling", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "mass_advection_interpolation", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "momentum_advection_interpolation", warn) &&
+       parameterConsistent<bool>(other_params, "pressure_two_term_bc_expansion", warn) &&
+       parameterConsistent<bool>(other_params, "momentum_two_term_bc_expansion", warn) &&
+       parameterConsistent<Real>(other_params, "mass_scaling", warn) &&
+       parameterConsistent<Real>(other_params, "momentum_scaling", warn));
+
+  return consistent;
+}

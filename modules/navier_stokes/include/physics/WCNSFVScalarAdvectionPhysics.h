@@ -27,6 +27,8 @@ public:
     return _passive_scalar_names;
   }
 
+  // bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+
 protected:
 private:
   void addNonlinearVariables() override;

@@ -26,6 +26,8 @@ public:
   const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
 
+  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+
 protected:
 private:
   void addNonlinearVariables() override;
