@@ -117,6 +117,7 @@ public:
   void push_back(const std::string & names);
   void push_back(const std::vector<std::string> & names);
   void push_back(const std::set<std::string> & names);
+  void push_back(const MultiMooseEnum & other_enum);
   ///@}
 
   /**
