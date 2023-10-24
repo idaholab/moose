@@ -62,7 +62,7 @@ SubChannelPressureDrop::execute()
 }
 
 Real
-SubChannelPressureDrop::getValue()
+SubChannelPressureDrop::getValue() const
 {
   return _value;
 }
