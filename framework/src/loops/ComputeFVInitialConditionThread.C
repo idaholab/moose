@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
-#include "InitialCondition.h"
+#include "FVInitialConditionTempl.h"
 
 ComputeFVInitialConditionThread::ComputeFVInitialConditionThread(FEProblemBase & fe_problem)
   : _fe_problem(fe_problem)
@@ -30,7 +30,7 @@ ComputeFVInitialConditionThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
+  const InitialConditionWarehouse & warehouse = _fe_problem.getFVInitialConditionWarehouse();
   printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
@@ -112,7 +112,7 @@ ComputeFVInitialConditionThread::join(const ComputeFVInitialConditionThread & /*
 void
 ComputeFVInitialConditionThread::printGeneralExecutionInformation() const
 {
-  const auto & ic_wh = _fe_problem.getInitialConditionWarehouse();
+  const auto & ic_wh = _fe_problem.getFVInitialConditionWarehouse();
   if (_fe_problem.shouldPrintExecution(_tid) && ic_wh.hasActiveObjects())
   {
     const auto & console = _fe_problem.console();

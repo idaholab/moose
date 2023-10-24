@@ -1476,6 +1476,11 @@ public:
   const InitialConditionWarehouse & getInitialConditionWarehouse() const { return _ics; }
 
   /**
+   * Return FVInitialCondition storage
+   */
+  const InitialConditionWarehouse & getFVInitialConditionWarehouse() const { return _fv_ics; }
+
+  /**
    * Get the solver parameters
    */
   SolverParams & solverParams();
