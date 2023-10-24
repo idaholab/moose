@@ -509,3 +509,20 @@ WCNSFVHeatAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 
   return necessary_layers;
 }
+
+bool
+WCNSFVHeatAdvectionPhysics::checkParametersMergeable(const InputParameters & other_params,
+                                                     bool warn) const
+{
+  bool consistent = WCNSFVPhysicsBase::checkParametersMergeable(other_params, warn);
+  // These parameters must be consistent because they are not defined on a per-block basis
+  consistent =
+      (consistent &&
+       parameterConsistent<std::vector<FunctionName>>(other_params, "initial_temperature", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "energy_face_interpolation", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "energy_advection_interpolation", warn) &&
+       parameterConsistent<bool>(other_params, "energy_two_term_bc_expansion", warn) &&
+       parameterConsistent<Real>(other_params, "energy_scaling", warn));
+
+  return consistent;
+}
