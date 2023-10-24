@@ -569,9 +569,6 @@ NSFVBase<BaseType>::commonMomentumBoundaryTypesParams()
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");
-  params.addParam<std::vector<FunctionName>>("pressure_function",
-                                             std::vector<FunctionName>(),
-                                             "Functions for boundary pressures at outlets.");
 
   MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction");
   params.addParam<MultiMooseEnum>(
@@ -585,13 +582,6 @@ InputParameters
 NSFVBase<BaseType>::commonMomentumBoundaryFluxesParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<std::vector<FunctionName>>>(
-      "momentum_inlet_function",
-      std::vector<std::vector<FunctionName>>(),
-      "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
-      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
-      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
-      "dimensions for fixed-velocity boundaries or is a single function name for pressure inlets.");
   params.addParam<std::vector<PostprocessorName>>(
       "flux_inlet_pps",
       std::vector<PostprocessorName>(),
@@ -633,19 +623,9 @@ NSFVBase<BaseType>::commonFluidEnergyEquationParams()
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
 
-  params.addParam<std::vector<FunctionName>>(
-      "energy_inlet_function",
-      std::vector<FunctionName>(),
-      "Functions for fixed-value boundaries in the energy equation.");
-
   MultiMooseEnum en_wall_types("fixed-temperature heatflux");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
-
-  params.addParam<std::vector<FunctionName>>(
-      "energy_wall_function",
-      std::vector<FunctionName>(),
-      "Functions for Dirichlet/Neumann boundaries in the energy equation.");
 
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "ambient_convection_blocks",
@@ -723,11 +703,6 @@ NSFVBase<BaseType>::commonScalarFieldAdvectionParams()
       "passive_scalar_inlet_types",
       ps_inlet_types,
       "Types for the inlet boundaries for the passive scalar equation.");
-
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "passive_scalar_inlet_function",
-      std::vector<std::vector<std::string>>(),
-      "Functions for inlet boundaries in the passive scalar equations.");
 
   params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
                               "passive_scalar_schmidt_number passive_scalar_source "
@@ -875,15 +850,43 @@ NSFVBase<BaseType>::validParams()
   params += NSFVBase<BaseType>::commonMomentumBoundaryTypesParams();
   params += NSFVBase<BaseType>::commonMomentumBoundaryFluxesParams();
 
+  /// These parameters are not shared because the WCNSFVPhysics use functors
+  params.addParam<std::vector<std::vector<FunctionName>>>(
+      "momentum_inlet_function",
+      std::vector<std::vector<FunctionName>>(),
+      "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
+      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
+      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
+      "dimensions for fixed-velocity boundaries or is a single function name for pressure inlets.");
+  params.addParam<std::vector<FunctionName>>("pressure_function",
+                                             std::vector<FunctionName>(),
+                                             "Functions for boundary pressures at outlets.");
+
   /**
    * Parameters describing the fluid energy equation
    */
   params += NSFVBase<BaseType>::commonFluidEnergyEquationParams();
 
+  // These parameters are not shared because the WCNSFVPhysics use functors
+  params.addParam<std::vector<FunctionName>>(
+      "energy_inlet_function",
+      std::vector<FunctionName>(),
+      "Functions for Dirichlet/Neumann inlet boundaries in the energy equation.");
+  params.addParam<std::vector<FunctionName>>(
+      "energy_wall_function",
+      std::vector<FunctionName>(),
+      "Functions for Dirichlet/Neumann wall boundaries in the energy equation.");
+
   /**
    * Parameters describing the handling of advected scalar fields
    */
   params += NSFVBase<BaseType>::commonScalarFieldAdvectionParams();
+
+  // These parameters are not shared because the WCNSFVPhysics use functors
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "passive_scalar_inlet_function",
+      std::vector<std::vector<std::string>>(),
+      "Functions for inlet boundaries in the passive scalar equations.");
 
   /**
    * Parameters describing the handling of turbulence
