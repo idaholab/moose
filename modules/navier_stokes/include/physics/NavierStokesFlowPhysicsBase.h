@@ -27,8 +27,6 @@ public:
   NonlinearVariableName getTemperatureName() const { return _fluid_temperature_name; }
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
-  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
-
 protected:
   /// Check that the shared parameters are consistent between this object's param and the other's
   virtual void checkCommonParametersConsistent(const InputParameters & other_params) const;
@@ -58,6 +56,13 @@ protected:
   const std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
   const std::vector<BoundaryName> _wall_boundaries;
+
+  /// Momentum inlet boundary types
+  MultiMooseEnum _momentum_inlet_types;
+  /// Momentum outlet boundary types
+  MultiMooseEnum _momentum_outlet_types;
+  /// Momentum wall boundary types
+  MultiMooseEnum _momentum_wall_types;
 
   /// Name of the density material property
   const MooseFunctorName _density_name;

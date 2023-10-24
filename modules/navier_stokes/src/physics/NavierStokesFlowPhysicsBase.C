@@ -75,6 +75,9 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
+    _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
+    _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
+    _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _density_name(getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _boundary_condition_information_complete(getParam<bool>("boundary_conditions_all_set"))
@@ -127,24 +130,4 @@ NavierStokesFlowPhysicsBase::checkCommonParametersConsistent(
 
   warnInconsistent<MooseFunctorName>(other_params, "dynamic_viscosity");
   warnInconsistent<MooseFunctorName>(other_params, "density");
-}
-
-bool
-NavierStokesFlowPhysicsBase::checkParametersMergeable(const InputParameters & other_params,
-                                                      bool warn) const
-{
-  // These parameters cannot be merged because they are not block-restricted
-  if (parameterConsistent<MooseEnum>(other_params, "compressibility", warn) &&
-      parameterConsistent<std::vector<std::string>>(other_params, "velocity_variable", warn) &&
-      parameterConsistent<NonlinearVariableName>(other_params, "pressure_variable", warn) &&
-      parameterConsistent<NonlinearVariableName>(
-          other_params, "fluid_temperature_variable", warn) &&
-      parameterConsistent<bool>(other_params, "porous_medium_treatment", warn) &&
-      parameterConsistent<MooseFunctorName>(other_params, "porosity", warn) &&
-      parameterConsistent<unsigned short>(other_params, "porosity_smoothing_layers", warn) &&
-      parameterConsistent<MooseFunctorName>(other_params, "dynamic_viscosity", warn) &&
-      parameterConsistent<MooseFunctorName>(other_params, "density", warn))
-    return true;
-  else
-    return false;
 }
