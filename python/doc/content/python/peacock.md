@@ -1,6 +1,9 @@
 # Peacock
 
+!style! halign=left
 Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute the application and view the results all within one package.
+!style-end!
+
 
 ## Conda Packages
 
@@ -8,26 +11,76 @@ Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows
 
 ## Environment
 
-Adding Peacock to yout PATH will allow you to launch it from your application or "tests" directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need th specify your application as an argument, and simplifying Peacock usage.
+!style! halign=left
+Adding Peacock to yout PATH will allow you to launch it from your application or `tests`` directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need to specify your application as an argument, and simplifying Peacock usage.
+!style-end!
 
-To add Peacock yo your PATH: assuming that $ MOOSE_DIR is the location of your git clone, navigate to the `$MOOSE_DIR/python/peacock` directory, and type: pwd. Whatever is printed out is the path to Peacock. Next, add the following to the end of your ~/bash_profile (Macintosh) or ~/.bashrc (Ubuntu) file:
+First, we need to discover the absolute path to `peacock` on your machine. Assuming that your MOOSE
+repository sits in the default location of `~/projects/moose`, enter the following directory and run
+`pwd`. Example:
 
 ```bash
-export PATH=pwd:$PATH
+cd ~/projects/moose/python/peacock
+pwd
+/home/you/projects/moose/python/peacock
 ```
 
-Where "pwd" is what was printed out in the previous step. Note that there can be *no spaces* around the equals sign in the line above!
+Whatever returns, this is your path to `peacock`.
+
+Next, we need to know what shell you are operating in to determine what profile to modify.
+Run `echo $0` to do so.
+Example:
+
+```bash
+echo $0
+-zsh
+```
+
+Where `-zsh` is our example result. The following table describes which profile file one must edit,
+as well as how to assign a value to a variable in that shell:
+
+| Shell | Profile Location | Command |
+| :- | :- | :- |
+| bash | `~/.bash_profile` | `export PATH=pwd:$PATH` |
+| zsh | `~/.zshrc` | `export PATH=pwd:$PATH` |
+| sh | `~/.profile` | `export PATH=pwd:$PATH` |
+| csh | `~/.cshrc` | `setenv PATH pwd:$PATH` |
+| tcsh | `~/.tcshrc` | `setenv PATH pwd:$PATH` |
+
+Replace occurrences of `pwd` in the above table with the result you recieved in the previous step,
+as you apply the following instructions:
+
+!alert! warning title=Dangerous Syntax Below
+Use single quotes: ( `'` ). We *literally* want to write "`$PATH`" in the below example, and not the
+value of `$PATH`.
+
+Use two greater thans: ( `>>` ). Two greater thans append information to a file, while a single
+greater than ( `>` ) overwrites the file entirely.
+!alert-end!
+
+`zsh` Example:
+
+```bash
+echo 'export PATH=/home/you/projects/moose/python/peacock:$PATH' >> ~/.zshrc
+```
+
+!alert! tip
+A wealth of information on how shell profiles work is available on the internet. Search for
+"`<your shell> profile`" for more information.
+!alert-end!
 
 ## Usage
 
+!style! halign=left
 The following examples assume you have added Peacock to your PATH. General usage is as follows:
+!style-end!
 
 ```bash
 cd ~/projects/<your application directory>
 peacock
 ```
 
-Peacock will search upwards from the current directory, and attempt to find your application's executable. Syntax is gathered, ans you are presented with input syntax specific to your application.
+Peacock will search upwards from the current directory, and attempt to find your application's executable. Syntax is gathered, and you are presented with input syntax specific to your application.
 
 ```bash
 cd ~/projects/trunk/<your application directory>/<your test directory>
@@ -42,7 +95,9 @@ Do not use `sudo` when running Peacock.
 
 ## Input File Tab
 
+!style! halign=left
 The "Input File" tab (showm below) allows you to create and edit input files. You can automaticaly load an input file by passing it as an argument on the command-line, or you can use the "Open" button on the Input File tab.
+!style-end!
 
 !media large_media/peacock/input_file_with_text_no_alpha.png
        style=width:50%;
@@ -69,18 +124,24 @@ Finally, if you would like to save your current input file, you can click the "S
 
 ## Parameter Editor
 
+!style! halign=left
 With the Iput File tab active, double-clicking to edit an item or right-clicking and selecting "Add..." for an item in the Tree View will cause the "Parameter Editor" window (shown below) to open. This window is where you choose what type of item you are adding and edit ther parameters for that object.
+!style-end!
 
 !media large_media/peacock/param_editor_with_text_no_alpha.png
        style=width:50%;
 
 ## Selecting a type
 
+!style! halign=left
 The first thing you'll want to do in the Parameter Editor window is use the large drop-down menu at the top to select the type of object you are editing. Note that sometimes there are no options there and only an asterisk ("*") will be shown (such as when adding a Variable).
+!style-end!
 
 ## Parameter Table
 
+!style! halign=left
 After selecting a type, the Parameter Table will be filled with the possible parameters for that object, including: Name, Value, Options, Description, and any Comments associated with each parameter.  Let's talk about each one of these columns in detail:
+!style-end!
 
 - +Name+: This is the name of the parameter, i.e. the thing on the left side of the "=" in a text-based input file.  This is not normally editable (the names are set for each parameter).  Parameters that are Required will have the background for their name colored ORANGE.  See the above image.
 
@@ -92,69 +153,100 @@ After selecting a type, the Parameter Table will be filled with the possible par
 
 ## Block Comment
 
+!style! halign=left
 Below the Parameter Table is the Block Comment box. Any text entered into this box will be displayed as a comment at the beginning of the block in question (see the Equivalent Input File Text in the above image). You can use "newlines" to create a multi-line comment, comment characters are not required -- they will be automatically inserted by Peacock.
+!style-end!
 
 ### Apply/Add Button
 
+!style! halign=left
 The button in the bottom left will either show "Apply" or "Add" depending on wheter you are editing or adding an item. Click this button to save your changes.
+!style-end!
 
 ### New Parameter Button
 
+!style! halign=left
 The "New Parameter" button will add a new row to the Parameter Table. You can fill in the Name and Value cells of this new row to add a new parameter. You should not need to add new parameters often: this button exists for the rares cases in which Peacock does not know about a valid parameter for this object. This can occur in certain circumstances involving custom Actions.
+!style-end!
 
 ### Cancel Button
 
+!style! halign=left
 Close the window without saving any changes. This is the same as just clicking the close button on the Peacock window.
+!style-end!
 
 ## Execute Tab
 
+!style! halign=left
 The Execute Tab (shown below) allows you to run the current application with the input from the Input Filw Tab. You dont need to save the input file first. Just edit the appropriate fields in the Input File Tab, then go to the Execute tab and click Run!
+!style-end!
 
 !media large_media/peacock/execute_with_text_no_alpha.png
        style=width:50%;
 
 ### MPI and Threads
 
+!style! halign=left
 Allows you to run in parallel using combinations of distributed - and shared- memory parallelism. Leave both boxes blank if you want to run serially
+!style-end!
 
 ### Other Options
 
+!style! halign=left
 Allows you to supply other command-line options that are simply appended to the command-line. You can pass PETSc-specified options here just like you can on the UNIX command line.
+!style-end!
 
 ### Run Button
 
+!style! halign=left
 Begins the execution of the application with the inputs currently defined on the Input File Tab.
+!style-end!
 
 ### Enable Postprocessor CSV Checkbox
 
+!style! halign=left
 This is enables by default. It causes a Comma Separated Value (CSV) file to be written with the Postprocessor values. That CSV file is necessary for the Postprocessor plotting tab to function.
+!style-end!
 
 ### Log Box
 
+!style! halign=left
 Shows the output from the execution of the application. This works similarly to console output in a terminal. If this window is scrolled all the way to the bottom, it will continually display the output from the currently executing run. If you scroll up in this text window, it will stop displaying new output (even though new output is continually being added to the bottom of the log).
+!style-end!
 
 ### Kill
 
+!style! halign=left
 Stop the currently running job.
+!style-end!
 
 ### Clear Log
 
+!style! halign=left
 Clear all the text from the log box.
+!style-end!
+
 
 ### Save Log
 
+!style! halign=left
 Save all of the current text to a file. Useful for providing extra information on Tickets/Issues.
+!style-end!
 
 ## Postprocess Tab
 
+!style! halign=left
 The Postprocess Tab (pictured below) allows you to plot Postprocessor values live, while the code is executing. The large drop-down menu at the top contains a list of all of the currently available Postprocessors. Check one or more of these blocks, and plots for those Postprocessors will appear. The plot will update automatically as new information becomes available from the current run. The plots can be right-clicked to display additional options (to save a plot file, and change the plot colors). The Clear button will clear out all of the current plots.
+!style-end!
 
 !media large_media/peacock/postprocess_with_text_no_alpha.png
        style=width:50%;
 
 ## Visualize Tab
 
+!style! halign=left
 The Visualize Tab (pictured below) is like a "mini Paraview" that allows you to view the results of your calculation live, while the code is executing. When you start a simulation on the Execute tab, the results will automatically start to show up in the Visualize tab.
+!style-end!
 
 The Visualize Tab is not intended to be a replacement for Paraview, Ensight, ViSit, or other fully-featured visualization tools. Instead, Peacock's visualization capability is a basic set of functionality that is useful while your simulation is running so you can quickly check on the status of the simulation. Some new visualization capabilities may be added to Peacock over time, but in general, users should rely on one of the tools mentioned previously for more advanced visualization needs.
 
@@ -163,15 +255,21 @@ The Visualize Tab is not intended to be a replacement for Paraview, Ensight, ViS
 
 ## Result View
 
+!style! halign=left
 The main view on this tab is a 3D view of the result. Left-click and drag to rotate the result. Right-click and drag to zoom. Middle-click ans drag or shift-left-click to pan.
+!style-end!
 
 ### Show Blocks
 
+!style! halign=left
 Check/uncheck blocks to show/hide them in the Result View.
+!style-end!
 
 ### Contour
 
+!style! halign=left
 Allows you to color the result by a variable. The drop-down menu in the top left allows you to select the variable. If the variable is a vector value (i.e. there is a sequence of variable names ending in _x, _y, _z) the other drop-down menu will be enabled, allowing you to select either a particular component or the Magnitude of the vector to use for coloring.
+!style-end!
 
 The Min/Max sections of the Visualize tab are for the legend minimum and maximum. There are currently two different options: Current and Custom. When set to Current, the min/max will update automatically with the min/max of the currently selected time step. The other option is a text box which allows manual input of custom min and max values. After editing the custom value, press the Enter key to use that value.
 
@@ -179,19 +277,27 @@ Options selected in the Contour section are stored by Peacock. If you set min/ma
 
 ### View Mesh
 
+!style! halign=left
 Shows the element edges in the mesh.
+!style-end!
 
 ### Displace
 
+!style! halign=left
 If a displacement vector is detected (generally variables named disp_x, disp_y and disp_z) this box will be selectable to enable movement of the mesh nodes by the displacement vector. The Multiplier box allows you to magnify the displacements by a scalar value. After entering a number, press Enter to use the new value.
+!style-end!
 
 ### Reset View
 
+!style! halign=left
 Centers the result in the Result view
+!style-end!
 
 ### Time
 
+!style! halign=left
 The time box allows selection of which time step to view. The time slider can be grabbed and moved left or right to go back and forth through time. The text box on the right side shows the currently selected time step number, edit this box and press Enter to jump to a particular time step.
+!style-end!
 
 The time slider works similarly to a scrolling UNIX terminal and Peacock's Execute tab. When the slider is all the way to the right, new time steps will be displayed automatically as they are written. If you move the slider to the left, the time step will remain fixed, and new results will simply be appended. Slide the slider back to the right to "re-attach" to the incoming results.
 
@@ -199,20 +305,9 @@ The "VCR Controls" give you the ability to step through the time steps and move 
 
 ### Clip
 
+!style! halign=left
 Turn on "clip mode" to see "inside" the result. The slider will allow you to move the "clip plane" back and forth through the model. The dropbox selects which direction the normal vector is pointing in for the clip plane.
-
-## Peacock Usage via HPC Clusters
-
-Peacock can be used on clusters that support X-forwarding through PBS and interactive jobs. For example, you can run:
-
-```bash
-ssh -X flogin2
-module load pbs
-qsub -I -X -lselect=1:ncpus=32:mem=4gb -lwalltime=3:00:00
-module load vtk
-cd ~/projects/<your application>
-python ../moose/python/peacock/peacock
-```
+!style-end!
 
 ## Troubleshooting
 
