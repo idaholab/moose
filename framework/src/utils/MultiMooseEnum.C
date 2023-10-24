@@ -162,6 +162,12 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
   assign(names.begin(), names.end(), true);
 }
 
+void
+MultiMooseEnum::push_back(const MultiMooseEnum & other_enum)
+{
+  assign(other_enum.begin(), other_enum.end(), true);
+}
+
 const std::string &
 MultiMooseEnum::operator[](unsigned int i) const
 {
