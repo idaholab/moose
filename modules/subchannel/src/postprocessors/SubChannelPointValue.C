@@ -70,7 +70,7 @@ SubChannelPointValue::execute()
 }
 
 Real
-SubChannelPointValue::getValue()
+SubChannelPointValue::getValue() const
 {
   return _value;
 }
