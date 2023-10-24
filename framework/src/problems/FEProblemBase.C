@@ -5617,6 +5617,11 @@ FEProblemBase::init()
     es().init();
   }
 
+  // Now that the equation system and the dof distribution is done, we can generate the
+  // finite volume-related parts if needed.
+  if (haveFV())
+    _mesh.buildFiniteVolumeInfo();
+
   for (auto & nl : _nl)
     nl->update();
   _aux->update();
@@ -7118,6 +7123,11 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // "active" and "local" may have been *changed* by refinement and
   // repartitioning done in EquationSystems::reinit().
   _mesh.meshChanged();
+
+  // If we have finite volume variables, we will need to recompute additional elemental/face
+  // quantities
+  if (haveFV())
+    _mesh.buildFiniteVolumeInfo();
 
   // Let the meshChangedInterface notify the mesh changed event before we update the active
   // semilocal nodes, because the set of ghosted elements may potentially be updated during a mesh
