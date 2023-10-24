@@ -33,6 +33,9 @@ public:
   /// Convenience routine to be able to retrieve the actual variable names from their default names
   VariableName getFlowVariableName(const std::string & default_name) const;
 
+  /// To merge parameters with another Physics
+  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+
 protected:
   InputParameters getAdditionalRMParams() const override;
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;

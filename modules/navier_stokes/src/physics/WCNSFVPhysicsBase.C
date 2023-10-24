@@ -232,6 +232,18 @@ WCNSFVPhysicsBase::checkCommonParametersConsistent(const InputParameters & other
   warnInconsistent<MooseEnum>(other_params, "momentum_face_interpolation");
 }
 
+bool
+WCNSFVPhysicsBase::checkParametersMergeable(const InputParameters & other_params, bool warn) const
+{
+  bool consistent = NavierStokesFlowPhysicsBase::checkParametersMergeable(other_params, warn);
+  // Check all the parameters in WCNSFVPhysicsBase
+  consistent =
+      (consistent && parameterConsistent<MooseEnum>(other_params, "velocity_interpolation", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "pressure_face_interpolation", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "momentum_face_interpolation", warn));
+  return consistent;
+}
+
 VariableName
 WCNSFVPhysicsBase::getFlowVariableName(const std::string & short_name) const
 {

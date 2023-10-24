@@ -27,6 +27,8 @@ public:
   NonlinearVariableName getTemperatureName() const { return _fluid_temperature_name; }
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
+  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+
 protected:
   /// Check that the shared parameters are consistent between this object's param and the other's
   virtual void checkCommonParametersConsistent(const InputParameters & other_params) const;
