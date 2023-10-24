@@ -146,6 +146,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_ic",                       InitialCondition,       false);
   appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
 
+  registerMooseObjectTask("add_fv_ic",                    FVInitialCondition,     false);
+  appendMooseObjectTask  ("add_fv_ic",                    ScalarInitialCondition);
+
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("add_time_steppers",            TimeStepper,            false);
@@ -470,6 +473,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
   registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
+  registerSyntaxTask("AddFVInitialConditionAction", "FVICs/*", "add_fv_ic");
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");

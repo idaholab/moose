@@ -3641,7 +3641,6 @@ MooseMesh::cacheFVElementalDoFs() const
           {
             std::vector<dof_id_type> indices;
             var->dofMap().dof_indices(elem_info_pair.second.elem(), indices, var->number());
-            std::cout << indices.size() << std::endl;
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
             system_var_dofs.push_back(indices[0]);
           }

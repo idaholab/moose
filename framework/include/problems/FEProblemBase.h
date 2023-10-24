@@ -712,9 +712,9 @@ public:
 
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
-  void addFVInterfaceKernel(const std::string & fv_ik_name,
-                            const std::string & name,
-                            InputParameters & parameters);
+  virtual void addFVInterfaceKernel(const std::string & fv_ik_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
 
   // Interface /////
   virtual void addInterfaceKernel(const std::string & kernel_name,
@@ -725,6 +725,15 @@ public:
   virtual void addInitialCondition(const std::string & ic_name,
                                    const std::string & name,
                                    InputParameters & parameters);
+  /**
+   * Add an initial condition for a finite volume variables
+   * @param ic_name The name of the boundary condition object
+   * @param name The user-defined name from the input file
+   * @param parameters The input parameters for construction
+   */
+  virtual void addFVInitialCondition(const std::string & ic_name,
+                                     const std::string & name,
+                                     InputParameters & parameters);
 
   void projectSolution();
 
@@ -2188,6 +2197,7 @@ protected:
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
+  InitialConditionWarehouse _fv_ics;
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
@@ -2462,6 +2472,16 @@ private:
   std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
+
+  /**
+   * Checks if the variable of the initial condition is getting restarted and errors for specific
+   * cases
+   * @param ic_name The name of the initial condition
+   * @param var_name The name of the variable
+   */
+  void checkICRestartError(const std::string & ic_name,
+                           const std::string & name,
+                           const VariableName & var_name);
 
   /*
    * Test if stateful property redistribution is expected to be
