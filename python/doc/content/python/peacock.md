@@ -1,7 +1,7 @@
 # Peacock
 
 !style! halign=left
-Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute the application and view the results all within one package.
+Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute the application, and view the results all within one package.
 !style-end!
 
 
@@ -12,7 +12,7 @@ Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows
 ## Environment
 
 !style! halign=left
-Adding Peacock to yout PATH will allow you to launch it from your application or `tests`` directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need to specify your application as an argument, and simplifying Peacock usage.
+Adding Peacock to your PATH will allow you to launch it from your application or `tests` directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need to specify your application as an argument, and simplifying Peacock usage.
 !style-end!
 
 First, we need to discover the absolute path to `peacock` on your machine. Assuming that your MOOSE
@@ -47,7 +47,7 @@ as well as how to assign a value to a variable in that shell:
 | csh | `~/.cshrc` | `setenv PATH pwd:$PATH` |
 | tcsh | `~/.tcshrc` | `setenv PATH pwd:$PATH` |
 
-Replace occurrences of `pwd` in the above table with the result you recieved in the previous step,
+Replace occurrences of `pwd` in the above table with the result you received in the previous step
 as you apply the following instructions:
 
 !alert! warning title=Dangerous Syntax Below
@@ -56,6 +56,8 @@ value of `$PATH`.
 
 Use two greater thans: ( `>>` ). Two greater thans append information to a file, while a single
 greater than ( `>` ) overwrites the file entirely.
+
+If you do not trust yourself, create a backup of this file using `cp` (copy) before you begin.
 !alert-end!
 
 `zsh` Example:
