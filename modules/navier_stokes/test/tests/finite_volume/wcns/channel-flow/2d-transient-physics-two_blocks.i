@@ -48,61 +48,65 @@ inlet_v = 0.001
 []
 
 [Physics]
-  [flow]
-    type = WCNSFVFlowPhysics
-    compressibility = 'weakly-compressible'
-    block = 0
+  [NavierStokes]
+    [WCNSFVFlowPhysics]
+      [flow1]
+        compressibility = 'weakly-compressible'
+        block = 0
 
-    # velocity_names = 'vel_x vel_y'
+        # velocity_names = 'vel_x vel_y'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+        density = 'rho'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '${inlet_v} 1e-15 0'
-    initial_pressure = '${outlet_pressure}'
+        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_pressure = '${outlet_pressure}'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_functors = '${inlet_v} 0'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip noslip'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip noslip'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_functors = '${outlet_pressure}'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
-  []
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
 
-  [flow_2]
-    type = WCNSFVFlowPhysics
-    compressibility = 'weakly-compressible'
-    block = 1
+    [WCNSFVFlowPhysics]
+      [flow2]
+        compressibility = 'weakly-compressible'
+        block = 1
 
-    velocity_variable = 'u v'
-    pressure_variable = 'p'
+        velocity_variable = 'u v'
+        pressure_variable = 'p'
 
-    density = 'rho_other'
-    dynamic_viscosity = 'mu'
+        density = 'rho_other'
+        dynamic_viscosity = 'mu'
 
-    initial_velocity = '${inlet_v} 1e-15 0'
-    initial_pressure = '${outlet_pressure}'
+        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_pressure = '${outlet_pressure}'
 
-    inlet_boundaries = 'left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${inlet_v} 0'
+        inlet_boundaries = 'left'
+        momentum_inlet_types = 'fixed-velocity'
+        momentum_inlet_functors = '${inlet_v} 0'
 
-    wall_boundaries = 'top bottom'
-    momentum_wall_types = 'noslip noslip'
+        wall_boundaries = 'top bottom'
+        momentum_wall_types = 'noslip noslip'
 
-    outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+        outlet_boundaries = 'right'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_functors = '${outlet_pressure}'
 
-    mass_advection_interpolation = 'average'
-    momentum_advection_interpolation = 'average'
+        mass_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'average'
+      []
+    []
   []
 []
 
