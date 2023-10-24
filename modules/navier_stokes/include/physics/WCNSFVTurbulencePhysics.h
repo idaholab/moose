@@ -25,7 +25,9 @@ public:
 
   WCNSFVTurbulencePhysics(const InputParameters & parameters);
 
-  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const;
+  // Routines for concatenating Physics parameters
+  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+  void processAdditionalParameters(const InputParameters & other_params) override;
 
 protected:
 private:
@@ -53,4 +55,6 @@ private:
 private:
   /// Name of the mixing length auxiliary variable
   const VariableName _mixing_length_name;
+  /// List of boundaries to act as walls for turbulence models
+  std::vector<BoundaryName> _mixing_length_walls;
 };

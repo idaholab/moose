@@ -28,7 +28,17 @@ WCNSFVFlowPhysics::validParams()
       "Define the Navier Stokes weakly-compressible mass and momentum equations");
 
   params += NSFVAction::commonMomentumEquationParams();
-  params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "pressure_function");
+
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
+      "momentum_inlet_functors",
+      std::vector<std::vector<MooseFunctorName>>(),
+      "Functors for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
+      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
+      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
+      "dimensions for fixed-velocity boundaries or is a single functor name for pressure inlets.");
+  params.addParam<std::vector<MooseFunctorName>>("pressure_functors",
+                                                 std::vector<MooseFunctorName>(),
+                                                 "Functors for boundary pressures at outlets.");
 
   // Initialization parameters
   params.transferParam<std::vector<FunctionName>>(NSFVAction::validParams(), "initial_velocity");
@@ -56,7 +66,10 @@ WCNSFVFlowPhysics::validParams()
 }
 
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
-  : WCNSFVPhysicsBase(parameters)
+  : WCNSFVPhysicsBase(parameters),
+    _momentum_inlet_functors(
+        getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")),
+    _pressure_functors(getParam<std::vector<MooseFunctorName>>("pressure_functors"))
 {
   for (const auto d : index_range(_velocity_names))
     saveNonlinearVariableName(_velocity_names[d]);
@@ -78,6 +91,12 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
 
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment",
                                         "porosity_interface_pressure_treatment");
+
+  if (_boundary_condition_information_complete)
+    checkVectorParamLengthSameAsCombinedOthers<BoundaryName,
+                                               std::vector<MooseFunctorName>,
+                                               PostprocessorName>(
+        "inlet_boundaries", "momentum_inlet_functors", "flux_inlet_pps");
 }
 
 void
@@ -590,15 +609,11 @@ WCNSFVFlowPhysics::addFVBCs()
 void
 WCNSFVFlowPhysics::addINSInletBC()
 {
-  const auto momentum_inlet_types = getParam<MultiMooseEnum>("momentum_inlet_types");
-  const auto momentum_inlet_functions =
-      getParam<std::vector<std::vector<FunctionName>>>("momentum_inlet_function");
-
   unsigned int flux_bc_counter = 0;
   unsigned int velocity_pressure_counter = 0;
-  for (unsigned int bc_ind = 0; bc_ind < momentum_inlet_types.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < _momentum_inlet_types.size(); ++bc_ind)
   {
-    if (momentum_inlet_types[bc_ind] == "fixed-velocity")
+    if (_momentum_inlet_types[bc_ind] == "fixed-velocity")
     {
       const std::string bc_type = "INSFVInletVelocityBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -608,25 +623,25 @@ WCNSFVFlowPhysics::addINSInletBC()
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseFunctorName>("functor") =
-            momentum_inlet_functions[velocity_pressure_counter][d];
+            _momentum_inlet_functors[velocity_pressure_counter][d];
 
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _inlet_boundaries[bc_ind], params);
       }
       ++velocity_pressure_counter;
     }
-    else if (momentum_inlet_types[bc_ind] == "fixed-pressure")
+    else if (_momentum_inlet_types[bc_ind] == "fixed-pressure")
     {
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _pressure_name;
-      params.set<FunctionName>("function") = momentum_inlet_functions[velocity_pressure_counter][0];
+      params.set<FunctionName>("function") = _momentum_inlet_functors[velocity_pressure_counter][0];
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
       ++velocity_pressure_counter;
     }
-    else if (momentum_inlet_types[bc_ind] == "flux-mass" ||
-             momentum_inlet_types[bc_ind] == "flux-velocity")
+    else if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
+             _momentum_inlet_types[bc_ind] == "flux-velocity")
     {
       const auto flux_inlet_pps = getParam<std::vector<PostprocessorName>>("flux_inlet_pps");
       const auto flux_inlet_directions = getParam<std::vector<Point>>("flux_inlet_directions");
@@ -645,7 +660,7 @@ WCNSFVFlowPhysics::addINSInletBC()
         if (_porous_medium_treatment)
           params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-        if (momentum_inlet_types[bc_ind] == "flux-mass")
+        if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
@@ -672,7 +687,7 @@ WCNSFVFlowPhysics::addINSInletBC()
         if (flux_inlet_directions.size())
           params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
 
-        if (momentum_inlet_types[bc_ind] == "flux-mass")
+        if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
@@ -692,14 +707,11 @@ WCNSFVFlowPhysics::addINSInletBC()
 void
 WCNSFVFlowPhysics::addINSOutletBC()
 {
-  const auto pressure_functions = getParam<std::vector<FunctionName>>("pressure_function");
-  const auto momentum_outlet_types = getParam<MultiMooseEnum>("momentum_outlet_types");
-
   const std::string u_names[3] = {"u", "v", "w"};
-  for (unsigned int bc_ind = 0; bc_ind < momentum_outlet_types.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < _momentum_outlet_types.size(); ++bc_ind)
   {
-    if (momentum_outlet_types[bc_ind] == "zero-gradient" ||
-        momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
+    if (_momentum_outlet_types[bc_ind] == "zero-gradient" ||
+        _momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
     {
       if (_porous_medium_treatment)
       {
@@ -744,18 +756,18 @@ WCNSFVFlowPhysics::addINSOutletBC()
       }
     }
 
-    if (momentum_outlet_types[bc_ind] == "fixed-pressure" ||
-        momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
+    if (_momentum_outlet_types[bc_ind] == "fixed-pressure" ||
+        _momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
     {
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _pressure_name;
-      params.set<FunctionName>("function") = pressure_functions[bc_ind];
+      params.set<MooseFunctorName>("functor") = _pressure_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
     }
-    else if (momentum_outlet_types[bc_ind] == "zero-gradient")
+    else if (_momentum_outlet_types[bc_ind] == "zero-gradient")
     {
       const std::string bc_type = "INSFVMassAdvectionOutflowBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -999,4 +1011,24 @@ WCNSFVFlowPhysics::checkParametersMergeable(const InputParameters & other_params
        parameterConsistent<Real>(other_params, "momentum_scaling", warn));
 
   return consistent;
+}
+
+void
+WCNSFVFlowPhysics::processAdditionalParameters(const InputParameters & other_params)
+{
+  WCNSFVPhysicsBase::processAdditionalParameters(other_params);
+
+  // Process inlet functors parameters
+  _momentum_inlet_functors.insert(
+      _momentum_inlet_functors.end(),
+      other_params.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")
+          .begin(),
+      other_params.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")
+          .end());
+
+  // Move outlet BCs parameters to this Physics' parameters
+  _pressure_functors.insert(
+      _pressure_functors.end(),
+      other_params.get<std::vector<MooseFunctorName>>("pressure_functors").begin(),
+      other_params.get<std::vector<MooseFunctorName>>("pressure_functors").end());
 }

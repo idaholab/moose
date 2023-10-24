@@ -27,7 +27,9 @@ public:
     return _passive_scalar_names;
   }
 
+  // Routines for concatenating Physics parameters
   bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+  void processAdditionalParameters(const InputParameters & other_params) override;
 
 protected:
 private:
@@ -55,5 +57,16 @@ private:
   void addScalarInletBC();
   void addScalarWallBC();
 
+  /// Names of the passive scalar variables
   std::vector<NonlinearVariableName> _passive_scalar_names;
+
+  /// Functors for the passive scalar sources. Inner indexing is scalar variable index
+  std::vector<std::vector<MooseFunctorName>> _passive_scalar_sources;
+  /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
+  std::vector<std::vector<Real>> _passive_scalar_sources_coef;
+
+  /// Passive scalar inlet boundary types
+  MultiMooseEnum _passive_scalar_inlet_types;
+  /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
+  std::vector<std::vector<MooseFunctorName>> _passive_scalar_inlet_functors;
 };

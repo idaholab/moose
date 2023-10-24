@@ -48,7 +48,8 @@ WCNSFVTurbulencePhysics::validParams()
 WCNSFVTurbulencePhysics::WCNSFVTurbulencePhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
     _turbulence_model(getParam<MooseEnum>("turbulence_model")),
-    _mixing_length_name(prefix() + "mixing_length")
+    _mixing_length_name(prefix() + "mixing_length"),
+    _mixing_length_walls(getParam<std::vector<BoundaryName>>("mixing_length_walls"))
 {
   if (isParamValid("heat_advection_physics"))
   {
@@ -214,8 +215,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryKernels()
     InputParameters ml_params = getFactory().getValidParams(ml_kernel_type);
     assignBlocks(ml_params, _blocks);
     ml_params.set<AuxVariableName>("variable") = _mixing_length_name;
-    ml_params.set<std::vector<BoundaryName>>("walls") =
-        getParam<std::vector<BoundaryName>>("mixing_length_walls");
+    ml_params.set<std::vector<BoundaryName>>("walls") = _mixing_length_walls;
     if (parameters().isParamValid("mixing_length_aux_execute_on"))
       ml_params.set<ExecFlagEnum>("execute_on") =
           getParam<ExecFlagEnum>("mixing_length_aux_execute_on");
@@ -267,4 +267,16 @@ WCNSFVTurbulencePhysics::checkParametersMergeable(const InputParameters & other_
        parameterConsistent<Real>(other_params, "turbulent_prandtl", warn));
 
   return consistent;
+}
+
+void
+WCNSFVTurbulencePhysics::processAdditionalParameters(const InputParameters & other_params)
+{
+  WCNSFVPhysicsBase::processAdditionalParameters(other_params);
+
+  // Add the new wall boundaries
+  _mixing_length_walls.insert(
+      _mixing_length_walls.end(),
+      other_params.get<std::vector<BoundaryName>>("mixing_length_walls").begin(),
+      other_params.get<std::vector<BoundaryName>>("mixing_length_walls").end());
 }
