@@ -46,7 +46,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a residual
@@ -92,7 +92,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a Jacobian
@@ -119,7 +119,7 @@ const ADReal &
 FVFluxBC::uOnUSub() const
 {
   mooseAssert(_face_info, "The face info has not been set");
-  const auto ft = _face_info->faceType(_var.name());
+  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   mooseAssert(
       ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
       "The variable " << _var.name()
@@ -140,7 +140,7 @@ const ADReal &
 FVFluxBC::uOnGhost() const
 {
   mooseAssert(_face_info, "The face info has not been set");
-  const auto ft = _face_info->faceType(_var.name());
+  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   mooseAssert(
       ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
       "The variable " << _var.name()

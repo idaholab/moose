@@ -38,7 +38,8 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
 ADReal
 INSFVSymmetryVelocityBC::computeSegregatedContribution()
 {
-  const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  const bool use_elem = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number())) ==
+                        FaceInfo::VarFaceNeighbors::ELEM;
   const auto elem_arg =
       use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
 
@@ -103,9 +104,9 @@ void
 INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
-  const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  const bool use_elem = _face_type == FaceInfo::VarFaceNeighbors::ELEM;
   const auto elem_arg =
       use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
   const auto state = determineState();

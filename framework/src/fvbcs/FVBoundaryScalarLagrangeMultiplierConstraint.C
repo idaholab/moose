@@ -12,6 +12,7 @@
 #include "MooseVariableScalar.h"
 #include "MooseVariableFV.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
 InputParameters
 FVBoundaryScalarLagrangeMultiplierConstraint::validParams()
@@ -38,7 +39,7 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeResidual(const FaceInfo & f
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a Jacobian
@@ -72,7 +73,7 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeJacobian(const FaceInfo & f
 {
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a Jacobian

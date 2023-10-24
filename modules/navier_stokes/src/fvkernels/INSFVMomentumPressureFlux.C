@@ -38,7 +38,7 @@ INSFVMomentumPressureFlux::computeQpResidual()
 {
   ADReal eps_p_interface;
   // Momentum and porosity domains should match
-  const auto & face_type = _face_info->faceType(_var.name());
+  const auto & face_type = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   const bool use_elem = (face_type == FaceInfo::VarFaceNeighbors::ELEM) ||
                         (face_type == FaceInfo::VarFaceNeighbors::BOTH);
 
