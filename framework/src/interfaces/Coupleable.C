@@ -1438,7 +1438,7 @@ Coupleable::coupledArrayDotDu(const std::string & var_name, unsigned int comp) c
   }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
-  if(!_coupleable_neighbor)
+  if (!_coupleable_neighbor)
   {
     if (_c_nodal)
       return var->dofValuesDuDotDu();
