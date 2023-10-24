@@ -305,8 +305,9 @@ void
 PhysicsBase::assertParamDefined(const std::string & libmesh_dbg_var(param1)) const
 {
   mooseAssert(parameters().have_parameter<T>(param1),
-              "Parameter '" + param1 + "' is not defined with type " +
-                  MooseUtils::prettyCppType<T>() + ". Check your code.");
+              "Parameter '" + param1 + "' is not defined with type '" +
+                  MooseUtils::prettyCppType<T>() + "' in object type '" +
+                  MooseUtils::prettyCppType(type()) + "'. Check your code.");
 }
 
 template <typename T, typename S>
