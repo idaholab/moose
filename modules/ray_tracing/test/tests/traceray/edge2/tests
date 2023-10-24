@@ -6,7 +6,7 @@
     type = 'CSVDiff'
     input = '../lots.i'
     csvdiff = 'lots_out.csv'
-    cli_args = 'Mesh/gmg/elem_type=edge2
+    cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                 Mesh/gmg/dim=1
                 RayBCs/active=kill_1d
                 UserObjects/lots/vertex_to_vertex=true
@@ -16,6 +16,6 @@
     allow_test_objects = true
     abs_zero = 1e-8
     method = '!dbg'
-    requirement = 'The system shall be able to trace rays within EDGE2 elements.'
+    requirement = 'The system shall be able to trace rays within EDGE elements.'
   []
 []

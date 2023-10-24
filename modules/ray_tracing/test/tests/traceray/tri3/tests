@@ -3,13 +3,13 @@
   issues = '#16028'
 
   [tests]
-    requirement = 'The system shall be able to trace rays within planar TRI3 elements '
+    requirement = 'The system shall be able to trace rays within planar TRI elements '
 
     [vtv]
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'vtv_out.csv'
-      cli_args = 'Mesh/gmg/elem_type=tri3
+      cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/vertex_to_vertex=true
                   Outputs/file_base=vtv_out'
       allow_test_objects = true
@@ -23,7 +23,7 @@
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'ctv_out.csv'
-      cli_args = 'Mesh/gmg/elem_type=tri3
+      cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_vertex=true
                   Outputs/file_base=ctv_out'
       allow_test_objects = true
@@ -37,7 +37,7 @@
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'ctc_out.csv'
-      cli_args = 'Mesh/gmg/elem_type=tri3
+      cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_centroid=true
                   Outputs/file_base=ctc_out'
       allow_test_objects = true
@@ -51,7 +51,7 @@
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'side_aq_out.csv'
-      cli_args = 'Mesh/gmg/elem_type=tri3
+      cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/side_aq=true
                   Outputs/file_base=side_aq_out'
       allow_test_objects = true
@@ -65,7 +65,7 @@
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'centroid_aq_out.csv'
-      cli_args = 'Mesh/gmg/elem_type=tri3
+      cli_args = 'Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_aq=true
                   Outputs/file_base=centroid_aq_out'
       allow_test_objects = true

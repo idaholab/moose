@@ -3,7 +3,7 @@
   issues = '#16028'
 
   [tests]
-    requirement = 'The system shall be able to trace rays within planar TET4 elements '
+    requirement = 'The system shall be able to trace rays within planar TET elements '
     [vtv]
       type = 'CSVDiff'
       input = '../lots.i'
@@ -12,7 +12,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/vertex_to_vertex=true
                   Outputs/file_base=vtv_out
                   RayBCs/active=kill_3d'
@@ -31,7 +31,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_vertex=true
                   Outputs/file_base=ctv_out
                   RayBCs/active=kill_3d'
@@ -50,7 +50,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_centroid=true
                   Outputs/file_base=ctc_out
                   RayBCs/active=kill_3d'
@@ -69,7 +69,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/edge_to_edge=true
                   Outputs/file_base=ete_out
                   RayBCs/active=kill_3d'
@@ -88,7 +88,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/side_aq=true
                   Outputs/file_base=side_aq_out
                   RayBCs/active=kill_3d'
@@ -107,7 +107,7 @@
                   Mesh/gmg/nx=3
                   Mesh/gmg/ny=3
                   Mesh/gmg/nz=3
-                  Mesh/gmg/elem_type=tet4
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_aq=true
                   Outputs/file_base=centroid_aq_out
                   RayBCs/active=kill_3d'

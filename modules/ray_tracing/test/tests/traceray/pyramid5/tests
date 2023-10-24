@@ -3,14 +3,14 @@
   issues = '#16028'
 
   [tests]
-  requirement = 'The system shall be able to trace rays within planar PYRAMID5 elements '
+  requirement = 'The system shall be able to trace rays within planar PYRAMID elements '
 
     [vtv]
       type = 'CSVDiff'
       input = '../lots.i'
       csvdiff = 'ntn_out.csv'
       cli_args = 'Mesh/gmg/dim=3
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/vertex_to_vertex=true
                   Outputs/file_base=ntn_out
                   RayBCs/active=kill_3d'
@@ -26,7 +26,7 @@
       input = '../lots.i'
       csvdiff = 'ctn_out.csv'
       cli_args = 'Mesh/gmg/dim=3
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_vertex=true
                   Outputs/file_base=ctn_out
                   RayBCs/active=kill_3d'
@@ -45,7 +45,7 @@
                   Mesh/gmg/nx=4
                   Mesh/gmg/ny=4
                   Mesh/gmg/ny=4
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_to_centroid=true
                   Outputs/file_base=ctc_out
                   RayBCs/active=kill_3d'
@@ -61,7 +61,7 @@
       input = '../lots.i'
       csvdiff = 'ete_out.csv'
       cli_args = 'Mesh/gmg/dim=3
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/edge_to_edge=true
                   Outputs/file_base=ete_out
                   RayBCs/active=kill_3d'
@@ -77,7 +77,7 @@
       input = '../lots.i'
       csvdiff = 'side_aq_out.csv'
       cli_args = 'Mesh/gmg/dim=3
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/side_aq=true
                   Outputs/file_base=side_aq_out
                   RayBCs/active=kill_3d'
@@ -93,7 +93,7 @@
       input = '../lots.i'
       csvdiff = 'centroid_aq_out.csv'
       cli_args = 'Mesh/gmg/dim=3
-                  Mesh/gmg/elem_type=pyramid5
+                  Mesh/gmg/elem_type=$(basename $PWD)
                   UserObjects/lots/centroid_aq=true
                   Outputs/file_base=centroid_aq_out
                   RayBCs/active=kill_3d'
