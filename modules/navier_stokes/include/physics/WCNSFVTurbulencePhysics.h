@@ -25,6 +25,8 @@ public:
 
   WCNSFVTurbulencePhysics(const InputParameters & parameters);
 
+  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const;
+
 protected:
 private:
   void addNonlinearVariables() override;

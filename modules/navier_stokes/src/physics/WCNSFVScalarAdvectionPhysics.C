@@ -298,3 +298,28 @@ WCNSFVScalarAdvectionPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 
   return necessary_layers;
 }
+
+bool
+WCNSFVScalarAdvectionPhysics::checkParametersMergeable(const InputParameters & other_params,
+                                                       bool warn) const
+{
+  bool consistent = WCNSFVPhysicsBase::checkParametersMergeable(other_params, warn);
+  // These parameters must be consistent because they are not defined on a per-block basis
+  consistent =
+      (consistent &&
+       parameterConsistent<std::vector<NonlinearVariableName>>(
+           other_params, "passive_scalar_names", warn) &&
+       parameterConsistent<std::vector<FunctionName>>(
+           other_params, "initial_scalar_variables", warn) &&
+       parameterConsistent<std::vector<MooseFunctorName>>(
+           other_params, "passive_scalar_diffusivity", warn) &&
+       parameterConsistent<std::vector<Real>>(
+           other_params, "passive_scalar_schmidt_number", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "passive_scalar_face_interpolation", warn) &&
+       parameterConsistent<MooseEnum>(
+           other_params, "passive_scalar_advection_interpolation", warn) &&
+       parameterConsistent<bool>(other_params, "passive_scalar_two_term_bc_expansion", warn) &&
+       parameterConsistent<std::vector<Real>>(other_params, "passive_scalar_scaling", warn));
+
+  return consistent;
+}

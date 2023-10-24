@@ -251,3 +251,20 @@ WCNSFVTurbulencePhysics::addMaterials()
         "MixingLengthTurbulentViscosityMaterial", prefix() + "mixing_length_material", params);
   }
 }
+
+bool
+WCNSFVTurbulencePhysics::checkParametersMergeable(const InputParameters & other_params,
+                                                  bool warn) const
+{
+  bool consistent = WCNSFVPhysicsBase::checkParametersMergeable(other_params, warn);
+  // These parameters must be consistent because they cannot be concatenated
+  consistent =
+      (consistent && parameterConsistent<MooseEnum>(other_params, "turbulence_model", warn) &&
+       parameterConsistent<ExecFlagEnum>(other_params, "mixing_length_aux_execute_on", warn) &&
+       parameterConsistent<MooseFunctorName>(other_params, "von_karman_const", warn) &&
+       parameterConsistent<MooseFunctorName>(other_params, "von_karman_const_0", warn) &&
+       parameterConsistent<MooseFunctorName>(other_params, "mixing_length_delta", warn) &&
+       parameterConsistent<Real>(other_params, "turbulent_prandtl", warn));
+
+  return consistent;
+}

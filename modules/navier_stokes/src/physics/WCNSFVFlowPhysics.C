@@ -957,7 +957,6 @@ WCNSFVFlowPhysics::addInitialConditions()
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
     getProblem().addInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
-    // addNSInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
   }
 }
 
@@ -982,6 +981,14 @@ WCNSFVFlowPhysics::checkParametersMergeable(const InputParameters & other_params
        parameterConsistent<FunctionName>(other_params, "initial_pressure", warn) &&
        parameterConsistent<MooseEnum>(
            other_params, "porosity_interface_pressure_treatment", warn) &&
+       parameterConsistent<bool>(other_params, "pin_pressure", warn) &&
+       parameterConsistent<MooseEnum>(other_params, "pinned_pressure_type", warn) &&
+       parameterConsistent<Point>(other_params, "pinned_pressure_point", warn) &&
+       parameterConsistent<PostprocessorName>(other_params, "pinned_pressure_value", warn) &&
+       parameterConsistent<bool>(other_params, "boussinesq_approximation", warn) &&
+       parameterConsistent<RealVectorValue>(other_params, "gravity", warn) &&
+       parameterConsistent<Real>(other_params, "ref_temperature", warn) &&
+       parameterConsistent<MooseFunctorName>(other_params, "thermal_expansion", warn) &&
        parameterConsistent<bool>(other_params, "use_friction_correction", warn) &&
        parameterConsistent<Real>(other_params, "consistent_scaling", warn) &&
        parameterConsistent<MooseEnum>(other_params, "mass_advection_interpolation", warn) &&

@@ -38,6 +38,9 @@ FileMeshWCNSFVComponent::validParams()
   params += WCNSFVScalarAdvectionPhysics::validParams();
   params += WCNSFVTurbulencePhysics::validParams();
 
+  params.addParam<bool>(
+      "merge_physics", false, "Attempt to merge the Physics parameters with another one");
+
   return params;
 }
 
@@ -64,8 +67,8 @@ FileMeshWCNSFVComponent::init()
   {
     InputParameters params = getMooseApp().getActionFactory().getValidParams("WCNSFVFlowPhysics");
     params.applyParameters(parameters());
-    const PhysicsName physics_name = prefix() + "flow";
-    addPhysics("WCNSFVFlowPhysics", physics_name, params);
+    PhysicsName physics_name = prefix() + "flow";
+    addPhysics<WCNSFVFlowPhysics>(physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
@@ -79,8 +82,8 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
-    const PhysicsName physics_name = prefix() + "energy";
-    addPhysics("WCNSFVHeatAdvectionPhysics", physics_name, params);
+    PhysicsName physics_name = prefix() + "energy";
+    addPhysics<WCNSFVHeatAdvectionPhysics>(physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
@@ -95,8 +98,8 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
-    const PhysicsName physics_name = prefix() + "scalar";
-    addPhysics("WCNSFVScalarAdvectionPhysics", physics_name, params);
+    PhysicsName physics_name = prefix() + "scalar";
+    addPhysics<WCNSFVScalarAdvectionPhysics>(physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
@@ -111,8 +114,8 @@ FileMeshWCNSFVComponent::init()
     params.applyParameters(parameters());
     if (getParam<bool>("add_flow_equations"))
       params.set<PhysicsName>("coupled_flow_physics") = prefix() + "flow";
-    const PhysicsName physics_name = prefix() + "turbulence";
-    addPhysics(physics_type, physics_name, params);
+    PhysicsName physics_name = prefix() + "turbulence";
+    addPhysics<WCNSFVTurbulencePhysics>(physics_name, params);
 
     // Keep track of new physics
     _physics_names.push_back(physics_name);
@@ -186,14 +189,36 @@ FileMeshWCNSFVComponent::getVariableName(const std::string & default_name) const
         default_name);
 }
 
+template <class T>
 void
-FileMeshWCNSFVComponent::addPhysics(const std::string & action_name,
-                                    const std::string & physics_name,
-                                    InputParameters & params)
+FileMeshWCNSFVComponent::addPhysics(std::string & physics_name, InputParameters & params)
 {
+  // Attempt to merge instead
+  if (getParam<bool>("merge_physics"))
+  {
+    // Find a physics of the same type defined by something else (Physics block or Component)
+    auto physics = getMooseApp().actionWarehouse().getPhysics<T>();
+    std::vector<PhysicsName> physics_names;
+
+    for (auto potential_match : physics)
+    {
+      physics_names.push_back(potential_match->name());
+      if (potential_match->checkParametersMergeable(params, true))
+      {
+        potential_match->mergeParameters(params);
+        physics_name = potential_match->name();
+        return;
+      }
+    }
+    if (physics.size())
+      mooseWarning("Unable to merge Physics " + physics_name +
+                   " with any of the existing Physics defined: " + Moose::stringify(physics_names));
+  }
+
   // Add the Physics/Action to be created. All the tasks associated with this
   // action will be run
   auto action_factory = getMooseApp().getActionFactory();
-  std::shared_ptr<Action> ptr = action_factory.create(action_name, physics_name, params);
+  std::shared_ptr<Action> ptr =
+      action_factory.create(MooseUtils::prettyCppType<T>(), physics_name, params);
   getMooseApp().actionWarehouse().addActionBlock(ptr);
 }

@@ -50,9 +50,10 @@ protected:
   virtual void init() override;
   virtual void setupMesh() override;
 
-  void addPhysics(const std::string & action_name,
-                  const std::string & physics_name,
-                  InputParameters & params);
+  /// Add a Physics to the action warehouse
+  /// If asked by the user, will attempt to merge the Physics with another Physics instead
+  template <class T>
+  void addPhysics(std::string & physics_name, InputParameters & params);
 
 private:
   /// Keeps track of the names of the Physics
