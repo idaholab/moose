@@ -11,6 +11,8 @@
     method = '!DBG'
     # See #24187
     petsc_version = '>=3.12.0'
+    # See #25819
+    dof_id_bytes = 8
     valgrind = none
   []
 []
