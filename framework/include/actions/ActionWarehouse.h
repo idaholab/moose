@@ -171,6 +171,28 @@ public:
   }
 
   /**
+   * Retrieve all Physics with a specific type ordered by their names
+   */
+  template <class T>
+  std::vector<T *> getPhysics()
+  {
+    // we need to create the map first to ensure that all physics in the map are unique
+    // and the physics are sorted by their names
+    typename std::map<std::string, const std::shared_ptr<T>> physics;
+    for (auto act_ptr : _all_ptrs)
+    {
+      auto p = std::dynamic_pointer_cast<T>(act_ptr);
+      if (p)
+        physics.insert(std::make_pair(act_ptr->name(), p));
+    }
+    // construct the vector from the map entries
+    std::vector<T *> physics_vector;
+    for (auto & pair : physics)
+      physics_vector.push_back(pair.second.get());
+    return physics_vector;
+  }
+
+  /**
    * Retrieve the action on a specific task with its type.
    * Error will be thrown if more than one actions are found.
    * @param task The task name.
