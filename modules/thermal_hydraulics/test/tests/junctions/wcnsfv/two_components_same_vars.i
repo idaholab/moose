@@ -20,7 +20,7 @@ p_outlet = 0
 []
 
 [Components]
-  [comp1_upstream]
+  [comp1]
     type = FileMeshWCNSFVComponent
     file = rectangle.e
     position = '0 0 0'
@@ -29,17 +29,22 @@ p_outlet = 0
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
+    turbulence_model = 'mixing-length'
 
-    inlet_boundaries = 'comp1_upstream:left'
+    inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_functors = 'f1 f1'
+    momentum_inlet_function = 'f1 f1'
+    energy_inlet_types = 'fixed-temperature'
+    energy_inlet_function = '300'
 
-    wall_boundaries = 'comp1_upstream:top comp1_upstream:bottom'
+    wall_boundaries = 'comp1:top comp1:bottom'
     momentum_wall_types = 'noslip symmetry'
+    energy_wall_types = 'heatflux'
+    energy_wall_function = '1'
 
-    outlet_boundaries = 'comp1_upstream:right'
+    outlet_boundaries = 'comp1:right'
     # momentum_outlet_types = 'fixed-pressure'
-    # pressure_functors = 'f1'
+    # pressure_function = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -52,10 +57,10 @@ p_outlet = 0
   []
   [join]
     type = FileMeshWCNSFVFlowJunction
-    connections = 'comp1_upstream:right:out comp2_downstream:left:in'
+    connections = 'comp1:right:out comp2:left:in'
     junction_techniques = 'stitching boundary_values'
   []
-  [comp2_downstream]
+  [comp2]
     type = FileMeshWCNSFVComponent
     file = rectangle.e
     position = '10 0 0'
@@ -65,23 +70,20 @@ p_outlet = 0
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
+    turbulence_model = 'mixing-length'
 
-    # Rename the variables for now
-    # We may want to prefix variable names later
-    # We will have to connect all the fields
-    velocity_variable = 'u v'
-    pressure_variable = 'p'
-
-    inlet_boundaries = 'comp2_downstream:left'
+    inlet_boundaries = 'comp2:left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_functors = 'vel_x vel_y'
+    momentum_inlet_function = 'f1 f1'
 
-    wall_boundaries = 'comp2_downstream:top comp2_downstream:bottom'
+    wall_boundaries = 'comp2:top comp2:bottom'
     momentum_wall_types = 'noslip symmetry'
+    energy_wall_types = 'heatflux'
+    energy_wall_function = '0'
 
-    outlet_boundaries = 'comp2_downstream:right'
+    outlet_boundaries = 'comp2:right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_functors = 'f1'
+    pressure_function = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -97,8 +99,8 @@ p_outlet = 0
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'rho mu total_viscosity'
-    prop_values = '1  1 1'
+    prop_names = 'rho mu k cp'
+    prop_values = '1  1 1 1'
   []
 []
 
@@ -124,13 +126,13 @@ p_outlet = 0
   [inlet-p]
     type = SideAverageValue
     variable = pressure
-    boundary = 'comp1_upstream:left'
+    boundary = 'comp1:left'
   []
-  # [outlet-u]
-  #   type = SideAverageValue
-  #   variable = superficial_vel_x
-  #   boundary = 'comp1_upstream:right'
-  # []
+  [mid-p2]
+    type = SideAverageValue
+    variable = p
+    boundary = 'comp2:left'
+  []
 []
 
 [Outputs]
