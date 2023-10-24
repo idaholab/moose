@@ -8,8 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# For now, 1.10 is the default version of torchlib
-VERSION=1.10
+# For now, 2.1 is the default version of torchlib
+VERSION=2.1
 IGNORE_CERT=""
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
