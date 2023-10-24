@@ -16,6 +16,7 @@
 #include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
+#include "FVInitialConditionWarehouse.h"
 #include "ScalarInitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
@@ -1478,7 +1479,7 @@ public:
   /**
    * Return FVInitialCondition storage
    */
-  const InitialConditionWarehouse & getFVInitialConditionWarehouse() const { return _fv_ics; }
+  const FVInitialConditionWarehouse & getFVInitialConditionWarehouse() const { return _fv_ics; }
 
   /**
    * Get the solver parameters
@@ -2202,7 +2203,7 @@ protected:
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
-  InitialConditionWarehouse _fv_ics;
+  FVInitialConditionWarehouse _fv_ics;
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 

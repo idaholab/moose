@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "InitialConditionBase.h"
+#include "FVInitialConditionBase.h"
 
 // libMesh
 #include "libmesh/point.h"
@@ -26,7 +26,7 @@ class FEProblemBase;
  * `computeNodal` method sets dof values for boundary restricted initial conditions
  */
 template <typename T>
-class FVInitialConditionTempl : public InitialConditionBase
+class FVInitialConditionTempl : public FVInitialConditionBase
 {
 public:
   /**
@@ -42,12 +42,7 @@ public:
 
   virtual MooseVariableFEBase & variable() override { return _base_var; }
 
-  virtual void compute() override;
-
-  virtual void computeNodal(const Point & p) override final
-  {
-    mooseError("This method should not be used for finite volume initial conditions!");
-  }
+  virtual void computeElement(const ElemInfo & elem_info) override;
 
   /**
    * The value of the variable at a point.
@@ -74,9 +69,7 @@ template <typename T>
 InputParameters
 FVInitialConditionTempl<T>::validParams()
 {
-  return InitialConditionBase::validParams();
+  return FVInitialConditionBase::validParams();
 }
 
 typedef FVInitialConditionTempl<Real> FVInitialCondition;
-typedef FVInitialConditionTempl<RealVectorValue> FVVectorInitialCondition;
-typedef FVInitialConditionTempl<RealEigenVector> FVArrayInitialCondition;

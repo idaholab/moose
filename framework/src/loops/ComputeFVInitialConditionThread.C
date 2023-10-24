@@ -30,77 +30,16 @@ ComputeFVInitialConditionThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  const InitialConditionWarehouse & warehouse = _fe_problem.getFVInitialConditionWarehouse();
+  const FVInitialConditionWarehouse & warehouse = _fe_problem.getFVInitialConditionWarehouse();
   printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
   for (const auto & elem_info : range)
   {
-    std::cout << "Bazinga punk" << std::endl;
-    // const unsigned int n_nodes = elem->n_nodes();
-
-    // // we need to execute objects that are for all subdomains covered by this
-    // // elements' nodes.
-    // std::set<SubdomainID> block_ids;
-    // for (unsigned int n = 0; n < n_nodes; n++)
-    // {
-    //   auto node = elem->node_ptr(n);
-    //   const auto & ids = _fe_problem.mesh().getNodeBlockIds(*node);
-    //   block_ids.insert(ids.begin(), ids.end());
-    // }
-
-    // // we need to remember the order the variables originally are provided in
-    // // since the ics dependencies are resolved to handle the inter-variable
-    // // dependencies correctly.
-    // std::vector<MooseVariableFEBase *> order;
-
-    // // group all initial condition objects by variable. so we can compute all
-    // // its dof values at once and copy into solution vector once.  This is
-    // // necessary because we have to collect extra off-block ic objects from
-    // // nodes shared between subdomains for cases where the off-block ic "wins"
-    // // on the interface.  The grouping is required because we need to have all
-    // // the dof values for the element determined together so we can compute
-    // // the correct qp values, etc. for the variable.
-    // std::map<MooseVariableFEBase *, std::vector<std::shared_ptr<InitialConditionBase>>> groups;
-    // for (auto id : block_ids)
-    //   if (warehouse.hasActiveBlockObjects(id, _tid))
-    //     for (auto ic : warehouse.getActiveBlockObjects(id, _tid))
-    //     {
-    //       if ((id != elem->subdomain_id()) && !ic->variable().isNodal())
-    //         continue;
-    //       order.push_back(&(ic->variable()));
-    //       groups[&(ic->variable())].push_back(ic);
-    //     }
-
-    // _fe_problem.setCurrentSubdomainID(elem, _tid);
-    // _fe_problem.prepare(elem, _tid);
-    // _fe_problem.reinitElem(elem, _tid);
-
-    // for (auto var : order)
-    // {
-    //   DenseVector<Real> Ue;
-    //   auto & vec = groups[var];
-
-    //   // because of all the off-node shenanigans/grouping above, per-variable
-    //   // objects could possible have their order jumbled - so re-sort just in
-    //   // case.
-    //   try
-    //   {
-    //     DependencyResolverInterface::sort<std::shared_ptr<InitialConditionBase>>(vec);
-    //   }
-    //   catch (CyclicDependencyException<std::shared_ptr<InitialConditionBase>> & e)
-    //   {
-    //     DependencyResolverInterface::cyclicDependencyError<std::shared_ptr<InitialConditionBase>>(
-    //         e, "Cyclic dependency detected in object ordering");
-    //   }
-
-    //   for (auto ic : vec)
-    //     ic->compute();
-    //   vec.clear();
-
-    //   // Now that all dofs are set for this variable, solemnize the solution.
-    //   var->insert(var->sys().solution());
-    // }
+    for (auto ic : warehouse.getActiveBlockObjects(elem_info->elem()->subdomain_id(), _tid))
+    {
+      ic->computeElement(*elem_info);
+    }
   }
 }
 

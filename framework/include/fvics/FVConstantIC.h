@@ -22,7 +22,7 @@ template <typename T>
 InputParameters validParams();
 
 /**
- * ConstantIC just returns a constant value.
+ * FVConstantIC just returns a constant value for a finite volume variable.
  */
 class FVConstantIC : public FVInitialCondition
 {
