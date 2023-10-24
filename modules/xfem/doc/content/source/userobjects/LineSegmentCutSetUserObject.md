@@ -12,7 +12,7 @@ of six values in cut_data prescribes a line segment cut: start point x, start
 point y, end point x, end point y, start cut time, end cut time. The object
 checks to ensure that the length of cut_data is a multiple of six. Provided
 that the start cut time and end cut time values are different, the cut will
-lenghten by $r_{total} \cdot \frac{t_{current} - t_{start}}{t_{end} -
+lengthen by $r_{total} \cdot \frac{t_{current} - t_{start}}{t_{end} -
 t_{start}}$ at each timestep from start cut time until the specified end cut
 time. As in the `LineSegmentCutUserObject`, scaling and translation are
 available via optional parameters and apply to all applicable components of
@@ -20,7 +20,7 @@ cut_data.
 
 ## Example Input Syntax
 
-!listing test/tests/second_order_elements/square_branch_quad9_2d.i block=UserObjects
+!listing test/tests/high_order_elements/square_branch_2d.i block=UserObjects
 
 !syntax parameters /UserObjects/LineSegmentCutSetUserObject
 

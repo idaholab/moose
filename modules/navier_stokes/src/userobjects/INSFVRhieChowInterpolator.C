@@ -52,13 +52,27 @@ INSFVRhieChowInterpolator::uniqueParams()
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
   params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
+  params.addParam<bool>(
+      "correct_volumetric_force", false, "Flag to activate volume force corrections.");
+  MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
+                                           "force-consistent");
+  params.addParam<MooseEnum>(
+      "volume_force_correction_method",
+      volume_force_correction_method,
+      "The method used for correcting the Rhie-Chow coefficients for a volume force.");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "volumetric_force_functors", "The names of the functors with the volumetric force sources.");
   return params;
 }
 
 std::vector<std::string>
 INSFVRhieChowInterpolator::listOfCommonParams()
 {
-  return {"pull_all_nonlocal_a", "mass_momentum_system"};
+  return {"pull_all_nonlocal_a",
+          "mass_momentum_system",
+          "correct_volumetric_force",
+          "volume_force_correction_method",
+          "volumetric_force_functors"};
 }
 
 InputParameters
@@ -106,7 +120,13 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
     _example(0),
     _a_data_provided(false),
-    _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
+    _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a")),
+    _bool_correct_vf(getParam<bool>("correct_volumetric_force")),
+    _volume_force_correction_method(getParam<MooseEnum>("volume_force_correction_method")),
+    _volumetric_force_functors(
+        isParamValid("volumetric_force_functors")
+            ? &getParam<std::vector<MooseFunctorName>>("volumetric_force_functors")
+            : nullptr)
 {
   auto process_displacement = [this](const auto & disp_name, auto & disp_container)
   {
@@ -172,6 +192,20 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
   if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
     fillARead();
+
+  if (_bool_correct_vf && !_volumetric_force_functors)
+    paramError("volumetric_force_functors",
+               "At least one volumetric force functor must be specified if "
+               "'correct_volumetric_force' is true.");
+
+  // Volume correction related
+  if (_bool_correct_vf)
+  {
+    const unsigned int num_volume_forces = (*_volumetric_force_functors).size();
+    _volumetric_force.resize(num_volume_forces);
+    for (const auto i : make_range(num_volume_forces))
+      _volumetric_force[i] = &getFunctor<Real>((*_volumetric_force_functors)[i]);
+  }
 }
 
 void
@@ -224,8 +258,8 @@ INSFVRhieChowInterpolator::fillARead()
     {
       _a_read[tid] = &_a;
 
-      // We are the fluid flow application, so we should make sure users have the ability to write
-      // 'a' out to aux variables for possible transfer to other applications
+      // We are the fluid flow application, so we should make sure users have the ability to
+      // write 'a' out to aux variables for possible transfer to other applications
       UserObject::_subproblem.addFunctor("ax", _ax, tid);
       UserObject::_subproblem.addFunctor("ay", _ay, tid);
       UserObject::_subproblem.addFunctor("az", _az, tid);
@@ -270,6 +304,22 @@ INSFVRhieChowInterpolator::initialSetup()
       mooseError("No INSFVKernels detected for the velocity variables. If you are trying to use "
                  "auxiliary variables for advection, please specify the a_u/v/w coefficients. If "
                  "not, please specify INSFVKernels for the momentum equations.");
+  }
+
+  // Get baseline force if force-correction method is used for volumetric correction
+  if (_bool_correct_vf && _volume_force_correction_method == "force-consistent")
+  {
+    _baseline_volume_force = 1e10;
+    for (const auto & loc_elem : _mesh.element_ptr_range())
+    {
+      Real elem_value = 0.0;
+      for (const auto i : make_range(_volumetric_force.size()))
+        elem_value += (*_volumetric_force[i])(makeElemArg(loc_elem), determineState());
+      if (std::abs(elem_value) < _baseline_volume_force)
+        _baseline_volume_force = std::abs(elem_value);
+      if (_baseline_volume_force == 0)
+        break;
+    }
   }
 }
 
@@ -329,8 +379,8 @@ INSFVRhieChowInterpolator::execute()
   TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
 
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
-  // operators we pull out the 'a' coefficients by querying the ADReal residual derivatives member
-  // at the element or neighbor dof locations. Consequently we need to enable derivative
+  // operators we pull out the 'a' coefficients by querying the ADReal residual derivatives
+  // member at the element or neighbor dof locations. Consequently we need to enable derivative
   // computation. We do this here outside the threaded regions
   const auto saved_do_derivatives = ADReal::do_derivatives;
   ADReal::do_derivatives = true;
@@ -533,13 +583,127 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   mooseAssert(neighbor && this->hasBlocks(neighbor->subdomain_id()),
               "We should be on an internal face...");
 
-  // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
-  // values on either side of the face
+  // Get pressure gradient. This is the uncorrected gradient plus a correction from cell
+  // centroid values on either side of the face
   const auto & grad_p = p.adGradSln(fi, time);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
   const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+
+  // Volumetric Correction Method #1: pressure-based correction
+  // Function that allows us to mark the face for which the Rhie-Chow interpolation is
+  // inconsistent Normally, we should apply a reconstructed volume correction to the Rhie-Chow
+  // coefficients However, since the fluxes at the face are given by the volume force we will
+  // simply mark the face add the reverse pressure interpolation for these faces In brief, this
+  // function is just marking the faces where the Rhie-Chow interpolation is inconsistent
+  auto vf_indicator_pressure_based =
+      [this, &elem, &neighbor, &time, &fi, &correct_skewness](const Point & unit_basis_vector)
+  {
+    // Holders for the interpolated corrected and uncorrected volume force
+    Real interp_vf;
+    Real uncorrected_interp_vf;
+
+    // Compute the corrected interpolated face value
+    Moose::FaceArg face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+
+    interp_vf = 0.0;
+    for (const auto i : make_range(_volumetric_force.size()))
+      interp_vf += (*this->_volumetric_force[i])(face, time);
+
+    // Compute the uncorrected interpolated face value
+    // For it to be consistent with the pressure gradient interpolation `uncorrectedAdGradSln`
+    // the uncorrected volume force computation should follow the same Green-Gauss process
+
+    Real elem_value = 0.0;
+    Real neigh_value = 0.0;
+
+    // Uncorrected interpolation - Step 1: loop over the faces of the element to compute
+    // face-average cell value
+    Real coord_multiplier;
+    const auto coord_type = _fe_problem.getCoordSystem(elem->subdomain_id());
+    const unsigned int rz_radial_coord =
+        Moose::COORD_RZ ? _fe_problem.getAxisymmetricRadialCoord() : libMesh::invalid_uint;
+
+    for (const auto side : make_range(elem->n_sides()))
+    {
+      const Elem * const loc_neighbor = elem->neighbor_ptr(side);
+      const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, loc_neighbor);
+      const FaceInfo * const fi_loc =
+          _moose_mesh.faceInfo(elem_has_fi ? elem : loc_neighbor,
+                               elem_has_fi ? side : loc_neighbor->which_neighbor_am_i(elem));
+
+      Moose::FaceArg loc_face{
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+
+      MooseMeshUtils::coordTransformFactor(
+          elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
+
+      Real face_volume_contribution = fi_loc->faceArea() *
+                                      (neighbor->vertex_average() - elem->vertex_average()).norm() *
+                                      coord_multiplier;
+
+      for (const auto i : make_range(_volumetric_force.size()))
+        elem_value += (*this->_volumetric_force[i])(loc_face, time) * face_volume_contribution *
+                      (fi_loc->normal() * unit_basis_vector);
+    }
+    elem_value = elem_value / elem->volume();
+
+    // Uncorrected interpolation - Step 2: loop over the face of the neighbor to compute
+    // face-average cell value
+    for (const auto side : make_range(neighbor->n_sides()))
+    {
+      const Elem * const loc_elem = neighbor->neighbor_ptr(side);
+      const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*neighbor, loc_elem);
+      const FaceInfo * const fi_loc =
+          _moose_mesh.faceInfo(elem_has_fi ? neighbor : loc_elem,
+                               elem_has_fi ? side : loc_elem->which_neighbor_am_i(neighbor));
+
+      Moose::FaceArg loc_face{
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+
+      MooseMeshUtils::coordTransformFactor(
+          neighbor->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
+
+      Real face_volume_contribution = fi_loc->faceArea() *
+                                      (elem->vertex_average() - neighbor->vertex_average()).norm() *
+                                      coord_multiplier;
+
+      for (const auto i : make_range(_volumetric_force.size()))
+        neigh_value += (*this->_volumetric_force[i])(loc_face, time) * face_volume_contribution *
+                       (fi_loc->normal() * unit_basis_vector);
+    }
+    neigh_value = neigh_value / neighbor->volume();
+
+    // Uncorrected interpolation - Step 3: interpolate element and neighbor reconstructed values
+    // to the face
+    MooseMeshUtils::coordTransformFactor(
+        fi.faceCentroid(), coord_multiplier, coord_type, rz_radial_coord);
+    interpolate(
+        Moose::FV::InterpMethod::Average, uncorrected_interp_vf, elem_value, neigh_value, fi, true);
+
+    // Return the flag indicator on which face the volume force correction is inconsistent
+    return MooseUtils::relativeFuzzyEqual(interp_vf, uncorrected_interp_vf, 1e-10) ? 0.0 : 1.0;
+  };
+
+  // Volumetric Correction Method #2: volume-based correction
+  // In thery, pressure and velocity cannot be decoupled when a body force is present
+  // Hence, we can de-activate the RC cofficient in faces that have a normal volume force
+  // In the method we mark the faces with a non-zero volume force with recpect to the baseline
+  auto vf_indicator_force_based = [this, &time, &fi, &correct_skewness](Point & face_normal)
+  {
+    Real value = 0.0;
+    Moose::FaceArg loc_face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+
+    for (const auto i : make_range(_volumetric_force.size()))
+      value += (*_volumetric_force[i])(loc_face, time) * (face_normal * fi.normal());
+    if ((std::abs(value) - _baseline_volume_force) > 0)
+      return 1.0;
+    else
+      return 0.0;
+  };
 
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
@@ -594,7 +758,28 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   // it only influences the averaged cell gradients which cancel out in the correction
   // below.
   for (const auto i : make_range(_dim))
+  {
+    // "Standard" pressure-based RC interpolation
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
+
+    if (_bool_correct_vf)
+    {
+      // To solve the volume force incorrect interpolation, we add back the pressure gradient to the
+      // RC-inconsistent faces regarding the marking method
+      Point unit_basis_vector;
+      unit_basis_vector(i) = 1.0;
+
+      // Get the value of the correction face indicator
+      Real correction_indicator;
+      if (_volume_force_correction_method == "force-consistent")
+        correction_indicator = vf_indicator_force_based(unit_basis_vector);
+      else
+        correction_indicator = vf_indicator_pressure_based(unit_basis_vector);
+
+      // Correct back the velocity
+      velocity(i) += face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i)) * correction_indicator;
+    }
+  }
 
   return velocity;
 }

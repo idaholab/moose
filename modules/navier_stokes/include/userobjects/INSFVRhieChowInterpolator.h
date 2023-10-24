@@ -188,6 +188,21 @@ private:
   /// Whether we want to pull all nonlocal 'a' coefficient data
   bool _pull_all_nonlocal;
 
+  /// Correct Rhie-Chow coefficients for volumetric force flag
+  const bool & _bool_correct_vf;
+
+  /// -- Method used for computing the properties average
+  const MooseEnum _volume_force_correction_method;
+
+  /// Names of the functors storing the volumetric forces
+  const std::vector<MooseFunctorName> * _volumetric_force_functors;
+
+  /// Values of the functors storing the volumetric forces
+  std::vector<const Moose::Functor<Real> *> _volumetric_force;
+
+  /// Minimum absolute RC force over the domain
+  Real _baseline_volume_force;
+
   /// A zero functor potentially used in _a_read
   const Moose::ConstantFunctor<ADReal> _zero_functor{0};
 };

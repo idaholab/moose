@@ -43,7 +43,7 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
                    cmake diffutils bison flex perl-IO-Compress perl-JSON perl-JSON-PP \
                    libtirpc libtirpc-devel zlib-devel patch patchutils epel-release file \
                    libpng libpng-devel unzip jq valgrind cppunit doxygen fftw-devel gsl-devel \
-                   libtool autoconf automake
+                   libtool autoconf automake cppunit-devel
     # After epel-release
     dnf install -y glpk-devel patchelf lcov
 
