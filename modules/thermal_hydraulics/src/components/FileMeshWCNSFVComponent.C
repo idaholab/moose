@@ -166,8 +166,21 @@ FileMeshWCNSFVComponent::hasPhysics(const PhysicsName & phys_name) const
 WCNSFVPhysicsBase *
 FileMeshWCNSFVComponent::getPhysics(const PhysicsName & phys_name) const
 {
-  auto physics =
-      getMooseApp().actionWarehouse().getPhysics<WCNSFVPhysicsBase>(prefix() + phys_name);
+  WCNSFVPhysicsBase * physics;
+  // Try to get it from the local storage first
+  if (phys_name == "flow")
+    return _flow_physics;
+  else if (phys_name == "energy")
+    return _energy_physics;
+  else if (phys_name == "scalar")
+    return _scalar_physics;
+  else if (phys_name == "turbulence")
+    return _turbulence_physics;
+  // The Physics might have been merged away. In this case, could be the wrong one. We will
+  // hit a helpful error in Action.h
+  else
+    physics = getMooseApp().actionWarehouse().getPhysics<WCNSFVPhysicsBase>(prefix() + phys_name);
+
   if (!physics)
     mooseError("Physics " + prefix() + phys_name + " is not derived from WCNSFVPhysicsBase");
   return physics;
@@ -205,7 +218,7 @@ FileMeshWCNSFVComponent::addPhysics(std::string & physics_name, InputParameters 
       physics_names.push_back(potential_match->name());
       if (potential_match->checkParametersMergeable(params, true))
       {
-        potential_match->mergeParameters(params);
+        potential_match->processAdditionalParameters(params);
         physics_name = potential_match->name();
         return;
       }
