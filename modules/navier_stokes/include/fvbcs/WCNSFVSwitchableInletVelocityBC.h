@@ -13,6 +13,8 @@
 
 /**
  * Dirichlet boundary conditions for the velocity, set from either a velocity postprocessor
+ * The class is similar to WCNSFVInletVelocityBC but includes a switch
+ * that allows us to switch on/off this boundary condition
  * or a mass flow rate divided by density and surface
  */
 class WCNSFVSwitchableInletVelocityBC : public WCNSFVInletVelocityBC
@@ -24,7 +26,7 @@ public:
 protected:
   ADReal boundaryValue(const FaceInfo & fi) const override;
 
-  /// Boolean switch to turn boudnary condition on/off
+  /// Boolean switch to turn boundary condition on/off
   const bool & _switch_bc;
 
   /// Face limiter

@@ -52,7 +52,6 @@ switch_time = 1.0
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
   []
   [pressure]
     type = INSFVPressureVariable
@@ -174,7 +173,7 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    enable = true
+    switch = true
     face_limiter = 1.0
   []
   [outlet_u]
@@ -184,7 +183,7 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    enable = false
+    switch = false
     scaling_factor = -1.0
     face_limiter = 1.0
   []
@@ -220,7 +219,7 @@ switch_time = 1.0
     variable = pressure
     boundary = 'right'
     function = ${outlet_pressure}
-    enable = true
+    switch = true
     face_limiter = 1.0
   []
   [inlet_p]
@@ -228,7 +227,7 @@ switch_time = 1.0
     variable = pressure
     boundary = 'left'
     function = ${outlet_pressure}
-    enable = false
+    switch = false
     face_limiter = 1.0
   []
 
@@ -258,32 +257,32 @@ switch_time = 1.0
   []
   [mass_flux_and_pressure_test_scaling]
     type = ParsedFunction
-    expression = 't'
+    expression = 'if(t<${switch_time} | t>2.0*${switch_time}, 0.1, 0.2)'
   []
 []
 
 [Controls]
   [func_control_u_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_u/enable'
+    parameter = 'FVBCs/inlet_u/switch'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_u_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_u/enable'
+    parameter = 'FVBCs/outlet_u/switch'
     function = 'func_coef_comp'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_p/enable'
+    parameter = 'FVBCs/outlet_p/switch'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_p/enable'
+    parameter = 'FVBCs/inlet_p/switch'
     function = 'func_coef_comp'
     execute_on = 'initial timestep_begin'
   []

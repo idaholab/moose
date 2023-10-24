@@ -24,7 +24,7 @@ WCNSFVSwitchableInletVelocityBC::validParams()
   params.addParam<bool>("switch", true, "Switch on (true) / off (false) for boundary condition.");
   params.declareControllable("switch");
 
-  params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
+  params.addParam<Real>("face_limiter", 1.0, "Face flux limiter.");
   params.declareControllable("face_limiter");
 
   return params;
@@ -35,18 +35,6 @@ WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputPara
     _switch_bc(getParam<bool>("switch")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
-  if (!dynamic_cast<INSFVVelocityVariable *>(&_var))
-    paramError("variable",
-               "The variable argument to WCNSFVSwitchableInletVelocityBC must be of type "
-               "INSFVVelocityVariable");
-
-  // Density is often set as global parameters so it is not checked
-  if (_velocity_pp && (_mdot_pp || _area_pp))
-    mooseWarning("If setting the velocity directly, no need for inlet mass flow rate or area");
-
-  // Need enough information if trying to use a mass flow rate postprocessor
-  if (!_velocity_pp && (!_mdot_pp || !_area_pp || !_rho))
-    mooseError("Mass flow rate, area and density should be provided if velocity is not");
 }
 
 ADReal

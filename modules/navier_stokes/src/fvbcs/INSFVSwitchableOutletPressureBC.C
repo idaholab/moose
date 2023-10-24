@@ -23,7 +23,7 @@ INSFVSwitchableOutletPressureBC::validParams()
   params.addParam<bool>("switch", true, "Switch on (true) / off (false) for boundary condition.");
   params.declareControllable("switch");
 
-  params.addParam<Real>("face_limiter", 1.0, "Interpolation face flux limiter.");
+  params.addParam<Real>("face_limiter", 1.0, "Face flux limiter.");
   params.declareControllable("face_limiter");
 
   return params;
@@ -34,16 +34,6 @@ INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputPara
     _switch_bc(getParam<bool>("switch")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
-  if (!dynamic_cast<INSFVPressureVariable *>(&_var))
-    paramError("variable",
-               "The variable argument to INSFVSwitchableOutletPressureBC must be of type "
-               "INSFVPressureVariable");
-
-  // Check parameters
-  if ((_functor && (_pp_value || _function)) || (_function && _pp_value) ||
-      (!_functor && !_pp_value && !_function))
-    mooseError("One and only one of function/functor/postprocessor may be specified for the outlet "
-               "pressure");
 }
 
 ADReal

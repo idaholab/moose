@@ -11,6 +11,6 @@
     type = CSVDiff
     input = switch_vel_pres_bc.i
     csvdiff = switch_vel_pres_bc_out.csv
-    requirement = 'The system shall be able to switch boundaries during runtime.'
+    requirement = 'The system shall be able to switch the behavior of velocity and pressure boundary conditions during runtime.'
   []
 []
