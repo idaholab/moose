@@ -38,14 +38,14 @@ inlet_v = 0.001
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '${inlet_v} 0'
+        momentum_inlet_functors = '${inlet_v} 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip noslip'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '${outlet_pressure}'
+        pressure_functors = '${outlet_pressure}'
 
         mass_advection_interpolation = 'average'
         momentum_advection_interpolation = 'average'

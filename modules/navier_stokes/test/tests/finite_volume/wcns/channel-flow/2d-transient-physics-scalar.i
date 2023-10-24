@@ -32,6 +32,8 @@ inlet_v = 0.001
         compressibility = 'weakly-compressible'
         # porous_medium_treatment = true
 
+        block = 0
+
         velocity_variable = 'vel_x vel_y'
 
         density = 'rho'
@@ -42,75 +44,67 @@ inlet_v = 0.001
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '${inlet_v} 0'
+        momentum_inlet_functors = '${inlet_v} 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip noslip'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '${outlet_pressure}'
+        pressure_functors = '${outlet_pressure}'
 
         mass_advection_interpolation = 'average'
         momentum_advection_interpolation = 'average'
       []
     []
-    [WCNSFVHeatAdvectionPhysics]
-      [energy]
+    [WCNSFVScalarAdvectionPhysics]
+      [passive_scalar]
         compressibility = 'weakly-compressible'
-        # porous_medium_treatment = true
-
-        coupled_flow_physics = flow
-
-        velocity_variable = 'vel_x vel_y'
-
-        density = 'rho'
-        dynamic_viscosity = 'mu'
-        thermal_conductivity = 'k'
-        specific_heat = 'cp'
-
-        initial_temperature = '${inlet_temp}'
-
-        inlet_boundaries = 'left'
-        momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '${inlet_v} 0'
-        energy_inlet_types = 'fixed-temperature'
-        energy_inlet_function = '${inlet_temp}'
-
-        wall_boundaries = 'top bottom'
-        momentum_wall_types = 'noslip noslip'
-        energy_wall_types = 'heatflux heatflux'
-        energy_wall_function = '0 0'
-
-        outlet_boundaries = 'right'
-        momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '${outlet_pressure}'
-
-        external_heat_source = 'power_density'
-
-        energy_advection_interpolation = 'average'
-      []
-    []
-    [WCNSFVTurbulencePhysics]
-      [turbulence]
-        compressibility = 'weakly-compressible'
-        porous_medium_treatment = true
+        porous_medium_treatment = false
 
         block = 0
 
         coupled_flow_physics = flow
-        heat_advection_physics = energy
 
         velocity_variable = 'vel_x vel_y'
+        passive_scalar_names = 'c1'
 
         density = 'rho'
         dynamic_viscosity = 'mu'
+        passive_scalar_diffusivity = '3'
+        passive_scalar_coupled_source = '4'
+        passive_scalar_coupled_source_coeff = '1'
+
+        initial_scalar_variables = '1'
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '${inlet_v} 0'
+        passive_scalar_inlet_types = 'fixed-value'
+        passive_scalar_inlet_functors = '${inlet_temp}'
+
+        passive_scalar_advection_interpolation = 'average'
       []
     []
+    # [WCNSFVTurbulencePhysics]
+    #   [turbulence]
+    #     compressibility = 'weakly-compressible'
+    #     porous_medium_treatment = true
+
+    #     block = 0
+
+    #     coupled_flow_physics = flow
+    #     scalar_advection_physics = passive_scalar
+
+    #     velocity_variable = 'vel_x vel_y'
+
+    #     density = 'rho'
+    #     dynamic_viscosity = 'mu'
+
+    #     inlet_boundaries = 'left'
+    #     momentum_inlet_types = 'fixed-velocity'
+    #     momentum_inlet_functors = '${inlet_v} 0'
+    #   []
+    # []
   []
 []
 
@@ -122,6 +116,10 @@ inlet_v = 0.001
   [porosity]
     type = MooseVariableFVReal
     initial_condition = 1
+  []
+  [T_fluid]
+    type = MooseVariableFVReal
+    initial_condition = 300
   []
 []
 
