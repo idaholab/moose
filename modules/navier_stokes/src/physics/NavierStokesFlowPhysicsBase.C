@@ -148,3 +148,28 @@ NavierStokesFlowPhysicsBase::checkParametersMergeable(const InputParameters & ot
   else
     return false;
 }
+
+void
+NavierStokesFlowPhysicsBase::processAdditionalParameters(const InputParameters & other_params)
+{
+  // Move inlet BCs parameters to this Physics' parameters
+  _inlet_boundaries.insert(_inlet_boundaries.end(),
+                           other_params.get<std::vector<BoundaryName>>("inlet_boundaries").begin(),
+                           other_params.get<std::vector<BoundaryName>>("inlet_boundaries").end());
+
+  // Move outlet BCs parameters to this Physics' parameters
+  _outlet_boundaries.insert(
+      _inlet_boundaries.end(),
+      other_params.get<std::vector<BoundaryName>>("outlet_boundaries").begin(),
+      other_params.get<std::vector<BoundaryName>>("outlet_boundaries").end());
+
+  // Move wall BCs parameters to this Physics' parameters
+  _wall_boundaries.insert(_inlet_boundaries.end(),
+                          other_params.get<std::vector<BoundaryName>>("wall_boundaries").begin(),
+                          other_params.get<std::vector<BoundaryName>>("wall_boundaries").end());
+
+  // Move block parameters to this Physics' parameters
+  _blocks.insert(_blocks.end(),
+                 other_params.get<std::vector<SubdomainName>>("blocks").begin(),
+                 other_params.get<std::vector<SubdomainName>>("blocks").end());
+}

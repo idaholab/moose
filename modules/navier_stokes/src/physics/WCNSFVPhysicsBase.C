@@ -260,3 +260,16 @@ WCNSFVPhysicsBase::getFlowVariableName(const std::string & short_name) const
   else
     mooseError("Short Variable name '", short_name, "' not recognized.");
 }
+
+void
+WCNSFVPhysicsBase::processAdditionalParameters(const InputParameters & other_params)
+{
+  NavierStokesFlowPhysicsBase::processAdditionalParameters(other_params);
+  // Move inlet BCs parameters to this Physics' parameters
+
+  // Move outlet BCs parameters to this Physics' parameters
+
+  // Move wall BCs parameters to this Physics' parameters
+
+  // Move block parameters to this Physics' parameters
+}

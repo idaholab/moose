@@ -189,7 +189,7 @@ protected:
    */
   void setCurrentItems(const std::vector<MooseEnumItem> & current);
 
-  /// The current id
+  /// The current values of the MultiMooseEnum
   std::vector<MooseEnumItem> _current;
 
   /**

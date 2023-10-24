@@ -90,8 +90,8 @@ public:
   {
     mooseError("Not implemented");
   }
-  /// Merge these parameters into existing parameters of this Physics
-  virtual void mergeParameters(const InputParameters & /*params*/)
+  /// Process these additional parameters into existing attributes of this Physics
+  virtual void processAdditionalParameters(const InputParameters & /*params*/)
   {
     mooseError("Not implemented");
   }

@@ -28,6 +28,7 @@ public:
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
   bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
+  void processAdditionalParameters(const InputParameters & other_params) override;
 
 protected:
   /// Check that the shared parameters are consistent between this object's param and the other's
@@ -53,11 +54,11 @@ protected:
   const NonlinearVariableName _fluid_temperature_name;
 
   /// Boundaries with a flow inlet specified on them
-  const std::vector<BoundaryName> _inlet_boundaries;
+  std::vector<BoundaryName> _inlet_boundaries;
   /// Boundaries with a flow outlet specified on them
-  const std::vector<BoundaryName> _outlet_boundaries;
+  std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
-  const std::vector<BoundaryName> _wall_boundaries;
+  std::vector<BoundaryName> _wall_boundaries;
 
   /// Name of the density material property
   const MooseFunctorName _density_name;
