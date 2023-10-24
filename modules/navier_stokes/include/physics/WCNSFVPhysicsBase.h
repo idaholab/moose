@@ -33,9 +33,6 @@ public:
   /// Convenience routine to be able to retrieve the actual variable names from their default names
   VariableName getFlowVariableName(const std::string & default_name) const;
 
-  /// To merge parameters with another Physics
-  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
-
 protected:
   InputParameters getAdditionalRMParams() const override;
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const;
@@ -51,6 +48,11 @@ protected:
 
   /// A physics object defining the flow equations
   const WCNSFVFlowPhysics * _flow_equations_physics;
+
+  /// Postprocessors describing the momentum inlet for each boundary. Indexing based on the number of flux boundaries
+  std::vector<PostprocessorName> _flux_inlet_pps;
+  /// Direction of each flux inlet. Indexing based on the number of flux boundaries
+  std::vector<Point> _flux_inlet_directions;
 
 private:
   /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations

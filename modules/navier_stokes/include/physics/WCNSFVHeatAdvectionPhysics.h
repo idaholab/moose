@@ -26,8 +26,6 @@ public:
   const MooseFunctorName & getSpecificHeatName() const { return _specific_heat_name; }
   const MooseFunctorName getSpecificEnthalpyName() const { return NS::specific_enthalpy; }
 
-  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
-
 protected:
 private:
   void addNonlinearVariables() override;
@@ -64,9 +62,25 @@ private:
   bool processThermalConductivity();
 
   /// Name of the specific heat material property
-  const MooseFunctorName _specific_heat_name;
-  /// Subdomains where we want to have different thermal conduction
-  const std::vector<std::vector<SubdomainName>> _thermal_conductivity_blocks;
+  MooseFunctorName _specific_heat_name;
+  /// Vector of subdomain groups where we want to have different thermal conduction
+  std::vector<std::vector<SubdomainName>> _thermal_conductivity_blocks;
   /// Name of the thermal conductivity functor for each block-group
-  const std::vector<MooseFunctorName> _thermal_conductivity_name;
+  std::vector<MooseFunctorName> _thermal_conductivity_name;
+
+  /// Vector of subdomain groups where we want to have different ambient convection
+  std::vector<std::vector<SubdomainName>> _ambient_convection_blocks;
+  /// Name of the ambient convection heat transfer coefficients for each block-group
+  std::vector<MooseFunctorName> _ambient_convection_alpha;
+  /// Name of the solid domain temperature for each block-group
+  std::vector<MooseFunctorName> _ambient_temperature;
+
+  /// Energy inlet boundary types
+  MultiMooseEnum _energy_inlet_types;
+  /// Functors describing the inlet boundary values. See energy_inlet_types for what the functors actually represent
+  std::vector<MooseFunctorName> _energy_inlet_functors;
+  /// Energy wall boundary types
+  MultiMooseEnum _energy_wall_types;
+  /// Functors describing the wall boundary values. See energy_wall_types for what the functors actually represent
+  std::vector<MooseFunctorName> _energy_wall_functors;
 };

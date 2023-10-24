@@ -23,8 +23,6 @@ public:
 
   WCNSFVFlowPhysics(const InputParameters & parameters);
 
-  bool checkParametersMergeable(const InputParameters & other_params, bool warn) const override;
-
 protected:
 private:
   void addNonlinearVariables() override;
@@ -74,4 +72,10 @@ private:
   bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
 
   const WCNSFVTurbulenceModel * _turbulence_physics;
+
+  /// Functors describing the momentum inlet for each boundary. See matching index momentum_inlet_types
+  /// for the function actually computes
+  std::vector<std::vector<MooseFunctorName>> _momentum_inlet_functors;
+  /// Functors describing the outlet pressure on each boundary
+  std::vector<MooseFunctorName> _pressure_functors;
 };
