@@ -215,7 +215,11 @@ FaceInfo::faceType(const std::pair<unsigned int, unsigned int> & var_sys) const
 {
   auto it = _face_types_by_var.find(var_sys);
   if (it == _face_types_by_var.end())
-    mooseError("Variable ", var_sys.first, " not found in variable to VarFaceNeighbors map");
+    mooseError("Variable number ",
+               var_sys.first,
+               " in system number ",
+               var_sys.second,
+               " not found in variable to VarFaceNeighbors map");
   return it->second;
 }
 
