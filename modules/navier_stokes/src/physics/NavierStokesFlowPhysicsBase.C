@@ -75,8 +75,10 @@ NavierStokesFlowPhysicsBase::NavierStokesFlowPhysicsBase(const InputParameters &
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
-    _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
+    _momentum_inlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _inlet_boundaries, getParam<MultiMooseEnum>("momentum_inlet_types"))),
+    _momentum_outlet_types(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+        _outlet_boundaries, getParam<MultiMooseEnum>("momentum_outlet_types"))),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _density_name(getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
@@ -166,14 +168,18 @@ NavierStokesFlowPhysicsBase::processAdditionalParameters(const InputParameters &
   _inlet_boundaries.insert(_inlet_boundaries.end(),
                            other_params.get<std::vector<BoundaryName>>("inlet_boundaries").begin(),
                            other_params.get<std::vector<BoundaryName>>("inlet_boundaries").end());
-  _momentum_inlet_types.push_back(other_params.get<MultiMooseEnum>("momentum_inlet_types"));
+  _momentum_inlet_types.merge(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      other_params.get<std::vector<BoundaryName>>("inlet_boundaries"),
+      other_params.get<MultiMooseEnum>("momentum_inlet_types")));
 
   // Move outlet BCs parameters to this Physics' parameters
   _outlet_boundaries.insert(
       _outlet_boundaries.end(),
       other_params.get<std::vector<BoundaryName>>("outlet_boundaries").begin(),
       other_params.get<std::vector<BoundaryName>>("outlet_boundaries").end());
-  _momentum_outlet_types.push_back(other_params.get<MultiMooseEnum>("momentum_outlet_types"));
+  _momentum_outlet_types.merge(createMapFromVectorAndMultiMooseEnum<BoundaryName>(
+      other_params.get<std::vector<BoundaryName>>("outlet_boundaries"),
+      other_params.get<MultiMooseEnum>("momentum_outlet_types")));
 
   // Move wall BCs parameters to this Physics' parameters
   _wall_boundaries.insert(_wall_boundaries.end(),

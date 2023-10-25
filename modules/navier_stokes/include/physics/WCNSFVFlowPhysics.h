@@ -68,20 +68,17 @@ private:
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
-  /// The type of the pressure interpolation method
-  // const MooseEnum _pressure_face_interpolation;
-  // /// The type of the face interpolation method for the velocity/momentum
-  // const MooseEnum _momentum_face_interpolation;
-
+  /// Whether a turbulence Physics has been coupled in, to know which viscosity to pick on symmetry boundary conditions
   bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
 
+  /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Functors describing the momentum inlet for each boundary. See matching index momentum_inlet_types
   /// for the function actually computes
-  std::vector<std::vector<MooseFunctorName>> _momentum_inlet_functors;
+  std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_inlet_functors;
   /// Functors describing the outlet pressure on each boundary
-  std::vector<MooseFunctorName> _pressure_functors;
+  std::map<BoundaryName, MooseFunctorName> _pressure_functors;
 
   /// Subdomains where we want to have volumetric friction
   std::vector<std::vector<SubdomainName>> _friction_blocks;

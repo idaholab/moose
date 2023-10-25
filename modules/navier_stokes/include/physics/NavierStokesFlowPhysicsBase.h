@@ -62,9 +62,9 @@ protected:
   std::vector<BoundaryName> _wall_boundaries;
 
   /// Momentum inlet boundary types
-  MultiMooseEnum _momentum_inlet_types;
+  std::map<BoundaryName, MooseEnum> _momentum_inlet_types;
   /// Momentum outlet boundary types
-  MultiMooseEnum _momentum_outlet_types;
+  std::map<BoundaryName, MooseEnum> _momentum_outlet_types;
   /// Momentum wall boundary types
   MultiMooseEnum _momentum_wall_types;
 

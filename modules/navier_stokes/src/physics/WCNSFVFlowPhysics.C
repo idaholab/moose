@@ -72,9 +72,6 @@ WCNSFVFlowPhysics::validParams()
 
 WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
-    _momentum_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")),
-    _pressure_functors(getParam<std::vector<MooseFunctorName>>("pressure_functors")),
     _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
     _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
     _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))
@@ -82,6 +79,13 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   for (const auto d : index_range(_velocity_names))
     saveNonlinearVariableName(_velocity_names[d]);
   saveNonlinearVariableName(_pressure_name);
+
+  // Create maps for boundary-restricted parameters
+  _momentum_inlet_functors = createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+      _inlet_boundaries,
+      getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors"));
+  _pressure_functors = createMapFromVectors<BoundaryName, MooseFunctorName>(
+      _outlet_boundaries, getParam<std::vector<MooseFunctorName>>("pressure_functors"));
 
   checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_types");
   checkTwoDVectorParamsSameLength<SubdomainName, std::string>("friction_blocks", "friction_coeffs");
@@ -628,13 +632,13 @@ WCNSFVFlowPhysics::addINSInletBC()
 {
   unsigned int flux_bc_counter = 0;
   unsigned int velocity_pressure_counter = 0;
-  for (unsigned int bc_ind = 0; bc_ind < _momentum_inlet_types.size(); ++bc_ind)
+  for (const auto & [inlet_bdy, momentum_inlet_type] : _momentum_inlet_types)
   {
-    if (_momentum_inlet_types[bc_ind] == "fixed-velocity")
+    if (momentum_inlet_type == "fixed-velocity")
     {
       const std::string bc_type = "INSFVInletVelocityBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
       if (_momentum_inlet_functors.size() < velocity_pressure_counter + 1)
         paramError("momentum_inlet_functors",
                    "More non-flux inlets than inlet functors (" +
@@ -644,13 +648,13 @@ WCNSFVFlowPhysics::addINSInletBC()
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseFunctorName>("functor") =
-            _momentum_inlet_functors[velocity_pressure_counter][d];
+            libmesh_map_find(_momentum_inlet_functors, inlet_bdy)[d];
 
-        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _inlet_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + inlet_bdy, params);
       }
       ++velocity_pressure_counter;
     }
-    else if (_momentum_inlet_types[bc_ind] == "fixed-pressure")
+    else if (momentum_inlet_type == "fixed-pressure")
     {
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -660,14 +664,14 @@ WCNSFVFlowPhysics::addINSInletBC()
                    "More non-flux inlets than inlet functors (" +
                        std::to_string(_momentum_inlet_functors.size()) + ")");
 
-      params.set<FunctionName>("function") = _momentum_inlet_functors[velocity_pressure_counter][0];
-      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+      params.set<FunctionName>("function") =
+          libmesh_map_find(_momentum_inlet_functors, inlet_bdy)[0];
+      params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
 
-      getProblem().addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, _pressure_name + "_" + inlet_bdy, params);
       ++velocity_pressure_counter;
     }
-    else if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
-             _momentum_inlet_types[bc_ind] == "flux-velocity")
+    else if (momentum_inlet_type == "flux-mass" || momentum_inlet_type == "flux-velocity")
     {
       {
         const std::string bc_type =
@@ -678,7 +682,7 @@ WCNSFVFlowPhysics::addINSInletBC()
           params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
-        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
         params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         if (_porous_medium_treatment)
           params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
@@ -687,10 +691,10 @@ WCNSFVFlowPhysics::addINSInletBC()
                      "More inlet flux BCs than inlet flux pps (" +
                          std::to_string(_flux_inlet_pps.size()) + ")");
 
-        if (_momentum_inlet_types[bc_ind] == "flux-mass")
+        if (momentum_inlet_type == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
-          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + inlet_bdy;
         }
         else
           params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
@@ -700,8 +704,7 @@ WCNSFVFlowPhysics::addINSInletBC()
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
           params.set<NonlinearVariableName>("variable") = _velocity_names[d];
 
-          getProblem().addFVBC(
-              bc_type, _velocity_names[d] + "_" + _inlet_boundaries[bc_ind], params);
+          getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + inlet_bdy, params);
         }
       }
       {
@@ -709,20 +712,20 @@ WCNSFVFlowPhysics::addINSInletBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<NonlinearVariableName>("variable") = _pressure_name;
-        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
 
         if (_flux_inlet_directions.size())
           params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
 
-        if (_momentum_inlet_types[bc_ind] == "flux-mass")
+        if (momentum_inlet_type == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
-          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + inlet_bdy;
         }
         else
           params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
-        getProblem().addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
+        getProblem().addFVBC(bc_type, _pressure_name + "_" + inlet_bdy, params);
       }
 
       // need to increment flux_bc_counter
@@ -735,19 +738,16 @@ void
 WCNSFVFlowPhysics::addINSOutletBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
-  mooseAssert(_momentum_outlet_types.size() == 0 ||
-                  (_momentum_outlet_types.size() == _outlet_boundaries.size()),
-              "We cant miss an outlet boundary if we are going to be creating them in the Physics");
-  for (unsigned int bc_ind = 0; bc_ind < _momentum_outlet_types.size(); ++bc_ind)
+  for (const auto & [outlet_bdy, momentum_outlet_type] : _momentum_outlet_types)
   {
-    if (_momentum_outlet_types[bc_ind] == "zero-gradient" ||
-        _momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
+    if (momentum_outlet_type == "zero-gradient" ||
+        momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
       {
         const std::string bc_type = _porous_medium_treatment ? "PINSFVMomentumAdvectionOutflowBC"
                                                              : "INSFVMomentumAdvectionOutflowBC";
         InputParameters params = getFactory().getValidParams(bc_type);
-        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+        params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
         if (_porous_medium_treatment)
           params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
         params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
@@ -761,37 +761,34 @@ WCNSFVFlowPhysics::addINSOutletBC()
           params.set<NonlinearVariableName>("variable") = _velocity_names[d];
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-          getProblem().addFVBC(
-              bc_type, _velocity_names[d] + "_" + _outlet_boundaries[bc_ind], params);
+          getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + outlet_bdy, params);
         }
       }
     }
 
-    if (_momentum_outlet_types[bc_ind] == "fixed-pressure" ||
-        _momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
+    if (momentum_outlet_type == "fixed-pressure" ||
+        momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
-      if (_momentum_outlet_types.size() != _pressure_functors.size())
-        paramError("pressure_functors", "Should be of the same size as the outlet types");
       const std::string bc_type = "INSFVOutletPressureBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _pressure_name;
-      params.set<MooseFunctorName>("functor") = _pressure_functors[bc_ind];
-      params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+      params.set<MooseFunctorName>("functor") = libmesh_map_find(_pressure_functors, outlet_bdy);
+      params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
 
-      getProblem().addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, _pressure_name + "_" + outlet_bdy, params);
     }
-    else if (_momentum_outlet_types[bc_ind] == "zero-gradient")
+    else if (momentum_outlet_type == "zero-gradient")
     {
       const std::string bc_type = "INSFVMassAdvectionOutflowBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _pressure_name;
       params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+      params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
 
       for (unsigned int d = 0; d < dimension(); ++d)
         params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
 
-      getProblem().addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, _pressure_name + "_" + outlet_bdy, params);
     }
   }
 }
@@ -1030,12 +1027,10 @@ WCNSFVFlowPhysics::processAdditionalParameters(const InputParameters & other_par
   WCNSFVPhysicsBase::processAdditionalParameters(other_params);
 
   // Process inlet functors parameters
-  _momentum_inlet_functors.insert(
-      _momentum_inlet_functors.end(),
-      other_params.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")
-          .begin(),
-      other_params.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")
-          .end());
+  // we can use the map merge because we do not expect overlap in the keys (boundaries)
+  _momentum_inlet_functors.merge(createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
+      other_params.get<std::vector<BoundaryName>>("inlet_boundaries"),
+      other_params.get<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")));
 
   // Process block restricted friction blocks parameters
   _friction_blocks.insert(
@@ -1052,8 +1047,7 @@ WCNSFVFlowPhysics::processAdditionalParameters(const InputParameters & other_par
       other_params.get<std::vector<std::vector<std::string>>>("friction_coeffs").end());
 
   // Move outlet BCs parameters to this Physics' parameters
-  _pressure_functors.insert(
-      _pressure_functors.end(),
-      other_params.get<std::vector<MooseFunctorName>>("pressure_functors").begin(),
-      other_params.get<std::vector<MooseFunctorName>>("pressure_functors").end());
+  _pressure_functors.merge(createMapFromVectors<BoundaryName, MooseFunctorName>(
+      other_params.get<std::vector<BoundaryName>>("outlet_boundaries"),
+      other_params.get<std::vector<MooseFunctorName>>("pressure_functors")));
 }
