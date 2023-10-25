@@ -4,6 +4,7 @@ The following pages provide examples on how to use the optimization module to so
 
 - [examples/forceInv_main.md]
 - [examples/materialInv_main.md]
+- [examples/top_opt_main.md]
 - [debuggingHelp.md]
 
 All of the examples in this section are parameterizing force loads or material properties for steady state
