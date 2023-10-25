@@ -278,11 +278,13 @@ private:
 #error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.
 #endif
 
+} // namespace Moose
+
+// TODO namespace this inside MOOSE as Moose::map_find once libmesh namespace is separate
 // This macro is useful to get around the deficiencies of the C++ map 'at' and 'find' operators
 // at errors with an exception which requires catching to output nicely
 // find is a very verbose syntax
 // This should only be used in a class where name() and type() are defined. If not, rely on
 // libmesh_map_find instead
-#define map_find(map, key) MooseUtils::map_find((map), (key), name(), type(), __FILE__, __LINE__)
-
-} // namespace Moose
+#define moose_map_find(map, key)                                                                   \
+  MooseUtils::map_find((map), (key), name(), type(), __FILE__, __LINE__)

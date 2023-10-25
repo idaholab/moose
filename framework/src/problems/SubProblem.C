@@ -1132,7 +1132,7 @@ SubProblem::initialSetup()
             "No functor ever provided with name '",
             functor_name,
             "', which was requested by '",
-            MooseUtils::join(libmesh_map_find(_functor_to_requestors, functor_wrapper_name), ","),
+            MooseUtils::join(moose_map_find(_functor_to_requestors, functor_wrapper_name), ","),
             "'.");
       if (true_functor_type == TrueFunctorIs::NONAD ? non_ad_functor->ownsWrappedFunctor()
                                                     : ad_functor->ownsWrappedFunctor())

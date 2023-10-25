@@ -76,7 +76,7 @@ GhostHigherDLowerDPointNeighbors::operator()(const MeshBase::const_element_itera
       if (node.processor_id() != p)
         continue;
 
-      const auto & elem_node_neighbors = libmesh_map_find(node_to_elem_map, node.id());
+      const auto & elem_node_neighbors = moose_map_find(node_to_elem_map, node.id());
       for (const auto elem_id : elem_node_neighbors)
       {
         const Elem * const elem_node_neighbor = _mesh->elem_ptr(elem_id);

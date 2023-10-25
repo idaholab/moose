@@ -1077,7 +1077,7 @@ FEProblemBase::initialSetup()
       // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
       // Lagrange on a second order mesh) and user-code can often handle that
       const Elem * const an_elem =
-          _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+          _mesh.getMesh().elem_ptr(moose_map_find(node_to_elem_map, node->id()).front());
       if (!an_elem->is_vertex(an_elem->get_node_index(node)))
         continue;
 
@@ -2405,7 +2405,7 @@ FEProblemBase::addVariable(const std::string & var_type,
   std::istringstream ss(nl_sys_name);
   unsigned int nl_sys_num;
   if (!(ss >> nl_sys_num) || !ss.eof())
-    nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
+    nl_sys_num = moose_map_find(_nl_sys_name_to_num, nl_sys_name);
 
   _nl[nl_sys_num]->addVariable(var_type, var_name, params);
   if (_displaced_problem)
@@ -5637,7 +5637,7 @@ FEProblemBase::nlSysNum(const NonlinearSystemName & nl_sys_name) const
   std::istringstream ss(nl_sys_name);
   unsigned int nl_sys_num;
   if (!(ss >> nl_sys_num) || !ss.eof())
-    nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
+    nl_sys_num = moose_map_find(_nl_sys_name_to_num, nl_sys_name);
 
   return nl_sys_num;
 }
