@@ -291,15 +291,17 @@ void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node
                          std::vector<dof_id_type> & ordered_elem_id_list);
 
 /**
- * Stitch two overlapping sidesets together
+ * Stitch two overlapping nodesets together
  * @param input_mesh the mesh to modify
- * @param side1 one of the sidesets to stitch, the one for which we keep the nodes
- * @param side2 one of the sidesets to stitch, we delete the nodes from that one
+ * @param side1 one of the nodesets to stitch, the one for which we keep the nodes
+ * @param side2 one of the nodesets to stitch, we delete the nodes from that one
  * @param allow_partial whether to allow partial stitching the two sidesets. If false, error if the
- *                      sidesets do not perfectly align
+ *                      nodesets do not perfectly align
+ * @param keep_old whether to copy all nodes from nodeset 1 to nodeset 2 after
  */
-void stitchSidesets(MooseMesh & input_mesh,
+void stitchNodesets(MooseMesh & input_mesh,
                     const BoundaryName & side1,
                     const BoundaryName & side2,
-                    bool allow_partial);
+                    bool allow_partial,
+                    bool keep_old);
 }
