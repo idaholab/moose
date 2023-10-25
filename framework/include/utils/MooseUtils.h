@@ -24,6 +24,7 @@
 #include "libmesh/bounding_box.h"
 #include "libmesh/int_range.h"
 #include "libmesh/tensor_tools.h"
+#include "libmesh/utility.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualnumber_decl.h"
@@ -1196,6 +1197,71 @@ inline bool
 isDigits(const std::string & str)
 {
   return std::all_of(str.begin(), str.end(), [](unsigned char c) { return std::isdigit(c); });
+}
+
+/**
+ * This function should not be called directly (although it can be),
+ * instead see the moose::map_find() macro.
+ *
+ * Calls find(key), and checks the result against end(). Returns the
+ * corresponding value if found, throws an error otherwise. Templated
+ * on the type of map, so this will work with both std::map and
+ * std::unordered_map.
+ */
+template <
+    typename Map,
+    typename Key,
+    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+inline const typename Map::mapped_type &
+map_find(const Map & map,
+         const Key & key,
+         std::string name,
+         std::string class_type,
+         const char * filename,
+         int line_number)
+{
+  auto it = map.find(key);
+  if (it == map.end())
+    mooseError("map_find() error: key not found during a search in class ",
+               name,
+               " of type ",
+               class_type,
+               ".\n See file ",
+               filename,
+               " at line ",
+               line_number);
+  return it->second;
+}
+
+/**
+ * A version of the map_find() utility which can only be used if
+ * the map key is printable via std::stream.
+ */
+template <
+    typename Map,
+    typename Key,
+    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+inline const typename Map::mapped_type &
+map_find(const Map & map,
+         const Key & key,
+         std::string name,
+         std::string class_type,
+         const char * filename,
+         int line_number)
+{
+  auto it = map.find(key);
+  if (it == map.end())
+    mooseError("map_find() error: key \"",
+               key,
+               "\" not found during a search in class ",
+               name,
+               " of type ",
+               class_type,
+               ".\n See file ",
+               filename,
+               " at line ",
+               line_number);
+  return it->second;
 }
 } // MooseUtils namespace
 
