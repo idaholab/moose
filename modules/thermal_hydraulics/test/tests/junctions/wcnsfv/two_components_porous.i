@@ -33,17 +33,17 @@ p_outlet = 0
 
     inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'f1 f1'
+    momentum_inlet_functors = 'f1 f1'
     energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '300'
+    energy_inlet_functors = '300'
 
     wall_boundaries = 'comp1:top comp1:bottom'
     momentum_wall_types = 'noslip symmetry'
-    energy_wall_function = '1'
+    energy_wall_functors = '1'
 
     outlet_boundaries = 'comp1:right'
     # momentum_outlet_types = 'fixed-pressure'
-    # pressure_function = 'f1'
+    # pressure_functors = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -79,15 +79,15 @@ p_outlet = 0
 
     inlet_boundaries = 'comp2:left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'f1 f1'
+    momentum_inlet_functors = 'f1 f1'
 
     wall_boundaries = 'comp2:top comp2:bottom'
     momentum_wall_types = 'noslip symmetry'
-    energy_wall_function = '1'
+    energy_wall_functors = '1'
 
     outlet_boundaries = 'comp2:right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 'f1'
+    pressure_functors = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'

@@ -73,8 +73,8 @@ p_outlet = 0
     pressure_variable = 'p'
 
     inlet_boundaries = 'comp2_downstream:left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_functors = 'vel_x vel_y'
+    # momentum_inlet_types = 'fixed-velocity'
+    # momentum_inlet_functors = 'f1 f1'
 
     wall_boundaries = 'comp2_downstream:top comp2_downstream:bottom'
     momentum_wall_types = 'noslip symmetry'

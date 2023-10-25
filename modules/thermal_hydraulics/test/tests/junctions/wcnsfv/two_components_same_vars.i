@@ -29,22 +29,22 @@ p_outlet = 0
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
-    turbulence_model = 'mixing-length'
+    # turbulence_model = 'mixing-length'
 
     inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'f1 f1'
+    momentum_inlet_functors = 'f1 f1'
     energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '300'
+    energy_inlet_functors = '300'
 
     wall_boundaries = 'comp1:top comp1:bottom'
     momentum_wall_types = 'noslip symmetry'
     energy_wall_types = 'heatflux'
-    energy_wall_function = '1'
+    energy_wall_functors = '1'
 
     outlet_boundaries = 'comp1:right'
     # momentum_outlet_types = 'fixed-pressure'
-    # pressure_function = 'f1'
+    # pressure_functors = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -55,10 +55,17 @@ p_outlet = 0
     # The junction adds more boundary conditions
     boundary_conditions_all_set = false
   []
+  # [join]
+  #   type = FileMeshWCNSFVFlowJunction
+  #   connections = 'comp1:right:out comp2:left:in'
+  #   junction_techniques = 'stitching'
+  #   # no need as the Physics are merged
+  #   # boundary_values
+  # []
+  # The one above is not needed because we dont need to add kernels if we share the same physics
   [join]
-    type = FileMeshWCNSFVFlowJunction
+    type = FileMeshStitchJunction
     connections = 'comp1:right:out comp2:left:in'
-    junction_techniques = 'stitching boundary_values'
   []
   [comp2]
     type = FileMeshWCNSFVComponent
@@ -70,20 +77,20 @@ p_outlet = 0
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
-    turbulence_model = 'mixing-length'
+    # turbulence_model = 'mixing-length'
 
     inlet_boundaries = 'comp2:left'
-    momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'f1 f1'
+    # momentum_inlet_types = 'fixed-velocity'
+    # momentum_inlet_functors = 'f1 f1'
 
     wall_boundaries = 'comp2:top comp2:bottom'
     momentum_wall_types = 'noslip symmetry'
     energy_wall_types = 'heatflux'
-    energy_wall_function = '0'
+    energy_wall_functors = '0'
 
     outlet_boundaries = 'comp2:right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 'f1'
+    pressure_functors = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -130,11 +137,12 @@ p_outlet = 0
   []
   [mid-p2]
     type = SideAverageValue
-    variable = p
+    variable = pressure
     boundary = 'comp2:left'
   []
 []
 
 [Outputs]
   exodus = true
+  dofmap = true
 []
