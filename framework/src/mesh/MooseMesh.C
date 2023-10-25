@@ -3623,12 +3623,12 @@ MooseMesh::cacheFVElementalDoFs() const
 
   for (auto & elem_info_pair : _elem_to_elem_info)
   {
+    auto & elem_info = elem_info_pair.second;
     std::vector<std::vector<dof_id_type>> dof_vector(num_eqs);
 
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
-        std::cout << "caching dofs for system " << i << std::endl;
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
         std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables(),
                                                  libMesh::DofObject::invalid_id);
@@ -3637,22 +3637,15 @@ MooseMesh::cacheFVElementalDoFs() const
         {
           const std::set<SubdomainID> & var_subdomains = var->blockIDs();
 
-          std::cout << var->name() << " " << var->isFV() << " "
-                    << (var_subdomains.find(elem_info_pair.second.subdomain_id()) !=
-                        var_subdomains.end())
-                    << std::endl;
-
           // We will only cache for FV variables and if they live on the current subdomain
-          if (var->isFV() &&
-              var_subdomains.find(elem_info_pair.second.subdomain_id()) != var_subdomains.end())
+          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
           {
             std::vector<dof_id_type> indices;
-            var->dofMap().dof_indices(elem_info_pair.second.elem(), indices, var->number());
+            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
             system_var_dofs[var->number()] = indices[0];
           }
         }
-        std::cout << Moose::stringify(system_var_dofs) << std::endl;
         dof_vector[sys.number()] = system_var_dofs;
       }
 
@@ -3667,17 +3660,17 @@ MooseMesh::cacheFVElementalDoFs() const
         const std::set<SubdomainID> & var_subdomains = var->blockIDs();
 
         // We will only cache for FV variables and if they live on the current subdomain
-        if (var->isFV() &&
-            var_subdomains.find(elem_info_pair.second.subdomain_id()) != var_subdomains.end())
+        if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
         {
           std::vector<dof_id_type> indices;
-          var->dofMap().dof_indices(elem_info_pair.second.elem(), indices, var->number());
+          var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
           mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
           system_var_dofs[var->number()] = indices[0];
         }
       }
       dof_vector[sys.number()] = system_var_dofs;
     }
+    elem_info.dofID() = dof_vector;
   }
 }
 

@@ -35,12 +35,9 @@ ComputeFVInitialConditionThread::operator()(const ElemInfoRange & range)
 
   // Iterate over all the elements in the range
   for (const auto & elem_info : range)
-  {
-    for (auto ic : warehouse.getActiveBlockObjects(elem_info->elem()->subdomain_id(), _tid))
-    {
-      ic->computeElement(*elem_info);
-    }
-  }
+    if (warehouse.hasActiveBlockObjects(elem_info->subdomain_id(), _tid))
+      for (auto ic : warehouse.getActiveBlockObjects(elem_info->subdomain_id(), _tid))
+        ic->computeElement(*elem_info);
 }
 
 void
