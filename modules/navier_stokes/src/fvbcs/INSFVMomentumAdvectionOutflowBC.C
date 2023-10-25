@@ -83,7 +83,7 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
 
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;

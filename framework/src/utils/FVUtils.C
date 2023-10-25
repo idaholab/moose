@@ -9,6 +9,7 @@
 
 #include "MooseVariableFV.h"
 #include "FVUtils.h"
+#include "SystemBase.h"
 
 namespace Moose
 {
@@ -36,7 +37,7 @@ template <typename OutputType>
 std::tuple<const Elem *, const Elem *, bool>
 determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var)
 {
-  auto ft = fi.faceType(var.name());
+  auto ft = fi.faceType(std::make_pair(var.number(), var.sys().number()));
   mooseAssert(ft == FaceInfo::VarFaceNeighbors::BOTH
                   ? var.hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
                         var.hasBlocks(fi.neighborPtr()->subdomain_id())

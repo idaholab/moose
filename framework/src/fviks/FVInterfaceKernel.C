@@ -149,8 +149,8 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
   _elem_is_one = _subdomain1.find(fi.elem().subdomain_id()) != _subdomain1.end();
 
 #ifndef NDEBUG
-  const auto ft1 = fi.faceType(_var1.name());
-  const auto ft2 = fi.faceType(_var2.name());
+  const auto ft1 = fi.faceType(std::make_pair(_var1.number(), _var1.sys().number()));
+  const auto ft2 = fi.faceType(std::make_pair(_var2.number(), _var2.sys().number()));
   constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
   constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
   constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;

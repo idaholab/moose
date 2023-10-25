@@ -95,7 +95,7 @@ void
 INSFVWallFunctionBC::gatherRCData(const FaceInfo & fi)
 {
   _face_info = &fi;
-  _face_type = fi.faceType(_var.name());
+  _face_type = fi.faceType(std::make_pair(_var.number(), _var.sys().number()));
   _normal = fi.normal();
 
   // Fill-in the coefficient _a (but without multiplication by A)

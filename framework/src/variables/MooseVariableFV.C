@@ -341,7 +341,7 @@ MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
   _element_data->setGeometry(Moose::Face);
   _neighbor_data->setGeometry(Moose::Face);
 
-  auto facetype = fi.faceType(_var_name);
+  const auto facetype = fi.faceType(std::make_pair(this->number(), this->sys().number()));
   if (facetype == FaceInfo::VarFaceNeighbors::NEITHER)
     return;
   else if (facetype == FaceInfo::VarFaceNeighbors::BOTH)

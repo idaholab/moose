@@ -108,7 +108,7 @@ endif
 #
 # FParser JIT defines
 #
-ADDITIONAL_CPPFLAGS += -DADFPARSER_INCLUDES="\"-I$(FRAMEWORK_DIR)/include/utils -I$(FRAMEWORK_DIR)/include/base -I$(LIBMESH_DIR)/include\""
+ADDITIONAL_CPPFLAGS += -DADFPARSER_INCLUDES="\"-I$(FRAMEWORK_DIR)/include/utils -I$(FRAMEWORK_DIR)/include/base $(libmesh_INCLUDE)\""
 
 # some systems have python2/3 but no python2/3-config command - fall back to python-config for them
 pyconfig := python3-config
