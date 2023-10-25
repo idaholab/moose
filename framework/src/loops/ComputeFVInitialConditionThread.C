@@ -9,8 +9,6 @@
 
 #include "ComputeFVInitialConditionThread.h"
 #include "FEProblem.h"
-#include "DisplacedProblem.h"
-#include "Assembly.h"
 #include "FVInitialConditionTempl.h"
 
 ComputeFVInitialConditionThread::ComputeFVInitialConditionThread(FEProblemBase & fe_problem)

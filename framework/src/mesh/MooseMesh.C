@@ -3624,14 +3624,15 @@ MooseMesh::cacheFVElementalDoFs() const
   for (auto & elem_info_pair : _elem_to_elem_info)
   {
     auto & elem_info = elem_info_pair.second;
-    std::vector<std::vector<dof_id_type>> dof_vector(num_eqs);
+    auto & dof_vector = elem_info.dofID();
+    dof_vector.clear();
+    dof_vector.resize(num_eqs, std::vector<dof_id_type>());
 
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables(),
-                                                 libMesh::DofObject::invalid_id);
+        dof_vector[sys.number()].resize(sys.nFieldVariables(), libMesh::DofObject::invalid_id);
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)
         {
@@ -3643,17 +3644,15 @@ MooseMesh::cacheFVElementalDoFs() const
             std::vector<dof_id_type> indices;
             var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-            system_var_dofs[var->number()] = indices[0];
+            dof_vector[sys.number()][var->number()] = indices[0];
           }
         }
-        dof_vector[sys.number()] = system_var_dofs;
       }
 
     if (_app.feProblem().getAuxiliarySystem().nFVVariables())
     {
       auto & sys = _app.feProblem().getAuxiliarySystem();
-      std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables(),
-                                               libMesh::DofObject::invalid_id);
+      dof_vector[sys.number()].resize(sys.nFieldVariables(), libMesh::DofObject::invalid_id);
       const auto & aux_variables = sys.getVariables(0);
       for (const auto & var : aux_variables)
       {
@@ -3665,10 +3664,9 @@ MooseMesh::cacheFVElementalDoFs() const
           std::vector<dof_id_type> indices;
           var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
           mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-          system_var_dofs[var->number()] = indices[0];
+          dof_vector[sys.number()][var->number()] = indices[0];
         }
       }
-      dof_vector[sys.number()] = system_var_dofs;
     }
     elem_info.dofID() = dof_vector;
   }

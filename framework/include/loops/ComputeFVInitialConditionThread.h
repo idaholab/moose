@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "MooseMesh.h"
 
 // libmesh
 #include "libmesh/elem_range.h"
