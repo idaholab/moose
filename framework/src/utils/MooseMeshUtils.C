@@ -503,10 +503,11 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
 }
 
 void
-stitchSidesets(MooseMesh & input_mesh,
+stitchNodesets(MooseMesh & input_mesh,
                const BoundaryName & side1,
                const BoundaryName & side2,
-               bool allow_partial)
+               bool allow_partial,
+               bool keep_old_nodeset)
 {
   // Node to elem map will make it easy to find the nodes to fix
   const auto node_to_elems = input_mesh.nodeToElemMap();
@@ -518,8 +519,8 @@ stitchSidesets(MooseMesh & input_mesh,
     mooseError("Nodeset '", side1, "' was not found in the mesh");
   if (!input_mesh.nodeSetNodes().count(side2_id))
     mooseError("Nodeset '", side2, "' was not found in the mesh");
-  const auto nodes_sideset_1 = input_mesh.nodeSetNodes().at(side1_id);
-  const auto nodes_sideset_2 = input_mesh.nodeSetNodes().at(side2_id);
+  const auto & nodes_sideset_1 = input_mesh.nodeSetNodes().at(side1_id);
+  const auto & nodes_sideset_2 = input_mesh.nodeSetNodes().at(side2_id);
 
   for (const auto node1_id : nodes_sideset_1)
   {
@@ -570,5 +571,15 @@ stitchSidesets(MooseMesh & input_mesh,
                  " nodes on boundary ",
                  side2);
   }
+
+  // This isn't very precise. We really should be only working with the nodes that got merged.
+  // here we add all of side1 to side2!
+  // and in the other case we delete all of side2 even though side2 could extend beyond side1
+  if (keep_old_nodeset)
+    for (const auto & node : input_mesh.nodeSetNodes().at(side1_id))
+      input_mesh.getMesh().get_boundary_info().add_node(node, side2_id);
+  else
+    // remove reference to the old id
+    input_mesh.getMesh().get_boundary_info().remove_id(side2_id);
 }
 }
