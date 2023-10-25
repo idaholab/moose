@@ -972,3 +972,45 @@ TEST(HitTests, FileIncludeCircular)
   std::remove("include_file_01.i");
   std::remove("include_file_02.i");
 }
+
+// test scenario where nested file include is first element in included file
+TEST(HitTests, FileIncludeFirstField)
+{
+  // base input file defines parameter after all content from included files
+  std::string file_a = R"INPUT(
+!include fileB.i
+param_03 = 30
+)INPUT";
+
+  // write input to file on disk that includes another file as first element
+  std::ofstream file_b("fileB.i");
+  file_b << R"INPUT(
+!include fileC.i
+param_02 = 20
+)INPUT";
+  file_b.close();
+
+  // write input to file on disk that another file includes as first element
+  std::ofstream file_c("fileC.i");
+  file_c << R"INPUT(
+param_01 = 10
+)INPUT";
+  file_c.close();
+
+  // parse the base input string to consume all contents from included files
+  auto root = hit::parse("FILE-A", file_a);
+
+  // delete two extra files that were put on disk to be parsed from includes
+  std::remove("fileB.i");
+  std::remove("fileC.i");
+
+  // expected content from all include files when the parse tree is rendered
+  std::string render_expect = R"INPUT(
+param_01 = 10
+param_02 = 20
+param_03 = 30
+)INPUT";
+
+  // check that all file content is included when the parse tree is rendered
+  EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
+}
