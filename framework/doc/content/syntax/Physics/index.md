@@ -57,9 +57,84 @@ the still-existing `Action` to the new `Physics` object.
 
 TODO
 
+
+
+#### Processing additional parameters
+
+Physics, if implemented for a particular Physics, have the capability to process additional parameters.
+This is done to be able to use the same Physics on multiple Components and add parameters from each component.
+Parameters may only be concatenated like this if they are block or boundary restricted. Any parameter this is
+general and applies to the whole Physics must simply be the same between the current value and the additional parameters.
+
+Because of the vectorized nature of block / boundary restriction, we expect you will use these standard container types
+to host these parameters: vectors, MultiMooseEnum or maps. To process additional parameters you can perform
+the following:
+
+- vector
+
+In header (.h):
+```
+  /// non-const vector attribute to the Physics
+  std::vector<Real> _my_real_parameter_for_each_block;
+```
+
+In source (.C):
+```
+  // In Constructor initializer list
+  _my_real_parameter_for_each_block(getParam<std::vector<Real>>("real_per_block"))
+
+  // In processAdditionalParameter routine
+  _my_real_parameter_for_each_block.insert(
+      _my_real_parameter_for_each_block.end(),
+      other_params.get<std::vector<Real>>("real_per_block").begin(),
+      other_params.get<std::vector<Real>>("real_per_block").end());
+
+```
+
+
+- MultiMooseEnum (a vector but restricting the options)
+
+In header (.h):
+```
+  /// non-const MultiMooseEnum attribute to the Physics
+  MultiMooseEnum _my_enum_value_for_each_block;
+```
+
+In source (.C):
+```
+  // In Constructor
+  _my_enum_value_for_each_block(getParam<MultiMooseEnum>>("enum_per_block"))
+
+  // In processAdditionalParameter routine
+  _my_enum_value_for_each_block.push_back(other_params.get<MultiMooseEnum>("enum_per_block"));
+```
+
+- map
+
+In header (.h):
+```
+  /// non-const map attribute to the Physics
+  std::map<SubdomainName, MooseFunctorName> _my_functors_for_each_block;
+```
+
+In source (.C):
+```
+  // In Constructor
+  _my_functors_for_each_block(createMapFromVectors<SubdomainName, MooseFunctorName>(
+      getParam<std::vector<SubdomainName>>("blocks"),
+      getParam<std::vector<MooseFunctorName>>("functors_per_block"))),
+
+  // In processAdditionalParameter routine
+  _my_functors_for_each_block.merge(createMapFromVectors<SubdomainName, MooseFunctorName>(
+      other_params.get<std::vector<SubdomainName>>("blocks"),
+      other_params.get<std::vector<MooseFunctorName>>("functors_per_block")));
+```
+
 ### Advice on implementation
 
-- Use as much parameter checking as you. [PhysicsBase.md] defined utilities such as the ones below
+#### Add a lot of checks
+
+Use as much parameter checking as you. [PhysicsBase.md] defined utilities such as the ones below
   that let you check that the user inputs to your physics are correct.
 
 ```
@@ -70,7 +145,12 @@ TODO
   void checkVectorParamsNoOverlap(std::vector<std::string> param_vec) const;
 ```
 
-The Physics class you will create will hold the parameters that are shared between all the
+Because `Components` are not created the same way, and can merge Physics together, thus bypassing checks at construction
+time on parameters, consider adding the same battery of checks before the `Physics` creates any objects.
+
+#### Separate the definition of the Equation from its discretization
+
+The Physics base class you will create will hold the parameters that are shared between all the
 discretized versions of it.
 
 Physics and spatial discretizations are as separated as we could, but they are still very much intertwined. So
