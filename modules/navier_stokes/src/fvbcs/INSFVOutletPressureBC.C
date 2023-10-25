@@ -13,11 +13,12 @@
 
 registerMooseObject("NavierStokesApp", INSFVOutletPressureBC);
 
+template <class T>
 InputParameters
-INSFVOutletPressureBC::validParams()
+INSFVOutletPressureBCTempl<T>::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
-  params += INSFVFullyDevelopedFlowBC::validParams();
+  params += T::validParams();
 
   // Value may be specified by a AD functor (typically a variable), a function or a postprocessor
   params.addParam<FunctionName>("function", "The boundary pressure as a regular function");
@@ -27,10 +28,11 @@ INSFVOutletPressureBC::validParams()
   return params;
 }
 
-INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
+template <class T>
+INSFVOutletPressureBCTempl<T>::INSFVOutletPressureBCTempl(const InputParameters & params)
   : FVDirichletBCBase(params),
-    INSFVFullyDevelopedFlowBC(params),
-    _functor(isParamValid("functor") ? &getFunctor<ADReal>("functor") : nullptr),
+    T(params),
+    _functor(isParamValid("functor") ? &this->template getFunctor<ADReal>("functor") : nullptr),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _pp_value(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : nullptr)
 {
@@ -46,8 +48,9 @@ INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
                "pressure");
 }
 
+template <class T>
 ADReal
-INSFVOutletPressureBC::boundaryValue(const FaceInfo & fi) const
+INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi) const
 {
   if (_functor)
     return (*_functor)(singleSidedFaceArg(&fi), determineState());
@@ -56,3 +59,6 @@ INSFVOutletPressureBC::boundaryValue(const FaceInfo & fi) const
   else
     return *_pp_value;
 }
+
+template class INSFVOutletPressureBCTempl<INSFVFlowBC>;
+template class INSFVOutletPressureBCTempl<INSFVFullyDevelopedFlowBC>;

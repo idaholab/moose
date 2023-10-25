@@ -16,7 +16,7 @@ registerMooseObject("NavierStokesApp", INSFVSwitchableOutletPressureBC);
 InputParameters
 INSFVSwitchableOutletPressureBC::validParams()
 {
-  InputParameters params = INSFVOutletPressureBC::validParams();
+  InputParameters params = INSFVOutletPressureBCTempl<INSFVFlowBC>::validParams();
 
   params.addClassDescription("Adds switchable pressure-outlet boundary condition");
 
@@ -30,7 +30,7 @@ INSFVSwitchableOutletPressureBC::validParams()
 }
 
 INSFVSwitchableOutletPressureBC::INSFVSwitchableOutletPressureBC(const InputParameters & params)
-  : INSFVOutletPressureBC(params),
+  : INSFVOutletPressureBCTempl<INSFVFlowBC>(params),
     _switch_bc(getParam<bool>("switch")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
@@ -40,7 +40,7 @@ ADReal
 INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
   if (_switch_bc)
-    return INSFVOutletPressureBC::boundaryValue(fi) * _face_limiter;
+    return INSFVOutletPressureBCTempl<INSFVFlowBC>::boundaryValue(fi) * _face_limiter;
   else
     return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
            _face_limiter;

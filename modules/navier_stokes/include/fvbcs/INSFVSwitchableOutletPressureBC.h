@@ -17,7 +17,7 @@
  * that allows us to switch on/off this boundary condition
  * It may not be used with a mean/pinned-pressure approach
  */
-class INSFVSwitchableOutletPressureBC : public INSFVOutletPressureBC
+class INSFVSwitchableOutletPressureBC : public INSFVOutletPressureBCTempl<INSFVFlowBC>
 {
 public:
   static InputParameters validParams();
