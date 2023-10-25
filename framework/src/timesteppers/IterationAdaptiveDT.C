@@ -261,12 +261,20 @@ IterationAdaptiveDT::computeDT()
   {
     _sync_last_step = false;
     if (_post_function_sync_dt)
+    {
       dt = _post_function_sync_dt;
-    else
-      dt = _dt_old;
 
-    if (_verbose)
-      _console << "Setting dt to value used before sync: " << std::setw(9) << dt << std::endl;
+      if (_verbose)
+        _console << "Setting dt to 'post_function_sync_dt': " << std::setw(9) << dt << std::endl;
+    }
+    else
+    {
+      dt = _executioner.unconstrainedDT();
+
+      if (_verbose)
+        _console << "Setting dt to unconstrained value used before sync: " << std::setw(9) << dt
+                 << std::endl;
+    }
   }
   else if (_adaptive_timestepping)
     computeAdaptiveDT(dt);
