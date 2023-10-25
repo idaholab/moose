@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AddICAction.h"
+#include "AddFVICAction.h"
 #include "FEProblem.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 
-registerMooseAction("MooseApp", AddICAction, "add_ic");
+registerMooseAction("MooseApp", AddFVICAction, "add_fv_ic");
 
 InputParameters
-AddICAction::validParams()
+AddFVICAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
 
@@ -29,10 +29,10 @@ AddICAction::validParams()
   return params;
 }
 
-AddICAction::AddICAction(const InputParameters & params) : MooseObjectAction(params) {}
+AddFVICAction::AddFVICAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
-AddICAction::act()
+AddFVICAction::act()
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
@@ -42,9 +42,10 @@ AddICAction::act()
   _moose_object_pars.set<VariableName>("variable") = var_name;
   const auto & var = _problem->getVariable(0, var_name);
 
-  if (var.isFV())
-    mooseError("Finite volume variables do not support an [InitialCondition] subblock, try using a "
-               "separate [FVInitialConditions] block in your input file.");
+  if (!var.isFV())
+    mooseError(
+        "Finite element variables do not support an [FVInitialCondition] subblock, try using a "
+        "separate [InitialConditions] block in your input file.");
   else
-    _problem->addInitialCondition(_type, var_name, _moose_object_pars);
+    _problem->addFVInitialCondition(_type, var_name, _moose_object_pars);
 }

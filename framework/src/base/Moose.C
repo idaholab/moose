@@ -462,12 +462,14 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "Variables/*/FVInitialCondition");
 
   registerSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
 
   registerSyntax("AddICAction", "AuxVariables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "AuxVariables/*/FVInitialCondition");
 
   registerSyntaxTask("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
   registerSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
