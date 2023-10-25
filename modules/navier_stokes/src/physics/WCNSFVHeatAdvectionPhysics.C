@@ -554,8 +554,18 @@ WCNSFVHeatAdvectionPhysics::processAdditionalParameters(const InputParameters & 
   WCNSFVPhysicsBase::processAdditionalParameters(other_params);
 
   // Add the new inlet types and values
+  _energy_inlet_types.push_back(other_params.get<MultiMooseEnum>("energy_inlet_types"));
+  _energy_inlet_functors.insert(
+      _energy_inlet_functors.end(),
+      other_params.get<std::vector<MooseFunctorName>>("energy_inlet_functors").begin(),
+      other_params.get<std::vector<MooseFunctorName>>("energy_inlet_functors").end());
 
   // Add the new wall types and values
+  _energy_wall_types.push_back(other_params.get<MultiMooseEnum>("energy_wall_types"));
+  _energy_wall_functors.insert(
+      _energy_wall_functors.end(),
+      other_params.get<std::vector<MooseFunctorName>>("energy_wall_functors").begin(),
+      other_params.get<std::vector<MooseFunctorName>>("energy_wall_functors").end());
 
   // Add the block restricted thermal conductivity parameters
   _thermal_conductivity_blocks.insert(

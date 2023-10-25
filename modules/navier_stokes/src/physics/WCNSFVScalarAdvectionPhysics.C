@@ -339,7 +339,7 @@ WCNSFVScalarAdvectionPhysics::processAdditionalParameters(const InputParameters 
 
   // Process the new inlet boundary values
   _passive_scalar_inlet_types.push_back(
-      other_params.get<MultiMooseEnum>("passive_scalar_inlet_types").items());
+      other_params.get<MultiMooseEnum>("passive_scalar_inlet_types"));
   _passive_scalar_inlet_functors.insert(
       _passive_scalar_inlet_functors.end(),
       other_params.get<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors")
