@@ -1,38 +1,66 @@
 [Mesh]
-    [subchannel]
-      type = DetailedQuadSubChannelMeshGenerator
-      nx = 6
-      ny = 6
-      n_cells = 30
-      pitch = 0.0126
-      rod_diameter = 0.00950
-      gap = 0.00095
-      heated_length = 3.0
-    []
+  [subchannel]
+    type = DetailedQuadSubChannelMeshGenerator
+    nx = 6
+    ny = 6
+    n_cells = 20
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095
+    heated_length = 1.0
+  []
+
+  [fuel_pins]
+    type = DetailedQuadPinMeshGenerator
+    input = subchannel
+    nx = 6
+    ny = 6
+    n_cells = 20
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    heated_length = 1.0
+  []
 []
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
-  []
-  [mu]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [w_perim]
+    block = subchannel
+  []
+  [mu]
+    block = subchannel
   []
   [q_prime]
+    block = fuel_pins
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
   []
 []
 
@@ -46,6 +74,4 @@
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

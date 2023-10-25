@@ -4,8 +4,8 @@
 
 !style halign=left
 After Pronghorn-SC is installed and tested, you should now be able to run input files
-using the `subchannel-opt` executable located at `~/projects/SubChannel`. Input files
-demonstrating the capabilities of SubChannel can be found in `~/projects/test/tests`.
+using the `subchannel-opt` executable located at `~/projects/subchannel`. Input files
+demonstrating the capabilities of SubChannel can be found in `~/projects/subchannel/examples`.
 Any input file (say, one called `example_input.i`) can be run with the following
 basic syntax:
 

@@ -10,7 +10,7 @@ the instructions to the conda installation step named "Cloning MOOSE". Then,
 return to this page and continue with Step Two.
 
 - [Linux and MacOS](https://mooseframework.inl.gov/getting_started/installation/conda.html)
-- [Windows 10 (experimental)](https://mooseframework.inl.gov/getting_started/installation/windows10.html)
+- [Windows 10,11 (experimental)](https://mooseframework.inl.gov/getting_started/installation/windows.html)
 
 Advanced manual installation instructions for this environment are available
 [via the MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).
@@ -32,15 +32,15 @@ To clone Pronghorn-SC, run the following commands in Terminal:
 mkdir ~/projects
 cd ~/projects
 git clone https://github.inl.gov/ncrc/subchannel.git
-cd SubChannel
-git checkout main
+cd subchannel
+git checkout master
 ```
 
-!alert! note title=SubChannel branches
+!alert! note title=subchannel branches
 This sequence of commands downloads Pronghorn-SC from the GitHub server and checks
 out the "main" code branch. There are two code branches available:
 
-- "main", which is the current most-tested version of Pronghorn-SC for general usage, and
+- "master", which is the current most-tested version of Pronghorn-SC for general usage, and
 - "devel", which is intended for code development (and may be more regularly broken
   as changes occur in Pronghorn-SC and MOOSE).
 
@@ -61,7 +61,7 @@ mamba activate moose
 Then navigate to the Pronghorn-SC clone directory and download the MOOSE submodule:
 
 ```bash
-cd ~/projects/SubChannel
+cd ~/projects/subchannel
 git submodule update --init moose
 ```
 
@@ -91,8 +91,7 @@ Pronghorn-SC is ready to be used and further developed.
 If issues are experienced in installation and testing, several resources
 are available:
 
-- [Pronghorn-SC Issues Page](https://github.com/idaholab/SubChannel/issues) for SubChannel bugs or feature requests.
-- [Pronghorn-SC Discussion Forum](https://github.com/idaholab/SubChannel/discussions) for SubChannel issues and questions.
+- [Pronghorn-SC Issues Page](https://github.inl.gov/ncrc/subchannel/issues) for SubChannel bugs or feature requests.
 - [MOOSE FAQ page](https://mooseframework.inl.gov/help/faq/index.html) for common MOOSE issues.
 - [MOOSE Discussion Forum](https://github.com/idaholab/moose/discussions) for non-SubChannel issues and questions.
 
