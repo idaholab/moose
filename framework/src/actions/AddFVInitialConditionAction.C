@@ -23,10 +23,13 @@ AddFVInitialConditionAction::validParams()
 AddFVInitialConditionAction::AddFVInitialConditionAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
+  std::cout << "Creating FV initial condition action" << std::endl;
 }
 
 void
 AddFVInitialConditionAction::act()
 {
-  _problem->addFVInitialCondition(_type, _name, _moose_object_pars);
+    std::cout << "Adding FV initial condition" << std::endl;
+
+    _problem->addFVInitialCondition(_type, _name, _moose_object_pars);
 }

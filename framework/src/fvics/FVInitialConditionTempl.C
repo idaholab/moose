@@ -44,8 +44,11 @@ FVInitialConditionTempl<T>::computeElement(const ElemInfo & elem_info)
   {
     const auto system_number = _base_var.sys().number();
     const auto var_number = _base_var.number();
-    _base_var.sys().system().solution->set(elem_info.dofID()[system_number][var_number],
-                                           this->value(elem_info.centroid()));
+    std::cout << system_number << " " << var_number << " " << _base_var.name() << std::endl;
+    std::cout << elem_info.dofID().size() << std::endl;
+    const auto dof_id = elem_info.dofID()[system_number][var_number];
+    const auto dof_value = this->value(elem_info.centroid());
+    _base_var.sys().system().solution->set(dof_id, dof_value);
   }
   // If we want this to work with real and array variables we can add the different cases here late
   else

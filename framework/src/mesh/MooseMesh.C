@@ -3628,12 +3628,19 @@ MooseMesh::cacheFVElementalDoFs() const
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
+        std::cout << "caching dofs for system " << i << std::endl;
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables());
+        std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables(),
+                                                 libMesh::DofObject::invalid_id);
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)
         {
           const std::set<SubdomainID> & var_subdomains = var->blockIDs();
+
+          std::cout << var->name() << " " << var->isFV() << " "
+                    << (var_subdomains.find(elem_info_pair.second.subdomain_id()) !=
+                        var_subdomains.end())
+                    << std::endl;
 
           // We will only cache for FV variables and if they live on the current subdomain
           if (var->isFV() &&
@@ -3642,18 +3649,18 @@ MooseMesh::cacheFVElementalDoFs() const
             std::vector<dof_id_type> indices;
             var->dofMap().dof_indices(elem_info_pair.second.elem(), indices, var->number());
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-            system_var_dofs.push_back(indices[0]);
+            system_var_dofs[var->number()] = indices[0];
           }
-          else
-            system_var_dofs.push_back(libMesh::DofObject::invalid_id);
         }
+        std::cout << Moose::stringify(system_var_dofs) << std::endl;
         dof_vector[sys.number()] = system_var_dofs;
       }
 
     if (_app.feProblem().getAuxiliarySystem().nFVVariables())
     {
       auto & sys = _app.feProblem().getAuxiliarySystem();
-      std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables());
+      std::vector<dof_id_type> system_var_dofs(sys.nFieldVariables(),
+                                               libMesh::DofObject::invalid_id);
       const auto & aux_variables = sys.getVariables(0);
       for (const auto & var : aux_variables)
       {
@@ -3666,10 +3673,8 @@ MooseMesh::cacheFVElementalDoFs() const
           std::vector<dof_id_type> indices;
           var->dofMap().dof_indices(elem_info_pair.second.elem(), indices, var->number());
           mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-          system_var_dofs.push_back(indices[0]);
+          system_var_dofs[var->number()] = indices[0];
         }
-        else
-          system_var_dofs.push_back(libMesh::DofObject::invalid_id);
       }
       dof_vector[sys.number()] = system_var_dofs;
     }

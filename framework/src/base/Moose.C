@@ -315,7 +315,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
-                           "(add_ic)"
+                           "(add_ic add_fv_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
                            "(add_times)"

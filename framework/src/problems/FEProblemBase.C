@@ -3100,6 +3100,15 @@ FEProblemBase::projectSolution()
   ComputeInitialConditionThread cic(*this);
   Threads::parallel_reduce(elem_range, cic);
 
+  if (haveFV())
+  {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
+
+    ComputeFVInitialConditionThread cfvic(*this);
+    Threads::parallel_reduce(elem_info_range, cfvic);
+  }
+
   // Need to close the solution vector here so that boundary ICs take precendence
   for (auto & nl : _nl)
     nl->solution().close();
