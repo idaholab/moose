@@ -14,6 +14,7 @@
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
 #include "Factory.h"
+#include "MultiMooseEnum.h"
 
 class Kernel;
 class FVKernel;
