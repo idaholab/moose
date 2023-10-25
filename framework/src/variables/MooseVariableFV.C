@@ -543,8 +543,11 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
                                                               const Elem * elem_to_extrapolate_from,
                                                               const StateArg & state) const
 {
-  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from, state),
-              "This function should only be called on extrapolated boundary faces");
+  mooseAssert(
+      isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from, state) || !two_term_expansion,
+      "We allow Dirichlet boundary conditions to call this method. However, the only way to "
+      "ensure we don't have infinite recursion, with Green Gauss gradients calling back to the "
+      "Dirichlet boundary condition calling back to this method, is to do a one term expansion");
 
   ADReal boundary_value;
   bool elem_to_extrapolate_from_is_fi_elem;

@@ -42,6 +42,13 @@ INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi) const
   if (_switch_bc)
     return INSFVOutletPressureBCTempl<INSFVFlowBC>::boundaryValue(fi) * _face_limiter;
   else
-    return _var.getExtrapolatedBoundaryFaceValue(fi, false, false, fi.elemPtr(), determineState()) *
+    // The two-term expansion = false piece is critical as it prevents infinite recursion that would
+    // occur with a Green-Gauss gradient calculation which would call back to this "Dirichlet"
+    // object
+    return _var.getExtrapolatedBoundaryFaceValue(fi,
+                                                 /*two_term_expansion=*/false,
+                                                 /*correct_skewness=*/false,
+                                                 fi.elemPtr(),
+                                                 determineState()) *
            _face_limiter;
 }
