@@ -37,11 +37,19 @@
   CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
+#ifndef NDEBUG
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
   const PerfID __perf_id =                                                                         \
       this->registerTimedSection(section_name, level, live_message, print_dots);                   \
   CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
+#else
+#define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
+  static const PerfID __perf_id =                                                                  \
+      this->registerTimedSection(section_name, level, live_message, print_dots);                   \
+  CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
+  TIME_SECTION1(__perf_id);
+#endif
 
 // Overloading solution from https://stackoverflow.com/a/11763277
 #define GET_MACRO(_1, _2, _3, _4, NAME, ...) NAME
