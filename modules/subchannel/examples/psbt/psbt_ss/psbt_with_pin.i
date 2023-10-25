@@ -207,3 +207,28 @@ P_out = 4.923e6 # Pa
 [Executioner]
   type = Steady
 []
+
+################################################################################
+# The multiapp that the subchannel solution get projected on
+################################################################################
+[MultiApps]
+  [viz]
+    type = FullSolveMultiApp
+    input_files = "3d.i"
+    execute_on = "final"
+  []
+[]
+
+###### Transfers to the detailedMesh at the end of the coupled simulations
+[Transfers]
+  [subchannel_transfer]
+    type = MultiAppDetailedSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [pin_transfer]
+    type = MultiAppDetailedPinSolutionTransfer
+    to_multi_app = viz
+    variable = 'Dpin Tpin q_prime'
+  []
+[]
