@@ -56,7 +56,7 @@ static_assert(__cplusplus >= 201703L,
               "MOOSE requires a C++17 compatible compiler (GCC >= 7.5.0, Clang >= 5.0.2). Please "
               "update your compiler or, if compatible, add '-std=c++17' to your compiler flags "
               "and try again. If using the MOOSE conda package, please attempt a MOOSE environment "
-              "update (using `mamba update --all`). If this update is not successful, please "
+              "update (using `mamba update moose-dev`). If this update is not successful, please "
               "create a new MOOSE environment (see "
               "https://mooseframework.inl.gov/getting_started/installation/"
               "conda.html#uninstall-conda-moose-environment).");
