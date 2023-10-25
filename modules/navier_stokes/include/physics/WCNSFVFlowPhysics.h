@@ -11,7 +11,7 @@
 
 #include "WCNSFVPhysicsBase.h"
 
-class WCNSFVTurbulenceModel;
+class WCNSFVTurbulencePhysics;
 
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
@@ -75,11 +75,18 @@ private:
 
   bool hasTurbulencePhysics() const { return !(!_turbulence_physics); }
 
-  const WCNSFVTurbulenceModel * _turbulence_physics;
+  const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Functors describing the momentum inlet for each boundary. See matching index momentum_inlet_types
   /// for the function actually computes
   std::vector<std::vector<MooseFunctorName>> _momentum_inlet_functors;
   /// Functors describing the outlet pressure on each boundary
   std::vector<MooseFunctorName> _pressure_functors;
+
+  /// Subdomains where we want to have volumetric friction
+  std::vector<std::vector<SubdomainName>> _friction_blocks;
+  /// The friction correlation types used for each block
+  std::vector<std::vector<std::string>> _friction_types;
+  /// The coefficients used for each item if friction type
+  std::vector<std::vector<std::string>> _friction_coeffs;
 };
