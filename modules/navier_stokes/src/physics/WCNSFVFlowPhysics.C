@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVFlowPhysics.h"
+#include "WCNSFVTurbulencePhysics.h"
 #include "NSFVAction.h"
 
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
@@ -52,6 +53,10 @@ WCNSFVFlowPhysics::validParams()
   params.transferParam<bool>(NSFVAction::validParams(), "use_friction_correction");
   params.transferParam<Real>(NSFVAction::validParams(), "consistent_scaling");
 
+  // Couple to turbulence physics
+  params.addParam<PhysicsName>("coupled_turbulence_physics",
+                               "Turbulence Physics coupled with the flow");
+
   // Spatial discretization scheme
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "mass_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVAction::validParams(), "momentum_advection_interpolation");
@@ -69,7 +74,10 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
   : WCNSFVPhysicsBase(parameters),
     _momentum_inlet_functors(
         getParam<std::vector<std::vector<MooseFunctorName>>>("momentum_inlet_functors")),
-    _pressure_functors(getParam<std::vector<MooseFunctorName>>("pressure_functors"))
+    _pressure_functors(getParam<std::vector<MooseFunctorName>>("pressure_functors")),
+    _friction_blocks(getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")),
+    _friction_types(getParam<std::vector<std::vector<std::string>>>("friction_types")),
+    _friction_coeffs(getParam<std::vector<std::vector<std::string>>>("friction_coeffs"))
 {
   for (const auto d : index_range(_velocity_names))
     saveNonlinearVariableName(_velocity_names[d]);
@@ -101,6 +109,15 @@ WCNSFVFlowPhysics::WCNSFVFlowPhysics(const InputParameters & parameters)
     checkVectorParamsSameLength<BoundaryName, MooseFunctorName>("outlet_boundaries",
                                                                 "pressure_functors");
   }
+
+  // TODO make this more robust
+  if (isParamValid("coupled_turbulence_physics"))
+  {
+    _turbulence_physics = getCoupledPhysics<WCNSFVTurbulencePhysics>(
+        getParam<PhysicsName>("coupled_turbulence_physics"));
+  }
+  else
+    _turbulence_physics = nullptr;
 }
 
 void
@@ -475,11 +492,7 @@ WCNSFVFlowPhysics::addINSMomentumBoussinesqKernels()
 void
 WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
 {
-  const auto friction_blocks = getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks");
-  const auto friction_types = getParam<std::vector<std::vector<std::string>>>("friction_types");
-  const auto friction_coeffs = getParam<std::vector<std::vector<std::string>>>("friction_coeffs");
-
-  unsigned int num_friction_blocks = friction_blocks.size();
+  unsigned int num_friction_blocks = _friction_blocks.size();
   unsigned int num_used_blocks = num_friction_blocks ? num_friction_blocks : 1;
 
   if (_porous_medium_treatment)
@@ -495,8 +508,8 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
       std::string block_name = "";
       if (num_friction_blocks)
       {
-        params.set<std::vector<SubdomainName>>("block") = friction_blocks[block_i];
-        block_name = Moose::stringify(friction_blocks[block_i]);
+        params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
+        block_name = Moose::stringify(_friction_blocks[block_i]);
       }
       else
       {
@@ -508,13 +521,13 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        for (unsigned int type_i = 0; type_i < friction_types[block_i].size(); ++type_i)
+        for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
         {
-          const auto upper_name = MooseUtils::toUpper(friction_types[block_i][type_i]);
+          const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
-            params.set<MooseFunctorName>("Darcy_name") = friction_coeffs[block_i][type_i];
+            params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
           else if (upper_name == "FORCHHEIMER")
-            params.set<MooseFunctorName>("Forchheimer_name") = friction_coeffs[block_i][type_i];
+            params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
 
         getProblem().addFVKernel(kernel_type,
@@ -528,7 +541,7 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
         const std::string correction_kernel_type = "PINSFVMomentumFrictionCorrection";
         InputParameters corr_params = getFactory().getValidParams(correction_kernel_type);
         if (num_friction_blocks)
-          corr_params.set<std::vector<SubdomainName>>("block") = friction_blocks[block_i];
+          corr_params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
         else
           assignBlocks(corr_params, _blocks);
         corr_params.set<MooseFunctorName>(NS::density) = _density_name;
@@ -539,14 +552,14 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
         {
           corr_params.set<NonlinearVariableName>("variable") = _velocity_names[d];
           corr_params.set<MooseEnum>("momentum_component") = NS::directions[d];
-          for (unsigned int type_i = 0; type_i < friction_types[block_i].size(); ++type_i)
+          for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
           {
-            const auto upper_name = MooseUtils::toUpper(friction_types[block_i][type_i]);
+            const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
             if (upper_name == "DARCY")
-              corr_params.set<MooseFunctorName>("Darcy_name") = friction_coeffs[block_i][type_i];
+              corr_params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
             else if (upper_name == "FORCHHEIMER")
               corr_params.set<MooseFunctorName>("Forchheimer_name") =
-                  friction_coeffs[block_i][type_i];
+                  _friction_coeffs[block_i][type_i];
           }
 
           getProblem().addFVKernel(correction_kernel_type,
@@ -568,8 +581,8 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
       std::string block_name = "";
       if (num_friction_blocks)
       {
-        params.set<std::vector<SubdomainName>>("block") = friction_blocks[block_i];
-        block_name = Moose::stringify(friction_blocks[block_i]);
+        params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
+        block_name = Moose::stringify(_friction_blocks[block_i]);
       }
       else
       {
@@ -581,13 +594,13 @@ WCNSFVFlowPhysics::addINSMomentumFrictionKernels()
       {
         params.set<NonlinearVariableName>("variable") = _velocity_names[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        for (unsigned int type_i = 0; type_i < friction_types[block_i].size(); ++type_i)
+        for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
         {
-          const auto upper_name = MooseUtils::toUpper(friction_types[block_i][type_i]);
+          const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
-            params.set<MooseFunctorName>("linear_coef_name") = friction_coeffs[block_i][type_i];
+            params.set<MooseFunctorName>("linear_coef_name") = _friction_coeffs[block_i][type_i];
           else if (upper_name == "FORCHHEIMER")
-            params.set<MooseFunctorName>("quadratic_coef_name") = friction_coeffs[block_i][type_i];
+            params.set<MooseFunctorName>("quadratic_coef_name") = _friction_coeffs[block_i][type_i];
         }
 
         getProblem().addFVKernel(kernel_type,
@@ -653,34 +666,31 @@ WCNSFVFlowPhysics::addINSInletBC()
     else if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
              _momentum_inlet_types[bc_ind] == "flux-velocity")
     {
-      const auto flux_inlet_pps = getParam<std::vector<PostprocessorName>>("flux_inlet_pps");
-      const auto flux_inlet_directions = getParam<std::vector<Point>>("flux_inlet_directions");
-
       {
         const std::string bc_type =
             _porous_medium_treatment ? "PWCNSFVMomentumFluxBC" : "WCNSFVMomentumFluxBC";
         InputParameters params = getFactory().getValidParams(bc_type);
 
-        if (flux_inlet_directions.size())
-          params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
+        if (_flux_inlet_directions.size())
+          params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
         params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
         if (_porous_medium_treatment)
           params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-        if (flux_inlet_pps.size() < flux_bc_counter + 1)
+        if (_flux_inlet_pps.size() < flux_bc_counter + 1)
           paramError("flux_inlet_pps",
                      "More inlet flux BCs than inlet flux pps (" +
-                         std::to_string(flux_inlet_pps.size()) + ")");
+                         std::to_string(_flux_inlet_pps.size()) + ")");
 
         if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
-          params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
         }
         else
-          params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
         for (unsigned int d = 0; d < dimension(); ++d)
         {
@@ -698,16 +708,16 @@ WCNSFVFlowPhysics::addINSInletBC()
         params.set<NonlinearVariableName>("variable") = _pressure_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
-        if (flux_inlet_directions.size())
-          params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
+        if (_flux_inlet_directions.size())
+          params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
 
         if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
-          params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
         }
         else
-          params.set<PostprocessorName>("velocity_pp") = flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
         getProblem().addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
       }
@@ -722,6 +732,9 @@ void
 WCNSFVFlowPhysics::addINSOutletBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
+  mooseAssert(_momentum_outlet_types.size() == 0 ||
+                  (_momentum_outlet_types.size() == _outlet_boundaries.size()),
+              "We cant miss an outlet boundary if we are going to be creating them in the Physics");
   for (unsigned int bc_ind = 0; bc_ind < _momentum_outlet_types.size(); ++bc_ind)
   {
     if (_momentum_outlet_types[bc_ind] == "zero-gradient" ||
@@ -783,12 +796,11 @@ WCNSFVFlowPhysics::addINSOutletBC()
 void
 WCNSFVFlowPhysics::addINSWallsBC()
 {
-  const auto momentum_wall_types = getParam<MultiMooseEnum>("momentum_wall_types");
   const std::string u_names[3] = {"u", "v", "w"};
 
-  for (unsigned int bc_ind = 0; bc_ind < momentum_wall_types.size(); ++bc_ind)
+  for (unsigned int bc_ind = 0; bc_ind < _momentum_wall_types.size(); ++bc_ind)
   {
-    if (momentum_wall_types[bc_ind] == "noslip")
+    if (_momentum_wall_types[bc_ind] == "noslip")
     {
       const std::string bc_type = "INSFVNoSlipWallBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -802,7 +814,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
       }
     }
-    else if (momentum_wall_types[bc_ind] == "wallfunction")
+    else if (_momentum_wall_types[bc_ind] == "wallfunction")
     {
       const std::string bc_type = "INSFVWallFunctionBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -822,7 +834,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
       }
     }
-    else if (momentum_wall_types[bc_ind] == "slip")
+    else if (_momentum_wall_types[bc_ind] == "slip")
     {
       const std::string bc_type = "INSFVNaturalFreeSlipBC";
       InputParameters params = getFactory().getValidParams(bc_type);
@@ -837,7 +849,7 @@ WCNSFVFlowPhysics::addINSWallsBC()
         getProblem().addFVBC(bc_type, _velocity_names[d] + "_" + _wall_boundaries[bc_ind], params);
       }
     }
-    else if (momentum_wall_types[bc_ind] == "symmetry")
+    else if (_momentum_wall_types[bc_ind] == "symmetry")
     {
       {
         std::string bc_type;
