@@ -28,6 +28,7 @@ public:
   // These objects are added by the Physics already
   virtual void addVariables() override{};
   virtual void addMooseObjects() override{};
+  virtual void setupMesh() override;
 
 protected:
   virtual void init() override;

@@ -20,12 +20,17 @@ FileMeshPhysicsComponent::validParams()
   params.addClassDescription("Component with Physics objects active on it.");
   params.addParam<std::vector<PhysicsName>>("physics", "Physics object(s) active on the Component");
 
-  // We do not know which flow physics would be active so we cannot have the parameters of the flow
-  // on the component. Parameters are not dynamic, they are known at compile time.
-  // Some flow parameters could be nice to have on the component, such as in order the boundary
-  // condition specifications, the heat source, etc. You quickly start to want all the parameters of
-  // the Physics onto the component, which defeats the purpose of trying to factor out Physics.
-  // Instead we should rely on:
+  params.addParam<std::vector<BoundaryName>>("incoming_boundaries",
+                                             "Boundaries facing inwards for Junction purposes");
+  params.addParam<std::vector<BoundaryName>>("outgoing_boundaries",
+                                             "Boundaries facing outwards for Junction purposes");
+
+  // We do not know which flow physics would be active so we cannot have the parameters of the
+  // flow on the component. Parameters are not dynamic, they are known at compile time. Some
+  // flow parameters could be nice to have on the component, such as in order the boundary
+  // condition specifications, the heat source, etc. You quickly start to want all the
+  // parameters of the Physics onto the component, which defeats the purpose of trying to factor
+  // out Physics. Instead we should rely on:
   // - junctions to create boundary conditions
 
   // Having the flow parameters on the component would also undesirably lead to the following:
@@ -53,4 +58,23 @@ FileMeshPhysicsComponent::init()
 
   for (auto physics : _physics)
     physics->addBlocks(getSubdomainNames());
+}
+
+void
+FileMeshPhysicsComponent::setupMesh()
+{
+  FileMeshComponent::setupMesh();
+
+  // Add connections for planned inlet and outlet
+  const auto inlet_boundaries = getParam<std::vector<BoundaryName>>("incoming_boundaries");
+  const auto outlet_boundaries = getParam<std::vector<BoundaryName>>("outgoing_boundaries");
+
+  // For now we only need the boundary ids. The need for more Connection information may increase as
+  // we add more types of junction techniques
+  for (const auto i : index_range(inlet_boundaries))
+    _connections[FileMeshComponentConnection::EEndType::IN].push_back(
+        Connection(constMesh().getBoundaryID(inlet_boundaries[i])));
+  for (const auto i : index_range(outlet_boundaries))
+    _connections[FileMeshComponentConnection::EEndType::OUT].push_back(
+        Connection(constMesh().getBoundaryID(outlet_boundaries[i])));
 }

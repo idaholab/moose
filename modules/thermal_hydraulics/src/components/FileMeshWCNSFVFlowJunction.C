@@ -66,9 +66,10 @@ FileMeshWCNSFVFlowJunction::setupMesh()
         continue;
       const auto & b1_name = _connections[0]._boundary_name;
       const auto & b2_name = _connections[conn_i]._boundary_name;
-      MooseMeshUtils::stitchSidesets(comp_meshes, b1_name, b2_name, false);
+      MooseMeshUtils::stitchNodesets(comp_meshes, b1_name, b2_name, false, true);
     }
-    // TODO boundary infos from the component should be invalidated now
+    // Because we copied over boundary 1 into boundary 2 after stitching them, the boundary
+    // info on each component are still valid.
   }
 }
 
@@ -115,7 +116,9 @@ FileMeshWCNSFVFlowJunction::addMooseObjects()
   {
     // Set the outlet of one to be the inlet of the other and vice-versa
     // We cannot mix combinations of fully developed and not-fully developed BCs
+    // TODO: replace these BCs with FVIKs when stitching
     connectVariableWithBoundaryConditions("flow", NS::pressure, "FVADFunctorDirichletBC", true);
+    // connectVariableWithBoundaryConditions("flow", NS::pressure, "INSFVOutletPressureBC", true);
     connectVariableWithBoundaryConditions("flow", NS::velocity_x, "INSFVInletVelocityBC", false);
     if (constMesh().dimension() > 1 && getConnectedComponent(0).dimension() > 1)
       connectVariableWithBoundaryConditions("flow", NS::velocity_y, "INSFVInletVelocityBC", false);
@@ -156,7 +159,8 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
 
         InputParameters params = getMooseApp().getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_connections[0]._boundary_name};
-        params.set<bool>("functor_defined_on_other_side") = true;
+        if (params.have_parameter<bool>("functor_defined_on_other_side"))
+          params.set<bool>("functor_defined_on_other_side") = true;
 
         // we cannot add dirichlet BCs on both sides, it would create an infinite recursion
         // Add boundary condition on one side on the junction
