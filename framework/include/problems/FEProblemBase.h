@@ -2400,6 +2400,9 @@ protected:
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
 
+  /// Whether or not to be verbose during setup
+  const bool _verbose_setup;
+
   /// Whether or not to be verbose with multiapps
   const bool _verbose_multiapps;
 
@@ -2598,6 +2601,10 @@ FEProblemBase::addObject(const std::string & type,
                          const std::string & var_param_name)
 {
   parallel_object_only();
+
+  if (_verbose_setup)
+    _console << "Adding " << MooseUtils::prettyCppType<T>() << " '" << name << "' of type " << type
+             << std::endl;
 
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name, var_param_name);

@@ -226,6 +226,8 @@ FEProblemBase::validParams()
                         "or transferring to/from Multiapps "
                         "(default: false)");
 
+  params.addParam<bool>(
+      "verbose_setup", false, "Set to True to have the problem report on any object created");
   params.addParam<bool>("verbose_multiapps",
                         false,
                         "Set to True to enable verbose screen printing related to MultiApps");
@@ -289,7 +291,8 @@ FEProblemBase::validParams()
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
-  params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
+  params.addParamNamesToGroup("verbose_setup verbose_multiapps parallel_barrier_messaging",
+                              "Verbosity");
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
       "Null space removal");
@@ -372,6 +375,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_time_integrator(false),
     _has_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
+    _verbose_setup(getParam<bool>("verbose_setup")),
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -2211,6 +2215,8 @@ FEProblemBase::addFunction(const std::string & type,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
+    if (_verbose_setup)
+      _console << "Adding Function '" << name << "' of type " << type << std::endl;
     _functions.addObject(func, tid);
 
     if (auto * const functor = dynamic_cast<Moose::FunctorBase<Real> *>(func.get()))
@@ -3019,6 +3025,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         mooseError("Your FE variable in initial condition ",
                    name,
                    " must be either of scalar or vector type");
+      if (_verbose_setup)
+        _console << "Adding IC '" << name << "' for variable " << var_name << std::endl;
       _ics.addObject(ic, tid);
     }
   }
@@ -3030,6 +3038,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
     parameters.set<SystemBase *>("_sys") = &var.sys();
     std::shared_ptr<ScalarInitialCondition> ic =
         _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
+    if (_verbose_setup)
+      _console << "Adding ScalarIC '" << name << "' for variable " << var_name << std::endl;
     _scalar_ics.addObject(ic);
   }
 
@@ -3211,7 +3221,9 @@ FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
       // Create the general Block/Boundary MaterialBase object
       std::shared_ptr<MaterialBase> material =
           _factory.create<MaterialBase>(functor_material_name, name, parameters, tid);
-
+      if (_verbose_setup)
+        _console << "Adding Functor Material '" << name << "' of type " << functor_material_name
+                 << std::endl;
       _all_materials.addObject(material, tid);
       _materials.addObject(material, tid);
     }
@@ -3276,7 +3288,8 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // Create the general Block/Boundary MaterialBase object
     std::shared_ptr<MaterialBase> material =
         _factory.create<MaterialBase>(mat_name, name, parameters, tid);
-
+    if (_verbose_setup)
+      _console << "Adding Material '" << name << "' of type " << mat_name << std::endl;
     bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted or if it is a functor material we do not create the
@@ -3662,6 +3675,8 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
         _factory.create<UserObject>(user_object_name, name, parameters, tid);
+    if (_verbose_setup)
+      _console << "Adding User Object '" << name << "' of type " << user_object_name << std::endl;
     uos.push_back(user_object);
 
     if (tid != 0)
@@ -4573,7 +4588,8 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
   {
     std::shared_ptr<Indicator> indicator =
         _factory.create<Indicator>(indicator_name, name, parameters, tid);
-
+    if (_verbose_setup)
+      _console << "Adding Indicator '" << name << "' of type " << indicator_name << std::endl;
     std::shared_ptr<InternalSideIndicator> isi =
         std::dynamic_pointer_cast<InternalSideIndicator>(indicator);
     if (isi)
@@ -4615,6 +4631,8 @@ FEProblemBase::addMarker(const std::string & marker_name,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
+    if (_verbose_setup)
+      _console << "Adding Marker '" << name << "' of type " << marker_name << std::endl;
     _markers.addObject(marker, tid);
   }
 }
@@ -4652,7 +4670,8 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
   }
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
-
+  if (_verbose_setup)
+    _console << "Adding MultiApp '" << name << "' of type " << multi_app_name << std::endl;
   multi_app->setupPositions();
 
   _multi_apps.addObject(multi_app);
@@ -5018,6 +5037,8 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 
   // Create the Transfer objects
   std::shared_ptr<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
+  if (_verbose_setup)
+    _console << "Adding Transfer '" << name << "' of type " << transfer_name << std::endl;
 
   // Add MultiAppTransfer object
   std::shared_ptr<MultiAppTransfer> multi_app_transfer =
@@ -5968,6 +5989,9 @@ FEProblemBase::addPredictor(const std::string & type,
 
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
+  if (_verbose_setup)
+    _console << "Adding Predictor '" << name << "' of type " << type << std::endl;
+
   for (auto & nl : _nl)
     nl->setPredictor(predictor);
 }
@@ -7890,6 +7914,8 @@ FEProblemBase::addOutput(const std::string & object_type,
 
   // Create the object and add it to the warehouse
   std::shared_ptr<Output> output = _factory.create<Output>(object_type, object_name, parameters);
+  if (_verbose_setup)
+    _console << "Adding Output '" << object_name << "' of type " << object_type << std::endl;
   output_warehouse.addOutput(output);
 }
 
