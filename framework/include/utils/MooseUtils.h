@@ -1207,25 +1207,51 @@ isDigits(const std::string & str)
  * corresponding value if found, throws an error otherwise. Templated
  * on the type of map, so this will work with both std::map and
  * std::unordered_map.
+ * Note:
+ * - we need both a const and non-const version for the return type, due to the use
+ *   of the find operation to simply find a value or modify a value
+ * - const references can bind to more things for templated function parameter Key
+ * - we cannot have the exact same signatures and different return types
+ * - typename T::type requests that T defines the type function
  */
 template <
     typename Map,
     typename Key,
+    typename T,
+    typename T::type,
+    typename T::name,
     typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
-inline const typename Map::mapped_type &
-map_find(const Map & map,
-         const Key & key,
-         std::string name,
-         std::string class_type,
-         const char * filename,
-         int line_number)
+inline typename Map::mapped_type &
+map_find(Map & map, const Key & key, const T * object, const char * filename, int line_number)
 {
   auto it = map.find(key);
   if (it == map.end())
     mooseError("map_find() error: key not found during a search in class ",
-               name,
+               object->name(),
                " of type ",
-               class_type,
+               object->type(),
+               ".\n See file ",
+               filename,
+               " at line ",
+               line_number);
+  return it->second;
+}
+template <
+    typename Map,
+    typename Key,
+    typename T,
+    typename T::type,
+    typename T::name,
+    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+inline const typename Map::mapped_type &
+map_find(const Map & map, const Key & key, const T * object, const char * filename, int line_number)
+{
+  auto it = map.find(key);
+  if (it == map.end())
+    mooseError("map_find() error: key not found during a search in class ",
+               object->name(),
+               " of type ",
+               object->type(),
                ".\n See file ",
                filename,
                " at line ",
@@ -1234,35 +1260,34 @@ map_find(const Map & map,
 }
 
 /**
- * A version of the map_find() utility which can only be used if
- * the map key is printable via std::stream.
+ * Version where this is being used outside of a class so `this` does not exist
+ * First template for non-const returns
+ * Second template for const returns
+ * We enforce that the const-ness of the Map matches the constness of the return argument
  */
 template <
     typename Map,
     typename Key,
+    typename T,
+    typename std::enable_if<!std::is_const<Map>::value, Key>::type * = nullptr,
+    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+inline typename Map::mapped_type &
+map_find(Map & map, const Key & key, const T * /*obj*/, const char * filename, int line)
+{
+  return libMesh::Utility::map_find(map, key, filename, line);
+}
+template <
+    typename Map,
+    typename Key,
+    typename T,
+    typename std::enable_if<std::is_const<Map>::value, Key>::type * = nullptr,
     typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
 inline const typename Map::mapped_type &
-map_find(const Map & map,
-         const Key & key,
-         std::string name,
-         std::string class_type,
-         const char * filename,
-         int line_number)
+map_find(Map & map, const Key & key, const T * /*obj*/, const char * filename, int line_number)
 {
-  auto it = map.find(key);
-  if (it == map.end())
-    mooseError("map_find() error: key \"",
-               key,
-               "\" not found during a search in class ",
-               name,
-               " of type ",
-               class_type,
-               ".\n See file ",
-               filename,
-               " at line ",
-               line_number);
-  return it->second;
+  return libMesh::Utility::map_find(map, key, filename, line_number);
 }
+
 } // MooseUtils namespace
 
 /**
