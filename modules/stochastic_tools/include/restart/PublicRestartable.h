@@ -70,8 +70,8 @@ public:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
-  template <typename T, typename... Args>
-  const T & getRestartableData(const std::string & data_name) const
+  template <typename T>
+  const T & getRestartableData(const std::string & data_name)
   {
     return Restartable::getRestartableData<T>(data_name);
   }

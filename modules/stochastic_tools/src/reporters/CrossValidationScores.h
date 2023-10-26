@@ -24,5 +24,5 @@ protected:
   std::vector<std::vector<std::vector<Real>> *> _cv_scores;
 
   /// Model to extract CV values from.
-  std::vector<const SurrogateModel *> _models;
+  std::vector<SurrogateModel *> _models;
 };
