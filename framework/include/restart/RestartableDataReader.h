@@ -132,6 +132,11 @@ public:
    */
   LateRestartableDataRestorer & getLateRestorer() { return _late_restorer; }
 
+  /**
+   * @return Whether or not this object has restored at least once
+   */
+  bool hasRestored() const { return _has_restored; }
+
 private:
   /**
    * Struct that describes data in the header
@@ -203,4 +208,7 @@ private:
 
   /// The external API for restoring data late
   LateRestartableDataRestorer _late_restorer;
+
+  /// Whether or not this reader has restored at least once
+  bool _has_restored;
 };

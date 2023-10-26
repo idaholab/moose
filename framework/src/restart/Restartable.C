@@ -98,8 +98,10 @@ Restartable::hasRestartableData(const std::string & full_name, const std::type_i
   // always return false in them because the headers aren't even read yet
   if (const auto map = _restartable_app.queryRestartableDataMap(_metaname, _restartable_tid))
   {
+    // Data does exist!
     if (const auto data = map->findData(full_name))
     {
+      // And it even has the same type!
       if (data->typeId() == type)
         return HasRestartableData::HAS_DATA_LOADED;
 
@@ -112,6 +114,10 @@ Restartable::hasRestartableData(const std::string & full_name, const std::type_i
                  "'");
     }
 
+    // Data doesn't exist, but we also haven't restored anything yet. Thus, we'll probably
+    // want to lazily declare it so note that it's not loaded yet
+    if (!_restartable_app.hasRestoredRestartableData(_metaname))
+      return HasRestartableData::NOT_RESTORED;
     // Data doesn't exist, but it might be restorable late
     if (_restartable_app.getLateRestartableDataRestorer(_metaname).isRestorable(
             full_name, type, _restartable_tid))

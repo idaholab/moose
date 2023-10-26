@@ -298,7 +298,8 @@ private:
   {
     HAS_DATA_LOADED,
     HAS_DATA_RESTORABLE,
-    MISSING_DATA
+    MISSING_DATA,
+    NOT_RESTORED
   };
 
   /**

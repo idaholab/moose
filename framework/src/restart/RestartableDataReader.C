@@ -26,7 +26,8 @@ RestartableDataReader::RestartableDataReader(MooseApp & app, RestartableDataMap 
   : RestartableDataIO(app, data),
     _is_restoring(false),
     _error_on_different_number_of_processors(true),
-    _late_restorer(*this)
+    _late_restorer(*this),
+    _has_restored(false)
 {
 }
 
@@ -34,7 +35,8 @@ RestartableDataReader::RestartableDataReader(MooseApp & app, std::vector<Restart
   : RestartableDataIO(app, data),
     _is_restoring(false),
     _error_on_different_number_of_processors(true),
-    _late_restorer(*this)
+    _late_restorer(*this),
+    _has_restored(false)
 {
 }
 
@@ -212,6 +214,8 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
         deserializeValue(*_streams.data, value, header_entry);
     }
   }
+
+  _has_restored = true;
 }
 
 bool

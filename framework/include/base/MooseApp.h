@@ -614,6 +614,16 @@ public:
                                                  const RestartableDataMapName & metaname = "");
 
   /**
+   * @return Whether or not restartable data with the name \p metaname (if any, otherwise
+   * the primary metadata) has been restored at least once
+   *
+   * This is needed so that we can know whether it is appropriate to check if metadata
+   * exists (because it's being checked after restore), or if we can't because we haven't
+   * even loaded anything yet
+  */
+  bool hasRestoredRestartableData(const RestartableDataMapName & metaname = "") const;
+
+  /**
    * @return The meta data value with the name \p name in the map \p metaname, if any
    */
   const RestartableDataValue *

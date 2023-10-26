@@ -1820,6 +1820,21 @@ MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
   return *stored_data;
 }
 
+bool
+MooseApp::hasRestoredRestartableData(const RestartableDataMapName & metaname /* = "" */) const
+{
+  if (metaname.empty())
+    return _rd_reader.hasRestored();
+  const auto it = _restartable_meta_data.find(metaname);
+  if (it == _restartable_meta_data.end())
+    mooseError("MooseApp::hasRestoredRestartableData(): Failed to find meta data with name '",
+               metaname,
+               "'");
+  const auto & entry = it->second;
+  mooseAssert(entry.reader, "Reader not set");
+  return entry.reader->hasRestored();
+}
+
 const RestartableDataValue *
 MooseApp::queryRestartableMetaData(const std::string & name,
                                    const RestartableDataMapName & metaname) const
