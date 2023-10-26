@@ -67,7 +67,6 @@
   []
 
   [./exodus_pseudoiga_test]
-    skip = 'libMesh issue, #25819'
     type = XMLDiff
     input = '3d_steady_diffusion_iga.i'
     expect_out = 'Solve Converged'
