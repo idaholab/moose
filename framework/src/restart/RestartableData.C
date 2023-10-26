@@ -17,7 +17,7 @@ RestartableDataValue::RestartableDataValue(const std::string & name, void * cons
 void
 RestartableDataValue::setDeclared(const SetDeclaredKey)
 {
-  mooseAssert(!_declared, "Already declared");
+  mooseAssert(!_declared, "Data '" + name() + "' is already declared");
   _declared = true;
 }
 
