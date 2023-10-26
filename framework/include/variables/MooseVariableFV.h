@@ -524,33 +524,6 @@ protected:
                                   const Elem * elem,
                                   const Moose::StateArg & state) const override;
 
-  /**
-   * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
-   * be sure that \p isExtrapolatedBoundaryFace returns true. In the base implementation we only
-   * inspect the face information object for the extrapolated value. However, derived classes may
-   * allow discontinuities between + and - side face values, e.g. one side may have a Dirichlet
-   * condition and the other side may perform extrapolation to determine its value. This is the
-   * reason for the existence of the \p elem parameter, to indicate sidedness
-   * @param fi The face information object
-   * @param two_term_expansion Whether to use the cell gradient in addition to the cell center value
-   * to compute the extrapolated boundary face value. If this is false, then the cell center value
-   * will be used
-   * @param correct_skewness Whether to perform skew corrections. This is relevant when performing
-   * two term expansions as the gradient evaluation may involve evaluating face values on internal
-   * skewed faces
-   * @param elem_side_to_extrapolate_from An element that can be used to indicate sidedness of the
-   * face
-   * @param state State argument which describes at what time / solution iteration  state we want to
-   * evaluate the variable
-   * @return The extrapolated value on the boundary face associated with \p fi (and potentially \p
-   * elem_side_to_extrapolate_from)
-   */
-  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                  bool two_term_expansion,
-                                                  bool correct_skewness,
-                                                  const Elem * elem_side_to_extrapolate_from,
-                                                  const StateArg & state) const;
-
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
@@ -638,6 +611,33 @@ public:
   virtual const FieldVariablePhiValue & phiLower() const override;
 
   unsigned int oldestSolutionStateRequested() const override final;
+
+  /**
+   * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
+   * be sure that \p isExtrapolatedBoundaryFace returns true. In the base implementation we only
+   * inspect the face information object for the extrapolated value. However, derived classes may
+   * allow discontinuities between + and - side face values, e.g. one side may have a Dirichlet
+   * condition and the other side may perform extrapolation to determine its value. This is the
+   * reason for the existence of the \p elem parameter, to indicate sidedness
+   * @param fi The face information object
+   * @param two_term_expansion Whether to use the cell gradient in addition to the cell center value
+   * to compute the extrapolated boundary face value. If this is false, then the cell center value
+   * will be used
+   * @param correct_skewness Whether to perform skew corrections. This is relevant when performing
+   * two term expansions as the gradient evaluation may involve evaluating face values on internal
+   * skewed faces
+   * @param elem_side_to_extrapolate_from An element that can be used to indicate sidedness of the
+   * face
+   * @param state State argument which describes at what time / solution iteration  state we want to
+   * evaluate the variable
+   * @return The extrapolated value on the boundary face associated with \p fi (and potentially \p
+   * elem_side_to_extrapolate_from)
+   */
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                  bool two_term_expansion,
+                                                  bool correct_skewness,
+                                                  const Elem * elem_side_to_extrapolate_from,
+                                                  const StateArg & state) const;
 
 protected:
   /**

@@ -1,10 +1,16 @@
 [Tests]
   design = 'ConditionalFunctionEnableControl.md'
-  issues = '#24259'
+  issues = '#24259 #25806'
   [test]
     type = CSVDiff
     input = test.i
     csvdiff = test_out.csv
     requirement = 'The system shall be able to switch Dirichlet boundary conditions on and off over the course of a transient in finite volume contexts.'
+  []
+  [test_boundary_switch]
+    type = CSVDiff
+    input = switch_vel_pres_bc.i
+    csvdiff = switch_vel_pres_bc_out.csv
+    requirement = 'The system shall be able to switch the behavior of velocity and pressure boundary conditions during runtime.'
   []
 []
