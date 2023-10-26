@@ -15,10 +15,10 @@
 #include "MooseVariableInterface.h"
 #include "SamplerBase.h"
 
-class PointSamplerBase : public GeneralVectorPostprocessor,
-                         public CoupleableMooseVariableDependencyIntermediateInterface,
-                         public MooseVariableInterface<Real>,
-                         protected SamplerBase
+/**
+ * Base class for sampling objects (variables, functors etc) at points
+ */
+class PointSamplerBase : public GeneralVectorPostprocessor, protected SamplerBase
 {
 public:
   static InputParameters validParams();
@@ -28,11 +28,7 @@ public:
   virtual ~PointSamplerBase() {}
 
   virtual void initialize();
-  virtual void execute();
   virtual void finalize();
-
-  void setPointsVector(const std::vector<Point> & points);
-  void transferPointsVector(std::vector<Point> && points);
 
 protected:
   /**
@@ -60,8 +56,7 @@ protected:
   /// Whether or not the Point was found on this processor (short because bool and char don't work with MPI wrappers)
   std::vector<short> _found_points;
 
-  unsigned int _qp;
-
+  /// Point locator
   std::unique_ptr<PointLocatorBase> _pl;
 
   /// Postprocessor multiplying the variables
@@ -70,6 +65,6 @@ protected:
   /// Whether to return a warning if a discontinuous variable is sampled on a face
   const bool _warn_discontinuous_face_values;
 
-  /// Whether discontinuous variable values are requested, which are ill-defined on faces for this object
-  bool _discontinuous_variables;
+  /// Whether values are requested for objects that are discontinuous on faces
+  bool _discontinuous_at_faces;
 };

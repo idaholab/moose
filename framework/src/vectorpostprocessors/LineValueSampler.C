@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", LineValueSampler);
 InputParameters
 LineValueSampler::validParams()
 {
-  InputParameters params = PointSamplerBase::validParams();
+  InputParameters params = PointVariableSamplerBase::validParams();
 
   params.addRequiredParam<Point>("start_point", "The beginning of the line");
   params.addRequiredParam<Point>("end_point", "The ending of the line");
@@ -30,7 +30,7 @@ LineValueSampler::validParams()
 }
 
 LineValueSampler::LineValueSampler(const InputParameters & parameters)
-  : PointSamplerBase(parameters),
+  : PointVariableSamplerBase(parameters),
     _start_point(getParam<Point>("start_point")),
     _end_point(getParam<Point>("end_point")),
     _num_points(
