@@ -173,7 +173,7 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    switch = true
+    switch_bc = true
     face_limiter = 1.0
   []
   [outlet_u]
@@ -183,7 +183,7 @@ switch_time = 1.0
     mdot_pp = 'inlet_mdot'
     area_pp = 'surface_inlet'
     rho = 'rho'
-    switch = false
+    switch_bc = false
     scaling_factor = -1.0
     face_limiter = 1.0
   []
@@ -219,7 +219,7 @@ switch_time = 1.0
     variable = pressure
     boundary = 'right'
     function = ${outlet_pressure}
-    switch = true
+    switch_bc = true
     face_limiter = 1.0
   []
   [inlet_p]
@@ -227,7 +227,7 @@ switch_time = 1.0
     variable = pressure
     boundary = 'left'
     function = ${outlet_pressure}
-    switch = false
+    switch_bc = false
     face_limiter = 1.0
   []
 
@@ -264,25 +264,25 @@ switch_time = 1.0
 [Controls]
   [func_control_u_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_u/switch'
+    parameter = 'FVBCs/inlet_u/switch_bc'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_u_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_u/switch'
+    parameter = 'FVBCs/outlet_u/switch_bc'
     function = 'func_coef_comp'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_outlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/outlet_p/switch'
+    parameter = 'FVBCs/outlet_p/switch_bc'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   []
   [func_control_p_inlet]
     type = BoolFunctionControl
-    parameter = 'FVBCs/inlet_p/switch'
+    parameter = 'FVBCs/inlet_p/switch_bc'
     function = 'func_coef_comp'
     execute_on = 'initial timestep_begin'
   []

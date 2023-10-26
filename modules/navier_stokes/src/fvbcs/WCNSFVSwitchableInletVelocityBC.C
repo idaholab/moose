@@ -21,8 +21,9 @@ WCNSFVSwitchableInletVelocityBC::validParams()
   params.addClassDescription("Adds switchable inlet-velocity boundary condition"
                              "for weakly compressible flows.");
 
-  params.addParam<bool>("switch", true, "Switch on (true) / off (false) for boundary condition.");
-  params.declareControllable("switch");
+  params.addParam<bool>(
+      "switch_bc", true, "Switch on (true) / off (false) for boundary condition.");
+  params.declareControllable("switch_bc");
 
   params.addParam<Real>("face_limiter", 1.0, "Face flux limiter.");
   params.declareControllable("face_limiter");
@@ -32,7 +33,7 @@ WCNSFVSwitchableInletVelocityBC::validParams()
 
 WCNSFVSwitchableInletVelocityBC::WCNSFVSwitchableInletVelocityBC(const InputParameters & params)
   : WCNSFVInletVelocityBC(params),
-    _switch_bc(getParam<bool>("switch")),
+    _switch_bc(getParam<bool>("switch_bc")),
     _face_limiter(getParam<Real>("face_limiter"))
 {
 }
