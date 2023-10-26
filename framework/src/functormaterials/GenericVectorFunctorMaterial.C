@@ -26,7 +26,6 @@ InputParameters
 GenericVectorFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
   params.addClassDescription(
       "FunctorMaterial object for declaring vector properties that are populated by "
@@ -73,7 +72,8 @@ GenericVectorFunctorMaterialTempl<is_ad>::GenericVectorFunctorMaterialTempl(
   {
     addFunctorProperty<GenericRealVectorValue<is_ad>>(
         _prop_names[i],
-        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
+        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad>
+        {
           return {(*_functors[LIBMESH_DIM * i])(r, t),
                   (*_functors[LIBMESH_DIM * i + 1])(r, t),
                   (*_functors[LIBMESH_DIM * i + 2])(r, t)};

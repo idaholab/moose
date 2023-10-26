@@ -64,6 +64,7 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
   buildParsedFunction();
 
   // Add the functor material property
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   addFunctorProperty<GenericReal<is_ad>>(
       _property_name,
       [this](const auto & r, const auto & t) -> GenericReal<is_ad>
@@ -80,7 +81,8 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
 
         // Evaluate the parsed function
         return evaluate(_parsed_function, _name);
-      });
+      },
+      clearance_schedule);
 }
 
 template <bool is_ad>

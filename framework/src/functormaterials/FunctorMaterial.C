@@ -14,6 +14,14 @@ FunctorMaterial::validParams()
 {
   auto params = Material::validParams();
   params.suppressParameter<bool>("use_displaced_mesh");
+
+  // Functor materials define functors, and the functor caching is defined by the execute_on
+  params += SetupInterface::validParams();
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(EXEC_ALWAYS);
+  // Default is no-caching. Same default as not passing a clearance schedule when adding a functor
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
+
   return params;
 }
 
