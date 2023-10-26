@@ -731,27 +731,22 @@ pow(const B & base)
  * objects, C variables, and number literals.
  */
 #define CT_OPERATOR_BINARY(op, OP)                                                                 \
-  template <typename L, typename R>                                                                            \
-            class = std::enable_if_t<std::is_base_of<CTBase, L>::value &&                          \
+  template <typename L,                                                                            \
+            typename R,                                                                            \
+            class = std::enable_if_t<std::is_base_of<CTBase, L>::value ||                          \
                                      std::is_base_of<CTBase, R>::value>>                           \
   auto operator op(const L & left, const R & right)                                                \
   {                                                                                                \
     /* We need a template arguments here because:      */                                          \
     /* alias template deduction only available with '-std=c++2a' or '-std=gnu++2a'      */         \
-    if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value) \
-    return OP<L, R>(left, right);                                                                  \
-  }
-
-#define CT_OPERATOR_BINARY_MIX(op, OP, ot)                                                         \
-  template <typename L, class = std::enable_if_t<std::is_base_of<CTBase, L>::value>>               \
-  auto operator op(const L & left, const ot & right)                                               \
-  {                                                                                                \
-    return OP<L, decltype(makeValue(right))>(left, makeValue(right));                              \
-  }                                                                                                \
-  template <typename R, class = std::enable_if_t<std::is_base_of<CTBase, R>::value>>               \
-  auto operator op(const ot & left, const R & right)                                               \
-  {                                                                                                \
-    return OP<decltype(makeValue(left)), R>(makeValue(left), right);                               \
+    if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value)          \
+      return OP<L, R>(left, right);                                                                \
+    else if constexpr (std::is_base_of<CTBase, L>::value)                                          \
+      return OP<L, decltype(makeValue(right))>(left, makeValue(right));                            \
+    else if constexpr (std::is_base_of<CTBase, R>::value)                                          \
+      return OP<decltype(makeValue(left)), R>(makeValue(left), right);                             \
+    else                                                                                           \
+      throw std::runtime_error("This should not be instantiated.");                                \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)
@@ -764,23 +759,6 @@ CT_OPERATOR_BINARY(>, CTCompareGreater)
 CT_OPERATOR_BINARY(>=, CTCompareGreaterEqual)
 CT_OPERATOR_BINARY(==, CTCompareEqual)
 CT_OPERATOR_BINARY(!=, CTCompareUnequal)
-
-#define CT_OPERATORS_BINARY_MIX(ot)                                                                \
-  CT_OPERATOR_BINARY_MIX(+, CTAdd, ot)                                                             \
-  CT_OPERATOR_BINARY_MIX(-, CTSub, ot)                                                             \
-  CT_OPERATOR_BINARY_MIX(*, CTMul, ot)                                                             \
-  CT_OPERATOR_BINARY_MIX(/, CTDiv, ot)                                                             \
-  CT_OPERATOR_BINARY_MIX(<, CTCompareLess, ot)                                                     \
-  CT_OPERATOR_BINARY_MIX(<=, CTCompareLessEqual, ot)                                               \
-  CT_OPERATOR_BINARY_MIX(>, CTCompareGreater, ot)                                                  \
-  CT_OPERATOR_BINARY_MIX(>=, CTCompareGreaterEqual, ot)                                            \
-  CT_OPERATOR_BINARY_MIX(==, CTCompareEqual, ot)                                                   \
-  CT_OPERATOR_BINARY_MIX(!=, CTCompareUnequal, ot)
-
-// Add entries here to support other types in CTD expressions
-CT_OPERATORS_BINARY_MIX(double)
-CT_OPERATORS_BINARY_MIX(float)
-CT_OPERATORS_BINARY_MIX(int)
 
 /**
  * Macro for implementing a simple unary function overload. No function specific optimizations are
