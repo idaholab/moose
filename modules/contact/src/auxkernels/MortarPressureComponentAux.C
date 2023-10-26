@@ -80,7 +80,7 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
                "frictional pressure vector auxiliary variable definition.");
 
   _mortar_generation_object =
-      &libmesh_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id));
+      &moose_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id));
 }
 
 Real
@@ -89,7 +89,7 @@ MortarPressureComponentAux::computeValue()
   // A node id may correspond to more than one lower-d elements on the secondary surface.
   // However, we are looping over nodes below, so we will locate the correct geometry
   const Elem * lower_dimensional_element =
-      libmesh_map_find(_mortar_generation_object->nodesToSecondaryElem(), _current_node->id())[0];
+      moose_map_find(_mortar_generation_object->nodesToSecondaryElem(), _current_node->id())[0];
 
   // Get the nodal normals for this element
   const auto & nodal_normals =

@@ -62,8 +62,8 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
   RealEigenVector b = RealEigenVector::Zero(_q);
   for (auto elem_id : elem_ids)
   {
-    A += libmesh_map_find(_Ae, elem_id);
-    b += libmesh_map_find(_be, elem_id);
+    A += moose_map_find(_Ae, elem_id);
+    b += moose_map_find(_be, elem_id);
   }
 
   // Solve the least squares fitting

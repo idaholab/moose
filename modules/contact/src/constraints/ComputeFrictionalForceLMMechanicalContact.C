@@ -129,8 +129,7 @@ ComputeFrictionalForceLMMechanicalContact::post()
     if (dof_object->processor_id() != this->processor_id())
       continue;
 
-    const auto & [weighted_gap_pr, normalization] =
-        libmesh_map_find(dof_to_weighted_gap, dof_object);
+    const auto & [weighted_gap_pr, normalization] = moose_map_find(dof_to_weighted_gap, dof_object);
     _weighted_gap_ptr = &weighted_gap_pr;
     _normalization_ptr = &normalization;
     _tangential_vel_ptr[0] = &(weighted_velocities_pr[0]);

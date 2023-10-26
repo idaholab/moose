@@ -304,7 +304,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
 
     const auto possible_normalization =
-        (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
+        (_use_physical_gap ? moose_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
 
     // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
     // caps the penalty increase)

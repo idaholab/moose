@@ -244,7 +244,7 @@ PenaltyFrictionUserObject::reinit()
 
     Real normal_lm = -1;
     if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
-      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+      normal_lm = moose_map_find(_dof_to_lagrange_multiplier, node);
 
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
@@ -252,7 +252,7 @@ PenaltyFrictionUserObject::reinit()
       using namespace std;
 
       const auto & real_tangential_velocity =
-          libmesh_map_find(_dof_to_real_tangential_velocity, node);
+          moose_map_find(_dof_to_real_tangential_velocity, node);
       const ADTwoVector slip_distance = {real_tangential_velocity[0] * _dt,
                                          real_tangential_velocity[1] * _dt};
 
@@ -347,7 +347,7 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
     if (_dof_to_real_tangential_velocity.find(dof_object) != _dof_to_real_tangential_velocity.end())
     {
       const auto & real_tangential_velocity =
-          libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+          moose_map_find(_dof_to_real_tangential_velocity, dof_object);
       slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
                        MetaPhysicL::raw_value(real_tangential_velocity[1])};
     }
@@ -403,11 +403,11 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
       penalty_friction = _penalty_friction;
 
     // normal quantities
-    const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, dof_object);
+    const auto & normal_lm = moose_map_find(_dof_to_lagrange_multiplier, dof_object);
 
     // tangential quantities
     const auto & real_tangential_velocity =
-        libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+        moose_map_find(_dof_to_real_tangential_velocity, dof_object);
     const TwoVector slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
                                      MetaPhysicL::raw_value(real_tangential_velocity[1])};
 
@@ -442,7 +442,7 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     }
     else if (_adaptivity_friction == AdaptivityFrictionalPenalty::FRICTION_LIMIT)
     {
-      const auto & step_slip = libmesh_map_find(_dof_to_step_slip, dof_object);
+      const auto & step_slip = moose_map_find(_dof_to_step_slip, dof_object);
       // No change of direction: Adjust penalty factor for the frictional problem
       if (step_slip.first.dot(step_slip.second) > 0.0 && std::abs(normal_lm) > TOLERANCE &&
           _slip_tolerance < _dt * slip_velocity.norm())
