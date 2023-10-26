@@ -119,7 +119,7 @@ either a Conda update, or rebuild PETSc/libMesh:
 
   ```bash
   mamba activate moose
-  mamba update --all
+  mamba update moose-dev
   ```
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
