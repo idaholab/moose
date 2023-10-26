@@ -1,0 +1,87 @@
+# React script, saved Tue Jul 11 2023 by Mr. Toad
+data = thermo+Urea+Ankerite+SRP_Basalt.tdat verify
+conductivity = conductivity-USGS.dat
+suppress ALL
+unsuppress  Akermanite Al2(SO4)3 Al2(SO4)3^6H2O Albite
+unsuppress  "Albite high" "Albite low" Alunite Amesite-14A
+unsuppress  Amrph^silica Analc-dehydr Analcime Andalusite
+unsuppress  Andradite Anhydrite Ankerite Annite
+unsuppress  Anorthite Antarcticite Anthophyllite Antigorite
+unsuppress  Aragonite Arcanite Artinite Basalt_SRP
+unsuppress  Bassanite Beidellit-Ca Beidellit-H Beidellit-K
+unsuppress  Beidellit-Mg Beidellit-Na Bischofite Bloedite
+unsuppress  Boehmite Brucite Burkeite Ca(OH)2(c)
+unsuppress  "Ca-Al Pyroxene" Ca2Cl2(OH)2^H2O Ca2Si3O8^5/2H2O Ca2SiO4(gamma)
+unsuppress  Ca2SiO4^7/6H2O Ca3Si2O7^3H2O Ca3SiO5 Ca4Cl2(OH)6^13H2O
+unsuppress  Ca4Si3O10^3/2H2O Ca5Si6O17^11/2H2O Ca5Si6O17^21/2H2O Ca5Si6O17^3H2O
+unsuppress  Ca6Si6O18^H2O CaCl2^2H2O CaCl2^4H2O CaCl2^H2O
+unsuppress  CaSO4^1/2H2O(beta) CaSi2O5^2H2O Calcite Calcite_ESRPA
+unsuppress  Carnallite Celestite Chalcedony Chamosite-7A
+unsuppress  Chloromagnesite Chrysotile Clinochl-14A Clinochl-7A
+unsuppress  Clinoptil-Ca Clinoptil-K Clinoptil-Mg Clinoptil-Na
+unsuppress  Clinozoisite Cordier^anhy Cordier^hydr Corundum
+unsuppress  Cronstedt-7A Daphnite-14A Daphnite-7A Dawsonite
+unsuppress  Diaspore Diopside Enstatite Epidote
+unsuppress  Epidote-ord Epsomite Fayalite Fe(OH)2(ppd)
+unsuppress  Fe(OH)3(ppd) Fe2(SO4)3(c) FeF2(c) FeF3(c)
+unsuppress  FeO(c) FeSO4(c) Ferrite-2-Ca Ferrite-Ca
+unsuppress  Ferrite-Mg Ferrosilite Fluorite Forsterite
+unsuppress  Gaylussite Gehlenite Gibbsite Goethite
+unsuppress  Graphite Greenalite Grossular Gypsum
+unsuppress  Halite Hedenbergite Hercynite Heulandite
+unsuppress  Hexahydrite Huntite Hydromagnesite Hydrophilite
+unsuppress  Illite Jadeite Jarosite-K Jarosite-Na
+unsuppress  K-feldspar K2CO3^3/2H2O K8H4(CO3)6^3H2O KBr
+unsuppress  KMgCl3 KMgCl3^2H2O KNaCO3^6H2O Kainite
+unsuppress  Kalicinite Kalsilite Kaolinite Kieserite
+unsuppress  Kyanite Larnite Laumontite Lawrencite
+unsuppress  Lawsonite Leonhardtite Lime MHSH(Mg1.5)
+unsuppress  Magnesite Magnetite Margarite "Maximum Microcline"
+unsuppress  Melanterite Mercallite Merwinite Mg2Cl(OH)3^4H2O
+unsuppress  MgBr2 MgBr2^6H2O MgCl2^2H2O MgCl2^4H2O
+unsuppress  MgCl2^H2O MgF2(c) MgOHCl MgSO4(c)
+unsuppress  Minnesotaite Mirabilite Misenite Molysite
+unsuppress  Monohydrocalcite Monticellite Mordenite-K Mordenite-Na
+unsuppress  Muscovite Na2Si2O5 Na2SiO3 Na3H(SO4)2
+unsuppress  Na4SiO4 Na6Si2O7 NaBr NaFeO2(c)
+unsuppress  Nepheline Nesquehonite Nontronit-Ca Nontronit-K
+unsuppress  Nontronit-Mg Nontronit-Na "O-phth acid(c)" Paragonite
+unsuppress  Pargasite Pentahydrite Phengite Phlogopite
+unsuppress  Pirssonite Portlandite Prehnite Pseudowollastonite
+unsuppress  Pyrite Pyrophyllite Pyrrhotite Rankinite
+unsuppress  Ripidolit-14A Ripidolit-7A "Sanidine high" Saponite-Ca
+unsuppress  Saponite-H Saponite-K Saponite-Mg Saponite-Na
+unsuppress  Sepiolite Siderite Sillimanite Smectite-high-Fe-Mg
+unsuppress  Smectite-low-Fe-Mg Spinel Sr(NO3)2(c) Sr(NO3)2^4H2O
+unsuppress  Sr(OH)2(c) Sr2SiO4(c) SrBr2(c) SrBr2^6H2O
+unsuppress  SrBr2^H2O SrCl2(c) SrCl2^2H2O SrCl2^6H2O
+unsuppress  SrCl2^H2O SrF2(c) SrO(c) SrS(c)
+unsuppress  SrSiO3(c) Strontianite Sulfur-Rhmb Sylvite
+unsuppress  Tachyhydrite Talc Thenardite Tremolite
+unsuppress  Troilite Wairakite Wollastonite Wustite
+unsuppress  Zoisite
+time start = 0 day, end = 1 yr
+porosity = .127
+volume = 7874 cm3
+temperature = 18.8 C
+pressure = 10
+H2O          = .9999983226825 free kg
+swap CO2(g) for H+
+CO2(g)       = 9.478 fugacity
+HCO3-        = .4093571051862 mol
+balance on HCO3-
+O2(aq)       = .0002100900074698 activity
+Ca++         = .0005651669917896 mol
+Mg++         = .0006309455306607 mol
+Na+          = .0003487794245486 mol
+K+           = 7.946939050072e-5 mol
+Cl-          = .0001314794080392 mol
+SO4--        = .0001638188918256 mol
+F-           = 1.002380562806e-5 mol
+NO3-         = 6.465915769954e-6 mol
+SiO2(aq)     = .0005638393365801 mol
+Al+++        = 1e-12 mol
+Fe++         = 1e-12 mol
+kinetic Basalt_SRP 6874 cm3 pre-exp = 1.44e-7 act_eng = 32000 surface = 1 apower(H+) = .15
+fix fugacity of CO2(g)
+suffix "_GSS_EBR 1 Char"
