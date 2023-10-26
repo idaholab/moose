@@ -91,7 +91,7 @@ UpdateDisplacedMeshThread::init()
         this->_fe_problem, _ref_mesh, var_num_and_direction.first, sys);
     Threads::parallel_reduce(node_range, send_list);
     send_list.unique();
-    auto & [soln, ghost_soln] = libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num);
+    auto & [soln, ghost_soln] = moose_map_find(_sys_to_nonghost_and_ghost_soln, sys_num);
     ghost_soln->init(soln->size(), soln->local_size(), send_list.send_list(), true, GHOSTED);
     soln->localize(*ghost_soln, send_list.send_list());
   }
@@ -114,7 +114,7 @@ UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
       if (reference_node.n_dofs(sys_num, var_numbers[i]) > 0)
         displaced_node(direction) =
             reference_node(direction) +
-            (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
+            (*moose_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
                 reference_node.dof_number(sys_num, var_numbers[i], 0));
     }
   }

@@ -372,7 +372,7 @@ AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
     const auto & tangent_vectors =
-        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n));
+        moose_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n));
     nodal_tangents_one.push_back(tangent_vectors[0]);
     nodal_tangents_two.push_back(tangent_vectors[1]);
   }
@@ -845,7 +845,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
    */
   for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
+    MortarSegmentInfo & msinfo = moose_map_find(_msm_elem_to_info, msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
     if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
         std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
@@ -894,7 +894,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Verify that all segments without primary contribution have been deleted
   for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
+    const MortarSegmentInfo & msinfo = moose_map_find(_msm_elem_to_info, msm_elem);
     mooseAssert(msinfo.primary_elem != nullptr,
                 "All mortar segment elements should have valid "
                 "primary element.");

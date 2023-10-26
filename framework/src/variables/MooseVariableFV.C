@@ -775,7 +775,7 @@ typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
 {
   const auto & node_to_elem_map = this->_mesh.nodeToElemMap();
-  const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
+  const auto & elem_ids = moose_map_find(node_to_elem_map, node_arg.node->id());
   ValueType sum = 0;
   Real total_weight = 0;
   mooseAssert(elem_ids.size(), "There should always be at least one element connected to a node");

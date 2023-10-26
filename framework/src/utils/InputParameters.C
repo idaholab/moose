@@ -116,10 +116,10 @@ InputParameters::attemptPrintDeprecated(const std::string & name_in)
       return true;
     };
 
-    if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
+    if (_params.count(name) && !moose_map_find(_params, name)._deprecation_message.empty())
       return emit_deprecation_message(name,
                                       "The parameter '" + name + "' is deprecated.\n" +
-                                          libmesh_map_find(_params, name)._deprecation_message);
+                                          moose_map_find(_params, name)._deprecation_message);
     else if (auto it = _old_to_new_name_and_dep.find(name_in);
              it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
       return emit_deprecation_message(name_in, it->second.second);
@@ -940,7 +940,7 @@ InputParameters::applyParameter(const InputParameters & common,
     _values[local_name] = common._values.find(common_name)->second->clone();
     set_attributes(local_name, false);
     _params[local_name]._set_by_add_param =
-        libmesh_map_find(common._params, common_name)._set_by_add_param;
+        moose_map_find(common._params, common_name)._set_by_add_param;
   }
 
   // Enable deprecated message printing

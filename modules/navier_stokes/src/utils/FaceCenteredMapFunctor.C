@@ -131,7 +131,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
 {
   try
   {
-    return libmesh_map_find(*this, fi->id());
+    return moose_map_find(*this, fi->id());
   }
   catch (libMesh::LogicError &)
   {

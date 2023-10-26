@@ -52,7 +52,7 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // normals).
       // Get the _dof_to_weighted_gap map
       {
-        const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
+        const auto normal_index = moose_map_find(_secondary_ip_lowerd_map, _i);
         return _test_secondary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
                _normals[normal_index](_component);
       }
@@ -61,7 +61,7 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
       {
-        const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+        const auto normal_index = moose_map_find(_primary_ip_lowerd_map, _i);
         return -_test_primary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
                _normals[normal_index](_component);
       }

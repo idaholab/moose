@@ -68,14 +68,14 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
       {
-        const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
+        const unsigned int tangent_index = moose_map_find(_secondary_ip_lowerd_map, _i);
         return _test_secondary[_i][_qp] * tangential_pressure *
                nodal_tangents[_direction][tangent_index](_component) /
                nodal_tangents[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
     {
-      const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+      const unsigned int tangent_index = moose_map_find(_primary_ip_lowerd_map, _i);
       return -_test_primary[_i][_qp] * tangential_pressure *
              nodal_tangents[_direction][tangent_index](_component) /
              nodal_tangents[_direction][tangent_index].norm();

@@ -64,7 +64,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
   // Lagrange on a second order mesh) and user-code can often handle that
   const Elem * const an_elem =
-      mesh.getMesh().elem_ptr(libmesh_map_find(_node_to_elem_map, node->id()).front());
+      mesh.getMesh().elem_ptr(moose_map_find(_node_to_elem_map, node->id()).front());
   if (!an_elem->is_vertex(an_elem->get_node_index(node)))
     return;
 

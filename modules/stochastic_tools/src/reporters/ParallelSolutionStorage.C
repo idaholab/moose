@@ -66,7 +66,7 @@ ParallelSolutionStorage::addEntry(const VariableName & vname,
 unsigned int
 ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname) const
 {
-  const auto & samples = libmesh_map_find(_distributed_solutions, vname);
+  const auto & samples = moose_map_find(_distributed_solutions, vname);
 
   return std::accumulate(
       samples.begin(),
@@ -83,7 +83,7 @@ ParallelSolutionStorage::hasGlobalSample(unsigned int global_sample_i,
   if (_distributed_solutions.find(variable) == _distributed_solutions.end())
     return false;
 
-  auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+  auto & variable_storage = moose_map_find(_distributed_solutions, variable);
 
   return (variable_storage.find(global_sample_i) != variable_storage.end());
 }
@@ -94,11 +94,11 @@ ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
 {
   mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
               "We don't have the requested variable!");
-  const auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+  const auto & variable_storage = moose_map_find(_distributed_solutions, variable);
   mooseAssert(variable_storage.find(global_sample_i) != variable_storage.end(),
               "We don't have the requested global sample index! ");
 
-  return libmesh_map_find(variable_storage, global_sample_i);
+  return moose_map_find(variable_storage, global_sample_i);
 }
 
 std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
@@ -108,7 +108,7 @@ ParallelSolutionStorage::getStorage(const VariableName & variable)
     mooseError(
         "We are trying to access container for variable '", variable, "' but we don't have it!");
 
-  return libmesh_map_find(_distributed_solutions, variable);
+  return moose_map_find(_distributed_solutions, variable);
 }
 
 const std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
@@ -118,7 +118,7 @@ ParallelSolutionStorage::getStorage(const VariableName & variable) const
     mooseError(
         "We are trying to access container for variable '", variable, "' but we don't have it!");
 
-  return libmesh_map_find(_distributed_solutions, variable);
+  return moose_map_find(_distributed_solutions, variable);
 }
 
 void

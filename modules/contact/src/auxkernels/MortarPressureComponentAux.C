@@ -80,7 +80,7 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
                "frictional pressure vector auxiliary variable definition.");
 
   _mortar_generation_object =
-      &moose_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id));
+      &libmesh_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id));
 }
 
 Real

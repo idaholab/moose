@@ -146,7 +146,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       auto compute_elem_error =
           [elem_id, current_h, elem, &analytic](auto & container, auto & error)
       {
-        auto & current = moose_map_find(container, elem_id);
+        auto & current = libmesh_map_find(container, elem_id);
         const auto diff = analytic - current;
         error += diff * diff * current_h * current_h;
 
@@ -181,7 +181,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
 
       auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
       {
-        auto & current = moose_map_find(container, elem_id);
+        auto & current = libmesh_map_find(container, elem_id);
         const auto diff = analytic - current;
         error += diff * diff * current_h * current_h;
       };

@@ -3707,7 +3707,7 @@ NonlinearSystemBase::setupScalingData()
     for (const auto i : index_range(_variable_autoscaled))
       if (std::find(_ignore_variables_for_autoscaling.begin(),
                     _ignore_variables_for_autoscaling.end(),
-                    libmesh_map_find(number_to_var_map, i)->name()) !=
+                    moose_map_find(number_to_var_map, i)->name()) !=
           _ignore_variables_for_autoscaling.end())
         _variable_autoscaled[i] = false;
 }
