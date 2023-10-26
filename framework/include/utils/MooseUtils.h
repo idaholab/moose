@@ -1201,7 +1201,7 @@ isDigits(const std::string & str)
 
 /**
  * This function should not be called directly (although it can be),
- * instead see the moose::map_find() macro.
+ * instead see the moose_map_find() macro.
  *
  * Calls find(key), and checks the result against end(). Returns the
  * corresponding value if found, throws an error otherwise. Templated
@@ -1220,13 +1220,15 @@ template <
     typename T,
     typename T::type,
     typename T::name,
-    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
 inline typename Map::mapped_type &
 map_find(Map & map, const Key & key, const T * object, const char * filename, int line_number)
 {
   auto it = map.find(key);
   if (it == map.end())
-    mooseError("map_find() error: key not found during a search in class ",
+    mooseError("map_find() error: key '",
+               key,
+               "' not found during a search in class ",
                object->name(),
                " of type ",
                object->type(),
@@ -1242,13 +1244,15 @@ template <
     typename T,
     typename T::type,
     typename T::name,
-    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
 inline const typename Map::mapped_type &
 map_find(const Map & map, const Key & key, const T * object, const char * filename, int line_number)
 {
   auto it = map.find(key);
   if (it == map.end())
-    mooseError("map_find() error: key not found during a search in class ",
+    mooseError("map_find() error: key '",
+               key,
+               "' not found during a search in class ",
                object->name(),
                " of type ",
                object->type(),
@@ -1270,7 +1274,7 @@ template <
     typename Key,
     typename T,
     typename std::enable_if<!std::is_const<Map>::value, Key>::type * = nullptr,
-    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
 inline typename Map::mapped_type &
 map_find(Map & map, const Key & key, const T * /*obj*/, const char * filename, int line)
 {
@@ -1281,7 +1285,7 @@ template <
     typename Key,
     typename T,
     typename std::enable_if<std::is_const<Map>::value, Key>::type * = nullptr,
-    typename std::enable_if<libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
+    typename std::enable_if<!libMesh::Utility::is_streamable<Key>::value, Key>::type * = nullptr>
 inline const typename Map::mapped_type &
 map_find(Map & map, const Key & key, const T * /*obj*/, const char * filename, int line_number)
 {
