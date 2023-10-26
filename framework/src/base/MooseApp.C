@@ -1870,7 +1870,11 @@ MooseApp::loadRestartableMetaData(const RestartableDataMapName & name,
                                   const std::filesystem::path & folder,
                                   const bool retain_reader)
 {
-  auto & entry = _restartable_meta_data.at(name);
+  auto it = _restartable_meta_data.find(name);
+  if (it == _restartable_meta_data.end())
+    mooseError(
+        "MooseApp::loadRestartableMetaData(): The meta data map '", name, "' is not registered");
+  auto & entry = it->second;
 
   mooseAssert(entry.reader, "Not available");
 
@@ -1885,8 +1889,9 @@ MooseApp::loadRestartableMetaData(const RestartableDataMapName & name,
 void
 MooseApp::loadCheckpointMetaData(const std::filesystem::path & checkpoint_folder_base)
 {
-  for (const auto & name_map_pair : _restartable_meta_data)
-    possiblyLoadCheckpointMetaData(name_map_pair.first, checkpoint_folder_base, true);
+  for (const auto & [name, entry] : _restartable_meta_data)
+    if (entry.auto_load)
+      possiblyLoadCheckpointMetaData(name, checkpoint_folder_base, true);
 }
 
 void
@@ -2780,15 +2785,17 @@ MooseApp::queryRestartableDataMap(const RestartableDataMapName & meta_name /* = 
 }
 
 void
-MooseApp::registerRestartableDataMap(const RestartableDataMapName & name)
+MooseApp::registerRestartableDataMap(const RestartableDataMapName & name,
+                                     const bool auto_load /* = true */)
 {
   const auto [it, inserted] = _restartable_meta_data.emplace(name, MetaDataEntry{});
   if (!inserted)
     mooseError(
-        "MooseApp::registerRestartableMetaDataMapName: The map '", name, "' is already registered");
+        "MooseApp::registerRestartableMetaDataMap: The map '", name, "' is already registered");
 
   auto & entry = it->second;
   entry.reader = std::make_unique<RestartableDataReader>(*this, entry.map);
+  entry.auto_load = auto_load;
 }
 
 std::string

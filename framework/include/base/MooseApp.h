@@ -749,8 +749,9 @@ public:
    * This should be called in the constructor of an application.
    *
    * @param name A key to use for accessing the data object
+   * @param auto_load Whether or not to auto load this map in loadCheckpointMetaData
    */
-  void registerRestartableDataMap(const RestartableDataMapName & name);
+  void registerRestartableDataMap(const RestartableDataMapName & name, const bool auto_load = true);
 
   /**
    * @return The input/output name for the restartable data with name \p name
@@ -1455,6 +1456,8 @@ private:
     RestartableDataMap map;
     /// The reader, used to load data later if needed
     std::unique_ptr<RestartableDataReader> reader;
+    /// Whether or not to automatically load this data
+    bool auto_load;
   };
 
   /// General storage for custom RestartableData that can be added to from outside applications
