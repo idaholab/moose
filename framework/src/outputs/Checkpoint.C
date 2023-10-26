@@ -47,11 +47,10 @@ Checkpoint::validParams()
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
 
-  // Since it only makes sense to write checkpoints at the end of time steps,
+  // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum = {EXEC_TIMESTEP_END};
-  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   return params;
 }
@@ -62,12 +61,31 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
-  // Prevent the checkpoint from executing at any time other than TIMESTEP_END
+  // Prevent the checkpoint from executing at any time other than INITIAL and/or
+  // TIMESTEP_END
   const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
-  if (!(execute_on.size() == 1 && execute_on.contains(EXEC_TIMESTEP_END)))
+
+  // Create a vector containing all valid values of execute_on
+  std::vector<ExecFlagEnum> valid_execute_on_values(3);
+  {
+    ExecFlagEnum valid_execute_on_value = execute_on;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_values[0] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_values[1] = valid_execute_on_value;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_values[2] = valid_execute_on_value;
+  }
+
+  // Check if the value of execute_on is valid
+  auto it = std::find(valid_execute_on_values.begin(), valid_execute_on_values.end(), execute_on);
+  const bool is_valid_value = (it != valid_execute_on_values.end());
+  if (!is_valid_value)
     paramError("execute_on",
-               "The checkpoint system may only be used with execute_on = ",
-               "TIMESTEP_END, not '",
+               "The checkpoint system may only be used with execute_on values ",
+               "INITIAL and/or TIMESTEP_END, not '",
                execute_on,
                "'.");
 }
