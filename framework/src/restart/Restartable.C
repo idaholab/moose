@@ -67,7 +67,15 @@ Restartable::restartableName(const std::string & system_name,
                              const std::string & restartable_name,
                              const std::string & data_name)
 {
-  return system_name + "/" + restartable_name + "/" + data_name;
+  mooseAssert(data_name.size(), "Should have at least a data name");
+
+  std::string name;
+  if (system_name.size())
+    name += system_name + "/";
+  if (restartable_name.size())
+    name += restartable_name + "/";
+  name += data_name;
+  return name;
 }
 
 std::string
