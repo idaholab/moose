@@ -1,0 +1,10 @@
+[Tests]
+  design = 'PseudoTimestep.md'
+  issues = '#25931'
+  [pseudotimestep]
+    type = 'CSVDiff'
+    input = 'steady_state.i'
+    csvdiff = 'steady_state_out.csv'
+    requirement = 'This tests the pseudotimestepper postprocessor for the SER method.'
+  []
+[]
