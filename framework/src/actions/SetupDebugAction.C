@@ -45,6 +45,7 @@ SetupDebugAction::validParams()
   ExecFlagEnum print_on = MooseUtils::getDefaultExecFlagEnum();
   print_on.addAvailableFlags(EXEC_TRANSFER);
   print_on.addAvailableFlags(EXEC_FAILED);
+  print_on.addAvailableFlags(EXEC_ALWAYS);
   params.addParam<ExecFlagEnum>(
       "show_execution_order",
       print_on,

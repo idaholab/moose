@@ -36,6 +36,7 @@ template <typename T>
 FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & parameters)
   : FunctorMaterial(parameters)
 {
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   auto reg_props_in = getParam<std::vector<MooseFunctorName>>("reg_props_in");
   auto ad_props_out = getParam<std::vector<MooseFunctorName>>("ad_props_out");
   auto ad_props_in = getParam<std::vector<MooseFunctorName>>("ad_props_in");
@@ -87,16 +88,19 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
     addFunctorProperty<typename Moose::ADType<T>::type>(
         ad_props_out[i],
         [&reg_functor](const auto & r, const auto & t) -> typename Moose::ADType<T>::type
-        { return reg_functor(r, t); });
+        { return reg_functor(r, t); },
+        clearance_schedule);
   }
 
   // Define the regular functors
   for (const auto i : index_range(ad_props_in))
   {
     const auto & ad_functor = getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
-    addFunctorProperty<T>(reg_props_out[i],
-                          [&ad_functor](const auto & r, const auto & t) -> T
-                          { return MetaPhysicL::raw_value(ad_functor(r, t)); });
+    addFunctorProperty<T>(
+        reg_props_out[i],
+        [&ad_functor](const auto & r, const auto & t) -> T
+        { return MetaPhysicL::raw_value(ad_functor(r, t)); },
+        clearance_schedule);
   }
 }
 

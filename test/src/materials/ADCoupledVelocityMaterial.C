@@ -28,7 +28,6 @@ ADCoupledVelocityMaterial::validParams()
       "rho_v", "rho_v", "The product of the density and the y-velocity component");
   params.addParam<MaterialPropertyName>(
       "rho_w", "rho_w", "The product of the density and the z-velocity component");
-  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
   return params;
 }

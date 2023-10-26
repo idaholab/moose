@@ -18,7 +18,6 @@ InputParameters
 VectorMagnitudeFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
   params.addClassDescription(
       "This class takes up to three scalar-valued functors corresponding to vector "
