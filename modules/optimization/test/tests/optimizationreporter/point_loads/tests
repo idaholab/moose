@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#21885 #24101'
+  issues = '#21885 #24101 #25689'
   design = 'ReporterPointSource.md OptimizationReporter/index.md'
   [point_loads]
     requirement = "The system shall be able to invert for point loads using"
@@ -30,9 +30,8 @@
     []
     [adjoint]
       type = CSVDiff
-      input =main.i
-      cli_args = "Executioner/tao_solver=taolmvm "
-                 "Executioner/petsc_options_iname='-tao_gttol' "
+      input = main.i
+      cli_args = "Executioner/tao_solver=taolmvm Executioner/petsc_options_iname='-tao_gttol' "
                  "Executioner/petsc_options_value='1e-5'"
       csvdiff = main_out_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
@@ -45,8 +44,7 @@
     [adjoint_reg]
       type = CSVDiff
       input = "main.i regularization_for_main.i"
-      cli_args = "Executioner/tao_solver=taolmvm "
-                 "Executioner/petsc_options_iname='-tao_gttol' "
+      cli_args = "Executioner/tao_solver=taolmvm Executioner/petsc_options_iname='-tao_gttol' "
                  "Executioner/petsc_options_value='1e-5'"
       csvdiff = main_out_reg_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
@@ -59,14 +57,15 @@
     [auto_adjoint]
       type = CSVDiff
       input = main_auto_adjoint.i
-      cli_args = 'Outputs/file_base=main_out'
+      absent_out = 'type: ilu'
+      cli_args = 'Outputs/file_base=main_out -ksp_view'
       csvdiff = main_out_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'gradient-based optimization with an automatically computed adjoint, or '
+      detail = 'gradient-based optimization with an automatically computed adjoint that uses the same preconditioner as the forward solve, or '
     []
     [auto_adjoint_reg]
       type = CSVDiff
@@ -78,7 +77,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'gradient-based optimization with an automatically computed adjoint, with Tikhonov regularization, and initial conditions do not affect the converged regularized solution.'
+      detail = 'gradient-based optimization with an automatically computed adjoint, with Tikhonov regularization, and initial conditions do not affect the converged regularized solution, or'
     []
   []
 []
