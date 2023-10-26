@@ -392,7 +392,10 @@ Restartable::getRestartableDataInternal(const std::string & full_name)
   const auto has_data = hasRestartableData(full_name, typeid(T));
 
   if (has_data == HasRestartableData::MISSING_DATA)
-    mooseError("Failed to find restartable data '", full_name, "'");
+    mooseError("Failed to find restartable data '",
+               full_name,
+               "'",
+               _metaname.size() ? (" in '" + _metaname + "'") : "");
 
   const auto & value = declareRestartableDataHelper<T>(full_name, nullptr);
 
