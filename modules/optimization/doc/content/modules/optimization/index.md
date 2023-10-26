@@ -5,7 +5,7 @@
 ## Optimization Code
 
 The MOOSE optimization module provides functionality for solving optimization
-problems in moose. It use the TAO optimization interface from PETSc for solving PDE-constrained optimization problems.
+problems in moose. It uses the TAO optimization interface from PETSc for solving PDE-constrained optimization problems.
 
 !row!
 !col! small=12 medium=4 large=4 icon=toys
