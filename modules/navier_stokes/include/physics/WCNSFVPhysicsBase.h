@@ -13,9 +13,14 @@
 
 class WCNSFVFlowPhysics;
 
+#define registerWCNSFVPhysicsBaseTasks(app_name, derived_name)                                     \
+  registerPhysicsBaseTasks(app_name, derived_name);                                                \
+  registerMooseAction(app_name, derived_name, "add_user_object");                                  \
+  registerMooseAction(app_name, derived_name, "add_geometric_rm");
+
 /**
  * Base class to hold common parameters and utilities between all the weakly compressible
- * Navier Stokes-based equations
+ * Navier Stokes-based equations (WCNSFV)
  * Includes incompressible flow (INSFV).
  */
 class WCNSFVPhysicsBase : public NavierStokesFlowPhysicsBase

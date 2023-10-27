@@ -13,10 +13,6 @@
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysics.h"
 
-// Register the actions for the objects created in this base class
-// registerMooseAction("NavierStokesApp", WCNSFVPhysicsBase, "add_user_object");
-// TODO: does not work, parent class tasks are not inherited
-
 InputParameters
 WCNSFVPhysicsBase::validParams()
 {

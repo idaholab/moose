@@ -11,15 +11,12 @@
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVAction.h"
 
+registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
-
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "init_physics");
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_user_object");
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_geometric_rm");
 
 InputParameters
 WCNSFVFlowPhysics::validParams()

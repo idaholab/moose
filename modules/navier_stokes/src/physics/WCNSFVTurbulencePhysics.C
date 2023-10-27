@@ -12,6 +12,7 @@
 #include "WCNSFVHeatAdvectionPhysics.h"
 #include "WCNSFVScalarAdvectionPhysics.h"
 
+registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variable");

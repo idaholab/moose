@@ -18,7 +18,7 @@ class WCNSFVScalarAdvectionPhysics;
  * Creates all the objects needed to add a turbulence model to an incompressible /
  * weakly-compressible Navier Stokes finite volume flow simulation
  */
-class WCNSFVTurbulencePhysics : public WCNSFVPhysicsBase
+class WCNSFVTurbulencePhysics final : public WCNSFVPhysicsBase
 {
 public:
   static InputParameters validParams();
