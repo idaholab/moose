@@ -42,9 +42,9 @@ input_heat_flux = 40000.0
     dim = 2
     #dx   = '0.7032625e-4  0.7112e-5'
     dx = '${Liquid_width} ${Solid_width}'
-    ix = '10 3'
+    ix = '3 1'
     dy = '${fparse 1./5.*Domain_length} ${fparse 4./5.*Domain_length}'
-    iy = '30 10'
+    iy = '10 3'
     subdomain_id = '0 1
                     0 1'
   []

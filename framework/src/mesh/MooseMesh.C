@@ -3641,10 +3641,10 @@ MooseMesh::cacheFVElementalDoFs() const
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        std::cout << sys.number() << " " << sys.nFieldVariables() << std::endl;
+        std::cout << sys.number() << " " << sys.nVariables() << std::endl;
         std::cout << Moose::stringify(dof_vector[sys.number()]) << std::endl;
         dof_vector[sys.number()].clear();
-        dof_vector[sys.number()].resize(sys.nFieldVariables(), dof_id_type(0));
+        dof_vector[sys.number()].resize(sys.nVariables(), dof_id_type(0));
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)
         {
@@ -3656,6 +3656,8 @@ MooseMesh::cacheFVElementalDoFs() const
             std::vector<dof_id_type> indices;
             var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            std::cout << " " << sys.number() << "/" << dof_vector.size() << " " << var->number()
+                      << "/" << dof_vector[sys.number()].size() << " " << var->name() << std::endl;
             dof_vector[sys.number()][var->number()] = indices[0];
           }
         }
@@ -3664,7 +3666,7 @@ MooseMesh::cacheFVElementalDoFs() const
     if (_app.feProblem().getAuxiliarySystem().nFVVariables())
     {
       auto & sys = _app.feProblem().getAuxiliarySystem();
-      dof_vector[sys.number()].resize(sys.nFieldVariables(), libMesh::DofObject::invalid_id);
+      dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
       const auto & aux_variables = sys.getVariables(0);
       for (const auto & var : aux_variables)
       {

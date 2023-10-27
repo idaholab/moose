@@ -11,8 +11,8 @@ cp = 1
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 2
-    ny = 2
+    nx = 32
+    ny = 32
   []
 []
 
