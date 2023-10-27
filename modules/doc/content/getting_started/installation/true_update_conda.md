@@ -2,7 +2,7 @@ Update Conda:
 
 ```bash
 mamba activate moose
-mamba update --all
+mamba update moose-dev
 ```
 
 !alert note title=Always Update MOOSE and the Conda/Mamba packages together

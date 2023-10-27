@@ -9,7 +9,7 @@ date.
 
   ```bash
   mamba activate moose
-  mamba update --all
+  mamba update moose-dev
   ```
 
   if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
