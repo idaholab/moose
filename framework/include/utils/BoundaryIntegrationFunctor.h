@@ -42,7 +42,7 @@ public:
                                   const Elem * elem,
                                   const Moose::StateArg & time) const override;
 
-  bool hasBlocks(SubdomainID id) const override;
+  bool hasBlocks(SubdomainID /* id */) const override { return true; }
 
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
@@ -109,13 +109,6 @@ BoundaryIntegralFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 }
 
 template <typename T>
-bool
-BoundaryIntegralFunctor<T>::hasBlocks(const SubdomainID id) const
-{
-  return _functor.hasBlocks(id);
-}
-
-template <typename T>
 void
 BoundaryIntegralFunctor<T>::subdomainErrorMessage(const SubdomainID sub_id) const
 {
@@ -151,22 +144,17 @@ BoundaryIntegralFunctor<T>::evaluate(const Moose::FaceArg & face,
     if (bc_id != _bid)
       continue;
     const auto elem = _mesh.elemPtr(elem_id);
-    const auto fi = _mesh.faceInfo(elem, side_id);
+    auto fi = _mesh.faceInfo(elem, side_id);
+    if (!fi)
+    {
+      const auto neighbor = elem->neighbor_ptr(side_id);
+      mooseAssert(neighbor, "We should have a neighbor");
+      fi = _mesh.faceInfo(neighbor, neighbor->which_neighbor_am_i(elem));
+    }
     mooseAssert(fi, "We should have a face info");
     Moose::FaceArg face_arg = {fi, Moose::FV::LimiterType::CentralDifference, true, true, nullptr};
     sum += _functor(face_arg, time) * fi->faceArea() * fi->faceCoord();
   }
-
-  if (face.face_side)
-  {
-    const auto sub_id = face.face_side->subdomain_id();
-    if (!hasBlocks(sub_id))
-      subdomainErrorMessage(sub_id);
-
-    return sum;
-  }
-  mooseAssert(this->isInternalFace(*face.fi),
-              "If we did not have a face side, then we must be an internal face");
   return sum;
 }
 
@@ -257,22 +245,18 @@ BoundaryAverageFunctor<T>::evaluate(const Moose::FaceArg & face, const Moose::St
     if (bc_id != _bid)
       continue;
     const auto elem = _mesh.elemPtr(elem_id);
-    const auto fi = _mesh.faceInfo(elem, side_id);
+    auto fi = _mesh.faceInfo(elem, side_id);
+    if (!fi)
+    {
+      const auto neighbor = elem->neighbor_ptr(side_id);
+      mooseAssert(neighbor, "We should have a neighbor");
+      fi = _mesh.faceInfo(neighbor, neighbor->which_neighbor_am_i(elem));
+    }
+    mooseAssert(fi, "We should have a face info");
     mooseAssert(fi, "We should have a face info");
     Moose::FaceArg face_arg = {fi, Moose::FV::LimiterType::CentralDifference, true, true, nullptr};
     sum += _functor(face_arg, time) * fi->faceArea() * fi->faceCoord();
     area += fi->faceArea() * fi->faceCoord();
   }
-
-  if (face.face_side)
-  {
-    const auto sub_id = face.face_side->subdomain_id();
-    if (!hasBlocks(sub_id))
-      subdomainErrorMessage(sub_id);
-
-    return sum / area;
-  }
-  mooseAssert(this->isInternalFace(*face.fi),
-              "If we did not have a face side, then we must be an internal face");
   return sum / area;
 }
