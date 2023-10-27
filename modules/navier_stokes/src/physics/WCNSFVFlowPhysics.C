@@ -17,6 +17,7 @@ registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 
+// TODO fix inheritance and remove
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "init_physics");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_user_object");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_geometric_rm");

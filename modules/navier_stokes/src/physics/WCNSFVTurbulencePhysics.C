@@ -18,6 +18,9 @@ registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variabl
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_material");
 
+// TODO fix inheritance and remove
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "init_physics");
+
 InputParameters
 WCNSFVTurbulencePhysics::validParams()
 {
