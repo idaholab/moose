@@ -117,7 +117,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if "
+    requirement = "The system shall report an error if "
     issues = '#23743'
     [invalid_hide]
       type = 'RunException'
@@ -131,10 +131,9 @@
       input = 'exodus_elem_id.i'
       cli_args = "MultiApps/ma/type=FullSolveMultiApp MultiApps/ma/input_files=exodus_elem_id.i "
                  "MultiApps/ma/positions='0 0 0 1 1 0' MultiApps/ma/cli_args=Outputs/file_base=bad"
-      expect_err = 'A file base has been specified but there are multiple child apps for this MultiApp'
+      expect_err = 'The parameter \'file_base\' may not be specified for a child app when the MultiApp has multiple instances of the child app'
 
-      detail = "a file base is passed for file outputs and the child apps would be writing the same "
-               "file."
+      detail = "a file base is supplied for a child app when there are multiple instances."
     []
   []
 []
