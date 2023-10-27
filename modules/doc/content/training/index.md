@@ -4,20 +4,21 @@
 Upcoming MOOSE related training:
 !style-end!
 
-- [Modeling and Simulation of Advanced Reactors (2023 Oct 23-26, Idaho Falls)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
-
-  - [Details](more_detail/2023_10_23-26_idaho_falls.md)
-  - *Invitation Only*
-
 - [MOOSE Training (2024 January 16-17, MIT)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
-- [BISON Training (2024 January 18-19, MIT)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+  - [Details](more_detail/MOOSE_2024_01_16-17_MIT.md)
+
+- [BISON Fuels Performance (2024 January 18-19, MIT)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+
+  - [Details](more_detail/BISON_2024_01_18-19_MIT.md)
 
 - [MOOSE Training (2024 April 2-4, Oregon State University)](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
   - [Details](more_detail/2024_04_02-04_OSU.md)
 
 Past Training:
+
+- Modeling and Simulation of Advanced Reactors (2023 Oct 23-26, Idaho Falls)
 
 - MOOSE Framework (2023 Sept 12-14, Georgia Tech)
 

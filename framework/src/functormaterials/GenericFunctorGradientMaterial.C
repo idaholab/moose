@@ -18,7 +18,6 @@ InputParameters
 GenericFunctorGradientMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
   params.addClassDescription(
       "FunctorMaterial object for declaring properties that are populated by evaluation of "
@@ -66,9 +65,8 @@ GenericFunctorGradientMaterialTempl<is_ad>::GenericFunctorGradientMaterialTempl(
   for (const auto i : make_range(_num_props))
     addFunctorProperty<GenericRealVectorValue<is_ad>>(
         _prop_names[i],
-        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
-          return (*_functors[i]).gradient(r, t);
-        },
+        [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad>
+        { return (*_functors[i]).gradient(r, t); },
         clearance_schedule);
 }
 

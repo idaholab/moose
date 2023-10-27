@@ -43,6 +43,8 @@ PiecewiseByBlockFunctorMaterialTempl<T>::PiecewiseByBlockFunctorMaterialTempl(
     const InputParameters & params)
   : FunctorMaterial(params)
 {
+  // Ultimately this can impose more caching than the original functors, but not less
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto & map_pr :
        getParam<std::map<std::string, std::string>>("subdomain_to_prop_value"))
   {
@@ -51,7 +53,8 @@ PiecewiseByBlockFunctorMaterialTempl<T>::PiecewiseByBlockFunctorMaterialTempl(
     addFunctorPropertyByBlocks<T>(
         "prop_name",
         [&functor](const auto & r, const auto & t) -> T { return functor(r, t); },
-        std::set<SubdomainID>({_mesh.getSubdomainID(map_pr.first)}));
+        std::set<SubdomainID>({_mesh.getSubdomainID(map_pr.first)}),
+        clearance_schedule);
   }
 }
 

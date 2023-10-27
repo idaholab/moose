@@ -30,7 +30,7 @@ NSFVPressurePin::validParams()
   // Not much flexibility there, applying the pin at the wrong time prevents convergence
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   // all bad choices
-  exec_enum.removeAvailableFlags(EXEC_LINEAR, EXEC_NONE, EXEC_TIMESTEP_BEGIN, EXEC_ALWAYS);
+  exec_enum.removeAvailableFlags(EXEC_LINEAR, EXEC_NONE, EXEC_TIMESTEP_BEGIN);
   exec_enum = {EXEC_TIMESTEP_END};
 
   // Avoid uninitialized residual objects

@@ -64,6 +64,8 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
       factory.releaseSharedObjects(*rm_obj);
   }
 
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
+
   for (const auto i : index_range(_functors_in))
   {
     // This potentially upcasts functors from non-AD to AD
@@ -218,7 +220,8 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                          ". Please contact a MOOSE developer or implement it yourself.");
           }
           return average;
-        });
+        },
+        clearance_schedule);
   }
 }
 

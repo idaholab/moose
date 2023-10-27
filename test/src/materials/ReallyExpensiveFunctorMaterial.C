@@ -15,7 +15,6 @@ InputParameters
 ReallyExpensiveFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params += SetupInterface::validParams();
   return params;
 }
 
