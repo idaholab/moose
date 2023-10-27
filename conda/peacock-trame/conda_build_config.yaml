@@ -1,9 +1,0 @@
-moose_mpich:
-  - moose-mpich 4.1.1 build_0
-
-# Pesky packages that break internal CI
-# Note: Modifying/Updating this will require changes to conda/mpich!
-setuptools:
-  - <60.0
-pin_run_as_build:
-  setuptools: x.x
