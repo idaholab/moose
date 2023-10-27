@@ -232,7 +232,7 @@ public:
       Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
       Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) const = 0;
   virtual MooseVariableFieldBase &
-  getVariable(THREAD_ID tid,
+  getVariable(const THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY)
@@ -242,17 +242,20 @@ public:
   }
 
   /// Returns the variable reference for requested MooseVariable which may be in any system
-  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual MooseVariable & getStandardVariable(const THREAD_ID tid,
+                                              const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested MooseVariableField which may be in any system
-  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+  virtual MooseVariableFieldBase & getActualFieldVariable(const THREAD_ID tid,
                                                           const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested VectorMooseVariable which may be in any system
-  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual VectorMooseVariable & getVectorVariable(const THREAD_ID tid,
+                                                  const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested ArrayMooseVariable which may be in any system
-  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual ArrayMooseVariable & getArrayVariable(const THREAD_ID tid,
+                                                const std::string & var_name) = 0;
 
   /// Returns the variable name of a component of an array variable
   static std::string arrayVariableComponent(const std::string & var_name, unsigned int i)
@@ -264,7 +267,8 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) const = 0;
 
   /// Returns the scalar variable reference from whichever system contains it
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual MooseVariableScalar & getScalarVariable(const THREAD_ID tid,
+                                                  const std::string & var_name) = 0;
 
   /// Returns the equation system containing the variable provided
   virtual System & getSystem(const std::string & var_name) = 0;
@@ -285,14 +289,14 @@ public:
    * @param tid The thread id
    */
   virtual const std::set<MooseVariableFieldBase *> &
-  getActiveElementalMooseVariables(THREAD_ID tid) const;
+  getActiveElementalMooseVariables(const THREAD_ID tid) const;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
    *
    * @return True if there has been a list of active elemental moose variables set, False otherwise
    */
-  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
+  virtual bool hasActiveElementalMooseVariables(const THREAD_ID tid) const;
 
   /**
    * Clear the active elemental MooseVariableFieldBase.  If there are no active variables then they
@@ -301,10 +305,10 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+  virtual void clearActiveElementalMooseVariables(const THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) const = 0;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) = 0;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the nonlinear system object as a base class reference given the system number
@@ -333,21 +337,21 @@ public:
   virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const;
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const;
 
-  virtual void addResidual(THREAD_ID tid) = 0;
-  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addResidualLower(THREAD_ID tid) = 0;
+  virtual void addResidual(const THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(const THREAD_ID tid) = 0;
+  virtual void addResidualLower(const THREAD_ID tid) = 0;
 
-  virtual void cacheResidual(THREAD_ID tid);
-  virtual void cacheResidualNeighbor(THREAD_ID tid);
-  virtual void addCachedResidual(THREAD_ID tid);
+  virtual void cacheResidual(const THREAD_ID tid);
+  virtual void cacheResidualNeighbor(const THREAD_ID tid);
+  virtual void addCachedResidual(const THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
 
-  virtual void addJacobian(THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addJacobianNeighborLowerD(THREAD_ID tid) = 0;
-  virtual void addJacobianLowerD(THREAD_ID tid) = 0;
+  virtual void addJacobian(const THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(const THREAD_ID tid) = 0;
+  virtual void addJacobianNeighborLowerD(const THREAD_ID tid) = 0;
+  virtual void addJacobianLowerD(const THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
@@ -357,9 +361,9 @@ public:
                                    const std::set<TagID> & tags,
                                    THREAD_ID tid) = 0;
 
-  virtual void cacheJacobian(THREAD_ID tid);
-  virtual void cacheJacobianNeighbor(THREAD_ID tid);
-  virtual void addCachedJacobian(THREAD_ID tid);
+  virtual void cacheJacobian(const THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(const THREAD_ID tid);
+  virtual void addCachedJacobian(const THREAD_ID tid);
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
@@ -370,7 +374,7 @@ public:
                        THREAD_ID tid) = 0;
   virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) = 0;
   virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
-  virtual void prepareAssembly(THREAD_ID tid) = 0;
+  virtual void prepareAssembly(const THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemPhys(const Elem * elem,
@@ -401,8 +405,9 @@ public:
    * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
    *        purpose of re-ordering derivative information for ADNodalBCs
    */
-  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
-  virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
+  virtual void reinitScalars(const THREAD_ID tid,
+                             bool reinit_for_derivative_reordering = false) = 0;
+  virtual void reinitOffDiagScalars(const THREAD_ID tid) = 0;
 
   /// sets the current boundary ID in assembly
   void setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid);
@@ -681,29 +686,29 @@ public:
   /// Is it safe to access the tagged vectors
   virtual bool safeAccessTaggedVectors() const { return _safe_access_tagged_vectors; }
 
-  virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+  virtual void clearActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid);
 
-  virtual void clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
+  virtual void clearActiveFEVariableCoupleableVectorTags(const THREAD_ID tid);
 
   virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
 
   virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
 
-  virtual void clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid);
+  virtual void clearActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid);
 
-  virtual void clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid);
+  virtual void clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid);
 
   virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
 
   virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
 
-  const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveFEVariableCoupleableVectorTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid) const;
 
   /**
    * Method for setting whether we have any ad objects
@@ -901,7 +906,7 @@ public:
   /**
    * reinitialize the finite volume assembly data for the provided face and thread
    */
-  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+  void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
 
   /**
    * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
@@ -914,7 +919,7 @@ protected:
    * checking whether Variables of the requested type are available.
    */
   template <typename T>
-  MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
+  MooseVariableFieldBase & getVariableHelper(const THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,

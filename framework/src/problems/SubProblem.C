@@ -340,25 +340,25 @@ SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THR
 }
 
 void
-SubProblem::clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid)
+SubProblem::clearActiveFEVariableCoupleableVectorTags(const THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid].clear();
 }
 
 void
-SubProblem::clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
+SubProblem::clearActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid)
 {
   _active_fe_var_coupleable_matrix_tags[tid].clear();
 }
 
 const std::set<TagID> &
-SubProblem::getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) const
+SubProblem::getActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid) const
 {
   return _active_fe_var_coupleable_matrix_tags[tid];
 }
 
 const std::set<TagID> &
-SubProblem::getActiveFEVariableCoupleableVectorTags(THREAD_ID tid) const
+SubProblem::getActiveFEVariableCoupleableVectorTags(const THREAD_ID tid) const
 {
   return _active_fe_var_coupleable_vector_tags[tid];
 }
@@ -379,25 +379,25 @@ SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
 }
 
 void
-SubProblem::clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid)
+SubProblem::clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid)
 {
   _active_sc_var_coupleable_vector_tags[tid].clear();
 }
 
 void
-SubProblem::clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
+SubProblem::clearActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid)
 {
   _active_sc_var_coupleable_matrix_tags[tid].clear();
 }
 
 const std::set<TagID> &
-SubProblem::getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) const
+SubProblem::getActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid) const
 {
   return _active_sc_var_coupleable_matrix_tags[tid];
 }
 
 const std::set<TagID> &
-SubProblem::getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) const
+SubProblem::getActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid) const
 {
   return _active_sc_var_coupleable_vector_tags[tid];
 }
@@ -414,19 +414,19 @@ SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase 
 }
 
 const std::set<MooseVariableFEBase *> &
-SubProblem::getActiveElementalMooseVariables(THREAD_ID tid) const
+SubProblem::getActiveElementalMooseVariables(const THREAD_ID tid) const
 {
   return _active_elemental_moose_variables[tid];
 }
 
 bool
-SubProblem::hasActiveElementalMooseVariables(THREAD_ID tid) const
+SubProblem::hasActiveElementalMooseVariables(const THREAD_ID tid) const
 {
   return _has_active_elemental_moose_variables[tid];
 }
 
 void
-SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
+SubProblem::clearActiveElementalMooseVariables(const THREAD_ID tid)
 {
   _has_active_elemental_moose_variables[tid] = 0;
   _active_elemental_moose_variables[tid].clear();
@@ -761,7 +761,7 @@ SubProblem::getAxisymmetricRadialCoord() const
 
 template <typename T>
 MooseVariableFEBase &
-SubProblem::getVariableHelper(THREAD_ID tid,
+SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
@@ -1231,28 +1231,28 @@ SubProblem::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
 }
 
 void
-SubProblem::cacheResidual(THREAD_ID tid)
+SubProblem::cacheResidual(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum())
       .cacheResidual(Assembly::GlobalDataKey{}, currentResidualVectorTags());
 }
 
 void
-SubProblem::cacheResidualNeighbor(THREAD_ID tid)
+SubProblem::cacheResidualNeighbor(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum())
       .cacheResidualNeighbor(Assembly::GlobalDataKey{}, currentResidualVectorTags());
 }
 
 void
-SubProblem::addCachedResidual(THREAD_ID tid)
+SubProblem::addCachedResidual(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum())
       .addCachedResiduals(Assembly::GlobalDataKey{}, currentResidualVectorTags());
 }
 
 void
-SubProblem::cacheJacobian(THREAD_ID tid)
+SubProblem::cacheJacobian(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum()).cacheJacobian(Assembly::GlobalDataKey{});
   if (hasNonlocalCoupling())
@@ -1260,26 +1260,26 @@ SubProblem::cacheJacobian(THREAD_ID tid)
 }
 
 void
-SubProblem::cacheJacobianNeighbor(THREAD_ID tid)
+SubProblem::cacheJacobianNeighbor(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum()).cacheJacobianNeighbor(Assembly::GlobalDataKey{});
 }
 
 void
-SubProblem::addCachedJacobian(THREAD_ID tid)
+SubProblem::addCachedJacobian(const THREAD_ID tid)
 {
   assembly(tid, currentNlSysNum()).addCachedJacobian(Assembly::GlobalDataKey{});
 }
 
 template MooseVariableFEBase &
-SubProblem::getVariableHelper(THREAD_ID tid,
+SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
                               const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
                               const SystemBase & aux) const;
 template MooseVariableFEBase &
-SubProblem::getVariableHelper(THREAD_ID tid,
+SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,

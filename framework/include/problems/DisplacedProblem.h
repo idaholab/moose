@@ -157,14 +157,14 @@ public:
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
   virtual MooseVariable & getStandardVariable(const THREAD_ID tid,
                                               const std::string & var_name) override;
-  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+  virtual MooseVariableFieldBase & getActualFieldVariable(const THREAD_ID tid,
                                                           const std::string & var_name) override;
-  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
+  virtual VectorMooseVariable & getVectorVariable(const THREAD_ID tid,
                                                   const std::string & var_name) override;
-  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid,
+  virtual ArrayMooseVariable & getArrayVariable(const THREAD_ID tid,
                                                 const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) const override;
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
+  virtual MooseVariableScalar & getScalarVariable(const THREAD_ID tid,
                                                   const std::string & var_name) override;
   virtual System & getSystem(const std::string & var_name) override;
 
@@ -182,7 +182,7 @@ public:
 
   // reinit /////
   virtual void prepare(const Elem * elem, THREAD_ID tid) override;
-  virtual void prepareNonlocal(THREAD_ID tid);
+  virtual void prepareNonlocal(const THREAD_ID tid);
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;
   virtual void prepare(const Elem * elem,
                        unsigned int ivar,
@@ -196,8 +196,8 @@ public:
                                     const std::vector<dof_id_type> & idof_indices,
                                     const std::vector<dof_id_type> & jdof_indices,
                                     THREAD_ID tid);
-  virtual void prepareAssembly(THREAD_ID tid) override;
-  virtual void prepareAssemblyNeighbor(THREAD_ID tid);
+  virtual void prepareAssembly(const THREAD_ID tid) override;
+  virtual void prepareAssemblyNeighbor(const THREAD_ID tid);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
 
@@ -236,27 +236,28 @@ public:
                                   THREAD_ID tid) override;
   virtual void
   reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) override;
-  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
-  virtual void reinitOffDiagScalars(THREAD_ID tid) override;
+  virtual void reinitScalars(const THREAD_ID tid,
+                             bool reinit_for_derivative_reordering = false) override;
+  virtual void reinitOffDiagScalars(const THREAD_ID tid) override;
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems) override;
   virtual void clearDiracInfo() override;
 
-  virtual void addResidual(THREAD_ID tid) override;
-  virtual void addResidualNeighbor(THREAD_ID tid) override;
-  virtual void addResidualLower(THREAD_ID tid) override;
+  virtual void addResidual(const THREAD_ID tid) override;
+  virtual void addResidualNeighbor(const THREAD_ID tid) override;
+  virtual void addResidualLower(const THREAD_ID tid) override;
 
   virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
-  virtual void addJacobian(THREAD_ID tid) override;
-  virtual void addJacobianNonlocal(THREAD_ID tid);
-  virtual void addJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
-  virtual void addJacobianLowerD(THREAD_ID tid) override;
+  virtual void addJacobian(const THREAD_ID tid) override;
+  virtual void addJacobianNonlocal(const THREAD_ID tid);
+  virtual void addJacobianNeighbor(const THREAD_ID tid) override;
+  virtual void addJacobianNeighborLowerD(const THREAD_ID tid) override;
+  virtual void addJacobianLowerD(const THREAD_ID tid) override;
   virtual void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     unsigned int ivar,
                                     unsigned int jvar,
@@ -281,14 +282,14 @@ public:
                                    const std::set<TagID> & tags,
                                    THREAD_ID tid) override;
 
-  virtual void cacheJacobianNonlocal(THREAD_ID tid);
+  virtual void cacheJacobianNonlocal(const THREAD_ID tid);
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) override;
-  const Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) const override;
+  Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) override;
+  const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
