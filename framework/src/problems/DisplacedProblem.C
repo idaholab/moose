@@ -182,6 +182,9 @@ DisplacedProblem::init()
   _displaced_aux->update(/*update_libmesh_system=*/false);
 
   _mesh.meshChanged();
+
+  if (haveFV())
+    _mesh.buildFiniteVolumeInfo();
 }
 
 void
@@ -278,7 +281,11 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   _mesh.getMesh().clear_point_locator();
 
   // The mesh has changed. Face information normals, areas, etc. must be re-calculated
-  _mesh.finiteVolumeInfoDirty();
+  if (haveFV())
+  {
+    _mesh.finiteVolumeInfoDirty();
+    _mesh.buildFiniteVolumeInfo();
+  }
   for (auto & disp_nl : _displaced_nl)
     disp_nl->update(false);
   _displaced_aux->update(false);

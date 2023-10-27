@@ -3621,6 +3621,9 @@ MooseMesh::cacheFVElementalDoFs() const
 {
   const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
+  std::cout << _app.feProblem().es().n_systems() << " " << _app.feProblem().numNonlinearSystems()
+            << std::endl;
+
   for (auto & elem_info_pair : _elem_to_elem_info)
   {
     auto & elem_info = elem_info_pair.second;
@@ -3628,11 +3631,15 @@ MooseMesh::cacheFVElementalDoFs() const
     dof_vector.clear();
     dof_vector.resize(num_eqs, std::vector<dof_id_type>());
 
+    std::cout << elem_info.centroid() << std::endl;
+
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        dof_vector[sys.number()].resize(sys.nFieldVariables(), libMesh::DofObject::invalid_id);
+        std::cout << sys.number() << " " << sys.nFieldVariables() << std::endl;
+        std::cout << Moose::stringify(dof_vector[sys.number()]) << std::endl;
+        dof_vector[sys.number()].resize(sys.nFieldVariables(), 0);
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)
         {
@@ -3668,7 +3675,6 @@ MooseMesh::cacheFVElementalDoFs() const
         }
       }
     }
-    elem_info.dofID() = dof_vector;
   }
 }
 
