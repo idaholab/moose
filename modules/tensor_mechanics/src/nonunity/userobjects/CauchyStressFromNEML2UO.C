@@ -82,11 +82,18 @@ CauchyStressFromNEML2UO::batchCompute()
       }
     }
   }
-  catch (...)
+  catch (neml2::NEMLException & e)
   {
-    _console << "An error occurred during the evaluation of a NEML2 model."
-             << NEML2Utils::NEML2_help_message << std::endl;
-    throw;
+    mooseException("An error occurred during the evaluation of a NEML2 model:\n",
+                   e.what(),
+                   NEML2Utils::NEML2_help_message);
+  }
+  catch (std::runtime_error & e)
+  {
+    mooseException("An unknown error occurred during the evaluation of a NEML2 model:\n",
+                   e.what(),
+                   "\nIt is possible that this error is related to NEML2.",
+                   NEML2Utils::NEML2_help_message);
   }
 }
 

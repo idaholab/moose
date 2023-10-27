@@ -114,7 +114,7 @@ neml2::BatchTensor
 toNEML2Batched(const T & data)
 {
   std::vector<torch::Tensor> res(data.size());
-  for (unsigned int i = 0; i < data.size(); i++)
+  for (const auto i : index_range(data))
     res[i] = toNEML2<typename T::value_type>(data[i]);
   return neml2::BatchTensor(torch::stack(res, 0), 1);
 }
