@@ -39,6 +39,12 @@ public:
   const std::vector<std::vector<dof_id_type>> & dofID() const { return _dof_ids; }
   std::vector<std::vector<dof_id_type>> & dofID() { return _dof_ids; }
 
+  void setDofIDs(const std::vector<std::vector<dof_id_type>> & dof_ids)
+  {
+    _dof_ids.clear();
+    _dof_ids = dof_ids;
+  }
+
   /// We return the subdomain ID of the corresponding libmesh element.
   SubdomainID subdomain_id() const { return _elem->subdomain_id(); }
 

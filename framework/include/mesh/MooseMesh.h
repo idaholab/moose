@@ -1487,14 +1487,6 @@ protected:
   void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
-  /// FaceInfo object storing information for face based loops. This container holds all the \p
-  /// FaceInfo objects accessible from this process
-  mutable std::vector<FaceInfo> _all_face_info;
-
-  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
-  /// e.g. the local \p FaceInfo objects
-  mutable std::vector<const FaceInfo *> _face_info;
-
   /// Map connecting elems with their corresponding ElemInfo, we use the element ID as
   /// the key
   mutable std::unordered_map<dof_id_type, ElemInfo> _elem_to_elem_info;
@@ -1502,6 +1494,14 @@ private:
   /// Holds only those \p ElemInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p ElemInfo objects
   mutable std::vector<const ElemInfo *> _elem_info;
+
+  /// FaceInfo object storing information for face based loops. This container holds all the \p
+  /// FaceInfo objects accessible from this process
+  mutable std::vector<FaceInfo> _all_face_info;
+
+  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
+  /// e.g. the local \p FaceInfo objects
+  mutable std::vector<const FaceInfo *> _face_info;
 
   /// Map from elem-side pair to FaceInfo
   mutable std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *>
