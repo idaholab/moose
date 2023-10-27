@@ -10,29 +10,22 @@
 #pragma once
 
 // MOOSE includes
-#include "GeneralPostprocessor.h"
+#include "FunctorMaterial.h"
 #include "BoundaryIntegrationFunctor.h"
 
 template <bool is_ad>
-class BoundaryFunctorIntegralTempl : public GeneralPostprocessor
+class BoundaryIntegralFunctorMaterialTempl : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  BoundaryFunctorIntegralTempl(const InputParameters & parameters);
+  BoundaryIntegralFunctorMaterialTempl(const InputParameters & parameters);
 
 protected:
-  /// Technically we should use finalize to compute the value
-  Real getValue() const override;
-
-  void initialize() override{};
-  void execute() override{};
-  void finalize() override{};
-
   std::unique_ptr<BoundaryIntegralFunctor<GenericReal<is_ad>>> _bif;
   std::unique_ptr<BoundaryAverageFunctor<GenericReal<is_ad>>> _baf;
   using FaceArg = Moose::FaceArg;
 };
 
-typedef BoundaryFunctorIntegralTempl<false> BoundaryFunctorIntegralOutput;
-typedef BoundaryFunctorIntegralTempl<true> ADBoundaryFunctorIntegralOutput;
+typedef BoundaryIntegralFunctorMaterialTempl<false> BoundaryIntegralFunctorMaterial;
+typedef BoundaryIntegralFunctorMaterialTempl<true> ADBoundaryIntegralFunctorMaterial;
