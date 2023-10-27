@@ -325,13 +325,13 @@ SubProblem::matrixTagName(TagID tag)
 }
 
 void
-SubProblem::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+SubProblem::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, const THREAD_ID tid)
 {
   _active_fe_var_coupleable_matrix_tags[tid] = mtags;
 }
 
 void
-SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, const THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid] = vtags;
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
@@ -364,13 +364,15 @@ SubProblem::getActiveFEVariableCoupleableVectorTags(const THREAD_ID tid) const
 }
 
 void
-SubProblem::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+SubProblem::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                        const THREAD_ID tid)
 {
   _active_sc_var_coupleable_matrix_tags[tid] = mtags;
 }
 
 void
-SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                        const THREAD_ID tid)
 {
   _active_sc_var_coupleable_vector_tags[tid] = vtags;
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
@@ -404,7 +406,7 @@ SubProblem::getActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid) con
 
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
-                                             THREAD_ID tid)
+                                             const THREAD_ID tid)
 {
   if (!moose_vars.empty())
   {
@@ -747,7 +749,7 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
 }
 
 void
-SubProblem::setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid)
+SubProblem::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
     assembly(tid, nl_sys_num).setCurrentBoundaryID(bid);
@@ -831,7 +833,7 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
                               Real tolerance,
                               const std::vector<Point> * const pts,
                               const std::vector<Real> * const weights,
-                              THREAD_ID tid)
+                              const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
   {
@@ -871,7 +873,7 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                   Real tolerance,
                                   const std::vector<Point> * const pts,
                                   const std::vector<Real> * const weights,
-                                  THREAD_ID tid)
+                                  const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
   {
@@ -903,7 +905,7 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
 
 void
 SubProblem::reinitLowerDElem(const Elem * elem,
-                             THREAD_ID tid,
+                             const THREAD_ID tid,
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights)
 {
@@ -932,14 +934,14 @@ SubProblem::reinitLowerDElem(const Elem * elem,
 }
 
 void
-SubProblem::reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid)
+SubProblem::reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
     assembly(tid, nl_sys_num).reinitNeighborLowerDElem(elem);
 }
 
 void
-SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
+SubProblem::reinitMortarElem(const Elem * elem, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
     assembly(tid, nl_sys_num).reinitMortarElem(elem);

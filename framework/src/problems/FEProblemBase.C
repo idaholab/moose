@@ -1413,7 +1413,7 @@ FEProblemBase::setVariableAllDoFMap(const std::vector<const MooseVariableFEBase 
 }
 
 void
-FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
+FEProblemBase::prepare(const Elem * elem, const THREAD_ID tid)
 {
   for (const auto i : index_range(_nl))
   {
@@ -1443,7 +1443,7 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
-FEProblemBase::prepareFace(const Elem * elem, THREAD_ID tid)
+FEProblemBase::prepareFace(const Elem * elem, const THREAD_ID tid)
 {
   for (auto & nl : _nl)
     nl->prepareFace(tid, true);
@@ -1458,7 +1458,7 @@ FEProblemBase::prepare(const Elem * elem,
                        unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
-                       THREAD_ID tid)
+                       const THREAD_ID tid)
 {
   for (const auto i : index_range(_nl))
   {
@@ -1490,7 +1490,7 @@ FEProblemBase::prepare(const Elem * elem,
 }
 
 void
-FEProblemBase::setCurrentSubdomainID(const Elem * elem, THREAD_ID tid)
+FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
 {
   SubdomainID did = elem->subdomain_id();
   for (const auto i : index_range(_nl))
@@ -1503,7 +1503,7 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, THREAD_ID tid)
 }
 
 void
-FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid)
+FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   SubdomainID did = elem->neighbor_ptr(side)->subdomain_id();
   for (const auto i : index_range(_nl))
@@ -1516,7 +1516,7 @@ FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, THRE
 }
 
 void
-FEProblemBase::setNeighborSubdomainID(const Elem * elem, THREAD_ID tid)
+FEProblemBase::setNeighborSubdomainID(const Elem * elem, const THREAD_ID tid)
 {
   SubdomainID did = elem->subdomain_id();
   for (const auto i : index_range(_nl))
@@ -1605,7 +1605,7 @@ FEProblemBase::addCachedResidual(const THREAD_ID tid)
 }
 
 void
-FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const THREAD_ID tid)
 {
   if (_current_nl_sys->hasVector(_current_nl_sys->timeVectorTag()))
     _assembly[tid][_current_nl_sys->number()]->addCachedResidualDirectly(
@@ -1624,7 +1624,7 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 }
 
 void
-FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblemBase::setResidual(NumericVector<Number> & residual, const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->setResidual(
       residual,
@@ -1635,7 +1635,7 @@ FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 }
 
 void
-FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->setResidualNeighbor(
       residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->residualVectorTag()));
@@ -1688,7 +1688,7 @@ FEProblemBase::addJacobianScalar(const THREAD_ID tid /* = 0*/)
 }
 
 void
-FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*/)
+FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, const THREAD_ID tid /* = 0*/)
 {
   _assembly[tid][_current_nl_sys->number()]->addJacobianOffDiagScalar(ivar,
                                                                       Assembly::GlobalDataKey{});
@@ -1725,7 +1725,7 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     const DofMap & dof_map,
                                     std::vector<dof_id_type> & dof_indices,
                                     const std::set<TagID> & tags,
-                                    THREAD_ID tid)
+                                    const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->addJacobianBlockTags(
       jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{}, tags);
@@ -1766,7 +1766,7 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,
-                                   THREAD_ID tid)
+                                   const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborTags(jacobian,
                                                                      ivar,
@@ -1782,19 +1782,19 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 }
 
 void
-FEProblemBase::prepareShapes(unsigned int var, THREAD_ID tid)
+FEProblemBase::prepareShapes(unsigned int var, const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->copyShapes(var);
 }
 
 void
-FEProblemBase::prepareFaceShapes(unsigned int var, THREAD_ID tid)
+FEProblemBase::prepareFaceShapes(unsigned int var, const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->copyFaceShapes(var);
 }
 
 void
-FEProblemBase::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
+FEProblemBase::prepareNeighborShapes(unsigned int var, const THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->copyNeighborShapes(var);
 }
@@ -1826,14 +1826,14 @@ FEProblemBase::ghostGhostedBoundaries()
 }
 
 void
-FEProblemBase::sizeZeroes(unsigned int /*size*/, THREAD_ID /*tid*/)
+FEProblemBase::sizeZeroes(unsigned int /*size*/, const THREAD_ID /*tid*/)
 {
   mooseDoOnce(mooseWarning(
       "This function is deprecated and no longer performs any function. Please do not call it."));
 }
 
 bool
-FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
+FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
 {
   std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem].first;
 
@@ -1888,7 +1888,7 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
+FEProblemBase::reinitElem(const Elem * elem, const THREAD_ID tid)
 {
   for (auto & nl : _nl)
     nl->reinitElem(elem, tid);
@@ -1901,7 +1901,7 @@ FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 FEProblemBase::reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid)
+                              const THREAD_ID tid)
 {
   mooseAssert(_mesh.queryElemPtr(elem->id()) == elem,
               "Are you calling this method with a displaced mesh element?");
@@ -1923,7 +1923,7 @@ void
 FEProblemBase::reinitElemFace(const Elem * elem,
                               unsigned int side,
                               BoundaryID bnd_id,
-                              THREAD_ID tid)
+                              const THREAD_ID tid)
 {
   for (const auto i : index_range(_nl))
   {
@@ -1938,7 +1938,7 @@ FEProblemBase::reinitElemFace(const Elem * elem,
 
 void
 FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem,
-                                THREAD_ID tid,
+                                const THREAD_ID tid,
                                 const std::vector<Point> * const pts,
                                 const std::vector<Real> * const weights)
 {
@@ -1950,7 +1950,7 @@ FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem,
 }
 
 void
-FEProblemBase::reinitNode(const Node * node, THREAD_ID tid)
+FEProblemBase::reinitNode(const Node * node, const THREAD_ID tid)
 {
   if (_displaced_problem && _reinit_displaced_elem)
     _displaced_problem->reinitNode(&_displaced_mesh->nodeRef(node->id()), tid);
@@ -1964,7 +1964,7 @@ FEProblemBase::reinitNode(const Node * node, THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
+FEProblemBase::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid)
 {
   if (_displaced_problem && _reinit_displaced_face)
     _displaced_problem->reinitNodeFace(&_displaced_mesh->nodeRef(node->id()), bnd_id, tid);
@@ -1978,7 +1978,7 @@ FEProblemBase::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID ti
 }
 
 void
-FEProblemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
+FEProblemBase::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
 {
   if (_displaced_problem && _reinit_displaced_elem)
     _displaced_problem->reinitNodes(nodes, tid);
@@ -1989,7 +1989,7 @@ FEProblemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid
 }
 
 void
-FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
+FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
 {
   if (_displaced_problem && _reinit_displaced_elem)
     _displaced_problem->reinitNodesNeighbor(nodes, tid);
@@ -2025,7 +2025,7 @@ FEProblemBase::reinitOffDiagScalars(const THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
+FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   setNeighborSubdomainID(elem, side, tid);
 
@@ -2065,7 +2065,9 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
 }
 
 void
-FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid)
+FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem,
+                                           unsigned int side,
+                                           const THREAD_ID tid)
 {
   reinitNeighbor(elem, side, tid);
 
@@ -2099,7 +2101,7 @@ void
 FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid)
+                                  const THREAD_ID tid)
 {
   mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a displaced mesh element?");
@@ -2126,7 +2128,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
 void
 FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid)
+                                  const THREAD_ID tid)
 {
   mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a displaced mesh element?");
@@ -2179,7 +2181,7 @@ FEProblemBase::clearDiracInfo()
 }
 
 void
-FEProblemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
+FEProblemBase::subdomainSetup(SubdomainID subdomain, const THREAD_ID tid)
 {
   _all_materials.subdomainSetup(subdomain, tid);
 
@@ -2195,7 +2197,7 @@ FEProblemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblemBase::neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid)
+FEProblemBase::neighborSubdomainSetup(SubdomainID subdomain, const THREAD_ID tid)
 {
   _all_materials.neighborSubdomainSetup(subdomain, tid);
 }
@@ -2226,13 +2228,13 @@ FEProblemBase::addFunction(const std::string & type,
 }
 
 bool
-FEProblemBase::hasFunction(const std::string & name, THREAD_ID tid)
+FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
   return _functions.hasActiveObject(name, tid);
 }
 
 Function &
-FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
+FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
 {
   // This thread lock is necessary since this method will create functions
   // for all threads if one is missing.
@@ -2331,7 +2333,7 @@ FEProblemBase::addSampler(const std::string & type,
 }
 
 Sampler &
-FEProblemBase::getSampler(const std::string & name, THREAD_ID tid)
+FEProblemBase::getSampler(const std::string & name, const THREAD_ID tid)
 {
   std::vector<Sampler *> objs;
   theWarehouse()
@@ -3154,7 +3156,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 std::shared_ptr<MaterialBase>
 FEProblemBase::getMaterial(std::string name,
                            Moose::MaterialDataType type,
-                           THREAD_ID tid,
+                           const THREAD_ID tid,
                            bool no_warn)
 {
   switch (type)
@@ -3181,7 +3183,7 @@ FEProblemBase::getMaterial(std::string name,
 }
 
 MaterialData &
-FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
+FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid)
 {
   switch (type)
   {
@@ -3357,7 +3359,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 }
 
 void
-FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
+FEProblemBase::prepareMaterials(SubdomainID blk_id, const THREAD_ID tid)
 {
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
@@ -3390,7 +3392,7 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 }
 
 void
-FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+FEProblemBase::reinitMaterials(SubdomainID blk_id, const THREAD_ID tid, bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3511,7 +3513,9 @@ FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
 }
 
 void
-FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
+FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id,
+                                        const THREAD_ID tid,
+                                        bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3813,7 +3817,7 @@ FEProblemBase::setVectorPostprocessorValueByName(const std::string & object_name
 
 const VectorPostprocessor &
 FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_name,
-                                                  THREAD_ID tid) const
+                                                  const THREAD_ID tid) const
 {
   return getUserObject<VectorPostprocessor>(object_name, tid);
 }
@@ -5142,7 +5146,7 @@ FEProblemBase::getSystem(const std::string & var_name)
 }
 
 void
-FEProblemBase::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+FEProblemBase::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, const THREAD_ID tid)
 {
   SubProblem::setActiveFEVariableCoupleableMatrixTags(mtags, tid);
 
@@ -5151,7 +5155,7 @@ FEProblemBase::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, 
 }
 
 void
-FEProblemBase::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+FEProblemBase::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, const THREAD_ID tid)
 {
   SubProblem::setActiveFEVariableCoupleableVectorTags(vtags, tid);
 
@@ -5160,7 +5164,8 @@ FEProblemBase::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, 
 }
 
 void
-FEProblemBase::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+FEProblemBase::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                           const THREAD_ID tid)
 {
   SubProblem::setActiveScalarVariableCoupleableMatrixTags(mtags, tid);
 
@@ -5169,7 +5174,8 @@ FEProblemBase::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mta
 }
 
 void
-FEProblemBase::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+FEProblemBase::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                           const THREAD_ID tid)
 {
   SubProblem::setActiveScalarVariableCoupleableVectorTags(vtags, tid);
 
@@ -5179,7 +5185,7 @@ FEProblemBase::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vta
 
 void
 FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
-                                                THREAD_ID tid)
+                                                const THREAD_ID tid)
 {
   SubProblem::setActiveElementalMooseVariables(moose_vars, tid);
 
@@ -5234,7 +5240,7 @@ FEProblemBase::clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid
 
 void
 FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
-                                           THREAD_ID tid)
+                                           const THREAD_ID tid)
 {
   _active_material_property_ids[tid] = mat_prop_ids;
 }
@@ -7719,7 +7725,7 @@ FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const
 }
 
 bool
-FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid)
 {
   if (_bnd_mat_side_cache[tid].find(bnd_id) == _bnd_mat_side_cache[tid].end())
   {
@@ -7755,7 +7761,7 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 }
 
 bool
-FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid)
 {
   if (_interface_mat_side_cache[tid].find(bnd_id) == _interface_mat_side_cache[tid].end())
   {
@@ -7789,7 +7795,7 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 }
 
 bool
-FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
+FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, const THREAD_ID tid)
 {
   if (_block_mat_side_cache[tid].find(subdomain_id) == _block_mat_side_cache[tid].end())
   {
@@ -7978,7 +7984,7 @@ FEProblemBase::reinitElemFaceRef(const Elem * elem,
                                  Real tolerance,
                                  const std::vector<Point> * const pts,
                                  const std::vector<Real> * const weights,
-                                 THREAD_ID tid)
+                                 const THREAD_ID tid)
 {
   SubProblem::reinitElemFaceRef(elem, side, bnd_id, tolerance, pts, weights, tid);
 
@@ -7994,7 +8000,7 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                      Real tolerance,
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights,
-                                     THREAD_ID tid)
+                                     const THREAD_ID tid)
 {
   SubProblem::reinitNeighborFaceRef(
       neighbor_elem, neighbor_side, bnd_id, tolerance, pts, weights, tid);

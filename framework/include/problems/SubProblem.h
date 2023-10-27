@@ -227,7 +227,7 @@ public:
    * type.
    */
   virtual const MooseVariableFieldBase & getVariable(
-      THREAD_ID tid,
+      const THREAD_ID tid,
       const std::string & var_name,
       Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
       Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) const = 0;
@@ -281,7 +281,7 @@ public:
    */
   virtual void
   setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
-                                   THREAD_ID tid);
+                                   const THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
@@ -321,9 +321,9 @@ public:
   virtual const SystemBase & systemBaseAuxiliary() const = 0;
   virtual SystemBase & systemBaseAuxiliary() = 0;
 
-  virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual void prepareShapes(unsigned int var, const THREAD_ID tid) = 0;
+  virtual void prepareFaceShapes(unsigned int var, const THREAD_ID tid) = 0;
+  virtual void prepareNeighborShapes(unsigned int var, const THREAD_ID tid) = 0;
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
@@ -345,8 +345,8 @@ public:
   virtual void cacheResidualNeighbor(const THREAD_ID tid);
   virtual void addCachedResidual(const THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void setResidual(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
 
   virtual void addJacobian(const THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(const THREAD_ID tid) = 0;
@@ -359,46 +359,48 @@ public:
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,
-                                   THREAD_ID tid) = 0;
+                                   const THREAD_ID tid) = 0;
 
   virtual void cacheJacobian(const THREAD_ID tid);
   virtual void cacheJacobianNeighbor(const THREAD_ID tid);
   virtual void addCachedJacobian(const THREAD_ID tid);
 
-  virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem, const THREAD_ID tid) = 0;
+  virtual void prepareFace(const Elem * elem, const THREAD_ID tid) = 0;
   virtual void prepare(const Elem * elem,
                        unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
-                       THREAD_ID tid) = 0;
-  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+                       const THREAD_ID tid) = 0;
+  virtual void setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid) = 0;
+  virtual void
+  setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void prepareAssembly(const THREAD_ID tid) = 0;
 
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void reinitElem(const Elem * elem, const THREAD_ID tid) = 0;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid) = 0;
+                              const THREAD_ID tid) = 0;
   virtual void
-  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, const THREAD_ID tid) = 0;
   virtual void reinitLowerDElem(const Elem * lower_d_elem,
-                                THREAD_ID tid,
+                                const THREAD_ID tid,
                                 const std::vector<Point> * const pts = nullptr,
                                 const std::vector<Real> * const weights = nullptr);
-  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
-  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitNode(const Node * node, const THREAD_ID tid) = 0;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) = 0;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) = 0;
+                                  const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) = 0;
-  virtual void reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+                                  const THREAD_ID tid) = 0;
+  virtual void
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   /**
    * fills the VariableValue arrays for scalar variables from the solution vector
    * @param tid The thread id
@@ -410,7 +412,7 @@ public:
   virtual void reinitOffDiagScalars(const THREAD_ID tid) = 0;
 
   /// sets the current boundary ID in assembly
-  void setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid);
+  void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
 
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference
@@ -424,7 +426,7 @@ public:
                                  Real tolerance,
                                  const std::vector<Point> * const pts,
                                  const std::vector<Real> * const weights = nullptr,
-                                 THREAD_ID tid = 0);
+                                 const THREAD_ID tid = 0);
 
   /**
    * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
@@ -438,22 +440,22 @@ public:
                                      Real tolerance,
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights = nullptr,
-                                     THREAD_ID tid = 0);
+                                     const THREAD_ID tid = 0);
 
   /**
    * reinitialize a neighboring lower dimensional element
    */
-  void reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid = 0);
+  void reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid = 0);
 
   /**
    * Reinit a mortar element to obtain a valid JxW
    */
-  void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);
+  void reinitMortarElem(const Elem * elem, const THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.
    */
-  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) = 0;
+  virtual bool reinitDirac(const Elem * elem, const THREAD_ID tid) = 0;
   /**
    * Fills "elems" with the elements that should be looped over for Dirac Kernels
    */
@@ -690,17 +692,21 @@ public:
 
   virtual void clearActiveFEVariableCoupleableVectorTags(const THREAD_ID tid);
 
-  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                       const THREAD_ID tid);
 
-  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                       const THREAD_ID tid);
 
   virtual void clearActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid);
 
   virtual void clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid);
 
-  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                           const THREAD_ID tid);
 
-  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                           const THREAD_ID tid);
 
   const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid) const;
 
@@ -818,26 +824,27 @@ public:
    */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name,
-                                       THREAD_ID tid,
+                                       const THREAD_ID tid,
                                        const std::string & requestor_name,
                                        bool requestor_is_ad);
 
   /**
    * checks whether we have a functor corresponding to \p name on the thread id \p tid
    */
-  bool hasFunctor(const std::string & name, THREAD_ID tid) const;
+  bool hasFunctor(const std::string & name, const THREAD_ID tid) const;
 
   /**
    * checks whether we have a functor of type T corresponding to \p name on the thread id \p tid
    */
   template <typename T>
-  bool hasFunctorWithType(const std::string & name, THREAD_ID tid) const;
+  bool hasFunctorWithType(const std::string & name, const THREAD_ID tid) const;
 
   /**
    * add a functor to the problem functor container
    */
   template <typename T>
-  void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
+  void
+  addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, const THREAD_ID tid);
 
   /**
    * Add a functor that has block-wise lambda definitions, e.g. the evaluations of the functor are
@@ -859,7 +866,7 @@ public:
                                    const std::set<ExecFlagType> & clearance_schedule,
                                    const MooseMesh & mesh,
                                    const std::set<SubdomainID> & block_ids,
-                                   THREAD_ID tid);
+                                   const THREAD_ID tid);
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -886,7 +893,7 @@ public:
   template <typename T>
   void registerUnfilledFunctorRequest(T * functor_interface,
                                       const std::string & functor_name,
-                                      THREAD_ID tid);
+                                      const THREAD_ID tid);
 
   /**
    * Return the residual vector tags we are currently computing
