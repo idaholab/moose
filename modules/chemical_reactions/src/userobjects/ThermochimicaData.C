@@ -160,6 +160,8 @@ ThermochimicaDataBase<is_nodal>::execute()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // either one DOF at a node or (currently) one DOF for constant monomial FV!
+  // This is enforced automatically by the ChemicalComposition action, which creates the correct
+  // variables.
   const unsigned int qp = 0;
 
   auto temperature = _temperature[qp];

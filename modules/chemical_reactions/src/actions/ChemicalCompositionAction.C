@@ -78,7 +78,7 @@ ChemicalCompositionAction::validParams()
       "output_element_phases",
       "List of elements whose molar amounts in specific phases are requested");
   params.addParam<std::string>(
-      "uo_name", "Thermochimica", "Name of the ThermochimicaNodalDataUserObject.");
+      "uo_name", "Thermochimica", "Name of the ThermochimicaDataUserObject.");
   return params;
 }
 

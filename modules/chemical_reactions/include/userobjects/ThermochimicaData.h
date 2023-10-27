@@ -21,8 +21,10 @@ using ThermochimicaDataBaseParent =
     typename std::conditional<is_nodal, NodalUserObject, ElementUserObject>::type;
 
 /**
- * User object that performs a Gibbs energy minimization at each node by calling
- * the Thermochimica code.
+ * User object that performs a Gibbs energy minimization at each node by
+ * calling the Thermochimica code. This object can only be added through
+ * the ChemicalCompositionAction which also sets up the variables for the
+ * calculation.
  */
 template <bool is_nodal>
 class ThermochimicaDataBase : public ThermochimicaDataBaseParent<is_nodal>
