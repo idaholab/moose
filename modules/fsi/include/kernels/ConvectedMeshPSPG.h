@@ -12,7 +12,7 @@
 #include "INSBase.h"
 
 /**
- * This calculates the time derivative for a coupled variable
+ *  Computes residual and Jacobian contributions for the PSPG stabilization term for mesh advection
  **/
 class ConvectedMeshPSPG : public INSBase
 {

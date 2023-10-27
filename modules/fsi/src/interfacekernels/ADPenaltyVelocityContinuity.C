@@ -77,8 +77,8 @@ ADPenaltyVelocityContinuity::computeResidual()
     for (auto & r : _residuals)
       r = 0;
 
-    for (const auto qp : make_range(_qrule->n_points()))
-      for (const auto i : index_range(phi))
+    for (const auto i : index_range(phi))
+      for (const auto qp : make_range(_qrule->n_points()))
         _residuals[i] += phi[i][qp] * _qp_jumps[qp];
 
     addResidualsAndJacobian(_assembly, _residuals, dof_indices, _velocity_var->scalingFactor());
@@ -105,45 +105,4 @@ ADPenaltyVelocityContinuity::computeResidual()
       addResidualsAndJacobian(_assembly, _residuals, dof_indices, disp_var->scalingFactor());
     }
   }
-}
-
-void
-ADPenaltyVelocityContinuity::computeJacobian()
-{
-  computeResidual();
-}
-
-void
-ADPenaltyVelocityContinuity::computeResidualAndJacobian()
-{
-  computeResidual();
-}
-
-void
-ADPenaltyVelocityContinuity::computeElementOffDiagJacobian(const unsigned int jvar)
-{
-  if (jvar == _velocity_var->number())
-    // Only need to do this once because AD does everything all at once
-    computeResidual();
-}
-
-void
-ADPenaltyVelocityContinuity::computeNeighborOffDiagJacobian(unsigned int)
-{
-}
-
-const MooseVariableFieldBase &
-ADPenaltyVelocityContinuity::variable() const
-{
-  return *_velocity_var;
-}
-
-const MooseVariableFieldBase &
-ADPenaltyVelocityContinuity::neighborVariable() const
-{
-  if (_displacements.empty() || !_displacements.front())
-    mooseError("The 'neighborVariable' method was called which requires that displacements be "
-               "actual variables.");
-
-  return *_displacements.front();
 }

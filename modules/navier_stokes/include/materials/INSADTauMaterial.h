@@ -91,7 +91,7 @@ protected:
   const unsigned int _vel_sys_number;
 
   /// The speed of the medium. This is the norm of the relative velocity, e.g. the velocity minus
-  /// the mesh velocity
+  /// the mesh velocity, at the current _qp
   ADReal _speed;
 
   using T::_ad_q_point;

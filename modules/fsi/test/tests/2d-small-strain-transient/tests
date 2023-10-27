@@ -9,7 +9,7 @@
       exodiff = 'fsi_flat_channel_out.e'
       detail = 'scalar field variables for velocity components and hand-coded Jacobians,'
       # vel_x_solid is not accurate
-      # We mmay improve that in the future
+      # We may improve that in the future
       rel_err = 1e-4
     []
     [INSAD]

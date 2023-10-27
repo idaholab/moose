@@ -113,10 +113,10 @@ protected:
 
   /// Whether displacements are provided
   const bool _disps_provided;
-  /// Time derivative of the x-displacement
+  /// Time derivative of the x-displacement, mesh velocity in the x-direction
   const VariableValue & _disp_x_dot;
-  /// Time derivative of the y-displacement
+  /// Time derivative of the y-displacement, mesh velocity in the y-direction
   const VariableValue & _disp_y_dot;
-  /// Time derivative of the z-displacement
+  /// Time derivative of the z-displacement, mesh velocity in the z-direction
   const VariableValue & _disp_z_dot;
 };

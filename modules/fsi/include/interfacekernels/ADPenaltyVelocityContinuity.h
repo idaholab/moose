@@ -10,6 +10,7 @@
 #pragma once
 
 #include "InterfaceKernelBase.h"
+#include "MooseVariableFE.h"
 
 /**
  * Interface kernel for enforcing continuity of stress and velocity
@@ -57,3 +58,44 @@ protected:
   /// Jump data member to avoid constant heap allocations
   std::vector<ADRealVectorValue> _qp_jumps;
 };
+
+inline void
+ADPenaltyVelocityContinuity::computeJacobian()
+{
+  computeResidual();
+}
+
+inline void
+ADPenaltyVelocityContinuity::computeResidualAndJacobian()
+{
+  computeResidual();
+}
+
+inline void
+ADPenaltyVelocityContinuity::computeElementOffDiagJacobian(const unsigned int jvar)
+{
+  if (jvar == _velocity_var->number())
+    // Only need to do this once because AD does everything all at once
+    computeResidual();
+}
+
+inline void
+ADPenaltyVelocityContinuity::computeNeighborOffDiagJacobian(unsigned int)
+{
+}
+
+inline const MooseVariableFieldBase &
+ADPenaltyVelocityContinuity::variable() const
+{
+  return *_velocity_var;
+}
+
+inline const MooseVariableFieldBase &
+ADPenaltyVelocityContinuity::neighborVariable() const
+{
+  if (_displacements.empty() || !_displacements.front())
+    mooseError("The 'neighborVariable' method was called which requires that displacements be "
+               "actual variables.");
+
+  return *_displacements.front();
+}
