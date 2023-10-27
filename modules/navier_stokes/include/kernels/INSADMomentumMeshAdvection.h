@@ -30,7 +30,7 @@ protected:
 
   /// The strong residual for this object, computed by material classes to eliminate computation
   /// duplication in simulations in which we have stabilization
-  const ADMaterialProperty<RealVectorValue> & _convected_mesh_strong_residual;
+  const ADMaterialProperty<RealVectorValue> & _advected_mesh_strong_residual;
 };
 
 template <typename T>
@@ -57,7 +57,7 @@ INSADMomentumMeshAdvection::setDisplacementParams(T & mesh_convection_obj)
         "ins_ad_object_tracker");
     for (const auto block_id : mesh_convection_obj.blockIDs())
     {
-      obj_tracker.set("has_convected_mesh", true, block_id);
+      obj_tracker.set("has_advected_mesh", true, block_id);
       obj_tracker.set("disp_x", mesh_convection_obj.coupledName("disp_x"), block_id);
       if (mesh_convection_obj.isParamValid("disp_y"))
         obj_tracker.set("disp_y", mesh_convection_obj.coupledName("disp_y"), block_id);

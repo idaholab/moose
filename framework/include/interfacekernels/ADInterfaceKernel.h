@@ -35,28 +35,27 @@ private:
    * Using the passed DGResidual type, selects the correct test function space and residual block,
    * and then calls computeQpResidual
    */
-  void computeElemNeighResidual(Moose::DGResidualType type) override final;
+  void computeElemNeighResidual(Moose::DGResidualType type);
 
   /**
    * Using the passed DGJacobian type, selects the correct test function and trial function spaces
    * and
    * jacobian block, and then calls computeQpJacobian
    */
-  void computeElemNeighJacobian(Moose::DGJacobianType type) override final;
+  void computeElemNeighJacobian(Moose::DGJacobianType type);
 
   /**
    * Using the passed DGJacobian type, selects the correct test function and trial function spaces
    * and
    * jacobian block, and then calls computeQpOffDiagJacobian with the passed jvar
    */
-  void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                       unsigned int jvar) override final;
+  void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
   /// Selects the correct Jacobian type and routine to call for the primary variable jacobian
-  void computeElementOffDiagJacobian(unsigned int jvar) override final;
+  virtual void computeElementOffDiagJacobian(unsigned int jvar) override final;
 
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
-  void computeNeighborOffDiagJacobian(unsigned int jvar) override final;
+  virtual void computeNeighborOffDiagJacobian(unsigned int jvar) override final;
 
   /// Computes the residual for the current side.
   void computeResidual() override final;

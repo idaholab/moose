@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-
 /**
  * This class computes strong and weak components of the INS governing
  * equations.  These terms can then be assembled in child classes
@@ -60,6 +58,12 @@ protected:
   /// Provides tau which yields superconvergence for 1D advection-diffusion
   virtual Real tauNodal();
 
+  /**
+   * Compute the velocity. If displacements are provided, then this routine will subtract the time
+   * derivative of the displacements, e.g. the mesh velocity
+   */
+  RealVectorValue relativeVelocity() const;
+
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
 
@@ -106,4 +110,13 @@ protected:
   bool _laplace;
   bool _convective_term;
   bool _transient_term;
+
+  /// Whether displacements are provided
+  const bool _disps_provided;
+  /// Time derivative of the x-displacement, mesh velocity in the x-direction
+  const VariableValue & _disp_x_dot;
+  /// Time derivative of the y-displacement, mesh velocity in the y-direction
+  const VariableValue & _disp_y_dot;
+  /// Time derivative of the z-displacement, mesh velocity in the z-direction
+  const VariableValue & _disp_z_dot;
 };

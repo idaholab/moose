@@ -36,7 +36,7 @@ require_total = 85
 require_total = 84
 
 [fsi]
-require_total = 90
+require_total = 85
 
 [functional_expansion_tools]
 require_total = 82

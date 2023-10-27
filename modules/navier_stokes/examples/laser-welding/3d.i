@@ -104,7 +104,7 @@ sb=5.67e-8
   [momentum_supg]
     type = INSADMomentumSUPG
     variable = vel
-    velocity = vel
+    material_velocity = relative_velocity
     use_displaced_mesh = true
   []
   [temperature_time]

@@ -24,8 +24,8 @@ INSADEnergyMeshAdvection::validParams()
 
 INSADEnergyMeshAdvection::INSADEnergyMeshAdvection(const InputParameters & parameters)
   : ADKernelValue(parameters),
-    _temperature_convected_mesh_strong_residual(
-        getADMaterialProperty<Real>("temperature_convected_mesh_strong_residual"))
+    _temperature_advected_mesh_strong_residual(
+        getADMaterialProperty<Real>("temperature_advected_mesh_strong_residual"))
 {
   INSADMomentumMeshAdvection::setDisplacementParams(*this);
 }
@@ -33,5 +33,5 @@ INSADEnergyMeshAdvection::INSADEnergyMeshAdvection(const InputParameters & param
 ADReal
 INSADEnergyMeshAdvection::precomputeQpResidual()
 {
-  return _temperature_convected_mesh_strong_residual[_qp];
+  return _temperature_advected_mesh_strong_residual[_qp];
 }
