@@ -41,42 +41,14 @@ public:
   PhysicsBase(const InputParameters & parameters);
 
   /// Forwards from the action tasks to the implemented addXYZ() in the derived classes
+  /// If you need more than these:
+  /// - register your action to the new task using
+  ///   registerMooseAction("AppName", ActionClass, "task_name");
+  /// - override act and add your additional work there
   void act() override;
 
   /// A new blocks to the Physics
   void addBlocks(const std::vector<SubdomainName> & blocks);
-
-  // The routines below are public to be accessible by components
-  // TODO: make private, components not using them
-  /// The default implementation of these routines will do nothing as we do not expect all Physics
-  /// to be defining an object of every type
-  virtual void addNonlinearVariables() {}
-  virtual void addAuxiliaryVariables() {}
-  virtual void addInitialConditions() {}
-  virtual void addFEKernels() {}
-  virtual void addFVKernels() {}
-  virtual void addNodalKernels() {}
-  virtual void addDiracKernels() {}
-  virtual void addDGKernels() {}
-  virtual void addScalarKernels() {}
-  virtual void addInterfaceKernels() {}
-  virtual void addFVInterfaceKernels() {}
-  virtual void addFEBCs() {}
-  virtual void addFVBCs() {}
-  virtual void addNodalBCs() {}
-  virtual void addPeriodicBCs() {}
-  virtual void addFunctions() {}
-  virtual void addAuxiliaryKernels() {}
-  virtual void addMaterials() {}
-  virtual void addFunctorMaterials() {}
-  virtual void addUserObjects() {}
-  virtual void addPostprocessors() {}
-  virtual void addVectorPostprocessors() {}
-  virtual void addReporters() {}
-  virtual void addOutputs() {}
-  virtual void addPreconditioning() {}
-  virtual void addExecutioner() {}
-  virtual void addExecutors() {}
 
   /// Provide additional parameters for the relationship managers
   virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
@@ -239,10 +211,37 @@ private:
   /// NOTE: this is not known at construction time, which is a huge bummer
   unsigned int _dim;
 
-  /// Needed to create every object
-  friend class AddPhysicsAction;
-  friend class FileMeshPhysicsComponent;
-  friend class FileMeshFlowComponent;
+  // The routines below are public to be accessible by components
+  // TODO: make private, components not using them
+  /// The default implementation of these routines will do nothing as we do not expect all Physics
+  /// to be defining an object of every type
+  virtual void addNonlinearVariables() {}
+  virtual void addAuxiliaryVariables() {}
+  virtual void addInitialConditions() {}
+  virtual void addFEKernels() {}
+  virtual void addFVKernels() {}
+  virtual void addNodalKernels() {}
+  virtual void addDiracKernels() {}
+  virtual void addDGKernels() {}
+  virtual void addScalarKernels() {}
+  virtual void addInterfaceKernels() {}
+  virtual void addFVInterfaceKernels() {}
+  virtual void addFEBCs() {}
+  virtual void addFVBCs() {}
+  virtual void addNodalBCs() {}
+  virtual void addPeriodicBCs() {}
+  virtual void addFunctions() {}
+  virtual void addAuxiliaryKernels() {}
+  virtual void addMaterials() {}
+  virtual void addFunctorMaterials() {}
+  virtual void addUserObjects() {}
+  virtual void addPostprocessors() {}
+  virtual void addVectorPostprocessors() {}
+  virtual void addReporters() {}
+  virtual void addOutputs() {}
+  virtual void addPreconditioning() {}
+  virtual void addExecutioner() {}
+  virtual void addExecutors() {}
 };
 
 template <typename T>

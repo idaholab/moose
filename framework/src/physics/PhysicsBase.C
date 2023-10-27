@@ -15,8 +15,6 @@
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
 
-// registerMooseAction("MooseApp", PhysicsBase, "init_physics");
-
 InputParameters
 PhysicsBase::validParams()
 {
@@ -57,6 +55,9 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
   checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
                                         "initial_from_file_timestep");
   prepareCopyNodalVariables();
+
+  // Register the minimal amount of tasks that a Physics has to run
+  appendTask("init_physics");
 }
 
 void

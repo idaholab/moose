@@ -256,7 +256,7 @@ Registry::getRegisteredName()
   for (const auto & [name, reg_ptr] : getRegistry()._name_to_entry)
     if (std::dynamic_pointer_cast<T>(reg_ptr))
       return name;
-  mooseError("The object of C++ type '", demangle(typeid(T).name()), "' has not registered.");
+  mooseError("The object of C++ type '", demangle(typeid(T).name()), "' has not been registered.");
 }
 
 template <typename T>
