@@ -111,6 +111,17 @@ public:
   unsigned int identifyCrossSlipFamily(const unsigned int index);
 
   /**
+   * A helper method to sort the slip systems of a crystal into groups of coplanar systems
+   * by identifying parallel slip plane normals. This method fills a vector of vectors, in
+   * which the inner vector stores the index of parallel slip plane normal slip systems.
+   * The size of the outer vector is set to the user-defined input parameter
+   * 'number_coplanar_groups'. This vector of vectors coplanar grouping can be used in
+   * inheriting classes to compute hardening or forest dislocation densities based on
+   * coplanar relationships.
+   */
+  void sortCoplanarSystems();
+
+  /**
    * This virtual method is called to set the constitutive internal state variables
    * current value and the previous substep value to the old property value for
    * the start of the stress convergence while loop.
@@ -203,6 +214,9 @@ protected:
   const Real _number_cross_slip_planes;
   ///@}
 
+  /// Number of non-parallel slip system plane normals to characterize coplanar behavior
+  const unsigned int _number_coplanar_groups;
+
   /// Internal variable update equation tolerance
   Real _rel_state_var_tol;
   /// Slip increment tolerance
@@ -237,6 +251,9 @@ protected:
 
   /// Sorted slip system indices into cross slip family groups
   std::vector<std::vector<unsigned int>> _cross_slip_familes;
+
+  /// Sort slip system indices into coplanar system groups
+  std::vector<std::vector<unsigned int>> _coplanar_groups;
 
   /// Flag to run the cross slip calculations if cross slip numbers are specified
   bool _calculate_cross_slip;

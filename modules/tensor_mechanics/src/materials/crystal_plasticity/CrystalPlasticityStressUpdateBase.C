@@ -58,6 +58,12 @@ CrystalPlasticityStressUpdateBase::validParams()
                         0,
                         "Quanity of slip planes belonging to a single cross slip direction; used "
                         "to determine cross slip families");
+  params.addRangeCheckedParam<unsigned int>(
+      "number_coplanar_groups",
+      0,
+      "number_coplanar_groups>=0",
+      "Quantity of the unique, non-parallel, slip planes; used to specify the number of coplanar "
+      "groupings for microstructure mechanisms relying on coplanar system classification");
   params.addParam<Real>(
       "slip_increment_tolerance",
       2e-2,
@@ -91,6 +97,7 @@ CrystalPlasticityStressUpdateBase::CrystalPlasticityStressUpdateBase(
     _slip_sys_file_name(getParam<FileName>("slip_sys_file_name")),
     _number_cross_slip_directions(getParam<Real>("number_cross_slip_directions")),
     _number_cross_slip_planes(getParam<Real>("number_cross_slip_planes")),
+    _number_coplanar_groups(getParam<unsigned int>("number_coplanar_groups")),
 
     _rel_state_var_tol(getParam<Real>("stol")),
     _slip_incr_tol(getParam<Real>("slip_increment_tolerance")),
@@ -109,6 +116,7 @@ CrystalPlasticityStressUpdateBase::CrystalPlasticityStressUpdateBase(
 {
   getSlipSystems();
   sortCrossSlipFamilies();
+  sortCoplanarSystems();
 
   if (parameters.isParamSetByUser("number_cross_slip_directions"))
     _calculate_cross_slip = true;
@@ -358,6 +366,72 @@ CrystalPlasticityStressUpdateBase::identifyCrossSlipFamily(const unsigned int in
 
   // Should never reach this statement
   mooseError("The supplied slip system index is not among the slip system families sorted.");
+}
+
+void
+CrystalPlasticityStressUpdateBase::sortCoplanarSystems()
+{
+  if (_number_coplanar_groups == 0)
+  {
+    _coplanar_groups.resize(0);
+    return;
+  }
+
+  _coplanar_groups.resize(_number_coplanar_groups);
+
+  // set the first slip system as the first entry in the initial vector
+  _coplanar_groups[0].push_back(0);
+  unsigned int cp_group_counter = 1;
+
+  for (const auto a : make_range(1u, _number_slip_systems)) // indicates 1 is unsigned int
+  {
+    for (const auto g : make_range(cp_group_counter))
+    {
+      for (const auto b : index_range(_coplanar_groups[g]))
+      {
+        const auto index = _coplanar_groups[g][b];
+        const auto cross = _slip_plane_normal[index].cross(_slip_plane_normal[a]);
+
+        if (MooseUtils::absoluteFuzzyEqual(cross.norm(), 0.0))
+        {
+          // the two planes are parallel and should be added to the same coplanar group
+          _coplanar_groups[g].push_back(a);
+          break;
+        }
+        else
+        {
+          // the current slip plane normal is not coplanar with _this_ group but could be with
+          // another group, so have to check them all before pushing back to add a new group
+          if (g == (cp_group_counter - 1))
+          {
+            if (cp_group_counter >= _number_coplanar_groups)
+              mooseError("The number of requested coplanar groups exceeds the value specified by "
+                         "the user for the parameter number_coplanar_groups");
+
+            _coplanar_groups[cp_group_counter].push_back(a);
+            ++cp_group_counter;
+            break;
+          }
+        }
+      }
+    }
+  }
+  if (cp_group_counter != _number_coplanar_groups)
+    mooseError("The coplanar sorting has resulted in a number of coplanar system groups "
+               "different from the number specified by the user.");
+
+  if (_print_convergence_message)
+  {
+    mooseWarning(
+        "The provided slip systems have been sorted into the following coplanar groups: \n");
+    for (const auto g : make_range(_number_coplanar_groups))
+    {
+      Moose::out << "  Coplanar group " << g << ": [";
+      for (const auto i : index_range(_coplanar_groups[g]))
+        Moose::out << " " << _coplanar_groups[g][i] << " ";
+      Moose::out << "]\n";
+    }
+  }
 }
 
 void
