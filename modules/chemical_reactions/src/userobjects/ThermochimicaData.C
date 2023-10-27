@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ThermochimicaNodalData.h"
+#include "ThermochimicaData.h"
 #include "ChemicalCompositionAction.h"
 #include "ThermochimicaUtils.h"
 #include "ActionWarehouse.h"

@@ -1,18 +1,21 @@
-# ThermochimicaNodalData
+# ThermochimicaElementData
 
-!syntax description /UserObjects/ThermochimicaNodalData
+!syntax description /UserObjects/ThermochimicaElementData
 
 !alert note title=For Use with Thermochimica
 This UserObject is designed for use with thermochemistry library Thermochimica.
 
 ## Description
 
-[`ThermochimicaNodalData`](ThermochimicaNodalData.md) provides a base class for performing Thermochimica calculations at nodes.
+[`ThermochimicaElementData`](ThermochimicaElementData.md) provides a base class for performing Thermochimica calculations on elements.
 In this UserObject, the masses of elements included in the vector variable `elements` are input
 to the Fortan 90 module Thermochimica, along with the temperature and pressure. Optionally, the
 user may disable Thermochimica calculation re-initialization by setting `reinit_requested` to `false`.
 This may reduce memory use in the calculation, but will likely greatly increase the length of each
 call to Thermochimica.
+
+!alert note
+Currently this object is designed to only work with constant monomial type variables (one DOF per element)!
 
 Thermochimica is called by this object at every execute (please see the Thermochimica user manual
 for more details), and the data required to re-initialize Thermochimica calculations is
@@ -29,10 +32,8 @@ potentials of the elements in the list are output to the variables specified in 
 
 ## Example Input Syntax
 
-!syntax parameters /UserObjects/ThermochimicaNodalData
+!syntax parameters /UserObjects/ThermochimicaElementData
 
-!syntax inputs /UserObjects/ThermochimicaNodalData
+!syntax inputs /UserObjects/ThermochimicaElementData
 
-!syntax children /UserObjects/ThermochimicaNodalData
-!syntax children /UserObjects/ThermochimicaNodalUO2X
-!syntax children /UserObjects/ThermochimicaNodalUZr
+!syntax children /UserObjects/ThermochimicaElementData

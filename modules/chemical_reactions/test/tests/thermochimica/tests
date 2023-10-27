@@ -18,8 +18,34 @@
     exodiff = MoRu_out.e
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
-    requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
+    requirement = 'The system shall be able to use reinitialization to speed up a nodal thermochimica solve'
     cli_args = 'ChemicalComposition/reinitialization_type=time'
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [MoRu_FV]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_FV_out.e
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#25877'
+    requirement = 'The system shall be able to set up an elemental thermochemistry solve using an action'
+    cli_args = 'ChemicalComposition/is_fv=true Outputs/file_base=MoRu_FV_out'
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [MoRu_FV_reinit]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_FV_out.e
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#25877'
+    requirement = 'The system shall be able to use reinitialization to speed up an elemental thermochimica solve'
+    cli_args = 'ChemicalComposition/reinitialization_type=time ChemicalComposition/is_fv=true Outputs/file_base=MoRu_FV_out'
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
