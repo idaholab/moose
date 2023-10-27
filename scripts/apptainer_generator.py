@@ -494,14 +494,17 @@ class ApptainerGenerator:
 
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
         if self.args.library == 'moose':
+            # test-tools is deprecated, but leave it here, so this scripts continues
+            # to function properly against older hashes.
             for package in ['tools', 'test-tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-                with open(meta_yaml, 'r') as meta_contents:
-                    _, version, _, _ = Versioner.conda_meta_jinja(meta_contents.read())
-                    variable_name = 'MOOSE_'
-                    variable_name += package.upper().replace('-', '_')
-                    variable_name += '_VERSION'
-                    jinja_data[variable_name] = version
+                if os.path.exists(meta_yaml):
+                    with open(meta_yaml, 'r') as meta_contents:
+                        _, version, _, _ = Versioner.conda_meta_jinja(meta_contents.read())
+                        variable_name = 'MOOSE_'
+                        variable_name += package.upper().replace('-', '_')
+                        variable_name += '_VERSION'
+                        jinja_data[variable_name] = version
         elif self.args.library == 'libmesh':
             package = 'libmesh-vtk'
             meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
