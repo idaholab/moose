@@ -26,7 +26,8 @@
     input = 'exodus_input.i'
     check_files = 'exodus_input_out.e'
 
-    requirement = "The system shall support including the executed input file within the ExodusII output."
+    requirement = "The system shall support including the executed input file within the ExodusII "
+                  "output."
   []
 
   [enable_initial]
@@ -34,7 +35,8 @@
     input = 'exodus_enable_initial.i'
     exodiff = 'exodus_enable_initial_out.e'
 
-    requirement = "The system shall support inclusion of initial condition data within the ExodusII output."
+    requirement = "The system shall support inclusion of initial condition data within the ExodusII "
+                  "output."
   []
 
   [output_all]
@@ -42,7 +44,8 @@
     input = 'variable_toggles.i'
     exodiff = 'variable_toggles_out.e'
 
-    requirement = "The system shall support writing non-linear, auxililary, scalar, and postprocessor variables to ExodusII format."
+    requirement = "The system shall support writing non-linear, auxililary, scalar, and "
+                  "postprocessor variables to ExodusII format."
   []
 
   [hide_output]
@@ -50,15 +53,8 @@
     input = 'hide_variables.i'
     exodiff = 'hide_variables_out.e'
 
-    requirement = "The system shall support the exclusion of non-linear, scalar, and postprocessor variables from ExodusII output."
-  []
-
-  [invalid_hide]
-    type = 'RunException'
-    input = 'invalid_hide_variables.i'
-    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\):'
-
-    requirement = "The system shall error if the supplied names for including or excluding variables is invalid."
+    requirement = "The system shall support the exclusion of non-linear, scalar, and postprocessor "
+                  "variables from ExodusII output."
   []
 
   [nodal_output]
@@ -66,7 +62,8 @@
     input = 'exodus_nodal.i'
     exodiff = 'exodus_nodal_out.e'
 
-    requirement = "The system shall support outputting elemental and scalar variables as nodal variables within ExodusII output."
+    requirement = "The system shall support outputting elemental and scalar variables as nodal "
+                  "variables within ExodusII output."
   []
 
   [discontinuous]
@@ -74,7 +71,8 @@
     input = 'exodus_discontinuous.i'
     exodiff = 'exodus_discontinuous_out.e'
 
-    requirement = "The system shall support outputting discontinuous finite element types with the ExodusII format."
+    requirement = "The system shall support outputting discontinuous finite element types with the "
+                  "ExodusII format."
   []
 
   [side_discontinuous_edge2]
@@ -82,7 +80,8 @@
     input = 'exodus_side_discontinuous_edge2.i'
     exodiff = 'exodus_side_discontinuous_edge2_out.e'
 
-    requirement = "The system shall support outputting side-discontinuous edge element data with the ExodusII format."
+    requirement = "The system shall support outputting side-discontinuous edge element data with the "
+                  "ExodusII format."
   []
 
   [side_discontinuous]
@@ -90,7 +89,8 @@
     input = 'exodus_side_discontinuous.i'
     exodiff = 'exodus_side_discontinuous_out.e'
 
-    requirement = "The system shall support outputting side-discontinuous quad element data with the ExodusII format."
+    requirement = "The system shall support outputting side-discontinuous quad element data with the "
+                  "ExodusII format."
   []
 
   [output_elem_id]
@@ -101,7 +101,8 @@
     exodiff = 'exodus_elem_id_out.e'
 
     issues = '#23386'
-    requirement = "The system shall support outputting extra element id data defined on the input mesh with the ExodusII format."
+    requirement = "The system shall support outputting extra element id data defined on the input "
+                  "mesh with the ExodusII format."
   []
 
   [output_elem_id_restrict]
@@ -111,6 +112,28 @@
     exodiff = 'exodus_elem_id_out.e'
 
     issues = '#23386'
-    requirement = "The system shall support restricting which extra element id data defined on the input mesh are outputted with the ExodusII format."
+    requirement = "The system shall support restricting which extra element id data defined on the "
+                  "input mesh are outputted with the ExodusII format."
+  []
+
+  [errors]
+    requirement = "The system shall report an error if "
+    issues = '#23743'
+    [invalid_hide]
+      type = 'RunException'
+      input = 'invalid_hide_variables.i'
+      expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\):'
+
+      detail = "the supplied names for including or excluding variables is invalid."
+    []
+    [file_base_in_child_apps]
+      type = 'RunException'
+      input = 'exodus_elem_id.i'
+      cli_args = "MultiApps/ma/type=FullSolveMultiApp MultiApps/ma/input_files=exodus_elem_id.i "
+                 "MultiApps/ma/positions='0 0 0 1 1 0' MultiApps/ma/cli_args=Outputs/file_base=bad"
+      expect_err = 'The parameter \'file_base\' may not be specified for a child app when the MultiApp has multiple instances of the child app'
+
+      detail = "a file base is supplied for a child app when there are multiple instances."
+    []
   []
 []
