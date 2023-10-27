@@ -222,6 +222,62 @@ protected:
   const R _right;
 };
 
+template <typename C, typename L, typename R>
+auto conditional(const C &, const L &, const R &);
+
+/**
+ * Base class for a ternary functions
+ */
+template <typename C, typename L, typename R>
+class CTConditional : public CTBinary<L, R>
+{
+public:
+  CTConditional(C condition, L left, R right) : CTBinary<L, R>(left, right), _condition(condition)
+  {
+  }
+  using typename CTBinary<L, R>::ResultType;
+
+  auto operator()() const { return _condition() ? _left() : _right(); }
+  template <CTTag dtag>
+  auto D() const
+  {
+    return conditional(_condition, _left.template D<dtag>(), _right.template D<dtag>());
+  }
+
+  template <typename Self>
+  std::string print() const
+  {
+    return "conditional(" + _condition.print() + ", " + _left.print() + ", " + _right.print() + ")";
+  }
+
+protected:
+  const C _condition;
+
+  using CTBinary<L, R>::_left;
+  using CTBinary<L, R>::_right;
+};
+
+template <typename C, typename L, typename R>
+auto
+conditional(const C & condition, const L & left, const R & right)
+{
+  return CTConditional<C, L, R>(condition, left, right);
+}
+
+template <typename L, typename R>
+auto
+min(const L & left, const R & right)
+{
+  return CTConditional<decltype(left < right), L, R>(left < right, left, right);
+}
+
+template <typename L, typename R>
+auto
+max(const L & left, const R & right)
+{
+  return CTConditional<decltype(left > right), L, R>(left > right, left, right);
+}
+
 /**
  * Constant value
  */
@@ -230,16 +286,16 @@ class CTValue : public CTBase
 {
 public:
   CTValue(const T value) : _value(value) {}
-  auto operator()() const { return _value; }
-  std::string print() const { return Moose::stringify(_value); }
+  typedef T ResultType;
 
+  auto operator()() const { return _value; }
   template <CTTag dtag>
   auto D() const
   {
     return CTNull<ResultType>();
   }
 
-  typedef T ResultType;
+  std::string print() const { return Moose::stringify(_value); }
 
 protected:
   T _value;
@@ -738,7 +794,7 @@ pow(const B & base)
   auto operator op(const L & left, const R & right)                                                \
   {                                                                                                \
     /* We need a template arguments here because:      */                                          \
-    /* alias template deduction only available with '-std=c++2a' or '-std=gnu++2a'      */         \
+    /* alias template deduction is only available with '-std=c++2a' or '-std=gnu++2a'      */      \
     if constexpr (std::is_base_of<CTBase, L>::value && std::is_base_of<CTBase, R>::value)          \
       return OP<L, R>(left, right);                                                                \
     else if constexpr (std::is_base_of<CTBase, L>::value)                                          \
@@ -746,7 +802,7 @@ pow(const B & base)
     else if constexpr (std::is_base_of<CTBase, R>::value)                                          \
       return OP<decltype(makeValue(left)), R>(makeValue(left), right);                             \
     else                                                                                           \
-      throw std::runtime_error("This should not be instantiated.");                                \
+      static_assert(always_false<L>, "This should not be instantiated.");                          \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)

@@ -112,6 +112,9 @@ TEST(CompileTimeDerivativesTest, evaluate)
   CTD_EVALTEST(cosh(x), -4, 4, 0.1)
   CTD_EVALTEST(atan(x), -4, 4, 0.1)
 
+  CTD_EVALTEST(min(x, x * x), -2, 2, 0.271)
+  CTD_EVALTEST(max(x, x * x), -2, 2, 0.271)
+
   const auto v = makeValue(0.5);
   const auto r1 = CompileTimeDerivatives::atan2(1.0, 2.0);
   const auto r2 = CompileTimeDerivatives::atan2(v, 2.0);
@@ -303,4 +306,20 @@ TEST(CompileTimeDerivativesTest, makeStandardDeviation)
   const auto std_dev = makeStandardDeviation<params>(f, covariance);
 
   EXPECT_NEAR(std_dev(), 0.6133922073192649, 1e-15);
+}
+
+TEST(CompileTimeDerivativesTest, conditional)
+{
+  Real vx = 0.0;
+  const auto x = makeRef(vx);
+
+  const auto result = conditional(x < 3, 2 * x, 5 * x);
+
+  for (vx = 0.0; vx < 6.0; vx += 0.31)
+  {
+    if (vx < 3)
+      EXPECT_EQ(result(), 2 * vx);
+    else
+      EXPECT_EQ(result(), 5 * vx);
+  }
 }
