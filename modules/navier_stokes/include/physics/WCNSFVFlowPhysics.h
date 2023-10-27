@@ -16,7 +16,7 @@ class WCNSFVTurbulencePhysics;
 /**
  * Creates all the objects needed to solve the Navier Stokes mass and momentum equations
  */
-class WCNSFVFlowPhysics : public WCNSFVPhysicsBase
+class WCNSFVFlowPhysics final : public WCNSFVPhysicsBase
 {
 public:
   static InputParameters validParams();

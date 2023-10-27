@@ -14,7 +14,7 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar advection equations
  */
-class WCNSFVScalarAdvectionPhysics : public WCNSFVPhysicsBase
+class WCNSFVScalarAdvectionPhysics final : public WCNSFVPhysicsBase
 {
 public:
   static InputParameters validParams();

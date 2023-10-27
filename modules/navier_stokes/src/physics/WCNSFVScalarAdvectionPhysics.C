@@ -11,22 +11,18 @@
 #include "NSFVAction.h"
 #include "WCNSFVFlowPhysics.h"
 
+registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarAdvectionPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_fv_bc");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_ic");
-
-// TODO fix inheritance and remove
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_user_object");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "init_physics");
-registerMooseAction("NavierStokesApp", WCNSFVScalarAdvectionPhysics, "add_geometric_rm");
 
 InputParameters
 WCNSFVScalarAdvectionPhysics::validParams()
 {
   InputParameters params = WCNSFVPhysicsBase::validParams();
   params.addClassDescription(
-      "Define the Navier Stokes weakly-compressible scalar field advection equation");
+      "Define the Navier Stokes weakly-compressible scalar field advection equation(s)");
 
   params += NSFVAction::commonScalarFieldAdvectionParams();
 

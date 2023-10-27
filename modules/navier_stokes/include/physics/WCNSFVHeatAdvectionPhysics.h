@@ -15,7 +15,7 @@
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
  */
-class WCNSFVHeatAdvectionPhysics : public WCNSFVPhysicsBase
+class WCNSFVHeatAdvectionPhysics final : public WCNSFVPhysicsBase
 {
 public:
   static InputParameters validParams();

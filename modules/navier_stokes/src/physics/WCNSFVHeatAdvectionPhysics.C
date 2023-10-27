@@ -11,15 +11,11 @@
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVAction.h"
 
+registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVHeatAdvectionPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_material");
-
-// TODO fix inheritance and remove
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_user_object");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "init_physics");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_geometric_rm");
 
 InputParameters
 WCNSFVHeatAdvectionPhysics::validParams()
