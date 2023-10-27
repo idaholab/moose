@@ -29,7 +29,7 @@ public:
 
   virtual void setInputParametersFEProblem(InputParameters & parameters) override;
 
-  virtual NonlinearSystem & getNonlinearSystem(unsigned int nl_sys_num) override;
+  virtual NonlinearSystem & getNonlinearSystem(const unsigned int nl_sys_num) override;
 
   virtual void addLineSearch(const InputParameters & parameters) override;
 

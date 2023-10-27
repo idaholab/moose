@@ -53,11 +53,11 @@ public:
   }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys(unsigned int sys_num);
+  DisplacedSystem & nlSys(const unsigned int sys_num);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
+  virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
@@ -76,7 +76,7 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool nlConverged(unsigned int nl_sys_num) override;
+  virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
@@ -150,12 +150,13 @@ public:
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
   virtual const MooseVariableFieldBase &
-  getVariable(THREAD_ID tid,
+  getVariable(const THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type =
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
-  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariable & getStandardVariable(const THREAD_ID tid,
+                                              const std::string & var_name) override;
   virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
                                                           const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
@@ -286,15 +287,15 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
+  Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) override;
+  const Assembly & assembly(THREAD_ID tid, const unsigned int nl_sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
 
-  virtual bool computingInitialResidual(unsigned int nl_sys_num) const override;
+  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const override;
 
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;
@@ -329,7 +330,7 @@ public:
 
   LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const override;
+  const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const override;
 
   bool haveDisplaced() const override final { return true; }
 
