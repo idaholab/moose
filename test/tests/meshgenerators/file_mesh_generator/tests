@@ -23,6 +23,7 @@
   [../]
 
   [./exodus_iga_test]
+    skip = 'libMesh issue, #25819'
     type = XMLDiff
     input = '2d_diffusion_iga.i'
     expect_out = 'Solve Converged'
@@ -44,6 +45,7 @@
   []
 
   [./exodus_iga_nosplines_test]
+    skip = 'libMesh issue, #25819'
     type = XMLDiff
     input = '2d_diffusion_iga_nosplines.i'
     expect_out = 'Solve Converged'
