@@ -10,7 +10,7 @@ This UserObject is designed for use with thermochemistry library Thermochimica.
 [`ThermochimicaElementData`](ThermochimicaElementData.md) performs Thermochimica calculations on elements.
 
 !alert note
-This object can only be set up using teh [ChemicalComposition](ChemicalCompositionAction.md) action
+This object can only be set up using the [ChemicalComposition](ChemicalCompositionAction.md) action
 
 Thermochimica is called by this object at every execute (please see the Thermochimica user manual
 for more details), and the data required to re-initialize Thermochimica calculations is
