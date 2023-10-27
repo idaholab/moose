@@ -11,19 +11,25 @@
 
 // MOOSE includes
 #include "NodalUserObject.h"
+#include "ElementUserObject.h"
 
 // Forward declaration
 class ChemicalCompositionAction;
+
+template <bool is_nodal>
+using ThermochimicaDataBaseParent =
+    typename std::conditional<is_nodal, NodalUserObject, ElementUserObject>::type;
 
 /**
  * User object that performs a Gibbs energy minimization at each node by calling
  * the Thermochimica code.
  */
-class ThermochimicaNodalData : public NodalUserObject
+template <bool is_nodal>
+class ThermochimicaDataBase : public ThermochimicaDataBaseParent<is_nodal>
 {
 public:
   static InputParameters validParams();
-  ThermochimicaNodalData(const InputParameters & parameters);
+  ThermochimicaDataBase(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -55,9 +61,16 @@ public:
     std::vector<double> _mol_fraction;
   };
 
-  const Data & getNodalData(dof_id_type node_id) const;
+  const Data & getNodalData(dof_id_type id) const;
+  const Data & getElementData(dof_id_type id) const;
+
+  // universal data access
+  const Data & getData(dof_id_type id) const;
 
 protected:
+  // get current node or element ID
+  auto currentID();
+
   const VariableValue & _pressure;
   const VariableValue & _temperature;
 
@@ -108,4 +121,13 @@ protected:
 
   /// Mass unit for output species
   const enum class OutputMassUnit { MOLES, FRACTION } _output_mass_unit;
+
+  using ThermochimicaDataBaseParent<is_nodal>::isCoupled;
+  using ThermochimicaDataBaseParent<is_nodal>::isParamValid;
+  using ThermochimicaDataBaseParent<is_nodal>::coupledValue;
+  using ThermochimicaDataBaseParent<is_nodal>::coupledComponents;
+  using ThermochimicaDataBaseParent<is_nodal>::writableVariable;
 };
+
+typedef ThermochimicaDataBase<true> ThermochimicaNodalData;
+typedef ThermochimicaDataBase<false> ThermochimicaElementData;

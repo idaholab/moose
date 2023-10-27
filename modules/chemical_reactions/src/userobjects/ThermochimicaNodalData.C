@@ -19,13 +19,20 @@
 #endif
 
 registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
+registerMooseObject("ChemicalReactionsApp", ThermochimicaElementData);
 
+template <bool is_nodal>
 InputParameters
-ThermochimicaNodalData::validParams()
+ThermochimicaDataBase<is_nodal>::validParams()
 {
-  InputParameters params = NodalUserObject::validParams();
-  ThermochimicaUtils::addClassDescription(
-      params, "Provides access to Thermochimica-calculated data at nodes.");
+  InputParameters params = ThermochimicaDataBaseParent<is_nodal>::validParams();
+
+  if constexpr (is_nodal)
+    ThermochimicaUtils::addClassDescription(
+        params, "Provides access to Thermochimica-calculated data at nodes.");
+  else
+    ThermochimicaUtils::addClassDescription(
+        params, "Provides access to Thermochimica-calculated data at elements.");
 
   params.addRequiredCoupledVar("elements", "Amounts of elements");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
@@ -46,14 +53,16 @@ ThermochimicaNodalData::validParams()
   params.addParam<MooseEnum>(
       "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
 
-  params.set<bool>("unique_node_execute") = true;
+  if constexpr (is_nodal)
+    params.set<bool>("unique_node_execute") = true;
 
   params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
   return params;
 }
 
-ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameters)
-  : NodalUserObject(parameters),
+template <bool is_nodal>
+ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & parameters)
+  : ThermochimicaDataBaseParent<is_nodal>(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
     _n_phases(coupledComponents("output_phases")),
@@ -139,17 +148,22 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   }
 }
 
+template <bool is_nodal>
 void
-ThermochimicaNodalData::initialize()
+ThermochimicaDataBase<is_nodal>::initialize()
 {
 }
 
+template <bool is_nodal>
 void
-ThermochimicaNodalData::execute()
+ThermochimicaDataBase<is_nodal>::execute()
 {
 #ifdef THERMOCHIMICA_ENABLED
-  auto temperature = _temperature[_qp];
-  auto pressure = _pressure[_qp];
+  // either one DOF at a node or (currently) one DOF for constant monomial FV!
+  const unsigned int qp = 0;
+
+  auto temperature = _temperature[qp];
+  auto pressure = _pressure[qp];
 
   // Set temperature and pressure for thermochemistry solver
   Thermochimica::setTemperaturePressure(temperature, pressure);
@@ -159,7 +173,7 @@ ThermochimicaNodalData::execute()
 
   // Set element masses
   for (const auto i : make_range(_n_elements))
-    Thermochimica::setElementMass(_el_ids[i], (*_el[i])[_qp]);
+    Thermochimica::setElementMass(_el_ids[i], (*_el[i])[qp]);
 
   // Optionally ask for a re-initialization (if reinit_requested == true)
   reinitDataMooseToTc();
@@ -188,9 +202,9 @@ ThermochimicaNodalData::execute()
         mooseError("Failed to get index of phase '", _ph_names[i], "'");
       // Convert from 1-based (fortran) to 0-based (c++) indexing
       if (index - 1 < 0)
-        _ph[i]->setDofValue(0.0, _qp);
+        _ph[i]->setDofValue(0.0, qp);
       else
-        _ph[i]->setDofValue(moles_phase[index - 1], _qp);
+        _ph[i]->setDofValue(moles_phase[index - 1], qp);
     }
 
     auto db_phases = Thermochimica::getPhaseNamesSystem();
@@ -258,9 +272,9 @@ ThermochimicaNodalData::execute()
           _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
 
       if (idbg == 0)
-        _sp[i]->setDofValue(fraction, _qp);
+        _sp[i]->setDofValue(fraction, qp);
       else if (idbg == 1)
-        _sp[i]->setDofValue(0.0, _qp);
+        _sp[i]->setDofValue(0.0, qp);
 #ifndef NDEBUG
       else
         mooseError("Failed to get phase speciation for phase '",
@@ -278,10 +292,10 @@ ThermochimicaNodalData::execute()
         auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
 
         if (idbg == 0)
-          _el_pot[i]->setDofValue(potential, _qp);
+          _el_pot[i]->setDofValue(potential, qp);
         else if (idbg == 1)
           // element not present, just leave this at 0 for now
-          _el_pot[i]->setDofValue(0.0, _qp);
+          _el_pot[i]->setDofValue(0.0, qp);
         else if (idbg == -1)
           Moose::out << "getoutputchempot " << idbg << "\n";
       }
@@ -294,9 +308,9 @@ ThermochimicaNodalData::execute()
         libmesh_ignore(moles);
 
         if (idbg == 0)
-          _vp[i]->setDofValue(fraction * pressure, _qp);
+          _vp[i]->setDofValue(fraction * pressure, qp);
         else if (idbg == 1)
-          _vp[i]->setDofValue(0.0, _qp);
+          _vp[i]->setDofValue(0.0, qp);
 #ifndef NDEBUG
         else
           mooseError("Failed to get vapor pressure for phase '",
@@ -315,9 +329,9 @@ ThermochimicaNodalData::execute()
                                                                    _phase_element_pairs[i].first);
 
         if (idbg == 0)
-          _el_ph[i]->setDofValue(moles, _qp);
+          _el_ph[i]->setDofValue(moles, qp);
         else if (idbg == 1)
-          _el_ph[i]->setDofValue(0.0, _qp);
+          _el_ph[i]->setDofValue(0.0, qp);
 #ifndef NDEBUG
         else
           mooseError("Failed to get moles of element '",
@@ -332,11 +346,22 @@ ThermochimicaNodalData::execute()
 #endif
 }
 
+template <bool is_nodal>
+auto
+ThermochimicaDataBase<is_nodal>::currentID()
+{
+  if constexpr (is_nodal)
+    return this->_current_node->id();
+  else
+    return this->_current_elem->id();
+}
+
+template <bool is_nodal>
 void
-ThermochimicaNodalData::reinitDataMooseFromTc()
+ThermochimicaDataBase<is_nodal>::reinitDataMooseFromTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
-  auto & d = _data[_current_node->id()];
+  auto & d = _data[currentID()];
 
   if (_reinit != ReinitializationType::NONE)
   {
@@ -357,8 +382,9 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 #endif
 }
 
+template <bool is_nodal>
 void
-ThermochimicaNodalData::reinitDataMooseToTc()
+ThermochimicaDataBase<is_nodal>::reinitDataMooseToTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // Tell Thermochimica whether a re-initialization is requested for this calculation
@@ -372,7 +398,7 @@ ThermochimicaNodalData::reinitDataMooseToTc()
   }
   // If we have re-initialization data and want a re-initialization, then
   // load data into Thermochimica
-  auto it = _data.find(_current_node->id());
+  auto it = _data.find(currentID());
   if (it != _data.end() &&
       _reinit == ReinitializationType::TIME) // If doing previous timestep reinit
   {
@@ -393,11 +419,38 @@ ThermochimicaNodalData::reinitDataMooseToTc()
 #endif
 }
 
-const ThermochimicaNodalData::Data &
-ThermochimicaNodalData::getNodalData(dof_id_type node_id) const
+template <bool is_nodal>
+const typename ThermochimicaDataBase<is_nodal>::Data &
+ThermochimicaDataBase<is_nodal>::getNodalData(dof_id_type node_id) const
 {
-  const auto it = _data.find(node_id);
+  if constexpr (!is_nodal)
+    mooseError("Requesting nodal data from an element object.");
+  return this->getData(node_id);
+}
+
+template <bool is_nodal>
+const typename ThermochimicaDataBase<is_nodal>::Data &
+ThermochimicaDataBase<is_nodal>::getElementData(dof_id_type element_id) const
+{
+  if constexpr (is_nodal)
+    mooseError("Requesting per element data from a nodal object.");
+  return this->getData(element_id);
+}
+
+template <bool is_nodal>
+const typename ThermochimicaDataBase<is_nodal>::Data &
+ThermochimicaDataBase<is_nodal>::getData(dof_id_type id) const
+{
+  const auto it = _data.find(id);
   if (it == _data.end())
-    mooseError("Unable to look up data for node ", node_id);
+  {
+    if constexpr (is_nodal)
+      mooseError("Unable to look up data for node ", id);
+    else
+      mooseError("Unable to look up data for element ", id);
+  }
   return it->second;
 }
+
+template class ThermochimicaDataBase<true>;
+template class ThermochimicaDataBase<false>;
