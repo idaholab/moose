@@ -15,8 +15,6 @@
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
 
-// registerMooseAction("MooseApp", PhysicsBase, "init_physics");
-
 InputParameters
 PhysicsBase::validParams()
 {
