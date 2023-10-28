@@ -14,12 +14,25 @@
   []
 []
 
+[ICs]
+  [u]
+    type = FunctionIC
+    variable = u
+    function = 'x'
+  []
+[]
+
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
     block = 0  # Avoid direct calculations on spline nodes
   []
+  [./time]
+    type = TimeDerivative
+    variable = u
+    block = 0
+  [../]
   [null]
     type = NullKernel
     variable = u
@@ -27,23 +40,11 @@
   []
 []
 
-[BCs]
-  [left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 1.0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 2.0
-  []
-[]
-
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 1
+  solve_type = NEWTON
+  dt = 1
 []
 
 [Outputs]

@@ -5,7 +5,6 @@
     discontinuous_spline_extraction = true
   []
   allow_renumbering = false
-  parallel_type = replicated
 []
 
 [Variables]
