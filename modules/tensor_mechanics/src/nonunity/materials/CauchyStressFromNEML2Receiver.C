@@ -23,8 +23,8 @@ CauchyStressFromNEML2Receiver::validParams()
 {
   InputParameters params = ComputeLagrangianObjectiveStress::validParams();
   params.addClassDescription(
-      "retrieve the batched output vector from a NEML2 material model and use the output variables "
-      "to perform the objective stress integration.");
+      "Retrieve the batched output vector from a NEML2 material model and use the output variables "
+      "to perform the objective stress integration");
   params.addRequiredParam<UserObjectName>(
       "neml2_uo", "The NEML2 user object that performs the batched computation");
   return params;

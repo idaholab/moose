@@ -18,8 +18,8 @@
 #include "ComputeLagrangianObjectiveStress.h"
 
 /**
- * The "glue" material retrieves the batched output vector from a NEML2 material model and uses the
- * output variables to perform the objective stress integration.
+ * This is a "glue" material that retrieves the batched output vector from a NEML2 material model
+ * and uses the output variables to perform the objective stress integration.
  */
 class CauchyStressFromNEML2Receiver : public ComputeLagrangianObjectiveStress
 {

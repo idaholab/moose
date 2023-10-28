@@ -23,7 +23,7 @@ InputParameters
 CauchyStressFromNEML2UO::validParams()
 {
   auto params = NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>::validParams();
-  params.addClassDescription("gather input variables required for an objective stress integration "
+  params.addClassDescription("Gather input variables required for an objective stress integration "
                              "from all quadrature points. The batched input vector is sent through "
                              "a NEML2 material model to perform the constitutive update.");
   params.addCoupledVar("temperature", "The temperature");

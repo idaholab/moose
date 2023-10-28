@@ -30,7 +30,7 @@ InputParameters
 NEML2Action::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Action to parse and setup NEML2 objects.");
+  params.addClassDescription("Parse and set up NEML2 objects");
   params.addRequiredParam<FileName>("input",
                                     "Path to the NEML2 input file containing the NEML2 model(s)");
   params.addRequiredParam<std::string>(

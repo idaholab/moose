@@ -26,7 +26,7 @@ CauchyStressFromNEML2::validParams()
 {
   InputParameters params =
       NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>::validParams();
-  params.addClassDescription("perform the objective stress update using a NEML2 material model.");
+  params.addClassDescription("Perform the objective stress update using a NEML2 material model");
   params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }

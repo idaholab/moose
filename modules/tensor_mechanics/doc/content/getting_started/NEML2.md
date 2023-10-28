@@ -1,14 +1,14 @@
 # NEML2
 
-BlackBear offers a wide variety of material models. In addition to the native material models, BlackBear can also seamlessly interface with an external material modeling library called [NEML2](https://github.com/reverendbedford/neml2).
+BlackBear offers a wide variety of material models. In addition to the native material models, BlackBear can also seamlessly interface with an external material modeling library called [NEML2](https://github.com/reverendbedford/neml2) [!cite](neml2_anl_report).
 
 ## What is NEML2?
 
 NEML2 stands for the New Engineering Material model Library, version 2.
 
-NEML2 is an offshoot of [NEML](https://github.com/Argonne-National-Laboratory/neml), an earlier constitutive modeling code developed at Argonne National Laboratory.
+NEML2 is an offshoot of [NEML](https://github.com/Argonne-National-Laboratory/neml), an earlier constitutive modeling code developed at Argonne National Laboratory that can also be used with BlackBear.
 Like NEML, NEML2 provides a flexible, modular way to build constitutive models from smaller blocks.
-Unlike NEML, NEML2 vectorizes the constitutive update to efficiently run on GPUs.  NEML2 is built on top of [libTorch](https://pytorch.org/cppdocs/) to provide GPU support, but this also means that NEML2 models have all the features of a Torch module.  So, for example, users can take derivatives of the model with respect to parameters using pytorch AD.
+Unlike NEML, NEML2 vectorizes the constitutive update to efficiently run on GPUs.  NEML2 is built on top of [libTorch](https://pytorch.org/cppdocs/) to provide GPU support, but this also means that NEML2 models have all the features of a Torch module.  So, for example, users can take derivatives of the model with respect to parameters using pytorch automatic differentiation (AD).
 
 NEML2 is provided as open source software under a MIT [license](https://raw.githubusercontent.com/reverendbedford/neml2/main/LICENSE).
 

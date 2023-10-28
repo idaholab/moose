@@ -18,7 +18,7 @@
 #include "Action.h"
 
 /**
- * Action to parse and setup NEML2 objects.
+ * Action to parse and set up NEML2 objects.
  */
 class NEML2Action : public Action
 {

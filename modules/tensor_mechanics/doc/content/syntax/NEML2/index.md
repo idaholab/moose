@@ -1,6 +1,12 @@
 # NEML2 syntax
 
-The `NEML2` block is used to construct a set of material and userobjects so that BlackBear can "outsource" the material update to NEML2.
+The `NEML2` block is used to construct a set of material and userobjects so that BlackBear can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
+
+| Object                        | Type       | Operation mode | Description                                                                                  |
+| ----------------------------- | ---------- | -------------- | -------------------------------------------------------------------------------------------- |
+| CauchyStressFromNEML2         | Material   | ELEMENT        | Perform element-wise batched material update                                                 |
+| CauchyStressFromNEML2UO       | UserObject | ALL            | Perform mesh-wise batched material update                                                    |
+| CauchyStressFromNEML2Receiver | Material   | ALL            | Assign the outputs of the batched material update into the corresponding material properties |
 
 ## Example Input Syntax
 
@@ -83,10 +89,10 @@ Parameters:
 
 ## Inspect NEML2 information
 
-BlackBear also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--neml2-only` command-line argument, i.e.
+BlackBear also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--parse-neml2-only` command-line argument, i.e.
 
 ```bash
-blackbear-opt -i input.i --neml2-only
+blackbear-opt -i input.i --parse-neml2-only
 ```
 
 !syntax parameters /NEML2/NEML2Action
