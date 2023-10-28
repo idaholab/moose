@@ -121,7 +121,6 @@ PressureDrop::execute()
   bool status_known = false;
   getFaceInfos();
 
-  std::cout << _face_infos.size() << std::endl;
   for (auto & fi : _face_infos)
   {
     for (const auto bdy : fi->boundaryIDs())

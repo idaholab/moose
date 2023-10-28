@@ -3621,9 +3621,6 @@ MooseMesh::cacheFVElementalDoFs() const
 {
   const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
-  std::cout << _app.feProblem().es().n_systems() << " " << _app.feProblem().numNonlinearSystems()
-            << std::endl;
-
   for (auto & elem_info_pair : _elem_to_elem_info)
   {
     ElemInfo & elem_info = elem_info_pair.second;
@@ -3631,18 +3628,10 @@ MooseMesh::cacheFVElementalDoFs() const
     // dof_vector.clear();
     dof_vector.resize(num_eqs, std::vector<dof_id_type>());
 
-    std::cout << "dof vector size and elements" << dof_vector.size() << std::endl;
-    for (const auto i : make_range(num_eqs))
-      std::cout << dof_vector[i].size() << std::endl;
-
-    std::cout << elem_info.centroid() << std::endl;
-
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        std::cout << sys.number() << " " << sys.nVariables() << std::endl;
-        std::cout << Moose::stringify(dof_vector[sys.number()]) << std::endl;
         dof_vector[sys.number()].clear();
         dof_vector[sys.number()].resize(sys.nVariables(), dof_id_type(0));
         const auto & variables = sys.getVariables(0);
@@ -3656,8 +3645,6 @@ MooseMesh::cacheFVElementalDoFs() const
             std::vector<dof_id_type> indices;
             var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
             mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
-            std::cout << " " << sys.number() << "/" << dof_vector.size() << " " << var->number()
-                      << "/" << dof_vector[sys.number()].size() << " " << var->name() << std::endl;
             dof_vector[sys.number()][var->number()] = indices[0];
           }
         }

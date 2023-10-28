@@ -179,6 +179,16 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     paramError("variable",
                "Variable family " + Moose::stringify(type.family) + " is not supported at order " +
                    Moose::stringify(type.order) + " by the AuxKernel system.");
+
+  // The AuxKernel computation loops rely on quadrature point evaluations. Up until the introduction
+  // of FVAuxKernels we will require quadrature point evaluations for the variables general
+  // AuxKernels act on.
+  if (_var.isFV())
+  {
+    auto * fv_var = dynamic_cast<MooseVariableFV<ComputeValueType> *>(&_var);
+    mooseAssert(fv_var, "Inconsistent variable type with isFV() function.");
+    fv_var->requireQpComputations();
+  }
 }
 
 template <typename ComputeValueType>
