@@ -42,7 +42,7 @@ SetupPreconditionerAction::act()
     std::shared_ptr<MoosePreconditioner> pc =
         _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
-    pc->_nl.setPreconditioner(pc);
+    pc->getNonlinearSystemBase().setPreconditioner(pc);
 
     /**
      * Go ahead and set common precondition options here.  The child classes will still be called
