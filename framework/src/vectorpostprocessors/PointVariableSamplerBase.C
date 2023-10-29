@@ -80,7 +80,8 @@ PointVariableSamplerBase::execute()
     Point & p = _points[i];
 
     // Do a bounding box check so we're not doing unnecessary PointLocator lookups
-    // If discontinuous variables, do all lookups to have global consensus on point ownership
+    // In the discontinuous case all ranks must proceed to get a global consensus
+    // on who owns face points in getLocalElemContainingPoint()
     if (bbox.contains_point(p) || _discontinuous_at_faces)
     {
       auto & values = _point_values[i];

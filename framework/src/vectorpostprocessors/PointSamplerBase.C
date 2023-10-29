@@ -108,6 +108,8 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p)
   const Elem * elem = nullptr;
   if (_discontinuous_at_faces)
   {
+    libmesh_parallel_only(comm());
+
     // Get all possible elements the point may be in
     std::set<const Elem *> candidate_elements;
     (*_pl)(p, candidate_elements);
