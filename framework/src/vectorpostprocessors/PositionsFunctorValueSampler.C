@@ -63,11 +63,14 @@ PositionsFunctorValueSampler::execute()
   const auto state = determineState();
 
   // Pull new points
+  const auto old_size = _points.size();
   _points = _positions.getPositions(_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL);
+  if (_points.size() != old_size)
+    mooseError("The points array has grown since initialize() was called");
 
   for (const auto i : index_range(_points))
   {
-    Point & p = _points[i];
+    const Point & p = _points[i];
 
     // Do a bounding box check so we're not doing unnecessary PointLocator lookups
     // In the discontinuous case all ranks must proceed to get a global consensus
