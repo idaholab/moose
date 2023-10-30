@@ -12,30 +12,27 @@
 #include "INSBase.h"
 
 /**
- * This calculates the time derivative for a coupled variable
+ *  Computes residual and Jacobian contributions for the PSPG stabilization term for mesh advection
  **/
-class ConvectedMesh : public INSBase
+class ConvectedMeshPSPG : public INSBase
 {
 public:
   static InputParameters validParams();
 
-  ConvectedMesh(const InputParameters & parameters);
+  ConvectedMeshPSPG(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /**
-   * Compute the Jacobian of the Petrov-Galerkin stabilization addition with respect to the provided
-   * velocity component
-   */
-  Real computePGVelocityJacobian(unsigned short component);
+  RealVectorValue dStrongResidualDDisp(unsigned short component);
+  RealVectorValue dStrongResidualDVel(unsigned short component);
 
   /**
    * Compute the strong residual, e.g. -rho * ddisp/dt * grad(u)
    */
-  Real strongResidual();
+  RealVectorValue strongResidual();
 
   const VariableValue & _disp_x_dot;
   const VariableValue & _d_disp_x_dot;
@@ -48,10 +45,4 @@ protected:
   const unsigned int _disp_z_id;
 
   const MaterialProperty<Real> & _rho;
-
-  /// Whether this kernel should include Streamline-Upwind Petrov-Galerkin stabilization
-  const bool _supg;
-
-  /// The velocity component this kernel is acting on
-  unsigned short _component;
 };

@@ -1,14 +1,42 @@
 [Tests]
   design = 'modules/fsi/index.md'
-
-  [./fsi]
-    type = 'Exodiff'
-    input = 'fsi_flat_channel.i'
-    exodiff = 'fsi_flat_channel_out.e'
-    requirement = 'We shall be able to combine navier-stokes and tensor-mechanics simulation capabilities to do some basic fluid-structure interaction simulations'
-    issues = '#12462'
-    # vel_x_solid is not accurate
-    # We mmay improve that in the future
-    rel_err = 1e-4
-  [../]
+  issues = '#12462'
+  [fsi]
+    requirement = 'We shall be able to combine navier-stokes and tensor-mechanics simulation capabilities to do some basic fluid-structure interaction simulations and produce equivalent results when the Navier-Stokes equations are implemented using'
+    [INS]
+      type = 'Exodiff'
+      input = 'fsi_flat_channel.i'
+      exodiff = 'fsi_flat_channel_out.e'
+      detail = 'scalar field variables for velocity components and hand-coded Jacobians,'
+      # vel_x_solid is not accurate
+      # We may improve that in the future
+      rel_err = 1e-4
+    []
+    [INSAD]
+      type = 'Exodiff'
+      input = 'ad-fsi-flat-channel.i'
+      exodiff = 'ad-fsi-flat-channel_out.e'
+      detail = 'and a vector field variable for velocity and a Jacobian computed using automatic differentation. Additionally,'
+      # vel_x_solid is not accurate
+      # We mmay improve that in the future
+      rel_err = 1e-4
+    []
+    [INSAD_displaced_jac]
+      type = 'PetscJacobianTester'
+      input = 'ad-fsi-flat-channel.i'
+      ratio_tol = 1e-6
+      difference_tol = 1
+      run_sim = True
+      cli_args = 'Mesh/gmg/nx=2 Mesh/gmg/ny=3 Executioner/num_steps=1'
+      detail = 'the automatic differentation Jacobian shall be (nearly) perfect when the fluid domain equations are run on the displaced mesh, and'
+    []
+    [INSAD_undisplaced_jac]
+      type = 'PetscJacobianTester'
+      input = 'ad-fsi-flat-channel.i'
+      difference_tol = 1
+      run_sim = True
+      cli_args = 'Mesh/gmg/nx=2 Mesh/gmg/ny=3 Executioner/num_steps=1 GlobalParams/use_displaced_mesh=false'
+      detail = 'perfect when the fluid domain equations are run on the undisplaced mesh, and'
+    []
+  []
 []

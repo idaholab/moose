@@ -50,8 +50,9 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _coupled_force_strong_residual(
         declareADProperty<RealVectorValue>("coupled_force_strong_residual")),
     _mesh_velocity(declareADProperty<RealVectorValue>("mesh_velocity")),
-    _convected_mesh_strong_residual(
-        declareADProperty<RealVectorValue>("convected_mesh_strong_residual")),
+    _relative_velocity(declareADProperty<RealVectorValue>("relative_velocity")),
+    _advected_mesh_strong_residual(
+        declareADProperty<RealVectorValue>("advected_mesh_strong_residual")),
     // _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints()),
@@ -112,8 +113,7 @@ INSADMaterial::subdomainSetup()
   // Setup data for Arbitrary Lagrangian Eulerian (ALE) simulations in which the simulation domain
   // is displacing. We will need to subtract the mesh velocity from the velocity solution in order
   // to get the correct material velocity for the momentum convection term.
-  if ((_has_convected_mesh =
-           _object_tracker->get<bool>("has_convected_mesh", _current_subdomain_id)))
+  if ((_has_advected_mesh = _object_tracker->get<bool>("has_advected_mesh", _current_subdomain_id)))
   {
     auto & disp_x = _subproblem.getStandardVariable(
         _tid, _object_tracker->get<VariableName>("disp_x", _current_subdomain_id));
@@ -210,16 +210,17 @@ INSADMaterial::computeQpProperties()
   if (_has_boussinesq)
     _boussinesq_strong_residual[_qp] = (*_boussinesq_alpha)[_qp] * _gravity_vector * _rho[_qp] *
                                        ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
+  _relative_velocity[_qp] = _velocity[_qp];
 
-  if (_has_convected_mesh)
+  if (_has_advected_mesh)
   {
     _mesh_velocity[_qp](0) = (*_disp_x_dot)[_qp];
     if (_disp_y_dot)
       _mesh_velocity[_qp](1) = (*_disp_y_dot)[_qp];
     if (_disp_z_dot)
       _mesh_velocity[_qp](2) = (*_disp_z_dot)[_qp];
-    _convected_mesh_strong_residual[_qp] =
-        -_rho[_qp] * _grad_velocity[_qp].left_multiply(_mesh_velocity[_qp]);
+    _relative_velocity[_qp] -= _mesh_velocity[_qp];
+    _advected_mesh_strong_residual[_qp] = -_rho[_qp] * _grad_velocity[_qp] * _mesh_velocity[_qp];
   }
 
   if (_has_coupled_force)

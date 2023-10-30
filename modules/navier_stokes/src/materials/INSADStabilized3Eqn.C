@@ -46,9 +46,8 @@ INSADStabilized3Eqn::computeQpProperties()
 
   const auto dissipation_coefficient = _k[_qp] / (_rho[_qp] * _cp[_qp]);
   const auto transient_part = _has_energy_transient ? 4. / (_dt * _dt) : 0.;
-  const auto speed = NS::computeSpeed(_velocity[_qp]);
   _tau_energy[_qp] =
-      _alpha / std::sqrt(transient_part + (2. * speed / _hmax) * (2. * speed / _hmax) +
+      _alpha / std::sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
                          9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
                              (4. * dissipation_coefficient / (_hmax * _hmax)));
 
@@ -69,6 +68,6 @@ INSADStabilized3Eqn::computeQpProperties()
   if (_has_heat_source)
     _temperature_strong_residual[_qp] += _temperature_source_strong_residual[_qp];
 
-  if (_has_convected_mesh)
-    _temperature_strong_residual[_qp] += _temperature_convected_mesh_strong_residual[_qp];
+  if (_has_advected_mesh)
+    _temperature_strong_residual[_qp] += _temperature_advected_mesh_strong_residual[_qp];
 }

@@ -21,7 +21,9 @@ ADKernelSUPGTempl<T>::validParams()
   InputParameters params = ADKernelStabilizedTempl<T>::validParams();
   params.addParam<MaterialPropertyName>(
       "tau_name", "tau", "The name of the stabilization parameter tau.");
-  params.addRequiredCoupledVar("velocity", "The velocity variable.");
+  params.addCoupledVar("velocity", "The velocity variable.");
+  params.addParam<MaterialPropertyName>("material_velocity",
+                                        "A material property describing the velocity");
   return params;
 }
 
@@ -29,7 +31,10 @@ template <typename T>
 ADKernelSUPGTempl<T>::ADKernelSUPGTempl(const InputParameters & parameters)
   : ADKernelStabilizedTempl<T>(parameters),
     _tau(this->template getADMaterialProperty<Real>("tau_name")),
-    _velocity(this->adCoupledVectorValue("velocity"))
+    _velocity(
+        this->isParamValid("velocity")
+            ? this->adCoupledVectorValue("velocity")
+            : this->template getADMaterialProperty<RealVectorValue>("material_velocity").get())
 {
 }
 

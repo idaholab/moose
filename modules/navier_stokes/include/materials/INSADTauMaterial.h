@@ -90,11 +90,15 @@ protected:
   /// The velocity system number
   const unsigned int _vel_sys_number;
 
+  /// The speed of the medium. This is the norm of the relative velocity, e.g. the velocity minus
+  /// the mesh velocity, at the current _qp
+  ADReal _speed;
+
   using T::_ad_q_point;
+  using T::_advected_mesh_strong_residual;
   using T::_advective_strong_residual;
   using T::_assembly;
   using T::_boussinesq_strong_residual;
-  using T::_convected_mesh_strong_residual;
   using T::_coord_sys;
   using T::_coupled_force_strong_residual;
   using T::_current_elem;
@@ -109,8 +113,8 @@ protected:
   using T::_grad_p;
   using T::_grad_velocity;
   using T::_gravity_strong_residual;
+  using T::_has_advected_mesh;
   using T::_has_boussinesq;
-  using T::_has_convected_mesh;
   using T::_has_coupled_force;
   using T::_has_gravity;
   using T::_has_transient;
@@ -120,6 +124,7 @@ protected:
   using T::_q_point;
   using T::_qp;
   using T::_qrule;
+  using T::_relative_velocity;
   using T::_rho;
   using T::_rz_axial_coord;
   using T::_rz_radial_coord;
@@ -335,8 +340,8 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 
   const auto nu = _mu[_qp] / _rho[_qp];
   const auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
-  const auto speed = NS::computeSpeed(_velocity[_qp]);
-  _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * speed / _hmax) * (2. * speed / _hmax) +
+  _speed = NS::computeSpeed(_relative_velocity[_qp]);
+  _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 
   _momentum_strong_residual[_qp] =
@@ -351,8 +356,8 @@ INSADTauMaterialTempl<T>::computeQpProperties()
   if (_has_boussinesq)
     _momentum_strong_residual[_qp] += _boussinesq_strong_residual[_qp];
 
-  if (_has_convected_mesh)
-    _momentum_strong_residual[_qp] += _convected_mesh_strong_residual[_qp];
+  if (_has_advected_mesh)
+    _momentum_strong_residual[_qp] += _advected_mesh_strong_residual[_qp];
 
   if (_has_coupled_force)
     _momentum_strong_residual[_qp] += _coupled_force_strong_residual[_qp];
