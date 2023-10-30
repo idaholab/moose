@@ -1,5 +1,6 @@
 # Topology Optimization Examples
 
+
 !card! large_media/optimization/2d_mbb.mp4 title=[2D Topology Optimization with a Convolution Filter](2d_mbb.md)
 A detailed description of the 2D topology optimization problem with the implementation of Convolution Filter.
 !card-end!
@@ -13,7 +14,20 @@ An example problem illustrating 2D topology optimization with the use of PDE Fil
 !card-end!
 
 !card! large_media/optimization/3d_mbb.mp4 title=[3D Topology Optimization with PDE Filter](3d_mbb.md)
-A comprehensive example showcasing 3D topology optimization using PDE Filter.
+An example showcasing 3D topology optimization using PDE Filter.
 !card-end!
 
-## More examples can be found in the `Combined` Module!
+!card! large_media/optimization/multiload.png title=[Multi-load with multiapp](multiload.md)
+An example showcasing topology optimization with multiple loads.
+!card-end!
+
+!card! large_media/optimization/multimaterial.png style=width:50% title=[Ordered SIMP: Multimaterial](multimaterial.md)
+An example showcasing topology optimization with multiple materials and a cost constraint.
+!card-end!
+
+!card! large_media/optimization/tm.png style=width:50% title=[Thermomechanical SIMP](thermomechanical.md)
+An example showcasing topology optimization with for thermal compliance.
+!card-end!
+
+
+## All input files for these examples can be found in the `Combined` Module!
