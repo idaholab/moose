@@ -933,7 +933,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(45u, completions_array.size());
+  EXPECT_EQ(46u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -961,6 +961,7 @@ label: Distributions        text: [Distributions]\n  \n[]        desc:          
 label: Executioner          text: [Executioner]\n  \n[]          desc:            application named block                 pos: [42.0]-[42.0]
 label: Executors            text: [Executors]\n  \n[]            desc:            application named block                 pos: [42.0]-[42.0]
 label: FVBCs                text: [FVBCs]\n  \n[]                desc:            application named block                 pos: [42.0]-[42.0]
+label: FVICs                text: [FVICs]\n  \n[]                desc:            application named block                 pos: [42.0]-[42.0]
 label: FVInterfaceKernels   text: [FVInterfaceKernels]\n  \n[]   desc:            application named block                 pos: [42.0]-[42.0]
 label: FVKernels            text: [FVKernels]\n  \n[]            desc:            application named block                 pos: [42.0]-[42.0]
 label: Functions            text: [Functions]\n  \n[]            desc:            application named block                 pos: [42.0]-[42.0]

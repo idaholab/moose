@@ -105,6 +105,7 @@ PressureDrop::initialize()
 
   // Build the face infos in all cases, needed to detect upstream/downstream status
   _mesh.buildFiniteVolumeInfo();
+  _mesh.computeFiniteVolumeCoords();
 }
 
 void

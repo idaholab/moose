@@ -1982,14 +1982,12 @@ MooseMesh::areElemIDsIdentical(const std::string & id_name1, const std::string &
 inline const std::vector<const FaceInfo *> &
 MooseMesh::faceInfo() const
 {
-  buildFiniteVolumeInfo();
   return _face_info;
 }
 
 inline const std::vector<FaceInfo> &
 MooseMesh::allFaceInfo() const
 {
-  buildFiniteVolumeInfo();
   return _all_face_info;
 }
 
