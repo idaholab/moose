@@ -354,12 +354,14 @@ INSFVRhieChowInterpolator::initialize()
   // Dont reset if not in current system
   // IDEA: clear them derivatives
   if (_u->sys().number() == _fe_problem.currentNlSysNum())
-    for (const auto & pair : _a)
-      _a[pair.first] = 0;
+    for (auto & pair : _a)
+      pair.second = 0;
   else
-    for (const auto & pair : _a)
-      _a[pair.first] = {
-          _a[pair.first](0).value(), _a[pair.first](1).value(), _a[pair.first](2).value()};
+    for (auto & pair : _a)
+    {
+      auto & a_val = pair.second;
+      a_val = MetaPhysicL::raw_value(a_val);
+    }
 }
 
 void
