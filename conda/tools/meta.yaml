@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.10.19" %}
+{% set version = "2023.10.27" %}
 
 package:
   name: moose-tools
@@ -24,6 +24,7 @@ requirements:
     - {{ clang_format }}
     - clang-tools
     - deepdiff
+    - git-lfs
     - gitpython
     - graphviz
     - jinja2
@@ -54,6 +55,7 @@ test:
   commands:
     - clang-format --version
     - dot -V
+    - git-lfs --version
     - pg_config --help
   imports:
     - bs4
