@@ -38,6 +38,7 @@ PINSFVEnergyDiffusion::validParams()
 
 PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    SolutionInvalidInterface(this),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_diffusivity")),
@@ -66,14 +67,30 @@ PINSFVEnergyDiffusion::computeQpResidual()
     const auto face_elem = elemArg();
     const auto face_neighbor = neighborArg();
 
-    const auto value1 = _porosity_factored_in
-                            ? _k(face_elem, state)
-                            : _k(face_neighbor, state) * _eps(face_neighbor, state);
-    const auto value2 = _porosity_factored_in
-                            ? _k(face_neighbor, state)
-                            : _k(face_neighbor, state) * _eps(face_neighbor, state);
+    auto value1 = _porosity_factored_in ? _k(face_elem, state)
+                                        : _k(face_neighbor, state) * _eps(face_neighbor, state);
+    auto value2 = _porosity_factored_in ? _k(face_neighbor, state)
+                                        : _k(face_neighbor, state) * _eps(face_neighbor, state);
 
-    Moose::FV::interpolate(_k_interp_method, k_eps_face, value1, value2, *_face_info, true);
+    // Adapt to users either passing 0 thermal diffusivity, 0 porosity, or k correlations going
+    // negative. The solution is invalid only for the latter case.
+    auto k_interp_method = _k_interp_method;
+    if (value1 <= 0)
+    {
+      flagInvalidSolution("Negative or null thermal diffusivity value");
+      if (_k_interp_method == Moose::FV::InterpMethod::HarmonicAverage)
+        k_interp_method = Moose::FV::InterpMethod::Average;
+      value1 = 0;
+    }
+    if (value2 <= 0)
+    {
+      flagInvalidSolution("Negative or null thermal diffusivity value");
+      if (_k_interp_method == Moose::FV::InterpMethod::HarmonicAverage)
+        k_interp_method = Moose::FV::InterpMethod::Average;
+      value2 = 0;
+    }
+
+    Moose::FV::interpolate(k_interp_method, k_eps_face, value1, value2, *_face_info, true);
   }
 
   // Compute the temperature gradient dotted with the surface normal
