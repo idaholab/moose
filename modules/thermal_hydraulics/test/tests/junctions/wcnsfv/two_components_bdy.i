@@ -29,7 +29,7 @@ p_outlet = 0
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
-    # turbulence_model = 'mixing-length'
+    turbulence_model = 'mixing-length'
 
     inlet_boundaries = 'comp1:left'
     momentum_inlet_types = 'fixed-velocity'
@@ -43,6 +43,8 @@ p_outlet = 0
     energy_wall_functors = '1'
 
     outlet_boundaries = 'comp1:right'
+    # momentum_outlet_types = 'fixed-pressure'
+    # pressure_functors = 'f1'
 
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
@@ -54,22 +56,31 @@ p_outlet = 0
     boundary_conditions_all_set = false
   []
   [join]
-    type = FileMeshStitchJunction
+    type = FileMeshWCNSFVFlowJunction
     connections = 'comp1:right:out comp2:left:in'
+    junction_techniques = 'stitching boundary_average_values'
   []
   [comp2]
     type = FileMeshWCNSFVComponent
     file = rectangle.e
     position = '10 0 0'
     verbose = true
-    merge_physics = true
 
     add_flow_equations = true
     add_energy_equation = false
     add_scalar_equations = false
-    # turbulence_model = 'mixing-length'
+    turbulence_model = 'mixing-length'
+
+    # Rename the variables for now
+    # We may want to prefix variable names later
+    # We will have to connect all the fields
+    velocity_variable = 'u v'
+    pressure_variable = 'p'
+    fluid_temperature_variable = 'T'
 
     inlet_boundaries = 'comp2:left'
+    # momentum_inlet_types = 'fixed-velocity'
+    # momentum_inlet_functors = 'f1 f1'
 
     wall_boundaries = 'comp2:top comp2:bottom'
     momentum_wall_types = 'noslip symmetry'
@@ -83,46 +94,13 @@ p_outlet = 0
     initial_velocity = '${u_inlet} 0 0'
     initial_pressure = '${p_outlet}'
 
+    mass_advection_interpolation = 'upwind'
+    momentum_advection_interpolation = 'upwind'
+
     # The junction adds more boundary conditions
     boundary_conditions_all_set = false
   []
 []
-
-# [comp2]
-#   type = FileMeshWCNSFVComponent
-#   file = rectangle.e
-#   position = '10 0 0'
-#   verbose = true
-#   merge_physics = true
-
-#   add_flow_equations = true
-#   add_energy_equation = false
-#   add_scalar_equations = false
-#   # turbulence_model = 'mixing-length'
-
-#   inlet_boundaries = 'comp2:left'
-#   # momentum_inlet_types = 'fixed-velocity'
-#   # momentum_inlet_functors = 'f1 f1'
-
-#   wall_boundaries = 'comp2:top comp2:bottom'
-#   momentum_wall_types = 'noslip symmetry'
-#   energy_wall_types = 'heatflux'
-#   energy_wall_functors = '0'
-
-#   outlet_boundaries = 'comp2:right'
-#   momentum_outlet_types = 'fixed-pressure'
-#   pressure_functors = 'f1'
-
-#   initial_velocity = '${u_inlet} 0 0'
-#   initial_pressure = '${p_outlet}'
-
-#   mass_advection_interpolation = 'upwind'
-#   momentum_advection_interpolation = 'upwind'
-
-#   # The junction adds more boundary conditions
-#   boundary_conditions_all_set = false
-# []
-# []
 
 [Materials]
   [const_functor]
@@ -156,14 +134,13 @@ p_outlet = 0
     variable = pressure
     boundary = 'comp1:left'
   []
-  [mid-p2]
-    type = SideAverageValue
-    variable = pressure
-    boundary = 'comp2:left'
-  []
+  # [mid-p2]
+  #   type = SideAverageValue
+  #   variable = p
+  #   boundary = 'comp1:right'
+  # []
 []
 
 [Outputs]
   exodus = true
-  dofmap = true
 []
