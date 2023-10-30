@@ -20,6 +20,9 @@ n_ax = 10
 
 # System variables
 T_in = 660
+[DefaultElementQuality]
+  failure_type = warning
+[]
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
