@@ -145,6 +145,9 @@ protected:
   template <typename T>
   void checkBlockwiseConsistency(const std::string & block_param_name,
                                  const std::vector<std::string> & parameter_names) const;
+  /// Check if an external object has the same block restriction
+  void checkBlockRestrictionIdentical(const std::string & object_name,
+                                      const std::vector<SubdomainName> & blocks) const;
   /// Check that all shared parameters are consistent: if set (default or user), set to the same value
   void checkCommonParametersConsistent(const InputParameters & parameters) const;
   template <typename T>

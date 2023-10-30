@@ -260,3 +260,39 @@ PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
   }
 }
+
+void
+PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
+                                            const std::vector<SubdomainName> & blocks) const
+{
+  // If identical, we can return fast
+  if (_blocks == blocks)
+    return;
+  // Copy, sort and unique is the only way to check that they are actually the same
+  auto copy_blocks = _blocks;
+  auto copy_blocks_other = blocks;
+  std::sort(copy_blocks.begin(), copy_blocks.end());
+  copy_blocks.erase(unique(copy_blocks.begin(), copy_blocks.end()), copy_blocks.end());
+  std::sort(copy_blocks_other.begin(), copy_blocks_other.end());
+  copy_blocks_other.erase(unique(copy_blocks_other.begin(), copy_blocks_other.end()),
+                          copy_blocks_other.end());
+
+  if (copy_blocks == copy_blocks_other)
+    return;
+  std::vector<SubdomainName> diff;
+  std::set_difference(copy_blocks.begin(),
+                      copy_blocks.end(),
+                      copy_blocks_other.begin(),
+                      copy_blocks_other.end(),
+                      std::inserter(diff, diff.begin()));
+  mooseError("Physics '",
+             name(),
+             "' and object '",
+             object_name,
+             "' have different block restrictions.\n Physics: ",
+             Moose::stringify(_blocks),
+             "\nObject: ",
+             Moose::stringify(blocks),
+             "\nDifference: ",
+             Moose::stringify(diff));
+}
