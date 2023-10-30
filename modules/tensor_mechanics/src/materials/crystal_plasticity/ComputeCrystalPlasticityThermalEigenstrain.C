@@ -15,7 +15,8 @@ InputParameters
 ComputeCrystalPlasticityThermalEigenstrain::validParams()
 {
   InputParameters params = ComputeCrystalPlasticityEigenstrainBase::validParams();
-
+  params.addClassDescription("Computes the deformation gradient associated with the linear thermal "
+                             "expansion in a crystal plasticity simulation");
   params.addCoupledVar("temperature", "Coupled temperature variable");
 
   // Let's check the range of the parameter here

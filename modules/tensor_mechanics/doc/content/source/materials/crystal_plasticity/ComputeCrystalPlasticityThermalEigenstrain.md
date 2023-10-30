@@ -100,7 +100,7 @@ The off-diagonal Jacobian contributions due to thermal expansion is currently *n
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/multiple_eigenstrains_test.i block=Materials/stress/ Materials/thermal_eigenstrain_1/ Materials/thermal_eigenstrain_2/
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/cp_eigenstrains/multiple_eigenstrains_test.i block=Materials/stress/ Materials/thermal_eigenstrain_1/ Materials/thermal_eigenstrain_2/
 
 !syntax parameters /Materials/ComputeCrystalPlasticityThermalEigenstrain
 

@@ -1,0 +1,53 @@
+[Tests]
+  [thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [multiple_eigenstrains]
+    type = 'CSVDiff'
+    input = 'multiple_eigenstrains_test.i'
+    csvdiff = 'multiple_eigenstrains_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct deformation gradient values for the total and '
+                  'individual eigenstrains'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [thermal_eigenstrain_011orientation]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_011orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=120.0 '
+               'Materials/elasticity_tensor/euler_angle_2=125.264 '
+               'Materials/elasticity_tensor/euler_angle_3=45.0 '
+               'Outputs/file_base=thermal_eigenstrain_test_011orientation_out '
+               'Outputs/execute_on=FINAL'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature under a 011 loading orientation'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [hcp_thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'hcp_thermal_eigenstrain.i'
+    csvdiff = 'hcp_thermal_eigenstrain_out.csv'
+    cli_args = 'Outputs/execute_on=FINAL'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature for an anisotropic HCP crystal lattice'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+             '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+  []
+[]
