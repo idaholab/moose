@@ -129,6 +129,8 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   {
     if (nonLinearVariableExists(_velocity_names[d], true))
     {
+      checkBlockRestrictionIdentical(_velocity_names[d],
+                                     getProblem().getVariable(0, _velocity_names[d]).blocks());
       continue;
     }
     std::string variable_type = "INSFVVelocityVariable";

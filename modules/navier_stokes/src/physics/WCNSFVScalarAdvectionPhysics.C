@@ -102,7 +102,12 @@ WCNSFVScalarAdvectionPhysics::addNonlinearVariables()
   {
     // Dont add if the user already defined the variable
     if (nonLinearVariableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
+    {
+      checkBlockRestrictionIdentical(
+          _passive_scalar_names[name_i],
+          getProblem().getVariable(0, _passive_scalar_names[name_i]).blocks());
       continue;
+    }
 
     if (isParamValid("passive_scalar_scaling"))
       params.set<std::vector<Real>>("scaling") = {
