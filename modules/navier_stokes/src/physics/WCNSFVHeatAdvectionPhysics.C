@@ -99,7 +99,11 @@ WCNSFVHeatAdvectionPhysics::addNonlinearVariables()
 {
   // Dont add if the user already defined the variable
   if (nonLinearVariableExists(_fluid_temperature_name, /*error_if_aux=*/true))
+  {
+    checkBlockRestrictionIdentical(_fluid_temperature_name,
+                                   getProblem().getVariable(0, _fluid_temperature_name).blocks());
     return;
+  }
 
   // Process parameters necessary to handle block-restriction
   processMesh();
