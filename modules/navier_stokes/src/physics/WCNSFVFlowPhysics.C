@@ -128,8 +128,9 @@ WCNSFVFlowPhysics::addNonlinearVariables()
   for (const auto d : make_range(dimension()))
   {
     if (nonLinearVariableExists(_velocity_names[d], true))
+    {
       continue;
-
+    }
     std::string variable_type = "INSFVVelocityVariable";
     if (_porous_medium_treatment)
       variable_type = "PINSFVSuperficialVelocityVariable";
