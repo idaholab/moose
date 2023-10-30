@@ -75,6 +75,9 @@ P_out = 2.0e5 # Pa
   [Dpin]
     block = fuel_pins
   []
+  [Disp]
+    block = subchannel
+  []
 []
 
 [FluidProperties]

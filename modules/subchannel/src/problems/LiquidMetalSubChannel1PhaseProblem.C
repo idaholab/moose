@@ -58,7 +58,8 @@ void
 LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 {
   auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
-  if (pin_mesh_exist || _duct_mesh_exist)
+  auto duct_mesh_exist = _subchannel_mesh.ductMeshExist();
+  if (pin_mesh_exist || duct_mesh_exist)
   {
     Real standard_area, wire_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
@@ -79,26 +80,38 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto Z = _z_grid[iz];
-
         Real rod_area = 0.0;
         Real rod_perimeter = 0.0;
-        Real Index = 0.0;
-        for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+        if (pin_mesh_exist)
         {
-          auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-          if (subch_type == EChannelType::CENTER || subch_type == EChannelType::CORNER)
+          for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
           {
-            rod_area +=
-                (1.0 / 6.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
-            rod_perimeter += (1.0 / 6.0) * M_PI * (*_Dpin_soln)(pin_node);
-            Index += 1.0;
+            auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+            if (subch_type == EChannelType::CENTER || subch_type == EChannelType::CORNER)
+            {
+              rod_area +=
+                  (1.0 / 6.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
+              rod_perimeter += (1.0 / 6.0) * M_PI * (*_Dpin_soln)(pin_node);
+            }
+            else
+            {
+              rod_area +=
+                  (1.0 / 4.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
+              rod_perimeter += (1.0 / 4.0) * M_PI * (*_Dpin_soln)(pin_node);
+            }
+          }
+        }
+        else
+        {
+          if (subch_type == EChannelType::CENTER || subch_type == EChannelType::EDGE)
+          {
+            rod_area = (1.0 / 2.0) * 0.25 * M_PI * rod_diameter * rod_diameter;
+            rod_perimeter = (1.0 / 2.0) * M_PI * rod_diameter;
           }
           else
           {
-            rod_area +=
-                (1.0 / 4.0) * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
-            rod_perimeter += (1.0 / 4.0) * M_PI * (*_Dpin_soln)(pin_node);
-            Index += 1.0;
+            rod_area = (1.0 / 6.0) * 0.25 * M_PI * rod_diameter * rod_diameter;
+            rod_perimeter = (1.0 / 6.0) * M_PI * rod_diameter;
           }
         }
 
@@ -144,30 +157,32 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
           }
           index++;
         }
-
         _S_flow_soln->set(node, subchannel_area);
         _w_perim_soln->set(node, wetted_perimeter);
       }
     }
 
-    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+    if (pin_mesh_exist)
     {
-      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+      for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
       {
-        auto gap_pins = _subchannel_mesh.getGapPins(i_gap);
-        auto pin_1 = gap_pins.first;
-        auto pin_2 = gap_pins.second;
-        auto * pin_node_1 = _subchannel_mesh.getPinNode(pin_1, iz);
-        auto * pin_node_2 = _subchannel_mesh.getPinNode(pin_2, iz);
+        for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+        {
+          auto gap_pins = _subchannel_mesh.getGapPins(i_gap);
+          auto pin_1 = gap_pins.first;
+          auto pin_2 = gap_pins.second;
+          auto * pin_node_1 = _subchannel_mesh.getPinNode(pin_1, iz);
+          auto * pin_node_2 = _subchannel_mesh.getPinNode(pin_2, iz);
 
-        if (pin_1 == pin_2) // Corner or edge gap
-        {
-          _tri_sch_mesh._gij_map[iz][i_gap] = (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap;
-        }
-        else // center gap
-        {
-          _tri_sch_mesh._gij_map[iz][i_gap] =
-              pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
+          if (pin_1 == pin_2) // Corner or edge gap
+          {
+            _tri_sch_mesh._gij_map[iz][i_gap] = (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap;
+          }
+          else // center gap
+          {
+            _tri_sch_mesh._gij_map[iz][i_gap] =
+                pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
+          }
         }
       }
     }
