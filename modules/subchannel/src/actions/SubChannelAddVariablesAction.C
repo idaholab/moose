@@ -53,7 +53,8 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::PIN_DIAMETER,
                                         SubChannelApp::DUCT_TEMPERATURE,
                                         SubChannelApp::DENSITY,
-                                        SubChannelApp::VISCOSITY};
+                                        SubChannelApp::VISCOSITY,
+                                        SubChannelApp::DISPLACEMENT};
 
   for (auto & vn : var_names)
   {
