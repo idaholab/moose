@@ -3,7 +3,7 @@
 The `NEML2` block is used to construct a set of material and userobjects so that BlackBear can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
 
 | Object                        | Type       | Operation mode | Description                                                                                  |
-| ----------------------------- | ---------- | -------------- | -------------------------------------------------------------------------------------------- |
+| ----------------------------- | ---------- | -------------- | :------------------------------------------------------------------------------------------- |
 | CauchyStressFromNEML2         | Material   | ELEMENT        | Perform element-wise batched material update                                                 |
 | CauchyStressFromNEML2UO       | UserObject | ALL            | Perform mesh-wise batched material update                                                    |
 | CauchyStressFromNEML2Receiver | Material   | ALL            | Assign the outputs of the batched material update into the corresponding material properties |
