@@ -188,7 +188,9 @@ harmonicInterpolation(const T1 & value1,
     // so we assert that the input values shall be positive.
 #ifndef NDEBUG
     if (value1 * value2 <= 0)
-      mooseWarning("Input values must be of the same sign for harmonic interpolation");
+      mooseWarning("Input values (" + Moose::stringify(MetaPhysicL::raw_value(value1)) + " & " +
+                   Moose::stringify(MetaPhysicL::raw_value(value2)) +
+                   ") must be of the same sign for harmonic interpolation");
 #endif
     return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
   }
@@ -200,8 +202,10 @@ harmonicInterpolation(const T1 & value1,
     {
 #ifndef NDEBUG
       if (value1(i) * value2(i) <= 0)
-        mooseWarning("Component " + std::to_string(i) +
-                     "of input values must be of the same sign for harmonic interpolation");
+        mooseWarning("Component " + std::to_string(i) + "of input values (" +
+                     Moose::stringify(MetaPhysicL::raw_value(value1(i))) + " & " +
+                     Moose::stringify(MetaPhysicL::raw_value(value2(i))) +
+                     ") must be of the same sign for harmonic interpolation");
 #endif
       result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
     }
@@ -218,7 +222,10 @@ harmonicInterpolation(const T1 & value1,
 #ifndef NDEBUG
         if (value1(i, j) * value2(i, j) <= 0)
           mooseWarning("Component (" + std::to_string(i) + "," + std::to_string(j) +
-                       ") of input values must be of the same sign for harmonic interpolation");
+                       ") of input values (" +
+                       Moose::stringify(MetaPhysicL::raw_value(value1(i, j))) + " & " +
+                       Moose::stringify(MetaPhysicL::raw_value(value2(i, j))) +
+                       ") must be of the same sign for harmonic interpolation");
 #endif
         result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
       }
