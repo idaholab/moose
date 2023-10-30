@@ -145,6 +145,8 @@ T_in = 660
   []
   [duct_surface_temperature]
   []
+  [disp_magnitude]
+  []
 []
 
 [AuxKernels]
@@ -156,6 +158,13 @@ T_in = 660
     diffusion_variable = temperature
     component = normal
     boundary = 'inside'
+    execute_on = 'timestep_end'
+  []
+  [Deformation]
+    type = ParsedAux
+    variable = disp_magnitude
+    coupled_variables = 'disp_x disp_y disp_z'
+    expression = 'sqrt(disp_x^2 + disp_y^2 + disp_z^2)'
     execute_on = 'timestep_end'
   []
 []

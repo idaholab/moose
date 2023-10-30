@@ -58,9 +58,9 @@ void
 LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 {
   auto pin_mesh_exist = _subchannel_mesh.pinMeshExist();
-  if (pin_mesh_exist)
+  if (pin_mesh_exist || _duct_mesh_exist)
   {
-    Real standard_area, wire_area, additional_area, wetted_perimeter;
+    Real standard_area, wire_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
     auto rod_diameter = _subchannel_mesh.getRodDiameter();
     auto wire_diameter = _tri_sch_mesh.getWireDiameter();
@@ -106,6 +106,7 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         {
           standard_area = std::pow(pitch, 2.0) * std::sqrt(3.0) / 4.0;
           additional_area = 0.0;
+          displaced_area = 0.0;
           wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
           wetted_perimeter = rod_perimeter + 0.5 * libMesh::pi * wire_diameter / std::cos(theta);
         }
@@ -113,6 +114,7 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         {
           standard_area = pitch * (rod_diameter / 2.0 + gap);
           additional_area = 0.0;
+          displaced_area = (*_Disp_soln)(node)*pitch;
           wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
           wetted_perimeter =
               rod_perimeter + 0.5 * libMesh::pi * wire_diameter / std::cos(theta) + pitch;
@@ -121,13 +123,16 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         {
           standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
           additional_area = 0.0;
+          displaced_area = 1.0 / std::sqrt(3.0) * (rod_diameter + 2.0 * gap + (*_Disp_soln)(node)) *
+                           (*_Disp_soln)(node);
           wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
           wetted_perimeter = rod_perimeter + libMesh::pi * wire_diameter / std::cos(theta) / 6.0 +
                              2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap);
         }
 
         /// Calculate subchannel area
-        auto subchannel_area = standard_area + additional_area - rod_area - wire_area;
+        auto subchannel_area =
+            standard_area + additional_area + displaced_area - rod_area - wire_area;
 
         /// Apply area reduction on subchannels affected by blockage
         auto index = 0;

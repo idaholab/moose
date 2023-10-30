@@ -64,6 +64,9 @@ P_out = 2.0e5 # Pa
   [mu]
     block = subchannel
   []
+  [Disp]
+    block = subchannel
+  []
   [q_prime_duct]
     block = duct
   []
@@ -252,6 +255,13 @@ P_out = 2.0e5 # Pa
     to_multi_app = duct_map
     source_variable = Tduct
     variable = duct_surface_temperature
+  []
+
+  [displacement_transfer]
+    type = MultiAppNearestNodeTransfer
+    from_multi_app = duct_map
+    source_variable = disp_magnitude
+    variable = Disp
   []
 
   [q_prime] # Recover q_prime from heat conduction solve
