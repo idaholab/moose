@@ -174,7 +174,6 @@
       detail = "be capable of restarting a simulation from the output data."
     []
     [execute_on_param_error]
-      requirement = 'The system shall report a reasonable error the execute_on parameter is set to an invalid value.'
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'
