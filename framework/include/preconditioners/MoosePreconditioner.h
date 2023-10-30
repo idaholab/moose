@@ -52,11 +52,6 @@ public:
                             const unsigned int to_var,
                             NumericVector<Number> & to_vector);
 
-  /**
-   * @return The nonlinear system this object is associated with
-   */
-  NonlinearSystemBase & getNonlinearSystemBase() { return _nl; }
-
 protected:
   /// Setup the coupling matrix on the finite element problem
   void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
@@ -69,4 +64,6 @@ protected:
 
   /// The nonlinear system whose linearization this preconditioner should be applied to
   NonlinearSystemBase & _nl;
+
+  friend class SetupPreconditionerAction;
 };

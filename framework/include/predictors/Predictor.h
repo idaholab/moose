@@ -40,11 +40,6 @@ public:
 
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
-  /**
-   * @return The nonlinear system this object is associated with
-   */
-  NonlinearSystemBase & getNonlinearSystemBase() { return _nl; }
-
 protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;
@@ -73,4 +68,6 @@ protected:
 
   /// Timestep tolerance from Transient executioner
   const Real & _timestep_tolerance;
+
+  friend class SetupPredictorAction;
 };
