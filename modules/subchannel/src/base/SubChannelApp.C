@@ -37,6 +37,7 @@ const std::string SubChannelApp::WETTED_PERIMETER = "w_perim";
 const std::string SubChannelApp::LINEAR_HEAT_RATE = "q_prime";
 const std::string SubChannelApp::DUCT_LINEAR_HEAT_RATE = "q_prime_duct";
 const std::string SubChannelApp::DUCT_TEMPERATURE = "Tduct";
+const std::string SubChannelApp::DISPLACEMENT = "Disp";
 
 InputParameters
 SubChannelApp::validParams()
