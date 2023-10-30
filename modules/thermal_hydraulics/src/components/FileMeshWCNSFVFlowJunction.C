@@ -105,7 +105,7 @@ FileMeshWCNSFVFlowJunction::addMooseObjects()
       addComponentConnectionFunctors("flow", NS::velocity_y, false);
     if (getConnectedComponent(0).dimension() > 2)
       addComponentConnectionFunctors("flow", NS::velocity_z, false);
-    addComponentConnectionFunctors("energy", NS::temperature, false);
+    // addComponentConnectionFunctors("energy", NS::temperature, false);
     // addComponentConnectionFunctors("scalar", false);
   }
 
@@ -124,8 +124,9 @@ FileMeshWCNSFVFlowJunction::addMooseObjects()
       connectVariableWithBoundaryConditions("flow", NS::velocity_y, "INSFVInletVelocityBC", false);
     if (constMesh().dimension() > 2 && getConnectedComponent(0).dimension() > 2)
       connectVariableWithBoundaryConditions("flow", NS::velocity_z, "INSFVInletVelocityBC", false);
-    connectVariableWithBoundaryConditions(
-        "energy", NS::temperature, "FVADFunctorDirichletBC", false);
+
+    // connectVariableWithBoundaryConditions(
+    //     "energy", NS::temperature, "FVADFunctorDirichletBC", false);c
     // connectVariableWithBoundaryConditions("scalar", "scalar", "FVADFunctorDirichletBC", false);
   }
 }
@@ -158,7 +159,6 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
             other_comp.getPhysics(physics_name)->getFlowVariableName(var_name);
 
         InputParameters params = getMooseApp().getFactory().getValidParams(bc_type);
-        params.set<std::vector<BoundaryName>>("boundary") = {_connections[0]._boundary_name};
         if (params.have_parameter<bool>("functor_defined_on_other_side"))
           params.set<bool>("functor_defined_on_other_side") = true;
 
@@ -166,6 +166,7 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
         // Add boundary condition on one side on the junction
         if (add_first_bc)
         {
+          params.set<std::vector<BoundaryName>>("boundary") = {_connections[0]._boundary_name};
           params.set<NonlinearVariableName>("variable") = variable_name;
           params.set<MooseFunctorName>("functor") =
               getConnectionFunctorName(conn_i, physics_name, variable_name, add_first_bc);
@@ -175,12 +176,13 @@ FileMeshWCNSFVFlowJunction::connectVariableWithBoundaryConditions(const PhysicsN
         // Add boundary condition on the other side of the junction
         else
         {
+          params.set<std::vector<BoundaryName>>("boundary") = {_connections[conn_i]._boundary_name};
           params.set<NonlinearVariableName>("variable") = other_variable_name;
           params.set<MooseFunctorName>("functor") =
               getConnectionFunctorName(conn_i, physics_name, variable_name, add_first_bc);
           getMooseApp().feProblem().addFVBC(bc_type,
                                             name() + ":" + other_variable_name + "_" +
-                                                _connections[0]._boundary_name,
+                                                _connections[conn_i]._boundary_name,
                                             params);
         }
       }
@@ -221,12 +223,14 @@ FileMeshWCNSFVFlowJunction::getConnectionFunctorName(unsigned int connection_ind
   }
   else
   {
+    // Coupling to primary side, indexed at 0
+    const auto boundary_name = _boundary_names[0];
     if (_junction_techniques.contains("boundary_values"))
       return var_name;
     else if (_junction_techniques.contains("boundary_average_values"))
-      return var_name + "_average";
+      return var_name + "_average_" + boundary_name;
     else if (_junction_techniques.contains("boundary_integral_values"))
-      return var_name + "_integral";
+      return var_name + "_integral_" + boundary_name;
   }
   mooseError("Should not have reached here");
 }
@@ -242,53 +246,31 @@ FileMeshWCNSFVFlowJunction::addComponentConnectionFunctors(const PhysicsName & p
   /// Need connection functors for all connection boundaries
   for (const auto & conn_i : index_range(_connections))
   {
-    // Avoid adding functors that wont be used
-    if (from_primary_side && conn_i == 0)
-      continue;
-    else if (conn_i > 0)
-      continue;
-
+    // Create the name of the functor. This needs to match the name returned in
+    // FileMeshWCNSFVFlowJunction::getConnectionFunctorName
     const auto & boundary_name = _boundary_names[conn_i];
     const auto & variable_name =
         getConnectedComponent(conn_i).getPhysics(physics_name)->getFlowVariableName(default_var);
     std::string integration_type = "_integral_";
-    std::string functor_name = "";
     if (_junction_techniques.contains("boundary_average_values"))
-    {
       integration_type = "_average_";
-      functor_name = variable_name + integration_type + boundary_name;
-      // TODO make average
-      _boundary_real_functors.push_back(std::make_unique<BoundaryIntegralFunctor<Real>>(
-          functor_name,
-          getFunctor<Real>("variable"),
-          clearance_schedule,
-          getTHMProblem().mesh(),
-          getTHMProblem().mesh().getBoundaryID(boundary_name)));
-      _boundary_adreal_functors.push_back(std::make_unique<BoundaryIntegralFunctor<ADReal>>(
-          functor_name,
-          getFunctor<ADReal>("variable"),
-          clearance_schedule,
-          getTHMProblem().mesh(),
-          getTHMProblem().mesh().getBoundaryID(boundary_name)));
-    }
-    else
+    std::string functor_name = variable_name + integration_type + boundary_name;
+
+    // Create a functor material property that creates the boundary functor
+    if ((from_primary_side && conn_i > 0) || (!from_primary_side && conn_i == 0))
     {
-      functor_name = variable_name + integration_type + boundary_name;
-      _boundary_real_functors.push_back(std::make_unique<BoundaryIntegralFunctor<Real>>(
-          functor_name,
-          getFunctor<Real>("variable"),
-          clearance_schedule,
-          getTHMProblem().mesh(),
-          getTHMProblem().mesh().getBoundaryID(boundary_name)));
-      _boundary_adreal_functors.push_back(std::make_unique<BoundaryIntegralFunctor<ADReal>>(
-          functor_name,
-          getFunctor<ADReal>("variable"),
-          clearance_schedule,
-          getTHMProblem().mesh(),
-          getTHMProblem().mesh().getBoundaryID(boundary_name)));
+      std::string mat_type = "ADBoundaryIntegralFunctorMaterial";
+      InputParameters params = getMooseApp().getFactory().getValidParams(mat_type);
+      if (_junction_techniques.contains("boundary_average_values"))
+        params.set<bool>("compute_average") = true;
+
+      params.set<BoundaryName>("integration_boundary") = {_connections[conn_i]._boundary_name};
+      params.set<MooseFunctorName>("functor_name") = functor_name;
+      params.set<MooseFunctorName>("functor_in") = variable_name;
+      getMooseApp().feProblem().addFunctorMaterial(mat_type,
+                                                   name() + ":" + variable_name + "_" +
+                                                       _connections[conn_i]._boundary_name,
+                                                   params);
     }
-    // TODO check threading
-    getTHMProblem().addFunctor(functor_name, *_boundary_real_functors[conn_i], 0);
-    getTHMProblem().addFunctor(functor_name, *_boundary_adreal_functors[conn_i], 0);
   }
 }
