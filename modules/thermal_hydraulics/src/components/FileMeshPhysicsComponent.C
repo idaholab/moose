@@ -78,3 +78,14 @@ FileMeshPhysicsComponent::setupMesh()
     _connections[FileMeshComponentConnection::EEndType::OUT].push_back(
         Connection(constMesh().getBoundaryID(outlet_boundaries[i])));
 }
+
+void
+FileMeshPhysicsComponent::warnParamPassed(const InputParameters & warn_params,
+                                          const InputParameters & allowed_params) const
+{
+  const auto warn_list = warn_params.getParametersList();
+  const auto allow_list = allowed_params.getParametersList();
+  for (const auto & param : parameters().getParametersList())
+    if (warn_list.count(param) && isParamSetByUser(param) && !allow_list.count(param))
+      mooseWarning("Parameter '" + param + "' has been passed but will be ignored");
+}

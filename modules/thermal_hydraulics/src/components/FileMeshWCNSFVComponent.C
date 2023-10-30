@@ -91,6 +91,8 @@ FileMeshWCNSFVComponent::init()
         getMooseApp().actionWarehouse().getPhysics<WCNSFVHeatAdvectionPhysics>(physics_name);
     _physics.push_back(_energy_physics);
   }
+  else
+    warnParamPassed(WCNSFVHeatAdvectionPhysics::validParams(), WCNSFVPhysicsBase::validParams());
   if (getParam<bool>("add_scalar_equations"))
   {
     InputParameters params =
@@ -107,6 +109,8 @@ FileMeshWCNSFVComponent::init()
         getMooseApp().actionWarehouse().getPhysics<WCNSFVScalarAdvectionPhysics>(physics_name);
     _physics.push_back(_scalar_physics);
   }
+  else
+    warnParamPassed(WCNSFVScalarAdvectionPhysics::validParams(), WCNSFVPhysicsBase::validParams());
   if (isParamSetByUser("turbulence_model"))
   {
     const auto physics_type = "WCNSFVTurbulencePhysics";
@@ -123,6 +127,8 @@ FileMeshWCNSFVComponent::init()
         getMooseApp().actionWarehouse().getPhysics<WCNSFVTurbulencePhysics>(physics_name);
     _physics.push_back(_turbulence_physics);
   }
+  else
+    warnParamPassed(WCNSFVTurbulencePhysics::validParams(), WCNSFVPhysicsBase::validParams());
 
   for (auto physics : _physics)
     // Add block restriction

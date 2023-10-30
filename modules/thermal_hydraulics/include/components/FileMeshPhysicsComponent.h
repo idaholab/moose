@@ -41,6 +41,10 @@ protected:
 
   virtual std::string prefix() const { return name() + ":"; }
 
+  /// Warn if these parameters are passed.
+  void warnParamPassed(const InputParameters & warn_params,
+                       const InputParameters & allowed_params) const;
+
   // TODO: Register the variable information to the simulation
   //       Register the variable initial condition information in the simulation
 
