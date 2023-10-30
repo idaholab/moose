@@ -45,12 +45,12 @@ NEML2Action::validParams()
       "temperature", std::vector<VariableName>{"0"}, "Coupled temperature");
 
   MooseEnum mode("ELEMENT ALL PARSE_ONLY", "ELEMENT");
-  params.addParam<MooseEnum>(
-      "mode",
-      mode,
-      "Mode of operation. ELEMENT: Perform constitutive update element-by-element. ALL: Perform "
-      "constitutive update for all quadrature points at once. PARSE_ONLY: Only parse the NEML2 "
-      "input file and manufacture the NEML2 model, does not setup any MOOSE objects.");
+  params.addParam<MooseEnum>("mode", mode, "Mode of operation for the NEML2 material model.");
+  mode.addDocumentation("ELEMENT", "Perform constitutive update element-by-element.");
+  mode.addDocumentation("ALL", "Perform constitutive update for all quadrature points at once.");
+  mode.addDocumentation("PARSE_ONLY",
+                        "Only parse the NEML2 input file and manufacture the NEML2 model, do not "
+                        "setup any MOOSE objects.");
 
   params.addParam<std::string>(
       "device",
