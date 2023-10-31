@@ -69,7 +69,7 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
 void
 CauchyStressFromNEML2::initialSetup()
 {
-  auto solver = _fe_problem.getNonlinearSystem().nonlinearSolver();
+  auto solver = _fe_problem.getNonlinearSystem(/*nl_sys_num=*/0).nonlinearSolver();
   if (solver->residual_object || solver->jacobian || !solver->residual_and_jacobian_object)
     mooseWarning("NEML2 material models are designed to be used together with "
                  "residual_and_jacobian_together = true.");
