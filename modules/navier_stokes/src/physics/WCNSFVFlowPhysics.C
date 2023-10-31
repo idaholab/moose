@@ -13,9 +13,9 @@
 
 registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 
 InputParameters
