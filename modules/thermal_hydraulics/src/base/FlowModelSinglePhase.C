@@ -407,6 +407,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("A") = {AREA};
+    params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
     _sim.addAuxKernel(class_name, genName(_comp_name, "v_aux"), params);
   }
   {
