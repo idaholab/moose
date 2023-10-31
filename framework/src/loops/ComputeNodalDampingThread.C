@@ -15,10 +15,11 @@
 
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem)
+ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
+                                                     NonlinearSystemBase & nl)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
-    _nl(feproblem.getNonlinearSystemBase()),
+    _nl(nl),
     _nodal_dampers(_nl.getNodalDamperWarehouse())
 {
 }

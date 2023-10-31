@@ -24,5 +24,5 @@ public:
 
   virtual void externalSolve() override { _console << "Dummy External Solve!" << std::endl; }
   virtual void syncSolutions(Direction /*direction*/) override {}
-  virtual bool converged() override { return true; }
+  virtual bool converged(unsigned int) override { return true; }
 };

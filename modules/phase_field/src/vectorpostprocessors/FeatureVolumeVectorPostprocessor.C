@@ -15,6 +15,7 @@
 #include "GrainTrackerInterface.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
 
@@ -58,7 +59,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _percolated(declareVector("percolated")),
     _vars(_feature_counter.getFECoupledVars()),
     _mesh(_subproblem.mesh()),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),

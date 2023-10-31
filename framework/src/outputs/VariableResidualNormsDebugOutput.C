@@ -29,12 +29,17 @@ VariableResidualNormsDebugOutput::validParams()
   // By default this outputs on every nonlinear iteration
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   params.suppressParameter<ExecFlagEnum>("execute_on");
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "nl0", "The nonlinear system that we should output information for.");
   return params;
 }
 
 VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(
     const InputParameters & parameters)
-  : PetscOutput(parameters), _sys(_problem_ptr->getNonlinearSystemBase().system())
+  : PetscOutput(parameters),
+    _nl(_problem_ptr->getNonlinearSystemBase(
+        _problem_ptr->nlSysNum(getParam<NonlinearSystemName>("nl_sys")))),
+    _sys(_nl.system())
 {
 }
 
@@ -57,8 +62,7 @@ VariableResidualNormsDebugOutput::output()
   oss << "    |residual|_2 of individual variables:\n";
   for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
-    Real var_res_id =
-        _sys.calculate_norm(_problem_ptr->getNonlinearSystemBase().RHS(), var_num, DISCRETE_L2);
+    Real var_res_id = _sys.calculate_norm(_nl.RHS(), var_num, DISCRETE_L2);
     oss << std::setw(27 - max_name_size) << " "
         << std::setw(max_name_size + 2) // match position of overall NL residual
         << std::left << _sys.variable_name(var_num) + ":" << var_res_id << "\n";

@@ -28,7 +28,8 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     Restartable(this, "TimeIntegrators"),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _nl(_fe_problem.getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase(
+        dynamic_cast<NonlinearSystemBase *>(&_sys) ? _sys.number() : 0)),
     _nonlinear_implicit_system(dynamic_cast<NonlinearImplicitSystem *>(&_sys.system())),
     _Re_time(_nl.getResidualTimeVector()),
     _Re_non_time(_nl.getResidualNonTimeVector()),

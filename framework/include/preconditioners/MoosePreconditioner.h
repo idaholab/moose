@@ -21,6 +21,7 @@
 
 // Forward declarations
 class FEProblemBase;
+class NonlinearSystemBase;
 namespace libMesh
 {
 class MeshBase;
@@ -57,4 +58,12 @@ protected:
 
   /// Subproblem this preconditioner is part of
   FEProblemBase & _fe_problem;
+
+  /// The nonlinear system number whose linearization this preconditioner should be applied to
+  const unsigned int _nl_sys_num;
+
+  /// The nonlinear system whose linearization this preconditioner should be applied to
+  NonlinearSystemBase & _nl;
+
+  friend class SetupPreconditionerAction;
 };

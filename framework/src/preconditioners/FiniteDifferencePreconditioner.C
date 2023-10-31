@@ -49,7 +49,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
     mooseWarning("Finite differencing to assemble the Jacobian is MUCH MUCH slower than forming "
                  "the Jacobian by hand, so don't complain about performance if you use it!");
 
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase(_nl_sys_num);
   unsigned int n_vars = nl.nVariables();
 
   std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);

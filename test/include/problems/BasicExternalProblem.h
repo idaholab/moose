@@ -22,7 +22,7 @@ public:
   virtual void externalSolve() override;
   virtual void syncSolutions(ExternalProblem::Direction direction) override;
 
-  virtual bool converged() override { return true; }
+  virtual bool converged(unsigned int) override { return true; }
 
 protected:
   unsigned int _heat_source_var;

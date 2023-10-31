@@ -149,8 +149,8 @@ ExplicitSSPRungeKutta::solveStage()
 
   // Compute RHS vector using previous stage solution in steady-state residual
   _explicit_residual.zero();
-  _fe_problem.computeResidual(*_nonlinear_implicit_system->current_local_solution,
-                              _explicit_residual);
+  _fe_problem.computeResidual(
+      *_nonlinear_implicit_system->current_local_solution, _explicit_residual, _nl.number());
 
   // Move the residual to the RHS
   _explicit_residual *= -1.0;

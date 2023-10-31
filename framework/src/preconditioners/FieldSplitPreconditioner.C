@@ -43,7 +43,7 @@ FieldSplitPreconditioner::validParams()
 FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & parameters)
   : MoosePreconditioner(parameters),
     _top_split(getParam<std::vector<std::string>>("topsplit")),
-    _nl(_fe_problem.getNonlinearSystemBase())
+    _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num))
 {
   // number of variables
   unsigned int n_vars = _nl.nVariables();
@@ -84,8 +84,8 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   _nl.useFieldSplitPreconditioner(true);
 
   // set a top splitting
-  _fe_problem.getNonlinearSystemBase().setDecomposition(_top_split);
+  _nl.setDecomposition(_top_split);
 
   // apply prefix and store PETSc options
-  _fe_problem.getNonlinearSystemBase().setupFieldDecomposition();
+  _nl.setupFieldDecomposition();
 }

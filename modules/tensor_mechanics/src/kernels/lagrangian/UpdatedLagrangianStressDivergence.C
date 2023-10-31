@@ -19,7 +19,7 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
     _material_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
 
     // Assembly quantities in the reference frame for stabilization
-    _assembly_undisplaced(_fe_problem.assembly(_tid)),
+    _assembly_undisplaced(_fe_problem.assembly(_tid, this->_sys.number())),
     _grad_phi_undisplaced(_assembly_undisplaced.gradPhi()),
     _JxW_undisplaced(_assembly_undisplaced.JxW()),
     _coord_undisplaced(_assembly_undisplaced.coordTransformation()),

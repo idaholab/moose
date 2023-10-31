@@ -75,4 +75,7 @@ protected:
 
   /// Reference to the mesh object
   MooseMesh & _mesh;
+
+  /// The nonlinear system number we should output degree of freedom information for
+  const unsigned int _nl_sys_num;
 };

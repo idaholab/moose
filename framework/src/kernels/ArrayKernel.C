@@ -53,7 +53,7 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters)
   {
     ArrayMooseVariable * var = &_subproblem.getArrayVariable(_tid, _save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase(_sys.number()).hasVariable(_save_in_strings[i]))
       paramError("save_in", "cannot use solution variable as save-in variable");
 
     if (var->feType() != _var.feType())
@@ -73,7 +73,7 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters)
   {
     ArrayMooseVariable * var = &_subproblem.getArrayVariable(_tid, _diag_save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase(_sys.number()).hasVariable(_diag_save_in_strings[i]))
       paramError("diag_save_in", "cannot use solution variable as diag save-in variable");
 
     if (var->feType() != _var.feType())

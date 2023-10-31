@@ -42,4 +42,8 @@ public:
    * @return A string of output file including the extension
    */
   virtual std::string filename() override;
+
+protected:
+  /// The nonlinear system number we should output information for
+  const unsigned int _nl_sys_num;
 };

@@ -51,7 +51,7 @@ PhysicsBasedPreconditioner::validParams()
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & params)
   : MoosePreconditioner(params),
     Preconditioner<Number>(MoosePreconditioner::_communicator),
-    _nl(_fe_problem.getNonlinearSystemBase())
+    _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num))
 {
   const auto & libmesh_system = _nl.system();
   unsigned int num_systems = _nl.system().n_vars();
@@ -62,8 +62,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
   _pre_type.resize(num_systems);
 
   { // Setup the Coupling Matrix so MOOSE knows what we're doing
-    NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
-    unsigned int n_vars = nl.nVariables();
+    unsigned int n_vars = _nl.nVariables();
 
     // The coupling matrix is held and released by FEProblemBase, so it is not released in this
     // object
@@ -230,7 +229,7 @@ PhysicsBasedPreconditioner::setup()
     }
   }
 
-  _fe_problem.computeJacobianBlocks(blocks);
+  _fe_problem.computeJacobianBlocks(blocks, _nl.number());
 
   // cleanup
   for (auto & block : blocks)

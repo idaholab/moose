@@ -50,7 +50,7 @@ PeriodicNodeMapTester::initialize()
   auto point_locator = _mesh.getPointLocator();
 
   // Get a pointer to the PeriodicBoundaries buried in libMesh
-  auto pbs = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
+  auto pbs = _fe_problem.getNonlinearSystemBase(0).dofMap().get_periodic_boundaries();
 
   // rebuild periodic node map (this is the heaviest part by far)
   std::multimap<dof_id_type, dof_id_type> periodic_node_map;

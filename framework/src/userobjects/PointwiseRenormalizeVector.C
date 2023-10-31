@@ -31,9 +31,7 @@ PointwiseRenormalizeVector::PointwiseRenormalizeVector(const InputParameters & p
   : GeneralUserObject(parameters),
     _mesh(_fe_problem.mesh()),
     _var_names(getParam<std::vector<VariableName>>("v")),
-    _target_norm(getParam<Real>("norm")),
-    _nl_sys(_fe_problem.getNonlinearSystemBase()),
-    _sys(_nl_sys.system())
+    _target_norm(getParam<Real>("norm"))
 {
   const MooseVariableFieldBase * first_var = nullptr;
   for (const auto & var_name : _var_names)
@@ -58,10 +56,10 @@ PointwiseRenormalizeVector::PointwiseRenormalizeVector(const InputParameters & p
     {
       const auto & array_var = _fe_problem.getArrayVariable(0, var_name);
       for (unsigned int p = 0; p < var.count(); ++p)
-        _var_numbers.push_back(_sys.variable_number(array_var.componentName(p)));
+        _var_numbers.push_back(_sys.system().variable_number(array_var.componentName(p)));
     }
     else
-      _var_numbers.push_back(_sys.variable_number(var_name));
+      _var_numbers.push_back(_sys.system().variable_number(var_name));
   }
 }
 
@@ -69,13 +67,13 @@ void
 PointwiseRenormalizeVector::initialize()
 {
   // do one solution.close to get updated
-  _sys.solution->close();
+  _sys.system().solution->close();
 }
 
 void
 PointwiseRenormalizeVector::execute()
 {
-  auto & dof_map = _sys.get_dof_map();
+  auto & dof_map = _sys.system().get_dof_map();
   const auto local_dof_begin = dof_map.first_dof();
   const auto local_dof_end = dof_map.end_dof();
 
@@ -96,9 +94,9 @@ PointwiseRenormalizeVector::execute()
 
     // iterate over current, old, and older solutions
     for (const auto s : make_range(3))
-      if (_nl_sys.hasSolutionState(s))
+      if (_sys.hasSolutionState(s))
       {
-        auto & solution = _nl_sys.solutionState(s);
+        auto & solution = _sys.solutionState(s);
 
         // loop over all DOFs
         for (const auto j : index_range(dof_indices[0]))
@@ -129,8 +127,8 @@ void
 PointwiseRenormalizeVector::finalize()
 {
   for (const auto s : make_range(3))
-    if (_nl_sys.hasSolutionState(s))
-      _nl_sys.solutionState(s).close();
+    if (_sys.hasSolutionState(s))
+      _sys.solutionState(s).close();
 
   _sys.update();
 }

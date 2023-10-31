@@ -31,5 +31,5 @@ NumResidualEvaluations::NumResidualEvaluations(const InputParameters & parameter
 Real
 NumResidualEvaluations::getValue() const
 {
-  return _fe_problem.getNonlinearSystemBase().nResidualEvaluations();
+  return _fe_problem.getNonlinearSystemBase(_sys.number()).nResidualEvaluations();
 }

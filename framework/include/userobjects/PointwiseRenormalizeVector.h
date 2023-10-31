@@ -43,10 +43,4 @@ protected:
 
   /// desired norm
   const Real _target_norm;
-
-  // MOOSE Nonlinear system
-  NonlinearSystemBase & _nl_sys;
-
-  /// libMesh System pointer
-  System & _sys;
 };

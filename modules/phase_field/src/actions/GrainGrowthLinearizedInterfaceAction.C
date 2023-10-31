@@ -206,8 +206,8 @@ GrainGrowthLinearizedInterfaceAction::act()
 
   if (_current_task == "add_bounds_vectors")
   {
-    _problem->getNonlinearSystemBase().addVector("lower_bound", false, GHOSTED);
-    _problem->getNonlinearSystemBase().addVector("upper_bound", false, GHOSTED);
+    _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).addVector("lower_bound", false, GHOSTED);
+    _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).addVector("upper_bound", false, GHOSTED);
   }
 
   // Add AuxVriable and AuxKernel for Bnds variable

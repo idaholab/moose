@@ -22,7 +22,7 @@ ALEKernel::validParams()
 
 ALEKernel::ALEKernel(const InputParameters & parameters)
   : DerivativeMaterialInterface<Kernel>(parameters),
-    _assembly_undisplaced(_fe_problem.assembly(_tid)),
+    _assembly_undisplaced(_fe_problem.assembly(_tid, _sys.number())),
     _var_undisplaced(
         _fe_problem.getStandardVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _grad_phi_undisplaced(_assembly_undisplaced.gradPhi()),

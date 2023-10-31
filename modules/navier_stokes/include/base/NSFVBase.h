@@ -1254,7 +1254,9 @@ NSFVBase<BaseType>::copyNSNodalVariables()
 {
   if (parameters().template get<bool>("initialize_variables_from_mesh_file"))
   {
-    SystemBase & system = getProblem().getNonlinearSystemBase();
+    auto & problem = getProblem();
+    auto & system = problem.getNonlinearSystemBase(
+        problem.nlSysNum(parameters().template get<NonlinearSystemName>("mass_momentum_system")));
 
     if (_create_pressure)
       system.addVariableToCopy(
@@ -1311,7 +1313,11 @@ template <class BaseType>
 void
 NSFVBase<BaseType>::setResidualAndJacobianTogether()
 {
-  getProblem().getNonlinearSystemBase().residualAndJacobianTogether();
+  auto & problem = getProblem();
+  problem
+      .getNonlinearSystemBase(
+          problem.nlSysNum(parameters().template get<NonlinearSystemName>("mass_momentum_system")))
+      .residualAndJacobianTogether();
 }
 
 template <class BaseType>

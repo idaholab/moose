@@ -69,7 +69,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
         _consistent_fe_type = false;
   }
 
-  _pf_var_num.assign(_fe_problem.getNonlinearSystemBase().nVariables(),
+  _pf_var_num.assign(_sys.nVariables(),
                      _num_variables); // Note: the _num_variables assignment indicates that "this is
                                       // not a PorousFlow variable"
   for (unsigned int i = 0; i < _num_variables; ++i)

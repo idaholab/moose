@@ -41,7 +41,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
-  NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
+  NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem(/*nl_sys_num=*/0);
 
   // If this is a nonlinear eigenvalue problem,
   // we do not need to assemble anything

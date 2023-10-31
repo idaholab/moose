@@ -55,7 +55,7 @@ EigenExecutionerBase::eigenvalueOld()
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
-    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase())),
+    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase(/*nl_sys=*/0))),
     _feproblem_solve(*this),
     _eigenvalue(addAttributeReporter("eigenvalue", getParam<Real>("k0"))),
     _source_integral(getPostprocessorValue("bx_norm")),
@@ -67,7 +67,7 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   // FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
   _problem.transient(true);
-  _problem.getNonlinearSystemBase().needSolutionState(2);
+  _eigen_sys.needSolutionState(2);
   _fe_problem.getAuxiliarySystem().needSolutionState(2);
 
   // we want to tell the App about what our system time is (in case anyone else is interested).
@@ -243,11 +243,11 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // Important: we do not call _problem.advanceState() because we do not
     // want to overwrite the old postprocessor values and old material
     // properties in stateful materials.
-    _problem.getNonlinearSystemBase().copyOldSolutions();
+    _eigen_sys.copyOldSolutions();
     _problem.getAuxiliarySystem().copyOldSolutions();
     if (_problem.getDisplacedProblem() != NULL)
     {
-      _problem.getDisplacedProblem()->nlSys().copyOldSolutions();
+      _problem.getDisplacedProblem()->nlSys(_eigen_sys.number()).copyOldSolutions();
       _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
     }
 
@@ -255,8 +255,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _source_integral_old = _source_integral;
 
     preIteration();
-    _problem.solve();
-    converged = _problem.converged();
+    _problem.solve(_eigen_sys.number());
+    converged = _problem.converged(_eigen_sys.number());
     if (!converged)
       break;
     postIteration();
@@ -584,7 +584,7 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
   _problem.es().parameters.set<Real>("linear solver tolerance") = l_rtol;
 
   // call nonlinear solve
-  _problem.solve();
+  _problem.solve(_eigen_sys.number());
 
   k = _source_integral;
   _eigenvalue = k;
@@ -593,5 +593,5 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
   _problem.es().parameters.set<Real>("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol3;
 
-  return _problem.converged();
+  return _problem.converged(_eigen_sys.number());
 }

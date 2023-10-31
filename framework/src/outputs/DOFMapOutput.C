@@ -40,6 +40,8 @@ DOFMapOutput::validParams()
   // By default this only executes on the initial timestep
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
 
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "nl0", "The nonlinear system that we should output information for.");
   return params;
 }
 
@@ -48,7 +50,8 @@ DOFMapOutput::DOFMapOutput(const InputParameters & parameters)
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),
-    _mesh(_problem_ptr->mesh())
+    _mesh(_problem_ptr->mesh()),
+    _nl_sys_num(_problem_ptr->nlSysNum(getParam<NonlinearSystemName>("nl_sys")))
 {
 }
 
@@ -119,7 +122,7 @@ DOFMapOutput::output()
   const DofMap & dof_map = sys.get_dof_map();
 
   // fetch the KernelWarehouse through the NonlinearSystem
-  NonlinearSystemBase & _nl = _problem_ptr->getNonlinearSystemBase();
+  NonlinearSystemBase & _nl = _problem_ptr->getNonlinearSystemBase(_nl_sys_num);
   auto & kernels = _nl.getKernelWarehouse();
 
   // get a set of all subdomains

@@ -65,14 +65,14 @@ FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
     getNonlinearSystemBase(nl_sys_num).associateVectorToTag(_tagged_vector, _tag_id);
   }
   else
-    FEProblem::computeResidual(soln, residual);
+    FEProblem::computeResidual(soln, residual, nl_sys_num);
 }
 
 void
 FixedPointProblem::computeFullResidual(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual)
 {
-  FEProblem::computeResidual(soln, residual);
+  FEProblem::computeResidual(soln, residual, 0);
   if (_tagged_vector_for_partial_residual)
     residual += _tagged_vector;
 }

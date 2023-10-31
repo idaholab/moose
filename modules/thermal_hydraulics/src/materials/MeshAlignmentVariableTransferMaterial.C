@@ -41,7 +41,7 @@ MeshAlignmentVariableTransferMaterial::validParams()
 MeshAlignmentVariableTransferMaterial::MeshAlignmentVariableTransferMaterial(
     const InputParameters & parameters)
   : Material(parameters),
-    _nl_sys(_subproblem.systemBaseNonlinear()),
+    _nl_sys(_subproblem.systemBaseNonlinear(/*nl_sys_num=*/0)),
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(
         _subproblem

@@ -87,7 +87,7 @@ InterfaceUserObjectTestGetMaterialProperty::execute()
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       // check material property values
-      Real V = _t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations();
+      Real V = _t_step + _fe_problem.nNonlinearIterations(0) * _fe_problem.nLinearIterations(0);
       if (_mp[qp] != (1 * V))
         mooseError("InterfaceUserObjectTestGetMaterialProperty bad material property value" +
                    std::to_string(_mp[qp]) + " instead of " + std::to_string(1 * V));

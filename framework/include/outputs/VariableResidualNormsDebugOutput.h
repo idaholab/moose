@@ -14,6 +14,8 @@
 
 #include "libmesh/system.h"
 
+class NonlinearSystemBase;
+
 /**
  * A class for producing various debug related outputs
  *
@@ -35,6 +37,9 @@ protected:
    * Perform the debugging output
    */
   virtual void output() override;
+
+  /// Reference to MOOSE's nonlinear system
+  NonlinearSystemBase & _nl;
 
   /// Reference to libMesh system
   System & _sys;

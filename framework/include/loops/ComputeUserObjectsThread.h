@@ -37,9 +37,7 @@ class NumericVector;
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(FEProblemBase & problem,
-                           SystemBase & sys,
-                           const TheWarehouse::Query & query);
+  ComputeUserObjectsThread(FEProblemBase & problem, const TheWarehouse::Query & query);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
@@ -58,8 +56,6 @@ public:
   void join(const ComputeUserObjectsThread & /*y*/);
 
 protected:
-  const NumericVector<Number> & _soln;
-
   /// Print general information about the loop, like the ordering of class of objects
   void printGeneralExecutionInformation() const override;
 

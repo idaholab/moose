@@ -36,7 +36,7 @@ TestVectorType::validParams()
 TestVectorType::TestVectorType(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _test_sys(getParam<MooseEnum>("system") == 0
-                  ? (SystemBase &)_fe_problem.getNonlinearSystemBase()
+                  ? (SystemBase &)_fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0)
                   : (SystemBase &)_fe_problem.getAuxiliarySystem()),
     _test_vec_name(getParam<std::string>("vector")),
     _par_type(getParam<MooseEnum>("vector_type").getEnum<ParallelType>())

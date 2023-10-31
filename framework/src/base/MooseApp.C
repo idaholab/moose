@@ -2427,8 +2427,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
     if (undisp_clone)
     {
       problem.removeAlgebraicGhostingFunctor(*undisp_clone);
-      auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-      dof_map.remove_coupling_functor(*undisp_clone);
+      problem.removeCouplingGhostingFunctor(*undisp_clone);
     }
 
     auto * dp = problem.getDisplacedProblem().get();

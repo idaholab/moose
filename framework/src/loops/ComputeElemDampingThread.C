@@ -16,10 +16,11 @@
 
 #include "libmesh/threads.h"
 
-ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem)
+ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem,
+                                                   NonlinearSystemBase & nl)
   : ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
-    _nl(feproblem.getNonlinearSystemBase()),
+    _nl(nl),
     _element_dampers(_nl.getElementDamperWarehouse())
 {
 }

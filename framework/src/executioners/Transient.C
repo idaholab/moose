@@ -147,7 +147,7 @@ Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _feproblem_solve(*this),
-    _nl(_fe_problem.getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0)),
     _aux(_fe_problem.getAuxiliarySystem()),
     _check_aux(getParam<bool>("check_aux")),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),

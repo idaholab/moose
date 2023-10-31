@@ -24,7 +24,7 @@ CallTaggedResidualsTest::validParams()
 }
 
 CallTaggedResidualsTest::CallTaggedResidualsTest(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _nl(_fe_problem.getNonlinearSystemBase())
+  : GeneralUserObject(parameters), _nl(_fe_problem.getNonlinearSystemBase(_sys.number()))
 {
   for (const auto & tag : getParam<std::vector<TagName>>("residual_tags"))
   {
@@ -46,7 +46,7 @@ void
 CallTaggedResidualsTest::execute()
 {
   // Call residual to accumulate all vectors
-  _fe_problem.computeResidual(*_nl.currentSolution(), _nl.RHS());
+  _fe_problem.computeResidual(*_nl.currentSolution(), _nl.RHS(), _nl.number());
 
   // Copy into saved vectors
   for (const auto & i : index_range(_tags))

@@ -23,11 +23,18 @@ SolutionHistory::validParams()
   InputParameters params = FileOutput::validParams();
   params.addClassDescription("Outputs the non-linear and linear iteration solve history.");
 
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "nl0", "The nonlinear system that we should output information for.");
+
   // Return the parameters
   return params;
 }
 
-SolutionHistory::SolutionHistory(const InputParameters & parameters) : FileOutput(parameters) {}
+SolutionHistory::SolutionHistory(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _nl_sys_num(_problem_ptr->nlSysNum(getParam<NonlinearSystemName>("nl_sys")))
+{
+}
 
 std::string
 SolutionHistory::filename()
@@ -39,7 +46,7 @@ void
 SolutionHistory::output()
 {
   // Reference to the Non-linear System
-  NonlinearSystemBase & nl_sys = _problem_ptr->getNonlinearSystemBase();
+  NonlinearSystemBase & nl_sys = _problem_ptr->getNonlinearSystemBase(_nl_sys_num);
 
   std::ofstream slh_file;
   slh_file.open(filename().c_str(), std::ios::app);

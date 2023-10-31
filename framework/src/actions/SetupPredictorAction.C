@@ -41,6 +41,6 @@ SetupPredictorAction::act()
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     std::shared_ptr<Predictor> predictor =
         _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
-    _problem->getNonlinearSystemBase().setPredictor(predictor);
+    predictor->_nl.setPredictor(predictor);
   }
 }

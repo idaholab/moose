@@ -140,6 +140,8 @@ INSAction::validParams()
   params.addParam<std::string>("pressure_variable_name",
                                "A name for the pressure variable. If this is not provided, a "
                                "sensible default will be used.");
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "nl0", "The nonlinear system that this action belongs to.");
 
   params.addParamNamesToGroup(
       "equation_type block gravity dynamic_viscosity_name density_name boussinesq_approximation "
@@ -332,7 +334,9 @@ INSAction::act()
     }
 
     if (getParam<bool>("add_temperature_equation") &&
-        !_problem->getNonlinearSystemBase().hasVariable(_temperature_variable_name))
+        !_problem
+             ->getNonlinearSystemBase(_problem->nlSysNum(getParam<NonlinearSystemName>("nl_sys")))
+             .hasVariable(_temperature_variable_name))
     {
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
       _problem->addVariable(var_type, _temperature_variable_name, params);

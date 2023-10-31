@@ -46,7 +46,6 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
-  NonlinearSystemBase & _nl;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;

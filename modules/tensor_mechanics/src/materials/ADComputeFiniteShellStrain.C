@@ -58,7 +58,7 @@ ADComputeFiniteShellStrain::computeProperties()
   // (in isoparametric space).
   FEType fe_type(Utility::string_to_enum<Order>("First"),
                  Utility::string_to_enum<FEFamily>("LAGRANGE"));
-  auto & fe = _fe_problem.assembly(_tid).getFE(fe_type, dim);
+  auto & fe = _fe_problem.assembly(_tid, /*nl_sys_num=*/0).getFE(fe_type, dim);
   _dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   _dphideta_map = fe->get_fe_map().get_dphideta_map();
   _phi_map = fe->get_fe_map().get_phi_map();

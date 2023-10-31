@@ -132,8 +132,10 @@ bool
 ExceptionKernel::time_to_throw() const
 {
   if (_counter < 0)
-    return (_t_step == 1 &&
-            _fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1);
+    return (
+        _t_step == 1 &&
+        _fe_problem.getNonlinearSystemBase(_sys.number()).getCurrentNonlinearIterationNumber() ==
+            1);
   if (_counter == 0)
     return true;
   return false;

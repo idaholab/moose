@@ -32,7 +32,7 @@ Eigenvalues::Eigenvalues(const InputParameters & parameters)
     _inverse(getParam<bool>("inverse_eigenvalue")),
     _eigen_values_real(declareVector("eigen_values_real")),
     _eigen_values_imag(declareVector("eigen_values_imag")),
-    _nl_eigen(dynamic_cast<NonlinearEigenSystem *>(&_fe_problem.getNonlinearSystemBase()))
+    _nl_eigen(dynamic_cast<const NonlinearEigenSystem *>(&_sys))
 {
   if (!_nl_eigen)
     mooseError("Given system is not a NonlinearEigenSystem \n");

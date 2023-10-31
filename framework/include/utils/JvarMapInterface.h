@@ -125,7 +125,7 @@ template <class T>
 JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters)
   : T(parameters),
     _n_args(this->_coupled_standard_moose_vars.size()),
-    _jvar_max_size(this->_fe_problem.getNonlinearSystemBase().nVariables()),
+    _jvar_max_size(this->_sys.nVariables()),
     _jvar_map(_jvar_max_size, -1)
 {
   // populate map

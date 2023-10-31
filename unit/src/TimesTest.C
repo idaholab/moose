@@ -29,6 +29,7 @@ TEST(Times, getUninitialized)
   InputParameters params = factory->getValidParams("SimulationTimes");
   params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
   params.set<SubProblem *>("_subproblem") = fe_problem;
+  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "SimulationTimes";
   SimulationTimes Times(params);
@@ -59,6 +60,7 @@ TEST(Times, getters)
   InputParameters params = factory->getValidParams("InputTimes");
   params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
   params.set<SubProblem *>("_subproblem") = fe_problem;
+  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
   params.set<std::vector<Real>>("times") = {0.2, 0.8, 1.2};
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "InputTimes";

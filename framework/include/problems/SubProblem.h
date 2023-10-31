@@ -90,7 +90,7 @@ public:
   /**
    * @return whether the given \p nl_sys_num is converged
    */
-  virtual bool nlConverged(unsigned int nl_sys_num) = 0;
+  virtual bool nlConverged(const unsigned int nl_sys_num) { return converged(nl_sys_num); }
 
   /**
    * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
@@ -98,7 +98,12 @@ public:
    * change this signature. Then we can go through the apps again and convert back to this changed
    * API
    */
-  virtual bool converged() { return nlConverged(0); }
+  virtual bool converged(const unsigned int nl_sys_num) { return nlConverged(nl_sys_num); }
+
+  /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
+  virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const = 0;
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
@@ -222,12 +227,12 @@ public:
    * type.
    */
   virtual const MooseVariableFieldBase & getVariable(
-      THREAD_ID tid,
+      const THREAD_ID tid,
       const std::string & var_name,
       Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
       Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) const = 0;
   virtual MooseVariableFieldBase &
-  getVariable(THREAD_ID tid,
+  getVariable(const THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY)
@@ -237,17 +242,20 @@ public:
   }
 
   /// Returns the variable reference for requested MooseVariable which may be in any system
-  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual MooseVariable & getStandardVariable(const THREAD_ID tid,
+                                              const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested MooseVariableField which may be in any system
-  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+  virtual MooseVariableFieldBase & getActualFieldVariable(const THREAD_ID tid,
                                                           const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested VectorMooseVariable which may be in any system
-  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual VectorMooseVariable & getVectorVariable(const THREAD_ID tid,
+                                                  const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested ArrayMooseVariable which may be in any system
-  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual ArrayMooseVariable & getArrayVariable(const THREAD_ID tid,
+                                                const std::string & var_name) = 0;
 
   /// Returns the variable name of a component of an array variable
   static std::string arrayVariableComponent(const std::string & var_name, unsigned int i)
@@ -259,7 +267,8 @@ public:
   virtual bool hasScalarVariable(const std::string & var_name) const = 0;
 
   /// Returns the scalar variable reference from whichever system contains it
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual MooseVariableScalar & getScalarVariable(const THREAD_ID tid,
+                                                  const std::string & var_name) = 0;
 
   /// Returns the equation system containing the variable provided
   virtual System & getSystem(const std::string & var_name) = 0;
@@ -272,7 +281,7 @@ public:
    */
   virtual void
   setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
-                                   THREAD_ID tid);
+                                   const THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
@@ -280,14 +289,14 @@ public:
    * @param tid The thread id
    */
   virtual const std::set<MooseVariableFieldBase *> &
-  getActiveElementalMooseVariables(THREAD_ID tid) const;
+  getActiveElementalMooseVariables(const THREAD_ID tid) const;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
    *
    * @return True if there has been a list of active elemental moose variables set, False otherwise
    */
-  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
+  virtual bool hasActiveElementalMooseVariables(const THREAD_ID tid) const;
 
   /**
    * Clear the active elemental MooseVariableFieldBase.  If there are no active variables then they
@@ -296,25 +305,25 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+  virtual void clearActiveElementalMooseVariables(const THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const = 0;
+  virtual Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) = 0;
+  virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the nonlinear system object as a base class reference given the system number
    */
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const = 0;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) = 0;
+  virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
   virtual const SystemBase & systemBaseAuxiliary() const = 0;
   virtual SystemBase & systemBaseAuxiliary() = 0;
 
-  virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual void prepareShapes(unsigned int var, const THREAD_ID tid) = 0;
+  virtual void prepareFaceShapes(unsigned int var, const THREAD_ID tid) = 0;
+  virtual void prepareNeighborShapes(unsigned int var, const THREAD_ID tid) = 0;
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
@@ -324,25 +333,25 @@ public:
   unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const;
-  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
-  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
+  virtual Real finalNonlinearResidual(const unsigned int nl_sys_num) const;
+  virtual unsigned int nNonlinearIterations(const unsigned int nl_sys_num) const;
+  virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const;
 
-  virtual void addResidual(THREAD_ID tid) = 0;
-  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addResidualLower(THREAD_ID tid) = 0;
+  virtual void addResidual(const THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(const THREAD_ID tid) = 0;
+  virtual void addResidualLower(const THREAD_ID tid) = 0;
 
-  virtual void cacheResidual(THREAD_ID tid);
-  virtual void cacheResidualNeighbor(THREAD_ID tid);
-  virtual void addCachedResidual(THREAD_ID tid);
+  virtual void cacheResidual(const THREAD_ID tid);
+  virtual void cacheResidualNeighbor(const THREAD_ID tid);
+  virtual void addCachedResidual(const THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void setResidual(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
 
-  virtual void addJacobian(THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addJacobianNeighborLowerD(THREAD_ID tid) = 0;
-  virtual void addJacobianLowerD(THREAD_ID tid) = 0;
+  virtual void addJacobian(const THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(const THREAD_ID tid) = 0;
+  virtual void addJacobianNeighborLowerD(const THREAD_ID tid) = 0;
+  virtual void addJacobianLowerD(const THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
@@ -350,57 +359,60 @@ public:
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,
-                                   THREAD_ID tid) = 0;
+                                   const THREAD_ID tid) = 0;
 
-  virtual void cacheJacobian(THREAD_ID tid);
-  virtual void cacheJacobianNeighbor(THREAD_ID tid);
-  virtual void addCachedJacobian(THREAD_ID tid);
+  virtual void cacheJacobian(const THREAD_ID tid);
+  virtual void cacheJacobianNeighbor(const THREAD_ID tid);
+  virtual void addCachedJacobian(const THREAD_ID tid);
 
-  virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem, const THREAD_ID tid) = 0;
+  virtual void prepareFace(const Elem * elem, const THREAD_ID tid) = 0;
   virtual void prepare(const Elem * elem,
                        unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
-                       THREAD_ID tid) = 0;
-  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
-  virtual void prepareAssembly(THREAD_ID tid) = 0;
+                       const THREAD_ID tid) = 0;
+  virtual void setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid) = 0;
+  virtual void
+  setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
+  virtual void prepareAssembly(const THREAD_ID tid) = 0;
 
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void reinitElem(const Elem * elem, const THREAD_ID tid) = 0;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid) = 0;
+                              const THREAD_ID tid) = 0;
   virtual void
-  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, const THREAD_ID tid) = 0;
   virtual void reinitLowerDElem(const Elem * lower_d_elem,
-                                THREAD_ID tid,
+                                const THREAD_ID tid,
                                 const std::vector<Point> * const pts = nullptr,
                                 const std::vector<Real> * const weights = nullptr);
-  virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
-  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
-  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void reinitNode(const Node * node, const THREAD_ID tid) = 0;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) = 0;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) = 0;
+                                  const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) = 0;
-  virtual void reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+                                  const THREAD_ID tid) = 0;
+  virtual void
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   /**
    * fills the VariableValue arrays for scalar variables from the solution vector
    * @param tid The thread id
    * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the
    *        purpose of re-ordering derivative information for ADNodalBCs
    */
-  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) = 0;
-  virtual void reinitOffDiagScalars(THREAD_ID tid) = 0;
+  virtual void reinitScalars(const THREAD_ID tid,
+                             bool reinit_for_derivative_reordering = false) = 0;
+  virtual void reinitOffDiagScalars(const THREAD_ID tid) = 0;
 
   /// sets the current boundary ID in assembly
-  void setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid);
+  void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid);
 
   /**
    * reinitialize FE objects on a given element on a given side at a given set of reference
@@ -414,7 +426,7 @@ public:
                                  Real tolerance,
                                  const std::vector<Point> * const pts,
                                  const std::vector<Real> * const weights = nullptr,
-                                 THREAD_ID tid = 0);
+                                 const THREAD_ID tid = 0);
 
   /**
    * reinitialize FE objects on a given neighbor element on a given side at a given set of reference
@@ -428,22 +440,22 @@ public:
                                      Real tolerance,
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights = nullptr,
-                                     THREAD_ID tid = 0);
+                                     const THREAD_ID tid = 0);
 
   /**
    * reinitialize a neighboring lower dimensional element
    */
-  void reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid = 0);
+  void reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid = 0);
 
   /**
    * Reinit a mortar element to obtain a valid JxW
    */
-  void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);
+  void reinitMortarElem(const Elem * elem, const THREAD_ID tid = 0);
 
   /**
    * Returns true if the Problem has Dirac kernels it needs to compute on elem.
    */
-  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) = 0;
+  virtual bool reinitDirac(const Elem * elem, const THREAD_ID tid) = 0;
   /**
    * Fills "elems" with the elements that should be looped over for Dirac Kernels
    */
@@ -606,7 +618,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const = 0;
+  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.
@@ -676,29 +688,33 @@ public:
   /// Is it safe to access the tagged vectors
   virtual bool safeAccessTaggedVectors() const { return _safe_access_tagged_vectors; }
 
-  virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+  virtual void clearActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid);
 
-  virtual void clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
+  virtual void clearActiveFEVariableCoupleableVectorTags(const THREAD_ID tid);
 
-  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                       const THREAD_ID tid);
 
-  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                       const THREAD_ID tid);
 
-  virtual void clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid);
+  virtual void clearActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid);
 
-  virtual void clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid);
+  virtual void clearActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid);
 
-  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                           const THREAD_ID tid);
 
-  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                           const THREAD_ID tid);
 
-  const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveFEVariableCoupleableVectorTags(const THREAD_ID tid) const;
 
-  const std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) const;
+  const std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(const THREAD_ID tid) const;
 
   /**
    * Method for setting whether we have any ad objects
@@ -714,7 +730,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const = 0;
+  virtual const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const = 0;
 
 private:
   /**
@@ -754,6 +770,11 @@ public:
    * Remove an algebraic ghosting functor from this problem's DofMaps
    */
   void removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf);
+
+  /**
+   * Remove a coupling ghosting functor from this problem's DofMaps
+   */
+  void removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf);
 
   /**
    * Automatic scaling setter
@@ -803,26 +824,27 @@ public:
    */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name,
-                                       THREAD_ID tid,
+                                       const THREAD_ID tid,
                                        const std::string & requestor_name,
                                        bool requestor_is_ad);
 
   /**
    * checks whether we have a functor corresponding to \p name on the thread id \p tid
    */
-  bool hasFunctor(const std::string & name, THREAD_ID tid) const;
+  bool hasFunctor(const std::string & name, const THREAD_ID tid) const;
 
   /**
    * checks whether we have a functor of type T corresponding to \p name on the thread id \p tid
    */
   template <typename T>
-  bool hasFunctorWithType(const std::string & name, THREAD_ID tid) const;
+  bool hasFunctorWithType(const std::string & name, const THREAD_ID tid) const;
 
   /**
    * add a functor to the problem functor container
    */
   template <typename T>
-  void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
+  void
+  addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, const THREAD_ID tid);
 
   /**
    * Add a functor that has block-wise lambda definitions, e.g. the evaluations of the functor are
@@ -844,7 +866,7 @@ public:
                                    const std::set<ExecFlagType> & clearance_schedule,
                                    const MooseMesh & mesh,
                                    const std::set<SubdomainID> & block_ids,
-                                   THREAD_ID tid);
+                                   const THREAD_ID tid);
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -871,7 +893,7 @@ public:
   template <typename T>
   void registerUnfilledFunctorRequest(T * functor_interface,
                                       const std::string & functor_name,
-                                      THREAD_ID tid);
+                                      const THREAD_ID tid);
 
   /**
    * Return the residual vector tags we are currently computing
@@ -891,7 +913,7 @@ public:
   /**
    * reinitialize the finite volume assembly data for the provided face and thread
    */
-  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+  void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
 
   /**
    * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
@@ -904,7 +926,7 @@ protected:
    * checking whether Variables of the requested type are available.
    */
   template <typename T>
-  MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
+  MooseVariableFieldBase & getVariableHelper(const THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,

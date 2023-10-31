@@ -281,11 +281,11 @@ FEProblemSolve::solve()
   // This loop is for nonlinear multigrids (developed by Alex)
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
-    _problem.solve();
+    _problem.solve(_nl.number());
 
     if (_problem.shouldSolve())
     {
-      if (_problem.converged())
+      if (_problem.converged(_nl.number()))
         _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
       else
       {
@@ -299,5 +299,5 @@ FEProblemSolve::solve()
     if (grid_step != _num_grid_steps)
       _problem.uniformRefine();
   }
-  return _problem.converged();
+  return _problem.converged(_nl.number());
 }

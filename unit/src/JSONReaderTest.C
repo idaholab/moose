@@ -28,6 +28,7 @@ TEST(JSONFileReader, errors)
   InputParameters params = factory->getValidParams("JSONFileReader");
   params.set<FEProblemBase *>("_fe_problem_base") = fe_problem;
   params.set<SubProblem *>("_subproblem") = fe_problem;
+  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "JSONFileReader";
   params.set<FileName>("filename") = "data/json/function_values.json";
@@ -104,6 +105,7 @@ TEST(JSONFileReader, getters)
   params.set<std::string>("_object_name") = "test";
   params.set<std::string>("_type") = "JSONFileReader";
   params.set<FileName>("filename") = "data/json/function_values.json";
+  params.set<SystemBase *>("_sys") = &fe_problem->getNonlinearSystemBase(0);
   JSONFileReader JSONFileReader(params);
 
   // Test scalar getters

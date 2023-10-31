@@ -40,7 +40,7 @@ ExceptionMaterial::computeQpProperties()
 
   // Throw an exception if we haven't already done so, and the
   // coupled variable has reached a certain value.
-  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+  if (_fe_problem.getNonlinearSystemBase(0).getCurrentNonlinearIterationNumber() == 1 &&
       _t_step == 2 && !_has_thrown &&
       (_rank == DofObject::invalid_processor_id || _rank == processor_id()))
   {

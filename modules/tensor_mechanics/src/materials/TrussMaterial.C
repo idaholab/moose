@@ -75,7 +75,7 @@ TrussMaterial::computeProperties()
   _origin_length = dxyz.norm();
 
   // fetch the solution for the two end nodes
-  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
   const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
 
   std::vector<Real> disp0, disp1;

@@ -457,7 +457,7 @@ NonlinearSystemBase::setupFieldDecomposition()
     return;
 
   std::shared_ptr<Split> top_split = getSplit(_decomposition_split);
-  top_split->setup();
+  top_split->setup(*this);
 }
 
 void
@@ -2248,7 +2248,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Only compute Jacobian entries if this coupling is being used by the
                   // preconditioner
                   if (nfc->variable().number() == jvar->number() ||
-                      !_fe_problem.areCoupled(nfc->variable().number(), jvar->number()))
+                      !_fe_problem.areCoupled(
+                          nfc->variable().number(), jvar->number(), this->number()))
                     continue;
 
                   // Need to zero out the matrices first
@@ -2463,7 +2464,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Only compute Jacobian entries if this coupling is being used by the
                   // preconditioner
                   if (nec->variable().number() == jvar->number() ||
-                      !_fe_problem.areCoupled(nec->variable().number(), jvar->number()))
+                      !_fe_problem.areCoupled(
+                          nec->variable().number(), jvar->number(), this->number()))
                     continue;
 
                   // Need to zero out the matrices first
@@ -2649,7 +2651,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Block restricted Nodal Kernels
     if (_nodal_kernels.hasActiveBlockObjects())
     {
-      ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
+      ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       Threads::parallel_reduce(range, cnkjt);
 
@@ -2718,7 +2720,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2743,7 +2745,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, *this, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2860,7 +2862,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       // which variables are "coupled" as far as the preconditioner is
       // concerned, not what variables a boundary condition specifically
       // depends on.
-      auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
+      auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0, this->number());
 
       // Compute Jacobians for NodalBCBases
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -3105,7 +3107,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         TIME_SECTION("computeDampers", 3, "Computing Dampers");
         has_active_dampers = true;
         *_increment_vec = update;
-        ComputeElemDampingThread cid(_fe_problem);
+        ComputeElemDampingThread cid(_fe_problem, *this);
         Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
         damping = std::min(cid.damping(), damping);
       }
@@ -3120,7 +3122,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 
         has_active_dampers = true;
         *_increment_vec = update;
-        ComputeNodalDampingThread cndt(_fe_problem);
+        ComputeNodalDampingThread cndt(_fe_problem, *this);
         Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
         damping = std::min(cndt.damping(), damping);
       }

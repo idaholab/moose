@@ -271,7 +271,8 @@ AddVariableAction::addVariable(const std::string & var_name)
     // MooseEigenSystem will be eventually removed. NonlinearEigenSystem will be used intead.
     // It is legal for NonlinearEigenSystem to specify a variable as eigen in input file,
     // but we do not need to do anything here.
-    MooseEigenSystem * esys = dynamic_cast<MooseEigenSystem *>(&_problem->getNonlinearSystemBase());
+    MooseEigenSystem * esys =
+        dynamic_cast<MooseEigenSystem *>(&_problem->getNonlinearSystemBase(/*nl_sys=*/0));
     if (esys)
       esys->markEigenVariable(var_name);
   }

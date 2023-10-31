@@ -68,4 +68,6 @@ protected:
 
   /// Timestep tolerance from Transient executioner
   const Real & _timestep_tolerance;
+
+  friend class SetupPredictorAction;
 };

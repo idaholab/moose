@@ -36,7 +36,7 @@ GhostingUserObject::validParams()
 GhostingUserObject::GhostingUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
-    _nl(_fe_problem.getNonlinearSystemBase())
+    _nl(_fe_problem.getNonlinearSystemBase(_sys.number()))
 {
   _maps.resize(2); // Geometric and Algebraic maps
 
