@@ -32,13 +32,12 @@ FVInitialConditionWarehouse::addObject(std::shared_ptr<FVInitialConditionBase> o
                                        bool recurse)
 {
   // Check that when object is boundary restricted that the variable is nodal
-  const MooseVariableFEBase & var = object->variable();
+  const auto & var = object->variable();
 
   // Block Restricted
   if (object->blockRestricted())
   {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
+    auto iter = _block_ics[tid].find(var.name());
     if (iter != _block_ics[tid].end() &&
         (object->hasBlocks(iter->second) ||
          (iter->second.find(Moose::ANY_BLOCK_ID) != iter->second.end())))
@@ -51,8 +50,7 @@ FVInitialConditionWarehouse::addObject(std::shared_ptr<FVInitialConditionBase> o
   // Non-restricted
   else
   {
-    std::map<std::string, std::set<SubdomainID>>::const_iterator iter =
-        _block_ics[tid].find(var.name());
+    auto iter = _block_ics[tid].find(var.name());
     if (iter != _block_ics[tid].end())
       mooseError("The initial condition '",
                  object->name(),

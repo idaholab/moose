@@ -147,7 +147,6 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
 
   registerMooseObjectTask("add_fv_ic",                    FVInitialCondition,     false);
-  appendMooseObjectTask  ("add_fv_ic",                    ScalarInitialCondition);
 
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
@@ -315,7 +314,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
-                           "(add_ic add_fv_ic)"
+                           "(add_ic, add_fv_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
                            "(add_times)"

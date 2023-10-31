@@ -51,7 +51,7 @@ public:
   /**
    * retrieves the MOOSE variable that this initial condition acts upon
    */
-  virtual MooseVariableFEBase & variable() = 0;
+  virtual MooseVariableFieldBase & variable() = 0;
 
   /**
    * Workhorse method for projecting the initial conditions for boundary restricted initial

@@ -1157,10 +1157,9 @@ public:
   ///@}
 
   /**
-   * Cache \p elem and \p neighbor dof indices information for variables in all the local \p
-   * FaceInfo objects to save computational expense
+   * Cache if variables live on the elements connected by the FaceInfo objects
    */
-  void cacheVarIndicesByFace() const;
+  void cacheFaceInfoVariableOwnership() const;
 
   void cacheFVElementalDoFs() const;
 

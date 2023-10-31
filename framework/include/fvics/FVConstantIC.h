@@ -18,9 +18,6 @@ namespace libMesh
 class Point;
 }
 
-template <typename T>
-InputParameters validParams();
-
 /**
  * FVConstantIC just returns a constant value for a finite volume variable.
  */

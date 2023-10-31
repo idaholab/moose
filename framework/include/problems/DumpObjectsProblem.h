@@ -83,7 +83,7 @@ public:
   captureDump(addAuxScalarKernel,     "AuxScalarKernels")
   captureDump(addAuxVariable,         "AuxVariables")
   captureDump(addBoundaryCondition,   "BCs")
-  captureDump(addFVBC,  "FVBCs")
+  captureDump(addFVBC,                "FVBCs")
   captureDump(addConstraint,          "Constraints")
   captureDump(addDamper,              "Dampers")
   captureDump(addDGKernel,            "DGKernels")

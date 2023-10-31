@@ -64,8 +64,9 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   mesh->prepare(nullptr);
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   mesh->setCoordSystem({}, coord_type_enum);
+  mesh->buildFiniteVolumeInfo();
+  mesh->computeFiniteVolumeCoords();
   const auto & all_fi = mesh->allFaceInfo();
-  mesh->computeFaceInfoFaceCoords();
 
   // We create a face-centered functor
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> u(*mesh,

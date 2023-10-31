@@ -16,6 +16,6 @@ ElemInfo::ElemInfo(const Elem * const elem)
     _volume(_elem->volume()),
     _centroid(_elem->vertex_average()),
     _coord_transform_factor(1.0),
-    _dof_ids(std::vector<std::vector<dof_id_type>>())
+    _dof_indices(std::vector<std::vector<dof_id_type>>())
 {
 }

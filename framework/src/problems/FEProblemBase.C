@@ -5683,7 +5683,7 @@ FEProblemBase::init()
   {
     _mesh.buildFiniteVolumeInfo();
     _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheVarIndicesByFace();
+    _mesh.cacheFaceInfoVariableOwnership();
     _mesh.cacheFVElementalDoFs();
   }
 
@@ -7195,7 +7195,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   {
     _mesh.buildFiniteVolumeInfo();
     _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheVarIndicesByFace();
+    _mesh.cacheFaceInfoVariableOwnership();
     _mesh.cacheFVElementalDoFs();
   }
 

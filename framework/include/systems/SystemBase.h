@@ -547,13 +547,13 @@ public:
    * Get the number of field variables in this system
    * @return the number of field variables
    */
-  virtual unsigned int nFieldVariables() const;
+  unsigned int nFieldVariables() const;
 
   /**
    * Get the number of finite volume variables in this system
    * @return the number of finite volume variables
    */
-  virtual unsigned int nFVVariables() const;
+  unsigned int nFVVariables() const;
 
   /**
    * Gets the maximum number of dofs used by any one variable on any one element

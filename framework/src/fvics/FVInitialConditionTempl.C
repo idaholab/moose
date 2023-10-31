@@ -40,11 +40,13 @@ template <typename T>
 void
 FVInitialConditionTempl<T>::computeElement(const ElemInfo & elem_info)
 {
+  _base_var.prepareIC();
+
   if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
   {
     const auto system_number = _base_var.sys().number();
     const auto var_number = _base_var.number();
-    const auto dof_id = elem_info.dofID()[system_number][var_number];
+    const auto dof_id = elem_info.dofIndices()[system_number][var_number];
     const auto dof_value = this->value(elem_info.centroid());
 
     _base_var.sys().solution().set(dof_id, dof_value);

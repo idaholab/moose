@@ -3356,8 +3356,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   if (!_finite_volume_info_dirty)
     return;
 
-  // mooseError("Lemme see the stack");
-
   mooseAssert(!Threads::in_threads,
               "This routine has not been implemented for threads. Please query this routine before "
               "a threaded region or contact a MOOSE developer to discuss.");
@@ -3482,7 +3480,9 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
     return nullptr;
   else
   {
-    mooseAssert(it->second, "For some reason, the FaceInfo object is NULL!");
+    mooseAssert(it->second,
+                "For some reason, the FaceInfo object is NULL! Try calling "
+                "`buildFiniteVolumeInfo()` before using this accessor!");
     return it->second;
   }
 }
@@ -3549,7 +3549,7 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-MooseMesh::cacheVarIndicesByFace() const
+MooseMesh::cacheFaceInfoVariableOwnership() const
 {
   std::vector<const MooseVariableFieldBase *> moose_vars;
 
@@ -3618,20 +3618,20 @@ MooseMesh::cacheFVElementalDoFs() const
   for (auto & elem_info_pair : _elem_to_elem_info)
   {
     ElemInfo & elem_info = elem_info_pair.second;
-    std::vector<std::vector<dof_id_type>> dof_vector;
-    // dof_vector.clear();
-    dof_vector.resize(num_eqs, std::vector<dof_id_type>());
+    auto & dof_vector = elem_info.dofIndices();
+
+    dof_vector.clear();
+    dof_vector.resize(num_eqs);
 
     for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
       if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
       {
         auto & sys = _app.feProblem().getNonlinearSystemBase(i);
-        dof_vector[sys.number()].clear();
-        dof_vector[sys.number()].resize(sys.nVariables(), dof_id_type(0));
+        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
         const auto & variables = sys.getVariables(0);
         for (const auto & var : variables)
         {
-          const std::set<SubdomainID> & var_subdomains = var->blockIDs();
+          const auto & var_subdomains = var->blockIDs();
 
           // We will only cache for FV variables and if they live on the current subdomain
           if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
@@ -3651,7 +3651,7 @@ MooseMesh::cacheFVElementalDoFs() const
       const auto & aux_variables = sys.getVariables(0);
       for (const auto & var : aux_variables)
       {
-        const std::set<SubdomainID> & var_subdomains = var->blockIDs();
+        const auto & var_subdomains = var->blockIDs();
 
         // We will only cache for FV variables and if they live on the current subdomain
         if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
@@ -3663,7 +3663,6 @@ MooseMesh::cacheFVElementalDoFs() const
         }
       }
     }
-    elem_info.setDofIDs(dof_vector);
   }
 }
 
