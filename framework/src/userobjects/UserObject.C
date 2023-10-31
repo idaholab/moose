@@ -93,7 +93,20 @@ UserObject::UserObject(const InputParameters & parameters)
   mooseAssert(_sys.varKind() == Moose::VAR_NONLINEAR,
               "We expect the system to conceptually be nonlinear");
 
+  // insert self
   _supplied_uo.insert(name());
+
+  // add items for dependency resolution of writable coupled variables
+  if (auto coupleable = dynamic_cast<Coupleable *>(this); coupleable)
+  {
+    // add writable coupled variables as supplied
+    for (const auto & var : coupleable->getWritableCoupledVariables())
+      _supplied_uo.insert("Variable/" + var->name());
+
+    // add read-only coupled variables as depending on
+    for (MooseVariableFEBase * coupled_var : coupleable->getCoupledMooseVars())
+      _depend_uo.insert("Variable/" + coupled_var->name());
+  }
 }
 
 std::set<UserObjectName>
