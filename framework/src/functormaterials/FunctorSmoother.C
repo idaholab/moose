@@ -133,6 +133,17 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                 }
               average /= n_neighbors;
             }
+            if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
+            {
+              const auto elem_map = const_cast<MooseMesh &>(_mesh).nodeToElemMap();
+              unsigned int n_neighbors = 0;
+              for (const auto neighbor_id : libmesh_map_find(elem_map, r.node->id()))
+              {
+                n_neighbors++;
+                average += functor_in(Moose::ElemArg{_mesh.elemPtr(neighbor_id), false}, t);
+              }
+              average /= n_neighbors;
+            }
             else
               mooseError("Element layered averaging smoothing has only been defined for the "
                          "ElemArg functor argument, not for ",
