@@ -21,4 +21,27 @@
       detail = "or divergence occurs at any frame below main."
     []
   []
+
+  [ignore_param_tests]
+    requirement = "The find_hung_process.py script shall be able to identify "
+                  "diverged stacks, where"
+    design = 'Debug/index.md'
+    issues = '#25870'
+
+    [default_ignore_params]
+      type = RunApp
+      command = '../../framework/scripts/find_hung_process.py -f ignore_param_test.1603456.cache'
+      expect_out = '^Count: 4'
+
+      detail = "there are differing values in some parameters, but they are ignored,"
+    []
+
+    [params_are_analyzed]
+      type = RunApp
+      command = '../../framework/scripts/find_hung_process.py -f ignore_param_test.1603456.cache -p'
+      expect_out = '^Count: 3'
+
+      detail = "or those values are treated as significant differences."
+    []
+  []
 []
