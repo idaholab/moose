@@ -1,0 +1,94 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADBoundaryFlux3EqnGhostFunctorVelocityTemperature.h"
+#include "THMIndices3Eqn.h"
+#include "SinglePhaseFluidProperties.h"
+#include "Numerics.h"
+#include "MooseFunctorArguments.h"
+
+registerMooseObject("ThermalHydraulicsApp", ADBoundaryFlux3EqnGhostFunctorVelocityTemperature);
+
+InputParameters
+ADBoundaryFlux3EqnGhostFunctorVelocityTemperature::validParams()
+{
+  InputParameters params = ADBoundaryFlux3EqnGhostBase::validParams();
+
+  params.addClassDescription(
+      "Computes a boundary flux from a specified velocity and temperature for the 1-D, "
+      "1-phase, variable-area Euler equations using a ghost cell and functors");
+
+  params.addRequiredParam<MooseFunctorName>("vel", "Specified functor for 1D velocity");
+  params.addRequiredParam<MooseFunctorName>("T", "Specified functor temperature");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
+
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "Name of single-phase fluid properties user object");
+  return params;
+}
+
+ADBoundaryFlux3EqnGhostFunctorVelocityTemperature::
+    ADBoundaryFlux3EqnGhostFunctorVelocityTemperature(const InputParameters & parameters)
+  : ADBoundaryFlux3EqnGhostBase(parameters),
+    ADFunctorInterface(this),
+
+    _vel(getFunctor<ADReal>("vel")),
+    _T(getFunctor<ADReal>("T")),
+    _reversible(getParam<bool>("reversible")),
+    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+{
+}
+
+std::vector<ADReal>
+ADBoundaryFlux3EqnGhostFunctorVelocityTemperature::getGhostCellSolution(
+    const std::vector<ADReal> & U) const
+{
+  const ADReal rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const ADReal rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const ADReal rhoEA = U[THM3Eqn::CONS_VAR_RHOEA];
+  const ADReal A = U[THM3Eqn::CONS_VAR_AREA];
+
+  // Both these functors should be constant anyway
+  Node a(Point(0, 0, 0), 1);
+  Moose::NodeArg node_arg = {&a, 0};
+  Moose::StateArg time_arg = {0, Moose::SolutionIterationType::Time};
+
+  const ADReal vel_b = _vel(node_arg, time_arg);
+  const ADReal T = _T(node_arg, time_arg);
+
+  const ADReal rho = rhoA / A;
+  std::vector<ADReal> U_ghost(THM3Eqn::N_CONS_VAR);
+  if (!_reversible || THM::isInlet(vel_b, _normal))
+  {
+    // Pressure is the only quantity coming from the interior
+    const ADReal vel = rhouA / rhoA;
+    const ADReal E = rhoEA / rhoA;
+    const ADReal e = E - 0.5 * vel * vel;
+    const ADReal p = _fp.p_from_v_e(1.0 / rho, e);
+
+    const ADReal rho_b = _fp.rho_from_p_T(p, T);
+    const ADReal rhouA_b = rho_b * vel_b * A;
+    const ADReal e_b = _fp.e_from_p_rho(p, rho_b);
+    const ADReal E_b = e_b + 0.5 * vel_b * vel_b;
+
+    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rho_b * A;
+    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rhouA_b;
+    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rho_b * E_b * A;
+    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+  }
+  else
+  {
+    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
+    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rhoA * vel_b;
+    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
+    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+  }
+
+  return U_ghost;
+}
