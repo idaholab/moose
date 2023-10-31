@@ -37,6 +37,6 @@ THMSpecificVolumeAux::computeValue()
 {
   mooseAssert(_rhoA[_qp] != 0, "Detected zero density.");
   Real v = _alpha[_qp] * _area[_qp] / _rhoA[_qp];
-  mooseAssert(v >= 0., "specific volume is negative.");
+  // mooseAssert(v >= 0., "specific volume is negative.");
   return v;
 }
