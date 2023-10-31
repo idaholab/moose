@@ -1,0 +1,187 @@
+Host: lemhi0109 PID: 1004859
+Thread 4 (Thread 0x15200dc0c700 (LWP 1004934)):
+#0  0x0000152013cb845c in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x0000152014dabfb7 in cm_timeout_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#3  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 3 (Thread 0x15200dd0d700 (LWP 1004933)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c9060 in ibv_get_cq_event () from /lib64/libibverbs.so
+#2  0x0000152014dac1e6 in cm_completion_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 2 (Thread 0x15202cc04700 (LWP 1004931)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c2fa3 in ibv_get_async_event () from /lib64/libibverbs.so
+#2  0x0000152014d9b008 in async_thread () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x15202cc7ee00 (LWP 1004859)):
+#0  0x0000152014d68a5e in MPIDI_CH3I_SMP_pull_header () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#1  0x0000152014d693c5 in MPIDI_CH3I_SMP_read_progress () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152014d5783f in MPIDI_CH3I_Progress_test () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152014377359 in mv2_shm_bcast () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#4  0x0000152014346c1e in MPIR_Shmem_Bcast_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#5  0x0000152014338920 in MPIR_Allreduce_topo_aware_hierarchical_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#6  0x000015201433b899 in MPIR_Allreduce_index_tuned_intra_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#7  0x00001520142c3606 in MPIR_Allreduce_impl () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#8  0x00001520142c3e35 in PMPI_Allreduce () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#9  0x000015202ae96d3e in TIMPI::Communicator::min<unsigned long> (r=@0x7fffa7a78080: 98, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/data_type.h:83
+#10 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2056
+#11 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2051
+#12 libMesh::PetscVector<double>::zero (this=this@entry=0x52083b0) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/libmesh/petsc_vector.h:865
+#13 0x000015202aea0648 in libMesh::PetscVector<double>::init (this=this@entry=foo, n=437434470, n_local=n_local@entry=970200, ghost=..., fast=fast@entry=false, ptype=ptype@entry=libMesh::GHOSTED) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/ext/new_allocator.h:89
+#14 0x000015201c35cba8 in libMesh::System::init_data (this=<optimized out>) at ./include/libmesh/dof_map.h:511
+#15 0x000015201c35d49c in libMesh::System::init (this=0x51f7880) at ../src/systems/system.C:199
+#16 0x000015201c2f259c in libMesh::EquationSystems::init (this=0xab4cac0) at ./include/libmesh/equation_systems.h:819
+#17 0x00001520207cd32d in FEProblemBase::init (this=this@entry=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/moose/framework/build/header_symlinks/Restartable.h:59
+#18 0x000015202b35b370 in SNFEProblem::init (this=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/radiation_transport/src/transportsystems/SN-DFEM/problems/SNFEProblem.C:50
+#19 0x00001520204aac46 in Action::timedAct (this=0x378cba0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/Action.C:85
+#20 0x00001520204b5941 in ActionWarehouse::executeActionsWithAction (this=0x305ab38, task=...) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:386
+#21 0x00001520204b5e77 in ActionWarehouse::executeAllActions (this=this@entry=0x305ab38) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:346
+#22 0x000015201ffe02a8 in MooseApp::runInputFile (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1084
+#23 0x00001520200099f1 in MooseApp::run (this=this@entry=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1504
+#24 0x000015202c7abb35 in MooseApp::run (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/src/base/MooseApp.C:273
+#25 0x0000000000402d68 in main (argc=3, argv=0x7fffa7a7b0f8) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/bits/shared_ptr_base.h:1020
+****************************************************************************************************************************************************************
+
+Host: lemhi0109 PID: 1004860
+Thread 4 (Thread 0x15200dc0c700 (LWP 1004934)):
+#0  0x0000152013cb845c in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x0000152014dabfb7 in cm_timeout_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#3  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 3 (Thread 0x15200dd0d700 (LWP 1004933)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c9060 in ibv_get_cq_event () from /lib64/libibverbs.so
+#2  0x0000152014dac1e6 in cm_completion_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 2 (Thread 0x15202cc04700 (LWP 1004931)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c2fa3 in ibv_get_async_event () from /lib64/libibverbs.so
+#2  0x0000152014d9b008 in async_thread () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x15202cc7ee00 (LWP 1004859)):
+#0  0x0000152014d68a5e in MPIDI_CH3I_SMP_pull_header () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#1  0x0000152014d693c5 in MPIDI_CH3I_SMP_read_progress () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152014d5783f in MPIDI_CH3I_Progress_test () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152014377359 in mv2_shm_bcast () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#4  0x0000152014346c1e in MPIR_Shmem_Bcast_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#5  0x0000152014338920 in MPIR_Allreduce_topo_aware_hierarchical_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#6  0x000015201433b899 in MPIR_Allreduce_index_tuned_intra_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#7  0x00001520142c3606 in MPIR_Allreduce_impl () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#8  0x00001520142c3e35 in PMPI_Allreduce () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#9  0x000015202ae96d3e in TIMPI::Communicator::min<unsigned long> (r=@0x7fffa7a78080: 98, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/data_type.h:83
+#10 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2056
+#11 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2051
+#12 libMesh::PetscVector<double>::zero (this=this@entry=0x52083b0) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/libmesh/petsc_vector.h:865
+#13 0x000015202aea0648 in libMesh::PetscVector<double>::init (this=this@entry=foo, n=437434470, n_local=n_local@entry=970200, ghost=..., fast=fast@entry=false, ptype=ptype@entry=libMesh::GHOSTED) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/ext/new_allocator.h:89
+#14 0x000015201c35cba8 in libMesh::System::init_data (this=<optimized out>) at ./include/libmesh/dof_map.h:511
+#15 0x000015201c35d49c in libMesh::System::init (this=0x51f7880) at ../src/systems/system.C:199
+#16 0x000015201c2f259c in libMesh::EquationSystems::init (this=0xab4cac0) at ./include/libmesh/equation_systems.h:819
+#17 0x00001520207cd32d in FEProblemBase::init (this=this@entry=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/moose/framework/build/header_symlinks/Restartable.h:59
+#18 0x000015202b35b370 in SNFEProblem::init (this=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/radiation_transport/src/transportsystems/SN-DFEM/problems/SNFEProblem.C:50
+#19 0x00001520204aac46 in Action::timedAct (this=0x378cba0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/Action.C:85
+#20 0x00001520204b5941 in ActionWarehouse::executeActionsWithAction (this=0x305ab38, task=...) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:386
+#21 0x00001520204b5e77 in ActionWarehouse::executeAllActions (this=this@entry=0x305ab38) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:346
+#22 0x000015201ffe02a8 in MooseApp::runInputFile (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1084
+#23 0x00001520200099f1 in MooseApp::run (this=this@entry=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1504
+#24 0x000015202c7abb35 in MooseApp::run (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/src/base/MooseApp.C:273
+#25 0x0000000000402d68 in main (argc=3, argv=0x7fffa7a7b0f8) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/bits/shared_ptr_base.h:1020
+****************************************************************************************************************************************************************
+
+Host: lemhi0109 PID: 1004861
+Thread 4 (Thread 0x15200dc0c700 (LWP 1004934)):
+#0  0x0000152013cb845c in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x0000152014dabfb7 in cm_timeout_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#3  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 3 (Thread 0x15200dd0d700 (LWP 1004933)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c9060 in ibv_get_cq_event () from /lib64/libibverbs.so
+#2  0x0000152014dac1e6 in cm_completion_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 2 (Thread 0x15202cc04700 (LWP 1004931)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c2fa3 in ibv_get_async_event () from /lib64/libibverbs.so
+#2  0x0000152014d9b008 in async_thread () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x15202cc7ee00 (LWP 1004859)):
+#0  0x0000152014d68a5e in MPIDI_CH3I_SMP_pull_header () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#1  0x0000152014d693c5 in MPIDI_CH3I_SMP_read_progress () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152014d5783f in MPIDI_CH3I_Progress_test () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152014377359 in mv2_shm_bcast () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#4  0x0000152014346c1e in MPIR_Shmem_Bcast_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#5  0x0000152014338920 in MPIR_Allreduce_topo_aware_hierarchical_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#6  0x000015201433b899 in MPIR_Allreduce_index_tuned_intra_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#7  0x00001520142c3606 in MPIR_Allreduce_impl () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#8  0x00001520142c3e35 in PMPI_Allreduce () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#9  0x000015202ae96d3e in TIMPI::Communicator::min<unsigned long> (r=@0x7fffa7a78080: 98, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/data_type.h:83
+#10 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2056
+#11 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2051
+#12 libMesh::PetscVector<double>::zero (this=this@entry=0x52083b0) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/libmesh/petsc_vector.h:865
+#13 0x000015202aea0648 in libMesh::PetscVector<double>::init (this=this@entry=foo, n=437434470, n_local=n_local@entry=970200, ghost=..., fast=fast@entry=false, ptype=ptype@entry=libMesh::GHOSTED) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/ext/new_allocator.h:89
+#14 0x000015201c35cba8 in libMesh::System::init_data (this=<optimized out>) at ./include/libmesh/dof_map.h:511
+#15 0x000015201c35d49c in libMesh::System::init (this=0x51f7880) at ../src/systems/system.C:199
+#16 0x000015201c2f259c in libMesh::EquationSystems::init (this=0xab4cac0) at ./include/libmesh/equation_systems.h:819
+#17 0x00001520207cd32d in FEProblemBase::init (this=this@entry=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/moose/framework/build/header_symlinks/Restartable.h:59
+#18 0x000015202b35b370 in SNFEProblem::init (this=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/radiation_transport/src/transportsystems/SN-DFEM/problems/SNFEProblem.C:50
+#19 0x00001520204aac46 in Action::timedAct (this=0x378cba0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/Action.C:85
+#20 0x00001520204b5941 in ActionWarehouse::executeActionsWithAction (this=0x305ab38, task=...) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:386
+#21 0x00001520204b5e77 in ActionWarehouse::executeAllActions (this=this@entry=0x305ab38) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:346
+#22 0x000015201ffe02a8 in MooseApp::runInputFile (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1084
+#23 0x00001520200099f1 in MooseApp::run (this=this@entry=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1504
+#24 0x000015202c7abb35 in MooseApp::run (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/src/base/MooseApp.C:273
+#25 0x0000000000402d68 in main (argc=3, argv=0x7fffa7a7b0f8) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/bits/shared_ptr_base.h:1020
+****************************************************************************************************************************************************************
+
+Host: lemhi0109 PID: 1004862
+Thread 4 (Thread 0x15200dc0c700 (LWP 1004934)):
+#0  0x0000152013cb845c in pthread_cond_wait@@GLIBC_2.3.2 () from /lib64/libpthread.so.0
+#1  0x0000152014dabfb7 in cm_timeout_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#3  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 3 (Thread 0x15200dd0d700 (LWP 1004933)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c9060 in ibv_get_cq_event () from /lib64/libibverbs.so
+#2  0x0000152014dac1e6 in cm_completion_handler () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 2 (Thread 0x15202cc04700 (LWP 1004931)):
+#0  0x0000152013cbbab4 in read () from /lib64/libpthread.so.0
+#1  0x00001520102c2fa3 in ibv_get_async_event () from /lib64/libibverbs.so
+#2  0x0000152014d9b008 in async_thread () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152013cb21ca in start_thread () from /lib64/libpthread.so.0
+#4  0x0000152012052e73 in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x15202cc7ee00 (LWP 1004859)):
+#0  0x0000152014d68a5e in MPIDI_CH3I_SMP_pull_header () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#1  0x0000152014d693c5 in MPIDI_CH3I_SMP_read_progress () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#2  0x0000152014d5783f in MPIDI_CH3I_Progress_test () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#3  0x0000152014377359 in mv2_shm_bcast () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#4  0x0000152014346c1e in MPIR_Shmem_Bcast_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#5  0x0000152014338920 in MPIR_Allreduce_topo_aware_hierarchical_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#6  0x000015201433b899 in MPIR_Allreduce_index_tuned_intra_MV2 () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#7  0x00001520142c3606 in MPIR_Allreduce_impl () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#8  0x00001520142c3e35 in PMPI_Allreduce () from /apps/local/mvapich2/2.3.7-1/lib/libmpi.so.12
+#9  0x000015202ae96d3e in TIMPI::Communicator::min<unsigned long> (r=@0x7fffa7a78080: 98, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/data_type.h:83
+#10 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2056
+#11 TIMPI::Communicator::verify<unsigned long> (r=<optimized out>, this=0x3053750) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/timpi/parallel_implementation.h:2051
+#12 libMesh::PetscVector<double>::zero (this=this@entry=0x52083b0) at /home/wangy2/trunk/lemhi/griffin/moose/scripts/../libmesh/installed/include/libmesh/petsc_vector.h:865
+#13 0x000015202aea0648 in libMesh::PetscVector<double>::init (this=this@entry=bar, n=437434470, n_local=n_local@entry=970200, ghost=..., fast=fast@entry=false, ptype=ptype@entry=libMesh::GHOSTED) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/ext/new_allocator.h:89
+#14 0x000015201c35cba8 in libMesh::System::init_data (this=<optimized out>) at ./include/libmesh/dof_map.h:511
+#15 0x000015201c35d49c in libMesh::System::init (this=0x51f7880) at ../src/systems/system.C:199
+#16 0x000015201c2f259c in libMesh::EquationSystems::init (this=0xab4cac0) at ./include/libmesh/equation_systems.h:819
+#17 0x00001520207cd32d in FEProblemBase::init (this=this@entry=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/moose/framework/build/header_symlinks/Restartable.h:59
+#18 0x000015202b35b370 in SNFEProblem::init (this=0xade7a40) at /home/wangy2/trunk/lemhi/griffin/radiation_transport/src/transportsystems/SN-DFEM/problems/SNFEProblem.C:50
+#19 0x00001520204aac46 in Action::timedAct (this=0x378cba0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/Action.C:85
+#20 0x00001520204b5941 in ActionWarehouse::executeActionsWithAction (this=0x305ab38, task=...) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:386
+#21 0x00001520204b5e77 in ActionWarehouse::executeAllActions (this=this@entry=0x305ab38) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/actions/ActionWarehouse.C:346
+#22 0x000015201ffe02a8 in MooseApp::runInputFile (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1084
+#23 0x00001520200099f1 in MooseApp::run (this=this@entry=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/moose/framework/src/base/MooseApp.C:1504
+#24 0x000015202c7abb35 in MooseApp::run (this=0x305a4c0) at /home/wangy2/trunk/lemhi/griffin/src/base/MooseApp.C:273
+#25 0x0000000000402d68 in main (argc=3, argv=0x7fffa7a7b0f8) at /apps/local/spack/opt/spack/gcc-8.4.1/gcc-9.4.0-57pg55xkr4cydqecxijtmaaptbrgkxcn/include/c++/9.4.0/bits/shared_ptr_base.h:1020
+****************************************************************************************************************************************************************

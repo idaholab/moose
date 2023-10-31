@@ -331,6 +331,7 @@ class ProcessTraces:
         self.host_and_frames_re = re.compile('^(Host.*?)\n(.*)', re.M | re.S)
         self.memory_re = re.compile(r'0x[0-9a-f]*')    # Pattern to match (and remove) memory addresses
         self.frame_num_re = re.compile(r'^#\d.', re.M) # frame numbers IMPORTANT: Always match 2 characters due to fixed width formatting!
+        self.param_val_re = re.compile(r'(\w+?)=\S+(?=(?:,|\)))') # Pattern to match and ignore parameter values for all parameters of any routine.
 
     def read_tracesfromfile(self, filename):
         """
@@ -362,7 +363,7 @@ class ProcessTraces:
         """
         return max(trace.count('\n') for trace in self.traces)
 
-    def process_traces(self, num_lines_to_keep):
+    def process_traces(self, num_lines_to_keep, params_are_significant):
         """
         Process the individual traces into buckets to determine whether processes have diverged from one and other.
         """
@@ -404,7 +405,7 @@ class ProcessTraces:
 
                 unique = ''
                 for back_trace in self.unique_stack_traces:
-                    if self.compare_traces(trace, back_trace):
+                    if self.compare_traces(trace, back_trace, params_are_significant):
                         unique = back_trace
 
                 if unique == '':
@@ -462,7 +463,7 @@ class ProcessTraces:
                 print("\n".join(count))
             print(f'\n{trace}')
 
-    def compare_traces(self, trace1, trace2):
+    def compare_traces(self, trace1, trace2, params_are_significant):
         """
         Return True if trace1 == trace2
         """
@@ -473,6 +474,11 @@ class ProcessTraces:
         # Drop Frame Numbers
         trace1 = self.frame_num_re.sub('#00', trace1)
         trace2 = self.frame_num_re.sub('#00', trace2)
+
+        # Drop parameter values for all routines from the comparison
+        if not params_are_significant:
+            trace1 = self.param_val_re.sub(r'\1=<ignored>', trace1)
+            trace2 = self.param_val_re.sub(r'\1=<ignored>', trace2)
 
         if trace1 != trace2:
             return False
@@ -501,6 +507,9 @@ def main():
     parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
                         help='The number of stack frames to keep and compare for '
                         'uniqueness (Default: ALL)')
+    parser.add_argument('-p', '--param-values', action='store_true', dest="params_are_significant", default=False,
+                        help='Set whether the argument values for each routine/level in the stack trace are significant '
+                        'for the comparison of stack traces between ranks. (Default: all significant)')
     args = parser.parse_args()
 
     cache_filename = None
@@ -525,7 +534,7 @@ def main():
     # Process the traces to collapse them into unique stacks
     pt = ProcessTraces()
     pt.read_tracesfromfile(cache_filename)
-    pt.process_traces(args.stacks)
+    pt.process_traces(args.stacks, args.params_are_significant)
 
 if __name__ == '__main__':
     sys.exit(main())
