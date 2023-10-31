@@ -1948,6 +1948,7 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
   }
 
 #else
+  libmesh_ignore(app_name, library_path, library_name, lib_load_deps);
   mooseError("Dynamic Loading is either not supported or was not detected by libMesh configure.");
 #endif
 }
@@ -1976,6 +1977,7 @@ MooseApp::dynamicAllRegistration(const std::string & app_name,
 
   dynamicRegistration(params);
 #else
+  libmesh_ignore(app_name, factory, action_factory, syntax, library_path, library_name);
   mooseError("Dynamic Loading is either not supported or was not detected by libMesh configure.");
 #endif
 }
