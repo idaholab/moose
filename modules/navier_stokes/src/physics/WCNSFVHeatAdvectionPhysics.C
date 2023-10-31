@@ -13,8 +13,9 @@
 
 registerWCNSFVPhysicsBaseTasks("NavierStokesApp", WCNSFVHeatAdvectionPhysics);
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_variable");
-registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_ic");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_kernel");
+registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSFVHeatAdvectionPhysics, "add_material");
 
 InputParameters
@@ -146,7 +147,8 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyTimeKernels()
   assignBlocks(params, _blocks);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseFunctorName>(NS::specific_enthalpy) = NS::specific_enthalpy;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
+      NS::time_deriv(NS::specific_enthalpy);
 
   if (_porous_medium_treatment)
   {
@@ -342,10 +344,10 @@ WCNSFVHeatAdvectionPhysics::addINSEnergyInletBC()
   {
     if (_energy_inlet_types[bc_ind] == "fixed-temperature")
     {
-      const std::string bc_type = "FVFunctionDirichletBC";
+      const std::string bc_type = "FVADFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      params.set<FunctionName>("function") = _energy_inlet_functors[bc_ind];
+      params.set<MooseFunctorName>("functor") = _energy_inlet_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(
