@@ -954,6 +954,10 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
   // need quick access to the list of all variables that need to be inserted into the solution
   // vector by a given thread.
   _writable_coupled_variables[_c_tid].insert(var);
+
+  // enable auxkernel dependency resolution
+  if (auto aux = dynamic_cast<AuxKernel *>(this); aux)
+    aux->_supplied_vars.insert(var->name());
 }
 
 const VariableValue &

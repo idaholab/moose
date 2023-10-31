@@ -109,9 +109,6 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
             if (var->isNodalDefined())
               // insert into the global solution vector
               var->insert(_aux_sys.solution());
-
-          // make solution values available for dependent AuxKernels
-          _fe_problem.reinitNode(node, _tid);
         }
       }
   }

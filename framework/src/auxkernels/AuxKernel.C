@@ -143,6 +143,10 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
+  // add writable coupled variables
+  for (const auto & var : getWritableCoupledVariables())
+    _supplied_vars.insert(var->name());
+
   if (_bnd && !isNodal() && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,

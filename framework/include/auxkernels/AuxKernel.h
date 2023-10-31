@@ -252,6 +252,9 @@ private:
 
   /// Depend UserObjects
   mutable std::set<UserObjectName> _depend_uo;
+
+  /// Coupleable needs to register writable coupled variables as _supplied_vars
+  friend class Coupleable;
 };
 
 template <typename ComputeValueType>
