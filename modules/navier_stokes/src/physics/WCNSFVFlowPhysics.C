@@ -12,9 +12,9 @@
 #include "NSFVAction.h"
 
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_variable");
+registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_fv_bc");
-registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_ic");
 registerMooseAction("NavierStokesApp", WCNSFVFlowPhysics, "add_material");
 
 // TODO fix inheritance and remove
