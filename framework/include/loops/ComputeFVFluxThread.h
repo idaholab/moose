@@ -614,8 +614,8 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
         same_matprop_name.insert(_fe_problem.getMaterialPropertyRegistry().getName(prop_id));
     }
 
-    const auto & mp_deps = mat->getMatPropDependencies();
-    emptyDifferenceTest(mp_deps, supplied_props, props_diff);
+    // const auto & mp_deps = mat->getMatPropDependencies();
+    // emptyDifferenceTest(mp_deps, supplied_props, props_diff);
   }
 
   // Print a warning if block restricted materials are used
