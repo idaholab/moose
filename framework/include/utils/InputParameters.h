@@ -789,6 +789,11 @@ public:
   std::vector<std::pair<R1, R2>> get(const std::string & param1, const std::string & param2) const;
 
   /**
+   * @returns list of all parameters
+   */
+  std::set<std::string> getParametersList() const;
+
+  /**
    * Return list of controllable parameters
    */
   std::set<std::string> getControllableParameters() const;
