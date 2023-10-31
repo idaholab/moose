@@ -2126,7 +2126,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
     else
     {
 
-#ifdef DEBUG
+#if defined(DEBUG) && defined(LIBMESH_HAVE_DLOPEN)
       // We found a dynamic library that doesn't have a dynamic
       // registration method in it. This shouldn't be an error, so
       // we'll just move on.
