@@ -25,6 +25,9 @@ protected:
   std::unique_ptr<BoundaryIntegralFunctor<GenericReal<is_ad>>> _bif;
   std::unique_ptr<BoundaryAverageFunctor<GenericReal<is_ad>>> _baf;
   using FaceArg = Moose::FaceArg;
+
+  /// Factor multiplying the boundary integral / average
+  const Moose::Functor<GenericReal<is_ad>> & _factor;
 };
 
 typedef BoundaryIntegralFunctorMaterialTempl<false> BoundaryIntegralFunctorMaterial;

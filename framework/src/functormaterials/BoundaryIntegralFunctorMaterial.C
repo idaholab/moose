@@ -27,6 +27,8 @@ BoundaryIntegralFunctorMaterialTempl<is_ad>::validParams()
   params.addRequiredParam<MooseFunctorName>("functor_name", "Name of the functor to be created");
   params.addRequiredParam<MooseFunctorName>(
       "functor_in", "The name of the functor which the boundary functor will integrate");
+  params.addParam<MooseFunctorName>(
+      "factor", 1, "The name of the functor multiplying the entire integral (not the integrand)");
   params.addParam<BoundaryName>("integration_boundary", "Boundary to integrate the functor on");
   params.addParam<bool>(
       "compute_average", false, "Whether to compute an average instead of an integral");
@@ -36,7 +38,7 @@ BoundaryIntegralFunctorMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 BoundaryIntegralFunctorMaterialTempl<is_ad>::BoundaryIntegralFunctorMaterialTempl(
     const InputParameters & parameters)
-  : FunctorMaterial(parameters)
+  : FunctorMaterial(parameters), _factor(getFunctor<GenericReal<is_ad>>("factor"))
 {
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
 
@@ -60,12 +62,14 @@ BoundaryIntegralFunctorMaterialTempl<is_ad>::BoundaryIntegralFunctorMaterialTemp
   if (!getParam<bool>("compute_average"))
     addFunctorProperty<GenericReal<is_ad>>(
         getParam<MooseFunctorName>("functor_name"),
-        [this](const auto & r, const auto & t) -> GenericReal<is_ad> { return (*_bif)(r, t); },
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _factor(r, t) * (*_bif)(r, t); },
         clearance_schedule);
   else
     addFunctorProperty<GenericReal<is_ad>>(
         getParam<MooseFunctorName>("functor_name"),
-        [this](const auto & r, const auto & t) -> GenericReal<is_ad> { return (*_baf)(r, t); },
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _factor(r, t) * (*_baf)(r, t); },
         clearance_schedule);
 }
 
