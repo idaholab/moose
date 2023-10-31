@@ -24,7 +24,10 @@
 /**
  * Pretty print the summary of a NEML2 model
  */
-std::ostream & operator<<(std::ostream &, const neml2::Model &);
+namespace neml2
+{
+std::ostream & operator<<(std::ostream &, const Model &);
+}
 
 namespace NEML2Utils
 {

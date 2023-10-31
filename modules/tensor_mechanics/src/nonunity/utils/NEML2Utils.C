@@ -17,14 +17,16 @@
 #include "NEML2Utils.h"
 #include "VariadicTable.h"
 
-std::ostream &
-operator<<(std::ostream & os, const neml2::Model & model)
+namespace neml2
 {
-  auto print_axis = [](std::ostream & os, const neml2::LabeledAxis & axis)
+std::ostream &
+operator<<(std::ostream & os, const Model & model)
+{
+  auto print_axis = [](std::ostream & os, const LabeledAxis & axis)
   {
-    VariadicTable<std::string, neml2::TorchSize> table({"Variable", "Storage size"});
+    VariadicTable<std::string, TorchSize> table({"Variable", "Storage size"});
     for (const auto & var : axis.variable_accessors(/*recursive=*/true))
-      table.addRow(neml2::utils::stringify(var), axis.storage_size(var));
+      table.addRow(utils::stringify(var), axis.storage_size(var));
     table.print(os);
   };
 
@@ -46,6 +48,7 @@ operator<<(std::ostream & os, const neml2::Model & model)
 
   return os;
 }
+} // namespace neml2
 
 namespace NEML2Utils
 {
