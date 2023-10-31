@@ -16,7 +16,7 @@ T_initial = 300
 []
 
 [Components]
-  [inlet]
+  [fixed_inlet]
     type = InletVelocityTemperature1Phase
     input = 'comp1:in'
     vel = ${u_inlet}
@@ -154,6 +154,13 @@ T_initial = 300
     gamma = 1.4
     # emit_on_nan = none
   []
+  # [fp]
+  #   # Nearly incompressible
+  #   type = SimpleFluidProperties
+  #   cp = 4194
+  #   density0 = 1000
+  #   bulk_modulus = 2e+09
+  # []
 []
 
 [Closures]

@@ -59,7 +59,7 @@ T_initial = 300
     type = InletVelocityTemperature1PhaseFromWCNSFV
     input = 'comp2:in'
     vel = 'vx_outlet'
-    T = T_fluid
+    T = T_outlet
   []
 
   [comp2]
@@ -106,6 +106,12 @@ T_initial = 300
     type = ADBoundaryIntegralFunctorMaterial
     functor_in = 'vy'
     functor_name = 'vy_outlet'
+    integration_boundary = 'comp1:right'
+  []
+  [boundary_md_T]
+    type = ADBoundaryIntegralFunctorMaterial
+    functor_in = 'T_fluid'
+    functor_name = 'T_outlet'
     integration_boundary = 'comp1:right'
   []
   # Part 2a of the junction: create the boundary functors for getting the pressure
