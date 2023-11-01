@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVEnthalpyMaterial.h"
+#include "INSFVEnthalpyFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSFVEnthalpyMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           INSFVEnthalpyMaterial,
+                           "02/01/2024 00:00",
+                           INSFVEnthalpyFunctorMaterial);
+registerMooseObject("NavierStokesApp", INSFVEnthalpyFunctorMaterial);
 
 InputParameters
-INSFVEnthalpyMaterial::validParams()
+INSFVEnthalpyFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
@@ -31,7 +35,7 @@ INSFVEnthalpyMaterial::validParams()
   return params;
 }
 
-INSFVEnthalpyMaterial::INSFVEnthalpyMaterial(const InputParameters & parameters)
+INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _rho(getFunctor<ADReal>(NS::density)),
     _temperature(getFunctor<ADReal>("temperature")),
