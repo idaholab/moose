@@ -12,15 +12,14 @@ It computes the values of the variable at the cell centroids.
 The preferred syntax is to create a top-level "FVICs" block with subblocks defining the initial
 conditions for one or more variables.
 
-!listing function_ic/bazinga.i block=ICs
+!listing fvics/function_ic/parsed_function.i block=FVICs
 
 ## FVICs from an Exodus File
 
 MOOSE contains a shortcut syntax for reading solutions from an Exodus file for the initial
-condition from right within the [Variables](Variables/index.html). The name of the variable
-and the time step from which to read the solution must be supplied.
+condition from right within the [Variables](Variables/index.html). The name of the variable and the time step from which to read the solution must be supplied.
 
-!listing from_exodus_solution/bazinga.i block=Variables
+!listing fvics/file_ic/file_restart.i block=Variables
 
 ## Sanity checks on FVICs
 

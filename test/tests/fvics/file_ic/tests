@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#25824'
+  design = 'syntax/FVICs/index.md'
+
+  [parsed_function]
+    type = 'Exodiff'
+    input = 'file_restart.i'
+    exodiff = 'file_restart_out.e'
+    requirement = 'The system shall support the initialization of a finite volume variable from an exodus file.'
+  []
+[]
