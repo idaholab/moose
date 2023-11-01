@@ -55,12 +55,12 @@ ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
 $(error Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
   To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
-	To suppress this warning, set ENABLE_NEML2 to false.)
+	To disable NEML2, set ENABLE_NEML2 to false.)
 else
 $(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
   To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
-	To disable NEML2, set ENABLE_NEML2 to false.)
+	To suppress this warning, set ENABLE_NEML2 to false.)
 endif
 
 endif
