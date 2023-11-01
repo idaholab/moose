@@ -59,6 +59,8 @@ HLLCUserObject::initialSetup()
   {
     _mesh.buildFiniteVolumeInfo();
     _mesh.computeFiniteVolumeCoords();
+    _mesh.cacheFaceInfoVariableOwnership();
+    _mesh.cacheFVElementalDoFs();
   }
 
   for (unsigned int j = 0; j < _face_info.size(); ++j)

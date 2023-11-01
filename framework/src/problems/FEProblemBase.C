@@ -7191,7 +7191,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   // If we have finite volume variables, we will need to recompute additional elemental/face
   // quantities
-  if (haveFV())
+  if (haveFV() && _mesh.isFiniteVolumeInfoDirty())
   {
     _mesh.buildFiniteVolumeInfo();
     _mesh.computeFiniteVolumeCoords();

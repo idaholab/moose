@@ -1264,9 +1264,12 @@ public:
   /**
    * Mark the finite volume information as dirty
    */
-  void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
+  void markFiniteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
 
-  bool cachedLinearFVDoFs() { return _linear_finite_volume_dofs_cached; }
+  /**
+   * Return if the finite volume information is dirty
+   */
+  bool isFiniteVolumeInfoDirty() const { return _finite_volume_info_dirty; }
 
   /**
    * @return the coordinate transformation object that describes how to transform this problem's

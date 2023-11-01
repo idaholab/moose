@@ -288,7 +288,7 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   // The mesh has changed. Face information normals, areas, etc. must be re-calculated
   if (haveFV())
   {
-    _mesh.finiteVolumeInfoDirty();
+    _mesh.markFiniteVolumeInfoDirty();
     _mesh.buildFiniteVolumeInfo();
     _mesh.computeFiniteVolumeCoords();
     _mesh.cacheFaceInfoVariableOwnership();
