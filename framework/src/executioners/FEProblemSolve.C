@@ -57,7 +57,7 @@ FEProblemSolve::validParams()
                         "be looser than the standard linear tolerance");
 
   params += Moose::PetscSupport::getPetscValidParams();
-  params.addParam<Real>("l_tol", 1.0e-5, "Linear Tolerance");
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
