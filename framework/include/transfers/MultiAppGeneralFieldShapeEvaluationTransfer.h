@@ -30,6 +30,7 @@ protected:
                                     std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
   /*
    * Build mesh functions local to the domain
    * @param[in] var_name the variable to build the mesh functions for
