@@ -149,7 +149,9 @@ TopologyOptimizerDecision::acceptOrRejectProposal()
     _top_opt->setCurrentConfiguration(_current_configuration);
     _top_opt->setBestConfiguration(_current_configuration);
     if (_t_step == static_cast<int>(_top_opt->numIt()))
-      _console << "Preparing for last iteration. Resetting current configuration to best configuration" << std::endl;
+      _console
+          << "Preparing for last iteration. Resetting current configuration to best configuration"
+          << std::endl;
     else
       _console << "Resetting current configuration to best configuration" << std::endl;
     _console << "Best objective value: " << _best_objective_value << std::endl;

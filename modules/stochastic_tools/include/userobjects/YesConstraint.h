@@ -20,5 +20,6 @@ public:
   static InputParameters validParams();
 
   YesConstraint(const InputParameters & params);
-  virtual bool isConfigAllowed(const std::vector<dof_id_type> config, const MooseMesh * _subapp_mesh) const override;
+  virtual bool isConfigAllowed(const std::vector<dof_id_type> config,
+                               const MooseMesh * _subapp_mesh) const override;
 };

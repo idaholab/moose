@@ -22,7 +22,8 @@ InputParameters
 InitialTopologicalMeshTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
-  params.addClassDescription("This transfer initializes the TopologyOptimizationSampler with the initial guess of the geometry of the physics problem.");
+  params.addClassDescription("This transfer initializes the TopologyOptimizationSampler with the "
+                             "initial guess of the geometry of the physics problem.");
   params.suppressParameter<MultiMooseEnum>("direction");
   params.suppressParameter<MultiAppName>("multi_app");
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
