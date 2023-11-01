@@ -95,5 +95,5 @@ BlackBear also provides a command-line option to inspect the NEML2 material mode
 blackbear-opt -i input.i --parse-neml2-only
 ```
 
-!if function=hasNEML2()
+!if function=hasObject("NEML2Action")
 !syntax parameters /NEML2/NEML2Action
