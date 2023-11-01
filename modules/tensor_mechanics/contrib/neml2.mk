@@ -43,17 +43,13 @@ endif
 else
 
 ifneq ($(ENABLE_LIBTORCH),true)
-
 $(error Attempting to compile Blackbear with NEML2, but libTorch is not enabled. \
   To enable libTorch, configure MOOSE with the --with-libtorch option. \
   To disable NEML2, set ENABLE_NEML2 to false)
-
 endif
 
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
-
 ENABLE_NEML2 = false
-
 ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
 $(error Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
   To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
@@ -65,7 +61,6 @@ $(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot 
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
 	To suppress this warning, set ENABLE_NEML2 to false.)
 endif
-
 endif
 
 endif
