@@ -18,22 +18,27 @@
 #                will terminate with an error message if ENABLE_NEML2 is true
 #                AND a NEML2 checkout cannot be found.
 
+NEML2_DIR ?= $(BLACKBEAR_DIR)/contrib/neml2
+ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
+_ENABLE_NEML2_DEFAULT = false
+else
 _ENABLE_NEML2_DEFAULT = true
-_ENABLE_NEML2_SET_BY_USER = false
+endif
 
 ifdef ENABLE_NEML2
-
 _ENABLE_NEML2_SET_BY_USER = true
-
 else
-
 ENABLE_NEML2 = $(_ENABLE_NEML2_DEFAULT)
-
+_ENABLE_NEML2_SET_BY_USER = false
 endif
 
 ifneq ($(ENABLE_NEML2),true)
 
+ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
 $(info Not compiling BlackBear with NEML2 because ENABLE_NEML2 is set to false.)
+else
+$(info Not compiling BlackBear with NEML2 because NEML2_DIR is not a valid NEML2 checkout.)
+endif
 
 else
 
@@ -44,8 +49,6 @@ $(error Attempting to compile Blackbear with NEML2, but libTorch is not enabled.
   To disable NEML2, set ENABLE_NEML2 to false)
 
 endif
-
-NEML2_DIR ?= $(BLACKBEAR_DIR)/contrib/neml2
 
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 
@@ -72,6 +75,8 @@ endif
 # At this point, we have everything needed to compile BlackBear with NEML2
 ###############################################################################
 ifeq ($(ENABLE_NEML2),true)
+
+$(info Compiling BlackBear with NEML2.)
 
 NEML2_INCLUDE        := $(NEML2_DIR)/include
 NEML2_SRC            := $(shell find $(NEML2_DIR)/src -name "*.cxx")
