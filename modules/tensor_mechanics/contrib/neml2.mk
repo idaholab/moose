@@ -18,7 +18,18 @@
 #                will terminate with an error message if ENABLE_NEML2 is true
 #                AND a NEML2 checkout cannot be found.
 
-ENABLE_NEML2 ?= true
+_ENABLE_NEML2_DEFAULT = true
+_ENABLE_NEML2_SET_BY_USER = false
+
+ifdef ENABLE_NEML2
+
+_ENABLE_NEML2_SET_BY_USER = true
+
+else
+
+ENABLE_NEML2 = $(_ENABLE_NEML2_DEFAULT)
+
+endif
 
 ifneq ($(ENABLE_NEML2),true)
 
@@ -40,10 +51,17 @@ ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 
 ENABLE_NEML2 = false
 
-$(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
+ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
+$(error Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
   To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
 	To suppress this warning, set ENABLE_NEML2 to false.)
+else
+$(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
+  To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
+	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
+	To disable NEML2, set ENABLE_NEML2 to false.)
+endif
 
 endif
 
