@@ -383,8 +383,8 @@ ThermalContactAction::addMaterials()
 void
 ThermalContactAction::addSecondaryFluxVector()
 {
-  _problem->getNonlinearSystemBase().addVector("secondary_flux", false, GHOSTED);
-  _problem->getNonlinearSystemBase().zeroVectorForResidual("secondary_flux");
+  _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).addVector("secondary_flux", false, GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).zeroVectorForResidual("secondary_flux");
 
   // It is risky to apply this optimization to contact problems
   // since the problem configuration may be changed during Jacobian

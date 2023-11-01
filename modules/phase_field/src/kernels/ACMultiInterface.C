@@ -32,7 +32,7 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters)
     _num_etas(coupledComponents("etas")),
     _eta(coupledValues("etas")),
     _grad_eta(coupledGradients("etas")),
-    _eta_vars(_fe_problem.getNonlinearSystemBase().nVariables(), -1),
+    _eta_vars(_sys.nVariables(), -1),
     _kappa_names(getParam<std::vector<MaterialPropertyName>>("kappa_names")),
     _kappa(_num_etas),
     _L(getMaterialProperty<Real>("mob_name"))
@@ -40,7 +40,7 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters)
   if (_num_etas != _kappa_names.size())
     paramError("kappa_names", "Supply the same number of etas and kappa_names.");
 
-  unsigned int nvariables = _fe_problem.getNonlinearSystemBase().nVariables();
+  unsigned int nvariables = _sys.nVariables();
 
   int a = -1;
   for (unsigned int i = 0; i < _num_etas; ++i)

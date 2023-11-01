@@ -89,9 +89,10 @@ PiecewiseLinearFromVectorPostprocessor::valueInternal(const T & t, const P & p) 
   if (_argument_column.empty())
     return 0.0;
 
-  const std::tuple<Real, unsigned int, unsigned int> now = {MetaPhysicL::raw_value(t),
-                                                            _fe_problem.nNonlinearIterations(),
-                                                            _fe_problem.nLinearIterations()};
+  const std::tuple<Real, unsigned int, unsigned int> now = {
+      MetaPhysicL::raw_value(t),
+      _fe_problem.nNonlinearIterations(/*nl_sys=*/0),
+      _fe_problem.nLinearIterations(/*nl_sys=*/0)};
 
   if (now != _last_update)
   {

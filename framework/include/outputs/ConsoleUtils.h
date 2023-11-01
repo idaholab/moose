@@ -57,7 +57,8 @@ std::string outputAuxiliarySystemInformation(FEProblemBase & problem);
 /**
  * Output the Nonlinear system information
  */
-std::string outputNonlinearSystemInformation(FEProblemBase & problem);
+std::string outputNonlinearSystemInformation(FEProblemBase & problem,
+                                             const unsigned int nl_sys_num);
 
 /**
  * Output action RelationshipManager information

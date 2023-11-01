@@ -432,7 +432,7 @@ InterfaceKernelTempl<T>::computeResidualAndJacobian()
   if (!isImplicit())
     return;
 
-  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid))
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid, _sys.number()))
   {
     if (ivariable->isFV())
       continue;

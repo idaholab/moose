@@ -29,8 +29,8 @@ TagVectorSum::validParams()
 
 TagVectorSum::TagVectorSum(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _vec(_fe_problem.getNonlinearSystemBase().getVector(
-        _fe_problem.getVectorTagID(getParam<TagName>("vector"))))
+    _vec(_fe_problem.getNonlinearSystemBase(_sys.number())
+             .getVector(_fe_problem.getVectorTagID(getParam<TagName>("vector"))))
 {
 }
 

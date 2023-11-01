@@ -53,11 +53,11 @@ public:
   }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys(unsigned int sys_num = 0);
+  DisplacedSystem & nlSys(const unsigned int sys_num);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
+  virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
@@ -76,7 +76,8 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool nlConverged(unsigned int nl_sys_num) override;
+  virtual bool nlConverged(const unsigned int nl_sys_num) override;
+  virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -149,20 +150,21 @@ public:
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
   virtual const MooseVariableFieldBase &
-  getVariable(THREAD_ID tid,
+  getVariable(const THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type =
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
-  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
-  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+  virtual MooseVariable & getStandardVariable(const THREAD_ID tid,
+                                              const std::string & var_name) override;
+  virtual MooseVariableFieldBase & getActualFieldVariable(const THREAD_ID tid,
                                                           const std::string & var_name) override;
-  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
+  virtual VectorMooseVariable & getVectorVariable(const THREAD_ID tid,
                                                   const std::string & var_name) override;
-  virtual ArrayMooseVariable & getArrayVariable(THREAD_ID tid,
+  virtual ArrayMooseVariable & getArrayVariable(const THREAD_ID tid,
                                                 const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) const override;
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
+  virtual MooseVariableScalar & getScalarVariable(const THREAD_ID tid,
                                                   const std::string & var_name) override;
   virtual System & getSystem(const std::string & var_name) override;
 
@@ -179,37 +181,41 @@ public:
   virtual void meshChanged() override;
 
   // reinit /////
-  virtual void prepare(const Elem * elem, THREAD_ID tid) override;
-  virtual void prepareNonlocal(THREAD_ID tid);
-  virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;
+  virtual void prepare(const Elem * elem, const THREAD_ID tid) override;
+  virtual void prepareNonlocal(const THREAD_ID tid);
+  virtual void prepareFace(const Elem * elem, const THREAD_ID tid) override;
   virtual void prepare(const Elem * elem,
                        unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices,
-                       THREAD_ID tid) override;
-  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) override;
-  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) override;
+                       const THREAD_ID tid) override;
+  virtual void setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid) override;
+  virtual void
+  setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void prepareBlockNonlocal(unsigned int ivar,
                                     unsigned int jvar,
                                     const std::vector<dof_id_type> & idof_indices,
                                     const std::vector<dof_id_type> & jdof_indices,
-                                    THREAD_ID tid);
-  virtual void prepareAssembly(THREAD_ID tid) override;
-  virtual void prepareAssemblyNeighbor(THREAD_ID tid);
+                                    const THREAD_ID tid);
+  virtual void prepareAssembly(const THREAD_ID tid) override;
+  virtual void prepareAssemblyNeighbor(const THREAD_ID tid);
 
-  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
+  virtual bool reinitDirac(const Elem * elem, const THREAD_ID tid) override;
 
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
+  virtual void reinitElem(const Elem * elem, const THREAD_ID tid) override;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid) override;
-  virtual void
-  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
-  virtual void reinitNode(const Node * node, THREAD_ID tid) override;
-  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) override;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;
-  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) override;
+                              const THREAD_ID tid) override;
+  virtual void reinitElemFace(const Elem * elem,
+                              unsigned int side,
+                              BoundaryID bnd_id,
+                              const THREAD_ID tid) override;
+  virtual void reinitNode(const Node * node, const THREAD_ID tid) override;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) override;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) override;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes,
+                                   const THREAD_ID tid) override;
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
 
   /**
    * reinitialize neighbor routine
@@ -222,46 +228,47 @@ public:
    */
   void reinitNeighbor(const Elem * elem,
                       unsigned int side,
-                      THREAD_ID tid,
+                      const THREAD_ID tid,
                       const std::vector<Point> * neighbor_reference_points);
 
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) override;
+                                  const THREAD_ID tid) override;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
-                                  THREAD_ID tid) override;
+                                  const THREAD_ID tid) override;
   virtual void
-  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) override;
-  virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
-  virtual void reinitOffDiagScalars(THREAD_ID tid) override;
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
+  virtual void reinitScalars(const THREAD_ID tid,
+                             bool reinit_for_derivative_reordering = false) override;
+  virtual void reinitOffDiagScalars(const THREAD_ID tid) override;
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems) override;
   virtual void clearDiracInfo() override;
 
-  virtual void addResidual(THREAD_ID tid) override;
-  virtual void addResidualNeighbor(THREAD_ID tid) override;
-  virtual void addResidualLower(THREAD_ID tid) override;
+  virtual void addResidual(const THREAD_ID tid) override;
+  virtual void addResidualNeighbor(const THREAD_ID tid) override;
+  virtual void addResidualLower(const THREAD_ID tid) override;
 
-  virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addCachedResidualDirectly(NumericVector<Number> & residual, const THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
+  virtual void setResidual(NumericVector<Number> & residual, const THREAD_ID tid) override;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid) override;
 
-  virtual void addJacobian(THREAD_ID tid) override;
-  virtual void addJacobianNonlocal(THREAD_ID tid);
-  virtual void addJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
-  virtual void addJacobianLowerD(THREAD_ID tid) override;
+  virtual void addJacobian(const THREAD_ID tid) override;
+  virtual void addJacobianNonlocal(const THREAD_ID tid);
+  virtual void addJacobianNeighbor(const THREAD_ID tid) override;
+  virtual void addJacobianNeighborLowerD(const THREAD_ID tid) override;
+  virtual void addJacobianLowerD(const THREAD_ID tid) override;
   virtual void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     unsigned int ivar,
                                     unsigned int jvar,
                                     const DofMap & dof_map,
                                     std::vector<dof_id_type> & dof_indices,
                                     const std::set<TagID> & tags,
-                                    THREAD_ID tid);
+                                    const THREAD_ID tid);
   void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -269,7 +276,7 @@ public:
                                 const std::vector<dof_id_type> & idof_indices,
                                 const std::vector<dof_id_type> & jdof_indices,
                                 const std::set<TagID> & tags,
-                                THREAD_ID tid);
+                                const THREAD_ID tid);
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
@@ -277,23 +284,23 @@ public:
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,
-                                   THREAD_ID tid) override;
+                                   const THREAD_ID tid) override;
 
-  virtual void cacheJacobianNonlocal(THREAD_ID tid);
+  virtual void cacheJacobianNonlocal(const THREAD_ID tid);
 
-  virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
-  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
-  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
+  virtual void prepareShapes(unsigned int var, const THREAD_ID tid) override;
+  virtual void prepareFaceShapes(unsigned int var, const THREAD_ID tid) override;
+  virtual void prepareNeighborShapes(unsigned int var, const THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const override;
+  Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) override;
+  const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
 
-  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const override;
+  virtual bool computingInitialResidual(const unsigned int nl_sys_num) const override;
 
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;
@@ -328,7 +335,7 @@ public:
 
   LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const override;
+  const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const override;
 
   bool haveDisplaced() const override final { return true; }
 

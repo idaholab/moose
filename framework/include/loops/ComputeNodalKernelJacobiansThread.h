@@ -16,6 +16,7 @@
 
 // Forward declarations
 class FEProblemBase;
+class NonlinearSystemBase;
 class AuxiliarySystem;
 class NodalKernelBase;
 
@@ -31,6 +32,7 @@ class ComputeNodalKernelJacobiansThread
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
+                                    NonlinearSystemBase & nl,
                                     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
                                     const std::set<TagID> & tags);
 
@@ -48,7 +50,7 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   FEProblemBase & _fe_problem;
-
+  NonlinearSystemBase & _nl;
   AuxiliarySystem & _aux_sys;
 
   const std::set<TagID> & _tags;

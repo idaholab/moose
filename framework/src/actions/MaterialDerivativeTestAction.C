@@ -241,7 +241,7 @@ MaterialDerivativeTestAction::act()
       std::shared_ptr<MoosePreconditioner> pc =
           _factory.create<MoosePreconditioner>("SMP", "material_derivative_SMP", params);
 
-      _problem->getNonlinearSystemBase().setPreconditioner(pc);
+      _problem->getNonlinearSystemBase(/*nl_sys=*/0).setPreconditioner(pc);
     }
     else
       mooseError("_problem.get() returned nullptr");

@@ -72,7 +72,7 @@ PODSamplerSolutionTransfer::execute()
       {
         // Getting reference to the  solution vector of the sub-app.
         FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
         NumericVector<Number> & solution = nl.solution();
 
         // Looping over the variables to extract the corresponding solution values
@@ -109,7 +109,7 @@ PODSamplerSolutionTransfer::execute()
           {
             // Getting the reference to the solution vector in the subapp.
             FEProblemBase & app_problem = getToMultiApp()->appProblemBase(counter);
-            NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+            NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
             NumericVector<Number> & solution = nl.solution();
 
             // Zeroing the solution to make sure that only the required part
@@ -156,7 +156,7 @@ PODSamplerSolutionTransfer::executeFromMultiapp()
       {
         // Getting reference to the  solution vector of the sub-app.
         FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
         NumericVector<Number> & solution = nl.solution();
 
         // Looping over the variables to extract the corresponding solution values
@@ -199,7 +199,7 @@ PODSamplerSolutionTransfer::executeToMultiapp()
 
     // Getting the reference to the solution vector in the subapp.
     FEProblemBase & app_problem = getToMultiApp()->appProblemBase(processor_id());
-    NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
     NumericVector<Number> & solution = nl.solution();
 
     // Zeroing the solution to make sure that only the required part

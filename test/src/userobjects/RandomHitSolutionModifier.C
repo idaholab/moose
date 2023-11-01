@@ -76,11 +76,11 @@ RandomHitSolutionModifier::execute()
       {
         _subproblem.reinitNode(closest_node, 0);
         _variable.setNodalValue(_variable.getNodalValue(*closest_node) + _amount);
-        _variable.insert(_fe_problem.getNonlinearSystemBase().solution());
+        _variable.insert(_fe_problem.getNonlinearSystemBase(0).solution());
       }
     }
   }
 
-  _fe_problem.getNonlinearSystemBase().solution().close();
-  _fe_problem.getNonlinearSystemBase().system().update();
+  _fe_problem.getNonlinearSystemBase(0).solution().close();
+  _fe_problem.getNonlinearSystemBase(0).system().update();
 }

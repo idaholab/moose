@@ -738,7 +738,8 @@ Simulation::couplingMatrixIntegrityCheck() const
   if (!_fe_problem.shouldSolve())
     return;
 
-  const TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
+  const TimeIntegrator * ti =
+      _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getTimeIntegrator();
   // Yes, this is horrible. Don't ask why...
   if ((dynamic_cast<const ExplicitTimeIntegrator *>(ti) != nullptr) ||
       (dynamic_cast<const ExplicitEuler *>(ti) != nullptr) ||
@@ -746,7 +747,7 @@ Simulation::couplingMatrixIntegrityCheck() const
       (dynamic_cast<const ExplicitTVDRK2 *>(ti) != nullptr))
     return;
 
-  const CouplingMatrix * cm = _fe_problem.couplingMatrix();
+  const CouplingMatrix * cm = _fe_problem.couplingMatrix(/*nl_sys_num=*/0);
   if (cm == nullptr)
     mooseError("Coupling matrix does not exists. Something really bad happened.");
 

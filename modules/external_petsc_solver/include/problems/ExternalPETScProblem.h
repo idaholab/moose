@@ -31,7 +31,7 @@ public:
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
-  virtual bool converged() override { return _petsc_converged; }
+  virtual bool converged(unsigned int) override { return _petsc_converged; }
 
   virtual void advanceState() override;
 

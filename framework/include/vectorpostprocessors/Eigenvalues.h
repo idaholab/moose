@@ -34,5 +34,5 @@ protected:
   VectorPostprocessorValue & _eigen_values_imag;
 
   /// Nonlinear eigen-system to get the eigenvalues from
-  NonlinearEigenSystem * _nl_eigen;
+  const NonlinearEigenSystem * const _nl_eigen;
 };

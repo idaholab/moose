@@ -69,7 +69,7 @@ ComputeFullJacobianThread::computeOnElement()
   /// done only when nonlocal kernels exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid, _nl.number());
     for (const auto & it : cne)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -135,7 +135,7 @@ ComputeFullJacobianThread::computeOnElement()
 void
 ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem)
 {
-  auto & ce = _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFieldBase & ivariable = *(it.first);
@@ -181,7 +181,7 @@ ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * low
   /// done only when nonlocal integrated_bcs exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid, _nl.number());
     for (const auto & it : cne)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -245,7 +245,7 @@ ComputeFullJacobianThread::computeOnInterface(BoundaryID bnd_id)
 {
   if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const auto & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
     for (const auto & it : ce)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -281,7 +281,7 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
 {
   if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const auto & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
     for (const auto & it : ce)
     {
       MooseVariableFieldBase & ivariable = *(it.first);

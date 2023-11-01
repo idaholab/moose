@@ -23,7 +23,7 @@ class MooseObjectWarehouse;
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemDampingThread(FEProblemBase & feproblem);
+  ComputeElemDampingThread(FEProblemBase & feproblem, NonlinearSystemBase & nl);
 
   // Splitting Constructor
   ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);

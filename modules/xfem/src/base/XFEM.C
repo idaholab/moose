@@ -1325,7 +1325,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
         mooseError("EFAelem is not of EFAelement2D type");
       xfce = new XFEMCutElem2D(libmesh_elem,
                                new_efa_elem2d,
-                               _fe_problem->assembly(0).qRule()->n_points(),
+                               _fe_problem->assembly(0, /*nl_sys_num=*/0).qRule()->n_points(),
                                libmesh_elem->n_sides());
     }
     else if (_mesh->mesh_dimension() == 3)
@@ -1335,7 +1335,7 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
         mooseError("EFAelem is not of EFAelement3D type");
       xfce = new XFEMCutElem3D(libmesh_elem,
                                new_efa_elem3d,
-                               _fe_problem->assembly(0).qRule()->n_points(),
+                               _fe_problem->assembly(0, /*nl_sys_num=*/0).qRule()->n_points(),
                                libmesh_elem->n_sides());
     }
     _cut_elem_map.insert(std::pair<unique_id_type, XFEMCutElem *>(libmesh_elem->unique_id(), xfce));

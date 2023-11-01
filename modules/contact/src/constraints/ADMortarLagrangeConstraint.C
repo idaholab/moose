@@ -47,7 +47,7 @@ ADMortarLagrangeConstraint::initialSetup()
   SetupInterface::initialSetup();
 
   // Detect if preconditioner is VCP. If so, disable automatic derivative trimming.
-  auto const * mpc = feProblem().getNonlinearSystemBase().getPreconditioner();
+  auto const * mpc = feProblem().getNonlinearSystemBase(_sys.number()).getPreconditioner();
 
   if (auto * const is_vcp = dynamic_cast<const VariableCondensationPreconditioner *>(mpc))
     _apply_derivative_threshold = false;

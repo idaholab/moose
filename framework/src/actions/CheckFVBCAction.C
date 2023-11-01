@@ -37,55 +37,58 @@ CheckFVBCAction::act()
     // 2. One variable cannot define more than one Dirichlet BCs
     //    on the same sideset
     TheWarehouse & the_warehouse = _problem->theWarehouse();
-    const std::vector<MooseVariableFEBase *> & variables =
-        _problem->getNonlinearSystemBase().getVariables(0);
-
-    for (auto & var : variables)
+    for (const auto i : make_range(_problem->numNonlinearSystems()))
     {
-      if (!var->isFV())
-        continue;
+      const std::vector<MooseVariableFEBase *> & variables =
+          _problem->getNonlinearSystemBase(i).getVariables(0);
 
-      unsigned int var_num = var->number();
-      std::vector<FVFluxBC *> flux_bcs;
-      std::vector<FVDirichletBCBase *> dirichlet_bcs;
-      the_warehouse.query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribVar>(var_num)
-          .template condition<AttribThread>(0)
-          .template condition<AttribSysNum>(var->sys().number())
-          .queryInto(flux_bcs);
-
-      the_warehouse.query()
-          .template condition<AttribSystem>("FVDirichletBC")
-          .template condition<AttribVar>(var_num)
-          .template condition<AttribThread>(0)
-          .template condition<AttribSysNum>(var->sys().number())
-          .queryInto(dirichlet_bcs);
-
-      std::set<BoundaryID> all_flux_side_ids;
-      for (auto & fbc : flux_bcs)
+      for (auto & var : variables)
       {
-        const std::set<BoundaryID> & t = fbc->boundaryIDs();
-        all_flux_side_ids.insert(t.begin(), t.end());
-      }
+        if (!var->isFV())
+          continue;
 
-      std::set<BoundaryID> all_dirichlet_side_ids;
-      for (auto & dbc : dirichlet_bcs)
-      {
-        const std::set<BoundaryID> & temp = dbc->boundaryIDs();
-        // check rule #2
-        for (auto & t : temp)
+        unsigned int var_num = var->number();
+        std::vector<FVFluxBC *> flux_bcs;
+        std::vector<FVDirichletBCBase *> dirichlet_bcs;
+        the_warehouse.query()
+            .template condition<AttribSystem>("FVFluxBC")
+            .template condition<AttribVar>(var_num)
+            .template condition<AttribThread>(0)
+            .template condition<AttribSysNum>(var->sys().number())
+            .queryInto(flux_bcs);
+
+        the_warehouse.query()
+            .template condition<AttribSystem>("FVDirichletBC")
+            .template condition<AttribVar>(var_num)
+            .template condition<AttribThread>(0)
+            .template condition<AttribSysNum>(var->sys().number())
+            .queryInto(dirichlet_bcs);
+
+        std::set<BoundaryID> all_flux_side_ids;
+        for (auto & fbc : flux_bcs)
+        {
+          const std::set<BoundaryID> & t = fbc->boundaryIDs();
+          all_flux_side_ids.insert(t.begin(), t.end());
+        }
+
+        std::set<BoundaryID> all_dirichlet_side_ids;
+        for (auto & dbc : dirichlet_bcs)
+        {
+          const std::set<BoundaryID> & temp = dbc->boundaryIDs();
+          // check rule #2
+          for (auto & t : temp)
+            if (all_dirichlet_side_ids.find(t) != all_dirichlet_side_ids.end())
+              mooseError(
+                  "Sideset ", t, " defines at least two DirichletBCs for variable ", var->name());
+          all_dirichlet_side_ids.insert(temp.begin(), temp.end());
+        }
+
+        // check rule #1
+        for (auto & t : all_flux_side_ids)
           if (all_dirichlet_side_ids.find(t) != all_dirichlet_side_ids.end())
             mooseError(
-                "Sideset ", t, " defines at least two DirichletBCs for variable ", var->name());
-        all_dirichlet_side_ids.insert(temp.begin(), temp.end());
+                "Sideset ", t, " defines a FluxBC and a DirichletBC for variable ", var->name());
       }
-
-      // check rule #1
-      for (auto & t : all_flux_side_ids)
-        if (all_dirichlet_side_ids.find(t) != all_dirichlet_side_ids.end())
-          mooseError(
-              "Sideset ", t, " defines a FluxBC and a DirichletBC for variable ", var->name());
     }
   }
 }

@@ -45,7 +45,7 @@ SetupResidualDebugAction::act()
     return;
 
   if (!_show_var_residual.empty())
-    _problem->getNonlinearSystemBase().debuggingResiduals(true);
+    _problem->getNonlinearSystemBase(/*nl_sys=*/0).debuggingResiduals(true);
 
   // debug variable residuals
   for (const auto & var_name : _show_var_residual)

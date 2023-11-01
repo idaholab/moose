@@ -218,7 +218,7 @@ ElementSubdomainModifier::finalize()
     _fe_problem.projectInitialConditionOnCustomRange(movedElemsRange(), movedBndNodesRange());
 
     // Set old and older solution on the initialized dofs
-    setOldAndOlderSolutionsForMovedNodes(_fe_problem.getNonlinearSystemBase());
+    setOldAndOlderSolutionsForMovedNodes(_fe_problem.getNonlinearSystemBase(_sys.number()));
     setOldAndOlderSolutionsForMovedNodes(_fe_problem.getAuxiliarySystem());
   }
 

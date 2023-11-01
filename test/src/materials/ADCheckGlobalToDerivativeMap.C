@@ -46,7 +46,7 @@ ADCheckGlobalToDerivativeMap::computeProperties()
 #ifndef NDEBUG
   if (_fe_problem.currentlyComputingJacobian())
   {
-    const auto & moose_nl_system = _fe_problem.getNonlinearSystemBase();
+    const auto & moose_nl_system = _fe_problem.getNonlinearSystemBase(0);
 
     const auto global_index_to_deriv_map = Moose::globalDofIndexToDerivative(
         _mat_prop, moose_nl_system, Moose::ElementType::Element, _tid);

@@ -69,7 +69,7 @@ ContactSplit::ContactSplit(const InputParameters & params)
 }
 
 void
-ContactSplit::setup(const std::string & prefix)
+ContactSplit::setup(NonlinearSystemBase & nl, const std::string & prefix)
 {
   // A reference to the PetscOptions
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
@@ -111,5 +111,5 @@ ContactSplit::setup(const std::string & prefix)
   // into the contact subsolver
   po.pairs.emplace_back(dmprefix + "includeAllContactNodes",
                         _include_all_contact_nodes ? "yes" : "no");
-  Split::setup(prefix);
+  Split::setup(nl, prefix);
 }

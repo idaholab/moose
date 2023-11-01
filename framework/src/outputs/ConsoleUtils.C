@@ -276,12 +276,12 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
 }
 
 std::string
-outputNonlinearSystemInformation(FEProblemBase & problem)
+outputNonlinearSystemInformation(FEProblemBase & problem, const unsigned int nl_sys_num)
 {
   std::stringstream oss;
   oss << std::left;
 
-  return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase().system());
+  return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase(nl_sys_num).system());
 }
 
 std::string
@@ -338,16 +338,21 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   if (!pc_desc.empty())
     oss << std::setw(console_field_width) << "  PETSc Preconditioner: " << pc_desc << '\n';
 
-  MoosePreconditioner const * mpc = problem.getNonlinearSystemBase().getPreconditioner();
-  if (mpc)
+  for (const auto i : make_range(problem.numNonlinearSystems()))
   {
-    oss << std::setw(console_field_width)
-        << "  MOOSE Preconditioner: " << mpc->getParam<std::string>("_type");
-    if (mpc->name() == "_moose_auto")
-      oss << " (auto)";
-    oss << '\n';
+    MoosePreconditioner const * mpc = problem.getNonlinearSystemBase(i).getPreconditioner();
+    if (mpc)
+    {
+      oss << std::setw(console_field_width)
+          << "  MOOSE Preconditioner" +
+                 (problem.numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") + ": "
+          << mpc->getParam<std::string>("_type");
+      if (mpc->name() == "_moose_auto")
+        oss << " (auto)";
+      oss << '\n';
+    }
+    oss << std::endl;
   }
-  oss << std::endl;
 
   return oss.str();
 }

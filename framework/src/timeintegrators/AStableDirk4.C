@@ -146,14 +146,14 @@ AStableDirk4::solve()
       }
 
       // Do the solve
-      _fe_problem.getNonlinearSystemBase().system().solve();
+      _nl.system().solve();
 
       // Update the iteration counts
       _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
       _n_linear_iterations += getNumLinearIterationsLastSolve();
 
       // Abort time step immediately on stage failure - see TimeIntegrator doc page
-      if (!_fe_problem.converged())
+      if (!_fe_problem.converged(_nl.number()))
         return;
     }
   }

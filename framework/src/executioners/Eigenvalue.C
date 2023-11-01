@@ -132,8 +132,8 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   _eigen_problem.setInitialEigenvalue(getParam<Real>("initial_eigenvalue"));
 
   // Set a flag to nonlinear eigen system
-  _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
-      getParam<bool>("precond_matrix_includes_eigen"));
+  _eigen_problem.getNonlinearEigenSystem(/*nl_sys_num=*/0)
+      .precondMatrixIncludesEigenKernels(getParam<bool>("precond_matrix_includes_eigen"));
 #else
   mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
              "PETSc configuration'");
@@ -205,7 +205,7 @@ void
 Eigenvalue::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in eigenvalue simulation
-  if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
+  if (_eigen_problem.getNonlinearSystemBase(/*nl_sys=*/0).containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvalue simulation");
 }
 

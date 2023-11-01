@@ -54,7 +54,7 @@ StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters
 void
 StressDivergenceTensorsTruss::initialSetup()
 {
-  _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
+  _orientation = &_subproblem.assembly(_tid, _sys.number()).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
 void

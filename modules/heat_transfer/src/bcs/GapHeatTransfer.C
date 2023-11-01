@@ -223,7 +223,7 @@ GapHeatTransfer::computeJacobian()
              ++_secondary_j)
           K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSecondaryQpJacobian();
 
-      addJacobian(_subproblem.assembly(_tid),
+      addJacobian(_subproblem.assembly(_tid, _sys.number()),
                   K_secondary,
                   _var.dofIndices(),
                   secondary_side_dof_indices,
@@ -290,7 +290,7 @@ GapHeatTransfer::computeOffDiagJacobian(const unsigned int jvar_num)
           K_secondary(_i, _secondary_j) +=
               _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar_num);
 
-      addJacobian(_subproblem.assembly(_tid),
+      addJacobian(_subproblem.assembly(_tid, _sys.number()),
                   K_secondary,
                   _var.dofIndices(),
                   secondary_side_dof_indices,

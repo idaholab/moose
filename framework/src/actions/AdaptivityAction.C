@@ -147,7 +147,7 @@ AdaptivityAction::act()
 
   else if (_current_task == "setup_adaptivity")
   {
-    NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
+    NonlinearSystemBase & system = _problem->getNonlinearSystemBase(/*nl_sys_num=*/0);
 
     Adaptivity & adapt = _problem->adaptivity();
 

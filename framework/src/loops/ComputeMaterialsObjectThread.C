@@ -29,7 +29,6 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
-    _nl(fe_problem.getNonlinearSystemBase()),
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
     _neighbor_material_props(neighbor_material_props),
@@ -49,7 +48,6 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
                                                            Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
-    _nl(x._nl),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _neighbor_material_props(x._neighbor_material_props),

@@ -30,7 +30,6 @@ BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     _elem_aux(_aux_sys.elemAuxWarehouse()),
     _elem_vec_aux(_aux_sys.elemVectorAuxWarehouse()),
     _elem_array_aux(_aux_sys.elemArrayAuxWarehouse()),
-    _integrated_bcs(fe_problem.getNonlinearSystemBase().getIntegratedBCWarehouse()),
     _query(query)
 {
 }
@@ -43,7 +42,6 @@ BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     _elem_aux(x._elem_aux),
     _elem_vec_aux(x._elem_vec_aux),
     _elem_array_aux(x._elem_array_aux),
-    _integrated_bcs(x._integrated_bcs),
     _query(x._query)
 {
 }
@@ -123,7 +121,8 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
     check(_elem_aux);
     check(_elem_vec_aux);
     check(_elem_array_aux);
-    check(_integrated_bcs);
+    for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+      check(_fe_problem.getNonlinearSystemBase(i).getIntegratedBCWarehouse());
   }
 }
 

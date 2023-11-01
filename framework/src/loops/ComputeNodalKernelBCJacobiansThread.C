@@ -21,10 +21,12 @@
 
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
     FEProblemBase & fe_problem,
+    NonlinearSystemBase & nl,
     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _fe_problem(fe_problem),
+    _nl(nl),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _tags(tags),
     _nodal_kernels(nodal_kernels),
@@ -37,6 +39,7 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
     ComputeNodalKernelBCJacobiansThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _fe_problem(x._fe_problem),
+    _nl(x._nl),
     _aux_sys(x._aux_sys),
     _tags(x._tags),
     _nodal_kernels(x._nodal_kernels),
@@ -64,7 +67,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  auto & ce = _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);

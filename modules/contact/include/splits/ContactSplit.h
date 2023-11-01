@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
 
   ContactSplit(const InputParameters & params);
-  virtual void setup(const std::string & prefix = "-") override;
+  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "-") override;
 
 protected:
   const std::vector<std::pair<BoundaryName, BoundaryName>> _contact_pairs;

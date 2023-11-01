@@ -25,6 +25,8 @@ IterationInfo::validParams()
       "items",
       items,
       "The iteration information to output, if nothing is provided everything will be output.");
+  params.addParam<NonlinearSystemName>(
+      "nl_sys", "nl0", "The nonlinear system that this should report iteration info for.");
   return params;
 }
 
@@ -35,7 +37,9 @@ IterationInfo::IterationInfo(const InputParameters & parameters)
     _time_step_value(declareHelper<unsigned int>("timestep", _dummy_unsigned_int)),
     _num_linear(declareHelper<unsigned int>("num_linear_iterations", _dummy_unsigned_int)),
     _num_nonlinear(declareHelper<unsigned int>("num_nonlinear_iterations", _dummy_unsigned_int)),
-    _num_fixed_point(declareHelper<unsigned int>("num_fixed_point_iterations", _dummy_unsigned_int))
+    _num_fixed_point(
+        declareHelper<unsigned int>("num_fixed_point_iterations", _dummy_unsigned_int)),
+    _nl_sys_num(_subproblem.nlSysNum(getParam<NonlinearSystemName>("nl_sys")))
 {
 }
 
@@ -44,7 +48,7 @@ IterationInfo::execute()
 {
   _time_value = _t;
   _time_step_value = _t_step;
-  _num_nonlinear = _subproblem.nNonlinearIterations();
-  _num_linear = _subproblem.nLinearIterations();
+  _num_nonlinear = _subproblem.nNonlinearIterations(_nl_sys_num);
+  _num_linear = _subproblem.nLinearIterations(_nl_sys_num);
   _num_fixed_point = _app.getExecutioner()->fixedPointSolve().numFixedPointIts();
 }

@@ -31,11 +31,11 @@ public:
   }
 
 #ifdef LIBMESH_HAVE_SLEPC
-  virtual void solve(unsigned int nl_sys_num = 0) override;
+  virtual void solve(const unsigned int nl_sys_num) override;
 
   virtual void init() override;
 
-  virtual bool nlConverged(unsigned int nl_sys_num) override;
+  virtual bool nlConverged(const unsigned int nl_sys_num) override;
 
   unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
@@ -47,7 +47,7 @@ public:
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
-  NonlinearEigenSystem & getNonlinearEigenSystem(unsigned int nl_sys_num = 0);
+  NonlinearEigenSystem & getNonlinearEigenSystem(const unsigned int nl_sys_num);
   NonlinearEigenSystem & getCurrentNonlinearEigenSystem();
 
   virtual void checkProblemIntegrity() override;
@@ -142,7 +142,7 @@ public:
                          TagID tagB);
 
   virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
-                                     unsigned int nl_sys_num = 0) override;
+                                     const unsigned int nl_sys_num) override;
 
   /**
    * Form a vector for all kernels and BCs with a given tag

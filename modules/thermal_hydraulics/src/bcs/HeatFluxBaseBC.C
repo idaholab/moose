@@ -71,7 +71,8 @@ HeatFluxBaseBC::computeOffDiagJacobian(const unsigned int jvar_num)
     for (std::size_t i = 0; i < _off_diag_var_nums.size(); i++)
     {
       unsigned int jvar_num = _off_diag_var_nums[i];
-      MooseVariableFEBase & jvar = _fe_problem.getNonlinearSystemBase().getVariable(_tid, jvar_num);
+      MooseVariableFEBase & jvar =
+          _fe_problem.getNonlinearSystemBase(_sys.number()).getVariable(_tid, jvar_num);
       jvar.prepareNeighbor();
       _assembly.copyNeighborShapes(jvar_num);
 

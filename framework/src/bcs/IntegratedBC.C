@@ -185,7 +185,7 @@ IntegratedBC::computeResidualAndJacobian()
 {
   computeResidual();
 
-  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid))
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid, _sys.number()))
   {
     const unsigned int ivar = ivariable->number();
     const unsigned int jvar = jvariable->number();

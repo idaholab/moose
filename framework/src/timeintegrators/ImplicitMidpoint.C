@@ -72,12 +72,12 @@ ImplicitMidpoint::solve()
   _console << "1st stage" << std::endl;
   _stage = 1;
   _fe_problem.time() = time_half;
-  _fe_problem.getNonlinearSystemBase().system().solve();
+  _nl.system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged())
+  if (!_fe_problem.converged(_nl.number()))
     return;
 
   // Compute second stage
@@ -85,7 +85,7 @@ ImplicitMidpoint::solve()
   _console << "2nd stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time_new;
-  _fe_problem.getNonlinearSystemBase().system().solve();
+  _nl.system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 }

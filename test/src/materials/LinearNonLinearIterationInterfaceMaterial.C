@@ -36,5 +36,6 @@ void
 LinearNonLinearIterationInterfaceMaterial::computeQpProperties()
 {
   _mat_prop[_qp] =
-      (_t_step + _fe_problem.nNonlinearIterations() * _fe_problem.nLinearIterations()) * _prefactor;
+      (_t_step + _fe_problem.nNonlinearIterations(0) * _fe_problem.nLinearIterations(0)) *
+      _prefactor;
 }
