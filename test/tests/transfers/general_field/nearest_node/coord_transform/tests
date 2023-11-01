@@ -1,0 +1,18 @@
+[Tests]
+  design = 'Transfers/index.md'
+  issues = '#12293'
+  [multi-app]
+    type = Exodiff
+    input = main-app.i
+    exodiff = main-app_out.e
+    cli_args = 'Transfers/from_sub/type=MultiAppGeneralFieldNearestLocationTransfer'
+    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation with the transforms applied in the sub application, using the general field version of the nearest-location transfers.'
+  []
+  [transform-main-multi-app]
+    type = Exodiff
+    input = transform-main-main-app.i
+    exodiff = transform-main-main-app_out.e
+    cli_args = 'Transfers/from_sub/type=MultiAppGeneralFieldNearestLocationTransfer'
+    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation with the transforms applied in the main application, using the general field version of the nearest-location transfers.'
+  []
+[]
