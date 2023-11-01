@@ -146,6 +146,10 @@ protected:
   std::vector<std::unique_ptr<MultiAppCoordTransform>> _to_transforms;
   std::vector<std::unique_ptr<MultiAppCoordTransform>> _from_transforms;
 
+  /// Whether to skip coordinate collapsing (transformations of coordinates between applications
+  /// using different frames of reference)
+  const bool _skip_coordinate_collapsing;
+
   /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;
   /// True if displaced mesh is used for the target mesh, otherwise false

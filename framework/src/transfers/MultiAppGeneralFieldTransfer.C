@@ -17,6 +17,7 @@
 #include "MooseVariableFE.h"
 #include "Positions.h"
 #include "MultiAppPositions.h" // remove after use_nearest_app deprecation
+#include "MooseAppCoordTransform.h"
 
 // libmesh includes
 #include "libmesh/point_locator_base.h"
@@ -505,7 +506,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
       for (Point p : f.points_requested())
         // using the point number as a "dof_object_id" will serve to identify the point if we ever
         // rework interp/distance_cache into the dof_id_to_value maps
-        this->cacheOutgoingPointInfo(p + _to_positions[i_to], point_id++, i_to, outgoing_points);
+        this->cacheOutgoingPointInfo(
+            _to_transforms[i_to]->mapBack(p), point_id++, i_to, outgoing_points);
 
       // This is going to require more complicated transfer work
       if (!g.points_requested().empty())
@@ -529,7 +531,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfo(*node + _to_positions[i_to], node->id(), i_to, outgoing_points);
+        cacheOutgoingPointInfo((*_to_transforms[i_to])(*node), node->id(), i_to, outgoing_points);
       }
     }
     else // Elemental, constant monomial
@@ -551,7 +553,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         // Cache point information
         // We will use this information later for setting values back to solution vectors
         cacheOutgoingPointInfo(
-            elem->vertex_average() + _to_positions[i_to], elem->id(), i_to, outgoing_points);
+            (*_to_transforms[i_to])(elem->vertex_average()), elem->id(), i_to, outgoing_points);
       } // for
     }   // else
   }     // for
@@ -610,7 +612,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
       InterpCache & distance_cache = distance_caches[problem_id];
-      Point p = point_requests[val_offset] - _to_positions[problem_id];
+      Point p = _to_transforms[problem_id]->mapBack(point_requests[val_offset]);
       const Number val = incoming_vals[val_offset].first;
 
       // Initialize distance to be able to compare
@@ -688,7 +690,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
                            incoming_vals[val_offset].second))
         {
           // Keep track of distance and value
-          const auto p = point_requests[val_offset] - _to_positions[problem_id];
+          const auto p = _to_transforms[problem_id]->mapBack(point_requests[val_offset]);
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
         }
 
@@ -849,7 +851,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
       bool is_nodal = _to_variables[var_index]->isNodal();
 
       // Move to target problem local mesh
-      auto local_p = p + _to_positions[i_to];
+      auto local_p = (*_to_transforms[i_to])(p);
 
       // Higher order elemental
       if (fe_type.order > CONSTANT && !is_nodal)
@@ -1312,6 +1314,8 @@ bool
 MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Point & pt) const
 {
   mooseAssert(_nearest_positions_obj, "Should not be here without a positions object");
+  if (!_skip_coordinate_collapsing)
+    paramError("skip_coordinate_collapsing", "Coordinate collapsing not implemented");
   bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
   return _nearest_positions_obj->getPosition(pos_index, initial) ==
          _nearest_positions_obj->getNearestPosition(pt, initial);
@@ -1415,9 +1419,11 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
       bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
     else
     {
-      // Translate the bounding box to the from domain's position.
-      bbox.first += _from_positions[j];
-      bbox.second += _from_positions[j];
+      // Translate the bounding box to the from domain's position. We may have rotations so we must
+      // be careful in constructing the new min and max (first and second)
+      const auto from_global_num =
+          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[j];
+      transformBoundingBox(bbox, *_from_transforms[from_global_num]);
     }
 
     // Cast the bounding box into a pair of points (so it can be put through
@@ -1433,6 +1439,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
   for (const auto i : make_range(bb_points.size()))
     bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
 
+  // TODO move up
   // Check for a user-set fixed bounding box size and modify the sizes as appropriate
   if (_fixed_bbox_size != std::vector<Real>(3, 0))
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)

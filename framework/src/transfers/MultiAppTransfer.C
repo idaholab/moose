@@ -79,6 +79,7 @@ MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
+    _skip_coordinate_collapsing(getParam<bool>("skip_coordinate_collapsing")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
     _bbox_factor(isParamValid("bbox_factor") ? getParam<Real>("bbox_factor") : 1)
@@ -249,10 +250,6 @@ MultiAppTransfer::getAppInfo()
   _to_local2global_map.clear();
   _from_local2global_map.clear();
 
-  const bool skip_coordinate_collapsing = isParamValid("skip_coordinate_collapsing")
-                                              ? getParam<bool>("skip_coordinate_collapsing")
-                                              : false;
-
   // Build the vectors for to problems, from problems, and subapps positions.
   if (_current_direction == FROM_MULTIAPP)
   {
@@ -325,18 +322,17 @@ MultiAppTransfer::getAppInfo()
    *                          one creating the transfer) or for child apps
    * multiapp: pointer to the multiapp to obtain the position of the child apps
    */
-  auto create_multiapp_transforms =
-      [skip_coordinate_collapsing](auto & transforms,
-                                   const auto & moose_app_transform,
-                                   const bool is_parent_app_transform,
-                                   const MultiApp * const multiapp = nullptr)
+  auto create_multiapp_transforms = [this](auto & transforms,
+                                           const auto & moose_app_transform,
+                                           const bool is_parent_app_transform,
+                                           const MultiApp * const multiapp = nullptr)
   {
     mooseAssert(is_parent_app_transform || multiapp,
                 "Coordinate transform must be created either for child app or parent app");
     if (is_parent_app_transform)
     {
       transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
-      transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
+      transforms.back()->skipCoordinateCollapsing(_skip_coordinate_collapsing);
       // zero translation
     }
     else
@@ -346,7 +342,7 @@ MultiAppTransfer::getAppInfo()
       {
         transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
         auto & transform = transforms[i];
-        transform->skipCoordinateCollapsing(skip_coordinate_collapsing);
+        transform->skipCoordinateCollapsing(_skip_coordinate_collapsing);
         if (multiapp->usingPositions())
           transform->setTranslationVector(multiapp->position(i));
       }
