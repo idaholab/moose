@@ -15,7 +15,8 @@ InputParameters
 ComputeCrystalPlasticityVolumetricEigenstrain::validParams()
 {
   InputParameters params = ComputeCrystalPlasticityEigenstrainBase::validParams();
-
+  params.addClassDescription("Computes the deformation gradient from the volumetric eigenstrain "
+                             "due to spherical voids in a crystal plasticity simulation");
   params.addRequiredParam<MaterialPropertyName>(
       "spherical_void_number_density",
       "The material property name of the number density of the spherical voids, in 1/mm^3.");
@@ -43,11 +44,15 @@ ComputeCrystalPlasticityVolumetricEigenstrain::computeQpDeformationGradient()
 {
   // check that the values of the radius and the density are both positive
   if (_void_radius[_qp] < 0.0)
-    mooseError("A negative mean spherical void radius value has been provided; this value is "
-               "non-physical and "
-               "violates the assumptions of this eigenstrain class");
+    mooseError("A negative mean spherical void radius value, ",
+               _void_radius[_qp],
+               ", has been provided; this value is "
+               "non-physical and violates the assumptions of this eigenstrain class");
   if (_void_density[_qp] < 0.0)
-    mooseError("A negative, non-physical spherical void number density has been provided");
+    mooseError(
+        "A negative, non-physical spherical void number density has been provided: ",
+        _void_density[_qp],
+        ". This value is non-physical and violates the assumptions of this eigenstrain class");
 
   // compute the linear commponent of the current and old volume due to the voids
   _equivalent_linear_change[_qp] =

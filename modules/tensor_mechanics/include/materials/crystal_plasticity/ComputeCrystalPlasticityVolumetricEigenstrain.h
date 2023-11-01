@@ -62,4 +62,3 @@ protected:
   // prefix for the calculation of volume of a sphere as a function of radius
   const Real _sphere_coefficient;
 };
-

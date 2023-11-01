@@ -16,35 +16,19 @@
     order = FIRST
     family = LAGRANGE
   []
-  [e_xtalpl_xx]
+  [e_void_xx]
     order = CONSTANT
     family = MONOMIAL
   []
-  [e_xtalpl_yy]
+  [e_void_yy]
     order = CONSTANT
     family = MONOMIAL
   []
-  [eth_zz]
+  [e_void_zz]
     order = CONSTANT
     family = MONOMIAL
   []
-  [fth_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [fth_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [fth_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [fp_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [fp_yy]
+  [f_void_zz]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -52,15 +36,19 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [f_xx]
+  [resolved_shear_stress_3]
     order = CONSTANT
     family = MONOMIAL
   []
-  [f_yy]
+  [resolved_shear_stress_4]
     order = CONSTANT
     family = MONOMIAL
   []
-  [f_zz]
+  [resolved_shear_stress_9]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [resolved_shear_stress_14]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -68,8 +56,8 @@
 
 [Modules/TensorMechanics/Master/all]
   strain = FINITE
+  incremental = true
   add_variables = true
-  generate_output = stress_zz
 []
 
 [AuxKernels]
@@ -79,68 +67,36 @@
     function = '300+400*t' # temperature increases at a constant rate
     execute_on = timestep_begin
   []
-  [e_xtalpl_xx]
+  [e_void_xx]
     type = RankTwoAux
-    variable = e_xtalpl_xx
-    rank_two_tensor = total_lagrangian_strain
+    variable = e_void_xx
+    rank_two_tensor = void_eigenstrain
     index_j = 0
     index_i = 0
     execute_on = timestep_end
   []
-  [e_xtalpl_yy]
+  [e_void_yy]
     type = RankTwoAux
-    variable = e_xtalpl_yy
-    rank_two_tensor = total_lagrangian_strain
+    variable = e_void_yy
+    rank_two_tensor = void_eigenstrain
     index_j = 1
     index_i = 1
     execute_on = timestep_end
   []
-  [eth_zz]
+  [e_void_zz]
     type = RankTwoAux
-    variable = eth_zz
-    rank_two_tensor = thermal_eigenstrain
+    variable = e_void_zz
+    rank_two_tensor = void_eigenstrain
     index_j = 2
     index_i = 2
     execute_on = timestep_end
   []
-  [fth_xx]
+  [f_void_zz]
     type = RankTwoAux
-    variable = fth_xx
-    rank_two_tensor = thermal_deformation_gradient
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  []
-  [fth_yy]
-    type = RankTwoAux
-    variable = fth_yy
-    rank_two_tensor = thermal_deformation_gradient
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
-  []
-  [fth_zz]
-    type = RankTwoAux
-    variable = fth_zz
-    rank_two_tensor = thermal_deformation_gradient
+    variable = f_void_zz
+    rank_two_tensor = volumetric_deformation_gradient
     index_j = 2
     index_i = 2
-    execute_on = timestep_end
-  []
-  [fp_xx]
-    type = RankTwoAux
-    variable = fp_xx
-    rank_two_tensor = plastic_deformation_gradient
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  []
-  [fp_yy]
-    type = RankTwoAux
-    variable = fp_yy
-    rank_two_tensor = plastic_deformation_gradient
-    index_j = 1
-    index_i = 1
     execute_on = timestep_end
   []
   [fp_zz]
@@ -151,28 +107,32 @@
     index_i = 2
     execute_on = timestep_end
   []
-  [f_xx]
-    type = RankTwoAux
-    variable = f_xx
-    rank_two_tensor = deformation_gradient
-    index_j = 0
-    index_i = 0
+  [tau_3]
+    type = MaterialStdVectorAux
+    variable = resolved_shear_stress_3
+    property = applied_shear_stress
+    index = 3
     execute_on = timestep_end
   []
-  [f_yy]
-    type = RankTwoAux
-    variable = f_yy
-    rank_two_tensor = deformation_gradient
-    index_j = 1
-    index_i = 1
+  [tau_4]
+    type = MaterialStdVectorAux
+    variable = resolved_shear_stress_4
+    property = applied_shear_stress
+    index = 4
     execute_on = timestep_end
   []
-  [f_zz]
-    type = RankTwoAux
-    variable = f_zz
-    rank_two_tensor = deformation_gradient
-    index_j = 2
-    index_i = 2
+  [tau_9]
+    type = MaterialStdVectorAux
+    variable = resolved_shear_stress_9
+    property = applied_shear_stress
+    index = 9
+    execute_on = timestep_end
+  []
+  [tau_14]
+    type = MaterialStdVectorAux
+    variable = resolved_shear_stress_14
+    property = applied_shear_stress
+    index = 14
     execute_on = timestep_end
   []
 []
@@ -213,9 +173,9 @@
   [stress]
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
-    eigenstrain_names = thermal_eigenstrain
+    eigenstrain_names = void_eigenstrain
     tan_mod_type = exact
-    maximum_substep_iteration = 10
+    maximum_substep_iteration = 5
   []
   [trial_xtalpl]
     type = CrystalPlasticityHCPDislocationSlipBeyerleinUpdate
@@ -239,71 +199,72 @@
     Hall_Petch_like_constant_per_mode = '0.2 0.2' #Estimated to match graph in Capolungo et al MSEA (2009), Figure 2
     grain_size = 20.0e-3 #20 microns, Beyerlein and Tome IJP (2008)
   []
-  [thermal_eigenstrain]
-    type = ComputeCrystalPlasticityThermalEigenstrain
-    eigenstrain_name = thermal_eigenstrain
-    deformation_gradient_name = thermal_deformation_gradient
-    temperature = temperature
-    thermal_expansion_coefficients = '1e-05 1e-05 1e-05' # thermal expansion coefficients along three directions
+  [void_eigenstrain]
+    type = ComputeCrystalPlasticityVolumetricEigenstrain
+    eigenstrain_name = void_eigenstrain
+    deformation_gradient_name = volumetric_deformation_gradient
+    mean_spherical_void_radius = void_radius
+    spherical_void_number_density = void_density
+  []
+  [void_radius]
+    type = ParsedMaterial
+    property_name = void_radius
+    coupled_variables = temperature
+    expression = 'if(temperature<321.0, 1.0e-5, (1.0e-5  - 5.0e-8 * (temperature - 320)))' #mm
+  []
+  [void_density]
+    type = GenericConstantMaterial
+    prop_names = void_density
+    prop_values = '1.0e8'  ###1/mm^3
   []
 []
 
 [Postprocessors]
-  [stress_zz]
+  [e_void_xx]
     type = ElementAverageValue
-    variable = stress_zz
+    variable = e_void_xx
   []
-  [e_xtalpl_xx]
+  [e_void_yy]
     type = ElementAverageValue
-    variable = e_xtalpl_xx
+    variable = e_void_yy
   []
-  [e_xtalpl_yy]
+  [e_void_zz]
     type = ElementAverageValue
-    variable = e_xtalpl_yy
+    variable = e_void_zz
   []
-  [eth_zz]
+  [f_void_zz]
     type = ElementAverageValue
-    variable = eth_zz
+    variable = f_void_zz
   []
-  [fth_xx]
-    type = ElementAverageValue
-    variable = fth_xx
+  [void_density]
+    type = ElementAverageMaterialProperty
+    mat_prop = void_density
+    execute_on = TIMESTEP_END
   []
-  [fth_yy]
-    type = ElementAverageValue
-    variable = fth_yy
-  []
-  [fth_zz]
-    type = ElementAverageValue
-    variable = fth_zz
-  []
-  [temperature]
-    type = ElementAverageValue
-    variable = temperature
-  []
-  [fp_xx]
-    type = ElementAverageValue
-    variable = fp_xx
-  []
-  [fp_yy]
-    type = ElementAverageValue
-    variable = fp_yy
+  [void_radius]
+    type = ElementAverageMaterialProperty
+    mat_prop = void_radius
+    execute_on = TIMESTEP_END
   []
   [fp_zz]
     type = ElementAverageValue
     variable = fp_zz
   []
-  [f_xx]
+  [tau_3]
     type = ElementAverageValue
-    variable = f_xx
+    variable = resolved_shear_stress_3
   []
-  [f_yy]
+  [tau_4]
     type = ElementAverageValue
-    variable = f_yy
+    variable = resolved_shear_stress_4
   []
-  [f_zz]
+  [tau_9]
     type = ElementAverageValue
-    variable = f_zz
+    variable = resolved_shear_stress_9
+  []
+  [tau_14]
+    type = ElementAverageValue
+    variable = resolved_shear_stress_14
   []
 []
 
@@ -314,17 +275,22 @@
   []
 []
 
+[Debug]
+  show_var_residual_norms = true
+[]
+
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
 
+  petsc_options = '-snes_converged_reason'
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'
   nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-8
   nl_abs_step_tol = 1e-10
 
-  dt = 0.1
+  dt = 0.05
   dtmin = 1e-4
   num_steps = 10
 []
