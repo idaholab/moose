@@ -11,10 +11,6 @@ T_initial = 300
     type = MooseVariableFVReal
     initial_condition = 0.5
   []
-  # [T_fluid]
-  #   type = MooseVariableFVReal
-  #   initial_condition = ${T_initial}
-  # []
 []
 
 [Functions]
@@ -190,18 +186,10 @@ T_initial = 300
   petsc_options_value = 'lu       NONZERO               mumps'
   line_search = 'none'
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-5
+  nl_abs_tol = 1e-7
   automatic_scaling = true
   off_diagonals_in_auto_scaling = true
   verbose = true
-[]
-
-[Debug]
-  show_var_residual_norms = true
-[]
-
-[Problem]
-  verbose_setup = true
 []
 
 # Some basic Postprocessors to examine the solution
@@ -211,10 +199,15 @@ T_initial = 300
     variable = p
     boundary = 'comp1:in'
   []
-  [p_mid]
+  [p_mid_1D]
     type = SideAverageValue
     variable = p
     boundary = 'comp1:out'
+  []
+  [p_mid_mD]
+    type = SideAverageValue
+    variable = pressure
+    boundary = 'comp2:left'
   []
   [p_out]
     type = SideAverageValue
@@ -265,6 +258,14 @@ T_initial = 300
     boundary = 'comp2:right'
     rhie_chow_user_object = 'comp2:flow_ins_rhie_chow_interpolator'
   []
+[]
+
+[Debug]
+  show_var_residual_norms = true
+[]
+
+[Problem]
+  verbose_setup = true
 []
 
 [Outputs]

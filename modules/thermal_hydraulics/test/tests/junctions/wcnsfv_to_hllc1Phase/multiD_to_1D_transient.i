@@ -12,6 +12,7 @@ outlet_md_elem_id = 100
   [porosity]
     type = MooseVariableFVReal
     initial_condition = 0.5
+    components = 1
   []
 []
 
@@ -72,6 +73,7 @@ outlet_md_elem_id = 100
     input = 'comp2:in'
     vel = 'vx_outlet'
     T = T_outlet
+    reversible = false
   []
 
   [comp2]
@@ -87,7 +89,8 @@ outlet_md_elem_id = 100
     initial_p = ${p_outlet}
     initial_vel = ${u_inlet}
 
-    f = 10.0
+    f = 10000.0
+    scaling_factor_1phase = '1 1 1e-5'
     closures = simple_closures
     fp = fp
   []
@@ -111,7 +114,7 @@ outlet_md_elem_id = 100
   [boundary_md_velocity_x]
     type = ADBoundaryIntegralFunctorMaterial
     functor_in = 'vx'
-    factor = '1'
+    # factor = '-1'
     functor_name = 'vx_outlet'
     integration_boundary = 'comp1:right'
   []
@@ -134,6 +137,10 @@ outlet_md_elem_id = 100
     fp = fp
     pressure_name = 'pressure_ad_elem'
     temperature_name = 'T_1d'
+    # Loses derivatives
+    # v = 'v'
+    # e = 'e'
+    # Good
     rhoA = 'rhoA'
     rhoEA = 'rhoEA'
     rhouA = 'rhouA'
@@ -156,7 +163,8 @@ outlet_md_elem_id = 100
   # []
   [boundary_1d_pressure]
     type = ADFixedElemValueFunctorMaterial
-    functor_in = 'pressure_ad_elem'
+    functor_in = 'pressure_ad_elem' # TODO fix this
+    # functor_in = 'p' # looses the derivative
     functor_name = 'pressure_1d_left'
     elem_id = ${outlet_md_elem_id}
   []
@@ -203,8 +211,8 @@ outlet_md_elem_id = 100
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-5
-  automatic_scaling = true
-  off_diagonals_in_auto_scaling = true
+  # automatic_scaling = true
+  # off_diagonals_in_auto_scaling = true
   verbose = true
 []
 
@@ -223,10 +231,15 @@ outlet_md_elem_id = 100
     variable = pressure
     boundary = 'comp1:left'
   []
-  [p_mid]
+  [p_mid_mD]
     type = SideAverageValue
     variable = pressure
     boundary = 'comp1:right'
+  []
+  [p_mid_oneD]
+    type = SideAverageValue
+    variable = p
+    boundary = 'comp2:in'
   []
   [p_out]
     type = SideAverageValue
@@ -282,4 +295,33 @@ outlet_md_elem_id = 100
 [Outputs]
   exodus = true
   print_linear_residuals = true
+[]
+
+[AuxVariables]
+  [T1d_chk]
+    family = MONOMIAL
+    order = CONSTANT
+    block = comp2
+    components = 1
+  []
+  [p_chk]
+    family = MONOMIAL
+    order = CONSTANT
+    block = comp2
+    components = 1
+  []
+[]
+
+[AuxKernels]
+  [p]
+    type = FunctorAux
+    variable = p_chk
+    functor = 'pressure_ad_elem'
+    execute_on = TIMESTEP_BEGIN
+  []
+  [T]
+    type = FunctorAux
+    variable = T1d_chk
+    functor = 'T_1d'
+  []
 []
