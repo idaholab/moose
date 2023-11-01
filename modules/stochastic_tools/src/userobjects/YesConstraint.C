@@ -24,7 +24,8 @@ YesConstraint::YesConstraint(const InputParameters & parameters)
 }
 
 bool
-YesConstraint::isConfigAllowed(const std::vector<dof_id_type> /*config*/, const MooseMesh * /*_subapp_mesh*/) const
+YesConstraint::isConfigAllowed(const std::vector<dof_id_type> /*config*/,
+                               const MooseMesh * /*_subapp_mesh*/) const
 {
   return true;
 }

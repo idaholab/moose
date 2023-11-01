@@ -35,7 +35,8 @@ TopologyOptimizationSampler::validParams()
   params.addParam<std::vector<UserObjectName>>(
       "constraints", "Vector of user object names of type TopologicalConstraintBase");
   params.addParam<unsigned int>("seed", 1, "Random seed");
-  params.addRequiredParam<unsigned int>("num_iterations", "The number of simulated annealing iterations");
+  params.addRequiredParam<unsigned int>("num_iterations",
+                                        "The number of simulated annealing iterations");
   return params;
 }
 
@@ -275,8 +276,8 @@ TopologyOptimizationSampler::syncedRand() const
   return buffer[_root_processor_id];
 }
 
-Real
-TopologyOptimizationSampler::computeSample(dof_id_type /*row_index*/, dof_id_type /*col_index*/)
+Real TopologyOptimizationSampler::computeSample(dof_id_type /*row_index*/,
+                                                dof_id_type /*col_index*/)
 {
   mooseError("This method should not be called.");
   return 0;
