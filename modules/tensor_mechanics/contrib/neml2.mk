@@ -38,16 +38,23 @@ NEML2_DIR ?= $(BLACKBEAR_DIR)/contrib/neml2
 
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 
-$(error Attempting to compile BlackBear with NEML2, but a NEML2 checkout cannot be found. \
+ENABLE_NEML2 = false
+
+$(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
   To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
-	To disable NEML2, set ENABLE_NEML2 to false)
+	To suppress this warning, set ENABLE_NEML2 to false.)
 
 endif
+
+endif
+
 
 ###############################################################################
 # At this point, we have everything needed to compile BlackBear with NEML2
 ###############################################################################
+ifeq ($(ENABLE_NEML2),true)
+
 NEML2_INCLUDE        := $(NEML2_DIR)/include
 NEML2_SRC            := $(shell find $(NEML2_DIR)/src -name "*.cxx")
 NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))
@@ -74,7 +81,3 @@ NONUNITY_DIRS        += $(shell find test/src/nonunity -type d -not -path '*/.li
 app_non_unity_dirs   += $(foreach i, $(NONUNITY_DIRS), %$(i))
 
 endif
-
-
-
-
