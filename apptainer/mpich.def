@@ -60,7 +60,7 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     # Installing Clang, and its dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
-                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64 libgfortran.x86_64
+                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64
 {%- endif %}
 
     # After epel-release
@@ -153,11 +153,10 @@ EOF
     # Basic script for setting mpich environment
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
-{%- if ALTERNATE_FROM == "clang" %}
-export PATH=${MOOSE_MPI_DIR}/bin:/opt/rh/gcc-toolset-12/root/bin:${PATH}
-export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
-{%- else %}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
+{%- if ALTERNATE_FROM == "clang" %}
+export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
+export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
 {%- endif %}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
