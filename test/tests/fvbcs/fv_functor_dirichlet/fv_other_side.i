@@ -59,6 +59,7 @@
     variable = u
     functor = v
     functor_only_defined_on_other_side = true
+    ghost_layers = 3
     boundary = mid
   []
   [right]
