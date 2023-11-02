@@ -47,7 +47,7 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->getParam<std::string>("_object_name")),
-    _blk_dim(std::numeric_limits<unsigned int>::max())
+    _blk_dim(libMesh::invalid_uint)
 {
   if (initialize)
     initializeBlockRestrictable(moose_object);
@@ -65,7 +65,7 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
     _boundary_ids(boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->getParam<std::string>("_object_name")),
-    _blk_dim(std::numeric_limits<unsigned int>::max())
+    _blk_dim(libMesh::invalid_uint)
 {
   initializeBlockRestrictable(moose_object);
 }
@@ -354,4 +354,11 @@ BlockRestrictable::checkVariable(const MooseVariableFieldBase & variable) const
                "': ",
                var_ids);
   }
+}
+
+unsigned int
+BlockRestrictable::blocksMaxDimension() const
+{
+  mooseAssert(_blk_dim != libMesh::invalid_uint, "Block restriction not initialized");
+  return _blk_dim;
 }

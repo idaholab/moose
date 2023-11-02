@@ -111,12 +111,7 @@ public:
   /**
    * Return the largest mesh dimension of the elements in the blocks for this object
    */
-  unsigned int blocksMaxDimension() const
-  {
-    mooseAssert(_blk_dim != std::numeric_limits<unsigned int>::max(),
-                "Block restriction not initialized");
-    return _blk_dim;
-  }
+  unsigned int blocksMaxDimension() const;
 
   /**
    * Test if the supplied block name is valid for this object
