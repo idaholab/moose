@@ -24,8 +24,9 @@ PINSFVEnergyDiffusion::validParams()
   params.addParam<bool>(
       "effective_diffusivity",
       false,
-      "Whether the diffusivity should be multiplied by porosity, or whether the provided "
-      "diffusivity is an effective diffusivity taking porosity effects into account");
+      "Whether the conductivity should be multiplied by porosity, or whether the provided "
+      "conductivity is an effective conductivity taking porosity effects into account");
+  params.renameParam("effective_diffusivity", "effective_conductivity", "");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>(
       "kappa_interp_method",
@@ -41,7 +42,7 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
     SolutionInvalidInterface(this),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _porosity_factored_in(getParam<bool>("effective_diffusivity")),
+    _porosity_factored_in(getParam<bool>("effective_conductivity")),
     _k_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {
@@ -72,13 +73,13 @@ PINSFVEnergyDiffusion::computeQpResidual()
     auto value2 = _porosity_factored_in ? _k(face_neighbor, state)
                                         : _k(face_neighbor, state) * _eps(face_neighbor, state);
 
-    // Adapt to users either passing 0 thermal diffusivity, 0 porosity, or k correlations going
+    // Adapt to users either passing 0 thermal conductivity, 0 porosity, or k correlations going
     // negative. The solution is invalid only for the latter case.
     auto k_interp_method = _k_interp_method;
     if (value1 <= 0 || value2 <= 0)
     {
       flagInvalidSolution(
-          "Negative or null thermal diffusivity value. If this is on purpose use arithmetic mean "
+          "Negative or null thermal conductivity value. If this is on purpose use arithmetic mean "
           "interpolation instead of the default harmonic interpolation.");
       if (_k_interp_method == Moose::FV::InterpMethod::HarmonicAverage)
         k_interp_method = Moose::FV::InterpMethod::Average;
