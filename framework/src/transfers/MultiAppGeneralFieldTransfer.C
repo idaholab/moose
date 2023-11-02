@@ -452,7 +452,7 @@ void
 MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index,
                                                     ProcessorToPointVec & outgoing_points)
 {
-  // Get the variable name, with the accomodation for array/vector names
+  // Get the variable name, with the accommodation for array/vector names
   const auto & var_name = getToVarName(var_index);
 
   // Clean up the map from processor to pointInfo vector
@@ -545,11 +545,11 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
 
-        // Skip if it is a block restricted block and current elem does not have
-        // specified blocks
+        // Skip if the element is not inside the block restriction
         if (!_to_blocks.empty() && !inBlocks(_to_blocks, elem))
           continue;
 
+        // Skip if the element does not have a side on the boundary
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, elem))
           continue;
 
@@ -645,7 +645,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     }
     else
     {
-      // Use this dof object pointer, so we can handle
+      // Using the dof object pointer, so we can handle
       // both element and node using the same code
 #ifndef NDEBUG
       auto var_num = _to_variables[var_index]->number();
@@ -703,7 +703,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
             if (!_skip_coordinate_collapsing)
               mooseInfo("Search value conflict cannot find the origin point due to the "
                         "non-uniqueness of the coordinate collapsing reverse mapping");
-            p = point_requests[val_offset] + _to_positions[problem_id];
+            p = point_requests[val_offset] - _to_positions[problem_id];
           }
           else
             p = to_transform->mapBack(point_requests[val_offset]);
@@ -825,6 +825,8 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     const unsigned int i_from = std::get<0>(potential_conflict);
     Point p = std::get<2>(potential_conflict);
     const Real distance = std::get<3>(potential_conflict);
+    // If not using nearest-positions: potential conflict was saved in the source frame
+    // If using nearest-positions: potential conflict was saved in the reference frame
     if (!_nearest_positions_obj)
     {
       const auto from_global_num = getGlobalSourceAppIndex(i_from);
@@ -871,8 +873,18 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
       auto & fe_type = to_sys->variable_type(var_num);
       bool is_nodal = _to_variables[var_index]->isNodal();
 
-      // Move to target problem local mesh
-      auto local_p = (*_to_transforms[getGlobalTargetAppIndex(i_to)])(p);
+      // Move to the local frame of reference for the target
+      Point local_p;
+      const auto & to_transform = _to_transforms[getGlobalTargetAppIndex(i_to)];
+      if (to_transform->hasNonTranslationTransformation())
+      {
+        if (!_skip_coordinate_collapsing)
+          mooseInfo("Resolution of local value conflicts detected cannot find the exact origin "
+                    "point due to the non-uniqueness of the coordinate collapsing reverse mapping");
+        local_p = p - _to_positions[i_to];
+      }
+      else
+        local_p = to_transform->mapBack(p);
 
       // Higher order elemental
       if (fe_type.order > CONSTANT && !is_nodal)
@@ -914,6 +926,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
         if (dof_object_id == std::numeric_limits<dof_id_type>::max())
           continue;
 
+        // this dof was not requested by this problem on this process
         if (dofobject_to_valsvec[i_to].find(dof_object_id) == dofobject_to_valsvec[i_to].end())
           continue;
 
@@ -986,7 +999,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
     for (const auto & conflict : _local_conflicts)
     {
       const unsigned int problem_id = std::get<0>(conflict);
-      const Point p = std::get<2>(conflict);
+      Point p = std::get<2>(conflict);
 
       std::string origin_domain_message;
       if (hasFromMultiApp() && !_nearest_positions_obj)
@@ -999,10 +1012,19 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         const auto app_id = _from_local2global_map[problem_id];
         origin_domain_message = "In source child app " + std::to_string(app_id) + " mesh,";
       }
-      // We can't locate the source app when considering nearest positions, we return the conflict
-      // location in the target app (parent or sibling) instead
+      // We can't locate the source app when considering nearest positions, so we saved the data
+      // in the reference space. So we return the conflict location in the target app (parent or
+      // sibling) instead
       else if (hasFromMultiApp() && _nearest_positions_obj)
-        origin_domain_message = "In target app mesh,";
+      {
+        if (_to_problems.size() == 1 || _skip_coordinate_collapsing)
+        {
+          p = (*_to_transforms[0])(p);
+          origin_domain_message = "In target app mesh,";
+        }
+        else
+          origin_domain_message = "In reference (post-coordinate collapse) mesh,";
+      }
       else
         origin_domain_message = "In source parent app mesh,";
 
@@ -1010,14 +1032,15 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
 
       local_conflicts_string += origin_domain_message + " point: (" + std::to_string(p(0)) + ", " +
-                                std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")\n";
+                                std::to_string(p(1)) + ", " + std::to_string(p(2)) +
+                                "), equi-distance: " + std::to_string(std::get<3>(conflict)) + "\n";
     }
     // Explicitly name source to give more context
-    std::string source_str = "";
+    std::string source_str = "unknown";
     if (_from_var_names.size())
       source_str = "variable '" + getFromVarName(var_index) + "'";
-    else
-      source_str = "user object ";
+    else if (isParamValid("source_user_object"))
+      source_str = "user object '" + getParam<UserObjectName>("source_user_object") + "'";
 
     mooseWarning("On rank " + rank_str +
                  ", multiple valid values from equidistant points were "
@@ -1052,7 +1075,9 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       if (hasToMultiApp() && _to_problems.size() > 1)
         mooseDoOnce(potential_reasons += "Are multiple subapps overlapping?\n";);
       received_conflict_string += target_domain_message + " point: (" + std::to_string(p(0)) +
-                                  ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")\n";
+                                  ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) +
+                                  "), equi-distance: " + std::to_string(std::get<3>(conflict)) +
+                                  "\n";
     }
     mooseWarning("On rank " + rank_str +
                  ", multiple valid values from equidistant points were "
