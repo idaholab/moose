@@ -26,6 +26,8 @@ protected:
   const Moose::Functor<ADReal> * const _rho_dot;
   /// the specific heat or isobaric heat capacity
   const Moose::Functor<ADReal> * const _cp;
+  /// the specific enthalpy
+  const Moose::Functor<ADReal> * const _h;
   /// the time derivative of the specific enthalpy
   const Moose::Functor<ADReal> * const _h_dot;
   /// the porosity

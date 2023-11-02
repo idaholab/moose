@@ -53,7 +53,6 @@ velocity_interp_method = 'rc'
   []
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1e-6
   []
   [pressure]
     type = INSFVPressureVariable
@@ -73,9 +72,6 @@ velocity_interp_method = 'rc'
   [porosity]
     type = MooseVariableFVReal
     initial_condition = 0.5
-  []
-  [velocity_norm]
-    type = MooseVariableFVReal
   []
 []
 
@@ -159,8 +155,10 @@ velocity_interp_method = 'rc'
   [energy_time]
     type = PINSFVEnergyTimeDerivative
     variable = T_fluid
+    h = 'h'
     dh_dt = 'dh_dt'
     rho = ${rho}
+    drho_dt = 'drho_dt'
     is_solid = false
     porosity = porosity
   []
@@ -292,7 +290,7 @@ velocity_interp_method = 'rc'
     fp = fp
     pressure = 'pressure'
     T_fluid = 'T_fluid'
-    speed = 'velocity_norm'
+    speed = 'speed'
 
     # To initialize with a high viscosity
     mu_rampdown = 'mu_rampdown'
@@ -311,6 +309,13 @@ velocity_interp_method = 'rc'
     prop_names = 'h_cv'
     prop_values = '${h_fs}'
   []
+  [speed]
+    type = PINSFVSpeedFunctorMaterial
+    porosity = 'porosity'
+    T_fluid = 'T_fluid'
+    superficial_vel_x = 'superficial_vel_x'
+    superficial_vel_y = 'superficial_vel_y'
+  []
 []
 
 [Functions]
@@ -318,15 +323,6 @@ velocity_interp_method = 'rc'
     type = PiecewiseLinear
     x = '1 2 3 4'
     y = '1e3 1e2 1e1 1'
-  []
-[]
-
-[AuxKernels]
-  [speed]
-    type = ParsedAux
-    variable = 'velocity_norm'
-    coupled_variables = 'superficial_vel_x superficial_vel_y porosity'
-    expression = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / porosity'
   []
 []
 
@@ -351,9 +347,12 @@ velocity_interp_method = 'rc'
     boundary = 'left'
   []
   [outlet-u]
-    type = SideAverageValue
-    variable = superficial_vel_x
+    type = VolumetricFlowRate
     boundary = 'right'
+    advected_quantity = '1'
+    advected_interp_method = ${advected_interp_method}
+    vel_x = 'superficial_vel_x'
+    vel_y = 'superficial_vel_y'
   []
   [outlet-temp]
     type = SideAverageValue
