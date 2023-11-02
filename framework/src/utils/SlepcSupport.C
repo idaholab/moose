@@ -968,7 +968,7 @@ mooseSlepcEigenFormNorm(SNES /*snes*/, Vec /*Bx*/, PetscReal * norm, void * ctx)
   PetscFunctionBegin;
   auto * const eigen_problem = static_cast<EigenProblem *>(ctx);
   *norm = eigen_problem->formNorm();
-  PetscFunctionReturn(PETSC_SUCCESS);
+  PetscFunctionReturn(0);
 }
 
 void
@@ -1103,7 +1103,8 @@ PCCreate_MoosePC(PC pc)
   PetscFunctionReturn(0);
 }
 
-PetscErrorCode PCDestroy_MoosePC(PC /*pc*/)
+PetscErrorCode
+PCDestroy_MoosePC(PC /*pc*/)
 {
   PetscFunctionBegin;
   /* We do not need to do anything right now, but later we may have some data we need to free here
