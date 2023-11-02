@@ -620,7 +620,7 @@ public:
    * This is needed so that we can know whether it is appropriate to check if metadata
    * exists (because it's being checked after restore), or if we can't because we haven't
    * even loaded anything yet
-  */
+   */
   bool hasRestoredRestartableData(const RestartableDataMapName & metaname = "") const;
 
   /**
