@@ -5,10 +5,8 @@
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
 
 {%- if ALTERNATE_FROM == "clang" %}
-BootStrap: yum
-OSVersion: 8
-MirrorURL: https://download.rockylinux.org/pub/rocky/%{OSVERSION}/BaseOS/$basearch/os/
-Include: yum
+Bootstrap: docker
+From: rockylinux:8
 {%- else %}
 BootStrap: oras
 {%- endif %}
