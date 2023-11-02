@@ -462,6 +462,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
   // Loop over all problems
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
+    const auto global_i_to = getGlobalTargetAppIndex(i_to);
+
     // libMesh EquationSystems
     auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
     // libMesh system that has this variable
@@ -507,7 +509,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         // using the point number as a "dof_object_id" will serve to identify the point if we ever
         // rework interp/distance_cache into the dof_id_to_value maps
         this->cacheOutgoingPointInfo(
-            _to_transforms[i_to]->mapBack(p), point_id++, i_to, outgoing_points);
+            (*_to_transforms[global_i_to])(p), point_id++, i_to, outgoing_points);
 
       // This is going to require more complicated transfer work
       if (!g.points_requested().empty())
@@ -531,7 +533,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfo((*_to_transforms[i_to])(*node), node->id(), i_to, outgoing_points);
+        cacheOutgoingPointInfo(
+            (*_to_transforms[global_i_to])(*node), node->id(), i_to, outgoing_points);
       }
     }
     else // Elemental, constant monomial
@@ -552,8 +555,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfo(
-            (*_to_transforms[i_to])(elem->vertex_average()), elem->id(), i_to, outgoing_points);
+        cacheOutgoingPointInfo((*_to_transforms[global_i_to])(elem->vertex_average()),
+                               elem->id(),
+                               i_to,
+                               outgoing_points);
       } // for
     }   // else
   }     // for
@@ -612,7 +617,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
       InterpCache & distance_cache = distance_caches[problem_id];
-      Point p = _to_transforms[problem_id]->mapBack(point_requests[val_offset]);
+      Point p =
+          _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(point_requests[val_offset]);
       const Number val = incoming_vals[val_offset].first;
 
       // Initialize distance to be able to compare
@@ -690,7 +696,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
                            incoming_vals[val_offset].second))
         {
           // Keep track of distance and value
-          const auto p = _to_transforms[problem_id]->mapBack(point_requests[val_offset]);
+          const auto p = _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(
+              point_requests[val_offset]);
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
         }
 
@@ -808,7 +815,10 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     Point p = std::get<2>(potential_conflict);
     const Real distance = std::get<3>(potential_conflict);
     if (!_nearest_positions_obj)
-      p += _from_positions[i_from];
+    {
+      const auto from_global_num = getGlobalSourceAppIndex(i_from);
+      p = (*_from_transforms[from_global_num])(p);
+    }
 
     // Send data in the global frame of reference
     potential_conflicts.push_back(std::make_tuple(p, distance));
@@ -851,7 +861,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
       bool is_nodal = _to_variables[var_index]->isNodal();
 
       // Move to target problem local mesh
-      auto local_p = (*_to_transforms[i_to])(p);
+      auto local_p = (*_to_transforms[getGlobalTargetAppIndex(i_to)])(p);
 
       // Higher order elemental
       if (fe_type.order > CONSTANT && !is_nodal)
@@ -924,7 +934,10 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     Point p = std::get<2>(potential_conflict);
     const Real distance = std::get<3>(potential_conflict);
     if (!_nearest_positions_obj)
-      p += _from_positions[i_from];
+    {
+      const auto from_global_num = getGlobalSourceAppIndex(i_from);
+      p = (*_from_transforms[from_global_num])(p);
+    }
 
     // If not in the vector of real conflicts, was not real so delete it
     if (std::find_if(real_conflicts.begin(),
@@ -1170,23 +1183,23 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
   else
   {
     auto * pl = _from_point_locators[i_from].get();
+    const auto from_global_num =
+        _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+    const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
 
     // Check block restriction
-    if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, pt - _from_positions[i_from]))
+    if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, transformed_pt))
       return false;
 
     // Check boundary restriction. Passing the block restriction will speed up the search
-    if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries,
-                                                   _from_blocks,
-                                                   *_from_meshes[i_from],
-                                                   pl,
-                                                   pt - _from_positions[i_from]))
+    if (!_from_boundaries.empty() &&
+        !onBoundaries(_from_boundaries, _from_blocks, *_from_meshes[i_from], pl, transformed_pt))
       return false;
 
     // Check that the app actually contains the origin point
     // We dont need to check if we already found it in a block or a boundary
     if (_from_blocks.empty() && _from_boundaries.empty() && _source_app_must_contain_point &&
-        !inMesh(pl, pt - _from_positions[i_from]))
+        !inMesh(pl, transformed_pt))
       return false;
   }
   return true;

@@ -192,6 +192,17 @@ protected:
   /// Given local app index, returns global app index.
   std::vector<unsigned int> _from_local2global_map;
 
+  /// Return the global app index from the local index in the "from-multiapp" transfer direction
+  unsigned int getGlobalSourceAppIndex(unsigned int i_from) const
+  {
+    return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+  }
+  /// Return the global app index from the local index in the "to-multiapp" transfer direction
+  unsigned int getGlobalTargetAppIndex(unsigned int i_to) const
+  {
+    return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+  }
+
   /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.
    *
