@@ -27,6 +27,7 @@ FunctionValuePostprocessor::validParams()
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
   params.addParam<std::vector<PostprocessorName>>(
       "indirect_dependencies",
+      {},
       "If the evaluated function depends on other postprocessors they must be listed here to "
       "ensure proper dependency resolution");
 
@@ -58,12 +59,9 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
       _point[j] = &getPostprocessorValue("point", j);
   }
 
-  if (isParamValid("indirect_dependencies"))
-  {
-    const auto & indirect_dependencies =
-        getParam<std::vector<PostprocessorName>>("indirect_dependencies");
-    _depend_uo.insert(indirect_dependencies.begin(), indirect_dependencies.end());
-  }
+  const auto & indirect_dependencies =
+      getParam<std::vector<PostprocessorName>>("indirect_dependencies");
+  _depend_uo.insert(indirect_dependencies.begin(), indirect_dependencies.end());
 }
 
 void

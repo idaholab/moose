@@ -31,9 +31,12 @@ ParsedAux::validParams()
       false,
       "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
   params.addParam<std::vector<std::string>>(
-      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+      "constant_names",
+      {},
+      "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
@@ -67,10 +70,9 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-    addFParserConstants(_func_F,
-                        getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
+  addFParserConstants(_func_F,
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)

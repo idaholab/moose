@@ -32,10 +32,11 @@ ParsedNodeTransformGenerator::validParams()
   params.addParam<ParsedFunctionExpression>(
       _func_name[2], "z", "Function for the updated z component of the node");
 
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
@@ -52,10 +53,9 @@ ParsedNodeTransformGenerator::ParsedNodeTransformGenerator(const InputParameters
     setParserFeatureFlags(_functions[i]);
 
     // add the constant expressions
-    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-      addFParserConstants(_functions[i],
-                          getParam<std::vector<std::string>>("constant_names"),
-                          getParam<std::vector<std::string>>("constant_expressions"));
+    addFParserConstants(_functions[i],
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
 
     // parse function
     if (_functions[i]->Parse(getParam<ParsedFunctionExpression>(_func_name[i]), "x,y,z") >= 0)

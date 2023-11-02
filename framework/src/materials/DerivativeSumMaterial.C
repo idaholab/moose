@@ -59,9 +59,7 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
     mooseError("Please supply at least one material to sum in DerivativeSumMaterial ", name());
 
   // get prefactor values if not 1.0
-  std::vector<Real> p = this->isParamValid("prefactor")
-                            ? this->template getParam<std::vector<Real>>("prefactor")
-                            : std::vector<Real>{};
+  std::vector<Real> p = this->template getParam<std::vector<Real>>("prefactor");
 
   // if prefactor is used we need the same number of prefactors as sum materials
   if (_num_materials == p.size())

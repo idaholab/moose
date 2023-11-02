@@ -69,9 +69,10 @@ AdaptivityAction::validParams()
                         std::numeric_limits<Real>::max(),
                         "The time after which adaptivity will no longer be active.");
   params.addParam<std::vector<std::string>>(
-      "weight_names", "List of names of variables that will be associated with weight_values");
+      "weight_names", {}, "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real>>(
       "weight_values",
+      {},
       "List of values between 0 and 1 to weight the associated weight_names error by");
   params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
 
@@ -170,15 +171,15 @@ AdaptivityAction::act()
 
     adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
-    if (isParamValid("weight_names") && isParamValid("weight_values"))
+    const std::vector<std::string> & weight_names =
+        getParam<std::vector<std::string>>("weight_names");
+    const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
+
+    auto num_weight_names = weight_names.size();
+    auto num_weight_values = weight_values.size();
+
+    if (num_weight_names)
     {
-      const std::vector<std::string> & weight_names =
-          getParam<std::vector<std::string>>("weight_names");
-      const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
-
-      auto num_weight_names = weight_names.size();
-      auto num_weight_values = weight_values.size();
-
       if (num_weight_names != num_weight_values)
         mooseError("Number of weight_names must be equal to number of weight_values in "
                    "Execution/Adaptivity");

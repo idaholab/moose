@@ -69,6 +69,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
     if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
+
       for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
       {
         unsigned int row =

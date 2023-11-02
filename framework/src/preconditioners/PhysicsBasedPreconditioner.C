@@ -127,7 +127,6 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
       off_diag[row].push_back(column);
     }
   }
-
   // Add all of the preconditioning systems
   for (unsigned int var = 0; var < n_vars; var++)
     addSystem(var, off_diag[var], _pre_type[var]);

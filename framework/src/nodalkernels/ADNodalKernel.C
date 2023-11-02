@@ -25,10 +25,10 @@ ADNodalKernel::validParams()
 ADNodalKernel::ADNodalKernel(const InputParameters & parameters)
   : NodalKernelBase(parameters), _u(_var.adDofValues())
 {
-  if (isParamSetByUser("save_in"))
+  if (getParam<std::vector<AuxVariableName>>("save_in").size())
     paramError("save_in",
                "ADNodalKernels do not support save_in. Please use the tagging system instead.");
-  if (isParamSetByUser("diag_save_in"))
+  if (getParam<std::vector<AuxVariableName>>("diag_save_in").size())
     paramError(
         "diag_save_in",
         "ADNodalKernels do not support diag_save_in. Please use the tagging system instead.");

@@ -39,10 +39,11 @@ ParsedSubdomainMeshGenerator::validParams()
       "A set of subdomain ids that will not changed even if "
       "they are inside/outside the combinatorial geometry",
       "excluded_subdomain_ids is deprecated, use excluded_subdomains (ids or names accepted)");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription(
       "Uses a parsed expression (`combinatorial_geometry`) to determine if an "
@@ -69,10 +70,9 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-    addFParserConstants(_func_F,
-                        getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
+  addFParserConstants(_func_F,
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)

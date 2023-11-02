@@ -20,8 +20,8 @@ HeatStructurePlate::validParams()
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each transverse region [m]");
   params.addRequiredParam<std::vector<unsigned int>>(
       "n_part_elems", "Number of elements of each transverse region");
-  params.addParam<std::vector<std::string>>(
-      "materials", {}, "Material name for each transverse region");
+  params.addParam<std::vector<std::string>>("materials",
+                                            "Material name for each transverse region");
   params.addParam<Real>("num_rods", 1.0, "Number of rods represented by this heat structure");
   params.addRequiredParam<Real>("depth", "Dimension of plate fuel in the third direction [m]");
 
@@ -38,7 +38,8 @@ HeatStructurePlate::HeatStructurePlate(const InputParameters & params)
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
-  _material_names = getParam<std::vector<std::string>>("materials");
+  _material_names = isParamValid("materials") ? getParam<std::vector<std::string>>("materials")
+                                              : std::vector<std::string>{};
 
   _width = getParam<std::vector<Real>>("widths");
   _total_width = std::accumulate(_width.begin(), _width.end(), 0.0);
@@ -63,7 +64,7 @@ HeatStructurePlate::check() const
 
   checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
   checkEqualSize<std::string, Real>("names", "widths");
-  if (isParamSetByUser("materials"))
+  if (isParamValid("materials"))
     checkEqualSize<std::string, std::string>("names", "materials");
 }
 

@@ -129,9 +129,11 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _q_function_type(getParam<MooseEnum>("q_function_type")),
     _crack_front_points_provider(nullptr)
 {
+  auto boundary = isParamValid("boundary") ? getParam<std::vector<BoundaryName>>("boundary")
+                                           : std::vector<BoundaryName>{};
   if (isParamValid("crack_front_points"))
   {
-    if (isParamSetByUser("boundary"))
+    if (boundary.size())
       paramError("crack_front_points",
                  "CrackFrontDefinition error: since boundary is defined, crack_front_points should "
                  "not be added.");
@@ -148,7 +150,7 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
   }
   else if (isParamValid("crack_front_points_provider"))
   {
-    if (isParamSetByUser("boundary"))
+    if (boundary.size())
       paramError("crack_front_points_provider",
                  "CrackFrontDefinition error: since boundary is defined, "
                  "crack_front_points_provider should not be added.");
@@ -164,7 +166,7 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     paramError("number_points_from_provider",
                "CrackFrontDefinition error: number_points_from_provider is provided but "
                "crack_front_points_provider cannot be found.");
-  else if (isParamValid("boundary"))
+  else if (boundary.size())
   {
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_NODES;
     if (parameters.isParamSetByUser("closed_loop"))

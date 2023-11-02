@@ -63,7 +63,7 @@ HeatStructureBase::addMooseObjects()
 {
   HeatStructureInterface::addMooseObjects();
 
-  if (isParamSetByUser("materials"))
+  if (isParamValid("materials"))
   {
     _hc_model->addMaterials();
 

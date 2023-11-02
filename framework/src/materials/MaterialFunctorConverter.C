@@ -38,9 +38,10 @@ MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParam
   const auto & reg_props_out = getParam<std::vector<MaterialPropertyName>>("reg_props_out");
   const auto & ad_props_out = getParam<std::vector<MaterialPropertyName>>("ad_props_out");
 
-  if (isParamSetByUser("reg_props_out") && isParamSetByUser("ad_props_out"))
+  if (reg_props_out.size() && ad_props_out.size())
     paramError("reg_props_out",
-               "We dont support converting functors to both regular and AD material properties in "
+               "We dont support converting functors to both regular and AD "
+               "material properties in "
                "a single instance of '",
                type(),
                "'. Please create two instances, one for regular and one for AD.");

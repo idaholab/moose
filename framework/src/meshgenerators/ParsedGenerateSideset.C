@@ -58,10 +58,11 @@ ParsedGenerateSideset::validParams()
       "normal",
       Point(),
       "If provided specifies the normal vector on sides that are added to the new ");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
                              "centroid satisfies the `combinatorial_geometry` expression. "
@@ -122,10 +123,9 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-    addFParserConstants(_func_F,
-                        getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
+  addFParserConstants(_func_F,
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)

@@ -241,12 +241,14 @@ FEProblemBase::validParams()
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_vectors",
+      {},
       "Extra vectors to add to the system that can be filled by objects which compute residuals "
       "and Jacobians (Kernels, BCs, etc.) by setting tags on them. The outer index is for which "
       "nonlinear system the extra tag vectors should be added for");
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_matrices",
+      {},
       "Extra matrices to add to the system that can be filled "
       "by objects which compute residuals and Jacobians "
       "(Kernels, BCs, etc.) by setting tags on them. The outer index is for which "
@@ -254,6 +256,7 @@ FEProblemBase::validParams()
 
   params.addParam<std::vector<TagName>>(
       "extra_tag_solutions",
+      {},
       "Extra solution vectors to add to the system that can be used by "
       "objects for coupling variable values stored in them.");
 
@@ -500,41 +503,34 @@ void
 FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
-  if (isParamValid("extra_tag_vectors"))
-  {
-    auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
-    for (const auto nl_sys_num : index_range(vectors))
-      for (auto & vector : vectors[nl_sys_num])
-      {
-        auto tag = addVectorTag(vector);
-        _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
-      }
-  }
+  auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
+  for (const auto nl_sys_num : index_range(vectors))
+    for (auto & vector : vectors[nl_sys_num])
+    {
+      auto tag = addVectorTag(vector);
+      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+    }
 
   // add matrices and their tags
-  if (isParamValid("extra_tag_matrices"))
-  {
-    auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
-    for (const auto nl_sys_num : index_range(matrices))
-      for (auto & matrix : matrices[nl_sys_num])
-      {
-        auto tag = addMatrixTag(matrix);
-        _nl[nl_sys_num]->addMatrix(tag);
-      }
-  }
+  auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
+  for (const auto nl_sys_num : index_range(matrices))
+    for (auto & matrix : matrices[nl_sys_num])
+    {
+      auto tag = addMatrixTag(matrix);
+      _nl[nl_sys_num]->addMatrix(tag);
+    }
 }
 
 void
 FEProblemBase::createTagSolutions()
 {
-  if (isParamValid("extra_tag_solutions"))
-    for (auto & vector : getParam<std::vector<TagName>>("extra_tag_solutions"))
-    {
-      auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
-      for (auto & nl : _nl)
-        nl->addVector(tag, false, GHOSTED);
-      _aux->addVector(tag, false, GHOSTED);
-    }
+  for (auto & vector : getParam<std::vector<TagName>>("extra_tag_solutions"))
+  {
+    auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
+    for (auto & nl : _nl)
+      nl->addVector(tag, false, GHOSTED);
+    _aux->addVector(tag, false, GHOSTED);
+  }
 
   if (getParam<bool>("previous_nl_solution_required"))
   {

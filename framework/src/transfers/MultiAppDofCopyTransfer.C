@@ -31,9 +31,12 @@ MultiAppDofCopyTransfer::validParams()
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
       "from_blocks",
+      {},
       "Subdomain restriction to transfer from (defaults to all the origin app domain)");
   params.addParam<std::vector<SubdomainName>>(
-      "to_blocks", "Subdomain restriction to transfer to, (defaults to all the target app domain)");
+      "to_blocks",
+      {},
+      "Subdomain restriction to transfer to, (defaults to all the target app domain)");
 
   params.addClassDescription(
       "Base class for copying degrees-of-freedom values (nonlinear and auxiliary) between apps "
@@ -43,7 +46,8 @@ MultiAppDofCopyTransfer::validParams()
 
 MultiAppDofCopyTransfer::MultiAppDofCopyTransfer(const InputParameters & parameters)
   : MultiAppFieldTransfer(parameters),
-    _has_block_restrictions(isParamValid("from_blocks") || isParamValid("to_blocks"))
+    _has_block_restrictions(!getParam<std::vector<SubdomainName>>("from_blocks").empty() ||
+                            !getParam<std::vector<SubdomainName>>("to_blocks").empty())
 {
 }
 
@@ -75,14 +79,14 @@ MultiAppDofCopyTransfer::initialSetup()
   // Convert block names to block IDs, fill with all blocks if unspecified
   if (_has_block_restrictions)
   {
-    if (isParamValid("from_blocks"))
-    {
-      const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
-      for (const auto & b : from_block_names)
-        if (!MooseMeshUtils::hasSubdomainName(
-                const_cast<MeshBase &>(from_problem->mesh().getMesh()), b))
-          paramError("from_blocks", "The block '", b, "' was not found in the mesh");
+    const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
+    for (const auto & b : from_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(from_problem->mesh().getMesh()),
+                                            b))
+        paramError("from_blocks", "The block '", b, "' was not found in the mesh");
 
+    if (from_block_names.size())
+    {
       if (from_problem)
       {
         const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
@@ -95,14 +99,14 @@ MultiAppDofCopyTransfer::initialSetup()
     else
       _from_blocks = from_problem->mesh().meshSubdomains();
 
-    if (isParamValid("to_blocks"))
-    {
-      const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
-      for (const auto & b : to_block_names)
-        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_problem->mesh().getMesh()),
-                                              b))
-          paramError("to_blocks", "The block '", b, "' was not found in the mesh");
+    const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+    for (const auto & b : to_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_problem->mesh().getMesh()),
+                                            b))
+        paramError("to_blocks", "The block '", b, "' was not found in the mesh");
 
+    if (to_block_names.size())
+    {
       if (to_problem)
       {
         const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);

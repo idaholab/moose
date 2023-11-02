@@ -49,6 +49,7 @@ VariableCondensationPreconditioner::validParams()
 
   params.addParam<std::vector<NonlinearVariableName>>(
       "coupled_groups",
+      {},
       "List multiple space separated groups of comma separated variables. "
       "Off-diagonal jacobians will be generated for all pairs within a group.");
 
@@ -147,6 +148,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     // off-diagonal entries from the off_diag_row and off_diag_column parameters
     std::vector<std::vector<unsigned int>> off_diag(_n_vars);
     if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
+
       for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
       {
         const unsigned int row =
@@ -159,21 +161,20 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
       }
 
     // off-diagonal entries from the coupled_groups parameters
-    if (isParamValid("coupled_groups"))
-      for (const auto & coupled_group :
-           getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
-      {
-        std::vector<NonlinearVariableName> vars;
-        MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
-        for (unsigned int j : index_range(vars))
-          for (unsigned int k = j + 1; k < vars.size(); ++k)
-          {
-            const unsigned int row = _nl.getVariable(0, vars[j]).number();
-            const unsigned int column = _nl.getVariable(0, vars[k]).number();
-            (*cm)(row, column) = 1;
-            (*cm)(column, row) = 1;
-          }
-      }
+    for (const auto & coupled_group :
+         getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
+    {
+      std::vector<NonlinearVariableName> vars;
+      MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
+      for (unsigned int j : index_range(vars))
+        for (unsigned int k = j + 1; k < vars.size(); ++k)
+        {
+          const unsigned int row = _nl.getVariable(0, vars[j]).number();
+          const unsigned int column = _nl.getVariable(0, vars[k]).number();
+          (*cm)(row, column) = 1;
+          (*cm)(column, row) = 1;
+        }
+    }
   }
   else
   {

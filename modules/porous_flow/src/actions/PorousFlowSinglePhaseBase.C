@@ -163,8 +163,8 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
     _nacl_name = getParam<VariableName>("nacl_name");
   }
 
-  if (params.isParamSetByUser("save_component_rate_in") &&
-      _save_component_rate_in.size() != _num_mass_fraction_vars + 1)
+  auto save_component_rate_in_size = _save_component_rate_in.size();
+  if (save_component_rate_in_size && save_component_rate_in_size != _num_mass_fraction_vars + 1)
     paramError("save_component_rate_in",
                "The number of save_component_rate_in variables must be the number of fluid "
                "components + 1");

@@ -351,7 +351,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  if (_pars.isParamSetByUser("output_element_phases"))
+  if (_element_phases.size())
   {
     auto phases = Thermochimica::getPhaseNamesSystem();
     if (_element_phases.size() == 1 && _element_phases[0] == "ALL")
@@ -490,7 +490,7 @@ ChemicalCompositionAction::act()
                   _vapor_pressures.begin(),
                   _vapor_pressures.end());
 
-    if (_pars.isParamSetByUser("output_element_phases"))
+    if (_element_phases.size())
       uo_params.set<std::vector<VariableName>>("output_element_phases")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
                   _element_phases.begin(),

@@ -35,11 +35,13 @@ addAdvancedOutputParams(InputParameters & params)
   // Hide/show variable output options
   params.addParam<std::vector<VariableName>>(
       "hide",
+      {},
       "A list of the variables and postprocessors that should NOT be output to the Exodus "
       "file (may include Variables, ScalarVariables, and Postprocessor names).");
 
   params.addParam<std::vector<VariableName>>(
       "show",
+      {},
       "A list of the variables and postprocessors that should be output to the Exodus file "
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
@@ -161,9 +163,8 @@ AdvancedOutput::init()
   initAvailableLists();
 
   // Separate the hide/show list into components
-  if (isParamValid("show") && isParamValid("hide"))
-    initShowHideLists(getParam<std::vector<VariableName>>("show"),
-                      getParam<std::vector<VariableName>>("hide"));
+  initShowHideLists(getParam<std::vector<VariableName>>("show"),
+                    getParam<std::vector<VariableName>>("hide"));
 
   // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
