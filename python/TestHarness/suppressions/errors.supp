@@ -222,7 +222,7 @@
    fun:KSPSolve
 }
 {
-   libtorch_jit
+   libtorch_deregister_operator
    Memcheck:Cond
    ...
    fun:*deregisterOperator*
