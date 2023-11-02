@@ -77,6 +77,7 @@ N = 2
   petsc_options_value = 'lu'
   automatic_scaling = true
   dt = 1e-3
+  dtmin = 1e-3
   num_steps = 5
   residual_and_jacobian_together = true
 []

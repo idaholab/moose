@@ -4,7 +4,7 @@
   [neml2_error]
     type = RunException
     input = 'fem.i'
-    cli_args = 'neml2_input=error Executioner/dtmin=1e-3'
+    cli_args = 'neml2_input=error'
     requirement = 'BlackBear shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
     expect_err = 'To debug NEML2 related issues'
     collections = 'SYSTEM'
