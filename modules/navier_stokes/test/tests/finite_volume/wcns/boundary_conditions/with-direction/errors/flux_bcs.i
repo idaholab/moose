@@ -300,7 +300,7 @@ inlet_velocity = 0.001
     prop_values = '${cp} ${k} ${rho}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
   []

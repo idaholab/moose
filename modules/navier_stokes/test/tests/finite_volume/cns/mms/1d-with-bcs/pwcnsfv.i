@@ -176,7 +176,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     pressure = pressure
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = T_fluid
     rho = ${rho}
   []

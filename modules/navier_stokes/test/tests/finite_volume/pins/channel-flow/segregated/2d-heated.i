@@ -259,7 +259,7 @@ pressure_tag = "pressure_grad"
     prop_values = '0.1 ${cp}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = 'T_fluid'
   []

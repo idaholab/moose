@@ -327,13 +327,13 @@ input_heat_flux = 40000.0
     prop_values = '${cp} ${k} ${k_solid}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T'
     rho = ${rho}
     block = 0
   []
   [ins_fv_solid]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'Ts'
     rho = ${rho}
     cp = ${cp}

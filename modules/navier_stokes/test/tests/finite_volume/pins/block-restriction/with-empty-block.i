@@ -370,7 +370,7 @@ Q = 200
   []
 
   [density_fluid]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho_fluid}
     block = 'spacer_block porous_block'
