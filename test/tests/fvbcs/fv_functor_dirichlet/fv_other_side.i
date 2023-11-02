@@ -58,7 +58,7 @@
     type = FVADFunctorDirichletBC
     variable = u
     functor = v
-    functor_defined_on_other_side = true
+    functor_only_defined_on_other_side = true
     boundary = mid
   []
   [right]

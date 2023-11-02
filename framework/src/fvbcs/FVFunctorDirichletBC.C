@@ -20,7 +20,7 @@ FVFunctorDirichletBCTempl<is_ad>::validParams()
   params.addClassDescription("Uses the value of a functor to set a Dirichlet boundary value.");
   params.addRequiredParam<MooseFunctorName>(
       "functor", "The name of the functor whose value is imposed on the boundary");
-  params.addParam<bool>("functor_defined_on_other_side",
+  params.addParam<bool>("functor_only_defined_on_other_side",
                         false,
                         "Whether to evaluate the functor on the other side of the boundary");
   return params;
@@ -30,7 +30,7 @@ template <bool is_ad>
 FVFunctorDirichletBCTempl<is_ad>::FVFunctorDirichletBCTempl(const InputParameters & parameters)
   : FVDirichletBCBase(parameters),
     _functor(getFunctor<GenericReal<is_ad>>("functor")),
-    _use_other_side(getParam<bool>("functor_defined_on_other_side"))
+    _use_other_side(getParam<bool>("functor_only_defined_on_other_side"))
 {
 }
 
