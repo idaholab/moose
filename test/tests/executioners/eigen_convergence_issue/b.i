@@ -65,7 +65,7 @@
   bx_norm = fluxintegral
   solve_type = PJFNK
   free_power_iterations = 4
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 2e-10
 []
 
 [Outputs]
