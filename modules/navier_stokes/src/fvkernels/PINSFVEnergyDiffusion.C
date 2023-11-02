@@ -75,19 +75,17 @@ PINSFVEnergyDiffusion::computeQpResidual()
     // Adapt to users either passing 0 thermal diffusivity, 0 porosity, or k correlations going
     // negative. The solution is invalid only for the latter case.
     auto k_interp_method = _k_interp_method;
-    if (value1 <= 0)
+    if (value1 <= 0 || value2 <= 0)
     {
-      flagInvalidSolution("Negative or null thermal diffusivity value");
+      flagInvalidSolution(
+          "Negative or null thermal diffusivity value. If this is on purpose use arithmetic mean "
+          "interpolation instead of the default harmonic interpolation.");
       if (_k_interp_method == Moose::FV::InterpMethod::HarmonicAverage)
         k_interp_method = Moose::FV::InterpMethod::Average;
-      value1 = 0;
-    }
-    if (value2 <= 0)
-    {
-      flagInvalidSolution("Negative or null thermal diffusivity value");
-      if (_k_interp_method == Moose::FV::InterpMethod::HarmonicAverage)
-        k_interp_method = Moose::FV::InterpMethod::Average;
-      value2 = 0;
+      if (value1 < 0)
+        value1 = 0;
+      if (value2 < 0)
+        value2 = 0;
     }
 
     Moose::FV::interpolate(k_interp_method, k_eps_face, value1, value2, *_face_info, true);

@@ -18,6 +18,11 @@ generally neglected. It is not computed by this kernel.
 To switch from using a regular diffusivity to an effective diffusivity, use the
 [!param](/FVKernels/PINSFVEnergyDiffusion/effective_diffusivity) parameter.
 
+!alert note
+If specifying a zero thermal diffusivity, the harmonic interpolation method for the face value of the thermal
+conductivity is not well-defined and will
+be automatically changed to an average interpolation.
+
 !syntax parameters /FVKernels/PINSFVEnergyDiffusion
 
 !syntax inputs /FVKernels/PINSFVEnergyDiffusion
