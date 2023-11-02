@@ -6,14 +6,13 @@
 
 {%- if ALTERNATE_FROM == "clang" %}
 Bootstrap: docker
-From: rockylinux:8
 {%- else %}
 BootStrap: oras
 {%- endif %}
 {%- if ALTERNATE_FROM == "rocky9" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky9-{{ ARCH }}:9.0-0
 {%- elif ALTERNATE_FROM == "clang" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-clang-{{ ARCH }}:8.6-0
+From: rockylinux:8
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
 {%- else %}
