@@ -696,8 +696,18 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
                            incoming_vals[val_offset].second))
         {
           // Keep track of distance and value
-          const auto p = _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(
-              point_requests[val_offset]);
+          const auto & to_transform = _to_transforms[getGlobalTargetAppIndex(problem_id)];
+          Point p;
+          if (to_transform->hasNonTranslationTransformation())
+          {
+            if (!_skip_coordinate_collapsing)
+              mooseInfo("Search value conflict cannot find the origin point due to the "
+                        "non-uniqueness of the coordinate collapsing reverse mapping");
+            p = point_requests[val_offset] + _to_positions[problem_id];
+          }
+          else
+            p = to_transform->mapBack(point_requests[val_offset]);
+
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
         }
 
@@ -742,9 +752,9 @@ MultiAppGeneralFieldTransfer::examineReceivedValueConflicts(
   const auto var_name = getToVarName(var_index);
   // We must check a posteriori because we could have two
   // equidistant points with different values from two different problems, but a third point from
-  // another problem is actually closer, so there is no conflict because only that last one matters
-  // We check here whether the potential conflicts actually were the nearest points
-  // Loop over potential conflicts
+  // another problem is actually closer, so there is no conflict because only that last one
+  // matters We check here whether the potential conflicts actually were the nearest points Loop
+  // over potential conflicts
   for (auto conflict_it = _received_conflicts.begin(); conflict_it != _received_conflicts.end();)
   {
     const auto potential_conflict = *conflict_it;
@@ -796,10 +806,11 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
   // We must check a posteriori because we could have:
   // - two equidistant points with different values from two different problems
   // - two (or more) equidistant points with different values from the same problem
-  // but a third point/value couple from another problem is actually closer, so there is no conflict
-  // because only that last one matters. We check here whether the potential conflicts actually were
-  // the nearest points. We use several global reductions. If there are not too many potential
-  // conflicts (and there should not be in a well-posed problem) it should be manageably expensive
+  // but a third point/value couple from another problem is actually closer, so there is no
+  // conflict because only that last one matters. We check here whether the potential conflicts
+  // actually were the nearest points. We use several global reductions. If there are not too many
+  // potential conflicts (and there should not be in a well-posed problem) it should be manageably
+  // expensive
 
   // Move relevant conflict info (location, distance) to a smaller data structure
   std::vector<std::tuple<Point, Real>> potential_conflicts;
@@ -847,8 +858,8 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     const Point p = std::get<0>(potential_conflict);
     const Real distance = std::get<1>(potential_conflict);
 
-    // Check all the problems to try to find this requested point in the data structures filled with
-    // the received information
+    // Check all the problems to try to find this requested point in the data structures filled
+    // with the received information
     bool target_found = false;
     bool conflict_real = false;
     for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
@@ -871,8 +882,8 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
         if (cached_distance != distance_caches[i_to].end())
         {
           target_found = true;
-          // Distance between source & target is still the distance we found in the sending process
-          // when we detected a potential overlap while gathering values to send
+          // Distance between source & target is still the distance we found in the sending
+          // process when we detected a potential overlap while gathering values to send
           if (MooseUtils::absoluteFuzzyEqual(cached_distance->second, distance))
             conflict_real = true;
         }
@@ -924,8 +935,8 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
 
   // Delete potential conflicts that were resolved
   // Each local list of conflicts will now be updated. It's important to keep conflict lists local
-  // so we can give more context like the sending processor id (the domain of which can be inspected
-  // by the user)
+  // so we can give more context like the sending processor id (the domain of which can be
+  // inspected by the user)
   for (auto conflict_it = _local_conflicts.begin(); conflict_it != _local_conflicts.end();)
   {
     // Extract info for the potential conflict
@@ -1432,8 +1443,8 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
       bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
     else
     {
-      // Translate the bounding box to the from domain's position. We may have rotations so we must
-      // be careful in constructing the new min and max (first and second)
+      // Translate the bounding box to the from domain's position. We may have rotations so we
+      // must be careful in constructing the new min and max (first and second)
       const auto from_global_num =
           _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[j];
       transformBoundingBox(bbox, *_from_transforms[from_global_num]);
