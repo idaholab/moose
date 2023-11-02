@@ -3069,7 +3069,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      MooseVariableFEBase & var = getVariable(
+      auto & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       parameters.set<SystemBase *>("_sys") = &var.sys();
       std::shared_ptr<FVInitialConditionBase> ic;
@@ -5680,12 +5680,7 @@ FEProblemBase::init()
   // Now that the equation system and the dof distribution is done, we can generate the
   // finite volume-related parts if needed.
   if (haveFV())
-  {
-    _mesh.buildFiniteVolumeInfo();
-    _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheFaceInfoVariableOwnership();
-    _mesh.cacheFVElementalDoFs();
-  }
+    _mesh.setupFiniteVolumeMeshData();
 
   for (auto & nl : _nl)
     nl->update();
@@ -7192,12 +7187,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // If we have finite volume variables, we will need to recompute additional elemental/face
   // quantities
   if (haveFV() && _mesh.isFiniteVolumeInfoDirty())
-  {
-    _mesh.buildFiniteVolumeInfo();
-    _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheFaceInfoVariableOwnership();
-    _mesh.cacheFVElementalDoFs();
-  }
+    _mesh.setupFiniteVolumeMeshData();
 
   // Let the meshChangedInterface notify the mesh changed event before we update the active
   // semilocal nodes, because the set of ghosted elements may potentially be updated during a mesh

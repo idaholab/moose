@@ -1152,6 +1152,9 @@ public:
   /// Accessor for the elemInfo object for a given element ID
   const ElemInfo & elemInfo(const dof_id_type id) const;
 
+  /// Accessor for the element info objects owned by this process
+  const std::vector<const ElemInfo *> & elemInfoVector() const { return _elem_info; }
+
   /// Accessor for all \p FaceInfo objects.
   const std::vector<FaceInfo> & allFaceInfo() const;
   ///@}
@@ -1161,6 +1164,10 @@ public:
    */
   void cacheFaceInfoVariableOwnership() const;
 
+  /**
+   * Cache the DoF indices for FV variables on each element. These indices are used to speed up the
+   * setup loops of finite volume systems.
+   */
   void cacheFVElementalDoFs() const;
 
   /**
@@ -1267,7 +1274,7 @@ public:
   void markFiniteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
 
   /**
-   * Return if the finite volume information is dirty
+   * @return whether the finite volume information is dirty
    */
   bool isFiniteVolumeInfoDirty() const { return _finite_volume_info_dirty; }
 
@@ -1295,17 +1302,19 @@ public:
   bool isSplit() const { return _is_split; }
 
   /**
-   * Builds the face info vector that stores meta-data needed for looping over and doing
-   * calculations based on mesh faces and elements in a finite volume setting.
-   * We also build a vector of elem info objects which cache volumes and centroids for elements.
-   * We build finite volume information only upon request and only if the
-   * \p _finite_volume_info_dirty flag is false, either because this method has yet to be called or
-   * because someone called \p update() indicating the mesh has changed. Face information is only
-   * requested by getters that should appear semantically const. Consequently this method must
-   * also be marked const and so we make it and all associated face information data private to
-   * prevent misuse
+   * Builds the face and elem info vectors that store meta-data needed for looping over and doing
+   * calculations based on mesh faces and elements in a finite volume setting. This should only
+   * be called when finite volume variables are used in the problem or when the face and elem info
+   * objects are necessary for functor-based evaluations.
    */
   void buildFiniteVolumeInfo() const;
+
+  /**
+   * Sets up the additional data needed for finite volume computations.
+   * This involves building FaceInfo and ElemInfo objects, caching variable associations
+   * and elemental DoF indices for FV variables.
+   */
+  void setupFiniteVolumeMeshData() const;
 
 protected:
   /// Deprecated (DO NOT USE)

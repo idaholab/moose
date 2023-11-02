@@ -184,12 +184,7 @@ DisplacedProblem::init()
   _mesh.meshChanged();
 
   if (haveFV())
-  {
-    _mesh.buildFiniteVolumeInfo();
-    _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheFaceInfoVariableOwnership();
-    _mesh.cacheFVElementalDoFs();
-  }
+    _mesh.setupFiniteVolumeMeshData();
 }
 
 void
@@ -289,10 +284,7 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   if (haveFV())
   {
     _mesh.markFiniteVolumeInfoDirty();
-    _mesh.buildFiniteVolumeInfo();
-    _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheFaceInfoVariableOwnership();
-    _mesh.cacheFVElementalDoFs();
+    _mesh.setupFiniteVolumeMeshData();
   }
   for (auto & disp_nl : _displaced_nl)
     disp_nl->update(false);

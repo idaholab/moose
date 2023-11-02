@@ -51,7 +51,7 @@ protected:
   Point _centroid;
   /// Cached coordinate transformation factor
   Real _coord_transform_factor;
-  /// Cached dof id mainly for segregated linear FV evaluations
+  /// Cached dof indices mainly for segregated linear FV evaluations
   /// with the following structure: _dof_indices[system_number][variable_number] = dof_index
   /// Systems with no FV variables will store an empty vector and should not be accessed.
   /// This will be checked through multiple asserts in the assembly routines.

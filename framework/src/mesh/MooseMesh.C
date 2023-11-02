@@ -3507,8 +3507,10 @@ MooseMesh::computeFiniteVolumeCoords() const
   }
 
   for (auto & ei : _elem_to_elem_info)
+  {
     coordTransformFactor(
         *this, ei.second.subdomain_id(), ei.second.centroid(), ei.second.coordFactor());
+  }
 }
 
 MooseEnum
@@ -3548,6 +3550,10 @@ MooseMesh::deleteRemoteElements()
 void
 MooseMesh::cacheFaceInfoVariableOwnership() const
 {
+  mooseAssert(
+      !Threads::in_threads,
+      "Performing writes to faceInfo variable association maps. This must be done unthreaded!");
+
   std::vector<const MooseVariableFieldBase *> moose_vars;
 
   for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
@@ -3610,6 +3616,9 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
 void
 MooseMesh::cacheFVElementalDoFs() const
 {
+  mooseAssert(!Threads::in_threads,
+              "Performing writes to elemInfo dof indices. This must be done unthreaded!");
+
   const unsigned int num_eqs = _app.feProblem().es().n_systems();
 
   for (auto & elem_info_pair : _elem_to_elem_info)
@@ -3661,6 +3670,15 @@ MooseMesh::cacheFVElementalDoFs() const
       }
     }
   }
+}
+
+void
+MooseMesh::setupFiniteVolumeMeshData() const
+{
+  buildFiniteVolumeInfo();
+  computeFiniteVolumeCoords();
+  cacheFaceInfoVariableOwnership();
+  cacheFVElementalDoFs();
 }
 
 void

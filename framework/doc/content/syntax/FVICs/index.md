@@ -2,7 +2,7 @@
 
 ## Description
 
-The `FVICs` block within an input file is utilized to define the initial (starting) conditions for
+The `FVICs` block within an input file is used to define the initial (starting) conditions for
 the finite volume variables within your simulation. Initial conditions may be applied to both the "unknowns"
 (nonlinear) or auxiliary variables.
 It computes the values of the variable at the cell centroids.

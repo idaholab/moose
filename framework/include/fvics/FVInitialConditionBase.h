@@ -17,7 +17,7 @@
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "MooseTypes.h"
-#include "ADFunctorInterface.h"
+#include "NonADFunctorInterface.h"
 
 class SystemBase;
 class MooseVariableFieldBase;
@@ -34,7 +34,7 @@ class FVInitialConditionBase : public MooseObject,
                                public FunctionInterface,
                                public Restartable,
                                public DependencyResolverInterface,
-                               public ADFunctorInterface
+                               public NonADFunctorInterface
 {
 public:
   /**
@@ -54,7 +54,7 @@ public:
   virtual MooseVariableFieldBase & variable() = 0;
 
   /**
-   * Workhorse method for projecting the initial conditions for boundary restricted initial
+   * Workhorse method for computing the initial conditions for block-restricted initial
    * conditions
    */
   virtual void computeElement(const ElemInfo & elem_info) = 0;
@@ -63,7 +63,7 @@ public:
    * Gets called at the beginning of the simulation before this object is asked to do its job.
    * Note: This method is normally inherited from SetupInterface.  However in this case it makes
    * no sense to inherit the other virtuals available in that class so we are adding this virtual
-   * directly to this class with out the extra inheritance.
+   * directly to this class without the extra inheritance.
    */
   virtual void initialSetup() {}
 

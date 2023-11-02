@@ -32,7 +32,7 @@ FVInitialConditionBase::FVInitialConditionBase(const InputParameters & parameter
     FunctionInterface(this),
     Restartable(this, "FVInitialConditionBases"),
     DependencyResolverInterface(),
-    ADFunctorInterface(this),
+    NonADFunctorInterface(this),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _depend_vars(std::set<std::string>())
 {

@@ -58,7 +58,7 @@ FVInitialConditionTempl<T>::computeElement(const ElemInfo & elem_info)
     // types that are not supported. This is the reason we needed the always_false function. Hope as
     // C++ gets nicer, we can do this in a nicer way.
     static_assert(Moose::always_false<T>,
-                  "Initial conditions not is not implemented for the used type!");
+                  "Initial condition is not implemented for the used type!");
   }
 }
 

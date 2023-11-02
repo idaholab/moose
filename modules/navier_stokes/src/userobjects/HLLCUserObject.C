@@ -56,12 +56,7 @@ HLLCUserObject::initialSetup()
   // This means that we have no finite volume variables, so we need to build the
   // finite volume information on the mesh so that we can still use this object
   if (!_face_info.size())
-  {
-    _mesh.buildFiniteVolumeInfo();
-    _mesh.computeFiniteVolumeCoords();
-    _mesh.cacheFaceInfoVariableOwnership();
-    _mesh.cacheFVElementalDoFs();
-  }
+    _mesh.setupFiniteVolumeMeshData();
 
   for (unsigned int j = 0; j < _face_info.size(); ++j)
   {
