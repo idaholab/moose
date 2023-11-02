@@ -1570,6 +1570,9 @@ public:
    */
   void setParallelBarrierMessaging(bool flag) { _parallel_barrier_messaging = flag; }
 
+  /// Make the problem be verbose
+  void setVerboseProblem(bool verbose);
+
   /**
    * Whether or not to use verbose printing for MultiApps.
    */
@@ -2406,10 +2409,10 @@ protected:
   bool _parallel_barrier_messaging;
 
   /// Whether or not to be verbose during setup
-  const bool _verbose_setup;
+  bool _verbose_setup;
 
   /// Whether or not to be verbose with multiapps
-  const bool _verbose_multiapps;
+  bool _verbose_multiapps;
 
   /// The error message to go with an exception
   std::string _exception_message;

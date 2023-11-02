@@ -76,6 +76,10 @@ Executioner::Executioner(const InputParameters & parameters)
     _fixed_point_solve = std::make_unique<SecantSolve>(*this);
   else if (_iteration_method == "steffensen")
     _fixed_point_solve = std::make_unique<SteffensenSolve>(*this);
+
+  // Propagate the verbosity down to the problem
+  if (_verbose)
+    _fe_problem.setVerboseProblem(_verbose);
 }
 
 Executioner::Executioner(const InputParameters & parameters, bool)

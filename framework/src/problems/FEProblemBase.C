@@ -8217,3 +8217,10 @@ FEProblemBase::havePRefinement()
   if (_displaced_problem)
     _displaced_problem->havePRefinement();
 }
+
+void
+FEProblemBase::setVerboseProblem(bool verbose)
+{
+  _verbose_setup = verbose;
+  _verbose_multiapps = verbose;
+}
