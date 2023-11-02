@@ -125,8 +125,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       else
       {
         // Use mesh function to compute interpolation values
-        const auto from_global_num =
-            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+        const auto from_global_num = getGlobalSourceAppIndex(i_from);
         auto val = (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
 
         // Get nearest position (often a subapp position) for the target point

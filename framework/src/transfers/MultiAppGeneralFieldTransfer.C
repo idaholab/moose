@@ -696,18 +696,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
                            incoming_vals[val_offset].second))
         {
           // Keep track of distance and value
-          const auto & to_transform = _to_transforms[getGlobalTargetAppIndex(problem_id)];
-          Point p;
-          if (to_transform->hasNonTranslationTransformation())
-          {
-            if (!_skip_coordinate_collapsing)
-              mooseInfo("Search value conflict cannot find the origin point due to the "
-                        "non-uniqueness of the coordinate collapsing reverse mapping");
-            p = point_requests[val_offset] - _to_positions[problem_id];
-          }
-          else
-            p = to_transform->mapBack(point_requests[val_offset]);
-
+          const Point p =
+              getPointInTargetAppFrame(point_requests[val_offset],
+                                       problem_id,
+                                       "Registration of received equi-distant value conflict");
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
         }
 
@@ -873,18 +865,9 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
       auto & fe_type = to_sys->variable_type(var_num);
       bool is_nodal = _to_variables[var_index]->isNodal();
 
-      // Move to the local frame of reference for the target
-      Point local_p;
-      const auto & to_transform = _to_transforms[getGlobalTargetAppIndex(i_to)];
-      if (to_transform->hasNonTranslationTransformation())
-      {
-        if (!_skip_coordinate_collapsing)
-          mooseInfo("Resolution of local value conflicts detected cannot find the exact origin "
-                    "point due to the non-uniqueness of the coordinate collapsing reverse mapping");
-        local_p = p - _to_positions[i_to];
-      }
-      else
-        local_p = to_transform->mapBack(p);
+      // Move to the local frame of reference for the target problem
+      Point local_p =
+          getPointInTargetAppFrame(p, i_to, "Resolution of local value conflicts detected");
 
       // Higher order elemental
       if (fe_type.order > CONSTANT && !is_nodal)
@@ -1219,8 +1202,7 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
   else
   {
     auto * pl = _from_point_locators[i_from].get();
-    const auto from_global_num =
-        _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+    const auto from_global_num = getGlobalSourceAppIndex(i_from);
     const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
 
     // Check block restriction
@@ -1470,8 +1452,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     {
       // Translate the bounding box to the from domain's position. We may have rotations so we
       // must be careful in constructing the new min and max (first and second)
-      const auto from_global_num =
-          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[j];
+      const auto from_global_num = getGlobalSourceAppIndex(j);
       transformBoundingBox(bbox, *_from_transforms[from_global_num]);
     }
 

@@ -609,3 +609,24 @@ MultiAppTransfer::checkVariable(const FEProblemBase & fe_problem,
       paramError(param_name, "The variable '", var_name, "' does not exist.");
   }
 }
+
+Point
+MultiAppTransfer::getPointInTargetAppFrame(const Point & p,
+                                           unsigned int local_i_to,
+                                           const std::string & phase) const
+{
+  const auto & to_transform = _to_transforms[getGlobalTargetAppIndex(local_i_to)];
+  if (to_transform->hasCoordinateSystemTypeChange())
+  {
+    if (!_skip_coordinate_collapsing)
+      mooseInfo(phase + " cannot use the point in the target app frame due to the "
+                        "non-uniqueness of the coordinate collapsing reverse mapping."
+                        " Coordinate collapse is ignored for this operation");
+    to_transform->skipCoordinateCollapsing(true);
+    const auto target_point = to_transform->mapBack(p);
+    to_transform->skipCoordinateCollapsing(false);
+    return target_point;
+  }
+  else
+    return to_transform->mapBack(p);
+}

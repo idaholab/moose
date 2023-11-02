@@ -204,6 +204,18 @@ protected:
   }
 
   /**
+   * Get the target app point from a point in the reference frame
+   * @param p the point in the reference frame
+   * @param local_i_to the local target problem into
+   * @param phase the phase of the transfer where this is being attempted in case we have
+   *              to output an info message that the coordinate collapse is not being applied
+   * @return the point in the target app frame
+   */
+  Point getPointInTargetAppFrame(const Point & p,
+                                 unsigned int local_i_to,
+                                 const std::string & phase) const;
+
+  /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.
    *
    * This method was added to allow the check to be delayed by child classes,
