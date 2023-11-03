@@ -14,15 +14,15 @@
 
 #pragma once
 
-#include "Material.h"
-#include "UserObject.h"
-
 #ifdef NEML2_ENABLED
 #include "neml2/models/Model.h"
 #include "neml2/misc/parser_utils.h"
 #else
 #include "NEML2Utils.h"
 #endif
+
+#include "Material.h"
+#include "UserObject.h"
 
 /**
  * Interface class to provide common input parameters, members, and methods for MOOSEObjects that

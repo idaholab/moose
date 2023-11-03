@@ -14,6 +14,12 @@
 
 #pragma once
 
+#ifdef NEML2_ENABLED
+#include "neml2/tensors/LabeledVector.h"
+#include "neml2/tensors/LabeledMatrix.h"
+#include "neml2/models/Model.h"
+#endif
+
 #include "NEML2SolidMechanicsInterface.h"
 
 #include "BatchMaterial.h"
@@ -21,14 +27,6 @@
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
-
-#ifdef NEML2_ENABLED
-
-#include "neml2/tensors/LabeledVector.h"
-#include "neml2/tensors/LabeledMatrix.h"
-#include "neml2/models/Model.h"
-
-#endif
 
 typedef BatchMaterial<BatchMaterialUtils::TupleStd,
                       // Outputs: stress, internal variables, dstress/dstrain

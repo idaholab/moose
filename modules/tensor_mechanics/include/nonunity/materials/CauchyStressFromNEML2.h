@@ -14,13 +14,13 @@
 
 #pragma once
 
-#include "NEML2SolidMechanicsInterface.h"
-#include "ComputeLagrangianObjectiveStress.h"
-
 #ifdef NEML2_ENABLED
 #include "neml2/tensors/LabeledVector.h"
 #include "neml2/tensors/LabeledMatrix.h"
 #endif
+
+#include "NEML2SolidMechanicsInterface.h"
+#include "ComputeLagrangianObjectiveStress.h"
 
 /**
  * This material performs the objective stress update using a NEML2 material model.

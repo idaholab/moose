@@ -14,11 +14,11 @@
 
 #pragma once
 
-#include "Action.h"
-
 #ifdef NEML2_ENABLED
 #include "neml2/models/Model.h"
 #endif
+
+#include "Action.h"
 
 /**
  * Action to parse and set up NEML2 objects.
