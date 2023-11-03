@@ -12,8 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef NEML2_ENABLED
-
 #include "CauchyStressFromNEML2.h"
 #include "NEML2Utils.h"
 #include "NonlinearSystem.h"
@@ -31,8 +29,10 @@ CauchyStressFromNEML2::validParams()
   return params;
 }
 
+#ifdef NEML2_ENABLED
+
 CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
-  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters),
+  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
     // Inputs to the constitutive model
     _mechanical_strain_old(nullptr),
     _temperature(nullptr),
@@ -204,4 +204,11 @@ CauchyStressFromNEML2::solve()
   _dout_din = std::get<1>(res).to(torch::kCPU);
 }
 
-#endif // NEML2_ENABLED
+#else
+
+CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
+  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
+{
+}
+
+#endif

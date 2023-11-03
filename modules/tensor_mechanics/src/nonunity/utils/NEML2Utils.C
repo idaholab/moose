@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "NEML2Utils.h"
+
 #ifdef NEML2_ENABLED
 
-#include "NEML2Utils.h"
 #include "VariadicTable.h"
 
 namespace neml2
 {
+
 std::ostream &
 operator<<(std::ostream & os, const Model & model)
 {
@@ -52,6 +54,11 @@ operator<<(std::ostream & os, const Model & model)
 
 namespace NEML2Utils
 {
+void
+requireNEML2(const MooseObject &)
+{
+}
+
 template <>
 neml2::BatchTensor
 toNEML2(const Real & v)
@@ -116,6 +123,20 @@ toMOOSE(const neml2::BatchTensor & t)
 
   return symsymr4t;
 }
+
 } // namespace NEML2Utils
 
-#endif // NEML2_ENABLED
+#else
+
+#include "MooseObject.h"
+
+namespace NEML2Utils
+{
+void
+requireNEML2(const MooseObject & object)
+{
+  object.mooseError("This object requires Blackbear to be compiled with NEML2 support");
+}
+} // namespace NEML2Utils
+
+#endif

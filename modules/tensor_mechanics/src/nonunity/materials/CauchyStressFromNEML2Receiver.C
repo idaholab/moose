@@ -12,9 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef NEML2_ENABLED
-
 #include "CauchyStressFromNEML2Receiver.h"
+
+#include "NEML2Utils.h"
 
 registerMooseObject("BlackBearApp", CauchyStressFromNEML2Receiver);
 
@@ -35,6 +35,7 @@ CauchyStressFromNEML2Receiver::CauchyStressFromNEML2Receiver(const InputParamete
     _neml2_uo(getUserObject<CauchyStressFromNEML2UO>("neml2_uo")),
     _output(_neml2_uo.getOutputData())
 {
+  NEML2Utils::requireNEML2(*this);
 }
 
 void
@@ -47,5 +48,3 @@ CauchyStressFromNEML2Receiver::computeQpSmallStress()
   _small_stress[_qp] = std::get<0>(_output[index + _qp]);
   _small_jacobian[_qp] = std::get<1>(_output[index + _qp]);
 }
-
-#endif // NEML2_ENABLED

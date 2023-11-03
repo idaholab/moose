@@ -94,8 +94,5 @@ $(NEML2_DIR)/src/%.$(obj-suffix) : $(NEML2_DIR)/src/%.cxx
 ADDITIONAL_INCLUDES  += -iquote$(NEML2_INCLUDE)
 ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD) -lstdc++fs
 ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64
-NONUNITY_DIRS        += $(shell find src/nonunity -type d -not -path '*/.libs*' 2> /dev/null)
-NONUNITY_DIRS        += $(shell find test/src/nonunity -type d -not -path '*/.libs*' 2> /dev/null)
-app_non_unity_dirs   += $(foreach i, $(NONUNITY_DIRS), %$(i))
 
 endif

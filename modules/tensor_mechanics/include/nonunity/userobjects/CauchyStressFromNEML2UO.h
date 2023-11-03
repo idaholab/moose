@@ -14,17 +14,21 @@
 
 #pragma once
 
-#include "neml2/tensors/LabeledVector.h"
-#include "neml2/tensors/LabeledMatrix.h"
-#include "neml2/models/Model.h"
-
 #include "NEML2SolidMechanicsInterface.h"
-#include "BatchMaterial.h"
 
+#include "BatchMaterial.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
+
+#ifdef NEML2_ENABLED
+
+#include "neml2/tensors/LabeledVector.h"
+#include "neml2/tensors/LabeledMatrix.h"
+#include "neml2/models/Model.h"
+
+#endif
 
 typedef BatchMaterial<BatchMaterialUtils::TupleStd,
                       // Outputs: stress, internal variables, dstress/dstrain
@@ -48,8 +52,10 @@ public:
 
   CauchyStressFromNEML2UO(const InputParameters & params);
 
+#ifndef NEML2_ENABLED
+  virtual void batchCompute() override {}
+#else
   virtual void timestepSetup() override;
-
   virtual void batchCompute() override;
 
 protected:
@@ -73,4 +79,5 @@ protected:
 
   /// The derivative of the output vector w.r.t. the input vector
   neml2::LabeledMatrix _dout_din;
+#endif
 };

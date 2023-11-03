@@ -14,10 +14,15 @@
 
 #pragma once
 
-#include "neml2/models/Model.h"
-#include "neml2/misc/parser_utils.h"
 #include "Material.h"
 #include "UserObject.h"
+
+#ifdef NEML2_ENABLED
+#include "neml2/models/Model.h"
+#include "neml2/misc/parser_utils.h"
+#else
+#include "NEML2Utils.h"
+#endif
 
 /**
  * Interface class to provide common input parameters, members, and methods for MOOSEObjects that
@@ -32,6 +37,7 @@ public:
   template <typename... P>
   NEML2ModelInterface(const InputParameters & params, P &&... args);
 
+#ifdef NEML2_ENABLED
 protected:
   /**
    * Validate the NEML2 material model. This method should throw a moose error with the first
@@ -60,6 +66,7 @@ private:
 
   /// The device on which to evaluate the NEML2 model
   const torch::Device _device;
+#endif
 };
 
 template <class T>
@@ -85,14 +92,22 @@ NEML2ModelInterface<T>::validParams()
 template <class T>
 template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
-  : T(params, args...),
+  : T(params, args...)
+#ifdef NEML2_ENABLED
+    ,
     _model(neml2::Factory::get_object<neml2::Model>("Models", params.get<std::string>("model"))),
     _device(params.get<std::string>("device"))
+#endif
 {
+#ifdef NEML2_ENABLED
   // Send the model to the compute device
   _model.to(_device);
+#else
+  NEML2Utils::requireNEML2(*this);
+#endif
 }
 
+#ifdef NEML2_ENABLED
 template <class T>
 void
 NEML2ModelInterface<T>::validateModel() const
@@ -122,3 +137,4 @@ NEML2ModelInterface<T>::getLabeledAxisAccessor(const std::string & raw_str) cons
 {
   return neml2::utils::parse<neml2::LabeledAxisAccessor>(raw_str);
 }
+#endif

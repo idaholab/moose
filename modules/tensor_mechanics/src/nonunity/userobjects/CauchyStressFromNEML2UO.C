@@ -12,10 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef NEML2_ENABLED
-
-#include "NEML2Utils.h"
 #include "CauchyStressFromNEML2UO.h"
+
+#ifdef NEML2_ENABLED
+#include "NEML2Utils.h"
+#endif // NEML2_ENABLED
 
 registerMooseObject("BlackBearApp", CauchyStressFromNEML2UO);
 
@@ -41,8 +42,12 @@ CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
   : NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>(
         params, "mechanical_strain", "temperature")
 {
+#ifdef NEML2_ENABLED
   validateModel();
+#endif // NEML2_ENABLED
 }
+
+#ifdef NEML2_ENABLED
 
 void
 CauchyStressFromNEML2UO::timestepSetup()

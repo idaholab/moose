@@ -12,15 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "NEML2Action.h"
+#include "FEProblem.h"
+#include "Factory.h"
+#include "NEML2Utils.h"
+
 #ifdef NEML2_ENABLED
 
 #include "neml2/misc/utils.h"
 #include "neml2/misc/parser_utils.h"
 #include "neml2/base/HITParser.h"
-#include "NEML2Action.h"
-#include "NEML2Utils.h"
-#include "FEProblem.h"
-#include "Factory.h"
+
+#endif
 
 registerMooseAction("BlackBearApp", NEML2Action, "parse_neml2");
 registerMooseAction("BlackBearApp", NEML2Action, "add_material");
@@ -66,14 +69,21 @@ NEML2Action::NEML2Action(const InputParameters & params)
     _fname(getParam<FileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
-    _mode(getParam<MooseEnum>("mode")),
+    _mode(getParam<MooseEnum>("mode"))
+#ifdef NEML2_ENABLED
+    ,
     _device(getParam<std::string>("device"))
+#endif
 {
+#ifndef NEML2_ENABLED
+  paramError("input", "This action requires that Blackbear be compiled with NEML2 support");
+#endif
 }
 
 void
 NEML2Action::act()
 {
+#ifdef NEML2_ENABLED
   if (_current_task == "parse_neml2")
   {
     neml2::HITParser parser;
@@ -137,6 +147,5 @@ NEML2Action::act()
     else
       mooseError("Unsupported mode of constitutive update: ", _mode);
   }
-}
-
 #endif
+}

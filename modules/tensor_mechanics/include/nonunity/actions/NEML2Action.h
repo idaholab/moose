@@ -14,8 +14,11 @@
 
 #pragma once
 
-#include "neml2/models/Model.h"
 #include "Action.h"
+
+#ifdef NEML2_ENABLED
+#include "neml2/models/Model.h"
+#endif
 
 /**
  * Action to parse and set up NEML2 objects.
@@ -42,6 +45,8 @@ protected:
   /// The operation mode
   const MooseEnum _mode;
 
-  /// The device on which to evaluate the NEML2 model
+/// The device on which to evaluate the NEML2 model
+#ifdef NEML2_ENABLED
   const torch::Device _device;
+#endif
 };

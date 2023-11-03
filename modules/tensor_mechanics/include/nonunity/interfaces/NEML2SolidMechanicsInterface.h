@@ -29,6 +29,7 @@ public:
   template <typename... P>
   NEML2SolidMechanicsInterface(const InputParameters & params, P &&... args);
 
+#ifdef NEML2_ENABLED
 protected:
   using NEML2ModelInterface<T>::getLabeledAxisAccessor;
   using NEML2ModelInterface<T>::model;
@@ -59,6 +60,7 @@ private:
   const neml2::LabeledAxisAccessor _neml2_temperature_n;
   const neml2::LabeledAxisAccessor _neml2_time_n;
   // @}
+#endif // NEML2_ENABLED
 };
 
 template <class T>
@@ -79,7 +81,9 @@ template <class T>
 template <typename... P>
 NEML2SolidMechanicsInterface<T>::NEML2SolidMechanicsInterface(const InputParameters & params,
                                                               P &&... args)
-  : NEML2ModelInterface<T>(params, args...),
+  : NEML2ModelInterface<T>(params, args...)
+#ifdef NEML2_ENABLED
+    ,
     // The LabeledAxisAccessors for the NEML2 variables:
     _neml2_stress(getLabeledAxisAccessor(params.get<std::string>("neml2_stress")).on("state")),
     _neml2_strain(getLabeledAxisAccessor(params.get<std::string>("neml2_strain")).on("forces")),
@@ -91,9 +95,11 @@ NEML2SolidMechanicsInterface<T>::NEML2SolidMechanicsInterface(const InputParamet
     _neml2_strain_n(_neml2_strain.slice(1).on("old_forces")),
     _neml2_temperature_n(_neml2_temperature.slice(1).on("old_forces")),
     _neml2_time_n(_neml2_time.slice(1).on("old_forces"))
+#endif // NEML2_ENABLED
 {
 }
 
+#ifdef NEML2_ENABLED
 template <class T>
 void
 NEML2SolidMechanicsInterface<T>::validateModel() const
@@ -108,3 +114,4 @@ NEML2SolidMechanicsInterface<T>::validateModel() const
   if (!model().output().has_variable(_neml2_stress))
     mooseError("The NEML2 model does not have ", _neml2_stress, " as an output.");
 }
+#endif

@@ -14,12 +14,20 @@
 
 #pragma once
 
+#ifdef NEML2_ENABLED
+
 #include "neml2/models/Model.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
 #include "SymmetricRankFourTensor.h"
 #include "MaterialProperty.h"
+
+#endif
+
+class MooseObject;
+
+#ifdef NEML2_ENABLED
 
 /**
  * Pretty print the summary of a NEML2 model
@@ -29,8 +37,17 @@ namespace neml2
 std::ostream & operator<<(std::ostream &, const Model &);
 }
 
+#endif
+
 namespace NEML2Utils
 {
+/**
+ * Helper for producing a useful error when NEML2 is not available
+ */
+void requireNEML2(const MooseObject & object);
+
+#ifdef NEML2_ENABLED
+
 /**
  * Convert a MOOSE data structure to its NEML2 counterpart
  */
@@ -180,4 +197,7 @@ setBatched(neml2::LabeledVector & v,
   if constexpr (sizeof...(Ts) > 0)
     setBatched<I + 1>(v, indices, t...);
 }
+
+#endif
+
 } // namespace NEML2Utils
