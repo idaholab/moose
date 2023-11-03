@@ -284,6 +284,7 @@ private:
   /// Keeps track of all local equidistant points to requested points, creating an indetermination
   /// in which values should be sent for that request
   /// We keep the origin problem ID, the dof ID, the point, and the distance origin-target
+  /// If using nearest-positions the origin problem ID is not set
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _local_conflicts;
 
   /// Keeps track of all received conflicts. Multiple problems (different subapps for example)

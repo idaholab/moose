@@ -125,7 +125,8 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       else
       {
         // Use mesh function to compute interpolation values
-        auto val = (local_meshfuns[i_from])(pt - _from_positions[i_from]);
+        const auto from_global_num = getGlobalSourceAppIndex(i_from);
+        auto val = (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
 
         // Get nearest position (often a subapp position) for the target point
         // We want values from the child app that is closest to the same position as the target
@@ -136,6 +137,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
           const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
           nearest_position_source =
               _nearest_positions_obj->getNearestPosition(_from_positions[i_from], initial);
+          if (!_skip_coordinate_collapsing &&
+              _from_transforms[from_global_num]->hasNonTranslationTransformation())
+            mooseError(
+                "Rotation and scaling currently unsupported with nearest positions transfer.");
 
           // Source (often app position) is not closest to the same positions as the
           // target, dont send values
@@ -151,7 +156,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
                            outgoing_vals[i_pt].first,
                            _nearest_positions_obj ? (pt - nearest_position_source).norm() : 1,
                            outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
+          registerConflict(i_from, 0, _from_transforms[from_global_num]->mapBack(pt), 1, true);
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

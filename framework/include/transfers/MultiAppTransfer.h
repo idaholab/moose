@@ -146,6 +146,10 @@ protected:
   std::vector<std::unique_ptr<MultiAppCoordTransform>> _to_transforms;
   std::vector<std::unique_ptr<MultiAppCoordTransform>> _from_transforms;
 
+  /// Whether to skip coordinate collapsing (transformations of coordinates between applications
+  /// using different frames of reference)
+  const bool _skip_coordinate_collapsing;
+
   /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;
   /// True if displaced mesh is used for the target mesh, otherwise false
@@ -187,6 +191,29 @@ protected:
   std::vector<unsigned int> _to_local2global_map;
   /// Given local app index, returns global app index.
   std::vector<unsigned int> _from_local2global_map;
+
+  /// Return the global app index from the local index in the "from-multiapp" transfer direction
+  unsigned int getGlobalSourceAppIndex(unsigned int i_from) const
+  {
+    return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+  }
+  /// Return the global app index from the local index in the "to-multiapp" transfer direction
+  unsigned int getGlobalTargetAppIndex(unsigned int i_to) const
+  {
+    return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+  }
+
+  /**
+   * Get the target app point from a point in the reference frame
+   * @param p the point in the reference frame
+   * @param local_i_to the local target problem into
+   * @param phase the phase of the transfer where this is being attempted in case we have
+   *              to output an info message that the coordinate collapse is not being applied
+   * @return the point in the target app frame
+   */
+  Point getPointInTargetAppFrame(const Point & p,
+                                 unsigned int local_i_to,
+                                 const std::string & phase) const;
 
   /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.

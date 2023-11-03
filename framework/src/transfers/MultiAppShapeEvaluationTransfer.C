@@ -288,7 +288,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
         {
           const auto from_global_num =
               _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
-          // Use mesh funciton to compute interpolation values
+          // Use mesh function to compute interpolation values
           vals_ids_for_incoming_points[i_pt].first =
               (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
           // Record problem ID as well
@@ -416,7 +416,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 
         points.clear();
         point_ids.clear();
-        // grap sample points
+        // grab sample points
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
