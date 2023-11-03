@@ -65,19 +65,16 @@ NEML2Action::validParams()
 }
 
 NEML2Action::NEML2Action(const InputParameters & params)
-  : Action(params),
+  : Action(params)
+#ifdef NEML2_ENABLED
+    ,
     _fname(getParam<FileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
-    _mode(getParam<MooseEnum>("mode"))
-#ifdef NEML2_ENABLED
-    ,
+    _mode(getParam<MooseEnum>("mode")),
     _device(getParam<std::string>("device"))
 #endif
 {
-#ifndef NEML2_ENABLED
-  paramError("input", "This action requires that Blackbear be compiled with NEML2 support");
-#endif
 }
 
 void
@@ -147,5 +144,9 @@ NEML2Action::act()
     else
       mooseError("Unsupported mode of constitutive update: ", _mode);
   }
+#else
+  paramError(
+      "input",
+      "The action for NEML2 cannot be used because Blackbear was not compiled with NEML2 support");
 #endif
 }
