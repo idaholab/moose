@@ -16,6 +16,15 @@
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/utility.h"
 
+// Make newer nanoflann API compatible with older nanoflann versions
+#if NANOFLANN_VERSION < 0x150
+namespace nanoflann
+{
+template <typename T, typename U>
+using ResultItem = std::pair<T, U>;
+}
+#endif
+
 class KDTree
 {
 public:
@@ -34,7 +43,7 @@ public:
 
   void radiusSearch(const Point & query_point,
                     Real radius,
-                    std::vector<std::pair<std::size_t, Real>> & indices_dist);
+                    std::vector<nanoflann::ResultItem<std::size_t, Real>> & indices_dist);
 
   std::size_t numberCandidatePoints();
 
