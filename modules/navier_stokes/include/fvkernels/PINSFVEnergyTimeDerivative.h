@@ -23,11 +23,13 @@ protected:
   /// the density
   const Moose::Functor<ADReal> & _rho;
   /// the time derivative of the density
-  const Moose::Functor<ADReal> * _rho_dot;
-  /// the heat conductivity
-  const Moose::Functor<ADReal> & _cp;
-  /// the time derivative of the heat conductivity
-  const Moose::Functor<ADReal> * _cp_dot;
+  const Moose::Functor<ADReal> * const _rho_dot;
+  /// the specific heat or isobaric heat capacity
+  const Moose::Functor<ADReal> * const _cp;
+  /// the specific enthalpy
+  const Moose::Functor<ADReal> * const _h;
+  /// the time derivative of the specific enthalpy
+  const Moose::Functor<ADReal> * const _h_dot;
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
   /// whether this kernel is being used for a solid or a fluid temperature

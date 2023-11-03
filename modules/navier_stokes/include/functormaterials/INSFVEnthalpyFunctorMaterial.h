@@ -15,12 +15,12 @@
  * This is the material class used to compute enthalpy for the incompressible/weakly-compressible
  * finite-volume implementation of the Navier-Stokes equations
  */
-class INSFVEnthalpyMaterial : public FunctorMaterial
+class INSFVEnthalpyFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  INSFVEnthalpyMaterial(const InputParameters & parameters);
+  INSFVEnthalpyFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// density

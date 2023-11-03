@@ -1,23 +1,34 @@
-mu = 1
-rho = 1
-k = 1e-3
-cp = 1
+# Fluid properties
+mu = 'mu'
+rho = 'rho'
+k = 'k'
+
+# Solid properties
+cp_s = 2
+rho_s = 4
+k_s = 1e-2
+h_fs = 10
+
+# Operating conditions
 u_inlet = 1
 T_inlet = 200
+p_outlet = 10
+top_side_temperature = 150
+
+# Numerical scheme
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 
-pressure_tag = "pressure_grad"
-
 [Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
+  [gen]
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '5 5'
-    dy = '1.0'
-    ix = '20 20'
-    iy = '5'
-    subdomain_id = '1 2'
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 1
+    nx = 20
+    ny = 5
   []
 []
 
@@ -27,7 +38,7 @@ pressure_tag = "pressure_grad"
 
 [UserObjects]
   [rc]
-    type = PINSFVRhieChowInterpolatorSegregated
+    type = PINSFVRhieChowInterpolator
     u = superficial_vel_x
     v = superficial_vel_y
     pressure = pressure
@@ -35,40 +46,25 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Problem]
-  nl_sys_names = 'u_system v_system pressure_system energy_system solid_energy_system'
-  previous_nl_solution_required = true
-[]
-
 [Variables]
   [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = ${u_inlet}
-    nl_sys = u_system
-    two_term_boundary_expansion = false
   []
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1e-6
-    nl_sys = v_system
-    two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
-    two_term_boundary_expansion = false
-    nl_sys = pressure_system
+    initial_condition = ${p_outlet}
   []
   [T_fluid]
     type = INSFVEnergyVariable
-    two_term_boundary_expansion = false
-    nl_sys = energy_system
-    initial_condition = 200
+    initial_condition = ${T_inlet}
   []
   [T_solid]
     type = MooseVariableFVReal
-    two_term_boundary_expansion = false
-    nl_sys = solid_energy_system
-    initial_condition = 200
+    initial_condition = 100
   []
 []
 
@@ -76,11 +72,31 @@ pressure_tag = "pressure_grad"
   [porosity]
     type = MooseVariableFVReal
     initial_condition = 0.5
-    two_term_boundary_expansion = false
   []
 []
 
 [FVKernels]
+  [mass_time]
+    type = PWCNSFVMassTimeDerivative
+    variable = pressure
+    porosity = 'porosity'
+    drho_dt = 'drho_dt'
+  []
+  [mass]
+    type = PWCNSFVMassAdvection
+    variable = pressure
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+  []
+
+  [u_time]
+    type = WCNSFVMomentumTimeDerivative
+    variable = superficial_vel_x
+    rho = ${rho}
+    drho_dt = 'drho_dt'
+    momentum_component = 'x'
+  []
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = superficial_vel_x
@@ -103,9 +119,15 @@ pressure_tag = "pressure_grad"
     momentum_component = 'x'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
   []
 
+  [v_time]
+    type = WCNSFVMomentumTimeDerivative
+    variable = superficial_vel_y
+    rho = ${rho}
+    drho_dt = 'drho_dt'
+    momentum_component = 'y'
+  []
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = superficial_vel_y
@@ -128,55 +150,58 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
   []
 
-  [p_diffusion]
-    type = FVAnisotropicDiffusion
-    variable = pressure
-    coeff = "Ainv"
-    coeff_interp_method = 'average'
+  [energy_time]
+    type = PINSFVEnergyTimeDerivative
+    variable = T_fluid
+    h = 'h'
+    dh_dt = 'dh_dt'
+    rho = ${rho}
+    drho_dt = 'drho_dt'
+    is_solid = false
+    porosity = porosity
   []
-  [p_source]
-    type = FVDivergence
-    variable = pressure
-    vector_field = "HbyA"
-    force_boundary_execution = true
-  []
-
   [energy_advection]
     type = PINSFVEnergyAdvection
     variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    boundaries_to_force = bottom
   []
   [energy_diffusion]
     type = PINSFVEnergyDiffusion
-    k = ${k}
     variable = T_fluid
+    k = ${k}
     porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
     variable = T_fluid
     is_solid = false
-    T_fluid = 'T_fluid'
-    T_solid = 'T_solid'
+    T_fluid = T_fluid
+    T_solid = T_solid
     h_solid_fluid = 'h_cv'
   []
 
+  [solid_energy_time]
+    type = PINSFVEnergyTimeDerivative
+    variable = T_solid
+    cp = ${cp_s}
+    rho = ${rho_s}
+    is_solid = true
+    porosity = porosity
+  []
   [solid_energy_diffusion]
     type = FVDiffusion
-    coeff = ${k}
     variable = T_solid
+    coeff = ${k_s}
   []
   [solid_energy_convection]
     type = PINSFVEnergyAmbientConvection
     variable = T_solid
     is_solid = true
-    T_fluid = 'T_fluid'
-    T_solid = 'T_solid'
+    T_fluid = T_fluid
+    T_solid = T_solid
     h_solid_fluid = 'h_cv'
   []
 []
@@ -217,7 +242,7 @@ pressure_tag = "pressure_grad"
     type = FVDirichletBC
     boundary = 'top'
     variable = 'T_solid'
-    value = 250
+    value = ${top_side_temperature}
   []
 
   [symmetry-u]
@@ -248,51 +273,99 @@ pressure_tag = "pressure_grad"
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0.1
+    function = ${p_outlet}
   []
 []
 
-[Materials]
-  [constants]
-    type = ADGenericFunctorMaterial
-    prop_names = 'h_cv cp'
-    prop_values = '0.1 ${cp}'
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+  []
+[]
+
+[FunctorMaterials]
+  [fluid_props_to_mat_props]
+    type = GeneralFunctorFluidProps
+    fp = fp
+    pressure = 'pressure'
+    T_fluid = 'T_fluid'
+    speed = 'speed'
+
+    # To initialize with a high viscosity
+    mu_rampdown = 'mu_rampdown'
+
+    # For porous flow
+    characteristic_length = 1
+    porosity = 'porosity'
   []
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = 'T_fluid'
   []
+  [constants]
+    type = ADGenericFunctorMaterial
+    prop_names = 'h_cv'
+    prop_values = '${h_fs}'
+  []
+  [speed]
+    type = PINSFVSpeedFunctorMaterial
+    porosity = 'porosity'
+    T_fluid = 'T_fluid'
+    superficial_vel_x = 'superficial_vel_x'
+    superficial_vel_y = 'superficial_vel_y'
+  []
+[]
+
+[Functions]
+  [mu_rampdown]
+    type = PiecewiseLinear
+    x = '1 2 3 4'
+    y = '1e3 1e2 1e1 1'
+  []
 []
 
 [Executioner]
-  type = SIMPLE
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  energy_l_abs_tol = 1e-14
-  solid_energy_l_abs_tol = 1e-14
-  momentum_l_tol = 0
-  pressure_l_tol = 0
-  energy_l_tol = 0
-  solid_energy_l_tol = 0
-  rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system'
-  pressure_system = 'pressure_system'
-  energy_system = 'energy_system'
-  solid_energy_system = 'solid_energy_system'
-  pressure_gradient_tag = ${pressure_tag}
-  momentum_equation_relaxation = 0.8
-  pressure_variable_relaxation = 0.4
-  energy_equation_relaxation = 1.0
-  num_iterations = 160
-  pressure_absolute_tolerance = 1e-13
-  momentum_absolute_tolerance = 1e-13
-  energy_absolute_tolerance = 1e-13
-  solid_energy_absolute_tolerance = 1e-13
-  print_fields = false
+  type = Transient
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      100                lu           NONZERO'
+  line_search = 'none'
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-10
+  automatic_scaling = true
+
+  end_time = 3.0
+[]
+
+# Some basic Postprocessors to examine the solution
+[Postprocessors]
+  [inlet-p]
+    type = SideAverageValue
+    variable = pressure
+    boundary = 'left'
+  []
+  [outlet-u]
+    type = VolumetricFlowRate
+    boundary = 'right'
+    advected_quantity = '1'
+    advected_interp_method = ${advected_interp_method}
+    vel_x = 'superficial_vel_x'
+    vel_y = 'superficial_vel_y'
+  []
+  [outlet-temp]
+    type = SideAverageValue
+    variable = T_fluid
+    boundary = 'right'
+  []
+  [solid-temp]
+    type = ElementAverageValue
+    variable = T_solid
+  []
 []
 
 [Outputs]
   exodus = true
-  csv = false
+  csv = true
 []

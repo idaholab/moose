@@ -379,7 +379,7 @@ pressure_tag = "pressure_grad"
   []
 
   [density_fluid]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho_fluid}
     block = 'spacer_block porous_block'

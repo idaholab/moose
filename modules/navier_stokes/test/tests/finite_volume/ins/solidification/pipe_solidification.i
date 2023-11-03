@@ -338,7 +338,7 @@ Ny = 5
 
 [Materials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = rho_mixture
     cp = cp_mixture
     temperature = 'T'
