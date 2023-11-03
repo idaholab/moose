@@ -31,16 +31,19 @@ public:
   static InputParameters validParams();
   CauchyStressFromNEML2(const InputParameters & parameters);
 
+#ifndef NEML2_ENABLED
+
 protected:
   virtual void computeQpSmallStress() override {}
 
-#ifdef NEML2_ENABLED
-public:
+#else
+
   virtual void initialSetup() override;
   virtual void computeProperties() override;
 
 protected:
   virtual void initQpStatefulProperties() override;
+  virtual void computeQpSmallStress() override;
 
   /// Advance state and forces in time
   virtual void advanceStep();

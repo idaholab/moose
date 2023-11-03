@@ -32,7 +32,7 @@ CauchyStressFromNEML2::validParams()
 #ifdef NEML2_ENABLED
 
 CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
-  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
+  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters),
     // Inputs to the constitutive model
     _mechanical_strain_old(nullptr),
     _temperature(nullptr),
