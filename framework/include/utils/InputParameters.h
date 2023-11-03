@@ -898,6 +898,7 @@ public:
    * @param old_name The old name of the parameter
    * @param new_name The new name of the parameter
    * @param new_docstring The new documentation string for the parameter
+   *                      If left empty, uses the old docstring for the renamed parameter
    */
   void renameParam(const std::string & old_name,
                    const std::string & new_name,
