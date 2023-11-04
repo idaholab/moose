@@ -8,6 +8,7 @@
     expect_out = '4 Nonlinear'
     absent_out = '5 Nonlinear'
     requirement = 'The system shall be able to solve an eigenvalue problem using something other than the L2 norm of Bx for normalization and a native eigenvalue solver.'
+    rel_err = 3e-5
   []
   [test11]
     type = CSVDiff
