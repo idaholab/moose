@@ -8,7 +8,7 @@
     requirement = 'BlackBear shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
     expect_err = 'To debug NEML2 related issues'
     collections = 'SYSTEM'
-    required_objects = 'CauchyStressFromNEML2'
+    required_submodule = 'contrib/neml2'
     valgrind = none
   []
   [neml2]
@@ -20,7 +20,7 @@
       cli_args = 'neml2_input=elasticity'
       exodiff = 'elasticity.e'
       detail = 'to solve an elasticity problem;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_perfect]
@@ -29,7 +29,7 @@
       cli_args = 'neml2_input=viscoplasticity_perfect'
       exodiff = 'viscoplasticity_perfect.e'
       detail = 'to solve a perfect viscoplasticity problem;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_isoharden]
@@ -38,7 +38,7 @@
       cli_args = 'neml2_input=viscoplasticity_isoharden'
       exodiff = 'viscoplasticity_isoharden.e'
       detail = 'to solve a viscoplasticity problem with isotropic hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_kinharden]
@@ -47,7 +47,7 @@
       cli_args = 'neml2_input=viscoplasticity_kinharden'
       exodiff = 'viscoplasticity_kinharden.e'
       detail = 'to solve a viscoplasticity problem with kinematic hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_isokinharden]
@@ -56,7 +56,7 @@
       cli_args = 'neml2_input=viscoplasticity_isokinharden'
       exodiff = 'viscoplasticity_isokinharden.e'
       detail = 'to solve a viscoplasticity problem with both isotropic and kinematic hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_chaboche]
@@ -65,7 +65,7 @@
       cli_args = 'neml2_input=viscoplasticity_chaboche'
       exodiff = 'viscoplasticity_chaboche.e'
       detail = 'to solve a viscoplasticity problem with non-associative Chaboche hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [viscoplasticity_radial_return]
@@ -74,7 +74,7 @@
       cli_args = 'neml2_input=viscoplasticity_radial_return'
       exodiff = 'viscoplasticity_radial_return.e'
       detail = 'to solve a viscoplasticity problem using radial return;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [rate_independent_plasticity_perfect]
@@ -83,7 +83,7 @@
       cli_args = 'neml2_input=rate_independent_plasticity_perfect'
       exodiff = 'rate_independent_plasticity_perfect.e'
       detail = 'to solve a rate-independent problem with perfect plasticity;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [rate_independent_plasticity_isoharden]
@@ -92,7 +92,7 @@
       cli_args = 'neml2_input=rate_independent_plasticity_isoharden'
       exodiff = 'rate_independent_plasticity_isoharden.e'
       detail = 'to solve a rate-independent problem with isotropic hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [rate_independent_plasticity_kinharden]
@@ -101,7 +101,7 @@
       cli_args = 'neml2_input=rate_independent_plasticity_kinharden'
       exodiff = 'rate_independent_plasticity_kinharden.e'
       detail = 'to solve a rate-independent problem with kinematic hardening;'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [rate_independent_plasticity_isokinharden]
@@ -110,7 +110,7 @@
       cli_args = 'neml2_input=rate_independent_plasticity_isokinharden'
       exodiff = 'rate_independent_plasticity_isokinharden.e'
       detail = 'to solve a rate-independent problem with both isotropic and kinematic hardening.'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       valgrind = heavy
     []
     [batched]
@@ -120,7 +120,7 @@
       cli_args = 'neml2_input=viscoplasticity_isokinharden NEML2/mode=ALL'
       exodiff = 'viscoplasticity_isokinharden.e'
       detail = 'in a batched fashion.'
-      required_objects = 'CauchyStressFromNEML2'
+      required_submodule = 'contrib/neml2'
       recover = false
       valgrind = heavy
     []
