@@ -53,6 +53,13 @@
   []
 []
 
+[VectorPostprocessors]
+  [eigen]
+    type = Eigenvalues
+    inverse_eigenvalue = true
+  []
+[]
+
 [Postprocessors]
   [fluxintegral]
     type = ElementIntegralVariablePostprocessor
@@ -76,6 +83,5 @@
 []
 
 [Outputs]
-  exodus = true
-  perf_graph = true
+  csv = true
 []
