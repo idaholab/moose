@@ -11,6 +11,8 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
+#include "ResidualConvergence.h"
+#include "ReferenceResidualConvergence.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -21,9 +23,36 @@ FEProblemSolve::mooseLineSearches()
 }
 
 InputParameters
+FEProblemSolve::feProblemDefaultConvergenceParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
+  params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
+  params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
+  params.addParam<Real>(
+      "nl_div_tol",
+      1.0e10,
+      "Nonlinear Relative Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>(
+      "nl_abs_div_tol",
+      1.0e50,
+      "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
+  params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
+  params.addParam<unsigned int>(
+      "n_max_nonlinear_pingpong",
+      100,
+      "The maximum number of times the nonlinear residual can ping pong "
+      "before requesting halting the current evaluation and requesting timestep cut");
+  return params;
+}
+
+InputParameters
 FEProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
+  params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
   params.addParam<std::vector<std::string>>("splitting",
                                             {},
@@ -61,26 +90,10 @@ FEProblemSolve::validParams()
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
   params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
   params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
-  params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
-  params.addParam<unsigned int>("nl_forced_its", 0, "The Number of Forced Nonlinear Iterations");
-  params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
-  params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
-  params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>(
-      "nl_div_tol",
-      1.0e10,
-      "Nonlinear Relative Divergence Tolerance. A negative value disables this check.");
-  params.addParam<Real>(
-      "nl_abs_div_tol",
-      1.0e50,
-      "Nonlinear Absolute Divergence Tolerance. A negative value disables this check.");
   params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
-  params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
-  params.addParam<unsigned int>(
-      "n_max_nonlinear_pingpong",
-      100,
-      "The maximum number of times the nonlinear residual can ping pong "
-      "before requesting halting the current evaluation and requesting timestep cut");
+  params.addParam<ConvergenceName>(
+      "nonlinear_convergence",
+      "Name of Convergence object to use to assess convergence of the nonlinear solve");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -220,11 +233,23 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
-  _problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
+  if (isParamValid("nonlinear_convergence"))
+  {
+    _problem.setNonlinearConvergenceName(getParam<ConvergenceName>("nonlinear_convergence"));
+    if (_problem.onlyAllowDefaultNonlinearConvergence())
+      mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
+  }
+  else
+  {
+    const std::string default_name = "default_nonlinear_convergence";
+    _problem.setNonlinearConvergenceName(default_name);
 
-  _problem.setNonlinearForcedIterations(getParam<unsigned int>("nl_forced_its"));
-
-  _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
+    // Some executioners may create multiple FEProblemSolves - only need to
+    // create a single Convergence object for now. Later we may consider having
+    // a Convergence per FEProblemSolve.
+    if (!_problem.hasConvergence(default_name))
+      _problem.addDefaultNonlinearConvergence(parameters());
+  }
 
   _nl.setDecomposition(_splitting);
 

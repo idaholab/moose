@@ -1,0 +1,11 @@
+[Tests]
+  design = 'ResidualConvergence.md'
+  issues = '#25931'
+
+  [nonlinear]
+    type = CSVDiff
+    input = 'residual_convergence.i'
+    csvdiff = 'residual_convergence_out.csv'
+    requirement = 'The system shall be able to determine convergence of the nonlinear solve using residual-based criteria through an object.'
+  []
+[]
