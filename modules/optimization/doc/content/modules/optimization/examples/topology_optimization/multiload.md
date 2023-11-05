@@ -1,7 +1,7 @@
 # Multiple Load SIMP
 
 We employ here a multi-app scheme similar to that employed in
-[Thermal and mechanical optimization](combined/examples/optimization/thermomechanical.md).
+[Thermal and mechanical optimization](topology_optimization/thermomechanical.md).
 In this example, each subapp is solving the same mechanics problem with a different applied load.
 The sensitivity of the structure to each load is computed separately and used in a
 global optimization algorithm. Considering the optimization of a problem with

@@ -236,7 +236,7 @@ restricted_blocks = '1'
 
 [Materials]
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'temperature'
     rho = ${rho}
     block = ${restricted_blocks}

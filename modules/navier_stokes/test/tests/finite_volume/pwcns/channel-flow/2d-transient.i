@@ -303,7 +303,7 @@ velocity_interp_method = 'rc'
     porosity = 'porosity'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = 'T_fluid'
   []

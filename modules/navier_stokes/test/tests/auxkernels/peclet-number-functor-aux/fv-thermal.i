@@ -177,7 +177,7 @@ cp = 1
     cp = ${cp}
   []
   [enthalpy]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = T
     cp = ${cp}

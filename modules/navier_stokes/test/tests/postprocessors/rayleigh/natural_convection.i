@@ -196,7 +196,7 @@ l = 4
     prop_values = '${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T'
     rho = ${rho}
   []

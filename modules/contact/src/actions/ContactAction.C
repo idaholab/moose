@@ -29,6 +29,17 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
 
+// Make newer nanoflann API compatible with older nanoflann versions
+#if NANOFLANN_VERSION < 0x150
+namespace nanoflann
+{
+typedef SearchParams SearchParameters;
+
+template <typename T, typename U>
+using ResultItem = std::pair<T, U>;
+}
+#endif
+
 using NodeBoundaryIDInfo = std::pair<const Node *, BoundaryID>;
 
 // Counter for naming mortar auxiliary kernels
@@ -1291,8 +1302,8 @@ ContactAction::createSidesetsFromNodeProximity()
   kd_tree->buildIndex();
 
   // data structures for kd-tree search
-  nanoflann::SearchParams search_params;
-  std::vector<std::pair<std::size_t, Real>> ret_matches;
+  nanoflann::SearchParameters search_params;
+  std::vector<nanoflann::ResultItem<std::size_t, Real>> ret_matches;
 
   const auto radius_for_search = getParam<Real>("automatic_pairing_distance");
 

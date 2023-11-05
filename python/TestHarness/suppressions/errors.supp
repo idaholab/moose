@@ -222,13 +222,12 @@
    fun:KSPSolve
 }
 {
-   libtorch_jit
+   libtorch_deregister_operator
    Memcheck:Cond
+   ...
    fun:*deregisterOperator*
-   fun:*deregisterDef*
-   fun:*RegisterOperators*
-   fun:*finalize
-   obj:*libtorch_cpu.so
+   ...
+   obj:*libtorch*
 }
 {
    libtorch_at_native_leak

@@ -219,14 +219,15 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
             continue;
 
+          const auto transformed_node = (*_from_transforms[getGlobalSourceAppIndex(i_from)])(*node);
+
           // Only add to the KDTree nodes that are closest to the 'position'
           // When querying values at a target point, the KDTree associated to the closest
           // position to the target point is queried
-          if (_nearest_positions_obj &&
-              !closestToPosition(i_source, *node + _from_positions[i_from]))
+          if (_nearest_positions_obj && !closestToPosition(i_source, transformed_node))
             continue;
 
-          _local_points[i_source].push_back(*node + _from_positions[i_from]);
+          _local_points[i_source].push_back(transformed_node);
           auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
           if (!_use_zero_dof_for_value[var_index])
@@ -251,12 +252,13 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
             continue;
 
           const auto vertex_average = elem->vertex_average();
+          const auto transformed_vertex_average =
+              (*_from_transforms[getGlobalSourceAppIndex(i_from)])(vertex_average);
 
-          if (_nearest_positions_obj &&
-              !closestToPosition(i_source, vertex_average + _from_positions[i_from]))
+          if (_nearest_positions_obj && !closestToPosition(i_source, transformed_vertex_average))
             continue;
 
-          _local_points[i_source].push_back(vertex_average + _from_positions[i_from]);
+          _local_points[i_source].push_back(transformed_vertex_average);
           if (_use_zero_dof_for_value[var_index])
           {
             auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
@@ -360,9 +362,15 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           auto num_found = return_dist_sqr.size();
 
           // Local coordinates only accessible when not using nearest-position
+          // as we did not keep the index of the source app, only the position index
           Point local_pt = pt;
           if (!_nearest_positions_obj)
+          {
             local_pt -= _from_positions[i_from];
+            if (!_skip_coordinate_collapsing)
+              mooseInfo("Search value conflict cannot find the origin point due to the "
+                        "non-uniqueness of the coordinate collapsing reverse mapping");
+          }
 
           // Look for too many equidistant nodes within a problem. First zip then sort by distance
           std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;

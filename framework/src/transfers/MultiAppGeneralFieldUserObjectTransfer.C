@@ -111,7 +111,8 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
             _from_problems[i_from]->getUserObjectBase(_user_object_name);
 
         // Use spatial value routine to compute the origin value to transfer
-        auto val = user_object.spatialValue(pt - _from_positions[i_from]);
+        const auto from_global_num = getGlobalSourceAppIndex(i_from);
+        auto val = user_object.spatialValue(_from_transforms[from_global_num]->mapBack(pt));
 
         // Get nearest position (often a subapp position) for the target point
         // We want values from the child app that is closest to the same position as the target
@@ -120,8 +121,8 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         {
           const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
           const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
-          nearest_position_source =
-              _nearest_positions_obj->getNearestPosition(_from_positions[i_from], initial);
+          nearest_position_source = _nearest_positions_obj->getNearestPosition(
+              (*_from_transforms[from_global_num])(Point(0, 0, 0)), initial);
 
           // Source (usually app position) is not closest to the same positions as the target, dont
           // send values
@@ -137,7 +138,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
                            outgoing_vals[i_pt].first,
                            _nearest_positions_obj ? (pt - nearest_position_source).norm() : 1,
                            outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
+          registerConflict(i_from, 0, _from_transforms[from_global_num]->mapBack(pt), 1, true);
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

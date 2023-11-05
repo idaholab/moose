@@ -25,8 +25,9 @@ PINSFVEnergyAnisotropicDiffusion::validParams()
   params.addParam<bool>(
       "effective_diffusivity",
       true,
-      "Whether the diffusivity should be multiplied by porosity, or whether the provided "
-      "diffusivity is an effective diffusivity taking porosity effects into account");
+      "Whether the conductivity should be multiplied by porosity, or whether the provided "
+      "conductivity is an effective conductivity taking porosity effects into account");
+  params.renameParam("effective_diffusivity", "effective_conductivity", "");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>(
       "kappa_interp_method",
@@ -41,7 +42,7 @@ PINSFVEnergyAnisotropicDiffusion::PINSFVEnergyAnisotropicDiffusion(const InputPa
   : FVFluxKernel(params),
     _k(getFunctor<ADRealVectorValue>(NS::kappa)),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _porosity_factored_in(getParam<bool>("effective_diffusivity")),
+    _porosity_factored_in(getParam<bool>("effective_conductivity")),
     _k_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {

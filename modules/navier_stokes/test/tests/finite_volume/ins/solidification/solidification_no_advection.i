@@ -116,7 +116,7 @@ N = 10
     phase_1_fraction = fl
   []
   [h]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     cp = ${cp_liquid}
     temperature = T
     rho = ${rho_liquid}

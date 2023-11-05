@@ -40,6 +40,7 @@ protected:
                 const Elem * elem) const override;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
   /*
    * Build KD-Trees for each local app
    * @param var_index the index of the variable being transferred

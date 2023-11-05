@@ -6593,7 +6593,6 @@ FEProblemBase::computeJacobianBlock(SparseMatrix<Number> & jacobian,
   JacobianBlock jac_block(precond_system, jacobian, ivar, jvar);
   std::vector<JacobianBlock *> blocks = {&jac_block};
   mooseAssert(_current_nl_sys, "This should be non-null");
-  mooseAssert(&_current_nl_sys->system() == &precond_system, "libMesh systems should match");
   computeJacobianBlocks(blocks, _current_nl_sys->number());
 }
 

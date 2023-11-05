@@ -180,7 +180,7 @@ pressure_tag = "pressure_grad"
     prop_values = '${mu} ${rho} ${cp}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     cp = ${cp}
     temperature = 'T'

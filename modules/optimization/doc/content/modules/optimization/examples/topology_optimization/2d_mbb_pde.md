@@ -3,7 +3,7 @@
 In this example we will go over using a PDE filter instead of a convolution type
 filter (see [!cite](pde_filter)). For larger problems this method may scale better depending on processor
 counts and filter radius size. Only new material not covered in the previous
-example will be covered here [2D Topology Optimization with Radial Average Filter](examples/optimization/2d_mbb.md).
+example will be covered here [2D Topology Optimization with a Convolution Filter](2d_mbb.md).
 
 First there is a new variable `Dc` that will be the filtered sensitivity.
 

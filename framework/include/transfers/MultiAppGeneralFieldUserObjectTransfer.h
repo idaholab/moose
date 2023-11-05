@@ -31,6 +31,7 @@ protected:
                                     std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
   /*
    * Evaluate interpolation values for incoming points
    * @param[in] bounding boxes to restrict the evaluation domain

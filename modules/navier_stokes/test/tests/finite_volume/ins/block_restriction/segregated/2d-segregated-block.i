@@ -291,7 +291,7 @@ restricted_blocks = '1'
     prop_values = '2'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     rho = ${rho}
     temperature = 'T_fluid'
     block = ${restricted_blocks}

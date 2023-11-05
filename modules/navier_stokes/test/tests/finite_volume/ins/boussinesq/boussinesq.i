@@ -200,7 +200,7 @@ temp_ref = '${fparse hot_temp / 2.}'
     prop_values = '${alpha} ${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVEnthalpyMaterial
+    type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
     rho = ${rho}
   []
