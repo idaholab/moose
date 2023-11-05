@@ -13,11 +13,12 @@
 #include "GeneralPostprocessor.h"
 
 /**
- * Computes a time step size based on user-specified CFL number
+ * Computes a time step size based on pseudo-timestep continuation
  */
 class PseudoTimestep : public GeneralPostprocessor
 {
 public:
+  static InputParameters validParams();
   PseudoTimestep(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -26,24 +27,41 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  /// Enum that is used to select the timestep-selection method.
   const MooseEnum _method;
 
+  /// Required parameters for the pseudotimestepper
   const Real _initial_dt;
   const Real _alpha;
-  const Real _max_dt;
-  const unsigned int _iterations_window;
+
+  /// Number of iterations over which the residual can be lagged
+  unsigned int _iterations_window;
+
+  /// Boolean to check if an upper bound was provided
+  bool _bound;
+
+  /// Upper bound on timestep
+  Real _max_dt;
+
+  /// Transient pseudotimestep
   Real _dt;
 
-  std::vector<Real> _residual_norms_sequence;
-  std::vector<Real> _iterations_step_sequence;
+  /// arrays for storing residual and iterations sequence
+  std::vector<Real> & _residual_norms_sequence;
+  std::vector<Real> & _iterations_step_sequence;
 
-  Real current_residual_norm() const;
-  Real timestep_SER();
-  Real timestep_EXP();
-  Real timestep_RDM();
+  /// Computes the norm of the non-time dependent residual
+  Real currentResidualNorm() const;
 
-  void output_pseudo_timestep(Real & curr_dt, const ExecFlagType & exec_type);
+  /// implementation of SER method
+  Real timestepSER() const;
 
-public:
-  static InputParameters validParams();
+  /// implementation of EXP method
+  Real timestepEXP() const;
+
+  /// implementation of RDM method
+  Real timestepRDM() const;
+
+  /// Outputs the status of the residual and timestep at the end of time step
+  void outputPseudoTimestep(Real curr_dt) const;
 };
