@@ -18,6 +18,8 @@ public:
 
   static InputParameters validParams();
 
+  static InputParameters commonParams();
+
   static const std::set<std::string> & mooseLineSearches();
 
   /**

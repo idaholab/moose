@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Convergence.md'
+  issues = '#25931'
+  [nonlinear]
+    type = 'Exodiff'
+    input = 'diffusion_convergence.i'
+    exodiff = 'diffusion_convergence_out.e'
+    requirement = 'The system shall query the convergence status of the nonlinear solvers.'
+  []
+[]

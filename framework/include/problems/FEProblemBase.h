@@ -83,7 +83,7 @@ class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
-class Function;
+class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 
@@ -209,38 +209,6 @@ public:
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
-
-  /**
-   * Check for convergence of the nonlinear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param it             Iteration counter
-   * @param xnorm          Norm of the solution vector
-   * @param snorm          Norm of the change in the solution vector
-   * @param fnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param divtol         Relative residual divergence tolerance
-   * @param stol           Solution change convergence tolerance
-   * @param abstol         Absolute residual convergence tolerance
-   * @param nfuncs         Number of function evaluations
-   * @param max_funcs      Maximum Number of function evaluations
-   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of preset BCs
-   * values on solution vector
-   * @param div_threshold  Maximum value of residual before triggering divergence check
-   */
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold);
 
   /// Perform steps required before checking nonlinear convergence
   virtual void nonlinearConvergenceSetup() {}
@@ -616,6 +584,15 @@ public:
   addMeshDivision(const std::string & type, const std::string & name, InputParameters & params);
   /// Get a MeshDivision
   MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
+
+  virtual void
+  addConvergence(const std::string & type, const std::string & name,
+                      InputParameters & parameters);
+  virtual Convergence & getConvergence(const std::string & name, const THREAD_ID tid = 0);
+  virtual bool hasConvergence(const std::string & name, const THREAD_ID tid=0);
+
+  /// Nonlinear convergence name
+  ConvergenceName _nonlinear_convergence_name;
 
   /**
    * add a MOOSE line search
@@ -2052,6 +2029,18 @@ public:
     _nl_abs_div_tol = nl_abs_div_tol;
   }
 
+  /// method returning the absolute divergence tolerance
+  Real getNonlinearAbsoluteDivergenceTolerance() const { return _nl_abs_div_tol; };
+
+  /**
+   * Sets the nonlinear convergence object name if there is one
+   */
+  void setNonlinearConvergenceObject(const ConvergenceName & convergence)
+  {
+    _nonlinear_convergence_name = convergence;
+    _set_nonlinear_convergence_name = true;
+  }
+
   /**
    * Setter for whether we're computing the scaling jacobian
    */
@@ -2159,6 +2148,12 @@ public:
    */
   bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
 
+  /// Nonlinear convergence name
+  ConvergenceName _nonlinear_convergence_name;
+  /// Flag that the nonlinear convergence name has been set
+  bool _set_nonlinear_convergence_name;
+
+
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid) override;
   virtual void setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid) override;
 
@@ -2192,7 +2187,11 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  /// maximum numbver
+  /// Flag that the nonlinear convergence name has been set
+  bool _set_nonlinear_convergence_name;
+  
+
+  /// maximum number
   unsigned int _n_nl_pingpong = 0;
   unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
 
@@ -2240,6 +2239,9 @@ protected:
 
   /// functions
   MooseObjectWarehouse<Function> _functions;
+
+  //convergence
+  MooseObjectWarehouse<Convergence> _convergences;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;

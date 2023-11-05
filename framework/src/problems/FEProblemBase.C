@@ -35,6 +35,7 @@
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"
+#include "Convergence.h"
 #include "NonlinearSystem.h"
 #include "Distribution.h"
 #include "Sampler.h"
@@ -335,6 +336,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
+    _set_nonlinear_convergence_name(false),
     _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
@@ -2274,6 +2276,21 @@ FEProblemBase::addFunction(const std::string & type,
   }
 }
 
+
+void
+FEProblemBase::addConvergence(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  //parallel_object_only();
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<Convergence> func = _factory.create<Convergence>(type, name, parameters, tid);
+    _convergences.addObject(func, tid);
+  }
+}
+
 bool
 FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
@@ -2321,6 +2338,36 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
   auto * const ret = dynamic_cast<Function *>(_functions.getActiveObject(name, tid).get());
   if (!ret)
     mooseError("No function named ", name, " of appropriate type");
+
+  return *ret;
+}
+
+
+bool
+FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid)
+{
+  return _convergences.hasActiveObject(name, tid);
+}
+
+Convergence &
+FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid)
+{
+  // This thread lock is necessary since this method will create functions
+  // for all threads if one is missing.
+  //Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+
+  if (!hasConvergence(name, tid))
+  {
+    //mooseError("Unable to find convergence criteria " + name);
+    std::string class_name = "ResidualConvergence";
+    InputParameters params = _factory.getValidParams(class_name);
+    setNonlinearConvergenceObject("default");
+    addConvergence(class_name,_nonlinear_convergence_name, params);
+  }
+
+  auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
+  if (!ret)
+    mooseError("No convergence criteria named ", name, " of appropriate type");
 
   return *ret;
 }
@@ -7772,124 +7819,6 @@ FEProblemBase::getVariableNames()
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;
-}
-
-MooseNonlinearConvergenceReason
-FEProblemBase::checkNonlinearConvergence(std::string & msg,
-                                         const PetscInt it,
-                                         const Real xnorm,
-                                         const Real snorm,
-                                         const Real fnorm,
-                                         const Real rtol,
-                                         const Real divtol,
-                                         const Real stol,
-                                         const Real abstol,
-                                         const PetscInt nfuncs,
-                                         const PetscInt max_funcs,
-                                         const Real initial_residual_before_preset_bcs,
-                                         const Real div_threshold)
-{
-  TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
-  mooseAssert(_current_nl_sys, "This should be non-null");
-
-  nonlinearConvergenceSetup();
-
-  if (_fail_next_nonlinear_convergence_check)
-  {
-    _fail_next_nonlinear_convergence_check = false;
-    return MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
-  }
-
-  NonlinearSystemBase & system = *_current_nl_sys;
-  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
-
-  Real fnorm_old;
-  // This is the first residual before any iterations have been done,
-  // but after preset BCs (if any) have been imposed on the solution
-  // vector.  We save it, and use it to detect convergence if
-  // compute_initial_residual_before_preset_bcs=false.
-  if (it == 0)
-  {
-    system._initial_residual_after_preset_bcs = fnorm;
-    fnorm_old = fnorm;
-    _n_nl_pingpong = 0;
-  }
-  else
-    fnorm_old = system._last_nl_rnorm;
-
-  // Check for nonlinear residual pingpong.
-  // Pingpong will always start from a residual increase
-  if ((_n_nl_pingpong % 2 == 1 && !(fnorm > fnorm_old)) ||
-      (_n_nl_pingpong % 2 == 0 && fnorm > fnorm_old))
-    _n_nl_pingpong += 1;
-  else
-    _n_nl_pingpong = 0;
-
-  std::ostringstream oss;
-  if (fnorm != fnorm)
-  {
-    oss << "Failed to converge, function norm is NaN\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
-  }
-  else if ((it >= _nl_forced_its) && fnorm < abstol)
-  {
-    oss << "Converged due to function norm " << fnorm << " < " << abstol << '\n';
-    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
-  }
-  else if (nfuncs >= max_funcs)
-  {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
-        << '\n';
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
-  }
-  else if ((it >= _nl_forced_its) && it && fnorm > system._last_nl_rnorm && fnorm >= div_threshold)
-  {
-    oss << "Nonlinear solve was blowing up!\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH;
-  }
-
-  if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
-  {
-    // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by PETSc to determine convergence.
-    Real the_residual = system._compute_initial_residual_before_preset_bcs
-                            ? initial_residual_before_preset_bcs
-                            : system._initial_residual_after_preset_bcs;
-    if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    else if (snorm < stol * xnorm)
-    {
-      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
-          << '\n';
-      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
-    }
-    else if (divtol > 0 && fnorm > the_residual * divtol)
-    {
-      oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
-          << divtol << " * initial residual " << the_residual << '\n';
-      reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
-    }
-    else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
-    {
-      oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
-          << _nl_abs_div_tol << '\n';
-      reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
-    }
-    else if (_n_nl_pingpong > _n_max_nl_pingpong)
-    {
-      oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
-      reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
-    }
-  }
-
-  system._last_nl_rnorm = fnorm;
-  system._current_nl_its = static_cast<unsigned int>(it);
-
-  msg = oss.str();
-  if (_app.multiAppLevel() > 0)
-    MooseUtils::indentMessage(_app.name(), msg);
-
-  return reason;
 }
 
 bool

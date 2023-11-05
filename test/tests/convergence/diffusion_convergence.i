@@ -35,7 +35,7 @@
 [Convergence]
   [res_conv]
     type = ResidualConvergence
-    variable = blah
+    nl_abs_tol=1e-6
   []
 []
 
