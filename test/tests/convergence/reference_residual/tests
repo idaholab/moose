@@ -1,0 +1,25 @@
+[Tests]
+  design = 'ReferenceResidualConvergence.md'
+  issues = '#25931'
+  [reference_residual]
+    type = 'Exodiff'
+    input = 'reference_residual.i'
+    exodiff = 'reference_residual_out.e'
+    requirement = 'The system shall perform convergence checks by comparing individual '
+                  'variables to reference quantities of those variables.'
+  []
+  [residual_default]
+    type = 'CSVDiff'
+    input = 'residual_default.i'
+    csvdiff = 'residual_default_csv.csv'
+    requirement = 'The system shall perform convergence checks using the default convergence object.'
+  []
+  [residual_convergence]
+    type = 'CSVDiff'
+    input = 'residual_default.i'
+    csvdiff = 'residual_convergence_csv.csv'
+    cli_args = "Outputs/file_base=residual_convergence_csv Convergence/res_conv/type=ReferenceResidualConvergence Convergence/res_conv/reference_vector='ref' Convergence/res_conv/nl_rel_tol=1e-13"
+    requirement = 'The system shall perform convergence checks by comparing individual '
+                  'variables to reference quantities of those variables.'
+  []
+[]

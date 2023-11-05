@@ -1,0 +1,30 @@
+[Tests]
+  design = 'IterationCountConvergence.md'
+  issues = '#24128'
+
+  [min_iterations]
+    type = CSVDiff
+    input = 'min_iterations.i'
+    csvdiff = 'min_iterations_out.csv'
+    requirement = 'The system shall be able to specify a minimum number of iterations.'
+  []
+  [max_iterations_converge]
+    type = CSVDiff
+    input = 'max_iterations_converge.i'
+    csvdiff = 'max_iterations_converge_out.csv'
+    requirement = 'The system shall be able to specify to converge after a certain number of iterations.'
+  []
+  [max_iterations_diverge]
+    type = RunApp
+    input = 'max_iterations_diverge.i'
+    expect_out = "Solve Did NOT Converge"
+    requirement = 'The system shall be able to specify to diverge if not converged after a certain number of iterations.'
+  []
+  [error_max_greater_than_min]
+    type = RunException
+    input = 'min_iterations.i'
+    cli_args = "Convergence/test_conv/max_iterations=1"
+    expect_err = "'max_iterations' must be >= 'min_iterations'"
+    requirement = 'The system shall report an error when the maximum number of iterations is less than the minimum number of iterations.'
+  []
+[]
