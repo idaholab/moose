@@ -42,8 +42,8 @@ All transfers derived from this base class should be able to support:
 - interpolation and extrapolation transfers, as defined by the derived class
 - detection of indetermination due to source points equidistant to a target point
 - limitation of transfer source to the nearest position (see [Positions](syntax/Positions/index.md)) of target point
-- general coordinate transformations. Coordinate system changes (RZ to XYZ for example) are not
-  fully supported for the the "floating point precision indetermination" detection
+- general coordinate transformations. Coordinate system changes (RZ to XYZ, for example) are not
+  fully supported for the "floating point precision indetermination" detection.
 
 !alert note
 Examine each derived object's respective documentation for feature support.
