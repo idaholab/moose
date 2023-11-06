@@ -10,8 +10,9 @@
 #pragma once
 
 #include "MooseBase.h"
+#include "MooseBaseParameterInterface.h"
+#include "MooseBaseErrorInterface.h"
 #include "InputParameters.h"
-#include "ConsoleStreamInterface.h"
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
@@ -31,14 +32,12 @@ class Executioner;
 class MooseApp;
 class Factory;
 
-// needed to avoid #include cycle with MooseApp and MooseObject
-[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
-
 /**
  * Base class for actions.
  */
 class Action : public MooseBase,
-               public ConsoleStreamInterface,
+               public MooseBaseParameterInterface,
+               public MooseBaseErrorInterface,
                public MeshMetaDataInterface,
                public PerfGraphInterface,
                public libMesh::ParallelObject,
@@ -105,125 +104,15 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type);
 
   /**
-   * Get the MooseApp this object is associated with.
-   */
-  MooseApp & getMooseApp() const { return _app; }
-
-  /**
    * The unique name for accessing input parameters of this action in the InputParameterWarehouse
    */
-  MooseObjectName uniqueActionName() const
-  {
-    return MooseObjectName(_pars.get<std::string>("_unique_name"));
-  }
-
-  const InputParameters & parameters() const { return _pars; }
+  MooseObjectName uniqueActionName() const { return uniqueName(); }
 
   const std::string & specificTaskName() const { return _specific_task_name; }
 
   const std::set<std::string> & getAllTasks() const { return _all_tasks; }
 
-  /**
-   * Retrieve a parameter for the object
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
-  template <typename T>
-  const T & getParam(const std::string & name) const;
-
-  /**
-   * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
-   * The template parameter must be a pointer or an error will be thrown.
-   */
-  template <typename T>
-  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
-  {
-    return parameters().getCheckedPointerParam<T>(name, error_string);
-  }
-
-  /**
-   * Retrieve two parameters and provide pair of parameters for the object
-   * @param param1 The name of first parameter
-   * @param param2 The name of second parameter
-   * @return Vector of pairs of first and second parameters
-   */
-  template <typename T1, typename T2>
-  std::vector<std::pair<T1, T2>> getParam(const std::string & param1,
-                                          const std::string & param2) const
-  {
-    return parameters().get<T1, T2>(param1, param2);
-  }
-
-  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
-
-  inline bool isParamSetByUser(const std::string & name) const;
-
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
-
-  /**
-   * Emits an error prefixed with object name and type.
-   */
-  template <typename... Args>
-  [[noreturn]] void mooseError(Args &&... args) const
-  {
-    std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, errorPrefix("error"), std::forward<Args>(args)...);
-    std::string msg = oss.str();
-    callMooseErrorRaw(msg, &_app);
-  }
-
-  /**
-   * Emits an error prefixed with the file and line number of the given param (from the input
-   * file) along with the full parameter path+name followed by the given args as the message.
-   * If this object's parameters were not created directly by the Parser, then this function falls
-   * back to the normal behavior of mooseError - only printing a message using the given args.
-   */
-  template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args) const
-  {
-    auto prefix = param + ": ";
-    if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
-    mooseError(prefix, args...);
-  }
-
-  /**
-   * Emits a warning prefixed with the file and line number of the given param (from the input
-   * file) along with the full parameter path+name followed by the given args as the message.
-   * If this object's parameters were not created directly by the Parser, then this function falls
-   * back to the normal behavior of mooseWarning - only printing a message using the given args.
-   */
-  template <typename... Args>
-  void paramWarning(const std::string & param, Args... args) const
-  {
-    auto prefix = param + ": ";
-    if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
-    mooseWarning(prefix, args...);
-  }
-
-  /**
-   * Emits an informational message prefixed with the file and line number of the given param
-   * (from the input file) along with the full parameter path+name followed by the given args as
-   * the message.  If this object's parameters were not created directly by the Parser, then this
-   * function falls back to the normal behavior of mooseInfo - only printing a message using
-   * the given args.
-   */
-  template <typename... Args>
-  void paramInfo(const std::string & param, Args... args) const
-  {
-    auto prefix = param + ": ";
-    if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
-    mooseInfo(prefix, args...);
-  }
-
-  /**
-   * A descriptive prefix for errors for this object:
-   *
-   * The following <error_type> occurred in the object "<name>", of type "<type>".
-   */
-  std::string errorPrefix(const std::string & error_type) const;
 
 protected:
   /**
@@ -231,33 +120,8 @@ protected:
    */
   virtual void act() = 0;
 
-  /**
-   * Connect controllable parameter of this action with the controllable parameters of the
-   * objects added by this action.
-   * @param parameter Name of the controllable parameter of this action
-   * @param object_type Type of the object added by this action.
-   * @param object_name Name of the object added by this action.
-   * @param object_parameter Name of the parameter of the object.
-   */
-  virtual void connectControllableParams(const std::string & parameter,
-                                         const std::string & object_type,
-                                         const std::string & object_name,
-                                         const std::string & object_parameter) const;
-
-  /// Input parameters for the action
-  const InputParameters & _pars;
-
   // The registered syntax for this block if any
   std::string _registered_identifier;
-
-  /// The MOOSE application this is associated with
-  MooseApp & _app;
-
-  /// The Factory associated with the MooseApp
-  Factory & _factory;
-
-  /// Builds Actions
-  ActionFactory & _action_factory;
 
   /**
    * This member will only be populated if this Action instance is only designed to
@@ -277,7 +141,7 @@ protected:
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
 
-  /// The current action (even though we have seperate instances for each action)
+  /// The current action (even though we have separate instances for each action)
   const std::string & _current_task;
 
   std::shared_ptr<MooseMesh> & _mesh;
@@ -288,17 +152,14 @@ protected:
 
   /// Timers
   PerfID _act_timer;
+
+  using MooseBase::_app;
+  using MooseBase::_name;
+  using MooseBase::_type;
+  using MooseBaseErrorInterface::_console;
+  using MooseBaseErrorInterface::mooseDeprecated;
+  using MooseBaseErrorInterface::mooseError;
+  using MooseBaseErrorInterface::mooseWarning;
+  using MooseBaseParameterInterface::_action_factory;
+  using MooseBaseParameterInterface::_factory;
 };
-
-template <typename T>
-const T &
-Action::getParam(const std::string & name) const
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
-
-bool
-Action::isParamSetByUser(const std::string & name) const
-{
-  return _pars.isParamSetByUser(name);
-}

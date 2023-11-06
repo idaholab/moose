@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 
-#include "MooseApp.h"
+class MooseApp;
 
 /**
  * Base class for everything in MOOSE with a name and a type.
@@ -22,8 +22,8 @@
 class MooseBase
 {
 public:
-  MooseBase(const std::string & type, const std::string & name, MooseApp * app)
-    : _type(type), _name(name), _app(*app)
+  MooseBase(const std::string & type, const std::string & name, MooseApp & app)
+    : _app(app), _type(type), _name(name)
   {
   }
 
@@ -52,13 +52,6 @@ public:
    */
   std::string typeAndName() const;
 
-  /**
-   * A descriptive prefix for errors for this class:
-   *
-   * The following <error_type> occurred in the class "<name>", of type "<type>".
-   */
-  std::string errorPrefix(const std::string & error_type) const;
-
 protected:
   /// The MOOSE application this is associated with
   MooseApp & _app;
@@ -69,12 +62,3 @@ protected:
   /// The name of this class, reference to value stored in InputParameters
   const std::string & _name;
 };
-
-std::string
-MooseBase::errorPrefix(const std::string & error_type) const
-{
-  std::stringstream oss;
-  oss << "The following " << error_type << " occurred in the class \"" << name() << "\", of type \""
-      << type() << "\".\n\n";
-  return oss.str();
-}

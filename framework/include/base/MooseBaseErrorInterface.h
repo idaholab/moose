@@ -9,17 +9,21 @@
 
 #pragma once
 
-#include "MooseApp.h"
 #include "MooseBase.h"
+#include "ConsoleStreamInterface.h"
+
+/// Needed to break include cycle between MooseApp.h and Action.h
+class MooseApp;
+[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
 /**
- * Class to handle errors
+ * Interface that provides APIs to output errors/warnings/info messages
  */
 class MooseBaseErrorInterface : public ConsoleStreamInterface
 {
 public:
   MooseBaseErrorInterface(const MooseBase * const base)
-    : ConsoleStreamInterface(base->getMooseApp()), _app(base->getMooseApp()){};
+    : ConsoleStreamInterface(base->getMooseApp()), _app(base->getMooseApp()), _moose_base(base){};
 
   virtual ~MooseBaseErrorInterface() = default;
 
@@ -88,14 +92,7 @@ public:
 protected:
   /// The MOOSE application this is associated with
   MooseApp & _app;
-}
 
-[[noreturn]] void
-callMooseErrorRaw(std::string & msg, MooseApp * app)
-{
-  app->getOutputWarehouse().mooseConsole();
-  std::string prefix;
-  if (!app->isUltimateMaster())
-    prefix = app->name();
-  moose::internal::mooseErrorRaw(msg, prefix);
-}
+  /// The MooseBase class deriving from this interface
+  const MooseBase * const _moose_base;
+};

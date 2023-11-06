@@ -53,6 +53,14 @@ public:
   const InputParameters & parameters() const { return _pars; }
 
   /**
+   * The unique name for accessing input parameters of this object in the InputParameterWarehouse
+   */
+  MooseObjectName uniqueName() const
+  {
+    return MooseObjectName(_pars.get<std::string>("_unique_name"));
+  }
+
+  /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
    * @return The value of the parameter
@@ -100,11 +108,6 @@ public:
   inline bool isParamSetByUser(const std::string & nm) const { return _pars.isParamSetByUser(nm); }
 
   /**
-   * Return the enabled status of the object.
-   */
-  virtual bool enabled() const { return _enabled; }
-
-  /**
    * Emits an error prefixed with the file and line number of the given param (from the input
    * file) along with the full parameter path+name followed by the given args as the message.
    * If this object's parameters were not created directly by the Parser, then this function falls
@@ -132,6 +135,24 @@ public:
   template <typename... Args>
   void paramInfo(const std::string & param, Args... args) const;
 
+  /**
+   * A descriptive prefix for errors for an object
+   */
+  std::string objectErrorPrefix(const std::string & error_type) const;
+
+  /**
+   * Connect controllable parameter of this action with the controllable parameters of the
+   * objects added by this action.
+   * @param parameter Name of the controllable parameter of this action
+   * @param object_type Type of the object added by this action.
+   * @param object_name Name of the object added by this action.
+   * @param object_parameter Name of the parameter of the object.
+   */
+  void connectControllableParams(const std::string & parameter,
+                                 const std::string & object_type,
+                                 const std::string & object_name,
+                                 const std::string & object_parameter) const;
+
 protected:
   /// The MooseBase object that inherits this class
   const MooseBase * _moose_base;
@@ -139,8 +160,11 @@ protected:
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
 
-  /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
-  const bool & _enabled;
+  /// The Factory associated with the MooseApp
+  Factory & _factory;
+
+  /// Builds Actions
+  ActionFactory & _action_factory;
 
 private:
   template <typename... Args>
@@ -150,7 +174,7 @@ private:
 
     // With no input location information, append object info (name + type)
     const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? _moose_base->errorPrefix("parameter error") : "";
+        _pars.inputLocation(param).empty() ? objectErrorPrefix("parameter error") : "";
 
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
@@ -197,7 +221,7 @@ MooseBaseParameterInterface::getRenamedParam(const std::string & old_name,
   else if (!isParamValid(old_name) && !isParamValid(new_name))
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
                "' is being retrieved without being set.\n"
-               "Did you mispell it?");
+               "Did you misspell it?");
   // Refuse: both old and new parameters set by user
   else
     mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
