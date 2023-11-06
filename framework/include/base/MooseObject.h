@@ -10,6 +10,7 @@
 #pragma once
 
 // MOOSE includes
+#include "MooseBase.h"
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
@@ -44,7 +45,8 @@ std::string paramErrorPrefix(const InputParameters & params, const std::string &
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public ConsoleStreamInterface,
+class MooseObject : public MooseBase,
+                    public ConsoleStreamInterface,
                     public libMesh::ParallelObject,
                     public DataFileInterface<MooseObject>
 {
@@ -56,30 +58,12 @@ public:
   virtual ~MooseObject() = default;
 
   /**
-   * Get the type of this object.
-   * @return the name of the type of this object
-   */
-  const std::string & type() const { return _type; }
-
-  /**
-   * Get the name of the object
-   * @return The name of the object
-   */
-  virtual const std::string & name() const { return _name; }
-
-  /**
    * The unique parameter name of a valid parameter of this object for accessing parameter controls
    */
   MooseObjectParameterName uniqueParameterName(const std::string & parameter_name) const
   {
     return MooseObjectParameterName(_pars.get<std::string>("_moose_base"), _name, parameter_name);
   }
-
-  /**
-   * Get the object's combined type and name; useful in error handling.
-   * @return The type and name of this object in the form '<type()> "<name()>"'.
-   */
-  std::string typeAndName() const;
 
   /**
    * Get the parameters of the object
@@ -241,13 +225,7 @@ protected:
   /// The MooseApp this object is associated with
   MooseApp & _app;
 
-  /// The type of this object (the Class name)
-  const std::string & _type;
-
-  /// The name of this object, reference to value stored in InputParameters
-  const std::string & _name;
-
-  /// Reference to the "enable" InputParaemters, used by Controls for toggling on/off MooseObjects
+  /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
 
 private:

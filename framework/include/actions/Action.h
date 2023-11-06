@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseBase.h"
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "MeshMetaDataInterface.h"
@@ -30,10 +31,14 @@ class Executioner;
 class MooseApp;
 class Factory;
 
+// needed to avoid #include cycle with MooseApp and MooseObject
+[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
+
 /**
  * Base class for actions.
  */
-class Action : public ConsoleStreamInterface,
+class Action : public MooseBase,
+               public ConsoleStreamInterface,
                public MeshMetaDataInterface,
                public PerfGraphInterface,
                public libMesh::ParallelObject,
@@ -100,17 +105,9 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type);
 
   /**
-   * The name of the action
+   * Get the MooseApp this object is associated with.
    */
-  const std::string & name() const { return _name; }
-
-  ///@{
-  /**
-   * Deprecated name methods, use name()
-   */
-  std::string getBaseName() const;
-  std::string getShortName() const;
-  ///@}
+  MooseApp & getMooseApp() const { return _app; }
 
   /**
    * The unique name for accessing input parameters of this action in the InputParameterWarehouse
@@ -119,8 +116,6 @@ public:
   {
     return MooseObjectName(_pars.get<std::string>("_unique_name"));
   }
-
-  const std::string & type() const { return _action_type; }
 
   const InputParameters & parameters() const { return _pars; }
 
@@ -164,6 +159,18 @@ public:
   inline bool isParamSetByUser(const std::string & name) const;
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
+
+  /**
+   * Emits an error prefixed with object name and type.
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseError(Args &&... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, errorPrefix("error"), std::forward<Args>(args)...);
+    std::string msg = oss.str();
+    callMooseErrorRaw(msg, &_app);
+  }
 
   /**
    * Emits an error prefixed with the file and line number of the given param (from the input
@@ -211,6 +218,13 @@ public:
     mooseInfo(prefix, args...);
   }
 
+  /**
+   * A descriptive prefix for errors for this object:
+   *
+   * The following <error_type> occurred in the object "<name>", of type "<type>".
+   */
+  std::string errorPrefix(const std::string & error_type) const;
+
 protected:
   /**
    * Method to add objects to the simulation or perform other setup tasks.
@@ -235,12 +249,6 @@ protected:
 
   // The registered syntax for this block if any
   std::string _registered_identifier;
-
-  /// The name of the action
-  std::string _name;
-
-  // The type name of this Action instance
-  std::string _action_type;
 
   /// The MOOSE application this is associated with
   MooseApp & _app;

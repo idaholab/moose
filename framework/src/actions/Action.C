@@ -40,7 +40,8 @@ Action::validParams()
 }
 
 Action::Action(const InputParameters & parameters)
-  : ConsoleStreamInterface(
+  : MooseBase(getParam<std::string>("action_type"), getParam<std::string>("_action_name")),
+    ConsoleStreamInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     MeshMetaDataInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
@@ -63,8 +64,6 @@ Action::Action(const InputParameters & parameters)
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
                                : ""),
-    _name(getParam<std::string>("_action_name")),
-    _action_type(getParam<std::string>("action_type")),
     _app(*getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
@@ -128,7 +127,10 @@ Action::addRelationshipManager(
   return added;
 }
 
-void Action::addRelationshipManagers(Moose::RelationshipManagerType) {}
+void
+Action::addRelationshipManagers(Moose::RelationshipManagerType)
+{
+}
 
 bool
 Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
@@ -150,21 +152,6 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
   }
 
   return added;
-}
-
-/// DEPRECATED METHODS
-std::string
-Action::getShortName() const
-{
-  mooseDeprecated("getShortName() is deprecated.");
-  return MooseUtils::shortName(_name);
-}
-
-std::string
-Action::getBaseName() const
-{
-  mooseDeprecated("getBaseName() is deprecated.");
-  return MooseUtils::baseName(_name);
 }
 
 void
