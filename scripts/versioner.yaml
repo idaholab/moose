@@ -56,6 +56,8 @@ packages:
     influential:
       - apptainer/moose.def
       - apptainer/remove_channels.def
+      - conda/peacock/meta.yaml
+      - conda/peacock/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
       - conda/moose/build.sh
