@@ -1,0 +1,176 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "PhysicsBase.h"
+#include "MooseUtils.h"
+#include "FEProblemBase.h"
+
+#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
+#include "BlockRestrictable.h"
+
+InputParameters
+PhysicsBase::validParams()
+{
+  InputParameters params = Action::validParams();
+  params.addClassDescription("Creates all the objects necessary to solve a particular physics");
+
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Blocks that this Physics is active on. Components can add additional blocks");
+
+  MooseEnum transient_options("true false same_as_problem", "same_as_problem");
+  params.addParam<MooseEnum>(
+      "transient", transient_options, "Whether the physics is to be solved as a transient");
+
+  params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
+
+  // Restart parameters
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized"
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the time step number (or \"LATEST\") for which to read the Exodus solution");
+  params.addParamNamesToGroup("initialize_variables_from_mesh_file initial_from_file_timestep",
+                              "Restart from Exodus");
+  return params;
+}
+
+PhysicsBase::PhysicsBase(const InputParameters & parameters)
+  : Action(parameters),
+    _verbose(getParam<bool>("verbose")),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
+    _is_transient(getParam<MooseEnum>("transient"))
+{
+}
+
+void
+PhysicsBase::act()
+{
+  if (_current_task == "init_physics")
+    initializePhysics();
+  else if (_current_task == "add_variable")
+    addNonlinearVariables();
+  else if (_current_task == "add_ic")
+    addInitialConditions();
+
+  else if (_current_task == "add_kernel")
+    addFEKernels();
+  else if (_current_task == "add_nodal_kernel")
+    addNodalKernels();
+  else if (_current_task == "add_fv_kernel")
+    addFVKernels();
+  else if (_current_task == "add_dirac_kernel")
+    addDiracKernels();
+  else if (_current_task == "add_dg_kernel")
+    addDGKernels();
+  else if (_current_task == "add_scalar_kernel")
+    addScalarKernels();
+  else if (_current_task == "add_interface_kernel")
+    addInterfaceKernels();
+  else if (_current_task == "add_fv_ik")
+    addFVInterfaceKernels();
+
+  else if (_current_task == "add_bc")
+    addFEBCs();
+  else if (_current_task == "add_nodal_bc")
+    addNodalBCs();
+  else if (_current_task == "add_fv_bc")
+    addFVBCs();
+  else if (_current_task == "add_periodic_bc")
+    addPeriodicBCs();
+  else if (_current_task == "add_function")
+    addFunctions();
+  else if (_current_task == "add_user_object")
+    addUserObjects();
+
+  else if (_current_task == "add_aux_variable")
+    addAuxiliaryVariables();
+  else if (_current_task == "add_aux_kernel")
+    addAuxiliaryKernels();
+  else if (_current_task == "add_material")
+    addMaterials();
+  else if (_current_task == "add_functor_material")
+    addFunctorMaterials();
+
+  else if (_current_task == "add_postprocessor")
+    addPostprocessors();
+  else if (_current_task == "add_vector_postprocessor")
+    addVectorPostprocessors();
+  else if (_current_task == "add_reporter")
+    addReporters();
+  else if (_current_task == "add_output")
+    addOutputs();
+  else if (_current_task == "add_preconditioning")
+    addPreconditioning();
+  else if (_current_task == "add_executioner")
+    addExecutioner();
+  else if (_current_task == "add_executor")
+    addExecutors();
+}
+
+void
+PhysicsBase::prepareCopyNodalVariables() const
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    _app.setExodusFileRestart(true);
+}
+
+bool
+PhysicsBase::isTransient() const
+{
+  mooseAssert(_problem, "We dont have a problem yet");
+  if (_is_transient == "true")
+    return true;
+  else if (_is_transient == "false")
+    return false;
+  else
+    return getProblem().isTransient();
+}
+
+unsigned int
+PhysicsBase::dimension() const
+{
+  mooseAssert(_mesh, "We dont have a mesh yet");
+  mooseAssert(_dim < 4, "Dimension has not been set yet");
+  return _dim;
+}
+
+void
+PhysicsBase::addBlocks(const std::vector<SubdomainName> & blocks)
+{
+  if (blocks.size())
+  {
+    _blocks.insert(_blocks.end(), blocks.begin(), blocks.end());
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  }
+}
+
+void
+PhysicsBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  InputParameters params = getAdditionalRMParams();
+  Action::addRelationshipManagers(input_rm_type, params);
+}
+
+void
+PhysicsBase::initializePhysics()
+{
+  mooseAssert(_mesh, "We should have a mesh to find the dimension");
+  if (_blocks.size())
+    _dim = _mesh->getBlocksMaxDimension(_blocks);
+  else
+    _dim = _mesh->dimension();
+
+  mooseAssert(_mesh, "We should have a problem to check if it is transient");
+  if (_is_transient == "true" && !getProblem().isTransient())
+    paramError("transient", "We cannot solve a physics as transient in a steady problem");
+}
