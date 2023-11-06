@@ -20,12 +20,15 @@
     requirement = 'The system shall support the loading of a restarted value after initialization'
   []
   [load_no_store]
-    type = 'RunException'
+    type = 'RunApp'
+    # Eventually, we will probably want to error here when we load a value after
+    # we have skipped restart/recover. But I'm not sure and I don't have the time
+    # to implement it at the moment, so we should at least verify that this
+    # behavior is consistent
     input = 'late_restart_load.i'
     allow_test_objects = true
     cli_args = 'UserObjects/test/test_method=load_no_restart'
-    expect_err = 'Failed to find restartable data \'UserObjects/test/value\''
     prereq = store
-    requirement = 'The system shall report a reasonable error when failing to load a restarted value after initialization that does not exist'
+    requirement = 'The system shall support the loading of a default (not loaded) restarted value after initialization'
   []
 []

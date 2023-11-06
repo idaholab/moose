@@ -38,10 +38,12 @@ LateRestartLoadTest::initialSetup()
   {
     const auto has_value = hasRestartableData<unsigned int>("value");
     if (has_value != (_test_method == "load"))
-      mooseError("Has value check failed");
+      mooseError("Has value check failed, has_value=", has_value);
 
     const auto value = getRestartableData<unsigned int>("value");
-    if (value != _value)
-      mooseError("Failed to load value");
+    if (_test_method == "load" && value != _value)
+      mooseError("Failed to load value, value=", value);
+    if (_test_method == "load_no_restart" && value != 0)
+      mooseError("Failed to load default value, value=", value);
   }
 }
