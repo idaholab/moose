@@ -9,8 +9,10 @@
 
 #pragma once
 
-#include "MooseBase.h"
+#include <sstream>
 #include "ConsoleStreamInterface.h"
+#include "MooseError.h"
+#include "MooseBase.h"
 
 /// Needed to break include cycle between MooseApp.h and Action.h
 class MooseApp;

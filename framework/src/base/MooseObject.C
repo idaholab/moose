@@ -20,12 +20,6 @@ class SystemBase;
 class AuxiliarySystem;
 class Transient;
 
-std::string
-paramErrorPrefix(const InputParameters & params, const std::string & param)
-{
-  return params.errorPrefix(param);
-}
-
 InputParameters
 MooseObject::validParams()
 {
@@ -51,12 +45,13 @@ MooseObject::validParams()
 }
 
 MooseObject::MooseObject(const InputParameters & parameters)
-  : MooseBase(getParam<std::string>("_type"), getParam<std::string>("_object_name")),
-    ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  : MooseBase(parameters.get<std::string>("_type"),
+              parameters.get<std::string>("_object_name"),
+              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    MooseBaseParameterInterface(parameters, this),
+    MooseBaseErrorInterface(this),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     DataFileInterface<MooseObject>(*this),
-    _pars(parameters),
-    _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
     _enabled(getParam<bool>("enable"))
 {
 }

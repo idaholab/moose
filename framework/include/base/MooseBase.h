@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include <string>
-#include <sstream>
 
 class MooseApp;
 
@@ -50,7 +50,10 @@ public:
    * Get the class's combined type and name; useful in error handling.
    * @return The type and name of this class in the form '<type()> "<name()>"'.
    */
-  std::string typeAndName() const;
+  std::string typeAndName() const
+  {
+    return type() + std::string(" \"") + name() + std::string("\"");
+  }
 
 protected:
   /// The MOOSE application this is associated with

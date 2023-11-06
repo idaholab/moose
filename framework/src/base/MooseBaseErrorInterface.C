@@ -9,12 +9,13 @@
 
 #include "MooseBaseErrorInterface.h"
 #include "MooseBase.h"
+#include "MooseApp.h"
 
 std::string
 MooseBaseErrorInterface::errorPrefix(const std::string & error_type) const
 {
   std::stringstream oss;
-  oss << "The following " << error_type << " occurred in the class \"" << _moose_base->name()
+  oss << "The following " << error_type << " occurred in the object \"" << _moose_base->name()
       << "\", of type \"" << _moose_base->type() << "\".\n\n";
   return oss.str();
 }
