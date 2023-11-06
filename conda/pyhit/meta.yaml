@@ -1,5 +1,4 @@
-{% set build = 0 %}
-{% set version = "2023.10.24" %}
+{% set version = "2023.11.06" %}
 
 package:
   name: moose-pyhit
@@ -9,7 +8,8 @@ source:
   git_url: https://github.com/milljm/moose-pyhit.git
 
 build:
-  number:              # [linux,osx]
+  number: 0
+  string: build_0
   skip: true           # [win]
   pin_depends: record
 
