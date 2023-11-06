@@ -18,7 +18,7 @@ element solution of the weak formulation.
 The Jacobian is defined as:
 
 \begin{equation}
-\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).
+\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \psi_i, \nabla \psi_j).
 \end{equation}
 
 !syntax parameters /Kernels/Diffusion
