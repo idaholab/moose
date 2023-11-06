@@ -65,6 +65,11 @@ protected:
     return *_problem;
   }
 
+  /// Tell the app if we want to use Exodus restart
+  void prepareCopyNodalVariables() const;
+  /// Copy variables from the mesh file
+  void copyVariablesFromMesh(std::vector<VariableName> variables_to_copy);
+
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
 

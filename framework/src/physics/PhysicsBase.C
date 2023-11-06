@@ -174,3 +174,16 @@ PhysicsBase::initializePhysics()
   if (_is_transient == "true" && !getProblem().isTransient())
     paramError("transient", "We cannot solve a physics as transient in a steady problem");
 }
+
+void
+PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
+{
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  {
+    SystemBase & system = getProblem().getNonlinearSystemBase();
+
+    for (const auto & var_name : variables_to_copy)
+      system.addVariableToCopy(
+          var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
+  }
+}
