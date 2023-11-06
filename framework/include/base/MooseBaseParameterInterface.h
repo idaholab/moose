@@ -12,20 +12,12 @@
 // MOOSE includes
 #include "MooseBase.h"
 #include "InputParameters.h"
-#include "ConsoleStreamInterface.h"
 #include "Registry.h"
 #include "MooseUtils.h"
-#include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
+#include "MooseBaseErrorInterface.h"
 
-#include "libmesh/parallel_object.h"
-
-#define usingMooseObjectMembers                                                                    \
-  using MooseObject::isParamValid;                                                                 \
-  using MooseObject::isParamSetByUser;                                                             \
-  using MooseObject::paramError
-
-class MooseApp;
+#include <string>
 
 /**
  * Get canonical paramError prefix for param-related error/warning/info messages.
@@ -35,32 +27,23 @@ class MooseApp;
  */
 std::string paramErrorPrefix(const InputParameters & params, const std::string & param);
 
-// helper macro to explicitly instantiate AD classes
-#define adBaseClass(X)                                                                             \
-  template class X<RESIDUAL>;                                                                      \
-  template class X<JACOBIAN>
-
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public MooseBase,
-                    public ConsoleStreamInterface,
-                    public libMesh::ParallelObject,
-                    public DataFileInterface<MooseObject>
+class MooseBaseParameterInterface
 {
 public:
-  static InputParameters validParams();
+  MooseBaseParameterInterface(const InputParameters & parameters, const MooseBase * base);
 
-  MooseObject(const InputParameters & parameters);
-
-  virtual ~MooseObject() = default;
+  virtual ~MooseBaseParameterInterface() = default;
 
   /**
    * The unique parameter name of a valid parameter of this object for accessing parameter controls
    */
   MooseObjectParameterName uniqueParameterName(const std::string & parameter_name) const
   {
-    return MooseObjectParameterName(_pars.get<std::string>("_moose_base"), _name, parameter_name);
+    return MooseObjectParameterName(
+        _pars.get<std::string>("_moose_base"), _moose_base->name(), parameter_name);
   }
 
   /**
@@ -149,74 +132,12 @@ public:
   template <typename... Args>
   void paramInfo(const std::string & param, Args... args) const;
 
-  /**
-   * Emits an error prefixed with object name and type.
-   */
-  template <typename... Args>
-  [[noreturn]] void mooseError(Args &&... args) const
-  {
-    std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, errorPrefix("error"), std::forward<Args>(args)...);
-    std::string msg = oss.str();
-    callMooseErrorRaw(msg, &_app);
-  }
-
-  /**
-   * Emits an error without the prefixing included in mooseError().
-   */
-  template <typename... Args>
-  [[noreturn]] void mooseErrorNonPrefixed(Args &&... args) const
-  {
-    std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-    std::string msg = oss.str();
-    callMooseErrorRaw(msg, &_app);
-  }
-
-  /**
-   * Emits a warning prefixed with object name and type.
-   */
-  template <typename... Args>
-  void mooseWarning(Args &&... args) const
-  {
-    moose::internal::mooseWarningStream(
-        _console, errorPrefix("warning"), std::forward<Args>(args)...);
-  }
-
-  /**
-   * Emits a warning without the prefixing included in mooseWarning().
-   */
-  template <typename... Args>
-  void mooseWarningNonPrefixed(Args &&... args) const
-  {
-    moose::internal::mooseWarningStream(_console, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void mooseDeprecated(Args &&... args) const
-  {
-    moose::internal::mooseDeprecatedStream(_console, false, true, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  void mooseInfo(Args &&... args) const
-  {
-    moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...);
-  }
-
-  /**
-   * A descriptive prefix for errors for this object:
-   *
-   * The following <error_type> occurred in the object "<name>", of type "<type>".
-   */
-  std::string errorPrefix(const std::string & error_type) const;
-
 protected:
+  /// The MooseBase object that inherits this class
+  const MooseBase * _moose_base;
+
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
-
-  /// The MooseApp this object is associated with
-  MooseApp & _app;
 
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
@@ -229,7 +150,7 @@ private:
 
     // With no input location information, append object info (name + type)
     const std::string object_prefix =
-        _pars.inputLocation(param).empty() ? errorPrefix("parameter error") : "";
+        _pars.inputLocation(param).empty() ? _moose_base->errorPrefix("parameter error") : "";
 
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
@@ -252,14 +173,15 @@ private:
 
 template <typename T>
 const T &
-MooseObject::getParam(const std::string & name) const
+MooseBaseParameterInterface::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
 template <typename T>
 const T &
-MooseObject::getRenamedParam(const std::string & old_name, const std::string & new_name) const
+MooseBaseParameterInterface::getRenamedParam(const std::string & old_name,
+                                             const std::string & new_name) const
 {
   // this enables having a default on the new parameter but bypassing it with the old one
   // Most important: accept new parameter
@@ -284,39 +206,39 @@ MooseObject::getRenamedParam(const std::string & old_name, const std::string & n
 
 template <typename... Args>
 [[noreturn]] void
-MooseObject::paramError(const std::string & param, Args... args) const
+MooseBaseParameterInterface::paramError(const std::string & param, Args... args) const
 {
   Moose::show_trace = false;
   std::string msg = paramErrorMsg(param, std::forward<Args>(args)...);
-  callMooseErrorRaw(msg, &_app);
+  callMooseErrorRaw(msg, &_moose_base->getMooseApp());
   Moose::show_trace = true;
 }
 
 template <typename... Args>
 void
-MooseObject::paramWarning(const std::string & param, Args... args) const
+MooseBaseParameterInterface::paramWarning(const std::string & param, Args... args) const
 {
   mooseWarning(paramErrorMsg(param, std::forward<Args>(args)...));
 }
 
 template <typename... Args>
 void
-MooseObject::paramInfo(const std::string & param, Args... args) const
+MooseBaseParameterInterface::paramInfo(const std::string & param, Args... args) const
 {
   mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
 }
 
 template <typename T1, typename T2>
 std::vector<std::pair<T1, T2>>
-MooseObject::getParam(const std::string & param1, const std::string & param2) const
+MooseBaseParameterInterface::getParam(const std::string & param1, const std::string & param2) const
 {
   return _pars.get<T1, T2>(param1, param2);
 }
 
 template <typename T>
 T
-MooseObject::getCheckedPointerParam(const std::string & name,
-                                    const std::string & error_string) const
+MooseBaseParameterInterface::getCheckedPointerParam(const std::string & name,
+                                                    const std::string & error_string) const
 {
   return parameters().getCheckedPointerParam<T>(name, error_string);
 }

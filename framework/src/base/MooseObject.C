@@ -60,22 +60,3 @@ MooseObject::MooseObject(const InputParameters & parameters)
     _enabled(getParam<bool>("enable"))
 {
 }
-
-[[noreturn]] void
-callMooseErrorRaw(std::string & msg, MooseApp * app)
-{
-  app->getOutputWarehouse().mooseConsole();
-  std::string prefix;
-  if (!app->isUltimateMaster())
-    prefix = app->name();
-  moose::internal::mooseErrorRaw(msg, prefix);
-}
-
-std::string
-MooseObject::errorPrefix(const std::string & error_type) const
-{
-  std::stringstream oss;
-  oss << "The following " << error_type << " occurred in the object \"" << name()
-      << "\", of type \"" << type() << "\".\n\n";
-  return oss.str();
-}

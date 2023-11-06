@@ -9,6 +9,9 @@
 
 #pragma once
 #include <string>
+#include <sstream>
+
+#include "MooseApp.h"
 
 /**
  * Base class for everything in MOOSE with a name and a type.
@@ -19,32 +22,59 @@
 class MooseBase
 {
 public:
-  MooseBase(const std::string & type, const std::string & name) : _type(type), _name(name) {}
+  MooseBase(const std::string & type, const std::string & name, MooseApp * app)
+    : _type(type), _name(name), _app(*app)
+  {
+  }
 
   virtual ~MooseBase() = default;
 
   /**
-   * Get the type of this object.
-   * @return the name of the type of this object
+   * Get the MooseApp this class is associated with.
+   */
+  MooseApp & getMooseApp() const { return _app; }
+
+  /**
+   * Get the type of this class.
+   * @return the name of the type of this class
    */
   const std::string & type() const { return _type; }
 
   /**
-   * Get the name of the object
-   * @return The name of the object
+   * Get the name of the class
+   * @return The name of the class
    */
   virtual const std::string & name() const { return _name; }
 
   /**
-   * Get the object's combined type and name; useful in error handling.
-   * @return The type and name of this object in the form '<type()> "<name()>"'.
+   * Get the class's combined type and name; useful in error handling.
+   * @return The type and name of this class in the form '<type()> "<name()>"'.
    */
   std::string typeAndName() const;
 
+  /**
+   * A descriptive prefix for errors for this class:
+   *
+   * The following <error_type> occurred in the class "<name>", of type "<type>".
+   */
+  std::string errorPrefix(const std::string & error_type) const;
+
 protected:
-  /// The type of this object (the Class name)
+  /// The MOOSE application this is associated with
+  MooseApp & _app;
+
+  /// The type of this class
   const std::string & _type;
 
-  /// The name of this object, reference to value stored in InputParameters
+  /// The name of this class, reference to value stored in InputParameters
   const std::string & _name;
 };
+
+std::string
+MooseBase::errorPrefix(const std::string & error_type) const
+{
+  std::stringstream oss;
+  oss << "The following " << error_type << " occurred in the class \"" << name() << "\", of type \""
+      << type() << "\".\n\n";
+  return oss.str();
+}

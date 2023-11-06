@@ -41,8 +41,6 @@ Action::validParams()
 
 Action::Action(const InputParameters & parameters)
   : MooseBase(getParam<std::string>("action_type"), getParam<std::string>("_action_name")),
-    ConsoleStreamInterface(
-        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     MeshMetaDataInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     PerfGraphInterface(
