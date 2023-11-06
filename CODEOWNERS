@@ -69,6 +69,7 @@
 /modules/tensor_mechanics/*/lagrangian @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/tensor_mechanics/*/materials/cohesive_zone_model @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/tensor_mechanics/*/interfacekernels @bwspenc @dschwen @jiangwen84 @hugary1995
+/modules/tensor_mechanics/*/materials/crystal_plasticity @bwspenc @dschwen @jiangwen84 @sapitts
 /modules/thermal_hydraulics @joshuahansel
 /modules/xfem @bwspenc @jiangwen84
 
