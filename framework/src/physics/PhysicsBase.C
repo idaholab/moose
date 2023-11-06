@@ -193,6 +193,16 @@ PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
 }
 
 void
+PhysicsBase::checkParamsBothSetOrNotSet(const std::string & param1,
+                                        const std::string & param2) const
+{
+  if ((isParamValid(param1) + isParamValid(param2)) % 2 != 0)
+    paramError(param1,
+               "Parameters " + param1 + " and " + param2 +
+                   " must be either both set or both not set");
+}
+
+void
 PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                                    const std::string & param2) const
 {
@@ -203,4 +213,19 @@ PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
     paramError(param2,
                "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
                    "' is set by the user");
+}
+
+bool
+PhysicsBase::nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const
+{
+  if (_problem->getNonlinearSystemBase(_sys_number).hasVariable(var_name))
+    return true;
+  else if (error_if_aux && _problem->getAuxiliarySystem().hasVariable(var_name))
+    mooseError("Variable '",
+               var_name,
+               "' is supposed to be nonlinear for physics '",
+               name(),
+               "' but it's already defined as auxiliary");
+  else
+    return false;
 }

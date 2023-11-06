@@ -81,10 +81,27 @@ protected:
     _nl_var_names.push_back(var_name);
   }
 
-  // Utilities for checking parameters.
+  // BEGIN: Utilities for checking parameters.
+  // These will be replaced by being baked into the validParams() logic, one day
+  /// Check in debug mode that this parameter has been added to the validParams
+  template <typename T>
+  void assertParamDefined(const std::string & param1) const;
   /// Check that two parameters are either both set or both not set
+  void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
+  /// Check that a parameter is set only if the first one is set to true
   void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
                                              const std::string & param2) const;
+  /// Check that the two vector parameters are of the same length
+  template <typename T, typename S>
+  void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
+  /// Check that there is no overlap between the two vector parameters
+  template <typename T>
+  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
+
+  // END: parameter checking utilities
+
+  /// Check whether a nonlinear variable already exists
+  bool nonLinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
 
   /// System number for the systems owning the variables
   const unsigned int _sys_number;
@@ -161,4 +178,54 @@ PhysicsBase::getCoupledPhysics(const PhysicsName & phys_name) const
              "' does not exist or is not of type '",
              MooseUtils::prettyCppType<T>(),
              "'");
+}
+
+template <typename T>
+void
+PhysicsBase::assertParamDefined(const std::string & libmesh_dbg_var(param1)) const
+{
+  mooseAssert(parameters().have_parameter<T>(param1),
+              "Parameter '" + param1 + "' is not defined with type '" +
+                  MooseUtils::prettyCppType<T>() + "' in object type '" +
+                  MooseUtils::prettyCppType(type()) + "'. Check your code.");
+}
+
+template <typename T, typename S>
+void
+PhysicsBase::checkVectorParamsSameLength(const std::string & param1,
+                                         const std::string & param2) const
+{
+  assertParamDefined<std::vector<T>>(param1);
+  assertParamDefined<std::vector<S>>(param2);
+
+  if (isParamValid(param1) && isParamValid(param2))
+  {
+    const auto size_1 = getParam<std::vector<T>>(param1).size();
+    const auto size_2 = getParam<std::vector<S>>(param2).size();
+    if (size_1 != size_2)
+      paramError(param1,
+                 "Vector parameters '" + param1 + "' (size " + std::to_string(size_1) + ") and '" +
+                     param2 + "' (size " + std::to_string(size_2) + ") must be the same size");
+  }
+  // handle empty vector defaults
+  else if (isParamValid(param1) || isParamValid(param2))
+    if (getParam<std::vector<T>>(param1).size() || getParam<std::vector<T>>(param2).size())
+      checkParamsBothSetOrNotSet(param1, param2);
+}
+
+template <typename T>
+void
+PhysicsBase::checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const
+{
+  std::set<std::string> unique_params;
+  for (const auto & param : param_vec)
+  {
+    assertParamDefined<std::vector<T>>(param);
+
+    for (const auto & value : getParam<std::vector<T>>(param))
+      if (!unique_params.insert(value).second)
+        mooseError("Item " + value + "specified in vector parameter " + param +
+                   " is also present in one or more of these other parameters " +
+                   Moose::stringify(param_vec) + ". This is disallowed");
+  }
 }
