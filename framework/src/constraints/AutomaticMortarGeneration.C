@@ -1118,7 +1118,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       std::vector<Real> out_dist_sqr(num_results);
       nanoflann::KNNResultSet<Real> result_set(num_results);
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
-      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters(10));
+      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters());
 
       // Initialize list of processed primary elements, we don't want to revisit processed elements
       std::set<const Elem *, CompareDofObjectsByID> processed_primary_elems;
@@ -1927,7 +1927,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       std::vector<Real> out_dist_sqr(num_results);
       nanoflann::KNNResultSet<Real> result_set(num_results);
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
-      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters(10));
+      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters());
 
       // If this flag gets set in the loop below, we can break out of the outer r-loop as well.
       bool projection_succeeded = false;
@@ -2226,7 +2226,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       std::vector<Real> out_dist_sqr(num_results);
       nanoflann::KNNResultSet<Real> result_set(num_results);
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
-      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters(10));
+      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParameters());
 
       // If this flag gets set in the loop below, we can break out of the outer r-loop as well.
       bool projection_succeeded = false;
