@@ -57,7 +57,7 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     # Installing Clang, and its dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
-                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64
+                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64 lldb
 {%- endif %}
 
     # After epel-release
