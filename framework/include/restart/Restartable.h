@@ -149,11 +149,7 @@ protected:
   bool hasRestartableData(const std::string & system_name,
                           const std::string & restartable_name,
                           const std::string & data_name,
-                          const std::type_info & type) const
-  {
-    return hasRestartableData(restartableName(system_name, restartable_name, data_name), type) !=
-           HasRestartableData::MISSING_DATA;
-  }
+                          const std::type_info & type) const;
 
   /**
    * @return Whether or not restartable data is had for the system with name \p system_name,
@@ -166,10 +162,7 @@ protected:
   template <typename T>
   bool hasRestartableData(const std::string & system_name,
                           const std::string & restartable_name,
-                          const std::string & data_name) const
-  {
-    return hasRestartableData(system_name, restartable_name, data_name, typeid(T));
-  }
+                          const std::string & data_name) const;
 
   /**
    * @return Whether or not this object has restartable data with name \p data_name and the
@@ -180,11 +173,7 @@ protected:
    * at the same time.
    */
   template <typename T>
-  bool hasRestartableData(const std::string & data_name) const
-  {
-    return hasRestartableData(restartableName(data_name), typeid(T)) !=
-           HasRestartableData::MISSING_DATA;
-  }
+  bool hasRestartableData(const std::string & data_name) const;
 
   /**
    * Declare a piece of data as "restartable" and initialize it
@@ -337,6 +326,24 @@ Restartable::declareManagedRestartableDataWithContext(const std::string & data_n
   auto & data_ptr = declareRestartableDataHelper<T>(
       restartableName(data_name), context, std::forward<Args>(args)...);
   return Restartable::ManagedValue<T>(data_ptr);
+}
+
+template <typename T>
+bool
+Restartable::hasRestartableData(const std::string & system_name,
+                                const std::string & restartable_name,
+                                const std::string & data_name) const
+{
+  return hasRestartableData(system_name, restartable_name, data_name, typeid(T));
+}
+
+template <typename T>
+bool
+Restartable::hasRestartableData(const std::string & data_name) const
+{
+  const auto has = hasRestartableData(restartableName(data_name), typeid(T));
+  return has == HasRestartableData::HAS_DATA_LOADED ||
+         has == HasRestartableData::HAS_DATA_RESTORABLE;
 }
 
 template <typename T>

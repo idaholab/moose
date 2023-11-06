@@ -62,6 +62,18 @@ Restartable::registerRestartableNameWithFilterOnApp(const std::string & name,
   _restartable_app.registerRestartableNameWithFilter(name, filter);
 }
 
+bool
+Restartable::hasRestartableData(const std::string & system_name,
+                                const std::string & restartable_name,
+                                const std::string & data_name,
+                                const std::type_info & type) const
+{
+  const auto has =
+      hasRestartableData(restartableName(system_name, restartable_name, data_name), type);
+  return has == HasRestartableData::HAS_DATA_LOADED ||
+         has == HasRestartableData::HAS_DATA_RESTORABLE;
+}
+
 std::string
 Restartable::restartableName(const std::string & system_name,
                              const std::string & restartable_name,
