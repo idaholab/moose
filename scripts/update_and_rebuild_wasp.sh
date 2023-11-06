@@ -59,7 +59,7 @@ else
   rm -rf "${WASP_SRC_DIR}"/build
   mkdir -p "${WASP_SRC_DIR}"/build
   cd "${WASP_SRC_DIR}"/build
-  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_SRC_DIR}/install"
+  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_PREFIX:-${WASP_SRC_DIR}/install}"
   source $SCRIPT_DIR/configure_wasp.sh
   configure_wasp "$WASP_OPTIONS" ../ $*
   if [[ $? -ne 0 ]] ; then
