@@ -81,6 +81,9 @@ protected:
     _nl_var_names.push_back(var_name);
   }
 
+  /// System number for the systems owning the variables
+  const unsigned int _sys_number;
+
   /// Whether to output additional information
   const bool _verbose;
 

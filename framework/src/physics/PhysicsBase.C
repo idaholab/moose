@@ -46,6 +46,7 @@ PhysicsBase::validParams()
 
 PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : Action(parameters),
+    _sys_number(0),
     _verbose(getParam<bool>("verbose")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _is_transient(getParam<MooseEnum>("transient"))
@@ -180,7 +181,7 @@ PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
-    SystemBase & system = getProblem().getNonlinearSystemBase();
+    SystemBase & system = getProblem().getNonlinearSystemBase(_sys_number);
 
     for (const auto & var_name : variables_to_copy)
       system.addVariableToCopy(
