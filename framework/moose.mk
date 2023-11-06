@@ -74,9 +74,6 @@ endif
 wasp_LIBS           := $(notdir $(wasp_LIBS))
 wasp_LIBS           := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
 wasp_LIBS           := $(patsubst lib%,-l%,$(wasp_LIBS))
-ifeq ($(wasp_LIBS),)
-  $(error WASP does not seem to be available. Make sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory, or set WASP_DIR to a valid WASP install)
-endif
 wasp_CXXFLAGS     := -DWASP_ENABLED -I$(WASP_DIR)/include
 wasp_LDFLAGS      := -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 libmesh_CXXFLAGS  += $(wasp_CXXFLAGS)
@@ -367,7 +364,13 @@ endif
 libmesh_submodule_status:
 	@if [ x$(libmesh_message) != "x" ]; then printf $(libmesh_message); fi
 
-moose: $(moose_revision_header) $(moose_LIB)
+ifeq ($(wasp_LIBS),)
+  wasp_submodule_message = "\n***ERROR***\nWASP does not seem to be available.\nMake sure to either run scripts/update_and_rebuild_wasp.sh in your MOOSE directory,\nor set WASP_DIR to a valid WASP install\n"
+endif
+wasp_submodule_status:
+	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
+
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
