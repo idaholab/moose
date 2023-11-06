@@ -61,9 +61,9 @@ TestElemInfo::execute()
     _cy.push_back(centroid(1));
     _cz.push_back(centroid(2));
 
-    for (unsigned int l = 0; l < _vars.size(); ++l)
+    for (const auto var_i : index_range(_vars))
     {
-      const auto & var = _subproblem.getVariable(0, _vars[l]);
+      const auto & var = _subproblem.getVariable(0, _vars[var_i]);
       const auto system_number = var.sys().number();
       const auto variable_number = var.number();
       const auto & dof_indices = elem_info->dofIndices();
@@ -72,9 +72,9 @@ TestElemInfo::execute()
       // compiler. For example, with the minimum clang version it is O(1E9) whereas with
       // other versions it is O(1E19). This would result in CSV diffs.
       if (dof_indices[system_number][variable_number] != libMesh::DofObject::invalid_id)
-        _var_dof_indices[l]->push_back(dof_indices[system_number][variable_number]);
+        _var_dof_indices[var_i]->push_back(dof_indices[system_number][variable_number]);
       else
-        _var_dof_indices[l]->push_back(-1);
+        _var_dof_indices[var_i]->push_back(-1);
     }
   }
 }

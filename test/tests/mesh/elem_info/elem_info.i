@@ -15,7 +15,6 @@
 [Problem]
   kernel_coverage_check = false
   solve = false
-
 []
 
 [Variables]

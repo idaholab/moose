@@ -3507,10 +3507,8 @@ MooseMesh::computeFiniteVolumeCoords() const
   }
 
   for (auto & ei : _elem_to_elem_info)
-  {
     coordTransformFactor(
         *this, ei.second.subdomain_id(), ei.second.centroid(), ei.second.coordFactor());
-  }
 }
 
 MooseEnum

@@ -20,7 +20,7 @@
       csvdiff = 'cylindrical_quads_elem_info_0001.csv'
       recover = false
       cli_args = "Outputs/file_base='cylindrical_quads' Mesh/coord_type='RZ' Mesh/rz_coord_blocks='0' Mesh/rz_coord_origins='0 -2 0' Mesh/rz_coord_directions='1 0 0'"
-      detail = "quadrilateral elements in cylindrical coordinate system, and"
+      detail = "quadrilateral elements in a cylindrical coordinate system, and"
     []
     [tri]
       type = 'CSVDiff'
