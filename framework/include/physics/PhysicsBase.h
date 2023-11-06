@@ -81,6 +81,11 @@ protected:
     _nl_var_names.push_back(var_name);
   }
 
+  // Utilities for checking parameters.
+  /// Check that two parameters are either both set or both not set
+  void checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                             const std::string & param2) const;
+
   /// System number for the systems owning the variables
   const unsigned int _sys_number;
 

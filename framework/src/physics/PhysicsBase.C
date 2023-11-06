@@ -51,6 +51,9 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _is_transient(getParam<MooseEnum>("transient"))
 {
+  checkSecondParamSetOnlyIfFirstOneTrue("initialize_variables_from_mesh_file",
+                                        "initial_from_file_timestep");
+  prepareCopyNodalVariables();
 }
 
 void
@@ -187,4 +190,17 @@ PhysicsBase::copyVariablesFromMesh(std::vector<VariableName> variables_to_copy)
       system.addVariableToCopy(
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
   }
+}
+
+void
+PhysicsBase::checkSecondParamSetOnlyIfFirstOneTrue(const std::string & param1,
+                                                   const std::string & param2) const
+{
+  mooseAssert(parameters().have_parameter<bool>(param1),
+              "Cannot check if parameter " + param1 +
+                  " is true if it's not a bool parameter of this object");
+  if (!getParam<bool>(param1) && isParamSetByUser(param2))
+    paramError(param2,
+               "Parameter '" + param1 + "' cannot be set to false if parameter '" + param2 +
+                   "' is set by the user");
 }
