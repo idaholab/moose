@@ -42,6 +42,7 @@ packages:
       - conda/libmesh-vtk/build.sh
   wasp:
     influential:
+      - scripts/update_and_rebuild_wasp.sh
       - framework/contrib/wasp
       - conda/wasp/meta.yaml
       - conda/wasp/conda_build_config.yaml
