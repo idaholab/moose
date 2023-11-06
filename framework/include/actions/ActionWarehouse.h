@@ -127,9 +127,9 @@ public:
           all_names.push_back(act_ptr->name());
         else
           all_names.push_back("unnamed");
-      mooseError("Action with name being ",
+      mooseError("Action with name '",
                  name,
-                 " does not exist.\n Actions that do exist:",
+                 "' does not exist.\n These are the Actions that do exist:",
                  Moose::stringify(all_names));
     }
     return *p;

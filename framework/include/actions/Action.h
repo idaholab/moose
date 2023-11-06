@@ -161,10 +161,7 @@ public:
 
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
-  inline bool isParamSetByUser(const std::string & name) const
-  {
-    return _pars.isParamSetByUser(name);
-  }
+  inline bool isParamSetByUser(const std::string & name) const;
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
@@ -290,4 +287,10 @@ const T &
 Action::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+bool
+Action::isParamSetByUser(const std::string & name) const
+{
+  return _pars.isParamSetByUser(name);
 }
