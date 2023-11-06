@@ -52,11 +52,22 @@
   []
 []
 
+[Reporters]
+  [optInfo]
+    type = OptimizationInfo
+    items = 'current_iterate function_value gnorm'
+  []
+[]
+
 [Executioner]
   type = Optimize
-  tao_solver = taobqnls
+  tao_solver = taobqnls #taobqnktr
   petsc_options_iname = '-tao_gttol -tao_max_it'
-  petsc_options_value = '1e-5 100'
+  petsc_options_value = '1e-5 100' #use this to get results for paper
+  # petsc_options_value = '1e-5 5'
   solve_on = 'NONE'
   verbose = true
+[]
+[Outputs]
+  csv = true
 []

@@ -97,7 +97,8 @@
   type = TransientAndAdjoint
   forward_system = nl0
   adjoint_system = adjoint
-
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
   dt = 0.1
   end_time = 1
 
