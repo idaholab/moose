@@ -1,0 +1,11 @@
+[Tests]
+  design = 'materialInv_diffusion_reaction.md'
+  issues = '#22215'
+    [forward_exact]
+      type = CSVDiff
+      input = forward_exact.i
+      csvdiff = forward_exact_csv_sample_0011.csv
+      allow_test_objects = true
+      requirement = 'The system shall create synthetic transient data in a consumable format.'
+    []
+[]
