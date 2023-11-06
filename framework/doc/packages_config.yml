@@ -5,5 +5,5 @@ minimum_clang: 10.0.1
 minimum_python: 3.7
 mpich: 4.0.2
 petsc_alt: 3.11.4
-petsc: 3.16.6
+petsc: 3.20.0
 moose_dev: 2023.11.06
