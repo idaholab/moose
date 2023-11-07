@@ -1409,6 +1409,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(NonlinearVariableName, string);
         setscalar(AuxVariableName, string);
         setscalar(FunctionName, string);
+        setscalar(MeshDivisionName, string);
         setscalar(UserObjectName, string);
         setscalar(VectorPostprocessorName, string);
         setscalar(IndicatorName, string);
