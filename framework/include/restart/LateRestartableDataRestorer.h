@@ -10,11 +10,13 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 #include <typeinfo>
 #include <string>
 
 class RestartableDataReader;
+class RestartableDataValue;
 
 /**
  * Restores late restartable data.
