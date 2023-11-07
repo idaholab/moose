@@ -999,21 +999,29 @@ def split_string_with_quotes(input_str):
 
         split_str += split_section
 
-    # Check for special --cli-args flag and remove outer quotes from next argument
-    try:
-        cli_index = split_str.index('--cli-args')
-    except ValueError: # No match found
-        cli_index = -1
 
-    if cli_index != -1:
-        next_arg = split_str[cli_index + 1]
-        first_char, last_char = next_arg[0], next_arg[-1]
-        # Strip off quotes
-        if (first_char == '"' and last_char == '"') or (first_char == "'" and last_char == "'"):
-           split_str[cli_index + 1] = next_arg[1:-1]
-        else:
-            raise ValueError(f"There was an issue with --cli-args value {next_arg}. "
-                             "This parameter was expected to be enclosed in quotes.")
+    # Funciton to check for certain flags and remove outer quotes from next argument
+    def RemoveQuotesFromNextArg(arg_name, raise_error=True):
+        try:
+            arg_index = split_str.index(arg_name)
+        except ValueError: # No match found
+            arg_index = -1
+
+        if arg_index != -1:
+            next_arg = split_str[arg_index + 1]
+            first_char, last_char = next_arg[0], next_arg[-1]
+            # Strip off quotes
+            if (first_char == '"' and last_char == '"') or (first_char == "'" and last_char == "'"):
+                split_str[arg_index + 1] = next_arg[1:-1]
+            elif raise_error:
+                raise ValueError(f"There was an issue with {arg_name} value {next_arg}. "
+                                "This parameter was expected to be enclosed in quotes.")
+
+    # Check for special --cli-args flag and remove outer quotes from next argument
+    RemoveQuotesFromNextArg("--cli-args")
+    # Check for optional [file] after --mesh-only and remove quotes from file name
+    # raise_error=False because argument after --mesh-only is optional
+    RemoveQuotesFromNextArg("--mesh-only", raise_error=False)
 
     # Check if the executable is /bin/sh and adjust accordingly
     if split_str[0] == '/bin/sh':
