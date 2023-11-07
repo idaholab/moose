@@ -2099,9 +2099,9 @@ public:
    */
   MooseAppCoordTransform & coordTransform();
 
-  virtual std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
+  virtual std::size_t numNonlinearSystems() const { return _num_nl_sys; }
 
-  virtual std::size_t numLinearSystems() const override { return _num_linear_sys; }
+  virtual std::size_t numLinearSystems() const { return _num_linear_sys; }
 
   virtual unsigned int currentNlSysNum() const override;
 

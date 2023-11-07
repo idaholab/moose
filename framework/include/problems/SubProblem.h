@@ -949,7 +949,7 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
-  template <typename T>
+  template <typename T, typename T2>
   MooseVariableFieldBase & getVariableHelper(const THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
