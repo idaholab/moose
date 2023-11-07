@@ -11,6 +11,7 @@
 #include "MooseTestApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "Parser.h"
 
 #include <iostream>
 
@@ -26,8 +27,13 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   MooseTestApp::registerApps();
 
+  // Construct front parser
+  Parser front_parser;
+
+  auto * p = &front_parser;
+
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("MooseTestApp", argc, argv);
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("MooseTestApp", argc, argv, p);
 
   // Execute the application
   app->run();

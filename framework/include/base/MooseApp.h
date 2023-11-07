@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Moose.h"
 #include "Parser.h"
+#include "ParserOther.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "ActionFactory.h"
@@ -211,7 +212,7 @@ public:
   /**
    * Returns a writable reference to the parser
    */
-  Parser & parser() { return _parser; }
+  ParserOther & parserOther() { return _parserOther; }
 
   /**
    * Returns a writable reference to the syntax object.
@@ -1139,7 +1140,10 @@ protected:
   OutputWarehouse _output_warehouse;
 
   /// Parser for parsing the input file
-  Parser _parser;
+  std::shared_ptr<Parser> _parser;
+
+  /// ParserOther for parsing the input file
+  ParserOther _parserOther;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;

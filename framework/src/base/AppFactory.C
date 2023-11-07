@@ -38,6 +38,7 @@ MooseAppPtr
 AppFactory::createAppShared(const std::string & default_app_type,
                             int argc,
                             char ** argv,
+                            Parser * parser,
                             MPI_Comm comm_world_in)
 {
   auto command_line = std::make_shared<CommandLine>(argc, argv);
@@ -53,6 +54,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
   app_params.set<int>("_argc") = argc;
   app_params.set<char **>("_argv") = argv;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+  app_params.set<Parser *>("_parser") = parser;
 
   return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
 }

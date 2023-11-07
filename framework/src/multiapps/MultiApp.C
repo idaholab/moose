@@ -405,7 +405,7 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+  _app.parserOther().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void

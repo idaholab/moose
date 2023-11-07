@@ -177,12 +177,12 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
                                            int character)
 {
   // add only root level blocks to completion list when parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!_check_app || !_check_app->parserOther()._root ||
+      _check_app->parserOther()._root->getNodeView().is_null())
     return addSubblocksToList(completionItems, "/", line, character);
 
   // find hit node for zero based request line and column number from input
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
@@ -279,6 +279,7 @@ MooseServer::getAllValidParameters(InputParameters & valid_params,
 {
   // gather global parameters then action parameters then object parameters
   valid_params = Parser::validParams();
+  valid_params += ParserOther::validParams();
   getActionParameters(valid_params, object_path, obj_act_tasks);
   getObjectParameters(valid_params, object_type, obj_act_tasks);
 }
@@ -680,7 +681,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
     if (input_path_iter != _type_to_input_paths.end())
     {
-      wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+      wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
 
       // walk over all syntax paths that are associated with parameter type
       for (const auto & input_path : input_path_iter->second)
@@ -981,11 +982,11 @@ bool
 MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 {
   // return prior to starting document symbol tree when parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!_check_app || !_check_app->parserOther()._root ||
+      _check_app->parserOther()._root->getNodeView().is_null())
     return true;
 
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
 
   bool pass = true;
 

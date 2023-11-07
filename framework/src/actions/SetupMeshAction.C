@@ -276,7 +276,7 @@ SetupMeshAction::act()
 
           // Since we changing the type on the fly, we'll have to manually extract parameters again
           // from the input file object.
-          _app.parser().extractParams(_registered_identifier, _moose_object_pars);
+          _app.parserOther().extractParams(_registered_identifier, _moose_object_pars);
         }
         else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
         {

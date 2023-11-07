@@ -331,6 +331,7 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
+  params.addPrivateParam<Parser *>("_parser");
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -360,7 +361,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(*this, _action_warehouse),
+    _parser(parameters.get<Parser *>("_parser")),
+    _parserOther(*this, _action_warehouse, *_parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
@@ -783,7 +785,7 @@ MooseApp::setupOptions()
 
     {
       TIME_SECTION("dump", 1, "Building Syntax Tree");
-      _parser.buildJsonSyntaxTree(tree);
+      _parserOther.buildJsonSyntaxTree(tree);
     }
 
     // Turn off live printing so that it doesn't mess with the dump
@@ -867,7 +869,7 @@ MooseApp::setupOptions()
 
     Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
-    _parser.buildJsonSyntaxTree(tree);
+    _parserOther.buildJsonSyntaxTree(tree);
     SONDefinitionFormatter formatter;
     Moose::out << "%-START-SON-DEFINITION-%\n"
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
@@ -879,7 +881,7 @@ MooseApp::setupOptions()
 
     Moose::perf_log.disable_logging();
 
-    _parser.initSyntaxFormatter(Parser::YAML, true);
+    _parserOther.initSyntaxFormatter(ParserOther::YAML, true);
 
     // Get command line argument following --yaml on command line
     std::string yaml_following_arg = getParam<std::string>("yaml");
@@ -888,9 +890,9 @@ MooseApp::setupOptions()
     // a dash, call buildFullTree() with an empty string, otherwise
     // pass the argument following --yaml.
     if (yaml_following_arg.empty() || (yaml_following_arg.find('-') == 0))
-      _parser.buildFullTree("");
+      _parserOther.buildFullTree("");
     else
-      _parser.buildFullTree(yaml_following_arg);
+      _parserOther.buildFullTree(yaml_following_arg);
 
     _ready_to_exit = true;
   }
@@ -910,7 +912,7 @@ MooseApp::setupOptions()
       search = json_following_arg;
 
     JsonSyntaxTree tree(search);
-    _parser.buildJsonSyntaxTree(tree);
+    _parserOther.buildJsonSyntaxTree(tree);
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
@@ -959,10 +961,15 @@ MooseApp::setupOptions()
 
     // Pass list of input files and optional text string if provided to parser
     if (!isParamValid("_input_text"))
-      _parser.parse(_input_filenames);
+    {
+      _parser->parse(_input_filenames);
+      _parserOther.parseother();
+    }
     else
-      _parser.parse(_input_filenames, getParam<std::string>("_input_text"));
-
+    {
+      _parser->parse(_input_filenames, getParam<std::string>("_input_text"));
+      _parserOther.parseother();
+    }
     if (isParamValid("mesh_only"))
     {
       _syntax.registerTaskName("mesh_only", true);
@@ -1103,7 +1110,7 @@ MooseApp::errorCheck()
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
 
-  _parser.errorCheck(*_comm, warn, err);
+  _parserOther.errorCheck(*_comm, warn, err);
 
   auto apps = feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
@@ -1727,7 +1734,7 @@ MooseApp::setStartTime(Real time)
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  return _parser.getPrimaryFileName(stripLeadingPath);
+  return _parserOther.getPrimaryFileName(stripLeadingPath);
 }
 
 OutputWarehouse &
