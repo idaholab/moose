@@ -60,7 +60,7 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal rhouL = rhouAL / AL;
   const ADReal rhoEL = rhoEAL / AL;
   const ADReal uL = rhouAL / rhoAL;
-  const ADReal qL = uL * nx;
+  const ADReal unL = uL * nx;
   const ADReal vL = 1.0 / rhoL;
   const ADReal EL = rhoEAL / rhoAL;
   const ADReal eL = EL - 0.5 * uL * uL;
@@ -72,7 +72,7 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal rhouR = rhouAR / AR;
   const ADReal rhoER = rhoEAR / AR;
   const ADReal uR = rhouAR / rhoAR;
-  const ADReal qR = uR * nx;
+  const ADReal unR = uR * nx;
   const ADReal vR = 1.0 / rhoR;
   const ADReal ER = rhoEAR / rhoAR;
   const ADReal eR = ER - 0.5 * uR * uR;
@@ -83,37 +83,36 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   // compute Roe-averaged variables
   const ADReal sqrt_rhoL = std::sqrt(rhoL);
   const ADReal sqrt_rhoR = std::sqrt(rhoR);
-  const ADReal u_roe = (sqrt_rhoL * uL + sqrt_rhoR * uR) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal q_roe = u_roe * nx;
+  const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
   const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal h_roe = H_roe - 0.5 * u_roe * u_roe;
+  const ADReal h_roe = H_roe - 0.5 * un_roe * un_roe;
   const ADReal rho_roe = std::sqrt(rhoL * rhoR);
   const ADReal v_roe = 1.0 / rho_roe;
   const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);
   const ADReal c_roe = _fp.c_from_v_e(v_roe, e_roe);
 
   // compute wave speeds
-  const ADReal sL = std::min(qL - cL, q_roe - c_roe);
-  const ADReal sR = std::max(qR + cR, q_roe + c_roe);
-  const ADReal sm = (rhoR * qR * (sR - qR) - rhoL * qL * (sL - qL) + pL - pR) /
-                    (rhoR * (sR - qR) - rhoL * (sL - qL));
+  const ADReal sL = std::min(unL - cL, un_roe - c_roe);
+  const ADReal sR = std::max(unR + cR, un_roe + c_roe);
+  const ADReal sm = (rhoR * unR * (sR - unR) - rhoL * unL * (sL - unL) + pL - pR) /
+                    (rhoR * (sR - unR) - rhoL * (sL - unL));
 
   // compute Omega_L, Omega_R
   const ADReal omegL = 1.0 / (sL - sm);
   const ADReal omegR = 1.0 / (sR - sm);
 
   // compute p^*
-  const ADReal ps = rhoL * (sL - qL) * (sm - qL) + pL;
+  const ADReal ps = rhoL * (sL - unL) * (sm - unL) + pL;
 
   // compute U_L^*, U_R^*
 
-  const ADReal rhoLs = omegL * (sL - qL) * rhoL;
-  const ADReal rhouLs = omegL * ((sL - qL) * rhouL + (ps - pL) * nx);
-  const ADReal rhoELs = omegL * ((sL - qL) * rhoEL - pL * qL + ps * sm);
+  const ADReal rhoLs = omegL * (sL - unL) * rhoL;
+  const ADReal rhouLs = omegL * ((sL - unL) * rhouL + (ps - pL) * nx);
+  const ADReal rhoELs = omegL * ((sL - unL) * rhoEL - pL * unL + ps * sm);
 
-  const ADReal rhoRs = omegR * (sR - qR) * rhoR;
-  const ADReal rhouRs = omegR * ((sR - qR) * rhouR + (ps - pR) * nx);
-  const ADReal rhoERs = omegR * ((sR - qR) * rhoER - pR * qR + ps * sm);
+  const ADReal rhoRs = omegR * (sR - unR) * rhoR;
+  const ADReal rhouRs = omegR * ((sR - unR) * rhouR + (ps - pR) * nx);
+  const ADReal rhoERs = omegR * ((sR - unR) * rhoER - pR * unR + ps * sm);
 
   const ADReal A_flow = computeFlowArea(UL, UR);
 
