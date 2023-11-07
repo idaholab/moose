@@ -36,6 +36,8 @@ void
 ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
                                   const std::vector<ADReal> & UR,
                                   const RealVectorValue & nLR,
+                                  const RealVectorValue & t1,
+                                  const RealVectorValue & t2,
                                   std::vector<ADReal> & FL,
                                   std::vector<ADReal> & FR) const
 {
@@ -60,10 +62,12 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal rhoL = rhoAL / AL;
   const ADRealVectorValue uvecL(rhouAL / rhoAL, rhovAL / rhoAL, rhowAL / rhoAL);
   const ADReal unL = uvecL * nLR;
+  const ADReal ut1L = uvecL * t1;
+  const ADReal ut2L = uvecL * t2;
   const ADReal rhoEL = rhoEAL / AL;
   const ADReal vL = 1.0 / rhoL;
   const ADReal EL = rhoEAL / rhoAL;
-  const ADReal eL = EL - 0.5 * unL * unL; // TODO: fix
+  const ADReal eL = EL - 0.5 * uvecL * uvecL;
   const ADReal pL = _fp.p_from_v_e(vL, eL);
   const ADReal HL = EL + pL / rhoL;
   const ADReal cL = _fp.c_from_v_e(vL, eL);
@@ -71,10 +75,12 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal rhoR = rhoAR / AR;
   const ADRealVectorValue uvecR(rhouAR / rhoAR, rhovAR / rhoAR, rhowAR / rhoAR);
   const ADReal unR = uvecR * nLR;
+  const ADReal ut1R = uvecR * t1;
+  const ADReal ut2R = uvecR * t2;
   const ADReal rhoER = rhoEAR / AR;
   const ADReal vR = 1.0 / rhoR;
   const ADReal ER = rhoEAR / rhoAR;
-  const ADReal eR = ER - 0.5 * unR * unR; // TODO: fix
+  const ADReal eR = ER - 0.5 * uvecR * uvecR;
   const ADReal pR = _fp.p_from_v_e(vR, eR);
   const ADReal HR = ER + pR / rhoR;
   const ADReal cR = _fp.c_from_v_e(vR, eR);
@@ -83,8 +89,11 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal sqrt_rhoL = std::sqrt(rhoL);
   const ADReal sqrt_rhoR = std::sqrt(rhoR);
   const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
+  const ADReal ut1_roe = (sqrt_rhoL * ut1L + sqrt_rhoR * ut1R) / (sqrt_rhoL + sqrt_rhoR);
+  const ADReal ut2_roe = (sqrt_rhoL * ut2L + sqrt_rhoR * ut2R) / (sqrt_rhoL + sqrt_rhoR);
   const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
-  const ADReal h_roe = H_roe - 0.5 * un_roe * un_roe; // TODO: fix
+  const ADRealVectorValue uvec_roe(un_roe, ut1_roe, ut2_roe);
+  const ADReal h_roe = H_roe - 0.5 * uvec_roe * uvec_roe;
   const ADReal rho_roe = std::sqrt(rhoL * rhoR);
   const ADReal v_roe = 1.0 / rho_roe;
   const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);

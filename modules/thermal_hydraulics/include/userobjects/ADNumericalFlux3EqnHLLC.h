@@ -32,6 +32,8 @@ public:
   virtual void calcFlux(const std::vector<ADReal> & UL,
                         const std::vector<ADReal> & UR,
                         const RealVectorValue & nLR,
+                        const RealVectorValue & t1,
+                        const RealVectorValue & t2,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const override;
 

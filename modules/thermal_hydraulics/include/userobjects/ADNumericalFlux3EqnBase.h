@@ -61,12 +61,16 @@ public:
    * @param[in] UL    Vector of variables on the "left"
    * @param[in] UR    Vector of variables on the "right"
    * @param[in] nLR   Direction from "left" to "right"
+   * @param[in] t1    1st tangent direction
+   * @param[in] t2    2nd tangent direction
    * @param[out] FL   Flux vector to be added to "left" side
    * @param[out] FR   Flux vector to be added to "right" side
    */
   virtual void calcFlux(const std::vector<ADReal> & UL,
                         const std::vector<ADReal> & UR,
                         const RealVectorValue & nLR,
+                        const RealVectorValue & t1,
+                        const RealVectorValue & t2,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const = 0;
 

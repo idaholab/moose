@@ -39,6 +39,8 @@ void
 ADNumericalFlux3EqnCentered::calcFlux(const std::vector<ADReal> & U1,
                                       const std::vector<ADReal> & U2,
                                       const RealVectorValue & nLR,
+                                      const RealVectorValue & /*t1*/,
+                                      const RealVectorValue & /*t2*/,
                                       std::vector<ADReal> & FL,
                                       std::vector<ADReal> & FR) const
 {

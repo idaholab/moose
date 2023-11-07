@@ -9,6 +9,7 @@
 
 #include "ADNumericalFlux3EqnBase.h"
 #include "THMIndicesVACE.h"
+#include "THMUtils.h"
 
 InputParameters
 ADNumericalFlux3EqnBase::validParams()
@@ -82,8 +83,10 @@ ADNumericalFlux3EqnBase::getFlux(const unsigned int iside,
     UR_3d[THMVACE3D::AREA] = UR_1d[THMVACE1D::AREA];
 
     const RealVectorValue nLR(nLR_dot_d.value(), 0, 0);
+    RealVectorValue t1, t2;
+    THM::computeOrthogonalDirections(nLR, t1, t2);
 
-    calcFlux(UL_3d, UR_3d, nLR, _FL, _FR);
+    calcFlux(UL_3d, UR_3d, nLR, t1, t2, _FL, _FR);
 
     _FL[THMVACE1D::MASS] *= nLR_dot_d;
     _FL[THMVACE1D::ENERGY] *= nLR_dot_d;
