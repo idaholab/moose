@@ -5,9 +5,9 @@ Create a unique conda environment for [!ac](MOOSE), named `moose`, and install t
 packages:
 !style-end!
 
-```bash
-mamba create -n moose moose-dev
-```
+!package! code
+mamba create -n moose moose-dev=__MOOSE_DEV__
+!package-end!
 
 After the installation completes, activate the new environment:
 

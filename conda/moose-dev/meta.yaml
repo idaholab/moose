@@ -3,8 +3,11 @@
 #   moose/conda_build_config.yaml
 #   template/conda_build_config.yaml
 #
+#   And documentation:
+#   framework/doc/packages_config.yml
+#
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.10.27" %}
+{% set version = "2023.11.06" %}
 
 package:
   name: moose-dev

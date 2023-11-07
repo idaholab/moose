@@ -115,12 +115,12 @@ section for what may look familiar, and follow those instructions:
 
   The quick fix-attempt, is to delete the faulty environment and re-install it:
 
-  ```bash
+  !package! code
   mamba activate base
   mamba env remove -n moose
-  mamba create -n moose moose-dev
+  mamba create -n moose moose-dev=__MOOSE_DEV__
   mamba activate moose
-  ```
+  !package-end!
 
   If the above re-install method ultimately failed, it is time to submit your errors to the
   [discussion forum](faq/discussion_forum.md).

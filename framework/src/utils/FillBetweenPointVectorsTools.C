@@ -508,13 +508,11 @@ isBoundarySimpleClosedLoop(MeshBase & mesh,
   max_node_radius = 0.0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
-  unsigned int elem_counter = 0;
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
   for (unsigned int i = 0; i < side_list_tmp.size(); i++)
   {
     if (std::get<2>(side_list_tmp[i]) == bid)
     {
-      elem_counter++;
       // store two nodes of each side
       boundary_node_assm.push_back(std::make_pair(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
                                                       ->side_ptr(std::get<1>(side_list_tmp[i]))
