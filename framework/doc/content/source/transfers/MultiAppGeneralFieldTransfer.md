@@ -42,7 +42,8 @@ All transfers derived from this base class should be able to support:
 - interpolation and extrapolation transfers, as defined by the derived class
 - detection of indetermination due to source points equidistant to a target point
 - limitation of transfer source to the nearest position (see [Positions](syntax/Positions/index.md)) of target point
-
+- general coordinate transformations. Coordinate system changes (RZ to XYZ, for example) are not
+  fully supported for the "floating point precision indetermination" detection.
 
 !alert note
 Examine each derived object's respective documentation for feature support.
@@ -66,7 +67,6 @@ the `MultiAppGeneralFieldTransfer` base class.
 
 These features are currently unsupported, but could be enabled if necessary with reasonable efforts:
 
-- general coordinate transformations. Only the positions of the child apps are supported.
 - caching optimizations for when both the target and origin mesh are constant
 
 
