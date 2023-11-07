@@ -1,4 +1,5 @@
 [Tests]
+  design = 'HeatSourceFromTotalPower.md'
   # physics
   [phy:power_component_shape_cylindrical]
     type = 'Exodiff'
@@ -7,7 +8,8 @@
     rel_err = 1e-4
     abs_zero = 1e-9
 
-    requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
+    requirement = "The system shall provide the heat source shape for a cylindrical heat structure "
+                  "when power component and power shape function are supplied"
   []
   [phy:power_component_shape_plate]
     type = 'Exodiff'
@@ -16,7 +18,8 @@
     rel_err = 1e-4
     abs_zero = 1e-9
 
-    requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
+    requirement = "The system shall provide the heat source shape for a plate heat structure when "
+                  "power component and power shape function are supplied"
   []
 
   [phy:conservation_plate]
@@ -61,7 +64,8 @@
   [err:no_hs]
     type = 'RunException'
     input = 'err.base.i'
-    cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' Components/hgen/power=reactor"
+    cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' "
+               "Components/hgen/power=reactor"
     expect_err = "hgen: The component 'reactor' is not of type 'HeatStructureInterface'"
   []
   [err:wrong_block_name]

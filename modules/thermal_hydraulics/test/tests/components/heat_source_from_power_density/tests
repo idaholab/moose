@@ -1,4 +1,5 @@
 [Tests]
+  design = 'HeatSourceFromPowerDensity.md'
   # physics
   [phy:power_density_shape]
     type = 'Exodiff'
