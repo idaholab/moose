@@ -323,6 +323,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_nl_sys(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
+    _mesh_divisions(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "material_props", &_mesh, _material_prop_registry)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -2277,6 +2278,26 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
   if (!ret)
     mooseError("No function named ", name, " of appropriate type");
 
+  return *ret;
+}
+
+void
+FEProblemBase::addMeshDivision(const std::string & type,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+  parallel_object_only();
+
+  std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, 0);
+  _mesh_divisions.addObject(func);
+}
+
+MeshDivision &
+FEProblemBase::getMeshDivision(const std::string & name) const
+{
+  auto * const ret = dynamic_cast<MeshDivision *>(_mesh_divisions.getActiveObject(name, 0).get());
+  if (!ret)
+    mooseError("No MeshDivision object named ", name, " of appropriate type");
   return *ret;
 }
 
