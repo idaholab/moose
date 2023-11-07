@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#25758'
+  design = 'bcs/FunctorDirichletBC.md'
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    requirement = "The system shall support Dirichlet type boundary conditions defined by a functor."
+  []
+[]
