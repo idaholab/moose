@@ -64,7 +64,7 @@ protected:
   void setNumDivisions(unsigned int ndivs) { _num_divs = ndivs; }
 
   /// Set up any data members that would be necessary to obtain the division indices
-  void initialize() {}
+  virtual void initialize() {}
 
   /// Pointer to the problem, needed to retrieve pointers to various objects
   const FEProblemBase * const _fe_problem;
