@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADNumericalFlux3EqnBase.h"
+#include "THMIndicesVACE.h"
 
 InputParameters
 ADNumericalFlux3EqnBase::validParams()
@@ -55,8 +56,8 @@ const std::vector<ADReal> &
 ADNumericalFlux3EqnBase::getFlux(const unsigned int iside,
                                  const dof_id_type ielem,
                                  bool res_side_is_left,
-                                 const std::vector<ADReal> & UL,
-                                 const std::vector<ADReal> & UR,
+                                 const std::vector<ADReal> & UL_1d,
+                                 const std::vector<ADReal> & UR_1d,
                                  const ADReal & nLR_dot_d) const
 {
   if (_cached_flux_elem_id != ielem || _cached_flux_side_id != iside)
@@ -64,7 +65,31 @@ ADNumericalFlux3EqnBase::getFlux(const unsigned int iside,
     _cached_flux_elem_id = ielem;
     _cached_flux_side_id = iside;
 
-    calcFlux(UL, UR, nLR_dot_d, _FL, _FR);
+    std::vector<ADReal> UL_3d(THMVACE3D::N_FLUX_INPUTS);
+    UL_3d[THMVACE3D::RHOA] = UL_1d[THMVACE1D::RHOA];
+    UL_3d[THMVACE3D::RHOUA] = UL_1d[THMVACE1D::RHOUA];
+    UL_3d[THMVACE3D::RHOVA] = 0;
+    UL_3d[THMVACE3D::RHOWA] = 0;
+    UL_3d[THMVACE3D::RHOEA] = UL_1d[THMVACE1D::RHOEA];
+    UL_3d[THMVACE3D::AREA] = UL_1d[THMVACE1D::AREA];
+
+    std::vector<ADReal> UR_3d(THMVACE3D::N_FLUX_INPUTS);
+    UR_3d[THMVACE3D::RHOA] = UR_1d[THMVACE1D::RHOA];
+    UR_3d[THMVACE3D::RHOUA] = UR_1d[THMVACE1D::RHOUA];
+    UR_3d[THMVACE3D::RHOVA] = 0;
+    UR_3d[THMVACE3D::RHOWA] = 0;
+    UR_3d[THMVACE3D::RHOEA] = UR_1d[THMVACE1D::RHOEA];
+    UR_3d[THMVACE3D::AREA] = UR_1d[THMVACE1D::AREA];
+
+    const RealVectorValue nLR(nLR_dot_d.value(), 0, 0);
+
+    calcFlux(UL_3d, UR_3d, nLR, _FL, _FR);
+
+    _FL[THMVACE1D::MASS] *= nLR_dot_d;
+    _FL[THMVACE1D::ENERGY] *= nLR_dot_d;
+
+    _FR[THMVACE1D::MASS] *= nLR_dot_d;
+    _FR[THMVACE1D::ENERGY] *= nLR_dot_d;
   }
 
   if (res_side_is_left)

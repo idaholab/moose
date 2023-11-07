@@ -58,16 +58,15 @@ public:
    *
    * This function is called only if the values are not already cached.
    *
-   * @param[in] UL        vector of variables on the "left"
-   * @param[in] UR        vector of variables on the "right"
-   * @param[in] nLR_dot_d   Dot product of direction from "left" to "right" with
-   *                        the flow channel direction
-   * @param[out] FL       flux vector to be added to "left" side
-   * @param[out] FR       flux vector to be added to "right" side
+   * @param[in] UL    Vector of variables on the "left"
+   * @param[in] UR    Vector of variables on the "right"
+   * @param[in] nLR   Direction from "left" to "right"
+   * @param[out] FL   Flux vector to be added to "left" side
+   * @param[out] FR   Flux vector to be added to "right" side
    */
   virtual void calcFlux(const std::vector<ADReal> & UL,
                         const std::vector<ADReal> & UR,
-                        const ADReal & nLR_dot_d,
+                        const RealVectorValue & nLR,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const = 0;
 

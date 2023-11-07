@@ -23,14 +23,14 @@ public:
 
   virtual void calcFlux(const std::vector<ADReal> & U1,
                         const std::vector<ADReal> & U2,
-                        const ADReal & nLR_dot_d,
+                        const RealVectorValue & nLR,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const override;
 
   virtual unsigned int getNumberOfRegions() const override { return 1; }
 
 protected:
-  std::vector<ADReal> computeFlux(const std::vector<ADReal> & U) const;
+  std::vector<ADReal> computeFlux(const std::vector<ADReal> & U, const RealVectorValue & n) const;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;

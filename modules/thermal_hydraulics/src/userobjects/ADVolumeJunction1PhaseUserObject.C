@@ -9,7 +9,7 @@
 
 #include "ADVolumeJunction1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "VolumeJunction1Phase.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
@@ -61,10 +61,10 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
-  _flow_variable_names.resize(THM3Eqn::N_EQ);
-  _flow_variable_names[THM3Eqn::CONS_VAR_RHOA] = "rhoA";
-  _flow_variable_names[THM3Eqn::CONS_VAR_RHOUA] = "rhouA";
-  _flow_variable_names[THM3Eqn::CONS_VAR_RHOEA] = "rhoEA";
+  _flow_variable_names.resize(THMVACE1D::N_FLUX_OUTPUTS);
+  _flow_variable_names[THMVACE1D::RHOA] = "rhoA";
+  _flow_variable_names[THMVACE1D::RHOUA] = "rhouA";
+  _flow_variable_names[THMVACE1D::RHOEA] = "rhoEA";
 
   _scalar_variable_names.resize(VolumeJunction1Phase::N_EQ);
   _scalar_variable_names[VolumeJunction1Phase::RHOV_INDEX] = "rhoV";
@@ -93,11 +93,11 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const Point ni = di * din;
   const Real nJi_dot_di = -din;
 
-  std::vector<ADReal> Ui(THM3Eqn::N_CONS_VAR, 0.);
-  Ui[THM3Eqn::CONS_VAR_RHOA] = _rhoA[0];
-  Ui[THM3Eqn::CONS_VAR_RHOUA] = _rhouA[0];
-  Ui[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA[0];
-  Ui[THM3Eqn::CONS_VAR_AREA] = _A[0];
+  std::vector<ADReal> Ui(THMVACE1D::N_FLUX_INPUTS, 0.);
+  Ui[THMVACE1D::RHOA] = _rhoA[0];
+  Ui[THMVACE1D::RHOUA] = _rhouA[0];
+  Ui[THMVACE1D::RHOEA] = _rhoEA[0];
+  Ui[THMVACE1D::AREA] = _A[0];
 
   const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
   const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
@@ -105,12 +105,12 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
   const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
 
-  std::vector<ADReal> UJi(THM3Eqn::N_CONS_VAR, 0.);
+  std::vector<ADReal> UJi(THMVACE1D::N_FLUX_INPUTS, 0.);
   const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
-  UJi[THM3Eqn::CONS_VAR_RHOA] = rhoV / _volume * _A[0];
-  UJi[THM3Eqn::CONS_VAR_RHOUA] = rhouV_vec * di / _volume * _A[0];
-  UJi[THM3Eqn::CONS_VAR_RHOEA] = rhoEV / _volume * _A[0];
-  UJi[THM3Eqn::CONS_VAR_AREA] = _A[0];
+  UJi[THMVACE1D::RHOA] = rhoV / _volume * _A[0];
+  UJi[THMVACE1D::RHOUA] = rhouV_vec * di / _volume * _A[0];
+  UJi[THMVACE1D::RHOEA] = rhoEV / _volume * _A[0];
+  UJi[THMVACE1D::AREA] = _A[0];
 
   _flux[c] =
       _numerical_flux_uo[c]->getFlux(_current_side, _current_elem->id(), true, UJi, Ui, nJi_dot_di);
@@ -153,14 +153,14 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
     _residual[VolumeJunction1Phase::RHOEV_INDEX] += S_loss * std::abs(vel_in);
   }
 
-  _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOA];
+  _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THMVACE1D::RHOA];
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -=
-      di(0) * din * _flux[c][THM3Eqn::CONS_VAR_RHOUA] - pJ * ni(0) * _A[0];
+      di(0) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(0) * _A[0];
   _residual[VolumeJunction1Phase::RHOVV_INDEX] -=
-      di(1) * din * _flux[c][THM3Eqn::CONS_VAR_RHOUA] - pJ * ni(1) * _A[0];
+      di(1) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(1) * _A[0];
   _residual[VolumeJunction1Phase::RHOWV_INDEX] -=
-      di(2) * din * _flux[c][THM3Eqn::CONS_VAR_RHOUA] - pJ * ni(2) * _A[0];
-  _residual[VolumeJunction1Phase::RHOEV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOEA];
+      di(2) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(2) * _A[0];
+  _residual[VolumeJunction1Phase::RHOEV_INDEX] -= din * _flux[c][THMVACE1D::RHOEA];
 }
 
 void

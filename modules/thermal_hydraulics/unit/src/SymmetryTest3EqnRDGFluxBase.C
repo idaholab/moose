@@ -9,7 +9,7 @@
 
 #include "SymmetryTest3EqnRDGFluxBase.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 void
 SymmetryTest3EqnRDGFluxBase::test()
@@ -18,6 +18,7 @@ SymmetryTest3EqnRDGFluxBase::test()
 
   std::set<unsigned int> flux_regions;
 
+  unsigned int i_side = 0;
   const auto W_pairs = getPrimitiveSolutionPairs();
   for (const auto & W_pair : W_pairs)
   {
@@ -30,15 +31,17 @@ SymmetryTest3EqnRDGFluxBase::test()
     const std::vector<ADReal> UL = computeConservativeSolution(WL, AL);
     const std::vector<ADReal> UR = computeConservativeSolution(WR, AR);
 
-    std::vector<ADReal> FLR, FRL;
-    _flux->calcFlux(UL, UR, _nLR_dot_d, FLR, FRL);
+    const auto FLR = _flux->getFlux(i_side, 0, true, UL, UR, _nLR_dot_d);
+    const auto FRL = _flux->getFlux(i_side, 0, false, UL, UR, _nLR_dot_d);
+    i_side++;
     flux_regions.insert(_flux->getLastRegionIndex());
 
-    std::vector<ADReal> FRL_flipped, FLR_flipped;
-    _flux->calcFlux(UR, UL, -_nLR_dot_d, FRL_flipped, FLR_flipped);
+    const auto FRL_flipped = _flux->getFlux(i_side, 0, true, UR, UL, -_nLR_dot_d);
+    const auto FLR_flipped = _flux->getFlux(i_side, 0, false, UR, UL, -_nLR_dot_d);
+    i_side++;
     flux_regions.insert(_flux->getLastRegionIndex());
 
-    for (unsigned int i = 0; i < THM3Eqn::N_EQ; ++i)
+    for (unsigned int i = 0; i < THMVACE1D::N_FLUX_OUTPUTS; ++i)
     {
       REL_TEST(FLR[i], FLR_flipped[i], REL_TOL_CONSISTENCY);
       REL_TEST(FRL[i], FRL_flipped[i], REL_TOL_CONSISTENCY);

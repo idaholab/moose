@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Test3EqnRDGObjectBase.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 
 std::vector<ADReal>
 Test3EqnRDGObjectBase::computeConservativeSolution(const std::vector<ADReal> & W,
@@ -22,11 +22,11 @@ Test3EqnRDGObjectBase::computeConservativeSolution(const std::vector<ADReal> & W
   const ADReal e = _fp.e_from_p_rho(p, rho);
   const ADReal E = e + 0.5 * vel * vel;
 
-  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, 0.0);
-  U[THM3Eqn::CONS_VAR_RHOA] = rho * A;
-  U[THM3Eqn::CONS_VAR_RHOUA] = rho * vel * A;
-  U[THM3Eqn::CONS_VAR_RHOEA] = rho * E * A;
-  U[THM3Eqn::CONS_VAR_AREA] = A;
+  std::vector<ADReal> U(THMVACE1D::N_FLUX_INPUTS, 0.0);
+  U[THMVACE1D::RHOA] = rho * A;
+  U[THMVACE1D::RHOUA] = rho * vel * A;
+  U[THMVACE1D::RHOEA] = rho * E * A;
+  U[THMVACE1D::AREA] = A;
 
   return U;
 }

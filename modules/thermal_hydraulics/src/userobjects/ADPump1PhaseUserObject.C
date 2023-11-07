@@ -9,7 +9,7 @@
 
 #include "ADPump1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "VolumeJunction1Phase.h"
 #include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
