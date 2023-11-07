@@ -88,6 +88,8 @@ public:
 
   /// The name used for registering mesh meta data as restartable meta data
   static const RestartableDataMapName MESH_META_DATA_NAME;
+  /// Deprecated name to be used for registering mesh metadata; requires griffin patch
+  static const RestartableDataMapName MESH_META_DATA;
 
   static InputParameters validParams();
 

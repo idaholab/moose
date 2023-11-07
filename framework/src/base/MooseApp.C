@@ -2784,6 +2784,7 @@ MooseApp::checkMetaDataIntegrity() const
 }
 
 const RestartableDataMapName MooseApp::MESH_META_DATA_NAME = "mesh";
+const RestartableDataMapName MooseApp::MESH_META_DATA = MooseApp::MESH_META_DATA_NAME;
 
 const RestartableDataMap *
 MooseApp::queryRestartableDataMap(const RestartableDataMapName & meta_name /* = "" */,
