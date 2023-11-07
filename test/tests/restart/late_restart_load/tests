@@ -6,6 +6,7 @@
     type = 'RunApp'
     input = 'late_restart_load.i'
     allow_test_objects = true
+    recover = false
     cli_args = 'UserObjects/test/test_method=store
                 Outputs/checkpoint=true'
     requirement = 'The system shall support the storing of a value that can be loaded after initialization in a later execution'
@@ -14,6 +15,7 @@
     type = 'RunApp'
     input = 'late_restart_load.i'
     allow_test_objects = true
+    recover = false
     cli_args = 'UserObjects/test/test_method=load
                 Problem/restart_file_base=late_restart_load_out_cp/LATEST'
     prereq = store
@@ -27,6 +29,7 @@
     # behavior is consistent
     input = 'late_restart_load.i'
     allow_test_objects = true
+    recover = false
     cli_args = 'UserObjects/test/test_method=load_no_restart'
     prereq = store
     requirement = 'The system shall support the loading of a default (not loaded) restarted value after initialization'
