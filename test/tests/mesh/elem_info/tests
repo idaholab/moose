@@ -1,0 +1,35 @@
+[Tests]
+  [elem_info]
+    requirement = 'The system shall compute and store internal finite volume related element data on request for'
+    issues = '#25824'
+    design = 'Mesh/index.md'
+
+    [quad]
+      type = 'CSVDiff'
+      input = 'elem_info.i'
+      max_parallel = 1
+      csvdiff = 'quads_elem_info_0001.csv'
+      recover = false
+      cli_args = "Outputs/file_base='quads'"
+      detail = "quadrilateral elements,"
+    []
+    [rz-quad]
+      type = 'CSVDiff'
+      input = 'elem_info.i'
+      max_parallel = 1
+      csvdiff = 'cylindrical_quads_elem_info_0001.csv'
+      recover = false
+      cli_args = "Outputs/file_base='cylindrical_quads' Mesh/coord_type='RZ' Mesh/rz_coord_blocks='0' Mesh/rz_coord_origins='0 -2 0' Mesh/rz_coord_directions='1 0 0'"
+      detail = "quadrilateral elements in a cylindrical coordinate system, and"
+    []
+    [tri]
+      type = 'CSVDiff'
+      input = 'elem_info.i'
+      max_parallel = 1
+      csvdiff = 'tris_elem_info_0001.csv'
+      recover = false
+      cli_args = "Outputs/file_base='tris' Mesh/gmg/elem_type='TRI3'"
+      detail = "triangular elements."
+    []
+  []
+[]

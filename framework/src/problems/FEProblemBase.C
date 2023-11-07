@@ -24,6 +24,7 @@
 #include "ComputeIndicatorThread.h"
 #include "ComputeMarkerThread.h"
 #include "ComputeInitialConditionThread.h"
+#include "ComputeFVInitialConditionThread.h"
 #include "ComputeBoundaryInitialConditionThread.h"
 #include "MaxQpsThread.h"
 #include "ActionWarehouse.h"
@@ -45,6 +46,7 @@
 #include "MeshChangedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ScalarInitialCondition.h"
+#include "FVInitialConditionTempl.h"
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
@@ -2963,17 +2965,10 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
 }
 
 void
-FEProblemBase::addInitialCondition(const std::string & ic_name,
+FEProblemBase::checkICRestartError(const std::string & ic_name,
                                    const std::string & name,
-                                   InputParameters & parameters)
+                                   const VariableName & var_name)
 {
-  parallel_object_only();
-
-  // before we start to mess with the initial condition, we need to check parameters for errors.
-  parameters.checkParams(name);
-  const std::string & var_name = parameters.get<VariableName>("variable");
-
-  // Forbid initial conditions on a restarted problem, as they would override the restart
   if (!_allow_ics_during_restart)
   {
     std::string restart_method = "";
@@ -2998,6 +2993,21 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
           ".\nThis is only allowed if you specify 'allow_initial_conditions_with_restart' to "
           "the [Problem], as initial conditions can override restarted fields");
   }
+}
+
+void
+FEProblemBase::addInitialCondition(const std::string & ic_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  parallel_object_only();
+
+  // before we start to mess with the initial condition, we need to check parameters for errors.
+  parameters.checkParams(name);
+  const std::string & var_name = parameters.get<VariableName>("variable");
+
+  // Forbid initial conditions on a restarted problem, as they would override the restart
+  checkICRestartError(ic_name, name, var_name);
 
   parameters.set<SubProblem *>("_subproblem") = this;
 
@@ -3042,6 +3052,47 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
 }
 
 void
+FEProblemBase::addFVInitialCondition(const std::string & ic_name,
+                                     const std::string & name,
+                                     InputParameters & parameters)
+{
+  parallel_object_only();
+
+  // before we start to mess with the initial condition, we need to check parameters for errors.
+  parameters.checkParams(name);
+  const std::string & var_name = parameters.get<VariableName>("variable");
+
+  // Forbid initial conditions on a restarted problem, as they would override the restart
+  checkICRestartError(ic_name, name, var_name);
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  // field IC
+  if (hasVariable(var_name))
+  {
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      auto & var = getVariable(
+          tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+      parameters.set<SystemBase *>("_sys") = &var.sys();
+      std::shared_ptr<FVInitialConditionBase> ic;
+      if (dynamic_cast<MooseVariableFVReal *>(&var))
+        ic = _factory.create<FVInitialCondition>(ic_name, name, parameters, tid);
+      else
+        mooseError(
+            "Your variable for an FVInitialCondition needs to be an a finite volume variable!");
+      _fv_ics.addObject(ic, tid);
+    }
+  }
+  else
+    mooseError("Variable '",
+               var_name,
+               "' requested in fiunite volume initial condition '",
+               name,
+               "' does not exist.");
+}
+
+void
 FEProblemBase::projectSolution()
 {
   TIME_SECTION("projectSolution", 2, "Projecting Initial Solutions")
@@ -3051,6 +3102,15 @@ FEProblemBase::projectSolution()
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeInitialConditionThread cic(*this);
   Threads::parallel_reduce(elem_range, cic);
+
+  if (haveFV())
+  {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_mesh.ownedElemInfoBegin(), _mesh.ownedElemInfoEnd());
+
+    ComputeFVInitialConditionThread cfvic(*this);
+    Threads::parallel_reduce(elem_info_range, cfvic);
+  }
 
   // Need to close the solution vector here so that boundary ICs take precendence
   for (auto & nl : _nl)
@@ -5624,6 +5684,11 @@ FEProblemBase::init()
     es().init();
   }
 
+  // Now that the equation system and the dof distribution is done, we can generate the
+  // finite volume-related parts if needed.
+  if (haveFV())
+    _mesh.setupFiniteVolumeMeshData();
+
   for (auto & nl : _nl)
     nl->update();
   _aux->update();
@@ -7126,6 +7191,11 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // "active" and "local" may have been *changed* by refinement and
   // repartitioning done in EquationSystems::reinit().
   _mesh.meshChanged();
+
+  // If we have finite volume variables, we will need to recompute additional elemental/face
+  // quantities
+  if (haveFV() && _mesh.isFiniteVolumeInfoDirty())
+    _mesh.setupFiniteVolumeMeshData();
 
   // Let the meshChangedInterface notify the mesh changed event before we update the active
   // semilocal nodes, because the set of ghosted elements may potentially be updated during a mesh

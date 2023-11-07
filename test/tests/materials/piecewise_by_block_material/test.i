@@ -42,8 +42,8 @@
   []
   [v]
     type = MooseVariableFVReal
-    [InitialCondition]
-      type = FunctionIC
+    [FVInitialCondition]
+      type = FVFunctionIC
       function = '4 * (x - 7) * (x - 8)'
     []
   []

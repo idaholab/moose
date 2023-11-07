@@ -330,8 +330,9 @@ TEST(MooseFunctorTest, testArgs)
   mesh->prepare(nullptr);
   mesh->setCoordSystem({}, coord_type_enum);
   // Build the face info
+  mesh->buildFiniteVolumeInfo();
+  mesh->computeFiniteVolumeCoords();
   const auto & all_fi = mesh->allFaceInfo();
-  mesh->computeFaceInfoFaceCoords();
 
   // Test VectorComponentFunctor
   {

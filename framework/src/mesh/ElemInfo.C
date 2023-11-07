@@ -12,6 +12,10 @@
 #include "ElemInfo.h"
 
 ElemInfo::ElemInfo(const Elem * const elem)
-  : _elem(elem), _volume(_elem->volume()), _centroid(_elem->vertex_average())
+  : _elem(elem),
+    _volume(_elem->volume()),
+    _centroid(_elem->vertex_average()),
+    _coord_transform_factor(1.0),
+    _dof_indices(std::vector<std::vector<dof_id_type>>())
 {
 }

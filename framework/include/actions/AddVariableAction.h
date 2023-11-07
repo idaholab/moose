@@ -93,6 +93,9 @@ protected:
   /// True if the variable being created is a scalar
   bool _scalar_var;
 
+  /// True if the variable being created is finite volume
+  bool _fv_var;
+
   /// Number of components for an array variable
   unsigned int _components;
 

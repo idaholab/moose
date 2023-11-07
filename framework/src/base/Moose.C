@@ -146,6 +146,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_ic",                       InitialCondition,       false);
   appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
 
+  registerMooseObjectTask("add_fv_ic",                    FVInitialCondition,     false);
+
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("add_time_steppers",            TimeStepper,            false);
@@ -312,7 +314,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
-                           "(add_ic)"
+                           "(add_ic, add_fv_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
                            "(add_times)"
@@ -459,17 +461,20 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
 
   registerSyntax("AddICAction", "Variables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "Variables/*/FVInitialCondition");
 
   registerSyntax("AddAuxVariableAction", "AuxVariables/*");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
 
   registerSyntax("AddICAction", "AuxVariables/*/InitialCondition");
+  registerSyntax("AddFVICAction", "AuxVariables/*/FVInitialCondition");
 
   registerSyntaxTask("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
   registerSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
   registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
+  registerSyntaxTask("AddFVInitialConditionAction", "FVICs/*", "add_fv_ic");
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");

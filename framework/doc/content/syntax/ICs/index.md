@@ -13,7 +13,7 @@ derivatives at that point (e.g. Gradient, Second).
 The preferred syntax is to create a top-level "ICs" block with subblocks defining the initial
 conditions for one or more variables.
 
-!listing function_ic/parsed_function.i block=ICs
+!listing tests/ics/function_ic/parsed_function.i block=ICs
 
 ## ICs from an Exodus File
 

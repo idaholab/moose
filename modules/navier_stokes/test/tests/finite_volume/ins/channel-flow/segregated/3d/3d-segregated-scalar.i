@@ -15,7 +15,7 @@ pressure_tag = "pressure_grad"
     dz = '0.8'
     ix = '3'
     iy = '3'
-    iz = '12'
+    iz = '6'
   []
 []
 

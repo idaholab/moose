@@ -65,8 +65,9 @@ TEST(ContainerFunctors, Test)
   mesh->setCoordSystem({}, coord_type_enum);
   mooseAssert(mesh->getAxisymmetricRadialCoord() == 0,
               "This should be 0 because we haven't set anything.");
+  mesh->buildFiniteVolumeInfo();
+  mesh->computeFiniteVolumeCoords();
   const auto & all_fi = mesh->allFaceInfo();
-  mesh->computeFaceInfoFaceCoords();
   std::vector<const FaceInfo *> faces(all_fi.size());
   for (const auto i : index_range(all_fi))
     faces[i] = &all_fi[i];

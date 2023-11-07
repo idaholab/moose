@@ -16,6 +16,7 @@
 #include "PointListAdaptor.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
@@ -1291,6 +1292,22 @@ MooseMesh::ownedFaceInfoEnd()
       _face_info.end(),
       _face_info.end(),
       libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
+}
+
+MooseMesh::elem_info_iterator
+MooseMesh::ownedElemInfoBegin()
+{
+  return elem_info_iterator(_elem_info.begin(),
+                            _elem_info.end(),
+                            Predicates::NotNull<std::vector<const ElemInfo *>::iterator>());
+}
+
+MooseMesh::elem_info_iterator
+MooseMesh::ownedElemInfoEnd()
+{
+  return elem_info_iterator(_elem_info.end(),
+                            _elem_info.end(),
+                            Predicates::NotNull<std::vector<const ElemInfo *>::iterator>());
 }
 
 // default begin() accessor
@@ -3347,9 +3364,6 @@ MooseMesh::getPointLocator() const
 void
 MooseMesh::buildFiniteVolumeInfo() const
 {
-  if (!_finite_volume_info_dirty)
-    return;
-
   mooseAssert(!Threads::in_threads,
               "This routine has not been implemented for threads. Please query this routine before "
               "a threaded region or contact a MOOSE developer to discuss.");
@@ -3374,6 +3388,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_side_to_face_info.clear();
 
   _elem_to_elem_info.clear();
+  _elem_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3386,6 +3401,8 @@ MooseMesh::buildFiniteVolumeInfo() const
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
     _elem_to_elem_info.emplace(elem->id(), elem);
+
+  _linear_finite_volume_dofs_cached = false;
 
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
@@ -3456,20 +3473,24 @@ MooseMesh::buildFiniteVolumeInfo() const
         (fi.neighborPtr() && (fi.neighborPtr()->processor_id() == this->processor_id())))
       _face_info.push_back(&fi);
   }
+
+  for (auto & ei : _elem_to_elem_info)
+    if (ei.second.elem()->processor_id() == this->processor_id())
+      _elem_info.push_back(&ei.second);
 }
 
 const FaceInfo *
 MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 {
-  buildFiniteVolumeInfo();
-
   auto it = _elem_side_to_face_info.find(std::make_pair(elem, side));
 
   if (it == _elem_side_to_face_info.end())
     return nullptr;
   else
   {
-    mooseAssert(it->second, "For some reason, the FaceInfo object is NULL!");
+    mooseAssert(it->second,
+                "For some reason, the FaceInfo object is NULL! Try calling "
+                "`buildFiniteVolumeInfo()` before using this accessor!");
     return it->second;
   }
 }
@@ -3481,10 +3502,10 @@ MooseMesh::elemInfo(const dof_id_type id) const
 }
 
 void
-MooseMesh::computeFaceInfoFaceCoords()
+MooseMesh::computeFiniteVolumeCoords() const
 {
   if (_finite_volume_info_dirty)
-    mooseError("Trying to compute face-info coords when the information is dirty");
+    mooseError("Trying to compute face- and elem-info coords when the information is dirty");
 
   for (auto & fi : _all_face_info)
   {
@@ -3495,6 +3516,10 @@ MooseMesh::computeFaceInfoFaceCoords()
     coordTransformFactor(
         *this, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
   }
+
+  for (auto & ei : _elem_to_elem_info)
+    coordTransformFactor(
+        *this, ei.second.subdomain_id(), ei.second.centroid(), ei.second.coordFactor());
 }
 
 MooseEnum
@@ -3532,9 +3557,26 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars)
+MooseMesh::cacheFaceInfoVariableOwnership() const
 {
-  buildFiniteVolumeInfo();
+  mooseAssert(
+      !Threads::in_threads,
+      "Performing writes to faceInfo variable association maps. This must be done unthreaded!");
+
+  std::vector<const MooseVariableFieldBase *> moose_vars;
+
+  for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
+  {
+    const auto & nl_variables = _app.feProblem().getNonlinearSystemBase(i).getVariables(0);
+    for (const auto & var : nl_variables)
+      if (var->fieldType() == 0)
+        moose_vars.push_back(var);
+  }
+
+  const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
+  for (const auto & var : aux_variables)
+    if (var->fieldType() == 0)
+      moose_vars.push_back(var);
 
   for (FaceInfo & face : _all_face_info)
   {
@@ -3578,6 +3620,74 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase 
       }
     }
   }
+}
+
+void
+MooseMesh::cacheFVElementalDoFs() const
+{
+  mooseAssert(!Threads::in_threads,
+              "Performing writes to elemInfo dof indices. This must be done unthreaded!");
+
+  const unsigned int num_eqs = _app.feProblem().es().n_systems();
+
+  for (auto & elem_info_pair : _elem_to_elem_info)
+  {
+    ElemInfo & elem_info = elem_info_pair.second;
+    auto & dof_vector = elem_info.dofIndices();
+
+    dof_vector.clear();
+    dof_vector.resize(num_eqs);
+
+    for (const auto i : make_range(_app.feProblem().numNonlinearSystems()))
+      if (_app.feProblem().getNonlinearSystemBase(i).nFVVariables())
+      {
+        auto & sys = _app.feProblem().getNonlinearSystemBase(i);
+        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
+        const auto & variables = sys.getVariables(0);
+        for (const auto & var : variables)
+        {
+          const auto & var_subdomains = var->blockIDs();
+
+          // We will only cache for FV variables and if they live on the current subdomain
+          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
+          {
+            std::vector<dof_id_type> indices;
+            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            dof_vector[sys.number()][var->number()] = indices[0];
+          }
+        }
+      }
+
+    if (_app.feProblem().getAuxiliarySystem().nFVVariables())
+    {
+      auto & sys = _app.feProblem().getAuxiliarySystem();
+      dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
+      const auto & aux_variables = sys.getVariables(0);
+      for (const auto & var : aux_variables)
+      {
+        const auto & var_subdomains = var->blockIDs();
+
+        // We will only cache for FV variables and if they live on the current subdomain
+        if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
+        {
+          std::vector<dof_id_type> indices;
+          var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
+          mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+          dof_vector[sys.number()][var->number()] = indices[0];
+        }
+      }
+    }
+  }
+}
+
+void
+MooseMesh::setupFiniteVolumeMeshData() const
+{
+  buildFiniteVolumeInfo();
+  computeFiniteVolumeCoords();
+  cacheFaceInfoVariableOwnership();
+  cacheFVElementalDoFs();
 }
 
 void
