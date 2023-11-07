@@ -308,7 +308,7 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def spawnSubprocessFromOptions(self, timer, options, shell_linux=True, shell_windows=True):
+    def spawnSubprocessFromOptions(self, timer, options, shell_linux=False, shell_windows=False):
         """
         Spawns a subprocess based on given options, sets output and error files,
         and starts timer.
@@ -317,9 +317,10 @@ class Tester(MooseObject):
         cmd_linux = cmd
         cmd_windows = cmd
         if not shell_linux:
-            cmd_linux = cmd_linux.split(" ")
+            cmd_linux = util.split_string_with_quotes(cmd_linux)
+
         if not shell_windows:
-            cmd_windows = cmd_windows.split(" ")
+            cmd_windows = util.split_string_with_quotes(cmd_windows)
 
         cwd = self.getTestDir()
 

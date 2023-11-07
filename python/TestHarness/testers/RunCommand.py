@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from Tester import Tester
+from TestHarness import util
 
 class RunCommand(Tester):
 
