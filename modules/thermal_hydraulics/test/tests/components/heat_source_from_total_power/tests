@@ -1,5 +1,6 @@
 [Tests]
   design = 'HeatSourceFromTotalPower.md'
+  issues = '#19679'
   # physics
   [phy:power_component_shape_cylindrical]
     type = 'Exodiff'
