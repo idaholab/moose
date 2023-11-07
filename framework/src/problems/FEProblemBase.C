@@ -3240,7 +3240,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       parameters.set<SystemBase *>("_sys") = &var.sys();
       std::shared_ptr<FVInitialConditionBase> ic;
-      if (dynamic_cast<MooseVariableFVReal *>(&var))
+      if (var.isFV())
         ic = _factory.create<FVInitialCondition>(ic_name, name, parameters, tid);
       else
         mooseError(

@@ -3789,6 +3789,27 @@ MooseMesh::cacheFVElementalDoFs() const
         }
       }
 
+    for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+      if (_app.feProblem().getLinearSystem(i).nFVVariables())
+      {
+        auto & sys = _app.feProblem().getLinearSystem(i);
+        dof_vector[sys.number()].resize(sys.nVariables(), libMesh::DofObject::invalid_id);
+        const auto & variables = sys.getVariables(0);
+        for (const auto & var : variables)
+        {
+          const auto & var_subdomains = var->blockIDs();
+
+          // We will only cache for FV variables and if they live on the current subdomain
+          if (var->isFV() && var_subdomains.find(elem_info.subdomain_id()) != var_subdomains.end())
+          {
+            std::vector<dof_id_type> indices;
+            var->dofMap().dof_indices(elem_info.elem(), indices, var->number());
+            mooseAssert(indices.size() == 1, "We expect to have only one dof per element!");
+            dof_vector[sys.number()][var->number()] = indices[0];
+          }
+        }
+      }
+
     if (_app.feProblem().getAuxiliarySystem().nFVVariables())
     {
       auto & sys = _app.feProblem().getAuxiliarySystem();
