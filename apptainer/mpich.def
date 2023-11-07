@@ -1,17 +1,21 @@
 {#- Required jinja arguments                                                                  -#}
 {#- ARCH: The machine arch                                                                    -#}
 
+{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
 
-{%- if ALTERNATE_FROM == "clang" %}
+{#- The minimum version of LLVM/Clang                                                         -#}
+{%- set MIN_CLANG_VERSION = '9.0.1' -%}
+
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 Bootstrap: docker
 {%- else %}
 BootStrap: oras
 {%- endif %}
 {%- if ALTERNATE_FROM == "rocky9" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky9-{{ ARCH }}:9.0-0
-{%- elif ALTERNATE_FROM == "clang" %}
+{%- elif ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 From: rockylinux:8
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
@@ -24,8 +28,12 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     export LC_ALL=C
 
 %post
-{%- if ALTERNATE_FROM == "clang" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
     export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-4.1.2"}
+    export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
+{%- if ALTERNATE_FROM == "clang-min" %}
+    export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
+{%- endif %}
 {%- else %}
     export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-3.4.3"}
     export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/mpi/openmpi-4.1.5"}
@@ -54,10 +62,17 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
                    libtool autoconf automake cppunit-devel
 
 {%- if ALTERNATE_FROM == "clang" %}
+
     # Installing Clang, and its dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
                    libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64 lldb
+{%- elif ALTERNATE_FROM == "clang-min" %}
+
+    # Installing additional packages necessary to build Clang from source
+    dnf groupinstall -y 'Development Tools'
+    dnf install -y gcc-toolset-12-gcc.x86_64 gcc-toolset-12-gcc-c++.x86_64 \
+                   gcc-toolset-12-gcc-gfortran.x86_64 git
 {%- endif %}
 
     # After epel-release
@@ -115,7 +130,43 @@ EOF
     cd git-lfs-3.2.0
     ./install.sh
 
-{%- if ALTERNATE_FROM == "clang" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+
+    # Set alternative gcc-toolchain paths
+    export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
+{%- endif %}
+
+{%- if ALTERNATE_FROM == "clang-min" %}
+
+    # Build minimum Clang from source; MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
+    cd ${TEMP_LOC}
+    git clone --depth 1 --branch llvmorg-${MIN_CLANG_VERSION} https://github.com/llvm/llvm-project
+    cd llvm-project
+    mkdir llvm-build
+    cd llvm-build
+    cmake ../llvm -G 'Unix Makefiles' \
+      -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;lldb' \
+      -DCMAKE_INSTALL_PREFIX=/opt/llvm-${MIN_CLANG_VERSION} \
+      -DCMAKE_INSTALL_RPATH:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
+      -DCMAKE_INSTALL_NAME_DIR:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
+      -DCMAKE_BUILD_WITH_INSTALL_RPATH=1 \
+      -DLLVM_TARGETS_TO_BUILD="X86" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_MACOSX_RPATH:BOOL=OFF \
+      -DCMAKE_CXX_COMPILER=/opt/rh/gcc-toolset-12/root/bin/g++ \
+      -DCMAKE_C_COMPILER=/opt/rh/gcc-toolset-12/root/bin/gcc \
+      -DCMAKE_CXX_LINK_FLAGS="-L/opt/rh/gcc-toolset-12/root/lib -Wl,-rpath,/opt/rh/gcc-toolset-12/root/lib"
+    make -j ${MOOSE_JOBS}
+    make install
+
+    # Use Clang {{ MIN_CLANG_VERSION }}
+    export PATH=/opt/llvm-${MIN_CLANG_VERSION}/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/llvm-${MIN_CLANG_VERSION}/lib:${LD_LIBRARY_PATH}
+{%- endif %}
+
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+
     # Build and Install MPICH Clang
     mkdir ${TEMP_LOC}/mpich
     cd ${TEMP_LOC}/mpich
@@ -123,8 +174,6 @@ EOF
     tar -xf mpich-4.1.2.tar.gz
     mkdir mpich-4.1.2/build
     cd mpich-4.1.2/build
-    export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
     ../configure --prefix=${MOOSE_MPICH_DIR} \
       --enable-shared \
       --enable-sharedlibs=clang \
@@ -143,7 +192,7 @@ EOF
       FCFLAGS='-fallow-argument-mismatch' \
       F90FLAGS='' \
       F77FLAGS=''
-    make -j ${MOOSE_JOBS:-6}
+    make -j ${MOOSE_JOBS}
     make install
 {%- endif %}
 
@@ -151,9 +200,13 @@ EOF
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
-{%- if ALTERNATE_FROM == "clang" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
 export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
+{%- endif %}
+{%- if ALTERNATE_FROM == "clang-min" %}
+export PATH=/opt/llvm-${MIN_CLANG_VERSION}/bin:${PATH}
+export LD_LIBRARY_PATH=/opt/llvm-${MIN_CLANG_VERSION}/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
