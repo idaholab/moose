@@ -75,8 +75,8 @@ TEST_F(RestartableDataIOTest, readWrite)
 
     // Declare a value with context for use later
     {
-      std::unique_ptr<RestartableDataValue> rdv =
-          std::make_unique<RestartableData<unsigned int>>(with_context_name, &dummy_context);
+      std::unique_ptr<RestartableDataValue> rdv = std::make_unique<RestartableData<unsigned int>>(
+          with_context_name, (void *)&dummy_context);
       rdm.addData(std::move(rdv));
     }
 
@@ -106,8 +106,10 @@ TEST_F(RestartableDataIOTest, readWrite)
 
   // Do the initial load
   RestartableDataReader reader(*_app, rdm);
+  EXPECT_FALSE(reader.hasRestored());
   reader.setInput(std::move(header_stream), std::move(data_stream));
   reader.restore();
+  EXPECT_TRUE(reader.hasRestored());
   auto & late_restorer = reader.getLateRestorer();
 
   // Make sure every other value is there and has the right value
