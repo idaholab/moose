@@ -276,8 +276,8 @@ TopologyOptimizationSampler::syncedRand() const
   return buffer[_root_processor_id];
 }
 
-Real TopologyOptimizationSampler::computeSample(dof_id_type /*row_index*/,
-                                                dof_id_type /*col_index*/)
+Real
+TopologyOptimizationSampler::computeSample(dof_id_type /*row_index*/, dof_id_type /*col_index*/)
 {
   mooseError("This method should not be called.");
   return 0;
