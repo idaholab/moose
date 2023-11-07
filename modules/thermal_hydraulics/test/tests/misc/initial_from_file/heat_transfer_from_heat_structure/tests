@@ -5,7 +5,7 @@
     exodiff = 'steady_state_out.e'
     recover = false
 
-    requirement = 'The system shall be able to produce an exodus file for setting initial conditions in volume junctions'
+    requirement = 'The system shall be able to produce an exodus file for setting initial conditions in a heat structure and a connected flow channel'
     design = 'HeatTransferFromHeatStructure1Phase.md'
     issues = '#20553'
   []
@@ -17,7 +17,7 @@
     prereq = steady_state
     recover = false
 
-    requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
+    requirement = 'The system shall be able to use an exodus file for setting initial conditions in a heat structure and a connected flow channel.'
     design = 'HeatTransferFromHeatStructure1Phase.md SolutionIC.md'
     issues = '#20553'
   []

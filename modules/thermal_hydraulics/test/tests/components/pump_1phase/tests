@@ -79,7 +79,7 @@
     difference_tol = 20
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
-    requirement = 'The system shall allow for controlling the pump head'
+    requirement = 'The system shall allow for controlling the pump head and maintain a numerically correct Jacobian.'
     design = 'Pump1Phase.md'
     issues = '#684'
   []
