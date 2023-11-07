@@ -33,10 +33,10 @@ SwitchingFunctionMultiPhaseMaterialTempl<is_ad>::SwitchingFunctionMultiPhaseMate
   : DerivativeMaterialInterface<Material>(parameters),
     _h_name(this->getParam<MaterialPropertyName>("h_name")),
     _num_eta_p(coupledComponents("phase_etas")),
-    _eta_p(coupledValues("phase_etas")),
+    _eta_p(coupledGenericValues<is_ad>("phase_etas")),
     _eta_p_names(coupledNames("phase_etas")),
     _num_eta(coupledComponents("all_etas")),
-    _eta(coupledValues("all_etas")),
+    _eta(coupledGenericValues<is_ad>("all_etas")),
     _eta_names(coupledNames("all_etas")),
     _is_p(_num_eta),
     _prop_h(declareGenericProperty<Real, is_ad>(_h_name)),
@@ -50,7 +50,6 @@ SwitchingFunctionMultiPhaseMaterialTempl<is_ad>::SwitchingFunctionMultiPhaseMate
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
     _prop_dh[i] = &this->template declarePropertyDerivative<Real, is_ad>(_h_name, _eta_names[i]);
-    // mooseWarning("Property name = ", _h_name, " and variable names are = ", _eta_names[i]);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
       _prop_d2h[i][j] = _prop_d2h[j][i] = &this->template declarePropertyDerivative<Real, is_ad>(

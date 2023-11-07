@@ -63,8 +63,6 @@ protected:
   std::vector<const GenericMaterialProperty<Real, is_ad> *> _prop_dhjdetai;
 
   using CoupledSwitchingTimeDerivativeBase<is_ad>::_qp;
-  // using ACSwitchingBase<is_ad>::_var;
-  // using CoupledSwitchingTimeDerivativeBase<is_ad>::_test;
 };
 
 class CoupledSwitchingTimeDerivative : public CoupledSwitchingTimeDerivativeTempl<false>

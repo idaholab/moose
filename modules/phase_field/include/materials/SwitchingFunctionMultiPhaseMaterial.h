@@ -37,12 +37,12 @@ protected:
 
   /// Order parameters for phase alpha
   const unsigned int _num_eta_p;
-  const std::vector<const VariableValue *> _eta_p;
+  const std::vector<const GenericVariableValue<is_ad> *> _eta_p;
   const std::vector<VariableName> _eta_p_names;
 
   /// Order parameters for all phases (including alpha)
   const unsigned int _num_eta;
-  const std::vector<const VariableValue *> _eta;
+  const std::vector<const GenericVariableValue<is_ad> *> _eta;
   const std::vector<VariableName> _eta_names;
 
   /// List of which order parameters in the full list of all etas belong to phase p
