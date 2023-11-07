@@ -1,6 +1,6 @@
-# ACKappaFunction
+# ACKappaFunction / ADACKappaFunction
 
-The ACKAppaFunction Kernel calculates the term
+The `ACKAppaFunction` (and its automatic differentiation version, `ADACKappaFunction`) Kernel calculates the term
 $\frac12 L \frac{\partial \kappa}{\partial \eta} f_g(\nabla \eta)$
 for the case where $\kappa$ is a function of $\eta$ and $f_g$ is the gradient
 energy function used in the phase field method.

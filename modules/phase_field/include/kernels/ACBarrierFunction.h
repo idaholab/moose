@@ -38,8 +38,6 @@ protected:
   using ACBarrierFunctionBase<is_ad>::_qp;
   using ACBarrierFunctionBase<is_ad>::_vals;
   using ACBarrierFunctionBase<is_ad>::_u;
-  // using ACBarrierFunctionBase<is_ad>::_vals;
-  // using ACGrGrMultiBase<is_ad>::_test;
 };
 
 class ACBarrierFunction : public ACBarrierFunctionTempl<false>

@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/ACGrGrMulti
 
-Implements the term
+`ACGrGrMulti` (and its automatic differentiation version, `ADACGrGrMulti`) implements the term
 
 \begin{equation}
 L \mu \left( \eta_{\alpha i}^3 - \eta_{\alpha i} + 2\eta_{\alpha i} \sum_{\beta=1}^N

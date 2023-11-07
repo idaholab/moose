@@ -11,8 +11,6 @@
 
 #include "ACBulk.h"
 #include "ADAllenCahnBase.h"
-// #include "JvarMapInterface.h"
-// #include "DerivativeMaterialInterface.h"
 
 /**
  * ACSwitching adds terms of the form

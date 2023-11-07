@@ -1,6 +1,6 @@
-# ACBarrierFunction
+# ACBarrierFunction / ADACBarrierFunction
 
-The ACBarrierFunction kernel implements the term $\frac{\partial m}{\partial \eta}f(\eta)$
+The `ACBarrierFunction` (and its automatic differentiation version, `ADACBarrierFunction`) kernel implements the term $\frac{\partial m}{\partial \eta}f(\eta)$
 term for the free energy given in [!cite](moelans_quantitative_2008).
 $m$ is the barrier energy coefficient.
 In many phase field models, $m$ is constant, but in the case where it is a function
