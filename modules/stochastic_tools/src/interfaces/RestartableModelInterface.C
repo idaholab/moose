@@ -25,8 +25,10 @@ RestartableModelInterface::RestartableModelInterface(const MooseObject & object,
     _model_meta_data_name(meta_data_name),
     _model_restartable(_model_object.getMooseApp(), "", "", 0, read_only, meta_data_name)
 {
-  _model_object.getMooseApp().registerRestartableDataMapName(_model_meta_data_name,
-                                                             _model_object.name());
+  // With this interface, we will often register the same map across multiple objects
+  // therefore this check is appropriate
+  if (!_model_object.getMooseApp().hasRestartableDataMap(_model_meta_data_name))
+    _model_object.getMooseApp().registerRestartableDataMap(_model_meta_data_name);
 }
 
 const FileName &

@@ -39,8 +39,8 @@ public:
   /**
    * Retrieve model data from the interface
    */
-  template <typename T, typename... Args>
-  const T & getModelData(const std::string & data_name, Args &&... args) const;
+  template <typename T>
+  const T & getModelData(const std::string & data_name);
   ///@}
 
   /// Accessor for the name of the model meta data
@@ -75,9 +75,9 @@ RestartableModelInterface::declareModelData(const std::string & data_name, Args 
   return _model_restartable.declareRestartableData<T>(data_name, std::forward<Args>(args)...);
 }
 
-template <typename T, typename... Args>
+template <typename T>
 const T &
-RestartableModelInterface::getModelData(const std::string & data_name, Args &&... args) const
+RestartableModelInterface::getModelData(const std::string & data_name)
 {
-  return _model_restartable.getRestartableData<T>(data_name, std::forward<Args>(args)...);
+  return _model_restartable.getRestartableData<T>(data_name);
 }

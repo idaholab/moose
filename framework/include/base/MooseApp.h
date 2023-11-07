@@ -764,6 +764,11 @@ public:
   void registerRestartableDataMap(const RestartableDataMapName & name, const bool auto_load = true);
 
   /**
+   * @return Whether or not the restartable data map with name \p name is registered
+   */
+  bool hasRestartableDataMap(const RestartableDataMapName & name) const;
+
+  /**
    * @return The input/output name for the restartable data with name \p name
    */
   std::string getRestartableDataMapIOSuffix(const RestartableDataMapName & name) const;

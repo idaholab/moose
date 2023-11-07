@@ -2813,6 +2813,12 @@ MooseApp::registerRestartableDataMap(const RestartableDataMapName & name,
   entry.auto_load = auto_load;
 }
 
+bool
+MooseApp::hasRestartableDataMap(const RestartableDataMapName & name) const
+{
+  return _restartable_meta_data.count(name);
+}
+
 std::string
 MooseApp::getRestartableDataMapIOSuffix(const RestartableDataMapName & name) const
 {
