@@ -60,6 +60,7 @@ AddVariableAction::AddVariableAction(const InputParameters & params)
   : MooseObjectAction(params),
     _fe_type(feType(params)),
     _scalar_var(_fe_type.family == SCALAR),
+    _fv_var(false),
     _components(1)
 {
 }
@@ -130,11 +131,11 @@ AddVariableAction::init()
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   // Determine the MooseVariable type
-  const auto is_fv = _moose_object_pars.get<bool>("fv");
+  _fv_var = _moose_object_pars.get<bool>("fv");
   const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
   if (_type == "MooseVariableBase")
-    _type = variableType(_fe_type, is_fv, is_array);
-  if (is_fv)
+    _type = variableType(_fe_type, _fv_var, is_array);
+  if (_fv_var)
     _problem->needFV();
 
   // Need static_cast to resolve overloads
@@ -184,7 +185,12 @@ AddVariableAction::createInitialConditionAction()
     if (is_vector)
       action_params.set<std::string>("type") = "VectorConstantIC";
     else
-      action_params.set<std::string>("type") = "ConstantIC";
+    {
+      if (_fv_var)
+        action_params.set<std::string>("type") = "FVConstantIC";
+      else
+        action_params.set<std::string>("type") = "ConstantIC";
+    }
   }
   else
   {
@@ -194,8 +200,13 @@ AddVariableAction::createInitialConditionAction()
   }
 
   // Create the action
-  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddInitialConditionAction", long_name, action_params));
+  std::shared_ptr<MooseObjectAction> action;
+  if (_fv_var)
+    action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create("AddFVInitialConditionAction", long_name, action_params));
+  else
+    action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create("AddInitialConditionAction", long_name, action_params));
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;

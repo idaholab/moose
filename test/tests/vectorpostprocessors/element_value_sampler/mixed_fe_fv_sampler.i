@@ -10,8 +10,8 @@
 [AuxVariables]
   [T]
     type = MooseVariableFVReal
-    [InitialCondition]
-      type = FunctionIC
+    [FVInitialCondition]
+      type = FVFunctionIC
       function = '10 * x*x'
     []
 

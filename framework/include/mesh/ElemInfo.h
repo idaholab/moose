@@ -34,6 +34,10 @@ public:
   const Elem * elem() const { return _elem; }
   Real volume() const { return _volume; }
   const Point & centroid() const { return _centroid; }
+  Real coordFactor() const { return _coord_transform_factor; }
+  Real & coordFactor() { return _coord_transform_factor; }
+  const std::vector<std::vector<dof_id_type>> & dofIndices() const { return _dof_indices; }
+  std::vector<std::vector<dof_id_type>> & dofIndices() { return _dof_indices; }
 
   /// We return the subdomain ID of the corresponding libmesh element.
   SubdomainID subdomain_id() const { return _elem->subdomain_id(); }
@@ -45,4 +49,13 @@ protected:
   Real _volume;
   /// Centroid of the element
   Point _centroid;
+  /// Cached coordinate transformation factor
+  Real _coord_transform_factor;
+  /// Cached dof indices mainly for segregated linear FV evaluations
+  /// with the following structure: _dof_indices[system_number][variable_number] = dof_index
+  /// Systems with no FV variables will store an empty vector and should not be accessed.
+  /// This will be checked through multiple asserts in the assembly routines.
+  /// Furthermore, if the current variable is not active on the subdomain or if it
+  /// is an FE variable of this element, we return an invalid_dof_index.
+  std::vector<std::vector<dof_id_type>> _dof_indices;
 };

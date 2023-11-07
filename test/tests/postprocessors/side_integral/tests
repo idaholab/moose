@@ -96,10 +96,13 @@
       input = 'side_integral_functor.i'
       csvdiff = 'side_integral_functor_qp_out.csv'
       cli_args = "Outputs/file_base=side_integral_functor_qp_out
-                  AuxVariables/v2/type=MooseVariable
-                  Postprocessors/ext_u/functor_argument=qp Postprocessors/ext_v1/functor_argument=qp Postprocessors/ext_v2/functor_argument=qp Postprocessors/ext_m1/functor_argument=qp Postprocessors/ext_m2/functor_argument=qp
+                  AuxVariables/inactive=v2
+                  AuxVariables/v2_fe/block=2
+                  AuxVariables/v2_fe/InitialCondition/type=FunctionIC
+                  AuxVariables/v2_fe/InitialCondition/function='2*x*x-y'
+                  Postprocessors/ext_u/functor_argument=qp Postprocessors/ext_v1/functor_argument=qp Postprocessors/ext_v2/functor_argument=qp Postprocessors/ext_v2/functor=v2_fe Postprocessors/ext_m1/functor_argument=qp Postprocessors/ext_m2/functor_argument=qp
                   Postprocessors/int_s1_u/functor_argument=qp Postprocessors/int_s1_v1/functor_argument=qp Postprocessors/int_s1_f1/functor_argument=qp Postprocessors/int_s1_m1/functor_argument=qp Postprocessors/int_s1_m2/functor_argument=qp
-                  Postprocessors/int_s2_v2/functor_argument=qp Postprocessors/int_s2_f1/functor_argument=qp Postprocessors/int_s2_m1/functor_argument=qp Postprocessors/int_s2_m2/functor_argument=qp"
+                  Postprocessors/int_s2_v2/functor_argument=qp Postprocessors/int_s2_v2/functor=v2_fe Postprocessors/int_s2_f1/functor_argument=qp Postprocessors/int_s2_m1/functor_argument=qp Postprocessors/int_s2_m2/functor_argument=qp"
 
       detail = 'support computing the integral of a functor using quadrature points instead of side faces'
     []

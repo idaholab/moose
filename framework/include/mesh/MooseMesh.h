@@ -1135,28 +1135,47 @@ public:
   face_info_iterator ownedFaceInfoBegin();
   face_info_iterator ownedFaceInfoEnd();
 
+  /// Need to declare these iterators here to make sure the iterators below work
+  struct elem_info_iterator;
+  struct const_elem_info_iterator;
+
+  /// Iterators to owned faceInfo objects. These faceInfo-s are required for the
+  /// face loops and to filter out the faceInfo-s that are not owned by this processor
+  /// in case we have a distributed mesh and we included FaceInfo objects that
+  /// are on processor boundaries
+  elem_info_iterator ownedElemInfoBegin();
+  elem_info_iterator ownedElemInfoEnd();
+
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
 
   /// Accessor for the elemInfo object for a given element ID
   const ElemInfo & elemInfo(const dof_id_type id) const;
 
+  /// Accessor for the element info objects owned by this process
+  const std::vector<const ElemInfo *> & elemInfoVector() const { return _elem_info; }
+
   /// Accessor for all \p FaceInfo objects.
   const std::vector<FaceInfo> & allFaceInfo() const;
   ///@}
 
   /**
-   * Cache \p elem and \p neighbor dof indices information for variables in all the local \p
-   * FaceInfo objects to save computational expense
+   * Cache if variables live on the elements connected by the FaceInfo objects
    */
-  void cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars);
+  void cacheFaceInfoVariableOwnership() const;
 
   /**
-   * Compute the face coordinate value for all \p FaceInfo objects. 'Coordinate' here means a
-   * coordinate value associated with the coordinate system. For Cartesian coordinate systems,
-   * 'coordinate' is simply '1'; in RZ, '2*pi*r', and in spherical, '4*pi*r^2'
+   * Cache the DoF indices for FV variables on each element. These indices are used to speed up the
+   * setup loops of finite volume systems.
    */
-  void computeFaceInfoFaceCoords();
+  void cacheFVElementalDoFs() const;
+
+  /**
+   * Compute the face coordinate value for all \p FaceInfo and \p ElemInfo objects. 'Coordinate'
+   * here means a coordinate value associated with the coordinate system. For Cartesian coordinate
+   * systems, 'coordinate' is simply '1'; in RZ, '2*pi*r', and in spherical, '4*pi*r^2'
+   */
+  void computeFiniteVolumeCoords() const;
 
   /**
    * Set whether this mesh is displaced
@@ -1252,7 +1271,12 @@ public:
   /**
    * Mark the finite volume information as dirty
    */
-  void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
+  void markFiniteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
+
+  /**
+   * @return whether the finite volume information is dirty
+   */
+  bool isFiniteVolumeInfoDirty() const { return _finite_volume_info_dirty; }
 
   /**
    * @return the coordinate transformation object that describes how to transform this problem's
@@ -1276,6 +1300,21 @@ public:
    * @return Whether or not this mesh comes from a split mesh
    */
   bool isSplit() const { return _is_split; }
+
+  /**
+   * Builds the face and elem info vectors that store meta-data needed for looping over and doing
+   * calculations based on mesh faces and elements in a finite volume setting. This should only
+   * be called when finite volume variables are used in the problem or when the face and elem info
+   * objects are necessary for functor-based evaluations.
+   */
+  void buildFiniteVolumeInfo() const;
+
+  /**
+   * Sets up the additional data needed for finite volume computations.
+   * This involves building FaceInfo and ElemInfo objects, caching variable associations
+   * and elemental DoF indices for FV variables.
+   */
+  void setupFiniteVolumeMeshData() const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1459,13 +1498,17 @@ protected:
   void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
-  /// FaceInfo object storing information for face based loops. This container holds all the \p
-  /// FaceInfo objects accessible from this process
-  mutable std::vector<FaceInfo> _all_face_info;
-
   /// Map connecting elems with their corresponding ElemInfo, we use the element ID as
   /// the key
   mutable std::unordered_map<dof_id_type, ElemInfo> _elem_to_elem_info;
+
+  /// Holds only those \p ElemInfo objects that have \p processor_id equal to this process's id,
+  /// e.g. the local \p ElemInfo objects
+  mutable std::vector<const ElemInfo *> _elem_info;
+
+  /// FaceInfo object storing information for face based loops. This container holds all the \p
+  /// FaceInfo objects accessible from this process
+  mutable std::vector<FaceInfo> _all_face_info;
 
   /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p FaceInfo objects
@@ -1478,18 +1521,10 @@ private:
   // true if the _face_info member needs to be rebuilt/updated.
   mutable bool _finite_volume_info_dirty = true;
 
-  /**
-   * Builds the face info vector that stores meta-data needed for looping over and doing
-   * calculations based on mesh faces and elements in a finite volume setting.
-   * We also build a vector of elem info objects which cache volumes and centroids for elements.
-   * We build finite volume information only upon request and only if the
-   * \p _finite_volume_info_dirty flag is false, either because this method has yet to be called or
-   * because someone called \p update() indicating the mesh has changed. Face information is only
-   * requested by getters that should appear semantically const. Consequently this method must
-   * also be marked const and so we make it and all associated face information data private to
-   * prevent misuse
-   */
-  void buildFiniteVolumeInfo() const;
+  // True if we have cached elemental dofs ids for the linear finite volume variables.
+  // This happens in the first system which has a linear finite volume variable, considering
+  // that currently we only support one variable per linear system.
+  mutable bool _linear_finite_volume_dofs_cached = false;
 
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
@@ -1747,6 +1782,50 @@ struct MooseMesh::const_face_info_iterator : variant_filter_iterator<MeshBase::P
 };
 
 /**
+ * The definition of the elem_info_iterator struct.
+ */
+struct MooseMesh::elem_info_iterator
+  : variant_filter_iterator<MeshBase::Predicate, const ElemInfo *>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  elem_info_iterator(const IterType & d, const IterType & e, const PredType & p)
+    : variant_filter_iterator<MeshBase::Predicate, const ElemInfo *>(d, e, p)
+  {
+  }
+};
+
+/**
+ * The definition of the const_elem_info_iterator struct. It is similar to the
+ * iterator above, but also provides an additional conversion-to-const ctor.
+ */
+struct MooseMesh::const_elem_info_iterator : variant_filter_iterator<MeshBase::Predicate,
+                                                                     const ElemInfo * const,
+                                                                     const ElemInfo * const &,
+                                                                     const ElemInfo * const *>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  const_elem_info_iterator(const IterType & d, const IterType & e, const PredType & p)
+    : variant_filter_iterator<MeshBase::Predicate,
+                              const ElemInfo * const,
+                              const ElemInfo * const &,
+                              const ElemInfo * const *>(d, e, p)
+  {
+  }
+
+  // The conversion-to-const ctor.  Takes a regular iterator and calls the appropriate
+  // variant_filter_iterator copy constructor.  Note that this one is *not* templated!
+  const_elem_info_iterator(const MooseMesh::elem_info_iterator & rhs)
+    : variant_filter_iterator<MeshBase::Predicate,
+                              const ElemInfo * const,
+                              const ElemInfo * const &,
+                              const ElemInfo * const *>(rhs)
+  {
+  }
+};
+
+/**
  * The definition of the bnd_node_iterator struct.
  */
 struct MooseMesh::bnd_node_iterator : variant_filter_iterator<MeshBase::Predicate, BndNode *>
@@ -1914,14 +1993,12 @@ MooseMesh::areElemIDsIdentical(const std::string & id_name1, const std::string &
 inline const std::vector<const FaceInfo *> &
 MooseMesh::faceInfo() const
 {
-  buildFiniteVolumeInfo();
   return _face_info;
 }
 
 inline const std::vector<FaceInfo> &
 MooseMesh::allFaceInfo() const
 {
-  buildFiniteVolumeInfo();
   return _all_face_info;
 }
 

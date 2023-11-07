@@ -76,6 +76,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
     }
 
   // Test face overloads
+  _mesh->buildFiniteVolumeInfo();
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
   auto face = Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
   f_traditional = f.value(0, fi->faceCentroid());

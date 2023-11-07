@@ -544,6 +544,18 @@ public:
   virtual unsigned int nVariables() const;
 
   /**
+   * Get the number of field variables in this system
+   * @return the number of field variables
+   */
+  unsigned int nFieldVariables() const;
+
+  /**
+   * Get the number of finite volume variables in this system
+   * @return the number of finite volume variables
+   */
+  unsigned int nFVVariables() const;
+
+  /**
    * Gets the maximum number of dofs used by any one variable on any one element
    *
    * @return The max
@@ -858,9 +870,6 @@ public:
   const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
 
   std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
-
-  /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
-  void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
