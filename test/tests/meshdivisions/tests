@@ -33,5 +33,11 @@
       csvdiff = 'nearest_position_division_out_div_out_0001.csv'
       detail = 'a nearest-point/neighbor partition,'
     []
+    [spherical]
+      type = CSVDiff
+      input = 'spherical_division.i'
+      csvdiff = 'spherical_division_out_div_out_0001.csv'
+      detail = 'a regular spherical radial grid,'
+    []
   []
 []
