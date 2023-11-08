@@ -45,5 +45,11 @@
       csvdiff = 'spherical_division_out_div_out_0001.csv'
       detail = 'a regular spherical radial grid,'
     []
+    [nested]
+      type = CSVDiff
+      input = 'nested_division.i'
+      csvdiff = 'nested_division_out_div_out_0001.csv'
+      detail = 'a nesting of mesh divisions.'
+    []
   []
 []
