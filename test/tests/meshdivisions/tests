@@ -9,5 +9,11 @@
       csvdiff = 'block_division_out.csv'
       detail = 'subdomains defined on the mesh,'
     []
+    [extra_id]
+      type = CSVDiff
+      input = 'extra_elem_id_division.i'
+      csvdiff = 'extra_elem_id_division_out_div_out_0001.csv'
+      detail = 'extra element integers stored on elements in the mesh,'
+    []
   []
 []
