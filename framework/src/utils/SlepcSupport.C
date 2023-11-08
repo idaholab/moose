@@ -356,6 +356,9 @@ setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
   // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
   Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
+  // We always want the number of free power iterations respected so we don't want to stop early if
+  // we've satisfied a convergence criterion. Consequently we make this tolerance very tight
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", "1e-50");
 }
 
 void
@@ -367,6 +370,7 @@ clearFreeNonlinearPowerIterations(const InputParameters & params)
                                             stringify(params.get<unsigned int>("nl_max_its")));
   Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
                                             stringify(params.get<Real>("nl_rel_tol")));
+  Moose::PetscSupport::setSinglePetscOption("-eps_tol", stringify(params.get<Real>("eigen_tol")));
 }
 
 void
@@ -1103,8 +1107,7 @@ PCCreate_MoosePC(PC pc)
   PetscFunctionReturn(0);
 }
 
-PetscErrorCode
-PCDestroy_MoosePC(PC /*pc*/)
+PetscErrorCode PCDestroy_MoosePC(PC /*pc*/)
 {
   PetscFunctionBegin;
   /* We do not need to do anything right now, but later we may have some data we need to free here
