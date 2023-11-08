@@ -27,5 +27,11 @@
       csvdiff = 'functor_values_division_out_div_out_0001.csv'
       detail = 'a mesh division based on the values of a functor,'
     []
+    [positions]
+      type = CSVDiff
+      input = 'nearest_position_division.i'
+      csvdiff = 'nearest_position_division_out_div_out_0001.csv'
+      detail = 'a nearest-point/neighbor partition,'
+    []
   []
 []
