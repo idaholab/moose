@@ -26,8 +26,7 @@
     requirement = 'The system shall support the ability to "install" inputs:'
     [setup_fake_test_structure]
       type = 'RunCommand'
-      command = '/bin/sh -c
-                 rm -rf ../../../make_install_test;
+      command = 'rm -rf ../../../make_install_test;
                  rm -rf ../../../share/moose_test;
                  mkdir -p ../../../share/moose_test/tests/version;
                  cp ../misc/version/tests ../../../share/moose_test/tests/version;
@@ -76,10 +75,9 @@
 
     [link_exec_installed]
       type = 'RunCommand'
-      command = '/bin/sh -c
-                 for bin in `ls ../../../test/moose_test-*`;
+      command = 'for bin in `ls ../../../test/moose_test-*`
                  do
-                 ln -sf $bin .;
+                 ln -sf $bin .
                  done'
       working_directory = '../../../make_install_test/moose_test/tests'
       installation_type = IN_TREE
@@ -101,8 +99,7 @@
 
     [tear_down]
       type = 'RunCommand'
-      command = '/bin/sh -c
-                 rm -rf ../../../share/;
+      command = 'rm -rf ../../../share/;
                  rm -rf ../../../make_install_test'
       prereq = 'test_copy_install/run'
       installation_type = IN_TREE
