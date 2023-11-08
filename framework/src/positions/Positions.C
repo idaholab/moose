@@ -77,23 +77,29 @@ const Point &
 Positions::getNearestPosition(const Point & target, const bool initial) const
 {
   const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
+  return positions[getNearestPositionIndex(target, initial)];
+}
+
+unsigned int
+Positions::getNearestPositionIndex(const Point & target, const bool initial) const
+{
+  const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
   // To keep track of indetermination due to equidistant positions
   std::pair<int, int> conflict_index(-1, -1);
 
   // TODO Use faster & fancier machinery such as a KNN-partition
   std::size_t nearest_index = 0;
   auto nearest_distance_sq = std::numeric_limits<Real>::max();
-  for (const auto i : index_range(_positions))
+  for (const auto i : index_range(positions))
   {
-    const auto & pt = _positions[i];
+    const auto & pt = positions[i];
     if (MooseUtils::absoluteFuzzyLessThan((pt - target).norm_sq(), nearest_distance_sq))
     {
       nearest_index = i;
       nearest_distance_sq = (pt - target).norm_sq();
     }
     // Check that no two positions are equidistant to the target
-    else if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(),
-                                            nearest_distance_sq))
+    else if (MooseUtils::absoluteFuzzyEqual((positions[i] - target).norm_sq(), nearest_distance_sq))
       conflict_index = std::make_pair(cast_int<int>(i), cast_int<int>(nearest_index));
   }
 
@@ -101,13 +107,13 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
   if (cast_int<int>(nearest_index) == conflict_index.second)
   {
     mooseWarning("Search for nearest position found at least two matches: " +
-                     Moose::stringify(_positions[conflict_index.first]) + " and " +
-                     Moose::stringify(_positions[nearest_index]),
+                     Moose::stringify(positions[conflict_index.first]) + " and " +
+                     Moose::stringify(positions[nearest_index]),
                  " for point " + Moose::stringify(target) + " at a distance of " +
                      std::to_string(std::sqrt(nearest_distance_sq)));
   }
 
-  return positions[nearest_index];
+  return nearest_index;
 }
 
 const std::vector<Point> &
