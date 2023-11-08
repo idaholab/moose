@@ -32,7 +32,7 @@ The volumetric eigenstrain deformation gradient is calculated as a function of t
 \begin{equation}
   \mathbf{F}^v = \left( \boldsymbol{\epsilon}^R_v \right)^{-1} \mathbf{F}^v_{old} \qquad \text{where} \qquad \boldsymbol{\epsilon}^R_v = \mathbf{I} - \Delta \boldsymbol{\epsilon}^v \mathbf{R}
 \end{equation}
-where $\mathbf{F}^v_{old}$ is the volumetric eigenstrain deformation gradient from the previous timestep $\mathbf{R}$ is the rotation tensor.
+where $\mathbf{F}^v_{old}$ is the volumetric eigenstrain deformation gradient from the previous timestep, $\mathbf{R}$ is the rotation tensor.
 
 
 
