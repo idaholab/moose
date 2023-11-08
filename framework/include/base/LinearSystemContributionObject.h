@@ -54,7 +54,7 @@ public:
    * @param parameters The InputParameters for the object
    * @param nodal Whether this object is applied to nodes or not
    */
-  LinearSystemContributionObject(const InputParameters & parameters, bool nodal = false);
+  LinearSystemContributionObject(const InputParameters & parameters);
 
   /// Compute this object's contribution to the residual
   virtual void computeMatrixContribution() = 0;
@@ -71,12 +71,6 @@ public:
    * Returns a reference to the SubProblem for which this Kernel is active
    */
   const SubProblem & subProblem() const { return _subproblem; }
-
-  /**
-   * Prepare shape functions
-   * @param var_num The variable number whose shape functions should be prepared
-   */
-  virtual void prepareShapes(unsigned int var_num);
 
 protected:
   /**
@@ -99,9 +93,6 @@ protected:
 
   /// The thread ID for this object
   THREAD_ID _tid;
-
-  /// Reference to the corresponding assembly object
-  Assembly & _assembly;
 
   /// Reference to the mesh object
   MooseMesh & _mesh;

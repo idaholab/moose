@@ -28,23 +28,18 @@ LinearSystemContributionObject::validParams()
   return params;
 }
 
-LinearSystemContributionObject::LinearSystemContributionObject(const InputParameters & parameters,
-                                                               bool is_nodal)
+LinearSystemContributionObject::LinearSystemContributionObject(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
-    // VPPs used by ScalarKernels must be broadcast because we don't know where the
-    // ScalarKernel will end up being evaluated
-    // Note: residual objects should have a valid _moose_base.
-    VectorPostprocessorInterface(this,
-                                 parameters.get<std::string>("_moose_base") == "ScalarKernel"),
+    VectorPostprocessorInterface(this, false),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
-                    is_nodal),
+                    false),
     Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
@@ -52,13 +47,6 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
-}
-
-void
-LinearSystemContributionObject::prepareShapes(const unsigned int var_num)
-{
-  _subproblem.prepareShapes(var_num, _tid);
 }
