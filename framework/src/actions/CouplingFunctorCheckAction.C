@@ -23,13 +23,14 @@ registerMooseAction("MooseApp", CouplingFunctorCheckAction, "coupling_functor_ch
 InputParameters
 CouplingFunctorCheckAction::validParams()
 {
+  auto params = Action::validParams();
+  params.set<std::string>("_action_name") = "coupling_functor_check";
   return Action::validParams();
 }
 
 CouplingFunctorCheckAction::CouplingFunctorCheckAction(const InputParameters & parameters)
   : Action(parameters)
 {
-  _name = "coupling_functor_check";
 }
 
 void

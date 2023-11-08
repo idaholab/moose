@@ -235,8 +235,8 @@ AddVariableAction::createInitialConditionAction()
 std::string
 AddVariableAction::determineType(const FEType & fe_type, unsigned int components, bool is_fv)
 {
-  mooseDeprecated("AddVariableAction::determineType() is deprecated. Use "
-                  "AddVariableAction::variableType() instead.");
+  ::mooseDeprecated("AddVariableAction::determineType() is deprecated. Use "
+                    "AddVariableAction::variableType() instead.");
   return variableType(fe_type, is_fv, components > 1);
 }
 
@@ -250,7 +250,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   {
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
         fe_type.family == MONOMIAL_VEC)
-      mooseError("Vector finite element families do not currently have ArrayVariable support");
+      ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
   }
