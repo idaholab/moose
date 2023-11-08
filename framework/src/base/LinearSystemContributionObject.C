@@ -10,6 +10,7 @@
 #include "LinearSystemContributionObject.h"
 #include "SubProblem.h"
 #include "InputParameters.h"
+#include "libmesh/linear_implicit_system.h"
 
 InputParameters
 LinearSystemContributionObject::validParams()
@@ -46,6 +47,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _mesh(_subproblem.mesh())
 {

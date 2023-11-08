@@ -16,4 +16,11 @@ class LinearFVSourceKernel : public ElementalLinearFVKernel
 public:
   static InputParameters validParams();
   LinearFVSourceKernel(const InputParameters & params);
+
+  virtual Real computeMatrixContribution() override;
+
+  virtual Real computeRightHandSideContribution() override;
+
+protected:
+  const Real _source_density;
 };

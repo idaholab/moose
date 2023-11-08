@@ -16,4 +16,11 @@ class LinearFVReactionKernel : public ElementalLinearFVKernel
 public:
   static InputParameters validParams();
   LinearFVReactionKernel(const InputParameters & params);
+
+  virtual Real computeMatrixContribution() override;
+
+  virtual Real computeRightHandSideContribution() override;
+
+protected:
+  const Real _coeff;
 };

@@ -15,10 +15,23 @@ InputParameters
 LinearFVSourceKernel::validParams()
 {
   InputParameters params = ElementalLinearFVKernel::validParams();
+  params.addParam<Real>("source_density", 1.0, "The source density.");
   return params;
 }
 
 LinearFVSourceKernel::LinearFVSourceKernel(const InputParameters & params)
-  : ElementalLinearFVKernel(params)
+  : ElementalLinearFVKernel(params), _source_density(getParam<Real>("source_density"))
 {
+}
+
+Real
+LinearFVSourceKernel::computeMatrixContribution()
+{
+  return 0.0;
+}
+
+Real
+LinearFVSourceKernel::computeRightHandSideContribution()
+{
+  return _source_density * _current_elem_info->volume();
 }

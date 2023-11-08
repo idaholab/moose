@@ -15,10 +15,23 @@ InputParameters
 LinearFVReactionKernel::validParams()
 {
   InputParameters params = ElementalLinearFVKernel::validParams();
+  params.addParam<Real>("coeff", 1.0, "The reaction coefficient.");
   return params;
 }
 
 LinearFVReactionKernel::LinearFVReactionKernel(const InputParameters & params)
-  : ElementalLinearFVKernel(params)
+  : ElementalLinearFVKernel(params), _coeff(getParam<Real>("coeff"))
 {
+}
+
+Real
+LinearFVReactionKernel::computeMatrixContribution()
+{
+  return _coeff * _current_elem_info->volume();
+}
+
+Real
+LinearFVReactionKernel::computeRightHandSideContribution()
+{
+  return 0.0;
 }

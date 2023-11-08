@@ -23,6 +23,8 @@
 #include "TaggingInterface.h"
 #include "SystemBase.h"
 
+#include "libmesh/linear_implicit_system.h"
+
 class FEProblemBase;
 class MooseMesh;
 class SubProblem;
@@ -56,11 +58,11 @@ public:
    */
   LinearSystemContributionObject(const InputParameters & parameters);
 
-  /// Compute this object's contribution to the residual
-  virtual void computeMatrixContribution() = 0;
+  /// Add this object's contribution to the system matrix
+  virtual void addMatrixContribution() = 0;
 
-  /// Compute this object's contribution to the diagonal Jacobian entries
-  virtual void computeRightHandSideContribution() = 0;
+  /// Add this object's contribution to the system right hand side
+  virtual void addRightHandSideContribution() = 0;
 
   /**
    * Returns the variable that this object operates on.
@@ -90,6 +92,9 @@ protected:
 
   /// Reference to the system this object contributes to
   SystemBase & _sys;
+
+  /// Reference to the libmesh linear system this object contributes to
+  libMesh::LinearImplicitSystem & _linear_system;
 
   /// The thread ID for this object
   THREAD_ID _tid;
