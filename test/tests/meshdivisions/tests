@@ -15,5 +15,11 @@
       csvdiff = 'extra_elem_id_division_out_div_out_0001.csv'
       detail = 'extra element integers stored on elements in the mesh,'
     []
+    [cartesian]
+      type = CSVDiff
+      input = 'cartesian_division.i'
+      csvdiff = 'cartesian_division_out_div_out_0001.csv'
+      detail = 'a regular Cartesian grid,'
+    []
   []
 []
