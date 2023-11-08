@@ -2288,6 +2288,7 @@ FEProblemBase::addMeshDivision(const std::string & type,
 {
   parallel_object_only();
   parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, 0);
   _mesh_divisions.addObject(func);
 }
