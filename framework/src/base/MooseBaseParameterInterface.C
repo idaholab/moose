@@ -22,11 +22,11 @@ paramErrorPrefix(const InputParameters & params, const std::string & param)
 }
 
 MooseBaseParameterInterface::MooseBaseParameterInterface(const InputParameters & parameters,
-                                                         const MooseBase * base)
-  : _moose_base(base),
-    _pars(parameters),
+                                                         const MooseBase * const base)
+  : _pars(parameters),
     _factory(base->getMooseApp().getFactory()),
-    _action_factory(base->getMooseApp().getActionFactory())
+    _action_factory(base->getMooseApp().getActionFactory()),
+    _moose_base(base)
 {
 }
 
@@ -37,12 +37,12 @@ MooseBaseParameterInterface::connectControllableParams(const std::string & param
                                                        const std::string & object_parameter) const
 {
   MooseObjectParameterName primary_name(uniqueName(), parameter);
-  auto base_type = _factory.getValidParams(object_type).get<std::string>("_moose_base");
+  const auto base_type = _factory.getValidParams(object_type).get<std::string>("_moose_base");
   MooseObjectParameterName secondary_name(base_type, object_name, object_parameter);
   _moose_base->getMooseApp().getInputParameterWarehouse().addControllableParameterConnection(
       primary_name, secondary_name);
 
-  const std::vector<std::string> & tags = _pars.get<std::vector<std::string>>("control_tags");
+  const auto & tags = _pars.get<std::vector<std::string>>("control_tags");
   for (const auto & tag : tags)
   {
     if (!tag.empty())

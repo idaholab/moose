@@ -25,7 +25,9 @@ class MooseBaseErrorInterface : public ConsoleStreamInterface
 {
 public:
   MooseBaseErrorInterface(const MooseBase * const base)
-    : ConsoleStreamInterface(base->getMooseApp()), _app(base->getMooseApp()), _moose_base(base){};
+    : ConsoleStreamInterface(base->getMooseApp()), _app(base->getMooseApp()), _moose_base(base)
+  {
+  }
 
   virtual ~MooseBaseErrorInterface() = default;
 
@@ -91,7 +93,7 @@ public:
    */
   std::string errorPrefix(const std::string & error_type) const;
 
-protected:
+private:
   /// The MOOSE application this is associated with
   MooseApp & _app;
 

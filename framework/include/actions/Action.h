@@ -153,13 +153,6 @@ protected:
   /// Timers
   PerfID _act_timer;
 
+  // Base classes have the same name for that attribute, pick one
   using MooseBase::_app;
-  using MooseBase::_name;
-  using MooseBase::_type;
-  using MooseBaseErrorInterface::_console;
-  using MooseBaseErrorInterface::mooseDeprecated;
-  using MooseBaseErrorInterface::mooseError;
-  using MooseBaseErrorInterface::mooseWarning;
-  using MooseBaseParameterInterface::_action_factory;
-  using MooseBaseParameterInterface::_factory;
 };

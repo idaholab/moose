@@ -154,9 +154,6 @@ public:
                                  const std::string & object_parameter) const;
 
 protected:
-  /// The MooseBase object that inherits this class
-  const MooseBase * _moose_base;
-
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
 
@@ -167,6 +164,9 @@ protected:
   ActionFactory & _action_factory;
 
 private:
+  /// The MooseBase object that inherits this class
+  const MooseBase * const _moose_base;
+
   template <typename... Args>
   std::string paramErrorMsg(const std::string & param, Args... args) const
   {

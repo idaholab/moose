@@ -53,23 +53,10 @@ public:
    */
   virtual bool enabled() const { return _enabled; }
 
-  using MooseBaseErrorInterface::_console;
-  using MooseBaseErrorInterface::mooseDeprecated;
-  using MooseBaseErrorInterface::mooseError;
-  using MooseBaseErrorInterface::mooseWarning;
-  using MooseBaseParameterInterface::getCheckedPointerParam;
-  using MooseBaseParameterInterface::getParam;
-  using MooseBaseParameterInterface::paramError;
-  using MooseBaseParameterInterface::paramInfo;
-  using MooseBaseParameterInterface::paramWarning;
-
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
 
+  // Base classes have the same name for that attribute, pick one
   using MooseBase::_app;
-  using MooseBase::_name;
-  using MooseBase::_type;
-  using MooseBaseParameterInterface::_action_factory;
-  using MooseBaseParameterInterface::_factory;
 };
