@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IsotropicPlasticityStressUpdate.h"
-
+#include "UserObject.h"
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
@@ -38,6 +38,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::validParams()
       "String that is prepended to the plastic_strain Material Property",
       "This has been replaced by the 'base_name' parameter");
   params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";
+  // params.set<MaterialPropertyName>("hardening_var_init1") = "hardening_var_init1";
 
   return params;
 }
@@ -68,7 +69,21 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::IsotropicPlasticityStressUpdateTemp
         this->template declareGenericProperty<Real, is_ad>(_base_name + "hardening_variable")),
     _hardening_variable_old(
         this->template getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
-    _temperature(this->template coupledGenericValue<is_ad>("temperature"))
+    _temperature(this->template coupledGenericValue<is_ad>("temperature")),
+    
+    // _hardening_var_init(getMaterialProperty("hardening_var_init"))
+    // _hardening_var_init(this->template getGenericMaterialProperty<Real, is_ad>("hardening_var_init1")),
+    _functions(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_hardening_variable")),
+    _functionsps00(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain00")),
+    _functionsps10(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain10")),
+    _functionsps20(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain20")),
+    _functionsps01(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain01")),
+    _functionsps11(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain11")),
+    _functionsps21(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain21")),
+    _functionsps02(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain02")),
+    _functionsps12(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain12")),
+    _functionsps22(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_plastic_strain22"))
+    
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
     mooseError("Yield stress must be greater than zero");
@@ -88,8 +103,23 @@ template <bool is_ad>
 void
 IsotropicPlasticityStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
-  _hardening_variable[_qp] = 0.0;
+  // _hardening_variable[_qp] = coupledValue("hardening_var_init")[_qp];
+  // _hardening_variable[_qp].getStandardVariable("hardening_var_init")[_qp];
+  // _hardening_var_init(getVar("hardening_var_init"),0)
+  // _functions[0]=FunctionInterface::getFunctionByName('solution_fcn');
+  _initstrain.fillFromInputVector(std::vector<Real>{_functionsps00.value(0, _q_point[_qp]), _functionsps10.value(0, _q_point[_qp]), _functionsps20.value(0, _q_point[_qp]), _functionsps01.value(0, _q_point[_qp]), _functionsps11.value(0, _q_point[_qp]), _functionsps21.value(0, _q_point[_qp]), _functionsps02.value(0, _q_point[_qp]), _functionsps12.value(0, _q_point[_qp]), _functionsps22.value(0, _q_point[_qp])});
+
+  _hardening_variable[_qp] = 0;
+  _hardening_variable[_qp]=_functions.value(0,_q_point[_qp]);
+  // _hardening_variable[_qp] += _hardening_var_init[_qp];
+  // _hardening_variable[_qp] = _current_elem->id();
+  
+  // std::cout << "current_elem" << _current_elem << std::endl;
+  // std::cout << "hardening_variable = " << _hardening_variable[_qp] << std::endl;
+  // std::cout << "element_id = " << _current_elem->id() << std::endl;
+
   _plastic_strain[_qp].zero();
+  _plastic_strain[_qp] += _initstrain;
 }
 
 template <bool is_ad>

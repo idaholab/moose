@@ -90,7 +90,9 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _use_substepping(
         this->template getParam<MooseEnum>("use_substepping").template getEnum<SubsteppingType>()),
     _adaptive_substepping(this->template getParam<bool>("adaptive_substepping")),
-    _maximum_number_substeps(this->template getParam<unsigned>("maximum_number_substeps"))
+    _maximum_number_substeps(this->template getParam<unsigned>("maximum_number_substeps")),
+    _functions(FunctionInterface::getFunctionByName("solution_fcn_eff_inel_strain"))
+
 {
   if (this->_pars.isParamSetByUser("use_substep"))
   {
@@ -126,6 +128,7 @@ void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
+  _effective_inelastic_strain[_qp] += _functions.value(0, _q_point[_qp]);
 }
 
 template <bool is_ad>

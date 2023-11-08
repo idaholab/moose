@@ -225,6 +225,8 @@ protected:
 
   /// Whether to use fully transformed Hill's tensor due to rigid body or large deformation kinematic rotation
   const bool _use_transformation;
+
+  const Function & _function;
 };
 
 typedef GeneralizedRadialReturnStressUpdateTempl<false> GeneralizedRadialReturnStressUpdate;

@@ -69,6 +69,7 @@ ComputeMultipleInelasticStress::validParams()
   params.addParam<bool>(
       "cycle_models", false, "At timestep N use only inelastic model N % num_models.");
   params.addParam<MaterialName>("damage_model", "Name of the damage model");
+  
 
   return params;
 }
@@ -96,7 +97,17 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _cycle_models(getParam<bool>("cycle_models")),
     _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
-    _all_models_isotropic(true)
+    _all_models_isotropic(true),
+    _functions00(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain00")),
+    _functions10(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain10")),
+    _functions20(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain20")),
+    _functions01(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain01")),
+    _functions11(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain11")),
+    _functions21(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain21")),
+    _functions02(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain02")),
+    _functions12(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain12")),
+    _functions22(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain22"))
+
 {
   if (_inelastic_weights.size() != _num_models)
     mooseError(
@@ -111,7 +122,13 @@ void
 ComputeMultipleInelasticStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
+
+  _initstrain.fillFromInputVector(std::vector<Real>{_functions00.value(0, _q_point[_qp]), _functions10.value(0, _q_point[_qp]), _functions20.value(0, _q_point[_qp]), _functions01.value(0, _q_point[_qp]), _functions11.value(0, _q_point[_qp]), _functions21.value(0, _q_point[_qp]), _functions02.value(0, _q_point[_qp]), _functions12.value(0, _q_point[_qp]), _functions22.value(0, _q_point[_qp])});
+
   _inelastic_strain[_qp].zero();
+  _inelastic_strain[_qp] += _initstrain;
+  // std::cout << "current_elem: " << _current_elem->id() << std::endl;
+
 }
 
 void

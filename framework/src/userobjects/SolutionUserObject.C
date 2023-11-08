@@ -1053,7 +1053,7 @@ SolutionUserObject::evalMeshFunction(const Point & p,
                oss.str(),
                " in the '",
                name(),
-               "' SolutionUserObject");
+               "' SolutionUserObject0");
   }
   return output(local_var_index);
 }
@@ -1094,7 +1094,7 @@ SolutionUserObject::evalMultiValuedMeshFunction(
                oss.str(),
                " in the '",
                name(),
-               "' SolutionUserObject");
+               "' SolutionUserObject1");
   }
 
   // Fill the actual map that is returned
@@ -1146,7 +1146,7 @@ SolutionUserObject::evalMeshFunctionGradient(
                oss.str(),
                " in the '",
                name(),
-               "' SolutionUserObject");
+               "' SolutionUserObject2");
   }
   return output[local_var_index];
 }
@@ -1187,7 +1187,7 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(
                oss.str(),
                " in the '",
                name(),
-               "' SolutionUserObject");
+               "' SolutionUserObject3");
   }
 
   // Fill the actual map that is returned

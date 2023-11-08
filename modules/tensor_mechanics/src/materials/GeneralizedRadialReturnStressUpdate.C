@@ -67,7 +67,8 @@ GeneralizedRadialReturnStressUpdateTempl<is_ad>::GeneralizedRadialReturnStressUp
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _max_integration_error(this->template getParam<Real>("max_integration_error")),
     _max_integration_error_time_step(std::numeric_limits<Real>::max()),
-    _use_transformation(this->template getParam<bool>("use_transformation"))
+    _use_transformation(this->template getParam<bool>("use_transformation")),
+    _function(FunctionInterface::getFunctionByName("solution_fcn_eff_inel_strain"))
 {
 }
 
@@ -76,6 +77,7 @@ void
 GeneralizedRadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
+  _effective_inelastic_strain[_qp] += _function.value(0, _q_point[_qp]);
   _inelastic_strain_rate[_qp] = 0.0;
 }
 

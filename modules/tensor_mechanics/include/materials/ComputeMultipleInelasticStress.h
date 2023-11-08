@@ -176,6 +176,18 @@ protected:
   /// are all inelastic models inherently isotropic? (not the case for e.g. weak plane plasticity models)
   bool _all_models_isotropic;
 
+  const Function & _functions00;
+  const Function & _functions10;
+  const Function & _functions20;
+  const Function & _functions01;
+  const Function & _functions11;
+  const Function & _functions21;
+  const Function & _functions02;
+  const Function & _functions12;
+  const Function & _functions22;
+
+  RankTwoTensor _initstrain;
+
   /// Pointer to the damage model
   DamageBaseTempl<false> * _damage_model;
 

@@ -79,7 +79,16 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(getParam<bool>("cycle_models")),
     _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _is_elasticity_tensor_guaranteed_isotropic(false)
+    _is_elasticity_tensor_guaranteed_isotropic(false),
+    _functions00(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain00")),
+    _functions10(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain10")),
+    _functions20(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain20")),
+    _functions01(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain01")),
+    _functions11(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain11")),
+    _functions21(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain21")),
+    _functions02(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain02")),
+    _functions12(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain12")),
+    _functions22(FunctionInterface::getFunctionByName(_base_name + "solution_fcn_inel_strain22"))
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",
@@ -93,7 +102,11 @@ void
 ADComputeMultipleInelasticStress::initQpStatefulProperties()
 {
   ADComputeFiniteStrainElasticStress::initQpStatefulProperties();
+  
+  _initstrain.fillFromInputVector(std::vector<Real>{_functions00.value(0, _q_point[_qp]), _functions10.value(0, _q_point[_qp]), _functions20.value(0, _q_point[_qp]), _functions01.value(0, _q_point[_qp]), _functions11.value(0, _q_point[_qp]), _functions21.value(0, _q_point[_qp]), _functions02.value(0, _q_point[_qp]), _functions12.value(0, _q_point[_qp]), _functions22.value(0, _q_point[_qp])});
+
   _inelastic_strain[_qp].zero();
+  _inelastic_strain[_qp] += _initstrain;
 }
 
 void

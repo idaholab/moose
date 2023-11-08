@@ -20,9 +20,7 @@
   using ADComputeStressBaseTempl<R2>::_mechanical_strain;                                          \
   using ADComputeStressBaseTempl<R2>::_stress;                                                     \
   using ADComputeStressBaseTempl<R2>::_elastic_strain;                                             \
-  using ADComputeStressBaseTempl<R2>::_extra_stresses;                                             \
-  using ADComputeStressBaseTempl<R2>::_initial_stress_fcn
-
+  using ADComputeStressBaseTempl<R2>::_extra_stresses;  
 /**
  * ADComputeStressBaseTempl is the base class for stress tensors
  */
@@ -44,15 +42,38 @@ protected:
 
   const ADMaterialProperty<R2> & _mechanical_strain;
 
+
   /// The stress tensor to be calculated
   ADMaterialProperty<R2> & _stress;
   ADMaterialProperty<R2> & _elastic_strain;
 
   /// Extra stress tensors
-  std::vector<const MaterialProperty<R2> *> _extra_stresses;
+  std::vector<const MaterialProperty<R2> *> _extra_stresses;  
+  const Function & _functions00;
+  const Function & _functions10;
+  const Function & _functions20;
+  const Function & _functions01;
+  const Function & _functions11;
+  const Function & _functions21;
+  const Function & _functions02;
+  const Function & _functions12;
+  const Function & _functions22;
 
-  /// initial stress components
-  std::vector<const Function *> _initial_stress_fcn;
+  const Function & _functions00es;
+  const Function & _functions10es;
+  const Function & _functions20es;
+  const Function & _functions01es;
+  const Function & _functions11es;
+  const Function & _functions21es;
+  const Function & _functions02es;
+  const Function & _functions12es;
+  const Function & _functions22es;
+
+
+  SymmetricRankTwoTensor _initstress;
+  SymmetricRankTwoTensor _initstrain;
+
+
 };
 
 typedef ADComputeStressBaseTempl<RankTwoTensor> ADComputeStressBase;

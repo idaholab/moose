@@ -10,6 +10,8 @@
 #pragma once
 
 #include "RadialReturnStressUpdate.h"
+#include "FunctionInterface.h"
+// #include "Assembly.h"
 
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
@@ -40,6 +42,14 @@ public:
   using Material::_qp;
   using RadialReturnStressUpdateTempl<is_ad>::_base_name;
   using RadialReturnStressUpdateTempl<is_ad>::_three_shear_modulus;
+  using Material::_q_point;                                                                        \
+  using Material::_qrule;                                                                          \
+  using Material::_JxW;                                                                            \
+  using Material::_current_elem;                                                                   \
+  using Material::_current_subdomain_id;                                                           \
+  using Material::_current_side;
+  // using Assembly::_current_elem;
+
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -80,6 +90,21 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _hardening_variable;
   const MaterialProperty<Real> & _hardening_variable_old;
   const GenericVariableValue<is_ad> & _temperature;
+  // const GenericMaterialProperty<Real, is_ad> & _hardening_var_init;
+  const Function & _functions;
+  const Function & _functionsps00;
+  const Function & _functionsps10;
+  const Function & _functionsps20;
+  const Function & _functionsps01;
+  const Function & _functionsps11;
+  const Function & _functionsps21;
+  const Function & _functionsps02;
+  const Function & _functionsps12;
+  const Function & _functionsps22;
+
+  RankTwoTensor _initstrain;
+
+
 };
 
 typedef IsotropicPlasticityStressUpdateTempl<false> IsotropicPlasticityStressUpdate;

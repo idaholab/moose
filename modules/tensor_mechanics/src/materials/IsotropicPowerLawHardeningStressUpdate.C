@@ -29,7 +29,6 @@ IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::validParams()
   params.set<Real>("hardening_constant") = 1.0;
   params.suppressParameter<Real>("yield_stress");
   params.suppressParameter<Real>("hardening_constant");
-
   // Power law hardening specific parameters
   params.addRequiredParam<Real>("strength_coefficient",
                                 "The strength coefficient (K) for power law hardening");
