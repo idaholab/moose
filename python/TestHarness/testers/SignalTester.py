@@ -63,7 +63,7 @@ class SignalTester(RunApp):
         in the tester's output and exit_code fields.
         """
 
-        exit_code = super().spawnSubprocessFromOptions(timer, options, shell_linux=False)
+        exit_code = super().spawnSubprocessFromOptions(timer, options)
         if exit_code: # Something went wrong
             return
 

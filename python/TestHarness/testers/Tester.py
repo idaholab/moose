@@ -308,18 +308,14 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def spawnSubprocessFromOptions(self, timer, options, shell_linux=False, shell_windows=False):
+    def spawnSubprocessFromOptions(self, timer, options):
         """
         Spawns a subprocess based on given options, sets output and error files,
         and starts timer.
         """
         cmd = self.getCommand(options)
-        cmd_linux = cmd
-        cmd_windows = cmd
-        if not shell_linux:
-            cmd_linux = shlex.split(cmd_linux)
-        if not shell_windows:
-            cmd_windows = shlex.split(cmd_windows)
+        # Split command into list of args to be passed to Popen
+        cmd = shlex.split(cmd)
 
         cwd = self.getTestDir()
 
@@ -338,12 +334,14 @@ class Tester(MooseObject):
 
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
+            # shell is set to False to avoid getting wrong PID to parent sh
+            # process on some systems instead of to child MOOSE app process
             if platform.system() == "Windows":
-                process = subprocess.Popen(cmd_windows, stdout=f, stderr=e, close_fds=False,
-                                           shell=shell_windows, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
+                                           shell=False, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
             else:
-                process = subprocess.Popen(cmd_linux, stdout=f, stderr=e, close_fds=False,
-                                           shell=shell_linux, preexec_fn=os.setsid, cwd=cwd)
+                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
+                                           shell=False, preexec_fn=os.setsid, cwd=cwd)
         except:
             print("Error in launching a new task", cmd)
             raise
