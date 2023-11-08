@@ -129,6 +129,13 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD:
 #if !PETSC_VERSION_LESS_THAN(3, 15, 0)
       ierr = TaoSetType(_tao, TAOALMM);
+      CHKERRQ(ierr);
+      // Need to cancel monitors for ALMM, if not there is a segfault at MOOSE destruction. Setup
+      // default constraint monitor.
+      ierr = TaoCancelMonitors(_tao);
+      CHKERRQ(ierr);
+      ierr = PetscOptionsSetValue(NULL, "-tao_cmonitor", NULL);
+      CHKERRQ(ierr);
       break;
 #else
       mooseError("ALMM is only compatible with PETSc versions above 3.14. ");
