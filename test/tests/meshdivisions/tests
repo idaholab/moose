@@ -21,5 +21,11 @@
       csvdiff = 'cartesian_division_out_div_out_0001.csv'
       detail = 'a regular Cartesian grid,'
     []
+    [functor]
+      type = CSVDiff
+      input = 'functor_values_division.i'
+      csvdiff = 'functor_values_division_out_div_out_0001.csv'
+      detail = 'a mesh division based on the values of a functor,'
+    []
   []
 []
