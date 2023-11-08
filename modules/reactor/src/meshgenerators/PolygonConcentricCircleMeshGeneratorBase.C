@@ -710,7 +710,6 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   // Set up customized Block Names and/or IDs
   unsigned int block_it = 0;
   unsigned ring_block_num = 0;
-  unsigned background_block_num = 1;
   std::vector<subdomain_id_type> block_ids_old;
   std::vector<subdomain_id_type> block_ids_new;
   std::vector<SubdomainName> block_names;
@@ -722,7 +721,6 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   {
     if (_background_intervals > 1)
     {
-      background_block_num++;
       block_ids_old.push_back(_block_id_shift + 1 + block_it);
       block_ids_new.push_back(_background_block_ids.empty() ? block_ids_old.back()
                                                             : _background_block_ids.front());

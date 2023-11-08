@@ -38,71 +38,40 @@ fi
 # If we are going fast then check and make sure the build directory exists
 
 if [[ -n "${FAST}"  ]] ; then
-
   if [[ ! -d "${WASP_SRC_DIR}"/build ]] ; then
-
     echo "Error: a build directory must exist to use the --fast option"
-
     exit 1
-
   fi
-
   cd "${WASP_SRC_DIR}"/build
 
 # If we are not going fast then update WASP, remove build, and reconfigure
-
 else
-
   git rev-parse 2> /dev/null
-
   if [[ $? -eq 0 ]] && [ -z "$SKIP_SUBMODULE_UPDATE" ]; then
-
     git submodule update --init --recursive "${WASP_SRC_DIR}"
-
     if [[ $? -ne 0 ]] ; then
-
       echo "Error: git submodule update failed to complete successfully"
-
       mkdir -p "${WASP_SRC_DIR}"
-
       exit 1
-
     fi
-
   fi
 
   rm -rf "${WASP_SRC_DIR}"/build
-
   mkdir -p "${WASP_SRC_DIR}"/build
-
   cd "${WASP_SRC_DIR}"/build
-
-  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_SRC_DIR}/install"
-
+  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_PREFIX:-${WASP_SRC_DIR}/install}"
   source $SCRIPT_DIR/configure_wasp.sh
-
   configure_wasp "$WASP_OPTIONS" ../ $*
-
   if [[ $? -ne 0 ]] ; then
-
     echo "Error: configure step for WASP failed to complete successfully"
-
     exit 1
-
   fi
-
 fi
 
 # Build with MOOSE_JOBS jobs if defined, otherwise build with a single job
-
 make -j ${MOOSE_JOBS:-1} install
-
 if [[ $? -ne 0 ]] ; then
-
   echo "Error: build step for WASP failed to complete successfully"
-
   exit 1
-
 fi
-
 exit 0

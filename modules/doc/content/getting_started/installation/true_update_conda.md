@@ -1,9 +1,11 @@
 Update Conda:
 
-```bash
+!package! code
+mamba activate base
+mamba env remove -n moose
+mamba create moose moose-dev=__MOOSE_DEV__
 mamba activate moose
-mamba update moose-dev
-```
+!package-end!
 
 !alert note title=Always Update MOOSE and the Conda/Mamba packages together
 There is a tight dependency between libraries being provided by Conda, and what libraries MOOSE

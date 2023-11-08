@@ -4,11 +4,15 @@
 {#- Optional jinja arguments                                                                  -#}
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
 
+{%- if ALTERNATE_FROM == "clang" %}
+Bootstrap: docker
+{%- else %}
 BootStrap: oras
+{%- endif %}
 {%- if ALTERNATE_FROM == "rocky9" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky9-{{ ARCH }}:9.0-0
 {%- elif ALTERNATE_FROM == "clang" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-clang-{{ ARCH }}:8.6-0
+From: rockylinux:8
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
 {%- else %}
@@ -20,8 +24,12 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     export LC_ALL=C
 
 %post
+{%- if ALTERNATE_FROM == "clang" %}
+    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-4.1.2"}
+{%- else %}
     export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-3.4.3"}
     export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/mpi/openmpi-4.1.5"}
+{%- endif %}
 
     # Get the RHEL version
     RHEL_VERSION=$(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print $2}' /etc/os-release)
@@ -44,6 +52,14 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
                    libtirpc libtirpc-devel zlib-devel patch patchutils epel-release file \
                    libpng libpng-devel unzip jq valgrind cppunit doxygen fftw-devel gsl-devel \
                    libtool autoconf automake cppunit-devel
+
+{%- if ALTERNATE_FROM == "clang" %}
+    # Installing Clang, and its dependencies
+    dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
+                   git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
+                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64 lldb
+{%- endif %}
+
     # After epel-release
     dnf install -y glpk-devel patchelf lcov
 
@@ -99,10 +115,46 @@ EOF
     cd git-lfs-3.2.0
     ./install.sh
 
+{%- if ALTERNATE_FROM == "clang" %}
+    # Build and Install MPICH Clang
+    mkdir ${TEMP_LOC}/mpich
+    cd ${TEMP_LOC}/mpich
+    curl -L -O http://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
+    tar -xf mpich-4.1.2.tar.gz
+    mkdir mpich-4.1.2/build
+    cd mpich-4.1.2/build
+    export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
+    ../configure --prefix=${MOOSE_MPICH_DIR} \
+      --enable-shared \
+      --enable-sharedlibs=clang \
+      --enable-fast=O2 \
+      --enable-debuginfo \
+      --enable-totalview \
+      --enable-two-level-namespace \
+      CC=clang \
+      CXX=clang++ \
+      FC=gfortran \
+      F77=gfortran \
+      F90='' \
+      CFLAGS='' \
+      CXXFLAGS='' \
+      FFLAGS='-fallow-argument-mismatch' \
+      FCFLAGS='-fallow-argument-mismatch' \
+      F90FLAGS='' \
+      F77FLAGS=''
+    make -j ${MOOSE_JOBS:-6}
+    make install
+{%- endif %}
+
     # Basic script for setting mpich environment
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
+{%- if ALTERNATE_FROM == "clang" %}
+export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
+export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
+{%- endif %}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
     # Add script for loading mpich environment

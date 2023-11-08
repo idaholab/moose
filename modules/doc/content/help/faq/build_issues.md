@@ -7,10 +7,12 @@ date.
 - Verify the Conda Environment is active and up to date, with the latest version of our moose
   packages:
 
-  ```bash
+  !package! code
+  mamba activate base
+  mamba env remove -n moose
+  mamba create -n moose moose-dev=__MOOSE_DEV__
   mamba activate moose
-  mamba update moose-dev
-  ```
+  !package-end!
 
   if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
