@@ -1477,6 +1477,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setvector(NonlinearVariableName, string);
         setvector(AuxVariableName, string);
         setvector(FunctionName, string);
+        setvector(MeshDivisionName, string);
         setvector(UserObjectName, string);
         setvector(IndicatorName, string);
         setvector(MarkerName, string);
