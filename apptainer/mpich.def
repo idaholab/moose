@@ -6,7 +6,7 @@
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
 
 {#- The minimum version of LLVM/Clang                                                         -#}
-{%- set MIN_CLANG_VERSION = '9.0.1' -%}
+{%- set MIN_CLANG_VERSION = '10.0.1' -%}
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 Bootstrap: docker
@@ -63,16 +63,24 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 
 {%- if ALTERNATE_FROM == "clang" %}
 
-    # Installing Clang, and its dependencies
+    # Installing system Clang, and its GCC GNU dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
-                   libomp.x86_64 gcc-toolset-12-gcc-gfortran.x86_64 lldb
+                   libomp.x86_64 lldb gcc-toolset-12
+
+    # Set alternative gcc-toolchain paths required by system Clang
+    export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
+
 {%- elif ALTERNATE_FROM == "clang-min" %}
 
     # Installing additional packages necessary to build Clang from source
     dnf groupinstall -y 'Development Tools'
-    dnf install -y gcc-toolset-12-gcc.x86_64 gcc-toolset-12-gcc-c++.x86_64 \
-                   gcc-toolset-12-gcc-gfortran.x86_64 git
+    dnf install -y gcc-toolset-10 git
+
+    # Set alternative gcc-toolchain paths required by system Clang
+    export PATH=/opt/rh/gcc-toolset-10/root/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-10/root/lib:/opt/rh/gcc-toolset-10/root/lib64:${LD_LIBRARY_PATH}
 {%- endif %}
 
     # After epel-release
@@ -130,13 +138,6 @@ EOF
     cd git-lfs-3.2.0
     ./install.sh
 
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-
-    # Set alternative gcc-toolchain paths
-    export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
-{%- endif %}
-
 {%- if ALTERNATE_FROM == "clang-min" %}
 
     # Build minimum Clang from source; MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
@@ -146,19 +147,18 @@ EOF
     mkdir llvm-build
     cd llvm-build
     cmake ../llvm -G 'Unix Makefiles' \
-      -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;lldb' \
-      -DCMAKE_INSTALL_PREFIX=/opt/llvm-${MIN_CLANG_VERSION} \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;openmp;lldb' \
+      -DCMAKE_INSTALL_PREFIX=/opt/llvm-${MIN_CLANG_VERSION}  \
       -DCMAKE_INSTALL_RPATH:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
       -DCMAKE_INSTALL_NAME_DIR:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
       -DCMAKE_BUILD_WITH_INSTALL_RPATH=1 \
-      -DLLVM_TARGETS_TO_BUILD="X86" \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_MACOSX_RPATH:BOOL=OFF \
-      -DCMAKE_CXX_COMPILER=/opt/rh/gcc-toolset-12/root/bin/g++ \
-      -DCMAKE_C_COMPILER=/opt/rh/gcc-toolset-12/root/bin/gcc \
-      -DCMAKE_CXX_LINK_FLAGS="-L/opt/rh/gcc-toolset-12/root/lib -Wl,-rpath,/opt/rh/gcc-toolset-12/root/lib"
+      -DGCC_INSTALL_PREFIX=/opt/rh/gcc-toolset-10/root \
+      -DCMAKE_C_COMPILER=/opt/rh/gcc-toolset-10/root/bin/gcc \
+      -DCMAKE_CXX_COMPILER=/opt/rh/gcc-toolset-10/root/bin/g++ \
+      -DCMAKE_CXX_LINK_FLAGS="-L/opt/rh/gcc-toolset-10/root/lib -Wl,-rpath,/opt/rh/gcc-toolset-10/root/lib"
     make -j ${MOOSE_JOBS}
-    make install
+    make install -j ${MOOSE_JOBS}
 
     # Use Clang {{ MIN_CLANG_VERSION }}
     export PATH=/opt/llvm-${MIN_CLANG_VERSION}/bin:${PATH}
@@ -167,25 +167,24 @@ EOF
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 
-    # Build and Install MPICH Clang
+    # Build and Install MPICH using Clang
     mkdir ${TEMP_LOC}/mpich
     cd ${TEMP_LOC}/mpich
     curl -L -O http://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
     tar -xf mpich-4.1.2.tar.gz
     mkdir mpich-4.1.2/build
     cd mpich-4.1.2/build
+    export CC=clang CXX=clang++ FC=gfortran F90=gfortran F77=gfortran
     ../configure --prefix=${MOOSE_MPICH_DIR} \
       --enable-shared \
-      --enable-sharedlibs=clang \
       --enable-fast=O2 \
       --enable-debuginfo \
-      --enable-totalview \
       --enable-two-level-namespace \
       CC=clang \
       CXX=clang++ \
       FC=gfortran \
       F77=gfortran \
-      F90='' \
+      F90=gfortan \
       CFLAGS='' \
       CXXFLAGS='' \
       FFLAGS='-fallow-argument-mismatch' \
@@ -193,20 +192,22 @@ EOF
       F90FLAGS='' \
       F77FLAGS=''
     make -j ${MOOSE_JOBS}
-    make install
+    make install -j ${MOOSE_JOBS}
 {%- endif %}
 
     # Basic script for setting mpich environment
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" %}
 export PATH=/opt/rh/gcc-toolset-12/root/bin:${PATH}
 export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/lib:/opt/rh/gcc-toolset-12/root/lib64:${LD_LIBRARY_PATH}
 {%- endif %}
 {%- if ALTERNATE_FROM == "clang-min" %}
-export PATH=/opt/llvm-${MIN_CLANG_VERSION}/bin:${PATH}
-export LD_LIBRARY_PATH=/opt/llvm-${MIN_CLANG_VERSION}/lib:${LD_LIBRARY_PATH}
+export PATH=/opt/rh/gcc-toolset-10/root/bin:${PATH}
+export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-10/root/lib:/opt/rh/gcc-toolset-10/root/lib64:${LD_LIBRARY_PATH}
+export PATH=/opt/llvm-{{ MIN_CLANG_VERSION }}/bin:${PATH}
+export LD_LIBRARY_PATH=/opt/llvm-{{ MIN_CLANG_VERSION }}/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
