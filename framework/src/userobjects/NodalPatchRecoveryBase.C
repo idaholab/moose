@@ -15,6 +15,7 @@
 // TIMPI includes
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
+#include "libmesh/parallel_eigen.h"
 
 InputParameters
 NodalPatchRecoveryBase::validParams()
@@ -129,48 +130,34 @@ NodalPatchRecoveryBase::finalize()
     if (elem->processor_id() != processor_id())
       query_ids[elem->processor_id()].push_back(elem->id());
 
+  typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
+
   // Answer queries received from other processors
   auto gather_data = [this](const processor_id_type /*pid*/,
                             const std::vector<dof_id_type> & elem_ids,
-                            std::vector<std::vector<Real>> & data_to_fill)
+                            std::vector<AbPair> & ab_pairs)
   {
-    data_to_fill.resize(elem_ids.size());
     for (const auto i : index_range(elem_ids))
     {
       const auto elem_id = elem_ids[i];
-      auto Ait = _Ae.find(elem_id);
-      if (Ait != _Ae.end())
-      {
-        auto bit = _be.find(elem_id);
-        mooseAssert(bit != _be.end(), "We found _Ae[elem_id] but not _be[elem_id]");
-        data_to_fill[i].insert(
-            data_to_fill[i].end(), Ait->second.data(), Ait->second.data() + _q * _q);
-        data_to_fill[i].insert(data_to_fill[i].end(), bit->second.data(), bit->second.data() + _q);
-      }
+      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
     }
   };
 
   // Gather answers received from other processors
   auto act_on_data = [this](const processor_id_type /*pid*/,
                             const std::vector<dof_id_type> & elem_ids,
-                            const std::vector<std::vector<Real>> & filled_data)
+                            const std::vector<AbPair> & ab_pairs)
   {
     for (const auto i : index_range(elem_ids))
     {
       const auto elem_id = elem_ids[i];
-      if (!filled_data[i].empty())
-      {
-        RealEigenMatrix Ae(_q, _q);
-        RealEigenVector be(_q);
-        std::copy(filled_data[i].begin(), filled_data[i].begin() + _q * _q, Ae.data());
-        std::copy(filled_data[i].begin() + _q * _q, filled_data[i].end(), be.data());
-        _Ae[elem_id] = Ae;
-        _be[elem_id] = be;
-      }
+      const auto & [Ae, be] = ab_pairs[i];
+      _Ae[elem_id] = Ae;
+      _be[elem_id] = be;
     }
   };
 
-  const std::vector<Real> * ex = nullptr;
-  libMesh::Parallel::pull_parallel_vector_data(
-      _communicator, query_ids, gather_data, act_on_data, ex);
+  libMesh::Parallel::pull_parallel_vector_data<AbPair>(
+      _communicator, query_ids, gather_data, act_on_data, 0);
 }
