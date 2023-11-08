@@ -2287,7 +2287,7 @@ FEProblemBase::addMeshDivision(const std::string & type,
                                InputParameters & parameters)
 {
   parallel_object_only();
-
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
   std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, 0);
   _mesh_divisions.addObject(func);
 }
@@ -3108,7 +3108,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
   else
     mooseError("Variable '",
                var_name,
-               "' requested in fiunite volume initial condition '",
+               "' requested in finite volume initial condition '",
                name,
                "' does not exist.");
 }
