@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#25901'
+  [mesh_div]
+    design = 'syntax/MeshDivisions/index.md'
+    requirement = 'The system shall be able to divide the mesh using'
+    [blocks]
+      type = CSVDiff
+      input = 'block_division.i'
+      csvdiff = 'block_division_out.csv'
+      detail = 'subdomains defined on the mesh,'
+    []
+  []
+[]
