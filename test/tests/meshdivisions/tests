@@ -33,6 +33,12 @@
       csvdiff = 'nearest_position_division_out_div_out_0001.csv'
       detail = 'a nearest-point/neighbor partition,'
     []
+    [cylinder]
+      type = CSVDiff
+      input = 'cylindrical_division.i'
+      csvdiff = 'cylindrical_division_out_div_out_0001.csv'
+      detail = 'a regular cylindrical R-theta-Z grid,'
+    []
     [spherical]
       type = CSVDiff
       input = 'spherical_division.i'
