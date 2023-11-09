@@ -14,10 +14,15 @@ The volume change in the lattice produced by the voids is calculated as
 where $r$ is the void radius and $\rho_v$ is the number density [!cite](was2007).
 Consistent with the unit system used in the MOOSE crystal plasticity models, these two void characteristics have units of $mm$ and $1/mm^3$, respectively.
 
-The equivalent linear strain increment, $\Delta l$, is calculated in the traditional fashion by taking the cubic root of the volumetric measure. The linear expansion increment tensor is calculated by multiplying the equivalent linear strain increment by the Rank-2 identity tensor
+The equivalent linear strain measure is calculated in the traditional fashion by taking the cubic root of the volume change due to the voids as defined above. The equivalent linear strain increment is defined as the difference between the volume change at two timesteps.
+\begin{equation}
+  \Delta l = \left[ \left(\frac{\Delta V}{V_o}\bigg\vert_t\right)^{1/3}  - \left(\frac{\Delta V}{V_o}\bigg\vert_{(t-1)}\right)^{1/3} \right]
+\end{equation}
+where $t$ indicates the current timestep and $(t-1)$ denotes the previous timestep.
+The linear expansion increment tensor is then calculated by multiplying the equivalent linear strain increment by the Rank-2 identity tensor, $\mathbf{I}$
 \begin{equation}
   \label{eqn:linearMeasureVolumeChangeCP}
-  \Delta \boldsymbol{\epsilon}^v = \mathbf{I} \cdot \Delta l = \mathbf{I} \cdot \left[ \left(\frac{\Delta V}{V_o}\bigg\vert_t\right)^{1/3}  - \left(\frac{\Delta V}{V_o}\bigg\vert_{(t-1)}\right)^{1/3} \right]
+  \Delta \boldsymbol{\epsilon}^v = \mathbf{I} \cdot \Delta l.
 \end{equation}
 
 
