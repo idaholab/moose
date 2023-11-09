@@ -137,36 +137,44 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   const ADReal A_flow = computeFlowArea(UL_1d, UR_1d);
 
   // compute the fluxes
-  FL.resize(THMVACE1D::N_FLUX_OUTPUTS);
+  FL.resize(THMVACE3D::N_FLUX_OUTPUTS);
   if (sL > 0.0)
   {
-    FL[THMVACE1D::MASS] = unL * rhoL * A_flow;
-    FL[THMVACE1D::MOMENTUM] = (unL * rhoL * unL + pL) * A_flow;
-    FL[THMVACE1D::ENERGY] = unL * (rhoEL + pL) * A_flow;
+    FL[THMVACE3D::MASS] = unL * rhoL * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (unL * rhoL * unL + pL) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhoL * unL * ut1L * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhoL * unL * ut2L * A_flow;
+    FL[THMVACE3D::ENERGY] = unL * (rhoEL + pL) * A_flow;
 
     _last_region_index = 0;
   }
   else if (sL <= 0.0 && sm > 0.0)
   {
-    FL[THMVACE1D::MASS] = sm * rhoLs * A_flow;
-    FL[THMVACE1D::MOMENTUM] = (sm * rhounLs + ps) * A_flow;
-    FL[THMVACE1D::ENERGY] = sm * (rhoELs + ps) * A_flow;
+    FL[THMVACE3D::MASS] = sm * rhoLs * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (sm * rhounLs + ps) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhounLs * ut1L * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhounLs * ut2L * A_flow;
+    FL[THMVACE3D::ENERGY] = sm * (rhoELs + ps) * A_flow;
 
     _last_region_index = 1;
   }
   else if (sm <= 0.0 && sR >= 0.0)
   {
-    FL[THMVACE1D::MASS] = sm * rhoRs * A_flow;
-    FL[THMVACE1D::MOMENTUM] = (sm * rhounRs + ps) * A_flow;
-    FL[THMVACE1D::ENERGY] = sm * (rhoERs + ps) * A_flow;
+    FL[THMVACE3D::MASS] = sm * rhoRs * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (sm * rhounRs + ps) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhounRs * ut1R * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhounRs * ut2R * A_flow;
+    FL[THMVACE3D::ENERGY] = sm * (rhoERs + ps) * A_flow;
 
     _last_region_index = 2;
   }
   else if (sR < 0.0)
   {
-    FL[THMVACE1D::MASS] = unR * rhoR * A_flow;
-    FL[THMVACE1D::MOMENTUM] = (unR * rhoR * unR + pR) * A_flow;
-    FL[THMVACE1D::ENERGY] = unR * (rhoER + pR) * A_flow;
+    FL[THMVACE3D::MASS] = unR * rhoR * A_flow;
+    FL[THMVACE3D::MOM_NORM] = (unR * rhoR * unR + pR) * A_flow;
+    FL[THMVACE3D::MOM_TAN1] = rhoR * unR * ut1R * A_flow;
+    FL[THMVACE3D::MOM_TAN2] = rhoR * unR * ut2R * A_flow;
+    FL[THMVACE3D::ENERGY] = unR * (rhoER + pR) * A_flow;
 
     _last_region_index = 3;
   }
@@ -176,10 +184,10 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   FR = FL;
 
   const ADReal A_wall_L = AL - A_flow;
-  FL[THMVACE1D::MOMENTUM] += pL * A_wall_L;
+  FL[THMVACE3D::MOM_NORM] += pL * A_wall_L;
 
   const ADReal A_wall_R = AR - A_flow;
-  FR[THMVACE1D::MOMENTUM] += pR * A_wall_R;
+  FR[THMVACE3D::MOM_NORM] += pR * A_wall_R;
 }
 
 ADReal

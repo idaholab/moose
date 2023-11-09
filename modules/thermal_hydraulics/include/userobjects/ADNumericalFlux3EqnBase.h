@@ -100,10 +100,14 @@ protected:
   /// side ID of the cached flux values
   mutable unsigned int _cached_flux_side_id;
 
-  /// flux vector for the "left" cell
-  mutable std::vector<ADReal> _FL;
-  /// flux vector for the "right" cell
-  mutable std::vector<ADReal> _FR;
+  /// flux vector for the "left" cell for 3D
+  mutable std::vector<ADReal> _FL_3d;
+  /// flux vector for the "right" cell for 3D
+  mutable std::vector<ADReal> _FR_3d;
+  /// flux vector for the "left" cell for 1D
+  mutable std::vector<ADReal> _FL_1d;
+  /// flux vector for the "right" cell for 1D
+  mutable std::vector<ADReal> _FR_1d;
 
   /// Index describing the region last entered, which is useful for testing and debugging
   mutable unsigned int _last_region_index;

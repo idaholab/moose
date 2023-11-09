@@ -32,7 +32,10 @@ public:
   virtual unsigned int getNumberOfRegions() const override { return 1; }
 
 protected:
-  std::vector<ADReal> computeFlux(const std::vector<ADReal> & U, const RealVectorValue & n) const;
+  std::vector<ADReal> computeFlux(const std::vector<ADReal> & U,
+                                  const RealVectorValue & n,
+                                  const RealVectorValue & t1,
+                                  const RealVectorValue & t2) const;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;

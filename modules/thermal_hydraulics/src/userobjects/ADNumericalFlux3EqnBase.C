@@ -86,17 +86,27 @@ ADNumericalFlux3EqnBase::getFlux(const unsigned int iside,
     RealVectorValue t1, t2;
     THM::computeOrthogonalDirections(nLR, t1, t2);
 
-    calcFlux(UL_3d, UR_3d, nLR, t1, t2, _FL, _FR);
+    calcFlux(UL_3d, UR_3d, nLR, t1, t2, _FL_3d, _FR_3d);
 
-    _FL[THMVACE1D::MASS] *= nLR_dot_d;
-    _FL[THMVACE1D::ENERGY] *= nLR_dot_d;
+    _FL_3d[THMVACE3D::MASS] *= nLR_dot_d;
+    _FL_3d[THMVACE3D::ENERGY] *= nLR_dot_d;
 
-    _FR[THMVACE1D::MASS] *= nLR_dot_d;
-    _FR[THMVACE1D::ENERGY] *= nLR_dot_d;
+    _FR_3d[THMVACE3D::MASS] *= nLR_dot_d;
+    _FR_3d[THMVACE3D::ENERGY] *= nLR_dot_d;
+
+    _FL_1d.resize(THMVACE1D::N_FLUX_OUTPUTS);
+    _FL_1d[THMVACE1D::MASS] = _FL_3d[THMVACE3D::MASS];
+    _FL_1d[THMVACE1D::MOMENTUM] = _FL_3d[THMVACE3D::MOM_NORM];
+    _FL_1d[THMVACE1D::ENERGY] = _FL_3d[THMVACE3D::ENERGY];
+
+    _FR_1d.resize(THMVACE1D::N_FLUX_OUTPUTS);
+    _FR_1d[THMVACE1D::MASS] = _FR_3d[THMVACE3D::MASS];
+    _FR_1d[THMVACE1D::MOMENTUM] = _FR_3d[THMVACE3D::MOM_NORM];
+    _FR_1d[THMVACE1D::ENERGY] = _FR_3d[THMVACE3D::ENERGY];
   }
 
   if (res_side_is_left)
-    return _FL;
+    return _FL_1d;
   else
-    return _FR;
+    return _FR_1d;
 }
