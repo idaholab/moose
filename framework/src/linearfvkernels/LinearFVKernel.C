@@ -63,9 +63,24 @@ LinearFVKernel::validParams()
 }
 
 LinearFVKernel::LinearFVKernel(const InputParameters & params)
-  : LinearSystemContributionObject(params), BlockRestrictable(this), ADFunctorInterface(this)
+  : LinearSystemContributionObject(params),
+    BlockRestrictable(this),
+    ADFunctorInterface(this),
+    MooseVariableDependencyInterface(this)
 {
-  _subproblem.haveADObjects(true);
+  auto & var = _fe_problem.getVariable(_tid,
+                                       params.varName("variable", name()),
+                                       Moose::VarKindType::VAR_LINEAR,
+                                       Moose::VarFieldType::VAR_FIELD_STANDARD);
+  _var = dynamic_cast<MooseLinearVariableFV<Real> *>(&var);
+  if (!_var)
+    paramError("variable",
+               "The variable defined for kernel ",
+               name(),
+               " is not derived from MooseLinearVariableFV!");
+
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "Linear FV kernels do not yet support displaced mesh");
+
+  addMooseVariableDependency(_var);
 }

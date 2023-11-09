@@ -11,6 +11,8 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", LinearFVReactionKernel);
+
 InputParameters
 LinearFVReactionKernel::validParams()
 {

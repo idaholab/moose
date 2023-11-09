@@ -13,12 +13,15 @@
 #include "BlockRestrictable.h"
 #include "Assembly.h"
 #include "ADFunctorInterface.h"
+#include "MooseLinearVariableFV.h"
+#include "MooseVariableDependencyInterface.h"
 
 class SubProblem;
 
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
-                       public ADFunctorInterface
+                       public ADFunctorInterface,
+                       public MooseVariableDependencyInterface
 {
 public:
   static InputParameters validParams();
@@ -26,4 +29,9 @@ public:
                           InputParameters & rm_params,
                           unsigned short ghost_layers);
   LinearFVKernel(const InputParameters & params);
+
+  virtual const MooseLinearVariableFV<Real> & variable() const override { return *_var; }
+
+protected:
+  MooseLinearVariableFV<Real> * _var;
 };

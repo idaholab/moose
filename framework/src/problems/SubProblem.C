@@ -795,7 +795,7 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
     var = &(nls[nl_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_LINEAR && var_in_linear &&
            linear_systems[linear_sys_num]->hasVariable(var_name))
-    var = &(nls[nl_sys_num]->getVariable(tid, var_name));
+    var = &(linear_systems[linear_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else

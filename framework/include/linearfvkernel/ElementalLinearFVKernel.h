@@ -14,7 +14,7 @@
 #include "MooseVariableFV.h"
 #include "MooseVariableInterface.h"
 
-class ElementalLinearFVKernel : public LinearFVKernel, public MooseVariableInterface<Real>
+class ElementalLinearFVKernel : public LinearFVKernel
 {
 public:
   static InputParameters validParams();
@@ -35,5 +35,4 @@ public:
 
 protected:
   const ElemInfo * _current_elem_info;
-  MooseVariableFV<Real> & _var;
 };

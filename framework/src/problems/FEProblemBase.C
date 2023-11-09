@@ -95,6 +95,7 @@
 #include "MaxVarNDofsPerElem.h"
 #include "MaxVarNDofsPerNode.h"
 #include "FVKernel.h"
+#include "LinearFVKernel.h"
 #include "FVTimeKernel.h"
 #include "MooseVariableFV.h"
 #include "MooseLinearVariableFV.h"
@@ -3055,13 +3056,13 @@ FEProblemBase::addLinearFVKernel(const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  const auto linear_sys_num =
-      determineLinearSystem(parameters.varName("variable", name), true).second;
-
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SystemBase *>("_sys") = _linear_systems[linear_sys_num].get();
-
-  _linear_systems[linear_sys_num]->addLinearFVKernel(kernel_name, name, parameters);
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+    // FVElementalKernels are computed in the historically finite element threaded loops. They rely
+    // on Assembly data like _current_elem. When we call reinit on the FEProblemBase we will only
+    // reinit the DisplacedProblem and its associated Assembly objects if we mark this boolean as
+    // true
+    _reinit_displaced_elem = true;
+  addObject<LinearFVKernel>(kernel_name, name, parameters);
 }
 
 void

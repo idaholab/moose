@@ -15,31 +15,25 @@ InputParameters
 ElementalLinearFVKernel::validParams()
 {
   InputParameters params = LinearFVKernel::validParams();
+  params.registerSystemAttributeName("ElementalLinearFVKernel");
   return params;
 }
 
 ElementalLinearFVKernel::ElementalLinearFVKernel(const InputParameters & params)
-  : LinearFVKernel(params),
-    MooseVariableInterface(this,
-                           false,
-                           "variable",
-                           Moose::VarKindType::VAR_NONLINEAR,
-                           Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _current_elem_info(nullptr),
-    _var(*mooseVariableFV())
+  : LinearFVKernel(params), _current_elem_info(nullptr)
 {
 }
 
 void
 ElementalLinearFVKernel::addMatrixContribution()
 {
-  const auto dof_id = _current_elem_info->dofIndices()[_var.sys().number()][_var.number()];
+  const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.matrix).add(dof_id, dof_id, computeMatrixContribution());
 }
 
 void
 ElementalLinearFVKernel::addRightHandSideContribution()
 {
-  const auto dof_id = _current_elem_info->dofIndices()[_var.sys().number()][_var.number()];
+  const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.rhs).add(dof_id, computeRightHandSideContribution());
 }

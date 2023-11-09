@@ -19,6 +19,16 @@
 []
 
 [LinearFVKernels]
+  [reaction]
+    type = LinearFVReactionKernel
+    variable = u
+    coeff = 5.0
+  []
+  [source]
+    type = LinearFVSourceKernel
+    variable = u
+    source_density = 1.0
+  []
 []
 
 [Executioner]

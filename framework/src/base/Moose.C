@@ -141,6 +141,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_dirac_kernel",             VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
+  registerMooseObjectTask("add_linear_fv_kernel",         LinearFVKernel,         false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);
   registerMooseObjectTask("add_fv_ik",                    FVInterfaceKernel,      false);
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
@@ -351,7 +352,7 @@ addActionTypes(Syntax & syntax)
                            "(add_reporter)"
                            "(declare_late_reporters)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
+                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_linear_fv_kernel, add_fv_bc, add_fv_ik,"
                            " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
                            " add_indicator, add_marker, add_bound)"
                            "(resolve_optional_materials)"
