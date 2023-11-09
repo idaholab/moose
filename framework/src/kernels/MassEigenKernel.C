@@ -15,9 +15,10 @@ InputParameters
 MassEigenKernel::validParams()
 {
   InputParameters params = EigenKernel::validParams();
-  params.addClassDescription("An eigenkernel with weak form $\\lambda(\\psi_i, -u_h)$ where "
-                             "$\\lambda$ is the eigenvalue.");
-  params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
+  params.addClassDescription(
+      "An eigenkernel with weak form $\\lambda(\\psi_i, -u_h \\times coeff)$ where "
+      "$\\lambda$ is the eigenvalue.");
+  params.addParam<Real>("coefficient", 1.0, "Coefficient multiplying the term");
   return params;
 }
 
