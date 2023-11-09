@@ -2105,6 +2105,8 @@ public:
 
   virtual unsigned int currentNlSysNum() const override;
 
+  virtual unsigned int currentLinearSysNum() const override;
+
   /**
    * @return the nonlinear system number corresponding to the provided \p nl_sys_name
    */

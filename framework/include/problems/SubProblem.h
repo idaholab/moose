@@ -105,6 +105,11 @@ public:
    */
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const = 0;
 
+  /**
+   * @return the linear system number corresponding to the provided \p sys_name
+   */
+  virtual unsigned int linearSysNum(const NonlinearSystemName & sys_name) const = 0;
+
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
@@ -887,6 +892,16 @@ public:
    * @return the current nonlinear system number
    */
   virtual unsigned int currentNlSysNum() const = 0;
+
+  /**
+   * @return the number of linear systems in the problem
+   */
+  virtual std::size_t numLinearSystems() const = 0;
+
+  /**
+   * @return the current linear system number
+   */
+  virtual unsigned int currentLinearSysNum() const = 0;
 
   /**
    * Register an unfulfilled functor request

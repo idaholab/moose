@@ -78,6 +78,7 @@ public:
   virtual void init() override;
   virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
+  virtual unsigned int linearSysNum(const NonlinearSystemName & sys_name) const override;
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -354,7 +355,11 @@ public:
 
   std::size_t numNonlinearSystems() const override;
 
+  std::size_t numLinearSystems() const override;
+
   unsigned int currentNlSysNum() const override;
+
+  unsigned int currentLinearSysNum() const override;
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
 

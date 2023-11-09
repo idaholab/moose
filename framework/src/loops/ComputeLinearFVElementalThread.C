@@ -1,0 +1,58 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ComputeLinearFVElementalThread.h"
+#include "LinearSystem.h"
+#include "LinearFVKernel.h"
+#include "ElementalLinearFVKernel.h"
+
+ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
+                                                               const unsigned int linear_system_num,
+                                                               const std::set<TagID> & tags)
+  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _tags(tags)
+{
+}
+
+// Splitting Constructor
+ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVElementalThread & x,
+                                                               Threads::split /*split*/)
+  : _fe_problem(x._fe_problem), _linear_system_number(x._linear_system_number), _tags(x._tags)
+
+{
+}
+
+void
+ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
+{
+  ParallelUniqueId puid;
+  _tid = puid.id;
+
+  const auto & warehouse =
+      _fe_problem.getLinearSystem(_linear_system_number).getLinearFVKernelWarehouse();
+
+  // Iterate over all the elements in the range
+  for (const auto & elem_info : range)
+  {
+    if (warehouse.hasActiveBlockObjects(elem_info->subdomain_id(), _tid))
+      for (auto kernel : warehouse.getActiveBlockObjects(elem_info->subdomain_id(), _tid))
+      {
+        if (auto elemental_fv_kernel = dynamic_cast<ElementalLinearFVKernel *>(kernel.get()))
+        {
+          elemental_fv_kernel->setCurrentElemInfo(elem_info);
+          elemental_fv_kernel->addMatrixContribution();
+          elemental_fv_kernel->addRightHandSideContribution();
+        }
+      }
+  }
+}
+
+void
+ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*/)
+{
+}

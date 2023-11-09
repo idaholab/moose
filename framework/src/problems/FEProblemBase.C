@@ -3814,17 +3814,27 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
                                      const std::string & object_name,
                                      const std::string & var_param_name)
 {
-  const auto nl_sys_num =
-      parameters.isParamValid(var_param_name) &&
-              determineNonlinearSystem(parameters.varName(var_param_name, object_name)).first
-          ? determineNonlinearSystem(parameters.varName(var_param_name, object_name)).second
-          : (unsigned int)0;
+  unsigned int sys_num = 0;
+  bool var_in_nl = false;
+  bool var_in_linear = false;
+
+  if (parameters.isParamValid(var_param_name))
+  {
+    std::tie(var_in_nl, sys_num) =
+        determineNonlinearSystem(parameters.varName(var_param_name, object_name));
+    if (!var_in_nl)
+      std::tie(var_in_linear, sys_num) =
+          determineLinearSystem(parameters.varName(var_param_name, object_name));
+  }
+  sys_num = (!var_in_nl && !var_in_nl) ? 0 : sys_num;
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
+
+    if (!var_in_linear)
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(sys_num);
   }
   else
   {
@@ -3836,7 +3846,10 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+    if (var_in_linear)
+      parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num].get();
+    else
+      parameters.set<SystemBase *>("_sys") = _nl[sys_num].get();
   }
 }
 
@@ -8468,6 +8481,12 @@ unsigned int
 FEProblemBase::currentNlSysNum() const
 {
   return currentNonlinearSystem().number();
+}
+
+unsigned int
+FEProblemBase::currentLinearSysNum() const
+{
+  return currentLinearSystem().number();
 }
 
 bool

@@ -585,6 +585,12 @@ DisplacedProblem::currentNlSysNum() const
   return _mproblem.currentNlSysNum();
 }
 
+unsigned int
+DisplacedProblem::currentLinearSysNum() const
+{
+  return _mproblem.currentLinearSysNum();
+}
+
 void
 DisplacedProblem::prepare(const Elem * elem, const THREAD_ID tid)
 {
@@ -1310,6 +1316,12 @@ DisplacedProblem::numNonlinearSystems() const
   return _mproblem.numNonlinearSystems();
 }
 
+std::size_t
+DisplacedProblem::numLinearSystems() const
+{
+  return _mproblem.numLinearSystems();
+}
+
 const std::vector<VectorTag> &
 DisplacedProblem::currentResidualVectorTags() const
 {
@@ -1350,4 +1362,10 @@ unsigned int
 DisplacedProblem::nlSysNum(const NonlinearSystemName & nl_sys_name) const
 {
   return _mproblem.nlSysNum(nl_sys_name);
+}
+
+unsigned int
+DisplacedProblem::linearSysNum(const NonlinearSystemName & sys_name) const
+{
+  return _mproblem.linearSysNum(sys_name);
 }
