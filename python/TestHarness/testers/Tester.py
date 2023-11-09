@@ -39,6 +39,7 @@ class Tester(MooseObject):
         params.addParam('success_message', 'OK', "The successful message")
 
         params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+        params.addParam('use_shell',          False, "Whether to use the shell as the executing program. This has the effect of prepending '/bin/sh -c ' to the command to be run.")
         params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -314,8 +315,12 @@ class Tester(MooseObject):
         and starts timer.
         """
         cmd = self.getCommand(options)
-        # Split command into list of args to be passed to Popen
-        cmd = shlex.split(cmd)
+
+        use_shell = self.specs["use_shell"]
+
+        if not use_shell:
+            # Split command into list of args to be passed to Popen
+            cmd = shlex.split(cmd)
 
         cwd = self.getTestDir()
 
@@ -338,10 +343,10 @@ class Tester(MooseObject):
             # process on some systems instead of to child MOOSE app process
             if platform.system() == "Windows":
                 process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=False, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                                           shell=use_shell, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
             else:
                 process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=False, preexec_fn=os.setsid, cwd=cwd)
+                                           shell=use_shell, preexec_fn=os.setsid, cwd=cwd)
         except:
             print("Error in launching a new task", cmd)
             raise
