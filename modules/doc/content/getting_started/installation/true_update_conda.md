@@ -3,7 +3,7 @@ Update Conda:
 !package! code
 mamba activate base
 mamba env remove -n moose
-mamba create moose moose-dev=__MOOSE_DEV__
+mamba create -n moose moose-dev=__MOOSE_DEV__
 mamba activate moose
 !package-end!
 
