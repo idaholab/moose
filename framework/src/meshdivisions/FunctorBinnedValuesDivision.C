@@ -106,7 +106,7 @@ FunctorBinnedValuesDivision::divisionIndex(const Point & pt) const
   (*pl)(pt, candidates);
 
   // By convention we will use the element with the lowest element id
-  const Elem * elem;
+  const Elem * elem = nullptr;
   unsigned int min_elem_id = libMesh::invalid_uint;
   for (const auto elem_ptr : candidates)
     if (elem_ptr->id() < min_elem_id)

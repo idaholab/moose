@@ -59,7 +59,7 @@ SubdomainsDivision::divisionIndex(const Point & pt) const
   (*pl)(pt, candidates);
 
   // By convention we will use the element with the lowest subdomain id
-  const Elem * elem;
+  const Elem * elem = nullptr;
   unsigned int min_sub_id = Moose::INVALID_BLOCK_ID;
   for (const auto elem_ptr : candidates)
     if (elem_ptr->subdomain_id() < min_sub_id)

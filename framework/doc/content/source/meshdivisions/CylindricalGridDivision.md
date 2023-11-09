@@ -9,7 +9,7 @@ using the [!param](/MeshDivisions/CylindricalGridDivision/assign_domain_outside_
 parameter.
 
 !alert note
-The [!param](/MeshDivisions/CylindricalGridDivision/cente) should be point on the axis of the cylinder
+The [!param](/MeshDivisions/CylindricalGridDivision/center) should be point on the axis of the cylinder
 that also corresponds to the reference for the minimal ([!param](/MeshDivisions/CylindricalGridDivision/cylinder_axial_min)) and maximal ([!param](/MeshDivisions/CylindricalGridDivision/cylinder_axial_max)) axial extent of the cylinder.
 
 !alert note

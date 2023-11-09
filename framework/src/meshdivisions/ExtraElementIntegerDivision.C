@@ -74,7 +74,7 @@ ExtraElementIntegerDivision::divisionIndex(const Point & pt) const
 
   // By convention we will use the element with the lowest extra element id
   // There could be other conventions: use lowest element if for example
-  const Elem * elem;
+  const Elem * elem = nullptr;
   libMesh::dof_id_type min_extra_id = std::numeric_limits<int>::max();
   for (const auto elem_ptr : candidates)
     if (elem_ptr->get_extra_integer(_extra_id) < min_extra_id)
