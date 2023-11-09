@@ -232,7 +232,7 @@ public:
   /**
    * Whether a Bx norm postprocessor has been provided
    */
-  bool bxNormProvided() const { return !_bx_norm_name.empty(); }
+  bool bxNormProvided() const { return _bx_norm_name.has_value(); }
 
 protected:
   unsigned int _n_eigen_pairs_required;
@@ -284,7 +284,7 @@ private:
 
   /// The name of the Postprocessor providing the Bx norm. This may be empty in which case the
   /// default L2 norm of Bx will be used as the Bx norm
-  const PostprocessorName _bx_norm_name;
+  const std::optional<PostprocessorName> _bx_norm_name;
 
 #endif
 

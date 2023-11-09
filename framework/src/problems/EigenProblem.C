@@ -62,7 +62,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _has_normalization(false),
     _normal_factor(1.0),
     _first_solve(declareRestartableData<bool>("first_solve", true)),
-    _bx_norm_name(isParamValid("bx_norm") ? getParam<PostprocessorName>("bx_norm") : "")
+    _bx_norm_name(isParamValid("bx_norm")
+                      ? std::make_optional(getParam<PostprocessorName>("bx_norm"))
+                      : std::nullopt)
 {
 #ifdef LIBMESH_HAVE_SLEPC
   if (_nl_sys_names.size() > 1)
@@ -642,8 +644,8 @@ EigenProblem::initPetscOutput()
 Real
 EigenProblem::formNorm()
 {
-  mooseAssert(!_bx_norm_name.empty(),
+  mooseAssert(_bx_norm_name,
               "We should not get here unless a bx_norm postprocessor has been provided");
-  return getPostprocessorValueByName(_bx_norm_name);
+  return getPostprocessorValueByName(*_bx_norm_name);
 }
 #endif
