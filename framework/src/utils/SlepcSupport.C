@@ -1016,15 +1016,10 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
   PetscContainer container;
   PetscContainerCreate(eigen_problem.comm().get(), &container);
   PetscContainerSetPointer(container, &eigen_problem);
-  PetscObjectCompose((PetscObject)mat, "formJacobianCtx", nullptr);
   PetscObjectCompose((PetscObject)mat, "formJacobianCtx", (PetscObject)container);
-  PetscObjectCompose((PetscObject)mat, "formFunctionCtx", nullptr);
   PetscObjectCompose((PetscObject)mat, "formFunctionCtx", (PetscObject)container);
   if (eigen_problem.bxNormProvided())
-  {
-    PetscObjectCompose((PetscObject)mat, "formNormCtx", nullptr);
     PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container);
-  }
   PetscContainerDestroy(&container);
 }
 
