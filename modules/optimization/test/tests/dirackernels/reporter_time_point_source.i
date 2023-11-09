@@ -33,6 +33,7 @@
     y_coord_name = values4D/coordy
     z_coord_name = values4D/coordz
     time_name = values4D/time
+    combine_duplicates=false
   []
 []
 
@@ -59,7 +60,7 @@
                           0.00 1.00 2.00 3.00 4.00 5.00 6.00 7.00
                           8.00 9.00 10.0 11.0 12.0 13.0 14.0 15.0
                           16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0'
-    outputs = none
+    # outputs = none
   []
 []
 
@@ -98,6 +99,7 @@
 []
 
 [Outputs]
+  exodus = true
   csv = true
   execute_on = 'initial timestep_end'
 []

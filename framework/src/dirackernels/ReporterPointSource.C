@@ -40,6 +40,14 @@ ReporterPointSource::validParams()
                         true,
                         "Whether or not to combine duplicates internally by summing their values "
                         "times their weights");
+  // Values and weights for duplicates need to be combined with combine_duplicates=true
+  // Duplicate points are never actually applied as seperate dirac points, instead they are combined
+  // and computeQpResidual can be multiplied by the number of points found at a single location by
+  // setting drop_duplicate_points=false.  This will not work for our case where each point may have
+  // a different value and weight so we must combine the weights and values ourself and apply them
+  // as a single point with a single value
+  params.set<bool>("drop_duplicate_points") = true;
+  params.suppressParameter<bool>("drop_duplicate_points");
   return params;
 }
 
@@ -47,6 +55,7 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
     _combine_duplicates(getParam<bool>("combine_duplicates")),
+    _read_in_points(isParamValid("point_name")),
     _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
     _ones_vec(_values.size(), 1.0),
     _zeros_vec(_values.size(), 0.0),
@@ -60,7 +69,7 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
     _coordz(isParamValid("z_coord_name")
                 ? getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_REPLICATED)
                 : _zeros_vec),
-    _point(isParamValid("point_name")
+    _point(_read_in_points
                ? getReporterValue<std::vector<Point>>("point_name", REPORTER_MODE_REPLICATED)
                : _zeros_pts),
     _weight(isParamValid("weight_name")
@@ -75,7 +84,7 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
 void
 ReporterPointSource::addPoints()
 {
-  _point_to_values.clear();
+  _point_to_weightedValue.clear();
 
   const auto nval = _values.size();
   if (nval == 0)
@@ -93,34 +102,19 @@ ReporterPointSource::addPoints()
   errorCheck("weight_name", _weight.size());
   errorCheck("point_name", _point.size());
 
-  const auto fill_points = [this](const std::vector<Point> & points)
+  if (_read_in_points)
   {
-    dof_id_type dirac_i = 0;
-    for (const auto i : index_range(points))
-    {
-      const auto & point = points[i];
-      auto it = _point_to_values.find(point);
-      if (it == _point_to_values.end())
-      {
-        addPoint(point, dirac_i++);
-        it = _point_to_values.emplace(point, 0).first;
-      }
-      else if (!_combine_duplicates)
-        mooseError("...");
-
-      auto & value = it->second;
-      value += _values[i] * _weight[i];
-    }
-  };
-
-  if (isParamValid("point_name"))
-    fill_points(_point);
+    for (const auto & i : index_range(_point))
+      fill_points(_point[i], i);
+  }
   else
   {
     std::vector<Point> points(_coordx.size());
     for (const auto i : index_range(_values))
-      points[i] = Point(_coordx[i], _coordy[i], _coordz[i]);
-    fill_points(points);
+    {
+      const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
+      fill_points(point, i);
+    }
   }
 }
 
@@ -128,7 +122,26 @@ Real
 ReporterPointSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp] * _point_to_values.at(_current_point);
+  return -_test[_i][_qp] * _point_to_weightedValue.at(_current_point);
+}
+
+void
+ReporterPointSource::fill_points(const Point & point, const dof_id_type id)
+{
+  auto it = _point_to_weightedValue.find(point);
+  if (it == _point_to_weightedValue.end())
+  {
+    addPoint(point, id);
+    it = _point_to_weightedValue.emplace(point, 0).first;
+  }
+  else if (!_combine_duplicates)
+    mooseError("combine_duplicates must be true if reporter has duplicate points.  Found "
+               "duplicate point (",
+               point,
+               ").");
+
+  auto & value = it->second;
+  value += _values[id] * _weight[id];
 }
 
 void

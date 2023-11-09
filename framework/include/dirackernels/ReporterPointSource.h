@@ -27,9 +27,19 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
+  /**
+   * Add points and check for duplicate points.  Values and weights are
+   * combined for duplicated points
+   * @param point The point to add
+   * @param id index for dirac kernel being added
+   */
+  void fill_points(const Point & point, const dof_id_type id);
   void errorCheck(const std::string & input_name, std::size_t reporterSize);
 
+  /// bool if duplicate points values and weights should be combined
   const bool _combine_duplicates;
+  /// bool if data format read in is points
+  const bool _read_in_points;
   /// values at each xyz coordinate
   const std::vector<Real> & _values;
   /// convenience vectors (these are not const because reporters can change their size)
@@ -47,5 +57,6 @@ protected:
   /// weights to scale value by
   const std::vector<Real> & _weight;
 
-  std::map<Point, Real> _point_to_values;
+  /// map from added point to the weighted values
+  std::map<Point, Real> _point_to_weightedValue;
 };
