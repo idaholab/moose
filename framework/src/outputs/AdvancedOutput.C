@@ -151,8 +151,8 @@ void
 AdvancedOutput::init()
 {
   // Initialize the execution flags
-  for (auto & it : _advanced_execute_on)
-    initExecutionTypes(it.first, it.second);
+  for (auto & [name, input] : _advanced_execute_on)
+    initExecutionTypes(name, input);
 
   // Clear existing execute information lists
   _execute_data.reset();

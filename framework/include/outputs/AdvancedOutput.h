@@ -410,7 +410,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
           (_advanced_execute_on[execute_data_name].isValid() &&
            _advanced_execute_on[execute_data_name].contains("none")))
       {
-        const bool is_pp_type = (execute_data_name == "postprocessors") ? true : false;
+        const bool is_pp_type = (execute_data_name == "postprocessors");
         const std::string pp_type_str = is_pp_type ? "post-processor" : "vector post-processor";
         mooseWarning("The ",
                      pp_type_str,
@@ -420,7 +420,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
                      name(),
                      "' output, but ",
                      pp_type_str,
-                     " output is disabled for this output object.");
+                     " output is disabled for that output object.");
       }
     }
   }
