@@ -1252,6 +1252,15 @@ InputParameters::getGroupParameters(const std::string & group) const
 }
 
 std::set<std::string>
+InputParameters::getParametersList() const
+{
+  std::set<std::string> param_set;
+  for (auto it = _params.begin(); it != _params.end(); ++it)
+    param_set.emplace(it->first);
+  return param_set;
+}
+
+std::set<std::string>
 InputParameters::getControllableParameters() const
 {
   std::set<std::string> controllable;

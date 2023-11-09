@@ -412,6 +412,18 @@ TEST(InputParameters, getControllablePairs)
   }
 }
 
+TEST(InputParameters, getParamList)
+{
+  std::vector<std::string> num_words{"zero", "one", "two", "three"};
+
+  InputParameters p = emptyInputParameters();
+  p.addParam<std::vector<std::string>>("first", num_words, "");
+  p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
+
+  std::set<std::string> param_list({"first", "second"});
+  EXPECT_EQ(p.getParametersList(), param_list);
+}
+
 TEST(InputParameters, transferParameters)
 {
   // Add parameters of various types to p1

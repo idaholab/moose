@@ -966,7 +966,8 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
                                                const bool cache_eligible) const
 {
   mooseAssert(this->hasBlocks(elem_qp.elem->subdomain_id()),
-              "This variable doesn't exist in the requested block!");
+              "Variable " + this->name() + " doesn't exist on block " +
+                  std::to_string(elem_qp.elem->subdomain_id()));
 
   const Elem * const elem = elem_qp.elem;
   if (!cache_eligible || (elem != _current_elem_qp_functor_elem))
@@ -1167,7 +1168,8 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
                                                    const bool cache_eligible) const
 {
   mooseAssert(this->hasBlocks(elem_side_qp.elem->subdomain_id()),
-              "This variable doesn't exist in the requested block!");
+              "Variable " + this->name() + " doesn't exist on block " +
+                  std::to_string(elem_side_qp.elem->subdomain_id()));
 
   const Elem * const elem = elem_side_qp.elem;
   const auto side = elem_side_qp.side;

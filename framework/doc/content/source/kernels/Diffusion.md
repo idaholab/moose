@@ -15,10 +15,11 @@ R_i(u_h) = (\nabla \psi_i, \nabla u_h) = 0 \quad \forall  \psi_i,
 where $\psi_i$ are the test functions and $u_h \in \mathcal{S}^h$ is the finite
 element solution of the weak formulation.
 
-The Jacobian is defined as:
+Since we seek $u_h = \sum_j u_j \phi_j$, for some unknown coefficients $u_j$
+and given basis functions $\phi_j$, the Jacobian is defined as:
 
 \begin{equation}
-\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).
+\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \psi_i, \nabla \phi_j).
 \end{equation}
 
 !syntax parameters /Kernels/Diffusion

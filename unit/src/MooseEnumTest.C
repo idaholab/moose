@@ -71,6 +71,16 @@ TEST(MooseEnum, multiTestOne)
   EXPECT_EQ(mme.contains("three"), true);
   EXPECT_EQ(mme.contains("four"), false);
 
+  // Insert another valid multi-enum
+  mme.clear();
+  mme = "one four";
+  MultiMooseEnum mme2("one two three four", "three");
+  mme.push_back(mme2);
+  EXPECT_EQ(mme.contains("one"), true);
+  EXPECT_EQ(mme.contains("two"), false);
+  EXPECT_EQ(mme.contains("three"), true);
+  EXPECT_EQ(mme.contains("four"), true);
+
   mme.clear();
   mme = "one four";
   EXPECT_EQ(mme.contains("one"), true);

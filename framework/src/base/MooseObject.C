@@ -20,12 +20,6 @@ class SystemBase;
 class AuxiliarySystem;
 class Transient;
 
-std::string
-paramErrorPrefix(const InputParameters & params, const std::string & param)
-{
-  return params.errorPrefix(param);
-}
-
 InputParameters
 MooseObject::validParams()
 {
@@ -51,38 +45,13 @@ MooseObject::validParams()
 }
 
 MooseObject::MooseObject(const InputParameters & parameters)
-  : ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  : MooseBase(parameters.get<std::string>("_type"),
+              parameters.get<std::string>("_object_name"),
+              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    MooseBaseParameterInterface(parameters, this),
+    MooseBaseErrorInterface(this),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     DataFileInterface<MooseObject>(*this),
-    _pars(parameters),
-    _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
-    _type(getParam<std::string>("_type")),
-    _name(getParam<std::string>("_object_name")),
     _enabled(getParam<bool>("enable"))
 {
-}
-
-[[noreturn]] void
-callMooseErrorRaw(std::string & msg, MooseApp * app)
-{
-  app->getOutputWarehouse().mooseConsole();
-  std::string prefix;
-  if (!app->isUltimateMaster())
-    prefix = app->name();
-  moose::internal::mooseErrorRaw(msg, prefix);
-}
-
-std::string
-MooseObject::errorPrefix(const std::string & error_type) const
-{
-  std::stringstream oss;
-  oss << "The following " << error_type << " occurred in the object \"" << name()
-      << "\", of type \"" << type() << "\".\n\n";
-  return oss.str();
-}
-
-std::string
-MooseObject::typeAndName() const
-{
-  return type() + std::string(" \"") + name() + std::string("\"");
 }
