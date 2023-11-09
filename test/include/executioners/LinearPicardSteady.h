@@ -10,10 +10,22 @@
 #pragma once
 
 #include "Executioner.h"
+#include "libmesh/solver_configuration.h"
 
 // Forward declarations
 class InputParameters;
 class FEProblemBase;
+
+/**
+ * Solver configuration class used with the linear solvers in a SIMPLE solver.
+ */
+class LinearPicardSolverConfiguration : public libMesh::SolverConfiguration
+{
+  /**
+   * Override this to make sure the PETSc options are not overwritten in the linear solver
+   */
+  virtual void configure_solver() override {}
+};
 
 /**
  * LinearPicardSteady executioners call "solve()" on two different nonlinear systems in sequence

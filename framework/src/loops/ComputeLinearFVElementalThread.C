@@ -33,22 +33,25 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  const auto & warehouse =
-      _fe_problem.getLinearSystem(_linear_system_number).getLinearFVKernelWarehouse();
+  std::vector<LinearFVKernel *> kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_fe_problem.getLinearSystem(_linear_system_number).number())
+      .template condition<AttribSystem>("ElementalLinearFVKernel")
+      .queryInto(kernels);
 
   // Iterate over all the elements in the range
   for (const auto & elem_info : range)
   {
-    if (warehouse.hasActiveBlockObjects(elem_info->subdomain_id(), _tid))
-      for (auto kernel : warehouse.getActiveBlockObjects(elem_info->subdomain_id(), _tid))
+    for (auto kernel : kernels)
+    {
+      if (auto elemental_fv_kernel = dynamic_cast<ElementalLinearFVKernel *>(kernel))
       {
-        if (auto elemental_fv_kernel = dynamic_cast<ElementalLinearFVKernel *>(kernel.get()))
-        {
-          elemental_fv_kernel->setCurrentElemInfo(elem_info);
-          elemental_fv_kernel->addMatrixContribution();
-          elemental_fv_kernel->addRightHandSideContribution();
-        }
+        elemental_fv_kernel->setCurrentElemInfo(elem_info);
+        elemental_fv_kernel->addMatrixContribution();
+        elemental_fv_kernel->addRightHandSideContribution();
       }
+    }
   }
 }
 

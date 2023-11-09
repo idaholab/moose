@@ -13,6 +13,9 @@
 #include "Factory.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
+#include "ComputeLinearFVElementalThread.h"
+#include "libmesh/linear_implicit_system.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -77,6 +80,39 @@ LinearPicardSteady::execute()
 
   for (unsigned int i = 0; i < _number_of_iterations; i++)
   {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_problem.mesh().ownedElemInfoBegin(),
+                                  _problem.mesh().ownedElemInfoEnd());
+
+    // FEProblemBase &fe_problem, const unsigned int linear_system_num,
+    //     const std::set<TagID> &tags
+
+    ComputeLinearFVElementalThread cfvic(_problem, 0, {});
+    Threads::parallel_reduce(elem_info_range, cfvic);
+
+    auto & sys = _problem.getLinearSystem(0);
+    LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
+
+    lisystem.matrix->close();
+    lisystem.rhs->close();
+
+    PetscLinearSolver<Real> & linear_solver =
+        libMesh::cast_ref<PetscLinearSolver<Real> &>(*lisystem.get_linear_solver());
+
+    KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+
+    // LinearPicardSolverConfiguration solver_config;
+    // solver_config.real_valued_data["abs_tol"] = 1e-7;
+    // linear_solver.set_solver_configuration(solver_config);
+
+    linear_solver.solve(
+        *lisystem.matrix, *lisystem.matrix, *lisystem.solution, *lisystem.rhs, 1e-10, 500);
+    lisystem.update();
+
+    lisystem.matrix->print();
+    lisystem.rhs->print();
+    lisystem.solution->print();
+
     _console << "Will solve al inear problem here" << std::endl;
   }
 
