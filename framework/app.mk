@@ -508,7 +508,9 @@ install_lib_%: %
 	@cp $< $(la_installed)                   # Copy the library archive file
 	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
 	@$(call patch_la,$(la_installed),$(lib_install_dir))
+ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
+endif
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
 # These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules
