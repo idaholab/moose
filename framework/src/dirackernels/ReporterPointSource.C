@@ -36,12 +36,17 @@ ReporterPointSource::validParams()
   params.addParam<ReporterName>("weight_name",
                                 "Name of vector-postprocessor or reporter vector containing "
                                 "weights to scale value, default is assumed to be all 1s.");
+  params.addParam<bool>("combine_duplicates",
+                        true,
+                        "Whether or not to combine duplicates internally by summing their values "
+                        "times their weights");
   return params;
 }
 
 ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
+    _combine_duplicates(getParam<bool>("combine_duplicates")),
     _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
     _ones_vec(_values.size(), 1.0),
     _zeros_vec(_values.size(), 0.0),
@@ -70,6 +75,8 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
 void
 ReporterPointSource::addPoints()
 {
+  _point_to_values.clear();
+
   const auto nval = _values.size();
   if (nval == 0)
     paramError("value_name", "Value vector must not be empty.");
@@ -86,31 +93,42 @@ ReporterPointSource::addPoints()
   errorCheck("weight_name", _weight.size());
   errorCheck("point_name", _point.size());
 
-  if (isParamValid("point_name"))
+  const auto fill_points = [this](const std::vector<Point> & points)
   {
-    for (const auto i : index_range(_values))
+    dof_id_type dirac_i = 0;
+    for (const auto i : index_range(points))
     {
-      _point_to_index[_point[i]] = i;
-      addPoint(_point[i], i);
+      const auto & point = points[i];
+      auto it = _point_to_values.find(point);
+      if (it == _point_to_values.end())
+      {
+        addPoint(point, dirac_i++);
+        it = _point_to_values.emplace(point, 0).first;
+      }
+      else if (!_combine_duplicates)
+        mooseError("...");
+
+      auto & value = it->second;
+      value += _values[i] * _weight[i];
     }
-  }
+  };
+
+  if (isParamValid("point_name"))
+    fill_points(_point);
   else
   {
+    std::vector<Point> points(_coordx.size());
     for (const auto i : index_range(_values))
-    {
-      const Point pt(_coordx[i], _coordy[i], _coordz[i]);
-      _point_to_index[pt] = i;
-      addPoint(pt, i);
-    }
+      points[i] = Point(_coordx[i], _coordy[i], _coordz[i]);
+    fill_points(points);
   }
 }
 
 Real
 ReporterPointSource::computeQpResidual()
 {
-  //  This is negative because it's a forcing function that has been brought over to the left side
-  std::size_t index = _point_to_index[_current_point];
-  return -_test[_i][_qp] * _values[index] * _weight[index];
+  // This is negative because it's a forcing function that has been brought over to the left side
+  return -_test[_i][_qp] * _point_to_values.at(_current_point);
 }
 
 void

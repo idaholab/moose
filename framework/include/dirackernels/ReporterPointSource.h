@@ -29,6 +29,7 @@ protected:
   virtual Real computeQpResidual() override;
   void errorCheck(const std::string & input_name, std::size_t reporterSize);
 
+  const bool _combine_duplicates;
   /// values at each xyz coordinate
   const std::vector<Real> & _values;
   /// convenience vectors (these are not const because reporters can change their size)
@@ -46,6 +47,5 @@ protected:
   /// weights to scale value by
   const std::vector<Real> & _weight;
 
-  /// map to associate points with their index into the vpp value
-  std::map<Point, size_t> _point_to_index;
+  std::map<Point, Real> _point_to_values;
 };
