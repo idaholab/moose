@@ -49,7 +49,9 @@ ExplicitDynamicsContactConstraint::validParams()
   params.addCoupledVar("secondary_gap_offset", "offset to the gap distance from secondary side");
   params.addCoupledVar("mapped_primary_gap_offset",
                        "offset to the gap distance mapped from primary side");
-  params.addRequiredCoupledVar("nodal_area", "The nodal area");
+  params.addRequiredCoupledVar("nodal_area", "The nodal area.");
+  params.addRequiredCoupledVar("nodal_density", "The nodal density.");
+  params.addRequiredCoupledVar("nodal_wave_speed", "The nodal wave speed.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>(
       "penalty",
@@ -104,10 +106,12 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _mapped_primary_gap_offset_var(
         _has_mapped_primary_gap_offset ? getVar("mapped_primary_gap_offset", 0) : nullptr),
     _nodal_area_var(getVar("nodal_area", 0)),
+    _nodal_density_var(getVar("nodal_density", 0)),
+    _nodal_wave_speed_var(getVar("nodal_wave_speed", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
-    _wave_speed(getMaterialProperty<Real>("wave_speed"))
+    _neighbor_density(getNeighborMaterialPropertyByName<Real>("density"))
 {
   _overwrite_secondary_residual = false;
 
@@ -142,6 +146,8 @@ ExplicitDynamicsContactConstraint::timestepSetup()
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
   }
+
+  Moose::out << "Quadrature point in time step setup: " << _qp << "\n";
 }
 
 void
@@ -268,9 +274,11 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
 }
 
 void
-ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & /*node*/,
-                                                        PenetrationInfo * /*pinfo*/)
+ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node, PenetrationInfo * pinfo)
 {
+  const auto nodal_area = nodalArea(node);
+
+  pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * nodal_area);
 }
 
 Real
@@ -371,4 +379,13 @@ ExplicitDynamicsContactConstraint::residualEnd()
     _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
   }
+}
+
+const std::set<BoundaryID> &
+ExplicitDynamicsContactConstraint::getBoundaryIDs()
+{
+  _boundary_ids.clear();
+  _boundary_ids.insert(_primary);
+  _boundary_ids.insert(_secondary);
+  return _boundary_ids;
 }

@@ -78,20 +78,20 @@
 []
 
 [AuxKernels]
-  [stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-    variable = stress_zz
-  []
-  [strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = elastic_strain
-    index_i = 2
-    index_j = 2
-    variable = strain_zz
-  []
+  # [stress_zz]
+  #   type = RankTwoAux
+  #   rank_two_tensor = stress
+  #   index_i = 2
+  #   index_j = 2
+  #   variable = stress_zz
+  # []
+  # [strain_zz]
+  #   type = RankTwoAux
+  #   rank_two_tensor = elastic_strain
+  #   index_i = 2
+  #   index_j = 2
+  #   variable = strain_zz
+  # []
   [accel_x]
     type = TestNewmarkTI
     variable = accel_x
@@ -132,7 +132,7 @@
     displacements = 'disp_x disp_y disp_z'
     volumetric_locking_correction = true
     stiffness_damping_coefficient = 0.04
-    #    generate_output = 'stress_zz strain_zz'
+    #generate_output = 'stress_zz strain_zz'
   []
   [inertia_x]
     type = InertialForce

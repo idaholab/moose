@@ -178,32 +178,101 @@ ExplicitDynamicsContactAction::act()
 
       _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
     }
+    // Add nodal density variable
+    {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+      _problem->addAuxVariable("MooseVariable", "nodal_density", var_params);
+    }
+    // Add nodal wave speed
+    {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+      _problem->addAuxVariable("MooseVariable", "nodal_wave_speed", var_params);
+    }
   }
 
   if (_current_task == "add_user_object")
   {
-    auto var_params = _factory.getValidParams("NodalArea");
+    {
+      auto var_params = _factory.getValidParams("NodalArea");
 
-    // Get secondary_boundary_vector from possibly updated set from the
-    // ContactAction constructor cleanup
-    const auto actions = _awh.getActions<ExplicitDynamicsContactAction>();
+      // Get secondary_boundary_vector from possibly updated set from the
+      // ContactAction constructor cleanup
+      const auto actions = _awh.getActions<ExplicitDynamicsContactAction>();
 
-    std::vector<BoundaryName> secondary_boundary_vector;
-    for (const auto * const action : actions)
-      for (const auto j : index_range(action->_boundary_pairs))
-        secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
+      std::vector<BoundaryName> secondary_boundary_vector;
+      for (const auto * const action : actions)
+        for (const auto j : index_range(action->_boundary_pairs))
+          secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
 
-    var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
-    var_params.set<std::vector<VariableName>>("variable") = {"nodal_area"};
+      var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
+      var_params.set<std::vector<VariableName>>("variable") = {"nodal_area"};
 
-    mooseAssert(_problem, "Problem pointer is NULL");
-    var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
-    var_params.set<bool>("use_displaced_mesh") = true;
+      mooseAssert(_problem, "Problem pointer is NULL");
+      var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
+      var_params.set<bool>("use_displaced_mesh") = true;
 
-    _problem->addUserObject("NodalArea",
-                            "nodal_area_object_" +
-                                Moose::stringify(ed_contact_userobject_counter++),
-                            var_params);
+      _problem->addUserObject("NodalArea",
+                              "nodal_area_object_" +
+                                  Moose::stringify(ed_contact_userobject_counter),
+                              var_params);
+    }
+    // Add nodal density and nodal wave speed user
+    {
+      // Add nodal density
+      auto var_params = _factory.getValidParams("NodalDensity");
+
+      // Get secondary_boundary_vector from possibly updated set from the
+      // ContactAction constructor cleanup
+      const auto actions = _awh.getActions<ExplicitDynamicsContactAction>();
+
+      std::vector<BoundaryName> secondary_boundary_vector;
+      for (const auto * const action : actions)
+        for (const auto j : index_range(action->_boundary_pairs))
+          secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
+
+      var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
+      var_params.set<std::vector<VariableName>>("variable") = {"nodal_density"};
+
+      mooseAssert(_problem, "Problem pointer is NULL");
+      var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
+      var_params.set<bool>("use_displaced_mesh") = true;
+
+      _problem->addUserObject("NodalDensity",
+                              "nodal_density_object_" +
+                                  Moose::stringify(ed_contact_userobject_counter),
+                              var_params);
+    }
+    {
+      // Add wave speed
+      auto var_params = _factory.getValidParams("NodalWaveSpeed");
+
+      // Get secondary_boundary_vector from possibly updated set from the
+      // ContactAction constructor cleanup
+      const auto actions = _awh.getActions<ExplicitDynamicsContactAction>();
+
+      std::vector<BoundaryName> secondary_boundary_vector;
+      for (const auto * const action : actions)
+        for (const auto j : index_range(action->_boundary_pairs))
+          secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
+
+      var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
+      var_params.set<std::vector<VariableName>>("variable") = {"nodal_wave_speed"};
+
+      mooseAssert(_problem, "Problem pointer is NULL");
+      var_params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
+      var_params.set<bool>("use_displaced_mesh") = true;
+
+      _problem->addUserObject("NodalWaveSpeed",
+                              "nodal_wavespeed_object_" +
+                                  Moose::stringify(ed_contact_userobject_counter++),
+                              var_params);
+    }
   }
 }
 
@@ -288,6 +357,9 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
   for (const auto & contact_pair : _boundary_pairs)
   {
     params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area"};
+    params.set<std::vector<VariableName>>("nodal_density") = {"nodal_density"};
+    params.set<std::vector<VariableName>>("nodal_wave_speed") = {"nodal_wave_speed"};
+
     params.set<BoundaryName>("boundary") = contact_pair.first;
     if (isParamValid("secondary_gap_offset"))
       params.set<std::vector<VariableName>>("secondary_gap_offset") = {

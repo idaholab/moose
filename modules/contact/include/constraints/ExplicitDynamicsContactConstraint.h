@@ -13,7 +13,6 @@
 #include "NodeFaceConstraint.h"
 #include "PenetrationLocator.h"
 #include "TwoMaterialPropertyInterface.h"
-
 // Forward Declarations
 enum class ExplicitDynamicsContactModel;
 
@@ -87,14 +86,10 @@ protected:
    */
   void solveImpactEquations(const Node & node, PenetrationInfo * pinfo);
 
-  const std::set<BoundaryID> getBoundaryIDs() const
-  {
-    std::set<BoundaryID> result;
-    result.insert(_primary);
-    result.insert(_secondary);
+  /// the union of the secondary and primary boundary ids
+  std::set<BoundaryID> _boundary_ids;
 
-    return result;
-  }
+  const std::set<BoundaryID> & getBoundaryIDs();
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real gapOffset(const Node & node);
@@ -120,6 +115,9 @@ protected:
   const MooseVariable * const _mapped_primary_gap_offset_var;
 
   MooseVariable * _nodal_area_var;
+  const MooseVariable * _nodal_density_var;
+  const MooseVariable * _nodal_wave_speed_var;
+
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
 
@@ -131,5 +129,5 @@ protected:
 
   const static unsigned int _no_iterations;
 
-  const MaterialProperty<Real> & _wave_speed;
+  const MaterialProperty<Real> & _neighbor_density;
 };
