@@ -64,6 +64,11 @@ public:
   virtual void preTrace();
 
   /**
+   * This method is called once a ray has reached the end of its trace.
+   */
+  virtual void postTrace();
+
+  /**
    * Whether or not this RayKernel needs a segment reinit
    */
   bool needSegmentReinit() const { return _need_segment_reinit; }

@@ -121,3 +121,8 @@ void
 RayKernelBase::preTrace()
 {
 }
+
+void
+RayKernelBase::postTrace()
+{
+}

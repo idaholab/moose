@@ -17,7 +17,7 @@ The remainder of the discussion focuses on the use of the functionality offered 
 
 ## Using a RayKernel
 
-The method that is called on each segment of a [Ray.md] in a RayKernel is `onSegment()`. This method is to be overridden to specialize the on-segment operation. The `preTrace()` method is also available to be overridden and is called before a trace begins on a processor/thread.
+The method that is called on each segment of a [Ray.md] in a RayKernel is `onSegment()`. This method is to be overridden to specialize the on-segment operation. The `preTrace()` method is also available to be overridden and is called before a trace begins on a processor/thread. After the ray has finished its trace the `postTrace()` method is called, this method is also available to be overridden.
 
 The significant information pertaining to the trace that is available within `onSegment()` is as follows:
 
