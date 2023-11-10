@@ -219,6 +219,10 @@ Assembly::~Assembly()
     for (auto & it : _vector_fe_face_neighbor[dim])
       delete it.second;
 
+  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+    for (auto & it : _vector_fe_lower[dim])
+      delete it.second;
+
   for (auto & it : _ad_grad_phi_data)
     it.second.release();
 
