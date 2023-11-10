@@ -156,6 +156,14 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.doingPRefinement(true, getParam<MultiMooseEnum>("disable_p_refinement_for_families"));
+    {
+      auto disable_p_refinement_for_families =
+          getParam<MultiMooseEnum>("disable_p_refinement_for_families");
+      if (!isParamSetByUser("disable_p_refinement_for_families"))
+        // If the user has not set this parameter we will set a logicial default
+        disable_p_refinement_for_families =
+            "LAGRANGE NEDELEC_ONE LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
+      adapt.doingPRefinement(true, disable_p_refinement_for_families);
+    }
   }
 }
