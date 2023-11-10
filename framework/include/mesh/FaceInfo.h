@@ -81,6 +81,8 @@ public:
   const Elem * elemPtr() const { return _elem_info->elem(); }
   const Elem & neighbor() const;
   const Elem * neighborPtr() const { return _neighbor_info ? _neighbor_info->elem() : nullptr; }
+  const ElemInfo * elemInfo() const { return _elem_info; }
+  const ElemInfo * neighborInfo() const { return _neighbor_info; }
   ///@}
 
   /// Returns the element centroids of the elements on the elem and neighbor sides of the face.
