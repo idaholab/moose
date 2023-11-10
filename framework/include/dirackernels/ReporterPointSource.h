@@ -33,7 +33,7 @@ protected:
    * @param point The point to add
    * @param id index for dirac kernel being added
    */
-  void fill_points(const Point & point, const dof_id_type id);
+  void fillPoint(const Point & point, const dof_id_type id);
   void errorCheck(const std::string & input_name, std::size_t reporterSize);
 
   /// bool if duplicate points values and weights should be combined
@@ -57,6 +57,6 @@ protected:
   /// weights to scale value by
   const std::vector<Real> & _weight;
 
-  /// map from added point to the weighted values
-  std::map<Point, Real> _point_to_weightedValue;
+  /// map from an added point to it's weighted value
+  std::unordered_map<Point, Real> _point_to_weightedValue;
 };

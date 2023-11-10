@@ -62,12 +62,12 @@ ReporterTimePointSource::addPoints()
     {
       if (_read_in_points)
       {
-        fill_points(_point[i], i);
+        fillPoint(_point[i], i);
       }
       else
       {
         const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
-        fill_points(point, i);
+        fillPoint(point, i);
       }
     }
   }

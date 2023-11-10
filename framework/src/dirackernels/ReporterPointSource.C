@@ -41,7 +41,7 @@ ReporterPointSource::validParams()
                         "Whether or not to combine duplicates internally by summing their values "
                         "times their weights");
   // Values and weights for duplicates need to be combined with combine_duplicates=true
-  // Duplicate points are never actually applied as seperate dirac points, instead they are combined
+  // Duplicate points are never actually applied as separate dirac points, instead they are combined
   // and computeQpResidual can be multiplied by the number of points found at a single location by
   // setting drop_duplicate_points=false.  This will not work for our case where each point may have
   // a different value and weight so we must combine the weights and values ourself and apply them
@@ -105,7 +105,7 @@ ReporterPointSource::addPoints()
   if (_read_in_points)
   {
     for (const auto & i : index_range(_point))
-      fill_points(_point[i], i);
+      fillPoint(_point[i], i);
   }
   else
   {
@@ -113,7 +113,7 @@ ReporterPointSource::addPoints()
     for (const auto i : index_range(_values))
     {
       const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
-      fill_points(point, i);
+      fillPoint(point, i);
     }
   }
 }
@@ -122,11 +122,11 @@ Real
 ReporterPointSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp] * _point_to_weightedValue.at(_current_point);
+  return -_test[_i][_qp] * libmesh_map_find(_point_to_weightedValue, _current_point);
 }
 
 void
-ReporterPointSource::fill_points(const Point & point, const dof_id_type id)
+ReporterPointSource::fillPoint(const Point & point, const dof_id_type id)
 {
   auto it = _point_to_weightedValue.find(point);
   if (it == _point_to_weightedValue.end())
@@ -135,7 +135,8 @@ ReporterPointSource::fill_points(const Point & point, const dof_id_type id)
     it = _point_to_weightedValue.emplace(point, 0).first;
   }
   else if (!_combine_duplicates)
-    mooseError("combine_duplicates must be true if reporter has duplicate points.  Found "
+    paramError("combine_duplicates",
+               "combine_duplicates must be true if reporter has duplicate points.  Found "
                "duplicate point (",
                point,
                ").");
