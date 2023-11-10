@@ -110,3 +110,27 @@ ADNumericalFlux3EqnBase::getFlux(const unsigned int iside,
   else
     return _FR_1d;
 }
+
+const std::vector<ADReal> &
+ADNumericalFlux3EqnBase::getFlux3D(const unsigned int iside,
+                                   const dof_id_type ielem,
+                                   bool res_side_is_left,
+                                   const std::vector<ADReal> & UL_3d,
+                                   const std::vector<ADReal> & UR_3d,
+                                   const RealVectorValue & nLR,
+                                   const RealVectorValue & t1,
+                                   const RealVectorValue & t2) const
+{
+  if (_cached_flux_elem_id != ielem || _cached_flux_side_id != iside)
+  {
+    _cached_flux_elem_id = ielem;
+    _cached_flux_side_id = iside;
+
+    calcFlux(UL_3d, UR_3d, nLR, t1, t2, _FL_3d, _FR_3d);
+  }
+
+  if (res_side_is_left)
+    return _FL_3d;
+  else
+    return _FR_3d;
+}

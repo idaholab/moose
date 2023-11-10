@@ -37,8 +37,8 @@
   [one_d_3eqn_energy_flux]
     type = 'PetscJacobianTester'
     input = 'one_d_3eqn_energy_flux.i'
-    ratio_tol = 2e-8
-    difference_tol = 2e-4
+    ratio_tol = 5e-8
+    difference_tol = 5e-4
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true

@@ -13,6 +13,7 @@
 #include "VolumeJunction1Phase.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
+#include "THMUtils.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
@@ -89,15 +90,18 @@ void
 ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
   const Real din = _normal[c];
-  const Point di = _dir[0];
-  const Point ni = di * din;
+  const RealVectorValue di = _dir[0];
+  const RealVectorValue ni = di * din;
+  const RealVectorValue nJi = -ni;
   const Real nJi_dot_di = -din;
 
-  std::vector<ADReal> Ui(THMVACE1D::N_FLUX_INPUTS, 0.);
-  Ui[THMVACE1D::RHOA] = _rhoA[0];
-  Ui[THMVACE1D::RHOUA] = _rhouA[0];
-  Ui[THMVACE1D::RHOEA] = _rhoEA[0];
-  Ui[THMVACE1D::AREA] = _A[0];
+  std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
+  Ui[THMVACE3D::RHOA] = _rhoA[0];
+  Ui[THMVACE3D::RHOUA] = _rhouA[0] * di(0);
+  Ui[THMVACE3D::RHOVA] = _rhouA[0] * di(1);
+  Ui[THMVACE3D::RHOWA] = _rhouA[0] * di(2);
+  Ui[THMVACE3D::RHOEA] = _rhoEA[0];
+  Ui[THMVACE3D::AREA] = _A[0];
 
   const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
   const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
@@ -105,17 +109,27 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
   const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
 
-  std::vector<ADReal> UJi(THMVACE1D::N_FLUX_INPUTS, 0.);
-  const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
-  UJi[THMVACE1D::RHOA] = rhoV / _volume * _A[0];
-  UJi[THMVACE1D::RHOUA] = rhouV_vec * di / _volume * _A[0];
-  UJi[THMVACE1D::RHOEA] = rhoEV / _volume * _A[0];
-  UJi[THMVACE1D::AREA] = _A[0];
+  std::vector<ADReal> UJi(THMVACE3D::N_FLUX_INPUTS, 0.);
+  UJi[THMVACE3D::RHOA] = rhoV / _volume * _A[0];
+  UJi[THMVACE3D::RHOUA] = rhouV / _volume * _A[0];
+  UJi[THMVACE3D::RHOVA] = rhovV / _volume * _A[0];
+  UJi[THMVACE3D::RHOWA] = rhowV / _volume * _A[0];
+  UJi[THMVACE3D::RHOEA] = rhoEV / _volume * _A[0];
+  UJi[THMVACE3D::AREA] = _A[0];
 
-  _flux[c] =
-      _numerical_flux_uo[c]->getFlux(_current_side, _current_elem->id(), true, UJi, Ui, nJi_dot_di);
+  RealVectorValue t1, t2;
+  THM::computeOrthogonalDirections(ni, t1, t2);
+
+  const auto flux_3d = _numerical_flux_uo[c]->getFlux3D(
+      _current_side, _current_elem->id(), true, UJi, Ui, nJi, t1, t2);
+
+  _flux[c].resize(THMVACE1D::N_FLUX_OUTPUTS);
+  _flux[c][THMVACE1D::MASS] = flux_3d[THMVACE3D::MASS] * nJi_dot_di;
+  _flux[c][THMVACE1D::MOMENTUM] = flux_3d[THMVACE3D::MOM_NORM];
+  _flux[c][THMVACE1D::ENERGY] = flux_3d[THMVACE3D::ENERGY] * nJi_dot_di;
 
   const ADReal vJ = THM::v_from_rhoA_A(rhoV, _volume);
+  const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
   const ADReal rhouV2 = rhouV_vec * rhouV_vec;
   const ADReal eJ = rhoEV / rhoV - 0.5 * rhouV2 / (rhoV * rhoV);
   const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
@@ -153,14 +167,18 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
     _residual[VolumeJunction1Phase::RHOEV_INDEX] += S_loss * std::abs(vel_in);
   }
 
-  _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THMVACE1D::RHOA];
-  _residual[VolumeJunction1Phase::RHOUV_INDEX] -=
-      di(0) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(0) * _A[0];
-  _residual[VolumeJunction1Phase::RHOVV_INDEX] -=
-      di(1) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(1) * _A[0];
-  _residual[VolumeJunction1Phase::RHOWV_INDEX] -=
-      di(2) * din * _flux[c][THMVACE1D::RHOUA] - pJ * ni(2) * _A[0];
-  _residual[VolumeJunction1Phase::RHOEV_INDEX] -= din * _flux[c][THMVACE1D::RHOEA];
+  const ADRealVectorValue flux_mom_n = flux_3d[THMVACE3D::MOM_NORM] * nJi +
+                                       flux_3d[THMVACE3D::MOM_TAN1] * t1 +
+                                       flux_3d[THMVACE3D::MOM_TAN2] * t2;
+  const RealVectorValue ex(1, 0, 0);
+  const RealVectorValue ey(0, 1, 0);
+  const RealVectorValue ez(0, 0, 1);
+
+  _residual[VolumeJunction1Phase::RHOV_INDEX] -= -flux_3d[THMVACE3D::RHOA];
+  _residual[VolumeJunction1Phase::RHOUV_INDEX] -= -flux_mom_n * ex - pJ * ni(0) * _A[0];
+  _residual[VolumeJunction1Phase::RHOVV_INDEX] -= -flux_mom_n * ey - pJ * ni(1) * _A[0];
+  _residual[VolumeJunction1Phase::RHOWV_INDEX] -= -flux_mom_n * ez - pJ * ni(2) * _A[0];
+  _residual[VolumeJunction1Phase::RHOEV_INDEX] -= -flux_3d[THMVACE3D::RHOEA];
 }
 
 void
