@@ -8,7 +8,7 @@ website.
 
 Basic artificial neural network trainer and surrogate classes have been implemented in the stochastic tools
 module for testing purposes. For their documentation, see
-[surrogates/LibtorchANNTrainer.md] and [surrogates/LibtorchANNSurrogate.md].
+[trainers/LibtorchANNTrainer.md] and [surrogates/LibtorchANNSurrogate.md].
 If MOOSE compiled without error messages, we can
 navigate to the testing folder within the stochastic tools root
 and use the following command to test the implementation (in `modules/stochastic_tools`):
