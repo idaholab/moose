@@ -19,6 +19,11 @@
 []
 
 [LinearFVKernels]
+  [diffusion]
+    type = LinearFVDiffusionKernel
+    variable = u
+    diffusion_coeff = 3.0
+  []
   [reaction]
     type = LinearFVReactionKernel
     variable = u

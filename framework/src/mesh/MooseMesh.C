@@ -3703,6 +3703,14 @@ MooseMesh::cacheFaceInfoVariableOwnership() const
         moose_vars.push_back(var);
   }
 
+  for (const auto i : make_range(_app.feProblem().numLinearSystems()))
+  {
+    const auto & variables = _app.feProblem().getLinearSystem(i).getVariables(0);
+    for (const auto & var : variables)
+      if (var->fieldType() == 0)
+        moose_vars.push_back(var);
+  }
+
   const auto & aux_variables = _app.feProblem().getAuxiliarySystem().getVariables(0);
   for (const auto & var : aux_variables)
     if (var->fieldType() == 0)

@@ -29,14 +29,14 @@ LinearFVDiffusionKernel::LinearFVDiffusionKernel(const InputParameters & params)
 Real
 LinearFVDiffusionKernel::computeElemMatrixContribution()
 {
-  return _diffusion_coeff * _current_face_info->gC() * _current_face_info->faceArea() *
+  return _diffusion_coeff / _current_face_info->dCNMag() * _current_face_info->faceArea() *
          _current_face_info->faceCoord();
 }
 
 Real
 LinearFVDiffusionKernel::computeNeighborMatrixContribution()
 {
-  return _diffusion_coeff * (1 - _current_face_info->gC()) * _current_face_info->faceArea() *
+  return -_diffusion_coeff / _current_face_info->dCNMag() * _current_face_info->faceArea() *
          _current_face_info->faceCoord();
 }
 

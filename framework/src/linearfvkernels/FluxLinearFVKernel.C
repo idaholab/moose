@@ -40,6 +40,8 @@ FluxLinearFVKernel::addMatrixContribution()
 
     (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, elem_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
+    (*_linear_system.matrix).add(dof_id_neighbor, dof_id_elem, -elem_matrix_contribution);
+    (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
   }
 }
 

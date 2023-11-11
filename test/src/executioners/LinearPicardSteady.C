@@ -15,6 +15,7 @@
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
 #include "ComputeLinearFVElementalThread.h"
+#include "ComputeLinearFVFaceThread.h"
 #include "libmesh/linear_implicit_system.h"
 
 #include "libmesh/equation_systems.h"
@@ -84,11 +85,18 @@ LinearPicardSteady::execute()
     ElemInfoRange elem_info_range(_problem.mesh().ownedElemInfoBegin(),
                                   _problem.mesh().ownedElemInfoEnd());
 
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_problem.mesh().ownedFaceInfoBegin(),
+                                  _problem.mesh().ownedFaceInfoEnd());
+
     // FEProblemBase &fe_problem, const unsigned int linear_system_num,
     //     const std::set<TagID> &tags
 
-    ComputeLinearFVElementalThread cfvic(_problem, 0, {});
-    Threads::parallel_reduce(elem_info_range, cfvic);
+    ComputeLinearFVElementalThread elem_thread(_problem, 0, {});
+    Threads::parallel_reduce(elem_info_range, elem_thread);
+
+    ComputeLinearFVFaceThread face_thread(_problem, 0, {});
+    Threads::parallel_reduce(face_info_range, face_thread);
 
     auto & sys = _problem.getLinearSystem(0);
     LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
