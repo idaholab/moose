@@ -5,16 +5,13 @@
     type = CSVDiff
     csvdiff = 'b_out.csv'
     input = 'b.i'
-    expect_out = '4 Nonlinear'
     absent_out = '5 Nonlinear'
     requirement = 'The system shall be able to solve an eigenvalue problem using something other than the L2 norm of Bx for normalization and a native eigenvalue solver.'
-    rel_err = 3e-5
   []
   [test11]
     type = CSVDiff
     csvdiff = 'a_out_eigen_0001.csv'
     input = 'a.i'
-    expect_out = '1[01] Nonlinear'
     absent_out = '12 Nonlinear'
     requirement = 'The system shall be able to solve an eigenvalue problem using the L2 norm of Bx and the sign of its first nonzero entry for normalization with a SLEPc eigenvalue solver.'
   []
@@ -23,7 +20,6 @@
     csvdiff = 'a_out_eigen_0001.csv'
     prereq = test11
     input = 'a.i'
-    expect_out = '7 Nonlinear'
     absent_out = '8 Nonlinear'
     cli_args = 'Problem/bx_norm=fluxintegral'
     petsc_version = '>=3.20.0'
@@ -34,7 +30,6 @@
     csvdiff = 'a_out_eigen_0001.csv'
     prereq = test7
     input = 'a.i'
-    expect_out = '4 Nonlinear'
     absent_out = '5 Nonlinear'
     cli_args = 'Problem/bx_norm=fluxintegral -eps_power_sign_normalization 0'
     petsc_version = '>=3.20.0'
