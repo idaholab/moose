@@ -262,6 +262,9 @@ public:
   MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
+  /// get a set of MaterialBase pointers for all material objects that this object depends on
+  std::set<MaterialBase *> getSupplyerMaterials();
+
   ///@{
   /**
    * Check if the material property exists

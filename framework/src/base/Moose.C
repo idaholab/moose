@@ -234,6 +234,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_mortar_interface", false);
   registerTask("coupling_functor_check", true);
   registerTask("add_master_action_material", false);
+  registerTask("setup_projected_properties", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -334,6 +335,7 @@ addActionTypes(Syntax & syntax)
                            "(add_material)"
                            "(add_master_action_material)"
                            "(add_functor_material)"
+                           "(setup_projected_properties)"
                            "(add_output_aux_variables)"
                            "(add_output)"
                            "(auto_checkpoint_action)"

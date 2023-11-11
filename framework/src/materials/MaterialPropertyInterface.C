@@ -134,12 +134,6 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-MaterialBase &
-MaterialPropertyInterface::getMaterial(const std::string & name)
-{
-  return getMaterialByName(_mi_params.get<MaterialName>(name));
-}
-
 void
 MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::shared_ptr<MaterialBase> discrete)
@@ -183,6 +177,12 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
 }
 
 MaterialBase &
+MaterialPropertyInterface::getMaterial(const std::string & name)
+{
+  return getMaterialByName(_mi_params.get<MaterialName>(name));
+}
+
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
   std::shared_ptr<MaterialBase> discrete =
@@ -190,6 +190,30 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
 
   checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
+}
+
+std::set<MaterialBase *>
+MaterialPropertyInterface::getSupplyerMaterials()
+{
+  std::set<MaterialBase *> matches;
+  const auto & mwh = _mi_feproblem.getMaterialWarehouse();
+  for (const auto id : _mi_block_ids)
+  {
+    const auto & active_objects = mwh[_material_data_type].getActiveBlockObjects(id, _mi_tid);
+    for (const auto & mat : active_objects)
+    {
+      const auto & supplied_prop_ids = mat->getSuppliedPropIDs();
+      if (MooseUtils::setsIntersect(_material_property_dependencies.begin(),
+                                    _material_property_dependencies.end(),
+                                    supplied_prop_ids.begin(),
+                                    supplied_prop_ids.end()))
+      {
+        matches.insert(mat.get());
+        break;
+      }
+    }
+  }
+  return matches;
 }
 
 void
