@@ -108,6 +108,7 @@ Extensions:
             functormaterials: syntax/FunctorMaterials/index.md
             fvbcs: syntax/FVBCs/index.md
             fviks: syntax/FVInterfaceKernels/index.md
+            fvics: syntax/FVICs/index.md
             fvkernels: syntax/FVKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
@@ -140,6 +141,8 @@ Extensions:
             solidproperties: syntax/SolidProperties/index.md
             splits: syntax/Preconditioning/index.md
             surrogates: syntax/Surrogates/index.md
+            likelihoods: syntax/Likelihood/index.md
+            trainers: syntax/Trainers/index.md
             systems: syntax/Systems/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
             times: syntax/Times/index.md

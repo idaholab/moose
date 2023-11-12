@@ -109,8 +109,7 @@
   [pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
-    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is "
-                 "disabled for the 'console' output object."
+    expect_out = "The post-processor 'avg_block' has requested to be output by the 'console' output, but post-processor output is disabled for that output object"
     allow_warnings = true
     max_parallel = 1 # warning can mix on multiple processes
     issues = '#1426'

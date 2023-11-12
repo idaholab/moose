@@ -308,7 +308,7 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   Real new_val;
   Real m_hat;
   Real v_hat;
-  Real store_loss;
+  Real store_loss = 0.0;
   std::vector<Real> grad1;
 
   // Initialize randomizer

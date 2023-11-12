@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'RunApp'
+    input = 'sample.i'
+    expect_out = '\[DBG\] Adding AuxVariable \'c\' of type MooseVariable\n\[DBG\] Adding Variable \'u\' of type MooseVariable'
+    requirement = 'The system shall be able to output to console which object it is creating.'
+    issues = '#25853'
+    design = '/Problem/index.md'
+  []
+[]

@@ -150,6 +150,10 @@ AdvancedOutput::initialSetup()
 void
 AdvancedOutput::init()
 {
+  // Initialize the execution flags
+  for (auto & [name, input] : _advanced_execute_on)
+    initExecutionTypes(name, input);
+
   // Clear existing execute information lists
   _execute_data.reset();
 
@@ -185,10 +189,6 @@ AdvancedOutput::init()
   // Initialize the show/hide/output lists for each of the types of output
   for (auto & it : _execute_data)
     initOutputList(it.second);
-
-  // Initialize the execution flags
-  for (auto & it : _advanced_execute_on)
-    initExecutionTypes(it.first, it.second);
 }
 
 AdvancedOutput::~AdvancedOutput() {}
