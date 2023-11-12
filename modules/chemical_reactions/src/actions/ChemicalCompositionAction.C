@@ -59,7 +59,7 @@ ChemicalCompositionAction::validParams()
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>(
-      "execute_on", exec_enum, "When to execute the ThermochimicaNodalData UO");
+      "execute_on", exec_enum, "When to execute the ThermochimicaData UO");
   params.addParam<bool>("is_fv", false, "Should the variables set up by action be of FV type");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
@@ -78,7 +78,7 @@ ChemicalCompositionAction::validParams()
       "output_element_phases",
       "List of elements whose molar amounts in specific phases are requested");
   params.addParam<std::string>(
-      "uo_name", "Thermochimica", "Name of the ThermochimicaNodalDataUserObject.");
+      "uo_name", "Thermochimica", "Name of the ThermochimicaDataUserObject.");
   return params;
 }
 
@@ -458,8 +458,9 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_user_object")
   {
+    const auto uo_type = _is_fv ? "ThermochimicaElementData" : "ThermochimicaNodalData";
 
-    auto uo_params = _factory.getValidParams("ThermochimicaNodalData");
+    auto uo_params = _factory.getValidParams(uo_type);
 
     std::copy(_elements.begin(),
               _elements.end(),
@@ -498,7 +499,7 @@ ChemicalCompositionAction::act()
 
     uo_params.applyParameters(parameters());
 
-    _problem->addUserObject("ThermochimicaNodalData", _uo_name, uo_params);
+    _problem->addUserObject(uo_type, _uo_name, uo_params);
   }
 
 #endif
