@@ -234,6 +234,11 @@ public:
    */
   bool bxNormProvided() const { return _bx_norm_name.has_value(); }
 
+  /**
+   * Set the Bx norm postprocessor programatically
+   */
+  void setBxNorm(const PostprocessorName & bx_norm) { _bx_norm_name = bx_norm; }
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
@@ -284,7 +289,7 @@ private:
 
   /// The name of the Postprocessor providing the Bx norm. This may be empty in which case the
   /// default L2 norm of Bx will be used as the Bx norm
-  const std::optional<PostprocessorName> _bx_norm_name;
+  std::optional<PostprocessorName> _bx_norm_name;
 
 #endif
 
