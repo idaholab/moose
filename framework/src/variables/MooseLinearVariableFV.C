@@ -19,6 +19,7 @@
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
 #include "GreenGaussGradient.h"
+#include "LinearFVBoundaryCondition.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -125,15 +126,15 @@ MooseLinearVariableFV<OutputType>::isVector() const
 
 template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
-MooseLinearVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
+MooseLinearVariableFV<OutputType>::getDirichletBC(const FaceInfo & /*fi*/) const
 {
-  if (!_dirichlet_map_setup)
-    const_cast<MooseLinearVariableFV<OutputType> *>(this)->determineBoundaryToDirichletBCMap();
+  // if (!_dirichlet_map_setup)
+  //   const_cast<MooseLinearVariableFV<OutputType> *>(this)->determineBoundaryToDirichletBCMap();
 
-  for (const auto bnd_id : fi.boundaryIDs())
-    if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
-        it != _boundary_id_to_dirichlet_bc.end())
-      return {true, it->second};
+  // for (const auto bnd_id : fi.boundaryIDs())
+  //   if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
+  //       it != _boundary_id_to_dirichlet_bc.end())
+  //     return {true, it->second};
 
   return {false, nullptr};
 }
@@ -528,10 +529,10 @@ MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
+MooseLinearVariableFV<OutputType>::cacheBoundaryBCMap()
 {
-  _boundary_id_to_dirichlet_bc.clear();
-  std::vector<FVDirichletBCBase *> bcs;
+  _boundary_id_to_bc.clear();
+  std::vector<LinearFVBoundaryCondition *> bcs;
 
   // I believe because query() returns by value but condition returns by reference that binding to a
   // const lvalue reference results in the query() getting destructed and us holding onto a dangling
@@ -540,7 +541,7 @@ MooseLinearVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
   const auto base_query = this->_subproblem.getMooseApp()
                               .theWarehouse()
                               .query()
-                              .template condition<AttribSystem>("FVDirichletBC")
+                              .template condition<AttribSystem>("LinearFVBoundaryCondition")
                               .template condition<AttribThread>(_tid)
                               .template condition<AttribVar>(_var_num)
                               .template condition<AttribSysNum>(this->_sys.number());
@@ -550,12 +551,10 @@ MooseLinearVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
     auto base_query_copy = base_query;
     base_query_copy.template condition<AttribBoundaries>(std::set<BoundaryID>({bnd_id}))
         .queryInto(bcs);
-    mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
+    mooseAssert(bcs.size() <= 1, "cannot have multiple BCs on the same boundary");
     if (!bcs.empty())
-      _boundary_id_to_dirichlet_bc.emplace(bnd_id, bcs[0]);
+      _boundary_id_to_bc.emplace(bnd_id, bcs[0]);
   }
-
-  _dirichlet_map_setup = true;
 }
 
 template class MooseLinearVariableFV<Real>;

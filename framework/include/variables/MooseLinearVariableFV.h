@@ -28,6 +28,7 @@ class MooseLinearVariableFV;
 typedef MooseLinearVariableFV<Real> MooseLinearVariableFVReal;
 class FVDirichletBCBase;
 class FVFluxBC;
+class LinearFVBoundaryCondition;
 
 namespace libMesh
 {
@@ -476,7 +477,7 @@ private:
   /**
    * Setup the boundary to Dirichlet BC map
    */
-  void determineBoundaryToDirichletBCMap();
+  void cacheBoundaryBCMap();
 
   /// Whether the boundary to Dirichlet cache map has been setup yet
   bool _dirichlet_map_setup = false;
@@ -679,9 +680,7 @@ private:
   /// data
   mutable const Elem * _prev_elem;
 
-  /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
-  /// in \p getDirichletBC
-  std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
+  std::unordered_map<BoundaryID, const LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
 protected:
   /// A cache for storing gradients on elements
