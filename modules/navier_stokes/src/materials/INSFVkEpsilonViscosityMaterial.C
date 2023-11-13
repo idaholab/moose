@@ -17,8 +17,7 @@ InputParameters
 INSFVkEpsilonViscosityMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription(
-      "Computes the mushy zone porous resistance for solidification/melting problems.");
+  params.addClassDescription("Computes the turbulent dynamic viscosity given k and epsilon.");
   params.addRequiredParam<MooseFunctorName>(NS::density,
                                             "The liquid density (not the mixture one).");
   params.addRequiredParam<MooseFunctorName>("k", "The turbulence kinetic energy.");

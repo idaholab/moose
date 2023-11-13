@@ -49,10 +49,4 @@ private:
 
   /// C_mu turbulent coefficient
   const Moose::Functor<ADReal> & _C_mu;
-
-  /// Linearzied computation of y_plus ?
-  const bool _linearized_yplus;
-
-  /// Maximum mixing length allowed for the domain
-  const Real _min_mixing_length;
 };

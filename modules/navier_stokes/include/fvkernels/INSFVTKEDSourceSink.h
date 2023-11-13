@@ -51,32 +51,23 @@ protected:
   /// Wall boundaries
   std::vector<BoundaryName> _wall_boundary_names;
 
-  /// functor for the first turbulent coefficient
-  const Moose::Functor<ADReal> & _C1_eps;
-
-  /// functor for the first turbulent coefficient
-  const Moose::Functor<ADReal> & _C2_eps;
-
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
 
   /// Linearized model?
   const bool _linearized_model;
 
-  /// Linearization coupled functor
-  const Moose::Functor<ADReal> & _linear_variable;
-
-  /// Apply realizable constraints?
-  const bool _realizable_constraint;
-
-  /// Local Relaxation Factor
-  const Real _rf;
-
   /// No equilibrium treatement
   const bool _non_equilibrium_treatement;
 
+  /// Value of the first epsilon closure coefficient
+  const Real _C1_eps;
+
+  /// Value of the first epsilon closure coefficient
+  const Real _C2_eps;
+
   /// C_mu constant
-  Real _C_mu;
+  const Real _C_mu;
 
   /// Stored strain rate
   std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
@@ -89,27 +80,9 @@ protected:
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<Point>> _normal;
-  std::map<const Elem *, Real> _production_NL_old;
-  std::map<const Elem *, Real> _destruction_NL_old;
-
-  /// Storing current time
-  Real _loc_dt;
-  std::map<const Elem *, Real> _pevious_production;
-  std::map<const Elem *, Real> _pevious_destruction;
+  std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
 
   /// -- Constants of the method
   static constexpr Real _von_karman{0.4187};
-
-  /// -- Time storing
-  Real _stored_time;
-
-  /// -- Relaxation method for production and destruction
-  const MooseEnum _relaxation_method;
-
-  /// -- Number of iterations needed to activate the source in the turbulent kinetic energy dissipation rate
-  unsigned int _iters_to_activate;
-
-  /// -- Top bounds for turbulent production and destruction
-  Real _top_production_bound;
-  Real _top_destruction_bound;
+  static constexpr Real E{9.793};
 };

@@ -101,6 +101,17 @@ Real prandtlPropertyDerivative(const Real & mu,
  */
 ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
+/**
+ * Finds the nondimensional wall distance normalized with the friction velcoity
+ * Implements a fixed-point iteration in the wall funcion to get this veloity
+ * @param mu the dynamic viscosity
+ * @param rho the density
+ * @param u the centroid velocity
+ * @param dist the element centroid distance to the wall
+ * @return the non-dimensional wall distance
+ */
+ADReal findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+
 using MooseUtils::isZero;
 
 /**
@@ -134,4 +145,13 @@ std::map<const Elem *, std::vector<Point>> *
 getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
                      const FEProblemBase & _fe_problem,
                      const SubProblem & _subproblem);
+
+/**
+ * Map storing face arguments to wall bounded faces
+ */
+extern std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
+std::map<const Elem *, std::vector<const FaceInfo *>> *
+getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
+                   const FEProblemBase & _fe_problem,
+                   const SubProblem & _subproblem);
 }

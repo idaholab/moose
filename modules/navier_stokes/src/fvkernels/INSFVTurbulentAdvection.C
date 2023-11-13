@@ -64,16 +64,6 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
   auto bounded_elem = _wall_bounded[elem];
   auto bounded_neigh = _wall_bounded[neighbor];
 
-  // _console << "Var Number: " << _var.number() << std::endl;
-  // _console << "Face: " << fi.faceCentroid() << std::endl;
-  // _console << "Elem: " << elem->vertex_average() << std::endl;
-  // if (neighbor)
-  //   _console << "Neigh: " << neighbor->vertex_average() << std::endl;
-  // else
-  //   _console << "No neighbor" << std::endl;
-  // _console << "Elem bounded: " << bounded_elem << std::endl;
-  // _console << "Neigh bounded: " << bounded_neigh << std::endl;
-
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
@@ -83,7 +73,6 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
       prepareVectorTag(_assembly, _var.number());
       _local_re(0) = r;
       accumulateTaggedLocalResidual();
-      // _console << "Assigning to element." << std::endl;
     }
   }
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
@@ -95,10 +84,8 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
       prepareVectorTagNeighbor(_assembly, _var.number());
       _local_re(0) = -r;
       accumulateTaggedLocalResidual();
-      // _console << "Assigning to neighbor." << std::endl;
     }
   }
-  // _console << "***********************" << std::endl;
 }
 
 void

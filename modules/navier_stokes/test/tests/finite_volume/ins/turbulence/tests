@@ -1,0 +1,88 @@
+[Tests]
+  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  issues = '#00000'
+  [lid_driven_turb_std_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-std-wall.i'
+    exodiff = 'lid-driven-turb-std-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with standard wall functions.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_non_eq_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-non-eq-wall.i'
+    exodiff = 'lid-driven-turb-non-eq-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with non-equilibrium wall functions.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_linear_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-linear-wall.i'
+    exodiff = 'lid-driven-turb-linear-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with linear wall functions.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_inc_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-inc-wall.i'
+    exodiff = 'lid-driven-turb-inc-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with incremental wall functions.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_no_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-no-wall.i'
+    exodiff = 'lid-driven-turb-no-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with no wall treatement.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_non_eq_bulk]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-non-eq-bulk.i'
+    exodiff = 'lid-driven-turb-non-eq-bulk_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with non-equilibrium bulk treatement.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_energy]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-energy.i'
+    exodiff = 'lid-driven-turb-energy_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with transported energy.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_energy_wall]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-energy-wall.i'
+    exodiff = 'lid-driven-turb-energy-wall_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures temperature wall functions.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_capped]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-capped.i'
+    exodiff = 'lid-driven-turb-capped_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with capped production.'
+    abs_zero = 1e-6
+  []
+  [lid_driven_turb_std_wall_nonlinear]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-std-wall-nonlinear.i'
+    exodiff = 'lid-driven-turb-std-wall-nonlinear_out.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with standard wall functions.'
+    abs_zero = 1e-6
+  []
+  [channel_ERCOFTAC]
+    type = 'Exodiff'
+    input = 'channel_ERCOFTAC.i'
+    exodiff = 'channel_ERCOFTAC_out.e'
+    requirement = 'The system shall be able to solve standard ERCOFTAC turbulent channel.'
+    abs_zero = 1e-6
+  []
+  [BFS_ERCOFTAC]
+    type = 'Exodiff'
+    input = 'BFS_ERCOFTAC.i'
+    exodiff = 'BFS_ERCOFTAC_out.e'
+    requirement = 'The system shall be able to solve standard ERCOFTAC backward facing step.'
+    abs_zero = 1e-6
+  []
+[]

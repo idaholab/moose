@@ -27,8 +27,6 @@ public:
 
 protected:
   virtual Real computeValue() override;
-  virtual void initialSetup() override;
-  // virtual void meshChanged() override;
 
   // Local method to find friction velocty
   // Note: this method may be to need reimplemented for each new turbulent model
@@ -53,31 +51,21 @@ protected:
   const Moose::Functor<ADReal> & _rho;
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
+
   /// C-mu closure coefficient
-  const Moose::Functor<ADReal> & _C_mu;
+  const Real _C_mu;
+
   /// Wall boundaries
   std::vector<BoundaryName> _wall_boundary_names;
 
   /// Linearzied computation of y_plus ?
   const bool _linearized_yplus;
 
-  /// Number of auxiliary kernel iterations
-  unsigned int _n_kernel_iters;
-
-  /// Relxation iteration for activating the k-epsilon model
-  const Real _n_iters_activate;
-
-  /// Maximum mixing length allowed for the domain
-  const Real _max_mixing_length;
-
   /// Linearzied computation of y_plus ?
-  const bool _wall_treatement;
+  const bool _bulk_wall_treatment;
 
   /// Non-equilibrium wall treatement ?
   const bool _non_equilibrium_treatement;
-
-  /// Relaxation Factor
-  const Real _rf;
 
   /// -- Parameters of the wall function method
 
@@ -88,33 +76,11 @@ protected:
   static constexpr Real _REL_TOLERANCE{1e-4};
 
   /// -- Constants of the method
-
   static constexpr Real _von_karman{0.4187};
   static constexpr Real _E{9.793};
 
-  /// Viscosity limiter - maximum viscosity must be at the wall
-  Real _max_viscosity_value;
-
-  /// -- Number of iterations needed to activate the computation of mu_t
-  unsigned int _iters_to_activate;
-
-  /// -- Initial value for mu_t
-  Real _mu_t_inital;
-
-  /// -- Relaxation method for production and destruction
-  const MooseEnum _relaxation_method;
-
-  /// -- Element Localized Damping
-  std::map<const Elem *, Real> _nl_damping_map;
-
-  /// -- Damping values for nonlinear iterations
-  Real _damper;
-
-  /// Maps for wall bounded elements
+  /// --- Maps for wall bounded elements
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<Point>> _normal;
-
-  /// Map of all viscosity values
-  std::map<const Elem *, Real> _mu_t_old;
 };

@@ -53,6 +53,7 @@ INSFVTurbulentTemperatureWallFunction::INSFVTurbulentTemperatureWallFunction(
 ADReal
 INSFVTurbulentTemperatureWallFunction::computeQpResidual()
 {
+  // Useful parameters
   const FaceInfo & fi = *_face_info;
   Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
@@ -74,6 +75,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
 
+  // Coputing friction velocity
   ADReal u_tau;
   if (_linearized_yplus)
   {
@@ -89,6 +91,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     u_tau = NS::findUStar(
         _mu(current_argument, state), _rho(current_argument, state), parallel_speed, wall_dist);
 
+  // Computing non-dimensional wall distance
   ADReal y_plus = wall_dist * u_tau * _rho(current_argument, state) / _mu(current_argument, state);
 
   ADReal alpha;
@@ -97,7 +100,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     alpha = _kappa(current_argument, state) /
             (_rho(current_argument, state) * _cp(current_argument, state));
   }
-  else if (y_plus >= 30.0)
+  else if (y_plus >= 30.0) // log-layer
   {
     auto Pr = _cp(current_argument, state) * _mu(current_argument, state) /
               _kappa(current_argument, state);
@@ -107,7 +110,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     auto wall_scaling = 1.0 / _von_karman * std::log(_E * y_plus) + jayatilleke_P;
     alpha = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
   }
-  else
+  else // buffer layer
   {
     auto alpha_lam = _kappa(current_argument, state) /
                      (_rho(current_argument, state) * _cp(current_argument, state));

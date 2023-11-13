@@ -98,6 +98,36 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
 }
 
 ADReal
+findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
+{
+  // Fixed point iteration method to find y_plus
+  // It should take 3 or 4 iterations
+  constexpr int MAX_ITERS{10};
+  constexpr Real REL_TOLERANCE{1e-2};
+
+  constexpr Real von_karman{0.4187};
+  constexpr Real E{9.793};
+
+  const ADReal nu = mu / rho;
+  ADReal yPlusLam = dist * u / nu;
+
+  ADReal yPlusLast = 0.0;
+  ADReal yPlus = yPlusLam;
+  ADReal rev_yPlusLam = 1.0 / yPlusLam;
+
+  ADReal kappa_time_Re = von_karman * u * dist / nu;
+  unsigned int iters = 0;
+
+  do
+  {
+    yPlusLast = yPlus;
+    yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(E * yPlus));
+  } while (rev_yPlusLam * (yPlus - yPlusLast) > REL_TOLERANCE && ++iters < MAX_ITERS);
+
+  return std::max(0.0, yPlus);
+}
+
+ADReal
 computeSpeed(const ADRealVectorValue & velocity)
 {
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
@@ -115,6 +145,10 @@ getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
                        const SubProblem & _subproblem)
 {
 
+  // If the map has already been populated, we return it
+  // We don't allow differential wall treatement for different models
+  // This can induce physical errors
+  // So, only 1 map exists for determining the wall bounded elements
   if (_wall_bounded.size() > 0)
     return &_wall_bounded;
 
@@ -147,6 +181,10 @@ getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
                 const SubProblem & _subproblem)
 {
 
+  // If the map has already been populated, we return it
+  // We don't allow differential wall treatement for different models
+  // This can induce physical errors
+  // So, only 1 map exists for determining the wall distances
   if (_dist.size() > 0)
     return &_dist;
 
@@ -181,7 +219,11 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
                      const SubProblem & _subproblem)
 {
 
-  if (_dist.size() > 0)
+  // If the map has already been populated, we return it
+  // We don't allow differential wall treatement for different models
+  // This can induce physical errors
+  // So, only 1 map exists for determining the wall bounded elements' normals
+  if (_normal.size() > 0)
     return &_normal;
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
@@ -204,6 +246,43 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
     }
   }
   return &_normal;
+}
+
+/// Face arguments to wall-bounded faces for wall tretement
+std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
+std::map<const Elem *, std::vector<const FaceInfo *>> *
+getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
+                   const FEProblemBase & _fe_problem,
+                   const SubProblem & _subproblem)
+{
+
+  // If the map has already been populated, we return it
+  // We don't allow differential wall treatement for different models
+  // This can induce physical errors
+  // So, only 1 map exists for determining the wall bounded elements' faces
+  if (_face_infos.size() > 0)
+    return &_face_infos;
+
+  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
+  {
+    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    {
+      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
+      for (const BoundaryName & name : _wall_boundary_name)
+      {
+        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
+        for (BoundaryID side_id : side_bnds)
+        {
+          if (side_id == wall_id)
+          {
+            const FaceInfo * fi = _subproblem.mesh().faceInfo(elem, i_side);
+            _face_infos[elem].push_back(fi);
+          }
+        }
+      }
+    }
+  }
+  return &_face_infos;
 }
 
 }

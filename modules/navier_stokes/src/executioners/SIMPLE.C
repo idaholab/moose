@@ -455,7 +455,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     const auto & turbulence_system_names =
         getParam<std::vector<NonlinearSystemName>>("turbulence_systems");
     if (turbulence_system_names.size() != _turbulence_equation_relaxation.size())
-      paramError("turbulencer_equation_relaxation",
+      paramError("turbulence_equation_relaxation",
                  "The number of equation relaxation parameters does not match the number of "
                  "turbulence scalar equations!");
     if (turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
@@ -1356,8 +1356,8 @@ SIMPLE::execute()
       if (_has_turbulence_systems)
       {
         _problem.execute(EXEC_NONLINEAR);
-
         Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
+
         for (auto system_i : index_range(_turbulence_systems))
         {
           residual_index += 1;
@@ -1369,6 +1369,10 @@ SIMPLE::execute()
                                   _turbulence_l_abs_tol);
 
           limitSolutionUpdate(*_turbulence_systems[system_i]);
+
+          // Relax the turbulence update for the next momentum predictor
+          relaxSolutionUpdate(*_turbulence_systems[system_i],
+                              _turbulence_equation_relaxation[system_i]);
         }
       }
 

@@ -29,41 +29,23 @@ INSFVTKEDSourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("mu_t", "Turbulent viscosity.");
   params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls.");
-  params.addRequiredParam<MooseFunctorName>("C1_eps", "First epsilon coefficient");
-  params.addRequiredParam<MooseFunctorName>("C2_eps", "Second epsilon coefficient");
   params.addParam<Real>("max_mixing_length",
-                        10.0,
+                        1e10,
                         "Maximum mixing legth allowed for the domain - adjust for realizable "
                         "k-epsilon to work properly.");
   params.addParam<bool>(
-      "linearized_model", false, "Boolean to determine if the problem is linearized.");
-  params.addParam<MooseFunctorName>(
-      "linear_variable", 1.0, "Linearization coefficient in case the problem has been linearized.");
-  params.addParam<bool>(
-      "realizable_constraint",
+      "linearized_model",
       true,
-      "Boolean to determine if the kEpsilon mixing length realizability constrints are applied.");
-  params.set<unsigned short>("ghost_layers") = 2;
-  params.addParam<Real>("rf", 1.0, "Relaxation factor.");
+      "Boolean to determine if the problem should be use in a linear or nonlinear solve");
   params.addParam<bool>(
       "non_equilibrium_treatement",
-      true,
+      false,
       "Use non-equilibrium wall treatement (faster than standard wall treatement)");
+  params.addParam<Real>("C1_eps", 1.44, "First epsilon coefficient");
+  params.addParam<Real>("C2_eps", 1.92, "Second epsilon coefficient");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
-  MooseEnum turbulence_type("time nl", "nl");
-  params.addParam<MooseEnum>(
-      "relaxation_method",
-      turbulence_type,
-      "The method used for relaxing the turbulent kinetic energy production. "
-      "'nl' = previous nonlinear iteration and 'time' = previous timestep.");
-  params.addParam<unsigned int>(
-      "iters_to_activate",
-      5,
-      "number of iterations needed to activate the source in the turbulent kinetic energy.");
-  params.addParam<Real>(
-      "top_production_bound", 100.0, "Top scale bound for turbulent kinetic energy production.");
-  params.addParam<Real>(
-      "top_destruction_bound", 100.0, "Top scale bound for turbulent kinetic energy destruction.");
+
+  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
@@ -82,19 +64,12 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>("mu_t")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _C1_eps(getFunctor<ADReal>("C1_eps")),
-    _C2_eps(getFunctor<ADReal>("C2_eps")),
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
-    _linear_variable(getFunctor<ADReal>("linear_variable")),
-    _realizable_constraint(getParam<bool>("realizable_constraint")),
-    _rf(getParam<Real>("rf")),
     _non_equilibrium_treatement(getParam<bool>("non_equilibrium_treatement")),
-    _C_mu(getParam<Real>("C_mu")),
-    _relaxation_method(getParam<MooseEnum>("relaxation_method")),
-    _iters_to_activate(getParam<unsigned int>("iters_to_activate")),
-    _top_production_bound(getParam<Real>("top_production_bound")),
-    _top_destruction_bound(getParam<Real>("top_destruction_bound"))
+    _C1_eps(getParam<Real>("C1_eps")),
+    _C2_eps(getParam<Real>("C2_eps")),
+    _C_mu(getParam<Real>("C_mu"))
 {
 
   if (!_u_var)
@@ -110,23 +85,10 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
 
-  _loc_dt = _dt;
-  _stored_time = _fe_problem.time();
-
   _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem));
   _normal = *(NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem));
   _dist = *(NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem));
-
-  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
-  {
-    _symmetric_strain_tensor_norm_old[elem] = 0.0;
-    _old_destruction[elem] = 0.0;
-    _pevious_nl_sol[elem] = 0.0;
-    _production_NL_old[elem] = 0.0;
-    _destruction_NL_old[elem] = 0.0;
-    _pevious_production[elem] = 0.0;
-    _pevious_destruction[elem] = 0.0;
-  }
+  _face_infos = *(NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem));
 }
 
 ADReal
@@ -136,18 +98,14 @@ INSFVTKEDSourceSink::computeQpResidual()
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
-  ADReal production_old_time = 0.0;
-  ADReal destruction_old_time = 0.0;
-  unsigned int time_state = 0;
-  const Moose::StateArg state(time_state);
-  const bool _relax_on_nonlinear = (_relaxation_method == "nl");
-  unsigned int current_nl_iteration = static_cast<NonlinearSystemBase &>(_sys)
-                                          .nonlinearSolver()
-                                          ->get_current_nonlinear_iteration_number();
+  const Moose::StateArg state = determineState();
+  auto old_state =
+      _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
 
   if (_wall_bounded[_current_elem])
   {
-    std::vector<ADReal> u_tau_vec, u_tau_vec_old;
+    std::vector<ADReal> y_plus_vec;
+
     Real tot_weight = 0.0;
 
     ADRealVectorValue velocity(_u_var->getElemValue(_current_elem, state));
@@ -158,119 +116,133 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < _normal[_current_elem].size(); i++)
     {
-      auto parallel_speed =
-          (velocity - velocity * _normal[_current_elem][i] * _normal[_current_elem][i]).norm();
       auto distance = _dist[_current_elem][i];
-      auto loc_u_tau = NS::findUStar(_mu(makeElemArg(_current_elem), state),
-                                     _rho(makeElemArg(_current_elem), state),
-                                     std::max(parallel_speed, 1e-10),
-                                     distance);
-      u_tau_vec.push_back(loc_u_tau);
+
+      ADReal y_plus;
+      if (_non_equilibrium_treatement)
+      {
+        y_plus = std::pow(_C_mu, 0.25) * distance *
+                 std::sqrt(_k(makeElemArg(_current_elem), state)) /
+                 _mu(makeElemArg(_current_elem), state);
+      }
+      else
+      {
+        auto parallel_speed =
+            (velocity - velocity * _normal[_current_elem][i] * _normal[_current_elem][i]).norm();
+
+        y_plus = NS::findyPlus(_mu(makeElemArg(_current_elem), state),
+                               _rho(makeElemArg(_current_elem), state),
+                               std::max(parallel_speed, 1e-10),
+                               distance);
+      }
+
+      y_plus_vec.push_back(y_plus);
+
       tot_weight += 1.0;
     }
 
-    Real eq_value = 0.0;
-    for (unsigned int i = 0; i < u_tau_vec.size(); i++)
+    for (unsigned int i = 0; i < y_plus_vec.size(); i++)
     {
-      auto kp = std::pow(u_tau_vec[i], 2) / std::sqrt(_C_mu) / tot_weight;
-      eq_value += std::pow(kp.value(), 0.5) * std::pow(_C_mu, 0.75) /
-                  (_von_karman * _dist[_current_elem][0]);
+      auto y_plus = y_plus_vec[i];
+
+      if (y_plus < 11.25)
+      {
+        auto fi = _face_infos[_current_elem][i];
+        const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
+        const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
+        Moose::FaceArg facearg = {
+            fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
+        ADReal wall_mut = _mu_t(facearg, state);
+        destruction += 2.0 * _k(makeElemArg(_current_elem), state) * wall_mut /
+                       Utility::pow<2>(_dist[_current_elem][i]) / tot_weight;
+      }
+      else
+        destruction += std::pow(_C_mu, 0.75) * _rho(makeElemArg(_current_elem), state) *
+                       std::pow(_k(makeElemArg(_current_elem), state), 1.5) /
+                       (_von_karman * _dist[_current_elem][i]) / tot_weight;
     }
 
-    // eq_value = _rf * eq_value + (1.0 - _rf) * _pevious_production[_current_elem];
-    _pevious_production[_current_elem] = eq_value;
-
-    residual = _var(makeElemArg(_current_elem), state) - eq_value;
+    residual = _var(makeElemArg(_current_elem), state) - destruction;
   }
   else
   {
 
-    if (((_fe_problem.time() > _stored_time) && (_dt >= _loc_dt)) || _relax_on_nonlinear)
+    const auto & grad_u = _u_var->adGradSln(_current_elem, state);
+    auto Sij_xx = 2.0 * grad_u(0);
+    ADReal Sij_xy = 0.0;
+    ADReal Sij_xz = 0.0;
+    ADReal Sij_yy = 0.0;
+    ADReal Sij_yz = 0.0;
+    ADReal Sij_zz = 0.0;
+
+    auto grad_xx = grad_u(0);
+    ADReal grad_xy = 0.0;
+    ADReal grad_xz = 0.0;
+    ADReal grad_yx = 0.0;
+    ADReal grad_yy = 0.0;
+    ADReal grad_yz = 0.0;
+    ADReal grad_zx = 0.0;
+    ADReal grad_zy = 0.0;
+    ADReal grad_zz = 0.0;
+
+    auto trace = Sij_xx / 3.0;
+
+    if (_dim >= 2)
     {
+      const auto & grad_v = _v_var->adGradSln(_current_elem, state);
+      Sij_xy = grad_u(1) + grad_v(0);
+      Sij_yy = 2.0 * grad_v(1);
 
-      unsigned int loc_time_state = 0;
-      Moose::SolutionIterationType type = Moose::SolutionIterationType::Time;
-      if (_relax_on_nonlinear)
+      grad_xy = grad_u(1);
+      grad_yx = grad_v(0);
+      grad_yy = grad_v(1);
+
+      trace += Sij_yy / 3.0;
+
+      if (_dim >= 3)
       {
-        loc_time_state = 1;
-        type = Moose::SolutionIterationType::Nonlinear;
+        const auto & grad_w = _w_var->adGradSln(_current_elem, state);
+
+        Sij_xz = grad_u(2) + grad_w(0);
+        Sij_yz = grad_v(2) + grad_w(1);
+        Sij_zz = 2.0 * grad_w(2);
+
+        grad_xz = grad_u(2);
+        grad_yz = grad_v(2);
+        grad_zx = grad_w(0);
+        grad_zy = grad_w(1);
+        grad_zz = grad_w(2);
+
+        trace += Sij_zz / 3.0;
       }
-      const Moose::StateArg loc_state(loc_time_state, type);
-
-      const auto & grad_u = _u_var->adGradSln(_current_elem, determineState());
-      auto Sij_00 = grad_u(0);
-      ADReal symmetric_strain_tensor_sq_norm = Utility::pow<2>(Sij_00);
-      if (_dim >= 2)
-      {
-        const auto & grad_v = _v_var->adGradSln(_current_elem, determineState());
-        auto Sij_01 = 0.5 * (grad_u(1) + grad_v(0));
-        auto Sij_11 = grad_v(1);
-        symmetric_strain_tensor_sq_norm += 2.0 * Utility::pow<2>(Sij_01) + Utility::pow<2>(Sij_11);
-        if (_dim >= 3)
-        {
-          const auto & grad_w = _w_var->adGradSln(_current_elem, determineState());
-          auto Sij_02 = 0.5 * (grad_u(2) + grad_w(0));
-          auto Sij_12 = 0.5 * (grad_v(2) + grad_w(1));
-          auto Sij_22 = grad_w(2);
-          symmetric_strain_tensor_sq_norm += 2.0 * Utility::pow<2>(Sij_02) +
-                                             2.0 * Utility::pow<2>(Sij_12) +
-                                             Utility::pow<2>(Sij_22);
-        }
-      }
-
-      auto production_k = 2.0 * _mu_t(makeElemArg(_current_elem), determineState()) *
-                          symmetric_strain_tensor_sq_norm;
-
-      auto time_scale = _k(makeElemArg(_current_elem), determineState()) /
-                            (_var(makeElemArg(_current_elem), determineState()) + 1e-10) +
-                        1e-10;
-
-      production =
-          _C1_eps(makeElemArg(_current_elem), determineState()) * production_k / time_scale;
-      destruction = _C2_eps(makeElemArg(_current_elem), determineState()) *
-                    _rho(makeElemArg(_current_elem), determineState()) *
-                    _var(makeElemArg(_current_elem), determineState()) / time_scale;
-
-      // production = _rf * production + (1.0 - _rf) * _pevious_production[_current_elem];
-      // destruction = _rf * destruction + (1.0 - _rf) * _pevious_destruction[_current_elem];
-
-      // _pevious_production[_current_elem] = production.value();
-      // _pevious_destruction[_current_elem] = destruction.value();
-
-      // if (std::abs(_pevious_production[_current_elem]) >
-      //     _top_production_bound * std::abs(_pevious_destruction[_current_elem]))
-      //   _pevious_production[_current_elem] =
-      //       _top_production_bound * std::abs(_pevious_destruction[_current_elem]) *
-      //       _pevious_production[_current_elem] / std::abs(_pevious_production[_current_elem]);
-
-      // if (std::abs(_pevious_destruction[_current_elem]) >
-      //     _top_destruction_bound * std::abs(_pevious_production[_current_elem]))
-      //   _pevious_destruction[_current_elem] =
-      //       _top_destruction_bound * std::abs(_pevious_production[_current_elem]) *
-      //       _pevious_destruction[_current_elem] / std::abs(_pevious_destruction[_current_elem]);
-
-      // _loc_dt = _dt;
-      // _stored_time = _fe_problem.time();
     }
 
-    // residual = _pevious_destruction[_current_elem] - _pevious_production[_current_elem];
-    // if (_fe_problem.isTransient())
-    //   residual +=
-    //       _rho(makeElemArg(_current_elem), state) * _var.dot(makeElemArg(_current_elem), state);
+    auto symmetric_strain_tensor_sq_norm =
+        (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
+        (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
+        (Sij_zz - trace) * grad_zz;
+
+    auto production_k =
+        _C_mu * symmetric_strain_tensor_sq_norm * _k(makeElemArg(_current_elem), state);
+
+    production = _C1_eps * _rho(makeElemArg(_current_elem), state) * production_k;
+
+    auto time_scale = raw_value(_k(makeElemArg(_current_elem), old_state) /
+                                    (_var(makeElemArg(_current_elem), old_state) + 1e-15) +
+                                1e-15);
+
+    destruction = _C2_eps * _rho(makeElemArg(_current_elem), state) *
+                  _var(makeElemArg(_current_elem), state) / time_scale;
+
+    // Production limiter - not needed for most applications
+    if (_max_mixing_length < 1e10)
+    {
+      if (std::pow(std::abs(production), 1.5) / std::abs(destruction) > _max_mixing_length)
+        production = std::pow(_max_mixing_length * std::abs(destruction.value()) + 1e-10, 2. / 3.);
+    }
 
     residual = destruction - production;
   }
-
-  _pevious_nl_sol[_current_elem] = _rf * _var(makeElemArg(_current_elem), state).value() +
-                                   (1.0 - _rf) * _pevious_nl_sol[_current_elem];
-  _production_NL_old[_current_elem] = production.value();
-  _destruction_NL_old[_current_elem] = destruction.value();
-
-  // return residual;
-  // if ((current_nl_iteration < _iters_to_activate))
-  //   return 0.0;
-  // else
-  //   return residual;
 
   return residual;
 }

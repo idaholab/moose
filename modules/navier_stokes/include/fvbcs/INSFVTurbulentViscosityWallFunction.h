@@ -48,14 +48,8 @@ private:
   const Moose::Functor<ADReal> & _k;
 
   /// C_mu turbulent coefficient
-  const Moose::Functor<ADReal> & _C_mu;
+  const Real _C_mu;
 
-  /// Linearzied computation of y_plus ?
-  const bool _linearized_yplus;
-
-  /// Maximum mixing length allowed for the domain
-  const Real _min_mixing_length;
-
-  /// Non-equilibrium wall treatement ?
-  const bool _non_equilibrium_treatement;
+  /// Method used for wall treatment
+  const MooseEnum _wall_treatment;
 };
