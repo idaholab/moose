@@ -749,7 +749,7 @@ public:
   virtual void addDGKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
-
+  // FV /////
   virtual void addFVKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
@@ -757,9 +757,12 @@ public:
   virtual void addLinearFVKernel(const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters);
-
   virtual void
   addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
+  virtual void addLinearFVBC(const std::string & fv_bc_name,
+                             const std::string & name,
+                             InputParameters & parameters);
+
   virtual void addFVInterfaceKernel(const std::string & fv_ik_name,
                                     const std::string & name,
                                     InputParameters & parameters);

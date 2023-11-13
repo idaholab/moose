@@ -100,6 +100,7 @@
 #include "MooseVariableFV.h"
 #include "MooseLinearVariableFV.h"
 #include "FVBoundaryCondition.h"
+#include "LinearFVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
 #include "Reporter.h"
 #include "ADUtils.h"
@@ -3052,20 +3053,6 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
 }
 
 void
-FEProblemBase::addLinearFVKernel(const std::string & kernel_name,
-                                 const std::string & name,
-                                 InputParameters & parameters)
-{
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-    // FVElementalKernels are computed in the historically finite element threaded loops. They rely
-    // on Assembly data like _current_elem. When we call reinit on the FEProblemBase we will only
-    // reinit the DisplacedProblem and its associated Assembly objects if we mark this boolean as
-    // true
-    _reinit_displaced_elem = true;
-  addObject<LinearFVKernel>(kernel_name, name, parameters);
-}
-
-void
 FEProblemBase::addFVBC(const std::string & fv_bc_name,
                        const std::string & name,
                        InputParameters & parameters)
@@ -3082,6 +3069,22 @@ FEProblemBase::addFVInterfaceKernel(const std::string & fv_ik_name,
   /// the user needs to create two interface kernels with flipped variables and parameters
   addObject<FVInterfaceKernel>(
       fv_ik_name, name, parameters, /*threaded=*/true, /*variable_param_name=*/"variable1");
+}
+
+void
+FEProblemBase::addLinearFVKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  addObject<LinearFVKernel>(kernel_name, name, parameters);
+}
+
+void
+FEProblemBase::addLinearFVBC(const std::string & bc_name,
+                             const std::string & name,
+                             InputParameters & parameters)
+{
+  addObject<LinearFVBoundaryCondition>(bc_name, name, parameters);
 }
 
 // InterfaceKernels ////
