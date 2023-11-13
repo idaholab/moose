@@ -42,6 +42,11 @@ ADVolumeJunction1PhaseUserObject::validParams()
   params.addRequiredParam<Real>("K", "Form loss coefficient [-]");
   params.addRequiredParam<Real>("A_ref", "Reference area [m^2]");
 
+  params.addParam<bool>("apply_velocity_scaling",
+                        false,
+                        "Set to true to apply the scaling to the normal velocity. See "
+                        "documentation for more information.");
+
   params.addClassDescription(
       "Computes and caches flux and residual vectors for a 1-phase volume junction");
 
@@ -59,6 +64,8 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
 
     _K(getParam<Real>("K")),
     _A_ref(getParam<Real>("A_ref")),
+
+    _apply_velocity_scaling(getParam<bool>("apply_velocity_scaling")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
@@ -95,6 +102,9 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const RealVectorValue nJi = -ni;
   const Real nJi_dot_di = -din;
 
+  RealVectorValue t1, t2;
+  THM::computeOrthogonalDirections(nJi, t1, t2);
+
   std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
   Ui[THMVACE3D::RHOA] = _rhoA[0];
   Ui[THMVACE3D::RHOUA] = _rhouA[0] * di(0);
@@ -109,16 +119,48 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
   const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
 
+  const ADReal rhoJ = rhoV / _volume;
+  const ADReal vJ = 1.0 / rhoJ;
+  const ADRealVectorValue uvecJ(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
+  const ADReal eJ = rhoEV / rhoV - 0.5 * uvecJ * uvecJ;
+  const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
+
   std::vector<ADReal> UJi(THMVACE3D::N_FLUX_INPUTS, 0.);
   UJi[THMVACE3D::RHOA] = rhoV / _volume * _A[0];
-  UJi[THMVACE3D::RHOUA] = rhouV / _volume * _A[0];
-  UJi[THMVACE3D::RHOVA] = rhovV / _volume * _A[0];
-  UJi[THMVACE3D::RHOWA] = rhowV / _volume * _A[0];
-  UJi[THMVACE3D::RHOEA] = rhoEV / _volume * _A[0];
-  UJi[THMVACE3D::AREA] = _A[0];
+  if (_apply_velocity_scaling)
+  {
+    const ADReal unJ = uvecJ * nJi;
+    const ADReal ut1J = uvecJ * t1;
+    const ADReal ut2J = uvecJ * t2;
+    const ADReal uni = _rhouA[0] / _rhoA[0] * nJi_dot_di;
 
-  RealVectorValue t1, t2;
-  THM::computeOrthogonalDirections(ni, t1, t2);
+    const ADReal rhoi = _rhoA[0] / _A[0];
+    const ADReal vi = 1.0 / rhoi;
+    const ADReal ei = _rhoEA[0] / _rhoA[0] - 0.5 * uni * uni;
+    const ADReal ci = _fp.c_from_v_e(vi, ei);
+    const ADReal cJ = _fp.c_from_v_e(vJ, eJ);
+    const ADReal cmax = std::max(ci, cJ);
+
+    const ADReal uni_sign = (uni > 0) - (uni < 0);
+    const ADReal factor = 0.5 * (1.0 - uni_sign) * std::min(std::abs(uni - unJ) / cmax, 1.0);
+
+    const ADReal unJ_mod = uni - factor * (uni - unJ);
+    const ADRealVectorValue uvecJ_mod = unJ_mod * nJi + ut1J * t1 + ut2J * t2;
+    const ADReal EJ_mod = eJ + 0.5 * uvecJ_mod * uvecJ_mod;
+
+    UJi[THMVACE3D::RHOUA] = rhoJ * uvecJ_mod(0) * _A[0];
+    UJi[THMVACE3D::RHOVA] = rhoJ * uvecJ_mod(1) * _A[0];
+    UJi[THMVACE3D::RHOWA] = rhoJ * uvecJ_mod(2) * _A[0];
+    UJi[THMVACE3D::RHOEA] = rhoJ * EJ_mod * _A[0];
+  }
+  else
+  {
+    UJi[THMVACE3D::RHOUA] = rhouV / _volume * _A[0];
+    UJi[THMVACE3D::RHOVA] = rhovV / _volume * _A[0];
+    UJi[THMVACE3D::RHOWA] = rhowV / _volume * _A[0];
+    UJi[THMVACE3D::RHOEA] = rhoEV / _volume * _A[0];
+  }
+  UJi[THMVACE3D::AREA] = _A[0];
 
   const auto flux_3d = _numerical_flux_uo[c]->getFlux3D(
       _current_side, _current_elem->id(), true, UJi, Ui, nJi, t1, t2);
@@ -127,12 +169,6 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   _flux[c][THMVACE1D::MASS] = flux_3d[THMVACE3D::MASS] * nJi_dot_di;
   _flux[c][THMVACE1D::MOMENTUM] = flux_3d[THMVACE3D::MOM_NORM];
   _flux[c][THMVACE1D::ENERGY] = flux_3d[THMVACE3D::ENERGY] * nJi_dot_di;
-
-  const ADReal vJ = THM::v_from_rhoA_A(rhoV, _volume);
-  const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
-  const ADReal rhouV2 = rhouV_vec * rhouV_vec;
-  const ADReal eJ = rhoEV / rhoV - 0.5 * rhouV2 / (rhoV * rhoV);
-  const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
 
   if (c == 0 && std::abs(_K) > 1e-10)
   {

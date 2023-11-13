@@ -66,6 +66,7 @@ Pump1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("A_ref") = getParam<Real>("A_ref");
     params.set<Real>("K") = getParam<Real>("K");
     params.set<UserObjectName>("fp") = _fp_name;
+    params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
     connectObject(params, _junction_uo_name, "head");
