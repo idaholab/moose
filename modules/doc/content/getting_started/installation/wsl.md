@@ -74,7 +74,7 @@ must also be installed.
 ```bash
 sudo apt update
 sudo apt upgrade
-sudo apt install x11-apps libglu1-mesa
+sudo apt install x11-apps libglu1-mesa libxcb-*
 ```
 
 ### Configure WSL to use VcXsrv
