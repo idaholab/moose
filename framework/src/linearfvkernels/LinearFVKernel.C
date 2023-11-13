@@ -28,14 +28,6 @@ LinearFVKernel::validParams()
   InputParameters params = LinearSystemContributionObject::validParams();
   params += BlockRestrictable::validParams();
   params += ADFunctorInterface::validParams();
-  params.addParam<bool>("use_displaced_mesh",
-                        false,
-                        "Whether or not this object should use the "
-                        "displaced mesh for computation. Note that in "
-                        "the case this is true but no displacements "
-                        "are provided in the Mesh block the "
-                        "undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
   params.addParam<bool>("use_point_neighbors",
@@ -78,9 +70,6 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
                "The variable defined for kernel ",
                name(),
                " is not derived from MooseLinearVariableFV!");
-
-  if (getParam<bool>("use_displaced_mesh"))
-    paramError("use_displaced_mesh", "Linear FV kernels do not yet support displaced mesh");
 
   addMooseVariableDependency(_var);
 }
