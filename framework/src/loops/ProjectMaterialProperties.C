@@ -212,7 +212,7 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
   if (_need_internal_side_material &&
       _refine) // If we're refining then we need to also project "internal" child sides.
   {
-    mooseError("I'm pretty sure we're not handling stateful material property pronlongation or "
+    mooseError("I'm pretty sure we're not handling stateful material property prolongation or "
                "restriction correctly on internal sides");
     for (unsigned int child = 0; child < elem->n_children(); child++)
     {
