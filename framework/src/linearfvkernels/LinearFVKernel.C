@@ -19,7 +19,7 @@ LinearFVKernel::setRMParams(const InputParameters & obj_params,
   rm_params.set<unsigned short>("layers") = ghost_layers;
   rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
   rm_params.set<bool>("attach_geometric_early") = false;
-  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+  rm_params.set<bool>("use_displaced_mesh") = false;
 }
 
 InputParameters

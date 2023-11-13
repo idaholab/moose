@@ -36,7 +36,8 @@ LinearFVBoundaryCondition::validParams()
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.declareControllable("enable");
-  params.registerBase("LinearLinearFVBoundaryCondition");
+  params.registerBase("LinearFVBoundaryCondition");
+  params.registerSystemAttributeName("LinearFVBoundaryCondition");
   return params;
 }
 
@@ -55,16 +56,16 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     TaggingInterface(this),
     MooseVariableDependencyInterface(this),
     ADFunctorInterface(this),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _mesh(_subproblem.mesh()),
+    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _var(dynamic_cast<MooseLinearVariableFV<Real> *>(
         &_fv_problem.getVariable(_tid,
                                  parameters.varName("variable", name()),
                                  Moose::VarKindType::VAR_LINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD))),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
-    _sys(changeSystem(parameters, *_var)),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _mesh(_subproblem.mesh())
+    _sys(changeSystem(parameters, *_var))
 {
   if (!_var)
     paramError("variable",

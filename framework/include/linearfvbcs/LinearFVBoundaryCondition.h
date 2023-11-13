@@ -54,8 +54,7 @@ class LinearFVBoundaryCondition : public MooseObject,
                                   public MeshChangedInterface,
                                   public TaggingInterface,
                                   public MooseVariableDependencyInterface,
-                                  public ADFunctorInterface,
-                                  public FaceArgProducerInterface
+                                  public ADFunctorInterface
 {
 public:
   /**
@@ -77,7 +76,7 @@ public:
 
   virtual Real computeBoundaryValue(const FaceInfo * const face_info) = 0;
 
-  virtual Real computeBoundaryGradient(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) = 0;
 
   virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) = 0;
 
@@ -88,20 +87,20 @@ public:
   virtual Real computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) = 0;
 
 protected:
-  MooseLinearVariableFV<Real> * _var;
+  /// Thread id
+  THREAD_ID _tid;
 
   /// Reference to SubProblem
   SubProblem & _subproblem;
 
+  /// Mesh this BC is defined on
+  MooseMesh & _mesh;
+
   /// Reference to the ruling finite volume problem
   FVProblemBase & _fv_problem;
 
+  MooseLinearVariableFV<Real> * _var;
+
   /// Reference to SystemBase
   SystemBase & _sys;
-
-  /// Thread id
-  THREAD_ID _tid;
-
-  /// Mesh this BC is defined on
-  MooseMesh & _mesh;
 };

@@ -36,6 +36,15 @@
   []
 []
 
+[LinearFVBCs]
+  [left_dir]
+    type = LinearFVDirichletBC
+    variable = u
+    boundary = "left"
+    value = 2.0
+  []
+[]
+
 [Executioner]
   type = LinearPicardSteady
   linear_sys_to_solve = u_sys
