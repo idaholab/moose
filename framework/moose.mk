@@ -229,7 +229,8 @@ moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
 
-srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
+# Top level source directories in MOOSE 
+srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*')
 
 # This folder does not build with unity
 moose_non_unity := %/utils_nonunity
@@ -293,7 +294,7 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
 
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
 

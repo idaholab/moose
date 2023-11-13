@@ -79,14 +79,16 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # The idea here is that if all they have is src then it's a big jumble of stuff
 # that won't benefit from unity building
 # Also, exclude the base directory by default because it's another big jumble
-# of unrelated stuff
-non_unity_dirs := %.libs %/src %src/base $(app_non_unity_dirs)
+# of unrelated stuff.
+# Note: If a top-level directory is excluded from being built with unity, we
+# ignore contents of all subdirectories under that folder.
+non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
 
-# Find all of the individual subdirectories
+# Find all of the top-level subdirectories in our src folder(s)
 # We will create a Unity file for each individual subdirectory
 # The idea is that files grouped withing a subdirectory are closely related
 # and will benefit from a Unity build
-srcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -type d -not -path '*/.libs*')
 
 # Filter out the paths we don't want to Unity build
 unity_srcsubdirs := $(filter-out $(non_unity_dirs), $(srcsubdirs))
@@ -96,7 +98,7 @@ non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
