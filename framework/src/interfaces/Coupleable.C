@@ -853,16 +853,24 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   auto * var = getVarHelper<MooseWritableVariable>(var_name, comp);
 
   const auto * aux = dynamic_cast<const AuxKernel *>(this);
+  const auto * vector_aux = dynamic_cast<const VectorAuxKernel *>(this);
+  const auto * array_aux = dynamic_cast<const ArrayAuxKernel *>(this);
+
+  const bool aux_object = (aux || vector_aux || array_aux);
+  const bool aux_object_is_nodal =
+      ((aux && aux->isNodal()) || (vector_aux && vector_aux->isNodal()) ||
+       (array_aux && array_aux->isNodal()));
+
   const auto * euo = dynamic_cast<const ElementUserObject *>(this);
   const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
 
-  if (!aux && !euo && !nuo)
+  if (!aux_object && !euo && !nuo)
     mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, or "
                "NodalUserObjects. '",
                _obj->name(),
                "' is neither of those.");
 
-  if (aux && !aux->isNodal() && var->isNodal())
+  if (aux_object && !aux_object_is_nodal && var->isNodal())
     mooseError("The elemental AuxKernel '",
                _obj->name(),
                "' cannot obtain a writable reference to the nodal variable '",
