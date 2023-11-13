@@ -53,6 +53,8 @@ static const std::string duct_region_ids = "duct_region_ids";
 static const std::string duct_block_names = "duct_block_names";
 static const std::string peripheral_ring_region_id = "peripheral_ring_region_id";
 
+// Quantities related to bypassing mesh generation
+static const std::string bypass_meshgen = "bypass_meshgen";
 }
 
 /**
@@ -186,6 +188,15 @@ protected:
                                 std::map<std::string, SubdomainID> & name_id_map,
                                 std::string elem_block_name,
                                 SubdomainID & next_free_id);
+
+  /**
+   * Calls addMeshSubGenerator to add mesh sub generator defined by RGMB
+   * NOTE: addMeshSubGenerator only gets called if bypass_mesh_generation has not been set to true in ReactorMeshParams
+   * @param type of mesh generator
+   * @param name of mesh generator
+   * @param input parameters associated with mesh generator
+   */
+  void callMeshSubgenerator(std::string mg_type, std::string mg_name, InputParameters & params);
 
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;

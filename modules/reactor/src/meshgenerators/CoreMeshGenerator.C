@@ -117,10 +117,6 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   // represent an empty position
   declareNullMeshName(_empty_key);
 
-  // Declare that all of the meshes in the "inputs" parameter are to be used by
-  // a sub mesh generator
-  declareMeshesForSub("inputs");
-
   // periphery meshing input checking
   if (_mesh_periphery)
   {
@@ -232,6 +228,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
 
+  // Declare that all of the meshes in the "inputs" parameter are to be used by
+  // a sub mesh generator. If mesh generation should be bypassed, then store
+  // the input meshes to free later
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    declareMeshesForSub("inputs");
+  else
+    _mesh_ptrs = getMeshes("inputs");
+
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
   _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
 
@@ -285,7 +289,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
           params.set<std::vector<subdomain_id_type>>("block_id") = {(UINT16_MAX / 2) - 1};
 
-          addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
+          callMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
         }
         else
         {
@@ -313,7 +317,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           params.set<std::vector<subdomain_id_type>>("background_block_ids") =
               std::vector<subdomain_id_type>{(UINT16_MAX / 2) - 1};
 
-          addMeshSubgenerator(adaptive_mg_name, std::string(_empty_key), params);
+          callMeshSubgenerator(adaptive_mg_name, std::string(_empty_key), params);
         }
       }
     }
@@ -341,7 +345,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("external_boundary_name") = "outer_core";
       params.set<double>("rotate_angle") = 0.0;
 
-      addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
+      callMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
     }
   }
   if (_empty_pos)
@@ -352,7 +356,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<BoundaryName>("new_boundary") = "outer_core";
 
-    addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
+    callMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
   }
 
   std::string build_mesh_name;
@@ -382,7 +386,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
     build_mesh_name = name() + "_delbds";
-    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+    callMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto assembly : _inputs)
@@ -476,7 +480,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
     // finish periphery input
     build_mesh_name = name() + "_periphery";
-    addMeshSubgenerator(periphery_mg_name, build_mesh_name, params);
+    callMeshSubgenerator(periphery_mg_name, build_mesh_name, params);
   }
 
   if (_extrude && _mesh_dimensions == 3)
@@ -499,7 +503,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
 
-      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+      callMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {
@@ -511,7 +515,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
 
-      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+      callMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
     }
 
     {
@@ -530,12 +534,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("id_name") = "plane_id";
 
       build_mesh_name = name() + "_extrudedIDs";
-      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
+      callMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   generateMetadata();
 
-  _build_mesh = &getMeshByName(build_mesh_name);
+  // Store final mesh subgenerator if we are not bypassing mesh generation
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 void
@@ -607,6 +613,15 @@ CoreMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
+
+  // Return default mesh if option to bypass mesh generation is chosen and free all input meshes
+  if (getReactorParam<bool>(RGMB::bypass_meshgen))
+  {
+    for (const auto & mesh_ptr : _mesh_ptrs)
+      mesh_ptr->reset();
+    auto mesh = buildMeshBaseObject();
+    return dynamic_pointer_cast<MeshBase>(mesh);
+  }
 
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/names in case they were merged

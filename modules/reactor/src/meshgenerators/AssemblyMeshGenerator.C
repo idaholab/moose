@@ -106,8 +106,6 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                          : std::vector<std::vector<subdomain_id_type>>()),
     _extrude(getParam<bool>("extrude"))
 {
-  declareMeshesForSub("inputs");
-
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[0]));
   // Check that MG name for reactor params is consistent across all assemblies
@@ -118,6 +116,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
+
+  // Declare dependency of inputs to sub generator calls. If mesh generation
+  // should be bypassed, then store the input meshes to free later
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    declareMeshesForSub("inputs");
+  else
+    _mesh_ptrs = getMeshes("inputs");
 
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
   _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
@@ -311,16 +316,20 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
     params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
-    addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
+    callMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
 
     // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-    copyMeshProperty<bool>("is_control_drum_meta", name() + "_pattern");
-    copyMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern");
-    copyMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern");
-    copyMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
-                                                     name() + "_pattern");
-    copyMeshProperty<std::string>("position_file_name", name() + "_pattern");
-    copyMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
+    // Only relevant if we are generating RGMB mesh and not bypassing mesh generation
+    if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    {
+      copyMeshProperty<bool>("is_control_drum_meta", name() + "_pattern");
+      copyMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern");
+      copyMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern");
+      copyMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
+                                                       name() + "_pattern");
+      copyMeshProperty<std::string>("position_file_name", name() + "_pattern");
+      copyMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
+    }
   }
 
   std::string build_mesh_name = name() + "_delbds";
@@ -345,7 +354,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+    callMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto pinMG : _inputs)
@@ -379,7 +388,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
 
-      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+      callMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {
@@ -391,7 +400,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
           std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
 
-      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+      callMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
     }
 
     {
@@ -409,12 +418,14 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("id_name") = "plane_id";
 
       build_mesh_name = name() + "_extrudedIDs";
-      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
+      callMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   generateMetadata();
 
-  _build_mesh = &getMeshByName(build_mesh_name);
+  // Store final mesh subgenerator if we are not bypassing mesh generation
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 void
@@ -466,6 +477,15 @@ AssemblyMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
+
+  // Return default mesh if option to bypass mesh generation is chosen and free all input meshes
+  if (getReactorParam<bool>(RGMB::bypass_meshgen))
+  {
+    for (const auto & mesh_ptr : _mesh_ptrs)
+      mesh_ptr->reset();
+    auto mesh = buildMeshBaseObject();
+    return dynamic_pointer_cast<MeshBase>(mesh);
+  }
 
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage

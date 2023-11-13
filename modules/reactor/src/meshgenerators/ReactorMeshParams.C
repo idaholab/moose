@@ -43,6 +43,7 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
+  params.addParam<bool>("bypass_mesh_generation", false, "Whether or not to bypass mesh generation when running RGMB workflow");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
   return params;
@@ -52,7 +53,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _geom(getParam<MooseEnum>("geom")),
-    _assembly_pitch(getParam<Real>("assembly_pitch"))
+    _assembly_pitch(getParam<Real>("assembly_pitch")),
+    _bypass_meshgen(getParam<bool>("bypass_mesh_generation"))
 {
   if (int(_dim) == 2)
   {
@@ -78,6 +80,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty("name_id_map", _name_id_map);
+  this->declareMeshProperty(RGMB::bypass_meshgen, _bypass_meshgen);
 
   if (isParamValid("top_boundary_id"))
   {

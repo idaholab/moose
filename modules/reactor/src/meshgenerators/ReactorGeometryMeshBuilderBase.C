@@ -108,6 +108,13 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
 }
 
 void
+ReactorGeometryMeshBuilderBase::callMeshSubgenerator(std::string mg_type, std::string mg_name, InputParameters & params)
+{
+  if (!ReactorGeometryMeshBuilderBase::getReactorParam<bool>(RGMB::bypass_meshgen))
+    addMeshSubgenerator(mg_type, mg_name, params);
+}
+
+void
 ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string geometry_type,
                                                      const std::string mg_name,
                                                      bool first_function_call)

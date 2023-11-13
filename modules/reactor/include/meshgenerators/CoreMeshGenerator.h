@@ -63,6 +63,10 @@ protected:
   const unsigned int _periphery_num_layers;
   /// Desired (maximum) triangle area
   const Real _desired_area;
+
+  ///Temporary container for mesh pointers pointing to input meshes
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+
   /// Desired (local) triangle area as a function of (x,y)
   std::string _desired_area_func;
 

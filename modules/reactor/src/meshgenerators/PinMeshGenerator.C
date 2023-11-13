@@ -211,7 +211,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     params.set<std::vector<SubdomainName>>("block_name") = {block_name};
 
     build_mesh_name = name() + "_2D";
-    addMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
+    callMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
   }
   else
   {
@@ -349,7 +349,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
       }
 
-      addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
+      callMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
     }
 
     // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
@@ -366,16 +366,20 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
       build_mesh_name = name() + "_del_bds";
-      addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+      callMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
     }
   }
 
   // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-  copyMeshProperty<Real>("pitch_meta", name() + "_2D");
-  copyMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D");
-  copyMeshProperty<Real>("max_radius_meta", name() + "_2D");
-  copyMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
-  copyMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+  // Only relevant if we are generating RGMB mesh and not bypassing mesh generation
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+  {
+    copyMeshProperty<Real>("pitch_meta", name() + "_2D");
+    copyMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D");
+    copyMeshProperty<Real>("max_radius_meta", name() + "_2D");
+    copyMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
+    copyMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+  }
   if (_is_assembly)
     declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>(RGMB::assembly_pitch));
   else if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
@@ -397,7 +401,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
-      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+      callMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {
@@ -408,8 +412,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           std::to_string(top_boundary),
           std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
-
-      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+      callMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
     }
 
     {
@@ -427,13 +430,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("id_name") = "plane_id";
 
       build_mesh_name = name() + "_extrudedIDs";
-      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
+      callMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
 
   generateMetadata();
 
-  _build_mesh = &getMeshByName(build_mesh_name);
+  // Store final mesh subgenerator if we are not bypassing mesh generation
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 void
@@ -517,6 +522,13 @@ PinMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
+
+  // Return default mesh if option to bypass mesh generation is chosen
+  if (getReactorParam<bool>(RGMB::bypass_meshgen))
+  {
+    auto mesh = buildMeshBaseObject();
+    return dynamic_pointer_cast<MeshBase>(mesh);
+  }
 
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
