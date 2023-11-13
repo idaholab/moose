@@ -64,6 +64,54 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 }
 
 void
+MaterialPropertyStorage::updateStatefulPropsForPRefinement(
+    const processor_id_type libmesh_dbg_var(pid),
+    const std::vector<QpMap> & p_refinement_map,
+    const QBase & qrule,
+    const QBase & qrule_face,
+    const THREAD_ID tid,
+    const Elem & elem,
+    const int input_side)
+{
+  unsigned int n_qpoints = 0;
+
+  // If we passed in -1 for these then we really need to store properties at 0
+  unsigned int side = input_side == -1 ? 0 : input_side;
+
+  if (input_side == -1) // Not doing side projection (ie, doing volume projection)
+    n_qpoints = qrule.n_points();
+  else
+    n_qpoints = qrule_face.n_points();
+
+  getMaterialData(tid).resize(n_qpoints);
+
+  mooseAssert(elem.active(), "We should be doing p-refinement on active elements only");
+  mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
+  mooseAssert(p_refinement_map.size() == n_qpoints, "Refinement map not proper size");
+
+  initProps(tid, &elem, side, n_qpoints);
+
+  for (const auto state : stateIndexRange())
+  {
+    auto & props = setProps(&elem, side, state);
+    for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+    {
+      auto & current_p_level_prop = props[i];
+      // We need to clone this property in order to not overwrite the values we're going to be
+      // reading from
+      auto previous_p_level_prop = current_p_level_prop.clone(current_p_level_prop.size());
+      // Cloning, despite its name, does not copy the data. Luckily since we are about to overwrite
+      // all of the current_p_level_prop data, we can just swap its data over to our
+      // previous_p_level_prop
+      previous_p_level_prop->swap(current_p_level_prop);
+      current_p_level_prop.resize(n_qpoints);
+      for (const auto qp : index_range(p_refinement_map))
+        current_p_level_prop.qpCopy(qp, *previous_p_level_prop, p_refinement_map[qp]._to);
+    }
+  }
+}
+
+void
 MaterialPropertyStorage::prolongStatefulProps(
     processor_id_type pid,
     const std::vector<std::vector<QpMap>> & refinement_map,

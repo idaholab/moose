@@ -219,7 +219,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
     _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
-    _coord_system_set(false)
+    _coord_system_set(false),
+    _doing_p_refinement(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -277,7 +278,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _rz_coord_axis(other_mesh._rz_coord_axis),
     _subdomain_id_to_rz_coord_axis(other_mesh._subdomain_id_to_rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
-    _provided_coord_blocks(other_mesh._provided_coord_blocks)
+    _provided_coord_blocks(other_mesh._provided_coord_blocks),
+    _doing_p_refinement(other_mesh._doing_p_refinement)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -2039,10 +2041,8 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 }
 
 void
-MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
+MooseMesh::buildHRefinementAndCoarseningMaps(Assembly * const assembly)
 {
-  TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
-
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
@@ -2095,6 +2095,114 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
         if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
           buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
+}
+
+void
+MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
+{
+  _elem_type_to_p_refinement_map.clear();
+  _elem_type_to_p_refinement_side_map.clear();
+  _elem_type_to_p_coarsening_map.clear();
+  _elem_type_to_p_coarsening_side_map.clear();
+
+  std::map<ElemType, std::pair<Elem *, unsigned int>> elems_and_max_p_level;
+
+  for (const auto & elem : getMesh().active_element_ptr_range())
+  {
+    const auto type = elem->type();
+    auto & [picked_elem, max_p_level] = elems_and_max_p_level[type];
+    if (!picked_elem)
+      picked_elem = elem;
+    max_p_level = std::max(max_p_level, elem->p_level());
+  }
+
+  // The only requirement on the FEType is that it can be arbitrarily p-refined
+  const FEType p_refinable_fe_type(CONSTANT, MONOMIAL);
+  std::vector<Point> volume_ref_points_coarse, volume_ref_points_fine, face_ref_points_coarse,
+      face_ref_points_fine;
+  std::vector<unsigned int> p_levels;
+
+  for (auto & [elem_type, elem_p_level_pair] : elems_and_max_p_level)
+  {
+    auto & [moose_elem, max_p_level] = elem_p_level_pair;
+    const auto dim = moose_elem->dim();
+    // Need to do this just once to get the right qrules put in place
+    assembly->setCurrentSubdomainID(moose_elem->subdomain_id());
+    assembly->reinit(moose_elem);
+    assembly->reinit(moose_elem, 0);
+    auto & qrule = assembly->writeableQRule();
+    auto & qrule_face = assembly->writeableQRuleFace();
+
+    libMesh::Parallel::Communicator self_comm{};
+    ReplicatedMesh mesh(self_comm);
+    mesh.set_mesh_dimension(dim);
+    for (const auto & nd : moose_elem->node_ref_range())
+      mesh.add_point(nd);
+
+    Elem * const elem = mesh.add_elem(Elem::build(elem_type).release());
+    for (const auto i : elem->node_index_range())
+      elem->set_node(i) = mesh.node_ptr(i);
+
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, p_refinable_fe_type));
+    std::unique_ptr<FEBase> fe_face(FEBase::build(dim, p_refinable_fe_type));
+    fe_face->get_phi();
+    const auto & face_phys_points = fe_face->get_xyz();
+
+    fe->attach_quadrature_rule(qrule);
+    fe_face->attach_quadrature_rule(qrule_face);
+    fe->reinit(elem);
+    volume_ref_points_coarse = qrule->get_points();
+    fe_face->reinit(elem, (unsigned int)0);
+    FEInterface::inverse_map(
+        dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_coarse);
+
+    p_levels.resize(max_p_level + 1);
+    std::iota(p_levels.begin(), p_levels.end(), 0);
+    MeshRefinement mesh_refinement(mesh);
+
+    for (const auto p_level : p_levels)
+    {
+      mesh_refinement.uniformly_p_refine(1);
+      fe->reinit(elem);
+      volume_ref_points_fine = qrule->get_points();
+      fe_face->reinit(elem, (unsigned int)0);
+      FEInterface::inverse_map(
+          dim, p_refinable_fe_type, elem, face_phys_points, face_ref_points_fine);
+
+      const auto map_key = std::make_pair(elem_type, p_level);
+      auto & volume_refine_map = _elem_type_to_p_refinement_map[map_key];
+      auto & face_refine_map = _elem_type_to_p_refinement_side_map[map_key];
+      auto & volume_coarsen_map = _elem_type_to_p_coarsening_map[map_key];
+      auto & face_coarsen_map = _elem_type_to_p_coarsening_side_map[map_key];
+
+      auto fill_maps = [this](const auto & coarse_ref_points,
+                              const auto & fine_ref_points,
+                              auto & coarsen_map,
+                              auto & refine_map)
+      {
+        mapPoints(fine_ref_points, coarse_ref_points, refine_map);
+        mapPoints(coarse_ref_points, fine_ref_points, coarsen_map);
+      };
+
+      fill_maps(
+          volume_ref_points_coarse, volume_ref_points_fine, volume_coarsen_map, volume_refine_map);
+      fill_maps(face_ref_points_coarse, face_ref_points_fine, face_coarsen_map, face_refine_map);
+
+      // With this level's maps filled our fine points now become our coarse points
+      volume_ref_points_fine.swap(volume_ref_points_coarse);
+      face_ref_points_fine.swap(face_ref_points_coarse);
+    }
+  }
+}
+
+void
+MooseMesh::buildRefinementAndCoarseningMaps(Assembly * const assembly)
+{
+  TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
+  if (doingPRefinement())
+    buildPRefinementAndCoarseningMaps(assembly);
+  else
+    buildHRefinementAndCoarseningMaps(assembly);
 }
 
 void
@@ -2283,7 +2391,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   fe->attach_quadrature_rule(&qrule);
   fe_face->attach_quadrature_rule(&qrule_face);
 
-  // The current q_points
+  // The current q_points (locations in *physical* space)
   const std::vector<Point> * q_points;
 
   if (parent_side != -1)
@@ -2303,6 +2411,9 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   MeshRefinement mesh_refinement(mesh);
   mesh_refinement.uniformly_refine(1);
 
+  // A map from the child element index to the locations of all the child's quadrature points in
+  // *reference* space. Note that we use a map here instead of a vector because the caller can
+  // pass an explicit child index. We are not guaranteed to have a sequence from [0, n_children)
   std::map<unsigned int, std::vector<Point>> child_to_ref_points;
 
   unsigned int n_children = elem->n_children();
@@ -3938,4 +4049,51 @@ MooseMesh::checkDuplicateSubdomainNames()
     else
       subdomain[sub_name] = sbd_id;
   }
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementMapHelper(
+    const Elem & elem,
+    const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> & map) const
+{
+  mooseAssert(elem.active() && elem.p_refinement_flag() == Elem::JUST_REFINED,
+              "These are the conditions that should be met for requesting a refinement map");
+  // We are actually seeking the map stored with the p_level - 1 key, e.g. the refinement map that
+  // maps from the previous p_level to this element's p_level
+  return libmesh_map_find(map,
+                          std::make_pair(elem.type(), cast_int<unsigned int>(elem.p_level() - 1)));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningMapHelper(
+    const Elem & elem,
+    const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> & map) const
+{
+  mooseAssert(elem.active() && elem.p_refinement_flag() == Elem::JUST_COARSENED,
+              "These are the conditions that should be met for requesting a coarsening map");
+  return libmesh_map_find(map, std::make_pair(elem.type(), elem.p_level()));
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementMap(const Elem & elem) const
+{
+  return getPRefinementMapHelper(elem, _elem_type_to_p_refinement_map);
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPRefinementSideMap(const Elem & elem) const
+{
+  return getPRefinementMapHelper(elem, _elem_type_to_p_refinement_side_map);
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningMap(const Elem & elem) const
+{
+  return getPCoarseningMapHelper(elem, _elem_type_to_p_coarsening_map);
+}
+
+const std::vector<QpMap> &
+MooseMesh::getPCoarseningSideMap(const Elem & elem) const
+{
+  return getPCoarseningMapHelper(elem, _elem_type_to_p_coarsening_side_map);
 }
