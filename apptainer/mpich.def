@@ -194,7 +194,7 @@ EOF
       CXX=clang++ \
       FC=gfortran \
       F77=gfortran \
-      F90=gfortan \
+      F90=gfortran \
       CFLAGS='' \
       CXXFLAGS='' \
       FFLAGS='-fallow-argument-mismatch' \
