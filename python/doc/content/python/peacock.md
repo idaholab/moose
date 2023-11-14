@@ -85,7 +85,7 @@ peacock
 Peacock will search upwards from the current directory, and attempt to find your application's executable. Syntax is gathered, and you are presented with input syntax specific to your application.
 
 ```bash
-cd ~/projects/trunk/<your application directory>/<your test directory>
+cd ~/projects/<your application directory>/<your test directory>
 peacock -i your_input_file.i
 ```
 

@@ -920,6 +920,24 @@ public:
    */
   virtual bool hasNonlocalCoupling() const = 0;
 
+  /**
+   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * @param doing_p_refinement Whether we're doing p-refinement
+   * @param disable_p_refinement_for_families Families to disable p-refinement for
+   */
+  virtual void doingPRefinement(bool doing_p_refinement,
+                                const MultiMooseEnum & disable_p_refinement_for_families);
+
+  /**
+   * @returns whether the kind of adaptivity we're doing is p-refinement
+   */
+  [[nodiscard]] bool doingPRefinement() const;
+
+  /**
+   * Query whether p-refinement has been requested at any point during the simulation
+   */
+  [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -1101,6 +1119,9 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
+
+  /// Whether p-refinement has been requested at any point during the simulation
+  bool _have_p_refinement;
 
   friend class Restartable;
 };

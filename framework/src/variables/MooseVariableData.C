@@ -856,6 +856,13 @@ MooseVariableData<OutputType>::computeMonomialValues()
   if (_dof_indices.size() == 0)
     return;
 
+  if (_elem->p_level())
+  {
+    // The optimizations in this routine are not appropriate after p-refinement
+    computeValues();
+    return;
+  }
+
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _current_qrule->n_points();
 

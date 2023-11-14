@@ -21,7 +21,9 @@ cd ${PREFIX}/bin
 ln -s ${INSTALL_DIR}/bin/<EXECUTABLE>-opt .
 ln -s ${INSTALL_DIR}/bin/moose_test_runner .
 cd ${PREFIX}/share
-ln -s ${INSTALL_DIR}/share/<APPLICATION> .
+if ! [ -d "<APPLICATION>" ]; then
+    ln -s ${INSTALL_DIR}/share/<APPLICATION> .
+fi
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export MOOSE_ADFPARSER_JIT_INCLUDE=${INSTALL_DIR}/include/moose/ADRealMonolithic.h

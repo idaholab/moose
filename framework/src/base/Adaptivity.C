@@ -273,7 +273,7 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
   if (level == libMesh::invalid_uint)
     level = mesh->uniformRefineLevel();
 
-  // Skip deletion and repartition will make uniform refinements will run more
+  // Skip deletion and repartition will make uniform refinements run more
   // efficiently, but at the same time, there might be extra ghosting elements.
   // The number of layers of additional ghosting elements depends on the number
   // of uniform refinement levels. This should happen only when you have a "fine enough"
@@ -387,10 +387,11 @@ Adaptivity::isAdaptivityDue()
 }
 
 void
-Adaptivity::switchHToPRefinement()
+Adaptivity::doingPRefinement(const bool doing_p_refinement,
+                             const MultiMooseEnum & disable_p_refinement_for_families)
 {
-  _p_refinement_flag = true;
-  _fe_problem.havePRefinement();
+  _p_refinement_flag = doing_p_refinement;
+  _fe_problem.doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 #endif // LIBMESH_ENABLE_AMR

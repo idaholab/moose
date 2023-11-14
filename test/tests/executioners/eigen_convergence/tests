@@ -21,7 +21,7 @@
     prereq = test11
     input = 'a.i'
     absent_out = '8 Nonlinear'
-    cli_args = 'Problem/bx_norm=fluxintegral'
+    cli_args = 'Problem/bx_norm=fluxintegral -eps_power_sign_normalization 1'
     petsc_version = '>=3.20.0'
     requirement = 'The system shall be able to solve an eigenvalue problem using the sign of the first nonzero entry of Bx combined with something other than the L2 norm of Bx for normalization with a SLEPc eigenvalue solver.'
   []
@@ -31,7 +31,7 @@
     prereq = test7
     input = 'a.i'
     absent_out = '5 Nonlinear'
-    cli_args = 'Problem/bx_norm=fluxintegral -eps_power_sign_normalization 0'
+    cli_args = 'Problem/bx_norm=fluxintegral'
     petsc_version = '>=3.20.0'
     requirement = 'The system shall be able to solve an eigenvalue problem using something other than the L2 norm of Bx for normalization and a SLEPc eigenvalue solver.'
   []

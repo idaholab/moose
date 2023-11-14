@@ -91,6 +91,29 @@ public:
                             const int input_child_side);
 
   /**
+   * Based on the p-refinement flag of \p elem, either prolong (for refinement) or restrict (for
+   * coarsening) the stateful material property data.
+   * @param pid The rank returned by the mesh. This is used to assert that we are only
+   * prolonging/restricting for elements that our process owns
+   * @param p_refinement_map A map that describes, for each quadrature point on the current level
+   * which quadrature point on the previous level it is closest to
+   * @param qrule The volumetric quadrature rule
+   * @param qrule_face The face quadrature rule
+   * @param tid The thread ID
+   * @param elem The element that was just p-refined or coarsened that we are performing material
+   * property prolongation/restriction for
+   * @param input_side Which element side we are performing material property
+   * prolongation/restriction for. Pass in -1 for doing volumetric prolongation/restriction
+   */
+  void updateStatefulPropsForPRefinement(const processor_id_type pid,
+                                         const std::vector<QpMap> & p_refinement_map,
+                                         const QBase & qrule,
+                                         const QBase & qrule_face,
+                                         const THREAD_ID tid,
+                                         const Elem & elem,
+                                         const int input_side);
+
+  /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
    * children to the parent.
    *

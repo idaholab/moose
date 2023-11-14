@@ -11,6 +11,11 @@
 
 #include "Action.h"
 
+namespace Moose
+{
+InputParameters commonAdaptivityParams();
+}
+
 class SetAdaptivityOptionsAction : public Action
 {
 public:

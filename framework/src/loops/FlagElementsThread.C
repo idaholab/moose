@@ -61,6 +61,8 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
 void
 FlagElementsThread::onElement(const Elem * elem)
 {
+  mooseAssert(elem->active(), "This thread should only act on active elements");
+
   // By default do nothing, and only grab the marker from the solution if the current variable is
   // active
   // on the element subdomain.

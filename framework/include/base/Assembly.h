@@ -1834,9 +1834,15 @@ public:
   const Elem * const & msmElem() const { return _msm_elem; }
 
   /**
-   * Indicate that we have p-refinement
+   * Indicate that we have p-refinement. This method will perform the following tasks:
+   * - Disable p-refinement as requested by the user with \p disable_p_refinement_for_families
+   * -.Disable p-refinement of Lagrange helper types that we use for getting things like the
+   *   physical locations of quadrature points and JxW. (Don't worry, we still use the element
+   *   p-level when initializing the quadrature rule attached to the Lagrange helper so the number
+   *   of quadrature points reflects the element p-level)
+   * @param disable_p_refinement_for_families Families that we should disable p-refinement for
    */
-  void havePRefinement();
+  void havePRefinement(const std::vector<FEFamily> & disable_p_refinement_for_families);
 
 private:
   /**
@@ -2756,6 +2762,9 @@ protected:
   /// have libMesh-level constraints (hanging nodes, periodic bcs) applied to them. These are for
   /// storing the dof indices
   std::vector<dof_id_type> _row_indices, _column_indices;
+
+  /// Whether we have ever conducted p-refinement
+  bool _have_p_refinement;
 };
 
 template <typename OutputType>

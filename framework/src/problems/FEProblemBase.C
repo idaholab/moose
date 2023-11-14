@@ -7270,6 +7270,9 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (_has_initialized_stateful &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
+    if (havePRefinement())
+      _mesh.buildPRefinementAndCoarseningMaps(_assembly[0][0].get());
+
     // Prolong properties onto newly refined elements' children
     {
       ProjectMaterialProperties pmp(
@@ -7279,13 +7282,16 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
       // Concurrent erasure from the shared hash map is not safe while we are reading from it in
       // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is
-      // not thread safe in and of itself because it is a read-write operation
-      for (const auto & elem : range)
-      {
-        _material_props.eraseProperty(elem);
-        _bnd_material_props.eraseProperty(elem);
-        _neighbor_material_props.eraseProperty(elem);
-      }
+      // not thread safe in and of itself because it is a read-write operation. Note that we do not
+      // do the erasure for p-refinement because the coarse level element is the same as our active
+      // refined level element
+      if (!doingPRefinement())
+        for (const auto & elem : range)
+        {
+          _material_props.eraseProperty(elem);
+          _bnd_material_props.eraseProperty(elem);
+          _neighbor_material_props.eraseProperty(elem);
+        }
     }
 
     // Restrict properties onto newly coarsened elements
@@ -7294,16 +7300,19 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
           /* refine = */ false, *this, _material_props, _bnd_material_props, _assembly);
       const auto & range = *_mesh.coarsenedElementRange();
       Threads::parallel_reduce(range, pmp);
-      for (const auto & elem : range)
-      {
-        auto && coarsened_children = _mesh.coarsenedElementChildren(elem);
-        for (auto && child : coarsened_children)
+      // Note that we do not do the erasure for p-refinement because the coarse level element is the
+      // same as our active refined level element
+      if (!doingPRefinement())
+        for (const auto & elem : range)
         {
-          _material_props.eraseProperty(child);
-          _bnd_material_props.eraseProperty(child);
-          _neighbor_material_props.eraseProperty(child);
+          auto && coarsened_children = _mesh.coarsenedElementChildren(elem);
+          for (auto && child : coarsened_children)
+          {
+            _material_props.eraseProperty(child);
+            _bnd_material_props.eraseProperty(child);
+            _neighbor_material_props.eraseProperty(child);
+          }
         }
-      }
     }
   }
 
@@ -8286,14 +8295,12 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
 }
 
 void
-FEProblemBase::havePRefinement()
+FEProblemBase::doingPRefinement(const bool doing_p_refinement,
+                                const MultiMooseEnum & disable_p_refinement_for_families)
 {
-  for (auto & assembly_vecs : _assembly)
-    for (auto & assembly : assembly_vecs)
-      assembly->havePRefinement();
-
+  SubProblem::doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
   if (_displaced_problem)
-    _displaced_problem->havePRefinement();
+    _displaced_problem->doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 void
