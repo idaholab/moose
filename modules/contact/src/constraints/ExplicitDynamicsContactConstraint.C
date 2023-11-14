@@ -201,6 +201,8 @@ ExplicitDynamicsContactConstraint::shouldApply()
     PenetrationInfo * pinfo = found->second;
     if (pinfo != nullptr)
     {
+      _neighbor_density[0];
+
       // This computes the contact force once per constraint, rather than once per quad point
       // and for both primary and secondary cases.
       if (_component == 0)

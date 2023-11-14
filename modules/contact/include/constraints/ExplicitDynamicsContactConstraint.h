@@ -78,6 +78,8 @@ public:
    */
   virtual bool addCouplingEntriesToJacobian() override { return false; }
 
+  virtual const std::set<unsigned int> & getMatPropDependencies() const override;
+
 protected:
   /**
    * Determine "Lagrange multipliers" from the iterative solution of the impact problem.
@@ -131,3 +133,9 @@ protected:
 
   const MaterialProperty<Real> & _neighbor_density;
 };
+
+inline const std::set<unsigned int> &
+ExplicitDynamicsContactConstraint::getMatPropDependencies() const
+{
+  return TwoMaterialPropertyInterface::getMatPropDependencies();
+}

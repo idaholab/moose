@@ -1111,6 +1111,13 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     {
       const auto & constraints =
           _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
+      std::set<unsigned int> needed_mat_props;
+      for (const auto & constraint : constraints)
+      {
+        const auto & mp_deps = constraint->getMatPropDependencies();
+        needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+      }
+      _fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
 
       for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
@@ -1136,10 +1143,11 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             // reinit variables on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            _fe_problem.reinitNeighborPhys(
+                _mesh.elemPtr(primary_elem->id()), primary_side, points, 0);
             // _fe_problem.reinitNeighbor(primary_elem, primary_side, 0);
-            _fe_problem.reinitNeighborFaceRef(
-                primary_elem, primary_side, primary_boundary, TOLERANCE, &points, nullptr, 0);
+            // _fe_problem.reinitNeighborFaceRef(
+            //     primary_elem, primary_side, primary_boundary, TOLERANCE, &points, nullptr, 0);
 
             // Two material interface relies on reiniting materials boundary
             // _fe_problem.reinitMaterialsBoundary(primary_boundary, 0);

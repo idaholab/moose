@@ -115,6 +115,8 @@ public:
 
   void residualSetup() override;
 
+  virtual const std::set<unsigned int> & getMatPropDependencies() const;
+
 protected:
   /**
    * Compute the value the secondary node should have at the beginning of a timestep.
@@ -287,6 +289,9 @@ protected:
   /// The value of the secondary residual
   Real _secondary_residual;
 
+  /// An empty material property dependency set for use with \p getMatPropDependencies
+  const std::set<unsigned int> _empty_mat_prop_deps;
+
 public:
   std::vector<dof_id_type> _connected_dof_indices;
 
@@ -310,3 +315,9 @@ public:
   /// one associated with interior physics
   DenseMatrix<Number> _Ken;
 };
+
+inline const std::set<unsigned int> &
+NodeFaceConstraint::getMatPropDependencies() const
+{
+  return _empty_mat_prop_deps;
+}
