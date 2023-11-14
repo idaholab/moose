@@ -108,7 +108,9 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
 }
 
 void
-ReactorGeometryMeshBuilderBase::callMeshSubgenerator(std::string mg_type, std::string mg_name, InputParameters & params)
+ReactorGeometryMeshBuilderBase::callMeshSubgenerator(std::string mg_type,
+                                                     std::string mg_name,
+                                                     InputParameters & params)
 {
   if (!ReactorGeometryMeshBuilderBase::getReactorParam<bool>(RGMB::bypass_meshgen))
     addMeshSubgenerator(mg_type, mg_name, params);

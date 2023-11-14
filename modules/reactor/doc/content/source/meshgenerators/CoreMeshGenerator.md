@@ -52,6 +52,8 @@ For meshes where a core periphery is defined, the following metadata is also def
 
 In addition, the value of the metadata `reactor_params_name` can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
+For applications where an output mesh does not need to be created and meshing routines can consist entirely of defining reactor-based metadata, the parameter [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/bypass_mesh_generation) can be set to true.
+
 ## Example Syntax
 
 !listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core_square.i block=Mesh

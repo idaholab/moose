@@ -15,6 +15,8 @@ The `ReactorMeshParams` object stores certain global mesh information as metadat
 - `axial_mesh_sizes`: Length of each axial region, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_regions). Only relevant for 3-D meshes.
 - `axial_mesh_intervals`: Number of elements in the axial dimension for each axial region, equivalent to [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_mesh_intervals). Only relevant for 3-D meshes.
 
+In addition, for applications where an output mesh does not need to be created and meshing routines can consist entirely of defining reactor-based metadata, the parameter [!param](/Mesh/ReactorMeshParams/bypass_mesh_generation) can be set to true.
+
 ## Example Syntax
 
 !listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_square.i block=Mesh/rmp

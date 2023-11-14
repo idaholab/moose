@@ -43,7 +43,9 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
-  params.addParam<bool>("bypass_mesh_generation", false, "Whether or not to bypass mesh generation when running RGMB workflow");
+  params.addParam<bool>("bypass_mesh_generation",
+                        false,
+                        "Whether or not to bypass mesh generation when running RGMB workflow");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
   return params;

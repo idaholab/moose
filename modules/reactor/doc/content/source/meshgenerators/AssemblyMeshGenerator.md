@@ -67,6 +67,8 @@ For each of the pins listed in `pin_names`, the pin-level metadata is also displ
 
 In addition, the value of the `reactor_params_name` metadata can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
+For applications where an output mesh does not need to be created and meshing routines can consist entirely of defining reactor-based metadata, the parameter [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/bypass_mesh_generation) can be set to true.
+
 ## Example Syntax
 
 !listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_square.i block=Mesh

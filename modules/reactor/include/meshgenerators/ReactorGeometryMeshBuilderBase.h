@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
+#include "CastUniquePointer.h"
 #include "libmesh/elem.h"
 
 namespace RGMB
@@ -191,7 +192,8 @@ protected:
 
   /**
    * Calls addMeshSubGenerator to add mesh sub generator defined by RGMB
-   * NOTE: addMeshSubGenerator only gets called if bypass_mesh_generation has not been set to true in ReactorMeshParams
+   * NOTE: addMeshSubGenerator only gets called if bypass_mesh_generation has not been set to true
+   * in ReactorMeshParams
    * @param type of mesh generator
    * @param name of mesh generator
    * @param input parameters associated with mesh generator
