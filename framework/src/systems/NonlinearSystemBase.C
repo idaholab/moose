@@ -169,6 +169,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
 
+  _sys.identify_variable_groups(_fe_problem.identifyVariableGroupsInNL());
+
   if (!_fe_problem.defaultGhosting())
   {
     auto & dof_map = _sys.get_dof_map();
@@ -3601,8 +3603,9 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                      THREAD_ID /*tid*/) const
+bool
+NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                 THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

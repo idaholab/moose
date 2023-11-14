@@ -2132,6 +2132,11 @@ public:
 
   virtual bool hasNonlocalCoupling() const override { return _has_nonlocal_coupling; }
 
+  /**
+   * Whether to identify variable groups in nonlinear systems. This affects dof ordering
+   */
+  bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2569,6 +2574,9 @@ private:
 
   /// When to print the execution of loops
   ExecFlagEnum _print_execution_on;
+
+  /// Whether to identify variable groups in nonlinear systems. This affects dof ordering
+  const bool _identify_variable_groups_in_nl;
 
   /// A data member to store the residual vector tag(s) passed into \p computeResidualTag(s). This
   /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
