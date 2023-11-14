@@ -57,15 +57,16 @@ INSADMomentumViscous::qpViscousTerm()
 ADRealVectorValue
 INSADMomentumViscous::qpAdditionalRZTerm()
 {
-  // Add the u_r / r^2 term. There is an extra factor of 2 for the traction form
-  ADReal resid = _mu[_qp] * _u[_qp](_rz_radial_coord);
-  if (_form == "traction")
-    resid *= 2.;
+  ADRealVectorValue ret;
+  auto & extra_term = ret(_rz_radial_coord);
 
-  if (_use_displaced_mesh)
-    return resid / (_ad_q_point[_qp](_rz_radial_coord) * _ad_q_point[_qp](_rz_radial_coord));
-  else
-    return resid / (_q_point[_qp](_rz_radial_coord) * _q_point[_qp](_rz_radial_coord));
+  // Add the u_r / r^2 term. There is an extra factor of 2 for the traction form
+  const auto & r = _ad_q_point[_qp](_rz_radial_coord);
+  extra_term = _mu[_qp] * _u[_qp](_rz_radial_coord) / (r * r);
+  if (_form == "traction")
+    extra_term *= 2.;
+
+  return ret;
 }
 
 void
