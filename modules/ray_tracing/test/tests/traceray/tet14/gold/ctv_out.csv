@@ -1,0 +1,3 @@
+time,distance_difference,expected_distance,total_distance
+0,0,0,0
+1,3.4106051316485e-13,1009.5543571299,1009.5543571299

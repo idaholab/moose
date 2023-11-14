@@ -104,6 +104,15 @@
     requirement = 'The system shall support refinement of TET10 mesh elements.'
   [../]
 
+  [./test_tet14_refine]
+    type = 'Exodiff'
+    input = 'high_order_elems.i'
+    exodiff = 'high_order_elems_tet14_refine_out.e'
+    cli_args = 'Mesh/uniform_refine=1 Mesh/elem_type=TET14 Variables/u/order=THIRD Mesh/dim=3 Mesh/nx=1 Mesh/ny=1 Mesh/nz=1 Outputs/file_base=high_order_elems_tet14_refine_out'
+
+    requirement = 'The system shall support refinement of TET14 mesh elements.'
+  [../]
+
   [./test_prism6_refine]
     type = 'Exodiff'
     input = 'high_order_elems.i'
