@@ -63,6 +63,14 @@ ProjectedStatefulMaterialStorageAction::ProjectedStatefulMaterialStorageAction(
 }
 
 void
+ProjectedStatefulMaterialStorageAction::addRelationshipManagers(
+    Moose::RelationshipManagerType input_rm_type)
+{
+  auto params = _factory.getValidParams("ProjectedStatefulMaterialNodalPatchRecovery");
+  addRelationshipManagers(input_rm_type, params);
+}
+
+void
 ProjectedStatefulMaterialStorageAction::processComponent(const std::string & prop_name,
                                                          std::vector<unsigned int> idx,
                                                          std::vector<VariableName> & vars,
@@ -79,6 +87,7 @@ ProjectedStatefulMaterialStorageAction::processComponent(const std::string & pro
 
   const auto var_name = name("var");
   vars.push_back(var_name);
+  const auto uo_name = name("uo");
 
   if (_current_task == "setup_projected_properties")
   {
@@ -87,6 +96,22 @@ ProjectedStatefulMaterialStorageAction::processComponent(const std::string & pro
     params.applyParameters(parameters());
     params.set<std::vector<OutputName>>("outputs") = {"none"};
     _problem->addAuxVariable(_var_type, var_name, params);
+
+    // use nodal patch recovery for lagrange
+    if (_fe_type.family == LAGRANGE)
+    {
+      // nodal variables require patch recovery (add user object)
+      const auto & type_name = is_ad ? "ADProjectedStatefulMaterialNodalPatchRecovery"
+                                     : "ProjectedStatefulMaterialNodalPatchRecovery";
+      auto params = _factory.getValidParams(type_name);
+      params.applySpecificParameters(parameters(), {"block"});
+      params.set<std::vector<unsigned int>>("component") = idx;
+      params.set<MaterialPropertyName>("property") = prop_name;
+      params.set<MooseEnum>("patch_polynomial_order") = _order;
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+      params.set<bool>("force_preaux") = true;
+      _problem->addUserObject(type_name, uo_name, params);
+    }
   }
 
   if (_current_task == "add_aux_kernel")
@@ -94,31 +119,13 @@ ProjectedStatefulMaterialStorageAction::processComponent(const std::string & pro
     // use nodal patch recovery for lagrange
     if (_fe_type.family == LAGRANGE)
     {
-      // nodal variables require patch recovery
-      const auto uo_name = name("uo");
-
-      {
-        // add user object
-        const auto & type_name = is_ad ? "ADProjectedStatefulMaterialNodalPatchRecovery"
-                                       : "ProjectedStatefulMaterialNodalPatchRecovery";
-        auto params = _factory.getValidParams(type_name);
-        params.applySpecificParameters(parameters(), {"block"});
-        params.set<std::vector<unsigned int>>("component") = idx;
-        params.set<MaterialPropertyName>("property") = prop_name;
-        params.set<MooseEnum>("patch_polynomial_order") = _order;
-        params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-        _problem->addUserObject(type_name, uo_name, params);
-      }
-
-      {
-        // add aux kernel
-        auto params = _factory.getValidParams("NodalPatchRecoveryAux");
-        params.applySpecificParameters(parameters(), {"block"});
-        params.set<AuxVariableName>("variable") = var_name;
-        params.set<UserObjectName>("nodal_patch_recovery_uo") = uo_name;
-        params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-        _problem->addAuxKernel("NodalPatchRecoveryAux", name("aux"), params);
-      }
+      // nodal variables require patch recovery (add aux kernel)
+      auto params = _factory.getValidParams("NodalPatchRecoveryAux");
+      params.applySpecificParameters(parameters(), {"block"});
+      params.set<AuxVariableName>("variable") = var_name;
+      params.set<UserObjectName>("nodal_patch_recovery_uo") = uo_name;
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+      _problem->addAuxKernel("NodalPatchRecoveryAux", name("aux"), params);
     }
     else
     {
@@ -175,12 +182,11 @@ ProjectedStatefulMaterialStorageAction::addMaterial(const std::string & prop_typ
                                                     std::vector<VariableName> & vars)
 {
   auto params = _factory.getValidParams("InterpolatedStatefulMaterial");
-  const auto name = _pomps_prefix + "mat_" + prop_name;
   params.applySpecificParameters(parameters(), {"block"});
   params.set<std::vector<VariableName>>("old_state") = vars;
   params.set<MooseEnum>("prop_type") = prop_type;
-  params.set<MaterialPropertyName>("prop_name") = name;
-  _problem->addMaterial("InterpolatedStatefulMaterial", name, params);
+  params.set<MaterialPropertyName>("prop_name") = prop_name;
+  _problem->addMaterial("InterpolatedStatefulMaterial", _pomps_prefix + "mat_" + prop_name, params);
 }
 
 void

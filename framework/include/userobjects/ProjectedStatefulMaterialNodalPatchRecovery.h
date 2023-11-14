@@ -12,6 +12,10 @@
 // MOOSE includes
 #include "NodalPatchRecoveryMaterialProperty.h"
 
+#include <deque>
+
+class MaterialBase;
+
 /**
  * Nodal patch recovery for material property components for projected stateful properties
  */
@@ -23,13 +27,11 @@ public:
   ProjectedStatefulMaterialNodalPatchRecovery(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void subdomainSetup() override;
 
 protected:
   virtual Real computeValue() override;
 
   const SubdomainID & _current_subdomain_id;
 
-  std::set<MaterialBase *> _all_materials;
-  std::vector<MaterialBase *> _active_materials;
+  std::map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
 };

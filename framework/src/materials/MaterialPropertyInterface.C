@@ -23,6 +23,11 @@ MaterialPropertyInterface::validParams()
                                         "An optional suffix parameter that can be appended to any "
                                         "attempt to retrieve/get material properties. The suffix "
                                         "will be prepended with a '_' character.");
+  params.addParam<bool>(
+      "use_interpolated_state",
+      false,
+      "For the old and older state use projected material properties interpolated at the "
+      "quadrature points. To set up projection use the ProjectedStatefulMaterialStorageAction.");
   return params;
 }
 
@@ -53,6 +58,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
+    _use_interpolated_state(_mi_params.get<bool>("use_interpolated_state")),
     _mi_boundary_restricted(moose::internal::boundaryRestricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
@@ -192,28 +198,21 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
   return *discrete;
 }
 
-std::set<MaterialBase *>
-MaterialPropertyInterface::getSupplyerMaterials()
+std::map<SubdomainID, std::vector<MaterialBase *>>
+MaterialPropertyInterface::buildRequiredMaterials(bool allow_stateful)
 {
-  std::set<MaterialBase *> matches;
+  std::map<SubdomainID, std::vector<MaterialBase *>> required_mats;
   const auto & mwh = _mi_feproblem.getMaterialWarehouse();
   for (const auto id : _mi_block_ids)
   {
-    const auto & active_objects = mwh[_material_data_type].getActiveBlockObjects(id, _mi_tid);
-    for (const auto & mat : active_objects)
-    {
-      const auto & supplied_prop_ids = mat->getSuppliedPropIDs();
-      if (MooseUtils::setsIntersect(_material_property_dependencies.begin(),
-                                    _material_property_dependencies.end(),
-                                    supplied_prop_ids.begin(),
-                                    supplied_prop_ids.end()))
-      {
-        matches.insert(mat.get());
-        break;
-      }
-    }
+    const auto & mats = mwh[_material_data_type].getActiveBlockObjects(id, _mi_tid);
+    std::array<const MaterialPropertyInterface *, 1> consumers = {{this}};
+    const auto block_required =
+        MaterialBase::buildRequiredMaterials(consumers, mats, allow_stateful);
+    required_mats[id].insert(
+        required_mats[id].begin(), block_required.begin(), block_required.end());
   }
-  return matches;
+  return required_mats;
 }
 
 void

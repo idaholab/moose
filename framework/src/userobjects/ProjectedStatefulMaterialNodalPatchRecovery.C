@@ -8,8 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ProjectedStatefulMaterialNodalPatchRecovery.h"
+#include "MaterialBase.h"
+#include "Assembly.h"
 
-registerMooseObject("TensorMechanicsApp", ProjectedStatefulMaterialNodalPatchRecovery);
+registerMooseObject("MooseApp", ProjectedStatefulMaterialNodalPatchRecovery);
 
 InputParameters
 ProjectedStatefulMaterialNodalPatchRecovery::validParams()
@@ -31,24 +33,14 @@ ProjectedStatefulMaterialNodalPatchRecovery::initialSetup()
   NodalPatchRecoveryMaterialProperty::initialSetup();
 
   // get all material classes that provide properties for this object
-  _all_materials = getSupplyerMaterials();
-}
-
-void
-ProjectedStatefulMaterialNodalPatchRecovery::subdomainSetup()
-{
-  // get materials for the current subdomain
-  _active_materials.clear();
-  for (const auto & mat : _all_materials)
-    if (mat->hasBlocks(_current_subdomain_id))
-      _active_materials.push_back(mat);
+  _required_materials = buildRequiredMaterials();
 }
 
 Real
 ProjectedStatefulMaterialNodalPatchRecovery::computeValue()
 {
   if (_t_step == 0)
-    for (const auto & mat : _active_materials)
+    for (const auto & mat : _required_materials[_current_subdomain_id])
       mat->initStatefulProperties(_qrule->size());
 
   return _prop[_qp];

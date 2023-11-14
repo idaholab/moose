@@ -24,6 +24,9 @@ public:
 
   virtual void act() override;
 
+  using Action::addRelationshipManagers;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
 protected:
   /**
    * Perform setup for a single scalar component of the material property prop_name, and gather the

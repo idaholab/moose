@@ -28,8 +28,11 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
-  /// Old state
+  /// Old projected state
   const std::vector<const VariableValue *> _old_state;
+
+  /// Older projected state
+  const std::vector<const VariableValue *> _older_state;
 
   /// emitted property name
   const MaterialPropertyName _prop_name;
@@ -43,8 +46,17 @@ protected:
     RANKFOURTENSOR
   } _prop_type;
 
-  MaterialProperty<Real> * _prop_real;
-  MaterialProperty<RealVectorValue> * _prop_realvectorvalue;
-  MaterialProperty<RankTwoTensor> * _prop_ranktwotensor;
-  MaterialProperty<RankFourTensor> * _prop_rankfourtensor;
+  ///@{ Old interpolated properties
+  MaterialProperty<Real> * _prop_old_real;
+  MaterialProperty<RealVectorValue> * _prop_old_realvectorvalue;
+  MaterialProperty<RankTwoTensor> * _prop_old_ranktwotensor;
+  MaterialProperty<RankFourTensor> * _prop_old_rankfourtensor;
+  ///@}
+
+  ///@{ Older interpolated properties
+  MaterialProperty<Real> * _prop_older_real;
+  MaterialProperty<RealVectorValue> * _prop_older_realvectorvalue;
+  MaterialProperty<RankTwoTensor> * _prop_older_ranktwotensor;
+  MaterialProperty<RankFourTensor> * _prop_older_rankfourtensor;
+  ///@}
 };

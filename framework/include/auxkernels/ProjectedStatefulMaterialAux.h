@@ -12,6 +12,10 @@
 #include "AuxKernel.h"
 #include "IndexableProperty.h"
 
+#include <deque>
+
+class MaterialBase;
+
 template <bool is_ad>
 class ProjectedStatefulMaterialAuxTempl : public AuxKernel
 {
@@ -21,7 +25,6 @@ public:
   ProjectedStatefulMaterialAuxTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void subdomainSetup() override;
 
 protected:
   virtual Real computeValue() override;
@@ -29,8 +32,7 @@ protected:
   const IndexableProperty<AuxKernel, is_ad> _prop;
   const SubdomainID & _current_subdomain_id;
 
-  std::set<MaterialBase *> _all_materials;
-  std::vector<MaterialBase *> _active_materials;
+  std::map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
 };
 
 typedef ProjectedStatefulMaterialAuxTempl<false> ProjectedStatefulMaterialAux;

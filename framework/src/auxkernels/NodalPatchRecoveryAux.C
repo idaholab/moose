@@ -10,7 +10,7 @@
 #include "NodalPatchRecoveryAux.h"
 #include "NodalPatchRecoveryBase.h"
 
-registerMooseObject("TensorMechanicsApp", NodalPatchRecoveryAux);
+registerMooseObject("MooseApp", NodalPatchRecoveryAux);
 
 InputParameters
 NodalPatchRecoveryAux::validParams()

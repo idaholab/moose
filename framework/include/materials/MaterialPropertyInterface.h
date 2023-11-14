@@ -18,6 +18,8 @@
 #include "InputParameters.h"
 #include "SubProblem.h"
 
+#include <deque>
+
 // Forward declarations
 class MooseObject;
 class FEProblemBase;
@@ -262,8 +264,9 @@ public:
   MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
-  /// get a set of MaterialBase pointers for all material objects that this object depends on
-  std::set<MaterialBase *> getSupplyerMaterials();
+  /// get a map of MaterialBase pointers for all material objects that this object depends on for each block
+  std::map<SubdomainID, std::vector<MaterialBase *>>
+  buildRequiredMaterials(bool allow_stateful = true);
 
   ///@{
   /**
@@ -532,6 +535,9 @@ protected:
 
   const MaterialPropertyName _get_suffix;
 
+  /// Use the interpolated state set up through the ProjectedStatefulMaterialStorageAction
+  const bool _use_interpolated_state;
+
 private:
   /**
    * @returns The MaterialDataType given the interface's parameters
@@ -765,6 +771,16 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
                                                             MaterialData & material_data,
                                                             const unsigned int state)
 {
+  if (_use_interpolated_state)
+  {
+    if (state == 1)
+      return getGenericMaterialPropertyByName<T, is_ad>(
+          name_in + "_interpolated_old", material_data, 0);
+    if (state == 2)
+      return getGenericMaterialPropertyByName<T, is_ad>(
+          name_in + "_interpolated_older", material_data, 0);
+  }
+
   const auto name = _get_suffix.empty()
                         ? static_cast<const std::string &>(name_in)
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");

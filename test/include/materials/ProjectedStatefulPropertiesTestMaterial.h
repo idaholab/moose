@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Material.h"
-#include "InterpolatedStatefulMaterialPropertyInterface.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
@@ -18,9 +17,7 @@
  * Test the projected old state capability in ProjectedStatefulMaterialStorageAction
  */
 template <bool is_ad>
-class ProjectedStatefulPropertiesTestMaterialTempl
-  : public Material,
-    public InterpolatedStatefulMaterialPropertyInterface
+class ProjectedStatefulPropertiesTestMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
@@ -34,19 +31,15 @@ protected:
   /// Real
   GenericMaterialProperty<Real, is_ad> & _prop_real;
   const MaterialProperty<Real> & _prop_real_old;
-  const MaterialProperty<Real> & _prop_real_old_interpolated;
   /// RealVectorValue
   GenericMaterialProperty<RealVectorValue, is_ad> & _prop_realvectorvalue;
   const MaterialProperty<RealVectorValue> & _prop_realvectorvalue_old;
-  const MaterialProperty<RealVectorValue> & _prop_realvectorvalue_old_interpolated;
   /// RankTwoTensor
   GenericMaterialProperty<RankTwoTensor, is_ad> & _prop_ranktwotensor;
   const MaterialProperty<RankTwoTensor> & _prop_ranktwotensor_old;
-  const MaterialProperty<RankTwoTensor> & _prop_ranktwotensor_old_interpolated;
   /// RankFourTensor
   GenericMaterialProperty<RankFourTensor, is_ad> & _prop_rankfourtensor;
   const MaterialProperty<RankFourTensor> & _prop_rankfourtensor_old;
-  const MaterialProperty<RankFourTensor> & _prop_rankfourtensor_old_interpolated;
 
   /// diagnostic outout
   MaterialProperty<Real> & _diff_norm;
