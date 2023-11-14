@@ -31,7 +31,7 @@ For a constant diffusion coefficient, the Jacobian is given by
 
 The `AnisotropicDiffusion` kernel may be used in a variety of physical models, including steady-state
 and time-dependent diffusion, advection-diffusion-reaction, etc. A kernel block demonstrating the
-`AnistropicDiffusion` syntax in a steady-state anisotropic diffusion problem can be found below:
+`AnisotropicDiffusion` syntax in a steady-state anisotropic diffusion problem can be found below:
 
 !listing test/tests/kernels/anisotropic_diffusion/aniso_diffusion.i block=Kernels
 

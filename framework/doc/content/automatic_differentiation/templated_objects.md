@@ -53,7 +53,7 @@ The corresponding source file is
 
 !listing framework/src/kernels/BodyForce.C
 
-One important observation in this case is that this class (`BodyForcdeTempl`) derives
+One important observation in this case is that this class (`BodyForceTempl`) derives
 from a templated base class (`GenericKernel<is_ad`). This is slightly more complicated
 than the material example above. Members of the base class are not available in this
 derived class without including them with the `using` declaration in the header file

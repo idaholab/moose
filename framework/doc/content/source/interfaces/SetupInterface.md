@@ -26,7 +26,7 @@ ALWAYS | Union of all the above flags.
 The "execute_on" parameter can be set to a single flag or multiple flags. For example, it may be
 desirable to only execute an object initially because the state of the auxiliary computation does not
 vary. In the input file snippet below, the [ElementLengthAux](/ElementLengthAux.md) computation only
-needs to be computed initially, thus the "exeucte_on" parameter is set as such.
+needs to be computed initially, thus the "execute_on" parameter is set as such.
 
 !listing test/tests/auxkernels/element_length/element_length.i block=AuxKernels
 

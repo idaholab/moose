@@ -8,7 +8,7 @@ One of the main purposes of this object is to aid in the diagnostic of mesh part
 
 This is particularly interesting in the case of the [PetscExternalPartitioner](PetscExternalPartitioner.md) which has the capability to do "hierarchical" partitioning.  Hierarchical partitioning makes it possible to partition over compute-nodes first... then within compute nodes, in order to better respect the physical topology of the compute cluster.
 
-One important aspect of that is that how you launch your parallel job can matter quite a bit to partitioning.  In-general, it's better for partitioners if all of the ranks of your job are contiguously assigned to each compute node.  Here are four different ways, and the outcome using `HardwareIDAux`, to launch a job using a 100x100 generated mesh on 16 processes and 4 ndoes with two different partitioner...
+One important aspect of that is that how you launch your parallel job can matter quite a bit to partitioning.  In-general, it's better for partitioners if all of the ranks of your job are contiguously assigned to each compute node.  Here are four different ways, and the outcome using `HardwareIDAux`, to launch a job using a 100x100 generated mesh on 16 processes and 4 nodes with two different partitioner...
 
 Top left (METIS):
 
