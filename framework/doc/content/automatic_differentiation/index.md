@@ -205,7 +205,7 @@ the $\phi_i's$ are shape functions associated with the dofs. For a
 Lagrange basis, shape functions and dofs are tied to mesh nodes. To
 illustrate initiation of the AD process, we will consider construction of
 a local finite element solution on a `QUAD4` element, that is to say a
-quadrilaterial with a number of nodes equal to the number of vertices. This
+quadrilateral with a number of nodes equal to the number of vertices. This
 element type when combined with a Lagrange basis has four dofs which
 contribute to the local solution, one for each element node. In MOOSE we
 assign these local degree of freedom solution values (the local $u_i's$) to a

@@ -24,8 +24,8 @@ higher than their parents.
 ## P-Refinement
 
 P-refinement level mismatches are not supported for continuous, non-hierarchic
-finite element families. Additionally, p-refinement of NEDELEC_ONE is not
-supported. Consequently, by default we disable p-refinement of the bollowing
+finite element families. Additionally, p-refinement of `NEDELEC_ONE` is not
+supported. Consequently, by default we disable p-refinement of the following
 bases: `LAGRANGE`, `NEDELEC_ONE`, `LAGRANGE_VEC`, `CLOUGH`, `BERNSTEIN`, and
 `RATIONAL_BERNSTEIN`. Users can control what families are disabled for
 p-refinement by setting the `disable_p_refinement_for_families` parameter.

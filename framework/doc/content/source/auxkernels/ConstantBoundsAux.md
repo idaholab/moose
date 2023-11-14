@@ -27,7 +27,7 @@ required to solve a constrained PDE defined by
 [this input file](/upper-and-lower-bound.i) with the various constraint
 algorithms is summarized below:
 
-- `viewntonrsls` and `ConstantBoundsAux`:                      22
+- `vinewtonrsls` and `ConstantBoundsAux`:                      22
 - `vinewtonssls` and `ConstantBoundsAux`:                      53
 - `UpperBoundNodalKernel` and `LowerBoundNodalKernel`: 25
 
