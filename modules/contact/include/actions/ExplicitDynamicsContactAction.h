@@ -13,9 +13,10 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-enum class ExplicitDynamicsContactModel {
-      FRICTIONLESS,
-      FRICTIONLESS_ITERATION
+enum class ExplicitDynamicsContactModel
+{
+  FRICTIONLESS,
+  FRICTIONLESS_BALANCE
 };
 
 /**

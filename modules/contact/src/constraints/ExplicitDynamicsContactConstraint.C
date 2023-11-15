@@ -78,8 +78,6 @@ ExplicitDynamicsContactConstraint::validParams()
       "using a node on face, primary/secondary algorithm, and multiple options "
       "for the physical behavior on the interface and the mathematical "
       "formulation for constraint enforcement");
-  params.addParam<MaterialPropertyName>(
-      "wave_speed", 0.0, "The wave speed used to solve the impact problem node-wise.");
   return params;
 }
 
@@ -111,7 +109,8 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
-    _neighbor_density(getNeighborMaterialPropertyByName<Real>("density"))
+    _neighbor_density(getNeighborMaterialPropertyByName<Real>("density")),
+    _neighbor_wave_speed(getNeighborMaterialPropertyByName<Real>("wave_speed"))
 {
   _overwrite_secondary_residual = false;
 
@@ -146,8 +145,6 @@ ExplicitDynamicsContactConstraint::timestepSetup()
     updateContactStatefulData(/* beginning_of_step = */ true);
     _update_stateful_data = false;
   }
-
-  Moose::out << "Quadrature point in time step setup: " << _qp << "\n";
 }
 
 void
@@ -201,8 +198,6 @@ ExplicitDynamicsContactConstraint::shouldApply()
     PenetrationInfo * pinfo = found->second;
     if (pinfo != nullptr)
     {
-      _neighbor_density[0];
-
       // This computes the contact force once per constraint, rather than once per quad point
       // and for both primary and secondary cases.
       if (_component == 0)
@@ -253,10 +248,9 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
   switch (_model)
   {
     case ExplicitDynamicsContactModel::FRICTIONLESS:
-      // pinfo->_contact_force = -pinfo->_normal * (pinfo->_normal * res_vec);
       pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
-    case ExplicitDynamicsContactModel::FRICTIONLESS_ITERATION:
+    case ExplicitDynamicsContactModel::FRICTIONLESS_BALANCE:
       solveImpactEquations(node, pinfo);
       break;
     default:
@@ -278,6 +272,9 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
 void
 ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node, PenetrationInfo * pinfo)
 {
+  // Stab at momentum balance, uncoupled normal pressure
+  // See Heinstein et al, 2000, Contact-impact modeling in explicit transient dynamics.
+
   const auto nodal_area = nodalArea(node);
 
   pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * nodal_area);
@@ -381,13 +378,4 @@ ExplicitDynamicsContactConstraint::residualEnd()
     _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
   }
-}
-
-const std::set<BoundaryID> &
-ExplicitDynamicsContactConstraint::getBoundaryIDs()
-{
-  _boundary_ids.clear();
-  _boundary_ids.insert(_primary);
-  _boundary_ids.insert(_secondary);
-  return _boundary_ids;
 }

@@ -221,6 +221,8 @@ protected:
     return coupledNeighborSecond(var_name, comp);
   }
 
+  const std::set<BoundaryID> & getBoundaryIDs();
+
   /// Boundary ID for the secondary surface
   unsigned int _secondary;
   /// Boundary ID for the primary surface
@@ -230,6 +232,9 @@ protected:
 
   const MooseArray<Point> & _primary_q_point;
   const QBase * const & _primary_qrule;
+
+  /// the union of the secondary and primary boundary ids
+  std::set<BoundaryID> _boundary_ids;
 
 public:
   PenetrationLocator & _penetration_locator;

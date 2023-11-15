@@ -88,11 +88,6 @@ protected:
    */
   void solveImpactEquations(const Node & node, PenetrationInfo * pinfo);
 
-  /// the union of the secondary and primary boundary ids
-  std::set<BoundaryID> _boundary_ids;
-
-  const std::set<BoundaryID> & getBoundaryIDs();
-
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real gapOffset(const Node & node);
   Real nodalArea(const Node & node);
@@ -131,7 +126,11 @@ protected:
 
   const static unsigned int _no_iterations;
 
+  /// Density material for neighbor projection
   const MaterialProperty<Real> & _neighbor_density;
+
+  /// Wave speed material for neighbor projection
+  const MaterialProperty<Real> & _neighbor_wave_speed;
 };
 
 inline const std::set<unsigned int> &
