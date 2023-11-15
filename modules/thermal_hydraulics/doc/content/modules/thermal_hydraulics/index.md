@@ -23,6 +23,7 @@ See [this paper](https://joss.theoj.org/papers/10.21105/joss.06146) for an overv
 
 ### Documentation class=center style=font-weight:400
 
+- [Theory manual](modules/thermal_hydraulics/theory_manual/index.md)
 - [Getting started](modules/thermal_hydraulics/getting_started.md)
 - Tutorials:
 
