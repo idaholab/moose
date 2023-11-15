@@ -17,7 +17,7 @@
     min_ad_size = 200
     input = 'continuity_sphere_hex.i'
     exodiff = 'continuity_sphere_hex20_out.e'
-    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
+    cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
                'Outputs/file_base=continuity_sphere_hex20_out'
     requirement = 'The system shall be able to produce the expected result for a solution continuity '
                   'test case using the mortar method on a HEX20 mesh with curved geometry, e.g. the '
@@ -78,6 +78,20 @@
     map = False
     partial = True
   []
+  [continuity_tet14]
+    type = 'Exodiff'
+    min_ad_size = 100
+    input = 'continuity_tet.i'
+    exodiff = 'continuity_tet14_out.e'
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+               'Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD '
+               'Outputs/file_base=continuity_tet14_out'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a TET14 conforming mesh, e.g. the primal '
+                  'variable values across the mortar interface shall be the same.'
+    map = False
+    partial = True
+  []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
     input = 'continuity_non_conforming_tet.i'
@@ -122,6 +136,18 @@
     map = False
     partial = True
   []
+  [continuity_penalty_tet14]
+    type = 'Exodiff'
+    input = 'continuity_penalty_tet.i'
+    exodiff = 'continuity_penalty_tet14_out.e'
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+               'Variables/T/order=THIRD Outputs/file_base=continuity_penalty_tet14_out'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a TET14 conforming mesh, e.g. '
+                  'the primal variable values across the mortar interface shall be the same.'
+    map = False
+    partial = True
+  []
   [continuity_penalty_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex.i'
@@ -138,7 +164,7 @@
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
-    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
+    cli_args = 'Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
                'Outputs/file_base=continuity_penalty_sphere_hex20_out -pc_type lu'
     requirement = 'The system shall be able to produce the expected result for a solution continuity '
                   'test case using the penalty-based mortar method on a HEX20 mesh with curved '
@@ -152,7 +178,7 @@
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
-    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
+    cli_args = 'Mesh/file/file=spheres_coarse_hex20.e Variables/T/order=SECOND '
                'Constraints/mortar/type=ADPenaltyEqualValueConstraint Outputs/file_base=continuity_penalty_sphere_hex20_out -pc_type lu'
     requirement = 'The system shall be able to produce the same result using the penalty-based '
                   'mortar method with and without automatic differentiation.'

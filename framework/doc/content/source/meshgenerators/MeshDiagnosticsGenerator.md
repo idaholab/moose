@@ -104,7 +104,7 @@ The coarse element, if it were refined with MOOSE h-adaptivity, would be refined
 originally present in the mesh.
 
 This check will only detect mesh refinement for triangle and quadrilateral 2D elements and, tetrahedral and hexahedral 3D
-elements. For tetrahedrals, because the refinement pattern depends on the selection of a diagonal inside the coarse element,
+elements. For tetrahedra, because the refinement pattern depends on the selection of a diagonal inside the coarse element,
 the check only considers the `tip` fine elements on the four vertex of the coarse element.
 
 !alert note

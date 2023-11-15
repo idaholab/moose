@@ -63,7 +63,7 @@ For background on the functor system see [Functors/index.md].
   `FaceArg` `limiter_type`. On external faces this will generally return a two
   term expansion using the cell center value and gradient unless
   `two_term_boundary_expansion` has been set to `false`. On Dirichlet faces this
-  will return the Diriclet value
+  will return the Dirichlet value
 - `ElemQpArg`: this forwards to `ElemPointArg` where the `point` is simply the
   quadrature point location
 - `ElemSideQpArg`: same as `ElemQpArg`

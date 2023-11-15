@@ -3,7 +3,7 @@
 A `ReporterPointSource` reads in multiple point sources from a `Reporter`.  The point source values and coordinates are updated as the `Reporter` values are changed.  
 
 An example of a `ReporterPointSource` using a [ConstantReporter](/ConstantReporter.md)
-and a `VectorPostrocessor` of type [CSVReader](/CSVReader.md) is given by:
+and a `VectorPostprocessor` of type [CSVReader](/CSVReader.md) is given by:
 
 !listing test/tests/dirackernels/reporter_point_source/2d_vpp.i block=reporter_point_source
 
@@ -12,7 +12,7 @@ The two ConstantReporters are given as:
 
 !listing test/tests/dirackernels/reporter_point_source/2d_vpp.i block=Reporters
 
-The `CSVReader` VectorPostrocessor is given by:
+The `CSVReader` VectorPostprocessor is given by:
 
 !listing test/tests/dirackernels/reporter_point_source/2d_vpp.i block=VectorPostprocessors
 
@@ -20,7 +20,7 @@ reading from the following csv file:
 
 !listing test/tests/dirackernels/reporter_point_source/point_value_file.csv
 
-The `Reporter` and `VectorPostrocessor` for the above example produce the same `ReporterPointSource` (e.g. same magnitude and location).   
+The `Reporter` and `VectorPostprocessor` for the above example produce the same `ReporterPointSource` (e.g. same magnitude and location).   
 
 The next example applies a `ReporterPointSource` in a transient simulation given by:
 

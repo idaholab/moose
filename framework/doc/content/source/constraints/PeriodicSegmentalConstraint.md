@@ -103,7 +103,7 @@ directly opposite along the unit normal direction.
 As mentioned above, the $\lambda$ discretization needs to be continuous along patches
 of element faces (`LAGRANGE`, not `MONOMIAL`) in order to be stable, but must be discontinuous along
 corners of the mesh where the outward unit normal $\hat{n}$ is discontinuous since it is
-a flux variable (see the thrid condition [strong-form]). An easy way to do this is to make a
+a flux variable (see the third condition [strong-form]). An easy way to do this is to make a
 separate `LAGRANGE` variable for each 'face' of the model with different $\hat{n}$, which
 usually corresponds with different named side-sets or boundaries used for creating
 lower-dimensional mesh surfaces. This approach is demonstrated in many of the test input files.

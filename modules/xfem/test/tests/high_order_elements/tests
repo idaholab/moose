@@ -54,6 +54,15 @@
     unique_id = true
     requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with second-order elements in 3D using TET10 elements when the XFEM cutting plane is prescribed using a level set field.'
   [../]
+  [./diffusion_3d_tet14]
+    type = Exodiff
+    input = diffusion_3d.i
+    exodiff = 'diffusion_3d_tet14_out.e'
+    cli_args = 'GlobalParams/order=THIRD Mesh/elem_type=TET14 Outputs/file_base=diffusion_3d_tet14_out'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall permit modeling of discontinuities represented with XFEM with third-order elements in 3D using TET14 elements when the XFEM cutting plane is prescribed using a level set field.'
+  [../]
   [./diffusion_3d_hex20]
     type = Exodiff
     input = diffusion_3d.i

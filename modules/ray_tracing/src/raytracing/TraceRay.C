@@ -19,6 +19,7 @@
 // libMesh includes
 #include "libmesh/cell_tet4.h"
 #include "libmesh/cell_tet10.h"
+#include "libmesh/cell_tet14.h"
 #include "libmesh/cell_hex8.h"
 #include "libmesh/cell_hex20.h"
 #include "libmesh/cell_hex27.h"
@@ -213,6 +214,15 @@ TraceRay::exitsElem(const Elem * elem,
       break;
     case TET10:
       intersected = exitsElem<Tet10, Tet4>(elem,
+                                           incoming_side,
+                                           intersection_point,
+                                           intersected_side,
+                                           intersected_extrema,
+                                           intersection_distance,
+                                           normals);
+      break;
+    case TET14:
+      intersected = exitsElem<Tet14, Tet4>(elem,
                                            incoming_side,
                                            intersection_point,
                                            intersected_side,

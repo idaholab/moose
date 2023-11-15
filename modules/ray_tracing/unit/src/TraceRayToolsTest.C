@@ -43,6 +43,7 @@ traceRayToolsTestMesh(const int type)
     case HEX27:
     case TET4:
     case TET10:
+    case TET14:
     case PYRAMID5:
     case PYRAMID13:
     case PYRAMID14:
