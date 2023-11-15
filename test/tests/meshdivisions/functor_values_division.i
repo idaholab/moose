@@ -51,6 +51,13 @@
   []
 []
 
+[Postprocessors]
+  [ndiv]
+    type = NumMeshDivisions
+    mesh_division = mesh_div
+  []
+[]
+
 [Problem]
   solve = false
 []
