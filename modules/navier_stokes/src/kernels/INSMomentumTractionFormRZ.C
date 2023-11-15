@@ -29,27 +29,13 @@ INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & par
 RealVectorValue
 INSMomentumTractionFormRZ::strongViscousTermTraction()
 {
-  const Real & r = _q_point[_qp](0);
-  return INSBase::strongViscousTermTraction() +
-         RealVectorValue(2. * _mu[_qp] * (_u_vel[_qp] / (r * r) - _grad_u_vel[_qp](0) / r),
-                         -_mu[_qp] / r * (_grad_v_vel[_qp](0) + _grad_u_vel[_qp](1)),
-                         0);
+  return INSBase::strongViscousTermTraction() + strongViscousTermTractionRZ();
 }
 
 RealVectorValue
-INSMomentumTractionFormRZ::dStrongViscDUCompTraction(unsigned comp)
+INSMomentumTractionFormRZ::dStrongViscDUCompTraction(const unsigned int comp)
 {
-  const Real & r = _q_point[_qp](0);
-  RealVectorValue add_jac(0, 0, 0);
-  if (comp == 0)
-  {
-    add_jac(0) = 2. * _mu[_qp] * (_phi[_j][_qp] / (r * r) - _grad_phi[_j][_qp](0) / r);
-    add_jac(1) = -_mu[_qp] / r * _grad_phi[_j][_qp](1);
-  }
-  else if (comp == 1)
-    add_jac(1) = -_mu[_qp] * _grad_phi[_j][_qp](0) / r;
-
-  return INSBase::dStrongViscDUCompTraction(comp) + add_jac;
+  return INSBase::dStrongViscDUCompTraction(comp) + dStrongViscDUCompTractionRZ(comp);
 }
 
 Real
@@ -58,12 +44,13 @@ INSMomentumTractionFormRZ::computeQpResidual()
   // Base class residual contribution
   Real res_base = INSMomentumTractionForm::computeQpResidual();
 
-  if (_component == 0)
+  if (_component == _rz_radial_coord)
   {
-    const Real r = _q_point[_qp](0);
+    const auto r = _q_point[_qp](_rz_radial_coord);
+    const auto r_vel = (_rz_radial_coord == 0) ? _u_vel[_qp] : _v_vel[_qp];
 
     // If this is the radial component of momentum, there is an extra term for RZ.
-    res_base += 2. * _mu[_qp] * _u_vel[_qp] / (r * r) * _test[_i][_qp];
+    res_base += 2. * _mu[_qp] * r_vel / (r * r) * _test[_i][_qp];
 
     // If the pressure is also integrated by parts, there is an extra term in RZ.
     if (_integrate_p_by_parts)
@@ -79,11 +66,12 @@ INSMomentumTractionFormRZ::computeQpJacobian()
   // Base class jacobian contribution
   Real jac_base = INSMomentumTractionForm::computeQpJacobian();
 
-  // If this is the radial component of momentum, there is an extra term for RZ.
-  if (_component == 0)
+  if (_component == _rz_radial_coord)
   {
-    const Real r = _q_point[_qp](0);
-    jac_base += 2. * _mu[_qp] * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
+    const auto r = _q_point[_qp](_rz_radial_coord);
+
+    // If this is the radial component of momentum, there is an extra term for RZ.
+    jac_base += 2. * _mu[_qp] * _phi[_j][_qp] / (r * r) * _test[_i][_qp];
   }
 
   return jac_base;
@@ -98,9 +86,9 @@ INSMomentumTractionFormRZ::computeQpOffDiagJacobian(unsigned jvar)
   // If we're getting the pressure Jacobian contribution, and we
   // integrated the pressure term by parts, there is an extra term for
   // RZ.
-  if (jvar == _p_var_number && _component == 0 && _integrate_p_by_parts)
+  if (jvar == _p_var_number && _component == _rz_radial_coord && _integrate_p_by_parts)
   {
-    const Real r = _q_point[_qp](0);
+    const auto r = _q_point[_qp](_rz_radial_coord);
     jac_base += -_phi[_j][_qp] / r * _test[_i][_qp];
   }
 

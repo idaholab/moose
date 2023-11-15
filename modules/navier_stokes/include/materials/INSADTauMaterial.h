@@ -316,23 +316,26 @@ INSADTauMaterialTempl<T>::viscousTermRZ()
   // so, the gradient of the velocity with respect to the radial coordinate will correspond to a
   // *column* slice
 
-  const auto r = _ad_q_point[_qp](_rz_radial_coord);
+  const auto & r = _ad_q_point[_qp](_rz_radial_coord);
 
-  if (_viscous_form == NS::ViscousForm::Laplace)
   {
+    // Do the "Laplace" form. This will be present in *both* Laplace and Traction forms
     ADRealVectorValue rz_term;
     for (const auto i : make_range((unsigned int)2))
       rz_term(i) = -_mu[_qp] * _grad_velocity[_qp](i, _rz_radial_coord) / r;
     rz_term(_rz_radial_coord) += _mu[_qp] * _velocity[_qp](_rz_radial_coord) / (r * r);
     _viscous_strong_residual[_qp] += rz_term;
   }
-  else
-    _viscous_strong_residual[_qp] +=
-        ADRealVectorValue(2. * _mu[_qp] *
-                              (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                          -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                          0);
+  if (_viscous_form == NS::ViscousForm::Traction)
+  {
+    ADRealVectorValue rz_term;
+    for (const auto i : make_range((unsigned int)2))
+      // This is the transpose of the above
+      rz_term(i) = -_mu[_qp] * _grad_velocity[_qp](_rz_radial_coord, i) / r;
+    // This is the same as above (since the transpose of the diagonal is the diagonal)
+    rz_term(_rz_radial_coord) += _mu[_qp] * _velocity[_qp](_rz_radial_coord) / (r * r);
+    _viscous_strong_residual[_qp] += rz_term;
+  }
 }
 
 template <typename T>

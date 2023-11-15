@@ -145,7 +145,7 @@ INSBase::strongViscousTermLaplace()
 RealVectorValue
 INSBase::strongViscousTermTraction()
 {
-  return strongViscousTermLaplace() -
+  return INSBase::strongViscousTermLaplace() -
          _mu[_qp] *
              (_second_u_vel[_qp].row(0) + _second_v_vel[_qp].row(1) + _second_w_vel[_qp].row(2));
 }
@@ -363,4 +363,34 @@ INSBase::dStrongViscDUCompLaplaceRZ(const unsigned int comp) const
     add_jac(comp) += _mu[_qp] * _phi[_j][_qp] / (r * r);
 
   return add_jac;
+}
+
+RealVectorValue
+INSBase::strongViscousTermTractionRZ() const
+{
+  auto ret = strongViscousTermLaplaceRZ();
+
+  const auto r = _q_point[_qp](_rz_radial_coord);
+
+  const auto & grad_r_vel = (_rz_radial_coord == 0) ? _grad_u_vel[_qp] : _grad_v_vel[_qp];
+  const auto & r_vel = (_rz_radial_coord == 0) ? _u_vel[_qp] : _v_vel[_qp];
+  ret += -_mu[_qp] * grad_r_vel / r;
+  ret(_rz_radial_coord) += _mu[_qp] * r_vel / (r * r);
+
+  return ret;
+}
+
+RealVectorValue
+INSBase::dStrongViscDUCompTractionRZ(const unsigned int comp) const
+{
+  auto ret = dStrongViscDUCompLaplaceRZ(comp);
+  if (comp != _rz_radial_coord)
+    return ret;
+
+  const auto r = _q_point[_qp](_rz_radial_coord);
+
+  ret += -_mu[_qp] * _grad_phi[_j][_qp] / r;
+  ret(_rz_radial_coord) += _mu[_qp] * _phi[_j][_qp] / (r * r);
+
+  return ret;
 }

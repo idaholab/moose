@@ -75,6 +75,17 @@ protected:
    */
   RealVectorValue dStrongViscDUCompLaplaceRZ(const unsigned int comp) const;
 
+  /**
+   * Computes the additional RZ terms for the Traction form of the strong viscous term
+   */
+  RealVectorValue strongViscousTermTractionRZ() const;
+
+  /**
+   * Computes the Jacobian for the additional RZ terms for the Traction form of the strong viscous
+   * term for the given velocity component \p comp
+   */
+  RealVectorValue dStrongViscDUCompTractionRZ(const unsigned int comp) const;
+
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
 
