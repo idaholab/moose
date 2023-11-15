@@ -673,39 +673,39 @@ Field::clone(bool absolute_path)
 Field::Kind
 Field::kind()
 {
+  // return kind value if set by constructor, setVal, or previous call here
   if (_kind != Kind::None)
     return _kind;
 
-  Kind value_kind = Kind::String;
+  // string is fallback kind for key arrays or if nothing matches key value
+  _kind = Kind::String;
 
-  try
+  // key value parent node will use token type of value child node for kind
+  if (_hnv.type() == wasp::KEYED_VALUE)
   {
-    boolVal();
-    value_kind = Kind::Bool;
-  }
-  catch (...)
-  {
+    wasp::HITNodeView value_node = _hnv.child_at(_hnv.child_count() - 1);
+    auto token_type = value_node.token_type();
+
+    // set that will be checked for bool kind before falling back to string
+    static const std::set<std::string> booleans = {"true", "on", "yes", "false", "off", "no"};
+
+    switch (token_type)
+    {
+      case wasp::INTEGER:
+        _kind = Kind::Int;
+        break;
+      case wasp::REAL:
+        _kind = Kind::Float;
+        break;
+      default:
+      case wasp::STRING:
+        if (booleans.count(lower(value_node.data())))
+          _kind = Kind::Bool;
+        break;
+    }
   }
 
-  try
-  {
-    floatVal();
-    value_kind = Kind::Float;
-  }
-  catch (...)
-  {
-  }
-
-  try
-  {
-    intVal();
-    value_kind = Kind::Int;
-  }
-  catch (...)
-  {
-  }
-
-  return value_kind;
+  return _kind;
 }
 
 void

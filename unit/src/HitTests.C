@@ -348,7 +348,7 @@ TEST(HitTests, BraceExpressions)
        "     }",
        "foo",
        "42",
-       hit::Field::Kind::Int},
+       hit::Field::Kind::String},
       {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
       {"fparse-dep-chain",
        "foo=${fparse 42} bar=${fparse foo}",
