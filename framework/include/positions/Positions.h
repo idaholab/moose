@@ -41,7 +41,7 @@ public:
   /// Find the nearest Position for a given point
   const Point & getNearestPosition(const Point & target, bool initial) const;
 
-  /// Find the nearest Position for a given point
+  /// Find the nearest Position index for a given point
   unsigned int getNearestPositionIndex(const Point & target, bool initial) const;
 
 protected:

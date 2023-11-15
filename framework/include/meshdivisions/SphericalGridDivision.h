@@ -21,12 +21,12 @@ public:
 
   SphericalGridDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
 protected:
-  /// Point on the axis of the sphere, serving as the coordinate frame center
+  /// Point at the center of the sphere, serving as the coordinate frame center
   const Point _center;
 
   /// Minimal radial extent of the sphere

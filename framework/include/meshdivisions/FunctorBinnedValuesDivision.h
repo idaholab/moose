@@ -22,10 +22,11 @@ public:
 
   FunctorBinnedValuesDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
+protected:
   /**
    * @brief Get the bin for that functor value
    * @param value functor value to bin
@@ -33,7 +34,6 @@ public:
    */
   unsigned int getBinIndex(Real value, const Point & pt) const;
 
-protected:
   /// Min functor bin value
   const Real _min;
   /// Max functor bin value

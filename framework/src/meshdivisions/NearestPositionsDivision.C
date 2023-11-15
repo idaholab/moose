@@ -20,10 +20,10 @@ InputParameters
 NearestPositionsDivision::validParams()
 {
   InputParameters params = MeshDivision::validParams();
-  params.addClassDescription("Divide the mesh by ");
+  params.addClassDescription("Divide the mesh using a nearest-point / voronoi algorithm, with the "
+                             "points coming from a Positions object");
   params.addRequiredParam<PositionsName>(
-      "positions",
-      "The name of the Positions object to form the nearest-neighbor partition/division with");
+      "positions", "The name of the Positions object to form the nearest-neighbor division with");
   return params;
 }
 
@@ -43,13 +43,13 @@ NearestPositionsDivision::initialize()
 unsigned int
 NearestPositionsDivision::divisionIndex(const Elem & elem) const
 {
-  bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+  const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
   return _nearest_positions_obj->getNearestPositionIndex(elem.vertex_average(), initial);
 }
 
 unsigned int
 NearestPositionsDivision::divisionIndex(const Point & pt) const
 {
-  bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+  const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
   return _nearest_positions_obj->getNearestPositionIndex(pt, initial);
 }

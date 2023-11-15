@@ -42,9 +42,7 @@ NestedDivision::initialize()
     _num_divs[i] = _divisions[i]->getNumDivisions();
     tot_divs *= _num_divs[i];
     if (_num_divs[i] == 0)
-      mooseError("Nested division",
-                 getParam<std::vector<MeshDivisionName>>("divisions")[i],
-                 "now has zero bins");
+      mooseError("Nested division '", _divisions[i]->name(), "' has zero bins");
   }
   setNumDivisions(tot_divs);
 }
@@ -54,7 +52,7 @@ NestedDivision::divisionIndex(const Elem & elem) const
 {
   unsigned int index = 0;
   unsigned int running_product = 1;
-  auto N_divs = _divisions.size();
+  const auto N_divs = _divisions.size();
   for (const auto i : index_range(_divisions))
   {
     index += _divisions[N_divs - 1 - i]->divisionIndex(elem) * running_product;
@@ -68,7 +66,7 @@ NestedDivision::divisionIndex(const Point & pt) const
 {
   unsigned int index = 0;
   unsigned int running_product = 1;
-  auto N_divs = _divisions.size();
+  const auto N_divs = _divisions.size();
   for (const auto i : index_range(_divisions))
   {
     index += _divisions[N_divs - 1 - i]->divisionIndex(pt) * running_product;

@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "NumMeshDivisions.h"
 #include "MeshDivision.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", NumMeshDivisions);
 

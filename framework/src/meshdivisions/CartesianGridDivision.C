@@ -91,7 +91,7 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   }
 
   const auto not_found = MooseMeshDivision::INVALID_DIVISION_INDEX;
-  unsigned int ix = not_found, iy = not_found, iz = not_found;
+  auto ix = not_found, iy = not_found, iz = not_found;
 
   // Look inside the grid and on the left / back / bottom
   for (const auto jx : make_range(_nx + 1))

@@ -137,7 +137,7 @@ CylindricalGridDivision::divisionIndex(const Point & pt) const
   }
 
   const auto not_found = MooseMeshDivision::INVALID_DIVISION_INDEX;
-  unsigned int ir = not_found, ia = not_found, iz = not_found;
+  auto ir = not_found, ia = not_found, iz = not_found;
   const Point widths(_max_r - _min_r, 2 * libMesh::pi, _max_z - _min_z);
 
   // Look inside the grid and on the left / back / bottom

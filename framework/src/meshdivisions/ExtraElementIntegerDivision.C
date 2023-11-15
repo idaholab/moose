@@ -44,17 +44,11 @@ ExtraElementIntegerDivision::initialize()
   std::set<libMesh::dof_id_type> extra_ids;
   for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
     extra_ids.insert(elem->get_extra_integer(_extra_id));
-  std::vector<libMesh::dof_id_type> extra_ids_vec(extra_ids.begin(), extra_ids.end());
-  _mesh.comm().allgather(extra_ids_vec);
-
-  // Sort and remove duplicates
-  std::sort(extra_ids_vec.begin(), extra_ids_vec.end());
-  extra_ids_vec.erase(unique(extra_ids_vec.begin(), extra_ids_vec.end()), extra_ids_vec.end());
-
-  setNumDivisions(extra_ids_vec.size());
+  _mesh.comm().set_union(extra_ids);
+  setNumDivisions(extra_ids.size());
 
   unsigned int i = 0;
-  for (const auto extra_id : extra_ids_vec)
+  for (const auto extra_id : extra_ids)
     _extra_ids_to_division_index[extra_id] = i++;
 }
 

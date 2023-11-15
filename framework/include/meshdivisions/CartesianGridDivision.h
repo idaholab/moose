@@ -21,16 +21,16 @@ public:
 
   CartesianGridDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
 protected:
   /// Bottom left point of the grid
   const Point _bottom_left;
   /// Top right point of the grid
   const Point _top_right;
-  /// Width of the grid in all 3 axis
+  /// Width of the grid in all 3 axes
   const Point _widths;
   /// Number of divisions in the X direction
   const unsigned int _nx;

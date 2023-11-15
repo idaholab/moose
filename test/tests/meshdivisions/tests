@@ -61,7 +61,7 @@
       type = CSVDiff
       input = 'nested_division.i'
       csvdiff = 'nested_division_out_div_out_0001.csv'
-      detail = 'a nesting of mesh divisions.'
+      detail = 'and a nesting of mesh divisions.'
       # Sampling is not ordered the same way on distributed meshes
       mesh_mode = REPLICATED
     []

@@ -54,7 +54,7 @@
 [Postprocessors]
   [ndiv]
     type = NumMeshDivisions
-    mesh_division = mesh_div
+    mesh_division = functor_div
   []
 []
 

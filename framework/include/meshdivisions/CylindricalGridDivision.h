@@ -21,9 +21,9 @@ public:
 
   CylindricalGridDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
 protected:
   /// Axis direction of the cylinder

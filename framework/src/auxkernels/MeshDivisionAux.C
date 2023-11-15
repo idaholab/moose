@@ -25,13 +25,10 @@ MeshDivisionAux::validParams()
 
 MeshDivisionAux::MeshDivisionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _mesh_division(_c_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division")))
+    _mesh_division(_c_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid))
 {
   // Check family types for reasonable choices
-  if (isNodal() && _var.feType().order != FIRST)
-    paramError("Variable order " + Moose::stringify(_var.feType().order) +
-               " unsupported for nodal variable");
-  else if (_var.feType().order != CONSTANT)
+  if (!_var.isNodal() && _var.feType().order != CONSTANT)
     paramError("Variable order " + Moose::stringify(_var.feType().order) + " unsupported");
 }
 

@@ -14,7 +14,6 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 
-// libMesh
 #include "libmesh/vector_value.h"
 
 // libMesh forward declarations
@@ -31,7 +30,7 @@ inline unsigned int INVALID_DIVISION_INDEX = std::numeric_limits<unsigned int>::
 
 /**
  * Base class for MeshDivision objects. MeshDivision objects divide the mesh into a
- * contiguously ordered set of divisions/partitions.
+ * contiguously numbered set of divisions/partitions.
  */
 class MeshDivision : public MooseObject, public SetupInterface, public MeshChangedInterface
 {
@@ -57,11 +56,11 @@ public:
   unsigned int getNumDivisions() const { return _num_divs; }
 
   /// By default, meshChanged will cause a re-initialization of the necessary data members
-  void meshChanged() override { initialize(); }
+  virtual void meshChanged() override { initialize(); }
 
 protected:
   /// Set the number of divisions
-  void setNumDivisions(unsigned int ndivs) { _num_divs = ndivs; }
+  void setNumDivisions(const unsigned int ndivs) { _num_divs = ndivs; }
 
   /// Set up any data members that would be necessary to obtain the division indices
   virtual void initialize() {}

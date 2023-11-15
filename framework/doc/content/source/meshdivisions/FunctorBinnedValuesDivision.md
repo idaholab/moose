@@ -4,7 +4,7 @@
 
 The number of divisions is simply equal to the number of bins.
 
-Points that lay outside the (min_value, max_value) interval may be assigned to the outer bins
+Points that lie outside the (min_value, max_value) interval may be assigned to the outer bins
 using the [!param](/MeshDivisions/FunctorBinnedValuesDivision/assign_out_of_bounds_to_extreme_bins)
 parameter.
 

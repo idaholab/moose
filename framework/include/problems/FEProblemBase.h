@@ -598,9 +598,10 @@ public:
   virtual Function & getFunction(const std::string & name, const THREAD_ID tid = 0);
 
   /// Add a MeshDivision
-  void addMeshDivision(const std::string & type, const std::string & nm, InputParameters & params);
+  void
+  addMeshDivision(const std::string & type, const std::string & name, InputParameters & params);
   /// Get a MeshDivision
-  MeshDivision & getMeshDivision(const std::string & name) const;
+  MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
    * add a MOOSE line search

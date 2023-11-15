@@ -21,9 +21,9 @@ public:
 
   SubdomainsDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
 protected:
   /// Map from subdomain ids to division index. Created on calls to initialize()

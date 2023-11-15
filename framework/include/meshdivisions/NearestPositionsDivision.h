@@ -24,11 +24,11 @@ public:
 
   NearestPositionsDivision(const InputParameters & parameters);
 
-  void initialize() override;
-  unsigned int divisionIndex(const Point & pt) const override;
-  unsigned int divisionIndex(const Elem & elem) const override;
+  virtual void initialize() override;
+  virtual unsigned int divisionIndex(const Point & pt) const override;
+  virtual unsigned int divisionIndex(const Elem & elem) const override;
 
 private:
   // Positions object to use to create the nearest-neighbor division/partition
-  const Positions * _nearest_positions_obj;
+  const Positions * const _nearest_positions_obj;
 };

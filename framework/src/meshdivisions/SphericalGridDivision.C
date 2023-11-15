@@ -87,7 +87,7 @@ SphericalGridDivision::divisionIndex(const Point & pt) const
   }
 
   const auto not_found = MooseMeshDivision::INVALID_DIVISION_INDEX;
-  unsigned int ir = not_found;
+  auto ir = not_found;
   const Real width = _max_r - _min_r;
 
   // Look inside the grid and on the left / back / bottom
