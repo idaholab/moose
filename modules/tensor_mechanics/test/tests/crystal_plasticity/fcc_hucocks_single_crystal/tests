@@ -1,0 +1,124 @@
+[Tests]
+  [fcc_hucocks_tensile_001orientation]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_001orientation.i'
+    csvdiff = 'fcc_hucocks_tensile_001orientation_out.csv'
+    requirement = 'The system shall calculate the stress response consistent with '
+                  'activation of all four coplanar slip groups, as indicated by '
+                  'significant non-zero slip increments and dislocation pinning '
+                  'point evolution for all four coplanar groups under tensile '
+                  'displacement loading.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [fcc_hucocks_tensile_111orientation]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_111orientation.i'
+    csvdiff = 'fcc_hucocks_tensile_111orientation_out.csv'
+    requirement = 'The system shall calculate the stress response consistent with '
+                  'activation of three of the four coplanar groups, as indicated by '
+                  'the zero slip increment for the 3rd coplanar group, which has a '
+                  'plane normal that is parallel to the loading direction.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeElasticityTensorCP.md'
+  []
+  [fcc_hucocks_tensile_110orientation]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_110orientation.i'
+    csvdiff = 'fcc_hucocks_tensile_110orientation_out.csv'
+    requirement = 'The system shall calculate the stress response consistent with '
+                  'activation of half of the coplanar groups, as indicated by a'
+                  'nearly zero slip increment response on the inactive 0th and '
+                  '2nd coplanar groups and a lower pinning point density accumulation '
+                  'on the active 1st and 3rd coplanar groups, consistent with the '
+                  'lower prescribed self evolution coefficient.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeElasticityTensorCP.md'
+  []
+  [fcc_hucocks_tensile_123orientation]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_123orientation.i'
+    csvdiff = 'fcc_hucocks_tensile_123orientation_out.csv'
+    requirement = 'The system shall calculate the stress response consistent with '
+                  'activation of only the 1st coplanar group as indicated by essentially '
+                  'zero slip increments on the other three coplanar groups. The pinning '
+                  'point evolution on the 0th, 2nd, and 3rd coplanar groups shall be '
+                  'calculated to be larger than the pinning point accumulation on the '
+                  '1st coplanar group due to the higher prescribed latent evolution '
+                  'coefficient value.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeElasticityTensorCP.md'
+  []
+  [fcc_hucocks_pressure_load]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_pressure_load.i'
+    csvdiff = 'fcc_hucocks_pressure_load_out.csv'
+    requirement = 'The system shall calculate the strain and pinning point evolution '
+                  'response for a compressive pressure applied in an initial ramp and '
+                  'then held constant to imitate the start of creep loading conditions. '
+                  'The system shall demonstrate pinning point density and slip resistance '
+                  'evolution, on all four coplanar groups, in a manner consistent with '
+                  'stress relaxation.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+
+
+
+
+
+
+
+  [single_active_group_zero_self_evolution]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_123orientation.i'
+    csvdiff = 'single_active_group_zero_self_evolution_out.csv'
+    cli_args = 'Materials/trial_xtalpl/coefficient_self_plane_evolution=0.0 '
+               'Outputs/file_base=single_active_group_zero_self_evolution_out'
+    requirement = 'The system shall demonstrate no change in the pinning point '
+                  'density value on the single active coplanar group when the '
+                  'self plane evolution coefficient is set to zero.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [single_active_group_zero_latent_evolution]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_tensile_123orientation.i'
+    csvdiff = 'single_active_group_zero_latent_evolution_out.csv'
+    cli_args = 'Materials/trial_xtalpl/coefficient_latent_plane_evolution=0.0 '
+               'Outputs/file_base=single_active_group_zero_latent_evolution_out'
+    requirement = 'The system shall calculate no change in the pinning point '
+                  'density value on all three inactive coplanar groups when '
+                  'the latent plane group evolution coefficient is set to zero.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+
+  [too_many_coplanar_groups_specified]
+    type = RunException
+    input = 'fcc_hucocks_tensile_001orientation.i'
+    cli_args = 'Materials/trial_xtalpl/number_coplanar_groups=5'
+    expect_err = 'The coplanar sorting has resulted in a number of coplanar '
+                 'system groups different from the number specified by the user.'
+    requirement = 'The system shall error out when the user specifies more coplanar '
+                  'groups than exist in the specified slip system text file.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [too_few_coplanar_groups_specified]
+    type = RunException
+    input = 'fcc_hucocks_tensile_001orientation.i'
+    cli_args = 'Materials/trial_xtalpl/number_coplanar_groups=3'
+    expect_err = 'The number of requested coplanar groups exceeds the value specified '
+                 'by the user for the parameter number_coplanar_groups'
+    requirement = 'The system shall error out when the user specifies fewer coplanar '
+                  'groups than are calculated from the specified slip system text file.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+[]
