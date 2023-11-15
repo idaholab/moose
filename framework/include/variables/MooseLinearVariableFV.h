@@ -662,6 +662,8 @@ public:
                             const StateArg & state,
                             bool correct_skewness = false) const;
 
+  const LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id);
+
 protected:
   /**
    * clear finite volume caches

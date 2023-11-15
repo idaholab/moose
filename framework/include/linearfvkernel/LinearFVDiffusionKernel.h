@@ -25,6 +25,10 @@ public:
 
   virtual Real computeNeighborRightHandSideContribution() override;
 
+  virtual Real computeBoundaryMatrixContribution() override;
+
+  virtual Real computeBoundaryRHSContribution() override;
+
 protected:
   const Real _diffusion_coeff;
 };

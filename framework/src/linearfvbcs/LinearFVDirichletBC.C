@@ -48,13 +48,15 @@ LinearFVDirichletBC::computeBoundaryValueRHSContribution(const FaceInfo * const 
 }
 
 Real
-LinearFVDirichletBC::computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info)
+LinearFVDirichletBC::computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const
 {
-  return 1.0 / face_info->dCNMag() * face_info->faceArea();
+  return face_info->faceArea() /
+         (face_info->neighborPtr() ? face_info->dCNMag() / 2 : face_info->dCNMag());
 }
 
 Real
-LinearFVDirichletBC::computeBoundaryGradientRHSContribution(const FaceInfo * const face_info)
+LinearFVDirichletBC::computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const
 {
-  return _value / face_info->dCNMag() * face_info->faceArea();
+  return _value * face_info->faceArea() /
+         (face_info->neighborPtr() ? face_info->dCNMag() / 2 : face_info->dCNMag());
 }

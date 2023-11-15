@@ -557,6 +557,17 @@ MooseLinearVariableFV<OutputType>::cacheBoundaryBCMap()
   }
 }
 
+template <typename OutputType>
+const LinearFVBoundaryCondition *
+MooseLinearVariableFV<OutputType>::getBoundaryCondition(const BoundaryID bd_id)
+{
+  const auto iter = _boundary_id_to_bc.find(bd_id);
+  if (iter == _boundary_id_to_bc.end())
+    return nullptr;
+  else
+    return iter->second;
+}
+
 template class MooseLinearVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

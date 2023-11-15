@@ -10,6 +10,7 @@
 #include "LinearFVDiffusionKernel.h"
 #include "Assembly.h"
 #include "SubProblem.h"
+#include "LinearFVBoundaryCondition.h"
 
 registerMooseObject("MooseApp", LinearFVDiffusionKernel);
 
@@ -50,4 +51,37 @@ Real
 LinearFVDiffusionKernel::computeNeighborRightHandSideContribution()
 {
   return 0.0;
+}
+
+Real
+LinearFVDiffusionKernel::computeBoundaryMatrixContribution()
+{
+  mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+              "We should only have one boundary on every face.");
+  const auto * boundary_condition =
+      _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
+  auto grad_contrib =
+      boundary_condition->computeBoundaryGradientMatrixContribution(_current_face_info);
+
+  if (!boundary_condition->includesMaterialPropertyMultiplier())
+    grad_contrib *= _diffusion_coeff;
+
+  return grad_contrib;
+}
+
+Real
+LinearFVDiffusionKernel::computeBoundaryRHSContribution()
+{
+  mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+              "We should only have one boundary on every face.");
+
+  const auto * boundary_condition =
+      _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
+  auto grad_contrib =
+      boundary_condition->computeBoundaryGradientRHSContribution(_current_face_info);
+
+  if (!boundary_condition->includesMaterialPropertyMultiplier())
+    grad_contrib *= _diffusion_coeff;
+
+  return grad_contrib;
 }

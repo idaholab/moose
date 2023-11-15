@@ -20,15 +20,16 @@ FluxLinearFVKernel::validParams()
 }
 
 FluxLinearFVKernel::FluxLinearFVKernel(const InputParameters & params)
-  : LinearFVKernel(params), _current_face_info(nullptr)
+  : LinearFVKernel(params),
+    _current_face_info(nullptr),
+    _current_face_type(FaceInfo::VarFaceNeighbors::NEITHER)
 {
 }
 
 void
 FluxLinearFVKernel::addMatrixContribution()
 {
-  if (_current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number())) ==
-      FaceInfo::VarFaceNeighbors::BOTH)
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     const auto dof_id_elem =
         _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
@@ -42,6 +43,25 @@ FluxLinearFVKernel::addMatrixContribution()
     (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_neighbor, dof_id_elem, -elem_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, -neighbor_matrix_contribution);
+  }
+  else if (_var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+  {
+    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
+                "We should only have one boundary on every face.");
+    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+    {
+      const auto dof_id_elem =
+          _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      const auto matrix_contribution = computeBoundaryMatrixContribution();
+      (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
+    }
+    else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+    {
+      const auto dof_id_neighbor =
+          _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      const auto matrix_contribution = computeBoundaryMatrixContribution();
+      (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
+    }
   }
 }
 
@@ -61,5 +81,22 @@ FluxLinearFVKernel::addRightHandSideContribution()
 
     (*_linear_system.rhs).add(dof_id_elem, elem_rhs_contribution);
     (*_linear_system.rhs).add(dof_id_neighbor, neighbor_rhs_contribution);
+  }
+  else if (_var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin()))
+  {
+    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+    {
+      const auto dof_id_elem =
+          _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      const auto rhs_contribution = computeBoundaryRHSContribution();
+      (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
+    }
+    else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+    {
+      const auto dof_id_neighbor =
+          _current_face_info->neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      const auto rhs_contribution = computeBoundaryRHSContribution();
+      (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
+    }
   }
 }

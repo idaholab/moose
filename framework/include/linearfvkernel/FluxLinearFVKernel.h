@@ -27,7 +27,12 @@ public:
   virtual void addRightHandSideContribution() override;
 
   /// Set current element
-  void setCurrentFaceInfo(const FaceInfo * face_info) { _current_face_info = face_info; }
+  void setCurrentFaceInfo(const FaceInfo * face_info)
+  {
+    _current_face_info = face_info;
+    _current_face_type =
+        _current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
+  }
 
   virtual Real computeElemMatrixContribution() = 0;
 
@@ -37,6 +42,13 @@ public:
 
   virtual Real computeNeighborRightHandSideContribution() = 0;
 
+  virtual Real computeBoundaryMatrixContribution() = 0;
+
+  virtual Real computeBoundaryRHSContribution() = 0;
+
 protected:
   const FaceInfo * _current_face_info;
+
+  /// The face type
+  FaceInfo::VarFaceNeighbors _current_face_type;
 };

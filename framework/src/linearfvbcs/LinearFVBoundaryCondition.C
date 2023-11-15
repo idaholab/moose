@@ -65,7 +65,8 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
                                  parameters.varName("variable", name()),
                                  Moose::VarKindType::VAR_LINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD))),
-    _sys(changeSystem(parameters, *_var))
+    _sys(changeSystem(parameters, *_var)),
+    _includes_material_multiplier(false)
 {
   if (!_var)
     paramError("variable",

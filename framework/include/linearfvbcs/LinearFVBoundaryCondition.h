@@ -82,9 +82,17 @@ public:
 
   virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) = 0;
 
-  virtual Real computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) = 0;
+  virtual Real
+  computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const = 0;
 
-  virtual Real computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const = 0;
+
+  bool includesMaterialPropertyMultiplier() const { return _includes_material_multiplier; }
+
+  void setIncludesMaterialPropertyMultiplier(const bool new_setting)
+  {
+    _includes_material_multiplier = new_setting;
+  }
 
 protected:
   /// Thread id
@@ -103,4 +111,7 @@ protected:
 
   /// Reference to SystemBase
   SystemBase & _sys;
+
+  /// Boolean to indicate if the boundary condition includes the material property multipliers ot not
+  bool _includes_material_multiplier;
 };
