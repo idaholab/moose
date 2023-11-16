@@ -360,6 +360,13 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
     params.set<std::vector<VariableName>>("nodal_density") = {"nodal_density"};
     params.set<std::vector<VariableName>>("nodal_wave_speed") = {"nodal_wave_speed"};
 
+    if (isParamValid("vel_x"))
+      params.set<std::vector<VariableName>>("vel_x") = getParam<std::vector<VariableName>>("vel_x");
+    if (isParamValid("vel_y"))
+      params.set<std::vector<VariableName>>("vel_y") = getParam<std::vector<VariableName>>("vel_y");
+    if (isParamValid("vel_z"))
+      params.set<std::vector<VariableName>>("vel_z") = getParam<std::vector<VariableName>>("vel_z");
+
     params.set<BoundaryName>("boundary") = contact_pair.first;
     if (isParamValid("secondary_gap_offset"))
       params.set<std::vector<VariableName>>("secondary_gap_offset") = {
@@ -389,7 +396,7 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
 MooseEnum
 ExplicitDynamicsContactAction::getModelEnum()
 {
-  return MooseEnum("frictionless", "frictionless");
+  return MooseEnum("frictionless frictionless_balance", "frictionless");
 }
 
 InputParameters
@@ -399,6 +406,11 @@ ExplicitDynamicsContactAction::commonParameters()
 
   params.addParam<MooseEnum>(
       "model", ExplicitDynamicsContactAction::getModelEnum(), "The contact model to use");
+
+  // Gap rate input
+  params.addCoupledVar("vel_x", "x-component of velocity");
+  params.addCoupledVar("vel_y", "y-component of velocity");
+  params.addCoupledVar("vel_z", "z-component of velocity");
 
   return params;
 }

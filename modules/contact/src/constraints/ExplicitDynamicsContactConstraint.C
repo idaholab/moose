@@ -78,6 +78,7 @@ ExplicitDynamicsContactConstraint::validParams()
       "using a node on face, primary/secondary algorithm, and multiple options "
       "for the physical behavior on the interface and the mathematical "
       "formulation for constraint enforcement");
+
   return params;
 }
 
@@ -110,7 +111,14 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _aux_solution(_aux_system.currentSolution()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _neighbor_density(getNeighborMaterialPropertyByName<Real>("density")),
-    _neighbor_wave_speed(getNeighborMaterialPropertyByName<Real>("wave_speed"))
+    _neighbor_wave_speed(getNeighborMaterialPropertyByName<Real>("wave_speed")),
+    _vel_x(isCoupled("vel_x") ? coupledValue("vel_x") : _zero),
+    _vel_y(isCoupled("vel_y") ? coupledValue("vel_y") : _zero),
+    _vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledValue("vel_z") : _zero),
+    _neighbor_vel_x(isCoupled("vel_x") ? coupledNeighborValue("vel_x") : _zero),
+    _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
+    _neighbor_vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledNeighborValue("vel_z")
+                                                                   : _zero)
 {
   _overwrite_secondary_residual = false;
 
@@ -135,6 +143,18 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(
         parameters.get<std::string>("normal_smoothing_method"));
+
+  if (_model == ExplicitDynamicsContactModel::FRICTIONLESS_BALANCE)
+  {
+    bool is_correct =
+        (isCoupled("vel_x") && isCoupled("vel_y") && _mesh.dimension() == 2) ||
+        (isCoupled("vel_x") && isCoupled("vel_y") && isCoupled("vel_z") && _mesh.dimension() == 3);
+
+    if (!is_correct)
+      paramError("vel_x",
+                 "Velocities vel_x and vel_y (also vel_z in three dimensions) need to be provided "
+                 "for the 'balance' option of solving normal contact in explicit dynamics.");
+  }
 }
 
 void
@@ -245,6 +265,7 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
   const Real penalty = getPenalty(node);
 
   RealVectorValue pen_force(penalty * distance_vec);
+
   switch (_model)
   {
     case ExplicitDynamicsContactModel::FRICTIONLESS:
@@ -275,9 +296,39 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node, Penet
   // Stab at momentum balance, uncoupled normal pressure
   // See Heinstein et al, 2000, Contact-impact modeling in explicit transient dynamics.
 
+  // Secondary surface
   const auto nodal_area = nodalArea(node);
 
-  pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * nodal_area);
+  dof_id_type dof_wave_speed =
+      node.dof_number(_aux_system.number(), _nodal_wave_speed_var->number(), 0);
+  const Real wave_speed_secondary = (*_aux_solution)(dof_wave_speed);
+
+  dof_id_type dof_density = node.dof_number(_aux_system.number(), _nodal_density_var->number(), 0);
+  const Real density_secondary = (*_aux_solution)(dof_density);
+
+  // Primary surface
+  _neighbor_density[0];
+  _neighbor_wave_speed[0];
+
+  Real contact_pressure_balance(0.0);
+  Real gap_rate(0.0);
+
+  contact_pressure_balance =
+      density_secondary * _neighbor_density[0] * wave_speed_secondary * _neighbor_wave_speed[0];
+  contact_pressure_balance /=
+      (density_secondary * wave_speed_secondary + _neighbor_density[0] * _neighbor_wave_speed[0]);
+  contact_pressure_balance *= nodal_area;
+
+  RealVectorValue secondary_velocity(
+      _vel_x[0], _vel_y[0], _mesh.dimension() == 3 ? _vel_z[0] : 0.0);
+  RealVectorValue closest_point_velocity(
+      _neighbor_vel_x[0], _neighbor_vel_y[0], _mesh.dimension() == 3 ? _neighbor_vel_z[0] : 0.0);
+  gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
+  contact_pressure_balance *= gap_rate;
+
+  // The gap rate can probably be saved in pinfo by adequately evaluating the velocity variable at
+  // the corresponding points. Let's do that.
+  pinfo->_contact_force = pinfo->_normal * contact_pressure_balance;
 }
 
 Real

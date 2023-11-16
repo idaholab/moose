@@ -131,6 +131,20 @@ protected:
 
   /// Wave speed material for neighbor projection
   const MaterialProperty<Real> & _neighbor_wave_speed;
+
+  /// X component of velocity at the contacting node
+  const VariableValue & _vel_x;
+  /// Y component of velocity at the contacting node
+  const VariableValue & _vel_y;
+  /// Z component of velocity at the contacting node
+  const VariableValue & _vel_z;
+
+  /// X component of velocity at the closest point
+  const VariableValue & _neighbor_vel_x;
+  /// Y component of velocity at the closest point
+  const VariableValue & _neighbor_vel_y;
+  /// Z component of velocity at the closest point
+  const VariableValue & _neighbor_vel_z;
 };
 
 inline const std::set<unsigned int> &
