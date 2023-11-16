@@ -182,8 +182,6 @@ MultiAppDofCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & fr
     if (to_var.fieldType() != from_var.fieldType())
       mooseError(
           "Corresponding transfer variables must be same field type (STANDARD | VECTOR | ARRAY).");
-    if (to_var.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
-      mooseError("Unable to transfer vector variables.");
     if (to_var.count() != from_var.count())
       mooseError("Corresponding transfer variables must have same number of components.");
 

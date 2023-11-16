@@ -1,0 +1,10 @@
+[Tests]
+  design = 'MultiAppCopyTransfer.md'
+  issues = '#26045'
+  [copy_vector]
+    type = CSVDiff
+    input = parent_L2_LagrangeVec.i
+    csvdiff = parent_L2_LagrangeVec_out_sub_app0.csv
+    requirement = 'The system shall be able to transfer vector variables between identical meshes using a direct copy transfer.'
+  []
+[]
