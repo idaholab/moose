@@ -117,13 +117,6 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
 
-  // Declare dependency of inputs to sub generator calls. If mesh generation
-  // should be bypassed, then store the input meshes to free later
-  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
-    declareMeshesForSub("inputs");
-  else
-    _mesh_ptrs = getMeshes("inputs");
-
   _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
   _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
 
@@ -250,78 +243,81 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   else
     _has_duct_block_names = false;
 
-  _assembly_boundary_id = 2000 + _assembly_type;
-  _assembly_boundary_name = "outer_assembly_" + std::to_string(_assembly_type);
-
-  // Call PatternedHexMeshGenerator or PatternedCartesianMeshGenerator to stitch assembly
+  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
   {
-    const auto patterned_mg_name =
-        _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
-    auto params = _app.getFactory().getValidParams(patterned_mg_name);
+    // Declare dependency of inputs to sub generator calls. If mesh generation
+    declareMeshesForSub("inputs");
 
-    if (_geom_type == "Hex")
+    _assembly_boundary_id = 2000 + _assembly_type;
+    _assembly_boundary_name = "outer_assembly_" + std::to_string(_assembly_type);
+
+    // Call PatternedHexMeshGenerator or PatternedCartesianMeshGenerator to stitch assembly
     {
-      params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
-      params.set<MooseEnum>("hexagon_size_style") = "apothem";
-    }
-    else
-    {
-      if (_background_region_id.size() == 0)
-        params.set<MooseEnum>("pattern_boundary") = "none";
+      const auto patterned_mg_name =
+          _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
+      auto params = _app.getFactory().getValidParams(patterned_mg_name);
+
+      if (_geom_type == "Hex")
+      {
+        params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
+        params.set<MooseEnum>("hexagon_size_style") = "apothem";
+      }
       else
       {
-        params.set<MooseEnum>("pattern_boundary") = "expanded";
-        params.set<Real>("square_size") = getReactorParam<Real>(RGMB::assembly_pitch);
-        params.set<bool>("uniform_mesh_on_sides") = true;
+        if (_background_region_id.size() == 0)
+          params.set<MooseEnum>("pattern_boundary") = "none";
+        else
+        {
+          params.set<MooseEnum>("pattern_boundary") = "expanded";
+          params.set<Real>("square_size") = getReactorParam<Real>(RGMB::assembly_pitch);
+          params.set<bool>("uniform_mesh_on_sides") = true;
+        }
       }
-    }
-    params.set<std::vector<std::string>>("id_name") = {"pin_id"};
-    params.set<std::vector<MooseEnum>>("assign_type") = {
-        MooseEnum("cell", "cell")}; // give elems IDs relative to position in assembly
-    params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
-    params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
-    params.set<bool>("create_outward_interface_boundaries") = false;
 
-    unsigned int assembly_block_id_start = 20000;
-    if (_background_intervals > 0)
-    {
-      params.set<unsigned int>("background_intervals") = _background_intervals;
-      // Initial block id used to define peripheral regions of assembly
+      params.set<std::vector<std::string>>("id_name") = {"pin_id"};
+      params.set<std::vector<MooseEnum>>("assign_type") = {
+          MooseEnum("cell", "cell")}; // give elems IDs relative to position in assembly
+      params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
+      params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
+      params.set<bool>("create_outward_interface_boundaries") = false;
 
-      const auto background_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R0";
-      const auto background_block_id = assembly_block_id_start;
-      params.set<subdomain_id_type>("background_block_id") = background_block_id;
-      params.set<SubdomainName>("background_block_name") = background_block_name;
-    }
-
-    if (_duct_sizes.size() > 0)
-    {
-      std::vector<subdomain_id_type> duct_block_ids;
-      std::vector<SubdomainName> duct_block_names;
-      for (const auto duct_it : index_range(_duct_region_ids[0]))
+      unsigned int assembly_block_id_start = 20000;
+      if (_background_intervals > 0)
       {
-        const auto duct_block_name =
-            "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
-        const auto duct_block_id = assembly_block_id_start + duct_it + 1;
-        duct_block_ids.push_back(duct_block_id);
-        duct_block_names.push_back(duct_block_name);
+        params.set<unsigned int>("background_intervals") = _background_intervals;
+        // Initial block id used to define peripheral regions of assembly
+
+        const auto background_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R0";
+        const auto background_block_id = assembly_block_id_start;
+        params.set<subdomain_id_type>("background_block_id") = background_block_id;
+        params.set<SubdomainName>("background_block_name") = background_block_name;
       }
 
-      params.set<std::vector<Real>>("duct_sizes") = _duct_sizes;
-      params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_block_ids;
-      params.set<std::vector<SubdomainName>>("duct_block_names") = duct_block_names;
-      params.set<std::vector<unsigned int>>("duct_intervals") = _duct_intervals;
-    }
+      if (_duct_sizes.size() > 0)
+      {
+        std::vector<subdomain_id_type> duct_block_ids;
+        std::vector<SubdomainName> duct_block_names;
+        for (const auto duct_it : index_range(_duct_region_ids[0]))
+        {
+          const auto duct_block_name =
+              "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
+          const auto duct_block_id = assembly_block_id_start + duct_it + 1;
+          duct_block_ids.push_back(duct_block_id);
+          duct_block_names.push_back(duct_block_name);
+        }
 
-    params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-    params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+        params.set<std::vector<Real>>("duct_sizes") = _duct_sizes;
+        params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_block_ids;
+        params.set<std::vector<SubdomainName>>("duct_block_names") = duct_block_names;
+        params.set<std::vector<unsigned int>>("duct_intervals") = _duct_intervals;
+      }
 
-    callMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
+      params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
+      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
-    // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-    // Only relevant if we are generating RGMB mesh and not bypassing mesh generation
-    if (!getReactorParam<bool>(RGMB::bypass_meshgen))
-    {
+      addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
+
+      // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
       copyMeshProperty<bool>("is_control_drum_meta", name() + "_pattern");
       copyMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern");
       copyMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern");
@@ -330,102 +326,107 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       copyMeshProperty<std::string>("position_file_name", name() + "_pattern");
       copyMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
     }
-  }
 
-  std::string build_mesh_name = name() + "_delbds";
+    std::string build_mesh_name = name() + "_delbds";
 
-  // Remove outer pin sidesets created by PolygonConcentricCircleMeshGenerator
-  {
-    // Get outer boundaries of all constituent pins based on pin_type
-    std::vector<BoundaryName> boundaries_to_delete = {};
-    for (const auto & pattern_x : _pattern)
+    // Remove outer pin sidesets created by PolygonConcentricCircleMeshGenerator
     {
-      for (const auto & pattern_idx : pattern_x)
+      // Get outer boundaries of all constituent pins based on pin_type
+      std::vector<BoundaryName> boundaries_to_delete = {};
+      for (const auto & pattern_x : _pattern)
       {
-        const auto pin_name = _inputs[pattern_idx];
-        const auto pin_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin_name);
-        const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
-        if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
-          boundaries_to_delete.push_back(boundary_name);
+        for (const auto & pattern_idx : pattern_x)
+        {
+          const auto pin_name = _inputs[pattern_idx];
+          const auto pin_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin_name);
+          const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
+          if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
+            boundaries_to_delete.push_back(boundary_name);
+        }
+      }
+      auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_pattern";
+      params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
+      addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
+    }
+
+    for (auto pinMG : _inputs)
+    {
+      std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map =
+          getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
+              RGMB::pin_region_ids, pinMG);
+      _pin_region_id_map.insert(
+          std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+              region_id_map.begin()->first, region_id_map.begin()->second));
+      subdomain_id_type pin_type_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pinMG);
+      std::vector<std::vector<std::string>> pin_block_names =
+          getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::pin_block_names, pinMG);
+      _pin_block_name_map.insert(
+          std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin_type_id,
+                                                                              pin_block_names));
+    }
+
+    if (_extrude && _mesh_dimensions == 3)
+    {
+      std::vector<Real> axial_boundaries =
+          getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+      const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+      const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
+      {
+        auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
+
+        params.set<MeshGeneratorName>("input") = name() + "_delbds";
+        params.set<Point>("direction") = Point(0, 0, 1);
+        params.set<std::vector<unsigned int>>("num_layers") =
+            getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
+        params.set<std::vector<Real>>("heights") = axial_boundaries;
+        params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
+        params.set<boundary_id_type>("top_boundary") = top_boundary;
+
+        addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
+      }
+
+      {
+        auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+        params.set<MeshGeneratorName>("input") = name() + "_extruded";
+        params.set<std::vector<BoundaryName>>("old_boundary") = {
+            std::to_string(top_boundary),
+            std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
+        params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
+
+        addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
+      }
+
+      {
+        auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
+
+        params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
+
+        std::vector<Real> plane_heights{0};
+        for (Real z : axial_boundaries)
+          plane_heights.push_back(z + plane_heights.back());
+
+        params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
+
+        std::string plane_id_name = "plane_id";
+        params.set<std::string>("id_name") = "plane_id";
+
+        build_mesh_name = name() + "_extrudedIDs";
+        addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
       }
     }
-    auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
 
-    params.set<MeshGeneratorName>("input") = name() + "_pattern";
-    params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
-
-    callMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
-  }
-
-  for (auto pinMG : _inputs)
-  {
-    std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map =
-        getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-            RGMB::pin_region_ids, pinMG);
-    _pin_region_id_map.insert(
-        std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-            region_id_map.begin()->first, region_id_map.begin()->second));
-    subdomain_id_type pin_type_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pinMG);
-    std::vector<std::vector<std::string>> pin_block_names =
-        getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::pin_block_names, pinMG);
-    _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-        pin_type_id, pin_block_names));
-  }
-
-  if (_extrude && _mesh_dimensions == 3)
-  {
-    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
-    const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
-    const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
-    {
-      auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_delbds";
-      params.set<Point>("direction") = Point(0, 0, 1);
-      params.set<std::vector<unsigned int>>("num_layers") =
-          getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
-      params.set<std::vector<Real>>("heights") = axial_boundaries;
-      params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
-      params.set<boundary_id_type>("top_boundary") = top_boundary;
-
-      callMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
-    }
-
-    {
-      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_extruded";
-      params.set<std::vector<BoundaryName>>("old_boundary") = {
-          std::to_string(top_boundary),
-          std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
-
-      callMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
-    }
-
-    {
-      auto params = _app.getFactory().getValidParams("PlaneIDMeshGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_change_plane_name";
-
-      std::vector<Real> plane_heights{0};
-      for (Real z : axial_boundaries)
-        plane_heights.push_back(z + plane_heights.back());
-
-      params.set<std::vector<Real>>("plane_coordinates") = plane_heights;
-
-      std::string plane_id_name = "plane_id";
-      params.set<std::string>("id_name") = "plane_id";
-
-      build_mesh_name = name() + "_extrudedIDs";
-      callMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
-    }
-  }
-  generateMetadata();
-
-  // Store final mesh subgenerator if we are not bypassing mesh generation
-  if (!getReactorParam<bool>(RGMB::bypass_meshgen))
+    // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
+  }
+  // If mesh generation should be bypassed, then store the input meshes to free later
+  else
+    _mesh_ptrs = getMeshes("inputs");
+
+  generateMetadata();
 }
 
 void
