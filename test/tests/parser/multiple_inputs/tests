@@ -40,7 +40,7 @@
   [no_file]
     type = 'RunException'
     input = ''
-    expect_err = 'No input files specified.'
+    expect_err = 'No input files specified. Add -i <inputfile> to your command line.'
     requirement = 'The system shall raise an error if no input files were specified after the -i option'
   []
 []

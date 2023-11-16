@@ -331,7 +331,7 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
-  params.addPrivateParam<Parser *>("_parser");
+  params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -361,7 +361,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(parameters.get<Parser *>("_parser")),
+    _parser(parameters.get<std::shared_ptr<Parser>>("_parser")),
     _parserOther(*this, _action_warehouse, *_parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
@@ -962,7 +962,8 @@ MooseApp::setupOptions()
     // Pass list of input files and optional text string if provided to parser
     if (!isParamValid("_input_text"))
     {
-      _parser->parse(_input_filenames);
+      if (_input_filenames.empty())
+        mooseError("No input files specified. Add -i <inputfile> to your command line.");
       _parserOther.parseother();
     }
     else
@@ -1041,6 +1042,7 @@ MooseApp::setupOptions()
                  "<inputfile> to your command line.");
 
     _command_line->printUsage();
+
     _ready_to_exit = true;
   }
 

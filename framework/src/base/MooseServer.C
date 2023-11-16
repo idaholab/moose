@@ -69,9 +69,15 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // turn output off so input check application does not affect messages
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
 
+  // create new parser tree for the application
+  auto front_parser = std::make_shared<Parser>();
+
   // create new application with parameters modified for input check run
-  _check_app = AppFactory::instance().createShared(
-      _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
+  _check_app = AppFactory::instance().createShared(_moose_app.type(),
+                                                   _moose_app.name(),
+                                                   app_params,
+                                                   front_parser,
+                                                   _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
   bool cached_logging_enabled = Moose::perf_log.logging_enabled();
@@ -278,7 +284,7 @@ MooseServer::getAllValidParameters(InputParameters & valid_params,
                                    std::set<std::string> & obj_act_tasks)
 {
   // gather global parameters then action parameters then object parameters
-  valid_params = Parser::validParams();
+  valid_params = ParserOther::validParams();
   valid_params += ParserOther::validParams();
   getActionParameters(valid_params, object_path, obj_act_tasks);
   getObjectParameters(valid_params, object_type, obj_act_tasks);

@@ -63,13 +63,14 @@ public:
 
   virtual ~AppFactory();
 
+  static InputParameters validParams();
   /**
    * Helper function for creating a MooseApp from command-line arguments.
    */
   static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,
                                      char ** argv,
-                                     Parser * parser,
+                                     std::shared_ptr<Parser> parser,
                                      MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
@@ -96,6 +97,7 @@ public:
   MooseAppPtr createShared(const std::string & app_type,
                            const std::string & name,
                            InputParameters parameters,
+                           std::shared_ptr<Parser> parser,
                            MPI_Comm COMM_WORLD_IN);
 
   /**

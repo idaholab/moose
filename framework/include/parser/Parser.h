@@ -12,7 +12,6 @@
 // MOOSE includes
 #include "ConsoleStreamInterface.h"
 #include "MooseTypes.h"
-#include "InputParameters.h"
 #include "Syntax.h"
 
 #include "hit.h"
@@ -104,11 +103,6 @@ public:
   virtual ~Parser();
 
   /**
-   * Parameters that are processed directly by the Parser and are valid anywhere in the input
-   */
-  static InputParameters validParams();
-
-  /**
    * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
@@ -125,7 +119,15 @@ public:
   /**
    * Get the root pointer from front parser
    */
-  hit::Node & getRootNode() { return *_root; };
+  hit::Node * getRootNode()
+  {
+    // normal input file is provided, front parser is set to parse input file
+    if (_root)
+      return _root.release();
+    // no valid input file is provided, front parser is skipped
+    else
+      return nullptr;
+  };
 
   /*
    * Get extracted variables from front parser
@@ -152,6 +154,8 @@ protected:
 
 private:
   std::string _errmsg;
+
+  std::vector<std::string> _dw_errmsg;
 
   // Allow the MooseServer class to access the root node of the hit parse tree
   friend class MooseServer;

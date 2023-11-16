@@ -30,6 +30,7 @@
 #include "Positions.h"
 #include "Transient.h"
 #include "Backup.h"
+#include "Parser.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -1101,14 +1102,23 @@ MultiApp::createApp(unsigned int i, Real start_time)
     if (displaced_problem)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
   }
-  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
-  auto & app = _apps[i];
 
   std::string input_file = "";
   if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
     input_file = _input_files[0];
   else
     input_file = _input_files[_first_local_app + i];
+
+  // create new parser tree for the application
+  auto front_parser = std::make_shared<Parser>();
+  std::vector<std::string> multiapp_input{input_file};
+
+  if (!input_file.empty())
+    front_parser->parse(multiapp_input);
+
+  _apps[i] =
+      AppFactory::instance().createShared(_app_type, full_name, app_params, front_parser, _my_comm);
+  auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);

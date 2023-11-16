@@ -10,7 +10,6 @@
 // MOOSE includes
 #include "MooseUtils.h"
 #include "MooseInit.h"
-#include "InputParameters.h"
 #include "ActionFactory.h"
 #include "Action.h"
 #include "Factory.h"
@@ -173,27 +172,6 @@ Parser::Parser() : _sections_read(false) {}
 
 Parser::~Parser() {}
 
-InputParameters
-Parser::validParams()
-{
-  InputParameters params = emptyInputParameters();
-
-  /**
-   * Add the "active" and "inactive" parameters so that all blocks in the input file
-   * can selectively create lists of active/inactive sub-blocks.
-   */
-  params.addParam<std::vector<std::string>>(
-      "active",
-      std::vector<std::string>({"__all__"}),
-      "If specified only the blocks named will be visited and made active");
-  params.addParam<std::vector<std::string>>(
-      "inactive",
-      std::vector<std::string>(),
-      "If specified blocks matching these identifiers will be skipped.");
-
-  return params;
-}
-
 void
 DupParamWalker ::walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n)
 {
@@ -308,8 +286,7 @@ Parser::parse(const std::vector<std::string> & input_filenames,
 
   // Save the filename
   _input_filenames = input_filenames;
-  if (_input_filenames.empty())
-    mooseError("No input files specified.");
+
   if (_input_filenames.size() > 1)
     mooseInfo("Merging inputs ", Moose::stringify(_input_filenames));
 
@@ -327,6 +304,7 @@ Parser::parse(const std::vector<std::string> & input_filenames,
   {
     // Parse the input text string if provided, otherwise read file from disk
     std::string input;
+    std::string errmsg;
     if (input_text.has_value())
       input = input_text.value();
     else
@@ -340,7 +318,8 @@ Parser::parse(const std::vector<std::string> & input_filenames,
     {
       std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
       hit::explode(root.get());
-
+      DupParamWalker dw;
+      root->walk(&dw, hit::NodeType::Field);
       if (!_root)
         _root = std::move(root);
       else
@@ -349,6 +328,10 @@ Parser::parse(const std::vector<std::string> & input_filenames,
         hit::merge(root.get(), _root.get());
       }
 
+      for (auto & msg : dw.errors)
+        errmsg += msg + "\n";
+
+      _dw_errmsg.push_back(errmsg);
       _root->walk(&cpw, hit::NodeType::Field);
     }
     catch (hit::ParseError & err)
@@ -361,37 +344,24 @@ Parser::parse(const std::vector<std::string> & input_filenames,
   if (!opw.warnings.empty())
     mooseInfo(Moose::stringify(opw.warnings), "\n");
 
-  // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
-  // MUST occur before parameter extraction - otherwise parameters will get wrong values.
-  hit::RawEvaler raw;
-  hit::EnvEvaler env;
-  hit::ReplaceEvaler repl;
-  FuncParseEvaler fparse_ev;
-  UnitsConversionEvaler units_ev;
-  hit::BraceExpander exw;
-  exw.registerEvaler("raw", raw);
-  exw.registerEvaler("env", env);
-  exw.registerEvaler("fparse", fparse_ev);
-  exw.registerEvaler("replace", repl);
-  exw.registerEvaler("units", units_ev);
-  _root->walk(&exw);
-  for (auto & var : exw.used)
-    _extracted_vars.insert(var);
-  for (auto & msg : exw.errors)
-    _errmsg += msg + "\n";
-
   // do as much error checking as early as possible so that errors are more useful instead
   // of surprising and disconnected from what caused them.
-  DupParamWalker dw;
+  // DupParamWalker dw;
   BadActiveWalker bw;
-  _root->walk(&dw, hit::NodeType::Field);
+  //_root->walk(&dw, hit::NodeType::Field);
   _root->walk(&bw, hit::NodeType::Section);
-  for (auto & msg : dw.errors)
-    _errmsg += msg + "\n";
+
+  // for (auto & msg : dw.errors)
+  //   _errmsg += msg + "\n";
+
   for (auto & msg : bw.errors)
     _errmsg += msg + "\n";
 
   // Print parse errors related to brace expansion early
   if (_errmsg.size() > 0)
     mooseError(_errmsg);
+
+  for (auto & msg : _dw_errmsg)
+    if (msg.size() > 0)
+      mooseError(msg);
 }

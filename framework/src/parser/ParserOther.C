@@ -115,7 +115,7 @@ findSimilar(std::string param, std::vector<std::string> options)
 
 ParserOther::ParserOther(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
   : ConsoleStreamInterface(app),
-    _root(parser.getRootNode().clone(true)),
+    _root(parser.getRootNode()),
     _app(app),
     _factory(app.getFactory()),
     _action_wh(action_wh),
@@ -420,6 +420,25 @@ ParserOther::parseother()
   {
     mooseError(err.what());
   }
+
+  // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
+  // MUST occur before parameter extraction - otherwise parameters will get wrong values.
+  hit::RawEvaler raw;
+  hit::EnvEvaler env;
+  hit::ReplaceEvaler repl;
+  FuncParseEvaler fparse_ev;
+  UnitsConversionEvaler units_ev;
+  hit::BraceExpander exw;
+  exw.registerEvaler("raw", raw);
+  exw.registerEvaler("env", env);
+  exw.registerEvaler("fparse", fparse_ev);
+  exw.registerEvaler("replace", repl);
+  exw.registerEvaler("units", units_ev);
+  _root->walk(&exw);
+  for (auto & var : exw.used)
+    _extracted_vars.insert(var);
+  for (auto & msg : exw.errors)
+    _errmsg += msg + "\n";
 
   // do as much error checking as early as possible so that errors are more useful instead
   // of surprising and disconnected from what caused them.
