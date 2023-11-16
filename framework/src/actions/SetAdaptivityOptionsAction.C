@@ -162,7 +162,7 @@ SetAdaptivityOptionsAction::act()
       if (!isParamSetByUser("disable_p_refinement_for_families"))
         // If the user has not set this parameter we will set a logicial default
         disable_p_refinement_for_families =
-            "LAGRANGE NEDELEC_ONE LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
+            "LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN RATIONAL_BERNSTEIN";
       adapt.doingPRefinement(true, disable_p_refinement_for_families);
     }
   }

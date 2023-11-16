@@ -71,7 +71,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
   // FIXME: continuity of FE type seems equivalent with the definition of nodal variables.
   //        Continuity does not depend on the FE dimension, so we just pass in a valid dimension.
   if (_fe_type.family == NEDELEC_ONE || _fe_type.family == LAGRANGE_VEC ||
-      _fe_type.family == MONOMIAL_VEC)
+      _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS)
     _continuity = _assembly.getVectorFE(_fe_type, _sys.mesh().dimension())->get_continuity();
   else
     _continuity = _assembly.getFE(_fe_type, _sys.mesh().dimension())->get_continuity();

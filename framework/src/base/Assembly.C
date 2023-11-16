@@ -453,7 +453,7 @@ Assembly::buildVectorFE(FEType type) const
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -471,6 +471,8 @@ Assembly::buildVectorFE(FEType type) const
     _vector_fe[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe[dim][type]->get_div_phi();
     // Pre-request xyz.  We have always computed xyz, but due to
     // recent optimizations in libmesh, we now need to explicity
     // request it, since apps (Yak) may rely on it being computed.
@@ -484,7 +486,7 @@ Assembly::buildVectorFaceFE(FEType type) const
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -502,6 +504,8 @@ Assembly::buildVectorFaceFE(FEType type) const
     _vector_fe_face[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_face[dim][type]->get_div_phi();
   }
 }
 
@@ -511,7 +515,7 @@ Assembly::buildVectorNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -529,6 +533,8 @@ Assembly::buildVectorNeighborFE(FEType type) const
     _vector_fe_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_neighbor[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_neighbor[dim][type]->get_div_phi();
   }
 }
 
@@ -538,7 +544,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
-  // Note that NEDELEC_ONE elements can only be built for dimension > 2
+  // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
   if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
     min_dim = 0;
@@ -557,6 +563,8 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
     _vector_fe_face_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face_neighbor[dim][type]->get_curl_phi();
+    if (type.family == RAVIART_THOMAS)
+      _vector_fe_face_neighbor[dim][type]->get_div_phi();
   }
 }
 
