@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#22789'
+  design = 'PositionsFunctorValueSampler.md'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'positions_functor_sampler.i'
+    csvdiff = 'positions_functor_sampler_out_point_sample_0001.csv'
+    requirement = 'The system shall support the ability to sample functors at points specified using a specific class to provide positions.'
+  []
+[]
