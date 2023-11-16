@@ -8,11 +8,6 @@
   objective_name = obj_value
 []
 
-[Postprocessors]
-  [cost_pp]
-    type = Receiver
-  []
-[]
 [Problem]
   solve = false
 []
