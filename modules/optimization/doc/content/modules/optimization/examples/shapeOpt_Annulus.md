@@ -128,7 +128,7 @@ To enable constrained optimization the
 is an Augmented Lagrangian method. This is the only TAO solver in MOOSE that has
 constraint support. The `taoalmm` subsolver is set with [!param](/Executioner/Optimize/petsc_options_iname) and
 [!param](/Executioner/Optimize/petsc_options_value).
-constraint support. This example computes the objective function's gradient using finite differencing in TAO with the `petsc_options_iname` `-tao_fd`.  Finite differencing only uses the forward problem's objective value and does not require an adjoint solve.
+This example computes the objective function's gradient using finite differencing in TAO with the `petsc_options_iname` `-tao_fd`.  Finite differencing only uses the forward problem's objective value and does not require an adjoint solve.
 `-tao_almm_subsolver_tao_type` and  `bqnktr` set the subsolver to the Bounded Quasi-Newton-Krylov
 Trust Region Method.
 
