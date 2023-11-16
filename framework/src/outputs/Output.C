@@ -219,15 +219,15 @@ Output::outputStep(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
-  // store current simulation time
-  _last_output_time = _time;
-
   // set current type
   _current_execute_flag = type;
 
   // Call the output method
   if (shouldOutput())
   {
+    // store current simulation time
+    _last_output_time = _time;
+
     TIME_SECTION("outputStep", 2, "Outputting Step");
     output();
   }
