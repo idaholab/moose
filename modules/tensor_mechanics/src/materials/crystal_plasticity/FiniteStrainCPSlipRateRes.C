@@ -10,12 +10,14 @@
 #include "FiniteStrainCPSlipRateRes.h"
 #include "libmesh/utility.h"
 
-registerMooseObject("TensorMechanicsApp", FiniteStrainCPSlipRateRes);
+registerMooseObjectDeprecated("TensorMechanicsApp", FiniteStrainCPSlipRateRes, "11/15/2024 12:00");
 
 InputParameters
 FiniteStrainCPSlipRateRes::validParams()
 {
   InputParameters params = FiniteStrainCrystalPlasticity::validParams();
+  params.addClassDescription("Deprecated class: please use CrystalPlasticityKalidindiUpdate and "
+                             "ComputeMultipleCrystalPlasticityStress instead.");
   return params;
 }
 

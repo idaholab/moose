@@ -54,7 +54,7 @@
     issues = '#10629'
     requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at '
                   'each material point using the stress-update based crystal plasticity implementation'
-    design = '/ComputeElasticityTensorConstantRotationCP.md'
+    design = '/ComputeElasticityTensorCP.md'
   []
   [patch_recovery]
     type = 'Exodiff'

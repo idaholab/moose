@@ -14,14 +14,17 @@
 #include <fstream>
 #include <cmath>
 
-registerMooseObject("TensorMechanicsApp", FiniteStrainCrystalPlasticity);
+registerMooseObjectDeprecated("TensorMechanicsApp",
+                              FiniteStrainCrystalPlasticity,
+                              "11/15/2024 12:00");
 
 InputParameters
 FiniteStrainCrystalPlasticity::validParams()
 {
   InputParameters params = ComputeStressBase::validParams();
-  params.addClassDescription(
-      "Crystal Plasticity base class: FCC system with power law flow rule implemented");
+  params.addClassDescription("Deprecated class: please use CrystalPlasticityKalidindiUpdate and "
+                             "ComputeMultipleCrystalPlasticityStress instead.  Crystal Plasticity "
+                             "base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int>("nss", "Number of slip systems");
   params.addParam<std::vector<Real>>("gprops", "Initial values of slip system resistances");
   params.addParam<std::vector<Real>>("hprops", "Hardening properties");
