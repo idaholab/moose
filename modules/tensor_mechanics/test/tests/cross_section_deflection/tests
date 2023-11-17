@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#26165'
+  [test_one_step]
+    type = 'CSVDiff'
+    input = 'test_one_step.i'
+    csvdiff = 'test_one_step_out_section_output_0001.csv'
+    design = 'SectionDisplacementAverage.md'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector.'
+  []
+[]
