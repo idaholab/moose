@@ -117,6 +117,14 @@ NodalPatchRecoveryBase::execute()
 }
 
 void
+NodalPatchRecoveryBase::threadJoin(const UserObject & uo)
+{
+  const auto & npr = static_cast<const NodalPatchRecoveryBase &>(uo);
+  _Ae.insert(npr._Ae.begin(), npr._Ae.end());
+  _be.insert(npr._be.begin(), npr._be.end());
+}
+
+void
 NodalPatchRecoveryBase::finalize()
 {
   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
