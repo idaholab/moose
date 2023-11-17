@@ -36,8 +36,9 @@ ArrayCoupledTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
 
   mooseAssert(_var.count() == _v_dot.size(),
-              "The variable and coupled variable have unequal sizes:\n  variable size        : "+std::to_string(_var.count())+"\n"+
-              "  coupled variable size: "+std::to_string(_v_dot.size()));
+              "The variable and coupled variable have unequal sizes:\n  variable size        : " +
+                  std::to_string(_var.count()) + "\n" +
+                  "  coupled variable size: " + std::to_string(_v_dot.size()));
 
   residual = _test[_i][_qp] * _v_dot[_qp];
 }
