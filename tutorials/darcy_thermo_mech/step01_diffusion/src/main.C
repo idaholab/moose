@@ -13,6 +13,7 @@
 #include "MooseInit.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
+#include "MooseCreate.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("DarcyThermoMech");
@@ -27,8 +28,11 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   DarcyThermoMechApp::registerApps();
 
-  // The unique_ptr will automatically free memory allocated by the AppFactory.
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("DarcyThermoMechApp", argc, argv);
+  // Instanitiate Moose App
+  MooseCreate create("DarcyThermoMechApp", argc, argv);
+
+  // Get the created application;
+  std::shared_ptr<MooseApp> app = create.getApp();
 
   // Execute the application
   app->run();

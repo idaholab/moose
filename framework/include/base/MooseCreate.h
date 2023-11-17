@@ -21,7 +21,7 @@
 class MooseCreate
 {
 public:
-  MooseCreate(int argc, char * argv[]);
+  MooseCreate(std::string app_name, int argc, char * argv[]);
   virtual ~MooseCreate() = default;
 
   void addParam(InputParameters & params);

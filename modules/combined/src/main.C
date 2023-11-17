@@ -17,6 +17,7 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
+#include "MooseCreate.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Modules");
@@ -31,8 +32,11 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   CombinedTestApp::registerApps();
 
-  // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("CombinedTestApp", argc, argv);
+  // Instanitiate Moose App
+  MooseCreate create("CombinedTestApp", argc, argv);
+
+  // Get the created application;
+  std::shared_ptr<MooseApp> app = create.getApp();
 
   app->setErrorOverridden();
 

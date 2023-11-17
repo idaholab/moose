@@ -13,6 +13,7 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
+#include "MooseCreate.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("ExternalPetscSolver");
@@ -27,9 +28,11 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   ExternalPetscSolverTestApp::registerApps();
 
-  // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app =
-      AppFactory::createAppShared("ExternalPetscSolverTestApp", argc, argv);
+  // Instanitiate Moose App
+  MooseCreate create("ExternalPetscSolverTestApp", argc, argv);
+
+  // Get the created application;
+  std::shared_ptr<MooseApp> app = create.getApp();
 
   // Execute the application
   app->run();

@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "AppFactory.h"
+#include "MooseCreate.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Peridynamics");
@@ -26,8 +27,11 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   PeridynamicsTestApp::registerApps();
 
-  // This creates dynamic memory that we're responsible for deleting
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("PeridynamicsTestApp", argc, argv);
+  // Instanitiate Moose App
+  MooseCreate create("PeridynamicsTestApp", argc, argv);
+
+  // Get the created application;
+  std::shared_ptr<MooseApp> app = create.getApp();
 
   app->setErrorOverridden();
 

@@ -27,7 +27,7 @@ main(int argc, char * argv[])
   MooseTestApp::registerApps();
 
   // Instanitiate Moose App
-  MooseCreate create(argc, argv);
+  MooseCreate create("MooseTestApp", argc, argv);
 
   // Get the created application;
   std::shared_ptr<MooseApp> app = create.getApp();

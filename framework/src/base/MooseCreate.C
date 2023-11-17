@@ -28,7 +28,7 @@ MooseCreate::addParam(InputParameters & params)
       "input.");
 }
 
-MooseCreate::MooseCreate(int argc, char * argv[])
+MooseCreate::MooseCreate(std::string app_name, int argc, char * argv[])
 {
   // Construct front parser
   auto front_parser = std::make_shared<Parser>();
@@ -45,5 +45,5 @@ MooseCreate::MooseCreate(int argc, char * argv[])
     front_parser->parse(input_filename);
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  _app = AppFactory::createAppShared("MooseTestApp", argc, argv, front_parser);
+  _app = AppFactory::createAppShared(app_name, argc, argv, front_parser);
 }

@@ -198,7 +198,7 @@ CompileParamWalker::walk(const std::string & fullpath,
 {
   if (n->type() == hit::NodeType::Field)
     _map[fullpath] = n;
-};
+}
 
 void
 OverrideParamWalker::walk(const std::string & fullpath,
@@ -214,7 +214,7 @@ OverrideParamWalker::walk(const std::string & fullpath,
                                      it->second->filename(),
                                      ":",
                                      it->second->line()));
-};
+}
 
 void
 BadActiveWalker ::walk(const std::string & /*fullpath*/,
