@@ -1,0 +1,29 @@
+[Tests]
+  [./jac_1d]
+    type = 'PetscJacobianTester'
+    input = 'test_jacobian_1d.i'
+    cli_args = 'Outputs/exodus=false Mesh/dim=1 Mesh/nx=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to reproduce the exact Jacobian for a 1d grid'
+  [../]
+  [./jac_2d]
+    type = 'PetscJacobianTester'
+    input = 'test_jacobian_2d.i'
+    cli_args = 'Outputs/exodus=false Mesh/dim=2 Mesh/nx=3 Mesh/ny=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to reproduce the exact Jacobian for a 2d grid'
+  [../]
+  [./jac_3d]
+    type = 'PetscJacobianTester'
+    input = 'test_jacobian_3d.i'
+    cli_args = 'Outputs/exodus=false Mesh/dim=3 Mesh/nx=3 Mesh/ny=3 Mesh/nz=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to reproduce the exact Jacobian for a 3d grid'
+  [../]
+[]
