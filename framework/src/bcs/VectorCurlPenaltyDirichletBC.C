@@ -17,6 +17,9 @@ VectorCurlPenaltyDirichletBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "The penalty coefficient");
+  params.addParam<FunctionName>("function",
+                                "The boundary condition vector function, "
+                                "use as an alternative to a component-wise specification");
   params.addParam<FunctionName>("function_x", 0, "The function for the x component");
   params.addParam<FunctionName>("function_y", 0, "The function for the y component");
   params.addParam<FunctionName>("function_z", 0, "The function for the z component");
