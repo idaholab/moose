@@ -71,7 +71,8 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
-  using FieldVariablePhiDivergence = typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
+  using FieldVariablePhiDivergence =
+      typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
   using FieldVariablePhiGradient =
       typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
   using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;

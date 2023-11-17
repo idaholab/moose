@@ -1372,7 +1372,8 @@ public:
   {
     return _vector_curl_phi_neighbor;
   }
-  const VectorVariablePhiDivergence & divPhiNeighbor(const MooseVariableField<RealVectorValue> &) const
+  const VectorVariablePhiDivergence &
+  divPhiNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_div_phi_neighbor;
   }
@@ -1720,7 +1721,8 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiDivergence & feDivPhiNeighbor(FEType type) const
+  const typename OutputTools<OutputType>::VariablePhiDivergence &
+  feDivPhiNeighbor(FEType type) const
   {
     _need_div[type] = true;
     buildNeighborFE(type);
@@ -1728,7 +1730,8 @@ public:
   }
 
   template <typename OutputType>
-  const typename OutputTools<OutputType>::VariablePhiDivergence & feDivPhiFaceNeighbor(FEType type) const
+  const typename OutputTools<OutputType>::VariablePhiDivergence &
+  feDivPhiFaceNeighbor(FEType type) const
   {
     _need_div[type] = true;
     buildFaceNeighborFE(type);

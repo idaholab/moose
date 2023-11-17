@@ -487,7 +487,7 @@ MooseVariableData<OutputType>::computeValues()
 
     if (_need_curl_old)
       _curl_u_old.resize(nqp);
-    
+
     if (_need_div_old)
       _div_u_old.resize(nqp);
 
@@ -514,7 +514,7 @@ MooseVariableData<OutputType>::computeValues()
 
     if (_need_curl)
       _curl_u[i] = 0;
-    
+
     if (_need_div)
       _div_u[i] = 0;
 
@@ -555,7 +555,7 @@ MooseVariableData<OutputType>::computeValues()
 
       if (_need_curl_old)
         _curl_u_old[i] = 0;
-      
+
       if (_need_div_old)
         _div_u_old[i] = 0;
     }
@@ -640,8 +640,9 @@ MooseVariableData<OutputType>::computeValues()
 
       if (div_required)
       {
-        mooseAssert(_current_div_phi,
-                    "We're requiring a divergence calculation but have not set a div shape function!");
+        mooseAssert(
+            _current_div_phi,
+            "We're requiring a divergence calculation but have not set a div shape function!");
         const OutputShapeDivergence div_phi_local = (*_current_div_phi)[i][qp];
 
         if (_need_div)
@@ -835,7 +836,7 @@ MooseVariableData<RealEigenVector>::computeValues()
 
       if (_need_curl_old)
         _curl_u_old[i].setZero(_count);
-      
+
       if (_need_div_old)
         _div_u_old[i].setZero(_count);
     }
@@ -932,7 +933,8 @@ MooseVariableData<RealEigenVector>::computeValues()
       if (div_required)
       {
         mooseAssert(_current_div_phi,
-                    "We're requiring a divergence calculation but have not set a divergence shape function!");
+                    "We're requiring a divergence calculation but have not set a divergence shape "
+                    "function!");
         const auto div_phi_local = (*_current_div_phi)[i][qp];
 
         if (_need_div)

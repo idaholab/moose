@@ -2708,7 +2708,8 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     var_type = "MooseVariableConstMonomial";
   else if (type.family == SCALAR)
     var_type = "MooseVariableScalar";
-  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE || type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
+  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE ||
+           type.family == MONOMIAL_VEC || type.family == RAVIART_THOMAS)
     var_type = "VectorMooseVariable";
   else
     var_type = "MooseVariable";

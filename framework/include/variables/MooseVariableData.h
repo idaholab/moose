@@ -631,11 +631,11 @@ private:
       _curl_phi_face_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
-                                                                           FEType)>
+                                                                                 FEType)>
       _div_phi_assembly_method;
 
   std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
-                                                                           FEType)>
+                                                                                 FEType)>
       _div_phi_face_assembly_method;
 
   std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>

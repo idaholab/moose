@@ -332,7 +332,10 @@ public:
   /// element divergence
   const FieldVariableDivergence & divSln() const { return _element_data->divSln(Moose::Current); }
   const FieldVariableDivergence & divSlnOld() const { return _element_data->divSln(Moose::Old); }
-  const FieldVariableDivergence & divSlnOlder() const { return _element_data->divSln(Moose::Older); }
+  const FieldVariableDivergence & divSlnOlder() const
+  {
+    return _element_data->divSln(Moose::Older);
+  }
 
   /// AD
   const ADTemplateVariableValue<OutputType> & adSln() const override

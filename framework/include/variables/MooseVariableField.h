@@ -216,7 +216,7 @@ public:
    */
   virtual bool computingCurl() const = 0;
 
-    /**
+  /**
    * Whether or not this variable is computing any divergence quantities
    */
   virtual bool computingDiv() const = 0;

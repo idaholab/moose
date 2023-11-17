@@ -797,8 +797,7 @@ Assembly::reinitFE(const Elem * elem)
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe.get_curl_phi()));
     if (_need_div.find(fe_type) != _need_div.end())
-      fesd._div_phi.shallowCopy(
-          const_cast<std::vector<std::vector<Real>> &>(fe.get_div_phi()));
+      fesd._div_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe.get_div_phi()));
   }
   if (!_unique_fe_helper.empty())
   {
@@ -1603,8 +1602,8 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
     if (_need_div.find(fe_type) != _need_div.end())
-      fesd._div_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(
-          fe_face_neighbor.get_div_phi()));
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
   if (!_unique_fe_face_neighbor_helper.empty())
   {
@@ -2235,8 +2234,8 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
     if (_need_div.find(fe_type) != _need_div.end())
-      fesd._div_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(
-          fe_face_neighbor.get_div_phi()));
+      fesd._div_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
   if (!_unique_fe_face_neighbor_helper.empty())
   {

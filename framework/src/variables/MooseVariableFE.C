@@ -33,7 +33,8 @@ InputParameters
 MooseVariableFE<RealVectorValue>::validParams()
 {
   auto params = MooseVariableField<RealVectorValue>::validParams();
-  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange, Nedelec or Raviart-Thomas");
+  params.addClassDescription(
+      "Represents vector field variables, e.g. Vector Lagrange, Nedelec or Raviart-Thomas");
   return params;
 }
 
