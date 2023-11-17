@@ -36,6 +36,9 @@ def get_options():
     parser.add_argument('-l', '--languages', nargs='+', type=str, choices=list(LANGUAGES.keys()),
                         default=list(LANGUAGES.keys()),
                         help="Limit the analysis the the listed languages.")
+    parser.add_argument('--since', nargs=1, type=str,
+                        help='Start date for the commit analysis. Use the same date format as the --since git shortlog argument.'
+                             ' Note that only the commit counts will respect the since-date, line counts will still be all-time contributions')
 
     return parser.parse_args()
 
@@ -82,14 +85,15 @@ def report(counts, commits, merges):
         for key in titles:
             totals[key] += row[key]
 
-        print(row_format.format(author, *values))
+        if (c != 0 or m != 0):
+            print(row_format.format(author, *values))
     print('-'*n)
     print(row_format.format('TOTAL', *['{:,}'.format(totals[key]) for key in titles]))
 
 if __name__ == '__main__':
     args = get_options()
 
-    # Populate desired langauges
+    # Populate desired languages
     lang = collections.OrderedDict()
     for key in args.languages:
         lang[key] = LANGUAGES[key]
@@ -115,11 +119,18 @@ if __name__ == '__main__':
                 update_count(c, group, counts)
         print('done')
 
+    # Restrict to commits past a certain date
+    commits_args = ['--no-merges']
+    merges_args = ['--merges']
+    if (args.since):
+        commits_args.append('--since=' + args.since[0])
+        merges_args.append('--since=' + args.since[0])
+
     # Compute number of commits per user
     commits = dict()
     merges = dict()
     for location in args.locations:
-        commits.update(mooseutils.git_committers(location, '--no-merges'))
-        merges.update(mooseutils.git_committers(location, '--merges'))
+        commits.update(mooseutils.git_committers(location, commits_args))
+        merges.update(mooseutils.git_committers(location, merges_args))
 
     report(counts, commits, merges)
