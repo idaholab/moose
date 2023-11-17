@@ -20,6 +20,8 @@ template <typename T>
 class MooseVariableFE;
 template <typename T>
 class MooseVariableFV;
+template <typename T>
+class MooseLinearVariableFV;
 
 /**
  * Interface for objects that need to get values of MooseVariables
@@ -55,6 +57,8 @@ public:
   MooseVariableFE<T> * mooseVariable() const;
 
   MooseVariableFV<T> * mooseVariableFV() const;
+
+  MooseLinearVariableFV<T> * mooseLinearVariableFV() const;
 
   virtual ~MooseVariableInterface();
 
@@ -213,6 +217,7 @@ protected:
   MooseVariableBase * _var = nullptr;
   MooseVariableFE<T> * _variable = nullptr;
   MooseVariableFV<T> * _fv_variable = nullptr;
+  MooseLinearVariableFV<T> * _linear_fv_variable = nullptr;
 
 protected:
   Assembly * _mvi_assembly;

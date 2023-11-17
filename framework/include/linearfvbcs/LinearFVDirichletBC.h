@@ -28,9 +28,10 @@ public:
 
   virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) override;
 
-  virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) override;
+  virtual Real
+  computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) const override;
 
-  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) override;
+  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) const override;
 
   virtual Real
   computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const override;

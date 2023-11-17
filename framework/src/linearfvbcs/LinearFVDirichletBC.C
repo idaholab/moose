@@ -37,12 +37,13 @@ LinearFVDirichletBC::computeBoundaryNormalGradient(const FaceInfo * const /*face
 }
 
 Real
-LinearFVDirichletBC::computeBoundaryValueMatrixContribution(const FaceInfo * const /*face_info*/)
+LinearFVDirichletBC::computeBoundaryValueMatrixContribution(
+    const FaceInfo * const /*face_info*/) const
 {
   return 0.0;
 }
 Real
-LinearFVDirichletBC::computeBoundaryValueRHSContribution(const FaceInfo * const /*face_info*/)
+LinearFVDirichletBC::computeBoundaryValueRHSContribution(const FaceInfo * const /*face_info*/) const
 {
   return _value;
 }

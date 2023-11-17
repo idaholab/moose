@@ -54,17 +54,18 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     GeometricSearchInterface(this),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
+    MooseVariableInterface(this,
+                           false,
+                           "variable",
+                           Moose::VarKindType::VAR_LINEAR,
+                           Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
     ADFunctorInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mesh(_subproblem.mesh()),
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
-    _var(dynamic_cast<MooseLinearVariableFV<Real> *>(
-        &_fv_problem.getVariable(_tid,
-                                 parameters.varName("variable", name()),
-                                 Moose::VarKindType::VAR_LINEAR,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD))),
+    _var(mooseLinearVariableFV()),
     _sys(changeSystem(parameters, *_var)),
     _includes_material_multiplier(false)
 {

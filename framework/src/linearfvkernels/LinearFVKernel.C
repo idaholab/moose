@@ -58,18 +58,13 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
   : LinearSystemContributionObject(params),
     BlockRestrictable(this),
     ADFunctorInterface(this),
-    MooseVariableDependencyInterface(this)
+    MooseVariableInterface(this,
+                           false,
+                           "variable",
+                           Moose::VarKindType::VAR_LINEAR,
+                           Moose::VarFieldType::VAR_FIELD_STANDARD),
+    MooseVariableDependencyInterface(this),
+    _var(mooseLinearVariableFV())
 {
-  auto & var = _fe_problem.getVariable(_tid,
-                                       params.varName("variable", name()),
-                                       Moose::VarKindType::VAR_LINEAR,
-                                       Moose::VarFieldType::VAR_FIELD_STANDARD);
-  _var = dynamic_cast<MooseLinearVariableFV<Real> *>(&var);
-  if (!_var)
-    paramError("variable",
-               "The variable defined for kernel ",
-               name(),
-               " is not derived from MooseLinearVariableFV!");
-
   addMooseVariableDependency(_var);
 }

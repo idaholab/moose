@@ -415,6 +415,14 @@ MooseLinearVariableFV<OutputType>::adGradSln(const FaceInfo & fi,
 
 template <typename OutputType>
 void
+MooseLinearVariableFV<OutputType>::initialSetup()
+{
+  MooseVariableField<OutputType>::initialSetup();
+  cacheBoundaryBCMap();
+}
+
+template <typename OutputType>
+void
 MooseLinearVariableFV<OutputType>::residualSetup()
 {
   clearCaches();
@@ -538,13 +546,14 @@ MooseLinearVariableFV<OutputType>::cacheBoundaryBCMap()
   // const lvalue reference results in the query() getting destructed and us holding onto a dangling
   // reference. I think that condition returned by value we would be able to bind to a const lvalue
   // reference here. But as it is we'll bind to a regular lvalue
-  const auto base_query = this->_subproblem.getMooseApp()
-                              .theWarehouse()
-                              .query()
-                              .template condition<AttribSystem>("LinearFVBoundaryCondition")
-                              .template condition<AttribThread>(_tid)
-                              .template condition<AttribVar>(_var_num)
-                              .template condition<AttribSysNum>(this->_sys.number());
+
+  auto base_query = this->_subproblem.getMooseApp()
+                        .theWarehouse()
+                        .query()
+                        .template condition<AttribSystem>("LinearFVBoundaryCondition")
+                        .template condition<AttribThread>(_tid)
+                        .template condition<AttribVar>(_var_num)
+                        .template condition<AttribSysNum>(this->_sys.number());
 
   for (const auto bnd_id : this->_mesh.getBoundaryIDs())
   {

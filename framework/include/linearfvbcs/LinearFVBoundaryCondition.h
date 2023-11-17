@@ -53,6 +53,7 @@ class LinearFVBoundaryCondition : public MooseObject,
                                   public GeometricSearchInterface,
                                   public MeshChangedInterface,
                                   public TaggingInterface,
+                                  public MooseVariableInterface<Real>,
                                   public MooseVariableDependencyInterface,
                                   public ADFunctorInterface
 {
@@ -78,9 +79,9 @@ public:
 
   virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) = 0;
 
-  virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) const = 0;
 
-  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) const = 0;
 
   virtual Real
   computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const = 0;

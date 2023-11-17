@@ -14,6 +14,7 @@
 #include "Assembly.h"
 #include "ADFunctorInterface.h"
 #include "MooseLinearVariableFV.h"
+#include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 
 class SubProblem;
@@ -21,6 +22,7 @@ class SubProblem;
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
                        public ADFunctorInterface,
+                       public MooseVariableInterface<Real>,
                        public MooseVariableDependencyInterface
 {
 public:

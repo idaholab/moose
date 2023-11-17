@@ -358,6 +358,7 @@ public:
 
   std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 
+  virtual void initialSetup() override;
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
   virtual void timestepSetup() override;
