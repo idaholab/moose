@@ -22,7 +22,7 @@ public:
   ArrayCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpResidual(RealEigenVector &residual) override;
+  virtual void computeQpResidual(RealEigenVector & residual) override;
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
 
