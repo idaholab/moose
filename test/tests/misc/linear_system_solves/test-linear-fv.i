@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 5
+  nx = 4
 []
 
 [Problem]
@@ -19,6 +19,13 @@
 []
 
 [LinearFVKernels]
+  [advection]
+    type = LinearFVAdvectionKernel
+    variable = u
+    density = 1.3
+    velocity = "0.5 0 0"
+    advected_interp_method = average
+  []
   [diffusion]
     type = LinearFVDiffusionKernel
     variable = u
@@ -32,7 +39,7 @@
   [source]
     type = LinearFVSourceKernel
     variable = u
-    source_density = 1.0
+    source_density = 1.5
   []
 []
 
@@ -41,6 +48,12 @@
     type = LinearFVDirichletBC
     variable = u
     boundary = "left"
+    value = 1.0
+  []
+  [right_dir]
+    type = LinearFVDirichletBC
+    variable = u
+    boundary = "right"
     value = 2.0
   []
 []

@@ -104,7 +104,7 @@ std::pair<Real, Real>
 interpCoeffs(const InterpMethod m,
              const FaceInfo & fi,
              const bool one_is_elem,
-             const Vector advector = Vector())
+             const Vector & advector = Vector())
 {
   switch (m)
   {

@@ -39,6 +39,12 @@ FluxLinearFVKernel::addMatrixContribution()
     const auto elem_matrix_contribution = computeElemMatrixContribution();
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
 
+    // std::cout << " Internal face "
+    //           << " adding to elem " << elem_matrix_contribution << " adding to neighbor "
+    //           << neighbor_matrix_contribution << " adding to neighbor offdiag "
+    //           << -elem_matrix_contribution << " adding to neigbor diag "
+    //           << -neighbor_matrix_contribution << std::endl;
+
     (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, elem_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_neighbor, dof_id_elem, -elem_matrix_contribution);
@@ -68,8 +74,7 @@ FluxLinearFVKernel::addMatrixContribution()
 void
 FluxLinearFVKernel::addRightHandSideContribution()
 {
-  if (_current_face_info->faceType(std::make_pair(_var->number(), _var->sys().number())) ==
-      FaceInfo::VarFaceNeighbors::BOTH)
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     const auto dof_id_elem =
         _current_face_info->elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
