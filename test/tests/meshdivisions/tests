@@ -14,56 +14,42 @@
       input = 'extra_elem_id_division.i'
       csvdiff = 'extra_elem_id_division_out_div_out_0001.csv'
       detail = 'extra element integers stored on elements in the mesh,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [cartesian]
       type = CSVDiff
       input = 'cartesian_division.i'
       csvdiff = 'cartesian_division_out_div_out_0001.csv'
       detail = 'a regular Cartesian grid,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [functor]
       type = CSVDiff
       input = 'functor_values_division.i'
       csvdiff = 'functor_values_division_out_div_out_0001.csv'
       detail = 'a mesh division based on the values of a functor,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [positions]
       type = CSVDiff
       input = 'nearest_position_division.i'
       csvdiff = 'nearest_position_division_out_div_out_0001.csv'
       detail = 'a nearest-point/neighbor partition,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [cylinder]
       type = CSVDiff
       input = 'cylindrical_division.i'
       csvdiff = 'cylindrical_division_out_div_out_0001.csv'
       detail = 'a regular cylindrical R-theta-Z grid,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [spherical]
       type = CSVDiff
       input = 'spherical_division.i'
       csvdiff = 'spherical_division_out_div_out_0001.csv'
       detail = 'a regular spherical radial grid,'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
     [nested]
       type = CSVDiff
       input = 'nested_division.i'
       csvdiff = 'nested_division_out_div_out_0001.csv'
       detail = 'and a nesting of mesh divisions.'
-      # Sampling is not ordered the same way on distributed meshes
-      mesh_mode = REPLICATED
     []
   []
 []

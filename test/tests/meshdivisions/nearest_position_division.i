@@ -9,6 +9,8 @@
     iy = '2 3'
     iz = '1 1 1 1'
   []
+  # To keep VPP output consistently ordered
+  allow_renumbering = false
 []
 
 [Positions]
