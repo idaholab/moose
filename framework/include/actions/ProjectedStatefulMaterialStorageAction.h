@@ -13,7 +13,7 @@
 #include "libmesh/fe_type.h"
 
 /**
- * Set up AuxKernels and AxVariables for projected material property storage (PoMPS).
+ * Set up AuxKernels and AuxVariables for projected material property storage (PoMPS).
  */
 class ProjectedStatefulMaterialStorageAction : public Action
 {
@@ -26,6 +26,9 @@ public:
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
+  /// List of supported types
+  typedef Moose::TypeList<Real, RealVectorValue, RankTwoTensor, RankFourTensor> SupportedTypes;
 
 protected:
   /**

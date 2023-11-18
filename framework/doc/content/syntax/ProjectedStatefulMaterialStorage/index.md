@@ -1,6 +1,10 @@
 # ProjectedStatefulMaterialStorage System
 
-The `ProjectedStatefulMaterialStorage` Action sets up the required objects to perform fracture integrals. See the documentation for [ProjectedStatefulMaterialStorageAction](ProjectedStatefulMaterialStorageAction.md) for details.
+The `ProjectedStatefulMaterialStorage` Action sets up the required objects to
+store old material state projected onto finite element basis functions. See the
+documentation for
+[ProjectedStatefulMaterialStorageAction](ProjectedStatefulMaterialStorageAction.md)
+for details.
 
 !syntax list /ProjectedStatefulMaterialStorage objects=True actions=False subsystems=False
 
