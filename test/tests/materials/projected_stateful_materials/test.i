@@ -45,6 +45,10 @@
   num_steps = 4
 []
 
+[Debug]
+  show_material_props = true
+[]
+
 [Outputs]
   csv = true
   # in initial the freshly set up old state of the material properties differes

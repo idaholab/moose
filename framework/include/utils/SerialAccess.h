@@ -12,6 +12,10 @@
 // MOOSE includes
 #include "Moose.h"
 #include "MooseTypes.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
+
+#include <tuple>
 
 namespace Moose
 {
@@ -23,48 +27,53 @@ namespace Moose
 template <typename T>
 struct SerialAccess
 {
-  static typename T::value_type * data(T & obj)
-  {
-    static_assert(always_false<T>,
-                  "Specialize SerialAccess for this type and implement the data() method.");
+  static_assert(always_false<T>, "Specialize SerialAccess for this type.");
+};
+
+// Specializations for scalar types
+#define SERIAL_ACCESS_SCALAR(type)                                                                 \
+  template <>                                                                                      \
+  struct SerialAccess<type>                                                                        \
+  {                                                                                                \
+    static type * data(type & obj) { return &obj; }                                                \
+    static constexpr std::size_t size(type &) { return 1u; }                                       \
+    static constexpr std::size_t size() { return 1u; }                                             \
   }
-  constexpr std::size_t * size(T &)
-  {
-    static_assert(always_false<T>,
-                  "Specialize SerialAccess for this type and implement the size() method.");
-    return 0;
+
+SERIAL_ACCESS_SCALAR(Real);
+SERIAL_ACCESS_SCALAR(const Real);
+SERIAL_ACCESS_SCALAR(ADReal);
+SERIAL_ACCESS_SCALAR(const ADReal);
+
+// constant size containers
+#define SERIAL_ACCESS_CONST_SIZE(type, dataptr, sizeval)                                           \
+  template <typename T>                                                                            \
+  struct SerialAccess<type<T>>                                                                     \
+  {                                                                                                \
+    static auto * data(type<T> & obj) { return dataptr; }                                          \
+    static constexpr std::size_t size(type<T> &) { return sizeval; }                               \
+    static constexpr std::size_t size() { return sizeval; }                                        \
   }
-};
 
-/// simple Real specialization
-template <>
-struct SerialAccess<Real>
-{
-  static Real * data(Real & obj) { return &obj; }
-  static constexpr std::size_t size(Real &) { return 1u; }
-};
-template <>
-struct SerialAccess<ADReal>
-{
-  static ADReal * data(ADReal & obj) { return &obj; }
-  static constexpr std::size_t size(ADReal &) { return 1u; }
-};
+SERIAL_ACCESS_CONST_SIZE(VectorValue, &obj(0u), Moose::dim);
+SERIAL_ACCESS_CONST_SIZE(const VectorValue, &obj(0u), Moose::dim);
+SERIAL_ACCESS_CONST_SIZE(RankTwoTensorTempl, &obj(0u, 0u), RankTwoTensorTempl<T>::N2);
+SERIAL_ACCESS_CONST_SIZE(const RankTwoTensorTempl, &obj(0u, 0u), RankTwoTensorTempl<T>::N2);
+SERIAL_ACCESS_CONST_SIZE(RankFourTensorTempl, &obj(0u, 0u, 0u, 0u), RankFourTensorTempl<T>::N4);
+SERIAL_ACCESS_CONST_SIZE(const RankFourTensorTempl,
+                         &obj(0u, 0u, 0u, 0u),
+                         RankFourTensorTempl<T>::N4);
 
-/// (AD)RealVectorValue etc. specialization
-template <typename T>
-struct SerialAccess<VectorValue<T>>
-{
-  static T * data(VectorValue<T> & obj) { return &obj(0u); }
-  static constexpr std::size_t size(VectorValue<T> &) { return Moose::dim; }
-};
+// dynamic size containers (determining size requires an object instance)
+#define SERIAL_ACCESS_DYNAMIC_SIZE(type, dataptr, sizeval)                                         \
+  template <typename T>                                                                            \
+  struct SerialAccess<type<T>>                                                                     \
+  {                                                                                                \
+    static auto * data(type<T> & obj) { return dataptr; }                                          \
+    static constexpr std::size_t size(type<T> & obj) { return sizeval; }                           \
+  }
 
-/// DenseVector specialization
-template <typename T>
-struct SerialAccess<DenseVector<T>>
-{
-  static T * data(DenseVector<T> & obj) { return &obj(0u); }
-  static std::size_t size(DenseVector<T> & obj) { return obj.size(); }
-};
+SERIAL_ACCESS_DYNAMIC_SIZE(DenseVector, &obj(0u), obj.size());
 
 /**
  * Value type helper (necessary for any type that does not have a value_type
@@ -89,7 +98,8 @@ struct SerialAccessVlaueTypeHelper<Real>
 template <typename T>
 class SerialAccessRange
 {
-  typedef typename SerialAccessVlaueTypeHelper<T>::value_type V;
+  typedef typename SerialAccessVlaueTypeHelper<typename std::remove_const<T>::type>::value_type R;
+  typedef typename std::conditional<std::is_const_v<T>, const R, R>::type V;
 
 public:
   class iterator
@@ -126,8 +136,9 @@ public:
   }
 
   iterator begin() const { return _begin; }
-
   iterator end() const { return _end; }
+
+  V & operator[](int i) { return *(&*_begin + i); }
 
 private:
   iterator _begin, _end;
@@ -144,16 +155,27 @@ serialAccess(T & obj)
 template <typename... Ts>
 struct TypeList
 {
+  typedef std::tuple<Ts...> Tuple;
+  typedef std::tuple<Ts *...> PointerTuple;
+  static constexpr std::size_t size = sizeof...(Ts);
 };
 
 /// Type loop
-template <template <typename> class L, typename T, typename... Ts, typename... As>
+template <template <typename, int> class L, int I, typename T, typename... Ts, typename... As>
 void
-typeLoop(TypeList<T, Ts...>, As... args)
+typeLoopInternal(TypeList<T, Ts...>, As... args)
 {
-  L<T>::apply(args...);
+  L<T, I>::apply(args...);
   if constexpr (sizeof...(Ts) > 0)
-    typeLoop<L>(TypeList<Ts...>{}, args...);
+    typeLoopInternal<L, I + 1>(TypeList<Ts...>{}, args...);
+}
+
+/// Type loop
+template <template <typename, int> class L, typename... Ts, typename... As>
+void
+typeLoop(TypeList<Ts...>, As... args)
+{
+  typeLoopInternal<L, 0>(TypeList<Ts...>{}, args...);
 }
 
 } // namespace Moose;

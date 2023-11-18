@@ -933,7 +933,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(47u, completions_array.size());
+  EXPECT_EQ(48u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -972,6 +972,7 @@ label: InterfaceKernels                 text: [InterfaceKernels]\n  \n[]        
 label: Kernels                          text: [Kernels]\n  \n[]                          desc:            application named block                 pos: [42.0]-[42.0]
 label: Materials                        text: [Materials]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
 label: Mesh                             text: [Mesh]\n  \n[]                             desc:            application named block                 pos: [42.0]-[42.0]
+label: MeshDivisions                    text: [MeshDivisions]\n  \n[]                    desc:            application named block                 pos: [42.0]-[42.0]
 label: MultiApps                        text: [MultiApps]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
 label: NodalKernels                     text: [NodalKernels]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
 label: NodalNormals                     text: [NodalNormals]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]

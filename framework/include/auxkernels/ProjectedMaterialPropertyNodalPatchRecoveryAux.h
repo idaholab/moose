@@ -12,18 +12,19 @@
 #include "NodalPatchRecoveryAuxBase.h"
 
 /// Forward declare user object
-class NodalPatchRecoveryBase;
+class ProjectedStatefulMaterialNodalPatchRecoveryBase;
 
-class NodalPatchRecoveryAux : public NodalPatchRecoveryAuxBase
+class ProjectedMaterialPropertyNodalPatchRecoveryAux : public NodalPatchRecoveryAuxBase
 {
 public:
   static InputParameters validParams();
 
-  NodalPatchRecoveryAux(const InputParameters & parameters);
+  ProjectedMaterialPropertyNodalPatchRecoveryAux(const InputParameters & parameters);
 
 protected:
   virtual Real nodalPatchRecovery() override;
 
 private:
-  const NodalPatchRecoveryBase & _npr;
+  const ProjectedStatefulMaterialNodalPatchRecoveryBase & _npr;
+  const unsigned int _component;
 };

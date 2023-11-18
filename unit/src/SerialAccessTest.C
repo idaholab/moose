@@ -27,6 +27,13 @@ TEST(SerialAccess, Real)
 
   EXPECT_EQ(count, 1);
   EXPECT_EQ(r, 9.0);
+
+  // test constant type
+  const auto cr = r;
+  for (auto & a : Moose::serialAccess(cr))
+    r = a + 11;
+
+  EXPECT_EQ(r, 20.0);
 }
 
 TEST(SerialAccess, ADReal)
@@ -48,12 +55,18 @@ TEST(SerialAccess, RealVectorValue)
   RealVectorValue r;
   std::size_t count = 0;
   for (auto & a : Moose::serialAccess(r))
-  {
     a = ++count;
-  }
 
   EXPECT_EQ(count, Moose::dim);
   EXPECT_EQ(r, RealVectorValue(1, 2, 3));
+
+  // test constant type
+  const auto & cr = r;
+  Real sum = 0.0;
+  for (auto & a : Moose::serialAccess(cr))
+    sum += a;
+
+  EXPECT_EQ(sum, 6);
 }
 
 TEST(SerialAccess, ADRealVectorValue)
@@ -61,9 +74,7 @@ TEST(SerialAccess, ADRealVectorValue)
   ADRealVectorValue r;
   std::size_t count = 0;
   for (auto & a : Moose::serialAccess(r))
-  {
     a = ++count;
-  }
 
   EXPECT_EQ(count, Moose::dim);
   EXPECT_EQ(r, RealVectorValue(1, 2, 3));
@@ -74,11 +85,9 @@ TEST(SerialAccess, RankTwoTensor)
   RankTwoTensor r;
   std::size_t count = 0;
   for (auto & a : Moose::serialAccess(r))
-  {
     a = ++count;
-  }
 
-  EXPECT_EQ(count, Moose::dim * Moose::dim);
+  EXPECT_EQ(count, RankTwoTensor::N2);
   EXPECT_EQ(r, RankTwoTensor(1, 4, 7, 2, 5, 8, 3, 6, 9));
 }
 
@@ -87,10 +96,9 @@ TEST(SerialAccess, RankFourTensor)
   RankFourTensor r;
   std::size_t count = 0;
   for (auto & a : Moose::serialAccess(r))
-  {
     a = ++count;
-  }
-  EXPECT_EQ(count, Moose::dim * Moose::dim * Moose::dim * Moose::dim);
+
+  EXPECT_EQ(count, RankFourTensor::N4);
 
   count = 0;
   RankFourTensor g;
@@ -101,4 +109,12 @@ TEST(SerialAccess, RankFourTensor)
           g(i, j, k, l) = ++count;
 
   EXPECT_EQ((r - g).L2norm(), 0.0);
+
+  // test constant AD type
+  const ADRankFourTensor cr = r;
+  ADReal sum = 0.0;
+  for (auto & a : Moose::serialAccess(cr))
+    sum += a;
+
+  EXPECT_EQ(sum, 3321);
 }

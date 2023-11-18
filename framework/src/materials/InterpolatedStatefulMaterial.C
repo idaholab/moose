@@ -8,107 +8,53 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterpolatedStatefulMaterial.h"
+#include "SerialAccess.h"
 
-registerMooseObject("MooseApp", InterpolatedStatefulMaterial);
+registerMooseObject("MooseApp", InterpolatedStatefulMaterialReal);
+registerMooseObject("MooseApp", InterpolatedStatefulMaterialRealVectorValue);
+registerMooseObject("MooseApp", InterpolatedStatefulMaterialRankTwoTensor);
+registerMooseObject("MooseApp", InterpolatedStatefulMaterialRankFourTensor);
 
+template <typename T>
 InputParameters
-InterpolatedStatefulMaterial::validParams()
+InterpolatedStatefulMaterialTempl<T>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Access old state from projected data.");
   params.addRequiredCoupledVar("old_state", "The AuxVars for the coupled components");
-  params.addParam<MooseEnum>(
-      "prop_type", MooseEnum("REAL REALVECTORVALUE RANKTWOTENSOR RANKFOURTENSOR"), "Property type");
   params.addRequiredParam<MaterialPropertyName>("prop_name", "Name to emit");
   return params;
 }
 
-InterpolatedStatefulMaterial::InterpolatedStatefulMaterial(const InputParameters & parameters)
+template <typename T>
+InterpolatedStatefulMaterialTempl<T>::InterpolatedStatefulMaterialTempl(
+    const InputParameters & parameters)
   : Material(parameters),
     _old_state(coupledValuesOld("old_state")),
-    _older_state(coupledValuesOld("old_state")),
+    _older_state(coupledValuesOld("old_state")), // older is missing
+    _size(Moose::SerialAccess<T>::size()),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
-    _prop_type(getParam<MooseEnum>("prop_type").getEnum<PropType>()),
-    _prop_old_real(_prop_type == PropType::REAL
-                       ? &declareProperty<Real>(_prop_name + "_interpolated_old")
-                       : nullptr),
-    _prop_old_realvectorvalue(
-        _prop_type == PropType::REALVECTORVALUE
-            ? &declareProperty<RealVectorValue>(_prop_name + "_interpolated_old")
-            : nullptr),
-    _prop_old_ranktwotensor(_prop_type == PropType::RANKTWOTENSOR
-                                ? &declareProperty<RankTwoTensor>(_prop_name + "_interpolated_old")
-                                : nullptr),
-    _prop_old_rankfourtensor(
-        _prop_type == PropType::RANKFOURTENSOR
-            ? &declareProperty<RankFourTensor>(_prop_name + "_interpolated_old")
-            : nullptr),
-    _prop_older_real(_prop_type == PropType::REAL
-                         ? &declareProperty<Real>(_prop_name + "_interpolated_older")
-                         : nullptr),
-    _prop_older_realvectorvalue(
-        _prop_type == PropType::REALVECTORVALUE
-            ? &declareProperty<RealVectorValue>(_prop_name + "_interpolated_older")
-            : nullptr),
-    _prop_older_ranktwotensor(
-        _prop_type == PropType::RANKTWOTENSOR
-            ? &declareProperty<RankTwoTensor>(_prop_name + "_interpolated_older")
-            : nullptr),
-    _prop_older_rankfourtensor(
-        _prop_type == PropType::RANKFOURTENSOR
-            ? &declareProperty<RankFourTensor>(_prop_name + "_interpolated_older")
-            : nullptr)
+    _prop_old(declareProperty<T>(_prop_name + "_interpolated_old")),
+    _prop_older(declareProperty<T>(_prop_name + "_interpolated_older"))
 {
+  if (_old_state.size() != _size)
+    paramError("old_state", "Wrong number of compoet AuxVariables passed in.");
 }
 
+template <typename T>
 void
-InterpolatedStatefulMaterial::computeQpProperties()
+InterpolatedStatefulMaterialTempl<T>::computeQpProperties()
 {
-  switch (_prop_type)
-  {
-    case PropType::REAL:
-      (*_prop_old_real)[_qp] = (*_old_state[0])[_qp];
-      (*_prop_older_real)[_qp] = (*_older_state[0])[_qp];
-      return;
+  std::size_t index = 0;
+  for (auto & v : Moose::serialAccess(_prop_old[_qp]))
+    v = (*_old_state[index++])[_qp];
 
-    case PropType::REALVECTORVALUE:
-    {
-      std::size_t index = 0;
-      for (const auto i : make_range(Moose::dim))
-      {
-        (*_prop_old_realvectorvalue)[_qp](i) = (*_old_state[index])[_qp];
-        (*_prop_older_realvectorvalue)[_qp](i) = (*_older_state[index])[_qp];
-        ++index;
-      }
-      return;
-    }
-
-    case PropType::RANKTWOTENSOR:
-    {
-      std::size_t index = 0;
-      for (const auto i : make_range(Moose::dim))
-        for (const auto j : make_range(Moose::dim))
-        {
-          (*_prop_old_ranktwotensor)[_qp](i, j) = (*_old_state[index])[_qp];
-          (*_prop_older_ranktwotensor)[_qp](i, j) = (*_older_state[index])[_qp];
-          ++index;
-        }
-      return;
-    }
-
-    case PropType::RANKFOURTENSOR:
-    {
-      std::size_t index = 0;
-      for (const auto i : make_range(Moose::dim))
-        for (const auto j : make_range(Moose::dim))
-          for (const auto k : make_range(Moose::dim))
-            for (const auto l : make_range(Moose::dim))
-            {
-              (*_prop_old_rankfourtensor)[_qp](i, j, k, l) = (*_old_state[index])[_qp];
-              (*_prop_older_rankfourtensor)[_qp](i, j, k, l) = (*_older_state[index])[_qp];
-              ++index;
-            }
-      return;
-    }
-  }
+  index = 0;
+  for (auto & v : Moose::serialAccess(_prop_older[_qp]))
+    v = (*_older_state[index++])[_qp];
 }
+
+template class InterpolatedStatefulMaterialTempl<Real>;
+template class InterpolatedStatefulMaterialTempl<RealVectorValue>;
+template class InterpolatedStatefulMaterialTempl<RankTwoTensor>;
+template class InterpolatedStatefulMaterialTempl<RankFourTensor>;

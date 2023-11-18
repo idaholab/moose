@@ -14,16 +14,16 @@
 #include "RankFourTensorForward.h"
 
 /**
- * PowerLawSoftening is a smeared crack softening model that
- * uses a power law equation to soften the tensile response.
- * It is for use with ComputeSmearedCrackingStress.
+ * Reconstitute a materal property from the old and older states of projected AuxVariables. Use
+ * though the ProjectedStatefulMaterialStorageAction.
  */
-class InterpolatedStatefulMaterial : public Material
+template <typename T>
+class InterpolatedStatefulMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  InterpolatedStatefulMaterial(const InputParameters & parameters);
+  InterpolatedStatefulMaterialTempl(const InputParameters & parameters);
 
   virtual void computeQpProperties() override;
 
@@ -34,29 +34,22 @@ protected:
   /// Older projected state
   const std::vector<const VariableValue *> _older_state;
 
+  /// total number of components
+  const std::size_t _size;
+
   /// emitted property name
   const MaterialPropertyName _prop_name;
 
-  /// Property type
-  enum class PropType
-  {
-    REAL,
-    REALVECTORVALUE,
-    RANKTWOTENSOR,
-    RANKFOURTENSOR
-  } _prop_type;
+  /// Old interpolated property
+  MaterialProperty<T> & _prop_old;
 
-  ///@{ Old interpolated properties
-  MaterialProperty<Real> * _prop_old_real;
-  MaterialProperty<RealVectorValue> * _prop_old_realvectorvalue;
-  MaterialProperty<RankTwoTensor> * _prop_old_ranktwotensor;
-  MaterialProperty<RankFourTensor> * _prop_old_rankfourtensor;
-  ///@}
-
-  ///@{ Older interpolated properties
-  MaterialProperty<Real> * _prop_older_real;
-  MaterialProperty<RealVectorValue> * _prop_older_realvectorvalue;
-  MaterialProperty<RankTwoTensor> * _prop_older_ranktwotensor;
-  MaterialProperty<RankFourTensor> * _prop_older_rankfourtensor;
-  ///@}
+  /// Older interpolated properties
+  MaterialProperty<T> & _prop_older;
 };
+
+typedef InterpolatedStatefulMaterialTempl<Real> InterpolatedStatefulMaterialReal;
+typedef InterpolatedStatefulMaterialTempl<RealVectorValue>
+    InterpolatedStatefulMaterialRealVectorValue;
+typedef InterpolatedStatefulMaterialTempl<RankTwoTensor> InterpolatedStatefulMaterialRankTwoTensor;
+typedef InterpolatedStatefulMaterialTempl<RankFourTensor>
+    InterpolatedStatefulMaterialRankFourTensor;

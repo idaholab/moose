@@ -10,7 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "Registry.h"
+#include "Conversion.h"
+#include "SerialAccess.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 #include "libmesh/fe_type.h"
+
+// created types
+#include <InterpolatedStatefulMaterial.h>
+#include <ProjectedStatefulMaterialAux.h>
+#include <ProjectedStatefulMaterialNodalPatchRecovery.h>
 
 /**
  * Set up AuxKernels and AuxVariables for projected material property storage (PoMPS).
@@ -30,38 +40,26 @@ public:
   /// List of supported types
   typedef Moose::TypeList<Real, RealVectorValue, RankTwoTensor, RankFourTensor> SupportedTypes;
 
+  /// get an enum with all supported types
+  static MooseEnum getTypeEnum();
+
+  template <typename T, bool is_ad>
+  void processProperty(const MaterialPropertyName & prop_name);
+
 protected:
-  /**
-   * Perform setup for a single scalar component of the material property prop_name, and gather the
-   * names of teh AuxVariables used to represent each component in `vars`.
-   */
-  void processComponent(const std::string & prop_name,
-                        std::vector<unsigned int> idx,
-                        std::vector<VariableName> & vars,
-                        bool is_ad);
-
-  /**
-   * Add the material object to obtain the interpolated old state (for use with
-   * InterpolatedStatefulMaterialPropertyInterface)
-   */
-  void addMaterial(const std::string & prop_type,
-                   const std::string & prop_name,
-                   std::vector<VariableName> & vars);
-
-  enum class PropertyType
+  template <typename T, int I>
+  struct ProcessProperty
   {
-    REAL,
-    REALVECTORVALUE,
-    RANKTWOTENSOR,
-    RANKFOURTENSOR
+    static void apply(ProjectedStatefulMaterialStorageAction * self,
+                      const MaterialPropertyName & prop_name)
+    {
+      self->processProperty<T, false>(prop_name);
+      self->processProperty<T, true>(prop_name);
+    }
   };
-  typedef std::pair<PropertyType, bool> PropertyInfo;
 
-  /**
-   * Return the property type and whether to use AD or not. If no property with a supported type is
-   * found, throw an error.
-   */
-  PropertyInfo checkProperty(const std::string & prop_name);
+  template <typename... Ts>
+  static MooseEnum getTypeEnum(typename Moose::TypeList<Ts...>);
 
   const std::vector<MaterialPropertyName> & _prop_names;
 
@@ -70,3 +68,105 @@ protected:
   const std::string _var_type;
   const std::string _pomps_prefix;
 };
+
+template <typename... Ts>
+MooseEnum
+ProjectedStatefulMaterialStorageAction::getTypeEnum(Moose::TypeList<Ts...>)
+{
+  return MooseEnum(Moose::stringify(std::vector<std::string>{typeid(Ts).name()...}, " "));
+}
+
+template <typename T, bool is_ad>
+void
+ProjectedStatefulMaterialStorageAction::processProperty(const MaterialPropertyName & prop_name)
+{
+  // check if a property of type T exists
+  const auto & data = _problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
+  if (!data.haveGenericProperty<T, is_ad>(prop_name))
+    return;
+
+  // number of scalar components
+  const auto size = Moose::SerialAccess<T>::size();
+
+  // generate variable names
+  std::vector<VariableName> vars;
+  for (const auto i : make_range(size))
+    vars.push_back("_var_" + prop_name + '_' + Moose::stringify(i));
+
+  if (_current_task == "setup_projected_properties")
+  {
+    // add the AuxVars for storage
+    for (const auto & var : vars)
+    {
+      auto params = _factory.getValidParams(_var_type);
+      params.applyParameters(parameters());
+      params.set<std::vector<OutputName>>("outputs") = {"none"};
+      _problem->addAuxVariable(_var_type, var, params);
+    }
+
+    // add material
+    {
+      const auto type = Registry::getClassName<InterpolatedStatefulMaterialTempl<T>>();
+      auto params = _factory.getValidParams(type);
+      params.applySpecificParameters(parameters(), {"block"});
+      params.template set<std::vector<VariableName>>("old_state") = vars;
+      params.template set<MaterialPropertyName>("prop_name") = prop_name;
+      _problem->addMaterial(type, "_mat_" + prop_name, params);
+    }
+
+    // use nodal patch recovery for lagrange
+    if (_fe_type.family == LAGRANGE)
+    {
+      // nodal variables require patch recovery (add user object)
+      const auto & type =
+          Registry::getClassName<ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>>();
+      auto params = _factory.getValidParams(type);
+      params.applySpecificParameters(parameters(), {"block"});
+      params.template set<MaterialPropertyName>("property") = prop_name;
+      params.template set<MooseEnum>("patch_polynomial_order") = _order;
+      params.template set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+      params.template set<bool>("force_preaux") = true;
+      _problem->addUserObject(type, "_npruo_" + prop_name, params);
+    }
+  }
+
+  if (_current_task == "add_aux_kernel")
+  {
+    // create variables
+    std::vector<std::string> auxnames;
+    for (const auto i : make_range(size))
+      auxnames.push_back("_aux_" + prop_name + '_' + Moose::stringify(i));
+
+    // use nodal patch recovery for lagrange
+    if (_fe_type.family == LAGRANGE)
+    {
+      // nodal variables require patch recovery (add aux kernel)
+      const auto & type = "ProjectedMaterialPropertyNodalPatchRecoveryAux";
+      for (const auto i : make_range(size))
+      {
+        auto params = _factory.getValidParams(type);
+        params.applySpecificParameters(parameters(), {"block"});
+        params.template set<AuxVariableName>("variable") = vars[i];
+        params.template set<unsigned int>("component") = i;
+        params.template set<UserObjectName>("nodal_patch_recovery_uo") = "_npruo_" + prop_name;
+        params.template set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+        _problem->addAuxKernel(type, auxnames[i], params);
+      }
+    }
+    else
+    {
+      // elemental variables
+      const auto & type = Registry::getClassName<ProjectedStatefulMaterialAuxTempl<T, is_ad>>();
+      for (const auto i : make_range(size))
+      {
+        auto params = _factory.getValidParams(type);
+        params.applySpecificParameters(parameters(), {"block"});
+        params.template set<AuxVariableName>("variable") = vars[i];
+        params.template set<unsigned int>("component") = i;
+        params.template set<MaterialPropertyName>("prop") = prop_name;
+        params.template set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+        _problem->addAuxKernel(type, auxnames[i], params);
+      }
+    }
+  }
+}
