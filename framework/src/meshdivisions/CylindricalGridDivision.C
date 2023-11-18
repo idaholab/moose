@@ -34,7 +34,7 @@ CylindricalGridDivision::validParams()
 
   // Spatial bounds of the cylinder
   params.addRangeCheckedParam<Real>(
-      "r_min", 0, "r_min>0", "Minimum radial coordinate (for a hollow cylinder)");
+      "r_min", 0, "r_min>=0", "Minimum radial coordinate (for a hollow cylinder)");
   params.addRequiredRangeCheckedParam<Real>("r_max", "r_max>0", "Maximum radial coordinate");
   params.addRangeCheckedParam<Real>("cylinder_axial_min",
                                     std::numeric_limits<Real>::min(),
