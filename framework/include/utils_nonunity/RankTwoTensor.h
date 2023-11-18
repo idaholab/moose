@@ -66,6 +66,21 @@ template <>
 void mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v);
 }
 
+namespace Moose
+{
+template <typename T>
+struct SerialAccess;
+template <typename T>
+struct SerialAccess<RankTwoTensorTempl<T>>
+{
+  static T * data(RankTwoTensorTempl<T> & obj) { return &obj(0, 0); }
+  static constexpr std::size_t size(RankTwoTensorTempl<T> &)
+  {
+    return RankTwoTensorTempl<T>::N2;
+  }
+};
+}
+
 /**
  * RankTwoTensorTempl is designed to handle the Stress or Strain Tensor for a fully anisotropic
  * material. It is designed to allow for maximum clarity of the mathematics and ease of use.

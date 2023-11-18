@@ -56,6 +56,18 @@ template <>
 void mooseSetToZero<ADRankFourTensor>(ADRankFourTensor & v);
 }
 
+namespace Moose
+{
+template <typename T>
+struct SerialAccess;
+template <typename T>
+struct SerialAccess<RankFourTensorTempl<T>>
+{
+  static T * data(RankFourTensorTempl<T> & obj) { return &obj(0, 0, 0, 0); }
+  static constexpr std::size_t size(RankFourTensorTempl<T> &) { return RankFourTensorTempl<T>::N4; }
+};
+}
+
 /**
  * RankFourTensorTempl is designed to handle any N-dimensional fourth order tensor, C.
  * Since N is hard-coded to 3, RankFourTensorTempl holds 81 separate C_ijkl entries,
@@ -73,6 +85,7 @@ public:
   ///@}
 
   typedef tuple_of<4, unsigned int> index_type;
+  typedef T value_type;
 
   /// Initialization method
   enum InitMethod
