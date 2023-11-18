@@ -156,3 +156,15 @@ MeshDivisionFunctorReductionVectorPostprocessor::threadJoin(const UserObject & s
         _volumes[i] += sibling._volumes[i];
     }
 }
+
+Real
+MeshDivisionFunctorReductionVectorPostprocessor::spatialValue(const Point & p) const
+{
+  if (_nfunctors > 1)
+    mooseError("The spatialValue user object interface was not conceived for objects that compute "
+               "multiple values for a given spatial point. Please specify only one functor");
+  const auto index = _mesh_division.divisionIndex(p);
+  if (index == MooseMeshDivision::INVALID_DIVISION_INDEX)
+    mooseError("Spatial value sampled outside of the mesh_division specified at", p);
+  return (*_functor_reductions[0])[index];
+}

@@ -32,6 +32,7 @@ public:
   {
     return _functor_reductions;
   };
+  virtual Real spatialValue(const Point & p) const override;
 
   enum ReductionEnum
   {
