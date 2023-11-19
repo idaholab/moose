@@ -966,6 +966,9 @@ DerivativeStringClass(PostprocessorName);
 /// This type is used for objects that expect VectorPostprocessor objects
 DerivativeStringClass(VectorPostprocessorName);
 
+/// This type is used for objects that expect MeshDivision objects
+DerivativeStringClass(MeshDivisionName);
+
 /// This type is used for objects that expect Moose Function objects
 DerivativeStringClass(FunctionName);
 

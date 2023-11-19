@@ -158,6 +158,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
   registerMooseObjectTask("add_field_split",              Split,                  false);
 
+  registerMooseObjectTask("add_mesh_division",            MeshDivision,           false);
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
 
@@ -326,6 +327,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_residual_debug)"
                            "(add_bounds_vectors)"
                            "(add_positions)"
+                           "(add_mesh_division)"  // NearestPositionsDivision uses a Positions
                            "(add_multi_app)"
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
@@ -443,6 +445,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
+
+  registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
+  syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");
 
   registerSyntax("GlobalParamsAction", "GlobalParams");
 
