@@ -38,7 +38,10 @@ def get_options():
                         help="Limit the analysis the the listed languages.")
     parser.add_argument('--since', nargs=1, type=str,
                         help='Start date for the commit analysis. Use the same date format as the --since git shortlog argument.'
-                             ' Note that only the commit counts will respect the since-date, line counts will still be all-time contributions')
+                             ' Note that only the commit counts will respect the since-date, line counts will still be all-time contributions.'
+                             ' For this reason, we recommend sorting results by commits')
+    parser.add_argument('--sort-by', type=str, default="Total", choices=['C++', 'Python', 'Make', 'Total', 'Commits'],
+                        action='store', help='How to sort results in the console output')
 
     return parser.parse_args()
 
@@ -72,21 +75,22 @@ def report(counts, commits, merges):
     print(row_format.format("Name", *titles))
     print('-'*n)
 
-    for author, row in reversed(sorted(counts.items(), key=lambda item:sum(item[1].values()))):
+    # Gather commits, sum all language lines, then tally total counts
+    for author, row in counts.items():
         row['Total'] = sum(row.values())
-        values = ['{:,}'.format(row[key]) for key in titles if key not in ('Commits', 'Merges')]
 
         c = commits.get(author, 0)
         m = merges.get(author, 0)
-        values += [c, m]
         row['Commits'] = c
         row['Merges'] = m
-
         for key in titles:
             totals[key] += row[key]
 
-        if (c != 0 or m != 0):
-            print(row_format.format(author, *values))
+    # Sort and print
+    args = get_options()
+    for author, row in reversed(sorted(counts.items(), key=lambda item:item[1][args.sort_by])):
+        values = ['{:,}'.format(row[key]) for key in titles]
+        print(row_format.format(author, *values))
     print('-'*n)
     print(row_format.format('TOTAL', *['{:,}'.format(totals[key]) for key in titles]))
 
