@@ -1,9 +1,9 @@
-mu=1.1
-rho=1.1
-advected_interp_method='average'
-velocity_interp_method='rc'
-darcy=1.1
-forch=1.1
+mu = 1.1
+rho = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
+darcy = 1.1
+forch = 1.1
 
 [Mesh]
   [gen]
@@ -171,13 +171,13 @@ forch=1.1
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = v
-    function = 'exact_v'
+    functor = 'exact_v'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
