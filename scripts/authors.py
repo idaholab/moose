@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # List all files in the repository
     all_files = set()
     for location in args.locations:
-        all_files.update(mooseutils.git_ls_files(os.path.abspath(args.locations[0]), exclude=args.exclude))
+        all_files.update(mooseutils.git_ls_files(os.path.abspath(location), exclude=args.exclude))
 
     # Group filenames by extension
     groups = collections.defaultdict(list)
