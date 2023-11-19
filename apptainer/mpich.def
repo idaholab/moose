@@ -51,21 +51,14 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/openmpi"}
 {%- endif %}
 
-    # Get the RHEL version
-    RHEL_VERSION=$(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print $2}' /etc/os-release)
-
     # Prepare a temp directory
     TEMP_LOC=/root/build
     mkdir ${TEMP_LOC}
 
     # Enable power tools
     dnf install -y dnf-plugins-core
-    if [[ $RHEL_VERSION = 9* ]]; then
-        dnf config-manager --enable crb
-    else
-        dnf config-manager --set-enabled powertools
-        dnf install -y redhat-lsb-core.x86_64
-    fi
+    dnf config-manager --set-enabled powertools
+    dnf install -y redhat-lsb-core.x86_64
 
 {%- if ALTERNATE_FROM == "gcc-min" %}
     dnf install -y gcc gcc-gfortran gcc-c++ gdb
