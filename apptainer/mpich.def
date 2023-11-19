@@ -31,24 +31,32 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     export LC_ALL=C
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
+    # Alternate GCC used for Clang compile
     source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
 {%- endif %}
 {%- if ALTERNATE_FROM == "clang_min" %}
+    # Clang {{ MIN_CLANG_VERSION }}
     export PATH=/opt/llvm/bin:${PATH}
     export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
 %post
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-{%- if ALTERNATE_FROM == "clang_min" %}
-    export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
-{%- endif %}
-    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpich"}
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
+
+    # Install prefix for mpich
+    export MOOSE_MPICH_DIR=/opt/mpich
+{%- if ALTERNATE_FROM is not defined %}
+    # Install prefix for openmpi
+    export MOOSE_OPENMPI_DIR=/opt/openmpi
+{%- endif %}
+
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
+    # Version of GCC needed to complement Clang
     export CLANG_GCC_VERSION={{ CLANG_GCC_VERSION }}
-{%- else %}
-    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpich"}
-    export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/openmpi"}
+{%- endif %}
+{%- if ALTERNATE_FROM == "clang_min" %}
+    # Version of clang to install
+    export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
 {%- endif %}
 
     # Prepare a temp directory
@@ -61,6 +69,7 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     dnf install -y redhat-lsb-core.x86_64
 
 {%- if ALTERNATE_FROM == "gcc_min" %}
+    # Install gcc
     dnf install -y gcc gcc-gfortran gcc-c++ gdb
 {%- endif %}
 
@@ -170,23 +179,23 @@ EOF
     mkdir mpich-4.1.2/build
     cd mpich-4.1.2/build
     ../configure --prefix=${MOOSE_MPICH_DIR} \
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
       --enable-shared \
-      --enable-fast=O2 \
       --enable-debuginfo \
       --enable-two-level-namespace \
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
       CC=clang \
       CXX=clang++ \
       FC=gfortran \
       F77=gfortran \
       F90=gfortran \
-{%- endif %}
       CFLAGS='' \
       CXXFLAGS='' \
       FFLAGS='-fallow-argument-mismatch' \
       FCFLAGS='-fallow-argument-mismatch' \
       F90FLAGS='' \
-      F77FLAGS=''
+      F77FLAGS='' \
+{%- endif %}
+      --enable-fast=O2
     make -j ${MOOSE_JOBS}
     make install -j ${MOOSE_JOBS}
 {%- endif %}
@@ -205,12 +214,14 @@ export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
 ${USE_MPI_SCRIPT}
 EOF
 
+{%- if ALTERNATE_FROM is not defined %}
     # Add script for loading openmpi environment
     cat << EOF > /opt/mpi/use-openmpi
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
 ${USE_MPI_SCRIPT}
 EOF
+{%- endif %}
 
     # Clean Up
     rm -rf ${TEMP_LOC}
