@@ -326,6 +326,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_nl_sys(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
+    _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "material_props", &_mesh, _material_prop_registry)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -2286,6 +2287,30 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
 }
 
 void
+FEProblemBase::addMeshDivision(const std::string & type,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+  parallel_object_only();
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, tid);
+    _mesh_divisions.addObject(func, tid);
+  }
+}
+
+MeshDivision &
+FEProblemBase::getMeshDivision(const std::string & name, const THREAD_ID tid) const
+{
+  auto * const ret = dynamic_cast<MeshDivision *>(_mesh_divisions.getActiveObject(name, tid).get());
+  if (!ret)
+    mooseError("No MeshDivision object named ", name, " of appropriate type");
+  return *ret;
+}
+
+void
 FEProblemBase::lineSearch()
 {
   _line_search->lineSearch();
@@ -3109,7 +3134,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
   else
     mooseError("Variable '",
                var_name,
-               "' requested in fiunite volume initial condition '",
+               "' requested in finite volume initial condition '",
                name,
                "' does not exist.");
 }

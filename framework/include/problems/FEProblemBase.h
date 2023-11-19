@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
+#include "MeshDivision.h"
 #include "MortarData.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
@@ -600,6 +601,12 @@ public:
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, const THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, const THREAD_ID tid = 0);
+
+  /// Add a MeshDivision
+  void
+  addMeshDivision(const std::string & type, const std::string & name, InputParameters & params);
+  /// Get a MeshDivision
+  MeshDivision & getMeshDivision(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
    * add a MOOSE line search
@@ -2202,6 +2209,11 @@ protected:
   /// The Assembly objects. The first index corresponds to the thread ID and the second index
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
+
+  /// Warehouse to store mesh divisions
+  /// NOTE: this could probably be moved to the MooseMesh instead of the Problem
+  /// Time (and people's uses) will tell where this fits best
+  MooseObjectWarehouse<MeshDivision> _mesh_divisions;
 
   /// functions
   MooseObjectWarehouse<Function> _functions;

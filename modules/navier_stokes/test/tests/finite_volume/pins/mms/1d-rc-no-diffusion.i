@@ -1,7 +1,7 @@
-mu=1e-15
-rho=1.1
-advected_interp_method='upwind'
-velocity_interp_method='rc'
+mu = 1e-15
+rho = 1.1
+advected_interp_method = 'upwind'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [mesh]
@@ -115,7 +115,7 @@ velocity_interp_method='rc'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
   []
   [outlet_p]
     type = INSFVOutletPressureBC

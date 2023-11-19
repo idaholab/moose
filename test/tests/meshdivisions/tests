@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#25901'
+  [mesh_div]
+    design = 'syntax/MeshDivisions/index.md'
+    requirement = 'The system shall be able to divide the mesh using'
+    [blocks]
+      type = CSVDiff
+      input = 'block_division.i'
+      csvdiff = 'block_division_out.csv'
+      detail = 'subdomains defined on the mesh,'
+    []
+    [extra_id]
+      type = CSVDiff
+      input = 'extra_elem_id_division.i'
+      csvdiff = 'extra_elem_id_division_out_div_out_0001.csv'
+      detail = 'extra element integers stored on elements in the mesh,'
+    []
+    [cartesian]
+      type = CSVDiff
+      input = 'cartesian_division.i'
+      csvdiff = 'cartesian_division_out_div_out_0001.csv'
+      detail = 'a regular Cartesian grid,'
+    []
+    [functor]
+      type = CSVDiff
+      input = 'functor_values_division.i'
+      csvdiff = 'functor_values_division_out_div_out_0001.csv'
+      detail = 'a mesh division based on the values of a functor,'
+    []
+    [positions]
+      type = CSVDiff
+      input = 'nearest_position_division.i'
+      csvdiff = 'nearest_position_division_out_div_out_0001.csv'
+      detail = 'a nearest-point/neighbor partition,'
+    []
+    [cylinder]
+      type = CSVDiff
+      input = 'cylindrical_division.i'
+      csvdiff = 'cylindrical_division_out_div_out_0001.csv'
+      detail = 'a regular cylindrical R-theta-Z grid,'
+    []
+    [spherical]
+      type = CSVDiff
+      input = 'spherical_division.i'
+      csvdiff = 'spherical_division_out_div_out_0001.csv'
+      detail = 'a regular spherical radial grid,'
+    []
+    [nested]
+      type = CSVDiff
+      input = 'nested_division.i'
+      csvdiff = 'nested_division_out_div_out_0001.csv'
+      detail = 'and a nesting of mesh divisions.'
+    []
+  []
+[]
