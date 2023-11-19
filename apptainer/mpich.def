@@ -3,22 +3,22 @@
 
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
-{#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang-min, gcc-min)    -#}
+{#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
 {#- The minimum version of LLVM/Clang                                                         -#}
 {%- set MIN_CLANG_VERSION = '10.0.1' -%}
 
-{#- The system GCC version based on ALTERNATE_FROM clang or clang-min                         -#}
+{#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
 {#- Note: harmless if not set                                                                 -#}
 {%- if ALTERNATE_FROM == "clang" %}
 {%- set CLANG_GCC_VERSION = '12' -%}
-{%- elif ALTERNATE_FROM == "clang-min" %}
+{%- elif ALTERNATE_FROM == "clang_min" %}
 {%- set CLANG_GCC_VERSION = '10' -%}
 {%- else %}
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
 
-{%- if ALTERNATE_FROM == "gcc-min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
 From: rockylinux:8.8.20230518
 {%- else %}
@@ -30,17 +30,17 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     # Fix locale warnings
     export LC_ALL=C
 
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
 {%- endif %}
-{%- if ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang_min" %}
     export PATH=/opt/llvm/bin:${PATH}
     export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
 %post
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-{%- if ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
+{%- if ALTERNATE_FROM == "clang_min" %}
     export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
 {%- endif %}
     export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpich"}
@@ -60,7 +60,7 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     dnf config-manager --set-enabled powertools
     dnf install -y redhat-lsb-core.x86_64
 
-{%- if ALTERNATE_FROM == "gcc-min" %}
+{%- if ALTERNATE_FROM == "gcc_min" %}
     dnf install -y gcc gcc-gfortran gcc-c++ gdb
 {%- endif %}
 
@@ -80,9 +80,9 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
                    libomp.x86_64 lldb
 {%- endif %}
 
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
+    # Install a different GCC for building Clang
     dnf install -y gcc-toolset-${CLANG_GCC_VERSION}
-
     # Set alternative gcc-toolchain paths required by Clang
     source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
 {%- endif %}
@@ -135,7 +135,7 @@ EOF
     cd git-lfs-3.2.0
     ./install.sh
 
-{%- if ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang_min" %}
     # Build minimum Clang {{ MIN_CLANG_VERSION }} from source
     cd ${TEMP_LOC}
     git clone --depth 1 --branch llvmorg-${MIN_CLANG_VERSION} https://github.com/llvm/llvm-project
@@ -161,8 +161,8 @@ EOF
     export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
-{%- if ALTERNATE_FROM == "gcc-min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-    # Build and Install MPICH using Clang
+{%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
+    # Build and install MPICH
     mkdir ${TEMP_LOC}/mpich
     cd ${TEMP_LOC}/mpich
     curl -L -O http://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
@@ -174,13 +174,13 @@ EOF
       --enable-fast=O2 \
       --enable-debuginfo \
       --enable-two-level-namespace \
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
       CC=clang \
       CXX=clang++ \
-{%- endif %}
       FC=gfortran \
       F77=gfortran \
       F90=gfortran \
+{%- endif %}
       CFLAGS='' \
       CXXFLAGS='' \
       FFLAGS='-fallow-argument-mismatch' \
