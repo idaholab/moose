@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", PointValueSampler);
 InputParameters
 PointValueSampler::validParams()
 {
-  InputParameters params = PointSamplerBase::validParams();
+  InputParameters params = PointVariableSamplerBase::validParams();
   params.addClassDescription("Sample a variable at specific points.");
   params.addRequiredParam<std::vector<Point>>(
       "points", "The points where you want to evaluate the variables");
@@ -25,7 +25,7 @@ PointValueSampler::validParams()
 }
 
 PointValueSampler::PointValueSampler(const InputParameters & parameters)
-  : PointSamplerBase(parameters)
+  : PointVariableSamplerBase(parameters)
 {
   _points = getParam<std::vector<Point>>("points");
 }
@@ -44,5 +44,5 @@ PointValueSampler::initialize()
   else if (_points.size() < _ids.size())
     _ids.resize(_points.size());
 
-  PointSamplerBase::initialize();
+  PointVariableSamplerBase::initialize();
 }

@@ -78,6 +78,13 @@ function configure_petsc()
     fi
   fi
 
+  # When manually building PETSc on Apple Silicon, set FFLAGS to the proper arch, otherwise MUMPS
+  # will fail to find MPI libraries
+  MUMPS_ARM_STR=''
+  if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    MUMPS_ARM_STR='FFLAGS=-march=armv8.3-a'
+  fi
+
   cd $PETSC_DIR
   python3 ./configure --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
@@ -98,6 +105,7 @@ function configure_petsc()
       --download-strumpack=1 \
       --download-superlu_dist=1 \
       $HDF5_STR \
+      $MUMPS_ARM_STR \
       $MAKE_NP_STR \
       "$@"
 
