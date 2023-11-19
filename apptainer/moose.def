@@ -6,7 +6,6 @@
 {#- Optional jinja arguments                                                                  -#}
 {#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
-{#- DEV_CONTAINER: Set to anything to add development packages                                -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 
 {#- The within-container build directory to use                                               -#}
@@ -75,11 +74,8 @@ From: {{ APPTAINER_FROM }}
 
     # Activate the new environment
     source activate ${MOOSE_MAMBAFORGE}/envs/${MOOSE_MAMBA_ENV}
-
-    {% if DEV_CONTAINER is defined -%}
-    # Other Development container installs
+    # Needed for coverage
     pip3 --no-cache install lcov-cobertura
-    {%- endif %}
 
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
