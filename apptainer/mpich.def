@@ -181,7 +181,7 @@ EOF
       --enable-fast=O2 \
       --enable-debuginfo \
       --enable-two-level-namespace \
-{%- ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
       CC=clang \
       CXX=clang++ \
 {%- endif %}
