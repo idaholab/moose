@@ -7,10 +7,9 @@
 {#- vtk_vtk_friendly_version: The short version name. vtk_vtk_ is not a typo                  -#}
 
 {#- Optional jinja arguments                                                                  -#}
-{#- DEV_CONTAINER: Set to anything to add development packages and install _all_ methods      -#}
 {#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
-{#- METHODS: Methods to build (defaults to opt, unused if DEV_CONTAINER is set)               -#}
+{#- METHODS: Methods to build (defaults to all methods)                                       -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -78,17 +77,10 @@ From: {{ APPTAINER_FROM }}
     export VTKINCLUDE_DIR
     export VTKLIB_DIR
 
-{%- if DEV_CONTAINER is defined %}
-    # DEV_CONTAINER set
-    METHODS="opt dbg oprof devel"
-{%- else %}
-    # DEV_CONTAINER not set
-    METHODS="{{ METHODS or "opt" }}"
-{%- endif %}
-
     # Build libMesh
     umask 022
     cd ${ROOT_BUILD_DIR}/moose
+    METHODS="{{ METHODS or "opt dbg oprof devel" }}"
     LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/update_and_rebuild_libmesh.sh {{ LIBMESH_OPTIONS }}
 
     # Fix possibly bad permissions
