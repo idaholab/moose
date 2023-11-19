@@ -3,7 +3,7 @@
 
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
-{#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
+{#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang-min, gcc-min)    -#}
 
 {#- The minimum version of LLVM/Clang                                                         -#}
 {%- set MIN_CLANG_VERSION = '10.0.1' -%}
@@ -18,24 +18,25 @@
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
 
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+{%- if ALTERNATE_FROM == "gcc-min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
 Bootstrap: docker
+From: rockylinux:8.8.20230518
 {%- else %}
 BootStrap: oras
-{%- endif %}
-{%- if ALTERNATE_FROM == "rocky9" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky9-{{ ARCH }}:9.0-0
-{%- elif ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-From: rockylinux:8
-{%- elif ALTERNATE_FROM == "cuda" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
-{%- else %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
 {%- endif %}
 
 %environment
     # Fix locale warnings
     export LC_ALL=C
+
+{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
+    source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
+{%- endif %}
+{%- if ALTERNATE_FROM == "clang-min" %}
+    export PATH=/opt/llvm/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
+{%- endif %}
 
 %post
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
@@ -65,43 +66,36 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
         dnf config-manager --set-enabled powertools
         dnf install -y redhat-lsb-core.x86_64
     fi
+
+{%- if ALTERNATE_FROM == "gcc-min" %}
+    dnf install -y gcc gcc-gfortran gcc-c++ gdb
+{%- endif %}
+
     # Additional installs
     dnf install -y vim tmux emacs wget rsync hostname python3-pyyaml python3-devel python39 \
-                   cmake diffutils bison flex perl-IO-Compress perl-JSON perl-JSON-PP \
+                   make cmake bzip2 diffutils bison flex perl-IO-Compress perl-JSON perl-JSON-PP \
                    libtirpc libtirpc-devel zlib-devel patch patchutils epel-release file \
                    libpng libpng-devel unzip jq valgrind cppunit doxygen fftw-devel gsl-devel \
-                   libtool autoconf automake cppunit-devel
+                   libtool autoconf automake cppunit-devel tar git
+    # After epel-release
+    dnf install -y glpk-devel patchelf lcov
 
 {%- if ALTERNATE_FROM == "clang" %}
-
     # Installing system Clang, and its GCC GNU dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
                    libomp.x86_64 lldb
-{%- elif ALTERNATE_FROM == "clang-min" %}
-
-    # Installing additional packages necessary to build Clang from source
-    dnf groupinstall -y 'Development Tools'
-    dnf install -y git
 {%- endif %}
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
     dnf install -y gcc-toolset-${CLANG_GCC_VERSION}
 
     # Set alternative gcc-toolchain paths required by Clang
-    export PATH=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib:/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib64:${LD_LIBRARY_PATH}
+    source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
 {%- endif %}
 
-    # After epel-release
-    dnf install -y glpk-devel patchelf lcov
-
     # Make python default to python3
-    if [[ $RHEL_VERSION = 9* ]]; then
-        alternatives --install /usr/bin/python python /usr/bin/python3 0
-    else
-        alternatives --set python /usr/bin/python3
-    fi
+    alternatives --set python /usr/bin/python3
 
     # Allow a custom initialization routine if the following files exist at /
     touch ${SINGULARITY_ROOTFS}/none
@@ -149,7 +143,6 @@ EOF
     ./install.sh
 
 {%- if ALTERNATE_FROM == "clang-min" %}
-
     # Build minimum Clang {{ MIN_CLANG_VERSION }} from source
     cd ${TEMP_LOC}
     git clone --depth 1 --branch llvmorg-${MIN_CLANG_VERSION} https://github.com/llvm/llvm-project
@@ -159,9 +152,9 @@ EOF
     cmake ../llvm -G 'Unix Makefiles' \
       -DCMAKE_BUILD_TYPE=Release \
       -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;openmp;lldb' \
-      -DCMAKE_INSTALL_PREFIX=/opt/llvm-${MIN_CLANG_VERSION}  \
-      -DCMAKE_INSTALL_RPATH:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
-      -DCMAKE_INSTALL_NAME_DIR:STRING=/opt/llvm-${MIN_CLANG_VERSION}/lib \
+      -DCMAKE_INSTALL_PREFIX=/opt/llvm  \
+      -DCMAKE_INSTALL_RPATH:STRING=/opt/llvm/lib \
+      -DCMAKE_INSTALL_NAME_DIR:STRING=/opt/llvm/lib \
       -DCMAKE_BUILD_WITH_INSTALL_RPATH=1 \
       -DGCC_INSTALL_PREFIX=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root \
       -DCMAKE_C_COMPILER=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/bin/gcc \
@@ -171,12 +164,11 @@ EOF
     make install -j ${MOOSE_JOBS}
 
     # Use Clang {{ MIN_CLANG_VERSION }}
-    export PATH=/opt/llvm-${MIN_CLANG_VERSION}/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/llvm-${MIN_CLANG_VERSION}/lib:${LD_LIBRARY_PATH}
+    export PATH=/opt/llvm/bin:${PATH}
+    export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
 {%- endif %}
 
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-
+{%- if ALTERNATE_FROM == "gcc-min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
     # Build and Install MPICH using Clang
     mkdir ${TEMP_LOC}/mpich
     cd ${TEMP_LOC}/mpich
@@ -184,14 +176,15 @@ EOF
     tar -xf mpich-4.1.2.tar.gz
     mkdir mpich-4.1.2/build
     cd mpich-4.1.2/build
-    export CC=clang CXX=clang++ FC=gfortran F90=gfortran F77=gfortran
     ../configure --prefix=${MOOSE_MPICH_DIR} \
       --enable-shared \
       --enable-fast=O2 \
       --enable-debuginfo \
       --enable-two-level-namespace \
+{%- ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
       CC=clang \
       CXX=clang++ \
+{%- endif %}
       FC=gfortran \
       F77=gfortran \
       F90=gfortran \
@@ -210,15 +203,6 @@ EOF
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang-min" %}
-CLANG_GCC_VERSION={{ CLANG_GCC_VERSION }}
-export PATH=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/bin:${PATH}
-export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib:/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib64:${LD_LIBRARY_PATH}
-{%- endif %}
-{%- if ALTERNATE_FROM == "clang-min" %}
-export PATH=/opt/llvm-{{ MIN_CLANG_VERSION }}/bin:${PATH}
-export LD_LIBRARY_PATH=/opt/llvm-{{ MIN_CLANG_VERSION }}/lib:${LD_LIBRARY_PATH}
-{%- endif %}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
     # Add script for loading mpich environment
