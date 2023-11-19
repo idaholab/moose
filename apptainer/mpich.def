@@ -206,6 +206,7 @@ EOF
 {%- endif %}
 
     # Basic script for setting mpich environment
+    mkdir /opt/mpi
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
