@@ -30,7 +30,7 @@ From: rockylinux:8
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
 {%- else %}
-From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
 {%- endif %}
 
 %environment
@@ -42,12 +42,12 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 {%- if ALTERNATE_FROM == "clang-min" %}
     export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
 {%- endif %}
-    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-4.1.2"}
+    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpich"}
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
     export CLANG_GCC_VERSION={{ CLANG_GCC_VERSION }}
 {%- else %}
-    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-3.4.3"}
-    export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/mpi/openmpi-4.1.5"}
+    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpich"}
+    export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/openmpi"}
 {%- endif %}
 
     # Get the RHEL version
