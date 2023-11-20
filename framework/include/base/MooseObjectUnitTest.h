@@ -15,6 +15,7 @@
 #include "GeneratedMesh.h"
 #include "FEProblem.h"
 #include "AppFactory.h"
+#include "MooseCreate.h"
 
 /**
  * Base class for building basic unit tests for MOOSE objects that can live alone (like user
@@ -73,7 +74,7 @@ public:
    * @param app_name The name of client's application
    */
   MooseObjectUnitTest(const std::string & app_name)
-    : _app(AppFactory::createAppShared(app_name, 0, nullptr)), _factory(_app->getFactory())
+    : _app(MooseCreate(app_name, 0, nullptr).getApp()), _factory(_app->getFactory())
   {
     buildObjects();
   }
