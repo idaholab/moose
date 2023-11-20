@@ -17,9 +17,9 @@ documenting new and changing code within MOOSE:
 ## MooseObject C++ Documentation
 
 The first step is to add documentation for your application in the `validParams` function. This is
-done by adding parameter documentation strings and calling the class description method.
+done by adding parameter documentation strings and calling the class description method as follows.
 
-A description of each parameter should also be provided when they are added with the various add
+Firstly, a description of each parameter should be provided when they are added with the various add
 methods of the `InputParameters` object. For example, in the
 [/BoxMarker.md] the following parameter documentation is
 added, which is then present in the parameter summary table of the generated site.

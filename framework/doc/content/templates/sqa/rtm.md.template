@@ -96,22 +96,22 @@ includes:
 ### Functional Requirements id=functional-requirements
 
 !template field key=functional-requirements
-Include the tracebility matrix for functional requirements.
+Include the traceability matrix for functional requirements.
 
 ### Usability Requirements id=usability-requirements
 
 !template field key=usability-requirements
-Include the tracebility matrix for usability requirements.
+Include the traceability matrix for usability requirements.
 
 ### Performance Requirements id=performance-requirements
 
 !template field key=performance-requirements
-Include the tracebility matrix for performance requirements.
+Include the traceability matrix for performance requirements.
 
 ### System Interface Requirements id=performance-requirements
 
 !template field key=system-interfaces-requirements
-Include the tracebility matrix for system interface requirements.
+Include the traceability matrix for system interface requirements.
 
 ## References id=references
 

@@ -114,7 +114,7 @@ understand this specification.
 ### Definitions id=definitions
 
 !template! field key=definitions
-Add or revise specific defintions.
+Add or revise specific definitions.
 
 - +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan,
   requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as
@@ -205,7 +205,7 @@ use. For example:
 | U1.2 | Users shall select values from a list of valid values instead of having to type a value into a text field |
 !template-end!
 
-### Performace Requirements id=performance-requirements
+### Performance Requirements id=performance-requirements
 
 !template! field key=performance-requirements
 Define the critical performance conditions and their associated capabilities by including such
@@ -263,7 +263,7 @@ attention due to the sensitivity of the operation or criticality of the task (i.
 the effects of human error would be particularly serious).
 !template-end!
 
-#### Maintainablity id=maintainability
+#### Maintainability id=maintainability
 
 !template! field key=maintainability
 Specify the quantitative maintainability requirements that apply to maintenance in the planned

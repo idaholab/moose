@@ -3,7 +3,7 @@
 ## Introduction id=introduction
 
 !template field key=introduction required=False
-The [!ac](VVR) for {{app}} provides evidence that {{app}} fullfills its intended purpose.
+The [!ac](VVR) for {{app}} provides evidence that {{app}} fulfills its intended purpose.
 
 ## Dependencies id=dependencies
 
