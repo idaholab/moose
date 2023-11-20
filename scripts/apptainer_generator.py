@@ -493,10 +493,10 @@ class ApptainerGenerator:
             self.add_application_additions(app_root, jinja_data)
 
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
-        if self.args.library == 'moose':
+        if self.args.library == 'moose-dev':
             # test-tools is deprecated, but leave it here, so this scripts continues
             # to function properly against older hashes.
-            for package in ['tools', 'test-tools']:
+            for package in ['tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 if os.path.exists(meta_yaml):
                     with open(meta_yaml, 'r') as meta_contents:
