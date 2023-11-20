@@ -1430,7 +1430,7 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) con
 const VariableValue &
 Coupleable::coupledArrayDotDu(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = getArrayVar(var_name, comp);
+  const auto * const var = getArrayVar(var_name, comp);
   if (!var)
   {
     _default_value_zero.resize(_coupleable_max_qps, 0);

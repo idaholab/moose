@@ -1091,8 +1091,7 @@ protected:
    * @return Reference to a ArrayVariableValue containing the time derivative of the coupled
    * variable
    */
-
-  virtual const VariableValue & coupledArrayDotDu(const std::string & var_name,
+  const VariableValue & coupledArrayDotDu(const std::string & var_name,
                                                   unsigned int comp = 0) const;
 
   /**

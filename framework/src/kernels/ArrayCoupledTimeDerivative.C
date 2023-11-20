@@ -17,7 +17,7 @@ ArrayCoupledTimeDerivative::validParams()
   InputParameters params = ArrayKernel::validParams();
   params.addClassDescription(
       "Time derivative Array Kernel that acts on a coupled variable. Weak form: "
-      "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$. The coupled varialbe and"
+      "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$. The coupled variable and"
       "the variable must have the same dimensionality");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
@@ -34,7 +34,6 @@ ArrayCoupledTimeDerivative::ArrayCoupledTimeDerivative(const InputParameters & p
 void
 ArrayCoupledTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
-
   mooseAssert(_var.count() == _v_dot.size(),
               "The variable and coupled variable have unequal sizes:\n  variable size        : " +
                   std::to_string(_var.count()) + "\n" +

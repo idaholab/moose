@@ -18,29 +18,24 @@
     type = ArrayCoupledTimeDerivative
     variable = u
     v = v
-    use_displaced_mesh = false
   []
   [u_time_derivative]
     type = ArrayTimeDerivative
     variable = u
-    use_displaced_mesh = false
   []
   [u_diffusion]
     type = ArrayDiffusion
     variable = u
     diffusion_coefficient = u_dc
-    use_displaced_mesh = false
   []
   [v_time_derivative]
     type = ArrayTimeDerivative
     variable = v
-    use_displaced_mesh = false
   []
   [v_diffusion]
     type = ArrayDiffusion
     variable = v
     diffusion_coefficient = v_dc
-    use_displaced_mesh = false
   []
 []
 
@@ -71,10 +66,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
