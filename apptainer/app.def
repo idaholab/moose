@@ -101,6 +101,16 @@ From: {{ APPTAINER_FROM }}
         export MOOSE_DIR=${MOOSE_DIR_REAL}
     fi
 
+    # Remove the libmesh methods from moose-dev that we do not need
+    for method in opt oprof devel dbg; do
+        if [ "$method" != "$METHOD" ]; then
+            find ${LIBMESH_DIR}/lib -name "*_$method.so*" -delete -print
+            find ${LIBMESH_DIR}/lib -name "*_$method.la" -delete -print
+            find ${LIBMESH_DIR}/bin -name "*-$method" -delete -print
+            find ${LIBMESH_DIR} -name "*-$method.pc" -delete -print
+        fi
+    done
+
 {%- if EXTRA_MAMBA_PACKAGES is defined %}
     # Install extra mamba packages
     mamba install -yq {{ EXTRA_MAMBA_PACKAGES }}
