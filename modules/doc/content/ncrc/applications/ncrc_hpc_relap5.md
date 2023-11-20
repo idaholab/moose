@@ -158,7 +158,7 @@ This command will place you back in your home directory. When running on an inte
 will need to load the application environment once more:
 
 ```bash
-module load use.exp_ctl relap53d
+module load use.exp_ctl relap53D
 ```
 
 ### (2) Run the simulation
@@ -238,3 +238,4 @@ Example commands you would use with a terminal opened on your machine to copy fi
 scp <your hpc user id>@hpclogin:~/testing/input_out.e /path/to/the/local/destination
 ```
 !alert-end!
+
