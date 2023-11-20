@@ -14,6 +14,8 @@
 #include "libmesh/libmesh_common.h"
 
 /**
+ * Optimization reporter that interfaces with TAO. Objective value, gradients,
+ * and constraints need to calculated in the subapps.
  */
 class GeneralOptimization : public OptimizationReporterBase
 {
