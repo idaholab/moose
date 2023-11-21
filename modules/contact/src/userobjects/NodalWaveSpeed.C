@@ -73,7 +73,7 @@ NodalWaveSpeed::execute()
   {
     const Real wave_speed = node_wave_speeds[j];
     if (wave_speed != 0)
-      _node_wave_speeds[_current_elem->node_ptr(j)] += wave_speed;
+      _node_wave_speeds[_current_elem->node_ptr(j)] = wave_speed;
   }
 }
 

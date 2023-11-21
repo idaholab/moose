@@ -75,7 +75,7 @@ NodalDensity::execute()
   {
     const Real density = node_densities[j];
     if (density != 0)
-      _node_densities[_current_elem->node_ptr(j)] += density;
+      _node_densities[_current_elem->node_ptr(j)] = density;
   }
 }
 
