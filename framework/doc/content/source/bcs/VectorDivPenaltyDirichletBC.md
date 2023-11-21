@@ -15,6 +15,11 @@ where $p$ is a scalar defining the penalty value, $\vec{\psi_i}$ the test
 functions, and $\vec{u} - \vec{u}_0$ is the vector difference between the
 current solution and the Dirichlet data.
 
+Users should instead use [VectorPenaltyDirichletBC.md] or
+[VectorCurlPenaltyDirichletBC.md] if they wish to set a Dirichlet boundary
+condition via the penalty method on the vector variable itself or its
+curl, respectively.
+
 ## Example Input File Syntax
 
 !listing coupled_electrostatics.i block=BCs
