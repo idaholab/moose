@@ -1092,7 +1092,7 @@ protected:
    * variable
    */
   const VariableValue & coupledArrayDotDu(const std::string & var_name,
-                                                  unsigned int comp = 0) const;
+                                          unsigned int comp = 0) const;
 
   /**
    * Returns nodal values of a coupled variable
