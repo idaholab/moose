@@ -9,25 +9,31 @@
 
 #pragma once
 
-#include "OptimizationData.h"
 #include "OptimizationReporterBase.h"
+#include "libmesh/id_types.h"
+#include "libmesh/libmesh_common.h"
 
 /**
- * Computes gradient and contains reporters for communicating between optimizeSolve and subapps
+ * Optimization reporter that interfaces with TAO. Objective value, gradients,
+ * and constraints need to calculated in the subapps.
  */
-class OptimizationReporter : public OptimizationDataTempl<OptimizationReporterBase>
+class GeneralOptimization : public OptimizationReporterBase
 {
-
 public:
   static InputParameters validParams();
-  OptimizationReporter(const InputParameters & parameters);
+  GeneralOptimization(const InputParameters & parameters);
 
   virtual Real computeObjective() override;
-  virtual void setMisfitToSimulatedValues() override;
 
 protected:
+  /// Reporter that will hold the objective value
+  Real & _objective_val;
+
+  std::vector<dof_id_type> * _num_values_reporter;
+
+  virtual dof_id_type getNumParams() const override;
+
   virtual void setICsandBounds() override;
 
 private:
-  virtual void setSimulationValuesForTesting(std::vector<Real> & data) override;
 };

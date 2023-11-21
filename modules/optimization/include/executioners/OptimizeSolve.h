@@ -13,6 +13,7 @@
 
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
+
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
@@ -76,6 +77,9 @@ protected:
   /// objective function defining objective, gradient, and hessian
   OptimizationReporterBase * _obj_function = nullptr;
 
+  ///function to get the objective reporter
+  OptimizationReporterBase * getObjFunction() { return _obj_function; }
+
   /// Tao optimization object
   Tao _tao;
 
@@ -123,6 +127,12 @@ private:
   objectiveAndGradientFunctionWrapper(Tao tao, Vec x, Real * objective, Vec gradient, void * ctx);
   static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
   static PetscErrorCode monitor(Tao tao, void * ctx);
+  static PetscErrorCode equalityFunctionWrapper(Tao tao, Vec x, Vec ce, void * ctx);
+  static PetscErrorCode
+  equalityGradientFunctionWrapper(Tao tao, Vec x, Mat gradient_e, Mat gradient_epre, void * ctx);
+  static PetscErrorCode inequalityFunctionWrapper(Tao tao, Vec x, Vec ci, void * ctx);
+  static PetscErrorCode
+  inequalityGradientFunctionWrapper(Tao tao, Vec x, Mat gradient_i, Mat gradient_ipre, void * ctx);
   ///@}
 
   /// Enum of tao solver types
@@ -141,7 +151,8 @@ private:
     BOUNDED_QUASI_NEWTON_LINE_SEARCH,
     ORTHANT_QUASI_NEWTON,
     GRADIENT_PROJECTION_CONJUGATE_GRADIENT,
-    BUNDLE_RISK_MIN
+    BUNDLE_RISK_MIN,
+    AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD
   } _tao_solver_enum;
 
   /// Number of parameters being optimized
@@ -152,4 +163,21 @@ private:
 
   /// Hessian (matrix) - usually a matrix-free representation
   Mat _hessian;
+
+  /// Equality constraint vector
+  Vec _ce;
+
+  /// Inequality constraint vector
+  Vec _ci;
+
+  /// Equality constraint gradient
+  Mat _gradient_e;
+
+  /// Inequality constraint gradient
+  Mat _gradient_i;
+
+  /// Used for creating petsc structures when using the ALMM algorithm
+  PetscErrorCode taoALCreate();
+  /// Used for destroying petsc structures when using the ALMM algorithm
+  PetscErrorCode taoALDestroy();
 };

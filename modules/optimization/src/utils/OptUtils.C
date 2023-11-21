@@ -8,7 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OptUtils.h"
+#include "libmesh/id_types.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
 
 // static functions to copy Petsc vectors to and from vectors for a Reporter
 
@@ -31,10 +33,28 @@ void
 copyPetscVectorIntoReporter(const libMesh::PetscVector<Number> & x,
                             std::vector<std::vector<Real> *> reporterVectors)
 {
-  dof_id_type n = 0;
+  dof_id_type j = 0;
   for (auto & data : reporterVectors)
     for (auto & val : *data)
-      val = x(n++);
+      val = x(j++);
+}
+void
+copyReporterIntoPetscMatrix(const std::vector<std::vector<Real> *> reporterVectors,
+                            libMesh::PetscMatrix<Number> & x)
+{
+  for (const auto i : index_range(reporterVectors))
+    for (const auto j : index_range(*reporterVectors[i]))
+      x.set(i, j, (*reporterVectors[i])[j]);
+
+  x.close();
 }
 
+void
+copyPetscMatrixIntoReporter(const libMesh::PetscMatrix<Number> & x,
+                            std::vector<std::vector<Real> *> reporterVectors)
+{
+  for (const auto i : index_range(reporterVectors))
+    for (const auto j : index_range(*reporterVectors[i]))
+      (*reporterVectors[i])[j] = x(i, j);
+}
 }

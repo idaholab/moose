@@ -1,0 +1,44 @@
+{
+    "reporters": {
+        "OptimizationReporter": {
+            "type": "GeneralOptimization",
+            "values": {
+                "grad_vals": {
+                    "type": "std::vector<double>"
+                },
+                "obj_value": {
+                    "type": "double"
+                },
+                "vals": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "OptimizationReporter": {
+                "grad_vals": [],
+                "obj_value": 0.0,
+                "vals": []
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "OptimizationReporter": {
+                "grad_vals": [
+                    3.552713678800501e-15,
+                    3.552713678800501e-15
+                ],
+                "obj_value": 1.5777218104420236e-30,
+                "vals": [
+                    1.0000000000000002,
+                    3.0000000000000004
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
