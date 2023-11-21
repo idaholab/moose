@@ -26,7 +26,12 @@ protected:
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
 
+  /// The first temporal derivative of the coupled variable
   const ArrayVariableValue & _v_dot;
+
+  /// The Jacobian of the time derivative of the coupled variable with respect to the coupled variable
   const VariableValue & _dv_dot;
+
+  /// The number of the coupled variable
   const unsigned int _v_var;
 };
