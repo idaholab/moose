@@ -8,10 +8,8 @@ Content:
             - css/*
             - contrib/**
             - media/**
-
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-
 Extensions:
     MooseDocs.extensions.navigation:
         name: Stork
