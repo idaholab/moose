@@ -145,7 +145,7 @@ ny = 5
   [base_friction]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy Forchheimer'
-    prop_values = '1 1 1 0.1 0.2 0.3'
+    prop_values = '220 240 260 0 0 0'
   []
 
   # Material definitions needed for the diode
@@ -153,7 +153,7 @@ ny = 5
     type = NSFVFrictionFlowDiodeMaterial
     # Friction only in X direction
     direction = '-1 0 0'
-    additional_linear_resistance = '100 0 0'
+    additional_linear_resistance = '20000 0 0'
     additional_quadratic_resistance = '0 0 0'
     base_linear_friction_coefs = 'Darcy'
     base_quadratic_friction_coefs = 'Forchheimer'

@@ -22,6 +22,7 @@ using namespace HeatConduction;
 static const std::string directions[3] = {"x", "y", "z"};
 
 // geometric quantities
+static const std::string pebble_diameter = "pebble_diameter";
 static const std::string infinite_porosity = "infinite_porosity";
 static const std::string axis = "axis";
 static const std::string center = "center";

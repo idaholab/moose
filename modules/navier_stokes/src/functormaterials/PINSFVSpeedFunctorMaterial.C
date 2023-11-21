@@ -9,6 +9,7 @@
 
 #include "PINSFVSpeedFunctorMaterial.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", PINSFVSpeedFunctorMaterial);
 
@@ -27,7 +28,18 @@ PINSFVSpeedFunctorMaterial::validParams()
       NS::superficial_velocity_y, 0, "The y component of the fluid superficial velocity variable.");
   params.addParam<MooseFunctorName>(
       NS::superficial_velocity_z, 0, "The z component of the fluid superficial velocity variable.");
-  params.addParam<MooseFunctorName>(NS::T_fluid, "The fluid temperature variable.");
+  auto add_property = [&params](const auto & property_name)
+  {
+    params.addParam<MooseFunctorName>(property_name,
+                                      property_name,
+                                      "The name to give the declared '" + property_name +
+                                          "' functor property");
+  };
+  add_property(NS::velocity);
+  add_property(NS::speed);
+  add_property(NS::velocity_x);
+  add_property(NS::velocity_y);
+  add_property(NS::velocity_z);
 
   return params;
 }
@@ -51,33 +63,28 @@ PINSFVSpeedFunctorMaterial::PINSFVSpeedFunctorMaterial(const InputParameters & p
                blocksMaxDimension());
 
   // Interstitial velocity is needed by certain correlations
-  addFunctorProperty<ADRealVectorValue>(NS::velocity,
-                                        [this](const auto & r, const auto & t) -> ADRealVectorValue
-                                        {
-                                          return ADRealVectorValue(_superficial_vel_x(r, t),
-                                                                   _superficial_vel_y(r, t),
-                                                                   _superficial_vel_z(r, t)) /
-                                                 _eps(r, t);
-                                        });
+  const auto & interstitial_velocity = addFunctorProperty<ADRealVectorValue>(
+      getParam<MooseFunctorName>(NS::velocity),
+      [this](const auto & r, const auto & t) -> ADRealVectorValue
+      {
+        return ADRealVectorValue(
+                   _superficial_vel_x(r, t), _superficial_vel_y(r, t), _superficial_vel_z(r, t)) /
+               _eps(r, t);
+      });
 
   // Speed is normal of regular interstitial velocity
   // This is needed to compute the Reynolds number
-  addFunctorProperty<ADReal>(NS::speed,
-                             [this](const auto & r, const auto & t) -> ADReal
-                             {
-                               // if the velocity is zero, then the norm function call fails because
-                               // AD tries to calculate the derivatives which causes a divide by
-                               // zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx. So add a
-                               // bit of noise to avoid this failure mode.
-                               if ((MooseUtils::absoluteFuzzyEqual(_superficial_vel_x(r, t), 0)) &&
-                                   (MooseUtils::absoluteFuzzyEqual(_superficial_vel_y(r, t), 0)) &&
-                                   (MooseUtils::absoluteFuzzyEqual(_superficial_vel_z(r, t), 0)))
-                                 return 1e-42;
+  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::speed),
+                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                             { return NS::computeSpeed(interstitial_velocity(r, t)); });
 
-                               return ADRealVectorValue(_superficial_vel_x(r, t),
-                                                        _superficial_vel_y(r, t),
-                                                        _superficial_vel_z(r, t))
-                                          .norm() /
-                                      _eps(r, t);
-                             });
+  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_x),
+                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                             { return interstitial_velocity(r, t)(0); });
+  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_y),
+                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                             { return interstitial_velocity(r, t)(1); });
+  addFunctorProperty<ADReal>(getParam<MooseFunctorName>(NS::velocity_z),
+                             [&interstitial_velocity](const auto & r, const auto & t) -> ADReal
+                             { return interstitial_velocity(r, t)(2); });
 }
