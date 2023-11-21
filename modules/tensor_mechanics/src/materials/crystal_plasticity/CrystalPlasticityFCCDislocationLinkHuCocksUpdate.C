@@ -194,12 +194,12 @@ void
 CrystalPlasticityFCCDislocationLinkHuCocksUpdate::calculateInitialSlipResistance()
 {
   std::vector<Real> solute_hardening(_number_coplanar_groups, 0.0);
-  // if (_include_solute_hardening)
-  calculateSoluteResistance(solute_hardening);
+  if (_include_solute_hardening)
+    calculateSoluteResistance(solute_hardening);
 
   std::vector<Real> precipitate_hardening(_number_coplanar_groups, 0.0);
-  // if (_include_precipitate_hardening)
-  calculatePrecipitateResistance(precipitate_hardening);
+  if (_include_precipitate_hardening)
+    calculatePrecipitateResistance(precipitate_hardening);
 
   for (const auto p : make_range(_number_coplanar_groups))
   {

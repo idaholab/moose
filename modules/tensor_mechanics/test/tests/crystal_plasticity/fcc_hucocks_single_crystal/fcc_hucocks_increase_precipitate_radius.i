@@ -12,35 +12,27 @@
 []
 
 [AuxVariables]
-  [temperature]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [fth_xx]
+  [pk2_zz]
     order = CONSTANT
     family = MONOMIAL
   []
-  [fth_yy]
+  [fp_zz]
     order = CONSTANT
     family = MONOMIAL
   []
-  [fth_zz]
+  [slip_resistance_0]
     order = CONSTANT
     family = MONOMIAL
   []
-  [pin_point_density_0]
+  [slip_resistance_3]
     order = CONSTANT
     family = MONOMIAL
   []
-  [pin_point_density_1]
+  [slip_resistance_6]
     order = CONSTANT
     family = MONOMIAL
   []
-  [pin_point_density_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [pin_point_density_3]
+  [slip_resistance_9]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -54,62 +46,48 @@
 []
 
 [AuxKernels]
-  [temperature]
-    type = FunctionAux
-    variable = temperature
-    function = '300+100*t' # temperature increases at a constant rate
-    execute_on = timestep_begin
-  []
-  [fth_xx]
+  [pk2_zz]
     type = RankTwoAux
-    variable = fth_xx
-    rank_two_tensor = thermal_deformation_gradient
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  []
-  [fth_yy]
-    type = RankTwoAux
-    variable = fth_yy
-    rank_two_tensor = thermal_deformation_gradient
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
-  []
-  [fth_zz]
-    type = RankTwoAux
-    variable = fth_zz
-    rank_two_tensor = thermal_deformation_gradient
+    variable = pk2_zz
+    rank_two_tensor = second_piola_kirchhoff_stress
     index_j = 2
     index_i = 2
     execute_on = timestep_end
   []
-  [pin_point_density_0]
+  [fp_zz]
+    type = RankTwoAux
+    variable = fp_zz
+    rank_two_tensor = plastic_deformation_gradient
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+  []
+  [slip_resistance_0]
     type = MaterialStdVectorAux
-    variable = pin_point_density_0
-    property = pinning_point_density
+    variable = slip_resistance_0
+    property = slip_resistance
     index = 0
     execute_on = timestep_end
   []
-  [pin_point_density_1]
+  [slip_resistance_3]
     type = MaterialStdVectorAux
-    variable = pin_point_density_1
-    property = pinning_point_density
-    index = 1
-    execute_on = timestep_end
-  []
-  [pin_point_density_2]
-    type = MaterialStdVectorAux
-    variable = pin_point_density_2
-    property = pinning_point_density
-    index = 2
-    execute_on = timestep_end
-  []
-  [pin_point_density_3]
-    type = MaterialStdVectorAux
-    variable = pin_point_density_3
-    property = pinning_point_density
+    variable = slip_resistance_3
+    property = slip_resistance
     index = 3
+    execute_on = timestep_end
+  []
+  [slip_resistance_6]
+    type = MaterialStdVectorAux
+    variable = slip_resistance_6
+    property = slip_resistance
+    index = 6
+    execute_on = timestep_end
+  []
+  [slip_resistance_9]
+    type = MaterialStdVectorAux
+    variable = slip_resistance_9
+    property = slip_resistance
+    index = 9
     execute_on = timestep_end
   []
 []
@@ -130,8 +108,21 @@
   [symmz]
     type = DirichletBC
     variable = disp_z
-    boundary = 'back front'
+    boundary = back
     value = 0
+  []
+  [constant_displacement]
+    type = FunctionDirichletBC
+    variable = disp_z
+    boundary = front
+    function = '1.0e-3*t'
+  []
+[]
+
+[Functions]
+  [precipitate_radius_function]
+    type = ParsedFunction
+    expression = '1.0e-3 + 1.0e-4*t'
   []
 []
 
@@ -144,11 +135,8 @@
   [stress]
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
-    eigenstrain_names = thermal_eigenstrain
     tan_mod_type = exact
-    line_search_method = CUT_HALF
-    use_line_search = true
-    maximum_substep_iteration = 10
+    maximum_substep_iteration = 1
   []
   [trial_xtalpl]
     type = CrystalPlasticityFCCDislocationLinkHuCocksUpdate
@@ -172,54 +160,40 @@
   []
   [concentrations]
     type = GenericConstantMaterial
-    prop_names = 'solute_conc             precipitate_conc    precipitate_radius'
-    prop_values = '2.818586455498711e+17  597211024.5155126     1.0e-3' # in 1/mm^3, backed out from given stress, except radius which is assumed
+    prop_names = 'solute_conc             precipitate_conc'
+    prop_values = '2.818586455498711e+17  597211024.5155126' # in 1/mm^3, backed out from given stress
   []
-  [thermal_eigenstrain]
-    type = ComputeCrystalPlasticityThermalEigenstrain
-    eigenstrain_name = thermal_eigenstrain
-    deformation_gradient_name = thermal_deformation_gradient
-    temperature = temperature
-    thermal_expansion_coefficients = '0.5e-05 0.5e-05 0.5e-05' # thermal expansion coefficients along three directions
+  [varying_solute_concentration]
+    type = GenericFunctionMaterial
+    prop_names = 'precipitate_radius'
+    prop_values = precipitate_radius_function
   []
 []
 
 [Postprocessors]
-  [stress_zz]
+  [pk2_zz]
     type = ElementAverageValue
-    variable = stress_zz
+    variable = pk2_zz
   []
-  [fth_xx]
+  [fp_zz]
     type = ElementAverageValue
-    variable = fth_xx
+    variable = fp_zz
   []
-  [fth_yy]
+  [slip_resistance_0]
     type = ElementAverageValue
-    variable = fth_yy
+    variable = slip_resistance_0
   []
-  [fth_zz]
+  [slip_resistance_3]
     type = ElementAverageValue
-    variable = fth_zz
+    variable = slip_resistance_3
   []
-  [temperature]
+  [slip_resistance_6]
     type = ElementAverageValue
-    variable = temperature
+    variable = slip_resistance_6
   []
-  [pin_point_density_0]
+  [slip_resistance_9]
     type = ElementAverageValue
-    variable = pin_point_density_0
-  []
-  [pin_point_density_1]
-    type = ElementAverageValue
-    variable = pin_point_density_1
-  []
-  [pin_point_density_2]
-    type = ElementAverageValue
-    variable = pin_point_density_2
-  []
-  [pin_point_density_3]
-    type = ElementAverageValue
-    variable = pin_point_density_3
+    variable = slip_resistance_9
   []
 []
 
@@ -228,10 +202,6 @@
     type = SMP
     full = true
   []
-[]
-
-[Debug]
-  show_var_residual_norms = true
 []
 
 [Executioner]
@@ -247,10 +217,11 @@
 
   dt = 0.1
   dtmin = 1e-4
-  num_steps = 10
+  num_steps = 5
 []
 
 [Outputs]
   csv = true
+  console = true
   perf_graph = true
 []

@@ -66,11 +66,86 @@
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
 
+  [fcc_hucocks_thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_thermal_eigenstrain.i'
+    csvdiff = 'fcc_hucocks_thermal_eigenstrain_out.csv'
+    requirement = 'The system shall produce the isotropic, positive thermal deformation '
+                  'gradient and the resulting negative compressive stress response in the '
+                  'z-direction in response to increasing temperature when zero displacement '
+                  'BCs are applied in the z-direction. The computed pinning point density '
+                  'on all slip planes shall also evolve in response to the thermal '
+                  'deformation gradient.'
+    issues = '#17734'
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+             '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
 
-
-
-
-
+  [fcc_hucocks_decrease_solute_hardening]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_decrease_solute_hardening.i'
+    csvdiff = 'fcc_hucocks_decrease_solute_hardening_out.csv'
+    requirement = 'The system shall compute a decreasing slip system resistance in response '
+                  'to decreasing solute concentration in a simulation where plasticity does '
+                  'not occur and the material property names for the precipitate density '
+                  'and radius are not provided.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [fcc_hucocks_increase_precipitate_radius]
+    type = CSVDiff
+    input = 'fcc_hucocks_increase_precipitate_radius.i'
+    csvdiff = 'fcc_hucocks_increase_precipitate_radius_out.csv'
+    requirement = 'The system shall compute, in the absence of plastic deformation and thus '
+                  'without pinning point density evolution, an increase in the slip system '
+                  'resistance in response to increasing precipitate radius when the solute '
+                  'concentration material property name is not provided.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [fcc_hucocks_only_solute_hardening]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_single_hardening_component_base.i'
+    csvdiff = 'fcc_hucocks_only_solute_hardening_out.csv'
+    cli_args = 'Materials/trial_xtalpl/solute_concentration=solute_conc '
+               'Outputs/file_base=fcc_hucocks_only_solute_hardening_out'
+    requirement = 'The system shall compute the contribution to the slip system '
+                  'resistance due only to a static solute concentration, without '
+                  'plasticity to match the analytical solution of 25MPa within '
+                  'reasonable rounding error.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [fcc_hucocks_only_precipitate_hardening]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_single_hardening_component_base.i'
+    csvdiff = 'fcc_hucocks_only_precipitate_hardening_out.csv'
+    cli_args = 'Materials/trial_xtalpl/precipitate_number_density=precipitate_conc '
+               'Materials/trial_xtalpl/mean_precipitate_radius=precipitate_radius '
+               'Outputs/file_base=fcc_hucocks_only_precipitate_hardening_out'
+    requirement = 'The system shall compute the contribution to the slip system '
+                  'resistance due only to a static, prescribed precipitate number density '
+                  ' and precipitate radius to match the analytical solution of 10 MPa, '
+                  ' with some error introduced by rounding in the input values.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
+  [fcc_hucocks_only_forest_hardening]
+    type = 'CSVDiff'
+    input = 'fcc_hucocks_single_hardening_component_base.i'
+    csvdiff = 'fcc_hucocks_only_forest_hardening_out.csv'
+    cli_args = 'Materials/trial_xtalpl/forest_dislocation_hardening_coefficient=0.35 '
+               'Outputs/file_base=fcc_hucocks_only_forest_hardening_out'
+    requirement = 'The system shall compute the first time step contribution to the '
+                  'slip system resistance due only to the forest hardening in a simulation '
+                  'where the applied displacement BC is too low to evoke a plastic response '
+                  'that would evolve the pinning point density. The presecribed initial '
+                  'pinning point density is set to produce the analytical solution of '
+                  'approximately 30 MPa.'
+    issues = ''
+    design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
+  []
 
   [single_active_group_zero_self_evolution]
     type = 'CSVDiff'
