@@ -370,53 +370,9 @@ stringify(const RelationshipManagerType & t)
 }
 
 std::string
-stringify(FEFamily f)
+stringify(libMesh::FEFamily f)
 {
-  switch (f)
-  {
-    case 0:
-      return "LAGRANGE";
-    case 1:
-      return "HIERARCHIC";
-    case 2:
-      return "MONOMIAL";
-    case 6:
-      return "L2_HIERARCHIC";
-    case 7:
-      return "L2_LAGRANGE";
-    case 3:
-      return "BERNSTEIN";
-    case 4:
-      return "SZABAB";
-    case 5:
-      return "XYZ";
-    case 11:
-      return "INFINITE_MAP";
-    case 12:
-      return "JACOBI_20_00";
-    case 13:
-      return "JACOBI_30_00";
-    case 14:
-      return "LEGENDRE";
-    case 21:
-      return "CLOUGH";
-    case 22:
-      return "HERMITE";
-    case 23:
-      return "SUBDIVISION";
-    case 31:
-      return "SCALAR";
-    case 41:
-      return "LAGRANGE_VEC";
-    case 42:
-      return "NEDELEC_ONE";
-    case 43:
-      return "MONOMIAL_VEC";
-    case 99:
-      return "INVALID_FE";
-    default:
-      mooseError("Unrecognized FEFamily ", static_cast<int>(f));
-  }
+  return libMesh::Utility::enum_to_string(f);
 }
 
 // Turn the warnings back on
