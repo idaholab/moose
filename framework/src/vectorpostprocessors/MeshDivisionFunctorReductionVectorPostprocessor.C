@@ -27,7 +27,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::validParams()
                                                          "Functors to apply the reduction on");
   params.addRequiredParam<MeshDivisionName>(
       "mesh_division",
-      "Mesh division object forming the partition of the elements to perform the reduction within");
+      "Mesh division object which dictates the elements to perform the reduction with");
   params.addClassDescription("Perform reductions on functors based on a per-mesh-division basis");
   return params;
 }
@@ -41,16 +41,16 @@ MeshDivisionFunctorReductionVectorPostprocessor::MeshDivisionFunctorReductionVec
     _mesh_division(_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid))
 {
   // Gather the functors
-  const auto functor_names = getParam<std::vector<MooseFunctorName>>("functors");
-  for (const auto i : make_range(_nfunctors))
-    _functors.push_back(&getFunctor<Real>(functor_names[i]));
+  const auto & functor_names = getParam<std::vector<MooseFunctorName>>("functors");
+  for (const auto & functor_name : functor_names)
+    _functors.push_back(&getFunctor<Real>(functor_name));
 
   // Set up reduction vectors
   const auto ndiv = _mesh_division.getNumDivisions();
   _volumes.resize(ndiv);
-  for (const auto i : index_range(functor_names))
+  for (const auto & functor_name : functor_names)
   {
-    auto & p = declareVector(functor_names[i]);
+    auto & p = declareVector(functor_name);
     p.resize(ndiv);
     _functor_reductions.push_back(&p);
   }
@@ -68,7 +68,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::initialize()
     else if (_reduction == ReductionEnum::MAX)
       std::fill(reduction->begin(), reduction->end(), std::numeric_limits<Real>::min());
     else
-      mooseAssert(true, "Unknown reduction type");
+      mooseAssert(false, "Unknown reduction type");
   }
   std::fill(_volumes.begin(), _volumes.end(), 0);
 }
@@ -79,18 +79,19 @@ MeshDivisionFunctorReductionVectorPostprocessor::execute()
   const auto state_arg = determineState();
   if (hasBlocks(_current_elem->subdomain_id()))
   {
-    auto index = _mesh_division.divisionIndex(*_current_elem);
+    const auto index = _mesh_division.divisionIndex(*_current_elem);
     if (index == MooseMeshDivision::INVALID_DIVISION_INDEX)
     {
-      mooseWarning("Spatial value sampled outside of the mesh_division specified at: " +
-                   Moose::stringify(*_current_elem));
+      mooseWarning("Spatial value sampled outside of the mesh_division specified in element: " +
+                   Moose::stringify(_current_elem->id()) + " of centroid " +
+                   Moose::stringify(_current_elem->true_centroid()));
       return;
     }
-    for (unsigned int i = 0; i < _nfunctors; ++i)
+    for (const auto i : make_range(_nfunctors))
       if (_functors[i]->hasBlocks(_current_elem->subdomain_id()))
-        for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+        for (const auto qp : make_range(_qrule->n_points()))
         {
-          Moose::ElemQpArg elem_qp = {_current_elem, qp, _qrule, _q_point[qp]};
+          const Moose::ElemQpArg elem_qp = {_current_elem, qp, _qrule, _q_point[qp]};
           const auto functor_value = (*_functors[i])(elem_qp, state_arg);
           if (_reduction == ReductionEnum::INTEGRAL || _reduction == ReductionEnum::AVERAGE)
             (*_functor_reductions[i])[index] += _JxW[qp] * _coord[qp] * functor_value;
@@ -102,6 +103,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::execute()
           else if (_reduction == ReductionEnum::MAX)
             if ((*_functor_reductions[i])[index] < functor_value)
               (*_functor_reductions[i])[index] = functor_value;
+
           if (i == 0 && _reduction == ReductionEnum::AVERAGE)
             _volumes[index] += _JxW[qp] * _coord[qp];
         }
@@ -122,7 +124,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::finalize()
   if (_reduction == ReductionEnum::AVERAGE)
   {
     gatherSum(_volumes);
-    for (unsigned int i_f = 0; i_f < _nfunctors; ++i_f)
+    for (const auto i_f : make_range(_nfunctors))
       for (const auto i : index_range(*_functor_reductions[i_f]))
         if (!MooseUtils::absoluteFuzzyEqual(_volumes[i], 0))
           (*_functor_reductions[i_f])[i] /= _volumes[i];
@@ -134,10 +136,9 @@ MeshDivisionFunctorReductionVectorPostprocessor::finalize()
 void
 MeshDivisionFunctorReductionVectorPostprocessor::threadJoin(const UserObject & s)
 {
-  const MeshDivisionFunctorReductionVectorPostprocessor & sibling =
-      static_cast<const MeshDivisionFunctorReductionVectorPostprocessor &>(s);
+  const auto & sibling = static_cast<const MeshDivisionFunctorReductionVectorPostprocessor &>(s);
 
-  for (unsigned int i_f = 0; i_f < _nfunctors; ++i_f)
+  for (const auto i_f : make_range(_nfunctors))
     for (const auto i : index_range(*_functor_reductions[i_f]))
     {
       if (_reduction == ReductionEnum::INTEGRAL || _reduction == ReductionEnum::AVERAGE)

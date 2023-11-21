@@ -22,12 +22,12 @@ for some of the bins of the user-specified [!param](/VectorPostprocessors/MeshDi
 the returned value of the reduction will be:
 
 - 0 for an average and an integral reduction
-- the maximum floating point number (near `1e300`) for a minimum
-- the minimum floating point number (near `-1e300`) for a maximum
+- the maximum floating point number (a very large positive number, depending on the `Real` floating point number type used) for a minimum
+- the minimum floating point number (minus the number mentioned above) for a maximum
 
 If there are elements within the subdomains of the `MeshDivisionFunctorReductionVectorPostprocessor` that
 are outside the user-specified [!param](/VectorPostprocessors/MeshDivisionFunctorReductionVectorPostprocessor/mesh_division),
-a warning will be output and the element will be ignored.
+a warning will be output and the elements will be ignored.
 
 !syntax parameters /VectorPostprocessors/MeshDivisionFunctorReductionVectorPostprocessor
 

@@ -27,11 +27,13 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
+
   /// Return Integral values
   const std::vector<VectorPostprocessorValue *> & getReductions() const
   {
     return _functor_reductions;
   };
+
   virtual Real spatialValue(const Point & p) const override;
 
   enum ReductionEnum
@@ -49,7 +51,7 @@ protected:
   const unsigned int _nfunctors;
   /// Mesh division providing the division
   const MeshDivision & _mesh_division;
-  /// Functors that undergo the reduction
+  /// Functors that are evaluated to create the reduction
   std::vector<const Moose::Functor<Real> *> _functors;
   /// Vectors holding functor reductions (integrals, averages, extrema..) over each mesh division
   std::vector<VectorPostprocessorValue *> _functor_reductions;
