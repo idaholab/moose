@@ -1305,13 +1305,25 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   dof_values[index] = value;
   _has_dof_values = true;
 
+  Moose::out << "MooseVariableData<OutputType>::setDofValue: " << value << " and index: " << index
+             << "\n";
   auto & u = _vector_tag_u[_solution_tag];
   for (unsigned int qp = 0; qp < u.size(); qp++)
   {
+    Moose::out << "Making that modification\n";
     u[qp] = (*_phi)[0][qp] * dof_values[0];
+    Moose::out << " dof_values[0] is: " << dof_values[0] << "\n";
+    Moose::out << "First u of " << qp << " is: " << u[qp] << "\n";
+
     for (unsigned int i = 1; i < dof_values.size(); i++)
+    {
       u[qp] += (*_phi)[i][qp] * dof_values[i];
+      Moose::out << " dof_values[i] is: " << dof_values[i] << "\n";
+      Moose::out << "Second u of " << qp << " is: " << u[qp] << "\n";
+    }
   }
+
+  Moose::out << "Final is (of 0): " << u[0] << "\n";
 }
 
 template <typename OutputType>

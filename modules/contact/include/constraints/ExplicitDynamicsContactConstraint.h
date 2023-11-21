@@ -13,6 +13,8 @@
 #include "NodeFaceConstraint.h"
 #include "PenetrationLocator.h"
 #include "TwoMaterialPropertyInterface.h"
+#include "Coupleable.h"
+
 // Forward Declarations
 enum class ExplicitDynamicsContactModel;
 
@@ -85,8 +87,11 @@ protected:
    * Determine "Lagrange multipliers" from the iterative solution of the impact problem.
    * @param node The number of the variable to be checked
    * @param pinfo The component index computed in this routine
+   * @param distance_gap The gap distance at the constraint node
    */
-  void solveImpactEquations(const Node & node, PenetrationInfo * pinfo);
+  void solveImpactEquations(const Node & node,
+                            PenetrationInfo * pinfo,
+                            const RealVectorValue & distance_gap);
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real gapOffset(const Node & node);
@@ -133,11 +138,11 @@ protected:
   const MaterialProperty<Real> & _neighbor_wave_speed;
 
   /// X component of velocity at the contacting node
-  const VariableValue & _vel_x;
+  MooseWritableVariable * _vel_x;
   /// Y component of velocity at the contacting node
-  const VariableValue & _vel_y;
+  MooseWritableVariable * _vel_y;
   /// Z component of velocity at the contacting node
-  const VariableValue & _vel_z;
+  MooseWritableVariable * _vel_z;
 
   /// X component of velocity at the closest point
   const VariableValue & _neighbor_vel_x;

@@ -26,6 +26,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
+#include "UpdateNodalAuxVariable.h"
+
 registerMooseObject("ContactApp", ExplicitDynamicsContactConstraint);
 
 const unsigned int ExplicitDynamicsContactConstraint::_no_iterations = 0;
@@ -73,6 +75,8 @@ ExplicitDynamicsContactConstraint::validParams()
       "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
+  // params.addParam<std::vector<UserObjectName>>(
+  //     "vel_uos", "List of nodal user objects to update the velocity vector.");
   params.addClassDescription(
       "Apply non-penetration constraints on the mechanical deformation "
       "using a node on face, primary/secondary algorithm, and multiple options "
@@ -112,9 +116,9 @@ ExplicitDynamicsContactConstraint::ExplicitDynamicsContactConstraint(
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _neighbor_density(getNeighborMaterialPropertyByName<Real>("density")),
     _neighbor_wave_speed(getNeighborMaterialPropertyByName<Real>("wave_speed")),
-    _vel_x(isCoupled("vel_x") ? coupledValue("vel_x") : _zero),
-    _vel_y(isCoupled("vel_y") ? coupledValue("vel_y") : _zero),
-    _vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledValue("vel_z") : _zero),
+    _vel_x(&writableVariable("vel_x")),
+    _vel_y(&writableVariable("vel_y")),
+    _vel_z(&writableVariable("vel_z")),
     _neighbor_vel_x(isCoupled("vel_x") ? coupledNeighborValue("vel_x") : _zero),
     _neighbor_vel_y(isCoupled("vel_y") ? coupledNeighborValue("vel_y") : _zero),
     _neighbor_vel_z((_mesh.dimension() == 3 && isCoupled("vel_z")) ? coupledNeighborValue("vel_z")
@@ -272,7 +276,7 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
       pinfo->_contact_force = pinfo->_normal * (pinfo->_normal * pen_force);
       break;
     case ExplicitDynamicsContactModel::FRICTIONLESS_BALANCE:
-      solveImpactEquations(node, pinfo);
+      solveImpactEquations(node, pinfo, distance_vec);
       break;
     default:
       mooseError("Invalid or unavailable contact model");
@@ -291,7 +295,9 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
 }
 
 void
-ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node, PenetrationInfo * pinfo)
+ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
+                                                        PenetrationInfo * pinfo,
+                                                        const RealVectorValue & /*distance_gap*/)
 {
   // Stab at momentum balance, uncoupled normal pressure
   // See Heinstein et al, 2000, Contact-impact modeling in explicit transient dynamics.
@@ -306,29 +312,134 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node, Penet
   dof_id_type dof_density = node.dof_number(_aux_system.number(), _nodal_density_var->number(), 0);
   const Real density_secondary = (*_aux_solution)(dof_density);
 
-  // Primary surface
-  _neighbor_density[0];
-  _neighbor_wave_speed[0];
-
   Real contact_pressure_balance(0.0);
+  Real mass_contact_pressure(0.0);
+
   Real gap_rate(0.0);
+  // Real gap(0.0);
 
-  contact_pressure_balance =
+  mass_contact_pressure =
       density_secondary * _neighbor_density[0] * wave_speed_secondary * _neighbor_wave_speed[0];
-  contact_pressure_balance /=
+  mass_contact_pressure /=
       (density_secondary * wave_speed_secondary + _neighbor_density[0] * _neighbor_wave_speed[0]);
-  contact_pressure_balance *= nodal_area;
+  mass_contact_pressure *= nodal_area;
 
-  RealVectorValue secondary_velocity(
-      _vel_x[0], _vel_y[0], _mesh.dimension() == 3 ? _vel_z[0] : 0.0);
-  RealVectorValue closest_point_velocity(
-      _neighbor_vel_x[0], _neighbor_vel_y[0], _mesh.dimension() == 3 ? _neighbor_vel_z[0] : 0.0);
-  gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
-  contact_pressure_balance *= gap_rate;
+  // Prepare equilibrium loop
+
+  bool is_converged(false);
+  const unsigned int max_no_iterations(20000);
+  unsigned int iteration_no(0);
+
+  // for (unsigned int i = 0; i < _ndisp; ++i)
+  // {
+  //   // translational velocities and accelerations
+  //   unsigned int dof_index_0 = node[0]->dof_number(nonlinear_sys.number(), _disp_num[i], 0);
+  //   _vel_0(i) = vel(dof_index_0);
+  // }
+
+  Real velocity_x = dynamic_cast<MooseVariableFE<Real> *>(_vel_x)->getNodalValue(node);
+  Real velocity_y = dynamic_cast<MooseVariableFE<Real> *>(_vel_y)->getNodalValue(node);
+  Real velocity_z = dynamic_cast<MooseVariableFE<Real> *>(_vel_z)->getNodalValue(node);
+
+  Real n_velocity_x = _neighbor_vel_x[0];
+  Real n_velocity_y = _neighbor_vel_y[0];
+  Real n_velocity_z = _neighbor_vel_z[0];
+
+  Real contact_pressure_old(0.0);
+
+  // Mass proxy for secondary node.
+  const Real mass_proxy = density_secondary * wave_speed_secondary * _dt * nodal_area;
+  const Real n_mass_proxy = _neighbor_density[0] * _neighbor_wave_speed[0] * _dt * nodal_area;
+
+  while (!is_converged && iteration_no < max_no_iterations)
+  {
+    // Start a loop until we converge on normal contact forces
+    RealVectorValue secondary_velocity(
+        velocity_x, velocity_y, _mesh.dimension() == 3 ? velocity_z : 0.0);
+    RealVectorValue closest_point_velocity(
+        n_velocity_x, n_velocity_y, _mesh.dimension() == 3 ? n_velocity_z : 0.0);
+    gap_rate = pinfo->_normal * (secondary_velocity - closest_point_velocity);
+
+    contact_pressure_balance = mass_contact_pressure * gap_rate;
+
+    velocity_x = velocity_x - _dt / mass_proxy * pinfo->_normal(0) *
+                                  (contact_pressure_balance - contact_pressure_old);
+    velocity_y = velocity_y - _dt / mass_proxy * pinfo->_normal(1) *
+                                  (contact_pressure_balance - contact_pressure_old);
+    velocity_z = velocity_z - _dt / mass_proxy * pinfo->_normal(2) *
+                                  (contact_pressure_balance - contact_pressure_old);
+
+    n_velocity_x = n_velocity_x - _dt / n_mass_proxy * pinfo->_normal(0) *
+                                      (contact_pressure_balance - contact_pressure_old);
+    n_velocity_y = n_velocity_y - _dt / n_mass_proxy * pinfo->_normal(1) *
+                                      (contact_pressure_balance - contact_pressure_old);
+    n_velocity_z = n_velocity_z - _dt / n_mass_proxy * pinfo->_normal(2) *
+                                      (contact_pressure_balance - contact_pressure_old);
+
+    // Convergence check:
+    const Real relative_error =
+        (contact_pressure_balance - contact_pressure_old) / contact_pressure_balance;
+    const Real absolute_error = std::abs(contact_pressure_balance - contact_pressure_old);
+
+    // Moose::out << "For error, current vs old is: " << contact_pressure_balance << ", "
+    //            << contact_pressure_old << "\n";
+
+    contact_pressure_old = contact_pressure_balance;
+
+    if (std::abs(relative_error) < TOLERANCE || absolute_error < TOLERANCE)
+    {
+      Moose::out << "Relative error of loop: " << std::abs(relative_error) << "\n";
+      is_converged = true;
+    }
+    else
+      iteration_no++;
+  }
+
+  auto & u_dot = *_sys.solutionUDot();
+  dof_id_type dof_x = node.dof_number(_sys.number(), _var_objects[0]->number(), 0);
+  dof_id_type dof_y = node.dof_number(_sys.number(), _var_objects[1]->number(), 0);
+  dof_id_type dof_z = node.dof_number(_sys.number(), _var_objects[2]->number(), 0);
+
+  Moose::out << "Dofs set up in this nodal constraint are: " << dof_x << ", " << dof_y << ", and "
+             << dof_z << "\n";
+
+  // Set velocities on contact interface according to local, converged solution.
+  u_dot.set(dof_x, velocity_x);
+  u_dot.set(dof_y, velocity_y);
+  u_dot.set(dof_z, velocity_z);
+  u_dot.close();
+
+  Moose::out << "Total iterations: " << iteration_no << "\n";
+  Moose::out << "vel z *before* local update: "
+             << dynamic_cast<MooseVariableFE<Real> *>(_vel_z)->getNodalValue(node) << "\n";
+  Moose::out << "vel z locally after update update: " << velocity_z << "\n";
+
+  // NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(_sys.number());
+
+  if (true)
+  {
+    numeric_index_type dof_index_x = node.dof_number(_aux_system.number(), _vel_x->number(), 0);
+    numeric_index_type dof_index_y = node.dof_number(_aux_system.number(), _vel_y->number(), 0);
+    numeric_index_type dof_index_z = node.dof_number(_aux_system.number(), _vel_z->number(), 0);
+
+    _vel_x->setNodalValue(velocity_x, dof_index_x);
+    _vel_y->setNodalValue(velocity_y, dof_index_y);
+    _vel_z->setNodalValue(velocity_z, dof_index_z);
+
+    // vel(dof_index_x) = velocity_x;
+    // vel(dof_index_y) = velocity_y;
+    // vel(dof_index_z) = velocity_z;
+  }
+
+  Moose::out << "vel z *after* local update: "
+             << dynamic_cast<MooseVariableFE<Real> *>(_vel_z)->nodalValue() << "\n";
 
   // The gap rate can probably be saved in pinfo by adequately evaluating the velocity variable at
   // the corresponding points. Let's do that.
-  pinfo->_contact_force = pinfo->_normal * contact_pressure_balance;
+  if (contact_pressure_balance < 0.0)
+    pinfo->_contact_force = pinfo->_normal * contact_pressure_balance;
+  else
+    pinfo->_contact_force = 0.0;
 }
 
 Real
