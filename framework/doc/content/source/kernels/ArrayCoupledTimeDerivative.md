@@ -37,9 +37,7 @@ to that the residual the `ArrayCoupledTimeDerivative` contributes, and the coupl
 variable `v` that the time derivative operator acts upon. Example syntax can be
 found in the kernel block below:
 
-!listing
-test/tests/kernels/array_coupled_time_derivative/test_jacobian.i
-block=Kernels label=false
+!listing test/tests/kernels/array_coupled_time_derivative/test_jacobian.i block=Kernels
 
 !syntax parameters /Kernels/ArrayCoupledTimeDerivative
 
