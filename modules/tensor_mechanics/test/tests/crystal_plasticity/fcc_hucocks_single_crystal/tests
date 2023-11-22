@@ -8,7 +8,7 @@
                   'significant non-zero slip increments and dislocation pinning '
                   'point evolution for all four coplanar groups under tensile '
                   'displacement loading.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [fcc_hucocks_tensile_111orientation]
@@ -19,7 +19,7 @@
                   'activation of three of the four coplanar groups, as indicated by '
                   'the zero slip increment for the 3rd coplanar group, which has a '
                   'plane normal that is parallel to the loading direction.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeElasticityTensorCP.md'
   []
@@ -33,7 +33,7 @@
                   '2nd coplanar groups and a lower pinning point density accumulation '
                   'on the active 1st and 3rd coplanar groups, consistent with the '
                   'lower prescribed self evolution coefficient.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeElasticityTensorCP.md'
   []
@@ -48,7 +48,7 @@
                   'calculated to be larger than the pinning point accumulation on the '
                   '1st coplanar group due to the higher prescribed latent evolution '
                   'coefficient value.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeElasticityTensorCP.md'
   []
@@ -62,7 +62,7 @@
                   'The system shall demonstrate pinning point density and slip resistance '
                   'evolution, on all four coplanar groups, in a manner consistent with '
                   'stress relaxation.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
 
@@ -76,7 +76,7 @@
                   'BCs are applied in the z-direction. The computed pinning point density '
                   'on all slip planes shall also evolve in response to the thermal '
                   'deformation gradient.'
-    issues = '#17734'
+    issues = '#17734 #26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
@@ -90,7 +90,7 @@
                   'to decreasing solute concentration in a simulation where plasticity does '
                   'not occur and the material property names for the precipitate density '
                   'and radius are not provided.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [fcc_hucocks_increase_precipitate_radius]
@@ -101,7 +101,7 @@
                   'without pinning point density evolution, an increase in the slip system '
                   'resistance in response to increasing precipitate radius when the solute '
                   'concentration material property name is not provided.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [fcc_hucocks_only_solute_hardening]
@@ -114,7 +114,7 @@
                   'resistance due only to a static solute concentration, without '
                   'plasticity to match the analytical solution of 25MPa within '
                   'reasonable rounding error.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [fcc_hucocks_only_precipitate_hardening]
@@ -128,7 +128,7 @@
                   'resistance due only to a static, prescribed precipitate number density '
                   ' and precipitate radius to match the analytical solution of 10 MPa, '
                   ' with some error introduced by rounding in the input values.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [fcc_hucocks_only_forest_hardening]
@@ -143,7 +143,7 @@
                   'that would evolve the pinning point density. The presecribed initial '
                   'pinning point density is set to produce the analytical solution of '
                   'approximately 30 MPa.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
 
@@ -156,7 +156,7 @@
     requirement = 'The system shall demonstrate no change in the pinning point '
                   'density value on the single active coplanar group when the '
                   'self plane evolution coefficient is set to zero.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
   [single_active_group_zero_latent_evolution]
@@ -168,7 +168,7 @@
     requirement = 'The system shall calculate no change in the pinning point '
                   'density value on all three inactive coplanar groups when '
                   'the latent plane group evolution coefficient is set to zero.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
   []
 
@@ -180,7 +180,7 @@
                  'system groups different from the number specified by the user.'
     requirement = 'The system shall error out when the user specifies more coplanar '
                   'groups than exist in the specified slip system text file.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
   []
@@ -192,7 +192,7 @@
                  'by the user for the parameter number_coplanar_groups'
     requirement = 'The system shall error out when the user specifies fewer coplanar '
                   'groups than are calculated from the specified slip system text file.'
-    issues = ''
+    issues = '#26120'
     design = '/CrystalPlasticityFCCDislocationLinkHuCocksUpdate.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
   []

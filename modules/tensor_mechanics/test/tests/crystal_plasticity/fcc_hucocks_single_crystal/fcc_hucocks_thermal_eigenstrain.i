@@ -230,10 +230,6 @@
   []
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'

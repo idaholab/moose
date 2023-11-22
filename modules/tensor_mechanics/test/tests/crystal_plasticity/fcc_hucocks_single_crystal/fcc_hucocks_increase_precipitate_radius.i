@@ -222,6 +222,5 @@
 
 [Outputs]
   csv = true
-  console = true
   perf_graph = true
 []

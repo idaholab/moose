@@ -282,10 +282,6 @@
   []
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
@@ -305,6 +301,5 @@
 
 [Outputs]
   csv = true
-  console = true
   perf_graph = true
 []

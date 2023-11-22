@@ -18,7 +18,7 @@ CrystalPlasticityFCCDislocationLinkHuCocksUpdate::validParams()
   InputParameters params = CrystalPlasticityStressUpdateBase::validParams();
   params.addClassDescription(
       "Athermal dislocation glide model for FCC cyrstals based on dislocation pinning points on "
-      "slip planes. This model was developed stainless steel by Hu and Cocks.");
+      "slip planes. This model was developed for stainless steel by Hu and Cocks.");
 
   params.set<MooseEnum>("crystal_lattice_type") = "FCC";
   params.suppressParameter<MooseEnum>("crystal_lattice_type");
