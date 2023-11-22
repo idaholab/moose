@@ -104,8 +104,3 @@ NodalNormalsEvaluator::finalize()
 {
   _aux.solution().close();
 }
-
-void
-NodalNormalsEvaluator::threadJoin(const UserObject & /*uo*/)
-{
-}

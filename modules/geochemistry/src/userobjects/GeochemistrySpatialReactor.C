@@ -444,7 +444,7 @@ void
 GeochemistrySpatialReactor::threadJoin(const UserObject & uo)
 {
   _nthreads += 1;
-  const GeochemistrySpatialReactor & gsr = static_cast<const GeochemistrySpatialReactor &>(uo);
+  const auto & gsr = static_cast<const GeochemistrySpatialReactor &>(uo);
   for (unsigned i = 0; i < _num_my_nodes; ++i)
   {
     if (!_execute_done[i] && gsr._execute_done[i])

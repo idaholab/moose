@@ -51,8 +51,7 @@ FunctionElementLoopIntegralUserObject::computeElement()
 void
 FunctionElementLoopIntegralUserObject::threadJoin(const UserObject & y)
 {
-  const FunctionElementLoopIntegralUserObject & uo =
-      static_cast<const FunctionElementLoopIntegralUserObject &>(y);
+  const auto & uo = static_cast<const FunctionElementLoopIntegralUserObject &>(y);
   _integral_value += uo._integral_value;
 }
 

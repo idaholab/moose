@@ -129,7 +129,7 @@ GeometricCutUserObject::execute()
 void
 GeometricCutUserObject::threadJoin(const UserObject & y)
 {
-  const GeometricCutUserObject & gcuo = dynamic_cast<const GeometricCutUserObject &>(y);
+  const auto & gcuo = static_cast<const GeometricCutUserObject &>(y);
 
   for (const auto & it : gcuo._marked_elems_2d)
   {

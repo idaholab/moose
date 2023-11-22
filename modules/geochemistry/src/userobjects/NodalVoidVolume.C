@@ -186,7 +186,7 @@ void
 NodalVoidVolume::threadJoin(const UserObject & uo)
 {
   // _nodal_void_volume will have been computed by other threads: add their contributions to ours.
-  const NodalVoidVolume & nvv = static_cast<const NodalVoidVolume &>(uo);
+  const auto & nvv = static_cast<const NodalVoidVolume &>(uo);
   for (auto & our_nvv : _nodal_void_volume)
     our_nvv.second += nvv._nodal_void_volume.at(our_nvv.first);
   // Now _nodal_void_volume is correct for all nodes within this processor's domain (but potentially

@@ -109,7 +109,7 @@ XFEMMaterialStateMarkerBase::execute()
 void
 XFEMMaterialStateMarkerBase::threadJoin(const UserObject & y)
 {
-  const XFEMMaterialStateMarkerBase & xmuo = dynamic_cast<const XFEMMaterialStateMarkerBase &>(y);
+  const auto & xmuo = dynamic_cast<const XFEMMaterialStateMarkerBase &>(y);
 
   for (std::map<unsigned int, RealVectorValue>::const_iterator mit = xmuo._marked_elems.begin();
        mit != xmuo._marked_elems.end();

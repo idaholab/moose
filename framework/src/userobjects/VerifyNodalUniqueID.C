@@ -49,7 +49,7 @@ VerifyNodalUniqueID::execute()
 void
 VerifyNodalUniqueID::threadJoin(const UserObject & y)
 {
-  const VerifyNodalUniqueID & uo = static_cast<const VerifyNodalUniqueID &>(y);
+  const auto & uo = static_cast<const VerifyNodalUniqueID &>(y);
 
   _all_ids.insert(_all_ids.end(), uo._all_ids.begin(), uo._all_ids.end());
 }

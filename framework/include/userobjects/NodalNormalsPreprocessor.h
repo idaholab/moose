@@ -33,7 +33,7 @@ public:
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void execute() override;
-  virtual void threadJoin(const UserObject & uo) override;
+  virtual void threadJoin(const UserObject & /*uo*/) override {}
 
   /**
    * Forces object to be stored as a block object.

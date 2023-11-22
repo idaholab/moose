@@ -80,8 +80,7 @@ HeatFluxFromHeatStructureBaseUserObject::finalize()
 void
 HeatFluxFromHeatStructureBaseUserObject::threadJoin(const UserObject & y)
 {
-  const HeatFluxFromHeatStructureBaseUserObject & uo =
-      static_cast<const HeatFluxFromHeatStructureBaseUserObject &>(y);
+  const auto & uo = static_cast<const HeatFluxFromHeatStructureBaseUserObject &>(y);
   for (auto & it : uo._heated_perimeter)
     _heated_perimeter[it.first] = it.second;
   for (auto & it : uo._heat_flux)

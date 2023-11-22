@@ -204,7 +204,7 @@ RadialAverage::finalize()
 void
 RadialAverage::threadJoin(const UserObject & y)
 {
-  const RadialAverage & uo = static_cast<const RadialAverage &>(y);
+  const auto & uo = static_cast<const RadialAverage &>(y);
   _qp_data.insert(_qp_data.begin(), uo._qp_data.begin(), uo._qp_data.end());
   _average.insert(uo._average.begin(), uo._average.end());
 }
