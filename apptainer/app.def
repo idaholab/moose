@@ -162,23 +162,25 @@ From: {{ APPTAINER_FROM }}
     export METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
     # Temp location for copying and running in
-    export TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
-
+    export TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
+    # Really make sure that we nuke the temp location in all circumstances
+    trap "/usr/bin/rm -rf $TEMP_LOC" EXIT HUP INT TERM
 {%- if SECTION_TEST_BEGIN is defined %}
     {{ SECTION_TEST_BEGIN }}
 {%- endif %}
 
-    # Really make sure that we nuke the temp location in all circumstances
-    trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
     # Copy and run each subset of tests
     for TEST_DIR in ${TEST_DIRS}; do
-        mkdir -p $TEMP_LOC
-        cd $TEMP_LOC
+        TEMP_TEST_LOC=${TEMP_LOC}/${TEST_DIR}
+        mkdir $TEMP_TEST_LOC
+        cd $TEMP_TEST_LOC
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        rm -rf $TEMP_LOC
+        rm -rf $TEMP_TEST_LOC
     done
+
+    rm -rf $TEMP_LOC
 
 {%- if SECTION_TEST_END is defined %}
     {{ SECTION_TEST_END }}
