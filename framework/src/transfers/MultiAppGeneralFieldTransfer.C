@@ -463,6 +463,8 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
+    if (_from_mesh_divisions.size())
+      pointinfo.spatial_restriction_id = _from_mesh_divisions[problem_id]->divisionIndex(point);
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }
