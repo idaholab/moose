@@ -34,6 +34,7 @@ HillConstantsTempl<is_ad>::validParams()
       "the rotation angles about z-, x-, and z-axis, respectively in degrees.");
   params.addParam<std::vector<FunctionName>>(
       "function_names",
+      {},
       "A set of functions that describe the evolution of anisotropy with temperature");
   params.addParam<bool>(
       "use_large_rotation",

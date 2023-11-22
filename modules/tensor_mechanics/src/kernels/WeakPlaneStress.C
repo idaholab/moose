@@ -30,6 +30,7 @@ WeakPlaneStress::validParams()
                        "simulations without temperature coupling.)");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
+      {},
       "List of eigenstrains used in the strain calculation. Used for computing their derivaties "
       "for off-diagonal Jacobian terms.");
   params.addParam<std::string>("base_name", "Material property base name");

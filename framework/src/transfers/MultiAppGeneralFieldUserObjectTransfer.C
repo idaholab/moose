@@ -31,6 +31,7 @@ MultiAppGeneralFieldUserObjectTransfer::validParams()
       "Transfers user object spatial evaluations from an origin app onto a variable in the target "
       "application.");
 
+  params.set<std::vector<VariableName>>("source_variable") = std::vector<VariableName>{};
   params.suppressParameter<std::vector<VariableName>>("source_variable");
   params.addRequiredParam<UserObjectName>("source_user_object",
                                           "The UserObject you want to transfer values from. "

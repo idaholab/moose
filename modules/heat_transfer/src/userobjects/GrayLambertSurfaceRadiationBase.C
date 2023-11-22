@@ -26,11 +26,12 @@ GrayLambertSurfaceRadiationBase::validParams()
   params.addRequiredParam<std::vector<Real>>("emissivity", "Emissivities for each boundary.");
   params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_boundary",
+      {},
       "The list of boundary IDs from the mesh with fixed temperatures.");
-  params.addParam<std::vector<FunctionName>>("fixed_boundary_temperatures",
-                                             "The temperatures of the fixed boundary.");
+  params.addParam<std::vector<FunctionName>>(
+      "fixed_boundary_temperatures", {}, "The temperatures of the fixed boundary.");
   params.addParam<std::vector<BoundaryName>>(
-      "adiabatic_boundary", "The list of boundary IDs from the mesh that are adiabatic.");
+      "adiabatic_boundary", {}, "The list of boundary IDs from the mesh that are adiabatic.");
 
   params.addClassDescription(
       "This object implements the exchange of heat by radiation between sidesets.");

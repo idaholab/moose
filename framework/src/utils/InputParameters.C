@@ -15,6 +15,7 @@
 #include "MooseUtils.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
+#include "MooseObject.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/simple_range.h"
@@ -1189,7 +1190,8 @@ template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
                                            const InputParameters & pars,
-                                           const MooseEnum *)
+                                           const MooseEnum *,
+                                           const MooseObject * /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
@@ -1199,7 +1201,8 @@ template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
                                                 const InputParameters & pars,
-                                                const MultiMooseEnum *)
+                                                const MultiMooseEnum *,
+                                                const MooseObject * /* = nullptr */)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
@@ -1414,4 +1417,10 @@ InputParameters::paramAliases(const std::string & param_name) const
     aliases.push_back(pr.second);
 
   return aliases;
+}
+
+void
+InputParameters::callMooseErrorHelper(const MooseObject & object, const std::string & error)
+{
+  object.mooseError(error);
 }

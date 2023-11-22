@@ -32,7 +32,7 @@ StatisticsReporter::validParams()
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
   params.addParam<std::vector<ReporterName>>(
-      "reporters", "List of Reporter values to utilized for statistic computations.");
+      "reporters", {}, "List of Reporter values to utilized for statistic computations.");
 
   MultiMooseEnum stats = StochasticTools::makeCalculatorEnum();
   params.addRequiredParam<MultiMooseEnum>(

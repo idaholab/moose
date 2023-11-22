@@ -35,8 +35,8 @@ MoosePreconditioner::validParams()
       "associated with an off-diagonal column from the same position in off_diag_column.");
   params.addParam<std::vector<NonlinearVariableName>>(
       "off_diag_column",
-      "The variable names for the off-diagonal columns you want to add into the matrix; they will "
-      "be associated with an off-diagonal row from the same position in off_diag_row.");
+      "The variable names for the off-diagonal columns you want to add into the matrix; they "
+      "will be associated with an off-diagonal row from the same position in off_diag_row.");
   params.addParam<bool>("full",
                         false,
                         "Set to true if you want the full set of couplings between variables "

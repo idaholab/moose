@@ -33,14 +33,17 @@ RadiationTransferAction::validParams()
       "boundary", "The boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
-      "adiabatic_boundary", "The adiabatic boundaries that participate in the radiative exchange.");
+      "adiabatic_boundary",
+      {},
+      "The adiabatic boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_boundary",
+      {},
       "The fixed temperature boundaries that participate in the radiative exchange.");
 
-  params.addParam<std::vector<FunctionName>>("fixed_boundary_temperatures",
-                                             "The temperatures of the fixed boundary.");
+  params.addParam<std::vector<FunctionName>>(
+      "fixed_boundary_temperatures", {}, "The temperatures of the fixed boundary.");
 
   params.addRequiredParam<std::vector<unsigned int>>("n_patches",
                                                      "Number of radiation patches per sideset.");

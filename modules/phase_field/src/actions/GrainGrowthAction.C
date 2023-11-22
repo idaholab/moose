@@ -77,8 +77,8 @@ GrainGrowthAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
 
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addParamNamesToGroup("c en_ratio ndef", "Multiphysics");

@@ -49,7 +49,7 @@ GeneralizedPlaneStrainActionPD::validParams()
                                               "GeneralizedPlaneStrainActionPD will be applied "
                                               "to");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
 
   return params;
 }

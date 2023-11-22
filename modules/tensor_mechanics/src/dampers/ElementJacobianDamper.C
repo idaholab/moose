@@ -22,8 +22,8 @@ ElementJacobianDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
   params.addClassDescription("Damper that limits the change in element Jacobians");
-  params.addParam<std::vector<VariableName>>("displacements",
-                                             "The nonlinear displacement variables");
+  params.addParam<std::vector<VariableName>>(
+      "displacements", {}, "The nonlinear displacement variables");
   params.addParam<Real>(
       "max_increment",
       0.1,

@@ -69,14 +69,15 @@ LineElementAction::validParams()
   // Master action, not in the common parameters area
   params.addParam<std::vector<SubdomainName>>(
       "block",
+      {},
       "The list of ids of the blocks (subdomain) "
       "that the stress divergence, inertia kernels and materials will be "
       "applied to");
   // Advanced
-  params.addParam<std::vector<AuxVariableName>>("save_in",
-                                                "The displacement and rotational residuals");
   params.addParam<std::vector<AuxVariableName>>(
-      "diag_save_in", "The displacement and rotational diagonal preconditioner terms");
+      "save_in", {}, "The displacement and rotational residuals");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in", {}, "The displacement and rotational diagonal preconditioner terms");
   params.addParamNamesToGroup("block", "Advanced");
   return params;
 }
@@ -200,6 +201,7 @@ LineElementAction::beamParameters()
       "Unit vector along the y direction if different from global y direction.");
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
+      {},
       "The list of boundary IDs from the mesh where the nodal "
       "mass/inertia will be applied.");
   return params;

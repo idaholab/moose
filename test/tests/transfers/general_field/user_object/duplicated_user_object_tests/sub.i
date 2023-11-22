@@ -24,7 +24,7 @@
 [Functions]
   [./axial_force]
     type = ParsedFunction
-    value = 1000*y
+    expression = 1000*y
   [../]
 []
 

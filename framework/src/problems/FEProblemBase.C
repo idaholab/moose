@@ -188,7 +188,7 @@ FEProblemBase::validParams()
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
   params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
+      "block", {}, "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
   params.addDeprecatedParam<MultiMooseEnum>("coord_type",
@@ -241,12 +241,14 @@ FEProblemBase::validParams()
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_vectors",
+      {},
       "Extra vectors to add to the system that can be filled by objects which compute residuals "
       "and Jacobians (Kernels, BCs, etc.) by setting tags on them. The outer index is for which "
       "nonlinear system the extra tag vectors should be added for");
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_matrices",
+      {},
       "Extra matrices to add to the system that can be filled "
       "by objects which compute residuals and Jacobians "
       "(Kernels, BCs, etc.) by setting tags on them. The outer index is for which "
@@ -254,6 +256,7 @@ FEProblemBase::validParams()
 
   params.addParam<std::vector<TagName>>(
       "extra_tag_solutions",
+      {},
       "Extra solution vectors to add to the system that can be used by "
       "objects for coupling variable values stored in them.");
 
@@ -522,8 +525,7 @@ FEProblemBase::createTagVectors()
 void
 FEProblemBase::createTagSolutions()
 {
-  auto & vectors = getParam<std::vector<TagName>>("extra_tag_solutions");
-  for (auto & vector : vectors)
+  for (auto & vector : getParam<std::vector<TagName>>("extra_tag_solutions"))
   {
     auto tag = addVectorTag(vector, Moose::VECTOR_TAG_SOLUTION);
     for (auto & nl : _nl)

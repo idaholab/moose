@@ -28,7 +28,7 @@ ADComputeStrainBaseTempl<R2>::validParams()
   params.addParam<bool>(
       "volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
   params.addParam<MaterialPropertyName>("global_strain",
                                         "Optional material property holding a global strain "
                                         "tensor applied to the mesh as a whole");

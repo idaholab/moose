@@ -21,8 +21,8 @@ FunctionDT::validParams()
   // TODO: This will be required when time_t and time_dt is removed
   params.addParam<FunctionName>(
       "function", "The name of the time-dependent function that prescribes the time step size.");
-  params.addParam<std::vector<Real>>("time_t", "The values of t");
-  params.addParam<std::vector<Real>>("time_dt", "The values of dt");
+  params.addParam<std::vector<Real>>("time_t", {}, "The values of t");
+  params.addParam<std::vector<Real>>("time_dt", {}, "The values of dt");
   params.addParam<Real>("growth_factor",
                         std::numeric_limits<Real>::max(),
                         "Maximum ratio of new to previous timestep sizes.");
@@ -49,7 +49,7 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
     _interpolate(getParam<bool>("interpolate"))
 {
   // TODO: remove this when `time_t` and `time_dt` is removed
-  if ((isParamValid("time_t") && isParamValid("time_dt")) && !isParamValid("function"))
+  if ((_time_t.size() && _time_dt.size()) && !isParamValid("function"))
     mooseDeprecated(name(),
                     ": Using `time_t` and `time_dt` parameter is deprecated. Switch your input "
                     "file to using `function` parameter.\n",
@@ -59,7 +59,7 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
                     "  3. Copy `time_dt` parameter into your function and rename it to `y`.\n",
                     "  4. Use the `function` parameter in your time stepper and pass your new "
                     "function name into it.\n");
-  else if ((isParamValid("time_t") && isParamValid("time_dt")) && isParamValid("function"))
+  else if ((_time_t.size() && _time_dt.size()) && isParamValid("function"))
     mooseError(name(),
                ": Using `time_t`, `_time_dt` and `function` at the same time. Use only `function`, "
                "`time_t` and _time_dt is deprecated.");
@@ -68,7 +68,7 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
                ": Please, specify a function (using the `function` parameter) that will prescribe "
                "the time step size.");
 
-  if (isParamValid("time_t") && isParamValid("time_dt"))
+  if (_time_t.size() && _time_dt.size())
   {
     try
     {

@@ -32,6 +32,7 @@ MultiAppConservativeTransfer::validParams()
 
   params.addParam<std::vector<PostprocessorName>>(
       "to_postprocessors_to_be_preserved",
+      {},
       "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
   params.addParam<bool>("allow_skipped_adjustment",
                         false,
@@ -51,7 +52,9 @@ MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
     _preserve_transfer(isParamValid("from_postprocessors_to_be_preserved")),
     _from_postprocessors_to_be_preserved(
-        getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
+        _preserve_transfer
+            ? getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")
+            : std::vector<PostprocessorName>{}),
     _to_postprocessors_to_be_preserved(
         getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
     _use_nearestpoint_pps(false),

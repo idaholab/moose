@@ -56,20 +56,26 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
-    const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
-    const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
-
-    // put 1s on diagonal
-    for (unsigned int i = 0; i < n_vars; i++)
-      (*cm)(i, i) = 1;
-
-    // off-diagonal entries
-    std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (const auto i : index_range(off_diag_rows))
+    if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
     {
-      unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
-      unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
-      (*cm)(row, column) = 1;
+
+      const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+      const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
+
+      // put 1s on diagonal
+      for (unsigned int i = 0; i < n_vars; i++)
+        (*cm)(i, i) = 1;
+
+      // off-diagonal entries
+      std::vector<std::vector<unsigned int>> off_diag(n_vars);
+      if (off_diag_rows.size() * off_diag_columns.size() != 0 &&
+          off_diag_rows.size() == off_diag_columns.size())
+        for (const auto i : index_range(off_diag_rows))
+        {
+          unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
+          unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
+          (*cm)(row, column) = 1;
+        }
     }
   }
   else

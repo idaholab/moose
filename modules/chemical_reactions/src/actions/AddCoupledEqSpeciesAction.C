@@ -31,7 +31,7 @@ AddCoupledEqSpeciesAction::validParams()
   params.addParam<std::vector<AuxVariableName>>(
       "secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
-  params.addParam<std::vector<VariableName>>("pressure", "Pressure variable");
+  params.addParam<std::vector<VariableName>>("pressure", {}, "Pressure variable");
   RealVectorValue g(0, 0, 0);
   params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
   params.addClassDescription("Adds coupled equilibrium Kernels and AuxKernels for primary species");

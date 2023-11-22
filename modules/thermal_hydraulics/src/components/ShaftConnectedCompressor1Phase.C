@@ -27,6 +27,7 @@ ShaftConnectedCompressor1Phase::validParams()
   params.makeParamRequired<Real>("A_ref");
   params.addRequiredParam<BoundaryName>("inlet", "Compressor inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Compressor outlet");
+  params.set<std::vector<BoundaryName>>("connections") = {};
   params.suppressParameter<std::vector<BoundaryName>>("connections");
   params.addParam<bool>("treat_as_turbine", false, "Treat the compressor as a turbine?");
   params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");

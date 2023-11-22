@@ -55,8 +55,8 @@ NonconservedAction::validParams()
                         "The mobility is a function of any MOOSE variable (if "
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
   return params;
 }
 

@@ -33,7 +33,7 @@ GlobalStrainAction::validParams()
   params.addClassDescription("Set up the GlobalStrainAction environment");
   params.addRequiredParam<VariableName>("scalar_global_strain",
                                         "Scalar variable for global strain");
-  params.addParam<std::vector<VariableName>>("displacements", "The displacement variables");
+  params.addParam<std::vector<VariableName>>("displacements", {}, "The displacement variables");
   params.addParam<std::vector<AuxVariableName>>(
       "auxiliary_displacements",
       "The auxliary displacement variables to be calculated from scalar variables");
@@ -44,7 +44,8 @@ GlobalStrainAction::validParams()
                                      "Vector of values defining the constant applied stress "
                                      "to add, in order 11, 22, 33, 23, 13, 12");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "The block id where this variable lives");
 
   return params;
 }

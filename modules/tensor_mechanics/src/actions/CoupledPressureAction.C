@@ -25,15 +25,16 @@ CoupledPressureAction::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The displacements appropriate for the simulation geometry and coordinate system");
 
   params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
-  params.addParam<std::vector<AuxVariableName>>("save_in_disp_x",
-                                                "The save_in variables for x displacement");
-  params.addParam<std::vector<AuxVariableName>>("save_in_disp_y",
-                                                "The save_in variables for y displacement");
-  params.addParam<std::vector<AuxVariableName>>("save_in_disp_z",
-                                                "The save_in variables for z displacement");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_x", {}, "The save_in variables for x displacement");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_y", {}, "The save_in variables for y displacement");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in_disp_z", {}, "The save_in variables for z displacement");
 
   params.addParam<VariableName>("pressure", "The variable that contains the pressure");
   return params;

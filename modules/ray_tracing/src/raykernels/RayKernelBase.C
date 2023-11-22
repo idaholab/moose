@@ -49,7 +49,7 @@ RayKernelBase::RayKernelBase(const InputParameters & params)
     _need_segment_reinit(getParam<bool>("_need_segment_reinit"))
 {
   // Add dependencies
-  if (params.isParamSetByUser("depends_on"))
+  if (isParamValid("depends_on"))
     for (const auto & name : getParam<std::vector<std::string>>("depends_on"))
       dependsOn(name);
 

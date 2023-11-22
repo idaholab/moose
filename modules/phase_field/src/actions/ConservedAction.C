@@ -55,8 +55,8 @@ ConservedAction::validParams()
   params.addRequiredParam<MaterialPropertyName>(
       "free_energy", "Base name of the free energy function F defined in a free energy material");
   params.addRequiredParam<MaterialPropertyName>("kappa", "The kappa used with the kernel");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
   return params;
 }
 

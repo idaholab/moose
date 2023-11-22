@@ -27,6 +27,7 @@ FunctionValuePostprocessor::validParams()
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
   params.addParam<std::vector<PostprocessorName>>(
       "indirect_dependencies",
+      {},
       "If the evaluated function depends on other postprocessors they must be listed here to "
       "ensure proper dependency resolution");
 

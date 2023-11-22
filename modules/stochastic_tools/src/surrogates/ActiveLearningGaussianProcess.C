@@ -40,8 +40,8 @@ ActiveLearningGaussianProcess::validParams()
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>(
       "show_optimization_details", false, "Switch to show TAO or Adam solver results");
-  params.addParam<std::vector<std::string>>("tune_parameters",
-                                            "Select hyperparameters to be tuned");
+  params.addParam<std::vector<std::string>>(
+      "tune_parameters", {}, "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>(
       "tuning_min", std::vector<Real>(), "Minimum allowable tuning value");
   params.addParam<std::vector<Real>>(

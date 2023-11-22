@@ -112,15 +112,18 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
   setParserFeatureFlags(_func_Fz);
 
   // add the constant expressions; note that the three functions share one set of constants
-  addFParserConstants(_func_Fx,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-  addFParserConstants(_func_Fy,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-  addFParserConstants(_func_Fz,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
+  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+  {
+    addFParserConstants(_func_Fx,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
+    addFParserConstants(_func_Fy,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
+    addFParserConstants(_func_Fz,
+                        getParam<std::vector<std::string>>("constant_names"),
+                        getParam<std::vector<std::string>>("constant_expressions"));
+  }
 
   // parse functions
   if (_func_Fx->Parse(_function_x, "t") >= 0)

@@ -25,6 +25,7 @@ ShaftConnectedPump1Phase::validParams()
   params.makeParamRequired<Real>("A_ref");
   params.addRequiredParam<BoundaryName>("inlet", "Pump inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Pump outlet");
+  params.set<std::vector<BoundaryName>>("connections") = {};
   params.suppressParameter<std::vector<BoundaryName>>("connections");
   params.addRequiredParam<Real>("omega_rated", "Rated pump speed [rad/s]");
   params.addRequiredParam<Real>("volumetric_rated", "Rated pump volumetric flow rate [m^3/s]");

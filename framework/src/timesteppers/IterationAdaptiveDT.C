@@ -57,8 +57,8 @@ IterationAdaptiveDT::validParams()
       "Timestep to apply after time sync with function point. To be used in "
       "conjunction with 'force_step_every_function_point'.");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
-  params.addParam<std::vector<Real>>("time_t", "The values of t");
-  params.addParam<std::vector<Real>>("time_dt", "The values of dt");
+  params.addParam<std::vector<Real>>("time_t", {}, "The values of t");
+  params.addParam<std::vector<Real>>("time_dt", {}, "The values of dt");
   params.addParam<Real>("growth_factor",
                         2.0,
                         "Factor to apply to timestep if easy convergence (if "

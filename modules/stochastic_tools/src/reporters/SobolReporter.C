@@ -36,7 +36,7 @@ SobolReporter::validParams()
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
 
   params.addParam<std::vector<ReporterName>>(
-      "reporters", "List of Reporter values to utilized for statistic computations.");
+      "reporters", {}, "List of Reporter values to utilized for statistic computations.");
 
   params.addParam<std::vector<Real>>(
       "ci_levels",

@@ -54,10 +54,12 @@ Q2PAction::validParams()
   params.addRequiredParam<Real>("gas_viscosity", "The gas viscosity");
   params.addRequiredParam<Real>("diffusivity", "The diffusivity");
   params.addParam<std::vector<OutputName>>("output_nodal_masses_to",
+                                           {},
                                            "Output Nodal masses to this Output object.  If you "
                                            "don't want any outputs, don't input anything here");
   params.addParam<std::vector<OutputName>>(
       "output_total_masses_to",
+      {},
       "Output total water and gas mass to this Output object.  If you "
       "don't want any outputs, don't input anything here");
   params.addParam<bool>("save_gas_flux_in_Q2PGasFluxResidual",

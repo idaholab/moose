@@ -41,6 +41,7 @@ StressDivergenceTensors::validParams()
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
+      {},
       "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
       "for off-diagonal Jacobian terms.");
   params.addCoupledVar("out_of_plane_strain",

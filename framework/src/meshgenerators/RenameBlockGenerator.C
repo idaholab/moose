@@ -99,7 +99,9 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   }
   else
   {
-    _old_block = getParam<std::vector<SubdomainName>>("old_block_name");
+    _old_block = isParamValid("old_block_name")
+                     ? getParam<std::vector<SubdomainName>>("old_block_name")
+                     : std::vector<SubdomainName>{};
     _old_block_param_name = "old_block_name";
   }
 
@@ -125,7 +127,9 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   }
   else
   {
-    _new_block = getParam<std::vector<SubdomainName>>("new_block_name");
+    _new_block = isParamValid("new_block_name")
+                     ? getParam<std::vector<SubdomainName>>("new_block_name")
+                     : std::vector<SubdomainName>{};
     new_block_param_name = "new_block_name";
   }
 

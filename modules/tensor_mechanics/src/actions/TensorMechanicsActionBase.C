@@ -154,7 +154,7 @@ TensorMechanicsActionBase::validParams()
       "use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
@@ -166,9 +166,9 @@ TensorMechanicsActionBase::validParams()
       "of the deformed shape with the periodic BC");
 
   // Advanced
-  params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
-  params.addParam<std::vector<AuxVariableName>>("diag_save_in",
-                                                "The displacement diagonal preconditioner terms");
+  params.addParam<std::vector<AuxVariableName>>("save_in", {}, "The displacement residuals");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in", {}, "The displacement diagonal preconditioner terms");
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Methods to calculate the finite strain and rotation increments");

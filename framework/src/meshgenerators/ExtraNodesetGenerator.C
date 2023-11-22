@@ -32,6 +32,7 @@ ExtraNodesetGenerator::validParams()
                                              "supplied).");
   params.addParam<std::vector<std::vector<Real>>>(
       "coord",
+      {},
       "The nodes with coordinates you want to be in the "
       "nodeset. Separate multple coords with ';' (Either this parameter or \"nodes\" must be "
       "supplied).");
@@ -52,18 +53,6 @@ std::unique_ptr<MeshBase>
 ExtraNodesetGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  const auto coord = getParam<std::vector<std::vector<Real>>>("coord");
-  const auto nodes = getParam<std::vector<unsigned int>>("nodes");
-
-  // make sure the input is not empty
-  bool data_valid = false;
-  if (isParamValid("nodes") && nodes.size() != 0)
-    data_valid = true;
-  if (_pars.isParamValid("coord") && coord.size() != 0)
-    data_valid = true;
-
-  if (!data_valid)
-    mooseError("Node set can not be empty!");
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
@@ -74,15 +63,16 @@ ExtraNodesetGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // add nodes with their ids
-  for (const auto & node_id : nodes)
-  {
-    // Our mesh may be distributed and this node may not exist on this process
-    if (!mesh->query_node_ptr(node_id))
-      continue;
+  if (isParamValid("nodes"))
+    for (const auto & node_id : getParam<std::vector<unsigned int>>("nodes"))
+    {
+      // Our mesh may be distributed and this node may not exist on this process
+      if (!mesh->query_node_ptr(node_id))
+        continue;
 
-    for (const auto & boundary_id : boundary_ids)
-      boundary_info.add_node(node_id, boundary_id);
-  }
+      for (const auto & boundary_id : boundary_ids)
+        boundary_info.add_node(node_id, boundary_id);
+    }
 
   // add nodes with their coordinates
   const auto dim = mesh->mesh_dimension();
@@ -91,7 +81,7 @@ ExtraNodesetGenerator::generate()
   locator->enable_out_of_mesh_mode();
 
   const auto tolerance = getParam<Real>("tolerance");
-  for (const auto & c : coord)
+  for (const auto & c : getParam<std::vector<std::vector<Real>>>("coord"))
   {
     Point p;
     if (c.size() < dim)
@@ -143,9 +133,9 @@ ExtraNodesetGenerator::generate()
     }
 
     if (!found_elem)
-      mooseError(
-          "Unable to locate the following point within the domain, please check its coordinates:\n",
-          p);
+      mooseError("Unable to locate the following point within the domain, please check its "
+                 "coordinates:\n",
+                 p);
 
     if (!on_node)
       mooseError("No node found at point:\n", p);

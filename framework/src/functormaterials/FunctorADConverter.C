@@ -22,13 +22,13 @@ FunctorADConverterTempl<T>::validParams()
   params.addClassDescription("Converts regular functors to AD functors and "
                              "AD functors to regular functors");
   params.addParam<std::vector<MooseFunctorName>>(
-      "reg_props_in", "The names of the regular functors to convert to AD functors");
-  params.addParam<std::vector<MooseFunctorName>>("ad_props_out",
-                                                 "The names of the output AD functors");
+      "reg_props_in", {}, "The names of the regular functors to convert to AD functors");
   params.addParam<std::vector<MooseFunctorName>>(
-      "ad_props_in", "The names of the AD functors to convert to regular functors");
-  params.addParam<std::vector<MooseFunctorName>>("reg_props_out",
-                                                 "The names of the output regular functors");
+      "ad_props_out", {}, "The names of the output AD functors");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "ad_props_in", {}, "The names of the AD functors to convert to regular functors");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "reg_props_out", {}, "The names of the output regular functors");
   return params;
 }
 

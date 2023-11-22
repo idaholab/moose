@@ -44,7 +44,7 @@ GeneralizedPlaneStrainOffDiag::validParams()
       "The index number of scalar_out_of_plane_strain this kernel acts on");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+      "eigenstrain_names", {}, "List of eigenstrains to be applied in this strain calculation");
 
   return params;
 }

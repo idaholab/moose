@@ -24,6 +24,7 @@ ContactSplit::validParams()
                                              "Secondary surface list for included contacts");
   params.addParam<std::vector<int>>(
       "contact_displaced",
+      {},
       "List of indicators whether displaced mesh is used to define included contact");
   params.addParam<std::vector<BoundaryName>>("uncontact_primary",
                                              "Primary surface list for excluded contacts");
@@ -31,6 +32,7 @@ ContactSplit::validParams()
                                              "Secondary surface list for excluded contacts");
   params.addParam<std::vector<int>>(
       "uncontact_displaced",
+      {},
       "List of indicators whether displaced mesh is used to define excluded contact");
   params.addRequiredParam<bool>("include_all_contact_nodes",
                                 "Whether to include all nodes on the contact surfaces");

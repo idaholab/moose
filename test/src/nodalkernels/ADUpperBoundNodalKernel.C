@@ -20,6 +20,7 @@ ADUpperBoundNodalKernel::validParams()
   params.addParam<Real>("upper_bound", "The upper bound on the coupled variable");
   params.addParam<std::vector<BoundaryName>>(
       "exclude_boundaries",
+      {},
       "Boundaries on which not to execute the NodalKernel. This can be useful for avoiding "
       "singularity in the matrix in case a constraint is active in the same place that a "
       "DirichletBC is set");
