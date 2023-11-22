@@ -161,13 +161,13 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
     export METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
+    # Temp location for copying and running in
+    export TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
 
 {%- if SECTION_TEST_BEGIN is defined %}
     {{ SECTION_TEST_BEGIN }}
 {%- endif %}
 
-    # Temp location for copying and running in
-    TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
     # Copy and run each subset of tests
