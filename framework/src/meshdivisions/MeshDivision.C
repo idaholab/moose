@@ -25,7 +25,8 @@ MeshDivision::MeshDivision(const InputParameters & parameters)
     SetupInterface(this),
     MeshChangedInterface(parameters),
     _fe_problem(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _mesh(_fe_problem->mesh())
+    _mesh(_fe_problem->mesh()),
+    _mesh_fully_indexed(true)
 {
 }
 
