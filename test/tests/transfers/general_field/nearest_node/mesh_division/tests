@@ -1,0 +1,51 @@
+[Tests]
+  issues = '#'
+  design = 'MeshDivision/index.md'
+  [mesh_div]
+    requirement = 'The system shall be able to leverage mesh divisions during transfers'
+    [restriction_source]
+      type = CSVDiff
+      input = 'main.i'
+      csvdiff = 'main.csv'
+      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
+                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
+                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub"
+      detail = 'to restrict the source domain for the transfered field,'
+    []
+    [restriction_target]
+      type = CSVDiff
+      input = 'main.i'
+      csvdiff = 'main.csv'
+      cli_args = "Transfers/to_sub/to_mesh_divisions=middle_sub "
+                 "Transfers/to_sub_elem/to_mesh_divisions=middle_sub "
+                 "Transfers/from_sub/to_mesh_divisions=middle "
+                 "Transfers/from_sub_elem/to_mesh_divisions=middle"
+      detail = 'to restrict the target domain for the transfered field,'
+    []
+    [distributed_source_divisions_onto_targets]
+      type = CSVDiff
+      input = 'main.i'
+      csvdiff = 'main.csv'
+      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
+                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
+                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub"
+      detail = 'to distribute field data restricted to divisions of the source mesh to a matching number of target applications,'
+    []
+    [matched_source_and_target_division]
+      type = CSVDiff
+      input = 'main.i'
+      csvdiff = 'main.csv'
+      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
+                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
+                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub "
+                 "Transfers/to_sub/to_mesh_divisions=middle_sub "
+                 "Transfers/to_sub_elem/to_mesh_divisions=middle_sub "
+                 "Transfers/from_sub/to_mesh_divisions=middle "
+                 "Transfers/from_sub_elem/to_mesh_divisions=middle"
+      detail = 'to distribute field data restricted to divisions of the source mesh to divisions of the target mesh.'
+    []
+  []
+[]
