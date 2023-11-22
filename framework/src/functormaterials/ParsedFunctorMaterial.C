@@ -22,10 +22,11 @@ ParsedFunctorMaterialTempl<is_ad>::validParams()
       "Computes a functor material from a parsed expression of other functors.");
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "Expression to parse for the new functor material");
-  params.addParam<std::vector<std::string>>("functor_names",
-                                            "Functors to use in the parsed expression");
+  params.addParam<std::vector<std::string>>(
+      "functor_names", {}, "Functors to use in the parsed expression");
   params.addParam<std::vector<std::string>>(
       "functor_symbols",
+      {},
       "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
       "provided, then the actual functor names must be used in the parsed expression.");
   params.addRequiredParam<std::string>("property_name",
