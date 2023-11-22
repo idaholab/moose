@@ -83,15 +83,15 @@ From: {{ APPTAINER_FROM }}
     {{ SECTION_POST_BEGIN }}
 {%- endif %}
     # Load jinja vars
-    APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
-    BINARY_NAME={{ BINARY_NAME }}
+    export APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
+    export BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD or "opt" }}
     export MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
-    MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
+    export MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
     export MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
-    TEMP_LOC={{ ROOT_BUILD_DIR }}
-    APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
+    export TEMP_LOC={{ ROOT_BUILD_DIR }}
+    export APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
     # If MOOSE_DIR is a symlink, we're using MOOSE within
@@ -114,9 +114,9 @@ From: {{ APPTAINER_FROM }}
 
     # Setup install
 {%- if BINARY_NAME == 'moose-combined' %}
-    MOOSE_PREFIX=/opt/moose
+    export MOOSE_PREFIX=/opt/moose
 {%- else %}
-    MOOSE_PREFIX=/opt/${BINARY_NAME}
+    export MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
