@@ -151,6 +151,8 @@ class ApptainerGenerator:
                                   help="Arguments to pass to apptainer build")
         build_parser.add_argument('--sign', type=int,
                                   help='Sign the built container with the given key')
+        build_parser.add_argument('--skip-tests', action='store_true',
+                                  help='Set to skip running the tests after the build')
 
         push_parser = action_parser.add_parser('push', parents=[parent],
                                                 help='Push a container')
@@ -662,8 +664,10 @@ class ApptainerGenerator:
 
         # Do the build!
         args = []
+        if self.args.skip_tests:
+            args.append('-T')
         if self.args.build_args is not None:
-            args = self.args.build_args.split(' ')
+            args.extend(self.args.build_args.split(' '))
         container_definition_path = self.container_path(self.name, self.tag, image=False)
         self.apptainer_build(container_definition_path, self.name, self.tag, args=args)
 
