@@ -36,6 +36,12 @@ def get_options():
     parser.add_argument('-l', '--languages', nargs='+', type=str, choices=list(LANGUAGES.keys()),
                         default=list(LANGUAGES.keys()),
                         help="Limit the analysis the the listed languages.")
+    parser.add_argument('--since', nargs=1, type=str,
+                        help='Start date for the commit analysis. Use the same date format as the --since git shortlog argument.'
+                             ' Note that only the commit counts will respect the since-date, line counts will still be all-time contributions.'
+                             ' For this reason, we recommend sorting results by commits')
+    parser.add_argument('--sort-by', type=str, default="Total", choices=['C++', 'Python', 'Make', 'Total', 'Commits'],
+                        action='store', help='How to sort results in the console output')
 
     return parser.parse_args()
 
@@ -69,19 +75,21 @@ def report(counts, commits, merges):
     print(row_format.format("Name", *titles))
     print('-'*n)
 
-    for author, row in reversed(sorted(counts.items(), key=lambda item:sum(item[1].values()))):
+    # Gather commits, sum all language lines, then tally total counts
+    for author, row in counts.items():
         row['Total'] = sum(row.values())
-        values = ['{:,}'.format(row[key]) for key in titles if key not in ('Commits', 'Merges')]
 
         c = commits.get(author, 0)
         m = merges.get(author, 0)
-        values += [c, m]
         row['Commits'] = c
         row['Merges'] = m
-
         for key in titles:
             totals[key] += row[key]
 
+    # Sort and print
+    args = get_options()
+    for author, row in reversed(sorted(counts.items(), key=lambda item:item[1][args.sort_by])):
+        values = ['{:,}'.format(row[key]) for key in titles]
         print(row_format.format(author, *values))
     print('-'*n)
     print(row_format.format('TOTAL', *['{:,}'.format(totals[key]) for key in titles]))
@@ -89,7 +97,7 @@ def report(counts, commits, merges):
 if __name__ == '__main__':
     args = get_options()
 
-    # Populate desired langauges
+    # Populate desired languages
     lang = collections.OrderedDict()
     for key in args.languages:
         lang[key] = LANGUAGES[key]
@@ -97,7 +105,7 @@ if __name__ == '__main__':
     # List all files in the repository
     all_files = set()
     for location in args.locations:
-        all_files.update(mooseutils.git_ls_files(os.path.abspath(args.locations[0]), exclude=args.exclude))
+        all_files.update(mooseutils.git_ls_files(os.path.abspath(location), exclude=args.exclude))
 
     # Group filenames by extension
     groups = collections.defaultdict(list)
@@ -115,11 +123,18 @@ if __name__ == '__main__':
                 update_count(c, group, counts)
         print('done')
 
+    # Restrict to commits past a certain date
+    commits_args = ['--no-merges']
+    merges_args = ['--merges']
+    if (args.since):
+        commits_args.append('--since=' + args.since[0])
+        merges_args.append('--since=' + args.since[0])
+
     # Compute number of commits per user
     commits = dict()
     merges = dict()
     for location in args.locations:
-        commits.update(mooseutils.git_committers(location, '--no-merges'))
-        merges.update(mooseutils.git_committers(location, '--merges'))
+        commits.update(mooseutils.git_committers(location, commits_args))
+        merges.update(mooseutils.git_committers(location, merges_args))
 
     report(counts, commits, merges)
