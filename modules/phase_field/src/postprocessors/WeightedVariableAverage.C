@@ -65,7 +65,7 @@ WeightedVariableAverage::getValue() const
 void
 WeightedVariableAverage::threadJoin(const UserObject & y)
 {
-  const WeightedVariableAverage & pp = static_cast<const WeightedVariableAverage &>(y);
+  const auto & pp = static_cast<const WeightedVariableAverage &>(y);
   _var_integral += pp._var_integral;
   _weight_integral += pp._weight_integral;
 }

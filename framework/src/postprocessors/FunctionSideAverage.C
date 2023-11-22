@@ -48,7 +48,7 @@ void
 FunctionSideAverage::threadJoin(const UserObject & y)
 {
   FunctionSideIntegral::threadJoin(y);
-  const FunctionSideAverage & pps = static_cast<const FunctionSideAverage &>(y);
+  const auto & pps = static_cast<const FunctionSideAverage &>(y);
   _volume += pps._volume;
 }
 

@@ -109,7 +109,7 @@ NodalValueSampler::finalize()
 void
 NodalValueSampler::threadJoin(const UserObject & y)
 {
-  const NodalValueSampler & vpp = static_cast<const NodalValueSampler &>(y);
+  const auto & vpp = static_cast<const NodalValueSampler &>(y);
 
   SamplerBase::threadJoin(vpp);
 }

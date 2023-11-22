@@ -83,7 +83,7 @@ VariableValueVolumeHistogram::finalize()
 void
 VariableValueVolumeHistogram::threadJoin(const UserObject & y)
 {
-  const VariableValueVolumeHistogram & uo = static_cast<const VariableValueVolumeHistogram &>(y);
+  const auto & uo = static_cast<const VariableValueVolumeHistogram &>(y);
   mooseAssert(uo._volume.size() == _volume.size(),
               "Inconsistent volume vector lengths across threads.");
 

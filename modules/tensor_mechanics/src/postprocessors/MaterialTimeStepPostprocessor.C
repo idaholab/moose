@@ -139,7 +139,7 @@ MaterialTimeStepPostprocessor::finalize()
 void
 MaterialTimeStepPostprocessor::threadJoin(const UserObject & y)
 {
-  const MaterialTimeStepPostprocessor & pps = static_cast<const MaterialTimeStepPostprocessor &>(y);
+  const auto & pps = static_cast<const MaterialTimeStepPostprocessor &>(y);
   if (_use_material_timestep_limit)
     _matl_value = std::min(_matl_value, pps._matl_value);
   if (_use_elements_changed)

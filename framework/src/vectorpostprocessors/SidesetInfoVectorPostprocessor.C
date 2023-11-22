@@ -138,8 +138,7 @@ SidesetInfoVectorPostprocessor::finalize()
 void
 SidesetInfoVectorPostprocessor::threadJoin(const UserObject & y)
 {
-  const SidesetInfoVectorPostprocessor & vpp =
-      static_cast<const SidesetInfoVectorPostprocessor &>(y);
+  const auto & vpp = static_cast<const SidesetInfoVectorPostprocessor &>(y);
 
   for (auto & e : _boundary_data)
   {

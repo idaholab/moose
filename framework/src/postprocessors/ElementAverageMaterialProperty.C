@@ -67,8 +67,7 @@ ElementAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 {
   ElementIntegralMaterialPropertyTempl<is_ad>::threadJoin(y);
 
-  const ElementAverageMaterialPropertyTempl<is_ad> & pps =
-      static_cast<const ElementAverageMaterialPropertyTempl<is_ad> &>(y);
+  const auto & pps = static_cast<const ElementAverageMaterialPropertyTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 

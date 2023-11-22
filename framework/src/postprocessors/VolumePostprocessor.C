@@ -27,7 +27,7 @@ VolumePostprocessor::VolumePostprocessor(const InputParameters & parameters)
 void
 VolumePostprocessor::threadJoin(const UserObject & y)
 {
-  const VolumePostprocessor & pps = static_cast<const VolumePostprocessor &>(y);
+  const auto & pps = static_cast<const VolumePostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

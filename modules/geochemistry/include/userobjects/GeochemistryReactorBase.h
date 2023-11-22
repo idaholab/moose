@@ -25,7 +25,7 @@ public:
   static InputParameters validParams();
   GeochemistryReactorBase(const InputParameters & parameters);
   virtual void initialize() override {}
-  virtual void threadJoin(const UserObject & uo) override {}
+  virtual void threadJoin(const UserObject & /*uo*/) override {}
   virtual void finalize() override {}
   virtual void execute() override {}
 
