@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "MeshDivision.h"
 #include "Positions.h"
 #include "MultiAppPositions.h" // remove after use_nearest_app deprecation
 #include "MooseAppCoordTransform.h"
@@ -72,6 +73,12 @@ MultiAppGeneralFieldTransfer::validParams()
                              nodes_or_sides,
                              "Whether elemental variable boundary restriction is considered by "
                              "element side or element nodes");
+
+  // Mesh division restriction
+  params.addParam<MeshDivisionName>("from_mesh_division",
+                                    "Mesh division object on the origin application");
+  params.addParam<MeshDivisionName>("to_mesh_division",
+                                    "Mesh division object on the target application");
 
   // Array and vector variables
   params.addParam<std::vector<unsigned int>>("source_variable_components",
@@ -210,6 +217,12 @@ MultiAppGeneralFieldTransfer::initialSetup()
       if (_from_boundaries.size() != boundary_names.size())
         paramError("from_boundaries", "Some boundaries were not found in the mesh");
     }
+
+    if (isParamValid("from_mesh_division"))
+    {
+      const auto & mesh_div_name = getParam<MeshDivisionName>("from_mesh_division");
+      _from_mesh_divisions.push_back(&_from_problems[i_from]->getMeshDivision(mesh_div_name));
+    }
   }
 
   // Loop over all target problems
@@ -232,6 +245,12 @@ MultiAppGeneralFieldTransfer::initialSetup()
       _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
       if (_to_boundaries.size() != boundary_names.size())
         paramError("to_boundaries", "Some boundaries were not found in the mesh");
+    }
+
+    if (isParamValid("to_mesh_division"))
+    {
+      const auto & mesh_div_name = getParam<MeshDivisionName>("to_mesh_division");
+      _to_mesh_divisions.push_back(&_from_problems[i_to]->getMeshDivision(mesh_div_name));
     }
   }
 
@@ -492,6 +511,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
       // We dont look at boundary restriction, not supported for higher order target variables
+      // Same for mesh divisions
       const auto & to_begin = _to_blocks.empty()
                                   ? to_mesh.active_local_elements_begin()
                                   : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
@@ -531,6 +551,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, node))
           continue;
 
+        // Skip if the node is not indexed within the mesh division
+        if (!_to_mesh_divisions.empty() && !inMeshDivision(_to_mesh_divisions[i_to], *node))
+          continue;
+
         // Cache point information
         // We will use this information later for setting values back to solution vectors
         cacheOutgoingPointInfo(
@@ -551,6 +575,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
 
         // Skip if the element does not have a side on the boundary
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, elem))
+          continue;
+
+        // Skip if the element is not indexed within the mesh division
+        if (!_to_mesh_divisions.empty() && !inMeshDivision(_to_mesh_divisions[i_to], *elem))
           continue;
 
         // Cache point information
@@ -613,6 +641,12 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         mooseError(
             "Higher order discontinuous elemental variables are not supported for target-boundary "
             "restricted transfers");
+      // Not implemented. Unless we contain the entire mesh!
+      if (_to_mesh_divisions.size())
+        for (const auto mesh_div : _to_mesh_divisions)
+          if (!mesh_div->coversEntireMesh())
+            mooseError("Higher order variable support not implemented for target mesh division "
+                       "unless the mesh is fully covered / indexed in the mesh division");
 
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
@@ -1092,7 +1126,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & interp_caches)
 {
-  // Get the variable name, with the accomodation for array/vector names
+  // Get the variable name, with the accommodation for array/vector names
   const auto & var_name = getToVarName(var_index);
 
   for (unsigned int problem_id = 0; problem_id < _to_problems.size(); ++problem_id)
@@ -1212,6 +1246,11 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
     // Check boundary restriction. Passing the block restriction will speed up the search
     if (!_from_boundaries.empty() &&
         !onBoundaries(_from_boundaries, _from_blocks, *_from_meshes[i_from], pl, transformed_pt))
+      return false;
+
+    // Check mesh division. If outside of the division there's no need to consider the point
+    if (!_from_mesh_divisions.empty() &&
+        inMeshDivision(_from_mesh_divisions[i_from], transformed_pt))
       return false;
 
     // Check that the app actually contains the origin point
@@ -1339,6 +1378,20 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
   if (!elem)
     return false;
   return onBoundaries(boundaries, mesh, elem);
+}
+
+bool
+MultiAppGeneralFieldTransfer::inMeshDivision(const MeshDivision * const mesh_div,
+                                             const Point & pt) const
+{
+  return mesh_div->divisionIndex(pt) != MooseMeshDivision::INVALID_DIVISION_INDEX;
+}
+
+bool
+MultiAppGeneralFieldTransfer::inMeshDivision(const MeshDivision * const mesh_div,
+                                             const Elem & elem) const
+{
+  return mesh_div->divisionIndex(elem) != MooseMeshDivision::INVALID_DIVISION_INDEX;
 }
 
 bool

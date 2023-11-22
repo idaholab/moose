@@ -20,6 +20,7 @@
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
 class Positions;
+class MeshDivision;
 
 /**
  * It is a general field transfer. It will do the following things
@@ -140,6 +141,20 @@ protected:
                     const Point & pt) const;
 
   /**
+   * Whether a point lies inside the mesh division delineated by the MeshDivision object
+   * @param mesh_div mesh division
+   * @param pt point to examine
+   */
+  bool inMeshDivision(const MeshDivision * const mesh_div, const Point & pt) const;
+
+  /**
+   * Whether an element lies inside the mesh division delineated by the MeshDivision object
+   * @param mesh_div mesh division
+   * @param elem element to examine
+   */
+  bool inMeshDivision(const MeshDivision * const mesh_div, const Elem & elem) const;
+
+  /**
    * Whether a point is closest to a position at the index specified than any other position
    * @param pos_index the index of the position to consider in the positions vector
    * @param pt the point
@@ -181,6 +196,12 @@ protected:
 
   /// Origin boundary(ies) restriction
   std::set<BoundaryID> _from_boundaries;
+
+  /// Division of the origin mesh
+  std::vector<const MeshDivision *> _from_mesh_divisions;
+
+  /// Division of the target mesh
+  std::vector<const MeshDivision *> _to_mesh_divisions;
 
   /// Whether elemental variable boundary restriction is considered by element side or element nodes
   const bool _elemental_boundary_restriction_on_sides;
