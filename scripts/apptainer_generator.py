@@ -481,13 +481,15 @@ class ApptainerGenerator:
             apptainer/app_post_pre_install
             apptainer/app_post_post_install
             apptainer/app_post_end
+            apptainer/app_test_begin
+            apptainer/app_test_end
         """
         if self.args.library != 'app':
             return
 
         app_name, app_root, _ = Versioner.get_app()
         sections = ['environment', 'post_begin', 'post_pre_make', 'post_pre_install',
-                    'post_post_install', 'post_end']
+                    'post_post_install', 'post_end', 'test_begin', 'test_end']
 
         for section in sections:
             filename = f'apptainer/app_{section}'

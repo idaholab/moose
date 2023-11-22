@@ -159,8 +159,12 @@ From: {{ APPTAINER_FROM }}
 {%- else %}
     BINARY_NAME={{ BINARY_NAME }}
 {%- endif %}
-    METHOD={{ METHOD or "opt" }}
+    export METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
+
+{%- if SECTION_TEST_BEGIN is defined %}
+    {{ SECTION_TEST_BEGIN }}
+{%- endif %}
 
     # Temp location for copying and running in
     TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
@@ -175,3 +179,7 @@ From: {{ APPTAINER_FROM }}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
         rm -rf $TEMP_LOC
     done
+
+{%- if SECTION_TEST_END is defined %}
+    {{ SECTION_TEST_END }}
+{%- endif %}
