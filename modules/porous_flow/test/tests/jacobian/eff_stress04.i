@@ -7,10 +7,11 @@
   dim = 2
   nx = 1
   ny = 1
+  coord_type = RZ
 []
 
 [Problem]
-  coord_type = RZ
+
 []
 
 [GlobalParams]

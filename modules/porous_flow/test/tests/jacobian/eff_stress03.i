@@ -7,9 +7,6 @@
   dim = 2
   nx = 1
   ny = 1
-[]
-
-[Problem]
   coord_type = RZ
 []
 
@@ -57,7 +54,6 @@
     max = 1
   []
 []
-
 
 [Kernels]
   [grad0]

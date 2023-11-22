@@ -8,9 +8,6 @@
   nx = 20
   xmax = 100
   bias_x = 1.05
-[]
-
-[Problem]
   coord_type = RZ
 []
 

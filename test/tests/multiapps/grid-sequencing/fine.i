@@ -5,8 +5,8 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
@@ -14,10 +14,10 @@
     type = TimeDerivative
     variable = u
   []
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [rxn]
     type = Reaction
     variable = u
@@ -25,20 +25,19 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient
@@ -56,21 +55,21 @@
 []
 
 [MultiApps]
-  [./coarse]
+  [coarse]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = coarse.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./mesh_function_begin]
-    type = MultiAppShapeEvaluationTransfer
+  [mesh_function_begin]
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = coarse
     source_variable = u
     variable = u
     execute_on = timestep_begin
-  [../]
+  []
 []

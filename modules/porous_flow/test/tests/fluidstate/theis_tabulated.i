@@ -11,12 +11,13 @@
   nx = 80
   xmax = 200
   bias_x = 1.05
+  coord_type = RZ
+  rz_coord_axis = Y
 []
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = Y
+
 []
 
 [GlobalParams]
@@ -121,7 +122,7 @@
     type = CO2FluidProperties
   []
   [tabulated]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = co2
     fluid_property_file = fluid_properties.csv
   []
@@ -220,12 +221,12 @@
 [Postprocessors]
   [pgas]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = pgas
   []
   [sgas]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = saturation_gas
   []
   [zi]
@@ -239,12 +240,12 @@
   []
   [x1]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = x1
   []
   [y0]
     type = PointValue
-    point =  '1 0 0'
+    point = '1 0 0'
     variable = y0
   []
 []

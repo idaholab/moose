@@ -1,61 +1,69 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'picard_parent.i'
     exodiff = 'picard_parent_out.e picard_parent_out_sub0.e'
-    rel_err = 5e-5  # Loosened for recovery tests
+    rel_err = 5e-5 # Loosened for recovery tests
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
-    requirement = "The system shall allow transient multiapps to use Picard iterations to rerun the time step"
-  [../]
-  [./iteration_adaptive]
+    requirement = "The system shall allow transient multiapps to use Picard iterations to rerun the "
+                  "time step"
+  []
+  [iteration_adaptive]
     type = 'Exodiff'
     input = 'picard_adaptive_parent.i'
     exodiff = 'picard_adaptive_parent_out.e'
     cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
     design = 'timesteppers/IterationAdaptiveDT.md'
     issues = '#2116 #10311'
-    requirement = "The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances"
-  [../]
-  [./iteration_adaptive_picard_max_its]
+    requirement = "The system shall support adaptive time stepping for transient multiapps with "
+                  "Picard iterations controlled by tolerances"
+  []
+  [iteration_adaptive_picard_max_its]
     type = 'Exodiff'
     input = 'picard_adaptive_parent.i'
     exodiff = 'picard_adaptive_parent_picard_max_its.e'
-    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_parent_picard_max_its sub0:Outputs/exodus=false"
+    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/fixed_point_max_its=3 "
+               "Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' "
+               "Executioner/TimeStepper/time_t='0 1.0 10' "
+               "Outputs/file_base=picard_adaptive_parent_picard_max_its sub0:Outputs/exodus=false"
     design = 'timesteppers/IterationAdaptiveDT.md'
     issues = '#12618'
-    requirement = "The system shall reject the solve if the maximum number of Picard iterations is reached without converging"
-  [../]
+    requirement = "The system shall reject the solve if the maximum number of Picard iterations is "
+                  "reached without converging"
+  []
 
-  [./rel_tol]
+  [rel_tol]
     type = 'Exodiff'
     input = 'picard_rel_tol_parent.i'
     exodiff = 'picard_rel_tol_parent_out.e'
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
-    requirement = "The system shall allow transient multiapps with Picard iterations controlled by relative tolerances"
-  [../]
+    requirement = "The system shall allow transient multiapps with Picard iterations controlled by "
+                  "relative tolerances"
+  []
 
-  [./abs_tol]
+  [abs_tol]
     type = 'Exodiff'
     input = 'picard_abs_tol_parent.i'
     exodiff = 'picard_abs_tol_parent_out.e'
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
-    requirement = "The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances"
-  [../]
+    requirement = "The system shall allow transient multiapps with Picard iterations controlled by "
+                  "absolute tolerances"
+  []
 
-  [./function_dt]
+  [function_dt]
     type = 'Exodiff'
     input = 'function_dt_parent.i'
     exodiff = 'function_dt_parent_out.e function_dt_parent_out_sub_app0.e'
-    rel_err = 5e-5  # Loosened for recovery tests
+    rel_err = 5e-5 # Loosened for recovery tests
     design = 'timesteppers/FunctionDT.md'
     issues = '#5800'
     requirement = "The system shall allow function-defined time stepping for transient multiapps"
-  [../]
+  []
 
-  [./steady]
+  [steady]
     type = 'Exodiff'
     input = 'steady_picard_parent.i'
     exodiff = 'steady_picard_parent_out.e steady_picard_parent_out_sub0.e'
@@ -63,9 +71,9 @@
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
     requirement = "The system shall allow steady-state Picard iteration with multiapps"
-  [../]
+  []
 
-  [./steady_fixed_picard_its]
+  [steady_fixed_picard_its]
     type = RunApp
     input = 'steady_picard_parent.i'
     cli_args = 'Executioner/disable_fixed_point_residual_norm_check=true Executioner/accept_on_max_fixed_point_iteration=true'
@@ -75,30 +83,32 @@
     issues = '#9038'
     prereq = steady
     requirement = "The system shall allow fixed number of Picard iterations"
-  [../]
+  []
 
-  [./steady_with_custom_convergence_check]
+  [steady_with_custom_convergence_check]
     type = 'Exodiff'
     input = 'steady_custom_picard_parent.i'
     exodiff = 'steady_custom_picard_parent_out.e steady_custom_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
-    requirement = "The system shall allow custom convergence check on Picard iteration with derived executioners"
+    requirement = "The system shall allow custom convergence check on Picard iteration with derived "
+                  "executioners"
     deleted = 'unused functionality - was removed'
-  [../]
+  []
 
-  [./steady_with_pseudo_transient_sub]
+  [steady_with_pseudo_transient_sub]
     type = 'Exodiff'
     input = 'pseudo_transient_picard_parent.i'
     exodiff = 'pseudo_transient_picard_parent_out.e pseudo_transient_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
-    requirement = "The system shall allow steady-state Picard iteration with pseudo-transient multiapps"
-  [../]
+    requirement = "The system shall allow steady-state Picard iteration with pseudo-transient "
+                  "multiapps"
+  []
 
-  [./steady_with_postprocessor_convergence]
+  [steady_with_postprocessor_convergence]
     type = 'Exodiff'
     input = 'picard_custom_postprocessor.i'
     exodiff = 'picard_custom_postprocessor_out.e picard_custom_postprocessor_out_sub0.e'
@@ -106,9 +116,10 @@
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#14642'
-    requirement = "The system shall allow convergence check with user defined postprocessor directly."
-  [../]
-  [./steady_with_postprocessor_diff_convergence]
+    requirement = "The system shall allow convergence check with user defined postprocessor "
+                  "directly."
+  []
+  [steady_with_postprocessor_diff_convergence]
     type = 'Exodiff'
     input = 'picard_custom_postprocessor.i'
     exodiff = 'picard_custom_diff_out.e picard_custom_diff_out_sub0.e'
@@ -116,9 +127,10 @@
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#14642'
-    requirement = "The system shall allow convergence check with the convergence of a user defined postprocessor."
-  [../]
-  [./postprocessor_convergence_history]
+    requirement = "The system shall allow convergence check with the convergence of a user defined "
+                  "postprocessor."
+  []
+  [postprocessor_convergence_history]
     type = 'RunApp'
     input = 'picard_custom_postprocessor.i'
     cli_args = 'Executioner/direct_pp_value=true Outputs/file_base=picard_custom_pp_history_out'
@@ -126,6 +138,7 @@
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#16940'
-    requirement = "The system shall show the Multiapp coupling convergence history of a user defined postprocessor that is used for convergence check."
-  [../]
+    requirement = "The system shall show the Multiapp coupling convergence history of a user defined "
+                  "postprocessor that is used for convergence check."
+  []
 []

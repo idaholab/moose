@@ -10,41 +10,41 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./t]
-  [../]
-  [./u_from_sub]
-  [../]
+  [t]
+  []
+  [u_from_sub]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -63,7 +63,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
@@ -71,26 +71,26 @@
     input_files = sub.i
     reset_apps = 0
     reset_time = 0.05
-  [../]
+  []
 []
 
 [Transfers]
-  [./t_from_sub]
+  [t_from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = t
     variable = t
-  [../]
-  [./u_from_sub]
+  []
+  [u_from_sub]
     type = MultiAppNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = u_from_sub
-  [../]
-  [./u_to_sub]
+  []
+  [u_to_sub]
     type = MultiAppNearestNodeTransfer
     to_multi_app = sub
     source_variable = u
     variable = u_from_master
-  [../]
+  []
 []

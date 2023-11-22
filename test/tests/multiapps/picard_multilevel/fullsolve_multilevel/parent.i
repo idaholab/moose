@@ -60,7 +60,6 @@
   []
 []
 
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
@@ -86,14 +85,14 @@
 
 [Transfers]
   [u_to_sub]
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = u
     variable = u
     to_multi_app = level1-
     execute_on = 'timestep_end'
   []
   [v_from_sub]
-    type = MultiAppShapeEvaluationTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     source_variable = v
     variable = v
     from_multi_app = level1-

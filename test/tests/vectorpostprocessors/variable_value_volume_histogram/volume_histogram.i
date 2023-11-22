@@ -7,42 +7,42 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = 'x<2&x>-2'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = c
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = c
     boundary = 'left right'
     value = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./histo]
-    type = VolumeHistogram
+  [histo]
+    type = VariableValueVolumeHistogram
     variable = c
     min_value = 0
     max_value = 1.1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

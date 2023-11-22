@@ -10,39 +10,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./layered_average]
+  [layered_average]
     type = LayeredAverage
     variable = u
     direction = x
     num_layers = 3
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,7 +61,7 @@
   exodus = true
 []
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
@@ -70,32 +70,32 @@
     sub_cycling = true
     interpolate_transfers = true
     output_sub_cycles = true
-  [../]
+  []
 []
 
 [Transfers]
-  [./nearest_node]
+  [nearest_node]
     type = MultiAppNearestNodeTransfer
     to_multi_app = sub
     source_variable = u
     variable = nearest_node
-  [../]
-  [./mesh_function]
+  []
+  [mesh_function]
     type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = u
     variable = mesh_function
-  [../]
-  [./user_object]
+  []
+  [user_object]
     type = MultiAppUserObjectTransfer
     to_multi_app = sub
     variable = user_object
     user_object = layered_average
-  [../]
-  [./interpolation]
+  []
+  [interpolation]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = interpolation
-  [../]
+  []
 []

@@ -30,9 +30,6 @@
     vector_value = '0.1 0 0'
     input = file
   []
-[]
-
-[Problem]
   coord_type = RZ
   rz_coord_axis = Y
 []
@@ -185,7 +182,7 @@
     type = MethaneFluidProperties
   []
   [methane_tab]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = methane
     save_file = false
   []

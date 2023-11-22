@@ -18,9 +18,6 @@
   xmax = 2.0
   ymin = -0.5
   ymax = 0.5
-[]
-
-[Problem]
   coord_type = RZ
 []
 

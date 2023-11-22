@@ -21,7 +21,7 @@
   [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x<1.0001'
-    included_subdomain_ids = 1
+    included_subdomains = 1
     new_sideset_name = 'injection_area'
     input = 'aquifer'
   []
@@ -31,9 +31,6 @@
     new_block = 'caps aquifer'
     input = 'injection_area'
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 
@@ -230,7 +227,6 @@
   []
 []
 
-
 [BCs]
   [pinned_top_bottom_r]
     type = DirichletBC
@@ -250,7 +246,7 @@
     type = DirichletBC
     boundary = injection_area
     variable = T
-    value = 290  # injection temperature
+    value = 290 # injection temperature
     use_displaced_mesh = false
   []
   [constant_co2_injection]
@@ -293,7 +289,7 @@
     type = Water97FluidProperties
   []
   [tabulated_water]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = true_water
     temperature_min = 275
     pressure_max = 1E8
@@ -303,7 +299,7 @@
     type = CO2FluidProperties
   []
   [tabulated_co2]
-    type = TabulatedFluidProperties
+    type = TabulatedBicubicFluidProperties
     fp = true_co2
     temperature_min = 275
     pressure_max = 1E8

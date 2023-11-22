@@ -7,59 +7,59 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v_begin]
-  [../]
-  [./v_end]
-  [../]
+  [v_begin]
+  []
+  [v_end]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
-  [./force_u_begin]
+  []
+  [force_u_begin]
     type = CoupledForce
     variable = u
     v = v_begin
-  [../]
-  [./force_u_end]
+  []
+  [force_u_end]
     type = CoupledForce
     variable = u
     v = v_end
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
   [picard_its]
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -74,44 +74,44 @@
 []
 
 [MultiApps]
-  [./sub_begin]
+  [sub_begin]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = picard_sub.i
-  [../]
-  [./sub_end]
+  []
+  [sub_end]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '1 1 1'
     input_files = picard_sub.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./v_from_sub_begin]
-    type = MultiAppNearestNodeTransfer
+  [v_from_sub_begin]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub_begin
     source_variable = v
     variable = v_begin
-  [../]
-  [./u_to_sub_begin]
-    type = MultiAppNearestNodeTransfer
+  []
+  [u_to_sub_begin]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub_begin
     source_variable = u
     variable = u
-  [../]
-  [./v_from_sub_end]
-    type = MultiAppNearestNodeTransfer
+  []
+  [v_from_sub_end]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub_end
     source_variable = v
     variable = v_end
-  [../]
-  [./u_to_sub_end]
-    type = MultiAppNearestNodeTransfer
+  []
+  [u_to_sub_end]
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub_end
     source_variable = u
     variable = u
-  [../]
+  []
 []
