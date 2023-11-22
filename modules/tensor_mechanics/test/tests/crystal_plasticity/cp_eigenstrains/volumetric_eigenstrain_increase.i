@@ -285,7 +285,7 @@
   nl_forced_its = 1
 
   dt = 1.0
-  dtmin = 1.0e-4
+  dtmin = 0.1
   end_time  = 5.0
 []
 

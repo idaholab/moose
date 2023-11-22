@@ -58,7 +58,4 @@ protected:
    * from the current volume change conversion
    */
   MaterialProperty<Real> & _equivalent_linear_change;
-
-  // prefix for the calculation of volume of a sphere as a function of radius
-  const Real _sphere_coefficient;
 };

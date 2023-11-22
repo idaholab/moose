@@ -34,8 +34,7 @@ ComputeCrystalPlasticityVolumetricEigenstrain::ComputeCrystalPlasticityVolumetri
     _void_density_old(getMaterialPropertyOld<Real>("spherical_void_number_density")),
     _void_radius(getMaterialProperty<Real>("mean_spherical_void_radius")),
     _void_radius_old(getMaterialPropertyOld<Real>("mean_spherical_void_radius")),
-    _equivalent_linear_change(declareProperty<Real>("equivalent_linear_change")),
-    _sphere_coefficient(4.0 * (libMesh::pi) / 3.0)
+    _equivalent_linear_change(declareProperty<Real>("equivalent_linear_change"))
 {
 }
 
@@ -44,12 +43,12 @@ ComputeCrystalPlasticityVolumetricEigenstrain::computeQpDeformationGradient()
 {
   // check that the values of the radius and the density are both positive
   if (_void_radius[_qp] < 0.0)
-    mooseError("A negative mean spherical void radius value, ",
-               _void_radius[_qp],
-               ", has been provided; this value is "
-               "non-physical and violates the assumptions of this eigenstrain class");
+    mooseException("A negative mean spherical void radius value, ",
+                   _void_radius[_qp],
+                   ", has been provided; this value is "
+                   "non-physical and violates the assumptions of this eigenstrain class");
   if (_void_density[_qp] < 0.0)
-    mooseError(
+    mooseException(
         "A negative, non-physical spherical void number density has been provided: ",
         _void_density[_qp],
         ". This value is non-physical and violates the assumptions of this eigenstrain class");
@@ -79,7 +78,7 @@ ComputeCrystalPlasticityVolumetricEigenstrain::computeLinearComponentVolume(cons
                                                                             const Real & density)
 {
   const Real cb_radius = Utility::pow<3>(radius);
-  const Real volume = _sphere_coefficient * cb_radius * density;
+  const Real volume = 4.0 * (libMesh::pi)*cb_radius * density / 3.0;
   const Real linear_component = std::cbrt(volume);
 
   return linear_component;
