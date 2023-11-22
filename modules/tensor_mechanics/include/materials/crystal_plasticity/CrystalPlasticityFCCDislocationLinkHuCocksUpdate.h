@@ -208,4 +208,3 @@ protected:
    */
   const MaterialProperty<Real> * const _twin_volume_fraction_total;
 };
-
