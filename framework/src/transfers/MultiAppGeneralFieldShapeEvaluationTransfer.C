@@ -90,7 +90,8 @@ MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValues(
-    const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+    std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesWithMeshFunctions(
       _local_bboxes, _local_meshfuns, incoming_points, outgoing_vals);
@@ -100,11 +101,11 @@ void
 MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctions(
     const std::vector<BoundingBox> & local_bboxes,
     std::vector<MeshFunction> & local_meshfuns,
-    const std::vector<Point> & incoming_points,
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
-  for (auto & pt : incoming_points)
+  for (auto & [pt, mesh_div] : incoming_points)
   {
     bool point_found = false;
     if (_nearest_positions_obj)
@@ -120,7 +121,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
          ++i_from)
     {
       // Check spatial restrictions
-      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
+      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt, mesh_div))
         continue;
       else
       {

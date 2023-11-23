@@ -360,15 +360,16 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
-  auto gather_functor = [this](processor_id_type /*pid*/,
-                               const std::vector<Point> & incoming_points,
-                               std::vector<std::pair<Real, Real>> & outgoing_vals)
+  auto gather_functor =
+      [this](processor_id_type /*pid*/,
+             const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
+             std::vector<std::pair<Real, Real>> & outgoing_vals)
   {
     outgoing_vals.resize(
-        incoming_points.size(),
+        incoming_locations.size(),
         {GeneralFieldTransfer::BetterOutOfMeshValue, GeneralFieldTransfer::BetterOutOfMeshValue});
     // Evaluate interpolation values for these incoming points
-    evaluateInterpValues(incoming_points, outgoing_vals);
+    evaluateInterpValues(incoming_locations, outgoing_vals);
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
@@ -378,7 +379,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Copy data out to incoming_vals_ids
   auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches, &distance_caches](
                             processor_id_type pid,
-                            const std::vector<Point> & my_outgoing_points,
+                            const std::vector<std::pair<Point, unsigned int>> & my_outgoing_points,
                             const std::vector<std::pair<Real, Real>> & incoming_vals)
   {
     auto & pointInfoVec = _processor_to_pointInfoVec[pid];
@@ -456,7 +457,10 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
   // We need to send these data to these processors
   for (auto pid : processors)
   {
-    outgoing_points[pid].push_back(point);
+    unsigned int div_index = 0;
+    if (_from_mesh_divisions.size())
+      _from_mesh_divisions[problem_id]->divisionIndex(point);
+    outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, div_index));
     // Store point information
     // We can use these information when insert values to solution vector
     PointInfo pointinfo;
@@ -464,7 +468,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
     if (_from_mesh_divisions.size())
-      pointinfo.spatial_restriction_id = _from_mesh_divisions[problem_id]->divisionIndex(point);
+      pointinfo.spatial_restriction_id = div_index;
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }
@@ -613,7 +617,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const unsigned int var_index,
     std::vector<PointInfo> & pointInfoVec,
-    const std::vector<Point> & point_requests,
+    const std::vector<std::pair<Point, unsigned int>> & point_requests,
     const std::vector<std::pair<Real, Real>> & incoming_vals,
     DofobjectToInterpValVec & dofobject_to_valsvec,
     InterpCaches & interp_caches,
@@ -653,8 +657,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
       InterpCache & distance_cache = distance_caches[problem_id];
-      Point p =
-          _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(point_requests[val_offset]);
+      Point p = _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(
+          point_requests[val_offset].first);
       const Number val = incoming_vals[val_offset].first;
 
       // Initialize distance to be able to compare
@@ -733,7 +737,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         {
           // Keep track of distance and value
           const Point p =
-              getPointInTargetAppFrame(point_requests[val_offset],
+              getPointInTargetAppFrame(point_requests[val_offset].first,
                                        problem_id,
                                        "Registration of received equi-distant value conflict");
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
@@ -1231,7 +1235,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 bool
 MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
                                                       const std::vector<BoundingBox> & local_bboxes,
-                                                      const Point & pt) const
+                                                      const Point & pt,
+                                                      const unsigned int mesh_div) const
 {
   if (!local_bboxes[i_from].contains_point(pt))
     return false;
@@ -1250,9 +1255,10 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
         !onBoundaries(_from_boundaries, _from_blocks, *_from_meshes[i_from], pl, transformed_pt))
       return false;
 
-    // Check mesh division. If outside of the division there's no need to consider the point
+    // Check the mesh division index. If the point is not the at the same index in the target
+    // and the origin meshes, reject
     if (!_from_mesh_divisions.empty() &&
-        inMeshDivision(_from_mesh_divisions[i_from], transformed_pt))
+        mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
       return false;
 
     // Check that the app actually contains the origin point

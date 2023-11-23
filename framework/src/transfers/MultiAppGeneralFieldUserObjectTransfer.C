@@ -76,7 +76,8 @@ MultiAppGeneralFieldUserObjectTransfer::prepareEvaluationOfInterpValues(
 
 void
 MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValues(
-    const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+    std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesWithUserObjects(_local_bboxes, incoming_points, outgoing_vals);
 }
@@ -84,11 +85,11 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValues(
 void
 MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
     const std::vector<BoundingBox> & local_bboxes,
-    const std::vector<Point> & incoming_points,
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
-  for (auto & pt : incoming_points)
+  for (auto & [pt, mesh_div] : incoming_points)
   {
     bool point_found = false;
     if (_nearest_positions_obj)
@@ -103,7 +104,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
          ++i_from)
     {
       // Check spatial restrictions
-      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
+      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt, mesh_div))
         continue;
       else
       {

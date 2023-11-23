@@ -282,17 +282,19 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
 
 void
 MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValues(
-    const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+    std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesNearestNode(incoming_points, outgoing_vals);
 }
 
 void
 MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
-    const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
+    const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+    std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
-  for (auto & pt : incoming_points)
+  for (auto & [pt, mesh_div] : incoming_points)
   {
     // Reset distance
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
@@ -305,21 +307,33 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
     // Loop on all sources
     for (const auto i_from : make_range(num_sources))
     {
+      // Transform the point to place it in the local coordinate system
+      const auto transformed_pt =
+          !_nearest_positions_obj ? (*_from_transforms[getGlobalSourceAppIndex(i_from)])(pt) : pt;
+
       // Only use the KDTree from the closest position if in "nearest-position" mode
-      if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+      if (_nearest_positions_obj && !closestToPosition(i_from, transformed_pt))
         continue;
 
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
 
       // Check mesh restriction before anything
-      if (_source_app_must_contain_point && !inMesh(_from_point_locators[i_from].get(), pt))
+      if (_source_app_must_contain_point &&
+          !inMesh(_from_point_locators[i_from].get(), transformed_pt))
+        continue;
+
+      // Check the mesh division index
+      if (!_from_mesh_divisions.empty() &&
+          mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
         continue;
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (_local_kdtrees[i_from]->numberCandidatePoints())
       {
         point_found = true;
+        // Note that we do not need to use the transformed_pt (in the source app frame)
+        // because the KDTree has been created in the reference frame
         _local_kdtrees[i_from]->neighborSearch(
             pt, _num_nearest_points, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
@@ -348,8 +362,12 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
 
       for (const auto i_from : make_range(num_sources))
       {
+        // Transform the point to place it in the local coordinate system
+        const auto transformed_pt =
+            !_nearest_positions_obj ? (*_from_transforms[getGlobalSourceAppIndex(i_from)])(pt) : pt;
+
         // Only use the KDTree from the closest position if in "nearest-position" mode
-        if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+        if (_nearest_positions_obj && !closestToPosition(i_from, transformed_pt))
           continue;
 
         unsigned int num_search = _num_nearest_points + 1;

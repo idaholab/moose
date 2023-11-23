@@ -60,8 +60,9 @@ protected:
   /*
    * Evaluate interpolation values for incoming points
    */
-  virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
-                                    std::vector<std::pair<Real, Real>> & outgoing_vals) = 0;
+  virtual void
+  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+                       std::vector<std::pair<Real, Real>> & outgoing_vals) = 0;
 
   /*
    * Local from bounding boxes for current processor
@@ -71,16 +72,18 @@ protected:
   /*
    * Whether all source mesh checks pass on the given points:
    * - within the source mesh bounding box
-   * - inside block restriction
-   * - inside boundary restriction / in an element near the origin boundary restriction
+   * - inside source block restriction
+   * - inside source boundary restriction / in an element near the origin boundary restriction
+   * - inside source mesh division and at the same index as in the target mesh division
    * - inside app mesh (if not already known to be inside a block or near a boundary)
    * @param i_from the index of the source problem/mesh
    * @param local_bboxes the bounding boxes for the local applications
-   * @param pt the point to consider
+   * @param pt the point to consider (in reference frame, not source or target frame)
    */
   bool acceptPointInOriginMesh(unsigned int i_from,
                                const std::vector<BoundingBox> & local_bboxes,
-                               const Point & pt) const;
+                               const Point & pt,
+                               const unsigned int mesh_div) const;
 
   /*
    * Whether or not a given point is within the mesh of an origin (from) app
@@ -246,7 +249,8 @@ private:
   std::vector<MooseVariableFieldBase *> _to_variables;
 
   /// A map from pid to a set of points
-  typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
+  typedef std::unordered_map<processor_id_type, std::vector<std::pair<Point, unsigned int>>>
+      ProcessorToPointVec;
 
   /// Point information
   struct PointInfo
@@ -337,7 +341,7 @@ private:
       processor_id_type pid,
       const unsigned int var_index,
       std::vector<PointInfo> & pointInfoVec,
-      const std::vector<Point> & point_requests,
+      const std::vector<std::pair<Point, unsigned int>> & point_requests,
       const std::vector<std::pair<Real, Real>> & incoming_vals,
       DofobjectToInterpValVec & dofobject_to_valsvec, // for nodal + constant monomial
       InterpCaches & interp_caches,                   // for higher order elemental values

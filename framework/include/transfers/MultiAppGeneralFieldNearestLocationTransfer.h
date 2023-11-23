@@ -31,8 +31,9 @@ public:
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
 
-  virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
-                                    std::vector<std::pair<Real, Real>> & outgoing_vals) override;
+  virtual void
+  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+                       std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
   using MultiAppGeneralFieldTransfer::inBlocks;
   bool inBlocks(const std::set<SubdomainID> & blocks,
@@ -55,8 +56,9 @@ private:
    * @param incoming_points all the points at which we need values
    * @param outgoing_vals vector containing the values and distances from point to nearest node
    */
-  void evaluateInterpValuesNearestNode(const std::vector<Point> & incoming_points,
-                                       std::vector<std::pair<Real, Real>> & outgoing_vals);
+  void evaluateInterpValuesNearestNode(
+      const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+      std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /// KD-Trees for all the local source apps
   std::vector<std::shared_ptr<KDTree>> _local_kdtrees;
