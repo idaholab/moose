@@ -83,11 +83,15 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
+}
 
-  _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem));
-  _normal = *(NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem));
-  _dist = *(NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem));
-  _face_infos = *(NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem));
+void
+INSFVTKESourceSink::initialSetup()
+{
+  _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem);
+  _normal = NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem);
+  _dist = NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem);
+  _face_infos = NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem);
 }
 
 ADReal

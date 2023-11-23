@@ -122,8 +122,8 @@ ADReal computeSpeed(const ADRealVectorValue & velocity);
 /**
  * Map marking wall bounded elements
  */
-extern std::map<const Elem *, bool> _wall_bounded;
-std::map<const Elem *, bool> *
+// extern std::map<const Elem *, bool> _wall_bounded;
+std::map<const Elem *, bool>
 getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
                        const FEProblemBase & _fe_problem,
                        const SubProblem & _subproblem);
@@ -131,8 +131,8 @@ getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing wall ditance for near-wall marked elements
  */
-extern std::map<const Elem *, std::vector<Real>> _dist;
-std::map<const Elem *, std::vector<Real>> *
+// extern std::map<const Elem *, std::vector<Real>> _dist;
+std::map<const Elem *, std::vector<Real>>
 getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
                 const FEProblemBase & _fe_problem,
                 const SubProblem & _subproblem);
@@ -140,8 +140,8 @@ getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing faces normals for wall bounded elements
  */
-extern std::map<const Elem *, std::vector<Point>> _normal;
-std::map<const Elem *, std::vector<Point>> *
+// extern std::map<const Elem *, std::vector<Point>> _normal;
+std::map<const Elem *, std::vector<Point>>
 getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
                      const FEProblemBase & _fe_problem,
                      const SubProblem & _subproblem);
@@ -149,8 +149,8 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing face arguments to wall bounded faces
  */
-extern std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
-std::map<const Elem *, std::vector<const FaceInfo *>> *
+// extern std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
+std::map<const Elem *, std::vector<const FaceInfo *>>
 getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
                    const FEProblemBase & _fe_problem,
                    const SubProblem & _subproblem);

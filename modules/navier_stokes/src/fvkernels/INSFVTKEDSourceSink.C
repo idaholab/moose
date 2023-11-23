@@ -84,11 +84,15 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
+}
 
-  _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem));
-  _normal = *(NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem));
-  _dist = *(NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem));
-  _face_infos = *(NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem));
+void
+INSFVTKEDSourceSink::initialSetup()
+{
+  _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem);
+  _normal = NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem);
+  _dist = NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem);
+  _face_infos = NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem);
 }
 
 ADReal
@@ -227,9 +231,9 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     production = _C1_eps * _rho(makeElemArg(_current_elem), state) * production_k;
 
-    auto time_scale = raw_value(_k(makeElemArg(_current_elem), old_state) /
-                                    (_var(makeElemArg(_current_elem), old_state) + 1e-15) +
-                                1e-15);
+    auto time_scale = _k(makeElemArg(_current_elem), old_state) /
+                          (_var(makeElemArg(_current_elem), old_state) + 1e-15) +
+                      1e-15;
 
     destruction = _C2_eps * _rho(makeElemArg(_current_elem), state) *
                   _var(makeElemArg(_current_elem), state) / time_scale;

@@ -138,8 +138,7 @@ computeSpeed(const ADRealVectorValue & velocity)
 }
 
 /// Bounded element maps for wall treatement
-std::map<const Elem *, bool> _wall_bounded;
-std::map<const Elem *, bool> *
+std::map<const Elem *, bool>
 getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
                        const FEProblemBase & _fe_problem,
                        const SubProblem & _subproblem)
@@ -149,8 +148,10 @@ getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
   // We don't allow differential wall treatement for different models
   // This can induce physical errors
   // So, only 1 map exists for determining the wall bounded elements
-  if (_wall_bounded.size() > 0)
-    return &_wall_bounded;
+  // if (_wall_bounded.size() > 0)
+  //   return &_wall_bounded;
+
+  std::map<const Elem *, bool> _wall_bounded;
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
@@ -170,12 +171,11 @@ getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
     }
     _wall_bounded[elem] = wall_bounded;
   }
-  return &_wall_bounded;
+  return _wall_bounded;
 }
 
 /// Bounded element face distances for wall treatement
-std::map<const Elem *, std::vector<Real>> _dist;
-std::map<const Elem *, std::vector<Real>> *
+std::map<const Elem *, std::vector<Real>>
 getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
                 const FEProblemBase & _fe_problem,
                 const SubProblem & _subproblem)
@@ -185,8 +185,10 @@ getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
   // We don't allow differential wall treatement for different models
   // This can induce physical errors
   // So, only 1 map exists for determining the wall distances
-  if (_dist.size() > 0)
-    return &_dist;
+  // if (_dist.size() > 0)
+  //   return &_dist;
+
+  std::map<const Elem *, std::vector<Real>> _dist;
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
@@ -208,12 +210,11 @@ getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
       }
     }
   }
-  return &_dist;
+  return _dist;
 }
 
 /// Bounded element face normals for wall treatement
-std::map<const Elem *, std::vector<Point>> _normal;
-std::map<const Elem *, std::vector<Point>> *
+std::map<const Elem *, std::vector<Point>>
 getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
                      const FEProblemBase & _fe_problem,
                      const SubProblem & _subproblem)
@@ -223,8 +224,10 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
   // We don't allow differential wall treatement for different models
   // This can induce physical errors
   // So, only 1 map exists for determining the wall bounded elements' normals
-  if (_normal.size() > 0)
-    return &_normal;
+  // if (_normal.size() > 0)
+  //   return &_normal;
+
+  std::map<const Elem *, std::vector<Point>> _normal;
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
@@ -245,12 +248,11 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
       }
     }
   }
-  return &_normal;
+  return _normal;
 }
 
 /// Face arguments to wall-bounded faces for wall tretement
-std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
-std::map<const Elem *, std::vector<const FaceInfo *>> *
+std::map<const Elem *, std::vector<const FaceInfo *>>
 getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
                    const FEProblemBase & _fe_problem,
                    const SubProblem & _subproblem)
@@ -260,8 +262,10 @@ getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
   // We don't allow differential wall treatement for different models
   // This can induce physical errors
   // So, only 1 map exists for determining the wall bounded elements' faces
-  if (_face_infos.size() > 0)
-    return &_face_infos;
+  // if (_face_infos.size() > 0)
+  //   return &_face_infos;
+
+  std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
@@ -282,7 +286,6 @@ getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
       }
     }
   }
-  return &_face_infos;
+  return _face_infos;
 }
-
 }

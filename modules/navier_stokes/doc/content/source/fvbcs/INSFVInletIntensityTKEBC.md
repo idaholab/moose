@@ -1,13 +1,15 @@
 # INSFVInletIntensityTKEBC
 
-!syntax description /Materials/INSFVInletIntensityTKEBC
+!syntax description /FVBCs/INSFVInletIntensityTKEBC
 
 This object wraps [`FVFunctionDirichletBC`](FVFunctionDirichletBC.md),
 to impose a precomputed value for the turbulent kinetic energy.
 
 The value set for the turbulent kinetic energy is:
 
-$$k = \frac{3}{2} (I |\vec{u} \cdot \vec{n}|)^2$$,
+\begin{equation}
+k = \frac{3}{2} (I |\vec{u} \cdot \vec{n}|)^2 \,,
+\end{equation}
 
 where:
 

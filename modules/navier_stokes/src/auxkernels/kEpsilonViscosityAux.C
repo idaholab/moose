@@ -63,11 +63,16 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _non_equilibrium_treatement(getParam<bool>("non_equilibrium_treatement"))
 {
+}
+
+void
+kEpsilonViscosityAux::initialSetup()
+{
   if (!_wall_boundary_names.empty())
   {
-    _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _c_fe_problem, _subproblem));
-    _normal = *(NS::getElementFaceNormal(_wall_boundary_names, _c_fe_problem, _subproblem));
-    _dist = *(NS::getWallDistance(_wall_boundary_names, _c_fe_problem, _subproblem));
+    _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _c_fe_problem, _subproblem);
+    _normal = NS::getElementFaceNormal(_wall_boundary_names, _c_fe_problem, _subproblem);
+    _dist = NS::getWallDistance(_wall_boundary_names, _c_fe_problem, _subproblem);
   }
 }
 

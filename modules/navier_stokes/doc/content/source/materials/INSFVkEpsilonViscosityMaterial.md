@@ -2,7 +2,12 @@
 
 !syntax description /Materials/INSFVkEpsilonViscosityMaterial
 
-This is the material class used to compute the dynamic turbulence viscosity $\mu_t = \rho C_{\mu} \frac{k^2}{\epsilon}$,
+This is the material class used to compute the dynamic turbulence viscosity
+
+\begin{equation}
+  \mu_t = \rho C_{\mu} \frac{k^2}{\epsilon} \,,
+\end{equation}
+
 where:
 
 - $\rho$ is the density,

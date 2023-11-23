@@ -19,6 +19,8 @@ class INSFVTKESourceSink : public FVElementalKernel
 public:
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   INSFVTKESourceSink(const InputParameters & parameters);
 
 protected:

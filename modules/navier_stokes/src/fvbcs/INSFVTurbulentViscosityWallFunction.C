@@ -11,7 +11,7 @@
 #include "Function.h"
 #include "NavierStokesMethods.h"
 
-registerMooseObject("MooseApp", INSFVTurbulentViscosityWallFunction);
+registerMooseObject("NavierStokesApp", INSFVTurbulentViscosityWallFunction);
 
 InputParameters
 INSFVTurbulentViscosityWallFunction::validParams()
@@ -100,7 +100,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
                            std::max(parallel_speed, 1e-10),
                            wall_dist);
     mut_log = _mu(current_argument, state) *
-              (karman_cte * wall_dist / std::log(std::max(E * y_plus, 1 + 1e-4)) - 1.0);
+              (karman_cte * y_plus / std::log(std::max(E * y_plus, 1 + 1e-4)) - 1.0);
   }
   else if (_wall_treatment == "eq_linearized")
   {
@@ -116,8 +116,8 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
   else if (_wall_treatment == "neq")
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, state)) /
-             _mu(current_argument, state);
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, state)) *
+             _rho(current_argument, state) / _mu(current_argument, state);
     mut_log = _mu(current_argument, state) *
               (karman_cte * wall_dist / std::log(std::max(E * y_plus, 1 + 1e-4)) - 1.0);
   }

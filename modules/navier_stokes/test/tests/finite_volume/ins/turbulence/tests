@@ -1,6 +1,6 @@
 [Tests]
-  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
-  issues = '#00000'
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#9007'
   [lid_driven_turb_std_wall]
     type = 'Exodiff'
     input = 'lid-driven-turb-std-wall.i'
@@ -68,7 +68,7 @@
     type = 'Exodiff'
     input = 'lid-driven-turb-std-wall-nonlinear.i'
     exodiff = 'lid-driven-turb-std-wall-nonlinear_out.e'
-    requirement = 'The system shall be able to solve turbulence in enclosures with standard wall functions.'
+    requirement = 'The system shall be able to solve nonlinear turbulence in enclosures with standard wall functions.'
     abs_zero = 1e-6
   []
   [channel_ERCOFTAC]

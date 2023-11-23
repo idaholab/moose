@@ -9,7 +9,7 @@
 
 #include "INSFVTurbulentDiffusion.h"
 
-registerMooseObject("MooseApp", INSFVTurbulentDiffusion);
+registerMooseObject("NavierStokesApp", INSFVTurbulentDiffusion);
 
 InputParameters
 INSFVTurbulentDiffusion::validParams()
@@ -29,6 +29,12 @@ INSFVTurbulentDiffusion::INSFVTurbulentDiffusion(const InputParameters & params)
     _scaling_coef(getFunctor<ADReal>("scaling_coef")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
+}
+
+void
+INSFVTurbulentDiffusion::initialSetup()
+{
+  FVDiffusion::initialSetup();
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
     auto wall_bounded = false;
@@ -96,7 +102,7 @@ INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   const Elem * elem = fi.elemPtr();
@@ -136,7 +142,7 @@ INSFVTurbulentDiffusion::computeJacobian(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   const ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   const Elem * elem = fi.elemPtr();

@@ -25,6 +25,7 @@ class INSFVTurbulentDiffusion : public FVDiffusion
 {
 public:
   static InputParameters validParams();
+  virtual void initialSetup() override;
   INSFVTurbulentDiffusion(const InputParameters & params);
 
 protected:

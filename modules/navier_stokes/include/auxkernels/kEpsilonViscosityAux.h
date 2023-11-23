@@ -23,6 +23,8 @@ class kEpsilonViscosityAux : public AuxKernel
 public:
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   kEpsilonViscosityAux(const InputParameters & parameters);
 
 protected:

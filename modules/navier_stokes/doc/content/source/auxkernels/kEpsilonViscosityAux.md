@@ -2,13 +2,30 @@
 
 !syntax description /AuxKernels/kEpsilonViscosityAux
 
-This is the axiliary kernel used to compute the dynamic turbulence viscosity $\mu_t = \rho C_{\mu} \frac{k^2}{\epsilon}$,
+This is the axiliary kernel used to compute the dynamic turbulence viscosity
+
+\begin{equation}
+\mu_t = \rho C_{\mu} \frac{k^2}{\epsilon} \,,
+\end{equation}
+
 where:
 
 - $\rho$ is the density,
 - $C_{\mu} = 0.09$ is a closure parameter,
 - $k$ is the turbulent kinetic energy,
 - $\epsilon$ is the turbulent kinetic energy dissipation rate.
+
+Via the parameter `bulk_wall_treatment = true` the methods allows us to set the value
+of the cells identified in contact with the boundaries identified in `walls` to the dynamic
+turbulent viscosity predicted from the law of the wall or non-equilibrium wall functions.
+See [INSFVTurbulentViscosityWallFunction](INSFVTurbulentViscosityWallFunction.md) for more
+details about the near-wall implementation.
+
+!alert note
+If the boundary conditions for the dynamic turbulent viscosity are already set via [INSFVTurbulentViscosityWallFunction](INSFVTurbulentViscosityWallFunction.md),
+there is no need to add bulk wall treatment, i.e., we should set `bulk_wall_treatment = false`.
+This type of bulk wall treatment is mainly design for porous media formulations
+with large computational cells.
 
 !syntax parameters /AuxKernels/kEpsilonViscosityAux
 

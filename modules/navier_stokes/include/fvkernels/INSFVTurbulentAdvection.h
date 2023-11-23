@@ -19,6 +19,7 @@ class INSFVTurbulentAdvection : public INSFVAdvectionKernel
 {
 public:
   static InputParameters validParams();
+  virtual void initialSetup() override;
   INSFVTurbulentAdvection(const InputParameters & params);
 
   bool hasMaterialTimeDerivative() const override { return false; }

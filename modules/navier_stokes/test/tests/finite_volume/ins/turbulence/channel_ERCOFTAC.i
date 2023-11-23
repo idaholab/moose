@@ -383,10 +383,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
 [Executioner]
   type = SIMPLE
   rhie_chow_user_object = 'rc'

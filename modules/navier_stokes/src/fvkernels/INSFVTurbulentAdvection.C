@@ -28,7 +28,13 @@ INSFVTurbulentAdvection::INSFVTurbulentAdvection(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  _wall_bounded = *(NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem));
+}
+
+void
+INSFVTurbulentAdvection::initialSetup()
+{
+  INSFVAdvectionKernel::initialSetup();
+  _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem);
 }
 
 ADReal
@@ -56,7 +62,7 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   const Elem * elem = fi.elemPtr();
@@ -96,7 +102,7 @@ INSFVTurbulentAdvection::computeJacobian(const FaceInfo & fi)
 
   _face_info = &fi;
   _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
+  _face_type = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
   const ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   const Elem * elem = fi.elemPtr();
