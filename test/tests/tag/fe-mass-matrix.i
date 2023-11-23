@@ -23,7 +23,7 @@
     variable = u
   []
   [mass]
-    type = Mass
+    type = MassKernel
     variable = u
     matrix_tags = 'mass'
   []
