@@ -96,8 +96,9 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
 {%- endif %}
 
-    # Make python default to python3
-    alternatives --set python /usr/bin/python3
+    # Make python default to python3.9
+    alternatives --set python /usr/bin/python3.9
+    alternatives --set python3 /usr/bin/python3.9
 
     # Allow a custom initialization routine if the following files exist at /
     touch ${SINGULARITY_ROOTFS}/none
