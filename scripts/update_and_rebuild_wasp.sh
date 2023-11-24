@@ -17,19 +17,21 @@ WASP_SRC_DIR="`pwd`/framework/contrib/wasp"
 # Loop over specified command line arguments and turn on any found options
 
 for ARG in "$@" ; do
-  if [[ "${ARG}" == "--fast" ]] ; then FAST=1 ; fi
-  if [[ "${ARG}" == "--help" ]] ; then HELP=1 ; fi
-  if [[ "${ARG}" == "--skip-submodule-update" ]] ; then SKIP_SUBMODULE_UPDATE=1 ; fi
+  if   [[ "${ARG}" == "--help" ]]                  ; then HELP=1
+  elif [[ "${ARG}" == "--fast" ]]                  ; then FAST=1
+  elif [[ "${ARG}" == "--skip-submodule-update" ]] ; then SKIP=1
+  else                                               EXTRA_ARGS+=("$ARG")
+  fi
 done
 
 # Display the help menu to show the list of available options if requested
 
 if [[ -n "${HELP}" ]] ; then
-  echo "Usage: $0 [ --help | --fast ]"
+  echo "Usage: $0 [ --help | --fast | --skip-submodule-update ]"
   echo
-  echo "--help    Display this message listing the options that are available"
+  echo "--help                   Display this message listing the options that are available"
   echo "--skip-submodule-update  Do not update the WASP submodule, use the current version"
-  echo "--fast    Run WASP 'make install' only and do NOT update or configure"
+  echo "--fast                   Run WASP 'make install' only and do NOT update or configure"
   echo "*********************************************************************"
   echo
   exit 0
@@ -47,7 +49,7 @@ if [[ -n "${FAST}"  ]] ; then
 # If we are not going fast then update WASP, remove build, and reconfigure
 else
   git rev-parse 2> /dev/null
-  if [[ $? -eq 0 ]] && [ -z "$SKIP_SUBMODULE_UPDATE" ]; then
+  if [[ $? -eq 0 ]] && [ -z "$SKIP" ]; then
     git submodule update --init --recursive "${WASP_SRC_DIR}"
     if [[ $? -ne 0 ]] ; then
       echo "Error: git submodule update failed to complete successfully"
@@ -61,7 +63,7 @@ else
   cd "${WASP_SRC_DIR}"/build
   WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_PREFIX:-${WASP_SRC_DIR}/install}"
   source $SCRIPT_DIR/configure_wasp.sh
-  configure_wasp "$WASP_OPTIONS" ../ $*
+  configure_wasp "$WASP_OPTIONS" ../ "${EXTRA_ARGS[@]}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: configure step for WASP failed to complete successfully"
     exit 1
