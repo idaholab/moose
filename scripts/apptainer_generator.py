@@ -596,9 +596,12 @@ class ApptainerGenerator:
 
         # Whether or not the definition file has a dependency
         needs_from = '{{ APPTAINER_BOOTSTRAP }}' in definition
-        # Provided one but we don't need it
-        if not needs_from and self.args.dep:
-            self.error(f'Library {self.name} does not need a dependency, but --dep was provided')
+        # User provided an alternate dependency
+        if self.args.dep:
+            self.print(f'Using alternate dependency {self.args.dep}')
+            # Provided one but we don't need it
+            if not needs_from:
+                self.error(f'Library {self.name} does not need a dependency, but --dep was provided')
         # No dependent library needed
         if dep_meta is None:
             if needs_from:
