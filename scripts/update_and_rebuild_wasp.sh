@@ -10,22 +10,23 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd "$(dirname "${BASH_SOURCE[0]}")"/..
-
-WASP_SRC_DIR="`pwd`/framework/contrib/wasp"
+if [ -n "$WASP_SRC_DIR" ]; then
+  SKIP_SUBMODULE_UPDATE=1
+else
+  MOOSE_DIR=${SCRIPT_DIR}/..
+  WASP_SRC_DIR=${MOOSE_DIR}/framework/contrib/wasp
+fi
 
 # Loop over specified command line arguments and turn on any found options
-
 for ARG in "$@" ; do
   if   [[ "${ARG}" == "--help" ]]                  ; then HELP=1
   elif [[ "${ARG}" == "--fast" ]]                  ; then FAST=1
-  elif [[ "${ARG}" == "--skip-submodule-update" ]] ; then SKIP=1
+  elif [[ "${ARG}" == "--skip-submodule-update" ]] ; then SKIP_SUBMODULE_UPDATE=1
   else                                               EXTRA_ARGS+=("$ARG")
   fi
 done
 
 # Display the help menu to show the list of available options if requested
-
 if [[ -n "${HELP}" ]] ; then
   echo "Usage: $0 [ --help | --fast | --skip-submodule-update ]"
   echo
@@ -38,18 +39,16 @@ if [[ -n "${HELP}" ]] ; then
 fi
 
 # If we are going fast then check and make sure the build directory exists
-
 if [[ -n "${FAST}"  ]] ; then
   if [[ ! -d "${WASP_SRC_DIR}"/build ]] ; then
     echo "Error: a build directory must exist to use the --fast option"
     exit 1
   fi
   cd "${WASP_SRC_DIR}"/build
-
 # If we are not going fast then update WASP, remove build, and reconfigure
 else
-  git rev-parse 2> /dev/null
-  if [[ $? -eq 0 ]] && [ -z "$SKIP" ]; then
+  if [ -z "$SKIP_SUBMODULE_UPDATE" ]; then
+    cd $MOOSE_DIR
     git submodule update --init --recursive "${WASP_SRC_DIR}"
     if [[ $? -ne 0 ]] ; then
       echo "Error: git submodule update failed to complete successfully"
