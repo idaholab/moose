@@ -6,5 +6,6 @@
     requirement = "The system shall be able to model flow around a bend with the porous incompressible Navier Stokes equations using a finite volume discretization and an Ergun drag correlation."
     issues = '#16756'
     design = 'FunctorErgunDragCoefficients.md'
+    max_time = 600
   []
 []
