@@ -11,11 +11,11 @@
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
-{#- Location to install mambaforge                                                            -#}
-{%- set MOOSE_MAMBAFORGE = '/opt/mambaforge3' -%}
+{#- Location to install miniforge3                                                            -#}
+{%- set MOOSE_MINIFORGE = '/opt/miniforge3' -%}
 
-{#- Name of the environment to create in mamba                                                -#}
-{%- set MOOSE_MAMBA_ENV = 'moose' -%}
+{#- Name of the environment to create in conda                                                -#}
+{%- set MOOSE_CONDA_ENV_NAME = 'moose' -%}
 
 {#- The installation location for wasp                                                        -#}
 {%- set WASP_DIR = '/opt/wasp' -%}
@@ -33,8 +33,8 @@ From: {{ APPTAINER_FROM }}
     git submodule update --init --recursive framework/contrib/wasp
 
 %environment
-    export PATH={{ MOOSE_MAMBAFORGE }}/bin:$PATH
-    source activate {{ MOOSE_MAMBAFORGE }}/envs/{{ MOOSE_MAMBA_ENV }}
+    export PATH={{ MOOSE_MINIFORGE }}/bin:$PATH
+    PATH={{ MOOSE_MINIFORGE }}/bin:$PATH source activate {{ MOOSE_MINIFORGE }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
@@ -43,22 +43,22 @@ From: {{ APPTAINER_FROM }}
 
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
-    MOOSE_MAMBAFORGE={{ MOOSE_MAMBAFORGE }}
-    MOOSE_MAMBA_ENV={{ MOOSE_MAMBA_ENV }}
+    MOOSE_MINIFORGE={{ MOOSE_MINIFORGE }}
+    MOOSE_CONDA_ENV_NAME={{ MOOSE_CONDA_ENV_NAME }}
     MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
-    MOOSE_TEST_TOOLS_VERSION={{ MOOSE_TEST_TOOLS_VERSION }}
     CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
-    MAMBAFORGE_VERSION=23.1.0-1
+    MINIFORGE_VERSION=23.3.1-1
     PYTHON_VERSION=3.10
 
-    # Install mamba in MOOSE_MAMBAFORGE
-    curl -L https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh -o ${ROOT_BUILD_DIR}/mambaforge.sh
-    bash ${ROOT_BUILD_DIR}/mambaforge.sh -b -p ${MOOSE_MAMBAFORGE}
-    rm ${ROOT_BUILD_DIR}/mambaforge.sh
-    PATH=${MOOSE_MAMBAFORGE}/bin:$PATH
+    # Install miniforge in MOOSE_MINIFORGE
+    MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
+    curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
+    bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
+    rm ${MINIFORGE_SCRIPT}
+    PATH=${MOOSE_MINIFORGE}/bin:$PATH
 
     # Add moose channels
     conda config --env --add channels https://conda.software.inl.gov/public
@@ -70,10 +70,10 @@ From: {{ APPTAINER_FROM }}
     # Create list of Conda Packages to install
     MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    mamba create -yq -n ${MOOSE_MAMBA_ENV} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
+    mamba create -yq -n ${MOOSE_CONDA_ENV_NAME} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
 
     # Activate the new environment
-    source activate ${MOOSE_MAMBAFORGE}/envs/${MOOSE_MAMBA_ENV}
+    source activate ${MOOSE_MINIFORGE}/envs/${MOOSE_CONDA_ENV_NAME}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
 
