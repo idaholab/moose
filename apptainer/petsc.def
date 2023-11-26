@@ -19,17 +19,14 @@
 {%- set MPI_FLAVOUR = 'mpich' -%}
 {%- endif %}
 
+{%- if PETSC_ALT is defined %}
+{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc_alt.sh' -%}
+{%- else -%}
+{%- set PETSC_BUILD_SCRIPT = 'update_and_rebuild_petsc.sh' -%}
+{%- endif %}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-
-%setup
-    # Copy moose from MOOSE_DIR into the container
-    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
-    mkdir ${ROOT_BUILD_DIR}
-    MOOSE_DIR={{ MOOSE_DIR }}
-    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
-    cd ${ROOT_BUILD_DIR}/moose
-    git submodule update --init petsc
 
 %environment
     # Set the MPI environment
@@ -53,20 +50,26 @@ From: {{ APPTAINER_FROM }}
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     PETSC_DIR={{ PETSC_DIR }}
-{%- if PETSC_ALT is defined %}
-    # PETSC_ALT set; using alt script and use container cmake
-    PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc_alt.sh
-    DOWNLOAD_CMAKE=
-{%- else %}
-    # PETSC_ALT not set; using standard script and download cmake
-    PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc.sh
-    DOWNLOAD_CMAKE=--download-cmake
+    PETSC_BUILD_SCRIPT={{ PETSC_BUILD_SCRIPT }}
+    PETSC_OPTIONS="{{ PETSC_OPTIONS }}"
+
+    # Make sure PETSc exists
+    if [ -n `${ROOT_BUILD_DIR}/petsc -d 0 -type d -empty` ]; then
+        echo "The petsc directory is empty; you must initialize the submodule"
+        exit 1
+    fi
+
+    # Don't bother with submodule changes
+    PETSC_OPTIONS+=" --skip-submodule-update"
+{%- if PETSC_ALT is not defined %}
+    # Need a newer cmake for current petsc
+    PETSC_OPTIONS+=" --download-cmake"
 {%- endif %}
 
     # Build PETSc
     umask 022
-    cd ${ROOT_BUILD_DIR}/moose
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} ${PETSC_BUILD_SCRIPT} ${DOWNLOAD_CMAKE} {{ PETSC_OPTIONS }}
+    cd ${ROOT_BUILD_DIR}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} scripts/${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
 
 {%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
@@ -79,3 +82,8 @@ From: {{ APPTAINER_FROM }}
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
+
+%files
+    {{ MOOSE_DIR }}/petsc {{ ROOT_BUILD_DIR }}/petsc
+    {{ MOOSE_DIR }}/scripts/{{ PETSC_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ PETSC_BUILD_SCRIPT }}
+    {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
