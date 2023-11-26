@@ -56,9 +56,10 @@ AdaptivityAction::validParams()
       "Determines whether information about the mesh is printed when adaptivity occurs",
       "Use the Console output parameter 'print_mesh_changed_info'");
   params.addParam<std::vector<std::string>>(
-      "weight_names", "List of names of variables that will be associated with weight_values");
+      "weight_names", {}, "List of names of variables that will be associated with weight_values");
   params.addParam<std::vector<Real>>(
       "weight_values",
+      {},
       "List of values between 0 and 1 to weight the associated weight_names error by");
   params.addParam<bool>(
       "show_initial_progress", true, "Show the progress of the initial adaptivity");

@@ -165,6 +165,8 @@ velocity_interp_method = 'rc'
     superficial_vel_x = vel_x
     superficial_vel_y = vel_y
     porosity = 1
+    vel_x = vel_x_mat
+    vel_y = vel_y_mat
   []
   [Re_material]
     type = ReynoldsNumberFunctorMaterial

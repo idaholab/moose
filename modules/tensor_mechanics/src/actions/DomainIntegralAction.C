@@ -42,8 +42,8 @@ DomainIntegralAction::validParams()
                                           integral_vec,
                                           "Domain integrals to calculate.  Choices are: " +
                                               integral_vec.getRawNames());
-  params.addParam<std::vector<BoundaryName>>("boundary",
-                                             "Boundary containing the crack front points");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary", {}, "Boundary containing the crack front points");
   params.addParam<std::vector<Point>>("crack_front_points", "Set of points to define crack front");
   params.addParam<std::string>(
       "order", "FIRST", "Specifies the order of the FE shape function to use for q AuxVariables");
@@ -59,9 +59,11 @@ DomainIntegralAction::validParams()
       "output_variable", "Variable values to be reported along the crack front");
   params.addParam<Real>("poissons_ratio", "Poisson's ratio");
   params.addParam<Real>("youngs_modulus", "Young's modulus");
-  params.addParam<std::vector<SubdomainName>>("block", "The block ids where integrals are defined");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "The block ids where integrals are defined");
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<VariableName>("temperature", "", "The temperature");
   params.addParam<MaterialPropertyName>(

@@ -94,8 +94,9 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
-    porosity = 'porosity'
     rho = ${rho}
+    speed = speed
+    mu = ${mu}
   []
 
   [v_advection]
@@ -126,8 +127,9 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
-    porosity = 'porosity'
     rho = ${rho}
+    speed = speed
+    mu = ${mu}
   []
 
   [p_diffusion]
@@ -215,11 +217,17 @@ pressure_tag = "pressure_grad"
   #####################################################################
 []
 
-[Materials]
+[FunctorMaterials]
   [darcy]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'
     prop_values = '0.01 0.02 0.03 0.01 0.02 0.03'
+  []
+  [speed]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = superficial_vel_x
+    superficial_vel_y = superficial_vel_y
+    porosity = porosity
   []
 []
 

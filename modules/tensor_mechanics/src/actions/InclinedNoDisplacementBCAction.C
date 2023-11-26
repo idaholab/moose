@@ -25,8 +25,9 @@ InclinedNoDisplacementBCAction::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "displacements",
+      {},
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
+  params.addParam<std::vector<AuxVariableName>>("save_in", {}, "The displacement residuals");
 
   params.addRequiredParam<Real>("penalty", "Penalty parameter");
   params.addParam<bool>("use_automatic_differentiation",

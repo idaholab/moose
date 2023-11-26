@@ -32,8 +32,8 @@ DisplacementGradientsAction::validParams()
                                                      "Vector of displacement gradient variables");
   params.addParam<Real>(
       "scaling", 1.0, "Specifies a scaling factor to apply to the displacement gradient variables");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the variables and kernels");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the variables and kernels");
   return params;
 }
 

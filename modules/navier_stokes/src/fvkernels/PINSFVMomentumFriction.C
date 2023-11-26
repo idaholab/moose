@@ -24,24 +24,63 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
   params.addParam<MooseFunctorName>("Forchheimer_name",
                                     "Name of the Forchheimer coefficients property.");
-  params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "the porosity");
+  params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
+  params.addParam<MooseFunctorName>(
+      NS::speed,
+      "The norm of the interstitial velocity. This is required for Forchheimer calculations");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   return params;
 }
 
 PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
   : INSFVElementalKernel(params),
-    _cL(isParamValid("Darcy_name") ? &getFunctor<ADRealVectorValue>("Darcy_name") : nullptr),
-    _cQ(isParamValid("Forchheimer_name") ? &getFunctor<ADRealVectorValue>("Forchheimer_name")
-                                         : nullptr),
+    _D(isParamValid("Darcy_name") ? &getFunctor<ADRealVectorValue>("Darcy_name") : nullptr),
+    _F(isParamValid("Forchheimer_name") ? &getFunctor<ADRealVectorValue>("Forchheimer_name")
+                                        : nullptr),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
-    _eps(getFunctor<ADReal>(NS::porosity)),
-    _rho(getFunctor<ADReal>(NS::density))
+    _mu(isParamValid(NS::mu) ? &getFunctor<ADReal>(NS::mu) : nullptr),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _speed(isParamValid(NS::speed) ? &getFunctor<ADReal>(NS::speed) : nullptr)
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
+
+  if (_use_Forchheimer_friction_model && !_speed)
+    mooseError("If using a Forchheimer friction model, then the '",
+               NS::speed,
+               "' parameter must be provided");
+
+  if (_use_Darcy_friction_model && !_mu)
+    mooseError(
+        "If using a Darcy friction model, then the '", NS::mu, "' parameter must be provided");
 }
+
+// We are going to follow the formulations in
+// https://holzmann-cfd.com/community/blog-and-tools/darcy-forchheimer and
+// https://www.simscale.com/knowledge-base/predict-darcy-and-forchheimer-coefficients-for-perforated-plates-using-analytical-approach/
+// for Darcy and Forchheimer which define:
+//
+// \nabla p = \mu D v + \frac{\rho}{2} F |v| v
+//
+// where v denotes the interstitial velocity (e.g. the true fluid velocity). Note that to be
+// consistent with our overall porous Navier-Stokes formulation, we must multiply the above equation
+// by porosity:
+//
+// \epsilon \nabla p = \epsilon \mu D v + \epsilon \frac{\rho}{2} F |v| v =
+// \mu D v_D + \frac{\rho}{2} F |v| v_D
+//
+// where v_D is the superficial velocity, which is the variable this kernel is acting on. The two
+// terms on the final RHS are what this kernel implements. Because both monolithic and segregated
+// solves multiply by v_D in the gatherRCData and computeSegregatedContribution methods
+// respectively, it is the job of the computeFrictionWCoefficient method to compute, for the Darcy
+// term:
+//
+// \mu D
+//
+// and for the Forchheimer term
+//
+// \frac{\rho}{2} F |v|
 
 ADReal
 PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_arg,
@@ -49,9 +88,10 @@ PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_
 {
   ADReal coefficient = 0.0;
   if (_use_Darcy_friction_model)
-    coefficient += (*_cL)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
+    coefficient += (*_mu)(elem_arg, state) * (*_D)(elem_arg, state)(_index);
   if (_use_Forchheimer_friction_model)
-    coefficient += (*_cQ)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
+    coefficient +=
+        _rho(elem_arg, state) / 2 * (*_F)(elem_arg, state)(_index) * (*_speed)(elem_arg, state);
 
   return coefficient;
 }

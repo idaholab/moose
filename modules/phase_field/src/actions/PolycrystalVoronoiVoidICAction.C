@@ -29,8 +29,8 @@ PolycrystalVoronoiVoidICAction::validParams()
       "",
       "File containing grain centroids, if file_name is provided, the centroids "
       "from the file will be used.");
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              "Block restriction for the initial condition");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", {}, "Block restriction for the initial condition");
 
   return params;
 }

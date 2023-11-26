@@ -20,16 +20,17 @@ TestAction::validParams()
 
   params.addParam<bool>("use_transient_executioner", "Option to use a transient executioner");
   params.addParam<bool>("generate_mesh", true, "Option to have the action generate the mesh");
-  params.addParam<std::vector<VariableName>>("scalar_variable_names", "List of scalar variables");
-  params.addParam<std::vector<FunctionName>>("scalar_variable_values",
-                                             "List of values of the scalar variables");
-  params.addParam<std::vector<VariableName>>("aux_variable_names", "List of aux variables");
-  params.addParam<std::vector<FunctionName>>("aux_variable_values",
-                                             "List of values of the aux variables");
-  params.addParam<std::vector<std::string>>("mat_property_names",
-                                            "List of material property names");
-  params.addParam<std::vector<FunctionName>>("mat_property_values",
-                                             "List of values of the material properties");
+  params.addParam<std::vector<VariableName>>(
+      "scalar_variable_names", {}, "List of scalar variables");
+  params.addParam<std::vector<FunctionName>>(
+      "scalar_variable_values", {}, "List of values of the scalar variables");
+  params.addParam<std::vector<VariableName>>("aux_variable_names", {}, "List of aux variables");
+  params.addParam<std::vector<FunctionName>>(
+      "aux_variable_values", {}, "List of values of the aux variables");
+  params.addParam<std::vector<std::string>>(
+      "mat_property_names", {}, "List of material property names");
+  params.addParam<std::vector<FunctionName>>(
+      "mat_property_values", {}, "List of values of the material properties");
   params.addParam<bool>("ad", false, "Setup for AD or non-AD testing");
 
   params.addPrivateParam<std::string>("fe_family");

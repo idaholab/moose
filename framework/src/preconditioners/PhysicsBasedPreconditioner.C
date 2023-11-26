@@ -112,16 +112,20 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
   unsigned int n_vars = _nl.system().n_vars();
 
   // off-diagonal entries
-  const std::vector<NonlinearVariableName> & odr =
-      getParam<std::vector<NonlinearVariableName>>("off_diag_row");
-  const std::vector<NonlinearVariableName> & odc =
-      getParam<std::vector<NonlinearVariableName>>("off_diag_column");
   std::vector<std::vector<unsigned int>> off_diag(n_vars);
-  for (const auto i : index_range(odr))
+  if (isParamValid("off_diag_row") && isParamValid("off_diag_column"))
   {
-    unsigned int row = _nl.system().variable_number(odr[i]);
-    unsigned int column = _nl.system().variable_number(odc[i]);
-    off_diag[row].push_back(column);
+    const std::vector<NonlinearVariableName> & odr =
+        getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+    const std::vector<NonlinearVariableName> & odc =
+        getParam<std::vector<NonlinearVariableName>>("off_diag_column");
+
+    for (const auto i : index_range(odr))
+    {
+      unsigned int row = _nl.system().variable_number(odr[i]);
+      unsigned int column = _nl.system().variable_number(odc[i]);
+      off_diag[row].push_back(column);
+    }
   }
   // Add all of the preconditioning systems
   for (unsigned int var = 0; var < n_vars; var++)

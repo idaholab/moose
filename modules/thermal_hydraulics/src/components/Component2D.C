@@ -48,7 +48,7 @@ Component2D::check() const
 {
   GeneratedMeshComponent::check();
 
-  if (isParamValid("axial_region_names"))
+  if (getParam<std::vector<std::string>>("axial_region_names").size())
     checkEqualSize<std::string, Real>("axial_region_names", "length");
   else if (_n_sections > 1)
     logError("If there is more than 1 axial region, then the parameter 'axial_region_names' must "

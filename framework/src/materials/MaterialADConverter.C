@@ -34,13 +34,17 @@ MaterialADConverterTempl<T>::validParams()
   params.addClassDescription(
       "Converts regular material properties to AD properties and vice versa");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "reg_props_in", "The names of the regular material properties to convert to AD properties");
-  params.addParam<std::vector<MaterialPropertyName>>("ad_props_out",
-                                                     "The names of the output AD properties");
+      "reg_props_in",
+      {},
+      "The names of the regular material properties to convert to AD properties");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "ad_props_in", "The names of the AD material properties to convert to regular properties");
-  params.addParam<std::vector<MaterialPropertyName>>("reg_props_out",
-                                                     "The names of the output regular properties");
+      "ad_props_out", {}, "The names of the output AD properties");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "ad_props_in",
+      {},
+      "The names of the AD material properties to convert to regular properties");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "reg_props_out", {}, "The names of the output regular properties");
   params.addParam<bool>(
       "intra_convert", false, "Whether to allow intra conversion, e.g. regular->regular, ad->ad");
   return params;
@@ -50,6 +54,7 @@ template <typename T>
 MaterialADConverterTempl<T>::MaterialADConverterTempl(const InputParameters & parameters)
   : Material(parameters), _intra_convert(getParam<bool>("intra_convert"))
 {
+
   auto reg_props_in = getParam<std::vector<MaterialPropertyName>>("reg_props_in");
   auto ad_props_out = getParam<std::vector<MaterialPropertyName>>("ad_props_out");
   auto ad_props_in = getParam<std::vector<MaterialPropertyName>>("ad_props_in");

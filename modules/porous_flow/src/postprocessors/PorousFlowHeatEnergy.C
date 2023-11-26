@@ -24,6 +24,7 @@ PorousFlowHeatEnergy::validParams()
   params.addParam<bool>(
       "include_porous_skeleton", true, "Include the heat energy of the porous skeleton");
   params.addParam<std::vector<unsigned int>>("phase",
+                                             {},
                                              "The index(es) of the fluid phase that this "
                                              "Postprocessor is restricted to.  Multiple "
                                              "indices can be entered.");

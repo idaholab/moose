@@ -24,8 +24,11 @@ PINSFVMomentumFrictionCorrection::validParams()
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
   params.addParam<MooseFunctorName>("Forchheimer_name",
                                     "Name of the Forchheimer coefficients property.");
-  params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
+  params.addParam<MooseFunctorName>(
+      NS::speed,
+      "The norm of the interstitial velocity. This is required for Forchheimer calculations");
+  params.addParam<MooseFunctorName>(NS::mu, NS::mu, "The dynamic viscosity");
   params.addRangeCheckedParam<Real>("consistent_scaling",
                                     1,
                                     "consistent_scaling >= 0",
@@ -36,17 +39,23 @@ PINSFVMomentumFrictionCorrection::validParams()
 
 PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputParameters & params)
   : INSFVFluxKernel(params),
-    _cL(isParamValid("Darcy_name") ? &getFunctor<ADRealVectorValue>("Darcy_name") : nullptr),
-    _cQ(isParamValid("Forchheimer_name") ? &getFunctor<ADRealVectorValue>("Forchheimer_name")
-                                         : nullptr),
+    _D(isParamValid("Darcy_name") ? &getFunctor<ADRealVectorValue>("Darcy_name") : nullptr),
+    _F(isParamValid("Forchheimer_name") ? &getFunctor<ADRealVectorValue>("Forchheimer_name")
+                                        : nullptr),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
-    _eps(getFunctor<ADReal>(NS::porosity)),
     _rho(getFunctor<ADReal>(NS::density)),
+    _mu(getFunctor<ADReal>(NS::mu)),
+    _speed(isParamValid(NS::speed) ? &getFunctor<ADReal>(NS::speed) : nullptr),
     _consistent_scaling(getParam<Real>("consistent_scaling"))
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
+
+  if (_use_Forchheimer_friction_model && !_speed)
+    mooseError("If using a Forchheimer friction model, then the '",
+               NS::speed,
+               "' parameter must be provided");
 }
 
 void
@@ -79,17 +88,15 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   {
     if (_use_Darcy_friction_model)
     {
-      friction_term_elem +=
-          (*_cL)(elem_face, state)(_index)*_rho(elem_face, state) / _eps(elem_face, state);
-      friction_term_neighbor += (*_cL)(neighbor_face, state)(_index)*_rho(neighbor_face, state) /
-                                _eps(neighbor_face, state);
+      friction_term_elem += (*_D)(elem_face, state)(_index)*_mu(elem_face, state);
+      friction_term_neighbor += (*_D)(neighbor_face, state)(_index)*_mu(neighbor_face, state);
     }
     if (_use_Forchheimer_friction_model)
     {
       friction_term_elem +=
-          (*_cQ)(elem_face, state)(_index)*_rho(elem_face, state) / _eps(elem_face, state);
-      friction_term_neighbor += (*_cQ)(neighbor_face, state)(_index)*_rho(neighbor_face, state) /
-                                _eps(neighbor_face, state);
+          (*_F)(elem_face, state)(_index)*_rho(elem_face, state) / 2 * (*_speed)(elem_face, state);
+      friction_term_neighbor += (*_F)(neighbor_face, state)(_index)*_rho(neighbor_face, state) / 2 *
+                                (*_speed)(neighbor_face, state);
     }
 
     Point _neighbor_centroid = _face_info->neighborCentroid();
@@ -112,9 +119,10 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
     const auto face =
         makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
     if (_use_Darcy_friction_model)
-      friction_term_elem += (*_cL)(face, state)(_index)*_rho(face, state) / _eps(face, state);
+      friction_term_elem += (*_D)(face, state)(_index)*_mu(face, state);
     if (_use_Forchheimer_friction_model)
-      friction_term_elem += (*_cQ)(face, state)(_index)*_rho(face, state) / _eps(face, state);
+      friction_term_elem +=
+          (*_F)(face, state)(_index)*_rho(face, state) / 2 * (*_speed)(face, state);
 
     Real geometric_factor =
         _consistent_scaling * std::pow((_elem_centroid - _face_centroid).norm(), 2);

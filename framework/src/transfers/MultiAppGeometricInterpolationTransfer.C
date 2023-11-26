@@ -60,6 +60,7 @@ MultiAppGeometricInterpolationTransfer::validParams()
 
   params.addParam<std::vector<SubdomainName>>(
       "exclude_gap_blocks",
+      {},
       "Gap subdomains we want to exclude when constructing/using virtually translated points");
 
   params.addParam<Real>("distance_tol",

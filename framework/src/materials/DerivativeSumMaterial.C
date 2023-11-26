@@ -33,7 +33,7 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
                        "action)");
 
   // Advanced arguments to construct a sum of the form \f$ c+\gamma\sum_iF_i \f$
-  params.addParam<std::vector<Real>>("prefactor", "Prefactor to multiply the sum term with.");
+  params.addParam<std::vector<Real>>("prefactor", {}, "Prefactor to multiply the sum term with.");
   params.addParam<Real>("constant", 0.0, "Constant to be added to the prefactor multiplied sum.");
 
   params.addParam<bool>("validate_coupling",

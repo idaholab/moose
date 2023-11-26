@@ -30,6 +30,7 @@ ComputeSmearedCrackingStress::validParams()
       "a softening model");
   params.addParam<std::vector<MaterialName>>(
       "softening_models",
+      {},
       "The material objects used to compute softening behavior for loading a crack."
       "Either 1 or 3 models must be specified. If a single model is specified, it is"
       "used for all directions. If 3 models are specified, they will be used for the"

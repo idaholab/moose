@@ -33,8 +33,8 @@ ComputeMultipleCrystalPlasticityStress::validParams()
   params.addRequiredParam<std::vector<MaterialName>>(
       "crystal_plasticity_models",
       "The material objects to use to calculate crystal plasticity stress and strains.");
-  params.addParam<std::vector<MaterialName>>("eigenstrain_names",
-                                             "The material objects to calculate eigenstrains.");
+  params.addParam<std::vector<MaterialName>>(
+      "eigenstrain_names", {}, "The material objects to calculate eigenstrains.");
   params.addParam<MooseEnum>("tan_mod_type",
                              MooseEnum("exact none", "none"),
                              "Type of tangent moduli for preconditioner: default elastic");

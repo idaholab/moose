@@ -94,10 +94,11 @@ velocity_interp_method = 'rc'
     type = PINSFVMomentumFriction
     variable = superficial_vel_x
     momentum_component = 'x'
-    porosity = porosity
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
+    mu = ${mu}
     rho = ${rho}
+    speed = speed
   []
 
   [v_advection]
@@ -127,10 +128,11 @@ velocity_interp_method = 'rc'
     type = PINSFVMomentumFriction
     variable = superficial_vel_y
     momentum_component = 'y'
-    porosity = porosity
     Darcy_name = 'Darcy_coefficient'
     Forchheimer_name = 'Forchheimer_coefficient'
     rho = ${rho}
+    speed = speed
+    mu = ${mu}
   []
 
   [mean-pressure]
@@ -212,11 +214,17 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [darcy]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'
     prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
+  []
+  [speec]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = superficial_vel_x
+    superficial_vel_y = superficial_vel_y
+    porosity = porosity
   []
 []
 

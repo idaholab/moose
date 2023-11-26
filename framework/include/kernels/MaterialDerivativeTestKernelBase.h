@@ -71,6 +71,7 @@ MaterialDerivativeTestKernelBase<T>::validParams()
   params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
   params.addParam<std::vector<SymbolName>>(
       "derivative",
+      {},
       "Select derivative to test derivatives of (leave empty for checking "
       "derivatives of the original material property)");
   return params;

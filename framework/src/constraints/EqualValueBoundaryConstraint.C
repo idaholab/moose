@@ -58,7 +58,8 @@ EqualValueBoundaryConstraint::validParams()
       "primary",
       std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
-  params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
+  params.addParam<std::vector<unsigned int>>(
+      "secondary_node_ids", {}, "The IDs of the secondary node");
   params.addParam<BoundaryName>(
       "secondary", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");

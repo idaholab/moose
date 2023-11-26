@@ -50,6 +50,7 @@ MaterialBase::validParams()
   params.set<std::vector<OutputName>>("outputs") = {"none"};
   params.addParam<std::vector<std::string>>(
       "output_properties",
+      {},
       "List of material properties, from this material, to output (outputs "
       "must also be defined to an output type)");
   params.addParam<MaterialPropertyName>(

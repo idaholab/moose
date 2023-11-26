@@ -38,9 +38,10 @@ FlexiblePatternGenerator::validParams()
                                     "the diameter of the CIRCLE boundary mesh.");
 
   params.addParam<std::vector<Point>>(
-      "extra_positions", "The extra non-patterned positions to set the input MeshGenerators.");
+      "extra_positions", {}, "The extra non-patterned positions to set the input MeshGenerators.");
   params.addParam<std::vector<unsigned int>>(
       "extra_positions_mg_indices",
+      {},
       "the indices of the input mesh generators for the extra position.");
 
   params.addParam<std::vector<std::vector<std::vector<unsigned int>>>>("hex_patterns",

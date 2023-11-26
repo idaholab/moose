@@ -37,7 +37,7 @@ LibmeshPartitioner::validParams()
                              "Specifies the sort direction if using the centroid partitioner. "
                              "Available options: x, y, z, radial");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "blocks", "Block is seperated by ;, and partition mesh block by block. ");
+      "blocks", {}, "Block is seperated by ;, and partition mesh block by block. ");
   return params;
 }
 

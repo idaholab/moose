@@ -38,7 +38,7 @@ CNSAction::validParams()
   params.addParam<MooseEnum>("equation_type", type, "Navier-Stokes equation type");
 
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
+      "block", {}, "The list of block ids (SubdomainID) on which NS equation is defined on");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");

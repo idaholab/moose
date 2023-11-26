@@ -44,8 +44,8 @@ Output::validParams()
       "interval", 1, "The interval at which time steps are output to the solution file");
   params.addParam<Real>(
       "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
-  params.addParam<std::vector<Real>>("sync_times",
-                                     "Times at which the output and solution is forced to occur");
+  params.addParam<std::vector<Real>>(
+      "sync_times", {}, "Times at which the output and solution is forced to occur");
   params.addParam<TimesName>(
       "sync_times_object",
       "Times object providing the times at which the output and solution is forced to occur");

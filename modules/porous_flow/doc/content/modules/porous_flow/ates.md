@@ -16,7 +16,7 @@ This process can be reversed to enable cooling. The duration of an ATES cycle ca
 There are many ATES systems in operation currently.  Their viability depends crucially on the recovery efficiency, $R$, which is the ratio of heat energy extracted to heat energy injected, because it is impossible to extract all of the injected heat from an ATES system due to heat losses caused by conduction and convection.  $R$ is
 
 \begin{equation}
-R = \frac{\overline{h}_{\mathrm{p}} - h_{\mathrm{amb}}}{h_{\mathrm{i}} - h_{\mathrm{amb}}} 
+R = \frac{\overline{h}_{\mathrm{p}} - h_{\mathrm{amb}}}{h_{\mathrm{i}} - h_{\mathrm{amb}}}
       \approx \frac{\overline{T}_{\mathrm{p}} - T_{\mathrm{amb}}}{T_{\mathrm{i}} - T_{\mathrm{amb}}} \ ,
 \end{equation}
 
@@ -28,11 +28,11 @@ The purpose of this page is to describe a MOOSE model of an ATES system, with th
 
 ## Model setup
 
-The model simulates an ATES system comprising a single injection-production well penetrating a horizontal aquifer 20 m thick. Five injection-production cycles are simulated, with each cycle comprising 91 days each of injection, storage, production and rest. The injection temperature is 90$^{\circ}\mathrm{C}$, and the injected fluid mass is 10$^8\,$kg. 
+The model simulates an ATES system comprising a single injection-production well penetrating a horizontal aquifer 20 m thick. Five injection-production cycles are simulated, with each cycle comprising 91 days each of injection, storage, production and rest. The injection temperature is 90$^{\circ}\mathrm{C}$, and the injected fluid mass is 10$^8\,$kg.
 
 The single-well system has radial symmetry, hence it may be simulated using "RZ" coordinates:
 
-!listing modules/porous_flow/examples/ates/ates.i block=Problem
+!listing modules/porous_flow/examples/ates/ates.i block=Mesh
 
 which means gravity acts along what is usually thought of as the "y" direction:
 

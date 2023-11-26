@@ -1,0 +1,16 @@
+[Tests]
+  design = 'Optimize.md'
+  [inequality_constraint]
+    type = JSONDiff
+    input = main_auto_adjoint.i
+    jsondiff = main_auto_adjoint_out_forward0.json
+    rel_err = 1e-4
+    # steady solve
+    recover = false
+    petsc_version = ">=3.15"
+    max_threads = 1 # Optimize executioner does not support multiple threads
+
+    issues = '#24930'
+    requirement = "The system shall minimize an inequality  constrained quadratic objective function from a test object."
+  []
+[]

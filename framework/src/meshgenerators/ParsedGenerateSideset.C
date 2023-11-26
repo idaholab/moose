@@ -58,10 +58,11 @@ ParsedGenerateSideset::validParams()
       "normal",
       Point(),
       "If provided specifies the normal vector on sides that are added to the new ");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
                              "centroid satisfies the `combinatorial_geometry` expression. "
@@ -103,15 +104,18 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   // Handle incompatible parameters
   if (_include_only_external_sides && _check_neighbor_subdomains)
     paramError("include_only_external_sides", "External sides dont have neighbors");
-  const auto & included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
-  if (std::find(included_boundaries.begin(), included_boundaries.end(), _sideset_name) !=
-      included_boundaries.end())
-    paramError("new_boundary",
-               "A boundary cannot be both the new boundary and be included in the list of included "
-               "boundaries. If you are trying to restrict an existing boundary, you must use a "
-               "different name for 'new_boundary', delete the old boundary, and then rename the "
-               "new boundary to the old boundary.");
-
+  if (_check_boundaries)
+  {
+    const auto & included_boundaries = getParam<std::vector<BoundaryName>>("included_boundaries");
+    if (std::find(included_boundaries.begin(), included_boundaries.end(), _sideset_name) !=
+        included_boundaries.end())
+      paramError(
+          "new_boundary",
+          "A boundary cannot be both the new boundary and be included in the list of included "
+          "boundaries. If you are trying to restrict an existing boundary, you must use a "
+          "different name for 'new_boundary', delete the old boundary, and then rename the "
+          "new boundary to the old boundary.");
+  }
   // base function object
   _func_F = std::make_shared<SymFunction>();
 

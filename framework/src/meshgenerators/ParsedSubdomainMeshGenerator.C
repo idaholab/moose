@@ -39,10 +39,11 @@ ParsedSubdomainMeshGenerator::validParams()
       "A set of subdomain ids that will not changed even if "
       "they are inside/outside the combinatorial geometry",
       "excluded_subdomain_ids is deprecated, use excluded_subdomains (ids or names accepted)");
-  params.addParam<std::vector<std::string>>("constant_names",
-                                            "Vector of constants used in the parsed function");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
+      {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription(
       "Uses a parsed expression (`combinatorial_geometry`) to determine if an "

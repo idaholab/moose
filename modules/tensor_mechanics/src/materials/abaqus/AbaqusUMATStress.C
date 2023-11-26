@@ -40,7 +40,7 @@ AbaqusUMATStress::validParams()
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
   params.addCoupledVar("external_fields",
                        "The external fields that can be used in the UMAT subroutine");
-  params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
+  params.addParam<std::vector<MaterialPropertyName>>("external_properties", {}, "");
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
@@ -83,8 +83,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
         getOptionalMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
-    _external_fields(coupledValues("external_fields")),
-    _external_fields_old(coupledValuesOld("external_fields")),
+    _external_fields(isCoupled("external_fields") ? coupledValues("external_fields")
+                                                  : std::vector<const VariableValue *>{}),
+    _external_fields_old(isCoupled("external_fields") ? coupledValuesOld("external_fields")
+                                                      : std::vector<const VariableValue *>{}),
     _number_external_fields(_external_fields.size()),
     _external_property_names(getParam<std::vector<MaterialPropertyName>>("external_properties")),
     _number_external_properties(_external_property_names.size()),

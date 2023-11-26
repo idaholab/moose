@@ -18,6 +18,7 @@ MechanicsBaseNOSPD::validParams()
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
+      {},
       "List of eigenstrains to be coupled in non-ordinary state-based mechanics kernels");
 
   return params;

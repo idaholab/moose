@@ -21,6 +21,7 @@ LowerBoundNodalKernel::validParams()
   params.addParam<Real>("lower_bound", 0, "The lower bound on the coupled variable");
   params.addParam<std::vector<BoundaryName>>(
       "exclude_boundaries",
+      {},
       "Boundaries on which not to execute the NodalKernel. This can be useful for avoiding "
       "singuarility in the matrix in case a constraint is active in the same place that a "
       "DirichletBC is set");

@@ -92,8 +92,8 @@
 [Materials]
   [./porous]
     type = GenericConstantMaterial
-    prop_names = 'porosity diffusivity'
-    prop_values = '0.25 1e-9'
+    prop_names = 'porosity diffusivity conductivity'
+    prop_values = '0.25 1e-9 1.0'
   [../]
 []
 

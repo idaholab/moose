@@ -37,7 +37,8 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
-  _material_names = getParam<std::vector<std::string>>("materials");
+  _material_names = isParamValid("materials") ? getParam<std::vector<std::string>>("materials")
+                                              : std::vector<std::string>{};
 
   _width = getParam<std::vector<Real>>("widths");
   _total_width = std::accumulate(_width.begin(), _width.end(), 0.0);

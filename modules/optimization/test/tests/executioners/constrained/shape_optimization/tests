@@ -1,0 +1,15 @@
+[Tests]
+  design = 'GeneralOptimization.md'
+  [equality_constraint]
+    issues = '#24930'
+    max_threads = 1 # Optimize executioner does not support multiple threads
+    input = main.i
+    csvdiff = main_out.csv
+    type = CSVDiff
+    requirement = "The system shall be able to minimize a constrained shape optimization problem using the ALMM algorithm."
+    heavy=true
+    recover = false
+    allow_warnings=true
+    petsc_version = ">=3.15"
+  []
+[]

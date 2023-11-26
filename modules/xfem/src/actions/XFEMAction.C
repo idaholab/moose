@@ -48,6 +48,7 @@ XFEMAction::validParams()
 
   params.addParam<std::vector<UserObjectName>>(
       "geometric_cut_userobjects",
+      {},
       "List of names of GeometricCutUserObjects with cut info and methods");
   params.addParam<std::string>("qrule", "volfrac", "XFEM quadrature rule to use");
   params.addRangeCheckedParam<unsigned int>(
