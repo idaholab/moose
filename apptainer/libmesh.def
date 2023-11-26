@@ -20,23 +20,11 @@
 {#- The installation location for VTK                                                         -#}
 {%- set VTK_DIR = '/opt/vtk' -%}
 
+{#- The script used to install libmesh                                                        -#}
+{%- set LIBMESH_BUILD_SCRIPT = 'update_and_rebuild_libmesh.sh' -%}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-
-%setup
-    # Copy moose from MOOSE_DIR into the container
-    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
-    mkdir ${ROOT_BUILD_DIR}
-    MOOSE_DIR={{ MOOSE_DIR }}
-    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
-    cd ${ROOT_BUILD_DIR}/moose
-    git submodule update --init --recursive libmesh
-
-    # Obtain VTK
-    cd ${ROOT_BUILD_DIR}
-    curl -L -O {{vtk_url}} || exit 1
-    if [[ `sha256sum $(basename {{vtk_url}}) | cut -d\  -f1` != '{{vtk_sha256}}' ]]; then exit 1; fi
-    tar -xf $(basename {{vtk_url}})
 
 %environment
     # From moose-libmesh
@@ -51,11 +39,31 @@ From: {{ APPTAINER_FROM }}
     LIBMESH_DIR={{ LIBMESH_DIR }}
     MOOSE_JOBS={{ MOOSE_JOBS }}
     VTK_DIR={{ VTK_DIR }}
+    VTK_URL={{ vtk_url }}
+    VTK_SHA256={{ vtk_sha256 }}
     VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     VTKLIB_DIR={{ VTK_DIR }}/lib
 
+    # Make sure libMesh exists
+    if [ -z $(ls -A ${ROOT_BUILD_DIR}/libmesh) ]; then
+        echo "The libmesh directory is empty; you must initialize the submodule"
+        exit 1
+    fi
+    # Make sure that all of the submodules are there
+    cd ${ROOT_BUILD_DIR}/libmesh
+    if git submodule status --recursive | grep '^-' --quiet; then
+        echo "The libmesh submodules are not initialized; you must recursively init all of them"
+        exit 1
+    fi
+
+    # Obtain VTK
+    cd ${ROOT_BUILD_DIR}
+    curl -L -O {{vtk_url}} || exit 1
+    if [[ `sha256sum $(basename ${VTK_URL}) | cut -d\  -f1` != "${VTK_SHA256}" ]]; then exit 1; fi
+    tar -xf $(basename ${VTK_URL})
+
     # Build VTK
-    cd ${ROOT_BUILD_DIR}/$(basename {{vtk_url}} .tar.gz)
+    cd ${ROOT_BUILD_DIR}/$(basename ${VTK_URL} .tar.gz)
     mkdir -p build; cd build
     cmake .. \
         -Wno-dev \
@@ -79,9 +87,9 @@ From: {{ APPTAINER_FROM }}
 
     # Build libMesh
     umask 022
-    cd ${ROOT_BUILD_DIR}/moose
+    cd ${ROOT_BUILD_DIR}
     METHODS="{{ METHODS or "opt dbg oprof devel" }}"
-    LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/update_and_rebuild_libmesh.sh {{ LIBMESH_OPTIONS }}
+    LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ LIBMESH_OPTIONS }} --skip-submodule-update
 
     # Fix possibly bad permissions
     chmod -R o=u-w,g=u-w ${LIBMESH_DIR}
@@ -89,3 +97,8 @@ From: {{ APPTAINER_FROM }}
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
     dnf clean all
+
+%files
+    {{ MOOSE_DIR }}/libmesh {{ ROOT_BUILD_DIR }}/libmesh
+    {{ MOOSE_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }}
+    {{ MOOSE_DIR }}/scripts/configure_libmesh.sh {{ ROOT_BUILD_DIR }}/scripts/configure_libmesh.sh
