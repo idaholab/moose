@@ -153,6 +153,8 @@ class ApptainerGenerator:
                                   help='Sign the built container with the given key')
         build_parser.add_argument('--skip-tests', action='store_true',
                                   help='Set to skip running the tests after the build')
+        build_parser.add_argument('--no-cleanup', action='store_true',
+                                  help='Pass to apptainer to not cleanup the build (for debugging)')
 
         push_parser = action_parser.add_parser('push', parents=[parent],
                                                 help='Push a container')
@@ -668,6 +670,8 @@ class ApptainerGenerator:
         args = []
         if self.args.skip_tests:
             args.append('-T')
+        if self.args.no_cleanup:
+            args.append('--no-cleanup')
         if self.args.build_args is not None:
             args.extend(self.args.build_args.split(' '))
         container_definition_path = self.container_path(self.name, self.tag, image=False)
