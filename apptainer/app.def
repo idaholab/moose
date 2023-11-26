@@ -83,15 +83,15 @@ From: {{ APPTAINER_FROM }}
     {{ SECTION_POST_BEGIN }}
 {%- endif %}
     # Load jinja vars
-    export APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
-    export BINARY_NAME={{ BINARY_NAME }}
-    export METHOD={{ METHOD or "opt" }}
-    export MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
+    APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
+    BINARY_NAME={{ BINARY_NAME }}
+    METHOD={{ METHOD or "opt" }}
+    MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
-    export MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
-    export MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
-    export TEMP_LOC={{ ROOT_BUILD_DIR }}
-    export APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
+    MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
+    MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
+    TEMP_LOC={{ ROOT_BUILD_DIR }}
+    APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
     # If MOOSE_DIR is a symlink, we're using MOOSE within
@@ -114,9 +114,9 @@ From: {{ APPTAINER_FROM }}
 
     # Setup install
 {%- if BINARY_NAME == 'moose-combined' %}
-    export MOOSE_PREFIX=/opt/moose
+    MOOSE_PREFIX=/opt/moose
 {%- else %}
-    export MOOSE_PREFIX=/opt/${BINARY_NAME}
+    MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
@@ -133,7 +133,7 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_POST_PRE_INSTALL is defined %}
     {{ SECTION_POST_PRE_INSTALL }}
 {%- endif %}
-    make install -j ${MOOSE_JOBS}
+    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}"
 {%- if SECTION_POST_POST_INSTALL is defined %}
     {{ SECTION_POST_POST_INSTALL }}
 {%- endif %}
@@ -162,7 +162,7 @@ From: {{ APPTAINER_FROM }}
     export METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
     # Temp location for copying and running in
-    export TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
+    TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "/usr/bin/rm -rf $TEMP_LOC" EXIT HUP INT TERM
 {%- if SECTION_TEST_BEGIN is defined %}
