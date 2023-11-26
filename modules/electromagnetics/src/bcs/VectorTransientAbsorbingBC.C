@@ -22,7 +22,7 @@ VectorTransientAbsorbingBC::validParams()
   params.addClassDescription(
       "First order transient absorbing boundary condition for vector variables.");
   params.addParam<FunctionName>("admittance",
-                                "1/(4*pi*1e-7*3e8)",
+                                1 / (EM::mu_0 * EM::c),
                                 "Intrinsic admittance of the infinite medium (default is "
                                 "$\\sqrt{\\frac{\\epsilon_0}{\\mu_0}} = \\frac{1}{\\mu_0 c}$, or "
                                 "the admittance of free space).");
