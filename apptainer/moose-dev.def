@@ -62,20 +62,6 @@ From: {{ APPTAINER_FROM }}
     git checkout ${WASP_GIT_SHA}
     git submodule update --init --recursive
 
-    # Make sure wasp exists
-    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
-    if [ -z $(ls -A ${WASP_SRC_DIR}) ]; then
-        echo "The wasp directory is empty; you must initialize the submodule {{ WASP_REPO_DIR }}"
-        exit 1
-    fi
-    # Make sure that all of the submodules are there
-    cd ${WASP_SRC_DIR}
-    if git submodule status --recursive | grep '^-' --quiet; then
-        echo "The wasp submodules are not initialized; you must recursively init all of them"
-        exit 1
-    fi
-    cd ${ROOT_BUILD_DIR}
-
     # Install miniforge in MOOSE_MINIFORGE
     MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
     curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
