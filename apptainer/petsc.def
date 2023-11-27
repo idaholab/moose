@@ -64,9 +64,9 @@ From: {{ APPTAINER_FROM }}
     PETSC_OPTIONS+=" --skip-submodule-update"
 {%- if PETSC_ALT is defined %}
     PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc_alt.sh
+{%- else %}
     # Need a newer cmake for current petsc
     PETSC_OPTIONS+=" --download-cmake"
-{%- else %}
     PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh
 {%- endif %}
 
