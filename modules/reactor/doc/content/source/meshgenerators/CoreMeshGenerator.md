@@ -6,7 +6,7 @@
 
 This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), and [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md).
 
-The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with block ID assignments and reporting (extra integer) IDs, as described in [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md and [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md). There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
+The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with block ID assignments and reporting (extra integer) IDs, as described in [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md) and [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md). There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
 
 This object automates the use and functionality of the [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md) for cartesian  reactor geometry, [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md) for hexagonal reactor geometry and, if extruding to three dimensions, the [`AdvancedExtruderGenerator'](AdvancedExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md) and [`PlaneIDMeshGenerator'](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates boundary ID and name assignment.
 
@@ -17,6 +17,16 @@ The `CoreMeshGenerator` object adopts much of the existing input structure of pa
 ## Reporting ID Information
 
 The `CoreMeshGenerator` object automatically tags the mesh, if three dimensional, with the axial layers using the extra integer name "plane_id". The assemblies composing the core are also tagged via [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md) or [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md), using the "cell" assignment type, with the extra integer name "assembly_id" and any "dummy" assembly (identified via the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter) locations excluded.
+
+## Depletion ID Information
+The `CoreMeshGenerator` object can optionally assign a depletion ID, with the extra integer name "depletion_id".
+The depletion ID generation option can be enabled by setting the  [!param](/Mesh/CoreMeshGenerator/generate_depletion_id) to true.
+The level of detail needed for depletion zones is specified in the input parameter [!param](/Mesh/CoreMeshGenerator/depletion_id_type).
+For a core with heterogeneous assemblies, [!param](/Mesh/CoreMeshGenerator/depletion_id_type) can be either `pin` and `pin_type`.
+All pins in the core have separate depletion ID values by setting [!param](/Mesh/CoreMeshGenerator/depletion_id_type) to `pin`.
+By setting that option to `pin_type`, unique ID values are assigned to individual pin types in assemblies.
+However, pins in different assemblies have different depletion IDs even if they have the same type.
+For a core with homogenized assemblies (no explicit pins), [!param](/Mesh/CoreMeshGenerator/depletion_id_type) can be either `assembly` and `assembly_type`, which assign unique ID values to indvidial assemblies or to individual assembly types, respectively.
 
 ## Exterior Boundary ID Information
 
