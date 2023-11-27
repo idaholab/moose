@@ -52,7 +52,7 @@ From: {{ APPTAINER_FROM }}
     LIBMESH_SRC_DIR=${ROOT_BUILD_DIR}/libmesh
     git clone ${LIBMESH_GIT_REMOTE} ${LIBMESH_SRC_DIR}
     cd ${LIBMESH_SRC_DIR}
-    git checkout ${LIBMESH_SRC_DIR}
+    git checkout ${LIBMESH_GIT_SHA}
     git submodule update --init --recursive
 
     # Obtain VTK
