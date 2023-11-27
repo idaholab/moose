@@ -1,66 +1,42 @@
-# Problems to be fixed:
-# 1. subchannel solver randomness might affect coupling:
-# Take too much time to converge or not solve at all. Implicit solver is more robust especially for
-# liquid metal hexagonal assemblies.
-# 2. parallel execution of subchannel
-
-# Following Advanced Burner Test Reactor Preconceptual Design Report
-# Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
-###################################################
-# Thermal-hydraulics parameters
-###################################################
-T_in = 628.15
-P_out = 758423 # Pa
-mass_flux_in = '${fparse 2786}' # kg/(m2.s)
-
+# Based on M. Fontana, et All, this arbitary subassembly is used for THM-SC coupling
+T_in = 583.0 #K
+flow_area = 0.0004980799633447909 #m2
+mass_flux_in = '${fparse 1.0/flow_area}'
+P_out = 2e5 # Pa
 ###################################################
 # Geometric parameters
 ###################################################
-
-# units are cm - do not forget to convert to meter
-scale_factor = 0.01
-fuel_element_pitch = '${fparse 14.598*scale_factor}'
-inter_assembly_gap = '${fparse 0.4*scale_factor}'
-duct_thickness = '${fparse 0.3*scale_factor}'
-fuel_pin_pitch = '${fparse 0.904*scale_factor}'
-fuel_pin_diameter = '${fparse 0.8*scale_factor}'
-wire_z_spacing = '${fparse 20.32*scale_factor}'
-wire_diameter = '${fparse 0.103*scale_factor}'
-n_rings = 9
-length_entry_fuel = '${fparse 60*scale_factor}'
-length_heated_fuel = '${fparse 80*scale_factor}'
-length_outlet_fuel = '${fparse 120*scale_factor}'
-orifice_plate_height = '${fparse 5*scale_factor}'
-duct_outside = '${fparse fuel_element_pitch - inter_assembly_gap}'
-duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
+n_cells = 25
+n_rings = 3
+fuel_pin_pitch = 7.26e-3
+fuel_pin_diameter = 5.84e-3
+wire_z_spacing = 0.3048
+wire_diameter = 1.42e-3
+inner_duct_in = 3.41e-2
+heated_length = 1.0
 ###################################################
-
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    nrings = '${fparse n_rings}'
-    n_cells = 26
-    flat_to_flat = '${fparse duct_inside}'
-    unheated_length_entry = '${fparse length_entry_fuel}'
-    heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse length_outlet_fuel}'
-    rod_diameter = '${fparse fuel_pin_diameter}'
-    pitch = '${fparse fuel_pin_pitch}'
-    dwire = '${fparse wire_diameter}'
-    hwire = '${fparse wire_z_spacing}'
-    spacer_z = '${fparse orifice_plate_height} ${fparse length_entry_fuel}'
-    spacer_k = '0.5 0.5'
+    nrings = ${n_rings}
+    n_cells = ${n_cells}
+    flat_to_flat = ${inner_duct_in}
+    heated_length = ${heated_length}
+    rod_diameter = ${fuel_pin_diameter}
+    pitch = ${fuel_pin_pitch}
+    dwire = ${wire_diameter}
+    hwire = ${wire_z_spacing}
+    spacer_z = '0.0'
+    spacer_k = '0.0'
   []
 
   [fuel_pins]
     type = TriPinMeshGenerator
     input = subchannel
-    nrings = '${fparse n_rings}'
-    n_cells = 26
-    unheated_length_entry = '${fparse length_entry_fuel}'
-    heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse length_outlet_fuel}'
-    pitch = '${fparse fuel_pin_pitch}'
+    nrings = ${n_rings}
+    n_cells = ${n_cells}
+    heated_length = ${heated_length}
+    pitch = ${fuel_pin_pitch}
   []
 []
 
@@ -83,47 +59,44 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [T]
     block = subchannel
   []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
   [rho]
     block = subchannel
   []
   [S]
     block = subchannel
   []
-  [Sij]
+  [w_perim]
     block = subchannel
   []
-  [w_perim]
+  [mu]
     block = subchannel
   []
   [q_prime]
     block = fuel_pins
   []
-  [mu]
-    block = subchannel
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
   []
 []
 
 [FluidProperties]
-  [sodium]
+  [Sodium]
     type = PBSodiumFluidProperties
   []
 []
 
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
-  fp = sodium
+  fp = Sodium
   n_blocks = 1
   P_out = report_pressure_outlet
   CT = 2.6
   compute_density = true
   compute_viscosity = true
-  compute_power = false
+  compute_power = true
   P_tol = 1.0e-3
   T_tol = 1.0e-3
   implicit = true
@@ -132,6 +105,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   monolithic_thermal = false
   verbose_multiapps = true
   verbose_subchannel = false
+  interpolation_scheme = 'upwind'
 []
 
 [ICs]
@@ -148,8 +122,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 0.0
-    filename = "pin_power_profile217.txt"
+    power = 2000 #W
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
@@ -181,7 +155,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     variable = mu
     p = ${P_out}
     T = T
-    fp = sodium
+    fp = Sodium
   []
 
   [rho_ic]
@@ -189,7 +163,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     variable = rho
     p = ${P_out}
     T = T
-    fp = sodium
+    fp = Sodium
   []
 
   [h_ic]
@@ -197,7 +171,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     variable = h
     p = ${P_out}
     T = T
-    fp = sodium
+    fp = Sodium
   []
 
   [mdot_ic]
@@ -209,10 +183,10 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [AuxKernels]
   [T_in_bc]
-    type = ConstantAux
+    type = PostprocessorConstantAux
     variable = T
     boundary = inlet
-    value = ${T_in}
+    postprocessor = report_temperature_inlet
     execute_on = 'timestep_begin'
     block = subchannel
   []
@@ -231,9 +205,21 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   exodus = true
 []
 
+[Executioner]
+  type = Steady
+[]
+
 [Postprocessors]
   [total_pressure_drop_SC]
     type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
+  []
+
+  [total_pressure_drop_SC_limited]
+    type = ParsedPostprocessor
+    pp_names = 'total_pressure_drop_SC'
+    function = 'min(total_pressure_drop_SC, 1e6)'
     execute_on = "timestep_end"
   []
 
@@ -242,14 +228,15 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     default = ${mass_flux_in}
   []
 
+  [report_temperature_inlet]
+    type = Receiver
+    default = ${T_in}
+  []
+
   [report_pressure_outlet]
     type = Receiver
     default = ${P_out}
   []
-[]
-
-[Executioner]
-  type = Steady
 []
 
 ################################################################################
@@ -258,8 +245,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = '3d_subchannel.i'
-    execute_on = 'final'
+    input_files = '3D.i'
+    execute_on = 'FINAL'
   []
 []
 
@@ -272,6 +259,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [pin_transfer]
     type = MultiAppDetailedPinSolutionTransfer
     to_multi_app = viz
-    variable = 'Tpin q_prime'
+    variable = 'Dpin Tpin q_prime'
   []
 []

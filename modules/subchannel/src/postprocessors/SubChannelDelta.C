@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "SubChannelPressureDrop.h"
+#include "SubChannelDelta.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 #include "Function.h"
@@ -21,48 +21,50 @@
 #include "SubProblem.h"
 #include "libmesh/system.h"
 
-registerMooseObject("SubChannelApp", SubChannelPressureDrop);
+registerMooseObject("SubChannelApp", SubChannelDelta);
 
 InputParameters
-SubChannelPressureDrop::validParams()
+SubChannelDelta::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription(
-      "Calculates an overall mass-flow-averaged pressure drop for the subchannel assembly");
+  params.addClassDescription("Calculates an overall mass-flow-averaged Delta of the chosen "
+                             "variable for the subchannel assembly");
+  params.addRequiredParam<AuxVariableName>("variable", "Variable you want the delta of");
   return params;
 }
 
-SubChannelPressureDrop::SubChannelPressureDrop(const InputParameters & parameters)
+SubChannelDelta::SubChannelDelta(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _variable(getParam<AuxVariableName>("variable")),
     _value(0)
 {
 }
 
 void
-SubChannelPressureDrop::execute()
+SubChannelDelta::execute()
 {
   auto nz = _mesh.getNumOfAxialCells();
   auto n_channels = _mesh.getNumOfChannels();
-  auto P_soln = SolutionHandle(_fe_problem.getVariable(0, "P"));
+  auto Soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
   auto mdot_soln = SolutionHandle(_fe_problem.getVariable(0, "mdot"));
 
   auto mass_flow_in = 0.0;
-  auto sum_DP_mass_flow_in = 0.0;
+  auto sum_Delta_mass_flow_in = 0.0;
   for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
   {
     auto * node_in = _mesh.getChannelNode(i_ch, 0);
     auto * node_out = _mesh.getChannelNode(i_ch, nz);
     mass_flow_in += mdot_soln(node_in);
-    auto DP = P_soln(node_in) - P_soln(node_out);
-    sum_DP_mass_flow_in += DP * mdot_soln(node_in);
+    auto Delta = abs(Soln(node_in) - Soln(node_out));
+    sum_Delta_mass_flow_in += Delta * mdot_soln(node_in);
   }
 
-  _value = sum_DP_mass_flow_in / mass_flow_in;
+  _value = sum_Delta_mass_flow_in / mass_flow_in;
 }
 
 Real
-SubChannelPressureDrop::getValue() const
+SubChannelDelta::getValue() const
 {
   return _value;
 }
