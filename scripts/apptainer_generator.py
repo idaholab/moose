@@ -575,14 +575,21 @@ class ApptainerGenerator:
                 jinja_data[jinja_var] = meta['source'][var]
 
         # Set petsc and libmesh versions
-        for library in ['petsc', 'libmesh']:
+        need_versions = {'petsc': {'package': 'petsc', 'submodule': 'petsc'},
+                         'libmesh': {'package': 'libmesh', 'submodule': 'libmesh'},
+                         'moose-dev': {'package': 'wasp', 'submodule': 'framework/contrib/wasp'}}
+        for library, package_info in need_versions.items():
             if library == self.args.library:
-                repo_sha = self.git_submodule_sha(MOOSE_DIR, library)
-                repo_remote = self.git_submodule_remote(MOOSE_DIR, library)
+                package = package_info['package']
+                submodule = package_info['submodule']
 
-                variable_prefix = f'{library}_'.upper()
+                repo_sha = self.git_submodule_sha(MOOSE_DIR, submodule)
+                repo_remote = self.git_submodule_remote(MOOSE_DIR, submodule)
+
+                variable_prefix = f'{package}_'.upper()
                 jinja_data[variable_prefix + 'GIT_SHA'] = repo_sha
                 jinja_data[variable_prefix + 'GIT_REMOTE'] = repo_remote
+                print(variable_prefix, repo_sha, repo_remote)
 
         # Add include contents, if any
         self.add_definition_includes(jinja_data)
