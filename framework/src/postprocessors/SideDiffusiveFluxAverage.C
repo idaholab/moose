@@ -71,8 +71,7 @@ void
 SideDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
   SideDiffusiveFluxIntegralTempl<is_ad, Real>::threadJoin(y);
-  const SideDiffusiveFluxAverageTempl<is_ad> & pps =
-      static_cast<const SideDiffusiveFluxAverageTempl<is_ad> &>(y);
+  const auto & pps = static_cast<const SideDiffusiveFluxAverageTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 

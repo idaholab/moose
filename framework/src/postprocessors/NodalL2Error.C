@@ -50,7 +50,7 @@ NodalL2Error::getValue() const
 void
 NodalL2Error::threadJoin(const UserObject & y)
 {
-  const NodalL2Error & pps = static_cast<const NodalL2Error &>(y);
+  const auto & pps = static_cast<const NodalL2Error &>(y);
   _integral_value += pps._integral_value;
 }
 

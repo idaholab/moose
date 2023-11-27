@@ -138,7 +138,7 @@ ElementQualityChecker::execute()
 void
 ElementQualityChecker::threadJoin(const UserObject & uo)
 {
-  const ElementQualityChecker & eqc = static_cast<const ElementQualityChecker &>(uo);
+  const auto & eqc = static_cast<const ElementQualityChecker &>(uo);
   _elem_ids.insert(eqc._elem_ids.begin(), eqc._elem_ids.end());
   _bypassed_elem_type.insert(eqc._bypassed_elem_type.begin(), eqc._bypassed_elem_type.end());
   _bypassed |= eqc._bypassed;

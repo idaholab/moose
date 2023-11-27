@@ -164,7 +164,7 @@ MaterialVectorPostprocessor::finalize()
 void
 MaterialVectorPostprocessor::threadJoin(const UserObject & y)
 {
-  auto & vpp = static_cast<const MaterialVectorPostprocessor &>(y);
+  const auto & vpp = static_cast<const MaterialVectorPostprocessor &>(y);
   _elem_ids.insert(_elem_ids.end(), vpp._elem_ids.begin(), vpp._elem_ids.end());
   _qp_ids.insert(_qp_ids.end(), vpp._qp_ids.begin(), vpp._qp_ids.end());
   _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());

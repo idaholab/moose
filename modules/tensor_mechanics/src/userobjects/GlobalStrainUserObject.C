@@ -85,7 +85,7 @@ GlobalStrainUserObject::execute()
 void
 GlobalStrainUserObject::threadJoin(const UserObject & uo)
 {
-  const GlobalStrainUserObject & pstuo = static_cast<const GlobalStrainUserObject &>(uo);
+  const auto & pstuo = static_cast<const GlobalStrainUserObject &>(uo);
   _residual += pstuo._residual;
   _jacobian += pstuo._jacobian;
 }

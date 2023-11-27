@@ -29,7 +29,7 @@ AreaPostprocessor::AreaPostprocessor(const InputParameters & parameters)
 void
 AreaPostprocessor::threadJoin(const UserObject & y)
 {
-  const AreaPostprocessor & pps = static_cast<const AreaPostprocessor &>(y);
+  const auto & pps = static_cast<const AreaPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

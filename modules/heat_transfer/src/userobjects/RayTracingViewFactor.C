@@ -82,7 +82,7 @@ RayTracingViewFactor::finalizeViewFactor()
 void
 RayTracingViewFactor::threadJoinViewFactor(const UserObject & y)
 {
-  const RayTracingViewFactor & pps = static_cast<const RayTracingViewFactor &>(y);
+  const auto & pps = static_cast<const RayTracingViewFactor &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
     _areas[i] += pps._areas[i];
 }

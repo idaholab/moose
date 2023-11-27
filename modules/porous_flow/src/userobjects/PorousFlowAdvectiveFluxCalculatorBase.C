@@ -212,8 +212,7 @@ void
 PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 {
   AdvectiveFluxCalculatorBase::threadJoin(uo);
-  const PorousFlowAdvectiveFluxCalculatorBase & pfafc =
-      static_cast<const PorousFlowAdvectiveFluxCalculatorBase &>(uo);
+  const auto & pfafc = static_cast<const PorousFlowAdvectiveFluxCalculatorBase &>(uo);
   // add the values of _dkij_dvar computed by different threads
   const std::size_t num_nodes = _connections.numNodes();
   for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)

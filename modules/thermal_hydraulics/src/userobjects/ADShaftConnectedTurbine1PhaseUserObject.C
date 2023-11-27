@@ -234,8 +234,7 @@ ADShaftConnectedTurbine1PhaseUserObject::threadJoin(const UserObject & uo)
   ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
-  const ADShaftConnectedTurbine1PhaseUserObject & scpuo =
-      dynamic_cast<const ADShaftConnectedTurbine1PhaseUserObject &>(uo);
+  const auto & scpuo = static_cast<const ADShaftConnectedTurbine1PhaseUserObject &>(uo);
   _driving_torque += scpuo._driving_torque;
   _friction_torque += scpuo._friction_torque;
   _flow_coeff += scpuo._flow_coeff;

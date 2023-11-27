@@ -388,8 +388,7 @@ ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
   ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
-  const ADShaftConnectedCompressor1PhaseUserObject & scpuo =
-      dynamic_cast<const ADShaftConnectedCompressor1PhaseUserObject &>(uo);
+  const auto & scpuo = static_cast<const ADShaftConnectedCompressor1PhaseUserObject &>(uo);
   _isentropic_torque += scpuo._isentropic_torque;
   _dissipation_torque += scpuo._dissipation_torque;
   _friction_torque += scpuo._friction_torque;

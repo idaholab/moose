@@ -124,7 +124,7 @@ HSCoupler2D3DUserObject::execute()
 void
 HSCoupler2D3DUserObject::threadJoin(const UserObject & uo)
 {
-  const HSCoupler2D3DUserObject & other_uo = static_cast<const HSCoupler2D3DUserObject &>(uo);
+  const auto & other_uo = static_cast<const HSCoupler2D3DUserObject &>(uo);
   for (auto & it : other_uo._elem_id_to_heat_flux)
     if (_elem_id_to_heat_flux.find(it.first) == _elem_id_to_heat_flux.end())
       _elem_id_to_heat_flux[it.first] = it.second;

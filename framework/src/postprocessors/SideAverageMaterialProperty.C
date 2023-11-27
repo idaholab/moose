@@ -66,8 +66,7 @@ SideAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 {
   SideIntegralMaterialPropertyTempl<is_ad>::threadJoin(y);
 
-  const SideAverageMaterialPropertyTempl<is_ad> & pps =
-      static_cast<const SideAverageMaterialPropertyTempl<is_ad> &>(y);
+  const auto & pps = static_cast<const SideAverageMaterialPropertyTempl<is_ad> &>(y);
   _area += pps._area;
 }
 

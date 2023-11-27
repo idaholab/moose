@@ -134,7 +134,7 @@ UnobstructedPlanarViewFactor::finalizeViewFactor()
 void
 UnobstructedPlanarViewFactor::threadJoinViewFactor(const UserObject & y)
 {
-  const UnobstructedPlanarViewFactor & pps = static_cast<const UnobstructedPlanarViewFactor &>(y);
+  const auto & pps = static_cast<const UnobstructedPlanarViewFactor &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
     _areas[i] += pps._areas[i];
 }

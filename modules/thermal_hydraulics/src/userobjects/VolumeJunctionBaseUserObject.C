@@ -129,8 +129,7 @@ VolumeJunctionBaseUserObject::computeScalarJacobianWRTFlowDofs(const DenseMatrix
 void
 VolumeJunctionBaseUserObject::threadJoin(const UserObject & uo)
 {
-  const VolumeJunctionBaseUserObject & volume_junction_uo =
-      dynamic_cast<const VolumeJunctionBaseUserObject &>(uo);
+  const auto & volume_junction_uo = static_cast<const VolumeJunctionBaseUserObject &>(uo);
 
   // Store the data computed/retrieved in the other threads
   for (unsigned int i = 0; i < volume_junction_uo._connection_indices.size(); i++)

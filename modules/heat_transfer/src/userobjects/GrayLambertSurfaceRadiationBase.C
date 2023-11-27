@@ -244,8 +244,7 @@ GrayLambertSurfaceRadiationBase::finalize()
 void
 GrayLambertSurfaceRadiationBase::threadJoin(const UserObject & y)
 {
-  const GrayLambertSurfaceRadiationBase & pps =
-      static_cast<const GrayLambertSurfaceRadiationBase &>(y);
+  const auto & pps = static_cast<const GrayLambertSurfaceRadiationBase &>(y);
 
   for (unsigned int j = 0; j < _n_sides; ++j)
   {

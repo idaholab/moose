@@ -37,7 +37,7 @@ MomentumFluxIntegral::MomentumFluxIntegral(const InputParameters & parameters)
 void
 MomentumFluxIntegral::threadJoin(const UserObject & y)
 {
-  const MomentumFluxIntegral & pps = static_cast<const MomentumFluxIntegral &>(y);
+  const auto & pps = static_cast<const MomentumFluxIntegral &>(y);
   _integral_value += pps._integral_value;
 }
 

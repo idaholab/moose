@@ -82,8 +82,7 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::finalize()
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::threadJoin(const UserObject & y)
 {
-  const ADHeatTransferFromHeatStructure3D1PhaseUserObject & uo =
-      static_cast<const ADHeatTransferFromHeatStructure3D1PhaseUserObject &>(y);
+  const auto & uo = static_cast<const ADHeatTransferFromHeatStructure3D1PhaseUserObject &>(y);
   for (auto & it : uo._heated_perimeter)
     _heated_perimeter[it.first] = it.second;
   for (auto & it : uo._T_fluid)

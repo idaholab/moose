@@ -45,8 +45,7 @@ InternalSideIntegralPostprocessor::getValue() const
 void
 InternalSideIntegralPostprocessor::threadJoin(const UserObject & y)
 {
-  const InternalSideIntegralPostprocessor & pps =
-      static_cast<const InternalSideIntegralPostprocessor &>(y);
+  const auto & pps = static_cast<const InternalSideIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

@@ -49,7 +49,7 @@ NodalL2Norm::getValue() const
 void
 NodalL2Norm::threadJoin(const UserObject & y)
 {
-  const NodalL2Norm & pps = static_cast<const NodalL2Norm &>(y);
+  const auto & pps = static_cast<const NodalL2Norm &>(y);
   _sum_of_squares += pps._sum_of_squares;
 }
 

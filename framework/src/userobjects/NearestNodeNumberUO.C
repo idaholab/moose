@@ -95,7 +95,7 @@ NearestNodeNumberUO::getClosestNode() const
 void
 NearestNodeNumberUO::threadJoin(const UserObject & y)
 {
-  const NearestNodeNumberUO & nnn = static_cast<const NearestNodeNumberUO &>(y);
+  const auto & nnn = static_cast<const NearestNodeNumberUO &>(y);
   if (!nnn._closest_node)
     return;
   if (nnn._min_distance < _min_distance ||

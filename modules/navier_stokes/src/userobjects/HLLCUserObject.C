@@ -128,7 +128,7 @@ HLLCUserObject::hasData(const Elem * const elem, const unsigned int side) const
 void
 HLLCUserObject::threadJoin(const UserObject & y)
 {
-  const HLLCUserObject & pps = static_cast<const HLLCUserObject &>(y);
+  const auto & pps = static_cast<const HLLCUserObject &>(y);
   for (auto & ws : pps._wave_speed)
   {
     const auto & it = _wave_speed.find(ws.first);

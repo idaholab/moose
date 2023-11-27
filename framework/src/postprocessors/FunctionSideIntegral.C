@@ -32,7 +32,7 @@ FunctionSideIntegral::FunctionSideIntegral(const InputParameters & parameters)
 void
 FunctionSideIntegral::threadJoin(const UserObject & y)
 {
-  const FunctionSideIntegral & pps = static_cast<const FunctionSideIntegral &>(y);
+  const auto & pps = static_cast<const FunctionSideIntegral &>(y);
   _integral_value += pps._integral_value;
 }
 
