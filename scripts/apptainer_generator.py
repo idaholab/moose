@@ -10,6 +10,7 @@ import subprocess
 import shutil
 import platform
 import getpass
+import re
 from datetime import datetime, timezone
 
 import jinja2
@@ -211,6 +212,36 @@ class ApptainerGenerator:
         """ gets sha of the given repo """
         command = ['git', 'rev-parse', 'HEAD']
         return subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
+    @staticmethod
+    def git_submodule_sha(dir, name):
+        """ gets the sha of the given submodule """
+        command = ['git', 'submodule', 'status', name]
+        result = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+        sha_re = re.search(r'^[ U+-]([a-f0-9]{40})', result)
+        if sha_re:
+            return sha_re.group(1)
+        raise Exception(f'Failed to parse submodule sha for {name}')
+
+    @staticmethod
+    def git_submodule_remote(dir, name):
+        """ gets the remote of the given submodule """
+        command = ['git', 'config', '--file=.gitmodules', f'submodule.{name}.url']
+        remote = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
+        # Need to replace remotes that are relative paths
+        if remote.startswith('../..'):
+            base_command = ['git', 'remote', 'get-url', 'origin']
+            base_remote = subprocess.check_output(base_command, cwd=dir, encoding='utf-8').strip()
+            ssh_re = re.search(r'^(git@[a-zA-Z0-9_-]+.[a-zA-Z]+:)', base_remote)
+            if ssh_re:
+                return remote.replace('../../', ssh_re.group(1))
+            https_re = re.search(r'^(https:\/\/[a-zA-Z0-9_-]+.[a-zA-Z]+\/)', base_remote)
+            if https_re:
+                return remote.replace('../../', ssh_re.https_re(1))
+            raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
+
+        return remote
 
     def run(self, command):
         """
@@ -542,6 +573,16 @@ class ApptainerGenerator:
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
+
+        # Set petsc and libmesh versions
+        for library in ['petsc', 'libmesh']:
+            if library == self.args.library:
+                repo_sha = self.git_submodule_sha(MOOSE_DIR, library)
+                repo_remote = self.git_submodule_remote(MOOSE_DIR, library)
+
+                variable_prefix = f'{library}_'.upper()
+                jinja_data[variable_prefix + 'GIT_SHA'] = repo_sha
+                jinja_data[variable_prefix + 'GIT_REMOTE'] = repo_remote
 
         # Add include contents, if any
         self.add_definition_includes(jinja_data)
