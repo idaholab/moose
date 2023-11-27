@@ -218,7 +218,7 @@ class ApptainerGenerator:
         """ gets the sha of the given submodule """
         command = ['git', 'submodule', 'status', name]
         result = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
-        sha_re = re.search(r'^[ U+-]([a-f0-9]{40})', result)
+        sha_re = re.search(r'^[U+-]?([a-f0-9]{40}) ', result)
         if sha_re:
             return sha_re.group(1)
         raise Exception(f'Failed to parse submodule sha for {name} from "{result}"')
