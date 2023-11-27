@@ -589,7 +589,6 @@ class ApptainerGenerator:
                 variable_prefix = f'{package}_'.upper()
                 jinja_data[variable_prefix + 'GIT_SHA'] = repo_sha
                 jinja_data[variable_prefix + 'GIT_REMOTE'] = repo_remote
-                print(variable_prefix, repo_sha, repo_remote)
 
         # Add include contents, if any
         self.add_definition_includes(jinja_data)
