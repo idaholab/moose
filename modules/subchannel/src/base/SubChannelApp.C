@@ -53,9 +53,9 @@ SubChannelApp::SubChannelApp(const InputParameters & parameters) : MooseApp(para
 void
 SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ModulesApp::registerAllObjects<SubChannelApp>(f, af, s);
   Registry::registerObjectsTo(f, {"SubChannelApp"});
   Registry::registerActionsTo(af, {"SubChannelApp"});
+  ModulesApp::registerAllObjects<SubChannelApp>(f, af, s);
 
   /* register custom execute flags, action syntax, etc. here */
   SubChannel::associateSyntax(s, af);

@@ -172,7 +172,7 @@ P_out = 2.0e5 # Pa
 
 [Postprocessors]
   [total_pressure_drop]
-    type = SubChannelPressureDrop
+    type = SubChannelDelta
     execute_on = "timestep_end"
   []
   [T]
