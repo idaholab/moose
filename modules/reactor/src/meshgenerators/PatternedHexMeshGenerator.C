@@ -456,7 +456,7 @@ PatternedHexMeshGenerator::generate()
     // In same cases, when the external hexagon size is small enough, the external hexagon boundary
     // may either be very close to the input hexagon meshes that are near the boundary or even cut
     // off the these hexagons. As long as the ring regions are not cut off, the input hexagons can
-    // be deformed to accomodate the external hexagon shape. This block sets up the range of mesh
+    // be deformed to accommodate the external hexagon shape. This block sets up the range of mesh
     // region that needs to be deformed.
     if (extra_dist.front() <= extra_dist_tol)
     {
@@ -906,7 +906,7 @@ PatternedHexMeshGenerator::addPeripheralMesh(
                   pitch,
                   i);
 
-    // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
+    // Loop for all applicable sides that need peripheral mesh (3 for corner and 2 for edge)
     for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
          peripheral_index++)
     {
@@ -1064,7 +1064,7 @@ PatternedHexMeshGenerator::addReportingIDs(
         "id_name", "An element integer with the name '", element_id_name, "' already exists");
   }
 
-  // asssign reporting IDs to individual elements
+  // assign reporting IDs to individual elements
   std::set<subdomain_id_type> background_block_ids;
   if (isParamValid("background_block_id"))
     background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
