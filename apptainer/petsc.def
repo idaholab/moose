@@ -1,7 +1,8 @@
 {#- Required jinja arguments                                                                  -#}
 {#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#- PETSC_GIT_SHA: The git SHA to use for PETSc                                               -#}
+{#- PETSC_GIT_REMOTE: The git remote to use to get PETSc                                      -#}
 
 {#- Optional jinja arguments                                                                  -#}
 {#- PETSC_ALT: Set to anything to use the alternate version of PETSc                          -#}
@@ -50,27 +51,29 @@ From: {{ APPTAINER_FROM }}
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     PETSC_DIR={{ PETSC_DIR }}
-    PETSC_BUILD_SCRIPT={{ PETSC_BUILD_SCRIPT }}
+    PETSC_GIT_SHA={{ PETSC_GIT_SHA }}
+    PETSC_GIT_REMOTE={{ PETSC_GIT_REMOTE }}
     PETSC_OPTIONS="{{ PETSC_OPTIONS }}"
 
-    # Make sure PETSc exists
+    # Clone PETSc
     PETSC_SRC_DIR=${ROOT_BUILD_DIR}/petsc
-    if ! [ -e ${PETSC_SRC_DIR}/README.md ]; then
-        echo "The petsc directory is empty; you must initialize the submodule"
-        exit 1
-    fi
+    git clone ${PETSC_GIT_REMOTE} ${PETSC_SRC_DIR}
+    cd ${PETSC_SRC_DIR}
+    git checkout ${PETSC_GIT_SHA}
 
-    # Don't bother with submodule changes
     PETSC_OPTIONS+=" --skip-submodule-update"
-{%- if PETSC_ALT is not defined %}
+{%- if PETSC_ALT is defined %}
+    PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc_alt.sh
     # Need a newer cmake for current petsc
     PETSC_OPTIONS+=" --download-cmake"
+{%- else %}
+    PETSC_BUILD_SCRIPT=${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh
 {%- endif %}
 
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} scripts/${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
 
 {%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
@@ -85,6 +88,8 @@ From: {{ APPTAINER_FROM }}
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
-    {{ MOOSE_DIR }}/petsc {{ ROOT_BUILD_DIR }}/petsc
-    {{ MOOSE_DIR }}/scripts/{{ PETSC_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ PETSC_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
+    {{ MOOSE_DIR }}/scripts/update_and_rebuild_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/update_and_rebuild_petsc.sh
+{%- if PETSC_ALT is defined %}
+    {{ MOOSE_DIR }}/scripts/update_and_rebuild_petsc_alt.sh {{ ROOT_BUILD_DIR }}/scripts/update_and_rebuild_petsc_alt.sh
+{%- endif %}
