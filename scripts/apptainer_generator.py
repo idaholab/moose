@@ -221,7 +221,7 @@ class ApptainerGenerator:
         sha_re = re.search(r'^[ U+-]([a-f0-9]{40})', result)
         if sha_re:
             return sha_re.group(1)
-        raise Exception(f'Failed to parse submodule sha for {name}')
+        raise Exception(f'Failed to parse submodule sha for {name} from "{result}"')
 
     @staticmethod
     def git_submodule_remote(dir, name):
