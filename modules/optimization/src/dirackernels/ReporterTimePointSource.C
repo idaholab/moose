@@ -53,24 +53,21 @@ ReporterTimePointSource::addPoints()
   errorCheck("point_name", _point.size());
   errorCheck("time_name", _coordt.size());
 
-  _point_to_index.clear();
+  _point_to_weightedValue.clear();
   const Real at =
       MooseUtils::absoluteFuzzyEqual(_reverse_time_end, 0.0) ? _t : _reverse_time_end - _t + _dt;
-  unsigned int id = 0;
   for (const auto & i : make_range(nval))
   {
     if (_coordt.empty() || MooseUtils::absoluteFuzzyEqual(at, _coordt[i]))
     {
-      if (isParamValid("point_name"))
+      if (_read_in_points)
       {
-        _point_to_index[_point[i]] = i;
-        addPoint(_point[i], id++);
+        fillPoint(_point[i], i);
       }
       else
       {
-        Point pt(_coordx[i], _coordy[i], _coordz[i]);
-        _point_to_index[pt] = i;
-        addPoint(pt, id++);
+        const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
+        fillPoint(point, i);
       }
     }
   }
