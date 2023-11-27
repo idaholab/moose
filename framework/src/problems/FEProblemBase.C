@@ -3020,7 +3020,8 @@ FEProblemBase::checkICRestartError(const std::string & ic_name,
   {
     std::string restart_method = "";
     if (_app.isRestarting())
-      restart_method = "a checkpoint restart";
+      restart_method =
+          "a checkpoint restart, by IC object '" + ic_name + "' for variable '" + name + "'";
     else if (_app.getExReaderForRestart())
     {
       std::vector<std::string> restarted_vars = _app.getExReaderForRestart()->get_elem_var_names();
