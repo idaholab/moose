@@ -238,7 +238,7 @@ class ApptainerGenerator:
                 return remote.replace('../../', ssh_re.group(1))
             https_re = re.search(r'^(https:\/\/[a-zA-Z0-9_.-]+.[a-zA-Z]+\/)', base_remote)
             if https_re:
-                return remote.replace('../../', ssh_re.https_re(1))
+                return remote.replace('../../', https_re.group(1))
             raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
 
         return remote
