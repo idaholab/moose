@@ -233,10 +233,10 @@ class ApptainerGenerator:
         if remote.startswith('../..'):
             base_command = ['git', 'remote', 'get-url', 'origin']
             base_remote = subprocess.check_output(base_command, cwd=dir, encoding='utf-8').strip()
-            ssh_re = re.search(r'^(git@[a-zA-Z0-9_-]+.[a-zA-Z]+:)', base_remote)
+            ssh_re = re.search(r'^(git@[a-zA-Z0-9_.-]+.[a-zA-Z]+:)', base_remote)
             if ssh_re:
                 return remote.replace('../../', ssh_re.group(1))
-            https_re = re.search(r'^(https:\/\/[a-zA-Z0-9_-]+.[a-zA-Z]+\/)', base_remote)
+            https_re = re.search(r'^(https:\/\/[a-zA-Z0-9_.-]+.[a-zA-Z]+\/)', base_remote)
             if https_re:
                 return remote.replace('../../', ssh_re.https_re(1))
             raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
