@@ -24,8 +24,6 @@
 
 {#- The script used to install wasp                                                           -#}
 {%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
-{#- The location in the repo to copy wasp from                                                -#}
-{%- set WASP_REPO_DIR = 'framework/contrib/wasp' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
