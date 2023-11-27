@@ -18,12 +18,12 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates an overall average pressure drop for the hexagonal subchannel assembly
+ * Calculates an overall Delta of a chosen variable for the subchannel assembly
  */
-class SubChannelPressureDrop : public GeneralPostprocessor
+class SubChannelDelta : public GeneralPostprocessor
 {
 public:
-  SubChannelPressureDrop(const InputParameters & params);
+  SubChannelDelta(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
@@ -31,6 +31,7 @@ public:
 
 protected:
   SubChannelMesh & _mesh;
+  AuxVariableName const & _variable;
   Real _value;
 
 public:
