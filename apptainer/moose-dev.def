@@ -77,7 +77,7 @@ From: {{ APPTAINER_FROM }}
     # Create list of Conda Packages to install
     MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    mamba create -yq -n ${MOOSE_CONDA_ENV_NAME} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
+    mamba create -yq -n ${MOOSE_CONDA_ENV_NAME} python=${PYTHON_VERSION} ${MAMBA_PACKAGES} openssl=3.1.4
 
     # Activate the new environment
     source activate ${MOOSE_MINIFORGE}/envs/${MOOSE_CONDA_ENV_NAME}
