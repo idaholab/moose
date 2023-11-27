@@ -54,7 +54,8 @@ From: {{ APPTAINER_FROM }}
     PETSC_OPTIONS="{{ PETSC_OPTIONS }}"
 
     # Make sure PETSc exists
-    if [ -n `${ROOT_BUILD_DIR}/petsc -d 0 -type d -empty` ]; then
+    PETSC_SRC_DIR=${ROOT_BUILD_DIR}/petsc
+    if ! [ -e ${PETSC_SRC_DIR}/README.md ]; then
         echo "The petsc directory is empty; you must initialize the submodule"
         exit 1
     fi
@@ -69,7 +70,7 @@ From: {{ APPTAINER_FROM }}
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} scripts/${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} scripts/${PETSC_BUILD_SCRIPT} ${PETSC_OPTIONS}
 
 {%- if MPI_FLAVOUR != "openmpi" %}
     # Test PETSc
