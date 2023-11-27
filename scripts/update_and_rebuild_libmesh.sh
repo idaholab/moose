@@ -109,7 +109,7 @@ if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
 fi
 
 # Test for git repository when not using fast
-if [ -n "$MOOSE_DIR"] && [ -z "$skip_sub_update" ]; then
+if [ -n "$MOOSE_DIR" ] && [ -z "$skip_sub_update" ]; then
   cd ${MOOSE_DIR}
   git_dir=`git rev-parse --show-cdup 2>/dev/null`
   if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
