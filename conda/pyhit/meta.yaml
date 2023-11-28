@@ -1,4 +1,4 @@
-{% set version = "2023.11.06" %}
+{% set version = "2023.11.28" %}
 
 package:
   name: moose-pyhit
