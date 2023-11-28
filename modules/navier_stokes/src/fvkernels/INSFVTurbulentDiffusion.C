@@ -19,7 +19,8 @@ INSFVTurbulentDiffusion::validParams()
       "Computes residual for the turbulent scaled diffusion operator for finite volume method.");
   params.addParam<MooseFunctorName>("scaling_coef", 1.0, "diffusion coefficient");
   params.set<unsigned short>("ghost_layers") = 2;
-  params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls.");
+  params.addParam<std::vector<BoundaryName>>(
+      "walls", {}, "Boundaries that correspond to solid walls.");
 
   return params;
 }

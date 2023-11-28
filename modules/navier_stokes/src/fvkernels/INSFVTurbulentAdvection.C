@@ -9,6 +9,7 @@
 
 #include "INSFVTurbulentAdvection.h"
 #include "NavierStokesMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVTurbulentAdvection);
 
@@ -19,7 +20,8 @@ INSFVTurbulentAdvection::validParams()
   params.addClassDescription(
       "Advects an arbitrary turbulent quantity, the associated nonlinear 'variable'.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
-  params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls.");
+  params.addParam<std::vector<BoundaryName>>(
+      "walls", {}, "Boundaries that correspond to solid walls.");
   return params;
 }
 

@@ -10,9 +10,12 @@
 #include "INSFVMomentumDiffusion.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 #include "RelationshipManager.h"
 #include "Factory.h"
+#include "libmesh/nonlinear_solver.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumDiffusion);
 

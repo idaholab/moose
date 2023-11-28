@@ -60,11 +60,6 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   auto current_argument = makeElemArg(&_current_elem);
   const auto state = determineState();
 
-  // Assign boundary weights to element
-  Real weight = 0.0;
-  for (unsigned int i_side = 0; i_side < _current_elem.n_sides(); ++i_side)
-    weight += static_cast<Real>(_subproblem.mesh().getBoundaryIDs(&_current_elem, i_side).size());
-
   // Get the velocity vector
   ADRealVectorValue velocity(_u_var(current_argument, state));
   if (_v_var)

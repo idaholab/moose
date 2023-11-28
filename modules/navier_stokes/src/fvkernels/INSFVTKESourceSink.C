@@ -29,7 +29,8 @@ INSFVTKESourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("mu_t", "Turbulent viscosity.");
-  params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls.");
+  params.addParam<std::vector<BoundaryName>>(
+      "walls", {}, "Boundaries that correspond to solid walls.");
 
   params.addParam<Real>("max_mixing_length",
                         1e10,
