@@ -12,9 +12,9 @@ boundary layer are identified as follows:
 
 - Sub-laminar region: $y^+ \le 5$
 - Buffer region: $y^+ \in (5, 30)$
-- Logarithmic region: $y^+ \ge 5$
+- Logarithmic region: $y^+ \ge 30$
 
-For the procedures for determining the non-dimensional wall distance as $y^+$
+For the procedure of determining the non-dimensional wall distance as $y^+$
 and the friction velocity $u_{\tau}$ plese see
 [INSFVTurbulentViscosityWallFunction](INSFVTurbulentViscosityWallFunction.md).
 
@@ -32,12 +32,12 @@ as follows:
 where:
 
 - $k$ is the thermal conductivity
-- $rho$ is the density
+- $\rho$ is the density
 - $c_p$ is the specific heat at constant pressure
 - $u_{\tau}$ is the friction velocity defined by law of the wall
 - $y_p$ is the distance from the boundary to the centroid of the near-wall cell
 - $Pr_t$ is the turbulent Prandtl number, which typically ranges between 0.3 and 0.9
-- $w_s$ is a near-wall scaling factor that is defined  as follows:
+- $w_s$ is a near-wall scaling factor that is defined as follows:
 
 \begin{equation}
   w_s = \frac{1}{\kappa} \operatorname{ln}(E y^+) + J_k \,,
@@ -61,10 +61,10 @@ For the buffer layer, i.e., in $y^+ \in (5, 30)$, the thermal diffusivity
 is defined via a linear blending function as follows:
 
 \begin{equation}
-  \alpha_b = \alpha_t \frac{(y^+ - 5)}{5} + \alpha_l \left[ 1 - \frac{(y^+ - 5)}{5} \right]
+  \alpha_b = \alpha_t \frac{(y^+ - 5)}{25} + \alpha_l \left[ 1 - \frac{(y^+ - 5)}{25} \right]
 \end{equation}
 
-Finally, using the thermal diffusivity, the heat flux as the wall is defined
+Finally, using the thermal diffusivity, the heat flux at the wall is defined
 as follows:
 
 \begin{equation}
@@ -79,7 +79,7 @@ where:
 !alert note
 The thermal wall functions are only valid for regions in which the equilibrium
 momentum wall functions are valid, i.e., no flow detachment, recirculation, etc.
-For resolving non-equilibrium phenomena, we recomnd refining the mesh.
+For resolving non-equilibrium phenomena, we recommend refining the mesh.
 
 !syntax parameters /FVBCs/INSFVTurbulentTemperatureWallFunction
 

@@ -9,6 +9,7 @@
 
 #include "kEpsilonViscosityAux.h"
 #include "NavierStokesMethods.h"
+#include "NS.h"
 #include "NonlinearSystemBase.h"
 #include "libmesh/nonlinear_solver.h"
 

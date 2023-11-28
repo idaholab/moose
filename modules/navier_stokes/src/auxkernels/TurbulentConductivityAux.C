@@ -9,6 +9,7 @@
 
 #include "TurbulentConductivityAux.h"
 #include "NavierStokesMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", TurbulentConductivityAux);
 

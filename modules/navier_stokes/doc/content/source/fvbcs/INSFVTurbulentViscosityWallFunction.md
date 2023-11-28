@@ -2,25 +2,26 @@
 
 !syntax description /FVBCs/INSFVTurbulentViscosityWallFunction
 
-Implements wall functions boundary conditions for the turbulent
+Implements wall function boundary condition for the turbulent
 dynamic viscosity $\mu_t$.
 
-The boundary conditions are different depending on whether the centroid
+The boundary conditions are different depending on where the centroid
 of the cell near the identified boundary lies in the wall function profile.
 Taking the non-dimensional wall distance as $y^+$, the three regions of the
 boundary layer are identified as follows:
 
 - Sub-laminar region: $y^+ \le 5$
 - Buffer region: $y^+ \in (5, 30)$
-- Logarithmic region: $y^+ \ge 5$
+- Logarithmic region: $y^+ \ge 30$
 
 Four different formulations are supported
-as defined by the `wall_treatment` parameter.
+as defined by the [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) parameter.
 
-*Equilibrium wall functions using a Newton solve*
+## Equilibrium wall functions using a Newton solve
 
-These treatment is enabled by the parameter `wall_treatment = eq_newton`.
-The treatment uses equilibrium wall functions where the following formulatiopn is used
+This treatment can be enabled by setting the parameter
+[!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_newton`.
+The treatment uses equilibrium wall functions where the following formulation is used
 for the turbulent viscosity.
 
 \begin{equation}
@@ -53,7 +54,7 @@ Here the standard or equilibrium law of the wall defines $y^+$ and $u_{\tau}$ as
 \end{equation}
 
 \begin{equation}
-  y^+ = \frac{\rho u_{tau} y_p}{\mu} \,,
+  y^+ = \frac{\rho u_{\tau} y_p}{\mu} \,,
 \end{equation}
 
 where:
@@ -63,8 +64,8 @@ where:
 - $\kappa = 0.4187$ is the von Kármán constant
 
 In this method, we iterate on the wall function and $y^+$ to find
-$u_{\tau}$ as via a Newton solve. Once $u_{\tau}$ defined, $y^+$ is
-computed defining the boundary turbulent viscosity.
+$u_{\tau}$ via a Newton solve. Once $u_{\tau}$ is defined, $y^+$ is
+computed followed by the determination of the boundary turbulent viscosity.
 
 !alert note
 `eq_newton` solve will converge the fastest for simple flow geometries but it
@@ -73,9 +74,10 @@ of the near wall cells are in the buffer layer. However, using a mesh that
 contains nodes in the buffer layer is not recommended.
 
 
-*Equilibrium wall functions using a fixed-point solve*
+## Equilibrium wall functions using a fixed-point solve*
 
-These treatment is enabled by the parameter `wall_treatment = eq_incremental`.
+hese treatment is enabled by setting parameter
+[!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_incremental`.
 The method uses the same equilibrium wall treatement than the Newton solve.
 However, the main difference is that, instead of computing $u_{\tau}$ for the
 near wall cells, a fixed point iteration is performed in the wall functions
@@ -89,24 +91,25 @@ solve to converge. Using a mesh that contains nodes in the buffer layer is
 not recommended.
 
 
-*Equilibrium wall functions using linearized wall function*
+## Equilibrium wall functions using linearized wall function*
 
-These treatment is enabled by the parameter `wall_treatment = eq_linearized`.
+This treatment is enabled by setting parameter
+[!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_linearized`.
 The treatement uses a linearized version of the wall function, in which
 a linear Taylor approximation is used for the natural logarithm.
 This approximation results in a quadratic equation that is solved directly for $u_{\tau}$.
 Then, $y^+$ is computed from $u_{\tau}$.
 
 !alert note
-`eq_linearized` will work fast as there is no nonlienar solve at
+`eq_linearized` will work fast as there is no nonlinear solve at
 the near-wall region. However, the method may introduce significant
 near-wall errors. The method is designed to be used in conjunction
 with porous media treatement and not necessairly for free flow.
 
+## Non-equilibrium wall functions*
 
-*Non-equilibrium wall functions*
-
-These treatment is enabled by the parameter `wall_treatment = neq`.
+This treatment is enabled by setting parameter
+[!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `neq`.
 In this case, the non-dimensional wall distance is computed from the
 turbulent kinetic energy near the wall as follows:
 

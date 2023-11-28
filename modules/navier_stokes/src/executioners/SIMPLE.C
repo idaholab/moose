@@ -1352,7 +1352,7 @@ SIMPLE::execute()
       }
 
       // If we have an turbulence equations, we solve it here. We solve it inside the
-      // momentum-pressure loop because it affects the turbulence viscosity
+      // momentum-pressure loop because it affects the turbulent viscosity
       if (_has_turbulence_systems)
       {
         _problem.execute(EXEC_NONLINEAR);

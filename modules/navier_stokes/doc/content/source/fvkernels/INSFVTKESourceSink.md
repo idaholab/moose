@@ -8,7 +8,7 @@ Two terms are computed `destruction` = $\epsilon$ and `production` = $G_k$ and t
 passed to the residual.
 A different treatment is used for the bulk and the near wall regions.
 
-*Bulk formulation*:
+## Bulk formulation:
 
 The turbulent production $G_k$ is modeled as:
 
@@ -24,13 +24,13 @@ where:
 The turbulent kinetic energy dissipation rate $\epsilon$ is generally coming from a coupled
 transport equation for $\epsilon$.
 However, for canonical or meassured cases, e.g., isotropic decaying turbulece,
-the user can force its value to a functor.
+the user can utilize predefined fields through functors in MOOSE.
 
-*Wall formulation*:
+## Wall formulation:
 
 All cells in contact with a boundary identified in the `walls` list are applied a different
 treatment for production and destruction.
-A separate formulation is used for the `sub-laminar` and `logarithmic` boundary layers.
+A different formulation is used for the `sub-laminar` and `logarithmic` boundary layers.
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
 The non-dimensional wall distance is defined as
@@ -65,7 +65,7 @@ where:
 - $||\nabla \vec{u}||$ is the near wall velocity gradient norm, which is defined as $$||\nabla \vec{u}||$ = (\nabla \vec{u} \cdot \hat{n}) \cdot \hat{n}$,
 - $\kappa = 0.41$ is the von Kármán constant.
 
-The formulation assumes that the nert wall value are already imposed in the $\mu_t$ functor.
+The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor.
 
 When solving a linear problem, instead of the nonlinear formulation, the production term is formulated as:
 
@@ -77,7 +77,8 @@ where:
 
 - $k_{old}$ is the value of the turbulent kinetic energy in the previous iteration.
 
-Whereas the linear or nonlinear formulation is used is controled by the `linearized_model` parameter.
+Whereas the linear or nonlinear formulation is used is controled by the
+[!param](/FVKernels/INSFVTKESourceSink/linearized_model) parameter.
 
 For the destruction formulation is different for the `sub-laminar` and `logarithmic` layers.
 For the `sub-laminar` layer, the destruction is defined as follows:
