@@ -28,6 +28,7 @@ PhaseFieldContactAngleBC::validParams()
 PhaseFieldContactAngleBC::PhaseFieldContactAngleBC(const InputParameters & params)
   : ADIntegratedBC(params),
     _pf(adCoupledValue("pf")),
+    _grad_pf(adCoupledGradient("pf")),
     _epsilon(getParam<Real>("epsilon")),
     _lambda(getParam<Real>("lambda")),
     _sigma(getParam<Real>("sigma")),
@@ -40,4 +41,10 @@ PhaseFieldContactAngleBC::computeQpResidual()
 {
   return _test[_i][_qp] * (0.75 * _epsilon * _epsilon / _lambda) * _sigma *
          std::cos(_contactangle) * (1 - _pf[_qp] * _pf[_qp]);
+  // if (MetaPhysicL::raw_value(_grad_pf[_qp].norm()) > libMesh::TOLERANCE)
+  // {
+  //  return _test[_i][_qp]*_epsilon*_epsilon*std::cos(_contactangle)*_grad_pf[_qp].norm();
+  // }
+  // else
+  // return _test[_i][_qp]*_epsilon*_epsilon*std::cos(_contactangle)*libMesh::TOLERANCE;
 }
