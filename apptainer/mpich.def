@@ -87,9 +87,7 @@ From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
                    git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
                    libomp.x86_64 lldb
-{%- endif %}
 
-{%- if ALTERNATE_FROM == "clang" %}
     # Clang will install a newer gcc, and we need to make sure that the version
     # that it uses is the same one that we expect it to use
     if ! [ -d /opt/rh/gcc-toolset-${CLANG_GCC_VERSION} ]; then
