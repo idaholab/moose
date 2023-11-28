@@ -63,6 +63,8 @@ class ReactorGeometryMeshBuilderBase : public MeshGenerator
 public:
   static InputParameters validParams();
 
+  static void addDepletionIDParams(InputParameters & parameters);
+
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
 
 protected:
@@ -187,6 +189,26 @@ protected:
 
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;
+  /// specify the depletion id is generated at which reactor generation level
+  enum class DepletionIDGenerationLevel
+  {
+    Pin,
+    Assembly,
+    Core
+  };
+
+  /**
+   * add depletion IDs
+   * @param input_mesh input mesh
+   * @param option option for specifying level of details
+   * @param generation_level depletion id is generated at which reactor generator level
+   * @param extrude whether input mesh is extruded, if false, assume that input mesh is defined in
+   * 2D and do not use 'plane_id` in depletion id generation
+   */
+  void addDepletionId(MeshBase & input_mesh,
+                      const MooseEnum & option,
+                      const DepletionIDGenerationLevel generation_level,
+                      const bool extrude);
 
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)

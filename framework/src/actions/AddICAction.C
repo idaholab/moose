@@ -43,8 +43,10 @@ AddICAction::act()
   const auto & var = _problem->getVariable(0, var_name);
 
   if (var.isFV())
-    mooseError("Finite volume variables do not support an [InitialCondition] subblock, try using a "
-               "separate [FVInitialConditions] block in your input file.");
+    mooseError(
+        "Finite volume variables do not support an [InitialCondition] subblock, please use a "
+        "separate [FVICs] block with all your finite volume initial conditions in your input "
+        "file.");
   else
     _problem->addInitialCondition(_type, var_name, _moose_object_pars);
 }
