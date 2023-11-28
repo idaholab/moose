@@ -94,7 +94,7 @@ if [ -z "$skip_sub_update" ]; then
     git submodule update --init --recursive petsc
     if [[ $? != 0 ]]; then
       echo "git submodule command failed, are your proxy settings correct?"
-      exit 1apptainer shell
+      exit 1
     fi
   fi
 fi

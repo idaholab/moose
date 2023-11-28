@@ -167,7 +167,7 @@ if [ -z "$go_fast" ]; then
   source $SCRIPT_DIR/configure_libmesh.sh
   SRC_DIR=${LIBMESH_SRC_DIR} configure_libmesh $DISABLE_TIMESTAMPS \
                                                $VTK_OPTIONS \
-                                                $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
+                                               $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.
