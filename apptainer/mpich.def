@@ -23,7 +23,7 @@ Bootstrap: docker
 From: rockylinux:8.8.20230518
 {%- else %}
 BootStrap: oras
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-x86_64:8.8-WIP
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.8-0
 {%- endif %}
 
 %environment
