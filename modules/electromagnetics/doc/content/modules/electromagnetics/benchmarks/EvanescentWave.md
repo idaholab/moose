@@ -43,7 +43,7 @@ where
 - $\vec{J}$ is the external current density in A/$\text{m}^2$, and
 - $j$ is the imaginary unit ($j^2 = -1$).
 
-In the EM module, these terms are represented by the [CurlCurlField.md],
+These terms are represented by the [CurlCurlField.md],
 [VectorFunctionReaction.md], and [VectorCurrentSource.md] objects, respectively. The
 current source in this study is applied in the $y$-direction and only on the real
 component, so in 2D we have
