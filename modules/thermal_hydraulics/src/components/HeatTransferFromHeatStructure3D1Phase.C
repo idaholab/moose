@@ -237,7 +237,9 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
       false, _P_hf_name, getTHMProblem().getFlowFEType(), _flow_channel_subdomains);
 
   _P_hf_fn_name = getParam<FunctionName>("P_hf");
-  getTHMProblem().addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
+
+  if (!_app.isRestarting())
+    getTHMProblem().addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
 
   getTHMProblem().addSimVariable(
       false, FlowModel::TEMPERATURE_WALL, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);

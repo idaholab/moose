@@ -31,7 +31,8 @@ TotalPower::addVariables()
 {
   TotalPowerBase::addVariables();
 
-  getTHMProblem().addConstantScalarIC(_power_var_name, _power);
+  if (!_app.isRestarting())
+    getTHMProblem().addConstantScalarIC(_power_var_name, _power);
 }
 
 void

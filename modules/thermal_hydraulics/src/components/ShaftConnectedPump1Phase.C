@@ -153,16 +153,17 @@ ShaftConnectedPump1Phase::addVariables()
   VolumeJunction1Phase::addVariables();
 
   getTHMProblem().addSimVariable(false, _head_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_head_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _hydraulic_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_hydraulic_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _friction_torque_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
-
   getTHMProblem().addSimVariable(false, _moment_of_inertia_var_name, FEType(FIRST, SCALAR));
-  getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+
+  if (!_app.isRestarting())
+  {
+    getTHMProblem().addConstantScalarIC(_head_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_hydraulic_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_friction_torque_var_name, 0);
+    getTHMProblem().addConstantScalarIC(_moment_of_inertia_var_name, _inertia_const);
+  }
 }
 
 void
