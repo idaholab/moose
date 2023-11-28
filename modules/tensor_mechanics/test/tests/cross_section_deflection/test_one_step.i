@@ -83,8 +83,9 @@
   [section_output]
     type = SectionDisplacementAverage
     axis_direction = '0 0 1'
-    length = 18.0
+    lengths = '10.0 18.0'
     block = '1'
+    reference_point = '0 0 0'
   []
 []
 

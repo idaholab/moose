@@ -30,8 +30,14 @@ protected:
   /// References to the mesh mesh
   const std::shared_ptr<MooseMesh> & _mesh;
 
-  /// Output with d-dimensional cross sectional displacement
-  VectorPostprocessorValue & _section_displacements;
+  /// Output with d-dimensional cross sectional displacement x
+  VectorPostprocessorValue & _section_displacements_x;
+
+  /// Output with d-dimensional cross sectional displacement y
+  VectorPostprocessorValue & _section_displacements_y;
+
+  /// Output with d-dimensional cross sectional displacement z
+  VectorPostprocessorValue & _section_displacements_z;
 
   // Block ids over which this postprocessor does the computation
   std::vector<SubdomainID> _block_ids;
@@ -39,16 +45,23 @@ protected:
   /// Axis direction of the structural component
   const Point _direction;
 
-  /// Location for of the cross section
-  const Real _length;
+  /// Starting or reference point of the structural component to locate nodes on the cross section
+  const Point _reference_point;
+
+  /// Locations for of the cross section
+  const std::vector<Real> _lengths;
 
   /// Tolerance to identify nodes on the user-prescribed cross section
   const Real _tolerance;
 
-  /// Number of nodes for computing output (local and global)
-  unsigned int _number_of_nodes;
+  /// Number of nodes for computing output (local and global). We allow each section to have different
+  /// numbers of nodes (this would allow local, regular refinement in the structural component mesh)
+  std::vector<unsigned int> _number_of_nodes;
 
 private:
   /// Axis direction of the structural component
-  Real distancePointPlane(const Node & node, const Point & axis_direction, const Real length) const;
+  Real distancePointPlane(const Node & node,
+                          const Point & axis_direction,
+                          const Point & reference_point,
+                          const Real length) const;
 };
