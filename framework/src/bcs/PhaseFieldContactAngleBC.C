@@ -14,20 +14,21 @@ registerMooseObject("PhaseFieldApp", PhaseFieldContactAngleBC);
 InputParameters
 PhaseFieldContactAngleBC::validParams()
 {
-  InputParameters params = ADIntegratedBC::validParams(); 
+  InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription("Enforce contact angle BC using phase field variable");
-  params.addRequiredCoupledVar("pf", "phase field variable");  
+  params.addRequiredCoupledVar("pf", "phase field variable");
   params.addRequiredParam<Real>("epsilon", "Interface width");
   params.addRequiredParam<Real>("lambda", "Mixing energy density");
   params.addRequiredParam<Real>("sigma", "Surface tension coefficient");
   params.addRequiredParam<Real>("contactangle",
-                                "Contact angle of the fluid with the wall boundary in Radians");                                
+                                "Contact angle of the fluid with the wall boundary in Radians");
   return params;
 }
 
 PhaseFieldContactAngleBC::PhaseFieldContactAngleBC(const InputParameters & params)
   : ADIntegratedBC(params),
     _pf(adCoupledValue("pf")),
+    _grad_pf(adCoupledGradient("pf")),
     _epsilon(getParam<Real>("epsilon")),
     _lambda(getParam<Real>("lambda")),
     _sigma(getParam<Real>("sigma")),
