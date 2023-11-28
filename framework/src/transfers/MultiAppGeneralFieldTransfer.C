@@ -1236,7 +1236,8 @@ bool
 MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
                                                       const std::vector<BoundingBox> & local_bboxes,
                                                       const Point & pt,
-                                                      const unsigned int mesh_div) const
+                                                      const unsigned int mesh_div,
+                                                      Real & distance) const
 {
   if (!local_bboxes[i_from].contains_point(pt))
     return false;
@@ -1260,6 +1261,29 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
     if (!_from_mesh_divisions.empty() &&
         mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
       return false;
+
+    // Get nearest position (often a subapp position) for the target point
+    // We want values from the child app that is closest to the same position as the target
+    Point nearest_position_source;
+    if (_nearest_positions_obj)
+    {
+      const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+      const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
+      nearest_position_source = _nearest_positions_obj->getNearestPosition(
+          (*_from_transforms[from_global_num])(Point(0, 0, 0)), initial);
+
+      if (!_skip_coordinate_collapsing &&
+          _from_transforms[from_global_num]->hasNonTranslationTransformation())
+        mooseError("Rotation and scaling currently unsupported with nearest positions transfer.");
+
+      // Source (usually app position) is not closest to the same positions as the target, dont
+      // send values
+      if (nearest_position != nearest_position_source)
+        return false;
+
+      // Set the distance as the distance from the nearest position to the target point
+      distance = (pt - nearest_position_source).norm();
+    }
 
     // Check that the app actually contains the origin point
     // We dont need to check if we already found it in a block or a boundary

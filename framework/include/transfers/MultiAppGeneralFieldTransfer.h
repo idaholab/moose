@@ -79,11 +79,18 @@ protected:
    * @param i_from the index of the source problem/mesh
    * @param local_bboxes the bounding boxes for the local applications
    * @param pt the point to consider (in reference frame, not source or target frame)
+   * @param mesh_div index of the point to consider in the target mesh division.
+   *        If mesh divisions are used to match regions between two meshes, then the index
+   *        must match in the target and source mesh divisions
+   * @param distance distance from the point to the target mesh division. This may be used to favor
+   *        a point over another, for example in a nearest-positions algorithm where we want
+   *        to report the distance of the point pt to the closest position of the 1-NN partition
    */
   bool acceptPointInOriginMesh(unsigned int i_from,
                                const std::vector<BoundingBox> & local_bboxes,
                                const Point & pt,
-                               const unsigned int mesh_div) const;
+                               const unsigned int mesh_div,
+                               Real & distance) const;
 
   /*
    * Whether or not a given point is within the mesh of an origin (from) app
