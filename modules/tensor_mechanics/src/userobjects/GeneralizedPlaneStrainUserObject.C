@@ -134,8 +134,7 @@ GeneralizedPlaneStrainUserObject::execute()
 void
 GeneralizedPlaneStrainUserObject::threadJoin(const UserObject & uo)
 {
-  const GeneralizedPlaneStrainUserObject & gpsuo =
-      static_cast<const GeneralizedPlaneStrainUserObject &>(uo);
+  const auto & gpsuo = static_cast<const GeneralizedPlaneStrainUserObject &>(uo);
   for (unsigned int i = 0; i < _residual.size(); ++i)
   {
     _residual[i] += gpsuo._residual[i];

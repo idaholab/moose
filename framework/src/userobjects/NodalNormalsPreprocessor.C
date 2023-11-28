@@ -170,8 +170,3 @@ NodalNormalsPreprocessor::finalize()
 {
   _aux.solution().close();
 }
-
-void
-NodalNormalsPreprocessor::threadJoin(const UserObject & /*uo*/)
-{
-}

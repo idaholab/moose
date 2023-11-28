@@ -248,7 +248,7 @@ AdvectiveFluxCalculatorBase::executeOnElement(
 void
 AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 {
-  const AdvectiveFluxCalculatorBase & afc = static_cast<const AdvectiveFluxCalculatorBase &>(uo);
+  const auto & afc = static_cast<const AdvectiveFluxCalculatorBase &>(uo);
   // add the values of _kij computed by different threads
   for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {

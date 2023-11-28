@@ -55,6 +55,6 @@ void
 FunctionElementAverage::threadJoin(const UserObject & y)
 {
   FunctionElementIntegral::threadJoin(y);
-  const FunctionElementAverage & pps = static_cast<const FunctionElementAverage &>(y);
+  const auto & pps = static_cast<const FunctionElementAverage &>(y);
   _volume += pps._volume;
 }

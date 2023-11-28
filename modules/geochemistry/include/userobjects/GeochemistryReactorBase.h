@@ -24,10 +24,10 @@ public:
 
   static InputParameters validParams();
   GeochemistryReactorBase(const InputParameters & parameters);
-  virtual void initialize() override;
-  virtual void threadJoin(const UserObject & uo) override;
-  virtual void finalize() override;
-  virtual void execute() override;
+  virtual void initialize() override {}
+  virtual void threadJoin(const UserObject & /*uo*/) override {}
+  virtual void finalize() override {}
+  virtual void execute() override {}
 
   /**
    * @return a reference to the equilibrium geochemical system at the given node

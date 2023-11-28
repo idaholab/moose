@@ -194,21 +194,3 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _abs_residual(_num_my_nodes, 0.0)
 {
 }
-
-void
-GeochemistryReactorBase::initialize()
-{
-}
-void
-GeochemistryReactorBase::finalize()
-{
-}
-void
-GeochemistryReactorBase::threadJoin(const UserObject & /*uo*/)
-{
-}
-
-void
-GeochemistryReactorBase::execute()
-{
-}

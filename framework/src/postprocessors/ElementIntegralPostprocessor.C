@@ -44,7 +44,7 @@ ElementIntegralPostprocessor::getValue() const
 void
 ElementIntegralPostprocessor::threadJoin(const UserObject & y)
 {
-  const ElementIntegralPostprocessor & pps = static_cast<const ElementIntegralPostprocessor &>(y);
+  const auto & pps = static_cast<const ElementIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;
 }
 

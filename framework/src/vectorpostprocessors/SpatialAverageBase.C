@@ -104,7 +104,7 @@ SpatialAverageBase::finalize()
 void
 SpatialAverageBase::threadJoin(const UserObject & y)
 {
-  const SpatialAverageBase & uo = static_cast<const SpatialAverageBase &>(y);
+  const auto & uo = static_cast<const SpatialAverageBase &>(y);
 
   for (MooseIndex(_counts) i = 0; i < _nbins; ++i)
   {

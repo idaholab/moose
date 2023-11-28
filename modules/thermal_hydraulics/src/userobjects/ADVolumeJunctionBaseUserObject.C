@@ -91,8 +91,7 @@ ADVolumeJunctionBaseUserObject::execute()
 void
 ADVolumeJunctionBaseUserObject::threadJoin(const UserObject & uo)
 {
-  const ADVolumeJunctionBaseUserObject & volume_junction_uo =
-      dynamic_cast<const ADVolumeJunctionBaseUserObject &>(uo);
+  const auto & volume_junction_uo = static_cast<const ADVolumeJunctionBaseUserObject &>(uo);
 
   // Store the data computed/retrieved in the other threads
   for (unsigned int i = 0; i < volume_junction_uo._connection_indices.size(); i++)

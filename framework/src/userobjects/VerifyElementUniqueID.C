@@ -49,7 +49,7 @@ VerifyElementUniqueID::execute()
 void
 VerifyElementUniqueID::threadJoin(const UserObject & y)
 {
-  const VerifyElementUniqueID & uo = static_cast<const VerifyElementUniqueID &>(y);
+  const auto & uo = static_cast<const VerifyElementUniqueID &>(y);
 
   _all_ids.insert(_all_ids.end(), uo._all_ids.begin(), uo._all_ids.end());
 }

@@ -6,16 +6,23 @@
     [2dConstantReporter]
       type = 'Exodiff'
       input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source_err vpp_point_source'"
+      cli_args = "DiracKernels/inactive='reporter_point_source_err reporter_point_source_dup_err vpp_point_source reporter_point_source_dup'"
       exodiff = '2d_vpp_out.e'
       detail = 'in a steady state 2D problem, reading data from a reporter and reproducing the constantPointSource.'
     []
     [2dConstantVPP]
       type = 'Exodiff'
       input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source_err reporter_point_source'"
+      cli_args = "DiracKernels/inactive='reporter_point_source_err reporter_point_source_dup_err reporter_point_source reporter_point_source_dup'"
       exodiff = '2d_vpp_out.e'
       detail = 'in a steady state 2D problem, reading data from a vectorPostProcessor and reproducing the constantPointSource.'
+    []
+    [2dConstReporterDuplicates]
+      type = 'Exodiff'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source_err reporter_point_source_dup_err vpp_point_source reporter_point_source '"
+      exodiff = '2d_vpp_out.e'
+      detail = 'in a steady state 2D problem, reading data from a reporter with duplicate points and reproducing the constantPointSource.'
     []
     [3dConstant]
       type = 'Exodiff'
@@ -32,9 +39,16 @@
     [wrong_size_error]
       type = 'RunException'
       input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source'"
+      cli_args = "DiracKernels/inactive='reporter_point_source_dup_err'"
       expect_err = "Number of x_coord_name entries \(2\) does not match number of entries read for value_name \(3\)"
-      detail = "and shall report an error if the input arrays are not the same size"
+      detail = "shall report an error if the input arrays are not the same size."
+    []
+    [duplicate_error]
+      type = 'RunException'
+      input = '2d_vpp.i'
+      cli_args = "DiracKernels/inactive='reporter_point_source_err'"
+      expect_err = "combine_duplicates must be true if reporter has duplicate points"
+      detail = "shall report an error if the input arrays have duplicated values."
     []
   []
 []

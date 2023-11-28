@@ -122,8 +122,7 @@ ElementVariablesDifferenceMax::initialize()
 void
 ElementVariablesDifferenceMax::threadJoin(const UserObject & s)
 {
-  const ElementVariablesDifferenceMax & sibling =
-      static_cast<const ElementVariablesDifferenceMax &>(s);
+  const auto & sibling = static_cast<const ElementVariablesDifferenceMax &>(s);
 
   if (_all[MAXIMUM_DIFFERENCE] < sibling._all[MAXIMUM_DIFFERENCE])
     _all = sibling._all;

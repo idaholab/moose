@@ -71,7 +71,7 @@ void
 MassFluxWeightedFlowRate::threadJoin(const UserObject & y)
 {
   VolumetricFlowRate::threadJoin(y);
-  const MassFluxWeightedFlowRate & pps = static_cast<const MassFluxWeightedFlowRate &>(y);
+  const auto & pps = static_cast<const MassFluxWeightedFlowRate &>(y);
   _mdot += pps._mdot;
 }
 

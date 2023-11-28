@@ -87,7 +87,7 @@ template <bool is_ad>
 void
 CFLTimeStepSizeTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  const CFLTimeStepSizeTempl<is_ad> & pps = static_cast<const CFLTimeStepSizeTempl<is_ad> &>(y);
+  const auto & pps = static_cast<const CFLTimeStepSizeTempl<is_ad> &>(y);
 
   _dt = std::min(_dt, pps._dt);
 }

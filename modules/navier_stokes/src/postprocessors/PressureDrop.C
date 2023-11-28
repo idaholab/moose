@@ -293,7 +293,7 @@ PressureDrop::computeQpWeightIntegral() const
 void
 PressureDrop::threadJoin(const UserObject & y)
 {
-  const PressureDrop & pps = static_cast<const PressureDrop &>(y);
+  const auto & pps = static_cast<const PressureDrop &>(y);
   _weighted_pressure_upstream += pps._weighted_pressure_upstream;
   _weighted_pressure_downstream += pps._weighted_pressure_downstream;
   _weight_upstream += pps._weight_upstream;

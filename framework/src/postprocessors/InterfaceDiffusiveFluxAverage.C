@@ -63,8 +63,7 @@ void
 InterfaceDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
   InterfaceDiffusiveFluxIntegralTempl<is_ad>::threadJoin(y);
-  const InterfaceDiffusiveFluxAverageTempl<is_ad> & pps =
-      static_cast<const InterfaceDiffusiveFluxAverageTempl<is_ad> &>(y);
+  const auto & pps = static_cast<const InterfaceDiffusiveFluxAverageTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 

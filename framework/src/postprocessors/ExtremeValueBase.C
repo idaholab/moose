@@ -112,7 +112,7 @@ template <class T>
 void
 ExtremeValueBase<T>::threadJoin(const UserObject & y)
 {
-  const ExtremeValueBase<T> & pps = static_cast<const ExtremeValueBase<T> &>(y);
+  const auto & pps = static_cast<const ExtremeValueBase<T> &>(y);
 
   switch (_type)
   {

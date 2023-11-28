@@ -29,10 +29,10 @@ public:
 
   BoundaryFluxBase(const InputParameters & parameters);
 
-  virtual void execute() override;
+  virtual void execute() override {}
   virtual void initialize() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject &) override;
+  virtual void finalize() override {}
+  virtual void threadJoin(const UserObject &) override {}
 
   /**
    * Get the boundary flux vector
