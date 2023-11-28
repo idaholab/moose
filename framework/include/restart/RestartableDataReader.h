@@ -38,28 +38,28 @@ public:
   };
 
   /**
-   * Sets the input stream for reading from the stringstreams \p header_stream
+   * Adds an input stream for reading from the stringstreams \p header_stream
    * and \p data_stream for the header and data, respectively.
    */
-  void setInput(std::unique_ptr<std::stringstream> header_stream,
+  void addInput(std::unique_ptr<std::stringstream> header_stream,
                 std::unique_ptr<std::stringstream> data_stream);
   /**
-   * Sets the input stream for reading to the file with the folder base \p folder_base
+   * Adds the input stream for reading to the file with the folder base \p folder_base
    */
-  void setInput(const std::filesystem::path & folder_base);
+  void addInput(const std::filesystem::path & folder_base);
 
   /**
    * @return Whether or not this reader is currently restoring
    */
-  bool isRestoring() const { return _streams.data != nullptr; }
+  bool isRestoring() const;
 
   /**
    * Clears the contents of the reader (header stream, data stream, header)
    *
-   * This returns ownership of the resulting input in the event that
+   * This returns ownership of the resulting inputs in the event that
    * it should be retained
    */
-  InputStreams clear();
+  std::vector<InputStreams> clear();
 
   /**
    * Restores the restartable data. The input must be set via setInput() first.
@@ -143,6 +143,8 @@ private:
    */
   struct HeaderEntry
   {
+    /// The input index for this data
+    std::size_t stream_index;
     /// The position in the stream at which this data is
     std::streampos position;
     /// The size of this data
@@ -156,17 +158,19 @@ private:
   };
 
   /**
+   * Internal method for adding the given input streams
+   */
+  void addInput(std::unique_ptr<InputStream> header, std::unique_ptr<InputStream> data);
+
+  /**
    * Internal method for reading the header (stored by RestartableDataWriter)
    */
-  std::vector<std::unordered_map<std::string, HeaderEntry>>
-  readHeader(InputStream & header_input) const;
+  void readHeader(const std::size_t index);
 
   /**
    * Internal method for deserializing (restoring from backup into a value)
    */
-  void deserializeValue(InputStream & data_input,
-                        RestartableDataValue & value,
-                        const HeaderEntry & header_entry) const;
+  void deserializeValue(RestartableDataValue & value, const HeaderEntry & header_entry);
 
   /**
    * Checks whether or not we're currently restoring and errors if not
@@ -195,7 +199,7 @@ private:
   bool isSameType(const HeaderEntry & header_entry, const std::type_info & type) const;
 
   /// The inputs for reading
-  InputStreams _streams;
+  std::vector<InputStreams> _streams;
 
   /// The loaded headers from the restart
   std::vector<std::unordered_map<std::string, HeaderEntry>> _header;

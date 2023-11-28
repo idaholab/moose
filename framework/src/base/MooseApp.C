@@ -1222,7 +1222,7 @@ MooseApp::restore(const std::filesystem::path & folder_base, const bool for_rest
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  _rd_reader.setInput(folder_base);
+  _rd_reader.addInput(folder_base);
   _rd_reader.restore(filter_names);
 
   postRestore(for_restart);
@@ -1244,7 +1244,7 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
   auto data = std::move(backup->data);
   mooseAssert(data, "Data not available");
 
-  _rd_reader.setInput(std::move(header), std::move(data));
+  _rd_reader.addInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
 
   postRestore(for_restart);
@@ -1264,7 +1264,10 @@ MooseApp::finalizeRestore()
     mooseError("MooseApp::finalizeRestore(): Not currently restoring");
 
   // This gives us access to the underlying streams so that we can return it if needed
-  auto input_streams = _rd_reader.clear();
+  auto streams = _rd_reader.clear();
+
+  mooseAssert(streams.size() == 1, "Should only have one set of streams");
+  auto & input_streams = streams[0];
 
   std::unique_ptr<Backup> backup;
 
@@ -1894,7 +1897,7 @@ MooseApp::loadRestartableMetaData(const RestartableDataMapName & name,
   mooseAssert(entry.reader, "Not available");
 
   entry.reader->setErrorOnLoadWithDifferentNumberOfProcessors(false);
-  entry.reader->setInput(folder);
+  entry.reader->addInput(folder);
   entry.reader->restore();
 
   if (!retain_reader)
