@@ -26,8 +26,10 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  /// reference to coupled variable, phi here
+  /// reference to coupled variable, pf here
   const ADVariableValue & _pf; 
+  /// Gradient of coupled variable
+  const ADVariableGradient & _grad_pf;
   /// Interface width
   const Real & _epsilon;
   /// Mixing energy density
