@@ -449,6 +449,11 @@ class ApptainerGenerator:
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
+
+            # We use the backend server on most build clients, so replace that
+            # URL with something more useful if we can
+            civet_server = civet_server.replace('https://civet-be.', 'https://civet.')
+
             contents += f'{name}.civet.job {civet_server}/job/{civet_job_id}\n'
         return definition + '\n\n' + self.add_def_whitespace(contents)
 
