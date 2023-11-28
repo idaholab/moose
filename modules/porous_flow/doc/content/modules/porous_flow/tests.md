@@ -28,7 +28,6 @@ Many of the PorousFlow tests were created before MOOSE's current documentation s
 - [actions](tests/actions/actions_tests.md)
 - [fluids](tests/fluids/fluids_tests.md)
 - [numerical_diffusion](tests/numerical_diffusion/numerical_diffusion_tests.md)
-- [adv_diff_bcs](tests/adv_diff_bcs/adv_diff_bcs_tests.md)
 - [aux_kernels](tests/aux_kernels/aux_kernels_tests.md)
 - [flux_limited_TVD_advection](tests/flux_limited_TVD_advection/flux_limited_TVD_advection_tests.md)
 - [basic_advection](tests/basic_advection/basic_advection_tests.md)
