@@ -101,7 +101,6 @@
     n_part_elems = 1
     materials = 'mat1'
     widths = 0.1
-    initial_T = Ts_init
   []
 
   [temp_outside]
