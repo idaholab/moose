@@ -15,15 +15,18 @@ InputParameters
 VectorOfVectorTestReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addRequiredParam<std::string>("name", "Reporter name to create");
+  params.addClassDescription(
+      "Test Reporter to create vector of vector for VectorOfVectorRowSum testing.");
+  params.addRequiredParam<std::string>("name", "Reporter name to create.");
   params.addRequiredParam<std::vector<std::vector<Real>>>(
-      "vector_of_vectors", "Data to put into vector of vector reporter");
+      "vector_of_vectors", "Data to put into vector of vector reporter.");
   return params;
 }
 
 VectorOfVectorTestReporter::VectorOfVectorTestReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _vectors(declareValueByName<std::vector<std::vector<Real>>>("name", REPORTER_MODE_REPLICATED))
+    _vectors(declareValueByName<std::vector<std::vector<Real>>>(getParam<std::string>("name"),
+                                                                REPORTER_MODE_REPLICATED))
 {
   _vectors = getParam<std::vector<std::vector<Real>>>("vector_of_vectors");
 }

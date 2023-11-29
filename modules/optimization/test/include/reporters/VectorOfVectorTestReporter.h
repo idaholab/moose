@@ -11,6 +11,10 @@
 
 #include "GeneralReporter.h"
 
+/**
+ * Test object to create vector of vector needed for testing VectorOfVectorRowSum
+ */
+
 class VectorOfVectorTestReporter : public GeneralReporter
 {
 public:
@@ -23,5 +27,6 @@ public:
   virtual void execute() override {}
 
 private:
+  /// Reporter vector of vector being created
   std::vector<std::vector<Real>> & _vectors;
 };

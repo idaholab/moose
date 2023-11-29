@@ -11,19 +11,25 @@
 
 #include "GeneralReporter.h"
 
-class ReporterVectorSum : public GeneralReporter
+/**
+ * Reporter containing row sum of a vector of vectors from another Reporter
+ */
+class VectorOfVectorRowSum : public GeneralReporter
 {
 public:
   static InputParameters validParams();
 
-  ReporterVectorSum(const InputParameters & parameters);
+  VectorOfVectorRowSum(const InputParameters & parameters);
 
   virtual void initialize() override {}
-  virtual void initialSetup() override;
-  virtual void execute() override;
-  virtual void finalize() override {}
+  virtual void execute() override {}
+  virtual void finalize() override;
 
 private:
-  std::vector<double> & _summed_data;
+  /// Reporter containing vector of vectors row sum
+  std::vector<double> & _row_sum;
+  /// Reporter name containing vector of vectors
+  const ReporterName & _rname;
+  /// Reporter data containing vector of vectors
   const std::vector<std::vector<Real>> * _reporter_data;
 };
