@@ -45,7 +45,7 @@ requirements:
     - {{ moose_clangxx }}       # [osx]
   host:
     # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a
+    - openssl <3.2.0a           # [osx]
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
@@ -80,7 +80,7 @@ requirements:
     - bison 3.4
     - mpi 1.0 mpich
     # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }}
+    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   run_constrained:
     - python <{{3.11}}
 

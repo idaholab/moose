@@ -18,7 +18,7 @@ build:
 requirements:
   host:
     # TODO: Try to remove when this version settles down among other conda-forge packages
-    - openssl <3.2.0a
+    - openssl <3.2.0a # [osx]
   run:
     - {{ moose_mpich }}
     - pyaml
@@ -28,7 +28,7 @@ requirements:
     - matplotlib
     - vtk
     # TODO: Try to remove when this version settles down among other conda-forge packages
-    - {{ pin_compatible('openssl', upper_bound='3.2') }}
+    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   # Python min/max constraints
   run_constrained:
     - python <{{3.11}}
