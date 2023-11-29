@@ -17,10 +17,10 @@
 /**
  * Applies a Dirichlet boundary condition with a value prescribed by a function
  */
-class INSFVTKEDWallFunction : public FVDirichletBCBase
+class INSFVTKEDWallFunctionBC : public FVDirichletBCBase
 {
 public:
-  INSFVTKEDWallFunction(const InputParameters & parameters);
+  INSFVTKEDWallFunctionBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 

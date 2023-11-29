@@ -276,7 +276,7 @@ pressure_tag = "pressure_grad"
     wall_treatment = ${wall_treatment}
   []
   [walls_TKED]
-    type = INSFVTKEDWallFunction
+    type = INSFVTKEDWallFunctionBC
     boundary = 'left right top bottom'
     variable = TKED
     u = vel_x

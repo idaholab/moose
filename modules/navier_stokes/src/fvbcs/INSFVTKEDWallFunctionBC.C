@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVTKEDWallFunction.h"
+#include "INSFVTKEDWallFunctionBC.h"
 #include "Function.h"
 #include "NavierStokesMethods.h"
 
-registerMooseObject("MooseApp", INSFVTKEDWallFunction);
+registerMooseObject("NavierStokesApp", INSFVTKEDWallFunctionBC);
 
 InputParameters
-INSFVTKEDWallFunction::validParams()
+INSFVTKEDWallFunctionBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
   params.addClassDescription("Adds Reichardt extrapolated wall values to set up directly the"
@@ -30,7 +30,7 @@ INSFVTKEDWallFunction::validParams()
   return params;
 }
 
-INSFVTKEDWallFunction::INSFVTKEDWallFunction(const InputParameters & params)
+INSFVTKEDWallFunctionBC::INSFVTKEDWallFunctionBC(const InputParameters & params)
   : FVDirichletBCBase(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(getFunctor<ADReal>("u")),
@@ -45,7 +45,7 @@ INSFVTKEDWallFunction::INSFVTKEDWallFunction(const InputParameters & params)
 }
 
 ADReal
-INSFVTKEDWallFunction::boundaryValue(const FaceInfo & fi) const
+INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
 {
   Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
