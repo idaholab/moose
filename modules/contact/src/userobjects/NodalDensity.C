@@ -88,15 +88,7 @@ NodalDensity::finalize()
   {
     const Node * const node = it->first;
     dof_id_type dof = node->dof_number(_system.number(), _variable->number(), 0);
-    _aux_solution.set(dof, 0);
-  }
-  _aux_solution.close();
-
-  for (std::map<const Node *, Real>::iterator it = _node_densities.begin(); it != it_end; ++it)
-  {
-    const Node * const node = it->first;
-    dof_id_type dof = node->dof_number(_system.number(), _variable->number(), 0);
-    _aux_solution.add(dof, it->second);
+    _aux_solution.set(dof, it->second);
   }
   _aux_solution.close();
 }

@@ -286,9 +286,15 @@ NodeFaceConstraint::overwriteSecondaryResidual()
 }
 
 const std::set<BoundaryID> &
-NodeFaceConstraint::getBoundaryIDs()
+NodeFaceConstraint::buildBoundaryIDs()
 {
   _boundary_ids.insert(_primary);
   _boundary_ids.insert(_secondary);
   return _boundary_ids;
+}
+
+const std::set<SubdomainID>
+NodeFaceConstraint::getSecondaryConnectecBlocks() const
+{
+  return _mesh.getBoundaryConnectedBlocks(_secondary);
 }

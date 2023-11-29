@@ -72,7 +72,7 @@ public:
 
   bool shouldApply() override;
   void computeContactForce(const Node & node, PenetrationInfo * pinfo, bool update_contact_set);
-
+  virtual bool isExplicitConstraint() const override { return true; }
   /**
    * Return false so that the nonlinear system does not try to add Jacobian entries
    * from the contact forces.
@@ -102,8 +102,6 @@ protected:
   const ExplicitDynamicsContactModel _model;
   const bool _normalize_penalty;
 
-  const Real _tension_release;
-  const Real _capture_tolerance;
   bool _update_stateful_data;
 
   const unsigned int _mesh_dimension;
@@ -123,13 +121,12 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
 
-  std::set<dof_id_type> _current_contact_state;
-  std::set<dof_id_type> _old_contact_state;
-
   const bool _print_contact_nodes;
   static Threads::spin_mutex _contact_set_mutex;
 
   const static unsigned int _no_iterations;
+
+  NumericVector<Number> & _residual_copy;
 
   /// Density material for neighbor projection
   const MaterialProperty<Real> & _neighbor_density;
@@ -137,12 +134,8 @@ protected:
   /// Wave speed material for neighbor projection
   const MaterialProperty<Real> & _neighbor_wave_speed;
 
-  /// X component of velocity at the contacting node
-  MooseWritableVariable * _vel_x;
-  /// Y component of velocity at the contacting node
-  MooseWritableVariable * _vel_y;
-  /// Z component of velocity at the contacting node
-  MooseWritableVariable * _vel_z;
+  /// Nodal gap rate (output for debugging or analyst perusal)
+  MooseWritableVariable * _gap_rate;
 
   /// X component of velocity at the closest point
   const VariableValue & _neighbor_vel_x;

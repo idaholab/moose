@@ -1,21 +1,22 @@
 # One element test to test the central difference time integrator in 3D.
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  volumetric_locking_correction = true
 []
 
 [Mesh]
   [block_one]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 2
+    nx = 3
+    ny = 3
+    nz = 3
     xmin = 4.5
     xmax = 5.5
     ymin = 4.5
     ymax = 5.5
-    zmin = 0.001
-    zmax = 1.001
+    zmin = 0.0001
+    zmax = 1.0001
     boundary_name_prefix = 'ball'
   []
   [block_two]
@@ -59,6 +60,8 @@
 []
 
 [AuxVariables]
+  [gap_rate]
+  []
   [vel_x]
   []
   [accel_x]
@@ -72,8 +75,12 @@
   [accel_z]
   []
   [stress_zz]
+    family = MONOMIAL
+    order = CONSTANT
   []
   [strain_zz]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
@@ -84,10 +91,11 @@
     index_i = 2
     index_j = 2
     variable = stress_zz
+    execute_on = 'TIMESTEP_END'
   []
   [strain_zz]
     type = RankTwoAux
-    rank_two_tensor = elastic_strain
+    rank_two_tensor = mechanical_strain
     index_i = 2
     index_j = 2
     variable = strain_zz
@@ -97,33 +105,39 @@
     variable = accel_x
     displacement = disp_x
     first = false
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
   [vel_x]
     type = TestNewmarkTI
     variable = vel_x
     displacement = disp_x
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
   [accel_y]
     type = TestNewmarkTI
     variable = accel_y
     displacement = disp_y
     first = false
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
   [vel_y]
     type = TestNewmarkTI
     variable = vel_y
     displacement = disp_x
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
   [accel_z]
     type = TestNewmarkTI
     variable = accel_z
     displacement = disp_z
     first = false
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
   [vel_z]
     type = TestNewmarkTI
     variable = vel_z
     displacement = disp_z
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
 []
 
@@ -131,8 +145,8 @@
   [DynamicTensorMechanics]
     displacements = 'disp_x disp_y disp_z'
     volumetric_locking_correction = true
-    stiffness_damping_coefficient = 0.04
-    #    generate_output = 'stress_zz strain_zz'
+    stiffness_damping_coefficient = 0.001
+    generate_output = 'stress_zz strain_zz'
   []
   [inertia_x]
     type = InertialForce
@@ -148,25 +162,22 @@
   []
 []
 
-[Functions]
-  [dispz]
-    type = ParsedFunction
-    expression = if(t<1.0e3,-0.01*t,0)
-  []
-  [push]
-    type = ParsedFunction
-    expression = if(t<10.0,0.01*t,0.1)
+[Kernels]
+  [gravity]
+    type = Gravity
+    variable = disp_z
+    value = -981.0
   []
 []
 
 [BCs]
-  [z_front]
-    type = FunctionDirichletBC
-    variable = disp_z
-    boundary = 'ball_front'
-    function = dispz
-    preset = false
-  []
+  # [z_front]
+  #   type = FunctionDirichletBC
+  #   variable = disp_z
+  #   boundary = 'ball_front'
+  #   function = dispz
+  #   preset = false
+  # []
   [x_front]
     type = DirichletBC
     variable = disp_x
@@ -202,70 +213,91 @@
     preset = false
     value = 0.0
   []
+  [z_fixed_front]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 'base_front'
+    preset = false
+    value = 0.0
+  []
 []
 
 [ExplicitDynamicsContact]
   [my_contact]
-    model = frictionless
-    # formulation = penalty
+    model = frictionless_balance
     primary = base_front
     secondary = ball_back
-    # penalty = 1e+05
-    # normalize_penalty = true
+    vel_x = 'vel_x'
+    vel_y = 'vel_y'
+    vel_z = 'vel_z'
   []
 []
-
-# [Controls]
-#   [mycontrol]
-#     type = TimePeriod
-#     disable_objects = 'BCs/z_bot'
-#     start_time = 1.0e-3
-#     end_time = 1.0e9
-#     execute_on = 'INITIAL TIMESTEP_END'
-#   []
-# []
 
 [Materials]
   [elasticity_tensor_block_one]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e3
+    youngs_modulus = 1e6
     poissons_ratio = 0.0
     block = 1
+    outputs = 'exodus'
+    output_properties = __all__
   []
   [elasticity_tensor_block_two]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e6
+    youngs_modulus = 1e10
     poissons_ratio = 0.0
     block = 2
+    outputs = 'exodus'
+    output_properties = __all__
   []
   [strain_block]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeFiniteStrain # ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []
   [stress_block]
     type = ComputeFiniteStrainElasticStress
   []
-  [density]
+  [density_one]
     type = GenericConstantMaterial
     prop_names = density
-    prop_values = 1e4
+    prop_values = 1e1
+    outputs = 'exodus'
+    output_properties = 'density'
+    block = '1'
+  []
+  [density_two]
+    type = GenericConstantMaterial
+    prop_names = density
+    prop_values = 1e6
+    outputs = 'exodus'
+    output_properties = 'density'
+    block = '2'
   []
   [wave_speed]
     type = WaveSpeed
+    outputs = 'exodus'
+    output_properties = 'wave_speed'
   []
 []
 
 [Executioner]
   type = Transient
   start_time = -0.01
-  end_time = 24.0
-  dt = 0.005
+  end_time = -0.0075 # 10
+  dt = 0.00001
   timestep_tolerance = 1e-6
 
   [TimeIntegrator]
     type = CentralDifference
+    solve_type = lumped
   []
+[]
+
+[Outputs]
+  interval = 50
+  exodus = true
+  csv = true
 []
 
 [Postprocessors]
@@ -293,10 +325,4 @@
     block = '1 2'
     value_type = max
   []
-[]
-
-[Outputs]
-  # interval = 50
-  exodus = true
-  csv = true
 []

@@ -170,6 +170,13 @@ ExplicitDynamicsContactAction::act()
 
       _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
     }
+    // Add gap rate for output
+    {
+      auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+      var_params.set<MooseEnum>("family") = "LAGRANGE";
+      _problem->addAuxVariable("MooseVariable", "gap_rate", var_params);
+    }
     // Add nodal area contact variable
     {
       auto var_params = _factory.getValidParams("MooseVariable");
@@ -367,6 +374,8 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
     if (isParamValid("vel_z"))
       params.set<std::vector<VariableName>>("vel_z") = getParam<std::vector<VariableName>>("vel_z");
 
+    params.set<std::vector<VariableName>>("gap_rate") = {"gap_rate"};
+
     params.set<BoundaryName>("boundary") = contact_pair.first;
     if (isParamValid("secondary_gap_offset"))
       params.set<std::vector<VariableName>>("secondary_gap_offset") = {
@@ -408,9 +417,11 @@ ExplicitDynamicsContactAction::commonParameters()
       "model", ExplicitDynamicsContactAction::getModelEnum(), "The contact model to use");
 
   // Gap rate input
-  params.addCoupledVar("vel_x", "x-component of velocity");
-  params.addCoupledVar("vel_y", "y-component of velocity");
-  params.addCoupledVar("vel_z", "z-component of velocity");
+  params.addCoupledVar("vel_x", "x-component of velocity.");
+  params.addCoupledVar("vel_y", "y-component of velocity.");
+  params.addCoupledVar("vel_z", "z-component of velocity.");
+  // Gap rate output
+  params.addCoupledVar("gap_rate", "Gap rate for output.");
 
   return params;
 }

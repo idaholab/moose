@@ -931,44 +931,51 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
 void
 Coupleable::checkWritableVar(MooseWritableVariable * var)
 {
-  // check block restrictions for compatibility
+  // check domain restrictions for compatibility
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);
+  const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
 
-  if (!br)
-    mooseWarning("This object '", _obj->name(), "'is not of the block restrictable type.");
-  else
-  {
-    if (!var->hasBlocks(br->blockIDs()))
-      mooseError("The variable '",
+  //   mooseWarning("This object '", _obj->name(), "'is not of the block restrictable type.");
+
+  if (br && !var->hasBlocks(br->blockIDs()))
+    mooseError("The variable '",
+               var->name(),
+               "' must be defined on all blocks '",
+               _obj->name(),
+               "' is defined on.");
+
+  if (nfc && !var->hasBlocks(nfc->getSecondaryConnectecBlocks()))
+    mooseError("The variable '",
+               var->name(),
+               " must be defined on all blocks '",
+               _obj->name(),
+               "'s secondary surface is defined on.");
+
+  // make sure only one object can access a variable
+  for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
+    if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))
+    {
+      // if both this and ci are block restrictable then we check if the block restrictions
+      // are not overlapping. If they don't we permit the call.
+      const auto * br_other = dynamic_cast<const BlockRestrictable *>(ci);
+      if (br && br_other && br->blockRestricted() && br_other->blockRestricted() &&
+          !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
+        continue;
+      else if (nfc)
+        continue;
+
+      mooseError("'",
+                 ci->_obj->name(),
+                 "' already obtained a writable reference to '",
                  var->name(),
-                 "' must be defined on all blocks '",
-                 _obj->name(),
-                 "' is defined on");
+                 "'. Only one object can obtain such a reference per variable and subdomain in a "
+                 "simulation.");
+    }
 
-    // make sure only one object can access a variable
-    for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
-      if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))
-      {
-        // if both this and ci are block restrictable then we check if the block restrictions
-        // are not overlapping. If they don't we permit the call.
-        const auto * br_other = dynamic_cast<const BlockRestrictable *>(ci);
-        if (br && br_other && br->blockRestricted() && br_other->blockRestricted() &&
-            !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
-          continue;
-
-        mooseError("'",
-                   ci->_obj->name(),
-                   "' already obtained a writable reference to '",
-                   var->name(),
-                   "'. Only one object can obtain such a reference per variable and subdomain in a "
-                   "simulation.");
-      }
-  }
   // var is unique across threads, so we could forego having a separate set per thread, but we
   // need quick access to the list of all variables that need to be inserted into the solution
   // vector by a given thread.
 
-  Moose::out << "Inserting variable... " << var->name() << " in checkWritableVar. \n";
   _writable_coupled_variables[_c_tid].insert(var);
 }
 

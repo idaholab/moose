@@ -47,6 +47,7 @@
     type = MeshCollectionGenerator
     inputs = ' block_one_id block_two_id'
   []
+  allow_renumbering = false
 []
 
 [Variables]
@@ -71,27 +72,9 @@
   []
   [accel_z]
   []
-  [stress_zz]
-  []
-  [strain_zz]
-  []
 []
 
 [AuxKernels]
-  # [stress_zz]
-  #   type = RankTwoAux
-  #   rank_two_tensor = stress
-  #   index_i = 2
-  #   index_j = 2
-  #   variable = stress_zz
-  # []
-  # [strain_zz]
-  #   type = RankTwoAux
-  #   rank_two_tensor = elastic_strain
-  #   index_i = 2
-  #   index_j = 2
-  #   variable = strain_zz
-  # []
   [accel_x]
     type = TestNewmarkTI
     variable = accel_x
@@ -207,23 +190,10 @@
 [ExplicitDynamicsContact]
   [my_contact]
     model = frictionless
-    # formulation = penalty
     primary = base_front
     secondary = ball_back
-    # penalty = 1e+05
-    # normalize_penalty = true
   []
 []
-
-# [Controls]
-#   [mycontrol]
-#     type = TimePeriod
-#     disable_objects = 'BCs/z_bot'
-#     start_time = 1.0e-3
-#     end_time = 1.0e9
-#     execute_on = 'INITIAL TIMESTEP_END'
-#   []
-# []
 
 [Materials]
   [elasticity_tensor_block_one]
@@ -269,16 +239,6 @@
 []
 
 [Postprocessors]
-  [accel_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = accel_z
-  []
-  [vel_58z]
-    type = NodalVariableValue
-    nodeid = 1
-    variable = vel_z
-  []
   [disp_58z]
     type = NodalVariableValue
     nodeid = 1
@@ -296,7 +256,6 @@
 []
 
 [Outputs]
-  # interval = 50
   exodus = true
   csv = true
 []

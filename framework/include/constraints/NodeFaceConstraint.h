@@ -117,6 +117,11 @@ public:
 
   virtual const std::set<unsigned int> & getMatPropDependencies() const;
 
+  /**
+   * Virtual method to avoid initial setups.
+   */
+  virtual bool isExplicitConstraint() const { return false; }
+
 protected:
   /**
    * Compute the value the secondary node should have at the beginning of a timestep.
@@ -221,7 +226,7 @@ protected:
     return coupledNeighborSecond(var_name, comp);
   }
 
-  const std::set<BoundaryID> & getBoundaryIDs();
+  const std::set<BoundaryID> & buildBoundaryIDs();
 
   /// Boundary ID for the secondary surface
   unsigned int _secondary;
@@ -237,6 +242,8 @@ protected:
   std::set<BoundaryID> _boundary_ids;
 
 public:
+  const std::set<SubdomainID> getSecondaryConnectecBlocks() const;
+
   PenetrationLocator & _penetration_locator;
 
 protected:
