@@ -9,7 +9,7 @@ sections.
 Creating a custom AuxKernel object is done by creating a new C++ object that inherits from
 `AuxKernel`, `VectorAuxKernel` or `ArrayAuxKernel` and overriding the `computeValue` method,
 which returns a scalar (`Real`), vector (`RealVectorValue`) or a Eigen vector (`RealEigenVector`)
-for the two types respectively. A forth type (`AuxScalarKernel`) also exists, but the syntax for
+for the three types respectively. A forth type (`AuxScalarKernel`) also exists, but the syntax for
 these objects is different and detailed in the [syntax/AuxScalarKernels/index.md].
 
 AuxKernel objects, like Kernel objects, must operate on a variable. Thus, there is a required
