@@ -49,13 +49,6 @@ From: {{ APPTAINER_FROM }}
     VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     VTKLIB_DIR={{ VTK_DIR }}/lib
 
-    # Clone libmesh
-    LIBMESH_SRC_DIR=${ROOT_BUILD_DIR}/libmesh
-    git clone ${LIBMESH_GIT_REMOTE} ${LIBMESH_SRC_DIR}
-    cd ${LIBMESH_SRC_DIR}
-    git checkout ${LIBMESH_GIT_SHA}
-    git submodule update --init --recursive
-
     # Don't build VTK for clang 16; 9.2.6 currently doesn't build for clang 16.
     # VTK 9.3 does build for clang 16, but it diffs horribly due to a few bugs
     if ! $CC --version | grep --quiet "clang version 16"; then
@@ -88,6 +81,13 @@ From: {{ APPTAINER_FROM }}
         export VTKINCLUDE_DIR
         export VTKLIB_DIR
     fi
+
+    # Clone libmesh
+    LIBMESH_SRC_DIR=${ROOT_BUILD_DIR}/libmesh
+    git clone ${LIBMESH_GIT_REMOTE} ${LIBMESH_SRC_DIR}
+    cd ${LIBMESH_SRC_DIR}
+    git checkout ${LIBMESH_GIT_SHA}
+    git submodule update --init --recursive
 
     # Build libMesh
     umask 022
