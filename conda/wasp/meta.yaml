@@ -21,6 +21,8 @@ build:
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
   run_exports:
     - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
 

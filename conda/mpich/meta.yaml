@@ -26,6 +26,9 @@ build:
   pin_depends: strict
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:
@@ -40,6 +43,9 @@ requirements:
     - {{ moose_libclang13 }}
     - {{ moose_clangcc }}       # [osx]
     - {{ moose_clangxx }}       # [osx]
+  host:
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - openssl <3.2.0a
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
@@ -73,7 +79,8 @@ requirements:
     - zfp 0.5.5
     - bison 3.4
     - mpi 1.0 mpich
-  # Python min/max constraints
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - {{ pin_compatible('openssl', upper_bound='3.2') }}
   run_constrained:
     - python <{{3.11}}
 

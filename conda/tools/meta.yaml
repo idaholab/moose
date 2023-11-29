@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2023.10.27" %}
+{% set version = "2023.11.28" %}
 
 package:
   name: moose-tools
@@ -14,11 +14,17 @@ source:
 
 build:
   number: 0
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:
     - {{ moose_python }}
     - setuptools
+  host:
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - openssl <3.2.0a
   run:
     - beautifulsoup4
     - {{ clang_format }}
@@ -50,7 +56,8 @@ requirements:
     - tabulate
     - xmltodict
     - yaml
-
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - {{ pin_compatible('openssl', upper_bound='3.2') }}
 test:
   commands:
     - clang-format --version

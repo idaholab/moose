@@ -15,6 +15,10 @@ build:
   string: build_0
   pin_depends: strict
   skip: true # [win]
+  script_env:
+    - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:

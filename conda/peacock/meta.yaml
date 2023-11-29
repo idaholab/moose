@@ -16,15 +16,19 @@ build:
   number: 0
 
 requirements:
+  host:
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - openssl <3.2.0a
   run:
     - {{ moose_mpich }}
-    - python
-    - trame <=2.5.0
     - pyaml
     - numpy
-    - paraview
     - pandas
     - pyqt
+    - matplotlib
+    - vtk
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - {{ pin_compatible('openssl', upper_bound='3.2') }}
   # Python min/max constraints
   run_constrained:
     - python <{{3.11}}
@@ -34,6 +38,7 @@ test:
     - PyQt5
     - pandas
     - matplotlib
+    - vtk
 
 about:
   home: https://mooseframework.org/
