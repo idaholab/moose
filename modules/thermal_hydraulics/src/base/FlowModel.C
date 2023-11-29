@@ -77,7 +77,7 @@ FlowModel::addCommonVariables()
 void
 FlowModel::addCommonInitialConditions()
 {
-  if (_flow_channel.isParamValid("A"))
+  if (_flow_channel.isParamValid("A") && !_app.isRestarting())
   {
     const std::vector<SubdomainName> & block = _flow_channel.getSubdomainNames();
     const FunctionName & area_function = _flow_channel.getAreaFunctionName();

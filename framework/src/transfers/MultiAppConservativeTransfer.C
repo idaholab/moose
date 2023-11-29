@@ -48,7 +48,9 @@ MultiAppConservativeTransfer::validParams()
 
 MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters & parameters)
   : MultiAppFieldTransfer(parameters),
-    _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
+    _from_var_names(isParamValid("source_variable")
+                        ? getParam<std::vector<VariableName>>("source_variable")
+                        : std::vector<VariableName>()),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
     _preserve_transfer(isParamValid("from_postprocessors_to_be_preserved")),
     _from_postprocessors_to_be_preserved(

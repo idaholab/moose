@@ -228,7 +228,7 @@ FlowChannelBase::addVariables()
   _flow_model->addVariables();
 
   // total heat flux perimeter
-  if (_n_heat_transfer_connections > 1)
+  if (_n_heat_transfer_connections > 1 && !_app.isRestarting())
   {
     const std::string class_name = "SumIC";
     InputParameters params = _factory.getValidParams(class_name);
