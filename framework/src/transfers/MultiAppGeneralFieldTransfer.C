@@ -234,6 +234,31 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & mesh_div_name = getParam<MeshDivisionName>("from_mesh_division");
       _from_mesh_divisions.push_back(&_from_problems[i_from]->getMeshDivision(mesh_div_name));
+      // Check that the behavior set makes sense
+      if (_from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+          _from_mesh_divisions[i_from]->coversEntireMesh())
+        mooseInfo("'from_mesh_division_usage' is set to use a spatial restriction but the "
+                  "'from_mesh_division' for source app of global index " +
+                  std::to_string(getGlobalSourceAppIndex(i_from)) +
+                  " covers the entire mesh. Do not expect any restriction from a mesh "
+                  "division that covers the entire mesh");
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+               !isParamValid("to_mesh_division"))
+        paramError("to_mesh_division_usage",
+                   "Source mesh division cannot match target mesh division if no target mesh "
+                   "division is specified");
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+        if (!hasFromMultiApp())
+          paramError("from_mesh_division_usage",
+                     "Cannot match source mesh division index to source subapp index if there is "
+                     "only one source: the parent app");
+        else if (getFromMultiApp()->numGlobalApps() !=
+                 _from_mesh_divisions[i_from]->getNumDivisions())
+          paramError("from_mesh_division_usage",
+                     "Cannot match source subapp index as the number of source mesh divisions is " +
+                         std::to_string(_from_mesh_divisions[i_from]->getNumDivisions()) +
+                         " while there are " + std::to_string(getFromMultiApp()->numGlobalApps()) +
+                         " subapps");
     }
   }
 
@@ -263,6 +288,37 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & mesh_div_name = getParam<MeshDivisionName>("to_mesh_division");
       _to_mesh_divisions.push_back(&_from_problems[i_to]->getMeshDivision(mesh_div_name));
+      // Check that the behavior set makes sense
+      if (_to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+          _to_mesh_divisions[i_to]->coversEntireMesh())
+        mooseInfo("'to_mesh_division_usage' is set to use a spatial restriction but the "
+                  "'to_mesh_division' for target application of global index " +
+                  std::to_string(getGlobalSourceAppIndex(i_to)) +
+                  " covers the entire mesh. Do not expect any restriction from a mesh "
+                  "division that covers the entire mesh");
+      else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
+      {
+        if (!isParamValid("from_mesh_division"))
+          paramError("to_mesh_division_usage",
+                     "Target mesh division cannot match source mesh division if no source mesh "
+                     "division is specified");
+        else if ((*_from_mesh_divisions.begin())->getNumDivisions() !=
+                 _to_mesh_divisions[i_to]->getNumDivisions())
+          mooseWarning("Source and target mesh divisions do not have the same number of bins. If "
+                       "this is what you expect, please reach out to a MOOSE or app developer to "
+                       "ensure appropriate use");
+      }
+      else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+        if (!hasToMultiApp())
+          paramError("to_mesh_division_usage",
+                     "Cannot match target division to target subapp index if there is only one "
+                     "target: the parent app");
+        else if (getToMultiApp()->numGlobalApps() != _to_mesh_divisions[i_to]->getNumDivisions())
+          paramError("to_mesh_division_usage",
+                     "Cannot match source subapp index as the number of source mesh divisions is " +
+                         std::to_string(_to_mesh_divisions[i_to]->getNumDivisions()) +
+                         " while there are " + std::to_string(getToMultiApp()->numGlobalApps()) +
+                         " subapps");
     }
   }
 
