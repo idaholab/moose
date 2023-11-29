@@ -230,16 +230,18 @@ class ApptainerGenerator:
         remote = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
 
         # Need to replace remotes that are relative paths
+        # Here, we'll replace even SSH relative paths with HTTPS relative paths
+        # because we shouldn't have private dependencies and SSH keys probably
+        # aren't available in the build
         if remote.startswith('../..'):
             base_command = ['git', 'remote', 'get-url', 'origin']
             base_remote = subprocess.check_output(base_command, cwd=dir, encoding='utf-8').strip()
-            ssh_re = re.search(r'^(git@[a-zA-Z0-9_.-]+\.[a-zA-Z]+:)', base_remote)
-            if ssh_re:
-                return remote.replace('../../', ssh_re.group(1))
-            https_re = re.search(r'^(https:\/\/[a-zA-Z0-9_.-]+\.[a-zA-Z]+\/)', base_remote)
-            if https_re:
-                return remote.replace('../../', https_re.group(1))
-            raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
+            host_re = re.search(r'^git@([a-zA-Z0-9_.-]+\.[a-zA-Z]+):', base_remote)
+            if not host_re:
+                https_re = re.search(r'^https:\/\/([a-zA-Z0-9_.-]+\.[a-zA-Z]+)\/', base_remote)
+            if not host_re:
+                raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
+            return remote.replace('../../', f'https://{host_re.group(1)}/')
 
         return remote
 
