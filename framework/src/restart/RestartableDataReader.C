@@ -90,7 +90,7 @@ RestartableDataReader::addInput(std::unique_ptr<InputStream> header,
 void
 RestartableDataReader::readHeader(const std::size_t index)
 {
-  mooseAssert(index < _header.size(), "Invalid index");
+  mooseAssert(index < _streams.size(), "Invalid index");
 
   InputStream & input_stream = *_streams[index].header;
   std::shared_ptr<std::istream> stream_ptr = input_stream.get();

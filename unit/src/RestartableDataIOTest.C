@@ -107,7 +107,7 @@ TEST_F(RestartableDataIOTest, readWrite)
   // Do the initial load
   RestartableDataReader reader(*_app, rdm);
   EXPECT_FALSE(reader.hasRestored());
-  reader.setInput(std::move(header_stream), std::move(data_stream));
+  reader.addInput(std::move(header_stream), std::move(data_stream));
   reader.restore();
   EXPECT_TRUE(reader.hasRestored());
   auto & late_restorer = reader.getLateRestorer();
