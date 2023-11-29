@@ -55,7 +55,7 @@
 /modules/fsi @lindsayad
 /modules/functional_expansion_tools @lindsayad
 /modules/heat_conduction @lindsayad
-/modules/navier_stokes @lindsayad @GiudGiud
+/modules/navier_stokes @lindsayad @GiudGiud @grmnptr
 /modules/optimization @zachmprince @dschwen
 /modules/phase_field @dschwen
 /modules/porous_flow @cpgr
@@ -64,7 +64,7 @@
 /modules/reactor @GiudGiud @loganharbour @roystgnr
 /modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
-/modules/stochastic_tools @zachmprince
+/modules/stochastic_tools @zachmprince @grmnptr
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
 /modules/tensor_mechanics/*/lagrangian @bwspenc @dschwen @jiangwen84 @hugary1995
 /modules/tensor_mechanics/*/materials/cohesive_zone_model @bwspenc @dschwen @jiangwen84 @hugary1995
