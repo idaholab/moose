@@ -253,8 +253,7 @@ CommandLine::getExecutableName() const
 {
   // Grab the first item out of argv
   std::string command(_args[0]);
-  command.substr(command.find_last_of("/\\") + 1);
-  return command;
+  return command.substr(command.find_last_of("/\\") + 1);;
 }
 
 void
