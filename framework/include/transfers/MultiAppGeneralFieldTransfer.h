@@ -213,6 +213,20 @@ protected:
   /// Division of the target mesh
   std::vector<const MeshDivision *> _to_mesh_divisions;
 
+  /// How to use the origin mesh divisions to restrict the transfer
+  const MooseEnum & _from_mesh_division_behavior;
+
+  /// How to use the target mesh divisions to restrict the transfer
+  const MooseEnum & _to_mesh_division_behavior;
+
+  /// Matching enum for the mesh division behaviors.
+  enum MeshDivisionTransferUse
+  {
+    RESTRICTION,
+    MATCH_DIVISION_INDEX,
+    MATCH_SUBAPP_INDEX
+  };
+
   /// Whether elemental variable boundary restriction is considered by element side or element nodes
   const bool _elemental_boundary_restriction_on_sides;
 

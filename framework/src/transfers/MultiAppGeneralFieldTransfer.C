@@ -79,6 +79,16 @@ MultiAppGeneralFieldTransfer::validParams()
                                     "Mesh division object on the origin application");
   params.addParam<MeshDivisionName>("to_mesh_division",
                                     "Mesh division object on the target application");
+  MooseEnum mesh_division_uses("spatial_restriction matching_divisions matching_subapp_index",
+                               "matching_subapp_index");
+  params.addParam<MooseEnum>("from_mesh_division_usage",
+                             mesh_division_uses,
+                             "How to use the source mesh division in the transfer. See object "
+                             "documentation for description of each option");
+  params.addParam<MooseEnum>("to_mesh_division_usage",
+                             mesh_division_uses,
+                             "How to use the source mesh division in the transfer. See object "
+                             "documentation for description of each option");
 
   // Array and vector variables
   params.addParam<std::vector<unsigned int>>("source_variable_components",
@@ -142,6 +152,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
             ? &_fe_problem.getPositionsObject(getParam<PositionsName>("use_nearest_position"))
             : nullptr),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
+    _from_mesh_division_behavior(getParam<MooseEnum>("from_mesh_division_usage")),
+    _to_mesh_division_behavior(getParam<MooseEnum>("from_mesh_division_usage")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
@@ -186,8 +198,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
       (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
     if (!isParamSetByUser("bbox_factor") && !isParamSetByUser("fixed_bounding_box_size"))
       mooseWarning(
-          "Extrapolation (nearest-source options, outside-app source) parameters have been passed, "
-          "but no subapp bounding box expansion parameters have been passed.");
+          "Extrapolation (nearest-source options, outside-app source) parameters have "
+          "been passed, but no subapp bounding box expansion parameters have been passed.");
 }
 
 void
@@ -1247,23 +1259,38 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
     const auto from_global_num = getGlobalSourceAppIndex(i_from);
     const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
 
-    // Check block restriction
+    // Check point against source block restriction
     if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, transformed_pt))
       return false;
 
-    // Check boundary restriction. Passing the block restriction will speed up the search
+    // Check point against source boundary restriction. Block restriction will speed up the search
     if (!_from_boundaries.empty() &&
         !onBoundaries(_from_boundaries, _from_blocks, *_from_meshes[i_from], pl, transformed_pt))
       return false;
 
-    // Check the mesh division index. If the point is not the at the same index in the target
-    // and the origin meshes, reject
-    if (!_from_mesh_divisions.empty() &&
-        mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
-      return false;
+    // Check point against the source mesh division
+    if (!_from_mesh_divisions.empty())
+    {
+      const auto source_division_index =
+          _from_mesh_divisions[i_from]->divisionIndex(transformed_pt);
+      // If the point is not indexed in the division and the division is used as a restriction
+      if (_from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+          source_division_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
+        return false;
+      // If the point is not the at the same index in the target and the origin meshes, reject
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+               mesh_div != source_division_index)
+        return false;
+      // If the point is at a certain division index that is not the same as the index of the subapp
+      // we are currently considering to obtain data for that point, reject
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+               source_division_index != from_global_num)
+        return false;
+    }
 
     // Get nearest position (often a subapp position) for the target point
     // We want values from the child app that is closest to the same position as the target
+    // TODO: use transformed point
     Point nearest_position_source;
     if (_nearest_positions_obj)
     {
