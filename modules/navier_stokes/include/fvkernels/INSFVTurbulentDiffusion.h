@@ -30,7 +30,9 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override final;
+  using FVDiffusion::computeResidual;
   void computeResidual(const FaceInfo & fi) override;
+  using FVDiffusion::computeJacobian;
   void computeJacobian(const FaceInfo & fi) override;
 
   const Moose::Functor<ADReal> & _scaling_coef;

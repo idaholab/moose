@@ -26,7 +26,9 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+  using INSFVAdvectionKernel::computeResidual;
   void computeResidual(const FaceInfo & fi) override;
+  using INSFVAdvectionKernel::computeJacobian;
   void computeJacobian(const FaceInfo & fi) override;
 
   // Density
