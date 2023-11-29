@@ -177,7 +177,7 @@
       type = 'RunException'
       input = 'checkpoint_block.i'
       cli_args = 'Outputs/out/execute_on=TIMESTEP_BEGIN'
-      expect_err = 'The checkpoint system may only be used with execute_on values INITIAL and/or TIMESTEP_END'
+      expect_err = 'The checkpoint system may only be used with execute_on values INITIAL, TIMESTEP_END, and FINAL'
       detail = 'invalid value of execute_on'
       mesh_mode = 'REPLICATED'
     []

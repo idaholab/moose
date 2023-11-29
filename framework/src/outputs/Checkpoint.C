@@ -61,12 +61,12 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
-  // Prevent the checkpoint from executing at any time other than INITIAL and/or
-  // TIMESTEP_END
+  // Prevent the checkpoint from executing at any time other than INITIAL,
+  // TIMESTEP_END, and FINAL
   const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
 
   // Create a vector containing all valid values of execute_on
-  std::vector<ExecFlagEnum> valid_execute_on_values(3);
+  std::vector<ExecFlagEnum> valid_execute_on_values(7);
   {
     ExecFlagEnum valid_execute_on_value = execute_on;
     valid_execute_on_value.clear();
@@ -74,9 +74,18 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     valid_execute_on_values[0] = valid_execute_on_value;
     valid_execute_on_value += EXEC_TIMESTEP_END;
     valid_execute_on_values[1] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[2] = valid_execute_on_value;
     valid_execute_on_value.clear();
     valid_execute_on_value += EXEC_TIMESTEP_END;
-    valid_execute_on_values[2] = valid_execute_on_value;
+    valid_execute_on_values[3] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[4] = valid_execute_on_value;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[5] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_values[6] = valid_execute_on_value;
   }
 
   // Check if the value of execute_on is valid
@@ -85,7 +94,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   if (!is_valid_value)
     paramError("execute_on",
                "The checkpoint system may only be used with execute_on values ",
-               "INITIAL and/or TIMESTEP_END, not '",
+               "INITIAL, TIMESTEP_END, and FINAL, not '",
                execute_on,
                "'.");
 }
