@@ -18,7 +18,7 @@
 #include "AppFactory.h"
 #include "GeneratedMesh.h"
 #include "MooseParsedFunctionWrapper.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 class ParsedFunctionTest : public ::testing::Test
 {
@@ -27,8 +27,7 @@ protected:
   {
     const char * argv[2] = {"foo", "\0"};
 
-    MooseCreate create("MooseUnitApp", 1, (char **)argv);
-    _app = create.getApp();
+    _app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
 
     _factory = &_app->getFactory();
 

@@ -113,7 +113,7 @@ findSimilar(std::string param, std::vector<std::string> options)
   return candidates;
 }
 
-ParserOther::ParserOther(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
+Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
   : ConsoleStreamInterface(app),
     _root(parser.getRootNode()),
     _app(app),
@@ -131,10 +131,10 @@ ParserOther::ParserOther(MooseApp & app, ActionWarehouse & action_wh, Parser & p
   _input_filenames = _parser.getInputFileNames();
 }
 
-ParserOther::~ParserOther() { delete _root; }
+Builder::~Builder() { delete _root; }
 
 InputParameters
-ParserOther::validParams()
+Builder::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -155,7 +155,7 @@ ParserOther::validParams()
 }
 
 std::vector<std::string>
-ParserOther::listValidParams(std::string & section_name)
+Builder::listValidParams(std::string & section_name)
 {
   bool dummy;
   std::string registered_identifier = _syntax.isAssociated(section_name, &dummy);
@@ -181,7 +181,7 @@ UnusedWalker ::walk(const std::string & fullpath, const std::string & nodename, 
       isSectionActive(fullpath, n->root()) && n->line() > 0)
   {
     auto section_name = fullpath.substr(0, fullpath.rfind("/"));
-    auto paramlist = _parserOther.listValidParams(section_name);
+    auto paramlist = _builder.listValidParams(section_name);
     auto candidates = findSimilar(nodename, paramlist);
     if (candidates.size() > 0)
       errors.push_back(hit::errormsg(
@@ -192,7 +192,7 @@ UnusedWalker ::walk(const std::string & fullpath, const std::string & nodename, 
 }
 
 std::string
-ParserOther::getPrimaryFileName(bool stripLeadingPath) const
+Builder::getPrimaryFileName(bool stripLeadingPath) const
 {
   if (!stripLeadingPath)
     return _input_filenames.back();
@@ -208,7 +208,7 @@ ParserOther::getPrimaryFileName(bool stripLeadingPath) const
 }
 
 void
-ParserOther::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * n)
+Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * n)
 {
   InputParameters active_list_params = Action::validParams();
   InputParameters params = EmptyAction::validParams();
@@ -305,7 +305,7 @@ ParserOther::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::No
 }
 
 void
-ParserOther::walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n)
+Builder::walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n)
 {
   // skip sections that were manually processed first.
   for (auto & sec : _secs_need_first)
@@ -315,7 +315,7 @@ ParserOther::walk(const std::string & fullpath, const std::string & nodepath, hi
 }
 
 std::string
-ParserOther::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
+Builder::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 {
   std::string hit_text;
   bool afterDoubleDash = false;
@@ -406,7 +406,7 @@ ParserOther::hitCLIFilter(std::string appname, const std::vector<std::string> & 
 }
 
 void
-ParserOther::parseother()
+Builder::builder()
 {
   // add in command line arguments
   try
@@ -497,7 +497,7 @@ ParserOther::parseother()
 // *after* all the other member functions on Parser have been run.  So this is here to be
 // externally called at the right time.
 void
-ParserOther::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused)
+Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused)
 {
   // this if guard is important in case the simulation was not configured via parsed input text -
   // e.g.  configured programatically.
@@ -547,7 +547,7 @@ ParserOther::errorCheck(const Parallel::Communicator & comm, bool warn_unused, b
 }
 
 void
-ParserOther::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
+Builder::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
 {
   switch (type)
   {
@@ -564,7 +564,7 @@ ParserOther::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
 }
 
 void
-ParserOther::buildJsonSyntaxTree(JsonSyntaxTree & root) const
+Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 {
   std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
 
@@ -678,7 +678,7 @@ ParserOther::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 }
 
 void
-ParserOther::buildFullTree(const std::string & search_string)
+Builder::buildFullTree(const std::string & search_string)
 {
   std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
 
@@ -773,7 +773,7 @@ using std::string;
 
 // Template Specializations for retrieving special types from the input file
 template <>
-void ParserOther::setScalarParameter<RealVectorValue, RealVectorValue>(
+void Builder::setScalarParameter<RealVectorValue, RealVectorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealVectorValue> * param,
@@ -781,14 +781,14 @@ void ParserOther::setScalarParameter<RealVectorValue, RealVectorValue>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<Point, Point>(const std::string & full_name,
-                                                   const std::string & short_name,
-                                                   InputParameters::Parameter<Point> * param,
-                                                   bool in_global,
-                                                   GlobalParamsAction * global_block);
+void Builder::setScalarParameter<Point, Point>(const std::string & full_name,
+                                               const std::string & short_name,
+                                               InputParameters::Parameter<Point> * param,
+                                               bool in_global,
+                                               GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<RealEigenVector, RealEigenVector>(
+void Builder::setScalarParameter<RealEigenVector, RealEigenVector>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealEigenVector> * param,
@@ -796,7 +796,7 @@ void ParserOther::setScalarParameter<RealEigenVector, RealEigenVector>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+void Builder::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealEigenMatrix> * param,
@@ -804,7 +804,7 @@ void ParserOther::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<PostprocessorName, PostprocessorName>(
+void Builder::setScalarParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<PostprocessorName> * param,
@@ -813,14 +813,14 @@ void ParserOther::setScalarParameter<PostprocessorName, PostprocessorName>(
 
 template <>
 void
-ParserOther::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
-                                                      const std::string & short_name,
-                                                      InputParameters::Parameter<MooseEnum> * param,
-                                                      bool in_global,
-                                                      GlobalParamsAction * global_block);
+Builder::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
+                                                  const std::string & short_name,
+                                                  InputParameters::Parameter<MooseEnum> * param,
+                                                  bool in_global,
+                                                  GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
+void Builder::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<MultiMooseEnum> * param,
@@ -828,7 +828,7 @@ void ParserOther::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
+void Builder::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<ExecFlagEnum> * param,
@@ -836,7 +836,7 @@ void ParserOther::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<RealTensorValue, RealTensorValue>(
+void Builder::setScalarParameter<RealTensorValue, RealTensorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealTensorValue> * param,
@@ -844,7 +844,7 @@ void ParserOther::setScalarParameter<RealTensorValue, RealTensorValue>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setScalarParameter<ReporterName, std::string>(
+void Builder::setScalarParameter<ReporterName, std::string>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<ReporterName> * param,
@@ -853,7 +853,7 @@ void ParserOther::setScalarParameter<ReporterName, std::string>(
 
 // Vectors
 template <>
-void ParserOther::setVectorParameter<RealVectorValue, RealVectorValue>(
+void Builder::setVectorParameter<RealVectorValue, RealVectorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<RealVectorValue>> * param,
@@ -861,15 +861,15 @@ void ParserOther::setVectorParameter<RealVectorValue, RealVectorValue>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<Point, Point>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<Point>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
+void
+Builder::setVectorParameter<Point, Point>(const std::string & full_name,
+                                          const std::string & short_name,
+                                          InputParameters::Parameter<std::vector<Point>> * param,
+                                          bool in_global,
+                                          GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<PostprocessorName, PostprocessorName>(
+void Builder::setVectorParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<PostprocessorName>> * param,
@@ -877,7 +877,7 @@ void ParserOther::setVectorParameter<PostprocessorName, PostprocessorName>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<MooseEnum, MooseEnum>(
+void Builder::setVectorParameter<MooseEnum, MooseEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<MooseEnum>> * param,
@@ -885,7 +885,7 @@ void ParserOther::setVectorParameter<MooseEnum, MooseEnum>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<VariableName, VariableName>(
+void Builder::setVectorParameter<VariableName, VariableName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<VariableName>> * param,
@@ -893,7 +893,7 @@ void ParserOther::setVectorParameter<VariableName, VariableName>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<ReporterName, std::string>(
+void Builder::setVectorParameter<ReporterName, std::string>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<ReporterName>> * param,
@@ -901,7 +901,7 @@ void ParserOther::setVectorParameter<ReporterName, std::string>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setVectorParameter<CLIArgString, std::string>(
+void Builder::setVectorParameter<CLIArgString, std::string>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<CLIArgString>> * param,
@@ -909,7 +909,7 @@ void ParserOther::setVectorParameter<CLIArgString, std::string>(
     GlobalParamsAction * global_block);
 
 template <>
-void ParserOther::setDoubleIndexParameter<Point>(
+void Builder::setDoubleIndexParameter<Point>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
@@ -917,7 +917,7 @@ void ParserOther::setDoubleIndexParameter<Point>(
     GlobalParamsAction * global_block);
 
 void
-ParserOther::extractParams(const std::string & prefix, InputParameters & p)
+Builder::extractParams(const std::string & prefix, InputParameters & p)
 {
   std::ostringstream error_stream;
   static const std::string global_params_task = "set_global_params";
@@ -1360,11 +1360,11 @@ toBool<bool>(const std::string & s, bool & val)
 
 template <typename T, typename Base>
 void
-ParserOther::setScalarParameter(const std::string & full_name,
-                                const std::string & short_name,
-                                InputParameters::Parameter<T> * param,
-                                bool in_global,
-                                GlobalParamsAction * global_block)
+Builder::setScalarParameter(const std::string & full_name,
+                            const std::string & short_name,
+                            InputParameters::Parameter<T> * param,
+                            bool in_global,
+                            GlobalParamsAction * global_block)
 {
   try
   {
@@ -1420,12 +1420,12 @@ ParserOther::setScalarParameter(const std::string & full_name,
 
 template <typename T>
 void
-ParserOther::setFilePathParam(const std::string & full_name,
-                              const std::string & short_name,
-                              InputParameters::Parameter<T> * param,
-                              InputParameters & params,
-                              bool in_global,
-                              GlobalParamsAction * global_block)
+Builder::setFilePathParam(const std::string & full_name,
+                          const std::string & short_name,
+                          InputParameters::Parameter<T> * param,
+                          InputParameters & params,
+                          bool in_global,
+                          GlobalParamsAction * global_block)
 {
   std::string prefix;
   std::string postfix = _root->param<std::string>(full_name);
@@ -1446,11 +1446,11 @@ ParserOther::setFilePathParam(const std::string & full_name,
 
 template <typename T, typename UP_T, typename Base>
 void
-ParserOther::setScalarValueTypeParameter(const std::string & full_name,
-                                         const std::string & short_name,
-                                         InputParameters::Parameter<T> * param,
-                                         bool in_global,
-                                         GlobalParamsAction * global_block)
+Builder::setScalarValueTypeParameter(const std::string & full_name,
+                                     const std::string & short_name,
+                                     InputParameters::Parameter<T> * param,
+                                     bool in_global,
+                                     GlobalParamsAction * global_block)
 {
   setScalarParameter<T, Base>(full_name, short_name, param, in_global, global_block);
 
@@ -1463,11 +1463,11 @@ ParserOther::setScalarValueTypeParameter(const std::string & full_name,
 
 template <typename T, typename Base>
 void
-ParserOther::setVectorParameter(const std::string & full_name,
-                                const std::string & short_name,
-                                InputParameters::Parameter<std::vector<T>> * param,
-                                bool in_global,
-                                GlobalParamsAction * global_block)
+Builder::setVectorParameter(const std::string & full_name,
+                            const std::string & short_name,
+                            InputParameters::Parameter<std::vector<T>> * param,
+                            bool in_global,
+                            GlobalParamsAction * global_block)
 {
   std::vector<T> vec;
   if (_root->find(full_name))
@@ -1498,11 +1498,11 @@ ParserOther::setVectorParameter(const std::string & full_name,
 
 template <typename KeyType, typename MappedType>
 void
-ParserOther::setMapParameter(const std::string & full_name,
-                             const std::string & short_name,
-                             InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
-                             bool in_global,
-                             GlobalParamsAction * global_block)
+Builder::setMapParameter(const std::string & full_name,
+                         const std::string & short_name,
+                         InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
+                         bool in_global,
+                         GlobalParamsAction * global_block)
 {
   std::map<KeyType, MappedType> the_map;
   if (_root->find(full_name))
@@ -1599,12 +1599,12 @@ ParserOther::setMapParameter(const std::string & full_name,
 
 template <typename T>
 void
-ParserOther::setVectorFilePathParam(const std::string & full_name,
-                                    const std::string & short_name,
-                                    InputParameters::Parameter<std::vector<T>> * param,
-                                    InputParameters & params,
-                                    bool in_global,
-                                    GlobalParamsAction * global_block)
+Builder::setVectorFilePathParam(const std::string & full_name,
+                                const std::string & short_name,
+                                InputParameters::Parameter<std::vector<T>> * param,
+                                InputParameters & params,
+                                bool in_global,
+                                GlobalParamsAction * global_block)
 {
   std::vector<T> vec;
   std::vector<std::string> rawvec;
@@ -1638,12 +1638,11 @@ ParserOther::setVectorFilePathParam(const std::string & full_name,
 
 template <typename T>
 void
-ParserOther::setDoubleIndexParameter(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<std::vector<T>>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
+Builder::setDoubleIndexParameter(const std::string & full_name,
+                                 const std::string & short_name,
+                                 InputParameters::Parameter<std::vector<std::vector<T>>> * param,
+                                 bool in_global,
+                                 GlobalParamsAction * global_block)
 {
   // Get the full string assigned to the variable full_name
   std::string buffer = _root->param<std::string>(full_name);
@@ -1677,7 +1676,7 @@ ParserOther::setDoubleIndexParameter(
 
 template <typename T>
 void
-ParserOther::setTripleIndexParameter(
+Builder::setTripleIndexParameter(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
@@ -1753,11 +1752,11 @@ ParserOther::setTripleIndexParameter(
 
 template <typename T>
 void
-ParserOther::setScalarComponentParameter(const std::string & full_name,
-                                         const std::string & short_name,
-                                         InputParameters::Parameter<T> * param,
-                                         bool in_global,
-                                         GlobalParamsAction * global_block)
+Builder::setScalarComponentParameter(const std::string & full_name,
+                                     const std::string & short_name,
+                                     InputParameters::Parameter<T> * param,
+                                     bool in_global,
+                                     GlobalParamsAction * global_block)
 {
   std::vector<double> vec;
   try
@@ -1797,11 +1796,11 @@ ParserOther::setScalarComponentParameter(const std::string & full_name,
 
 template <typename T>
 void
-ParserOther::setVectorComponentParameter(const std::string & full_name,
-                                         const std::string & short_name,
-                                         InputParameters::Parameter<std::vector<T>> * param,
-                                         bool in_global,
-                                         GlobalParamsAction * global_block)
+Builder::setVectorComponentParameter(const std::string & full_name,
+                                     const std::string & short_name,
+                                     InputParameters::Parameter<std::vector<T>> * param,
+                                     bool in_global,
+                                     GlobalParamsAction * global_block)
 {
   std::vector<double> vec;
   try
@@ -1849,7 +1848,7 @@ ParserOther::setVectorComponentParameter(const std::string & full_name,
 
 template <typename T>
 void
-ParserOther::setVectorVectorComponentParameter(
+Builder::setVectorVectorComponentParameter(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<std::vector<T>>> * param,
@@ -1919,7 +1918,7 @@ ParserOther::setVectorVectorComponentParameter(
 
 template <>
 void
-ParserOther::setScalarParameter<RealVectorValue, RealVectorValue>(
+Builder::setScalarParameter<RealVectorValue, RealVectorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealVectorValue> * param,
@@ -1931,18 +1930,18 @@ ParserOther::setScalarParameter<RealVectorValue, RealVectorValue>(
 
 template <>
 void
-ParserOther::setScalarParameter<Point, Point>(const std::string & full_name,
-                                              const std::string & short_name,
-                                              InputParameters::Parameter<Point> * param,
-                                              bool in_global,
-                                              GlobalParamsAction * global_block)
+Builder::setScalarParameter<Point, Point>(const std::string & full_name,
+                                          const std::string & short_name,
+                                          InputParameters::Parameter<Point> * param,
+                                          bool in_global,
+                                          GlobalParamsAction * global_block)
 {
   setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
 }
 
 template <>
 void
-ParserOther::setScalarParameter<RealEigenVector, RealEigenVector>(
+Builder::setScalarParameter<RealEigenVector, RealEigenVector>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealEigenVector> * param,
@@ -1974,7 +1973,7 @@ ParserOther::setScalarParameter<RealEigenVector, RealEigenVector>(
 
 template <>
 void
-ParserOther::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
+Builder::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealEigenMatrix> * param,
@@ -2022,11 +2021,11 @@ ParserOther::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
 
 template <>
 void
-ParserOther::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
-                                                      const std::string & short_name,
-                                                      InputParameters::Parameter<MooseEnum> * param,
-                                                      bool in_global,
-                                                      GlobalParamsAction * global_block)
+Builder::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
+                                                  const std::string & short_name,
+                                                  InputParameters::Parameter<MooseEnum> * param,
+                                                  bool in_global,
+                                                  GlobalParamsAction * global_block)
 {
   MooseEnum current_param = param->get();
 
@@ -2042,7 +2041,7 @@ ParserOther::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_n
 
 template <>
 void
-ParserOther::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
+Builder::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<MultiMooseEnum> * param,
@@ -2068,7 +2067,7 @@ ParserOther::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
 
 template <>
 void
-ParserOther::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
+Builder::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<ExecFlagEnum> * param,
@@ -2093,7 +2092,7 @@ ParserOther::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
 
 template <>
 void
-ParserOther::setScalarParameter<RealTensorValue, RealTensorValue>(
+Builder::setScalarParameter<RealTensorValue, RealTensorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<RealTensorValue> * param,
@@ -2130,7 +2129,7 @@ ParserOther::setScalarParameter<RealTensorValue, RealTensorValue>(
 // Specialization for coupling a Real value where a postprocessor would be needed in MOOSE
 template <>
 void
-ParserOther::setScalarParameter<PostprocessorName, PostprocessorName>(
+Builder::setScalarParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<PostprocessorName> * param,
@@ -2149,7 +2148,7 @@ ParserOther::setScalarParameter<PostprocessorName, PostprocessorName>(
 
 template <>
 void
-ParserOther::setScalarParameter<ReporterName, std::string>(
+Builder::setScalarParameter<ReporterName, std::string>(
     const std::string & full_name,
     const std::string & /*short_name*/,
     InputParameters::Parameter<ReporterName> * param,
@@ -2168,7 +2167,7 @@ ParserOther::setScalarParameter<ReporterName, std::string>(
 
 template <>
 void
-ParserOther::setVectorParameter<RealVectorValue, RealVectorValue>(
+Builder::setVectorParameter<RealVectorValue, RealVectorValue>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<RealVectorValue>> * param,
@@ -2180,19 +2179,18 @@ ParserOther::setVectorParameter<RealVectorValue, RealVectorValue>(
 
 template <>
 void
-ParserOther::setVectorParameter<Point, Point>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<Point>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
+Builder::setVectorParameter<Point, Point>(const std::string & full_name,
+                                          const std::string & short_name,
+                                          InputParameters::Parameter<std::vector<Point>> * param,
+                                          bool in_global,
+                                          GlobalParamsAction * global_block)
 {
   setVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
 
 template <>
 void
-ParserOther::setVectorParameter<MooseEnum, MooseEnum>(
+Builder::setVectorParameter<MooseEnum, MooseEnum>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<MooseEnum>> * param,
@@ -2229,7 +2227,7 @@ ParserOther::setVectorParameter<MooseEnum, MooseEnum>(
 
 template <>
 void
-ParserOther::setVectorParameter<PostprocessorName, PostprocessorName>(
+Builder::setVectorParameter<PostprocessorName, PostprocessorName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<PostprocessorName>> * param,
@@ -2258,7 +2256,7 @@ ParserOther::setVectorParameter<PostprocessorName, PostprocessorName>(
  */
 template <>
 void
-ParserOther::setVectorParameter<VariableName, VariableName>(
+Builder::setVectorParameter<VariableName, VariableName>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<VariableName>> * param,
@@ -2313,7 +2311,7 @@ ParserOther::setVectorParameter<VariableName, VariableName>(
 
 template <>
 void
-ParserOther::setVectorParameter<ReporterName, std::string>(
+Builder::setVectorParameter<ReporterName, std::string>(
     const std::string & full_name,
     const std::string & /*short_name*/,
     InputParameters::Parameter<std::vector<ReporterName>> * param,
@@ -2338,7 +2336,7 @@ ParserOther::setVectorParameter<ReporterName, std::string>(
 
 template <>
 void
-ParserOther::setVectorParameter<CLIArgString, std::string>(
+Builder::setVectorParameter<CLIArgString, std::string>(
     const std::string & full_name,
     const std::string & /*short_name*/,
     InputParameters::Parameter<std::vector<CLIArgString>> * param,
@@ -2384,7 +2382,7 @@ ParserOther::setVectorParameter<CLIArgString, std::string>(
 
 template <>
 void
-ParserOther::setDoubleIndexParameter<Point>(
+Builder::setDoubleIndexParameter<Point>(
     const std::string & full_name,
     const std::string & short_name,
     InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
@@ -2393,3 +2391,4 @@ ParserOther::setDoubleIndexParameter<Point>(
 {
   setVectorVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
+

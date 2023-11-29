@@ -19,7 +19,7 @@
 #include "libmesh/parallel_object.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 using namespace libMesh;
 using namespace Moose::FV;
@@ -32,8 +32,7 @@ TEST(LimitersTest, limitVector)
   TensorValue<Real> grad(0);
 
   const char * argv[2] = {"foo", "\0"};
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  auto app = create.getApp();
+  auto app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   ReplicatedMesh mesh(app->comm(), /*dim=*/2);
   MeshTools::Generation::build_square(mesh, 2, 2);
   ElemInfo ei(mesh.elem_ptr(0));

@@ -10,30 +10,12 @@
 // MOOSE includes
 #include "MooseUtils.h"
 #include "MooseInit.h"
-#include "ActionFactory.h"
-#include "Action.h"
-#include "Factory.h"
-#include "MooseObjectAction.h"
-#include "ActionWarehouse.h"
-#include "EmptyAction.h"
-#include "FEProblem.h"
-#include "MooseMesh.h"
-#include "Executioner.h"
-#include "MooseApp.h"
-#include "MooseEnum.h"
-#include "MultiMooseEnum.h"
-#include "MultiApp.h"
-#include "GlobalParamsAction.h"
-#include "SyntaxTree.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
 #include "MooseTypes.h"
 #include "CommandLine.h"
-#include "JsonSyntaxTree.h"
 #include "SystemInfo.h"
 #include "MooseUtils.h"
-#include "Conversion.h"
-#include "Units.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -346,18 +328,13 @@ Parser::parse(const std::vector<std::string> & input_filenames,
 
   // do as much error checking as early as possible so that errors are more useful instead
   // of surprising and disconnected from what caused them.
-  // DupParamWalker dw;
   BadActiveWalker bw;
-  //_root->walk(&dw, hit::NodeType::Field);
   _root->walk(&bw, hit::NodeType::Section);
-
-  // for (auto & msg : dw.errors)
-  //   _errmsg += msg + "\n";
 
   for (auto & msg : bw.errors)
     _errmsg += msg + "\n";
 
-  // Print parse errors related to brace expansion early
+  // Print parse errors related to bad active early
   if (_errmsg.size() > 0)
     mooseError(_errmsg);
 

@@ -7,7 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseCreate.h"
+#pragma once
+#include "MooseMain.h"
 #include "ParallelUniqueId.h"
 #include "Parser.h"
 #include "AppFactory.h"
@@ -18,24 +19,23 @@
 #include <omp.h>
 #endif
 
-void
-MooseCreate::addParam(InputParameters & params)
+namespace moose
 {
-  params.addCommandLineParam<std::vector<std::string>>(
+std::shared_ptr<MooseApp>
+createMooseApp(const std::string & default_app_name, int argc, char * argv[])
+{
+  // Construct front parser
+  auto front_parser = std::make_unique<Parser>();
+
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
+  auto input_param = emptyInputParameters();
+
+  input_param.addCommandLineParam<std::vector<std::string>>(
       "input_file",
       "-i <input_files>",
       "Specify one or multiple input files. Multiple files get merged into a single simulation "
       "input.");
-}
 
-MooseCreate::MooseCreate(std::string app_name, int argc, char * argv[])
-{
-  // Construct front parser
-  auto front_parser = std::make_shared<Parser>();
-
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto input_param = emptyInputParameters();
-  addParam(input_param);
   command_line->addCommandLineOptionsFromParams(input_param);
 
   std::vector<std::string> input_filename;
@@ -45,5 +45,6 @@ MooseCreate::MooseCreate(std::string app_name, int argc, char * argv[])
     front_parser->parse(input_filename);
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  _app = AppFactory::createAppShared(app_name, argc, argv, front_parser);
+  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(front_parser));
+}
 }

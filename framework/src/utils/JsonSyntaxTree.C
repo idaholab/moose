@@ -13,7 +13,7 @@
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
-#include "ParserOther.h"
+#include "Builder.h"
 #include "pcrecpp.h"
 #include "Action.h"
 #include "AppFactory.h"
@@ -157,7 +157,7 @@ JsonSyntaxTree::addGlobal()
   // If they are doing a search they probably don't want to see this
   if (_search.empty())
   {
-    auto params = ParserOther::validParams();
+    auto params = Builder::validParams();
     nlohmann::json jparams;
     setParams(&params, true, jparams);
     _root["global"]["parameters"] = jparams;

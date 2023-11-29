@@ -8,11 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "StochasticToolsTestApp.h"
-#include "MooseInit.h"
 #include "Moose.h"
-#include "MooseApp.h"
-#include "AppFactory.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("StochasticTools");
@@ -21,20 +18,7 @@ PerfLog Moose::perf_log("StochasticTools");
 int
 main(int argc, char * argv[])
 {
-  // Initialize MPI, solvers and MOOSE
-  MooseInit init(argc, argv);
-
-  // Register this application's MooseApp and any it depends on
-  StochasticToolsTestApp::registerApps();
-
-  // Instanitiate Moose App
-  MooseCreate create("StochasticToolsTestApp", argc, argv);
-
-  // Get the created application;
-  std::shared_ptr<MooseApp> app = create.getApp();
-
-  // Execute the application
-  app->run();
+  moose::main<StochasticToolsTestApp>(argc, argv);
 
   return 0;
 }

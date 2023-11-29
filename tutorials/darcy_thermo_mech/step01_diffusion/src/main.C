@@ -10,10 +10,8 @@
 #include "DarcyThermoMechApp.h"
 
 // Moose Includes
-#include "MooseInit.h"
-#include "MooseApp.h"
-#include "AppFactory.h"
-#include "MooseCreate.h"
+#include "Moose.h"
+#include "MooseMain.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("DarcyThermoMech");
@@ -22,20 +20,7 @@ PerfLog Moose::perf_log("DarcyThermoMech");
 int
 main(int argc, char * argv[])
 {
-  // Initialize MPI, solvers and MOOSE
-  MooseInit init(argc, argv);
-
-  // Register this application's MooseApp and any it depends on
-  DarcyThermoMechApp::registerApps();
-
-  // Instanitiate Moose App
-  MooseCreate create("DarcyThermoMechApp", argc, argv);
-
-  // Get the created application;
-  std::shared_ptr<MooseApp> app = create.getApp();
-
-  // Execute the application
-  app->run();
+  moose::main<DarcyThermoMechApp>(argc, argv);
 
   return 0;
 }

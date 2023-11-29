@@ -19,7 +19,7 @@
 #include "MooseEnum.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 using namespace MooseUtils;
 
@@ -194,8 +194,7 @@ TEST(MooseCoordTest, testLengthUnit)
 
   const auto nx = 2;
 
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  std::shared_ptr<MooseApp> app = create.getApp();
+  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
 
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";

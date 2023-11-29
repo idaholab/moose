@@ -70,13 +70,13 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   std::streambuf * cached_output_buffer = Moose::out.rdbuf(nullptr);
 
   // create new parser tree for the application
-  auto front_parser = std::make_shared<Parser>();
+  auto front_parser = std::make_unique<Parser>();
 
   // create new application with parameters modified for input check run
   _check_app = AppFactory::instance().createShared(_moose_app.type(),
                                                    _moose_app.name(),
                                                    app_params,
-                                                   front_parser,
+                                                   std::move(front_parser),
                                                    _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
@@ -183,12 +183,12 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
                                            int character)
 {
   // add only root level blocks to completion list when parser root is null
-  if (!_check_app || !_check_app->parserOther()._root ||
-      _check_app->parserOther()._root->getNodeView().is_null())
+  if (!_check_app || !_check_app->builder()._root ||
+      _check_app->builder()._root->getNodeView().is_null())
     return addSubblocksToList(completionItems, "/", line, character);
 
   // find hit node for zero based request line and column number from input
-  wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
+  wasp::HITNodeView view_root = _check_app->builder()._root->getNodeView();
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
@@ -284,8 +284,8 @@ MooseServer::getAllValidParameters(InputParameters & valid_params,
                                    std::set<std::string> & obj_act_tasks)
 {
   // gather global parameters then action parameters then object parameters
-  valid_params = ParserOther::validParams();
-  valid_params += ParserOther::validParams();
+  valid_params = Builder::validParams();
+  valid_params += Builder::validParams();
   getActionParameters(valid_params, object_path, obj_act_tasks);
   getObjectParameters(valid_params, object_type, obj_act_tasks);
 }
@@ -687,7 +687,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
     if (input_path_iter != _type_to_input_paths.end())
     {
-      wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
+      wasp::HITNodeView view_root = _check_app->builder()._root->getNodeView();
 
       // walk over all syntax paths that are associated with parameter type
       for (const auto & input_path : input_path_iter->second)
@@ -988,11 +988,11 @@ bool
 MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 {
   // return prior to starting document symbol tree when parser root is null
-  if (!_check_app || !_check_app->parserOther()._root ||
-      _check_app->parserOther()._root->getNodeView().is_null())
+  if (!_check_app || !_check_app->builder()._root ||
+      _check_app->builder()._root->getNodeView().is_null())
     return true;
 
-  wasp::HITNodeView view_root = _check_app->parserOther()._root->getNodeView();
+  wasp::HITNodeView view_root = _check_app->builder()._root->getNodeView();
 
   bool pass = true;
 

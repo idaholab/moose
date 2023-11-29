@@ -12,7 +12,7 @@
 #include "MooseApp.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
-#include "ParserOther.h"
+#include "Builder.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -22,7 +22,7 @@
 InputParameters
 Action::validParams()
 {
-  InputParameters params = ParserOther::validParams();
+  InputParameters params = Builder::validParams();
 
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system

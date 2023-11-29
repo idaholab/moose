@@ -406,7 +406,7 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.parserOther().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+  _app.builder().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
@@ -1110,14 +1110,14 @@ MultiApp::createApp(unsigned int i, Real start_time)
     input_file = _input_files[_first_local_app + i];
 
   // create new parser tree for the application
-  auto front_parser = std::make_shared<Parser>();
+  auto front_parser = std::make_unique<Parser>();
   std::vector<std::string> multiapp_input{input_file};
 
   if (!input_file.empty())
     front_parser->parse(multiapp_input);
 
-  _apps[i] =
-      AppFactory::instance().createShared(_app_type, full_name, app_params, front_parser, _my_comm);
+  _apps[i] = AppFactory::instance().createShared(
+      _app_type, full_name, app_params, std::move(front_parser), _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);

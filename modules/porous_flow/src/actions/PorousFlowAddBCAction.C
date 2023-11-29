@@ -71,7 +71,7 @@ PorousFlowAddBCAction::setupPorousFlowEnthalpySink()
   {
     const std::string class_name = "PorousFlowSink";
     InputParameters pars = _factory.getValidParams(class_name);
-    _app.parserOther().extractParams(_name, pars); // extract global params
+    _app.builder().extractParams(_name, pars); // extract global params
     pars.set<NonlinearVariableName>("variable") = {p_m_var.name()};
     pars.set<std::vector<BoundaryName>>("boundary") = boundary;
     pars.set<UserObjectName>("PorousFlowDictator") = dictator_name;
@@ -88,7 +88,7 @@ PorousFlowAddBCAction::setupPorousFlowEnthalpySink()
   {
     const std::string class_name = "PorousFlowEnthalpySink";
     InputParameters pars = _factory.getValidParams(class_name);
-    _app.parserOther().extractParams(_name, pars); // extract global params
+    _app.builder().extractParams(_name, pars); // extract global params
     pars.set<NonlinearVariableName>("variable") = {T_m_var.name()};
     pars.set<std::vector<BoundaryName>>("boundary") = boundary;
     pars.set<Real>("T_in") = obj_pars.get<Real>("T_in");

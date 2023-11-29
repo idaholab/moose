@@ -11,14 +11,13 @@
 #include "JSONFileReader.h"
 #include "AppFactory.h"
 #include "Executioner.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 TEST(JSONFileReader, errors)
 {
   // Create a minimal app that can create objects
   const char * argv[2] = {"foo", "\0"};
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  std::shared_ptr<MooseApp> app = create.getApp();
+  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   const auto & factory = &app->getFactory();
   app->parameters().set<bool>("minimal") = true;
   app->run();
@@ -94,8 +93,7 @@ TEST(JSONFileReader, getters)
 {
   // Create a minimal app that can create objects
   const char * argv[2] = {"foo", "\0"};
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  const auto & app = create.getApp();
+  const auto & app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   const auto & factory = &app->getFactory();
   app->parameters().set<bool>("minimal") = true;
   app->run();

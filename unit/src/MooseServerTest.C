@@ -12,7 +12,7 @@
 #include "MooseServer.h"
 #include "MooseApp.h"
 #include "Moose.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 #include "AppFactory.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
@@ -280,8 +280,7 @@ protected:
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
-    MooseCreate create("MooseUnitApp", 0, nullptr);
-    moose_unit_app = create.getApp();
+    moose_unit_app = moose::createMooseApp("MooseUnitApp", 0, nullptr);
 
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
   }

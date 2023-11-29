@@ -70,7 +70,7 @@ public:
   static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,
                                      char ** argv,
-                                     std::shared_ptr<Parser> parser,
+                                     std::unique_ptr<Parser> parser,
                                      MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
@@ -97,7 +97,7 @@ public:
   MooseAppPtr createShared(const std::string & app_type,
                            const std::string & name,
                            InputParameters parameters,
-                           std::shared_ptr<Parser> parser,
+                           std::unique_ptr<Parser> parser,
                            MPI_Comm COMM_WORLD_IN);
 
   /**

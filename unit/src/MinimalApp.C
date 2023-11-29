@@ -12,13 +12,12 @@
 #include "AppFactory.h"
 #include "Executioner.h"
 #include "MooseMesh.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 
 TEST(MinimalApp, create)
 {
   const char * argv[1] = {"\0"};
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  std::shared_ptr<MooseApp> app = create.getApp();
+  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
   Executioner * exec = app->getExecutioner();

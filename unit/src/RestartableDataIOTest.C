@@ -13,7 +13,7 @@
 
 #include "AppFactory.h"
 #include "MooseApp.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 #include "RestartableDataReader.h"
 #include "RestartableDataWriter.h"
 
@@ -25,8 +25,7 @@ void
 RestartableDataIOTest::SetUp()
 {
   const char * argv[2] = {"foo", "\0"};
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  _app = create.getApp();
+  _app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
 }
 
 std::map<std::string, RestartableDataIOTest::DataInfo>

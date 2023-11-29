@@ -31,12 +31,12 @@ class Factory;
 class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
-class ParserOther;
+class Builder;
 
 class UnusedWalker : public hit::Walker
 {
 public:
-  UnusedWalker(std::set<std::string> used, ParserOther & p) : _used(used), _parserOther(p) {}
+  UnusedWalker(std::set<std::string> used, Builder & p) : _used(used), _builder(p) {}
 
   void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
 
@@ -44,7 +44,7 @@ public:
 
 private:
   std::set<std::string> _used;
-  ParserOther & _parserOther;
+  Builder & _builder;
 };
 
 /**
@@ -52,7 +52,7 @@ private:
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
  * parser, please contact the MOOSE team for guidance.
  */
-class ParserOther : public ConsoleStreamInterface, public hit::Walker
+class Builder : public ConsoleStreamInterface, public hit::Walker
 {
 public:
   enum SyntaxFormatterType
@@ -61,8 +61,8 @@ public:
     YAML
   };
 
-  ParserOther(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
-  virtual ~ParserOther();
+  Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
+  virtual ~Builder();
 
   /**
    * Parameters that are processed directly by the Parser and are valid anywhere in the input
@@ -78,7 +78,7 @@ public:
    * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void parseother();
+  void builder();
 
   /**
    * This function attempts to extract values from the input file based on the contents of

@@ -16,7 +16,7 @@
 #include "MeshGeneratorMesh.h"
 #include "GeneratedMeshGenerator.h"
 #include "AppFactory.h"
-#include "MooseCreate.h"
+#include "MooseMain.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "ADWrapperFunctor.h"
 #include "RawValueFunctor.h"
@@ -304,8 +304,7 @@ TEST(MooseFunctorTest, testArgs)
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
 
   const auto nx = 2;
-  MooseCreate create("MooseUnitApp", 1, (char **)argv);
-  std::shared_ptr<MooseApp> app = create.getApp();
+  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 
