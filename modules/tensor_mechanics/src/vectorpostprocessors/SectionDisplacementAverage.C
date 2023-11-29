@@ -9,6 +9,7 @@
 
 #include "SectionDisplacementAverage.h"
 #include "MooseMesh.h"
+#include "SystemBase.h"
 
 registerMooseObject("TensorMechanicsApp", SectionDisplacementAverage);
 
@@ -18,9 +19,6 @@ SectionDisplacementAverage::validParams()
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Compute the section displacement vector average in three-dimensions "
                              "given a user-defined definition of the cross section.");
-  params.addParam<std::vector<std::string>>("vector_names",
-                                            std::vector<std::string>(1, "value"),
-                                            "Names of the column vectors in this object.");
   params.addParam<std::vector<SubdomainName>>(
       "block",
       "The list of blocks in which to search for cross sectional nodes to compute the displacement "
@@ -94,9 +92,6 @@ SectionDisplacementAverage::finalize()
 void
 SectionDisplacementAverage::execute()
 {
-  if (!_displaced_mesh->getMesh().is_serial())
-    paramError("block", "The variable section average requires a serial mesh.");
-
   _block_ids = _displaced_mesh->getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"));
 
   auto * active_nodes = _mesh->getActiveSemiLocalNodeRange();
