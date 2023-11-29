@@ -12,6 +12,7 @@
 #include "MathFVUtils.h"
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
+#include "INSFVVelocityVariable.h"
 
 class INSFVMomentumDiffusion : public INSFVFluxKernel
 {

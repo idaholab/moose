@@ -12,6 +12,7 @@
 #include "FVElementalKernel.h"
 #include "MathFVUtils.h"
 #include "INSFVMomentumResidualObject.h"
+#include "INSFVVelocityVariable.h"
 
 /**
  * Simple class to demonstrate off diagonal Jacobian contributions.

@@ -10,6 +10,7 @@
 #include "INSFVTKEDWallFunctionBC.h"
 #include "Function.h"
 #include "NavierStokesMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVTKEDWallFunctionBC);
 

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVElementalKernel.h"
+#include "INSFVVelocityVariable.h"
 
 /**
  * Simple class to demonstrate off diagonal Jacobian contributions.

@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVTurbulentTemperatureWallFunction.h"
+#include "NavierStokesMethods.h"
+#include "NS.h"
 
 registerADMooseObject("NavierStokesApp", INSFVTurbulentTemperatureWallFunction);
 
