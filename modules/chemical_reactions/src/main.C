@@ -11,7 +11,6 @@
 #include "Moose.h"
 #include "MooseMain.h"
 
-
 // Create a performance log
 PerfLog Moose::perf_log("ChemicalReactions");
 

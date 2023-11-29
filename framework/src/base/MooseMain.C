@@ -14,6 +14,7 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 #include "InputParameters.h"
+#include "MooseApp.h"
 
 #ifdef LIBMESH_HAVE_OPENMP
 #include <omp.h>

@@ -2391,4 +2391,3 @@ Builder::setDoubleIndexParameter<Point>(
 {
   setVectorVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
-
