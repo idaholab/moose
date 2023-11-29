@@ -21,7 +21,6 @@
 
 namespace Moose
 {
-std::map<std::string, QuadratureType> quadrature_type_to_enum;
 std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
 std::map<std::string, SolveType> solve_type_to_enum;
 std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
@@ -31,22 +30,6 @@ std::map<std::string, LineSearchType> line_search_type_to_enum;
 std::map<std::string, TimeIntegratorType> time_integrator_to_enum;
 std::map<std::string, MffdType> mffd_type_to_enum;
 std::map<std::string, RelationshipManagerType> rm_type_to_enum;
-
-void
-initQuadratureType()
-{
-  if (quadrature_type_to_enum.empty())
-  {
-    quadrature_type_to_enum["CLOUGH"] = QCLOUGH;
-    quadrature_type_to_enum["CONICAL"] = QCONICAL;
-    quadrature_type_to_enum["GAUSS"] = QGAUSS;
-    quadrature_type_to_enum["GRID"] = QGRID;
-    quadrature_type_to_enum["MONOMIAL"] = QMONOMIAL;
-    quadrature_type_to_enum["SIMPSON"] = QSIMPSON;
-    quadrature_type_to_enum["TRAP"] = QTRAP;
-    quadrature_type_to_enum["GAUSS_LOBATTO"] = QGAUSS_LOBATTO;
-  }
-}
 
 void
 initCoordinateSystemType()
@@ -182,15 +165,7 @@ template <>
 QuadratureType
 stringToEnum<QuadratureType>(const std::string & s)
 {
-  initQuadratureType();
-
-  std::string upper(s);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  if (!quadrature_type_to_enum.count(upper))
-    mooseError("Unknown quadrature type: ", upper);
-
-  return quadrature_type_to_enum[upper];
+  return Utility::string_to_enum<QuadratureType>("Q" + s);
 }
 
 template <>
