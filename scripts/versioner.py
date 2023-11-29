@@ -43,7 +43,8 @@ def undefined(arg, *args, **kwargs):
     return arg
 
 # Add your undefined template variables to call 'undefined' method above
-JINJA_CONFIG = {'pin_subpackage'        : undefined,
+JINJA_CONFIG = {'pin_compatible'        : undefined,
+                'pin_subpackage'        : undefined,
                 'compiler'              : undefined,
                 'base_mpich'            : undefined('mpich'),
                 'base_mpicc'            : undefined('mpicc'),
