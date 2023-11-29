@@ -28,6 +28,10 @@ protected:
   /// End type of the connected component
   EEndType _connected_component_end_type;
 
+  /// Element
+  const Elem * _elem;
+  /// Side ID
+  unsigned short int _side;
   /// Node ID
   dof_id_type _node;
   /// Outward normal on this boundary
