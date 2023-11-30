@@ -130,6 +130,16 @@ Now let's build!
 scripts/update_and_rebuild_libmesh.sh --without-gdb-command
 !package-end!
 
+## Build WASP
+
+Building WASP is also necessary. With the compilers already set in the above step, we only need to
+run the following commands:
+
+!package! code
+cd $MOOSE_DIR
+scripts/update_and_rebuild_wasp.sh
+!package-end!
+
 ## Build MOOSE
 
 I always prefer to make sure that all potentially stale object files have been
