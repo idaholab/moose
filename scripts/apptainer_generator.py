@@ -238,7 +238,7 @@ class ApptainerGenerator:
             base_remote = subprocess.check_output(base_command, cwd=dir, encoding='utf-8').strip()
             host_re = re.search(r'^git@([a-zA-Z0-9_.-]+\.[a-zA-Z]+):', base_remote)
             if not host_re:
-                https_re = re.search(r'^https:\/\/([a-zA-Z0-9_.-]+\.[a-zA-Z]+)\/', base_remote)
+                host_re = re.search(r'^https:\/\/([a-zA-Z0-9_.-]+\.[a-zA-Z]+)\/', base_remote)
             if not host_re:
                 raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
             return remote.replace('../../', f'https://{host_re.group(1)}/')
