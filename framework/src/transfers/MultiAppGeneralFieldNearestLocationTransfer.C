@@ -219,6 +219,13 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
             continue;
 
+          if (!_from_mesh_divisions.empty() &&
+              _from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+              _from_mesh_divisions[i_from]->divisionIndex(*node) ==
+                  MooseMeshDivision::INVALID_DIVISION_INDEX)
+            continue;
+
+          // Transformed node is in the reference space, as is the _nearest_positions_obj
           const auto transformed_node = (*_from_transforms[getGlobalSourceAppIndex(i_from)])(*node);
 
           // Only add to the KDTree nodes that are closest to the 'position'
@@ -251,7 +258,15 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
             continue;
 
+          if (!_from_mesh_divisions.empty() &&
+              _from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+              _from_mesh_divisions[i_from]->divisionIndex(*elem) ==
+                  MooseMeshDivision::INVALID_DIVISION_INDEX)
+            continue;
+
           const auto vertex_average = elem->vertex_average();
+          // Transformed element vertex average is in the reference space, as is the
+          // _nearest_positions_obj
           const auto transformed_vertex_average =
               (*_from_transforms[getGlobalSourceAppIndex(i_from)])(vertex_average);
 
@@ -323,10 +338,22 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           !inMesh(_from_point_locators[i_from].get(), transformed_pt))
         continue;
 
-      // Check the mesh division index
-      if (!_from_mesh_divisions.empty() &&
-          mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
-        continue;
+      // Check the mesh division. We have handled the restriction of the source locations when
+      // building the nearest-neighbor trees. We only need to check that we meet the required source
+      // division index.
+      if (!_from_mesh_divisions.empty())
+      {
+        if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+            mesh_div != getGlobalSourceAppIndex(i_from))
+          continue;
+        // Technically, this is not in the spirit of the nearest-location transfer. We would need to
+        // check that the KD-Tree data (nearest node/centroids) is at the right division index. We
+        // cannot do that as we do not know the target mesh divisions when we create the KDTrees
+        // Check that the point is in the expected source_mesh_division is different, but OK.
+        else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+                 mesh_div != _from_mesh_divisions[i_from]->divisionIndex(transformed_pt))
+          continue;
+      }
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (_local_kdtrees[i_from]->numberCandidatePoints())
