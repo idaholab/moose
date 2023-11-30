@@ -248,7 +248,7 @@ SubChannel1PhaseProblem::initialSetup()
   _S_flow_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SURFACE_AREA));
   _w_perim_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::WETTED_PERIMETER));
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
-  _Disp_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
+  _displacement_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
   if (_duct_mesh_exist)
   {
     _q_prime_duct_soln =
