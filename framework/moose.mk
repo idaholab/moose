@@ -19,7 +19,7 @@ APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
-
+$(warning "Please update your main.C to adapt new main function in MOOSE framework, see the example of ../moose/test/main.C. ")
 #
 # pcre
 #

@@ -11,6 +11,7 @@
 #include "CommandLine.h"
 #include "InputParameters.h"
 #include "MooseApp.h"
+#include "Parser.h"
 
 AppFactory &
 AppFactory::instance()
@@ -32,6 +33,49 @@ AppFactory::getValidParams(const std::string & name)
     return it->second->buildParameters();
 
   mooseError(std::string("A '") + name + "' is not a registered object\n\n");
+}
+
+MooseAppPtr
+AppFactory::createAppShared(const std::string & default_app_type,
+                            int argc,
+                            char ** argv,
+                            MPI_Comm comm_world_in)
+{
+  // Construct front parser
+  auto front_parser = std::make_unique<Parser>();
+
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
+  auto which_app_param = emptyInputParameters();
+
+  which_app_param.addCommandLineParam<std::vector<std::string>>(
+      "input_file",
+      "-i <input_files>",
+      "Specify one or multiple input files. Multiple files get merged into a single simulation "
+      "input.");
+
+  command_line->addCommandLineOptionsFromParams(which_app_param);
+
+  std::vector<std::string> input_filename;
+  command_line->search("input_file", input_filename);
+
+  if (!input_filename.empty())
+    front_parser->parse(input_filename);
+
+  MooseApp::addAppParam(which_app_param);
+  command_line->addCommandLineOptionsFromParams(which_app_param);
+
+  std::string app_type;
+  if (!command_line->search("app_to_run", app_type))
+    app_type = default_app_type;
+
+  auto app_params = AppFactory::instance().getValidParams(app_type);
+
+  app_params.set<int>("_argc") = argc;
+  app_params.set<char **>("_argv") = argv;
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+
+  return AppFactory::instance().createShared(
+      app_type, "main", app_params, std::move(front_parser), comm_world_in);
 }
 
 MooseAppPtr

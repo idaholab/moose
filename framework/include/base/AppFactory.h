@@ -74,6 +74,15 @@ public:
                                      MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
+   * Helper function for creating a MooseApp for MOOSE applications when adapting to main function
+   * change in MOOSE framework.
+   */
+  static MooseAppPtr createAppShared(const std::string & default_app_type,
+                                     int argc,
+                                     char ** argv,
+                                     MPI_Comm comm_word = MPI_COMM_WORLD);
+
+  /**
    * Register a new object
    * @param name Name of the object to register
    */
