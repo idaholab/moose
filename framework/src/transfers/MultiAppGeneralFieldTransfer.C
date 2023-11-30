@@ -133,9 +133,10 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search use_nearest_app use_nearest_position "
-                              "search_value_conflicts",
-                              "Search algorithm");
+  params.addParamNamesToGroup(
+      "greedy_search use_bounding_boxes use_nearest_app use_nearest_position "
+      "search_value_conflicts",
+      "Search algorithm");
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
@@ -487,11 +488,14 @@ void
 MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
                                                    std::set<processor_id_type> & processors)
 {
-  // Check which processors include this point
-  // One point might have more than one points
+  // Check which processors have apps that may include or be near this point
+  // A point may be close enough to several problems, hosted on several processes
   bool found = false;
-  unsigned int from0 = 0;
-  // Find which bboxes might have the nearest node to this point.
+
+  // We examine all bounding boxes and find the maximum distance within a bounding box
+  // from the point. This creates a sphere around the point of interest. Any app with a bounding
+  // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
+  // considered a potential source.
   Real nearest_max_distance = std::numeric_limits<Real>::max();
   for (const auto & bbox : _bboxes)
   {
@@ -499,6 +503,8 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
     if (distance < nearest_max_distance)
       nearest_max_distance = distance;
   }
+
+  unsigned int from0 = 0;
   for (processor_id_type i_proc = 0; i_proc < n_processors();
        from0 += _froms_per_proc[i_proc], ++i_proc)
     for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
@@ -528,21 +534,31 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
   processors.clear();
   locatePointReceivers(point, processors);
 
-  // We need to send these data to these processors
+  // We need to send this location data to these processors so they can send back values
   for (auto pid : processors)
   {
-    unsigned int div_index = 0;
-    if (_from_mesh_divisions.size())
-      _from_mesh_divisions[problem_id]->divisionIndex(point);
-    outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, div_index));
-    // Store point information
+
+    // Select which from_mesh_division the source data must come from for this point
+    unsigned int required_source_division = 0;
+    if (_to_mesh_divisions.size())
+    {
+      if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+        required_source_division = getGlobalTargetAppIndex(problem_id);
+      else
+        required_source_division = _from_mesh_divisions[problem_id]->divisionIndex(point);
+    }
+
+    // Store outgoing information for every source process
+    outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, required_source_division));
+
+    // Store point information locally for processing received data
     // We can use these information when insert values to solution vector
     PointInfo pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
     if (_from_mesh_divisions.size())
-      pointinfo.spatial_restriction_id = div_index;
+      pointinfo.spatial_restriction_id = required_source_division;
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }
@@ -1313,7 +1329,7 @@ bool
 MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
                                                       const std::vector<BoundingBox> & local_bboxes,
                                                       const Point & pt,
-                                                      const unsigned int mesh_div,
+                                                      const unsigned int only_from_mesh_div,
                                                       Real & distance) const
 {
   if (!local_bboxes[i_from].contains_point(pt))
@@ -1334,7 +1350,7 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
       return false;
 
     // Check point against the source mesh division
-    if (!_from_mesh_divisions.empty() && !inMeshDivision(pt, i_from, mesh_div, true))
+    if (!_from_mesh_divisions.empty() && !inMeshDivision(pt, i_from, only_from_mesh_div, true))
       return false;
 
     // Get nearest position (often a subapp position) for the target point
@@ -1491,29 +1507,29 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
 bool
 MultiAppGeneralFieldTransfer::inMeshDivision(const Point & pt,
                                              const unsigned int i_local,
-                                             const unsigned int potential_target_mesh_div,
+                                             const unsigned int only_from_this_mesh_div,
                                              bool from_direction) const
 {
   const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(pt)
                                              : _to_mesh_divisions[i_local]->divisionIndex(pt);
-  return acceptMeshDivision(division_index, i_local, potential_target_mesh_div, from_direction);
+  return acceptMeshDivision(division_index, i_local, only_from_this_mesh_div, from_direction);
 }
 
 bool
 MultiAppGeneralFieldTransfer::inMeshDivision(const Elem & elem,
                                              const unsigned int i_local,
-                                             const unsigned int potential_target_mesh_div,
+                                             const unsigned int only_from_this_mesh_div,
                                              bool from_direction) const
 {
   const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(elem)
                                              : _to_mesh_divisions[i_local]->divisionIndex(elem);
-  return acceptMeshDivision(division_index, i_local, potential_target_mesh_div, from_direction);
+  return acceptMeshDivision(division_index, i_local, only_from_this_mesh_div, from_direction);
 }
 
 bool
 MultiAppGeneralFieldTransfer::acceptMeshDivision(const unsigned int actual_mesh_div,
                                                  const unsigned int i_local,
-                                                 const unsigned int potential_target_mesh_div,
+                                                 const unsigned int only_from_this_mesh_div,
                                                  bool from_direction) const
 {
   const auto global_app_index =
@@ -1527,7 +1543,7 @@ MultiAppGeneralFieldTransfer::acceptMeshDivision(const unsigned int actual_mesh_
     return false;
   // If the point is not the at the same index in the target and the origin meshes, reject
   else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
-           potential_target_mesh_div != actual_mesh_div)
+           only_from_this_mesh_div != actual_mesh_div)
     return false;
   // If the point is at a certain division index that is not the same as the index of the subapp
   // we are currently considering to obtain data for that point, reject

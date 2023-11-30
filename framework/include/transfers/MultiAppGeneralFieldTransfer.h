@@ -154,38 +154,38 @@ protected:
    * Whether a point lies inside the mesh division delineated by the MeshDivision object
    * @param pt point to examine
    * @param i_local the index of the problem to consider, holding the mesh division to examine
-   * @param potential_target_mesh_div a mesh division index that must be matched when the
+   * @param only_from_this_mesh_div a mesh division index that must be matched when the
    * to/from_mesh_division_behavior for the direction examined is
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool inMeshDivision(const Point & pt,
                       const unsigned int i_local,
-                      const unsigned int potential_target_mesh_div,
+                      const unsigned int only_from_this_mesh_div,
                       bool from_direction) const;
 
   /**
    * Whether an element lies inside the mesh division delineated by the MeshDivision object
    * @param elem element to examine
    * @param i_local the index of the problem to consider, holding the mesh division to examine
-   * @param potential_target_mesh_div a mesh division index that must be matched when the
+   * @param only_from_this_mesh_div a mesh division index that must be matched when the
    * to/from_mesh_division_behavior for the direction examined is
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool inMeshDivision(const Elem & elem,
                       const unsigned int i_local,
-                      const unsigned int potential_target_mesh_div,
+                      const unsigned int only_from_this_mesh_div,
                       bool from_direction) const;
 
   /**
    * Whether the element division index should be accepted
    * @param i_local the index of the problem to consider, holding the mesh division to examine
-   * @param potential_target_mesh_div a mesh division index that must be matched when the
+   * @param only_from_this_mesh_div a mesh division index that must be matched when the
    * to/from_mesh_division_behavior for the direction examined is
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool acceptMeshDivision(const unsigned int actual_mesh_div,
                           const unsigned int i_local,
-                          const unsigned int potential_target_mesh_div,
+                          const unsigned int only_from_this_mesh_divv,
                           bool from_direction) const;
 
   /**
