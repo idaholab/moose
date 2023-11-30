@@ -54,7 +54,8 @@ MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
     const unsigned int var_index)
 {
   _local_bboxes.clear();
-  extractLocalFromBoundingBoxes(_local_bboxes);
+  if (_use_bounding_boxes)
+    extractLocalFromBoundingBoxes(_local_bboxes);
 
   _local_meshfuns.clear();
   buildMeshFunctions(var_index, _local_meshfuns);

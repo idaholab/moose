@@ -202,6 +202,10 @@ protected:
   /// Target array/vector variable components
   const std::vector<unsigned int> _to_var_components;
 
+  /// Whether to use bounding boxes to determine the applications that may receive point requests
+  /// then send value data, and at other various checks
+  const bool _use_bounding_boxes;
+
   /// Whether to keep track of the distance from the requested point to the app position
   const bool _use_nearest_app;
   // NOTE: Keeping track of that distance is not optimal efficiency-wise, because we could find the
@@ -346,8 +350,8 @@ private:
   /// Number of froms per processor
   std::vector<unsigned int> _froms_per_proc;
 
-  /// Bounding boxes for all processors
-  std::vector<BoundingBox> _bboxes;
+  /// Bounding boxes for all source applications (indexed with global source app)
+  std::vector<BoundingBox> _from_bboxes;
 
   /// A map from processor to pointInfo vector
   ProcessorToPointInfoVec _processor_to_pointInfoVec;

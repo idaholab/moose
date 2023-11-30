@@ -207,6 +207,12 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
       mooseWarning(
           "Extrapolation (nearest-source options, outside-app source) parameters have "
           "been passed, but no subapp bounding box expansion parameters have been passed.");
+
+  if (!_use_bounding_boxes &&
+      (isParamValid("fixed_bounding_box_size") || isParamSetByUser("bbox_factor")))
+    paramError("use_bounding_boxes",
+               "Cannot pass additional bounding box parameters (sizes, expansion, etc) if we are "
+               "not using bounding boxes");
 }
 
 void
@@ -255,6 +261,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                    "Source mesh division cannot match target mesh division if no target mesh "
                    "division is specified");
       else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      {
         if (!hasFromMultiApp())
           paramError("from_mesh_division_usage",
                      "Cannot match source mesh division index to source subapp index if there is "
@@ -266,6 +273,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                          std::to_string(_from_mesh_divisions[i_from]->getNumDivisions()) +
                          " while there are " + std::to_string(getFromMultiApp()->numGlobalApps()) +
                          " subapps");
+      }
     }
     else if (isParamSetByUser("from_mesh_division_usage"))
       paramError("from_mesh_division_usage",
@@ -319,6 +327,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                        "ensure appropriate use");
       }
       else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      {
         if (!hasToMultiApp())
           paramError("to_mesh_division_usage",
                      "Cannot match target division to target subapp index if there is only one "
@@ -329,6 +338,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                          std::to_string(_to_mesh_divisions[i_to]->getNumDivisions()) +
                          " while there are " + std::to_string(getToMultiApp()->numGlobalApps()) +
                          " subapps");
+      }
     }
     else if (isParamSetByUser("to_mesh_division_usage"))
       paramError("to_mesh_division_usage",
@@ -413,15 +423,15 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 
   // Get the bounding boxes for the "from" domains.
-  // Clean up _bboxes
-  _bboxes.clear();
+  // Clean up _from_bboxes
+  _from_bboxes.clear();
 
   // NOTE: This ignores the app's bounding box inflation and padding
-  _bboxes = getRestrictedFromBoundingBoxes();
+  _from_bboxes = getRestrictedFromBoundingBoxes();
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
-  extendBoundingBoxes(_bbox_factor, _bboxes);
+  extendBoundingBoxes(_bbox_factor, _from_bboxes);
 
   // Figure out how many "from" domains each processor owns.
   _froms_per_proc.clear();
@@ -498,32 +508,88 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   // A point may be close enough to several problems, hosted on several processes
   bool found = false;
 
-  // We examine all bounding boxes and find the maximum distance within a bounding box
-  // from the point. This creates a sphere around the point of interest. Any app with a bounding
-  // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
-  // considered a potential source.
-  Real nearest_max_distance = std::numeric_limits<Real>::max();
-  for (const auto & bbox : _bboxes)
-  {
-    Real distance = bboxMaxDistance(point, bbox);
-    if (distance < nearest_max_distance)
-      nearest_max_distance = distance;
-  }
+  // Additional process-restriction techniques we could use (TODOs):
+  // - nearest_positions/_app could use its own heuristic
+  // - from_mesh_divisions could be polled for which divisions they possess on each
+  //   process, depending on the behavior chosen. This could limit potential senders
+  //   This should be done ahead of this function call, for all points at once
 
-  unsigned int from0 = 0;
-  for (processor_id_type i_proc = 0; i_proc < n_processors();
-       from0 += _froms_per_proc[i_proc], ++i_proc)
-    for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+  // Select the method for determining the apps receiving points/sending values
+  if (_use_bounding_boxes)
+  {
+    // We examine all bounding boxes and find the maximum distance within a bounding box
+    // from the point. This creates a sphere around the point of interest. Any app with a bounding
+    // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
+    // considered a potential source.
+    // NOTE: This is a heuristic. We could try others
+    Real nearest_max_distance = std::numeric_limits<Real>::max();
+    for (const auto & bbox : _from_bboxes)
     {
-      Real distance = bboxMinDistance(point, _bboxes[i_from]);
-      // We will not break here because we want to send a point to all possible source domains
-      if (_greedy_search || distance <= nearest_max_distance ||
-          _bboxes[i_from].contains_point(point))
-      {
-        processors.insert(i_proc);
-        found = true;
-      }
+      Real distance = bboxMaxDistance(point, bbox);
+      if (distance < nearest_max_distance)
+        nearest_max_distance = distance;
     }
+
+    unsigned int from0 = 0;
+    for (processor_id_type i_proc = 0; i_proc < n_processors();
+         from0 += _froms_per_proc[i_proc], ++i_proc)
+      for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+      {
+        Real distance = bboxMinDistance(point, _from_bboxes[i_from]);
+        // We will not break here because we want to send a point to all possible source domains
+        if (_greedy_search || distance <= nearest_max_distance ||
+            _from_bboxes[i_from].contains_point(point))
+        {
+          processors.insert(i_proc);
+          found = true;
+        }
+      }
+  }
+  // Greedy search will contact every single processor. It's not scalable, but if there's valid data
+  // on any subapp on any process, it will find it
+  else if (_greedy_search)
+  {
+    found = true;
+    for (const auto i_proc : make_range(n_processors()))
+      processors.insert(i_proc);
+  }
+  // Since we indicated that we only wanted values from a subapp with the same global index as the
+  // target mesh division, we might as well only communicate with the process that owns this app
+  else if (!_to_mesh_divisions.empty() &&
+           _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+  {
+    // The target point could have a different index in each target mesh division. So on paper, we
+    // would need to check all of them.
+    auto saved_target_div = MooseMeshDivision::INVALID_DIVISION_INDEX;
+    for (const auto i_from : index_range(_from_meshes))
+    {
+      const auto target_div = _to_mesh_divisions[i_from]->divisionIndex(point);
+      // If it's the same division index, do not redo the search
+      if (target_div == saved_target_div)
+        continue;
+      else
+        saved_target_div = target_div;
+
+      // Look for the processors owning a source-app with an index equal to the target mesh division
+      unsigned int from0 = 0;
+      for (processor_id_type i_proc = 0; i_proc < n_processors();
+           from0 += _froms_per_proc[i_proc], ++i_proc)
+        for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+        {
+          const auto i_local = getLocalSourceAppIndex(i_from);
+          if (target_div == i_from)
+          {
+            processors.insert(i_proc);
+            found = true;
+          }
+        }
+    }
+  }
+  else
+    mooseError("No algorithm were selected to find which processes may send value data "
+               "for a each target point. Please either specify using bounding boxes, "
+               "greedy search, or to_mesh_division-based parameters");
+
   // Error out if we could not find this point when ask us to do so
   if (!found && _error_on_miss)
     mooseError("Cannot locate point ", point, " \n ", "mismatched meshes are used");
@@ -536,7 +602,9 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
                                                      ProcessorToPointVec & outgoing_points)
 {
   std::set<processor_id_type> processors;
-  // Try to find which processors
+  // Find which processors will receive point data so they can send back value data
+  // The list can be larger than needed, depending on the heuristic / algorithm used to make
+  // the call on whether a processor (and the apps it runs) should be involved
   processors.clear();
   locatePointReceivers(point, processors);
 
@@ -707,7 +775,7 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
 
   // Extract the local bounding boxes.
   for (unsigned int i_from = 0; i_from < _froms_per_proc[processor_id()]; ++i_from)
-    local_bboxes[i_from] = _bboxes[local_start + i_from];
+    local_bboxes[i_from] = _from_bboxes[local_start + i_from];
 }
 
 void
@@ -734,17 +802,17 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     auto & fe_type = _to_variables[var_index]->feType();
     bool is_nodal = _to_variables[var_index]->isNodal();
 
-    // In the higher order elemental variable case, we receive point values, not nodal or elemental
-    // We use an InterpCache to store the values
-    // The distance_cache is necessary to choose between multiple origin problems sending values
-    // This code could be unified with the lower order order case by using the dofobject_to_valsvec
+    // In the higher order elemental variable case, we receive point values, not nodal or
+    // elemental We use an InterpCache to store the values The distance_cache is necessary to
+    // choose between multiple origin problems sending values This code could be unified with the
+    // lower order order case by using the dofobject_to_valsvec
     if (fe_type.order > CONSTANT && !is_nodal)
     {
       // Defining only boundary values will not be enough to describe the variable, disallow it
       if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
-        mooseError(
-            "Higher order discontinuous elemental variables are not supported for target-boundary "
-            "restricted transfers");
+        mooseError("Higher order discontinuous elemental variables are not supported for "
+                   "target-boundary "
+                   "restricted transfers");
       // Not implemented. Unless we contain the entire mesh!
       if (_to_mesh_divisions.size() &&
           _to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION)
@@ -1338,7 +1406,7 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
                                                       const unsigned int only_from_mesh_div,
                                                       Real & distance) const
 {
-  if (!local_bboxes[i_from].contains_point(pt))
+  if (_use_bounding_boxes && !local_bboxes[i_from].contains_point(pt))
     return false;
   else
   {
