@@ -22,8 +22,8 @@ VectorOfVectorRowSum::validParams()
                                "Name of reporter that contains row sum from vector of vectors.");
   params.addRequiredParam<ReporterName>(
       "reporter_vector_of_vectors", "Name of StochasticReporter vector of vectors to be summed");
+  // should execute on Timestep end to make sure data has been cloned into reporter from subapps
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
