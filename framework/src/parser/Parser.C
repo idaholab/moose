@@ -15,8 +15,8 @@
 #include "MooseTypes.h"
 #include "CommandLine.h"
 #include "SystemInfo.h"
-#include "MooseUtils.h"
 #include "Parser.h"
+#include "Units.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
