@@ -39,6 +39,12 @@
     vector_b = vectors_to_dot/vec_b
     scale = 0.5
   []
+  [vector_sum]
+    type = VectorSum
+    name = sum
+    vector= vectors_to_dot/vec_a
+    scale = 0.5
+  []
 []
 
 [Outputs]
