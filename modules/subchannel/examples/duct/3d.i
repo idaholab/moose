@@ -33,7 +33,7 @@
   []
   [q_prime]
   []
-  [Disp]
+  [displacement]
   []
 []
 
