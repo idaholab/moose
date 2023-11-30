@@ -127,7 +127,7 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         {
           standard_area = pitch * (rod_diameter / 2.0 + gap);
           additional_area = 0.0;
-          displaced_area = (*_Disp_soln)(node)*pitch;
+          displaced_area = (*_displacement_soln)(node)*pitch;
           wire_area = libMesh::pi * std::pow(wire_diameter, 2.0) / 8.0 / std::cos(theta);
           wetted_perimeter =
               rod_perimeter + 0.5 * libMesh::pi * wire_diameter / std::cos(theta) + pitch;
