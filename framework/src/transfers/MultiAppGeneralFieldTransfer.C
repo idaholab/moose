@@ -260,6 +260,9 @@ MultiAppGeneralFieldTransfer::initialSetup()
                          " while there are " + std::to_string(getFromMultiApp()->numGlobalApps()) +
                          " subapps");
     }
+    else if (isParamSetByUser("from_mesh_division_usage"))
+      paramError("from_mesh_division_usage",
+                 "'from_mesh_division' must be specified if the usage method is specified");
   }
 
   // Loop over all target problems
@@ -320,6 +323,9 @@ MultiAppGeneralFieldTransfer::initialSetup()
                          " while there are " + std::to_string(getToMultiApp()->numGlobalApps()) +
                          " subapps");
     }
+    else if (isParamSetByUser("to_mesh_division_usage"))
+      paramError("to_mesh_division_usage",
+                 "'to_mesh_division' must be specified if the usage method is specified");
   }
 
   // Check if components are set correctly if using an array variable
@@ -625,8 +631,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, node))
           continue;
 
-        // Skip if the node is not indexed within the mesh division
-        if (!_to_mesh_divisions.empty() && !inMeshDivision(_to_mesh_divisions[i_to], *node))
+        // Skip if the node does not meet the target mesh division behavior
+        // We cannot know from which app the data will come from so we cannot know
+        // the source mesh division index and the source app global index
+        if (!_to_mesh_divisions.empty() && !inMeshDivision(*node, i_to, i_to, false))
           continue;
 
         // Cache point information
@@ -652,7 +660,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
           continue;
 
         // Skip if the element is not indexed within the mesh division
-        if (!_to_mesh_divisions.empty() && !inMeshDivision(_to_mesh_divisions[i_to], *elem))
+        if (!_to_mesh_divisions.empty() && !inMeshDivision(*elem, i_to, i_to, false))
           continue;
 
         // Cache point information
@@ -716,7 +724,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
             "Higher order discontinuous elemental variables are not supported for target-boundary "
             "restricted transfers");
       // Not implemented. Unless we contain the entire mesh!
-      if (_to_mesh_divisions.size())
+      if (_to_mesh_divisions.size() &&
+          _to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION)
         for (const auto mesh_div : _to_mesh_divisions)
           if (!mesh_div->coversEntireMesh())
             mooseError("Higher order variable support not implemented for target mesh division "
@@ -1325,24 +1334,8 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
       return false;
 
     // Check point against the source mesh division
-    if (!_from_mesh_divisions.empty())
-    {
-      const auto source_division_index =
-          _from_mesh_divisions[i_from]->divisionIndex(transformed_pt);
-      // If the point is not indexed in the division and the division is used as a restriction
-      if (_from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
-          source_division_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
-        return false;
-      // If the point is not the at the same index in the target and the origin meshes, reject
-      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
-               mesh_div != source_division_index)
-        return false;
-      // If the point is at a certain division index that is not the same as the index of the subapp
-      // we are currently considering to obtain data for that point, reject
-      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
-               source_division_index != from_global_num)
-        return false;
-    }
+    if (!_from_mesh_divisions.empty() && !inMeshDivision(pt, i_from, mesh_div, true))
+      return false;
 
     // Get nearest position (often a subapp position) for the target point
     // We want values from the child app that is closest to the same position as the target
@@ -1496,17 +1489,53 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
 }
 
 bool
-MultiAppGeneralFieldTransfer::inMeshDivision(const MeshDivision * const mesh_div,
-                                             const Point & pt) const
+MultiAppGeneralFieldTransfer::inMeshDivision(const Point & pt,
+                                             const unsigned int i_local,
+                                             const unsigned int potential_target_mesh_div,
+                                             bool from_direction) const
 {
-  return mesh_div->divisionIndex(pt) != MooseMeshDivision::INVALID_DIVISION_INDEX;
+  const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(pt)
+                                             : _to_mesh_divisions[i_local]->divisionIndex(pt);
+  return acceptMeshDivision(division_index, i_local, potential_target_mesh_div, from_direction);
 }
 
 bool
-MultiAppGeneralFieldTransfer::inMeshDivision(const MeshDivision * const mesh_div,
-                                             const Elem & elem) const
+MultiAppGeneralFieldTransfer::inMeshDivision(const Elem & elem,
+                                             const unsigned int i_local,
+                                             const unsigned int potential_target_mesh_div,
+                                             bool from_direction) const
 {
-  return mesh_div->divisionIndex(elem) != MooseMeshDivision::INVALID_DIVISION_INDEX;
+  const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(elem)
+                                             : _to_mesh_divisions[i_local]->divisionIndex(elem);
+  return acceptMeshDivision(division_index, i_local, potential_target_mesh_div, from_direction);
+}
+
+bool
+MultiAppGeneralFieldTransfer::acceptMeshDivision(const unsigned int actual_mesh_div,
+                                                 const unsigned int i_local,
+                                                 const unsigned int potential_target_mesh_div,
+                                                 bool from_direction) const
+{
+  const auto global_app_index =
+      from_direction ? getGlobalSourceAppIndex(i_local) : getGlobalTargetAppIndex(i_local);
+  const auto mesh_division_behavior =
+      from_direction ? _from_mesh_division_behavior : _to_mesh_division_behavior;
+
+  // If the point is not indexed in the division and the division is used as a restriction
+  if (mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
+      actual_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
+    return false;
+  // If the point is not the at the same index in the target and the origin meshes, reject
+  else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+           potential_target_mesh_div != actual_mesh_div)
+    return false;
+  // If the point is at a certain division index that is not the same as the index of the subapp
+  // we are currently considering to obtain data for that point, reject
+  else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+           actual_mesh_div != global_app_index)
+    return false;
+  else
+    return true;
 }
 
 bool

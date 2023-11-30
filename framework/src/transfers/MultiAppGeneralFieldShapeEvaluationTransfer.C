@@ -142,7 +142,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         else
           point_found = true;
 
-        // Assign value if it's closer
+        // Assign value and the distance from the target point to the origin data
+        // distance only matters if multiple applications are providing a valid value
+        // which would mean they overlap in the reference space. The distance can help
+        // lift the indetermination on which value to select
         if (distance < outgoing_vals[i_pt].second)
         {
           outgoing_vals[i_pt].first = val;
