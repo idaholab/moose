@@ -10,6 +10,7 @@ import subprocess
 import shutil
 import platform
 import getpass
+import re
 from datetime import datetime, timezone
 
 import jinja2
@@ -123,6 +124,8 @@ class ApptainerGenerator:
             add_default_args(parser, remote=True)
             parser.add_argument('--local', action='store_true',
                                 help='Use a local dependency container')
+            parser.add_argument('--dep', type=str,
+                                help='Use this dependency instead')
             parser.add_argument('--alt-dep-tag', type=str,
                                 help='An alternate dependency tag to pull')
             parser.add_argument('--alt-dep-tag-prefix', type=str,
@@ -149,6 +152,10 @@ class ApptainerGenerator:
                                   help="Arguments to pass to apptainer build")
         build_parser.add_argument('--sign', type=int,
                                   help='Sign the built container with the given key')
+        build_parser.add_argument('--skip-tests', action='store_true',
+                                  help='Set to skip running the tests after the build')
+        build_parser.add_argument('--no-cleanup', action='store_true',
+                                  help='Pass to apptainer to not cleanup the build (for debugging)')
 
         push_parser = action_parser.add_parser('push', parents=[parent],
                                                 help='Push a container')
@@ -205,6 +212,38 @@ class ApptainerGenerator:
         """ gets sha of the given repo """
         command = ['git', 'rev-parse', 'HEAD']
         return subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
+    @staticmethod
+    def git_submodule_sha(dir, name):
+        """ gets the sha of the given submodule """
+        command = ['git', 'submodule', 'status', name]
+        result = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+        sha_re = re.search(r'^[U+-]?([a-f0-9]{40}) ', result)
+        if sha_re:
+            return sha_re.group(1)
+        raise Exception(f'Failed to parse submodule sha for {name} from "{result}"')
+
+    @staticmethod
+    def git_submodule_remote(dir, name):
+        """ gets the remote of the given submodule """
+        command = ['git', 'config', '--file=.gitmodules', f'submodule.{name}.url']
+        remote = subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
+        # Need to replace remotes that are relative paths
+        # Here, we'll replace even SSH relative paths with HTTPS relative paths
+        # because we shouldn't have private dependencies and SSH keys probably
+        # aren't available in the build
+        if remote.startswith('../..'):
+            base_command = ['git', 'remote', 'get-url', 'origin']
+            base_remote = subprocess.check_output(base_command, cwd=dir, encoding='utf-8').strip()
+            host_re = re.search(r'^git@([a-zA-Z0-9_.-]+\.[a-zA-Z]+):', base_remote)
+            if not host_re:
+                host_re = re.search(r'^https:\/\/([a-zA-Z0-9_.-]+\.[a-zA-Z]+)\/', base_remote)
+            if not host_re:
+                raise Exception(f'Failed to replace ../../ in git submodule remote for {name}')
+            return remote.replace('../../', f'https://{host_re.group(1)}/')
+
+        return remote
 
     def run(self, command):
         """
@@ -387,7 +426,10 @@ class ApptainerGenerator:
         header += '# Consumed jinja variables\n'
         header += '#\n'
         for var in sorted(jinja_vars):
-            header += f'#   {var}="{jinja_data.get(var, "")}"\n'
+            contents = f'"{jinja_data.get(var, "")}"'
+            if '\n' in contents:
+                contents = 'Multi-line string'
+            header += f'#   {var}={contents}\n'
         header += '#\n'
         header += '\n'
 
@@ -397,20 +439,25 @@ class ApptainerGenerator:
         """
         Adds common labels to the given definition content
         """
-        definition += '\n\n%labels\n'
+        contents = '%labels\n'
         name = self.name
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             name += '.modified'
-        definition += f'    {name}.host.hostname {socket.gethostname()}\n'
-        definition += f'    {name}.host.user {getpass.getuser()}\n'
-        definition += f'    {name}.moose.sha {self.git_repo_sha(MOOSE_DIR)}\n'
-        definition += f'    {name}.version {self.tag}\n'
+        contents += f'{name}.host.hostname {socket.gethostname()}\n'
+        contents += f'{name}.host.user {getpass.getuser()}\n'
+        contents += f'{name}.moose.sha {self.git_repo_sha(MOOSE_DIR)}\n'
+        contents += f'{name}.version {self.tag}\n'
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            definition += f'    {name}.civet.job {civet_server}/job/{civet_job_id}\n'
-        return definition
+
+            # We use the backend server on most build clients, so replace that
+            # URL with something more useful if we can
+            civet_server = civet_server.replace('https://civet-be.', 'https://civet.')
+
+            contents += f'{name}.civet.job {civet_server}/job/{civet_job_id}\n'
+        return definition + '\n\n' + self.add_def_whitespace(contents)
 
     @staticmethod
     def create_filename(app_root, section_key, actions):
@@ -448,35 +495,56 @@ class ApptainerGenerator:
                                       file_path))
         return file_list
 
-    def add_application_additions(self, app_root, jinja_data):
+    @staticmethod
+    def add_def_whitespace(content):
         """
-        Add application specific sections if found to jinja data
-        Example, if found:
-            app_root/apptainer/post_pre_configure.sh
-            app_root/apptainer/post_pre.sh
-            app_root/apptainer/environment.sh
-            etc
-        then the contents therein will be exchanged where appropriate.
+        Adds whitespace to content for adding to a defintion file
+        """
+        if not content:
+            return content
+        return content.replace('\n', '\n    ')
 
-        File naming syntax:
-            <section>_<method>_<action>.sh
+    def add_definition_includes(self, jinja_data):
         """
-        # Add your sections here (be sure to modify apptainer/app.def to match)
-        section_meta = {'environment': [],
-                        'post': ['configure', 'make', 'makeinstall'],
-                        'test': ['test']}
-        for section_key, actions in section_meta.items():
-            file_list = self.create_filename(app_root, section_key, actions)
-            for (a_section, file_path) in file_list:
-                with open(file_path, 'r') as section_file:
-                    multi_lines = []
-                    for i, a_line in enumerate(section_file.readlines()):
-                        # next line items need indentation
-                        if i != 0:
-                            multi_lines.append(f'    {a_line}')
-                        else:
-                            multi_lines.append(a_line)
-                    jinja_data[a_section] = ''.join(multi_lines)
+        Includes files from the repository into the definition file as defined.
+        This is done by setting pre-defined jinja variables for the includes.
+
+        Currently, this is only for the "app" container.
+
+        From syntax (lower, file in repo): apptainer/<container>_<section>_<method>
+        Jinja variable (upper): SECTION_<section>_<method>
+
+        Current supported includes:
+            apptainer/app_environment
+            apptainer/app_post_begin
+            apptainer/app_post_pre_make
+            apptainer/app_post_pre_install
+            apptainer/app_post_post_install
+            apptainer/app_post_end
+            apptainer/app_test_begin
+            apptainer/app_test_end
+        """
+        if self.args.library != 'app':
+            return
+
+        app_name, app_root, _ = Versioner.get_app()
+        sections = ['environment', 'post_begin', 'post_pre_make', 'post_pre_install',
+                    'post_post_install', 'post_end', 'test_begin', 'test_end']
+
+        for section in sections:
+            filename = f'apptainer/app_{section}'
+            full_filename = os.path.join(app_root, filename)
+            if not os.path.isfile(full_filename):
+                continue
+
+            var = f'SECTION_{section.upper()}'
+            file_contents = open(full_filename, 'r').read()
+            contents = f"# Begin include from '{filename}' in {app_name}\n"
+            contents += file_contents
+            contents += f"# End include from '{filename}' in {app_name}\n"
+            contents = self.add_def_whitespace(contents)
+
+            jinja_data[var] = contents
 
     def add_definition_vars(self, jinja_data):
         """
@@ -490,13 +558,12 @@ class ApptainerGenerator:
             jinja_data['APPLICATION_DIR'] = app_root
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
-            self.add_application_additions(app_root, jinja_data)
 
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
-        if self.args.library == 'moose':
+        if self.args.library == 'moose-dev':
             # test-tools is deprecated, but leave it here, so this scripts continues
             # to function properly against older hashes.
-            for package in ['tools', 'test-tools']:
+            for package in ['tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 if os.path.exists(meta_yaml):
                     with open(meta_yaml, 'r') as meta_contents:
@@ -513,6 +580,25 @@ class ApptainerGenerator:
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
+
+        # Set petsc and libmesh versions
+        need_versions = {'petsc': {'package': 'petsc', 'submodule': 'petsc'},
+                         'libmesh': {'package': 'libmesh', 'submodule': 'libmesh'},
+                         'moose-dev': {'package': 'wasp', 'submodule': 'framework/contrib/wasp'}}
+        for library, package_info in need_versions.items():
+            if library == self.args.library:
+                package = package_info['package']
+                submodule = package_info['submodule']
+
+                repo_sha = self.git_submodule_sha(MOOSE_DIR, submodule)
+                repo_remote = self.git_submodule_remote(MOOSE_DIR, submodule)
+
+                variable_prefix = f'{package}_'.upper()
+                jinja_data[variable_prefix + 'GIT_SHA'] = repo_sha
+                jinja_data[variable_prefix + 'GIT_REMOTE'] = repo_remote
+
+        # Add include contents, if any
+        self.add_definition_includes(jinja_data)
 
     def _action_exists(self):
         """
@@ -564,16 +650,30 @@ class ApptainerGenerator:
 
         # Whether or not the definition file has a dependency
         needs_from = '{{ APPTAINER_BOOTSTRAP }}' in definition
+        # User provided an alternate dependency
+        if self.args.dep:
+            self.print(f'Using alternate dependency {self.args.dep}')
+            # Provided one but we don't need it
+            if not needs_from:
+                self.error(f'Library {self.name} does not need a dependency, but --dep was provided')
         # No dependent library needed
         if dep_meta is None:
             if needs_from:
                 self.error(f'Library {self.name} needs a dependency, but none found')
         # Dependency library is needed, figure out how to get it
         else:
+            apptainer_bootstrap, apptainer_from = None, None
             if not needs_from:
                 self.error(f'Definition {self.def_path} missing a templated BootStrap')
-
-            apptainer_bootstrap, apptainer_from = self._dependency_from(dep_meta)
+            if self.args.dep:
+                if self.args.dep.startswith('oras'):
+                    apptainer_bootstrap = 'oras'
+                    apptainer_from = self.args.dep.replace('oras://', '')
+                else:
+                    apptainer_bootstrap = 'localimage'
+                    apptainer_from = self.args.dep
+            else:
+                apptainer_bootstrap, apptainer_from = self._dependency_from(dep_meta)
             jinja_data['APPTAINER_BOOTSTRAP'] = apptainer_bootstrap
             jinja_data['APPTAINER_FROM'] = apptainer_from
 
@@ -625,8 +725,12 @@ class ApptainerGenerator:
 
         # Do the build!
         args = []
+        if self.args.skip_tests:
+            args.append('-T')
+        if self.args.no_cleanup:
+            args.append('--no-cleanup')
         if self.args.build_args is not None:
-            args = self.args.build_args.split(' ')
+            args.extend(self.args.build_args.split(' '))
         container_definition_path = self.container_path(self.name, self.tag, image=False)
         self.apptainer_build(container_definition_path, self.name, self.tag, args=args)
 

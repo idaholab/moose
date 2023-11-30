@@ -7,8 +7,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 2 %}
-{% set version = "3.20.0" %}
+{% set build = 0 %}
+{% set version = "3.20.1" %}
 
 # permanent
 {% set strbuild = "build_" + build|string %}
@@ -29,6 +29,8 @@ build:
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 

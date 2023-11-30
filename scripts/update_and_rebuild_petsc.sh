@@ -48,9 +48,15 @@ done
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SCRIPT_DIR
 
+if [ -n "$PETSC_SRC_DIR" ]; then
+  skip_sub_update=1
+else
+  MOOSE_DIR=${SCRIPT_DIR}/..
+  PETSC_SRC_DIR=${MOOSE_DIR}/petsc
+fi
+
 # Display help
 if [[ -n "$help" ]]; then
-  cd $SCRIPT_DIR/..
   echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | <PETSc options> ]"
   echo
   echo "-h | --help              Display this message and list of available PETSc options"
@@ -59,8 +65,8 @@ if [[ -n "$help" ]]; then
   echo "*************************************************************************************"
   echo ""
 
-  if [ -e "./petsc/configure" ]; then
-    cd petsc
+  if [ -e "${PETSC_SRC_DIR}/configure" ]; then
+    cd ${PETSC_SRC_DIR}
     ./configure -h
   fi
   exit 0
@@ -74,21 +80,22 @@ if [[ -n "$go_fast" && $# != 1 ]]; then
 fi
 
 # Set PETSc envir
-export PETSC_DIR=$SCRIPT_DIR/../petsc
+export PETSC_DIR=${PETSC_SRC_DIR}
 if [ -z "$PETSC_ARCH" ]; then
     export PETSC_ARCH=arch-moose
 fi
 
 
-cd $SCRIPT_DIR/..
-
 # Test for git repository when not using fast
-git_dir=`git rev-parse --show-cdup 2>/dev/null`
-if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]; then
-  git submodule update --init --recursive petsc
-  if [[ $? != 0 ]]; then
-    echo "git submodule command failed, are your proxy settings correct?"
-    exit 1
+if [ -z "$skip_sub_update" ]; then
+  cd ${MOOSE_DIR}
+  git_dir=`git rev-parse --show-cdup 2>/dev/null`
+  if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
+    git submodule update --init --recursive petsc
+    if [[ $? != 0 ]]; then
+      echo "git submodule command failed, are your proxy settings correct?"
+      exit 1
+    fi
   fi
 fi
 
@@ -97,11 +104,11 @@ if [ ! -z "$PETSC_PREFIX" ]; then
   PFX_STR="--prefix=$PETSC_PREFIX"
 fi
 
-cd $SCRIPT_DIR/../petsc
+cd ${PETSC_SRC_DIR}
 
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
-  rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
+  rm -rf ${PETSC_SRC_DIR}/$PETSC_ARCH
 
   source $SCRIPT_DIR/configure_petsc.sh
   configure_petsc "$PFX_STR" $*

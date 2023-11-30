@@ -4,8 +4,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
-{% set version = "2023.11.06" %}
+{% set build = 0 %}
+{% set version = "2023.11.29" %}
 {% set vtk_friendly_version = "9.2" %}
 
 # permanent
@@ -26,6 +26,8 @@ build:
   script_env:
     - MOOSE_JOBS
     - vtk_friendly_version={{ vtk_friendly_version }}
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:

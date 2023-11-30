@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 14 %}
+{% set build = 15 %}
 {% set version = "4.0.2" %}
 
 # permanent
@@ -26,6 +26,9 @@ build:
   pin_depends: strict
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:
@@ -40,6 +43,9 @@ requirements:
     - {{ moose_libclang13 }}
     - {{ moose_clangcc }}       # [osx]
     - {{ moose_clangxx }}       # [osx]
+  host:
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - openssl <3.2.0a           # [osx]
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
@@ -73,7 +79,8 @@ requirements:
     - zfp 0.5.5
     - bison 3.4
     - mpi 1.0 mpich
-  # Python min/max constraints
+    # TODO: Try to remove when this version settles down among other conda-forge packages
+    - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   run_constrained:
     - python <{{3.11}}
 

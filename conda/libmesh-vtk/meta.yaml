@@ -3,7 +3,7 @@
 #   libmesh/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 7 %}
+{% set build = 8 %}
 {% set vtk_version = "9.2.6" %}
 {% set vtk_friendly_version = "9.2" %}
 {% set sha256 = "06fc8d49c4e56f498c40fcb38a563ed8d4ec31358d0101e8988f0bb4d539dd12" %}
@@ -27,6 +27,8 @@ build:
   script_env:
     - MOOSE_JOBS
     - vtk_friendly_version={{ vtk_friendly_version }}
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
 
 requirements:
   build:
