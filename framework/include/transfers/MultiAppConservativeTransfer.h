@@ -36,9 +36,9 @@ protected:
 
   bool performAdjustment(const PostprocessorValue & from, const PostprocessorValue & to) const;
 
-  /// Name of variables transfering from
+  /// Name of variables transferring from
   const std::vector<VariableName> _from_var_names;
-  /// Name of variables transfering to
+  /// Name of variables transferring to
   const std::vector<AuxVariableName> _to_var_names;
 
   /// This values are used if a derived class only supports one variable
@@ -53,17 +53,18 @@ protected:
   std::vector<PostprocessorName> _to_postprocessors_to_be_preserved;
 
 private:
-  void adjustTransferedSolution(FEProblemBase * from_problem,
-                                PostprocessorName & from_postprocessor,
-                                FEProblemBase & to_problem,
-                                PostprocessorName & to_postprocessor);
+  void adjustTransferredSolution(FEProblemBase * from_problem,
+                                 PostprocessorName & from_postprocessor,
+                                 FEProblemBase & to_problem,
+                                 PostprocessorName & to_postprocessor);
 
-  void adjustTransferedSolutionNearestPoint(unsigned int i,
-                                            FEProblemBase * from_problem,
-                                            PostprocessorName & from_postprocessor,
-                                            FEProblemBase & to_problem,
-                                            PostprocessorName & to_postprocessor);
+  void adjustTransferredSolutionNearestPoint(unsigned int i,
+                                             FEProblemBase * from_problem,
+                                             PostprocessorName & from_postprocessor,
+                                             FEProblemBase & to_problem,
+                                             PostprocessorName & to_postprocessor);
 
+  /// Whether to use a nearest point UserObject to obtain the conservation factor
   bool _use_nearestpoint_pps;
   /// Whether the adjustment may be skipped when the postprocessor values are 0 / of different signs
   bool _allow_skipped_adjustment;

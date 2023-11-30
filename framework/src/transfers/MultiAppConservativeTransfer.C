@@ -231,16 +231,16 @@ MultiAppConservativeTransfer::postExecute()
         if (getToMultiApp()->hasLocalApp(i))
         {
           if (_use_nearestpoint_pps)
-            adjustTransferedSolutionNearestPoint(i,
-                                                 &from_problem,
-                                                 _from_postprocessors_to_be_preserved[0],
-                                                 getToMultiApp()->appProblemBase(i),
-                                                 _to_postprocessors_to_be_preserved[0]);
+            adjustTransferredSolutionNearestPoint(i,
+                                                  &from_problem,
+                                                  _from_postprocessors_to_be_preserved[0],
+                                                  getToMultiApp()->appProblemBase(i),
+                                                  _to_postprocessors_to_be_preserved[0]);
           else
-            adjustTransferedSolution(&from_problem,
-                                     _from_postprocessors_to_be_preserved[i],
-                                     getToMultiApp()->appProblemBase(i),
-                                     _to_postprocessors_to_be_preserved[0]);
+            adjustTransferredSolution(&from_problem,
+                                      _from_postprocessors_to_be_preserved[i],
+                                      getToMultiApp()->appProblemBase(i),
+                                      _to_postprocessors_to_be_preserved[0]);
         }
     }
 
@@ -254,14 +254,14 @@ MultiAppConservativeTransfer::postExecute()
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
       {
         if (_use_nearestpoint_pps)
-          adjustTransferedSolutionNearestPoint(
+          adjustTransferredSolutionNearestPoint(
               i,
               getFromMultiApp()->hasLocalApp(i) ? &getFromMultiApp()->appProblemBase(i) : nullptr,
               _from_postprocessors_to_be_preserved[0],
               to_problem,
               _to_postprocessors_to_be_preserved[0]);
         else
-          adjustTransferedSolution(
+          adjustTransferredSolution(
               getFromMultiApp()->hasLocalApp(i) ? &getFromMultiApp()->appProblemBase(i) : nullptr,
               _from_postprocessors_to_be_preserved[0],
               to_problem,
@@ -277,7 +277,7 @@ MultiAppConservativeTransfer::postExecute()
 }
 
 void
-MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
+MultiAppConservativeTransfer::adjustTransferredSolutionNearestPoint(
     unsigned int i,
     FEProblemBase * from_problem,
     PostprocessorName & from_postprocessor,
@@ -395,10 +395,10 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
 }
 
 void
-MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_problem,
-                                                       PostprocessorName & from_postprocessor,
-                                                       FEProblemBase & to_problem,
-                                                       PostprocessorName & to_postprocessor)
+MultiAppConservativeTransfer::adjustTransferredSolution(FEProblemBase * from_problem,
+                                                        PostprocessorName & from_postprocessor,
+                                                        FEProblemBase & to_problem,
+                                                        PostprocessorName & to_postprocessor)
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem)
@@ -426,7 +426,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   // Compute to-postprocessor to have the adjuster
   to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 
-  // Now we should have the right adjuster based on the transfered solution
+  // Now we should have the right adjuster based on the transferred solution
   const auto to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
 
   // decide if the adjustment should be performed
