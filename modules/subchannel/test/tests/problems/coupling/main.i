@@ -66,7 +66,7 @@ P_out = 101325 # Pa
   [q_prime]
     block = fuel_pins
   []
-  [Disp]
+  [displacement]
     block = sub_channel
   []
 []
