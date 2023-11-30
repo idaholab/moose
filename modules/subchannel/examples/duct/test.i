@@ -263,6 +263,6 @@ P_out = 2.0e5 # Pa
   [xfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S Disp'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S displacement'
   []
 []
