@@ -41,6 +41,8 @@ AppFactory::createAppShared(const std::string & default_app_type,
                             char ** argv,
                             MPI_Comm comm_world_in)
 {
+  mooseDeprecated("Please update your main.C to adapt new main function in MOOSE framework, see "
+                  "the example of ../moose/test/src/main.C. ");
   // Construct front parser
   auto front_parser = std::make_unique<Parser>();
 
