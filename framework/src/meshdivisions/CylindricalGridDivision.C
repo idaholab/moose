@@ -36,14 +36,10 @@ CylindricalGridDivision::validParams()
   params.addRangeCheckedParam<Real>(
       "r_min", 0, "r_min>=0", "Minimum radial coordinate (for a hollow cylinder)");
   params.addRequiredRangeCheckedParam<Real>("r_max", "r_max>0", "Maximum radial coordinate");
-  params.addRangeCheckedParam<Real>("cylinder_axial_min",
-                                    std::numeric_limits<Real>::min(),
-                                    "cylinder_axial_min>0",
-                                    "Minimum axial coordinate");
-  params.addRangeCheckedParam<Real>("cylinder_axial_max",
-                                    std::numeric_limits<Real>::max(),
-                                    "cylinder_axial_max>0",
-                                    "Maximum axial coordinate");
+  params.addParam<Real>(
+      "cylinder_axial_min", std::numeric_limits<Real>::lowest(), "Minimum axial coordinate");
+  params.addParam<Real>(
+      "cylinder_axial_max", std::numeric_limits<Real>::max(), "Maximum axial coordinate");
 
   // Number of bins
   params.addRequiredRangeCheckedParam<unsigned int>(
@@ -96,7 +92,8 @@ CylindricalGridDivision::CylindricalGridDivision(const InputParameters & paramet
     paramError("n_axial", "Zero-height cylinder cannot be subdivided axially");
 
   // Check non-infinite size if subdivided
-  if ((_min_z == std::numeric_limits<Real>::min() || _max_z == std::numeric_limits<Real>::min()) &&
+  if ((_min_z == std::numeric_limits<Real>::lowest() ||
+       _max_z == std::numeric_limits<Real>::max()) &&
       _n_axial > 1)
     paramError("n_axial",
                "Infinite-height cylinder cannot be subdivided axially. Please specify both a "
