@@ -45,6 +45,11 @@ public:
   virtual const unsigned int & getNumOfRods() const { return _nrods; }
 
   /**
+   * Return the number of rings
+   */
+  virtual const unsigned int & getNumOfRings() const { return _n_rings; }
+
+  /**
    * Return rod index given subchannel index and local neighbor index
    */
   virtual const unsigned int & getRodIndex(const unsigned int channel_idx,
@@ -57,6 +62,11 @@ public:
    * Return wire diameter
    */
   virtual const Real & getWireDiameter() const { return _dwire; }
+
+  /**
+   * Return flat to flat [m]
+   */
+  virtual const Real & getFlatToFlat() const { return _flat_to_flat; }
 
   /**
    * Return the wire lead length

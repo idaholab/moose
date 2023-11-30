@@ -2,7 +2,7 @@
 # “Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
 # ”Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
 T_in = 588.5
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 2.0e5 # Pa
 rod_diameter = 5.84e-3
 heated_length = 1.0
@@ -66,9 +66,6 @@ pitch = 7.26e-3
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []
@@ -88,7 +85,7 @@ pitch = 7.26e-3
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 

@@ -6,21 +6,21 @@
 ###################################################
 T_in = 616.4 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.427 / Total_Surface_Area}
+mass_flux_in = '${fparse 2.427 / Total_Surface_Area}'
 P_out = 2.0e5
 Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
 scale_factor = 0.01
-fuel_pin_pitch = ${fparse 0.5664*scale_factor}
-fuel_pin_diameter = ${fparse 0.4419*scale_factor}
-wire_z_spacing = ${fparse 15.24*scale_factor}
-wire_diameter = ${fparse 0.1244*scale_factor}
-inner_duct_in = ${fparse 4.64*scale_factor}
+fuel_pin_pitch = '${fparse 0.5664*scale_factor}'
+fuel_pin_diameter = '${fparse 0.4419*scale_factor}'
+wire_z_spacing = '${fparse 15.24*scale_factor}'
+wire_diameter = '${fparse 0.1244*scale_factor}'
+inner_duct_in = '${fparse 4.64*scale_factor}'
 n_rings = 5
-heated_length = ${fparse 34.3*scale_factor}
-unheated_length_exit = ${fparse 26.9*scale_factor}
+heated_length = '${fparse 34.3*scale_factor}'
+unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
@@ -73,9 +73,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     block = subchannel
   []
   [S]
-    block = subchannel
-  []
-  [Sij]
     block = subchannel
   []
   [w_perim]
@@ -207,7 +204,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     type = PiecewiseLinear
     data_file = 'massflow_SHRT45.csv'
     format = "columns"
-    scale_factor = ${fparse mass_flux_in / 2.427}
+    scale_factor = '${fparse mass_flux_in / 2.427}'
   []
 
   [time_step_limiting]
@@ -292,14 +289,14 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   end_time = 900.0
   [TimeStepper]
     type = IterationAdaptiveDT
-     dt = 0.1
-     iteration_window = 5
-     optimal_iterations = 6
-     growth_factor = 1.2
-     cutback_factor = 0.8
-     timestep_limiting_function = 'time_step_limiting'
-   []
-   dtmax = 20
+    dt = 0.1
+    iteration_window = 5
+    optimal_iterations = 6
+    growth_factor = 1.2
+    cutback_factor = 0.8
+    timestep_limiting_function = 'time_step_limiting'
+  []
+  dtmax = 20
 []
 
 ################################################################################

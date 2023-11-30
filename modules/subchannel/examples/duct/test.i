@@ -1,5 +1,5 @@
 T_in = 660
-mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
+mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -52,9 +52,6 @@ P_out = 2.0e5 # Pa
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []
@@ -77,7 +74,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 

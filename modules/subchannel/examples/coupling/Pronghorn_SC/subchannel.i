@@ -95,9 +95,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []

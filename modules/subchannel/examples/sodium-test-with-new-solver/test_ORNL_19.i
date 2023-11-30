@@ -5,10 +5,10 @@ T_in = 588.5
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
-rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
+rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
 flow_area = 0.0004980799633447909 #m2
 vol_flow = 3.47E-03
-mass_flux_in = ${fparse rho *  vol_flow / flow_area}
+mass_flux_in = '${fparse rho *  vol_flow / flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -45,8 +45,6 @@ P_out = 2.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]
@@ -57,7 +55,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -92,7 +90,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 322482.972 #W
@@ -116,14 +114,13 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
     T = T
     fp = sodium
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC
