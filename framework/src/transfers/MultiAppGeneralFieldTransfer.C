@@ -109,6 +109,11 @@ MultiAppGeneralFieldTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
+  params.addParam<bool>("use_bounding_boxes",
+                        true,
+                        "When set to false, bounding boxes will not be used to restrict the source "
+                        "of the transfer. Either source applications must be set using the "
+                        "from_mesh_division parameter, or a greedy search must be used.");
   params.addParam<bool>(
       "use_nearest_app",
       false,
@@ -147,6 +152,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   : MultiAppConservativeTransfer(parameters),
     _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
     _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
+    _use_bounding_boxes(getParam<bool>("use_bounding_boxes")),
     _use_nearest_app(getParam<bool>("use_nearest_app")),
     _nearest_positions_obj(
         isParamValid("use_nearest_position")
