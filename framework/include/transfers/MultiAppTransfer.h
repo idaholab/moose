@@ -202,6 +202,14 @@ protected:
   {
     return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
   }
+  /// Return the local app index from the global index in the "from-multiapp" transfer direction
+  /// We use the fact that global app indexes are consecutive on a given rank
+  unsigned int getLocalSourceAppIndex(unsigned int i_from) const
+  {
+    return _current_direction == TO_MULTIAPP
+               ? 0
+               : _from_local2global_map[i_from] - _from_local2global_map[0];
+  }
 
   /**
    * Get the target app point from a point in the reference frame

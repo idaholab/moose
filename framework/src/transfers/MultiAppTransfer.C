@@ -490,7 +490,7 @@ MultiAppTransfer::getFromBoundingBoxes()
 
     // Translate the bounding box to the from domain's position. We may have rotations so we must
     // be careful in constructing the new min and max (first and second)
-    const auto from_global_num = _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+    const auto from_global_num = getGlobalSourceAppIndex(i);
     transformBoundingBox(bbox, *_from_transforms[from_global_num]);
 
     // Cast the bounding box into a pair of points (so it can be put through
@@ -550,8 +550,7 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     {
       // Translate the bounding box to the from domain's position. We may have rotations so we must
       // be careful in constructing the new min and max (first and second)
-      const auto from_global_num =
-          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+      const auto from_global_num = getGlobalSourceAppIndex(i);
       transformBoundingBox(bbox, *_from_transforms[from_global_num]);
     }
 
