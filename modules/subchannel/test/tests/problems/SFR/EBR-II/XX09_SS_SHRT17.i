@@ -93,7 +93,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [Dpin]
     block = fuel_pins
   []
-  [Disp]
+  [displacement]
     block = subchannel
   []
 []
