@@ -24,7 +24,7 @@ public:
   ADVectorFunctionNeumannBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual();
+  virtual ADReal computeQpResidual() override;
 
 private:
   /// x component function

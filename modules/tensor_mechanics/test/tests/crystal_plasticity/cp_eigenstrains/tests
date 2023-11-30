@@ -1,0 +1,117 @@
+[Tests]
+  [thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [multiple_eigenstrains]
+    type = 'CSVDiff'
+    input = 'multiple_eigenstrains_test.i'
+    csvdiff = 'multiple_eigenstrains_test_out.csv'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct deformation gradient values for the total and '
+                  'individual eigenstrains'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [thermal_eigenstrain_011orientation]
+    type = 'CSVDiff'
+    input = 'thermal_eigenstrain_test.i'
+    csvdiff = 'thermal_eigenstrain_test_011orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=120.0 '
+               'Materials/elasticity_tensor/euler_angle_2=125.264 '
+               'Materials/elasticity_tensor/euler_angle_3=45.0 '
+               'Outputs/file_base=thermal_eigenstrain_test_011orientation_out '
+               'Outputs/execute_on=FINAL'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature under a 011 loading orientation'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [hcp_thermal_eigenstrain]
+    type = 'CSVDiff'
+    input = 'hcp_thermal_eigenstrain.i'
+    csvdiff = 'hcp_thermal_eigenstrain_out.csv'
+    cli_args = 'Outputs/execute_on=FINAL'
+    allow_warnings = true
+    issues = '#17734'
+    requirement = 'The system shall produce correct thermal deformation gradient values with '
+                  'changing temperature for an anisotropic HCP crystal lattice'
+    design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md '
+             '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+  []
+  [volumetric_eigenstrain_increase]
+    type = 'CSVDiff'
+    input = 'volumetric_eigenstrain_increase.i'
+    csvdiff = 'volumetric_eigenstrain_increase_out.csv'
+    issues = '#25932'
+    requirement = 'The system shall produce a positive isotropic eigenstrain in response '
+                  'to an increasing number density and shall demonstrate an applied shear '
+                  'stress on the slip systems with a z-component in response to the BCs '
+                  'on displacement in the z-direction.'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md '
+             '/CrystalPlasticityKalidindiUpdate.md'
+  []
+  [hcp_volumetric_eigenstrain_decrease]
+    type = 'CSVDiff'
+    input = 'hcp_volumetric_eigenstrain_decrease.i'
+    csvdiff = 'hcp_volumetric_eigenstrain_decrease_out.csv'
+    issues = '#25932'
+    requirement = 'The system shall produce a negative isotropic eigenstrain in response '
+                  'to an decreasing average radius and shall demonstrate an applied stress '
+                  'on the slip systems with a z-component in response to the BC constraints '
+                  'on displacement of the crystal in the z-direction.'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md '
+             '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+  []
+  [volumetric_eigenstrain_parabolic]
+    type = 'CSVDiff'
+    input = 'volumetric_eigenstrain_parabolic.i'
+    csvdiff = 'volumetric_eigenstrain_parabolic_out.csv'
+    issues = '#25932'
+    requirement = 'The system shall produce an isotropic eigenstrain in response '
+                  'to parabolic evolution of both the void number density and average '
+                  'radius, and shall induce plastic deformation in the crystal plasticity '
+                  'reponse through the state dependance of the deformation gradient that '
+                  'final strain state of the FCC crystal is not zero.'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
+             '/ComputeMultipleCrystalPlasticityStress.md '
+             '/CrystalPlasticityKalidindiUpdate.md'
+  []
+  [volumetric_eigenstrain_density_check]
+    type = 'RunException'
+    input = 'volumetric_eigenstrain_increase.i'
+    cli_args = 'Materials/void_density/expression="-0.01"'
+    expect_err = 'A negative, non-physical spherical void number density has been provided: '
+                 '-0.01. This value is non-physical and violates the assumptions of this '
+                 'eigenstrain class'
+    requirement =  'The system shall not attempt to calculate the volumetric eigenstrain from a '
+                    'negative number density of voids.'
+    issues = '#25932'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md'
+  []
+  [volumetric_eigenstrain_radius_check]
+    type = 'RunException'
+    input = 'volumetric_eigenstrain_increase.i'
+    cli_args = 'Materials/void_radius/prop_values="-1.0e-6"'
+    expect_err = 'A negative mean spherical void radius value, -1e-06, has been provided; '
+                 'this value is non-physical and violates the assumptions of this '
+                 'eigenstrain class'
+    requirement =  'The system shall not attempt to calculate the volumetric eigenstrain from a '
+                   'negative average radius value.'
+    issues = '#25932'
+    design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md'
+  []
+[]

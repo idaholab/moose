@@ -9,7 +9,7 @@
 
 #include "VectorFunctionReaction.h"
 
-registerMooseObject("ElectromagneticsApp", VectorFunctionReaction);
+registerMooseObject("MooseApp", VectorFunctionReaction);
 
 InputParameters
 VectorFunctionReaction::validParams()

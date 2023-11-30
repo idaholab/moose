@@ -71,7 +71,7 @@ where
 - $\varepsilon$ is the electric permittivity of the medium in F/m, and
 - $\omega$ is the operating frequency in rad/s.
 
-In the EM module, these terms are represented by the [CurlCurlField.md] and
+These terms are represented by the [CurlCurlField.md] and
 [VectorFunctionReaction.md] objects, respectively. At the edge of the simulation domain,
 this model uses the [VectorEMRobinBC.md] object. This is given by
 
