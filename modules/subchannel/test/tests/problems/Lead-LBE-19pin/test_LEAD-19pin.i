@@ -2,7 +2,7 @@ T_in = 673.15
 flow_area = 0.00128171 #m2
 rho_in = 10453.21705
 # [10 m^3/hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 10*rho_in/3600/flow_area}
+mass_flux_in = '${fparse 10*rho_in/3600/flow_area}'
 P_out = 1.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -39,8 +39,6 @@ P_out = 1.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]
@@ -53,7 +51,7 @@ P_out = 1.0e5 # Pa
 
 [FluidProperties]
   [LEAD]
-      type = LeadFluidProperties
+    type = LeadFluidProperties
   []
 []
 
@@ -88,10 +86,10 @@ P_out = 1.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${fparse 250000}
+    power = '${fparse 250000}'
     filename = "pin_power_profile19.txt"
   []
 
@@ -120,7 +118,6 @@ P_out = 1.0e5 # Pa
     T = T
     fp = LEAD
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC

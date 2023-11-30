@@ -1,7 +1,7 @@
 T_in = 588.5
 flow_area = 0.0004980799633447909 #m2
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
+mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -57,9 +57,6 @@ P_out = 2.0e5 # Pa
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []
@@ -82,7 +79,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -114,10 +111,10 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    power = '${fparse 16975/(0.5334+0.4046+0.0762)}' # W/m
     filename = "pin_power_profile19.txt"
   []
 

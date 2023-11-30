@@ -62,6 +62,8 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
   if (pin_mesh_exist || duct_mesh_exist)
   {
     Real standard_area, wire_area, additional_area, wetted_perimeter, displaced_area;
+    auto flat_to_flat = _tri_sch_mesh.getFlatToFlat();
+    auto n_rings = _tri_sch_mesh.getNumOfRings();
     auto pitch = _subchannel_mesh.getPitch();
     auto rod_diameter = _subchannel_mesh.getRodDiameter();
     auto wire_diameter = _tri_sch_mesh.getWireDiameter();
@@ -136,11 +138,13 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
         {
           standard_area = 1.0 / std::sqrt(3.0) * std::pow((rod_diameter / 2.0 + gap), 2.0);
           additional_area = 0.0;
-          displaced_area = 1.0 / std::sqrt(3.0) * (rod_diameter + 2.0 * gap + (*_displacement_soln)(node)) *
+          displaced_area = 1.0 / std::sqrt(3.0) *
+                           (rod_diameter + 2.0 * gap + (*_displacement_soln)(node)) *
                            (*_displacement_soln)(node);
           wire_area = libMesh::pi / 24.0 * std::pow(wire_diameter, 2.0) / std::cos(theta);
-          wetted_perimeter = rod_perimeter + libMesh::pi * wire_diameter / std::cos(theta) / 6.0 +
-                             2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap);
+          wetted_perimeter =
+              rod_perimeter + libMesh::pi * wire_diameter / std::cos(theta) / 6.0 +
+              2.0 / std::sqrt(3.0) * (rod_diameter / 2.0 + gap + (*_displacement_soln)(node));
         }
 
         /// Calculate subchannel area
@@ -176,7 +180,23 @@ LiquidMetalSubChannel1PhaseProblem::initializeSolution()
 
           if (pin_1 == pin_2) // Corner or edge gap
           {
-            _tri_sch_mesh._gij_map[iz][i_gap] = (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap;
+            auto displacement = 0.0;
+            auto counter = 0.0;
+            for (auto i_ch : _subchannel_mesh.getPinChannels(pin_1))
+            {
+              auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+              auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+              if (subch_type == EChannelType::CENTER || subch_type == EChannelType::CORNER)
+              {
+                displacement += (*_displacement_soln)(node);
+                counter += 1.0;
+              }
+            }
+            displacement = displacement / counter;
+            _tri_sch_mesh._gij_map[iz][i_gap] =
+                0.5 * (flat_to_flat - (n_rings - 1) * pitch * std::sqrt(3.0) -
+                       (*_Dpin_soln)(pin_node_1)) +
+                displacement;
           }
           else // center gap
           {

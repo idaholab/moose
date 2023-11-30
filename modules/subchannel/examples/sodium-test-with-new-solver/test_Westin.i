@@ -1,6 +1,6 @@
 T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
+mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 
 [TriSubChannelMesh]
@@ -36,8 +36,6 @@ P_out = 2.0e5 # Pa
   [rho]
   []
   [S]
-  []
-  [Sij]
   []
   [w_perim]
   []
@@ -116,7 +114,6 @@ P_out = 2.0e5 # Pa
     T = T
     fp = sodium
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC

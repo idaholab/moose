@@ -109,9 +109,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []
