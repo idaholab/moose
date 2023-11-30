@@ -250,7 +250,7 @@ P_out = 2.0e5 # Pa
     type = MultiAppGeneralFieldNearestNodeTransfer
     from_multi_app = duct_map
     source_variable = disp_magnitude
-    variable = Disp
+    variable = displacement
   []
 
   [q_prime] # Recover q_prime from heat conduction solve
