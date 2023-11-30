@@ -34,7 +34,7 @@ export PATH=$HOME/mambaforge3/bin:$PATH
 Now that we can execute `mamba`, initialize it and then exit the terminal:
 
 ```bash
-mamba init
+mamba init --all
 exit
 ```
 
