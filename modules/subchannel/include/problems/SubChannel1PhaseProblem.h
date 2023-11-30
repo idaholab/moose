@@ -202,7 +202,7 @@ protected:
   std::unique_ptr<SolutionHandle> _q_prime_soln;
   std::unique_ptr<SolutionHandle> _q_prime_duct_soln; // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _Tduct_soln;        // Only used for ducted assemblies
-  std::unique_ptr<SolutionHandle> _Disp_soln;
+  std::unique_ptr<SolutionHandle> _displacement_soln;
 
   /// Petsc Functions
   virtual PetscErrorCode createPetscVector(Vec & v, PetscInt n);
