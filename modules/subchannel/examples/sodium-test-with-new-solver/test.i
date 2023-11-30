@@ -1,6 +1,6 @@
 T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
+mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -36,8 +36,6 @@ P_out = 2.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]
@@ -48,7 +46,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -83,7 +81,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 1.000e5 # W
@@ -108,7 +106,7 @@ P_out = 2.0e5 # Pa
     value = 0.0
   []
 
-   [Viscosity_ic]
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}

@@ -40,8 +40,6 @@ P_out = 2.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]

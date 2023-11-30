@@ -5,31 +5,30 @@
 ###################################################
 T_in = 630
 P_out = 758423 # Pa
-mass_flux_in = ${fparse 1000} # kg/(m2.s)
+mass_flux_in = '${fparse 1000}' # kg/(m2.s)
 
 ###################################################
 # Geometric parameters
 ###################################################
-f = ${fparse sqrt(3) / 2}
+f = '${fparse sqrt(3) / 2}'
 
 # units are cm - do not forget to convert to meter
 scale_factor = 0.01
-fuel_element_pitch = ${fparse 14.598*scale_factor}
-inter_assembly_gap = ${fparse 0.4*scale_factor}
-duct_thickness = ${fparse 0.3*scale_factor}
-fuel_pin_pitch = ${fparse 0.904*scale_factor}
-fuel_pin_diameter= ${fparse 0.8*scale_factor}
-wire_z_spacing = ${fparse 20.32*scale_factor}
-wire_diameter = ${fparse 0.103*scale_factor}
+fuel_element_pitch = '${fparse 14.598*scale_factor}'
+inter_assembly_gap = '${fparse 0.4*scale_factor}'
+duct_thickness = '${fparse 0.3*scale_factor}'
+fuel_pin_pitch = '${fparse 0.904*scale_factor}'
+fuel_pin_diameter = '${fparse 0.8*scale_factor}'
+wire_z_spacing = '${fparse 20.32*scale_factor}'
+wire_diameter = '${fparse 0.103*scale_factor}'
 n_rings = 9
-length_entry_fuel = ${fparse 60*scale_factor}
-length_heated_fuel = ${fparse 80*scale_factor}
-length_outlet_fuel = ${fparse 120*scale_factor}
-height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
-orifice_plate_height = ${fparse 5*scale_factor}
-duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
-duct_inside = ${fparse duct_outside - 2 * duct_thickness}
-
+length_entry_fuel = '${fparse 60*scale_factor}'
+length_heated_fuel = '${fparse 80*scale_factor}'
+length_outlet_fuel = '${fparse 120*scale_factor}'
+height = '${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}'
+orifice_plate_height = '${fparse 5*scale_factor}'
+duct_outside = '${fparse fuel_element_pitch - inter_assembly_gap}'
+duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [TriSubChannelMesh]
   [subchannel]
@@ -113,9 +112,6 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [S]
     block = subchannel
   []
-  [Sij]
-    block = subchannel
-  []
   [w_perim]
     block = subchannel
   []
@@ -135,7 +131,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 

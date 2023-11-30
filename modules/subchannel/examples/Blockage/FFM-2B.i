@@ -6,12 +6,12 @@ T_in = 589.15
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
-rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
+rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
 Total_surface_area = 0.000452826 #m2
-Blocked_surface_area = ${fparse 8.65158e-06 * 13}
-Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
+Blocked_surface_area = '${fparse 8.65158e-06 * 13}'
+Flow_area = '${fparse Total_surface_area - Blocked_surface_area}'
 vol_flow = 0.00341 #m3/sec
-mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
+mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
 
 [TriSubChannelMesh]
@@ -49,8 +49,6 @@ P_out = 2.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]
@@ -61,7 +59,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -92,7 +90,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 162153.6 #W
@@ -163,7 +161,7 @@ P_out = 2.0e5 # Pa
     index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
     area = S
     unblocked_mass_flux = ${mass_flux_in}
-    blocked_mass_flux = ${fparse 0.1 * mass_flux_in}
+    blocked_mass_flux = '${fparse 0.1 * mass_flux_in}'
     execute_on = 'timestep_begin'
   []
 []

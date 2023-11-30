@@ -5,12 +5,12 @@ T_in = 714.261
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
-rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
+rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
 Total_surface_area = 0.000452826 #m2
 Blocked_surface_area = 0.0 #m2
-Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
+Flow_area = '${fparse Total_surface_area - Blocked_surface_area}'
 vol_flow = 3.4E-03 #m3/s
-mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
+mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -51,8 +51,6 @@ P_out = 2.0e5 # Pa
   []
   [S]
   []
-  [Sij]
-  []
   [w_perim]
   []
   [q_prime]
@@ -63,7 +61,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -94,7 +92,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 332500.0 #W
@@ -118,7 +116,7 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
@@ -183,56 +181,56 @@ P_out = 2.0e5 # Pa
     type = SubChannelPointValue
     variable = T
     index = 37
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [2]
     type = SubChannelPointValue
     variable = T
     index = 36
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [3]
     type = SubChannelPointValue
     variable = T
     index = 20
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [4]
     type = SubChannelPointValue
     variable = T
     index = 10
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [5]
     type = SubChannelPointValue
     variable = T
     index = 4
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [6]
     type = SubChannelPointValue
     variable = T
     index = 1
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [7]
     type = SubChannelPointValue
     variable = T
     index = 14
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
   [8]
     type = SubChannelPointValue
     variable = T
     index = 28
-    execute_on ='TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
     height = 0.9144
   []
 []
