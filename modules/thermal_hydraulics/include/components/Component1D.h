@@ -26,11 +26,11 @@ public:
     /// Physical position of the connecting point
     Point _position;
     /// Boundary element
-    const Elem * _elem;
+    const Elem * const _elem;
     /// Boundary side
     unsigned short int _side;
     /// Boundary node of connection (used by other components for connecting)
-    const Node * _node;
+    const Node * const _node;
     /// Boundary id of this connection
     unsigned int _boundary_id;
     /// Outward norm (either 1 or -1) on boundaries
