@@ -217,9 +217,26 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
-  _nl._use_fnorm0_before_smo = isParamSetByUser("compute_initial_residual_before_preset_bcs")
-                                   ? getParam<bool>("compute_initial_residual_before_preset_bcs")
-                                   : getParam<bool>("use_fnorm0_before_smo");
+  if (getMooseApp().parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+  {
+    _nl._use_fnorm0_before_smo = getParam<bool>("compute_initial_residual_before_preset_bcs");
+    if (isParamSetByUser("use_fnorm0_before_smo"))
+      mooseWarning(
+          "The parameter Executioner/use_fnorm0_before_smo is ignored because this application is "
+          "using the legacy behavior for initial residual evaluation. The legacy behavior is "
+          "controlled by the parameter Executioner/compute_initial_residual_before_preset_bcs. To "
+          "enable the new behavior, set the parameter "
+          "'use_legacy_initial_residual_evaluation_bahavior' to false in *App.C");
+  }
+  else
+  {
+    _nl._use_fnorm0_before_smo = getParam<bool>("use_fnorm0_before_smo");
+    if (isParamSetByUser("compute_initial_residual_before_preset_bcs"))
+      mooseWarning(
+          "The parameter Executioner/compute_initial_residual_before_preset_bcs is ignored because "
+          "this application is using the new behavior for initial residual evaluation. The new "
+          "behavior is controlled by the parameter Executioner/use_fnorm0_before_smo.");
+  }
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
