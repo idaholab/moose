@@ -1,19 +1,25 @@
+base_value = 3
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
-  xmax = 0.8
-  ymax = 0.8
+  nx = 5
+  ny = 5
+  xmin = -0.1
+  ymin = -0.1
+  xmax = 0.1
+  ymax = 0.1
 []
 
 [MeshDivisions]
   [middle_sub]
     type = CartesianGridDivision
-    bottom_left = '0.21 0.21 0'
-    top_right = '0.81 0.81 0'
-    nx = 4
-    ny = 4
+    # this division excludes the boundary nodes. The
+    # peaks in to_main on the boundaries should not be transferred
+    bottom_left = '-0.021 -0.021 0'
+    top_right = '0.081 0.081 0'
+    nx = 2
+    ny = 2
     nz = 1
   []
 []
@@ -30,7 +36,7 @@
   [to_main]
     [InitialCondition]
       type = FunctionIC
-      function = '3 + 2*x*x + 3*y*y*y'
+      function = '${base_value} + 20*x + 300*y*y*y'
     []
   []
   [to_main_elem]
@@ -38,7 +44,7 @@
     family = MONOMIAL
     [InitialCondition]
       type = FunctionIC
-      function = '4 + 2*x*x + 3*y*y*y'
+      function = '${base_value} + 1 + 20*x + 300*y*y*y'
     []
   []
 []
@@ -70,7 +76,23 @@
 [Outputs]
   [out]
     type = Exodus
-    hide = 'to_main to_main_elem'
+    hide = 'to_main to_main_elem div'
     overwrite = true
+  []
+[]
+
+# For debugging purposes
+[AuxVariables]
+  [div]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [mesh_div]
+    type = MeshDivisionAux
+    variable = div
+    mesh_division = 'middle_sub'
   []
 []

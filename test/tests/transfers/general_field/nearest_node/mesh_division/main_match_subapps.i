@@ -1,4 +1,11 @@
-# Base input for testing transfers. It has the following complexities:
+# Base input for testing transfers with mesh divisions restrictions. The mesh divisions
+# in the parent app will be matched with a subapp index.
+# In the to_multiapp direction, the main app data at the mesh division bins of index 1-4 will
+# be transferred to subapps of index 1-4 respectively
+# In the from_multiapp direction, the main app fields at the mesh divisions bins of index 1-4
+# will receive data (be transferred) from subapps of index 1-4 respectively
+# It has the following complexities:
+# - several sub-applications
 # - transfers both from and to the subapps
 # - both nodal and elemental variables
 # Tests derived from this input may add complexities through command line arguments
@@ -6,15 +13,16 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 4
+  ny = 4
 []
 
 [MeshDivisions]
   [middle]
     type = CartesianGridDivision
     bottom_left = '0.21 0.21 0'
-    top_right = '0.81 0.81 0'
+    # cover more and sample more bins
+    top_right = '1.001 1.001 0'
     nx = 2
     ny = 2
     nz = 1
@@ -71,8 +79,9 @@
     # The positions are randomly offset to prevent equi-distant nearest-locations
     positions = '0.1001 0.0000013 0
                  0.30054 0.600001985 0
-                 0.70021 0.0000022 0
-                 0.800212 0.5500022 0'
+                 0.70021 0.4000022 0
+                 0.800212 0.8500022 0'
+    # To differentiate the values received from each subapp
     cli_args = 'base_value=1 base_value=2 base_value=3 base_value=4'
   []
 []
@@ -83,6 +92,8 @@
     to_multi_app = sub
     source_variable = to_sub
     variable = from_main
+    from_mesh_division = middle
+    from_mesh_division_usage = 'matching_subapp_index'
   []
 
   [to_sub_elem]
@@ -90,6 +101,8 @@
     to_multi_app = sub
     source_variable = to_sub_elem
     variable = from_main_elem
+    from_mesh_division = middle
+    from_mesh_division_usage = 'matching_subapp_index'
   []
 
   [from_sub]
@@ -97,6 +110,8 @@
     from_multi_app = sub
     source_variable = to_main
     variable = from_sub
+    to_mesh_division = middle
+    to_mesh_division_usage = 'matching_subapp_index'
   []
 
   [from_sub_elem]
@@ -104,6 +119,8 @@
     from_multi_app = sub
     source_variable = to_main_elem
     variable = from_sub_elem
+    to_mesh_division = middle
+    to_mesh_division_usage = 'matching_subapp_index'
   []
 []
 

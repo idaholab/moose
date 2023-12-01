@@ -1,51 +1,70 @@
 [Tests]
-  issues = '#'
+  issues = '#25901'
   design = 'MeshDivision/index.md'
   [mesh_div]
-    requirement = 'The system shall be able to leverage mesh divisions during transfers'
+    requirement = 'The system shall be able to leverage mesh divisions during nearest-location based transfers'
     [restriction_source]
-      type = CSVDiff
+      type = Exodiff
       input = 'main.i'
-      csvdiff = 'main.csv'
-      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
-                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
-                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
-                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub"
+      exodiff = "restriction_source.e restriction_source_sub0_out.e restriction_source_sub1_out.e "
+                "restriction_source_sub2_out.e restriction_source_sub3_out.e"
+      cli_args = "Outputs/file_base=restriction_source "
+                 "Transfers/to_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/from_mesh_division=middle "
+                 "Transfers/to_sub_elem/from_mesh_division=middle "
+                 "Transfers/from_sub/from_mesh_division=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_division=middle_sub"
       detail = 'to restrict the source domain for the transfered field,'
     []
     [restriction_target]
-      type = CSVDiff
+      type = Exodiff
       input = 'main.i'
-      csvdiff = 'main.csv'
-      cli_args = "Transfers/to_sub/to_mesh_divisions=middle_sub "
-                 "Transfers/to_sub_elem/to_mesh_divisions=middle_sub "
-                 "Transfers/from_sub/to_mesh_divisions=middle "
-                 "Transfers/from_sub_elem/to_mesh_divisions=middle"
+      exodiff = "restriction_target.e restriction_target_sub0_out.e restriction_target_sub1_out.e "
+                "restriction_target_sub2_out.e restriction_target_sub3_out.e"
+      cli_args = "Outputs/file_base=restriction_target "
+                 "Transfers/to_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/to_mesh_division=middle_sub "
+                 "Transfers/to_sub_elem/to_mesh_division=middle_sub "
+                 "Transfers/from_sub/to_mesh_division=middle "
+                 "Transfers/from_sub_elem/to_mesh_division=middle"
       detail = 'to restrict the target domain for the transfered field,'
     []
-    [distributed_source_divisions_onto_targets]
-      type = CSVDiff
-      input = 'main.i'
-      csvdiff = 'main.csv'
-      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
-                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
-                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
-                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub"
-      detail = 'to distribute field data restricted to divisions of the source mesh to a matching number of target applications,'
+    [matching_division_from_target_division]
+      type = Exodiff
+      input = 'main_match_division.i'
+      exodiff = "matching_division_target.e  matching_division_target_sub0_out.e  "
+                "matching_division_target_sub1_out.e  matching_division_target_sub2_out.e  "
+                "matching_division_target_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_division_target"
+      # We grow the bounding-box factor for reproducibility in parallel
+      detail = 'to distribute field data restricted to divisions of the source mesh to matching divisions of the target mesh,'
     []
-    [matched_source_and_target_division]
-      type = CSVDiff
-      input = 'main.i'
-      csvdiff = 'main.csv'
-      cli_args = "Transfers/to_sub/from_mesh_divisions=middle "
-                 "Transfers/to_sub_elem/from_mesh_divisions=middle "
-                 "Transfers/from_sub/from_mesh_divisions=middle_sub "
-                 "Transfers/from_sub_elem/from_mesh_divisions=middle_sub "
-                 "Transfers/to_sub/to_mesh_divisions=middle_sub "
-                 "Transfers/to_sub_elem/to_mesh_divisions=middle_sub "
-                 "Transfers/from_sub/to_mesh_divisions=middle "
-                 "Transfers/from_sub_elem/to_mesh_divisions=middle"
-      detail = 'to distribute field data restricted to divisions of the source mesh to divisions of the target mesh.'
+    [matching_subapps]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp.e matching_subapp_sub0_out.e matching_subapp_sub1_out.e "
+                "matching_subapp_sub2_out.e matching_subapp_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/bbox_factor=20 "
+                 "Transfers/from_sub_elem/bbox_factor=20 "
+      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions,'
+    []
+    [matching_subapps_nobbox]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp_nobbox.e matching_subapp_nobbox_sub0_out.e "
+                "matching_subapp_nobbox_sub1_out.e matching_subapp_nobbox_sub2_out.e "
+                "matching_subapp_nobbox_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp_nobbox  Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/use_bounding_boxes=false "
+                 "Transfers/from_sub_elem/use_bounding_boxes=false "
+      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions, with a custom algorithm for finding source applications.'
     []
   []
 []
