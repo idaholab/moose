@@ -101,6 +101,7 @@
     y_coord_name = measure_data/measurement_ycoord
     z_coord_name = measure_data/measurement_zcoord
     value_name = measure_data/misfit_values
+    weight_name = measure_data/weight
   []
 []
 
@@ -125,11 +126,25 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    measurement_file = 'measurementData.csv'
+    file_xcoord = 'coordx'
+    file_ycoord ='y'
+    file_zcoord = 'z'
+    file_value = 'weightedMeasurement'
+    file_variable_weights = 'weight'
+    variable_weight_names = 'weight'
   []
   [params]
     type = ConstantReporter
     real_vector_names = 'left right'
     real_vector_values = '0 0; 0' # Dummy
+  []
+  [obj_sum]
+    type = VectorDotProduct
+    name = value
+    vector_a = measure_data/misfit_values
+    vector_b = measure_data/misfit_values
+    scale = 0.5
   []
 []
 
