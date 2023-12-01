@@ -32,26 +32,6 @@
   []
 []
 
-#this is for getting controllable parameters down to the forward problem
-[Reporters]
-  [controllable_params]
-    type = ConstantReporter
-    real_vector_names = 'vals'
-    real_vector_values = '0 4'
-  []
-[]
-
-[Transfers]
-  # regular transfer of the same controllable parameters to all subapps
-  [toForward]
-    type = MultiAppReporterTransfer
-    to_multi_app = forward
-    from_reporters = 'controllable_params/vals'
-    to_reporters = 'vals/vals'
-    execute_on = 'TIMESTEP_BEGIN'
-  []
-[]
-
 ##---------------------------------------
 # Getting objectives and gradients from each sample and combining
 [Transfers]
@@ -80,6 +60,28 @@
     vector = "storage/fromForward:obj_pp:value"
   []
 []
+
+##---------------------------------------
+#this is for getting controllable parameters down to the forward problem
+[Reporters]
+  [controllable_params]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0 4'
+  []
+[]
+
+[Transfers]
+  # regular transfer of the same controllable parameters to all subapps
+  [toForward]
+    type = MultiAppReporterTransfer
+    to_multi_app = forward
+    from_reporters = 'controllable_params/vals'
+    to_reporters = 'vals/vals'
+    execute_on = 'TIMESTEP_BEGIN'
+  []
+[]
+
 ##---------------------------------------
 
 [Outputs]
