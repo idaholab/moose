@@ -39,7 +39,6 @@
 []
 
 [Kernels]
-  active = 'diff timederivative sourceterm'
   [./diff]
      type = Diffusion
      variable = u
@@ -56,7 +55,6 @@
 []
 
 [AuxVariables]
-  active = 'v_midpoint v_trapazoid v_simpson'
   [./v_midpoint]
   [../]
   [./v_trapazoid]
@@ -87,7 +85,6 @@
 []
 
 [BCs]
-  active = 'RightBC LeftBC TopBC BottomBC'
  [./RightBC]
     type = FunctionDirichletBC
     variable = u
@@ -115,7 +112,6 @@
 []
 
 [Functions]
-  active = 'Soln Source TopBC BottomBC RightBC LeftBC'
  [./Soln]
     type = ParsedFunction
     expression = 't*(x*x+y*y)'
