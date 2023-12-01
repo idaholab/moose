@@ -6,6 +6,8 @@ u_inlet=1
 
 [GlobalParams]
   integrate_p_by_parts = false
+  supg = true
+  pspg = true
 []
 
 [Mesh]
@@ -24,38 +26,38 @@ u_inlet=1
 []
 
 [Variables]
-  [velocity]
-    family = LAGRANGE_VEC
+  [velocity_x]
+    family = LAGRANGE
+  []
+  [velocity_y]
+    family = LAGRANGE
   []
   [p][]
 []
 
 [Kernels]
   [mass]
-    type = INSADMass
+    type = INSMassRZ
     variable = p
-  []
-  [mass_pspg]
-    type = INSADMassPSPG
-    variable = p
-  []
-  [momentum_convection]
-    type = INSADMomentumAdvection
-    variable = velocity
-  []
-  [momentum_viscous]
-    type = INSADMomentumViscous
-    variable = velocity
-  []
-  [momentum_pressure]
-    type = INSADMomentumPressure
-    variable = velocity
+    u = velocity_x
+    v = velocity_y
     pressure = p
   []
-  [momentum_supg]
-    type = INSADMomentumSUPG
-    variable = velocity
-    velocity = velocity
+  [x_momentum]
+    type = INSMomentumLaplaceFormRZ
+    variable = velocity_x
+    u = velocity_x
+    v = velocity_y
+    pressure = p
+    component = 0
+  []
+  [y_momentum]
+    type = INSMomentumLaplaceFormRZ
+    variable = velocity_y
+    u = velocity_x
+    v = velocity_y
+    pressure = p
+    component = 1
   []
 []
 
@@ -67,26 +69,23 @@ u_inlet=1
 []
 
 [BCs]
-  [inlet]
-    type = VectorFunctionDirichletBC
-    variable = velocity
+  [inlet_x]
+    type = FunctionDirichletBC
+    variable = velocity_x
     boundary = 'left'
-    function_x = vel_x_inlet
-    function_y = 0
-  [../]
-  [wall]
-    type = VectorFunctionDirichletBC
-    variable = velocity
-    boundary = 'top'
-    function_x = 0
-    function_y = 0
+    function = vel_x_inlet
   []
-  [axis]
-    type = ADVectorFunctionDirichletBC
-    variable = velocity
-    boundary = 'bottom'
-    set_x_comp = false
-    function_y = 0
+  [zero_y]
+    type = FunctionDirichletBC
+    variable = velocity_y
+    boundary = 'left top bottom'
+    function = 0
+  []
+  [zero_x]
+    type = FunctionDirichletBC
+    variable = velocity_x
+    boundary = 'top'
+    function = 0
   []
   # pressure is not integrated by parts so we cannot remove the nullspace through a natural condition
   [p_corner]
@@ -99,14 +98,9 @@ u_inlet=1
 
 [Materials]
   [const]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
-  []
-  [ins_mat]
-    type = INSADTauMaterial
-    velocity = velocity
-    pressure = p
   []
 []
 

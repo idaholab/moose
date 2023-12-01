@@ -75,7 +75,7 @@ INSMass::computeQpJacobian()
   // Derivative wrt to p is zero
   Real r = 0;
 
-  // Unless we are doing GLS stabilization
+  // Unless we are doing PSPG stabilization
   if (_pspg)
     r += computeQpPGJacobian();
 
@@ -89,7 +89,7 @@ INSMass::computeQpPGJacobian()
 }
 
 Real
-INSMass::computeQpOffDiagJacobian(unsigned jvar)
+INSMass::computeQpOffDiagJacobian(const unsigned int jvar)
 {
   if (jvar == _u_vel_var_number)
   {
@@ -120,7 +120,7 @@ INSMass::computeQpOffDiagJacobian(unsigned jvar)
 }
 
 Real
-INSMass::computeQpPGOffDiagJacobian(unsigned comp)
+INSMass::computeQpPGOffDiagJacobian(const unsigned int comp)
 {
   RealVectorValue convective_term = _convective_term ? convectiveTerm() : RealVectorValue(0, 0, 0);
   RealVectorValue d_convective_term_d_u_comp =

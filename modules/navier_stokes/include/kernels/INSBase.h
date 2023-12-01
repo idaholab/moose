@@ -64,6 +64,28 @@ protected:
    */
   RealVectorValue relativeVelocity() const;
 
+  /**
+   * Computes the additional RZ terms for the Laplace form of the strong viscous term
+   */
+  RealVectorValue strongViscousTermLaplaceRZ() const;
+
+  /**
+   * Computes the Jacobian for the additional RZ terms for the Laplace form of the strong viscous
+   * term for the given velocity component \p comp
+   */
+  RealVectorValue dStrongViscDUCompLaplaceRZ(const unsigned int comp) const;
+
+  /**
+   * Computes the additional RZ terms for the Traction form of the strong viscous term
+   */
+  RealVectorValue strongViscousTermTractionRZ() const;
+
+  /**
+   * Computes the Jacobian for the additional RZ terms for the Traction form of the strong viscous
+   * term for the given velocity component \p comp
+   */
+  RealVectorValue dStrongViscDUCompTractionRZ(const unsigned int comp) const;
+
   /// second derivatives of the shape function
   const VariablePhiSecond & _second_phi;
 
@@ -119,4 +141,7 @@ protected:
   const VariableValue & _disp_y_dot;
   /// Time derivative of the z-displacement, mesh velocity in the z-direction
   const VariableValue & _disp_z_dot;
+
+  /// The radial coordinate index for RZ coordinate systems
+  const unsigned int _rz_radial_coord;
 };

@@ -30,31 +30,13 @@ INSMomentumLaplaceFormRZ::INSMomentumLaplaceFormRZ(const InputParameters & param
 RealVectorValue
 INSMomentumLaplaceFormRZ::strongViscousTermLaplace()
 {
-  const Real & r = _q_point[_qp](0);
-  return INSBase::strongViscousTermLaplace() +
-         // To understand the code below, visit
-         // https://en.wikipedia.org/wiki/Del_in_cylindrical_and_spherical_coordinates.
-         // The u_r / r^2 term comes from the vector Laplacian. The -du_r/dr * 1/r term comes from
-         // the scalar Laplacian. The scalar Laplacian in axisymmetric cylindrical coordinates is
-         // equivalent to the Cartesian Laplacian plus a 1/r * df/dr term. And of course we are
-         // applying a minus sign here because the strong form is -\nabala^2 * \vec{u}
-         RealVectorValue(_mu[_qp] * (_u_vel[_qp] / (r * r) - _grad_u_vel[_qp](0) / r),
-                         // Again we need the 1/r * df/dr term
-                         -_mu[_qp] * _grad_v_vel[_qp](0) / r,
-                         0);
+  return INSBase::strongViscousTermLaplace() + strongViscousTermLaplaceRZ();
 }
 
 RealVectorValue
-INSMomentumLaplaceFormRZ::dStrongViscDUCompLaplace(unsigned comp)
+INSMomentumLaplaceFormRZ::dStrongViscDUCompLaplace(const unsigned int comp)
 {
-  const Real & r = _q_point[_qp](0);
-  RealVectorValue add_jac(0, 0, 0);
-  if (comp == 0)
-    add_jac(0) = _mu[_qp] * (_phi[_j][_qp] / (r * r) - _grad_phi[_j][_qp](0) / r);
-  else if (comp == 1)
-    add_jac(1) = -_mu[_qp] * _grad_phi[_j][_qp](0) / r;
-
-  return INSBase::dStrongViscDUCompLaplace(comp) + add_jac;
+  return INSBase::dStrongViscDUCompLaplace(comp) + dStrongViscDUCompLaplaceRZ(comp);
 }
 
 Real
@@ -63,13 +45,14 @@ INSMomentumLaplaceFormRZ::computeQpResidual()
   // Base class residual contribution
   Real res_base = INSMomentumLaplaceForm::computeQpResidual();
 
-  if (_component == 0)
+  if (_component == _rz_radial_coord)
   {
-    const Real r = _q_point[_qp](0);
+    const auto r = _q_point[_qp](_rz_radial_coord);
 
     // If this is the radial component of momentum, there is an extra term for RZ.
     // The only difference between this and the traction form is a factor of 2.
-    res_base += _mu[_qp] * _u_vel[_qp] / (r * r) * _test[_i][_qp];
+    res_base +=
+        _mu[_qp] * ((_rz_radial_coord == 0) ? _u_vel[_qp] : _v_vel[_qp]) / (r * r) * _test[_i][_qp];
 
     // If the pressure is also integrated by parts, there is an extra term in RZ.
     if (_integrate_p_by_parts)
@@ -86,9 +69,9 @@ INSMomentumLaplaceFormRZ::computeQpJacobian()
   Real jac_base = INSMomentumLaplaceForm::computeQpJacobian();
 
   // If this is the radial component of momentum, there is an extra term for RZ.
-  if (_component == 0)
+  if (_component == _rz_radial_coord)
   {
-    const Real r = _q_point[_qp](0);
+    const auto r = _q_point[_qp](_rz_radial_coord);
     // The only difference between this and the traction form is a factor of 2.
     jac_base += _mu[_qp] * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
   }
@@ -97,7 +80,7 @@ INSMomentumLaplaceFormRZ::computeQpJacobian()
 }
 
 Real
-INSMomentumLaplaceFormRZ::computeQpOffDiagJacobian(unsigned jvar)
+INSMomentumLaplaceFormRZ::computeQpOffDiagJacobian(const unsigned int jvar)
 {
   // Base class jacobian contribution
   Real jac_base = INSMomentumLaplaceForm::computeQpOffDiagJacobian(jvar);
@@ -105,9 +88,9 @@ INSMomentumLaplaceFormRZ::computeQpOffDiagJacobian(unsigned jvar)
   // If we're getting the pressure Jacobian contribution, and we
   // integrated the pressure term by parts, there is an extra term for
   // RZ.
-  if (jvar == _p_var_number && _component == 0 && _integrate_p_by_parts)
+  if ((jvar == _p_var_number) && (_component == _rz_radial_coord) && _integrate_p_by_parts)
   {
-    const Real r = _q_point[_qp](0);
+    const auto r = _q_point[_qp](_rz_radial_coord);
     jac_base += -_phi[_j][_qp] / r * _test[_i][_qp];
   }
 

@@ -286,6 +286,11 @@ FEProblemBase::validParams()
                         "Whether or not to report invalid solution warnings at the time the "
                         "warning is produced instead of after the calculation");
 
+  params.addParam<bool>(
+      "identify_variable_groups_in_nl",
+      true,
+      "Whether to identify variable groups in nonlinear systems. This affects dof ordering");
+
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
       "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
@@ -407,7 +412,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_old_requested(false),
     _has_mortar(false),
     _num_grid_steps(0),
-    _print_execution_on()
+    _print_execution_on(),
+    _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl"))
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.

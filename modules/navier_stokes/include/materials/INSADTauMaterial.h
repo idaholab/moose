@@ -308,28 +308,34 @@ INSADTauMaterialTempl<T>::viscousTermRZ()
   // equivalent to the Cartesian Laplacian plus a 1/r * du_i/dr term. And of course we are
   // applying a minus sign here because the strong form is -\nabala^2 * \vec{u}
   //
-  // Another note: libMesh implements grad(v) as dvi/dxj
+  // Another note: libMesh implements grad(v) as dvi/dxj or more obviously:
+  //
+  // grad(v) = (vx_x vx_y)
+  //           (vy_x vy_y)
+  //
+  // so, the gradient of the velocity with respect to the radial coordinate will correspond to a
+  // *column* slice
 
-  const auto r = _ad_q_point[_qp](_rz_radial_coord);
+  const auto & r = _ad_q_point[_qp](_rz_radial_coord);
 
-  if (_viscous_form == NS::ViscousForm::Laplace)
-    _viscous_strong_residual[_qp] +=
-        // u_r
-        // Additional term from vector Laplacian
-        ADRealVectorValue(_mu[_qp] * (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                      // Additional term from scalar Laplacian
-                                      _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                          // u_z
-                          // Additional term from scalar Laplacian
-                          -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
-                          0);
-  else
-    _viscous_strong_residual[_qp] +=
-        ADRealVectorValue(2. * _mu[_qp] *
-                              (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                          -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                          0);
+  {
+    // Do the "Laplace" form. This will be present in *both* Laplace and Traction forms
+    ADRealVectorValue rz_term;
+    for (const auto i : make_range((unsigned int)2))
+      rz_term(i) = -_mu[_qp] * _grad_velocity[_qp](i, _rz_radial_coord) / r;
+    rz_term(_rz_radial_coord) += _mu[_qp] * _velocity[_qp](_rz_radial_coord) / (r * r);
+    _viscous_strong_residual[_qp] += rz_term;
+  }
+  if (_viscous_form == NS::ViscousForm::Traction)
+  {
+    ADRealVectorValue rz_term;
+    for (const auto i : make_range((unsigned int)2))
+      // This is the transpose of the above
+      rz_term(i) = -_mu[_qp] * _grad_velocity[_qp](_rz_radial_coord, i) / r;
+    // This is the same as above (since the transpose of the diagonal is the diagonal)
+    rz_term(_rz_radial_coord) += _mu[_qp] * _velocity[_qp](_rz_radial_coord) / (r * r);
+    _viscous_strong_residual[_qp] += rz_term;
+  }
 }
 
 template <typename T>

@@ -24,14 +24,6 @@ created; these objects are currently not as performant as their hand-coded
 peers, but they can be used seamlessly in simulations with mesh deformation and
 are guaranteed to generate correct Jacobians.
 
-Known limitations of AD INS implementation (these limitations are not present
-with the hand-coded INS implementation):
-
-- Stabilization methods will be inconsistent if a second order `LAGRANGE_VEC` basis is used
-  for the velocity variable. This is because second derivatives are not
-  implemented in libMesh for vector `FE` types, and consequently we cannot add in the contribution
-  from the viscous term which includes a Laplacian operation
-
 ## Notes on INS RZ
 
 Notes regarding INS RZ equations derivation:
