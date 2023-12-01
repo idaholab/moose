@@ -155,7 +155,8 @@ protected:
    * @param pt point to examine
    * @param i_local the index of the problem to consider, holding the mesh division to examine
    * @param only_from_this_mesh_div a mesh division index that must be matched when the
-   * to/from_mesh_division_behavior for the direction examined is
+   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
+   * It is ignored otherwise
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool inMeshDivision(const Point & pt,
@@ -168,7 +169,8 @@ protected:
    * @param elem element to examine
    * @param i_local the index of the problem to consider, holding the mesh division to examine
    * @param only_from_this_mesh_div a mesh division index that must be matched when the
-   * to/from_mesh_division_behavior for the direction examined is
+   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
+   * It is ignored otherwise
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool inMeshDivision(const Elem & elem,
@@ -180,7 +182,8 @@ protected:
    * Whether the element division index should be accepted
    * @param i_local the index of the problem to consider, holding the mesh division to examine
    * @param only_from_this_mesh_div a mesh division index that must be matched when the
-   * to/from_mesh_division_behavior for the direction examined is
+   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
+   * It is ignored otherwise
    * @param from_direction whether we are currently looking at a source or a target mesh division
    */
   bool acceptMeshDivision(const unsigned int actual_mesh_div,
