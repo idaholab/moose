@@ -1,19 +1,90 @@
 [Tests]
   design = 'cgfe.md'
   issues = '#21102'
-  [rz]
-    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis'
+  [rz_laplace]
+    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis, using a Laplace form for the viscous term'
+    [dirichlet_unstablized]
+      type = Exodiff
+      input = pipe-flow.i
+      cli_args = "Kernels/inactive='mass_pspg momentum_supg' Variables/velocity/order=SECOND Mesh/second_order=true Outputs/file_base=dirichlet-unstabilized -pc_factor_shift_type NONZERO"
+      exodiff = dirichlet-unstabilized.e
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, without PSPG and SUPG stabilization,'
+    []
+    [dirichlet_unstablized_hand]
+      type = Exodiff
+      input = hand-coded-jac-pipe-flow.i
+      cli_args = "GlobalParams/supg=false GlobalParams/pspg=false Variables/velocity_x/order=SECOND Variables/velocity_y/order=SECOND Mesh/second_order=true Outputs/file_base=hand-coded-jac-dirichlet-unstabilized -pc_factor_shift_type NONZERO"
+      exodiff = hand-coded-jac-dirichlet-unstabilized.e
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, without PSPG and SUPG stabilization,'
+    []
     [dirichlet]
       type = 'Exodiff'
       input = 'pipe-flow.i'
-      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet,'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
       exodiff = 'pipe-flow_out.e'
+    []
+    [dirichlet_hand]
+      type = 'Exodiff'
+      input = 'hand-coded-jac-pipe-flow.i'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization,'
+      exodiff = 'hand-coded-jac-pipe-flow_out.e'
     []
     [natural]
       type = 'Exodiff'
       input = 'pipe-flow-natural-bc.i'
-      detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet.'
+      detail = 'in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
       exodiff = 'pipe-flow-natural-bc_out.e'
+    []
+    [natural_hand]
+      type = 'Exodiff'
+      input = 'hand-coded-jac-pipe-flow-natural-bc.i'
+      detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization.'
+      exodiff = 'hand-coded-jac-pipe-flow-natural-bc_out.e'
+    []
+  []
+  [rz_traction]
+    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis, using a traction form for the viscous term'
+    [dirichlet_unstablized]
+      type = 'Exodiff'
+      input = 'pipe-flow.i'
+      cli_args = "Kernels/inactive='mass_pspg momentum_supg' Variables/velocity/order=SECOND Mesh/second_order=true Outputs/file_base=dirichlet-unstabilized-traction GlobalParams/viscous_form=traction -pc_factor_shift_type NONZERO"
+      exodiff = 'dirichlet-unstabilized-traction.e'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, without PSPG and SUPG stabilization,'
+    []
+    [dirichlet_unstablized_hand]
+      type = 'Exodiff'
+      input = 'hand-coded-jac-pipe-flow.i'
+      cli_args = "GlobalParams/supg=false GlobalParams/pspg=false Variables/velocity_x/order=SECOND Variables/velocity_y/order=SECOND Mesh/second_order=true Outputs/file_base=hand-coded-jac-dirichlet-unstabilized-traction GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ -pc_factor_shift_type NONZERO"
+      exodiff = 'hand-coded-jac-dirichlet-unstabilized-traction.e'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, without PSPG and SUPG stabilization,'
+    []
+    [dirichlet]
+      type = 'Exodiff'
+      input = 'pipe-flow.i'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
+      exodiff = 'dirichlet-traction.e'
+      cli_args = 'GlobalParams/viscous_form=traction Outputs/file_base=dirichlet-traction'
+    []
+    [dirichlet_hand]
+      type = 'Exodiff'
+      input = 'hand-coded-jac-pipe-flow.i'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization,'
+      exodiff = 'dirichlet-hand-traction.e'
+      cli_args = 'GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ Outputs/file_base=dirichlet-hand-traction'
+    []
+    [natural]
+      type = 'Exodiff'
+      input = 'pipe-flow-natural-bc.i'
+      detail = 'in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
+      exodiff = 'natural-traction.e'
+      cli_args = 'GlobalParams/viscous_form=traction Outputs/file_base=natural-traction'
+    []
+    [natural_hand]
+      type = 'Exodiff'
+      input = 'hand-coded-jac-pipe-flow-natural-bc.i'
+      detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization.'
+      exodiff = 'natural-hand-traction.e'
+      cli_args = 'GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ Outputs/file_base=natural-hand-traction'
     []
   []
 []
