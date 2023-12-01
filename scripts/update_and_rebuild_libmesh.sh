@@ -34,9 +34,15 @@ do
   fi
 done
 
+if [ -n "$LIBMESH_SRC_DIR" ]; then
+  skip_sub_update=1
+else
+  MOOSE_DIR=${SCRIPT_DIR}/..
+  LIBMESH_SRC_DIR=${MOOSE_DIR}/libmesh
+fi
+
 # Display help
 if [[ -n "$help" ]]; then
-  cd $SCRIPT_DIR/..
   echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | --quiet-build | <libmesh options> ]"
   echo
   echo "-h | --help              Display this message and list of available libmesh options"
@@ -46,8 +52,8 @@ if [[ -n "$help" ]]; then
   echo "*************************************************************************************"
   echo ""
 
-  if [ -e "./libmesh/configure" ]; then
-    libmesh/configure -h
+  if [ -e "${LIBMESH_SRC_DIR}/configure" ]; then
+    ${LIBMESH_SRC_DIR} -h
   fi
   exit 0
 fi
@@ -86,8 +92,8 @@ if [[ -n "$LIBMESH_DIR" ]]; then
   echo "INFO: No cleaning will be done in specified path"
   mkdir -p $LIBMESH_DIR
 else
-  export LIBMESH_DIR=$SCRIPT_DIR/../libmesh/installed
-  rm -rf $SCRIPT_DIR/../libmesh/installed
+  export LIBMESH_DIR=${LIBMESH_SRC_DIR}/installed
+  rm -rf ${LIBMESH_SRC_DIR}/installed
 fi
 
 # If the user set METHOD, but not METHODS, we'll let METHOD override
@@ -102,19 +108,20 @@ if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
   export VTK_OPTIONS="--with-vtk-lib=$VTKLIB_DIR --with-vtk-include=$VTKINCLUDE_DIR"
 fi
 
-cd $SCRIPT_DIR/..
-
 # Test for git repository when not using fast
-git_dir=`git rev-parse --show-cdup 2>/dev/null`
-if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]; then
-  git submodule update --init --recursive libmesh
-  if [[ $? != 0 ]]; then
-    echo "git submodule command failed, are your proxy settings correct?"
-    # TODO: is this a git bug?
-    # failed attempts with `git submodule update` deletes the submodule directory.
-    # So re-create it to prevent a diff.
-    mkdir libmesh
-    exit 1
+if [ -n "$MOOSE_DIR" ] && [ -z "$skip_sub_update" ]; then
+  cd ${MOOSE_DIR}
+  git_dir=`git rev-parse --show-cdup 2>/dev/null`
+  if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
+    git submodule update --init --recursive libmesh
+    if [[ $? != 0 ]]; then
+      echo "git submodule command failed, are your proxy settings correct?"
+      # TODO: is this a git bug?
+      # failed attempts with `git submodule update` deletes the submodule directory.
+      # So re-create it to prevent a diff.
+      mkdir libmesh
+      exit 1
+    fi
   fi
 fi
 
@@ -133,7 +140,7 @@ if [ $? == 0 ]; then
   fi
 fi
 
-cd $SCRIPT_DIR/../libmesh
+cd ${LIBMESH_SRC_DIR}
 
 # If PETSC_DIR is not set in the environment (perhaps because the user is not using the MOOSE
 # package), we use the PETSc submodule
@@ -151,16 +158,16 @@ if [ -z "$go_fast" ]; then
   if [[ -n "$LIBMESH_BUILD_DIR" ]]; then
     echo "INFO: LIBMESH_BUILD_DIR set - overriding default build path"
   else
-    export LIBMESH_BUILD_DIR=$SCRIPT_DIR/../libmesh/build
+    export LIBMESH_BUILD_DIR=${LIBMESH_SRC_DIR}/build
   fi
   rm -rf $LIBMESH_BUILD_DIR
   mkdir -p $LIBMESH_BUILD_DIR
   cd $LIBMESH_BUILD_DIR
 
   source $SCRIPT_DIR/configure_libmesh.sh
-  SRC_DIR=${SCRIPT_DIR}/../libmesh configure_libmesh $DISABLE_TIMESTAMPS \
-                                                     $VTK_OPTIONS \
-                                                     $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
+  SRC_DIR=${LIBMESH_SRC_DIR} configure_libmesh $DISABLE_TIMESTAMPS \
+                                               $VTK_OPTIONS \
+                                               $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.

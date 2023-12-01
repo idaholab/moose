@@ -920,8 +920,7 @@ TEST(HitTests, FileIncludeMissing)
   }
   catch (std::exception & err)
   {
-    EXPECT_EQ("TESTCASE line:4 column:3 : could not find 'missing_file.i'\n",
-              std::string(err.what()));
+    EXPECT_EQ("TESTCASE:4.3: could not find 'missing_file.i'\n", std::string(err.what()));
   }
 }
 
@@ -963,7 +962,7 @@ TEST(HitTests, FileIncludeCircular)
   }
   catch (std::exception & err)
   {
-    EXPECT_EQ("./include_file_02.i line:3 column:3 : file include would create circular reference "
+    EXPECT_EQ("./include_file_02.i:3.3: file include would create circular reference "
               "'include_file_01.i'\n",
               std::string(err.what()));
   }

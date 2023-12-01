@@ -5,7 +5,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2023.11.06" %}
+{% set version = "2023.11.29" %}
 
 package:
   name: moose-wasp
@@ -21,6 +21,8 @@ build:
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
   run_exports:
     - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
 
