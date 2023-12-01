@@ -20,12 +20,16 @@ MeshDivisionAux::validParams()
       "Returns the value of the mesh division index for each element / node");
   params.addRequiredParam<MeshDivisionName>("mesh_division",
                                             "The mesh division providing the value");
+  params.addParam<int>(
+      "output_invalid_value_as", -1, "Convert the invalid value index for output purposes");
   return params;
 }
 
 MeshDivisionAux::MeshDivisionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _mesh_division(_c_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid))
+    _mesh_division(
+        _c_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid)),
+    _invalid_bin_value(getParam<int>("output_invalid_value_as"))
 {
   // Check family types for reasonable choices
   if (!_var.isNodal() && _var.feType().order != CONSTANT)
@@ -35,8 +39,13 @@ MeshDivisionAux::MeshDivisionAux(const InputParameters & parameters)
 Real
 MeshDivisionAux::computeValue()
 {
+  unsigned int value;
   if (isNodal())
-    return _mesh_division.divisionIndex(*_current_node);
+    value = _mesh_division.divisionIndex(*_current_node);
   else
-    return _mesh_division.divisionIndex(*_current_elem);
+    value = _mesh_division.divisionIndex(*_current_elem);
+  if (value == MooseMeshDivision::INVALID_DIVISION_INDEX)
+    return _invalid_bin_value;
+  else
+    return value;
 }

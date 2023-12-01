@@ -28,4 +28,6 @@ protected:
 
   /// Mesh division to evaluate
   const MeshDivision & _mesh_division;
+  /// Number to use for the invalid value
+  const int _invalid_bin_value;
 };
