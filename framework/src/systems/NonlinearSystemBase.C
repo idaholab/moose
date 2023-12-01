@@ -3599,6 +3599,10 @@ NonlinearSystemBase::setMooseKSPNormType(MooseEnum kspnorm)
 bool
 NonlinearSystemBase::shouldEvaluateFNormBeforeSMO() const
 {
+  // This complies with the legacy behavior: always do the redundant residual evaluation
+  if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+    return true;
+
   // If solve_type == LINEAR, there is no need to evaluate the initial residual.
   if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
     return false;
