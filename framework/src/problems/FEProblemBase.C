@@ -7787,8 +7787,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     // Set the initial residual depending on what the user asks us to use.
-    Real the_residual =
-        system.shouldEvaluateFNormBeforeSMO() ? fnorm0_before_smo : system._fnorm0_after_smo;
+    Real the_residual;
+    if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+      the_residual = system._use_fnorm0_before_smo ? fnorm0_before_smo : system._fnorm0_after_smo;
+    else
+      the_residual =
+          system.shouldEvaluateFNormBeforeSMO() ? fnorm0_before_smo : system._fnorm0_after_smo;
     if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
       reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     else if (snorm < stol * xnorm)
