@@ -1,7 +1,11 @@
-mu = 1.1
-rho = 1.1
+mu = 1.0
+rho = 10.0
+mu_d = 0.1
+rho_d = 1.0
 l = 2
 U = 1
+dp = 0.01
+inlet_phase_2 = 0.1
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
@@ -23,11 +27,11 @@ velocity_interp_method = 'rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 10
+    xmax = '${fparse l * 5}'
     ymin = '${fparse -l / 2}'
     ymax = '${fparse l / 2}'
-    nx = 100
-    ny = 20
+    nx = 10
+    ny = 6
   []
   uniform_refine = 0
 []
@@ -35,24 +39,28 @@ velocity_interp_method = 'rc'
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 0
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 0
   []
   [pressure]
     type = INSFVPressureVariable
   []
+  [phase_2]
+    type = INSFVScalarFieldVariable
+  []
 []
 
 [FVKernels]
+
   [mass]
     type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
+    rho = 'rho_mixture'
   []
 
   [u_advection]
@@ -60,17 +68,16 @@ velocity_interp_method = 'rc'
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
+    rho = 'rho_mixture'
     momentum_component = 'x'
-
   []
   [u_advection_slip]
     type = INSFVMomentumAdvectionSlip
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-    rho_d = '${fparse rho / 1000.0}'
+    rho = 'rho_mixture'
+    rho_d = ${rho_d}
     fd = 0.5
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
@@ -79,7 +86,7 @@ velocity_interp_method = 'rc'
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = vel_x
-    mu = ${mu}
+    mu = 'mu_mixture'
     momentum_component = 'x'
   []
   [u_pressure]
@@ -94,7 +101,7 @@ velocity_interp_method = 'rc'
     variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
+    rho = 'rho_mixture'
     momentum_component = 'y'
   []
   [v_advection_slip]
@@ -103,7 +110,7 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
-    rho_d = '${fparse rho / 1000.0}'
+    rho_d = ${rho_d}
     fd = 0.5
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
@@ -112,7 +119,7 @@ velocity_interp_method = 'rc'
   [v_viscosity]
     type = INSFVMomentumDiffusion
     variable = vel_y
-    mu = ${mu}
+    mu = 'mu_mixture'
     momentum_component = 'y'
   []
   [v_pressure]
@@ -120,6 +127,21 @@ velocity_interp_method = 'rc'
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
+  []
+
+  [phase_2_advection]
+    type = INSFVScalarFieldAdvection
+    variable = phase_2
+    u_slip = 'vel_slip_x'
+    v_slip = 'vel_slip_y'
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = 'upwind'
+  []
+  [phase_2_src]
+    type = NSFVInterfaceTransfer
+    variable = phase_2
+    phase_coupled = phase_1
+    alpha = 0.1
   []
 []
 
@@ -154,6 +176,18 @@ velocity_interp_method = 'rc'
     variable = pressure
     function = '0'
   []
+  [inlet_phase_1]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = phase_1
+    value = '${fparse 1.0 - inlet_phase_2}'
+  []
+  [inlet_phase_2]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = phase_2
+    value = ${inlet_phase_2}
+  []
 []
 
 [AuxVariables]
@@ -161,6 +195,18 @@ velocity_interp_method = 'rc'
     type = MooseVariableFVReal
   []
   [vel_slip_y]
+    type = MooseVariableFVReal
+  []
+  [drag_coefficient]
+    type = MooseVariableFVReal
+  []
+  [rho_mixture_var]
+    type = MooseVariableFVReal
+  []
+  [mu_mixture_var]
+    type = MooseVariableFVReal
+  []
+  [phase_1]
     type = MooseVariableFVReal
   []
 []
@@ -172,10 +218,11 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
     u = 'vel_x'
     v = 'vel_y'
-    rho_c = '${rho}'
-    rho_d = '${fparse rho/1000.0}'
-    particle_diameter = 0.01
-    fd = 0.5
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
   []
   [populate_v_slip]
     type = INSFVSlipVelocityAux
@@ -183,65 +230,60 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
     u = 'vel_x'
     v = 'vel_y'
-    rho_c = '${rho}'
-    rho_d = '${fparse rho/1000.0}'
-    particle_diameter = 0.01
-    fd = 0.5
+    rho = ${rho}
+    mu = 'mu_mixture'
+    rho_d = ${rho_d}
+    particle_diameter = ${dp}
+    linear_coef_name = 'Darcy_coefficient'
+  []
+  [populate_cd]
+    type = FunctorAux
+    variable = drag_coefficient
+    functor = 'Darcy_coefficient'
+  []
+  [populate_rho_mixture_var]
+    type = FunctorAux
+    variable = rho_mixture_var
+    functor = 'rho_mixture'
+  []
+  [populate_mu_mixture_var]
+    type = FunctorAux
+    variable = mu_mixture_var
+    functor = 'mu_mixture'
+  []
+  [compute_phase_1]
+    type = ParsedAux
+    variable = phase_1
+    coupled_variables = 'phase_2'
+    expression = '1 - phase_2'
+  []
+[]
+
+[Materials]
+  [CD]
+    type = NSFVDispersePhaseDragMaterial
+    rho = 'rho_mixture'
+    mu = mu_mixture
+    u = 'vel_x'
+    v = 'vel_y'
+    particle_diameter = ${dp}
+  []
+  [mixing_material]
+    type = NSFVMixtureMaterial
+    phase_2_names = '${rho} ${mu}'
+    phase_1_names = '${rho_d} ${mu_d}'
+    prop_names = 'rho_mixture mu_mixture'
+    phase_1_fraction = 'phase_2'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  nl_rel_tol = 1e-5
+  nl_rel_tol = 1e-10
 []
 
 [Preconditioning]
-  active = SMP
-  [FSP]
-    type = FSP
-    # It is the starting point of splitting
-    topsplit = 'up' # 'up' should match the following block name
-    [up]
-      splitting = 'u p' # 'u' and 'p' are the names of subsolvers
-      splitting_type = schur
-      # Splitting type is set as schur, because the pressure part of Stokes-like systems
-      # is not diagonally dominant. CAN NOT use additive, multiplicative and etc.
-      #
-      # Original system:
-      #
-      # | Auu Aup | | u | = | f_u |
-      # | Apu 0   | | p |   | f_p |
-      #
-      # is factorized into
-      #
-      # |I             0 | | Auu  0|  | I  Auu^{-1}*Aup | | u | = | f_u |
-      # |Apu*Auu^{-1}  I | | 0   -S|  | 0  I            | | p |   | f_p |
-      #
-      # where
-      #
-      # S = Apu*Auu^{-1}*Aup
-      #
-      # The preconditioning is accomplished via the following steps
-      #
-      # (1) p* = f_p - Apu*Auu^{-1}f_u,
-      # (2) p = (-S)^{-1} p*
-      # (3) u = Auu^{-1}(f_u-Aup*p)
-
-      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_rtol -ksp_type'
-      petsc_options_value = 'full                            selfp                             300                1e-4      fgmres'
-    []
-    [u]
-      vars = 'vel_x vel_y'
-      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side'
-      petsc_options_value = 'hypre    boomeramg      gmres    5e-1      300                 right'
-    []
-    [p]
-      vars = 'pressure'
-      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side'
-      petsc_options_value = 'gmres    300                5e-1      jacobi    right'
-    []
-  []
   [SMP]
     type = SMP
     full = true

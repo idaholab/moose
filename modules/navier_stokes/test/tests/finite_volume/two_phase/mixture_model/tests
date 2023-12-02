@@ -1,0 +1,32 @@
+[Tests]
+  design = ''
+  issues = ''
+  [mixture_lid_driven_two_phase]
+    type = 'CSVDiff'
+    input = 'lid-driven-two-phase.i'
+    csvdiff = 'lid-driven-two-phase_CSV.csv'
+    requirement = 'The system shall solve two phase flow in a lid-driven cavity with the mixture model.'
+    rel_err = 1.0E-6
+    recover = false
+  []
+  [mixture_rayleigh_bernard_two_phase]
+    type = 'CSVDiff'
+    input = 'rayleigh-bernard-two-phase.i'
+    csvdiff = 'rayleigh-bernard-two-phase_CSV.csv'
+    requirement = 'The system shall solve two phase Rayleigh Bernard convection with the mixture model.'
+    rel_err = 1.0E-6
+    recover = false
+  []
+  [mixture_channel_drift_flux]
+    type = 'Exodiff'
+    input = 'channel-drift-flux.i'
+    exodiff = 'channel-drift-flux_out.e'
+    requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model.'
+  []
+  [mixture_channel_advection_slip]
+    type = 'Exodiff'
+    input = 'channel-advection-slip.i'
+    exodiff = 'channel-advection-slip_out.e'
+    requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture advection-slip model.'
+  []
+[]

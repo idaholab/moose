@@ -10,6 +10,7 @@
 #include "INSFVSlipVelocityAux.h"
 #include "INSFVVelocityVariable.h"
 #include "Function.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVSlipVelocityAux);
 
@@ -21,8 +22,9 @@ INSFVSlipVelocityAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Continuous phase density.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Mixture Density");
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
   params.addClassDescription("Object for advecting momentum with slip velocity, e.g. rho*u");
@@ -55,8 +57,9 @@ INSFVSlipVelocityAux::INSFVSlipVelocityAux(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho_c(getFunctor<ADReal>("rho_c")),
+    _rho_mixture(getFunctor<ADReal>(NS::density)),
     _rho_d(getFunctor<ADReal>("rho_d")),
+    _mu_mixture(getFunctor<ADReal>(NS::mu)),
     _gravity(getParam<RealVectorValue>("gravity")),
     _force_scale(getParam<Real>("force_value")),
     _force_function(getFunction("force_function")),
@@ -64,7 +67,6 @@ INSFVSlipVelocityAux::INSFVSlipVelocityAux(const InputParameters & params)
     _force_direction(getParam<RealVectorValue>("force_direction")),
     _linear_friction(getFunctor<ADReal>("linear_coef_name")),
     _particle_diameter(getFunctor<ADReal>("particle_diameter")),
-    _fd(getFunctor<ADReal>("fd")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
   if (!_u_var)
@@ -126,18 +128,16 @@ INSFVSlipVelocityAux::computeValue()
     }
   }
 
-  auto rho = _rho_c(elem_arg, state) +
-             (_rho_d(elem_arg, state) - _rho_c(elem_arg, state)) * _fd(elem_arg, state) + offset;
+  ADReal density_scaling =
+      (_rho_d(elem_arg, state) - _rho_mixture(elem_arg, state)) / _rho_d(elem_arg, state);
+  ADReal flux_residual =
+      density_scaling * (-term_transient - term_advection + term_gravity + term_force)(_index);
 
-  auto density_scaling = (rho - _rho_d(elem_arg, state)) / _rho_c(elem_arg, state);
-  auto flux_residual =
-      -density_scaling * (-term_transient - term_advection + term_gravity + term_force);
+  ADReal relaxation_time = _rho_d(elem_arg, state) *
+                           Utility::pow<2>(_particle_diameter(elem_arg, state)) /
+                           (18.0 * _mu_mixture(elem_arg, state));
 
-  ADRealVectorValue forcing_term = 4.0 / 3.0 * _particle_diameter(elem_arg, state) /
-                                   _linear_friction(elem_arg, state) * flux_residual;
+  ADReal linear_friction_factor = _linear_friction(elem_arg, state) + offset;
 
-  // Return the slip velocity
-  return raw_value(std::sqrt(std::abs(forcing_term(_index))) * forcing_term(_index) /
-                   (std::abs(forcing_term(_index)) + offset) * _fd(elem_arg, state) *
-                   (1.0 - _fd(elem_arg, state)));
+  return raw_value(relaxation_time / linear_friction_factor * flux_residual);
 }

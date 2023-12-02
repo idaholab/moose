@@ -37,10 +37,13 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Continuous Phase Density
-  const Moose::Functor<ADReal> & _rho_c;
+  const Moose::Functor<ADReal> & _rho_mixture;
 
   /// Dispersed Phase Density
   const Moose::Functor<ADReal> & _rho_d;
+
+  /// Mixture Density
+  const Moose::Functor<ADReal> & _mu_mixture;
 
   // Gravity acceleration vector
   RealVectorValue _gravity;
@@ -62,9 +65,6 @@ protected:
 
   /// Particle diameter in the dispersed phase
   const Moose::Functor<ADReal> & _particle_diameter;
-
-  /// Particle diameter in the dispersed phase
-  const Moose::Functor<ADReal> & _fd;
 
   /// index x|y|z
   unsigned int _index;

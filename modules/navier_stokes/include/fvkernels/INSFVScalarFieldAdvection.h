@@ -24,4 +24,17 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
   virtual bool hasMaterialTimeDerivative() const override { return true; }
+
+  /// The dimension of the simulation
+  const unsigned int _dim;
+
+  /// Boolean to determine if slip velocity is available
+  bool _add_slip_model;
+
+  /// x-velocity
+  const Moose::Functor<ADReal> * const _u_slip;
+  /// y-velocity
+  const Moose::Functor<ADReal> * const _v_slip;
+  /// z-velocity
+  const Moose::Functor<ADReal> * const _w_slip;
 };
