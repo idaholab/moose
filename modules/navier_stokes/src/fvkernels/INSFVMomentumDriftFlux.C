@@ -20,8 +20,7 @@ InputParameters
 INSFVMomentumDriftFlux::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
-  params.addClassDescription(
-      "Implements the drift momentum flux source.");
+  params.addClassDescription("Implements the drift momentum flux source.");
   params.addRequiredParam<MooseFunctorName>("u_slip", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The velocity in the z direction.");
@@ -45,7 +44,8 @@ INSFVMomentumDriftFlux::INSFVMomentumDriftFlux(const InputParameters & params)
     _u_slip(getFunctor<ADReal>("u_slip")),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
     _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr),
-    _density_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("density_interp_method")))
+    _density_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("density_interp_method")))
 {
   if (_dim >= 2 && !_v_slip)
     mooseError("In two or more dimensions, the v_slip velocity must be supplied using the 'v_slip' "
@@ -64,7 +64,8 @@ INSFVMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
   if (onBoundary(*_face_info))
     face_arg = singleSidedFaceArg();
   else
-    face_arg = Moose::FaceArg{_face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    face_arg =
+        Moose::FaceArg{_face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
@@ -95,9 +96,9 @@ INSFVMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     {
       if (_index == 1)
         _ae = uslipdotn * _u_slip(elemArg(), state);
-      if (_index ==2)
+      if (_index == 2)
         _ae = uslipdotn * (*_v_slip)(elemArg(), state);
-      if (_index ==3)
+      if (_index == 3)
         _ae = uslipdotn * (*_w_slip)(elemArg(), state);
       _ae *= -face_rho_fd;
     }
@@ -106,9 +107,9 @@ INSFVMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     {
       if (_index == 1)
         _ae = uslipdotn * _u_slip(neighborArg(), state);
-      if (_index ==2)
+      if (_index == 2)
         _ae = uslipdotn * (*_v_slip)(neighborArg(), state);
-      if (_index ==3)
+      if (_index == 3)
         _ae = uslipdotn * (*_w_slip)(neighborArg(), state);
       _an *= face_rho_fd;
     }

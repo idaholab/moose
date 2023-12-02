@@ -29,5 +29,4 @@ protected:
   const Moose::Functor<ADReal> & _alpha;
   /// Coupled Phase Functor
   const Moose::Functor<ADReal> & _phase_coupled;
-
 };
