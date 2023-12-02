@@ -18,4 +18,13 @@
     requirement = 'The system shall compute the average of the nodal displacements of a cross '
                   'section defined by the user via a nodal vector at multiple steps.'
   []
+  [test_one_step_two_ducts]
+    type = 'CSVDiff'
+    input = 'test_one_step_two_ducts.i'
+    csvdiff = 'test_one_step_two_ducts_out_section_output_0001.csv '
+              'test_one_step_two_ducts_out_section_output_two_0001.csv'
+    requirement = 'The system shall compute the average of the nodal displacements of a cross '
+                  'section defined by the user via two nodal vector and two reference points for two '
+                  'respective ducts.'
+  []
 []

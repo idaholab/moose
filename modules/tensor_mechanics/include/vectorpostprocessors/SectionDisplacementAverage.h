@@ -58,6 +58,9 @@ protected:
   /// numbers of nodes (this would allow local, regular refinement in the structural component mesh)
   std::vector<unsigned int> _number_of_nodes;
 
+  /// Tolerance to disambiguate cross section locations in different components within the same block
+  const Real _cross_section_maximum_radius;
+
 private:
   /// Axis direction of the structural component
   Real distancePointPlane(const Node & node,

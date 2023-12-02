@@ -10,6 +10,7 @@
 #include "SectionDisplacementAverage.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
+#include <limits>
 
 registerMooseObject("TensorMechanicsApp", SectionDisplacementAverage);
 
@@ -27,6 +28,10 @@ SectionDisplacementAverage::validParams()
   params.addRequiredParam<Point>("reference_point",
                                  "Structural component reference starting point from which the "
                                  "input parameter 'lengths' applies.");
+  params.addParam<Real>("cross_section_maximum_radius",
+                        std::numeric_limits<double>::max(),
+                        "Optional parameter to disambiguate cross sections of different structural "
+                        "components when they share the same mesh block.");
   params.addRequiredParam<std::vector<Real>>(
       "lengths", "Distance(s) to cross section from the global origin.");
   params.addParam<Real>("tolerance",
@@ -46,7 +51,8 @@ SectionDisplacementAverage::SectionDisplacementAverage(const InputParameters & p
     _reference_point(getParam<Point>("reference_point")),
     _lengths(getParam<std::vector<Real>>("lengths")),
     _tolerance(getParam<Real>("tolerance")),
-    _number_of_nodes(_lengths.size())
+    _number_of_nodes(_lengths.size()),
+    _cross_section_maximum_radius(getParam<Real>("cross_section_maximum_radius"))
 {
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1.0))
     paramError("axis_direction",
@@ -152,9 +158,19 @@ SectionDisplacementAverage::distancePointPlane(const Node & node,
                                                const Point & reference_point,
                                                const Real length) const
 {
-  // length is distance from (0,0,0) to plane
-  return std::abs(axis_direction(0) * node(0) + axis_direction(1) * node(1) +
-                  axis_direction(2) * node(2) -
-                  (length * axis_direction + reference_point).norm()) /
-         std::sqrt(axis_direction * axis_direction);
+  // Compute node location w.r.t. structural component length
+  const Point relative_distance{
+      node(0) - reference_point(0), node(1) - reference_point(1), node(2) - reference_point(2)};
+
+  const Real axial_distance = axis_direction(0) * relative_distance(0) +
+                              axis_direction(1) * relative_distance(1) +
+                              axis_direction(2) * relative_distance(2);
+  const Real out_of_plane_distance =
+      (relative_distance - relative_distance * axis_direction * axis_direction).norm();
+
+  // If condition below is fulfilled, not in the user-defined structural component
+  if (out_of_plane_distance > _cross_section_maximum_radius)
+    return std::numeric_limits<double>::max();
+
+  return std::abs(axial_distance - length) / std::sqrt(axis_direction * axis_direction);
 }
