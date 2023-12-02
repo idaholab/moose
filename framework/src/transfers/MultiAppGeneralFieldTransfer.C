@@ -1447,7 +1447,8 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
       return false;
 
     // Check point against the source mesh division
-    if (!_from_mesh_divisions.empty() && !inMeshDivision(pt, i_from, only_from_mesh_div, true))
+    if ((!_from_mesh_divisions.empty() || !_to_mesh_divisions.empty()) &&
+        !acceptPointMeshDivision(transformed_pt, i_from, only_from_mesh_div))
       return false;
 
     // Get nearest position (often a subapp position) for the target point
@@ -1602,56 +1603,30 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
 }
 
 bool
-MultiAppGeneralFieldTransfer::inMeshDivision(const Point & pt,
-                                             const unsigned int i_local,
-                                             const unsigned int only_from_this_mesh_div,
-                                             bool from_direction) const
+MultiAppGeneralFieldTransfer::acceptPointMeshDivision(
+    const Point & pt, const unsigned int i_local, const unsigned int only_from_this_mesh_div) const
 {
-  const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(pt)
-                                             : _to_mesh_divisions[i_local]->divisionIndex(pt);
-  return acceptMeshDivision(division_index, i_local, only_from_this_mesh_div, from_direction);
-}
+  // This routine can also be called to examine if the to_mesh_division index matches the current
+  // source subapp index
+  unsigned int source_mesh_div = MooseMeshDivision::INVALID_DIVISION_INDEX - 1;
+  if (!_from_mesh_divisions.empty())
+    source_mesh_div = _from_mesh_divisions[i_local]->divisionIndex(pt);
 
-bool
-MultiAppGeneralFieldTransfer::inMeshDivision(const Elem & elem,
-                                             const unsigned int i_local,
-                                             const unsigned int only_from_this_mesh_div,
-                                             bool from_direction) const
-{
-  const auto division_index = from_direction ? _from_mesh_divisions[i_local]->divisionIndex(elem)
-                                             : _to_mesh_divisions[i_local]->divisionIndex(elem);
-  return acceptMeshDivision(division_index, i_local, only_from_this_mesh_div, from_direction);
-}
-
-bool
-MultiAppGeneralFieldTransfer::acceptMeshDivision(const unsigned int actual_mesh_div,
-                                                 const unsigned int i_local,
-                                                 const unsigned int only_from_this_mesh_div,
-                                                 bool from_direction) const
-{
-  const auto mesh_division_behavior =
-      from_direction ? _from_mesh_division_behavior : _to_mesh_division_behavior;
-  const auto other_side_behavior =
-      from_direction ? _to_mesh_division_behavior : _from_mesh_division_behavior;
-
-  // If the point is not indexed in the division
-  if (actual_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
+  // If the point is not indexed in the source division
+  if (!_from_mesh_divisions.empty() && source_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
     return false;
   // If the point is not the at the same index in the target and the origin meshes, reject
-  else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
-           actual_mesh_div != only_from_this_mesh_div)
-    return false;
-  else if (other_side_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
-           actual_mesh_div != only_from_this_mesh_div)
+  else if ((_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+            _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX) &&
+           source_mesh_div != only_from_this_mesh_div)
     return false;
   // If the point is at a certain division index that is not the same as the index of the subapp
   // we wanted the information to be from for that point, reject
-  else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
-           actual_mesh_div != only_from_this_mesh_div)
+  else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+           source_mesh_div != only_from_this_mesh_div)
     return false;
-  else if (other_side_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
-           actual_mesh_div != (from_direction ? getGlobalSourceAppIndex(i_local)
-                                              : getGlobalTargetAppIndex(i_local)))
+  else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+           only_from_this_mesh_div != getGlobalSourceAppIndex(i_local))
     return false;
   else
     return true;

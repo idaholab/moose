@@ -33,7 +33,7 @@ public:
   ///}
 
   /// Get the number of positions in the Positions object
-  unsigned int getNumPositions(bool initial=false) const
+  unsigned int getNumPositions(bool initial = false) const
   {
     return (initial && _initial_positions) ? _initial_positions->size() : _positions.size();
   }

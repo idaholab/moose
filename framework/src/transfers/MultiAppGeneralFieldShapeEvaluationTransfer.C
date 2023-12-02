@@ -135,14 +135,15 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       {
         // Use mesh function to compute interpolation values
         const auto from_global_num = getGlobalSourceAppIndex(i_from);
-        auto val = (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+        const auto local_pt = _from_transforms[from_global_num]->mapBack(pt);
+        auto val = (local_meshfuns[i_from])(local_pt);
 
         // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but for shape evaluation we really do expect only one value to even be valid
         if (detectConflict(val, outgoing_vals[i_pt].first, distance, outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, _from_transforms[from_global_num]->mapBack(pt), 1, true);
+          registerConflict(i_from, 0, local_pt, distance, true);
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

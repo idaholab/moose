@@ -54,11 +54,17 @@ public:
 protected:
   /*
    * Prepare evaluation of interpolation values
+   * @param var_index index of the variable & component to prepare for. This routine is called once
+   *        for each variable and component to transfer
    */
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) = 0;
 
   /*
    * Evaluate interpolation values for incoming points
+   * @incoming_points vector of point requests with an additional integer to add constraints
+   *                  on the source regions
+   * @outgoing_vals vector of (evaluated value, distance to value location) for each of the
+   *                incoming point requests
    */
   virtual void
   evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
@@ -66,6 +72,8 @@ protected:
 
   /*
    * Local from bounding boxes for current processor
+   * @param local_bboxes vector of the local (to this process) bounding boxes
+   *        for the source applications
    */
   void extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes);
 
@@ -94,6 +102,8 @@ protected:
 
   /*
    * Whether or not a given point is within the mesh of an origin (from) app
+   * @param pl locator for the mesh of the source app
+   * @param pt point in the local coordinates of the source app we're considering
    */
   bool inMesh(const PointLocatorBase * const pl, const Point & pt) const;
 
@@ -107,12 +117,19 @@ protected:
 
   /*
    * Whether or not a given node is part of an element in the given blocks
+   * @param blocks list of blocks to examine.
+   * @param mesh containing the element and the node
+   * @param node node to consider
+   * A node is in a block if an element it is part of is in that block
    */
   bool
   inBlocks(const std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Whether or not a given point is part of an element in the given blocks
+   * @param blocks list of blocks to examine
+   * @param point locator to find the point in the blocks
+   * @param pt point to examine, in the local coordinates (same as the point locator)
    */
   bool inBlocks(const std::set<SubdomainID> & blocks,
                 const PointLocatorBase * const pl,
@@ -142,7 +159,7 @@ protected:
    *        Note: an empty set means ALL blocks should be considered
    * @param mesh the mesh to look for the boundaries in
    * @param pl the point locator that searches the mesh
-   * @param pt the point we want to know whether it is close to a boundary
+   * @param pt the point we want to know whether it is close to a boundary (local coordinates)
    */
   bool onBoundaries(const std::set<BoundaryID> & boundaries,
                     const std::set<SubdomainID> & block_restriction,
@@ -152,44 +169,15 @@ protected:
 
   /**
    * Whether a point lies inside the mesh division delineated by the MeshDivision object
-   * @param pt point to examine
+   * @param pt point to examine, in the local coordinates (source frame for from_direction=true)
    * @param i_local the index of the problem to consider, holding the mesh division to examine
    * @param only_from_this_mesh_div a mesh division index that must be matched when the
    * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
    * It is ignored otherwise
-   * @param from_direction whether we are currently looking at a source or a target mesh division
    */
-  bool inMeshDivision(const Point & pt,
-                      const unsigned int i_local,
-                      const unsigned int only_from_this_mesh_div,
-                      bool from_direction) const;
-
-  /**
-   * Whether an element lies inside the mesh division delineated by the MeshDivision object
-   * @param elem element to examine
-   * @param i_local the index of the problem to consider, holding the mesh division to examine
-   * @param only_from_this_mesh_div a mesh division index that must be matched when the
-   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
-   * It is ignored otherwise
-   * @param from_direction whether we are currently looking at a source or a target mesh division
-   */
-  bool inMeshDivision(const Elem & elem,
-                      const unsigned int i_local,
-                      const unsigned int only_from_this_mesh_div,
-                      bool from_direction) const;
-
-  /**
-   * Whether the element division index should be accepted
-   * @param i_local the index of the problem to consider, holding the mesh division to examine
-   * @param only_from_this_mesh_div a mesh division index that must be matched when the
-   * to/from_mesh_division_behavior for the direction examined is MATCH_DIVISION/SUBAPP_INDEX
-   * It is ignored otherwise
-   * @param from_direction whether we are currently looking at a source or a target mesh division
-   */
-  bool acceptMeshDivision(const unsigned int actual_mesh_div,
-                          const unsigned int i_local,
-                          const unsigned int only_from_this_mesh_divv,
-                          bool from_direction) const;
+  bool acceptPointMeshDivision(const Point & pt,
+                               const unsigned int i_local,
+                               const unsigned int only_from_this_mesh_div) const;
 
   /**
    * Whether a point is closest to a position at the index specified than any other position
