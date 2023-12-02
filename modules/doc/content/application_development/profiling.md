@@ -58,6 +58,12 @@ contains `oprof` (or not if you wish to profile with another method and have spe
 scripts/update_and_rebuild_libmesh.sh
 ```
 
+WASP must also be built:
+
+```
+scripts/update_and_rebuild_wasp.sh
+```
+
 Finally, when building MOOSE, you set the GPERF_DIR environment variable to the location of a
 gperftools installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  Then you compile MOOSE
 like normal - it should look something like this:

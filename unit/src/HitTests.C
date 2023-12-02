@@ -348,7 +348,7 @@ TEST(HitTests, BraceExpressions)
        "     }",
        "foo",
        "42",
-       hit::Field::Kind::Int},
+       hit::Field::Kind::String},
       {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
       {"fparse-dep-chain",
        "foo=${fparse 42} bar=${fparse foo}",
@@ -1011,5 +1011,134 @@ param_03 = 30
 )INPUT";
 
   // check that all file content is included when the parse tree is rendered
+  EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
+}
+
+// test capability that blocks of the same name are merged into single block
+TEST(HitTests, BlockMerge)
+{
+  // input that has multiple blocks of the same name and split child content
+  std::string input = R"INPUT(
+[Block_01]
+
+  param_01_a = value_01_a
+  param_01_b = value_01_b
+
+  [Subblock_01_01]
+    param_01_01_a = value_01_01_a
+    param_01_01_b = value_01_01_b
+  []
+[]
+
+[Block_02]
+
+  param_02_a = value_02_a
+  param_02_b = value_02_b
+
+  [Subblock_02_01]
+    param_02_01_a = value_02_01_a
+    param_02_01_b = value_02_01_b
+  []
+[]
+
+[Block_02]
+
+  param_02_c = value_02_c
+  param_02_d = value_02_d
+
+  [Subblock_02_01]
+    param_02_01_c = value_02_01_c
+    param_02_01_d = value_02_01_d
+  []
+
+  [Subblock_02_02]
+    param_02_02_a = value_02_02_a
+    param_02_02_b = value_02_02_b
+  []
+[]
+
+[Block_01]
+
+  [Subblock_01_02]
+    param_01_02_a = value_01_02_a
+    param_01_02_b = value_01_02_b
+  []
+
+  param_01_c = value_01_c
+  param_01_d = value_01_d
+[]
+
+[Block_01]
+
+  param_01_e = value_01_e
+  param_01_f = value_01_f
+
+  [Subblock_01_01]
+    param_01_01_c = value_01_01_c
+    param_01_01_d = value_01_01_d
+  []
+
+  param_01_g = value_01_g
+  param_01_h = value_01_h
+[]
+)INPUT";
+
+  // parse input string which merges content from blocks that have same name
+  auto root = hit::parse("TESTCASE", input);
+
+  // expected content from all merged blocks when the parse tree is rendered
+  std::string render_expect = R"INPUT(
+[Block_01]
+
+  param_01_a = value_01_a
+  param_01_b = value_01_b
+
+  [Subblock_01_01]
+    param_01_01_a = value_01_01_a
+    param_01_01_b = value_01_01_b
+
+    param_01_01_c = value_01_01_c
+    param_01_01_d = value_01_01_d
+  []
+
+  [Subblock_01_02]
+    param_01_02_a = value_01_02_a
+    param_01_02_b = value_01_02_b
+  []
+
+  param_01_c = value_01_c
+  param_01_d = value_01_d
+
+  param_01_e = value_01_e
+  param_01_f = value_01_f
+
+  param_01_g = value_01_g
+  param_01_h = value_01_h
+[]
+
+[Block_02]
+
+  param_02_a = value_02_a
+  param_02_b = value_02_b
+
+  [Subblock_02_01]
+    param_02_01_a = value_02_01_a
+    param_02_01_b = value_02_01_b
+
+    param_02_01_c = value_02_01_c
+    param_02_01_d = value_02_01_d
+  []
+
+  param_02_c = value_02_c
+  param_02_d = value_02_d
+
+  [Subblock_02_02]
+    param_02_02_a = value_02_02_a
+    param_02_02_b = value_02_02_b
+  []
+[]
+)INPUT";
+
+  // check that merging of blocks is correct when the parse tree is rendered
   EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
 }

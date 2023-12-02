@@ -22,7 +22,7 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
   instructions and then install our MOOSE Conda packages:
 
 !package! code
-  mamba create -n moose moose-dev=__MOOSE_DEV__
+mamba create -n moose moose-dev=__MOOSE_DEV__
 !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
@@ -135,6 +135,7 @@ either a Conda update, or rebuild PETSc/libMesh:
   cd ~/projects/{{binary}}/moose
   scripts/update_and_rebuild_petsc.sh
   scripts/update_and_rebuild_libmesh.sh
+  scripts/update_and_rebuild_wasp.sh
   ```
 
   For more information on the `METHODS` variable (and other influential environment variables) check out:

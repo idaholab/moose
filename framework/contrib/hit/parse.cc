@@ -673,39 +673,39 @@ Field::clone(bool absolute_path)
 Field::Kind
 Field::kind()
 {
+  // return kind value if set by constructor, setVal, or previous call here
   if (_kind != Kind::None)
     return _kind;
 
-  Kind value_kind = Kind::String;
+  // string is fallback kind for key arrays or if nothing matches key value
+  _kind = Kind::String;
 
-  try
+  // key value parent node will use token type of value child node for kind
+  if (_hnv.type() == wasp::KEYED_VALUE)
   {
-    boolVal();
-    value_kind = Kind::Bool;
-  }
-  catch (...)
-  {
+    wasp::HITNodeView value_node = _hnv.child_at(_hnv.child_count() - 1);
+    auto token_type = value_node.token_type();
+
+    // set that will be checked for bool kind before falling back to string
+    static const std::set<std::string> booleans = {"true", "on", "yes", "false", "off", "no"};
+
+    switch (token_type)
+    {
+      case wasp::INTEGER:
+        _kind = Kind::Int;
+        break;
+      case wasp::REAL:
+        _kind = Kind::Float;
+        break;
+      default:
+      case wasp::STRING:
+        if (booleans.count(lower(value_node.data())))
+          _kind = Kind::Bool;
+        break;
+    }
   }
 
-  try
-  {
-    floatVal();
-    value_kind = Kind::Float;
-  }
-  catch (...)
-  {
-  }
-
-  try
-  {
-    intVal();
-    value_kind = Kind::Int;
-  }
-  catch (...)
-  {
-  }
-
-  return value_kind;
+  return _kind;
 }
 
 void
@@ -1234,32 +1234,24 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       previous_file = hnv_child.node_pool()->stream_name();
       previous_line = hnv_child.last_line();
     }
-    // section handling is dependant on if specification is explode or normal
+
+    // create and add section node if not found in tree then recurse children
     else if (hnv_child.type() == wasp::OBJECT || hnv_child.type() == wasp::DOCUMENT_ROOT)
     {
-      bool explode_section_found = false;
+      // recurse using section if found and do not create or add anything new
+      if (auto hit_child = hit_parent->find(hnv_child.name());
+          hit_child && hit_child->type() == NodeType::Section)
+        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
 
-      // explode section found so create and add nothing just recurse with it
-      wasp::HITNodeView decl_node = hnv_child.first_child_by_name("decl");
-
-      if (decl_node.is_null() || decl_node.data().find("/") != std::string::npos)
-      {
-        if (Node * hit_child = hit_parent->find(hnv_child.name()))
-        {
-          buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
-          explode_section_found = true;
-        }
-      }
-
-      // normal or absent section so create and add node then recurse with it
-      if (!explode_section_found)
+      // create and add new section node if not found then recurse using node
+      else
       {
         // add blank line if needed between previous node line and this node line
         if (hnv_child.node_pool()->stream_name() == previous_file &&
             hnv_child.line() > previous_line + 1)
           hit_parent->addChild(new Blank());
 
-        auto hit_child = new Section(interpreter, hnv_child);
+        hit_child = new Section(interpreter, hnv_child);
         hit_parent->addChild(hit_child);
         previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.line();

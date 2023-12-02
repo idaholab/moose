@@ -45,6 +45,8 @@ Component1DConnection::setupMesh()
       {
         // get info from the connection
         _positions.push_back(conn._position);
+        _elems.push_back(conn._elem);
+        _sides.push_back(conn._side);
         _nodes.push_back(conn._node->id());
         _normals.push_back(conn._normal);
         _boundary_ids.push_back(conn._boundary_id);

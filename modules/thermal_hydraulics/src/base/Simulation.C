@@ -85,9 +85,6 @@ Simulation::buildMesh()
   // build mesh
   for (auto && comp : _components)
     comp->executeSetupMesh();
-  // Make sure all node sets have their corresponding side sets
-  if (_thm_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
-    _thm_mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
 }
 
 void
