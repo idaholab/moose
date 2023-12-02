@@ -11,6 +11,8 @@
 
 #include "MeshDivision.h"
 
+class Positions;
+
 /**
  * Divides the mesh based on a Cartesian grid
  */
@@ -27,9 +29,13 @@ public:
 
 protected:
   /// Bottom left point of the grid
-  const Point _bottom_left;
+  Point _bottom_left;
   /// Top right point of the grid
-  const Point _top_right;
+  Point _top_right;
+  /// Center of the grid, if user-specified
+  const Point * const _center;
+  /// Positions object holding the centers of the grids, if user-specified
+  const Positions * const _center_positions;
   /// Width of the grid in all 3 axes
   const Point _widths;
   /// Number of divisions in the X direction
