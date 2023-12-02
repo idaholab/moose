@@ -14,6 +14,7 @@
 []
 
 [MeshDivisions]
+  active = 'cartesian_div'
   [cartesian_div]
     type = CartesianGridDivision
     bottom_left = '0.1 0.5 0.5'
@@ -21,6 +22,29 @@
     nx = '3'
     ny = '4'
     nz = '1'
+  []
+  [cartesian_div_center]
+    type = CartesianGridDivision
+    center = '2.55 1.25 0.75'
+    widths = '4.9 1.5 0.5'
+    nx = '3'
+    ny = '4'
+    nz = '1'
+  []
+  [cartesian_div_center_pos]
+    type = CartesianGridDivision
+    center_positions = 'center'
+    widths = '4.9 1.5 0.5'
+    nx = '3'
+    ny = '4'
+    nz = '1'
+  []
+[]
+
+[Positions]
+  [center]
+    type = InputPositions
+    positions = '2.55 1.25 0.75'
   []
 []
 
