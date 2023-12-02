@@ -47,6 +47,13 @@ MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluation
   if (_nearest_positions_obj && isParamValid("to_multi_app") && !isParamValid("from_multi_app"))
     paramError("use_nearest_position",
                "Cannot use nearest-position algorithm when sending from the main application");
+
+  // There's not much use for matching cell divisions when the locations have to match exactly
+  // to get a valid source variable value anyway
+  if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+      _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
+    paramError("from_mesh_division_usage",
+               "Matching division index is disabled for shape evaluation transfers");
 }
 
 void
@@ -121,7 +128,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
          ++i_from)
     {
       // Check spatial restrictions
-      Real distance = 1;
+      Real distance = 0;
       if (!acceptPointInOriginMesh(i_from, local_bboxes, pt, mesh_div, distance))
         continue;
       else
