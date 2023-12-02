@@ -81,10 +81,11 @@
 
 [VectorPostprocessors]
   [section_output]
-    type = SectionDisplacementAverage
+    type = AverageSectionValueSampler
     axis_direction = '0 0 1'
     lengths = '10.0 18.0'
     block = '1'
+    variables = 'disp_x disp_y disp_z'
     reference_point = '0 0 0'
   []
 []

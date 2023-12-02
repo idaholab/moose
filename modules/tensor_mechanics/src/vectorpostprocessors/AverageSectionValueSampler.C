@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SectionDisplacementAverage.h"
+#include "AverageSectionValueSampler.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
 #include <limits>
 
-registerMooseObject("TensorMechanicsApp", SectionDisplacementAverage);
+registerMooseObject("TensorMechanicsApp", AverageSectionValueSampler);
 
 InputParameters
-SectionDisplacementAverage::validParams()
+AverageSectionValueSampler::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params.addClassDescription("Compute the section displacement vector average in three-dimensions "
+  params.addClassDescription("Compute the section's variable average in three-dimensions "
                              "given a user-defined definition of the cross section.");
   params.addParam<std::vector<SubdomainName>>(
       "block",
-      "The list of blocks in which to search for cross sectional nodes to compute the displacement "
-      "vector average.");
+      "The list of blocks in which to search for cross sectional nodes to compute the variable "
+      "average.");
   params.addRequiredParam<Point>("axis_direction", "Direction of the structural component's axis");
   params.addRequiredParam<Point>("reference_point",
                                  "Structural component reference starting point from which the "
@@ -32,6 +32,9 @@ SectionDisplacementAverage::validParams()
                         std::numeric_limits<double>::max(),
                         "Optional parameter to disambiguate cross sections of different structural "
                         "components when they share the same mesh block.");
+
+  params.addRequiredParam<std::vector<VariableName>>(
+      "variables", "Variables for the cross section output. These variables must be nodal.");
   params.addRequiredParam<std::vector<Real>>(
       "lengths", "Distance(s) to cross section from the global origin.");
   params.addParam<Real>("tolerance",
@@ -40,13 +43,11 @@ SectionDisplacementAverage::validParams()
   return params;
 }
 
-SectionDisplacementAverage::SectionDisplacementAverage(const InputParameters & parameters)
+AverageSectionValueSampler::AverageSectionValueSampler(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _displaced_mesh(_app.actionWarehouse().displacedMesh()),
     _mesh(_app.actionWarehouse().mesh()),
-    _section_displacements_x(declareVector("section_displacements_x")),
-    _section_displacements_y(declareVector("section_displacements_y")),
-    _section_displacements_z(declareVector("section_displacements_z")),
+    _variables(getParam<std::vector<VariableName>>("variables")),
     _direction(getParam<Point>("axis_direction")),
     _reference_point(getParam<Point>("reference_point")),
     _lengths(getParam<std::vector<Real>>("lengths")),
@@ -54,57 +55,68 @@ SectionDisplacementAverage::SectionDisplacementAverage(const InputParameters & p
     _number_of_nodes(_lengths.size()),
     _cross_section_maximum_radius(getParam<Real>("cross_section_maximum_radius"))
 {
+  if (_mesh->dimension() != 3)
+    mooseError("The AverageSectionValueSampler postprocessor can only be used with three "
+               "dimensional meshes.");
+
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1.0))
     paramError("axis_direction",
                "Axis diretion must have a norm of one and define the direction along which to "
                "locate cross sectional nodes.");
+
+  _output_vector.resize(_variables.size());
+  for (const auto j : make_range(_variables.size()))
+    _output_vector[j] = &declareVector(_variables[j]);
+
+  for (const auto j : make_range(_variables.size()))
+  {
+    const MooseVariable & variable = _sys.getFieldVariable<Real>(_tid, _variables[j]);
+    if (!variable.isNodal())
+      paramError(
+          "variables",
+          "The variables provided to this vector postprocessor must be defined at the nodes.");
+  }
 }
 
 void
-SectionDisplacementAverage::initialize()
+AverageSectionValueSampler::initialize()
 {
-  _section_displacements_x.clear();
-  _section_displacements_z.clear();
-  _section_displacements_z.clear();
-  _section_displacements_x.resize(_lengths.size());
-  _section_displacements_y.resize(_lengths.size());
-  _section_displacements_z.resize(_lengths.size());
+  for (const auto j : make_range(_variables.size()))
+  {
+    _output_vector[j]->clear();
+    _output_vector[j]->resize(_lengths.size());
+  }
   _number_of_nodes.clear();
   _number_of_nodes.resize(_lengths.size());
 }
 
 void
-SectionDisplacementAverage::finalize()
+AverageSectionValueSampler::finalize()
 {
-  _communicator.sum(_section_displacements_x);
-  _communicator.sum(_section_displacements_y);
-  _communicator.sum(_section_displacements_z);
+  for (const auto j : make_range(_variables.size()))
+    _communicator.sum(*(_output_vector[j]));
 
   _communicator.sum(_number_of_nodes);
 
   for (const auto li : index_range(_lengths))
     if (_number_of_nodes[li] < 1)
       mooseError(
-          "No nodes were found in SectionDisplacementAverage postprocessor. Revise your input.");
+          "No nodes were found in AverageSectionValueSampler postprocessor. Revise your input.");
 
   for (const auto li : index_range(_lengths))
-  {
-    _section_displacements_x[li] /= _number_of_nodes[li];
-    _section_displacements_y[li] /= _number_of_nodes[li];
-    _section_displacements_z[li] /= _number_of_nodes[li];
-  }
+    for (const auto j : make_range(_variables.size()))
+      (*_output_vector[j])[li] /= _number_of_nodes[li];
 }
 
 void
-SectionDisplacementAverage::execute()
+AverageSectionValueSampler::execute()
 {
   _block_ids = _displaced_mesh->getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"));
 
   auto * active_nodes = _mesh->getActiveSemiLocalNodeRange();
 
-  std::vector<Real> average_cross_sectional_displacement_x(_lengths.size());
-  std::vector<Real> average_cross_sectional_displacement_y(_lengths.size());
-  std::vector<Real> average_cross_sectional_displacement_z(_lengths.size());
+  std::vector<std::vector<Real>> output_vector_partial(_variables.size(),
+                                                       std::vector<Real>(_lengths.size()));
 
   const NumericVector<Number> & _sol = *_sys.currentSolution();
 
@@ -124,36 +136,24 @@ SectionDisplacementAverage::execute()
           if ((*node).processor_id() != processor_id())
             continue;
 
-          // Retrieve displacement variables
-          // x
-          const MooseVariable & disp_x_variable = _sys.getFieldVariable<Real>(_tid, "disp_x");
-          const auto disp_x_num = disp_x_variable.number();
-          average_cross_sectional_displacement_x[li] +=
-              _sol(node->dof_number(_sys.number(), disp_x_num, 0));
-
-          // y
-          const MooseVariable & disp_y_variable = _sys.getFieldVariable<Real>(_tid, "disp_y");
-          const auto disp_y_num = disp_y_variable.number();
-          average_cross_sectional_displacement_y[li] +=
-              _sol(node->dof_number(_sys.number(), disp_y_num, 0));
-
-          // z
-          const MooseVariable & disp_z_variable = _sys.getFieldVariable<Real>(_tid, "disp_z");
-          const auto disp_z_num = disp_z_variable.number();
-          average_cross_sectional_displacement_z[li] +=
-              _sol(node->dof_number(_sys.number(), disp_z_num, 0));
+          // Retrieve nodal variables
+          for (const auto j : make_range(_variables.size()))
+          {
+            const MooseVariable & variable = _sys.getFieldVariable<Real>(_tid, _variables[j]);
+            const auto var_num = variable.number();
+            output_vector_partial[j][li] += _sol(node->dof_number(_sys.number(), var_num, 0));
+          }
 
           _number_of_nodes[li]++;
         }
   }
 
-  _section_displacements_x = average_cross_sectional_displacement_x;
-  _section_displacements_y = average_cross_sectional_displacement_y;
-  _section_displacements_z = average_cross_sectional_displacement_z;
+  for (const auto j : make_range(_variables.size()))
+    *(_output_vector[j]) = output_vector_partial[j];
 }
 
 Real
-SectionDisplacementAverage::distancePointPlane(const Node & node,
+AverageSectionValueSampler::distancePointPlane(const Node & node,
                                                const Point & axis_direction,
                                                const Point & reference_point,
                                                const Real length) const

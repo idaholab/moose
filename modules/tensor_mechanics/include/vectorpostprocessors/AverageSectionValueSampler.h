@@ -12,12 +12,12 @@
 #include "GeneralVectorPostprocessor.h"
 #include "libmesh/communicator.h"
 
-class SectionDisplacementAverage : public GeneralVectorPostprocessor
+class AverageSectionValueSampler : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  SectionDisplacementAverage(const InputParameters & parameters);
+  AverageSectionValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -30,14 +30,11 @@ protected:
   /// References to the mesh mesh
   const std::shared_ptr<MooseMesh> & _mesh;
 
-  /// Output with d-dimensional cross sectional displacement x
-  VectorPostprocessorValue & _section_displacements_x;
+  /// Variables to output
+  std::vector<VariableName> _variables;
 
-  /// Output with d-dimensional cross sectional displacement y
-  VectorPostprocessorValue & _section_displacements_y;
-
-  /// Output with d-dimensional cross sectional displacement z
-  VectorPostprocessorValue & _section_displacements_z;
+  /// Output with cross sectional variables
+  std::vector<VectorPostprocessorValue *> _output_vector;
 
   // Block ids over which this postprocessor does the computation
   std::vector<SubdomainID> _block_ids;

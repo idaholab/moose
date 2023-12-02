@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26165'
-  design = 'SectionDisplacementAverage.md'
+  design = 'AverageSectionValueSampler.md'
   [test_one_step]
     type = 'CSVDiff'
     input = 'test_one_step.i'
