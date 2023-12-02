@@ -582,9 +582,9 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
     // The target point could have a different index in each target mesh division. So on paper, we
     // would need to check all of them.
     auto saved_target_div = MooseMeshDivision::INVALID_DIVISION_INDEX;
-    for (const auto i_from : index_range(_from_meshes))
+    for (const auto i_to : index_range(_to_meshes))
     {
-      const auto target_div = _to_mesh_divisions[i_from]->divisionIndex(point);
+      const auto target_div = _to_mesh_divisions[i_to]->divisionIndex(point);
       // If it's the same division index, do not redo the search
       if (target_div == saved_target_div)
         continue;
@@ -629,14 +629,19 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
   // We need to send this location data to these processors so they can send back values
   for (auto pid : processors)
   {
-
     // Select which from_mesh_division the source data must come from for this point
     unsigned int required_source_division = 0;
     if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
       required_source_division = getGlobalTargetAppIndex(problem_id);
     else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
-             _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
-      required_source_division = _to_mesh_divisions[problem_id]->divisionIndex(point);
+             _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+             _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      required_source_division =
+          _to_mesh_divisions[problem_id]->divisionIndex(_to_transforms[problem_id]->mapBack(point));
+
+    // Skip if we already know we don't want the point
+    if (required_source_division == MooseMeshDivision::INVALID_DIVISION_INDEX)
+      continue;
 
     // Store outgoing information for every source process
     outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, required_source_division));
@@ -696,6 +701,19 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
                                 GeneralFieldTransfer::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
+      // Defining only boundary values will not be enough to describe the variable, disallow it
+      if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
+        mooseError("Higher order discontinuous elemental variables are not supported for "
+                   "target-boundary "
+                   "restricted transfers");
+
+      // Not implemented as the target mesh division could similarly be cutting elements in an
+      // arbitrary way with not enough requested points to describe the target variable
+      if (!_to_mesh_divisions.empty() && !_to_mesh_divisions[i_to]->coversEntireMesh())
+        mooseError("Higher order variable support not implemented for target mesh division "
+                   "unless the mesh is fully covered / indexed in the mesh division. This must be "
+                   "set programmatically in the MeshDivision object used.");
+
       // We dont look at boundary restriction, not supported for higher order target variables
       // Same for mesh divisions
       const auto & to_begin = _to_blocks.empty()
@@ -740,10 +758,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         // Skip if the node does not meet the target mesh division behavior
         // We cannot know from which app the data will come from so we cannot know
         // the source mesh division index and the source app global index
-        if (!_to_mesh_divisions.empty() &&
-            _to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
-            _to_mesh_divisions[i_to]->divisionIndex(*node) ==
-                MooseMeshDivision::INVALID_DIVISION_INDEX)
+        if (!_to_mesh_divisions.empty() && _to_mesh_divisions[i_to]->divisionIndex(*node) ==
+                                               MooseMeshDivision::INVALID_DIVISION_INDEX)
           continue;
 
         // Cache point information
@@ -769,10 +785,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
           continue;
 
         // Skip if the element is not indexed within the mesh division
-        if (!_to_mesh_divisions.empty() &&
-            _to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
-            _to_mesh_divisions[i_to]->divisionIndex(*elem) ==
-                MooseMeshDivision::INVALID_DIVISION_INDEX)
+        if (!_to_mesh_divisions.empty() && _to_mesh_divisions[i_to]->divisionIndex(*elem) ==
+                                               MooseMeshDivision::INVALID_DIVISION_INDEX)
           continue;
 
         // Cache point information
@@ -830,19 +844,6 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     // lower order order case by using the dofobject_to_valsvec
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      // Defining only boundary values will not be enough to describe the variable, disallow it
-      if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
-        mooseError("Higher order discontinuous elemental variables are not supported for "
-                   "target-boundary "
-                   "restricted transfers");
-      // Not implemented. Unless we contain the entire mesh!
-      if (_to_mesh_divisions.size() &&
-          _to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION)
-        for (const auto mesh_div : _to_mesh_divisions)
-          if (!mesh_div->coversEntireMesh())
-            mooseError("Higher order variable support not implemented for target mesh division "
-                       "unless the mesh is fully covered / indexed in the mesh division");
-
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
       InterpCache & distance_cache = distance_caches[problem_id];
@@ -1633,9 +1634,8 @@ MultiAppGeneralFieldTransfer::acceptMeshDivision(const unsigned int actual_mesh_
   const auto other_side_behavior =
       from_direction ? _to_mesh_division_behavior : _from_mesh_division_behavior;
 
-  // If the point is not indexed in the division and the division is used as a restriction
-  if (mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION &&
-      actual_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
+  // If the point is not indexed in the division
+  if (actual_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
     return false;
   // If the point is not the at the same index in the target and the origin meshes, reject
   else if (mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
