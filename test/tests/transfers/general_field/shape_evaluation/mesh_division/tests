@@ -33,5 +33,15 @@
                  "Transfers/from_sub_elem/to_mesh_division=middle"
       detail = 'to restrict the target domain for the transfered field,'
     []
+    [matching_subapps]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp.e matching_subapp_sub0_out.e matching_subapp_sub1_out.e "
+                "matching_subapp_sub2_out.e matching_subapp_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/bbox_factor=20 "
+                 "Transfers/from_sub_elem/bbox_factor=20 "
+      detail = 'and to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions.'
+    []
   []
 []
