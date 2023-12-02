@@ -676,4 +676,35 @@ getInvariant(const RankTwoTensorTempl<T> & tensor, const InvariantType & scalar_
                  invariantOptions().getRawNames());
   }
 }
+
+void setRotationMatrix(const RealVectorValue & outwardnormal,
+                       const RealVectorValue & axialVector,
+                       RankTwoTensor & rotationMatrix,
+                       const bool transpose);
+
+template <bool is_ad>
+void
+RankTwoTensorToVoigtVector(const GenericRankTwoTensor<is_ad> & tensor,
+                           GenericDenseVector<is_ad> & voigt_vector)
+{
+  voigt_vector(0) = tensor(0, 0);
+  voigt_vector(1) = tensor(1, 1);
+  voigt_vector(2) = tensor(2, 2);
+  voigt_vector(3) = tensor(0, 1);
+  voigt_vector(4) = tensor(1, 2);
+  voigt_vector(5) = tensor(0, 2);
+}
+
+template <bool is_ad>
+void
+VoigtVectorToRankTwoTensor(const GenericDenseVector<is_ad> & voigt_vector,
+                           GenericRankTwoTensor<is_ad> & tensor)
+{
+  tensor(0, 0) = voigt_vector(0);
+  tensor(1, 1) = voigt_vector(1);
+  tensor(2, 2) = voigt_vector(2);
+  tensor(0, 1) = tensor(1, 0) = voigt_vector(3);
+  tensor(1, 2) = tensor(2, 1) = voigt_vector(4);
+  tensor(0, 2) = tensor(2, 0) = voigt_vector(5);
+}
 }
