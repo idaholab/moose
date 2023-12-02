@@ -1,15 +1,23 @@
-# ProjectedStatefulMaterialNodalPatchRecovery
+# ProjectedStatefulMaterialNodalPatchRecovery...
 
-This user object is derived from [NodalPatchRecoveryMaterialProperty](NodalPatchRecoveryMaterialProperty.md) and performs patch recovery for a material property component.
+This user object performs patch recovery for a material property component. At step zero this object will compute the material QP values by explicitly calling `initStatefulProperties` in order to project the state that will correspond to the *old state* in the first time step.
 
-At step zero this object will compute the material QP values by explicitly calling `initStatefulProperties` in order to project the state that will correspond to the *old state* in the first timestep.
+Variants include:
+- `ProjectedStatefulMaterialNodalPatchRecoveryReal`
+- `ProjectedStatefulMaterialNodalPatchRecoveryRealVectorValue`
+- `ProjectedStatefulMaterialNodalPatchRecoveryRankTwoTensor`
+- `ProjectedStatefulMaterialNodalPatchRecoveryRankFourTensor`
+- `ADProjectedStatefulMaterialNodalPatchRecoveryReal`
+- `ADProjectedStatefulMaterialNodalPatchRecoveryRealVectorValue`
+- `ADProjectedStatefulMaterialNodalPatchRecoveryRankTwoTensor`
+- `ADProjectedStatefulMaterialNodalPatchRecoveryRankFourTensor`
 
 This object is set up by the [ProjectedStatefulMaterialStorageAction](ProjectedStatefulMaterialStorageAction.md).
 
-!syntax description /UserObjects/NodalPatchRecoveryMaterialProperty
+!syntax description /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal
 
-!syntax parameters /UserObjects/NodalPatchRecoveryMaterialProperty
+!syntax parameters /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal
 
-!syntax inputs /UserObjects/NodalPatchRecoveryMaterialProperty
+!syntax inputs /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal
 
-!syntax children /UserObjects/NodalPatchRecoveryMaterialProperty
+!syntax children /UserObjects/ProjectedStatefulMaterialNodalPatchRecoveryReal

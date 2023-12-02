@@ -30,7 +30,9 @@ InputParameters
 ProjectedStatefulMaterialNodalPatchRecoveryBase::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-
+  params.addClassDescription(
+      "Prepare patches for use in nodal patch recovery based on a material property for material "
+      "property states projected onto nodal variables.");
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::ALGEBRAIC,
                                 [](const InputParameters &, InputParameters & rm_params)
