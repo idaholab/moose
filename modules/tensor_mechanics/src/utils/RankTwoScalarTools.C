@@ -61,4 +61,41 @@ normalPositionVector(const Point & point1,
   normalPosition = curr_point - normal;
   normalPosition /= normalPosition.norm();
 }
+
+void
+setRotationMatrix(const RealVectorValue & outwardnormal,
+                  const RealVectorValue & axialVector,
+                  RankTwoTensor & rotationMatrix,
+                  const bool transpose)
+{
+  RealVectorValue radial_vector(outwardnormal);
+  RealVectorValue azimuthal_vector(0, 0, 0);
+  RealVectorValue polar_vector(axialVector);
+
+  Real rv_norm = radial_vector.norm();
+  if (rv_norm)
+    radial_vector /= rv_norm;
+  else
+    mooseError("The outward normal vector cannot be a zero vector");
+
+  azimuthal_vector = polar_vector.cross(radial_vector);
+  azimuthal_vector /= azimuthal_vector.norm();
+
+  if (!transpose)
+  {
+    // Considering that Moose uses convention [T'] = [Q][T][Q_transpose], the
+    // basis vectors of old coordinate system should be arranged column wise
+    // to construct the rotation matrix Q.
+
+    rotationMatrix.fillColumn(0, radial_vector);
+    rotationMatrix.fillColumn(1, azimuthal_vector);
+    rotationMatrix.fillColumn(2, polar_vector);
+  }
+  else
+  {
+    rotationMatrix.fillRow(0, radial_vector);
+    rotationMatrix.fillRow(1, azimuthal_vector);
+    rotationMatrix.fillRow(2, polar_vector);
+  }
+}
 }

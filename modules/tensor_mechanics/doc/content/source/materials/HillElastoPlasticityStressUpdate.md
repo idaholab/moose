@@ -35,6 +35,19 @@ The model currently uses power law hardening:
 
 where $K$ is the hardening constant and $n$ is the hardening exponent. The hardening exponent has a default value of 1.0 and this value can be modified by the user by setting the parameter [!param](/Materials/HillElastoPlasticityStressUpdate/hardening_exponent). The [!param](/Materials/HillElastoPlasticityStressUpdate/yield_stress) ($\sigma_{yo}$) and [!param](/Materials/HillElastoPlasticityStressUpdate/hardening_constant) ($K$) are the required parameters to be supplied by the user.
 
+## Usage for 3D models
+
+When this model is used for curved 3D geometry (currently limited to only cylindrical geometry) with anisotropic plasticity, the model requires rotation of the stresses (global coordinate system (Cartesian) to local coordinate system (cylindrical)) and strains (local to global coordinate system). For cylindrical geometry, the user should set the parameter [!param](/Materials/HillElastoPlasticityStressUpdate/local_cylindrical_csys) to 'true' along with [!param](/Materials/HillElastoPlasticityStressUpdate/axis) (= x for x-axis y for y-axis and z for z-axis) used as axis of rotation. The option for using this material model for 3D spherical geometry will be added sometime in the future.
+
+The stress and strain tensors $T$ are rotated according to the following equation:
+
+\begin{equation}
+[T'] = [Q'] [T] [Q_{transpose}]
+\end{equation}
+
+where $T$ is a tensor in the old coordinate system and $T'$ is the tensor in the new coordinate system. The square brackets $[$ $]$ denote matrix form (3x3) of the tensor. The basis vectors of old coordinate system should be arranged column wise to construct the rotation matrix $Q$.
+
+
 ## Verification
 
 With $f$ being the yield condition, $\boldsymbol{s}$ the deviatoric stress and $\gamma$ the plastic multiplier, the plastic strain rate is given as:
@@ -130,6 +143,8 @@ The effective plastic strain increment is obtained within the framework of a gen
 ## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/anisotropic_elastoplasticity/ad_aniso_plasticity_x_one.i block=Materials/trial_plasticity
+
+!listing modules/tensor_mechanics/test/tests/anisotropic_elastoplasticity/hoop_strain_comparison.i block=Materials/plasticity
 
 !syntax parameters /Materials/HillElastoPlasticityStressUpdate
 
