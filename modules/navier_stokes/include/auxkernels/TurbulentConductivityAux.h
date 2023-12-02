@@ -15,7 +15,7 @@
 
 #include "INSFVVelocityVariable.h"
 /**
- * Computes the turbulent conductivity for the k-Epsilon model.
+ * Computes the turbulent conductivity.
  * Implements two near-wall treatements: equilibrium and non-equilibrium wall functions.
  */
 class TurbulentConductivityAux : public AuxKernel

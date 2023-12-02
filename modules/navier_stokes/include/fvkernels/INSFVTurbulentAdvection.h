@@ -12,7 +12,8 @@
 #include "INSFVAdvectionKernel.h"
 
 /**
- * Computes the advection term with the assumption that the advected quantity will have special wall treatments associated with turbulence.
+ * Computes the advection term with the assumption that the advected quantity will have special wall
+ * treatments associated with turbulence.
  */
 class INSFVTurbulentAdvection : public INSFVAdvectionKernel
 {
