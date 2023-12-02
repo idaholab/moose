@@ -33,7 +33,10 @@ public:
   ///}
 
   /// Get the number of positions in the Positions object
-  unsigned int getNumPositions() const { return _positions.size(); }
+  unsigned int getNumPositions(bool initial=false) const
+  {
+    return (initial && _initial_positions) ? _initial_positions->size() : _positions.size();
+  }
 
   /// Getter for a single position at a known index
   const Point & getPosition(unsigned int index, bool initial) const;
