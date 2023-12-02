@@ -144,11 +144,11 @@ protected:
    *
    * @param system_in The system whose solution shall be relaxed
    * @param min_limit = 0.0 The minimum limit for the solution
-   * @param max_limit = 1e10 The minimum limit for the solution
+   * @param max_limit = 1e10 The maximum limit for the solution
    */
   void limitSolutionUpdate(NonlinearSystemBase & system_in,
-                           Real min_limit = std::numeric_limits<Real>::epsilon(),
-                           Real max_limit = 1e10);
+                           const Real min_limit = std::numeric_limits<Real>::epsilon(),
+                           const Real max_limit = 1e10);
 
   /**
    * Implicitly constrain the system by adding a factor*(u-u_desired) to it at a desired dof
@@ -193,7 +193,7 @@ protected:
   /// Boolean for easy check if a passive scalar systems shall be solved or not
   const bool _has_passive_scalar_systems;
 
-  /// Boolean for easy check if a turbulence systems shall be solved or not
+  /// Boolean for easy check if turbulence systems shall be solved or not
   const bool _has_turbulence_systems;
 
   /// The names of the momentum systems.

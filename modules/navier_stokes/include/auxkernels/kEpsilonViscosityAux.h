@@ -12,11 +12,10 @@
 #pragma once
 
 #include "AuxKernel.h"
-
 #include "INSFVVelocityVariable.h"
 /**
  * Computes the turbuent viscosity for the k-Epsilon model.
- * Implements two near-wall treatements: equilibrium and non-equilibrium wall functions.
+ * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
  */
 class kEpsilonViscosityAux : public AuxKernel
 {
@@ -30,11 +29,11 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  // Local method to find friction velocty
-  // Note: this method may be to need reimplemented for each new turbulent model
+  /// Local method to find friction velocity.
+  /// This method may need to be reimplemented for each new turbulence model
   ADReal findUStarLocalMethod(const ADReal & u, const Real & dist);
 
-  /// the dimension of the simulation
+  /// The dimension of the domain
   const unsigned int _dim;
 
   /// x-velocity
@@ -60,16 +59,16 @@ protected:
   /// Wall boundaries
   std::vector<BoundaryName> _wall_boundary_names;
 
-  /// Linearzied computation of y_plus ?
+  /// If the user wants the linearized computation of y_plus
   const bool _linearized_yplus;
 
-  /// Linearzied computation of y_plus ?
+  /// If the user wants to enable bulk wall treatment
   const bool _bulk_wall_treatment;
 
-  /// Non-equilibrium wall treatement ?
+  /// IF the user requested non-equilibrium wall treatment
   const bool _non_equilibrium_treatement;
 
-  /// -- Parameters of the wall function method
+  // -- Parameters of the wall function method
 
   /// Maximum number of iterations to find the friction velocity
   static constexpr int _MAX_ITERS_U_TAU{50};

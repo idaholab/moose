@@ -12,7 +12,7 @@
 #include "FVDirichletBCBase.h"
 
 /**
- * A class for velocity inlet boundary conditions
+ * A class for turbulent kinetic energy inlet boundary conditions
  */
 class INSFVInletIntensityTKEBC : public FVDirichletBCBase
 {
@@ -32,8 +32,6 @@ protected:
   /// turbulent intensity
   const Moose::Functor<ADReal> & _intensity;
 
-  /// the dimension of the simulation
+  /// the dimension of the domain
   const unsigned int _dim;
-
-  ///
 };

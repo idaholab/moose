@@ -50,7 +50,7 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// Boolean parameter to include the complete momentum exmapnsion
+  /// Boolean parameter to include the complete momentum expansion
   const bool _complete_expansion;
 
   /// dimension

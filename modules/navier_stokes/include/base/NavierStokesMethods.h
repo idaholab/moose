@@ -102,8 +102,8 @@ Real prandtlPropertyDerivative(const Real & mu,
 ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
 /**
- * Finds the nondimensional wall distance normalized with the friction velcoity
- * Implements a fixed-point iteration in the wall funcion to get this veloity
+ * Finds the non-dimensional wall distance normalized with the friction velocity
+ * Implements a fixed-point iteration in the wall function to get this velocity
  * @param mu the dynamic viscosity
  * @param rho the density
  * @param u the centroid velocity
@@ -122,7 +122,6 @@ ADReal computeSpeed(const ADRealVectorValue & velocity);
 /**
  * Map marking wall bounded elements
  */
-// extern std::map<const Elem *, bool> _wall_bounded;
 std::map<const Elem *, bool>
 getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
                        const FEProblemBase & _fe_problem,
@@ -131,7 +130,6 @@ getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing wall ditance for near-wall marked elements
  */
-// extern std::map<const Elem *, std::vector<Real>> _dist;
 std::map<const Elem *, std::vector<Real>>
 getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
                 const FEProblemBase & _fe_problem,
@@ -140,7 +138,6 @@ getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing faces normals for wall bounded elements
  */
-// extern std::map<const Elem *, std::vector<Point>> _normal;
 std::map<const Elem *, std::vector<Point>>
 getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
                      const FEProblemBase & _fe_problem,
@@ -149,7 +146,6 @@ getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
 /**
  * Map storing face arguments to wall bounded faces
  */
-// extern std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
 std::map<const Elem *, std::vector<const FaceInfo *>>
 getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
                    const FEProblemBase & _fe_problem,

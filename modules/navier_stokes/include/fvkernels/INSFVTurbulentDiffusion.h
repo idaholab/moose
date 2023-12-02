@@ -11,7 +11,7 @@
 
 #include "FVDiffusion.h"
 
-/// FVTurbulentDiffusion implements a standard diffusion term for a turbulent problem:
+/// INSFVTurbulentDiffusion implements a standard diffusion term for a turbulent problem:
 ///
 ///     - strong form: \nabla \cdot k \nabla u / coef
 ///
@@ -21,6 +21,7 @@
 /// the elem and neighbor k-values (which should be face-values) is used to
 /// compute k on the face. Cross-diffusion correction factors are currently not
 /// implemented for the "grad_u*n" term.
+/// The specialty of this kernel is that it takes into account the wall treatment of the variable with respect to turbulence.
 class INSFVTurbulentDiffusion : public FVDiffusion
 {
 public:

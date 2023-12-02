@@ -13,7 +13,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Computes source the sink terms for the turbulent kinetic energy.
  */
 class INSFVTKESourceSink : public FVElementalKernel
 {
@@ -28,7 +28,7 @@ protected:
   ADReal computeQpResidual() override;
 
 protected:
-  /// The dimension of the simulation
+  /// The dimension of the domain
   const unsigned int _dim;
 
   /// x-velocity

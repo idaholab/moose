@@ -15,7 +15,7 @@
 #include "FVFluxBC.h"
 
 /**
- * Applies a Dirichlet boundary condition with a value prescribed by a function
+ * Applies a wall function to the turbulent viscosity field
  */
 class INSFVTurbulentViscosityWallFunction : public FVDirichletBCBase
 {
@@ -27,7 +27,7 @@ public:
   ADReal boundaryValue(const FaceInfo & fi) const override;
 
 private:
-  /// the dimension of the simulation
+  /// the dimension of the domain
   const unsigned int _dim;
 
   /// x-velocity
@@ -41,7 +41,7 @@ private:
   const Moose::Functor<ADReal> & _rho;
   /// Dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
-  /// Trubulent Dynamic viscosity
+  ///  Turbulent dynamic viscosity
   const Moose::Functor<ADReal> & _mu_t;
 
   /// Turbulent kinetic energy

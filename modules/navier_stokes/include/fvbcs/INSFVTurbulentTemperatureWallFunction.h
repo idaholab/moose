@@ -12,8 +12,7 @@
 #include "FVFluxBC.h"
 
 /**
- * This boundary condition sets a constant heat flux with a splitting between the
- * fluid and solid phases according to one of
+ * This boundary condition applies a wall function for the energy equation for turbulent flows
  */
 class INSFVTurbulentTemperatureWallFunction : public FVFluxBC
 {
@@ -24,7 +23,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// the dimension of the simulation
+  /// the dimension of the domain
   const unsigned int _dim;
 
   /// Wall Temperature

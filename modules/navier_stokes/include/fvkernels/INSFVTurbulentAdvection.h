@@ -12,8 +12,7 @@
 #include "INSFVAdvectionKernel.h"
 
 /**
- * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
- * physics and that advects arbitrary scalar quantities
+ * Computes the advection term with the assumption that the advected quantity will have special wall treatments associated with turbulence.
  */
 class INSFVTurbulentAdvection : public INSFVAdvectionKernel
 {

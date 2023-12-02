@@ -15,7 +15,7 @@
 #include "INSFVVelocityVariable.h"
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Computes the source and sink terms for the turbulent kinetic energy dissipation rate.
  */
 class INSFVTKEDSourceSink : public FVElementalKernel
 {
@@ -41,7 +41,6 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Turbulent kinetic energy
-  // const INSFVVariable * const _k;
   const Moose::Functor<ADReal> & _k;
 
   /// Density
@@ -59,7 +58,7 @@ protected:
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
 
-  /// Linearized model?
+  /// If the user wants to use the linearized model
   const bool _linearized_model;
 
   /// No equilibrium treatement
@@ -68,7 +67,7 @@ protected:
   /// Value of the first epsilon closure coefficient
   const Real _C1_eps;
 
-  /// Value of the first epsilon closure coefficient
+  /// Value of the second epsilon closure coefficient
   const Real _C2_eps;
 
   /// C_mu constant

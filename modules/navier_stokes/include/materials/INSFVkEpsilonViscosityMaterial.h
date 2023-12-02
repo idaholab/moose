@@ -26,7 +26,7 @@ protected:
   const Moose::Functor<ADReal> & _rho;
   /// The turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
-  /// The turbulent kinetic energy disipation rate
+  /// The turbulent kinetic energy dissipation rate
   const Moose::Functor<ADReal> & _epsilon;
   /// The C_mu
   const Moose::Functor<ADReal> & _C_mu;
