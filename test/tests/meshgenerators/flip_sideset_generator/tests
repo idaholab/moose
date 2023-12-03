@@ -1,0 +1,24 @@
+[Tests]
+    [flux_2D]
+      type = 'CSVDiff'
+      input = 'flux_flip_2D.i'
+      csvdiff = 'flux_flip_2D.csv'
+      recover = false
+      issues = '#25528'
+      design = 'FlipSidesetGenerator.md'
+      requirement = 'This system allows the sideset to be flipped'
+    []
+
+    [flux_3D]
+      type = 'CSVDiff'
+      input = 'flux_flip_3D.i'
+      csvdiff = 'flux_flip_3D.csv'
+      recover = false
+      requirement = 'This system allows the sideset to be flipped'
+      design = 'FlipSidesetGenerator.md'
+      issues = '#25528'
+    []
+
+
+[]
+
