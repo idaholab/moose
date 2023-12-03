@@ -222,7 +222,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
 
   // Use IDs for block and boundary restriction
   // Loop over all source problems
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
     if (isParamValid("from_blocks"))
@@ -291,7 +291,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
   }
 
   // Loop over all target problems
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
     if (isParamValid("to_blocks"))
@@ -367,7 +367,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
   }
 
   // Check if components are set correctly if using an array variable
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     for (const auto var_index : make_range(_from_var_names.size()))
     {
@@ -383,7 +383,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                    "Component passed is larger than size of variable");
     }
   }
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     for (const auto var_index : make_range(_to_var_names.size()))
     {
@@ -404,9 +404,9 @@ MultiAppGeneralFieldTransfer::initialSetup()
   if (_to_problems.size())
   {
     _to_variables.resize(_to_var_names.size());
-    for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
-      _to_variables[i_to] = &_to_problems[0]->getVariable(
-          0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    for (const auto i_var : index_range(_to_var_names))
+      _to_variables[i_var] = &_to_problems[0]->getVariable(
+          0, _to_var_names[i_var], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
   }
 }
 
@@ -417,7 +417,7 @@ MultiAppGeneralFieldTransfer::getAppInfo()
 
   // Create the point locators to locate evaluation points in the origin mesh(es)
   _from_point_locators.resize(_from_problems.size());
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
     _from_point_locators[i_from] =
@@ -432,7 +432,7 @@ MultiAppGeneralFieldTransfer::execute()
   getAppInfo();
 
   // loop over the vector of variables and make the transfer one by one
-  for (unsigned int i = 0; i < _var_size; ++i)
+  for (const auto i : make_range(_var_size))
     transferVariable(i);
 
   postExecute();
@@ -627,7 +627,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
   locatePointReceivers(point, processors);
 
   // We need to send this location data to these processors so they can send back values
-  for (auto pid : processors)
+  for (const auto pid : processors)
   {
     // Select which from_mesh_division the source data must come from for this point
     unsigned int required_source_division = 0;
@@ -670,7 +670,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
   _processor_to_pointInfoVec.clear();
 
   // Loop over all problems
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     const auto global_i_to = getGlobalTargetAppIndex(i_to);
 
@@ -729,7 +729,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
       request_gather.project(to_elem_range);
 
       dof_id_type point_id = 0;
-      for (Point p : f.points_requested())
+      for (const Point & p : f.points_requested())
         // using the point number as a "dof_object_id" will serve to identify the point if we ever
         // rework interp/distance_cache into the dof_id_to_value maps
         this->cacheOutgoingPointInfo(
@@ -770,7 +770,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
     }
     else // Elemental, constant monomial
     {
-      for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      for (const auto & elem :
+           as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
@@ -810,7 +811,7 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
     local_start += _froms_per_proc[i_proc];
 
   // Extract the local bounding boxes.
-  for (unsigned int i_from = 0; i_from < _froms_per_proc[processor_id()]; ++i_from)
+  for (const auto i_from : make_range(_froms_per_proc[processor_id()]))
     local_bboxes[i_from] = _from_bboxes[local_start + i_from];
 }
 
@@ -829,7 +830,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
               "Number of dof objects does not equal to the number of incoming values");
 
   dof_id_type val_offset = 0;
-  for (auto & pointinfo : pointInfoVec)
+  for (const auto & pointinfo : pointInfoVec)
   {
     // Retrieve target information from cached point infos
     const auto problem_id = pointinfo.problem_id;
@@ -1086,7 +1087,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     // with the received information
     bool target_found = false;
     bool conflict_real = false;
-    for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+    for (const auto i_to : index_range(_to_problems))
     {
       // Extract variable info
       auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
@@ -1325,7 +1326,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
   // Get the variable name, with the accommodation for array/vector names
   const auto & var_name = getToVarName(var_index);
 
-  for (unsigned int problem_id = 0; problem_id < _to_problems.size(); ++problem_id)
+  for (const auto problem_id : index_range(_to_problems))
   {
     auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
@@ -1377,9 +1378,9 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     }
     else
     {
-      for (auto & val_pair : dofobject_to_val)
+      for (const auto & val_pair : dofobject_to_val)
       {
-        auto dof_object_id = val_pair.first;
+        const auto dof_object_id = val_pair.first;
 
         const DofObject * dof_object = nullptr;
         if (is_nodal)
@@ -1387,9 +1388,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         else
           dof_object = to_mesh.elem_ptr(dof_object_id);
 
-        auto dof = dof_object->dof_number(sys_num, var_num, 0);
-
-        auto val = val_pair.second.interp;
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = val_pair.second.interp;
 
         // This will happen if meshes are mismatched
         if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
@@ -1560,13 +1560,13 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
   std::vector<BoundaryID> vec_to_fill;
   std::vector<BoundaryID> vec_to_fill_temp;
   if (_elemental_boundary_restriction_on_sides)
-    for (auto side : make_range(elem->n_sides()))
+    for (const auto side : make_range(elem->n_sides()))
     {
       bnd_info.boundary_ids(elem, side, vec_to_fill_temp);
       vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
     }
   else
-    for (auto node_index : make_range(elem->n_nodes()))
+    for (const auto node_index : make_range(elem->n_nodes()))
     {
       bnd_info.boundary_ids(elem->node_ptr(node_index), vec_to_fill_temp);
       vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
@@ -1705,13 +1705,13 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     bool at_least_one = false;
     const auto & from_mesh = _from_problems[j]->mesh(_displaced_source_mesh);
 
-    for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
-                                from_mesh.getMesh().local_elements_end()))
+    for (const auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
+                                      from_mesh.getMesh().local_elements_end()))
     {
       if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, elem))
         continue;
 
-      for (auto & node : elem->node_ref_range())
+      for (const auto & node : elem->node_ref_range())
       {
         if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, &node))
           continue;
@@ -1763,7 +1763,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
   // TODO move up
   // Check for a user-set fixed bounding box size and modify the sizes as appropriate
   if (_fixed_bbox_size != std::vector<Real>(3, 0))
-    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    for (const auto i : make_range(LIBMESH_DIM))
       if (!MooseUtils::absoluteFuzzyEqual(_fixed_bbox_size[i], 0))
         for (const auto j : make_range(bboxes.size()))
         {
@@ -1802,10 +1802,10 @@ MultiAppGeneralFieldTransfer::getMaxToProblemsBBoxDimensions() const
                          std::numeric_limits<Real>::min(),
                          std::numeric_limits<Real>::min()};
 
-  for (auto & to_mesh : _to_meshes)
+  for (const auto & to_mesh : _to_meshes)
   {
     const auto bbox = to_mesh->getInflatedProcessorBoundingBox();
-    for (auto dim : make_range(LIBMESH_DIM))
+    for (const auto dim : make_range(LIBMESH_DIM))
       max_dimension(dim) = std::max(
           max_dimension(dim), std::max(std::abs(bbox.first(dim)), std::abs(bbox.second(dim))));
   }
