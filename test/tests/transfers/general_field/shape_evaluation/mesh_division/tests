@@ -1,6 +1,6 @@
 [Tests]
   issues = '#25901'
-  design = 'MeshDivision/index.md'
+  design = 'MeshDivisions/index.md MultiAppGeneralFieldTransfer.md'
   [mesh_div]
     requirement = 'The system shall be able to leverage mesh divisions during variable shape evaluation transfers'
     [restriction_source]

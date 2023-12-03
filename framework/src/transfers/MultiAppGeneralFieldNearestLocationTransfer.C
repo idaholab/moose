@@ -16,6 +16,7 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 #include "Positions.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/system.h"
 
@@ -74,6 +75,9 @@ MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocation
                "We do not support using both nearest positions matching and checking if target "
                "points are within an app domain because the KDTrees for nearest-positions matching "
                "are (currently) built with data from multiple applications.");
+  if (_nearest_positions_obj &&
+      (isParamValid("from_mesh_divisions") || isParamValid("to_mesh_divisions")))
+    paramError("use_nearest_position", "Cannot use nearest positions with mesh divisions");
 
   // Parameter checks on grouping subapp values
   if (_group_subapps && _from_mesh_divisions.empty() && !_nearest_positions_obj)
@@ -210,13 +214,15 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
 
   // Construct a local KDTree for each source. A source can be a single app or multiple apps
   // combined (option for nearest-position / mesh-divisions)
-  for (unsigned int i_source = 0; i_source < num_sources; ++i_source)
+  for (const auto i_source : make_range(num_sources))
   {
-    // Nest a loop on apps in case multiple apps contribute to the same source
+    // Nest a loop on apps in case multiple apps contribute to the same KD-Tree source
     for (const auto app_i : make_range(num_apps_per_tree))
     {
       // Get the current app index
-      const unsigned int i_from = _group_subapps ? app_i : (i_source / getNumDivisions());
+      const auto i_from = _group_subapps ? app_i : (i_source / getNumDivisions());
+      // Current position index, if using nearest positions
+      const auto i_pos = _group_subapps ? i_source : (i_source % getNumDivisions());
 
       // Get access to the variable and some variable information
       FEProblemBase & from_problem = *_from_problems[i_from];
@@ -270,11 +276,11 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           // Only add to the KDTree nodes that are closest to the 'position'
           // When querying values at a target point, the KDTree associated to the closest
           // position to the target point is queried
-          if (_nearest_positions_obj && !closestToPosition(i_source, transformed_node))
+          if (_nearest_positions_obj && !closestToPosition(i_pos, transformed_node))
             continue;
 
           _local_points[i_source].push_back(transformed_node);
-          auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+          const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
           if (!_use_zero_dof_for_value[var_index])
             flagInvalidSolution(
@@ -322,7 +328,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           const auto transformed_vertex_average =
               (*_from_transforms[getGlobalSourceAppIndex(i_from)])(vertex_average);
 
-          if (_nearest_positions_obj && !closestToPosition(i_source, transformed_vertex_average))
+          if (_nearest_positions_obj && !closestToPosition(i_pos, transformed_vertex_average))
             continue;
 
           _local_points[i_source].push_back(transformed_vertex_average);
@@ -359,10 +365,6 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
-  // Pre-allocate these two work arrays. They will be regularly resized by the searches
-  std::vector<std::size_t> return_index(_num_nearest_points + _search_value_conflicts);
-  std::vector<Real> return_dist_sqr(_num_nearest_points + _search_value_conflicts);
-
   dof_id_type i_pt = 0;
   for (auto & [pt, mesh_div] : incoming_points)
   {
@@ -379,6 +381,10 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
 
+      // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+      std::vector<std::size_t> return_index(_num_nearest_points);
+      std::vector<Real> return_dist_sqr(_num_nearest_points);
+
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (_local_kdtrees[i_from]->numberCandidatePoints())
       {
@@ -388,7 +394,7 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         _local_kdtrees[i_from]->neighborSearch(
             pt, _num_nearest_points, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
-        for (auto index : return_index)
+        for (const auto index : return_index)
         {
           val_sum += _local_values[i_from][index];
           dist_sum += (_local_points[i_from][index] - pt).norm();
@@ -419,6 +425,11 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
         if (!checkRestrictionsForSource(pt, mesh_div, i_from))
           continue;
 
+        // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+        std::vector<std::size_t> return_index(_num_nearest_points + 1);
+        std::vector<Real> return_dist_sqr(_num_nearest_points + 1);
+
+        // NOTE: app_index is not valid if _group_subapps = true
         const auto app_index = i_from / getNumDivisions();
         const auto num_search = _num_nearest_points + 1;
 
@@ -430,6 +441,7 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           // Local coordinates only accessible when not using nearest-position
           // as we did not keep the index of the source app, only the position index
           const Point local_pt = getPointInLocalSourceFrame(app_index, pt);
+
           if (!_nearest_positions_obj &&
               _from_transforms[getGlobalSourceAppIndex(app_index)]->hasCoordinateSystemTypeChange())
             if (!_skip_coordinate_collapsing)
@@ -438,7 +450,7 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
 
           // Look for too many equidistant nodes within a problem. First zip then sort by distance
           std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;
-          for (auto i : make_range(num_found))
+          for (const auto i : make_range(num_found))
             zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
           std::sort(zipped_nearest_points.begin(), zipped_nearest_points.end());
 
@@ -455,7 +467,7 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
           // Recompute the distance for this problem. If it matches the cached value more than
           // once it means multiple problems provide equidistant values for this point
           Real dist_sum = 0;
-          for (auto i : make_range(num_search - 1))
+          for (const auto i : make_range(num_search - 1))
           {
             auto index = zipped_nearest_points[i].second;
             dist_sum += (_local_points[i_from][index] - pt).norm();
@@ -504,8 +516,15 @@ MultiAppGeneralFieldNearestLocationTransfer::inBlocks(const std::set<SubdomainID
 unsigned int
 MultiAppGeneralFieldNearestLocationTransfer::getNumSources() const
 {
-  if (!_from_mesh_divisions.empty() || _nearest_positions_obj)
+  // Number of source = number of KDTrees.
+  // Using mesh divisions or nearest-positions, for every app we use 1 tree per division
+  if (!_from_mesh_divisions.empty() || (_nearest_positions_obj && !_group_subapps))
     return _from_problems.size() * getNumDivisions();
+  // If we group apps, then we only use one tree per division (nearest-position region)
+  else if (_nearest_positions_obj && _group_subapps)
+    return _nearest_positions_obj->getNumPositions(_fe_problem.getCurrentExecuteOnFlag() ==
+                                                   EXEC_INITIAL);
+  // Regular case: 1 KDTree per app
   else
     return _from_problems.size();
 }
@@ -514,8 +533,15 @@ Point
 MultiAppGeneralFieldNearestLocationTransfer::getPointInLocalSourceFrame(unsigned int i_from,
                                                                         const Point & pt) const
 {
-  return !_nearest_positions_obj ? _from_transforms[getGlobalSourceAppIndex(i_from)]->mapBack(pt)
-                                 : pt;
+
+  if (!_nearest_positions_obj &&
+      (!_from_transforms[getGlobalSourceAppIndex(i_from)]->hasCoordinateSystemTypeChange() ||
+       _skip_coordinate_collapsing))
+    return _from_transforms[getGlobalSourceAppIndex(i_from)]->mapBack(pt);
+  else if (!_nearest_positions_obj || !_group_subapps)
+    return pt - _from_positions[i_from];
+  else
+    return pt;
 }
 
 unsigned int
@@ -530,7 +556,7 @@ MultiAppGeneralFieldNearestLocationTransfer::getNumAppsPerTree() const
 unsigned int
 MultiAppGeneralFieldNearestLocationTransfer::getNumDivisions() const
 {
-  if (_nearest_positions_obj)
+  if (_nearest_positions_obj && !_group_subapps)
     return _nearest_positions_obj->getNumPositions(_fe_problem.getCurrentExecuteOnFlag() ==
                                                    EXEC_INITIAL);
   else if (!_from_mesh_divisions.empty())
@@ -543,11 +569,12 @@ bool
 MultiAppGeneralFieldNearestLocationTransfer::checkRestrictionsForSource(
     const Point & pt, const unsigned int mesh_div, const unsigned int i_from) const
 {
-  const unsigned int app_index = i_from / getNumDivisions();
-
   // Only use the KDTree from the closest position if in "nearest-position" mode
-  if (_nearest_positions_obj && !closestToPosition(app_index, pt))
+  const auto i_pos = _group_subapps ? i_from : i_from % getNumDivisions();
+  if (_nearest_positions_obj && !closestToPosition(i_pos, pt))
     return false;
+
+  const unsigned int app_index = i_from / getNumDivisions();
 
   // Check mesh restriction before anything
   if (_source_app_must_contain_point)
@@ -586,6 +613,12 @@ MultiAppGeneralFieldNearestLocationTransfer::checkRestrictionsForSource(
     // application is equal to the target mesh division index, which was passed in the point request
     if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
         mesh_div != getGlobalSourceAppIndex(app_index))
+      return false;
+    // If matching source mesh divisions to target mesh divisions, we check that the index of the
+    // target mesh division, which was passed in the point request, is equal to the current mesh
+    // division
+    else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+             mesh_div != (i_from % getNumDivisions()))
       return false;
   }
   return true;

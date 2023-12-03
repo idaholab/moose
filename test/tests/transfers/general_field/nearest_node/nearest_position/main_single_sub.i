@@ -92,6 +92,7 @@
     use_nearest_position = partition_app_domain
     search_value_conflicts = true
     bbox_factor = 10
+    group_subapps = true
   []
 
   [from_sub_elem]
@@ -102,5 +103,6 @@
     use_nearest_position = partition_app_domain
     search_value_conflicts = true
     bbox_factor = 10
+    group_subapps = true
   []
 []

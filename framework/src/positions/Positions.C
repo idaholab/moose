@@ -63,7 +63,11 @@ Positions::getPosition(unsigned int index, bool initial) const
     if (_initial_positions && _positions.size() != (*_initial_positions).size())
       mooseError("Initial positions and current positions array length do not match");
     else if (_positions.size() < index)
-      mooseError("Positions retrieved with an out-of-bound index");
+      mooseError("Positions retrieved with an out-of-bound index: '",
+                 index,
+                 "' when there are only ",
+                 _positions.size(),
+                 " positions.");
   }
 
   if (initial && _initial_positions)
