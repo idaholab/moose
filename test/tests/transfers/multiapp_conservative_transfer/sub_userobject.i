@@ -82,17 +82,11 @@
   type = Transient
   num_steps = 1
   dt = 0.001
-
   solve_type = 'PJFNK'
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-[]
-
-[Problem]
-  type = FEProblem
 []

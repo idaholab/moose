@@ -12,11 +12,6 @@
   rz_coord_axis = Y
 []
 
-[Problem]
-  type = FEProblem
-
-[]
-
 [GlobalParams]
   PorousFlowDictator = dictator
   gravity = '0 0 0'

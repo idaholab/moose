@@ -95,6 +95,7 @@
     to_multi_app = TF_sub
     source_variable = Layered_Average
     variable = Temperature
+    fixed_meshes = True
   []
   [to_sub_layers_elem]
     type = MultiAppNearestNodeTransfer

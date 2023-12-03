@@ -195,9 +195,7 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
-  #  petsc_options = '-snes'
   nl_rel_tol = 1e-15
   nl_abs_tol = 1e-13
 []

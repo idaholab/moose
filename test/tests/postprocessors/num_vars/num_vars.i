@@ -82,13 +82,6 @@
 []
 
 [BCs]
-  # active = 'bc_u bc_v'
-  # [./bc_u]
-  # type = FunctionDirichletBC
-  # variable = u
-  # function = slnu
-  # boundary = 'top left right bottom'
-  # [../]
   [bc_ut]
     type = FunctionDirichletBC
     variable = u

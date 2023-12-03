@@ -38,11 +38,6 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-
-[]
-
 [Executioner]
   type = Transient
   scheme = implicit-euler

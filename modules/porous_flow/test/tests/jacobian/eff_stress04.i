@@ -10,10 +10,6 @@
   coord_type = RZ
 []
 
-[Problem]
-
-[]
-
 [GlobalParams]
   PorousFlowDictator = dictator
 []

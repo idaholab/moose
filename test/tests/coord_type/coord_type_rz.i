@@ -33,11 +33,6 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK

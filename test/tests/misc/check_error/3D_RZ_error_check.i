@@ -7,7 +7,6 @@
   zmin = 0
   zmax = 1
   coord_type = 'RZ'
-
   corrd_block = '0'
 []
 

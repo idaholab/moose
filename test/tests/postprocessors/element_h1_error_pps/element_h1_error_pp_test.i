@@ -25,7 +25,6 @@
 
   [forcing_func]
     type = ParsedFunction
-    #expression = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '4'
@@ -33,10 +32,6 @@
 
   [u_func]
     type = ParsedGradFunction
-    #expression = sin(alpha*pi*x*y)
-    #grad_x   = alpha*pi*y*cos(alpha*pi*x*y)
-    #grad_y   = alpha*pi*x*cos(alpha*pi*x*y)
-
     expression = sin(alpha*pi*x)
     grad_x = alpha*pi*cos(alpha*pi*x)
     symbol_names = 'alpha'
