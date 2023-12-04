@@ -702,6 +702,7 @@ public:
   unsigned int _current_nl_its;
   /// Whether to use the pre-initial residual in the relative convergence check
   bool _use_fnorm0_before_smo;
+  bool _use_fnorm0_before_smo_set_by_user;
 
 protected:
   /**

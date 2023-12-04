@@ -91,9 +91,11 @@ FEProblemSolve::validParams()
       "compute_initial_residual_before_preset_bcs",
       false,
       "Use the residual norm computed *before* preset BCs are imposed "
-      "in relative convergence check",
+      "in relative convergence check.",
       "This parameter is deprecated in favor of 'use_fnorm0_before_smo' and is recommended "
       "to stay false.");
+  params.deprecateParam(
+      "compute_initial_residual_before_preset_bcs", "use_fnorm0_before_smo", "12/31/2025");
   params.addParam<bool>(
       "use_fnorm0_before_smo",
       false,
@@ -217,26 +219,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
-  if (getMooseApp().parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
-  {
-    _nl._use_fnorm0_before_smo = getParam<bool>("compute_initial_residual_before_preset_bcs");
-    if (isParamSetByUser("use_fnorm0_before_smo"))
-      mooseWarning(
-          "The parameter Executioner/use_fnorm0_before_smo is ignored because this application is "
-          "using the legacy behavior for initial residual evaluation. The legacy behavior is "
-          "controlled by the parameter Executioner/compute_initial_residual_before_preset_bcs. To "
-          "enable the new behavior, set the parameter "
-          "'use_legacy_initial_residual_evaluation_bahavior' to false in *App.C");
-  }
-  else
-  {
-    _nl._use_fnorm0_before_smo = getParam<bool>("use_fnorm0_before_smo");
-    if (isParamSetByUser("compute_initial_residual_before_preset_bcs"))
-      mooseWarning(
-          "The parameter Executioner/compute_initial_residual_before_preset_bcs is ignored because "
-          "this application is using the new behavior for initial residual evaluation. The new "
-          "behavior is controlled by the parameter Executioner/use_fnorm0_before_smo.");
-  }
+  _nl._use_fnorm0_before_smo = getParam<bool>("use_fnorm0_before_smo");
+  _nl._use_fnorm0_before_smo_set_by_user = isParamSetByUser("use_fnorm0_before_smo");
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));

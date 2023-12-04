@@ -3607,13 +3607,16 @@ NonlinearSystemBase::shouldEvaluateFNormBeforeSMO() const
   if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
     return false;
 
-  // If the user explicitly says no to "computing pre-initial residual", then directly return false
+  // If the user explicitly specifies this parameter, do as the user says
+  if (_use_fnorm0_before_smo_set_by_user)
+    return _use_fnorm0_before_smo;
+
+  // Otherwise, we can try to be smart:
+  // If there are active solution-modifying objects, we compute the pre-initial residual
+  // and use it in the relative convergence check.
   if (!_use_fnorm0_before_smo)
     return false;
-
-  // Otherwise, if there are active solution-modifying objects, we compute the pre-initial residual
-  // and use it in the relative convergence check.
-  if (hasActiveSolutionModifyingObjects())
+  else if (hasActiveSolutionModifyingObjects())
     return true;
 
   return false;
