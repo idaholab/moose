@@ -301,43 +301,52 @@ typedef typename OutputTools<Real>::VariableValue VariableValue;
 typedef typename OutputTools<Real>::VariableGradient VariableGradient;
 typedef typename OutputTools<Real>::VariableSecond VariableSecond;
 typedef typename OutputTools<Real>::VariableCurl VariableCurl;
+typedef typename OutputTools<Real>::VariableDivergence VariableDivergence;
 typedef typename OutputTools<Real>::VariablePhiValue VariablePhiValue;
 typedef typename OutputTools<Real>::VariablePhiGradient VariablePhiGradient;
 typedef typename OutputTools<Real>::VariablePhiSecond VariablePhiSecond;
 typedef typename OutputTools<Real>::VariablePhiCurl VariablePhiCurl;
+typedef typename OutputTools<Real>::VariablePhiDivergence VariablePhiDivergence;
 typedef typename OutputTools<Real>::VariableTestValue VariableTestValue;
 typedef typename OutputTools<Real>::VariableTestGradient VariableTestGradient;
 typedef typename OutputTools<Real>::VariableTestSecond VariableTestSecond;
 typedef typename OutputTools<Real>::VariableTestCurl VariableTestCurl;
+typedef typename OutputTools<Real>::VariableTestDivergence VariableTestDivergence;
 
 // types for vector variable
 typedef typename OutputTools<RealVectorValue>::VariableValue VectorVariableValue;
 typedef typename OutputTools<RealVectorValue>::VariableGradient VectorVariableGradient;
 typedef typename OutputTools<RealVectorValue>::VariableSecond VectorVariableSecond;
 typedef typename OutputTools<RealVectorValue>::VariableCurl VectorVariableCurl;
+typedef typename OutputTools<RealVectorValue>::VariableDivergence VectorVariableDivergence;
 typedef typename OutputTools<RealVectorValue>::VariablePhiValue VectorVariablePhiValue;
 typedef typename OutputTools<RealVectorValue>::VariablePhiGradient VectorVariablePhiGradient;
 typedef typename OutputTools<RealVectorValue>::VariablePhiSecond VectorVariablePhiSecond;
 typedef typename OutputTools<RealVectorValue>::VariablePhiCurl VectorVariablePhiCurl;
+typedef typename OutputTools<RealVectorValue>::VariablePhiDivergence VectorVariablePhiDivergence;
 typedef typename OutputTools<RealVectorValue>::VariableTestValue VectorVariableTestValue;
 typedef typename OutputTools<RealVectorValue>::VariableTestGradient VectorVariableTestGradient;
 typedef typename OutputTools<RealVectorValue>::VariableTestSecond VectorVariableTestSecond;
 typedef typename OutputTools<RealVectorValue>::VariableTestCurl VectorVariableTestCurl;
+typedef typename OutputTools<RealVectorValue>::VariableTestDivergence VectorVariableTestDivergence;
 
 // types for array variable
 typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
 typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
 typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
 typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
+typedef typename OutputTools<RealEigenVector>::VariableDivergence ArrayVariableDivergence;
 typedef typename OutputTools<RealEigenVector>::VariablePhiValue ArrayVariablePhiValue;
 typedef typename OutputTools<RealEigenVector>::VariablePhiGradient ArrayVariablePhiGradient;
 typedef std::vector<std::vector<Eigen::Map<RealDIMValue>>> MappedArrayVariablePhiGradient;
 typedef typename OutputTools<RealEigenVector>::VariablePhiSecond ArrayVariablePhiSecond;
 typedef typename OutputTools<RealEigenVector>::VariablePhiCurl ArrayVariablePhiCurl;
+typedef typename OutputTools<RealEigenVector>::VariablePhiDivergence ArrayVariablePhiDivergence;
 typedef typename OutputTools<RealEigenVector>::VariableTestValue ArrayVariableTestValue;
 typedef typename OutputTools<RealEigenVector>::VariableTestGradient ArrayVariableTestGradient;
 typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableTestSecond;
 typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
+typedef typename OutputTools<RealEigenVector>::VariableTestDivergence ArrayVariableTestDivergence;
 
 /**
  * AD typedefs

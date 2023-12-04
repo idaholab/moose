@@ -33,7 +33,8 @@ InputParameters
 MooseVariableFE<RealVectorValue>::validParams()
 {
   auto params = MooseVariableField<RealVectorValue>::validParams();
-  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange or Nedelec");
+  params.addClassDescription(
+      "Represents vector field variables, e.g. Vector Lagrange, Nedelec or Raviart-Thomas");
   return params;
 }
 
@@ -738,6 +739,13 @@ MooseVariableFE<OutputType>::curlPhi() const
 }
 
 template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhi() const
+{
+  return _element_data->divPhi();
+}
+
+template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
 MooseVariableFE<OutputType>::secondPhiFace() const
 {
@@ -749,6 +757,13 @@ const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
 MooseVariableFE<OutputType>::curlPhiFace() const
 {
   return _element_data->curlPhiFace();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiFace() const
+{
+  return _element_data->divPhiFace();
 }
 
 template <typename OutputType>
@@ -766,6 +781,13 @@ MooseVariableFE<OutputType>::curlPhiNeighbor() const
 }
 
 template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiNeighbor() const
+{
+  return _neighbor_data->divPhi();
+}
+
+template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
 MooseVariableFE<OutputType>::secondPhiFaceNeighbor() const
 {
@@ -777,6 +799,13 @@ const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
 MooseVariableFE<OutputType>::curlPhiFaceNeighbor() const
 {
   return _neighbor_data->curlPhiFace();
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiDivergence &
+MooseVariableFE<OutputType>::divPhiFaceNeighbor() const
+{
+  return _neighbor_data->divPhiFace();
 }
 
 template <typename OutputType>
@@ -798,6 +827,13 @@ bool
 MooseVariableFE<OutputType>::computingCurl() const
 {
   return _element_data->computingCurl();
+}
+
+template <typename OutputType>
+bool
+MooseVariableFE<OutputType>::computingDiv() const
+{
+  return _element_data->computingDiv();
 }
 
 template <typename OutputType>

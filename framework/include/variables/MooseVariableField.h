@@ -217,6 +217,11 @@ public:
   virtual bool computingCurl() const = 0;
 
   /**
+   * Whether or not this variable is computing any divergence quantities
+   */
+  virtual bool computingDiv() const = 0;
+
+  /**
    * Return the variable's elemental shape functions
    */
   virtual const FieldVariablePhiValue & phi() const = 0;
@@ -235,6 +240,11 @@ public:
    * Curl of the shape functions
    */
   virtual const FieldVariablePhiValue & curlPhi() const = 0;
+
+  /**
+   * Divergence of the shape functions
+   */
+  virtual const FieldVariablePhiDivergence & divPhi() const = 0;
 
   /**
    * Return the variable's shape functions on an element face

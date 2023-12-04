@@ -140,6 +140,11 @@ public:
    */
   bool computingCurl() const override final;
 
+  /**
+   * Whether or not this variable is computing the divergence
+   */
+  bool computingDiv() const override final;
+
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
   FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
@@ -197,6 +202,7 @@ public:
   }
   const FieldVariablePhiSecond & secondPhi() const override final;
   const FieldVariablePhiCurl & curlPhi() const override final;
+  const FieldVariablePhiDivergence & divPhi() const override final;
 
   const FieldVariablePhiValue & phiFace() const override final { return _element_data->phiFace(); }
   const FieldVariablePhiGradient & gradPhiFace() const override final
@@ -209,6 +215,7 @@ public:
   }
   const FieldVariablePhiSecond & secondPhiFace() const override final;
   const FieldVariablePhiCurl & curlPhiFace() const;
+  const FieldVariablePhiDivergence & divPhiFace() const;
 
   const FieldVariablePhiValue & phiNeighbor() const override final { return _neighbor_data->phi(); }
   const FieldVariablePhiGradient & gradPhiNeighbor() const override final
@@ -221,6 +228,7 @@ public:
   }
   const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiNeighbor() const;
+  const FieldVariablePhiDivergence & divPhiNeighbor() const;
 
   const FieldVariablePhiValue & phiFaceNeighbor() const override final
   {
@@ -236,6 +244,7 @@ public:
   }
   const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
+  const FieldVariablePhiDivergence & divPhiFaceNeighbor() const;
 
   virtual const FieldVariablePhiValue & phiLower() const override { return _lower_data->phi(); }
   const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
@@ -319,6 +328,14 @@ public:
   const FieldVariableCurl & curlSln() const { return _element_data->curlSln(Moose::Current); }
   const FieldVariableCurl & curlSlnOld() const { return _element_data->curlSln(Moose::Old); }
   const FieldVariableCurl & curlSlnOlder() const { return _element_data->curlSln(Moose::Older); }
+
+  /// element divergence
+  const FieldVariableDivergence & divSln() const { return _element_data->divSln(Moose::Current); }
+  const FieldVariableDivergence & divSlnOld() const { return _element_data->divSln(Moose::Old); }
+  const FieldVariableDivergence & divSlnOlder() const
+  {
+    return _element_data->divSln(Moose::Older);
+  }
 
   /// AD
   const ADTemplateVariableValue<OutputType> & adSln() const override
@@ -451,6 +468,20 @@ public:
   const FieldVariableCurl & curlSlnOlderNeighbor() const
   {
     return _neighbor_data->curlSln(Moose::Older);
+  }
+
+  /// neighbor solution divergence
+  const FieldVariableDivergence & divSlnNeighbor() const
+  {
+    return _neighbor_data->divSln(Moose::Current);
+  }
+  const FieldVariableDivergence & divSlnOldNeighbor() const
+  {
+    return _neighbor_data->divSln(Moose::Old);
+  }
+  const FieldVariableDivergence & divSlnOlderNeighbor() const
+  {
+    return _neighbor_data->divSln(Moose::Older);
   }
 
   /// neighbor dots

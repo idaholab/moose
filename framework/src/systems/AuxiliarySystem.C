@@ -231,7 +231,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-        fe_type.family == MONOMIAL_VEC)
+        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
     {
       auto * var = _vars[tid].getActualFieldVariable<RealVectorValue>(name);
       if (var)
