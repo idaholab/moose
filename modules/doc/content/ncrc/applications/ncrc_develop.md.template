@@ -21,9 +21,9 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
 - If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
 
-!package! code
-mamba create -n moose moose-dev=__MOOSE_DEV__
-!package-end!
+  !package! code
+  mamba create -n moose moose-dev=__MOOSE_DEV__
+  !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
