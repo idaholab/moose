@@ -17,6 +17,7 @@ The following tutorial and example problems demonstrate the capabilities of the 
 - [modules/porous_flow/heterogeneous_models.md]
 - [modules/porous_flow/groundwater_models.md]
 - [modules/porous_flow/ates.md]
+- [modules/porous_flow/natural_convection.md]
 - [modules/porous_flow/tests.md]
 
 !! example-list-end
