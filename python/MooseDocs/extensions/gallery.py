@@ -223,7 +223,7 @@ class RenderGallery(components.RenderComponent):
         for child in token.children:
             if child.name != 'Card':
                 msg = "The 'gallery' command requires that all content be within cards (i.e., " \
-                      "created with the 'card' command. However, one of the children of the " \
+                      "created with the 'card' command). However, one of the children of the " \
                       "gallery is a '%s' token."
                 LOG.error(msg, child.name)
 
