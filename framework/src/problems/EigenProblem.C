@@ -48,7 +48,9 @@ EigenProblem::validParams()
 }
 
 EigenProblem::EigenProblem(const InputParameters & parameters)
-  : FEProblemBase(parameters),
+  : FEProblemBase(parameters)
+#ifdef LIBMESH_HAVE_SLEPC
+    ,
     // By default, we want to compute an eigenvalue only (smallest or largest)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
@@ -65,6 +67,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _bx_norm_name(isParamValid("bx_norm")
                       ? std::make_optional(getParam<PostprocessorName>("bx_norm"))
                       : std::nullopt)
+#endif
 {
 #ifdef LIBMESH_HAVE_SLEPC
   if (_nl_sys_names.size() > 1)
