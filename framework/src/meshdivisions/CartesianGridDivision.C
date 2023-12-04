@@ -27,7 +27,7 @@ CartesianGridDivision::validParams()
   params.addParam<Point>("top_right", "Top-front-right corner of the grid");
   params.addParam<Point>("center", "Center of the Cartesian grid");
   params.addParam<PositionsName>("center_positions",
-                                 "Positions of the centers of distributed Cartesian grids");
+                                 "Positions of the centers of divided Cartesian grids");
   params.addParam<Point>("widths", "Widths in the X, Y and Z directions");
   params.addRequiredRangeCheckedParam<unsigned int>("nx", "nx>0", "Number of divisions in X");
   params.addRequiredRangeCheckedParam<unsigned int>("ny", "ny>0", "Number of divisions in Y");
@@ -106,12 +106,12 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
 {
   unsigned int offset = 0;
   // Determine the local grid bounds
-  Point bottom_left = _bottom_left, top_right = _top_right, p = pt;
+  Point bottom_left, top_right, p;
   if (_center_positions)
   {
-    // If distributing using positions, find the closest position and
+    // If dividing using positions, find the closest position and
     // look at the relative position of the point compared to that position
-    bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_grid_center_index = _center_positions->getNearestPositionIndex(pt, initial);
     offset = nearest_grid_center_index * getNumDivisions();
     const auto nearest_grid_center =
@@ -119,6 +119,12 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
     bottom_left = -_widths / 2;
     top_right = _widths / 2;
     p = pt - nearest_grid_center;
+  }
+  else
+  {
+    bottom_left = _bottom_left;
+    top_right = _top_right;
+    p = pt;
   }
 
   if (!_outside_grid_counts_as_border)

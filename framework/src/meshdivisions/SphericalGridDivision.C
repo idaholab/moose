@@ -94,7 +94,7 @@ SphericalGridDivision::divisionIndex(const Point & pt) const
   else
   {
     // If distributing using positions, find the closest position
-    bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
     offset = nearest_center_index * getNumDivisions();
     pc(0) = (pt - _center_positions->getPosition(nearest_center_index, initial)).norm();

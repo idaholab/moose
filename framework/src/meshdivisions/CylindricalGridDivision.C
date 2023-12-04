@@ -140,8 +140,8 @@ CylindricalGridDivision::divisionIndex(const Point & pt) const
   }
   else
   {
-    // If distributing using positions, find the closest position
-    bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    // If dividing using positions, find the closest position
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
     const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
     offset = nearest_center_index * getNumDivisions();
     const auto new_center = _center_positions->getPosition(nearest_center_index, initial);

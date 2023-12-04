@@ -35,7 +35,7 @@
       cli_args = "MeshDivisions/active='cartesian_div_center_pos' "
                  "AuxKernels/mesh_div/mesh_division=cartesian_div_center_pos"
       csvdiff = 'cartesian_division_out_div_out_0001.csv'
-      detail = 'distributed Cartesian grids using a fixed width and a group of center positions,'
+      detail = 'Cartesian grids with a fixed width and a group of center positions,'
     []
     [functor]
       type = CSVDiff
@@ -60,7 +60,7 @@
       input = 'cylindrical_division.i'
       cli_args = 'MeshDivisions/active=cylindrical_div_positions AuxKernels/mesh_div/mesh_division=cylindrical_div_positions'
       csvdiff = 'cylindrical_division_out_div_out_0001.csv'
-      detail = 'distributed cylindrical R-theta-Z grids using a group of positions for the cylinder axis coordinates,'
+      detail = 'cylindrical R-theta-Z grids with a group of positions for the cylinder axis coordinates,'
     []
     [spherical]
       type = CSVDiff
@@ -73,7 +73,7 @@
       input = 'spherical_division.i'
       cli_args = 'MeshDivisions/active=spherical_div_positions AuxKernels/mesh_div/mesh_division=spherical_div_positions'
       csvdiff = 'spherical_division_out_div_out_0001.csv'
-      detail = 'distributed spherical radial grids, using a gorup of positions for the sphere centers,'
+      detail = 'spherical radial grids, using a group of positions for the sphere centers,'
     []
     [nested]
       type = CSVDiff
