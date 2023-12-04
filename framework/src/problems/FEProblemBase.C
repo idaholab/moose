@@ -2229,7 +2229,7 @@ FEProblemBase::addFunction(const std::string & type,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
-    logAdd("Function", type, name);
+    logAdd("Function", name, type);
     _functions.addObject(func, tid);
 
     if (auto * const functor = dynamic_cast<Moose::FunctorBase<Real> *>(func.get()))
