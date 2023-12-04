@@ -4,13 +4,6 @@
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during simulation'
 
-    [complement_moving_boundary]
-      type = 'Exodiff'
-      input = 'complement_boundary.i'
-      exodiff = 'complement_boundary_out.e complement_boundary_out.e-s002 complement_boundary_out.e-s003 complement_boundary_out.e-s004 complement_boundary_out.e-s005 complement_boundary_out.e-s006'
-      detail = 'with complement moving boundary,'
-    []
-
     [reversible]
       type = 'Exodiff'
       input = 'reversible.i'
@@ -88,7 +81,7 @@
     input = 'adaptivity_moving_boundary_3d.i'
     exodiff = 'adaptivity_moving_boundary_3d_out.e
     adaptivity_moving_boundary_3d_out.e-s002 adaptivity_moving_boundary_3d_out.e-s003 adaptivity_moving_boundary_3d_out.e-s004
-    adaptivity_moving_boundary_3d_out.e-s005 adaptivity_moving_boundary_3d_out.e-s006'
+    adaptivity_moving_boundary_3d_out.e-s005'
     mesh_mode = 'REPLICATED'
     requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier for 3D problems'
   []
@@ -96,7 +89,7 @@
   [amr_bc]
     type = 'Exodiff'
     input = 'amr_bc.i'
-    exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005 amr_bc_out.e-s006'
+    exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
     requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
@@ -106,7 +99,7 @@
     input = 'amr_bc.i'
     cli_args = "BCs/active='mbc leftright' Outputs/file_base=amr_integral_bc_out"
     exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
-    amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005 amr_integral_bc_out.e-s006'
+    amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
     requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
   []

@@ -13,6 +13,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'gen'
     block_id = 1
+    block_name = 'left'
     bottom_left = '0 0 0'
     top_right = '0.25 1 1'
   []
@@ -20,6 +21,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'left'
     block_id = 2
+    block_name = 'right'
     bottom_left = '0.25 0 0'
     top_right = '1 1 1'
   []
