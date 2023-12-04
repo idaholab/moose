@@ -351,6 +351,12 @@ public:
                          const std::string & name,
                          const InputParameters & params);
 
+  /**
+   * Helper function to link new added Builder back to Parser. This function will be removed after
+   *new Parser and builder are merged
+   **/
+  Builder & parser() { return _builder; }
+
 private:
   /**
    * Internal function used to recursively create the executor objects.

@@ -39,12 +39,42 @@ MooseAppPtr
 AppFactory::createAppShared(const std::string & default_app_type,
                             int argc,
                             char ** argv,
+                            std::unique_ptr<Parser> parser,
+                            MPI_Comm comm_world_in)
+{
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
+  auto which_app_param = emptyInputParameters();
+
+  MooseApp::addAppParam(which_app_param);
+  command_line->addCommandLineOptionsFromParams(which_app_param);
+
+  std::string app_type;
+  if (!command_line->search("app_to_run", app_type))
+    app_type = default_app_type;
+
+  auto app_params = AppFactory::instance().getValidParams(app_type);
+
+  app_params.set<int>("_argc") = argc;
+  app_params.set<char **>("_argv") = argv;
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+
+  // Take the front parser and add it to the parameters so that it can be retrieved in the
+  // Application
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
+
+  return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
+}
+
+MooseAppPtr
+AppFactory::createAppShared(const std::string & default_app_type,
+                            int argc,
+                            char ** argv,
                             MPI_Comm comm_world_in)
 {
   mooseDeprecated("Please update your main.C to adapt new main function in MOOSE framework, see "
                   "the example of ../moose/test/src/main.C. ");
   // Construct front parser
-  auto front_parser = std::make_unique<Parser>();
+  auto parser = std::make_unique<Parser>();
 
   auto command_line = std::make_shared<CommandLine>(argc, argv);
   auto which_app_param = emptyInputParameters();
@@ -61,7 +91,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
   command_line->search("input_file", input_filename);
 
   if (!input_filename.empty())
-    front_parser->parse(input_filename);
+    parser->parse(input_filename);
 
   MooseApp::addAppParam(which_app_param);
   command_line->addCommandLineOptionsFromParams(which_app_param);
@@ -76,40 +106,17 @@ AppFactory::createAppShared(const std::string & default_app_type,
   app_params.set<char **>("_argv") = argv;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
 
-  return AppFactory::instance().createShared(
-      app_type, "main", app_params, std::move(front_parser), comm_world_in);
-}
+  // Take the front parser and add it to the parameters so that it can be retrieved in the
+  // Application
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
 
-MooseAppPtr
-AppFactory::createAppShared(const std::string & default_app_type,
-                            int argc,
-                            char ** argv,
-                            std::unique_ptr<Parser> parser,
-                            MPI_Comm comm_world_in)
-{
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto which_app_param = emptyInputParameters();
-  MooseApp::addAppParam(which_app_param);
-  command_line->addCommandLineOptionsFromParams(which_app_param);
-  std::string app_type;
-  if (!command_line->search("app_to_run", app_type))
-    app_type = default_app_type;
-
-  auto app_params = AppFactory::instance().getValidParams(app_type);
-
-  app_params.set<int>("_argc") = argc;
-  app_params.set<char **>("_argv") = argv;
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
-
-  return AppFactory::instance().createShared(
-      app_type, "main", app_params, std::move(parser), comm_world_in);
+  return AppFactory::instance().createShared(app_type, "main", app_params, comm_world_in);
 }
 
 MooseAppPtr
 AppFactory::createShared(const std::string & app_type,
                          const std::string & name,
                          InputParameters parameters,
-                         std::unique_ptr<Parser> parser,
                          MPI_Comm comm_world_in)
 {
   // Error if the application type is not located
@@ -120,10 +127,6 @@ AppFactory::createShared(const std::string & app_type,
 
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
   parameters.set<std::string>("_type") = app_type;
-
-  // Take the front parser and add it to the parameters so that it can be retrieved in the
-  // Application
-  parameters.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams("");

@@ -1116,8 +1116,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (!input_file.empty())
     front_parser->parse(multiapp_input);
 
-  _apps[i] = AppFactory::instance().createShared(
-      _app_type, full_name, app_params, std::move(front_parser), _my_comm);
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(front_parser);
+
+  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);

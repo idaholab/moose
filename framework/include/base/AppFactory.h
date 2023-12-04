@@ -74,8 +74,8 @@ public:
                                      MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
-   * Helper function for creating a MooseApp for MOOSE applications when adapting to main function
-   * change in MOOSE framework.
+   * Helper function for creating a MooseApp for Apps haven't adapted to the new Parser and Builder
+   * changes. This function needed to be removed after the new Parser and Builder merged
    */
   static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,
@@ -106,7 +106,6 @@ public:
   MooseAppPtr createShared(const std::string & app_type,
                            const std::string & name,
                            InputParameters parameters,
-                           std::unique_ptr<Parser> parser,
                            MPI_Comm COMM_WORLD_IN);
 
   /**
