@@ -13,6 +13,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'gen'
     block_id = 1
+    block_name = 'left_block'
     bottom_left = '-1 -1 0'
     top_right = '0 1 1'
   []
@@ -20,6 +21,7 @@
     type = SubdomainBoundingBoxGenerator
     input = 'left'
     block_id = 2
+    block_name = 'right_block'
     bottom_left = '0 -1 0'
     top_right = '1 1 1'
   []
@@ -32,95 +34,87 @@
   []
 []
 
-[UserObjects]
+[MeshModifiers]
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
     coupled_var = 'phi'
     block = 2
-    criterion_type = ABOVE
+    criterion_type = 'ABOVE'
     threshold = 0.5
     subdomain_id = 1
-    moving_boundary_name = moving_boundary
-    execute_on = 'TIMESTEP_BEGIN'
-  []
-[]
-
-[Functions]
-  [moving_gauss]
-    type = ParsedFunction
-    value = 'exp(-((x+0.5-t)^2+(y)^2)/0.25)'
+    moving_boundaries = 'moving_boundary'
+    moving_boundary_subdomain_pairs = 'left_block right_block'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
 [AuxVariables]
   [phi]
-  []
-[]
-
-[AuxKernels]
-  [phi]
-    type = FunctionAux
-    variable = phi
-    function = moving_gauss
-    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END'
+    [AuxKernel]
+      type = ParsedAux
+      expression = 'exp(-((x+0.5-t)^2+(y)^2)/0.25)'
+      use_xyzt = true
+      execute_on = 'INITIAL TIMESTEP_BEGIN'
+    []
   []
 []
 
 [Adaptivity]
   steps = 1
-  marker = marker
-  initial_marker = marker
+  marker = 'marker'
+  initial_marker = 'marker'
   max_h_level = 1
   [Indicators/indicator]
     type = GradientJumpIndicator
-    variable = phi
+    variable = 'phi'
   []
   [Markers]
     [efm]
       type = ErrorFractionMarker
-      indicator = indicator
+      indicator = 'indicator'
       coarsen = 0.2
       refine = 0.5
     []
     [marker]
       type = BoundaryPreservedMarker
-      preserved_boundary = moving_boundary
+      preserved_boundary = 'moving_boundary'
       marker = 'efm'
     []
   []
 []
 
 [Variables]
- [u][]
+  [u]
+  []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
-    variable = u
+    variable = 'u'
   []
 []
 
 [BCs]
- active = 'mbc leftright'
- [mbc]
-   type = DirichletBC
-   variable = u
-   boundary = moving_boundary
-   value = 1
- []
- [nbc]
-  type = NeumannBC
-  variable = u
-  boundary = moving_boundary
-  value = 10
- []
- [leftright]
-   type = DirichletBC
-   variable = u
-   boundary = 'left right'
-   value = 0
- []
+  active = 'mbc leftright'
+  [mbc]
+    type = DirichletBC
+    variable = 'u'
+    boundary = 'moving_boundary'
+    value = 1
+  []
+  [nbc]
+    type = NeumannBC
+    variable = u
+    boundary = 'moving_boundary'
+    value = 10
+  []
+  [leftright]
+    type = DirichletBC
+    variable = u
+    boundary = 'left right'
+    value = 0
+  []
 []
 
 [Executioner]

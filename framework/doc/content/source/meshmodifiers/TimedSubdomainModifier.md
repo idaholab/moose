@@ -9,7 +9,7 @@ For geometrically complex models, an efficient option is to define the volumes t
 Addressing this task, the `TimedSubdomainModifier` eases re-assignment of all elements of a subdomain, makes Moose input files shorter, and reduces
 potential sources of error compared to the usage of [CoupledVarThresholdElementSubdomainModifier.md] (which in turn has its advantages if the geometry is not organized into subdomains).
 
-The `TimedSubdomainModifier` inherits from the [CoupledVarThresholdElementSubdomainModifier.md]. Details on solution initialization, stateful material property initialization and moving boundary/interface nodeset/sideset modification can be found in the description of the [CoupledVarThresholdElementSubdomainModifier.md].
+The `TimedSubdomainModifier` inherits from the [ElementSubdomainModifier.md]. Details on solution reinitialization, stateful material property reinitialization and moving boundary/interface nodeset/sideset modification can be found in the description of the [ElementSubdomainModifier.md].
 
 The subdomains and times to be used by the `TimedSubdomainModifier` can be specified using one of the following options:
 

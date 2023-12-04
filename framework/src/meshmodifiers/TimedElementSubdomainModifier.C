@@ -25,6 +25,9 @@ TimedElementSubdomainModifier::TimedElementSubdomainModifier(const InputParamete
 void
 TimedElementSubdomainModifier::initialize()
 {
+  // clear number of moved elements
+  ElementSubdomainModifier::initialize();
+
   // ask for all times (must NOT be sorted)
   const auto times = getTimes();
 
