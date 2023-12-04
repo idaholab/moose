@@ -15,6 +15,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/remote_elem.h"
 #include "libmesh/parallel_ghost_sync.h"
+#include "libmesh/petsc_vector.h"
 
 InputParameters
 ElementSubdomainModifier::validParams()
@@ -23,9 +24,6 @@ ElementSubdomainModifier::validParams()
   params.addClassDescription(
       "Modify element subdomain ID. This userobject only runs on the undisplaced mesh, and it will "
       "modify both the undisplaced and the displaced mesh.");
-  params.addParam<bool>("apply_initial_conditions",
-                        true,
-                        "Whether to apply initial conditions on the moved nodes and elements");
   params.addParam<BoundaryName>(
       "moving_boundary_name",
       "Boundary to modify when an element is moved. A boundary with the provided name will be "
@@ -34,6 +32,33 @@ ElementSubdomainModifier::validParams()
                                 "Boundary that associated with the unmoved domain when neighbor "
                                 "element(s) is moved. A boundary with the provided name will be "
                                 "created if not already exists on the mesh.");
+
+  params.addParam<std::vector<VariableName>>(
+      "initialize_variables",
+      {},
+      "Which variables to initialize when an element is moved into the active subdomains.");
+  MooseEnum init_strategy("IC NEAREST CONSTANT", "IC");
+  params.addParam<std::vector<MooseEnum>>(
+      "initialization_strategy",
+      {init_strategy},
+      "Which strategy to use when initializing variables on newly activated elements and nodes. "
+      "IC applies the variable initial condition to the newly activated dofs. NEAREST applies the "
+      "old value from the nearest element/node to the newly activated dofs. CONSTANT initializes "
+      "the newly activated dofs with a constant. This parameter should either have size of 1 or "
+      "size equal to that of 'initialize_variables'. If the size of this parameter is 1, then the "
+      "same strategy will be used for all variables listed in 'initialize_variables'.");
+  params.addParam<std::vector<Real>>(
+      "initialization_constant",
+      "The constants to use when initialization_strategy = CONSTANT. This parameter should either "
+      "have size of 1 or size equal to the number of variables with "
+      "initialization_strategy==CONSTANT.");
+  params.addParam<std::vector<SubdomainName>>(
+      "active_subdomains",
+      {},
+      "The 'active' subdomains on which the simulation is performed, i.e. the PDE "
+      "computational domain. If this parameter is left empty, then the entire mesh is treated as "
+      "the activate subdomain.");
+
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
@@ -42,11 +67,59 @@ ElementSubdomainModifier::validParams()
 ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
-    _apply_ic(getParam<bool>("apply_initial_conditions")),
+    _nl_sys(_fe_problem.getNonlinearSystemBase(systemNumber())),
+    _aux_sys(_fe_problem.getAuxiliarySystem()),
+    _init_vars(getParam<std::vector<VariableName>>("initialize_variables")),
+    _active_subdomains(
+        _mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("active_subdomains"))),
     _moving_boundary_specified(isParamValid("moving_boundary_name")),
     _complement_moving_boundary_specified(isParamValid("complement_moving_boundary_name")),
     _moving_boundary_id(-1)
 {
+  for (auto var_name : getParam<std::vector<VariableName>>("initialize_variables"))
+    if (!_nl_sys.hasVariable(var_name) && !_aux_sys.hasVariable(var_name))
+      paramError("initialize_variables", "Variable ", var_name, " does not exist.");
+
+  // The size of _init_strategy must be 1 or equal to the number of variables to initialize
+  const auto init_strategy_in = getParam<std::vector<MooseEnum>>("initialization_strategy");
+  if (_init_vars.size() == init_strategy_in.size())
+    _init_strategy = init_strategy_in;
+  else if (init_strategy_in.size() == 1)
+    _init_strategy.resize(_init_vars.size(), init_strategy_in[0]);
+  else
+    paramError("initialization_strategy",
+               "This parameter should either have size of 1 or size equal to "
+               "that of 'initialize_variables'. If the size of this parameter is 1, then the "
+               "same strategy will be used for all variables listed in 'initialize_variables'.");
+
+  // The size of _init_constant must be 1 or equal to the number of variables to initialize (with
+  // _init_strategy==CONSTANT)
+  if (isParamValid("initialization_constant"))
+  {
+    const auto init_constant_in = getParam<std::vector<Real>>("initialization_constant");
+    unsigned int count = 0;
+    for (auto i : index_range(_init_vars))
+      if (_init_strategy[i] == "CONSTANT")
+      {
+        if (init_constant_in.size() == 1)
+          _init_constant[_init_vars[i]] = init_constant_in[0];
+        else if (init_constant_in.size() > count)
+          _init_constant[_init_vars[i]] = init_constant_in[count];
+        else
+          paramError("initialization_constant",
+                     "This parameter should either have size of 1 or size equal to the number "
+                     "variables with initialization_strategy == CONSTANT.");
+        count++;
+      }
+  }
+
+  // For steady-state simulation we can only apply variable IC
+  if (!_fe_problem.isTransient() && !_init_vars.empty())
+    for (auto & s : _init_strategy)
+      if (s != "IC")
+        paramError(
+            "initial_condition_strategy",
+            "IC is the only supported initialization strategy for steady-state simulations.");
 }
 
 void
@@ -67,6 +140,28 @@ ElementSubdomainModifier::initialSetup()
     if (_displaced_problem)
       setComplementMovingBoundaryName(_displaced_problem->mesh());
   }
+
+  _nl_ndof = _nl_sys.system().n_dofs();
+  _aux_ndof = _aux_sys.system().n_dofs();
+}
+
+void
+ElementSubdomainModifier::serializeSolutionOld(dof_id_type ndof,
+                                               SystemBase & sys,
+                                               std::unique_ptr<NumericVector<Real>> & sol)
+{
+  if (!sol.get())
+    sol = NumericVector<Real>::build(_communicator);
+
+  sol->init(ndof, false, SERIAL);
+  sys.solutionOld().localize(*sol);
+}
+
+void
+ElementSubdomainModifier::timestepSetup()
+{
+  serializeSolutionOld(_nl_ndof, _nl_sys, _nl_sol_old);
+  serializeSolutionOld(_aux_ndof, _aux_sys, _aux_sol_old);
 }
 
 void
@@ -101,9 +196,16 @@ ElementSubdomainModifier::initialize()
 {
   _moved_elems.clear();
   _moved_displaced_elems.clear();
-  _moved_nodes.clear();
+
+  _activated_elems.clear();
+  _activated_nodes.clear();
+  _activated_bnd_nodes.clear();
+
   _cached_subdomain_assignments.clear();
   _moving_boundary_subdomains.clear();
+
+  _elem_nearest_dofs.clear();
+  _node_nearest_dofs.clear();
 }
 
 void
@@ -125,9 +227,37 @@ ElementSubdomainModifier::execute()
     Elem * displaced_elem =
         _displaced_problem ? _displaced_problem->mesh().elemPtr(elem_id) : nullptr;
 
-    // Save the affected nodes so that we can later update/initialize the solution
+    // Save the activated elements so that we can later update/initialize the solution
+    // If this element is not already on the active subdomain, this element is said to be newly
+    // activated
+    if (std::find(_active_subdomains.begin(),
+                  _active_subdomains.end(),
+                  _current_elem->subdomain_id()) != _active_subdomains.end())
+      if (std::find(_activated_elems.begin(), _activated_elems.end(), elem) ==
+          _activated_elems.end())
+        _activated_elems.push_back(elem);
+
+    // Save the activated nodes so that we can later update/initialize the solution
+    // If none of the node neighbors is on the active subdomain, this node is said to be newly
+    // activated
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-      _moved_nodes.insert(elem->node_id(i));
+    {
+      bool new_node = true;
+      for (auto eid : _mesh.nodeToElemMap().at(elem->node_id(i)))
+        if (std::find(_active_subdomains.begin(),
+                      _active_subdomains.end(),
+                      _mesh.elemPtr(eid)->subdomain_id()) != _active_subdomains.end())
+        {
+          new_node = false;
+          break;
+        }
+
+      if (new_node &&
+          std::find(_activated_nodes.begin(), _activated_nodes.end(), elem->node_ptr(i)) ==
+              _activated_nodes.end())
+        _activated_nodes.push_back(elem->node_ptr(i));
+    }
+
     _cached_subdomain_assignments.emplace_back(elem, subdomain_id);
     _moved_elems.push_back(elem);
     if (displaced_elem)
@@ -135,6 +265,7 @@ ElementSubdomainModifier::execute()
       _cached_subdomain_assignments.emplace_back(displaced_elem, subdomain_id);
       _moved_displaced_elems.push_back(displaced_elem);
     }
+
     // Change the parent's subdomain, if any
     // We do not save the parent info since they are inactive
     setAncestorsSubdomainIDs(subdomain_id, elem_id);
@@ -153,7 +284,10 @@ ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
                                 uo._moved_displaced_elems.begin(),
                                 uo._moved_displaced_elems.end());
 
-  _moved_nodes.insert(uo._moved_nodes.begin(), uo._moved_nodes.end());
+  _activated_elems.insert(
+      _activated_elems.end(), uo._activated_elems.begin(), uo._activated_elems.end());
+  _activated_nodes.insert(
+      _activated_nodes.end(), uo._activated_nodes.begin(), uo._activated_nodes.end());
   _cached_subdomain_assignments.insert(_cached_subdomain_assignments.end(),
                                        uo._cached_subdomain_assignments.begin(),
                                        uo._cached_subdomain_assignments.end());
@@ -162,6 +296,27 @@ ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
 void
 ElementSubdomainModifier::finalize()
 {
+  // If nothing need to change, just return.
+  // This will skip all mesh changes, and so no adaptivity mesh files will need to be written.
+  auto n_moved_elem = _cached_subdomain_assignments.size();
+  gatherSum(n_moved_elem);
+  if (n_moved_elem == 0)
+    return;
+
+  buildActivatedElemsRange();
+  buildActivatedNodesRange();
+  buildActivatedBndNodesRange();
+
+  // Build nearest node and element maps *before* modifying the subdomain IDs
+  for (auto i : index_range(_init_vars))
+    if (_init_strategy[i] == "NEAREST")
+    {
+      if (_nl_sys.hasVariable(_init_vars[i]))
+        findNearestDofs(_nl_sys, _init_vars[i]);
+      else
+        findNearestDofs(_aux_sys, _init_vars[i]);
+    }
+
   // apply cached subdomain changes
   for (auto & [elem, subdomain_id] : _cached_subdomain_assignments)
     elem->subdomain_id() = subdomain_id;
@@ -209,21 +364,61 @@ ElementSubdomainModifier::finalize()
   // Reinit equation systems
   _fe_problem.meshChanged();
 
-  // Apply initial condition for the newly moved elements and boundary nodes
-  buildMovedElemsRange();
-  buildMovedBndNodesRange();
-
-  if (_apply_ic)
+  // Apply initial condition for the newly activated dofs
+  if (!_init_vars.empty())
   {
-    _fe_problem.projectInitialConditionOnCustomRange(movedElemsRange(), movedBndNodesRange());
-
+    // At step 0 we can _only_ apply IC
+    if (_t_step == 0)
+      _fe_problem.projectInitialConditionOnCustomRange(activatedElemsRange(),
+                                                       activatedBndNodesRange());
+    else
+    {
+      // Perform IC projection if _any_ variable requests IC as the initialization strategy
+      for (auto & s : _init_strategy)
+        if (s == "IC")
+        {
+          _fe_problem.projectInitialConditionOnCustomRange(activatedElemsRange(),
+                                                           activatedBndNodesRange());
+          break;
+        }
+      // Loop over each variable and initialize
+      for (auto i : index_range(_init_vars))
+      {
+        if (_init_strategy[i] == "IC")
+          continue; // no-op
+        else if (_init_strategy[i] == "NEAREST")
+        {
+          if (_nl_sys.hasVariable(_init_vars[i]))
+            setNearestSolutionForActivatedDofs(_nl_sys, _init_vars[i], *_nl_sol_old);
+          else
+            setNearestSolutionForActivatedDofs(_aux_sys, _init_vars[i], *_aux_sol_old);
+        }
+        else if (_init_strategy[i] == "CONSTANT")
+        {
+          if (_nl_sys.hasVariable(_init_vars[i]))
+            setConstantForActivatedDofs(_nl_sys, _init_vars[i]);
+          else
+            setConstantForActivatedDofs(_aux_sys, _init_vars[i]);
+        }
+        else
+          mooseError("Unsupported initialization strategy: ", _init_strategy[i]);
+      }
+    }
     // Set old and older solution on the initialized dofs
-    setOldAndOlderSolutionsForMovedNodes(_fe_problem.getNonlinearSystemBase(_sys.number()));
-    setOldAndOlderSolutionsForMovedNodes(_fe_problem.getAuxiliarySystem());
+    _nl_sys.copyOldSolutions();
+    _aux_sys.copyOldSolutions();
   }
 
   // Initialize stateful material properties for the newly activated elements
-  _fe_problem.initElementStatefulProps(movedElemsRange(), false);
+  _fe_problem.initElementStatefulProps(activatedElemsRange(), false);
+}
+
+void
+ElementSubdomainModifier::meshChanged()
+{
+  // The number of dofs may have changed
+  _nl_ndof = _nl_sys.system().n_dofs();
+  _aux_ndof = _aux_sys.system().n_dofs();
 }
 
 void
@@ -544,98 +739,228 @@ ElementSubdomainModifier::pushBoundaryNodeInfo(MooseMesh & moose_mesh)
 }
 
 void
-ElementSubdomainModifier::buildMovedElemsRange()
+ElementSubdomainModifier::buildActivatedElemsRange()
 {
   // Clear the object first
-  _moved_elems_range.reset();
+  _activated_elems_range.reset();
 
   // Make some fake element iterators defining this vector of elements
-  Elem * const * elem_itr_begin = const_cast<Elem * const *>(_moved_elems.data());
-  Elem * const * elem_itr_end = elem_itr_begin + _moved_elems.size();
+  Elem * const * elem_itr_begin = const_cast<Elem * const *>(_activated_elems.data());
+  Elem * const * elem_itr_end = elem_itr_begin + _activated_elems.size();
 
   const auto elems_begin = MeshBase::const_element_iterator(
       elem_itr_begin, elem_itr_end, Predicates::NotNull<Elem * const *>());
   const auto elems_end = MeshBase::const_element_iterator(
       elem_itr_end, elem_itr_end, Predicates::NotNull<Elem * const *>());
 
-  _moved_elems_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
+  _activated_elems_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
 }
 
 void
-ElementSubdomainModifier::buildMovedBndNodesRange()
+ElementSubdomainModifier::buildActivatedNodesRange()
 {
-  // This is more involved than building the element range, because not all moved nodes are
-  // necessarily associated with a boundary initial condition. We need to first build a set of
-  // boundary nodes. Clear the object first:
-  _moved_bnd_nodes_range.reset();
+  // Clear the object first
+  _activated_nodes_range.reset();
 
-  // create a vector of the newly activated nodes
-  std::set<const BndNode *> moved_bnd_nodes_set;
+  // Make some fake element iterators defining this vector of elements
+  Node * const * node_itr_begin = const_cast<Node * const *>(_activated_nodes.data());
+  Node * const * node_itr_end = node_itr_begin + _activated_nodes.size();
+
+  const auto nodes_begin = MeshBase::const_node_iterator(
+      node_itr_begin, node_itr_end, Predicates::NotNull<Node * const *>());
+  const auto nodes_end = MeshBase::const_node_iterator(
+      node_itr_end, node_itr_end, Predicates::NotNull<Node * const *>());
+
+  _activated_nodes_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+}
+
+void
+ElementSubdomainModifier::buildActivatedBndNodesRange()
+{
+  // Clear the object first:
+  _activated_bnd_nodes_range.reset();
+
+  // Find activated boundary node
   for (auto & bnd_node : *_mesh.getBoundaryNodeRange())
-  {
-    dof_id_type bnd_node_id = bnd_node->_node->id();
-    if (_moved_nodes.find(bnd_node_id) != _moved_nodes.end())
-      moved_bnd_nodes_set.insert(bnd_node);
-  }
-
-  // Dump all the boundary nodes into a vector so that we can build a range out of it
-  std::vector<const BndNode *> moved_bnd_nodes;
-  moved_bnd_nodes.assign(moved_bnd_nodes_set.begin(), moved_bnd_nodes_set.end());
+    if (std::find(_activated_nodes.begin(), _activated_nodes.end(), bnd_node->_node) !=
+        _activated_nodes.end())
+      _activated_bnd_nodes.push_back(bnd_node);
 
   // Make some fake node iterators defining this vector of nodes
-  BndNode * const * bnd_node_itr_begin = const_cast<BndNode * const *>(moved_bnd_nodes.data());
-  BndNode * const * bnd_node_itr_end = bnd_node_itr_begin + moved_bnd_nodes.size();
+  BndNode * const * bnd_node_itr_begin = const_cast<BndNode * const *>(_activated_bnd_nodes.data());
+  BndNode * const * bnd_node_itr_end = bnd_node_itr_begin + _activated_bnd_nodes.size();
 
   const auto bnd_nodes_begin = MooseMesh::const_bnd_node_iterator(
       bnd_node_itr_begin, bnd_node_itr_end, Predicates::NotNull<const BndNode * const *>());
   const auto bnd_nodes_end = MooseMesh::const_bnd_node_iterator(
       bnd_node_itr_end, bnd_node_itr_end, Predicates::NotNull<const BndNode * const *>());
 
-  _moved_bnd_nodes_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
+  _activated_bnd_nodes_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
 }
 
 void
-ElementSubdomainModifier::setOldAndOlderSolutionsForMovedNodes(SystemBase & sys)
+ElementSubdomainModifier::findNearestDofs(SystemBase & sys, const VariableName & var_name)
 {
-  // Don't do anything if this is a steady simulation
-  if (!sys.hasSolutionState(1))
-    return;
+  std::map<dof_id_type, Real> nearest_distance;
 
-  ConstBndNodeRange & bnd_node_range = movedBndNodesRange();
+  // Get the variable
+  auto & var = sys.getVariable(_tid, var_name);
 
-  NumericVector<Number> & current_solution = *sys.system().current_local_solution;
-  NumericVector<Number> & old_solution = sys.solutionOld();
-  NumericVector<Number> * older_solution = sys.hasSolutionState(2) ? &sys.solutionOlder() : nullptr;
+  // Get the variable number
+  auto var_num = var.number();
 
+  // Get dofmap
+  const auto & dofmap = sys.dofMap();
+
+  for (auto elem : _mesh.getMesh().active_element_ptr_range())
+  {
+    if (!_active_subdomains.empty() &&
+        std::find(_active_subdomains.begin(), _active_subdomains.end(), elem->subdomain_id()) ==
+            _active_subdomains.end())
+      continue;
+
+    // The variable could have nodal dofs
+    for (const auto & activated_node : activatedNodesRange())
+      for (const auto & node : elem->node_ref_range())
+      {
+        // Skip if this node doesn't store dofs of this variable
+        if (node.n_comp(sys.number(), var_num) == 0)
+          continue;
+
+        if (_node_nearest_dofs[var_num].count(activated_node->id()))
+        {
+          Real dist = (node - *activated_node).norm();
+          if (dist < nearest_distance[activated_node->id()])
+          {
+            nearest_distance[activated_node->id()] = dist;
+            dofmap.dof_indices(&node, _node_nearest_dofs[var_num][activated_node->id()], var_num);
+          }
+        }
+        else
+        {
+          nearest_distance[activated_node->id()] = std::numeric_limits<Real>::max();
+          dofmap.dof_indices(&node, _node_nearest_dofs[var_num][activated_node->id()], var_num);
+        }
+      }
+    // or elemental dofs
+    for (const auto & activated_elem : activatedElemsRange())
+    {
+      // Skip if this element doesn't store dofs of this variable
+      if (elem->n_comp(sys.number(), var_num) == 0)
+        continue;
+
+      if (_elem_nearest_dofs[var_num].count(activated_elem->id()))
+      {
+        Real dist = (elem->centroid() - activated_elem->centroid()).norm();
+        if (dist < nearest_distance[activated_elem->id()])
+        {
+          nearest_distance[activated_elem->id()] = dist;
+          dofmap.dof_indices(elem, _elem_nearest_dofs[var_num][activated_elem->id()], var_num);
+        }
+      }
+      else
+      {
+        nearest_distance[activated_elem->id()] = std::numeric_limits<Real>::max();
+        dofmap.dof_indices(elem, _elem_nearest_dofs[var_num][activated_elem->id()], var_num);
+      }
+    }
+  }
+}
+
+void
+ElementSubdomainModifier::setNearestSolutionForActivatedDofs(SystemBase & sys,
+                                                             const VariableName & var_name,
+                                                             NumericVector<Real> & old_solution)
+{
+  // Get the variable
+  auto & var = sys.getVariable(_tid, var_name);
+
+  // Get the variable number
+  auto var_num = var.number();
+
+  auto & current_solution = sys.solution();
   DofMap & dof_map = sys.dofMap();
 
-  // Get dofs for the newly added elements
   std::vector<dof_id_type> dofs;
-  for (auto & bnd_node : bnd_node_range)
+  std::vector<dof_id_type> nearest_dofs;
+
+  if (_node_nearest_dofs.count(var_num))
   {
-    std::vector<dof_id_type> bnd_node_dofs;
-    dof_map.dof_indices(bnd_node->_node, bnd_node_dofs);
-    dofs.insert(dofs.end(), bnd_node_dofs.begin(), bnd_node_dofs.end());
+    for (auto & [activated_node_id, nearest_node_dofs] : _node_nearest_dofs[var_num])
+    {
+      auto activated_node = _mesh.nodePtr(activated_node_id);
+      // Dofs on the activated node
+      std::vector<dof_id_type> node_dofs;
+      dof_map.dof_indices(activated_node, node_dofs, var_num);
+      dofs.insert(dofs.end(), node_dofs.begin(), node_dofs.end());
+
+      // Dofs on the nearest node
+      nearest_dofs.insert(nearest_dofs.end(), nearest_node_dofs.begin(), nearest_node_dofs.end());
+    }
   }
 
-  // Set the old and older solution to match the IC.
-  for (auto dof : dofs)
+  if (_elem_nearest_dofs.count(var_num))
   {
-    old_solution.set(dof, current_solution(dof));
-    if (older_solution)
-      older_solution->set(dof, current_solution(dof));
+    for (auto & [activated_elem_id, nearest_elem_dofs] : _elem_nearest_dofs[var_num])
+    {
+      auto activated_elem = _mesh.elemPtr(activated_elem_id);
+      // Dofs on the activated element
+      std::vector<dof_id_type> elem_dofs;
+      dof_map.dof_indices(activated_elem, elem_dofs, var_num);
+      dofs.insert(dofs.end(), elem_dofs.begin(), elem_dofs.end());
+
+      // Dofs on the nearest element
+      nearest_dofs.insert(nearest_dofs.end(), nearest_elem_dofs.begin(), nearest_elem_dofs.end());
+    }
   }
 
+  for (auto i : index_range(dofs))
+    current_solution.set(dofs[i], old_solution(nearest_dofs[i]));
+
+  current_solution.close();
   old_solution.close();
-  if (older_solution)
-    older_solution->close();
+}
+
+void
+ElementSubdomainModifier::setConstantForActivatedDofs(SystemBase & sys,
+                                                      const VariableName & var_name)
+{
+  // Get the variable
+  auto & var = sys.getVariable(_tid, var_name);
+
+  // Get the variable number
+  auto var_num = var.number();
+
+  auto & current_solution = sys.solution();
+  DofMap & dof_map = sys.dofMap();
+
+  std::vector<dof_id_type> dofs;
+
+  for (auto activated_node : activatedNodesRange())
+  {
+    std::vector<dof_id_type> node_dofs;
+    dof_map.dof_indices(activated_node, node_dofs, var_num);
+    dofs.insert(dofs.end(), node_dofs.begin(), node_dofs.end());
+  }
+
+  for (auto activated_elem : activatedElemsRange())
+  {
+    std::vector<dof_id_type> elem_dofs;
+    dof_map.dof_indices(activated_elem, elem_dofs, var_num);
+    dofs.insert(dofs.end(), elem_dofs.begin(), elem_dofs.end());
+  }
+
+  for (auto i : index_range(dofs))
+    current_solution.set(dofs[i], _init_constant[var_name]);
+
+  current_solution.close();
 }
 
 void
 ElementSubdomainModifier::setAncestorsSubdomainIDs(const SubdomainID & subdomain_id,
                                                    const dof_id_type & elem_id)
 {
-  Elem * curr_elem = _mesh.elemPtr(elem_id);
+  auto curr_elem = _mesh.elemPtr(elem_id);
 
   unsigned int lv = curr_elem->level();
 
@@ -644,11 +969,11 @@ ElementSubdomainModifier::setAncestorsSubdomainIDs(const SubdomainID & subdomain
     // Change the parent's subdomain, if any
     curr_elem = curr_elem->parent();
     dof_id_type id = curr_elem->id();
-    Elem * elem = _mesh.elemPtr(id);
+    auto elem = _mesh.elemPtr(id);
     elem->subdomain_id() = subdomain_id;
 
     // displaced parent element
-    Elem * displaced_elem = _displaced_problem ? _displaced_problem->mesh().elemPtr(id) : nullptr;
+    auto displaced_elem = _displaced_problem ? _displaced_problem->mesh().elemPtr(id) : nullptr;
     if (displaced_elem)
       displaced_elem->subdomain_id() = subdomain_id;
   }
