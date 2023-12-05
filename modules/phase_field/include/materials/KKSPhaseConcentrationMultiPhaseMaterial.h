@@ -79,7 +79,7 @@ protected:
   const Real _rel_tol;
 
   const bool _damped_newton;
-  const Real _damping_factor;
+  // const Real _damping_factor;
 
   MaterialName _condition_name;
   MaterialBase * _condition;

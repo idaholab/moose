@@ -37,6 +37,11 @@ NestedSolveTempl<is_ad>::validParams()
                         "Factor applied to relative and absolute "
                         "tolerance for acceptable nonlinear convergence if "
                         "iterations are no longer making progress");
+  params.addParam<Real>("damping_factor",
+                        dampingFactorDefault(),
+                        "Factor applied to step size if guess does not satisfy damping criteria");
+  params.addParam<unsigned int>(
+      "max_damping_iterations", maxDampingIterationsDefault(), "Maximum number of damping steps per linear iteration of nested solve");
   return params;
 }
 
@@ -45,6 +50,8 @@ NestedSolveTempl<is_ad>::NestedSolveTempl()
   : _relative_tolerance_square(Utility::pow<2>(relativeToleranceDefault())),
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
     _delta_thresh(xToleranceDefault()),
+    _damping_factor(dampingFactorDefault()),
+    _max_damping_iterations(maxDampingIterationsDefault()),
     _min_iterations(minIterationsDefault()),
     _max_iterations(maxIterationsDefault()),
     _acceptable_multiplier(acceptableMultiplierDefault()),
@@ -58,6 +65,8 @@ NestedSolveTempl<is_ad>::NestedSolveTempl(const InputParameters & params)
   : _relative_tolerance_square(Utility::pow<2>(params.get<Real>("relative_tolerance"))),
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
     _delta_thresh(params.get<Real>("step_size_tolerance")),
+    _damping_factor(params.get<Real>("damping_factor")),
+    _max_damping_iterations(params.get<unsigned int>("max_damping_iterations")),
     _min_iterations(params.get<unsigned int>("min_iterations")),
     _max_iterations(params.get<unsigned int>("max_iterations")),
     _acceptable_multiplier(params.get<Real>("acceptable_multiplier")),

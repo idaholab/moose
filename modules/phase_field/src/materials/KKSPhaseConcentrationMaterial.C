@@ -36,7 +36,7 @@ KKSPhaseConcentrationMaterial::validParams()
   params.addCoupledVar("args", "The coupled variables of Fa and Fb.");
   params.addParam<bool>(
       "damped_Newton", false, "Whether or not to use the damped Newton's method.");
-  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  // params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
   params.addParam<MaterialName>("conditions",
                                 "C",
                                 "Material property that checks bounds and conditions on the "
@@ -74,7 +74,7 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
     _damped_newton(getParam<bool>("damped_Newton")),
-    _damping_factor(getParam<Real>("damping_factor")),
+    // _damping_factor(getParam<Real>("damping_factor")),
     _condition_name(getParam<MaterialName>("conditions")),
     _nested_solve(NestedSolve(parameters))
 
@@ -242,6 +242,8 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
   else
     _nested_solve.nonlinearDamped(solution, compute, computeCondition);
   _iter[_qp] = _nested_solve.getIterations();
+
+  std::cout << "Suceeded in " << _nested_solve.getIterations() << "iterations.\n";
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
     mooseException("Nested Newton iteration did not converge.");

@@ -39,7 +39,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
   params.addCoupledVar("args", "The coupled variables of free energies.");
   params.addParam<bool>("damped_Newton",false,
                                 "Whether or not to use the damped Newton's method.");
-  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  // params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
   params.addParam<MaterialName>("conditions",
                                 "C",
                                 "Material property that checks bounds and conditions on the "
@@ -77,7 +77,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
     _damped_newton(getParam<bool>("damped_Newton")),
-    _damping_factor(getParam<Real>("damping_factor")),
+    // _damping_factor(getParam<Real>("damping_factor")),
     _condition_name(getParam<MaterialName>("conditions")),
     _nested_solve(NestedSolve(parameters))
 

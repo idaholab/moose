@@ -126,6 +126,8 @@ public:
   static unsigned int minIterationsDefault() { return 3; }
   static unsigned int maxIterationsDefault() { return 1000; }
   static Real acceptableMultiplierDefault() { return 10.0; }
+  static Real dampingFactorDefault() { return 0.8; }
+  static unsigned int maxDampingIterationsDefault() { return 100; }
   ///@}
 
   void setRelativeTolerance(Real rel) { _relative_tolerance_square = rel * rel; }
@@ -136,6 +138,9 @@ public:
   Real _absolute_tolerance_square;
   // Threshold for minimum step size of linear iterations
   Real _delta_thresh;
+  // Damping factor
+  Real _damping_factor;
+  unsigned int _max_damping_iterations;
 
   unsigned int _min_iterations;
   unsigned int _max_iterations;
@@ -440,7 +445,7 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
     linear(jacobian, delta, residual);
 
     // // Check if step size is smaller than the floating point tolerance
- if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
+    if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
     {
       _state = State::CONVERGED_XTOL;
       return;
@@ -501,12 +506,15 @@ NestedSolveTempl<is_ad>::nonlinearDamped(V & guess, T && compute, C && computeCo
     }
 
     Real alpha = 1;
+    unsigned int damping_iterations = 0;
     auto prev_guess = guess;
     guess -= delta;
-    while (!computeCondition(guess))
+
+    while (!computeCondition(guess) && (damping_iterations < _max_damping_iterations))
     {
-      alpha *= 0.8;
+      alpha *= _damping_factor;
       guess = prev_guess - alpha * delta;
+      damping_iterations += 1;
     }
     _n_iterations++;
 
