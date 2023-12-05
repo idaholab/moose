@@ -142,7 +142,9 @@
   [initialization]
     type = 'Exodiff'
     input = 'initialization.i'
-    exodiff = 'initialization_out.e initialization_out.e-s002 initialization_out.e-s003 initialization_out.e-s004'
+    exodiff = "initialization_out.e initialization_out.e-s002 initialization_out.e-s003 initialization_out.e-s004
+               initialization_out.e-s005 initialization_out.e-s006 initialization_out.e-s007
+               initialization_out.e-s008 initialization_out.e-s009 initialization_out.e-s010"
     mesh_mode = 'REPLICATED'
     requirement = 'The framework shall support element subdomain modification with different variable initialization strategies.'
   []
