@@ -981,6 +981,9 @@ DerivativeStringClass(OutFileBase);
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
 DerivativeStringClass(NonlinearVariableName);
 
+/// This type is used for objects that expect linear variable names (i.e. LinearKernels, LinearBCs)
+DerivativeStringClass(LinearVariableName);
+
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
 DerivativeStringClass(AuxVariableName);
 

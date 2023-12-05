@@ -9,9 +9,12 @@
 
 #pragma once
 
-// MOOSE
 #include "LinearFVBoundaryCondition.h"
 
+/**
+ * Class implementing a Dirichlet boundary condition for linear finite
+ * volume variables
+ */
 class LinearFVDirichletBC : public LinearFVBoundaryCondition
 {
 public:
@@ -40,5 +43,6 @@ public:
   computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const override;
 
 protected:
-  const Real _value;
+  /// The functor for this BC (can be value, function, etc)
+  const Moose::Functor<Real> & _functor;
 };

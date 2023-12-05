@@ -24,7 +24,7 @@
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
-#include "ADFunctorInterface.h"
+#include "NonADFunctorInterface.h"
 #include "FaceArgInterface.h"
 #include "MooseLinearVariableFV.h"
 
@@ -55,7 +55,8 @@ class LinearFVBoundaryCondition : public MooseObject,
                                   public TaggingInterface,
                                   public MooseVariableInterface<Real>,
                                   public MooseVariableDependencyInterface,
-                                  public ADFunctorInterface
+                                  public NonADFunctorInterface,
+                                  public FaceArgProducerInterface
 {
 public:
   /**
@@ -67,35 +68,86 @@ public:
 
   static InputParameters validParams();
 
+  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+
   /**
    * Get a reference to the subproblem
    * @return Reference to SubProblem
    */
   const SubProblem & subProblem() const { return _subproblem; }
 
+  /// Return the linear finite volume variable
   const MooseLinearVariableFV<Real> & variable() const { return *_var; }
 
+  /**
+   * Computes the boundary value of this object. This relies on the current solution field.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face
+   */
   virtual Real computeBoundaryValue(const FaceInfo * const face_info) = 0;
 
+  /**
+   * Computes the normal gradient (often used in diffusion terms) on the boundary.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
+   */
   virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) = 0;
 
+  /**
+   * Computes the boundary value's contribution to the linear system matrix.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
+   */
   virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) const = 0;
 
+  /**
+   * Computes the boundary value's contribution to the linear system right hand side.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
+   */
   virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) const = 0;
 
+  /**
+   * Computed the boundary gradient's contribution to the linear system matrix. Mostly used for
+   * diffusion.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
+   */
   virtual Real
   computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const = 0;
 
+  /**
+   * Computed the boundary gradient's contribution to the linear system right hand side.
+   * Mostly used for diffusion.
+   * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
+   */
   virtual Real computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const = 0;
 
+  /**
+   * Check if the contributions to the right hand side and matrix already include the material
+   * property multipler. For dirichlet boundary conditions this is false, but for flux boundary
+   * conditions this can be true (like Neumann BC for diffusion problems).
+   */
   bool includesMaterialPropertyMultiplier() const { return _includes_material_multiplier; }
 
+  /**
+   * Set function for the material property multiplier switch.
+   */
   void setIncludesMaterialPropertyMultiplier(const bool new_setting)
   {
     _includes_material_multiplier = new_setting;
   }
 
 protected:
+  /**
+   * Determine the single sided face argument when evaluating a functor on a face.
+   * This is used to perform evaluations of material properties with the actual face values of
+   * their dependences, rather than interpolate the material property to the boundary.
+   * @param fi the FaceInfo for this face
+   * @param limiter_type the limiter type, to be specified if more than the default average
+   *        interpolation is required for the parameters of the functor
+   * @param correct_skewness whether to perform skew correction at the face
+   */
+  Moose::FaceArg singleSidedFaceArg(
+      const FaceInfo * fi = nullptr,
+      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+      bool correct_skewness = false) const;
+
   /// Thread id
   THREAD_ID _tid;
 
@@ -108,6 +160,7 @@ protected:
   /// Reference to the ruling finite volume problem
   FVProblemBase & _fv_problem;
 
+  /// Pointer to the linear finite volume variable object
   MooseLinearVariableFV<Real> * _var;
 
   /// Reference to SystemBase

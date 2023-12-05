@@ -48,13 +48,13 @@
     type = LinearFVDirichletBC
     variable = u
     boundary = "left"
-    value = 1.0
+    functor = 1.0
   []
   [right_dir]
     type = LinearFVDirichletBC
     variable = u
     boundary = "right"
-    value = 2.0
+    functor = 2.0
   []
 []
 
