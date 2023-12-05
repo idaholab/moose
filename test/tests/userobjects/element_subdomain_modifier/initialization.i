@@ -31,7 +31,7 @@
     active_subdomains = 0
     initialize_variables = 'u v w s'
     initialization_strategy = 'IC NEAREST CONSTANT CONSTANT'
-    initialization_constant = '0.213 -0.12' # There are two variables with initialization_strategy==CONSTANT, so we need to constants here. 
+    initialization_constant = '0.213 -0.12' # There are two variables with initialization_strategy==CONSTANT, so we need to constants here.
     moving_boundary_name = moving_boundary
     execute_on = 'TIMESTEP_BEGIN'
   []
