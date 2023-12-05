@@ -65,6 +65,12 @@ ThermochimicaDataBase<is_nodal>::validParams()
   return params;
 }
 
+void
+ThermochimicaDataBase_handler(int /*signum*/)
+{
+  exit(0);
+}
+
 template <bool is_nodal>
 ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & parameters)
   : ThermochimicaDataBaseParent<is_nodal>(parameters),
@@ -185,6 +191,8 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
   {
     // here we are in the child process
     _socket = sockets[0];
+    // clean exit upon SIGTERM (mainly for Civet code coverage)
+    signal(SIGTERM, ThermochimicaDataBase_handler);
     while (true)
       server();
   }
