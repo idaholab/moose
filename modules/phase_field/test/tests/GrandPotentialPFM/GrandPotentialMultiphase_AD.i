@@ -211,7 +211,7 @@
     args = 'w'
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
-    function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
+    expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
   []
   [omegab]
@@ -219,7 +219,7 @@
     args = 'w'
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
-    function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
+    expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
   []
   [rhoa]
@@ -227,7 +227,7 @@
     args = 'w'
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
-    function = 'w/Vm^2/ka + caeq/Vm'
+    expression = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
   []
   [rhob]
@@ -235,7 +235,7 @@
     args = 'w'
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
-    function = 'w/Vm^2/kb + cbeq/Vm'
+    expression = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
   []
   [const]
@@ -247,7 +247,7 @@
     type = ADDerivativeParsedMaterial
     f_name = Dchi
     material_property_names = 'D chi'
-    function = 'D*chi'
+    expression = 'D*chi'
     derivative_order = 2
   []
 []

@@ -1,6 +1,6 @@
 # This is an example of implementation of the multi-phase, multi-order parameter
 # grand potential based phase-field model described in Phys. Rev. E, 98, 023309
-# (2019). It includes 3 phases with 1 grain of each phase.
+# (2018). It includes 3 phases with 1 grain of each phase.
 # This is a revised version of the model that eliminates small variations in mass
 # that have been observed with the original formulation. In this version, rather
 # than evolving the chemical potential as a field variable, we evolve the composition

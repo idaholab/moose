@@ -40,7 +40,6 @@ protected:
 
   GenericReal<is_ad> computeFg(); /// gradient energy term
 
-  // using GenericKernel<is_ad>::_op_num;
   using GenericKernel<is_ad>::_qp;
   using GenericKernel<is_ad>::_i;
   using GenericKernel<is_ad>::_grad_u;
