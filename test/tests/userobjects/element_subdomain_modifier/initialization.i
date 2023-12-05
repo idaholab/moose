@@ -128,8 +128,8 @@
 
 [Executioner]
   type = Transient
-  dt = 0.2
-  end_time = 1.4
+  dt = 0.02
+  end_time = 0.2
   nl_abs_tol = 1e-12
 []
 

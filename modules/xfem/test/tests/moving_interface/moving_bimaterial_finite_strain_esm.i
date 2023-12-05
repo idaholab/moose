@@ -20,7 +20,8 @@
   [esm]
     type = CutElementSubdomainModifier
     geometric_cut_userobject = level_set_cut_uo
-    apply_initial_conditions = false
+    initialize_variables = 'disp_x disp_y'
+    initialization_strategy = 'NEAREST'
   []
 []
 
