@@ -422,7 +422,7 @@ ExplicitDynamicsContactConstraint::computeQpResidual(Moose::ConstraintType type)
   switch (type)
   {
     case Moose::Secondary:
-      return _test_secondary[_i][_qp] * 0.0;
+      return _test_secondary[_i][_qp] * resid;
 
     case Moose::Primary:
       return _test_primary[_i][_qp] * -resid;
