@@ -31,14 +31,16 @@ InterpolatedStatefulMaterialTempl<T>::InterpolatedStatefulMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _old_state(coupledValuesOld("old_state")),
-    _older_state(coupledValuesOld("old_state")), // older is missing
+    _older_state(coupledValuesOlder("old_state")),
     _size(Moose::SerialAccess<T>::size()),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
     _prop_old(declareProperty<T>(_prop_name + "_interpolated_old")),
     _prop_older(declareProperty<T>(_prop_name + "_interpolated_older"))
 {
   if (_old_state.size() != _size)
-    paramError("old_state", "Wrong number of compoet AuxVariables passed in.");
+    paramError("old_state", "Wrong number of component AuxVariables passed in.");
+  mooseAssert(_old_state.size() == _older_state.size(),
+              "Internal error. Old and older coupled variable vectors should have the same size.");
 }
 
 template <typename T>
