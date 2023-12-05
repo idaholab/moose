@@ -22,5 +22,6 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-  const Real _coeff;
+  /// The functor for the reaction coefficient
+  const Moose::Functor<Real> & _coefficient;
 };

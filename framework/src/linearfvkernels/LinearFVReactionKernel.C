@@ -17,19 +17,21 @@ InputParameters
 LinearFVReactionKernel::validParams()
 {
   InputParameters params = ElementalLinearFVKernel::validParams();
-  params.addParam<Real>("coeff", 1.0, "The reaction coefficient.");
+  params.addParam<MooseFunctorName>("coeff", 1.0, "The reaction coefficient.");
   return params;
 }
 
 LinearFVReactionKernel::LinearFVReactionKernel(const InputParameters & params)
-  : ElementalLinearFVKernel(params), _coeff(getParam<Real>("coeff"))
+  : ElementalLinearFVKernel(params), _coefficient(getFunctor<Real>("coeff"))
 {
 }
 
 Real
 LinearFVReactionKernel::computeMatrixContribution()
 {
-  return _coeff * _current_elem_info->volume();
+  const auto elem_arg = makeElemArg(_current_elem_info->elem());
+  return _coefficient(elem_arg, determineState()) * _current_elem_info->volume() *
+         _current_elem_info->coordFactor();
 }
 
 Real

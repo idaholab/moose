@@ -22,7 +22,6 @@
   [advection]
     type = LinearFVAdvectionKernel
     variable = u
-    density = 1.3
     velocity = "0.5 0 0"
     advected_interp_method = average
   []
@@ -45,13 +44,13 @@
 
 [LinearFVBCs]
   [left_dir]
-    type = LinearFVDirichletBC
+    type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "left"
     functor = 1.0
   []
   [right_dir]
-    type = LinearFVDirichletBC
+    type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "right"
     functor = 2.0

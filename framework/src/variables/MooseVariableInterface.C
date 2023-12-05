@@ -68,9 +68,8 @@ MooseLinearVariableFV<T> *
 MooseVariableInterface<T>::mooseLinearVariableFV() const
 {
   if (!_linear_fv_variable)
-    mooseError("_linear_fv_variable is null in ",
-               _moose_object.name(),
-               ". Is your variable a MooseLinearVariableFV?");
+    mooseError(
+        "The variable defined in ", _moose_object.name(), " is not a MooseLinearVariableFV!");
   return _linear_fv_variable;
 }
 

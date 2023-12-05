@@ -18,16 +18,14 @@ InputParameters
 LinearFVAdvectionKernel::validParams()
 {
   InputParameters params = FluxLinearFVKernel::validParams();
-  params.addRequiredParam<Real>("density", "Constant density for advected quantity multiplication");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
 
 LinearFVAdvectionKernel::LinearFVAdvectionKernel(const InputParameters & params)
-  : FluxLinearFVKernel(params),
-    _density(getParam<Real>("density")),
-    _velocity(getParam<RealVectorValue>("velocity"))
+  : FluxLinearFVKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
+
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 }
@@ -37,7 +35,7 @@ LinearFVAdvectionKernel::computeElemMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.first * _density * (_velocity * _current_face_info->normal()) *
+  return interp_coeffs.first * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
@@ -46,7 +44,7 @@ LinearFVAdvectionKernel::computeNeighborMatrixContribution()
 {
   const auto interp_coeffs =
       interpCoeffs(_advected_interp_method, *_current_face_info, true, _velocity);
-  return interp_coeffs.second * _density * (_velocity * _current_face_info->normal()) *
+  return interp_coeffs.second * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
@@ -72,7 +70,7 @@ LinearFVAdvectionKernel::computeBoundaryMatrixContribution()
   auto value_contrib =
       boundary_condition->computeBoundaryValueMatrixContribution(_current_face_info);
 
-  return value_contrib * _density * (_velocity * _current_face_info->normal()) *
+  return value_contrib * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
@@ -86,6 +84,6 @@ LinearFVAdvectionKernel::computeBoundaryRHSContribution()
       _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
   auto value_contrib = boundary_condition->computeBoundaryValueRHSContribution(_current_face_info);
 
-  return -value_contrib * _density * (_velocity * _current_face_info->normal()) *
+  return -value_contrib * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }

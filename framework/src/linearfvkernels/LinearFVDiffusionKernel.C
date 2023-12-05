@@ -18,27 +18,29 @@ InputParameters
 LinearFVDiffusionKernel::validParams()
 {
   InputParameters params = FluxLinearFVKernel::validParams();
-  params.addParam<Real>("diffusion_coeff", 1.0, "The reaction coefficient.");
+  params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The reaction coefficient.");
   return params;
 }
 
 LinearFVDiffusionKernel::LinearFVDiffusionKernel(const InputParameters & params)
-  : FluxLinearFVKernel(params), _diffusion_coeff(getParam<Real>("diffusion_coeff"))
+  : FluxLinearFVKernel(params), _diffusion_coeff(getFunctor<Real>("diffusion_coeff"))
 {
 }
 
 Real
 LinearFVDiffusionKernel::computeElemMatrixContribution()
 {
-  return _diffusion_coeff / _current_face_info->dCNMag() * _current_face_info->faceArea() *
-         _current_face_info->faceCoord();
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return _diffusion_coeff(face_arg, determineState()) / _current_face_info->dCNMag() *
+         _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
 Real
 LinearFVDiffusionKernel::computeNeighborMatrixContribution()
 {
-  return -_diffusion_coeff / _current_face_info->dCNMag() * _current_face_info->faceArea() *
-         _current_face_info->faceCoord();
+  const auto face_arg = makeCDFace(*_current_face_info);
+  return -_diffusion_coeff(face_arg, determineState()) / _current_face_info->dCNMag() *
+         _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
 Real
@@ -62,9 +64,11 @@ LinearFVDiffusionKernel::computeBoundaryMatrixContribution()
       _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
   auto grad_contrib =
       boundary_condition->computeBoundaryGradientMatrixContribution(_current_face_info);
-
   if (!boundary_condition->includesMaterialPropertyMultiplier())
-    grad_contrib *= _diffusion_coeff;
+  {
+    const auto face_arg = singleSidedFaceArg(_current_face_info);
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+  }
 
   return grad_contrib;
 }
@@ -79,9 +83,11 @@ LinearFVDiffusionKernel::computeBoundaryRHSContribution()
       _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
   auto grad_contrib =
       boundary_condition->computeBoundaryGradientRHSContribution(_current_face_info);
-
   if (!boundary_condition->includesMaterialPropertyMultiplier())
-    grad_contrib *= _diffusion_coeff;
+  {
+    const auto face_arg = singleSidedFaceArg(_current_face_info);
+    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+  }
 
   return grad_contrib;
 }

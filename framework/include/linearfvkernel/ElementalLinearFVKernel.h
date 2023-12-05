@@ -20,19 +20,22 @@ public:
   static InputParameters validParams();
   ElementalLinearFVKernel(const InputParameters & params);
 
-  /// Compute this object's contribution to the residual
+  /// Compute this object's contribution to the system matrix
   virtual void addMatrixContribution() override;
 
-  /// Compute this object's contribution to the diagonal Jacobian entries
+  /// Compute this object's contribution to the right hand side
   virtual void addRightHandSideContribution() override;
 
   /// Set current element
   void setCurrentElemInfo(const ElemInfo * elem_info) { _current_elem_info = elem_info; }
 
+  /// Computes the system matrix contribution for the current element
   virtual Real computeMatrixContribution() = 0;
 
+  /// Computes the right hand side contribution for the current element
   virtual Real computeRightHandSideContribution() = 0;
 
 protected:
+  /// Pointer to the current element info
   const ElemInfo * _current_elem_info;
 };

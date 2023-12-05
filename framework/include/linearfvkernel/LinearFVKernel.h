@@ -21,7 +21,7 @@ class SubProblem;
 
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
-                       public ADFunctorInterface,
+                       public NonADFunctorInterface,
                        public MooseVariableInterface<Real>,
                        public MooseVariableDependencyInterface
 {
@@ -35,5 +35,6 @@ public:
   virtual const MooseLinearVariableFV<Real> & variable() const override { return *_var; }
 
 protected:
+  /// Pointer to the linear finite volume variable
   MooseLinearVariableFV<Real> * _var;
 };

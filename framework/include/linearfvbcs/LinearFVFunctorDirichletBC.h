@@ -15,7 +15,7 @@
  * Class implementing a Dirichlet boundary condition for linear finite
  * volume variables
  */
-class LinearFVDirichletBC : public LinearFVBoundaryCondition
+class LinearFVFunctorDirichletBC : public LinearFVBoundaryCondition
 {
 public:
   /**
@@ -23,7 +23,7 @@ public:
    * @param parameters The InputParameters for the object
    * @param nodal Whether this BC is applied to nodes or not
    */
-  LinearFVDirichletBC(const InputParameters & parameters);
+  LinearFVFunctorDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -43,6 +43,11 @@ public:
   computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const override;
 
 protected:
+
+  /// Compute the distance for the gradient approximation. We need this because
+  /// the sideset associated within this boundary condition might be within the mesh.
+  Real computeCellToFaceDistance(const FaceInfo * const face_info) const;
+
   /// The functor for this BC (can be value, function, etc)
   const Moose::Functor<Real> & _functor;
 };

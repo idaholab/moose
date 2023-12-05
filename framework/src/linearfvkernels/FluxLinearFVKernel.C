@@ -21,6 +21,7 @@ FluxLinearFVKernel::validParams()
 
 FluxLinearFVKernel::FluxLinearFVKernel(const InputParameters & params)
   : LinearFVKernel(params),
+    FaceArgProducerInterface(),
     _current_face_info(nullptr),
     _current_face_type(FaceInfo::VarFaceNeighbors::NEITHER)
 {
@@ -38,12 +39,6 @@ FluxLinearFVKernel::addMatrixContribution()
 
     const auto elem_matrix_contribution = computeElemMatrixContribution();
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
-
-    // std::cout << " Internal face "
-    //           << " adding to elem " << elem_matrix_contribution << " adding to neighbor "
-    //           << neighbor_matrix_contribution << " adding to neighbor offdiag "
-    //           << -elem_matrix_contribution << " adding to neigbor diag "
-    //           << -neighbor_matrix_contribution << std::endl;
 
     (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, elem_matrix_contribution);
     (*_linear_system.matrix).add(dof_id_elem, dof_id_neighbor, neighbor_matrix_contribution);
@@ -104,4 +99,24 @@ FluxLinearFVKernel::addRightHandSideContribution()
       (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
     }
   }
+}
+
+bool
+FluxLinearFVKernel::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
+{
+  const auto ft = fi.faceType(std::make_pair(_var->number(), _var->sys().number()));
+  if (fi_elem_side)
+    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
+  else
+    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
+}
+
+Moose::FaceArg
+FluxLinearFVKernel::singleSidedFaceArg(const FaceInfo * fi,
+                                       const Moose::FV::LimiterType limiter_type,
+                                       const bool correct_skewness) const
+{
+  mooseAssert(fi, "FaceInfo should not be null!");
+
+  return makeFace(*fi, limiter_type, true, correct_skewness);
 }

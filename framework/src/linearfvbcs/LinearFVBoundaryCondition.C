@@ -12,18 +12,6 @@
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 
-namespace
-{
-SystemBase &
-changeSystem(const InputParameters & params_in, MooseVariableBase & var)
-{
-  SystemBase & var_sys = var.sys();
-  auto & params = const_cast<InputParameters &>(params_in);
-  params.set<SystemBase *>("_sys") = &var_sys;
-  return var_sys;
-}
-}
-
 InputParameters
 LinearFVBoundaryCondition::validParams()
 {
@@ -31,9 +19,9 @@ LinearFVBoundaryCondition::validParams()
   params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
   params += TaggingInterface::validParams();
-  params += ADFunctorInterface::validParams();
+  params += NonADFunctorInterface::validParams();
 
-  params.addRequiredParam<NonlinearVariableName>(
+  params.addRequiredParam<LinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.declareControllable("enable");
   params.registerBase("LinearFVBoundaryCondition");
@@ -60,20 +48,35 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
                            Moose::VarKindType::VAR_LINEAR,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
-    ADFunctorInterface(this),
+    NonADFunctorInterface(this),
+    FaceArgProducerInterface(),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mesh(_subproblem.mesh()),
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
     _var(mooseLinearVariableFV()),
-    _sys(changeSystem(parameters, *_var)),
+    _sys(_var->sys()),
     _includes_material_multiplier(false)
 {
-  if (!_var)
-    paramError("variable",
-               "The variable defined for boundary condition ",
-               name(),
-               " is not derived from MooseLinearVariableFV!");
-
   addMooseVariableDependency(_var);
+}
+
+bool
+LinearFVBoundaryCondition::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
+{
+  const auto ft = fi.faceType(std::make_pair(_var->number(), _var->sys().number()));
+  if (fi_elem_side)
+    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
+  else
+    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
+}
+
+Moose::FaceArg
+LinearFVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
+                                              const Moose::FV::LimiterType limiter_type,
+                                              const bool correct_skewness) const
+{
+  mooseAssert(fi, "FaceInfo should not be null!");
+
+  return makeFace(*fi, limiter_type, true, correct_skewness);
 }

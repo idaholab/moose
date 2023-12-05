@@ -30,8 +30,7 @@ public:
   virtual Real computeBoundaryRHSContribution() override;
 
 protected:
-  const Real _density;
-
+  /// Constant advecting velocity vector
   const RealVectorValue _velocity;
 
   /// The interpolation method to use for the advected quantity

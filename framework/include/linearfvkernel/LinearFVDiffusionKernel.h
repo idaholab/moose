@@ -30,5 +30,6 @@ public:
   virtual Real computeBoundaryRHSContribution() override;
 
 protected:
-  const Real _diffusion_coeff;
+  /// The functor for the diffusion coefficient
+  const Moose::Functor<Real> & _diffusion_coeff;
 };

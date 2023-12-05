@@ -27,7 +27,7 @@ LinearFVKernel::validParams()
 {
   InputParameters params = LinearSystemContributionObject::validParams();
   params += BlockRestrictable::validParams();
-  params += ADFunctorInterface::validParams();
+  params += NonADFunctorInterface::validParams();
 
   params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
   params.addParam<bool>("use_point_neighbors",
@@ -57,7 +57,7 @@ LinearFVKernel::validParams()
 LinearFVKernel::LinearFVKernel(const InputParameters & params)
   : LinearSystemContributionObject(params),
     BlockRestrictable(this),
-    ADFunctorInterface(this),
+    NonADFunctorInterface(this),
     MooseVariableInterface(this,
                            false,
                            "variable",
