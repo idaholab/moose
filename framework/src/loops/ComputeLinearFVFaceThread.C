@@ -10,7 +10,7 @@
 #include "ComputeLinearFVFaceThread.h"
 #include "LinearSystem.h"
 #include "LinearFVKernel.h"
-#include "FluxLinearFVKernel.h"
+#include "LinearFVFluxKernel.h"
 
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                                                      const unsigned int linear_system_num,
@@ -33,11 +33,11 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  std::vector<FluxLinearFVKernel *> kernels;
+  std::vector<LinearFVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSysNum>(_fe_problem.getLinearSystem(_linear_system_number).number())
-      .template condition<AttribSystem>("FluxLinearFVKernel")
+      .template condition<AttribSystem>("LinearFVFluxKernel")
       .queryInto(kernels);
 
   // Iterate over all the elements in the range

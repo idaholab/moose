@@ -14,11 +14,11 @@
 #include "MooseVariableFV.h"
 #include "MooseVariableInterface.h"
 
-class ElementalLinearFVKernel : public LinearFVKernel
+class LinearFVElementalKernel : public LinearFVKernel
 {
 public:
   static InputParameters validParams();
-  ElementalLinearFVKernel(const InputParameters & params);
+  LinearFVElementalKernel(const InputParameters & params);
 
   /// Compute this object's contribution to the system matrix
   virtual void addMatrixContribution() override;

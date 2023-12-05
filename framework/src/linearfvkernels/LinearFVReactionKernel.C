@@ -16,13 +16,13 @@ registerMooseObject("MooseApp", LinearFVReactionKernel);
 InputParameters
 LinearFVReactionKernel::validParams()
 {
-  InputParameters params = ElementalLinearFVKernel::validParams();
+  InputParameters params = LinearFVElementalKernel::validParams();
   params.addParam<MooseFunctorName>("coeff", 1.0, "The reaction coefficient.");
   return params;
 }
 
 LinearFVReactionKernel::LinearFVReactionKernel(const InputParameters & params)
-  : ElementalLinearFVKernel(params), _coefficient(getFunctor<Real>("coeff"))
+  : LinearFVElementalKernel(params), _coefficient(getFunctor<Real>("coeff"))
 {
 }
 

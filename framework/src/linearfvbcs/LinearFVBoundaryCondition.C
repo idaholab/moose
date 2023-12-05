@@ -77,6 +77,5 @@ LinearFVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
                                               const bool correct_skewness) const
 {
   mooseAssert(fi, "FaceInfo should not be null!");
-
   return makeFace(*fi, limiter_type, true, correct_skewness);
 }

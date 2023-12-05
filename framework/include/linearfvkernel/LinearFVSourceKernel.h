@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ElementalLinearFVKernel.h"
+#include "LinearFVElementalKernel.h"
 
-class LinearFVSourceKernel : public ElementalLinearFVKernel
+class LinearFVSourceKernel : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();
@@ -22,5 +22,6 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-  const Real _source_density;
+  /// The functor for the source density
+  const Moose::Functor<Real> & _source_density;
 };

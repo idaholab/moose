@@ -15,11 +15,11 @@
 #include "MooseVariableInterface.h"
 #include "FaceArgInterface.h"
 
-class FluxLinearFVKernel : public LinearFVKernel, public FaceArgProducerInterface
+class LinearFVFluxKernel : public LinearFVKernel, public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
-  FluxLinearFVKernel(const InputParameters & params);
+  LinearFVFluxKernel(const InputParameters & params);
 
   /// Compute this object's contribution to the system matrix
   virtual void addMatrixContribution() override;
@@ -51,23 +51,21 @@ public:
   virtual Real computeNeighborRightHandSideContribution() = 0;
 
   /// Computes the system matrix contribution from a boundary face
-  virtual Real computeBoundaryMatrixContribution() = 0;
+  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc) = 0;
 
-  /// Computes the righth and side contribution from a boundary face
-  virtual Real computeBoundaryRHSContribution() = 0;
+  /// Computes the right hand side contribution from a boundary face
+  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) = 0;
 
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
-   * This is used to perform evaluations of material properties with the actual face values of
-   * their dependences, rather than interpolate the material property to the boundary.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor
    * @param correct_skewness whether to perform skew correction at the face
    */
   Moose::FaceArg singleSidedFaceArg(
-      const FaceInfo * fi = nullptr,
+      const FaceInfo * fi,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
 

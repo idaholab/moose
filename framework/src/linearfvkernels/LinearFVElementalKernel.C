@@ -7,32 +7,32 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementalLinearFVKernel.h"
+#include "LinearFVElementalKernel.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 
 InputParameters
-ElementalLinearFVKernel::validParams()
+LinearFVElementalKernel::validParams()
 {
   InputParameters params = LinearFVKernel::validParams();
-  params.registerSystemAttributeName("ElementalLinearFVKernel");
+  params.registerSystemAttributeName("LinearFVElementalKernel");
   return params;
 }
 
-ElementalLinearFVKernel::ElementalLinearFVKernel(const InputParameters & params)
+LinearFVElementalKernel::LinearFVElementalKernel(const InputParameters & params)
   : LinearFVKernel(params), _current_elem_info(nullptr)
 {
 }
 
 void
-ElementalLinearFVKernel::addMatrixContribution()
+LinearFVElementalKernel::addMatrixContribution()
 {
   const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.matrix).add(dof_id, dof_id, computeMatrixContribution());
 }
 
 void
-ElementalLinearFVKernel::addRightHandSideContribution()
+LinearFVElementalKernel::addRightHandSideContribution()
 {
   const auto dof_id = _current_elem_info->dofIndices()[_var->sys().number()][_var->number()];
   (*_linear_system.rhs).add(dof_id, computeRightHandSideContribution());

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ElementalLinearFVKernel.h"
+#include "LinearFVElementalKernel.h"
 
-class LinearFVReactionKernel : public ElementalLinearFVKernel
+class LinearFVReactionKernel : public LinearFVElementalKernel
 {
 public:
   static InputParameters validParams();

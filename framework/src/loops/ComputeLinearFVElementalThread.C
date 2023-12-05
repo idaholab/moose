@@ -10,7 +10,7 @@
 #include "ComputeLinearFVElementalThread.h"
 #include "LinearSystem.h"
 #include "LinearFVKernel.h"
-#include "ElementalLinearFVKernel.h"
+#include "LinearFVElementalKernel.h"
 
 ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
                                                                const unsigned int linear_system_num,
@@ -33,11 +33,11 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  std::vector<ElementalLinearFVKernel *> kernels;
+  std::vector<LinearFVElementalKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSysNum>(_fe_problem.getLinearSystem(_linear_system_number).number())
-      .template condition<AttribSystem>("ElementalLinearFVKernel")
+      .template condition<AttribSystem>("LinearFVElementalKernel")
       .queryInto(kernels);
 
   // Iterate over all the elements in the range

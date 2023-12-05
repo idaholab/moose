@@ -27,26 +27,23 @@ public:
 
   static InputParameters validParams();
 
-  virtual Real computeBoundaryValue(const FaceInfo * const face_info) override;
+  virtual Real computeBoundaryValue() override;
 
-  virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) override;
+  virtual Real computeBoundaryNormalGradient() override;
 
-  virtual Real
-  computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) const override;
+  virtual Real computeBoundaryValueMatrixContribution() const override;
 
-  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) const override;
+  virtual Real computeBoundaryValueRHSContribution() const override;
 
-  virtual Real
-  computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const override;
+  virtual Real computeBoundaryGradientMatrixContribution() const override;
 
-  virtual Real
-  computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const override;
+  virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
 
   /// Compute the distance for the gradient approximation. We need this because
   /// the sideset associated within this boundary condition might be within the mesh.
-  Real computeCellToFaceDistance(const FaceInfo * const face_info) const;
+  Real computeCellToFaceDistance() const;
 
   /// The functor for this BC (can be value, function, etc)
   const Moose::Functor<Real> & _functor;

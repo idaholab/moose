@@ -39,7 +39,7 @@ class SubProblem;
 class SystemBase;
 
 /**
- * Base class for creating new types of boundary conditions.
+ * Base class for creating new types of boundary conditions for linear FV systems.
  */
 class LinearFVBoundaryCondition : public MooseObject,
                                   public BoundaryRestrictableRequired,
@@ -62,7 +62,6 @@ public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
-   * @param nodal Whether this BC is applied to nodes or not
    */
   LinearFVBoundaryCondition(const InputParameters & parameters);
 
@@ -83,40 +82,39 @@ public:
    * Computes the boundary value of this object. This relies on the current solution field.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face
    */
-  virtual Real computeBoundaryValue(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryValue() = 0;
 
   /**
    * Computes the normal gradient (often used in diffusion terms) on the boundary.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
-  virtual Real computeBoundaryNormalGradient(const FaceInfo * const face_info) = 0;
+  virtual Real computeBoundaryNormalGradient() = 0;
 
   /**
    * Computes the boundary value's contribution to the linear system matrix.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
-  virtual Real computeBoundaryValueMatrixContribution(const FaceInfo * const face_info) const = 0;
+  virtual Real computeBoundaryValueMatrixContribution() const = 0;
 
   /**
    * Computes the boundary value's contribution to the linear system right hand side.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
-  virtual Real computeBoundaryValueRHSContribution(const FaceInfo * const face_info) const = 0;
+  virtual Real computeBoundaryValueRHSContribution() const = 0;
 
   /**
    * Computed the boundary gradient's contribution to the linear system matrix. Mostly used for
    * diffusion.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
-  virtual Real
-  computeBoundaryGradientMatrixContribution(const FaceInfo * const face_info) const = 0;
+  virtual Real computeBoundaryGradientMatrixContribution() const = 0;
 
   /**
    * Computed the boundary gradient's contribution to the linear system right hand side.
    * Mostly used for diffusion.
    * @param face_info Pointer to the FaceInfo object corresponding to the boundary face.
    */
-  virtual Real computeBoundaryGradientRHSContribution(const FaceInfo * const face_info) const = 0;
+  virtual Real computeBoundaryGradientRHSContribution() const = 0;
 
   /**
    * Check if the contributions to the right hand side and matrix already include the material
@@ -133,18 +131,26 @@ public:
     _includes_material_multiplier = new_setting;
   }
 
+  /// Set current face info
+  void setCurrentFaceInfo(const FaceInfo * face_info, const FaceInfo::VarFaceNeighbors face_type)
+  {
+    mooseAssert(
+        face_info,
+        "The face info pointer should not be null when passing to the LinearFVBoundaryCondition!");
+    _current_face_info = face_info;
+    _current_face_type = face_type;
+  }
+
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
-   * This is used to perform evaluations of material properties with the actual face values of
-   * their dependences, rather than interpolate the material property to the boundary.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor
    * @param correct_skewness whether to perform skew correction at the face
    */
   Moose::FaceArg singleSidedFaceArg(
-      const FaceInfo * fi = nullptr,
+      const FaceInfo * fi,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
 
@@ -168,4 +174,10 @@ protected:
 
   /// Boolean to indicate if the boundary condition includes the material property multipliers ot not
   bool _includes_material_multiplier;
+
+  /// Pointer to the face info we are operating on right now
+  const FaceInfo * _current_face_info;
+
+  /// Face ownership information for the current face
+  FaceInfo::VarFaceNeighbors _current_face_type;
 };

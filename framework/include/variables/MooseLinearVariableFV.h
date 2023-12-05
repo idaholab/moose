@@ -663,7 +663,7 @@ public:
                             const StateArg & state,
                             bool correct_skewness = false) const;
 
-  const LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id);
+  LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id);
 
 protected:
   /**
@@ -683,7 +683,9 @@ private:
   /// data
   mutable const Elem * _prev_elem;
 
-  std::unordered_map<BoundaryID, const LinearFVBoundaryCondition *> _boundary_id_to_bc;
+  /// Map for easily accessing the boundary conditions based on the boundary IDs.
+  /// We assume that each boundary has one boundary condition only.
+  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_id_to_bc;
 
 protected:
   /// A cache for storing gradients on elements

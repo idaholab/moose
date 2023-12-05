@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FluxLinearFVKernel.h"
+#include "LinearFVFluxKernel.h"
 
-class LinearFVAdvectionKernel : public FluxLinearFVKernel
+class LinearFVAdvectionKernel : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -25,9 +25,9 @@ public:
 
   virtual Real computeNeighborRightHandSideContribution() override;
 
-  virtual Real computeBoundaryMatrixContribution() override;
+  virtual Real computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc) override;
 
-  virtual Real computeBoundaryRHSContribution() override;
+  virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc) override;
 
 protected:
   /// Constant advecting velocity vector

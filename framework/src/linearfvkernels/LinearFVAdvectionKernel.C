@@ -17,14 +17,14 @@ registerMooseObject("MooseApp", LinearFVAdvectionKernel);
 InputParameters
 LinearFVAdvectionKernel::validParams()
 {
-  InputParameters params = FluxLinearFVKernel::validParams();
+  InputParameters params = LinearFVFluxKernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
 
 LinearFVAdvectionKernel::LinearFVAdvectionKernel(const InputParameters & params)
-  : FluxLinearFVKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
+  : LinearFVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
 
 {
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
@@ -61,29 +61,17 @@ LinearFVAdvectionKernel::computeNeighborRightHandSideContribution()
 }
 
 Real
-LinearFVAdvectionKernel::computeBoundaryMatrixContribution()
+LinearFVAdvectionKernel::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition * bc)
 {
-  mooseAssert(_current_face_info->boundaryIDs().size() == 1,
-              "We should only have one boundary on every face.");
-  const auto * boundary_condition =
-      _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-  auto value_contrib =
-      boundary_condition->computeBoundaryValueMatrixContribution(_current_face_info);
-
+  auto value_contrib = bc->computeBoundaryValueMatrixContribution();
   return value_contrib * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }
 
 Real
-LinearFVAdvectionKernel::computeBoundaryRHSContribution()
+LinearFVAdvectionKernel::computeBoundaryRHSContribution(const LinearFVBoundaryCondition * bc)
 {
-  mooseAssert(_current_face_info->boundaryIDs().size() == 1,
-              "We should only have one boundary on every face.");
-
-  const auto * boundary_condition =
-      _var->getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-  auto value_contrib = boundary_condition->computeBoundaryValueRHSContribution(_current_face_info);
-
+  auto value_contrib = bc->computeBoundaryValueRHSContribution();
   return -value_contrib * (_velocity * _current_face_info->normal()) *
          _current_face_info->faceArea() * _current_face_info->faceCoord();
 }

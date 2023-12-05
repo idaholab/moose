@@ -25,69 +25,60 @@ LinearFVFunctorDirichletBC::LinearFVFunctorDirichletBC(const InputParameters & p
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryValue(const FaceInfo * const face_info)
+LinearFVFunctorDirichletBC::computeBoundaryValue()
 {
-  return _functor(singleSidedFaceArg(face_info), determineState());
+  return _functor(singleSidedFaceArg(_current_face_info), determineState());
 }
 
 Real
-LinearFVFunctorDirichletBC::computeCellToFaceDistance(const FaceInfo * const face_info) const
+LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
 {
-  const auto is_on_mesh_boundary = face_info->neighborPtr();
+  const auto is_on_mesh_boundary = _current_face_info->neighborPtr();
   const auto defined_on_elem =
-      is_on_mesh_boundary
-          ? true
-          : (face_info->faceType(std::make_pair(_var->number(), _var->sys().number())) ==
-             FaceInfo::VarFaceNeighbors::ELEM);
+      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
   if (is_on_mesh_boundary)
-    return face_info->dCNMag();
+    return _current_face_info->dCNMag();
   else
-    return (face_info->faceCentroid() -
-            (defined_on_elem ? face_info->elemCentroid() : face_info->neighborCentroid()))
+    return (_current_face_info->faceCentroid() - (defined_on_elem
+                                                      ? _current_face_info->elemCentroid()
+                                                      : _current_face_info->neighborCentroid()))
         .norm();
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryNormalGradient(const FaceInfo * const face_info)
+LinearFVFunctorDirichletBC::computeBoundaryNormalGradient()
 {
-  const auto defined_on_elem =
-      face_info->faceType(std::make_pair(_var->number(), _var->sys().number())) ==
-      FaceInfo::VarFaceNeighbors::ELEM;
-
-  const auto elem_arg =
-      makeElemArg(defined_on_elem ? face_info->elemPtr() : face_info->neighborPtr());
-  Real distance = computeCellToFaceDistance(face_info);
-  return (_functor(singleSidedFaceArg(face_info), determineState()) -
+  const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                        ? _current_face_info->elemPtr()
+                                        : _current_face_info->neighborPtr());
+  const Real distance = computeCellToFaceDistance();
+  return (_functor(singleSidedFaceArg(_current_face_info), determineState()) -
           raw_value((*_var)(elem_arg, determineState()))) /
          distance;
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryValueMatrixContribution(
-    const FaceInfo * const /*face_info*/) const
+LinearFVFunctorDirichletBC::computeBoundaryValueMatrixContribution() const
 {
   return 0.0;
 }
 Real
-LinearFVFunctorDirichletBC::computeBoundaryValueRHSContribution(
-    const FaceInfo * const face_info) const
+LinearFVFunctorDirichletBC::computeBoundaryValueRHSContribution() const
 {
-  return _functor(singleSidedFaceArg(face_info), determineState());
+  return _functor(singleSidedFaceArg(_current_face_info), determineState());
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryGradientMatrixContribution(
-    const FaceInfo * const face_info) const
+LinearFVFunctorDirichletBC::computeBoundaryGradientMatrixContribution() const
 {
-  Real distance = computeCellToFaceDistance(face_info);
-  return face_info->faceArea() / distance;
+  const Real distance = computeCellToFaceDistance();
+  return _current_face_info->faceArea() / distance;
 }
 
 Real
-LinearFVFunctorDirichletBC::computeBoundaryGradientRHSContribution(
-    const FaceInfo * const face_info) const
+LinearFVFunctorDirichletBC::computeBoundaryGradientRHSContribution() const
 {
-  Real distance = computeCellToFaceDistance(face_info);
-  return _functor(singleSidedFaceArg(face_info), determineState()) * face_info->faceArea() /
-         distance;
+  const Real distance = computeCellToFaceDistance();
+  return _functor(singleSidedFaceArg(_current_face_info), determineState()) *
+         _current_face_info->faceArea() / distance;
 }

@@ -16,13 +16,13 @@ registerMooseObject("MooseApp", LinearFVSourceKernel);
 InputParameters
 LinearFVSourceKernel::validParams()
 {
-  InputParameters params = ElementalLinearFVKernel::validParams();
-  params.addParam<Real>("source_density", 1.0, "The source density.");
+  InputParameters params = LinearFVElementalKernel::validParams();
+  params.addParam<MooseFunctorName>("source_density", 1.0, "The source density.");
   return params;
 }
 
 LinearFVSourceKernel::LinearFVSourceKernel(const InputParameters & params)
-  : ElementalLinearFVKernel(params), _source_density(getParam<Real>("source_density"))
+  : LinearFVElementalKernel(params), _source_density(getFunctor<Real>("source_density"))
 {
 }
 
@@ -35,5 +35,6 @@ LinearFVSourceKernel::computeMatrixContribution()
 Real
 LinearFVSourceKernel::computeRightHandSideContribution()
 {
-  return _source_density * _current_elem_info->volume();
+  const auto elem_arg = makeElemArg(_current_elem_info->elem());
+  return _source_density(elem_arg, determineState()) * _current_elem_info->volume();
 }

@@ -567,7 +567,7 @@ MooseLinearVariableFV<OutputType>::cacheBoundaryBCMap()
 }
 
 template <typename OutputType>
-const LinearFVBoundaryCondition *
+LinearFVBoundaryCondition *
 MooseLinearVariableFV<OutputType>::getBoundaryCondition(const BoundaryID bd_id)
 {
   const auto iter = _boundary_id_to_bc.find(bd_id);
