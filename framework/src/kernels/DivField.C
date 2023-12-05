@@ -16,7 +16,7 @@ InputParameters
 DivField::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription("Takes the divergence of a vector field, optionally"
+  params.addClassDescription("Takes the divergence of a vector field, optionally "
                              "scaled by a constant scalar coefficient.");
   params.addRequiredCoupledVar("coupled_vector_variable", "The vector field");
   params.addParam<Real>("coeff", 1.0, "The constant coefficient");

@@ -8,7 +8,7 @@
 condition on the divergence of a nonlinear vector variable $\vec{u}$ by setting
 
 \begin{equation}
-  R_i(\vec{u}) = p($\vec{\psi_i}$ \cdot \hat{n}, (\vec{u} - \vec{u}_0) \cdot \hat{n})
+  R_i(\vec{u}) = p(\vec{\psi_i} \cdot \hat{n}, (\vec{u} - \vec{u}_0) \cdot \hat{n})
 \end{equation}
 
 where $p$ is a scalar defining the penalty value, $\vec{\psi_i}$ the test

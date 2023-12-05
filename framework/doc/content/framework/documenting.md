@@ -159,7 +159,7 @@ values are overridden.
     type = CSVDiff
     input = one.i
     csvdiff = one_out.csv
-    requirement = "The system shall must compute a value."
+    requirement = "The system shall compute a value."
   []
   [two]
     type = RunException
@@ -182,27 +182,27 @@ and each of the details are a complete sentence when combined, as shown in the f
   [group] # this is an arbitrary name that is not used
     issues = "#1235"
     design = "MyObject.md"
-    requirement = "The system shall solve the Laplace equation in:"
+    requirement = "The system shall solve the Laplace equation in: "
     [1D]
       type = Exodiff
       input = input_1D.i
       exodiff = input_1D_out.e
 
-      detail = "in 1D,"
+      detail = "1D, "
     []
     [2D]
       type = Exodiff
       input = input_2D.i
       exodiff = input_2D_out.e
 
-      detail = "in 2D, and"
+      detail = "2D, and "
     []
     [3D]
       type = Exodiff
       input = input_3D.i
       exodiff = input_3D_out.e
 
-      detail = "in 3D."
+      detail = "3D."
     []
   []
 []
