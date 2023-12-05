@@ -23,7 +23,7 @@ def effS(S1_res,S): #this function calculate the effective saturation
 
 
 def brook_corey_func(lamda,Pe,S1_ref): #This function return a list of 2 listes, the first one is for wet phase and second is for non wet
-  Seff=effS(S1_ref,np.linspace(0.1,1,100))
+  Seff=effS(S1_ref,np.linspace(0,1,100))
   Pc=Pe*Seff**(-1/lamda)
 
   return Pc
@@ -59,45 +59,47 @@ vangen3 = np.genfromtxt('../../../../../../test/tests/capillary_pressure/vangenu
 
 
 S=np.linspace(0,1,100)
-ylim=[0, 1e7]
+ylim=[0, 2e6]
 
 plt.figure(0)
 # Brook Corey
 brook_corey_a1=brook_corey_func(2,1e5,0.1) #analytical
 brook_corey_a2=brook_corey_func(2,1e5,0.1) #analytical
-plt.plot(S, brook_corey_a1 ,'g' , label = 'Pc (Analytical)')
-plt.plot(brook_corey1['s0aux'], np.array(brook_corey1['p1aux']) - np.array((brook_corey1['p0aux'])),'og' , markevery=15, label = 'Pc (Moose) (log_extension off)')
-plt.plot(brook_corey2['s0aux'], np.array(brook_corey2['p1aux']) - np.array((brook_corey2['p0aux'])),'ob' , markevery=20, label = 'Pc (Moose) (log_extension on)')
+plt.semilogy(S, brook_corey_a1 ,'g' , label = 'Pc (Analytical)')
+plt.semilogy(brook_corey1['s0aux'], np.array(brook_corey1['p1aux']) - np.array((brook_corey1['p0aux'])),'og' , markevery=15, label = 'Pc (Moose) (log_extension off)')
+plt.semilogy(brook_corey2['s0aux'], np.array(brook_corey2['p1aux']) - np.array((brook_corey2['p0aux'])),'ob' , markevery=20, label = 'Pc (Moose) (log_extension on)')
 
 plt.xlabel('Phase 0 saturation (-)')
 plt.ylabel('Capillary Pressure (Pa)')
 plt.legend()
 plt.ylim(ylim)
-plt.title('Brooks-Corey Cappilary pressure: $\lambda =2, P_{e}=1*10^{5}Pa, S_{1,Res}=0.1$')
+plt.title('Brooks-Corey Capillary pressure: $\lambda =2, P_{e}=1*10^{5}Pa, S_{1,Res}=0.1$')
 plt.tight_layout()
 plt.savefig("brook_corey.png")
 
 
 plt.figure(1)
-ylim=[0, 5e6]
-xlim=[0.13,1]
+ylim=[1e3, 5e8]
+xlim=[-0.001,1]
 # Vangenuchten 1
 vanGen_a1=vanGen_func(0.5,1e-5,0.1)
 
-plt.plot(S, vanGen_a1 ,'b' , label = 'Pc m=0.5')
+plt.semilogy(S, vanGen_a1 ,'b' , label = 'Pc m=0.5')
 
 vanGen_a3=vanGen_func(0.5,1e-5,0.1,0.8)
-plt.plot(S, vanGen_a3 ,'r' , label = 'Pc m=0.5, scale factor=0.8')
+plt.semilogy(S, vanGen_a3 ,'r' , label = 'Pc m=0.5, scale factor=0.8')
 
 
-plt.plot(vangen1['s0aux'], np.array(vangen1['p1aux']) - np.array((vangen1['p0aux'])),'bo', markevery=40, label = 'Pc m=0.5 (MOOSE) (log_extension off)')
-plt.plot(vangen2['s0aux'], np.array(vangen2['p1aux']) - np.array((vangen2['p0aux'])),'go', markevery=25, label = 'Pc m=0.5 (MOOSE) (log_extension on)')
-plt.plot(vangen3['s0aux'], np.array(vangen3['p1aux']) - np.array((vangen3['p0aux'])),'ro', markevery=60, label = 'Pc m=0.5, scale factor=0.8 (MOOSE)')
+plt.semilogy(vangen1['s0aux'], np.array(vangen1['p1aux']) - np.array((vangen1['p0aux'])),'bo', markevery=40, label = 'Pc m=0.5 (MOOSE) (log_extension off)')
+plt.semilogy(vangen2['s0aux'], np.array(vangen2['p1aux']) - np.array((vangen2['p0aux'])),'go', markevery=25, label = 'Pc m=0.5 (MOOSE) (log_extension on)')
+plt.semilogy(vangen3['s0aux'], np.array(vangen3['p1aux']) - np.array((vangen3['p0aux'])),'ro', markevery=60, label = 'Pc m=0.5, scale factor=0.8 (MOOSE)')
 plt.xlabel('Phase 0 saturation (-)')
 plt.ylabel('Capillary Pressure (Pa)')
 plt.ylim(ylim)
 plt.xlim(xlim)
 plt.legend()
-plt.title('van Genuchten Cappilary pressure: $ \\alpha= 1*10^{-5}, S_{1,Res}=0.1$',fontsize=11)
+plt.title('van Genuchten Capillary pressure: $ \\alpha= 1*10^{-5}, S_{1,Res}=0.1$',fontsize=11)
 plt.tight_layout()
 plt.savefig("vangen.png")
+
+print('Image has been printed')

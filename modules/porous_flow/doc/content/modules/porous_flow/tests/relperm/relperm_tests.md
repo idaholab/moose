@@ -1,9 +1,20 @@
 # Relative permeability test descriptions
 
-#### The detail documentation of the implementation of this code packet can be founded in [here](porous_flow/relative_permeability.md).
+The details of the capillary pressure curve implementations can be found in [here](porous_flow/relative_permeability.md).
 
 
 ## Brooks-Corey
+
+The [!cite](brookscorey1966) relative permeability model is an extension of the previous  [!cite](corey1954) formulation where the relative permeability of the wetting phase is given by
+\begin{equation}
+k_{\mathrm{r, w}} = \left(S_{\mathrm{eff}}\right)^{(2 + 3 \lambda)/\lambda},
+\end{equation}
+and the relative permeability of the non-wetting phase is
+\begin{equation}
+k_{\mathrm{r, nw}} = (1 - S_{\mathrm{eff}})^2 \left[1 - \left(S_{\mathrm{eff}}\right)^{(2 + \lambda)/\lambda}\right],
+\end{equation}
+where $\lambda$ is a user-defined exponent. When $\lambda = 2$, this formulation reduces
+to the original [!cite](corey1954) form.
 
 #### Test 1
 
@@ -65,6 +76,35 @@ The input file for this test:
 
 
 ## van Genuchten
+
+The relative permeability of the wetting phase is given by [!cite](vangenuchten1980)
+\begin{equation}
+k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
+S_{\mathrm{eff}}^{1/m})^{m} \right)^{2}.
+\end{equation}
+This has the numerical disadvantage that its derivative as
+$S_{\mathrm{eff}}\rightarrow 1$ tends to infinity.  This means that
+simulations where the saturation oscillates around
+$S_{\mathrm{eff}}=1$ do not converge well.
+
+Therefore, a *cut* version of the van Genuchten expression is also offered, which is
+almost definitely indistinguishable experimentally from the original expression:
+\begin{equation}
+k_{\mathrm{r}} =
+\begin{cases}
+\textrm{van Genuchten} & \textrm{for } S_{\mathrm{eff}} < S_{c} \\
+\textrm{cubic} & \textrm{for } S_{\mathrm{eff}} \geq S_{c}.
+\end{cases}
+\end{equation}
+Here the cubic is chosen so that its value and derivative match the
+van Genuchten expression at $S=S_{c}$, and so that it is unity at
+$S_{\mathrm{eff}}=1$.
+
+For the non-wetting phase, the van Genuchten expression is
+\begin{equation}
+k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
+S_{\mathrm{eff}})^{1/m} \right)^{2m} \ .
+\end{equation}
 
 #### Test 1
 

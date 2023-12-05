@@ -135,7 +135,7 @@ brook_corey_a1=brook_corey_func(2) #analytical
 plt.plot(S, brook_corey_a1[0] ,'b' , label = 'kr0')
 plt.plot(S, brook_corey_a1[1] , 'g' ,label = 'kr1')
 plt.plot(brook_corey1['s0aux'], brook_corey1['kr0aux'],'ob' , label = 'kr0 (MOOSE)')
-plt.plot(brook_corey1['s0aux'], brook_corey1['kr1aux'],'og' , label = 'kr1 (Moose)')
+plt.plot(brook_corey1['s0aux'], brook_corey1['kr1aux'],'og' , label = 'kr1 (MOOSE)')
 plt.xlim(x_lim)
 plt.ylim(y_lim)
 plt.xlabel('Phase 0 saturation (-)')
@@ -226,6 +226,7 @@ plt.ylabel('Relative permeability (-)')
 plt.legend()
 plt.title('Corey relative permeability: $S_{0r}=0.2, S_{1r}=0.3, n=2$, scaling applied')
 plt.tight_layout()
+plt.ylim([0, 10.5])
 plt.savefig("corey4.png")
 
 
