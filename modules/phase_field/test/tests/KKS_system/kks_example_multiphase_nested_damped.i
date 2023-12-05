@@ -110,7 +110,7 @@
   # simple toy free energies
   [F1]
     type = DerivativeParsedMaterial
-    f_name = F1
+    property_name = F1
     expression = 'c1*log(c1/1e-4) + (1-c1)*log((1-c1)/(1-1e-4))'
     material_property_names = 'c1'
     additional_derivative_symbols = 'c1'
@@ -118,7 +118,7 @@
   []
   [F2]
     type = DerivativeParsedMaterial
-    f_name = F2
+    property_name = F2
     expression = 'c2*log(c2/0.5) + (1-c2)*log((1-c2)/(1-0.5))'
     material_property_names = 'c2'
     additional_derivative_symbols = 'c2'
@@ -126,7 +126,7 @@
   []
   [F3]
     type = DerivativeParsedMaterial
-    f_name = F3
+    property_name = F3
     expression = 'c3*log(c3/0.9999) + (1-c3)*log((1-c3)/(1-0.9999))'
     material_property_names = 'c3'
     additional_derivative_symbols = 'c3'
@@ -146,7 +146,7 @@
     hj_names = 'h1 h2 h3'
     ci_names = 'c1 c2 c3'
     ci_IC = '0.2 0.5 0.8'
-    Fj_material = 'F1 F2 F3'
+    Fj_names = 'F1 F2 F3'
     min_iterations = 1
     max_iterations = 1000
     absolute_tolerance = 1e-15
@@ -160,7 +160,7 @@
     type = KKSPhaseConcentrationMultiPhaseDerivatives
     global_cs = 'c'
     all_etas = 'eta1 eta2 eta3'
-    Fj_material = 'F1 F2 F3'
+    Fj_names = 'F1 F2 F3'
     hj_names = 'h1 h2 h3'
     ci_names = 'c1 c2 c3'
   []
@@ -172,7 +172,7 @@
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
-    f_name = h1
+    property_name = h1
   []
   # h2(eta1, eta2, eta3)
   [h2]
@@ -180,7 +180,7 @@
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
-    f_name = h2
+    property_name = h2
   []
   # h3(eta1, eta2, eta3)
   [h3]
@@ -188,7 +188,7 @@
     eta_i = eta3
     eta_j = eta1
     eta_k = eta2
-    f_name = h3
+    property_name = h3
   []
 
   # Barrier functions for each phase

@@ -81,7 +81,7 @@
   [fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    function = '(0.1-cm)^2'
+    expression = '(0.1-cm)^2'
     material_property_names = 'cm'
     additional_derivative_symbols = 'cm'
     compute = false
@@ -91,7 +91,7 @@
   [fd]
     type = DerivativeParsedMaterial
     property_name = fd
-    function = '(0.9-cd)^2'
+    expression = '(0.9-cd)^2'
     material_property_names = 'cd'
     additional_derivative_symbols = 'cd'
     compute = false

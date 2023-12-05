@@ -243,8 +243,6 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
     _nested_solve.nonlinearDamped(solution, compute, computeCondition);
   _iter[_qp] = _nested_solve.getIterations();
 
-  std::cout << "Suceeded in " << _nested_solve.getIterations() << "iterations.\n";
-
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
     mooseException("Nested Newton iteration did not converge.");
 
