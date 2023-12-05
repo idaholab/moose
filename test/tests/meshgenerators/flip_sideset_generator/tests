@@ -2,7 +2,7 @@
     [flux_2D]
       type = 'CSVDiff'
       input = 'flux_flip_2D.i'
-      csvdiff = 'flux_flip_2D.csv'
+      csvdiff = 'flux_flip_2D_out.csv'
       recover = false
       issues = '#25528'
       design = 'FlipSidesetGenerator.md'
@@ -12,13 +12,29 @@
     [flux_3D]
       type = 'CSVDiff'
       input = 'flux_flip_3D.i'
-      csvdiff = 'flux_flip_3D.csv'
+      csvdiff = 'flux_flip_3D_out.csv'
       recover = false
       requirement = 'This system allows the sideset to be flipped'
       design = 'FlipSidesetGenerator.md'
       issues = '#25528'
     []
-
-
+    [no_sideset_exception]
+      type = 'RunException'
+      input = 'no_sideset.i'
+      cli_args = '--mesh-only'
+      expect_err = "sideset doesn't exist in mesh"
+      requirement = 'The system shall error'
+      design = 'FlipSidesetGenerator.md'
+      issues = '#25528'
+    []
+    [no_neighbor_exception]
+      type = 'RunException'
+      input = 'no_neighbor.i'
+      cli_args = '--mesh-only'
+      expect_err = "neighbor"
+      requirement = 'The system shall error'
+      design = 'FlipSidesetGenerator.md'
+      issues = '#25528'
+    []
 []
 
