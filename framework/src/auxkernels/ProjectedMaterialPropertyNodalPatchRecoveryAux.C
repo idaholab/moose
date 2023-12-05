@@ -33,6 +33,7 @@ ProjectedMaterialPropertyNodalPatchRecoveryAux::ProjectedMaterialPropertyNodalPa
                "Nodal patch recovery auxiliary kernel is not defined in a subset of blocks of the "
                "associated user object. Revise your input file.");
 }
+
 Real
 ProjectedMaterialPropertyNodalPatchRecoveryAux::nodalPatchRecovery()
 {

@@ -34,7 +34,7 @@ ProjectedStatefulMaterialStorageAction::validParams()
 
   params.addParam<MooseEnum>(
       "family",
-      MooseEnum("LAGRANGE MONOMIAL", "LAGRANGE"),
+      MooseEnum("LAGRANGE MONOMIAL L2_LAGRANGE L2_HIERARCHIC", "LAGRANGE"),
       "Finite element variable family to project the material properties onto");
   params.addParam<MooseEnum>(
       "order",
@@ -56,8 +56,7 @@ ProjectedStatefulMaterialStorageAction::ProjectedStatefulMaterialStorageAction(
     _order(params.get<MooseEnum>("order")),
     _fe_type({Utility::string_to_enum<Order>(_order),
               Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"))}),
-    _var_type(AddVariableAction::variableType(_fe_type)),
-    _pomps_prefix("_pomps_")
+    _var_type(AddVariableAction::variableType(_fe_type))
 {
 }
 

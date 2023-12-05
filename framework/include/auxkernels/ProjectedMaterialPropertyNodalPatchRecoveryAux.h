@@ -25,6 +25,9 @@ protected:
   virtual Real nodalPatchRecovery() override;
 
 private:
+  /// User object holding the data needed for patch recovery
   const ProjectedStatefulMaterialNodalPatchRecoveryBase & _npr;
+
+  /// Property component (index into a serialized representation of the property)
   const unsigned int _component;
 };

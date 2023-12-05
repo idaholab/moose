@@ -277,9 +277,9 @@ Material::getGenericMaterialPropertyByName(const std::string & prop_name_in,
   if (_use_interpolated_state)
   {
     if (state == 1)
-      return getGenericMaterialPropertyByName<T, is_ad>(prop_name_in + "_interpolated_old", 0);
+      return getGenericMaterialPropertyByName<T, is_ad>(prop_name_in + _interpolated_old, 0);
     if (state == 2)
-      return getGenericMaterialPropertyByName<T, is_ad>(prop_name_in + "_interpolated_older", 0);
+      return getGenericMaterialPropertyByName<T, is_ad>(prop_name_in + _interpolated_older, 0);
   }
 
   MaterialBase::checkExecutionStage();

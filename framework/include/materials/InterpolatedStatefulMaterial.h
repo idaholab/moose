@@ -14,8 +14,8 @@
 #include "RankFourTensorForward.h"
 
 /**
- * Reconstitute a materal property from the old and older states of projected AuxVariables. Use
- * though the ProjectedStatefulMaterialStorageAction.
+ * Reconstitute a materal property from the old and older states of projected AuxVariables. Used
+ * through the ProjectedStatefulMaterialStorageAction.
  */
 template <typename T>
 class InterpolatedStatefulMaterialTempl : public Material
@@ -34,7 +34,7 @@ protected:
   /// Older projected state
   const std::vector<const VariableValue *> _older_state;
 
-  /// total number of components
+  /// Total number of components (e.g. 1 for Real, LIBMESH_DIM for RealVectorValue, LIBMESH_DIM^2 for RankTwoTensor)
   const std::size_t _size;
 
   /// emitted property name

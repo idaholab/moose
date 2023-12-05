@@ -13,6 +13,8 @@
 #include "ElementUserObject.h"
 #include "SerialAccess.h"
 
+#include <unordered_map>
+
 class ProjectedStatefulMaterialNodalPatchRecoveryBase : public ElementUserObject
 {
 public:
@@ -38,7 +40,7 @@ public:
   ProjectedStatefulMaterialNodalPatchRecoveryTempl(const InputParameters & parameters);
 
   /**
-   * Solve the least-squares problem. Use the fitted coefficients to calculate  the value at the
+   * Solve the least-squares problem. Use the fitted coefficients to calculate the value at the
    * requested point.
    *
    * @param p           Point at which to compute the fitted value
@@ -94,13 +96,13 @@ private:
   const GenericMaterialProperty<T, is_ad> & _prop;
 
   /// The element-level A matrix and the element-level b vectors for each component
-  std::map<dof_id_type, ElementData> _abs;
+  std::unordered_map<dof_id_type, ElementData> _abs;
 
   /// Current subdomain
   const SubdomainID & _current_subdomain_id;
 
-  /// list of require materials that need to be explicityly initialized at step zero
-  std::map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
+  /// list of required materials that need to be explicitly initialized at step zero
+  std::unordered_map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
 };
 
 typedef ProjectedStatefulMaterialNodalPatchRecoveryTempl<Real, false>

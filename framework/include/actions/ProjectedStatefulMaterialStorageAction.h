@@ -18,9 +18,9 @@
 #include "libmesh/fe_type.h"
 
 // created types
-#include <InterpolatedStatefulMaterial.h>
-#include <ProjectedStatefulMaterialAux.h>
-#include <ProjectedStatefulMaterialNodalPatchRecovery.h>
+#include "InterpolatedStatefulMaterial.h"
+#include "ProjectedStatefulMaterialAux.h"
+#include "ProjectedStatefulMaterialNodalPatchRecovery.h"
 
 /**
  * Set up AuxKernels and AuxVariables for projected material property storage (PoMPS).
@@ -37,7 +37,7 @@ public:
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
-  /// List of supported types
+  /// List of supported raw types (equivalent AD types are also supported)
   typedef Moose::TypeList<Real, RealVectorValue, RankTwoTensor, RankFourTensor> SupportedTypes;
 
   /// get an enum with all supported types
@@ -61,12 +61,17 @@ protected:
   template <typename... Ts>
   static MooseEnum getTypeEnum(typename Moose::TypeList<Ts...>);
 
+  /// Property names for which we will do stateful material property projection
   const std::vector<MaterialPropertyName> & _prop_names;
 
+  /// Variable order to project the properties into
   const MooseEnum _order;
+
+  /// FEType for the variables to project the properties into
   FEType _fe_type;
+
+  /// MooseObject name for the underlying variable type
   const std::string _var_type;
-  const std::string _pomps_prefix;
 };
 
 template <typename... Ts>
@@ -81,8 +86,10 @@ void
 ProjectedStatefulMaterialStorageAction::processProperty(const MaterialPropertyName & prop_name)
 {
   // check if a property of type T exists
-  const auto & data = _problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
-  if (!data.haveGenericProperty<T, is_ad>(prop_name))
+  const auto & block_data = _problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
+  const auto & boundary_data = _problem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
+  if (!block_data.haveGenericProperty<T, is_ad>(prop_name) &&
+      !boundary_data.haveGenericProperty<T, is_ad>(prop_name))
     return;
 
   // number of scalar components

@@ -53,7 +53,7 @@
   csv = true
   # in initial the freshly set up old state of the material properties differes
   # from the interpolated state as the MAT->AUX->MAT dependency cannot be
-  # resolved (as bot the computation of the current state as well as the
+  # resolved (as both the computation of the current state as well as the
   # testing are done in the same material object)
   execute_on = 'TIMESTEP_END'
 []

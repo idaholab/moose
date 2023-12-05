@@ -10,6 +10,7 @@
 #include "ProjectedStatefulMaterialNodalPatchRecovery.h"
 #include "ElementUserObject.h"
 #include "MaterialBase.h"
+#include "MathUtils.h"
 #include "Assembly.h"
 
 // TIMPI includes
@@ -101,7 +102,7 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::nodalPatchRecovery(
   // Assemble the least squares problem over the patch
   RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
   RealEigenVector b = RealEigenVector::Zero(_q);
-  for (auto elem_id : elem_ids)
+  for (const auto elem_id : elem_ids)
   {
     const auto abs = libmesh_map_find(_abs, elem_id);
     A += abs.first;
@@ -109,10 +110,10 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::nodalPatchRecovery(
   }
 
   // Solve the least squares fitting
-  RealEigenVector coef = A.completeOrthogonalDecomposition().solve(b);
+  const RealEigenVector coef = A.completeOrthogonalDecomposition().solve(b);
 
   // Compute the fitted nodal value
-  RealEigenVector p = evaluateBasisFunctions(x);
+  const RealEigenVector p = evaluateBasisFunctions(x);
   return p.dot(coef);
 }
 
@@ -123,13 +124,12 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::evaluateBasisFunctio
 {
   RealEigenVector p(_q);
   Real polynomial;
-  for (unsigned int r = 0; r < _multi_index.size(); r++)
+  for (const auto r : index_range(_multi_index))
   {
     polynomial = 1.0;
     mooseAssert(_multi_index[r].size() == _mesh.dimension(), "Wrong multi-index size.");
-    for (unsigned int c = 0; c < _multi_index[r].size(); c++)
-      for (unsigned int p = 0; p < _multi_index[r][c]; p++)
-        polynomial *= q_point(c);
+    for (const auto c : index_range(_multi_index[r]))
+      polynomial *= MathUtils::pow(q_point(c), _multi_index[r][c]);
     p(r) = polynomial;
   }
   return p;
@@ -163,7 +163,7 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::execute()
       bs[index++] += MetaPhysicL::raw_value(v) * p;
   }
 
-  dof_id_type elem_id = _current_elem->id();
+  const dof_id_type elem_id = _current_elem->id();
   _abs[elem_id] = {Ae, bs};
 }
 
@@ -187,7 +187,7 @@ ProjectedStatefulMaterialNodalPatchRecoveryTempl<T, is_ad>::finalize()
   // Populate algebraically ghosted elements to query
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
   const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
-  for (auto elem : evaluable_elem_range)
+  for (const auto * const elem : evaluable_elem_range)
     if (elem->processor_id() != processor_id())
       query_ids[elem->processor_id()].push_back(elem->id());
 

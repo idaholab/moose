@@ -10,9 +10,8 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "IndexableProperty.h"
 
-#include <deque>
+#include <unordered_map>
 
 class MaterialBase;
 
@@ -29,12 +28,16 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// ID of the subdomain currently being iterated over
   const SubdomainID & _current_subdomain_id;
 
-  std::map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
+  /// A sorted list of all material objects the processed property depends on on each subdomain
+  std::unordered_map<SubdomainID, std::vector<MaterialBase *>> _required_materials;
 
+  /// The property a component of which is being projected
   const GenericMaterialProperty<T, is_ad> & _prop;
 
+  /// Property component (index into a serialized representation of the property)
   const unsigned int _component;
 };
 

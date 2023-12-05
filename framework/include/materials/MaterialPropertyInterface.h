@@ -18,7 +18,7 @@
 #include "InputParameters.h"
 #include "SubProblem.h"
 
-#include <deque>
+#include <unordered_map>
 
 // Forward declarations
 class MooseObject;
@@ -265,7 +265,7 @@ public:
   ///@}
 
   /// get a map of MaterialBase pointers for all material objects that this object depends on for each block
-  std::map<SubdomainID, std::vector<MaterialBase *>>
+  std::unordered_map<SubdomainID, std::vector<MaterialBase *>>
   buildRequiredMaterials(bool allow_stateful = true);
 
   ///@{
@@ -538,6 +538,11 @@ protected:
   /// Use the interpolated state set up through the ProjectedStatefulMaterialStorageAction
   const bool _use_interpolated_state;
 
+  ///@{ name suffixes for interpolated old and older properties
+  static const std::string _interpolated_old;
+  static const std::string _interpolated_older;
+  ///@}
+
 private:
   /**
    * @returns The MaterialDataType given the interface's parameters
@@ -775,10 +780,10 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
   {
     if (state == 1)
       return getGenericMaterialPropertyByName<T, is_ad>(
-          name_in + "_interpolated_old", material_data, 0);
+          name_in + _interpolated_old, material_data, 0);
     if (state == 2)
       return getGenericMaterialPropertyByName<T, is_ad>(
-          name_in + "_interpolated_older", material_data, 0);
+          name_in + _interpolated_older, material_data, 0);
   }
 
   const auto name = _get_suffix.empty()

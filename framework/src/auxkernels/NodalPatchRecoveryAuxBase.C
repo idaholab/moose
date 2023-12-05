@@ -32,7 +32,7 @@ Real
 NodalPatchRecoveryAuxBase::computeValue()
 {
   // get node-to-conneted-elem map
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
 
@@ -42,7 +42,7 @@ NodalPatchRecoveryAuxBase::computeValue()
   // consider the case for corner node
   if (_elem_ids.size() == 1)
   {
-    dof_id_type elem_id = _elem_ids[0];
+    const dof_id_type elem_id = _elem_ids[0];
     for (auto & n : _mesh.elemPtr(elem_id)->node_ref_range())
     {
       node_to_elem_pair = node_to_elem_map.find(n.id());

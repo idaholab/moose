@@ -29,8 +29,9 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Override this to get the fitted value form a Nodal Patch Recovery User Object
+  /// Override this to get the fitted value from a Nodal Patch Recovery User Object
   virtual Real nodalPatchRecovery() = 0;
 
+  /// local patch of elements used for recovery
   std::vector<dof_id_type> _elem_ids;
 };

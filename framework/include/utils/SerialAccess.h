@@ -80,17 +80,17 @@ SERIAL_ACCESS_DYNAMIC_SIZE(DenseVector, &obj(0u), obj.size());
  * member or where value_type doesn't have a suitable meaning (ADReal)).
  */
 template <typename T>
-struct SerialAccessVlaueTypeHelper
+struct SerialAccessValueTypeHelper
 {
   typedef typename T::value_type value_type;
 };
 template <>
-struct SerialAccessVlaueTypeHelper<ADReal>
+struct SerialAccessValueTypeHelper<ADReal>
 {
   typedef ADReal value_type;
 };
 template <>
-struct SerialAccessVlaueTypeHelper<Real>
+struct SerialAccessValueTypeHelper<Real>
 {
   typedef Real value_type;
 };
@@ -98,10 +98,12 @@ struct SerialAccessVlaueTypeHelper<Real>
 template <typename T>
 class SerialAccessRange
 {
-  typedef typename SerialAccessVlaueTypeHelper<typename std::remove_const<T>::type>::value_type R;
+public:
+  /// Value type of the components of T
+  typedef typename SerialAccessValueTypeHelper<typename std::remove_const<T>::type>::value_type R;
+  /// Value type with the correct constness
   typedef typename std::conditional<std::is_const_v<T>, const R, R>::type V;
 
-public:
   class iterator
   {
   public:

@@ -12,6 +12,9 @@
 #include "MooseApp.h"
 #include "MaterialBase.h"
 
+const std::string MaterialPropertyInterface::_interpolated_old = "_interpolated_old";
+const std::string MaterialPropertyInterface::_interpolated_older = "_interpolated_older";
+
 InputParameters
 MaterialPropertyInterface::validParams()
 {
@@ -198,10 +201,10 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
   return *discrete;
 }
 
-std::map<SubdomainID, std::vector<MaterialBase *>>
+std::unordered_map<SubdomainID, std::vector<MaterialBase *>>
 MaterialPropertyInterface::buildRequiredMaterials(bool allow_stateful)
 {
-  std::map<SubdomainID, std::vector<MaterialBase *>> required_mats;
+  std::unordered_map<SubdomainID, std::vector<MaterialBase *>> required_mats;
   const auto & mwh = _mi_feproblem.getMaterialWarehouse();
   for (const auto id : _mi_block_ids)
   {
