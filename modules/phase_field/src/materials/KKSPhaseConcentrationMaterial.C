@@ -34,6 +34,13 @@ KKSPhaseConcentrationMaterial::validParams()
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
   params.addCoupledVar("args", "The coupled variables of Fa and Fb.");
+  params.addParam<bool>(
+      "damped_Newton", false, "Whether or not to use the damped Newton's method.");
+  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  params.addParam<MaterialName>("conditions",
+                                "C",
+                                "Material property that checks bounds and conditions on the "
+                                "material properties being solved for.");
   params += NestedSolve::validParams();
   return params;
 }
@@ -66,6 +73,9 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
     _iter(declareProperty<Real>("nested_iterations")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
+    _damped_newton(getParam<bool>("damped_Newton")),
+    _damping_factor(getParam<Real>("damping_factor")),
+    _condition_name(getParam<MaterialName>("conditions")),
     _nested_solve(NestedSolve(parameters))
 
 {
@@ -149,6 +159,11 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
           &declarePropertyDerivative<Real>("cp" + _Fa_name, _ci_names[n * 2], _args_names[m]);
     }
   }
+
+  if (_damped_newton)
+    _C = &getMaterialPropertyByName<Real>(_condition_name);
+  else
+    _C = NULL;
 }
 
 void
@@ -163,6 +178,8 @@ KKSPhaseConcentrationMaterial::initialSetup()
 {
   _Fa = &getMaterial("fa_name");
   _Fb = &getMaterial("fb_name");
+  if (_damped_newton)
+    _condition = &getMaterialByName(_condition_name);
 }
 
 void
@@ -212,8 +229,18 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
       jacobian(m * 2 + 1, m * 2 + 1) = _prop_h[_qp];
     }
   };
-
-  _nested_solve.nonlinear(solution, compute);
+  auto computeCondition = [&](const NestedSolve::Value<> & guess) -> Real
+  {
+    for (unsigned int m = 0; m < _num_c * 2; ++m)
+      (*_prop_ci[m])[_qp] = guess(m);
+    _condition->computePropertiesAtQp(_qp);
+    return ((*_C)[_qp]);
+  };
+  // choose between Newton or damped Newton's method
+  if (!_damped_newton)
+    _nested_solve.nonlinear(solution, compute);
+  else
+    _nested_solve.nonlinearDamped(solution, compute, computeCondition);
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)

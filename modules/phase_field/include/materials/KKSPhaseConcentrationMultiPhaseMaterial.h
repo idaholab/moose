@@ -80,8 +80,10 @@ protected:
 
   const bool _damped_newton;
   const Real _damping_factor;
-  std::vector<Real> _ci_lower_bounds;
-  std::vector<Real> _ci_upper_bounds;
+
+  MaterialName _condition_name;
+  MaterialBase * _condition;
+  const MaterialProperty<Real> * _C;
 
   /// Instantiation of the NestedSolve class
   NestedSolve _nested_solve;

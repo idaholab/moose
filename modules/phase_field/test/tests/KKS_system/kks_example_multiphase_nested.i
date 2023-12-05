@@ -18,63 +18,63 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./Energy]
+  [Energy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 1
-  [./eta1]
+  [eta1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 2
-  [./eta2]
+  [eta2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # order parameter 3
-  [./eta3]
+  [eta3]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 
   # chemical potential
-  [./mu]
+  [mu]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 
   # Lagrange multiplier
-  [./lambda]
+  [lambda]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [ICs]
-  [./eta1]
+  [eta1]
     variable = eta1
     type = SmoothCircleIC
     x1 = 20.0
@@ -83,8 +83,8 @@
     invalue = 0.9
     outvalue = 0.1
     int_width = 4
-  [../]
-  [./eta2]
+  []
+  [eta2]
     variable = eta2
     type = SmoothCircleIC
     x1 = 20.0
@@ -93,8 +93,8 @@
     invalue = 0.1
     outvalue = 0.9
     int_width = 4
-  [../]
-  [./c]
+  []
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 20.0
@@ -103,37 +103,36 @@
     invalue = 0.2
     outvalue = 0.5
     int_width = 2
-  [../]
+  []
 []
-
 
 [Materials]
   # simple toy free energies
-  [./F1]
+  [F1]
     type = DerivativeParsedMaterial
     f_name = F1
-    function = '20*(c1-0.2)^2'
+    expression = '20*(c1-0.2)^2'
     material_property_names = 'c1'
     additional_derivative_symbols = 'c1'
     compute = false
-  [../]
-  [./F2]
+  []
+  [F2]
     type = DerivativeParsedMaterial
     f_name = F2
-    function = '20*(c2-0.5)^2'
+    expression = '20*(c2-0.5)^2'
     material_property_names = 'c2'
     additional_derivative_symbols = 'c2'
     compute = false
-  [../]
-  [./F3]
+  []
+  [F3]
     type = DerivativeParsedMaterial
     f_name = F3
-    function = '20*(c3-0.8)^2'
+    expression = '20*(c3-0.8)^2'
     material_property_names = 'c3'
     additional_derivative_symbols = 'c3'
     compute = false
-  [../]
-  [./KKSPhaseConcentrationMultiPhaseMaterial]
+  []
+  [KKSPhaseConcentrationMultiPhaseMaterial]
     type = KKSPhaseConcentrationMultiPhaseMaterial
     global_cs = 'c'
     all_etas = 'eta1 eta2 eta3'
@@ -145,107 +144,107 @@
     max_iterations = 1000
     absolute_tolerance = 1e-11
     relative_tolerance = 1e-10
-  [../]
-  [./KKSPhaseConcentrationMultiPhaseDerivatives]
+  []
+  [KKSPhaseConcentrationMultiPhaseDerivatives]
     type = KKSPhaseConcentrationMultiPhaseDerivatives
     global_cs = 'c'
     all_etas = 'eta1 eta2 eta3'
     Fj_material = 'F1 F2 F3'
     hj_names = 'h1 h2 h3'
     ci_names = 'c1 c2 c3'
-  [../]
+  []
 
   # Switching functions for each phase
   # h1(eta1, eta2, eta3)
-  [./h1]
+  [h1]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
     f_name = h1
-  [../]
+  []
   # h2(eta1, eta2, eta3)
-  [./h2]
+  [h2]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
     f_name = h2
-  [../]
+  []
   # h3(eta1, eta2, eta3)
-  [./h3]
+  [h3]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta3
     eta_j = eta1
     eta_k = eta2
     f_name = h3
-  [../]
+  []
 
   # Barrier functions for each phase
-  [./g1]
+  [g1]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta1
     function_name = g1
-  [../]
-  [./g2]
+  []
+  [g2]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta2
     function_name = g2
-  [../]
-  [./g3]
+  []
+  [g3]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta3
     function_name = g3
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
-    prop_names  = 'L   kappa  M'
+    prop_names = 'L   kappa  M'
     prop_values = '0.7 1.0    0.025'
-  [../]
+  []
 []
 
 [Kernels]
-  [./lambda_lagrange]
+  [lambda_lagrange]
     type = SwitchingFunctionConstraintLagrange
     variable = lambda
-    etas =    'eta1 eta2 eta3'
+    etas = 'eta1 eta2 eta3'
     h_names = 'h1   h2   h3'
     epsilon = 1e-04
-  [../]
-  [./eta1_lagrange]
+  []
+  [eta1_lagrange]
     type = SwitchingFunctionConstraintEta
     variable = eta1
     h_name = h1
     lambda = lambda
-    args = 'eta2 eta3'
-  [../]
-  [./eta2_lagrange]
+    coupled_variables = 'eta2 eta3'
+  []
+  [eta2_lagrange]
     type = SwitchingFunctionConstraintEta
     variable = eta2
     h_name = h2
     lambda = lambda
-    args = 'eta1 eta3'
-  [../]
-  [./eta3_lagrange]
+    coupled_variables = 'eta1 eta3'
+  []
+  [eta3_lagrange]
     type = SwitchingFunctionConstraintEta
     variable = eta3
     h_name = h3
     lambda = lambda
-    args = 'eta1 eta2'
-  [../]
+    coupled_variables = 'eta1 eta2'
+  []
 
   #Kernels for Cahn-Hilliard equation
-  [./diff_time]
+  [diff_time]
     type = CoupledTimeDerivative
     variable = mu
     v = c
-  [../]
-  [./CHBulk]
+  []
+  [CHBulk]
     type = NestKKSSplitCHCRes
     variable = c
     all_etas = 'eta1 eta2 eta3'
@@ -253,22 +252,22 @@
     w = mu
     c1_names = 'c1'
     F1_name = F1
-    args = 'eta1 eta2 eta3 mu'
-  [../]
-  [./ckernel]
+    coupled_variables = 'eta1 eta2 eta3 mu'
+  []
+  [ckernel]
     type = SplitCHWRes
     variable = mu
     mob_name = M
-  [../]
+  []
 
   # Kernels for Allen-Cahn equation for eta1
-  [./deta1dt]
+  [deta1dt]
     type = TimeDerivative
     variable = eta1
-  [../]
-  [./ACBulkF1]
+  []
+  [ACBulkF1]
     type = NestKKSMultiACBulkF
-    variable  = eta1
+    variable = eta1
     global_cs = 'c'
     eta_i = eta1
     all_etas = 'eta1 eta2 eta3'
@@ -277,10 +276,10 @@
     Fj_names = 'F1 F2 F3'
     gi_name = g1
     mob_name = L
-    wi        = 1.0
-    args      = 'c eta2 eta3'
-  [../]
-  [./ACBulkC1]
+    wi = 1.0
+    coupled_variables = 'c eta2 eta3'
+  []
+  [ACBulkC1]
     type = NestKKSMultiACBulkC
     variable = eta1
     global_cs = 'c'
@@ -289,22 +288,22 @@
     ci_names = 'c1 c2 c3'
     hj_names = 'h1 h2 h3'
     Fj_names = 'F1 F2 F3'
-    args      = 'c eta2 eta3'
-  [../]
-  [./ACInterface1]
+    coupled_variables = 'c eta2 eta3'
+  []
+  [ACInterface1]
     type = ACInterface
     variable = eta1
     kappa_name = kappa
-  [../]
+  []
 
   # Kernels for Allen-Cahn equation for eta2
-  [./deta2dt]
+  [deta2dt]
     type = TimeDerivative
     variable = eta2
-  [../]
-  [./ACBulkF2]
+  []
+  [ACBulkF2]
     type = NestKKSMultiACBulkF
-    variable  = eta2
+    variable = eta2
     global_cs = 'c'
     eta_i = eta2
     all_etas = 'eta1 eta2 eta3'
@@ -313,10 +312,10 @@
     Fj_names = 'F1 F2 F3'
     gi_name = g2
     mob_name = L
-    wi        = 1.0
-    args      = 'c eta1 eta3'
-  [../]
-  [./ACBulkC2]
+    wi = 1.0
+    coupled_variables = 'c eta1 eta3'
+  []
+  [ACBulkC2]
     type = NestKKSMultiACBulkC
     variable = eta2
     global_cs = 'c'
@@ -325,22 +324,22 @@
     ci_names = 'c1 c2 c3'
     hj_names = 'h1 h2 h3'
     Fj_names = 'F1 F2 F3'
-    args      = 'c eta1 eta3'
-  [../]
-  [./ACInterface2]
+    coupled_variables = 'c eta1 eta3'
+  []
+  [ACInterface2]
     type = ACInterface
     variable = eta2
     kappa_name = kappa
-  [../]
+  []
 
   # Kernels for Allen-Cahn equation for eta3
-  [./deta3dt]
+  [deta3dt]
     type = TimeDerivative
     variable = eta3
-  [../]
-  [./ACBulkF3]
+  []
+  [ACBulkF3]
     type = NestKKSMultiACBulkF
-    variable  = eta3
+    variable = eta3
     global_cs = 'c'
     eta_i = eta3
     all_etas = 'eta1 eta2 eta3'
@@ -349,10 +348,10 @@
     Fj_names = 'F1 F2 F3'
     gi_name = g3
     mob_name = L
-    wi        = 1.0
-    args      = 'c eta1 eta2'
-  [../]
-  [./ACBulkC3]
+    wi = 1.0
+    coupled_variables = 'c eta1 eta2'
+  []
+  [ACBulkC3]
     type = NestKKSMultiACBulkC
     variable = eta3
     global_cs = 'c'
@@ -361,26 +360,26 @@
     ci_names = 'c1 c2 c3'
     hj_names = 'h1 h2 h3'
     Fj_names = 'F1 F2 F3'
-    args      = 'c eta1 eta2'
-  [../]
-  [./ACInterface3]
+    coupled_variables = 'c eta1 eta2'
+  []
+  [ACInterface3]
     type = ACInterface
     variable = eta3
     kappa_name = kappa
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Energy_total]
+  [Energy_total]
     type = KKSMultiFreeEnergy
     Fj_names = 'F1 F2 F3'
     hj_names = 'h1 h2 h3'
     gj_names = 'g1 g2 g3'
     variable = Energy
     w = 1
-    interfacial_vars =  'eta1  eta2  eta3'
-    kappa_names =       'kappa kappa kappa'
-  [../]
+    interfacial_vars = 'eta1  eta2  eta3'
+    kappa_names = 'kappa kappa kappa'
+  []
 []
 
 [Executioner]
@@ -400,14 +399,14 @@
 
 [Preconditioning]
   active = 'full'
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
-  [./mydebug]
+  []
+  [mydebug]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

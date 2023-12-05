@@ -79,6 +79,15 @@ protected:
   const Real _abs_tol;
   const Real _rel_tol;
 
+  // Add damping functionality to nested Newton solve
+  const bool _damped_newton;
+  const Real _damping_factor;
+
+  // Material property that defines the confidence bounds for the newton solve
+  MaterialName _condition_name;
+  MaterialBase * _condition;
+  const MaterialProperty<Real> * _C;
+
   /// Instantiation of the NestedSolve class
   NestedSolve _nested_solve;
 

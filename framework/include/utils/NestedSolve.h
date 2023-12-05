@@ -82,6 +82,10 @@ public:
   /// Solve the N*N nonlinear equation system using a built-in Netwon-Raphson loop
   template <typename V, typename T>
   void nonlinear(V & guess, T && compute);
+  /// @{ Solve the N*N nonlinear equation system using the damped Netwon-Raphson loop
+  template <typename V, typename T, typename C>
+  void nonlinearDamped(V & guess, T && compute, C && computeCondition);
+  ///@}
 
   /// @{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
   /// with a custom backwards compatible convergence check that allows for looser tolerances.
@@ -108,11 +112,17 @@ public:
   void
   nonlinearBounded(NSReal & guess, R & computeResidual, J & computeJacobian, B & computeBounds);
   ///@}
-
+  // @{ Perform a damped newton solve
+  template <typename R, typename J, typename C>
+  void nonlinearDamped(NSRealVectorValue & guess,
+                       R & computeResidual,
+                       J & computeJacobian,
+                       C & computeCondition);
+  ///@}
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
   static Real absoluteToleranceDefault() { return 1e-13; }
-  static Real xToleranceDefault() { return 1e-15; }
+  static Real xToleranceDefault() { return 1e-8; }
   static unsigned int minIterationsDefault() { return 3; }
   static unsigned int maxIterationsDefault() { return 1000; }
   static Real acceptableMultiplierDefault() { return 10.0; }
@@ -125,7 +135,7 @@ public:
   Real _relative_tolerance_square;
   Real _absolute_tolerance_square;
   // Threshold for minimum step size of linear iterations
-  Real _x_tolerance_square;
+  Real _delta_thresh;
 
   unsigned int _min_iterations;
   unsigned int _max_iterations;
@@ -429,14 +439,75 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
     // solve and apply next increment
     linear(jacobian, delta, residual);
 
-    // Check if step size is smaller than the floating point tolerance
-    if (normSquare(delta) <= _x_tolerance_square)
+    // // Check if step size is smaller than the floating point tolerance
+ if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
     {
       _state = State::CONVERGED_XTOL;
       return;
     }
 
     guess -= delta;
+    _n_iterations++;
+
+    // compute residual and jacobian for the next iteration
+    compute(guess, residual, jacobian);
+
+    r_square = normSquare(residual);
+  }
+
+  // if we exceed the max iterations, we could still be converged
+  // (considering the acceptable multiplier)
+  if (!isConverged(r0_square, r_square, /*acceptable=*/true))
+    _state = State::NOT_CONVERGED;
+}
+
+template <bool is_ad>
+template <typename V, typename T, typename C>
+void
+NestedSolveTempl<is_ad>::nonlinearDamped(V & guess, T && compute, C && computeCondition)
+{
+  V delta;
+  V residual;
+  CorrespondingJacobian<V> jacobian;
+  sizeItems(guess, residual, jacobian);
+
+  _n_iterations = 0;
+  compute(guess, residual, jacobian);
+
+  // compute first residual norm for relative convergence checks
+  auto r0_square = normSquare(residual);
+  if (r0_square == 0)
+  {
+    _state = State::EXACT_GUESS;
+    return;
+  }
+  auto r_square = r0_square;
+
+  // perform non-linear iterations
+  while (_n_iterations < _max_iterations)
+  {
+    // check convergence
+    if (_n_iterations >= _min_iterations && isConverged(r0_square, r_square, /*acceptable=*/false))
+      return;
+
+    // solve and apply next increment
+    linear(jacobian, delta, residual);
+
+    // Check if step size is smaller than the floating point tolerance
+    if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
+    {
+      _state = State::CONVERGED_XTOL;
+      return;
+    }
+
+    Real alpha = 1;
+    auto prev_guess = guess;
+    guess -= delta;
+    while (!computeCondition(guess))
+    {
+      alpha *= 0.8;
+      guess = prev_guess - alpha * delta;
+    }
     _n_iterations++;
 
     // compute residual and jacobian for the next iteration
