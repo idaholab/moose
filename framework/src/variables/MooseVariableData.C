@@ -47,6 +47,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _need_curl(false),
     _need_curl_old(false),
     _need_curl_older(false),
+    _need_div(false),
+    _need_div_old(false),
+    _need_div_older(false),
     _need_ad(false),
     _need_ad_u(false),
     _need_ad_grad_u(false),
@@ -60,6 +63,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
     _second_phi_face_assembly_method(nullptr),
     _curl_phi_assembly_method(nullptr),
     _curl_phi_face_assembly_method(nullptr),
+    _div_phi_assembly_method(nullptr),
+    _div_phi_face_assembly_method(nullptr),
     _ad_grad_phi_assembly_method(nullptr),
     _ad_grad_phi_face_assembly_method(nullptr),
     _time_integrator(nullptr),
@@ -71,7 +76,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
   // FIXME: continuity of FE type seems equivalent with the definition of nodal variables.
   //        Continuity does not depend on the FE dimension, so we just pass in a valid dimension.
   if (_fe_type.family == NEDELEC_ONE || _fe_type.family == LAGRANGE_VEC ||
-      _fe_type.family == MONOMIAL_VEC)
+      _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS)
     _continuity = _assembly.getVectorFE(_fe_type, _sys.mesh().dimension())->get_continuity();
   else
     _continuity = _assembly.getFE(_fe_type, _sys.mesh().dimension())->get_continuity();
@@ -92,6 +97,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
       _second_phi_face_assembly_method = &Assembly::feSecondPhiFace<OutputShape>;
       _curl_phi_assembly_method = &Assembly::feCurlPhi<OutputShape>;
       _curl_phi_face_assembly_method = &Assembly::feCurlPhiFace<OutputShape>;
+      _div_phi_assembly_method = &Assembly::feDivPhi<OutputShape>;
+      _div_phi_face_assembly_method = &Assembly::feDivPhiFace<OutputShape>;
       _ad_grad_phi_assembly_method = &Assembly::feADGradPhi<OutputShape>;
       _ad_grad_phi_face_assembly_method = &Assembly::feADGradPhiFace<OutputShape>;
 
@@ -109,6 +116,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
       _second_phi_face_assembly_method = &Assembly::feSecondPhiFaceNeighbor<OutputShape>;
       _curl_phi_assembly_method = &Assembly::feCurlPhiNeighbor<OutputShape>;
       _curl_phi_face_assembly_method = &Assembly::feCurlPhiFaceNeighbor<OutputShape>;
+      _div_phi_assembly_method = &Assembly::feDivPhiNeighbor<OutputShape>;
+      _div_phi_face_assembly_method = &Assembly::feDivPhiFaceNeighbor<OutputShape>;
 
       _ad_grad_phi = nullptr;
       _ad_grad_phi_face = nullptr;
@@ -155,6 +164,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_grad_phi = _grad_phi;
       _current_second_phi = _second_phi;
       _current_curl_phi = _curl_phi;
+      _current_div_phi = _div_phi;
       _current_ad_grad_phi = _ad_grad_phi;
       break;
     }
@@ -165,6 +175,7 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_grad_phi = _grad_phi_face;
       _current_second_phi = _second_phi_face;
       _current_curl_phi = _curl_phi_face;
+      _current_div_phi = _div_phi_face;
       _current_ad_grad_phi = _ad_grad_phi_face;
       break;
     }
@@ -330,6 +341,37 @@ MooseVariableData<OutputType>::curlSln(Moose::SolutionState state) const
 }
 
 template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableDivergence &
+MooseVariableData<OutputType>::divSln(Moose::SolutionState state) const
+{
+  divPhi();
+  divPhiFace();
+  switch (state)
+  {
+    case Moose::Current:
+    {
+      _need_div = true;
+      return _div_u;
+    }
+
+    case Moose::Old:
+    {
+      _need_div_old = true;
+      return _div_u_old;
+    }
+
+    case Moose::Older:
+    {
+      _need_div_older = true;
+      return _div_u_older;
+    }
+
+    default:
+      mooseError("We don't currently support divergence from the previous non-linear iteration");
+  }
+}
+
+template <typename OutputType>
 const typename MooseVariableData<OutputType>::FieldVariablePhiSecond &
 MooseVariableData<OutputType>::secondPhi() const
 {
@@ -362,6 +404,22 @@ MooseVariableData<OutputType>::curlPhiFace() const
 }
 
 template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariablePhiDivergence &
+MooseVariableData<OutputType>::divPhi() const
+{
+  _div_phi = &_div_phi_assembly_method(_assembly, _fe_type);
+  return *_div_phi;
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariablePhiDivergence &
+MooseVariableData<OutputType>::divPhiFace() const
+{
+  _div_phi_face = &_div_phi_face_assembly_method(_assembly, _fe_type);
+  return *_div_phi_face;
+}
+
+template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeValues()
 {
@@ -391,6 +449,9 @@ MooseVariableData<OutputType>::computeValues()
 
   if (_need_curl)
     _curl_u.resize(nqp);
+
+  if (_need_div)
+    _div_u.resize(nqp);
 
   if (_need_second_previous_nl)
     _second_u_previous_nl.resize(nqp);
@@ -427,6 +488,9 @@ MooseVariableData<OutputType>::computeValues()
     if (_need_curl_old)
       _curl_u_old.resize(nqp);
 
+    if (_need_div_old)
+      _div_u_old.resize(nqp);
+
     if (_need_second_older)
       _second_u_older.resize(nqp);
   }
@@ -450,6 +514,9 @@ MooseVariableData<OutputType>::computeValues()
 
     if (_need_curl)
       _curl_u[i] = 0;
+
+    if (_need_div)
+      _div_u[i] = 0;
 
     if (_need_second_previous_nl)
       _second_u_previous_nl[i] = 0;
@@ -488,12 +555,16 @@ MooseVariableData<OutputType>::computeValues()
 
       if (_need_curl_old)
         _curl_u_old[i] = 0;
+
+      if (_need_div_old)
+        _div_u_old[i] = 0;
     }
   }
 
   bool second_required =
       _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
   bool curl_required = _need_curl || _need_curl_old;
+  bool div_required = _need_div || _need_div_old;
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
@@ -565,6 +636,20 @@ MooseVariableData<OutputType>::computeValues()
 
         if (is_transient && _need_curl_old)
           _curl_u_old[qp] += curl_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
+      }
+
+      if (div_required)
+      {
+        mooseAssert(
+            _current_div_phi,
+            "We're requiring a divergence calculation but have not set a div shape function!");
+        const OutputShapeDivergence div_phi_local = (*_current_div_phi)[i][qp];
+
+        if (_need_div)
+          _div_u[qp] += div_phi_local * _vector_tags_dof_u[_solution_tag][i];
+
+        if (is_transient && _need_div_old)
+          _div_u_old[qp] += div_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
       }
 
       for (auto tag : _required_vector_tags)
@@ -646,6 +731,9 @@ MooseVariableData<RealEigenVector>::computeValues()
   if (_need_curl)
     _curl_u.resize(nqp);
 
+  if (_need_div)
+    _div_u.resize(nqp);
+
   if (_need_second_previous_nl)
     _second_u_previous_nl.resize(nqp);
 
@@ -681,6 +769,9 @@ MooseVariableData<RealEigenVector>::computeValues()
     if (_need_curl_old)
       _curl_u_old.resize(nqp);
 
+    if (_need_div_old)
+      _div_u_old.resize(nqp);
+
     if (_need_second_older)
       _second_u_older.resize(nqp);
   }
@@ -704,6 +795,9 @@ MooseVariableData<RealEigenVector>::computeValues()
 
     if (_need_curl)
       _curl_u[i].setZero(_count);
+
+    if (_need_div)
+      _div_u[i].setZero(_count);
 
     if (_need_second_previous_nl)
       _second_u_previous_nl[i].setZero(_count, LIBMESH_DIM * LIBMESH_DIM);
@@ -742,12 +836,16 @@ MooseVariableData<RealEigenVector>::computeValues()
 
       if (_need_curl_old)
         _curl_u_old[i].setZero(_count);
+
+      if (_need_div_old)
+        _div_u_old[i].setZero(_count);
     }
   }
 
   bool second_required =
       _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
   bool curl_required = _need_curl || _need_curl_old;
+  bool div_required = _need_div || _need_div_old;
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
@@ -830,6 +928,20 @@ MooseVariableData<RealEigenVector>::computeValues()
 
         if (is_transient && _need_curl_old)
           _curl_u_old[qp] += curl_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
+      }
+
+      if (div_required)
+      {
+        mooseAssert(_current_div_phi,
+                    "We're requiring a divergence calculation but have not set a divergence shape "
+                    "function!");
+        const auto div_phi_local = (*_current_div_phi)[i][qp];
+
+        if (_need_div)
+          _div_u[qp] += div_phi_local * _vector_tags_dof_u[_solution_tag][i];
+
+        if (is_transient && _need_div_old)
+          _div_u_old[qp] += div_phi_local * _vector_tags_dof_u[_old_solution_tag][i];
       }
 
       for (auto tag : _required_vector_tags)

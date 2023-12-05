@@ -731,7 +731,7 @@ SystemBase::addVariable(const std::string & var_type,
   if (var_type == "ArrayMooseVariable")
   {
     if (fe_type.family == NEDELEC_ONE || fe_type.family == LAGRANGE_VEC ||
-        fe_type.family == MONOMIAL_VEC)
+        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
       mooseError("Vector family type cannot be used in an array variable");
 
     // Build up the variable names

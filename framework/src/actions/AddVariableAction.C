@@ -70,7 +70,7 @@ AddVariableAction::getNonlinearVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
                    "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC "
-                   "RATIONAL_BERNSTEIN SIDE_HIERARCHIC",
+                   "RAVIART_THOMAS RATIONAL_BERNSTEIN SIDE_HIERARCHIC",
                    "LAGRANGE");
 }
 
@@ -176,7 +176,7 @@ AddVariableAction::createInitialConditionAction()
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   bool is_vector = (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE ||
-                    _fe_type.family == MONOMIAL_VEC);
+                    _fe_type.family == MONOMIAL_VEC || _fe_type.family == RAVIART_THOMAS);
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
@@ -249,7 +249,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   if (is_array)
   {
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-        fe_type.family == MONOMIAL_VEC)
+        fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
       ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
@@ -259,7 +259,7 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
   else if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
-           fe_type.family == MONOMIAL_VEC)
+           fe_type.family == MONOMIAL_VEC || fe_type.family == RAVIART_THOMAS)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

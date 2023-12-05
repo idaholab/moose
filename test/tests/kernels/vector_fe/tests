@@ -151,4 +151,61 @@
     issues = "#13309"
     requirement = "The system shall error if the 'function' and 'function_x' parameters are both set within the ADVectorFunctionDirichletBC object."
   []
+  [coupled_electrostatics]
+    design = 'DivField.md GradField.md VectorDivPenaltyDirichletBC.md'
+    issues = '#26105'
+    requirement = 'The system shall be capable of modeling a div-grad problem '
+                  'in H(div) using the following Raviart-Thomas elements: '
+    [hex27]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_hex27.e
+      cli_args = 'Outputs/file_base=coupled_electrostatics_hex27'
+      detail = 'HEX27, '
+    []
+    [tet14]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_tet14.e
+      cli_args = 'Mesh/gmg/elem_type=TET14 '
+                'Outputs/file_base=coupled_electrostatics_tet14'
+      detail = 'TET14, '
+    []
+    [tri6]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_tri6.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI6 '
+                'BCs/sides/boundary="top bottom left right" '
+                'Outputs/file_base=coupled_electrostatics_tri6'
+      detail = 'TRI6, '
+    []
+    [tri7]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_tri7.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI7 '
+                'BCs/sides/boundary="top bottom left right" '
+                'Outputs/file_base=coupled_electrostatics_tri7'
+      detail = 'TRI7, '
+    []
+    [quad8]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_quad8.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD8 '
+                'BCs/sides/boundary="top bottom left right" '
+                'Outputs/file_base=coupled_electrostatics_quad8'
+      detail = 'QUAD8, '
+    []
+    [quad9]
+      type = Exodiff
+      input = coupled_electrostatics.i
+      exodiff = coupled_electrostatics_quad9.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD9 '
+                'BCs/sides/boundary="top bottom left right" '
+                'Outputs/file_base=coupled_electrostatics_quad9'
+      detail = 'and QUAD9.'
+    []
+  []
 []

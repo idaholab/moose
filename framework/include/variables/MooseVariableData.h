@@ -191,6 +191,16 @@ public:
   const FieldVariablePhiCurl & curlPhiFace() const;
 
   /**
+   * divergence_phi getter
+   */
+  const FieldVariablePhiDivergence & divPhi() const;
+
+  /**
+   * divergence_phi_face getter
+   */
+  const FieldVariablePhiDivergence & divPhiFace() const;
+
+  /**
    * ad_grad_phi getter
    */
   const ADTemplateVariablePhiGradient<OutputShape> & adGradPhi() const;
@@ -222,6 +232,11 @@ public:
    * Whether or not this variable is computing the curl
    */
   bool computingCurl() const { return _need_curl || _need_curl_old; }
+
+  /**
+   * Whether or not this variable is computing the divergence
+   */
+  bool computingDiv() const { return _need_div || _need_div_old; }
 
   //////////////////////////////// Nodal stuff ///////////////////////////////////////////
 
@@ -270,6 +285,12 @@ public:
    * @param state The state of the simulation: current, old, older
    */
   const FieldVariableCurl & curlSln(Moose::SolutionState state) const;
+
+  /**
+   * Local solution divergence getter
+   * @param state The state of the simulation: current, old, older
+   */
+  const FieldVariableDivergence & divSln(Moose::SolutionState state) const;
 
   const ADTemplateVariableValue<OutputType> & adSln() const
   {
@@ -476,6 +497,11 @@ private:
   mutable bool _need_curl_old;
   mutable bool _need_curl_older;
 
+  /// divergence flags
+  mutable bool _need_div;
+  mutable bool _need_div_old;
+  mutable bool _need_div_older;
+
   /// AD flags
   mutable bool _need_ad;
   mutable bool _need_ad_u;
@@ -499,6 +525,11 @@ private:
   FieldVariableCurl _curl_u;
   FieldVariableCurl _curl_u_old;
   FieldVariableCurl _curl_u_older;
+
+  /// divergence_u
+  FieldVariableDivergence _div_u;
+  FieldVariableDivergence _div_u_old;
+  FieldVariableDivergence _div_u_older;
 
   /// AD u
   ADTemplateVariableValue<OutputType> _ad_u;
@@ -542,6 +573,7 @@ private:
   const FieldVariablePhiGradient * _grad_phi;
   mutable const FieldVariablePhiSecond * _second_phi;
   mutable const FieldVariablePhiCurl * _curl_phi;
+  mutable const FieldVariablePhiDivergence * _div_phi;
 
   // Mapped array phi
   MappedArrayVariablePhiGradient _mapped_grad_phi;
@@ -554,6 +586,7 @@ private:
   const FieldVariablePhiGradient * _grad_phi_face;
   mutable const FieldVariablePhiSecond * _second_phi_face;
   mutable const FieldVariablePhiCurl * _curl_phi_face;
+  mutable const FieldVariablePhiDivergence * _div_phi_face;
 
   const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi_face;
@@ -563,6 +596,7 @@ private:
   const FieldVariablePhiGradient * _current_grad_phi;
   const FieldVariablePhiSecond * _current_second_phi;
   const FieldVariablePhiCurl * _current_curl_phi;
+  const FieldVariablePhiDivergence * _current_div_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
 
   // dual mortar
@@ -595,6 +629,14 @@ private:
   std::function<const typename OutputTools<OutputShape>::VariablePhiCurl &(const Assembly &,
                                                                            FEType)>
       _curl_phi_face_assembly_method;
+
+  std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
+                                                                                 FEType)>
+      _div_phi_assembly_method;
+
+  std::function<const typename OutputTools<OutputShape>::VariablePhiDivergence &(const Assembly &,
+                                                                                 FEType)>
+      _div_phi_face_assembly_method;
 
   std::function<const ADTemplateVariablePhiGradient<OutputShape> &(const Assembly &, FEType)>
       _ad_grad_phi_assembly_method;
