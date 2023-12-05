@@ -203,11 +203,15 @@ private:
   std::map<unsigned int, std::map<dof_id_type, std::vector<dof_id_type>>> _elem_nearest_dofs;
   std::map<unsigned int, std::map<dof_id_type, std::vector<dof_id_type>>> _node_nearest_dofs;
 
+  /// Number of dofs in nonlinear system
   dof_id_type _nl_ndof;
-  dof_id_type _nl_ndof_old;
+
+  /// The serialized nonlinear solution vector
   std::unique_ptr<NumericVector<Real>> _nl_sol_old;
 
+  /// Number of dofs in aux system
   dof_id_type _aux_ndof;
-  dof_id_type _aux_ndof_old;
+
+  /// The serialized aux solution vector
   std::unique_ptr<NumericVector<Real>> _aux_sol_old;
 };
