@@ -57,6 +57,7 @@
                   'increments modify the stiffness of the material through '
                   'CompositeElasticityTensor. This test also serves as a reference for UMAT behavior '
                   'in the presence of shear deformation. '
+    installation_type = in_tree
   []
   [print_shear_print]
     type = 'RunApp'

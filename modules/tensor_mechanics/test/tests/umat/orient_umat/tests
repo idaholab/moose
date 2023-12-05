@@ -7,6 +7,8 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     cli_args = 'GlobalParams/decomposition_method=HughesWinget'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
   [hw_reference_umat_output]
     type = 'RunApp'
@@ -18,6 +20,8 @@
                  'STRAIN_ 1    0.0000101\n DSTRAIN_ 1    0.0000037\n STRAIN_ 2   -0.0004222\n DSTRAIN_ 2   -0.0001052\n STRAIN_ 3    0.0001507\n DSTRAIN_ 3    0.0000370\n '
                  'STRAIN_ 4    0.0020475\n DSTRAIN_ 4    0.0005107\n STRAIN_ 5    0.0001519\n DSTRAIN_ 5    0.0000383\n STRAIN_ 6   -0.0003596\n DSTRAIN_ 6   -0.0000896\n '
                  'COORDS_ 1    0.3915195\n COORDS_ 2    0.3857086\n COORDS_ 3    0.3873709'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 
   # rotated isotropic material module should give the same material (Cauchy) stress
@@ -29,6 +33,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     cli_args = 'GlobalParams/decomposition_method=HughesWinget Materials/umat/orientation="-30 0 0"'
+    installation_type = in_tree
   []
   # but the stress computed in the intermediate reference frame should be different
   # values match Abaqus
@@ -42,6 +47,7 @@
                  'STRAIN_ 1    0.0007858\n DSTRAIN_ 1    0.0001968\n STRAIN_ 2   -0.0011977\n DSTRAIN_ 2   -0.0002982\n STRAIN_ 3    0.0001505\n DSTRAIN_ 3    0.0000369\n '
                  'STRAIN_ 4    0.0006666\n DSTRAIN_ 4    0.0001664\n STRAIN_ 5   -0.0000461\n DSTRAIN_ 5   -0.0000109\n STRAIN_ 6   -0.0003887\n DSTRAIN_ 6   -0.0000972\n '
                  'COORDS_ 1    0.3915195\n COORDS_ 2    0.3857086\n COORDS_ 3    0.3873709'
+    installation_type = in_tree
   []
 
   # spot checked results from using Rashid kinematics to be within ~0.01% at final timestep, about what is expected for the two methods
@@ -52,5 +58,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     cli_args = 'Materials/umat/orientation="-30 0 0" Outputs/file_base=shear_top_umat_rashid_out'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
   []
 []
