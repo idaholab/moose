@@ -31,6 +31,9 @@ class Factory;
 class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
+
+namespace Moose
+{
 class Builder;
 
 class UnusedWalker : public hit::Walker
@@ -48,9 +51,7 @@ private:
 };
 
 /**
- * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
- * parsing files. It is not currently designed for extensibility. If you wish to build your own
- * parser, please contact the MOOSE team for guidance.
+ * Parses MOOSE input using HIT/WASP.
  */
 class Builder : public ConsoleStreamInterface, public hit::Walker
 {
@@ -112,6 +113,8 @@ public:
    * Marks MOOSE hit syntax from supplied command-line arguments
    */
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
+
+  hit::Node * root() { return _root; };
 
 protected:
   /**
@@ -284,3 +287,4 @@ private:
   // Allow the MooseServer class to access the root node of the hit parse tree
   friend class MooseServer;
 };
+}

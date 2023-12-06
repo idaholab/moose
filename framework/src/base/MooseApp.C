@@ -881,7 +881,7 @@ MooseApp::setupOptions()
 
     Moose::perf_log.disable_logging();
 
-    _builder.initSyntaxFormatter(Builder::YAML, true);
+    _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
 
     // Get command line argument following --yaml on command line
     std::string yaml_following_arg = getParam<std::string>("yaml");
@@ -1334,6 +1334,13 @@ MooseApp::addExecutorParams(const std::string & type,
                             const InputParameters & params)
 {
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
+}
+
+Moose::Builder &
+MooseApp::parser()
+{
+  mooseDeprecated("MooseApp::parser() is deprecated, use MooseApp::builder() instead.");
+  return _builder;
 }
 
 void

@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("FluidStructureInteraction");
 int
 main(int argc, char * argv[])
 {
-  moose::main<FsiTestApp>(argc, argv);
+  Moose::main<FsiTestApp>(argc, argv);
 
   return 0;
 }

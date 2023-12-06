@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Stork");
 int
 main(int argc, char * argv[])
 {
-  moose::main<StorkTestApp>(argc, argv);
+  Moose::main<StorkTestApp>(argc, argv);
 
   return 0;
 }

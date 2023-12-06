@@ -38,7 +38,7 @@ TEST(ContainerFunctors, Test)
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
 
   constexpr auto nx = 2;
-  auto app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
+  auto app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 

@@ -20,7 +20,7 @@ PerfLog Moose::perf_log("DarcyThermoMech");
 int
 main(int argc, char * argv[])
 {
-  moose::main<DarcyThermoMechApp>(argc, argv);
+  Moose::main<DarcyThermoMechApp>(argc, argv);
 
   return 0;
 }

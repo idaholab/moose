@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("MeshingTutorial");
 int
 main(int argc, char * argv[])
 {
-  moose::main<MeshingTutorialTestApp>(argc, argv);
+  Moose::main<MeshingTutorialTestApp>(argc, argv);
 
   return 0;
 }

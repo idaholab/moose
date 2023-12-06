@@ -19,7 +19,7 @@ PerfLog Moose::perf_log("ExternalPetscSolver");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ExternalPetscSolverTestApp>(argc, argv);
+  Moose::main<ExternalPetscSolverTestApp>(argc, argv);
 
   return 0;
 }

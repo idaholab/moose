@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("StochasticTools");
 int
 main(int argc, char * argv[])
 {
-  moose::main<StochasticToolsTestApp>(argc, argv);
+  Moose::main<StochasticToolsTestApp>(argc, argv);
 
   return 0;
 }

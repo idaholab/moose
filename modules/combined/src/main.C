@@ -23,7 +23,7 @@ PerfLog Moose::perf_log("Modules");
 int
 main(int argc, char * argv[])
 {
-  moose::main<CombinedTestApp>(argc, argv);
+  Moose::main<CombinedTestApp>(argc, argv);
 
   return 0;
 }

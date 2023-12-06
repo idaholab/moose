@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("geochemistry");
 int
 main(int argc, char * argv[])
 {
-  moose::main<GeochemistryTestApp>(argc, argv);
+  Moose::main<GeochemistryTestApp>(argc, argv);
 
   return 0;
 }

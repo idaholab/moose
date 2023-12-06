@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("HeatConduction");
 int
 main(int argc, char * argv[])
 {
-  moose::main<HeatTransferTestApp>(argc, argv);
+  Moose::main<HeatTransferTestApp>(argc, argv);
 
   return 0;
 }

@@ -1,6 +1,6 @@
 # Builder
 
-The MOOSE Builder object is responsible for constructing the necessary [Actions](Action.md) that ultimately execute to build up the objects which compose a complete MOOSE based simulation.
+The MOOSE Builder object is responsible for constructing the necessary [Actions](Action.md) that build the objects which compose a complete MOOSE based simulation.
 It is important to note that +this+ object is not responsible for the raw
 file-base I/O and parsing. The builder abstraction expects information to be parsed first and organized into a hierarchy of blocks with zero or more children at each level. All of the name/value pairs at each level are used to construct one or more complete objects.
 

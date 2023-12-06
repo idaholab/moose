@@ -65,7 +65,7 @@ public:
 
   static InputParameters validParams();
   /**
-   * Helper function for creating a MooseApp from command-line arguments.
+   * Helper function for creating a MooseApp from command-line arguments and a Parser.
    */
   static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,
@@ -74,8 +74,8 @@ public:
                                      MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
-   * Helper function for creating a MooseApp for Apps haven't adapted to the new Parser and Builder
-   * changes. This function needed to be removed after the new Parser and Builder merged
+   * Deprecated helper function for creating a MooseApp for Apps haven't adapted to the new Parser
+   * and Builder changes. This function needed to be removed after the new Parser and Builder merged
    */
   static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,

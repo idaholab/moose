@@ -74,7 +74,7 @@ public:
    * @param app_name The name of client's application
    */
   MooseObjectUnitTest(const std::string & app_name)
-    : _app(moose::createMooseApp(app_name, 0, nullptr)), _factory(_app->getFactory())
+    : _app(Moose::createMooseApp(app_name, 0, nullptr)), _factory(_app->getFactory())
   {
     buildObjects();
   }

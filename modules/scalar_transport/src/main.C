@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("ScalarTransport");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ScalarTransportTestApp>(argc, argv);
+  Moose::main<ScalarTransportTestApp>(argc, argv);
 
   return 0;
 }

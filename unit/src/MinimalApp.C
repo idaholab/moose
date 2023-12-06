@@ -17,7 +17,7 @@
 TEST(MinimalApp, create)
 {
   const char * argv[1] = {"\0"};
-  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
+  std::shared_ptr<MooseApp> app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
   Executioner * exec = app->getExecutioner();

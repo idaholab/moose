@@ -212,7 +212,7 @@ public:
   /**
    * Returns a writable reference to the builder
    */
-  Builder & builder() { return _builder; }
+  Moose::Builder & builder() { return _builder; }
 
   /**
    * Returns a writable reference to the syntax object.
@@ -352,10 +352,10 @@ public:
                          const InputParameters & params);
 
   /**
-   * Helper function to link new added Builder back to Parser. This function will be removed after
-   *new Parser and builder are merged
+   * Deprecated helper function to link the new added Builder back to Parser. This function will be
+   *removed after new Parser and builder are merged
    **/
-  Builder & parser() { return _builder; }
+  Moose::Builder & parser();
 
 private:
   /**
@@ -1149,7 +1149,7 @@ protected:
   std::shared_ptr<Parser> _parser;
 
   /// Builder for building app related parser tree
-  Builder _builder;
+  Moose::Builder _builder;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;

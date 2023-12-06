@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("RayTracing");
 int
 main(int argc, char * argv[])
 {
-  moose::main<RayTracingTestApp>(argc, argv);
+  Moose::main<RayTracingTestApp>(argc, argv);
 
   return 0;
 }

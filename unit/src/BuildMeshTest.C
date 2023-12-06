@@ -40,7 +40,7 @@ void
 BuildMeshTest::SetUp()
 {
   const char * argv[2] = {"foo", "\0"};
-  _app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
+  _app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
   std::string mesh_gen_type = "BuildMeshBaseTypesGenerator";

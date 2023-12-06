@@ -304,7 +304,7 @@ TEST(MooseFunctorTest, testArgs)
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
 
   const auto nx = 2;
-  std::shared_ptr<MooseApp> app = moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
+  std::shared_ptr<MooseApp> app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 

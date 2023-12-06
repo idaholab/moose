@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Babbler");
 int
 main(int argc, char * argv[])
 {
-  moose::main<BabblerTestApp>(argc, argv);
+  Moose::main<BabblerTestApp>(argc, argv);
 
   return 0;
 }

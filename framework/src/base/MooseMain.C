@@ -19,7 +19,7 @@
 #include <omp.h>
 #endif
 
-namespace moose
+namespace Moose
 {
 std::shared_ptr<MooseApp>
 createMooseApp(const std::string & default_app_name, int argc, char * argv[])

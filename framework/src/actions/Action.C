@@ -22,7 +22,7 @@
 InputParameters
 Action::validParams()
 {
-  InputParameters params = Builder::validParams();
+  InputParameters params = Moose::Builder::validParams();
 
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system

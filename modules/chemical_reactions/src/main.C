@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("ChemicalReactions");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ChemicalReactionsTestApp>(argc, argv);
+  Moose::main<ChemicalReactionsTestApp>(argc, argv);
 
   return 0;
 }

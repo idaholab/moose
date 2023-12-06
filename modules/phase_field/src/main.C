@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("PhaseField");
 int
 main(int argc, char * argv[])
 {
-  moose::main<PhaseFieldTestApp>(argc, argv);
+  Moose::main<PhaseFieldTestApp>(argc, argv);
 
   return 0;
 }

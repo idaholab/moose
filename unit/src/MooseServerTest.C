@@ -280,7 +280,7 @@ protected:
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
-    moose_unit_app = moose::createMooseApp("MooseUnitApp", 0, nullptr);
+    moose_unit_app = Moose::createMooseApp("MooseUnitApp", 0, nullptr);
 
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
   }

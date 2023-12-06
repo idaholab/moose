@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("THM");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ThermalHydraulicsTestApp>(argc, argv);
+  Moose::main<ThermalHydraulicsTestApp>(argc, argv);
 
   return 0;
 }

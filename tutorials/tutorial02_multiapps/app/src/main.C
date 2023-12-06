@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("MultiAppTut");
 int
 main(int argc, char * argv[])
 {
-  moose::main<MultiAppTutTestApp>(argc, argv);
+  Moose::main<MultiAppTutTestApp>(argc, argv);
 
   return 0;
 }

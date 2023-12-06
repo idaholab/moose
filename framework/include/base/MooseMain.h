@@ -13,7 +13,7 @@
 #include "MooseInit.h"
 #include "MooseApp.h"
 
-namespace moose
+namespace Moose
 {
 
 /**
@@ -29,7 +29,6 @@ template <typename DefaultAppType>
 void
 main(int argc, char * argv[])
 {
-
   MooseInit init(argc, argv);
 
   DefaultAppType::registerApps();
@@ -39,5 +38,4 @@ main(int argc, char * argv[])
 
   app->run();
 }
-
 }

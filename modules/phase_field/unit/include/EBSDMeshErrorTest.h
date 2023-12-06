@@ -25,7 +25,7 @@ protected:
   void SetUp()
   {
     const char * argv[2] = {"foo", "\0"};
-    _app = moose::createMooseApp("PhaseFieldApp", 1, (char **)argv);
+    _app = Moose::createMooseApp("PhaseFieldApp", 1, (char **)argv);
     _factory = &_app->getFactory();
   }
 

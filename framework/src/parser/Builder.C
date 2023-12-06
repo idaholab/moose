@@ -50,6 +50,9 @@
 #include <algorithm>
 #include <cstdlib>
 
+namespace Moose
+{
+
 bool
 isSectionActive(std::string path, hit::Node * root)
 {
@@ -172,7 +175,7 @@ Builder::listValidParams(std::string & section_name)
 }
 
 void
-UnusedWalker ::walk(const std::string & fullpath, const std::string & nodename, hit::Node * n)
+UnusedWalker::walk(const std::string & fullpath, const std::string & nodename, hit::Node * n)
 {
   // the line() > 0 check allows us to skip nodes that were merged into this tree (i.e. CLI
   // args) because their unused params are checked+reported independently of the ones in the
@@ -2391,3 +2394,5 @@ Builder::setDoubleIndexParameter<Point>(
 {
   setVectorVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
+
+} // end of namespace Moose

@@ -37,7 +37,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   const char * argv[2] = {"foo", "\0"};
 
   // First we create a simple mesh
-  auto app = moose::createMooseApp("NavierStokesUnitApp", 1, (char **)argv);
+  auto app = Moose::createMooseApp("NavierStokesUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 

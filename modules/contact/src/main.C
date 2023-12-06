@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Contact");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ContactTestApp>(argc, argv);
+  Moose::main<ContactTestApp>(argc, argv);
 
   return 0;
 }
