@@ -14,6 +14,12 @@
 
 ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) : QBase(d, o) {}
 
+std::unique_ptr<QBase>
+ArbitraryQuadrature::clone() const
+{
+  return std::make_unique<ArbitraryQuadrature>(*this);
+}
+
 QuadratureType
 ArbitraryQuadrature::type() const
 {
