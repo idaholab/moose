@@ -20,7 +20,6 @@
 #define usingMaterialMembers                                                                       \
   usingMaterialBaseMembers;                                                                        \
   usingCoupleableMembers;                                                                          \
-  using Material::_normals;                                                                        \
   using Material::_q_point;                                                                        \
   using Material::_qrule;                                                                          \
   using Material::_JxW;                                                                            \
@@ -227,8 +226,6 @@ protected:
   bool _bnd;
   bool _neighbor;
 
-  /// normals at quadrature points (valid only in face/neighbor-face materials)
-  const MooseArray<Point> & _normals;
   const MooseArray<Point> & _q_point;
   const QBase * const & _qrule;
 

@@ -17,7 +17,6 @@
 #define usingInterfaceMaterialMembers                                                              \
   usingMaterialBaseMembers;                                                                        \
   usingNeighborCoupleableMembers;                                                                  \
-  using InterfaceMaterial::_normals;                                                               \
   using InterfaceMaterial::_q_point;                                                               \
   using InterfaceMaterial::_qrule;                                                                 \
   using InterfaceMaterial::_JxW;                                                                   \
@@ -181,8 +180,6 @@ protected:
   virtual const QBase & qRule() const override { return *_qrule; }
 
   bool _bnd;
-  /// normals at quadrature points
-  const MooseArray<Point> & _normals;
   const MooseArray<Point> & _q_point;
   const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;

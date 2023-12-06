@@ -35,7 +35,6 @@ Material::Material(const InputParameters & parameters)
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
-    _normals(_neighbor ? _assembly.neighborNormals() : _assembly.normals()),
     _q_point(_bnd ? (_neighbor ? _assembly.qPointsFaceNeighbor() : _assembly.qPointsFace())
                   : _assembly.qPoints()),
     _qrule(_bnd ? (_neighbor ? _assembly.qRuleNeighbor() : _assembly.qRuleFace())
