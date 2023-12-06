@@ -81,7 +81,6 @@ protected:
 
   // Add damping functionality to nested Newton solve
   const bool _damped_newton;
-  // const Real _damping_factor;
 
   // Material property that defines the confidence bounds for the newton solve
   MaterialName _condition_name;
