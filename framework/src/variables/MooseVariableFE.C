@@ -1012,8 +1012,7 @@ MooseVariableFE<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
-    std::unique_ptr<QBase> qrule(QBase::build(
-        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+    auto qrule = qrule_template->clone();
 
     const auto & phi = fe->get_phi();
     const auto & dphi = fe->get_dphi();
@@ -1216,8 +1215,7 @@ MooseVariableFE<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_si
 
     using FEBaseType = typename FEBaseHelper<OutputType>::type;
     std::unique_ptr<FEBaseType> fe(FEBaseType::build(elem->dim(), _fe_type));
-    std::unique_ptr<QBase> qrule(QBase::build(
-        qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
+    auto qrule = qrule_template->clone();
 
     const auto & phi = fe->get_phi();
     const auto & dphi = fe->get_dphi();
