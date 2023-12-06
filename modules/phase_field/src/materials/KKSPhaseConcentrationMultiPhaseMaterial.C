@@ -37,8 +37,8 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
   params.addCoupledVar("args", "The coupled variables of free energies.");
-  params.addParam<bool>("damped_Newton",false,
-                                "Whether or not to use the damped Newton's method.");
+  params.addParam<bool>(
+      "damped_Newton", false, "Whether or not to use the damped Newton's method.");
   // params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
   params.addParam<MaterialName>("conditions",
                                 "C",
@@ -156,7 +156,6 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _C = &getMaterialPropertyByName<Real>(_condition_name);
   else
     _C = NULL;
-
 }
 
 void
@@ -232,7 +231,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
     }
   };
 
-  auto computeCondition = [&](const NestedSolve::Value<> & guess)->Real
+  auto computeCondition = [&](const NestedSolve::Value<> & guess) -> Real
   {
     for (unsigned int m = 0; m < _num_c * _num_j; ++m)
       (*_prop_ci[m])[_qp] = guess(m);

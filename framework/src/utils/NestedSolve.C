@@ -24,8 +24,9 @@ NestedSolveTempl<is_ad>::validParams()
   params.addParam<Real>("absolute_tolerance",
                         absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
-  params.addParam<Real>(
-      "step_size_tolerance", xToleranceDefault(), "Minimum step size of linear iterations relative to value of the solution");
+  params.addParam<Real>("step_size_tolerance",
+                        xToleranceDefault(),
+                        "Minimum step size of linear iterations relative to value of the solution");
   params.addParam<unsigned int>(
       "min_iterations",
       minIterationsDefault(),
@@ -41,7 +42,9 @@ NestedSolveTempl<is_ad>::validParams()
                         dampingFactorDefault(),
                         "Factor applied to step size if guess does not satisfy damping criteria");
   params.addParam<unsigned int>(
-      "max_damping_iterations", maxDampingIterationsDefault(), "Maximum number of damping steps per linear iteration of nested solve");
+      "max_damping_iterations",
+      maxDampingIterationsDefault(),
+      "Maximum number of damping steps per linear iteration of nested solve");
   return params;
 }
 
