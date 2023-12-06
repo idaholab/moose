@@ -1611,6 +1611,13 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
                 "We should be in bounds here");
     _unique_fe_face_neighbor_helper[neighbor_dim]->reinit(neighbor, &reference_points);
   }
+
+  _current_q_points_face_neighbor.shallowCopy(
+      const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
+  _current_JxW_neighbor.shallowCopy(
+      const_cast<std::vector<Real> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_JxW()));
+  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
+      _holder_fe_face_neighbor_helper[neighbor_dim]->get_normals()));
 }
 
 void
@@ -1988,15 +1995,12 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
   if (_need_JxW_neighbor)
-  {
-    // first do the side element. We need to do this to at a minimum get the correct JxW for the
-    // neighbor face.
+    // first do the side element. We need to do this to at a minimum get the correct neighbor
+    // face physical q points, and neighbor normals for the neighbor face. *Note* that while this
+    // below call is triggered by the _need_JxW_neighbor flag, the irony is that the JxW that comes
+    // out of this is *wrong* because we are providing the "quadrature" points but no weights.
+    // Consequently dummy weights (equal to 1) are used
     reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
-
-    // compute JxW on the neighbor's face
-    _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-        _holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()]->get_JxW()));
-  }
 
   reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
   reinitNeighbor(neighbor, *reference_points_ptr);
