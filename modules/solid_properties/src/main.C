@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("SolidProperties");
 int
 main(int argc, char * argv[])
 {
-  moose::main<SolidPropertiesTestApp>(argc, argv);
+  Moose::main<SolidPropertiesTestApp>(argc, argv);
 
   return 0;
 }

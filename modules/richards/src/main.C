@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Richards");
 int
 main(int argc, char * argv[])
 {
-  moose::main<RichardsTestApp>(argc, argv);
+  Moose::main<RichardsTestApp>(argc, argv);
 
   return 0;
 }

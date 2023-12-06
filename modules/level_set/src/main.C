@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("LevelSet");
 int
 main(int argc, char * argv[])
 {
-  moose::main<LevelSetTestApp>(argc, argv);
+  Moose::main<LevelSetTestApp>(argc, argv);
 
   return 0;
 }

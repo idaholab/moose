@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("NavierStokes");
 int
 main(int argc, char * argv[])
 {
-  moose::main<NavierStokesTestApp>(argc, argv);
+  Moose::main<NavierStokesTestApp>(argc, argv);
 
   return 0;
 }

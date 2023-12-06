@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Electromagnetics");
 int
 main(int argc, char * argv[])
 {
-  moose::main<ElectromagneticsTestApp>(argc, argv);
+  Moose::main<ElectromagneticsTestApp>(argc, argv);
 
   return 0;
 }

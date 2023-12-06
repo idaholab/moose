@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("VerificationTutorial");
 int
 main(int argc, char * argv[])
 {
-  moose::main<VerificationTutorialTestApp>(argc, argv);
+  Moose::main<VerificationTutorialTestApp>(argc, argv);
 
   return 0;
 }

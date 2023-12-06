@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("FluidProperties");
 int
 main(int argc, char * argv[])
 {
-  moose::main<FluidPropertiesTestApp>(argc, argv);
+  Moose::main<FluidPropertiesTestApp>(argc, argv);
 
   return 0;
 }

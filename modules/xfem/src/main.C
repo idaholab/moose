@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Xfem");
 int
 main(int argc, char * argv[])
 {
-  moose::main<XFEMTestApp>(argc, argv);
+  Moose::main<XFEMTestApp>(argc, argv);
 
   return 0;
 }

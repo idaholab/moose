@@ -19,7 +19,7 @@ PerfLog Moose::perf_log("FunctionalExpansionTools");
 int
 main(int argc, char * argv[])
 {
-  moose::main<FunctionalExpansionToolsTestApp>(argc, argv);
+  Moose::main<FunctionalExpansionToolsTestApp>(argc, argv);
 
   return 0;
 }

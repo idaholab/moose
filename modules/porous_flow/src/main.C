@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("PorousFlow");
 int
 main(int argc, char * argv[])
 {
-  moose::main<PorousFlowTestApp>(argc, argv);
+  Moose::main<PorousFlowTestApp>(argc, argv);
 
   return 0;
 }

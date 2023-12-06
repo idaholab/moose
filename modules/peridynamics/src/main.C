@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("Peridynamics");
 int
 main(int argc, char * argv[])
 {
-  moose::main<PeridynamicsTestApp>(argc, argv);
+  Moose::main<PeridynamicsTestApp>(argc, argv);
 
   return 0;
 }

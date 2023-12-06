@@ -18,7 +18,7 @@ PerfLog Moose::perf_log("TensorMechanics");
 int
 main(int argc, char * argv[])
 {
-  moose::main<TensorMechanicsTestApp>(argc, argv);
+  Moose::main<TensorMechanicsTestApp>(argc, argv);
 
   return 0;
 }
