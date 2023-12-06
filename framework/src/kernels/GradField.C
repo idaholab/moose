@@ -16,7 +16,7 @@ InputParameters
 GradField::validParams()
 {
   InputParameters params = VectorKernel::validParams();
-  params.addClassDescription("Takes the gradient of a scalar field, optionally"
+  params.addClassDescription("Takes the gradient of a scalar field, optionally "
                              "scaled by a constant scalar coefficient.");
   params.addRequiredCoupledVar("coupled_scalar_variable", "The scalar field");
   params.addParam<Real>("coeff", 1.0, "The constant coefficient");
