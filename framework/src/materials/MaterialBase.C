@@ -101,7 +101,6 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid, 0)),
     _qp(std::numeric_limits<unsigned int>::max()),
     _coord(_assembly.coordTransformation()),
-    _normals(_assembly.normals()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),

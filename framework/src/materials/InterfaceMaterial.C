@@ -30,6 +30,7 @@ InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
   : MaterialBase(parameters),
     NeighborCoupleable(this, false, false),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    _normals(_assembly.normals()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
     _JxW(_assembly.JxWFace()),

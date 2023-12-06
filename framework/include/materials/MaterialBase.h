@@ -44,7 +44,6 @@
   using MaterialBase::_assembly;                                                                   \
   using MaterialBase::_qp;                                                                         \
   using MaterialBase::_coord;                                                                      \
-  using MaterialBase::_normals;                                                                    \
   using MaterialBase::_mesh
 
 // forward declarations
@@ -286,8 +285,6 @@ protected:
   unsigned int _qp;
 
   const MooseArray<Real> & _coord;
-  /// normals at quadrature points (valid only in boundary materials)
-  const MooseArray<Point> & _normals;
 
   MooseMesh & _mesh;
 
