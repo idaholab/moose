@@ -263,6 +263,6 @@
 []
 
 [Outputs]
-  file_base = kks_example_nested
+  file_base = kks_example_nested_damped
   exodus = true
 []

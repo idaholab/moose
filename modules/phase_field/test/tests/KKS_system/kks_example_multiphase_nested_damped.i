@@ -256,7 +256,7 @@
     v = c
   []
   [CHBulk]
-    type = NestKKSSplitCHCRes
+    type = NestedKKSMultiSplitCHCRes
     variable = c
     all_etas = 'eta1 eta2 eta3'
     global_cs = 'c'
@@ -277,7 +277,7 @@
     variable = eta1
   []
   [ACBulkF1]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable = eta1
     global_cs = 'c'
     eta_i = eta1
@@ -291,7 +291,7 @@
     coupled_variables = 'c eta2 eta3'
   []
   [ACBulkC1]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta1
     global_cs = 'c'
     eta_i = eta1
@@ -313,7 +313,7 @@
     variable = eta2
   []
   [ACBulkF2]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable = eta2
     global_cs = 'c'
     eta_i = eta2
@@ -327,7 +327,7 @@
     coupled_variables = 'c eta1 eta3'
   []
   [ACBulkC2]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta2
     global_cs = 'c'
     eta_i = eta2
@@ -349,7 +349,7 @@
     variable = eta3
   []
   [ACBulkF3]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable = eta3
     global_cs = 'c'
     eta_i = eta3
@@ -363,7 +363,7 @@
     coupled_variables = 'c eta1 eta2'
   []
   [ACBulkC3]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta3
     global_cs = 'c'
     eta_i = eta3
@@ -421,6 +421,6 @@
 []
 
 [Outputs]
-  file_base = kks_example_multiphase_nested
+  file_base = kks_example_multiphase_nested_damped
   exodus = true
 []
