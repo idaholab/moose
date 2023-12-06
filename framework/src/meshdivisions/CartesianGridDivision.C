@@ -93,6 +93,20 @@ void
 CartesianGridDivision::initialize()
 {
   setNumDivisions(_nx * _ny * _nz);
+
+  // Check that the grid is well-defined
+  if (_center_positions)
+  {
+    Real min_dist = _widths.norm();
+    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    // Note that if the positions are not co-planar, the distance reported would be bigger but there
+    // could still be an overlap. Looking at min_center_dist is not enough
+    if (min_dist > min_center_dist)
+      mooseError(
+          "Cartesian grids centered on the positions are too close to each other (min distance: ",
+          min_center_dist,
+          "), closer than the extent of each grid. Mesh division is ill-defined");
+  }
 }
 
 unsigned int

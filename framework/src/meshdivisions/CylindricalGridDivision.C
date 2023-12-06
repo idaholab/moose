@@ -118,6 +118,20 @@ void
 CylindricalGridDivision::initialize()
 {
   setNumDivisions(_n_radial * _n_azim * _n_axial);
+
+  // Check that the grid is well-defined
+  if (_center_positions)
+  {
+    Real min_dist = 2 * _max_r;
+    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    // Note that if the positions are not co-planar, the distance reported would be bigger but there
+    // could still be an overlap. Looking at min_center_dist is not enough
+    if (min_dist > min_center_dist)
+      mooseError(
+          "Cylindrical grids centered on the positions are too close to each other (min distance: ",
+          min_center_dist,
+          "), closer than the radial extent of each grid. Mesh division is ill-defined");
+  }
 }
 
 unsigned int
