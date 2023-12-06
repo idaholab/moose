@@ -1878,16 +1878,31 @@ Assembly::reinitFVFace(const FaceInfo & fi)
 
   _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
 
+  mooseAssert(_current_qrule_face->n_points() == 1,
+              "Our finite volume quadrature rule should always yield a single point");
+
   // We've initialized the reference points. Now we need to compute the physical location of the
   // quadrature points. We do not do any FE initialization so we cannot simply copy over FE results
   // like we do in reinitFEFace. Instead we handle the computation of the physical locations
   // manually
-  const auto num_qp = _current_qrule_face->n_points();
-  _current_q_points_face.resize(num_qp);
+  _current_q_points_face.resize(1);
   const auto & ref_points = _current_qrule_face->get_points();
-  for (const auto qp : make_range(num_qp))
-    _current_q_points_face[qp] =
-        FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_points[qp]);
+  const auto & ref_point = ref_points[0];
+  auto physical_point = FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_point);
+  _current_q_points_face[0] = physical_point;
+
+  if (_current_neighbor_elem)
+  {
+    // Now handle the neighbor qrule/qpoints
+    ArbitraryQuadrature * const neighbor_rule =
+        qrules(_current_neighbor_elem->dim()).neighbor.get();
+    // Here we are setting a reference point that is correct for the neighbor *side* element. It
+    // would be wrong if this reference point is used for a volumetric FE reinit with the neighbor
+    neighbor_rule->setPoints(ref_points);
+    setNeighborQRule(neighbor_rule, _current_neighbor_elem->dim());
+    _current_q_points_face_neighbor.resize(1);
+    _current_q_points_face_neighbor[0] = std::move(physical_point);
+  }
 }
 
 QBase *
