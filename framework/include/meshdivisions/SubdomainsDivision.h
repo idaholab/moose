@@ -10,11 +10,12 @@
 #pragma once
 
 #include "MeshDivision.h"
+#include "BlockRestrictable.h"
 
 /**
  * Divides the mesh based on the subdomains
  */
-class SubdomainsDivision : public MeshDivision
+class SubdomainsDivision : public MeshDivision, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
