@@ -1616,8 +1616,6 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
       const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
   _current_JxW_neighbor.shallowCopy(
       const_cast<std::vector<Real> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_JxW()));
-  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
-      _holder_fe_face_neighbor_helper[neighbor_dim]->get_normals()));
 }
 
 void
