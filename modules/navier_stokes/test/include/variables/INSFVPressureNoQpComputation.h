@@ -21,7 +21,7 @@ public:
   /// Set a selection of routines that are use Qp values to error to make sure Qp values
   /// are not being computed. This is an optimization of INSFVVariables that we do not want to
   /// remove accidentally.
-  virtual void requireQpComputations() override
+  virtual void requireQpComputations() const override
   {
     mooseError("Qp-calculations should not be requested");
   }
