@@ -2247,8 +2247,6 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(
       const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
-  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
-      _holder_fe_face_neighbor_helper[neighbor_dim]->get_normals()));
 }
 
 void

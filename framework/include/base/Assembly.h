@@ -309,12 +309,6 @@ public:
    */
   const MooseArray<Point> & normals() const { return _current_normals; }
 
-  /**
-   * Returns the array of neighbor normals for quadrature points on a current side
-   * @return A _reference_.  Make sure to store this as a reference!
-   */
-  const MooseArray<Point> & neighborNormals() const { return _current_neighbor_normals; }
-
   /***
    * Returns the array of normals for quadrature points on a current side
    */
@@ -2463,8 +2457,6 @@ private:
   MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
   MooseArray<Point> _current_normals;
-  /// The current neighbor Normal vectors at the quadrature points.
-  MooseArray<Point> _current_neighbor_normals;
   /// Mapped normals
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
