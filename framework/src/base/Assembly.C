@@ -1667,8 +1667,11 @@ void
 Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
+  mooseAssert(_current_neighbor_subdomain_id == neighbor->subdomain_id(),
+              "Neighbor subdomain ID has not been correctly set");
 
-  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, _current_neighbor_subdomain_id).neighbor.get();
   neighbor_rule->setPoints(reference_points);
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
@@ -1881,9 +1884,11 @@ Assembly::reinitFVFace(const FaceInfo & fi)
 
   if (_current_neighbor_elem)
   {
+    mooseAssert(_current_neighbor_subdomain_id == _current_neighbor_elem->subdomain_id(),
+                "current neighbor subdomain has been set incorrectly");
     // Now handle the neighbor qrule/qpoints
     ArbitraryQuadrature * const neighbor_rule =
-        qrules(_current_neighbor_elem->dim()).neighbor.get();
+        qrules(_current_neighbor_elem->dim(), _current_neighbor_subdomain_id).neighbor.get();
     // Here we are setting a reference point that is correct for the neighbor *side* element. It
     // would be wrong if this reference point is used for a volumetric FE reinit with the neighbor
     neighbor_rule->setPoints(ref_points);
@@ -2180,7 +2185,11 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
+  mooseAssert(_current_neighbor_subdomain_id == neighbor->subdomain_id(),
+              "Neighbor subdomain ID has not been correctly set");
+
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, _current_neighbor_subdomain_id).neighbor.get();
   neighbor_rule->setPoints(*pts);
 
   // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
