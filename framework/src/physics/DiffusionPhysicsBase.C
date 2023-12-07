@@ -9,6 +9,9 @@
 
 #include "DiffusionPhysicsBase.h"
 #include "MatDiffusion.h"
+#include "MoosePreconditioner.h"
+#include "PetscSupport.h"
+#include "MooseEnumItem.h"
 
 InputParameters
 DiffusionPhysicsBase::validParams()

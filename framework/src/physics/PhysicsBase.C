@@ -28,6 +28,9 @@ PhysicsBase::validParams()
   params.addParam<MooseEnum>(
       "transient", transient_options, "Whether the physics is to be solved as a transient");
 
+  MooseEnum pc_options("default none", "none");
+  params.addParam<MooseEnum>(
+      "preconditioning", pc_options, "Which preconditioning to use for this Physics");
   params.addParam<bool>("verbose", false, "Flag to facilitate debugging a Physics");
 
   // Restart parameters
@@ -48,6 +51,7 @@ PhysicsBase::PhysicsBase(const InputParameters & parameters)
   : Action(parameters),
     _sys_number(0),
     _verbose(getParam<bool>("verbose")),
+    _preconditioning(getParam<MooseEnum>("preconditioning")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _is_transient(getParam<MooseEnum>("transient"))
 {

@@ -29,4 +29,8 @@ protected:
   const std::vector<BoundaryName> & _neumann_boundaries;
   /// Boundaries on which a Dirichlet boundary condition is applied
   const std::vector<BoundaryName> & _dirichlet_boundaries;
+
+private:
+  /// Add default preconditioning options
+  void addPreconditioning() override;
 };
