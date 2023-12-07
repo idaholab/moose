@@ -927,6 +927,16 @@ public:
                                          std::set<TagID> & selected_tags);
 
   /**
+   * Select the matrix tags which belong to a specific system
+   * @param system Reference to the nonlinear system
+   * @param input_matrix_tags A map of matrix tags
+   * @param selected_tags A set which gets populated by the tag-ids that belong to the system
+   */
+  static void selectMatrixTagsFromSystem(const SystemBase & system,
+                                         const std::map<TagName, TagID> & input_matrix_tags,
+                                         std::set<TagID> & selected_tags);
+
+  /**
    * reinitialize the finite volume assembly data for the provided face and thread
    */
   void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);

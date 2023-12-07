@@ -273,6 +273,17 @@ SubProblem::selectVectorTagsFromSystem(const SystemBase & system,
       selected_tags.insert(vector_tag._id);
 }
 
+void
+SubProblem::selectMatrixTagsFromSystem(const SystemBase & system,
+                                       const std::map<TagName, TagID> & input_matrix_tags,
+                                       std::set<TagID> & selected_tags)
+{
+  selected_tags.clear();
+  for (const auto & matrix_tag_pair : input_matrix_tags)
+    if (system.hasMatrix(matrix_tag_pair.second))
+      selected_tags.insert(matrix_tag_pair.second);
+}
+
 TagID
 SubProblem::addMatrixTag(TagName tag_name)
 {

@@ -234,7 +234,7 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
   // residual contributions from the domain
   PARALLEL_TRY
   {
-    TIME_SECTION("LinearFVKernels", 3 /*, "Computing LinearFVKernels"*/);
+    TIME_SECTION("LinearFVKernels_RightHandSide", 3 /*, "Computing LinearFVKernels"*/);
 
     using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
     ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
@@ -253,6 +253,87 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;
+
+  // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
+  // counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
+}
+
+void
+LinearSystem::computeSystemMatrixTags(const std::set<TagID> & tags)
+{
+  parallel_object_only();
+
+  TIME_SECTION("LinearSystem::computeJacobianTags", 5);
+
+  _fe_problem.setCurrentLinearSystem(number());
+
+  FloatingPointExceptionGuard fpe_guard(_app);
+
+  try
+  {
+    computeSystemMatrixInternal(tags);
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+}
+
+void
+LinearSystem::computeSystemMatrixInternal(const std::set<TagID> & tags)
+{
+  parallel_object_only();
+
+  TIME_SECTION("LinearSystem::computeSystemMatrixInternal", 3);
+
+  // Make matrix ready to use
+  activeAllMatrixTags();
+
+  for (auto tag : tags)
+  {
+    if (!hasMatrix(tag))
+      continue;
+
+    auto & tagged_matrix = getMatrix(tag);
+    // Necessary for speed
+    if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&tagged_matrix))
+    {
+      MatSetOption(petsc_matrix->mat(),
+                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   PETSC_TRUE);
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    }
+  }
+
+  jacobianSetup();
+
+  PARALLEL_TRY
+  {
+    TIME_SECTION("LinearFVKernels_systemMatrix", 3 /*, "Computing LinearFVKernels"*/);
+
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                  _fe_problem.mesh().ownedFaceInfoEnd());
+
+    ComputeLinearFVElementalThread elem_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::Matrix, tags);
+    Threads::parallel_reduce(elem_info_range, elem_thread);
+
+    ComputeLinearFVFaceThread face_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::Matrix, tags);
+    Threads::parallel_reduce(face_info_range, face_thread);
+  }
+  PARALLEL_CATCH;
+
+  closeTaggedMatrices(tags);
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
@@ -301,14 +382,6 @@ LinearSystem::computeLinearSystemTagsInternal(const std::set<TagID> & /*vector_t
 }
 
 void
-LinearSystem::computeSystemMatricesInternal(const std::set<TagID> & /*tags*/)
-{
-  TIME_SECTION("computeSystemMatricesInternal", 3);
-
-  _fe_problem.setCurrentNonlinearSystem(number());
-}
-
-void
 LinearSystem::computeSystemMatrix(SparseMatrix<Number> & /*matrix*/)
 {
 }
@@ -321,25 +394,6 @@ LinearSystem::computeSystemMatrix(SparseMatrix<Number> & matrix, const std::set<
   computeSystemMatrixTags(tags);
 
   disassociateMatrixFromTag(matrix, systemMatrixTag());
-}
-
-void
-LinearSystem::computeSystemMatrixTags(const std::set<TagID> & tags)
-{
-  TIME_SECTION("computeSystemMatrixTags", 5);
-
-  FloatingPointExceptionGuard fpe_guard(_app);
-
-  try
-  {
-    computeSystemMatricesInternal(tags);
-  }
-  catch (MooseException & e)
-  {
-    // The buck stops here, we have already handled the exception by
-    // calling stopSolve(), it is now up to PETSc to return a
-    // "diverged" reason during the next solve.
-  }
 }
 
 void

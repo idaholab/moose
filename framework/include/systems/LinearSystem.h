@@ -244,7 +244,7 @@ protected:
   /**
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
-  void computeSystemMatricesInternal(const std::set<TagID> & tags);
+  void computeSystemMatrixInternal(const std::set<TagID> & tags);
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 

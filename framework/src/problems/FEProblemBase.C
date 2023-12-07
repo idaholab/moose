@@ -6969,8 +6969,8 @@ FEProblemBase::computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-  // We filter out tags which do not have associated vectors in the current nonlinear
-  // system. This is essential to be able to use system-dependent residual tags.
+  // We filter out tags which do not have associated vectors in the current
+  // system. This is essential to be able to use system-dependent vector tags.
   selectVectorTagsFromSystem(*_current_linear_sys, vector_tags, _linear_vector_tags);
 
   computeLinearSystemRightHandSideTags(
@@ -6988,21 +6988,19 @@ FEProblemBase::computeLinearSystemRightHandSideTags(const NumericVector<Number> 
 
   _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
 
-  _aux->zeroVariablesForResidual();
-
   unsigned int n_threads = libMesh::n_threads();
 
-  _current_execute_on_flag = EXEC_LINEAR;
+  _current_execute_on_flag = EXEC_NONLINEAR;
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_LINEAR);
+    it.second->updateSeeds(EXEC_NONLINEAR);
 
-  execTransfers(EXEC_LINEAR);
+  execTransfers(EXEC_NONLINEAR);
 
-  execMultiApps(EXEC_LINEAR);
+  execMultiApps(EXEC_NONLINEAR);
 
-  computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
+  computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
   _aux->residualSetup();
 
@@ -7011,7 +7009,7 @@ FEProblemBase::computeLinearSystemRightHandSideTags(const NumericVector<Number> 
 
   try
   {
-    _aux->compute(EXEC_LINEAR);
+    _aux->compute(EXEC_NONLINEAR);
   }
   catch (MooseException & e)
   {
@@ -7027,9 +7025,9 @@ FEProblemBase::computeLinearSystemRightHandSideTags(const NumericVector<Number> 
     return;
   }
 
-  computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
+  computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
 
-  executeControls(EXEC_LINEAR);
+  executeControls(EXEC_NONLINEAR);
 
   _app.getOutputWarehouse().residualSetup();
 
@@ -7040,6 +7038,80 @@ FEProblemBase::computeLinearSystemRightHandSideTags(const NumericVector<Number> 
   _current_execute_on_flag = EXEC_NONE;
   _current_linear_sys->disassociateVectorFromTag(rhs,
                                                  _current_linear_sys->rightHandSideVectorTag());
+}
+
+void
+FEProblemBase::computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
+                                            SparseMatrix<Number> & system_matrix)
+{
+  TIME_SECTION("computeLinearSystemMatrixSys", 5);
+
+  setCurrentNonlinearSystem(sys.number());
+
+  const auto & matrix_tags = getMatrixTags();
+
+  // We filter out tags which do not have associated matrices in the current
+  // system. This is essential to be able to use system-dependent matrix tags.
+  selectMatrixTagsFromSystem(*_current_linear_sys, matrix_tags, _linear_matrix_tags);
+
+  computeLinearSystemMatrixTags(
+      *(_current_linear_sys->currentSolution()), system_matrix, _linear_matrix_tags);
+}
+
+void
+FEProblemBase::computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
+                                             SparseMatrix<Number> & system_matrix,
+                                             const std::set<TagID> & tags)
+{
+  TIME_SECTION("computeLinearSystemMatrixTags", 5, "Computing System Matrix");
+
+  _current_linear_sys->setSolution(soln);
+
+  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
+
+  for (auto tag : tags)
+    if (_current_nl_sys->hasMatrix(tag))
+    {
+      auto & matrix = _current_linear_sys->getMatrix(tag);
+      matrix.zero();
+    }
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_NONLINEAR);
+
+  _current_execute_on_flag = EXEC_NONLINEAR;
+
+  execTransfers(EXEC_NONLINEAR);
+  execMultiApps(EXEC_NONLINEAR);
+
+  computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
+
+  _aux->jacobianSetup();
+
+  for (unsigned int tid = 0; tid < n_threads; tid++)
+  {
+    _functions.jacobianSetup(tid);
+  }
+
+  _aux->compute(EXEC_NONLINEAR);
+
+  computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
+
+  executeControls(EXEC_NONLINEAR);
+
+  _app.getOutputWarehouse().jacobianSetup();
+
+  _safe_access_tagged_matrices = false;
+  _current_linear_sys->computeSystemMatrixTags(tags);
+  _safe_access_tagged_matrices = true;
+
+  // Reset execute_on flag as after this point we are no longer on NONLINEAR
+  _current_execute_on_flag = EXEC_NONE;
+  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
+                                                 _current_linear_sys->systemMatrixTag());
 }
 
 void
