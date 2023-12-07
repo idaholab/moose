@@ -50,6 +50,13 @@ enum class InterpMethod
   QUICK
 };
 
+enum class LinearFVComputationMode
+{
+  RHS,
+  Matrix,
+  FullSystem
+};
+
 /**
  * Returns an enum with all the currently supported interpolation methods and the current default
  * for FV: first-order upwind

@@ -244,10 +244,12 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVElementalThread elem_thread(_fe_problem, number(), tags);
+    ComputeLinearFVElementalThread elem_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::RHS, tags);
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
-    ComputeLinearFVFaceThread face_thread(_fe_problem, number(), tags);
+    ComputeLinearFVFaceThread face_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::RHS, tags);
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;

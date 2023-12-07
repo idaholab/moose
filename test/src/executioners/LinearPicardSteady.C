@@ -92,10 +92,10 @@ LinearPicardSteady::execute()
     // FEProblemBase &fe_problem, const unsigned int linear_system_num,
     //     const std::set<TagID> &tags
 
-    ComputeLinearFVElementalThread elem_thread(_problem, 0, {});
+    ComputeLinearFVElementalThread elem_thread(_problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
-    ComputeLinearFVFaceThread face_thread(_problem, 0, {});
+    ComputeLinearFVFaceThread face_thread(_problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
     Threads::parallel_reduce(face_info_range, face_thread);
 
     auto & sys = _problem.getLinearSystem(0);

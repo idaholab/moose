@@ -14,16 +14,19 @@
 
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                                                      const unsigned int linear_system_num,
+                                                     const Moose::FV::LinearFVComputationMode mode,
                                                      const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _tags(tags)
+  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _mode(mode), _tags(tags)
 {
 }
 
 // Splitting Constructor
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(ComputeLinearFVFaceThread & x,
                                                      Threads::split /*split*/)
-  : _fe_problem(x._fe_problem), _linear_system_number(x._linear_system_number), _tags(x._tags)
-
+  : _fe_problem(x._fe_problem),
+    _linear_system_number(x._linear_system_number),
+    _mode(x._mode),
+    _tags(x._tags)
 {
 }
 
@@ -34,19 +37,29 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   _tid = puid.id;
 
   std::vector<LinearFVFluxKernel *> kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSysNum>(_fe_problem.getLinearSystem(_linear_system_number).number())
-      .template condition<AttribSystem>("LinearFVFluxKernel")
-      .queryInto(kernels);
+  auto base_query = _fe_problem.theWarehouse()
+                        .query()
+                        .template condition<AttribSysNum>(
+                            _fe_problem.getLinearSystem(_linear_system_number).number())
+                        .template condition<AttribSystem>("LinearFVFluxKernel")
+                        .template condition<AttribThread>(_tid);
+
+  if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
+    base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
+  else
+    base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
 
   // Iterate over all the elements in the range
   for (const auto & face_info : range)
     for (auto kernel : kernels)
     {
       kernel->setCurrentFaceInfo(face_info);
-      kernel->addMatrixContribution();
-      kernel->addRightHandSideContribution();
+      if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
+          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
+        kernel->addMatrixContribution();
+      if (_mode == Moose::FV::LinearFVComputationMode::RHS ||
+          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
+        kernel->addRightHandSideContribution();
     }
 }
 

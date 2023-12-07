@@ -23,6 +23,7 @@ class ComputeLinearFVFaceThread
 public:
   ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                             const unsigned int linear_system_num,
+                            const Moose::FV::LinearFVComputationMode mode,
                             const std::set<TagID> & tags);
   // Splitting Constructor
   ComputeLinearFVFaceThread(ComputeLinearFVFaceThread & x, Threads::split split);
@@ -33,6 +34,7 @@ public:
 protected:
   FEProblemBase & _fe_problem;
   const unsigned int _linear_system_number;
-  const std::set<TagID> & _tags;
+  const Moose::FV::LinearFVComputationMode _mode;
+  const std::set<TagID> _tags;
   THREAD_ID _tid;
 };
