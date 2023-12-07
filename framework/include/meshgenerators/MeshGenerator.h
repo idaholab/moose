@@ -43,25 +43,28 @@ public:
     }
   };
 
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   static InputParameters validParams();
 
-  MeshGenerator(const InputParameters & parameters);
-
   /**
-   * Generate / modify the mesh
+   * Sets that a mesh generator has a generateData() implementation.
+   *
+   * This must be called in the validParams() implementation for all
+   * mesh generators that implement generateData().
    */
-  virtual std::unique_ptr<MeshBase> generate() = 0;
+  static void setHasGenerateData(InputParameters & params);
+  /**
+   * @return Whether or not the mesh generator noted by the given parameters
+   * has a generateData() implementation
+   */
+  static bool hasGenerateData(const InputParameters & params);
+
+  MeshGenerator(const InputParameters & parameters);
 
   /**
    * Internal generation method - this is what is actually called
    * within MooseApp to execute the MeshGenerator.
    */
-  [[nodiscard]] std::unique_ptr<MeshBase> generateInternal();
+  [[nodiscard]] std::unique_ptr<MeshBase> generateInternal(const bool data_only);
 
   /**
    * @returns The names of the MeshGenerators that were requested in the getMesh methods
@@ -162,7 +165,22 @@ public:
    */
   const std::string & getSavedMeshName() const;
 
+  /**
+   * @return Whether or not this generator has a generateData() implementation
+   */
+  bool hasGenerateData() const { return hasGenerateData(_pars); }
+
 protected:
+  /**
+   * Generate the mesh data
+   */
+  virtual void generateData();
+
+  /**
+   * Generate / modify the mesh
+   */
+  virtual std::unique_ptr<MeshBase> generate() = 0;
+
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
    * most other MOOSE systems and is recoverable.

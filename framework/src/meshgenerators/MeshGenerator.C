@@ -42,6 +42,8 @@ MeshGenerator::validParams()
   params.addParamNamesToGroup("save_with_name", "Advanced");
   params.registerBase("MeshGenerator");
 
+  params.addPrivateParam<bool>("_has_generate_data", false);
+
   return params;
 }
 
@@ -54,6 +56,18 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
     paramError(
         "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
+}
+
+void
+MeshGenerator::setHasGenerateData(InputParameters & params)
+{
+  params.set<bool>("_has_generate_data") = true;
+}
+
+bool
+MeshGenerator::hasGenerateData(const InputParameters & params)
+{
+  return params.get<bool>("_has_generate_data");
 }
 
 const MeshGeneratorName *
@@ -223,15 +237,24 @@ MeshGenerator::buildDistributedMesh(unsigned int dim)
 }
 
 std::unique_ptr<MeshBase>
-MeshGenerator::generateInternal()
+MeshGenerator::generateInternal(const bool data_only)
 {
   libmesh_parallel_only(comm());
   mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
 
+  if (data_only && !hasGenerateData())
+    mooseError("This generator does not support data-only generation");
+
 #ifndef NDEBUG
   for (const auto & [name, mesh] : _requested_meshes)
-    mooseAssert(*mesh, "Null output from " + name);
+    mooseAssert((bool)*mesh == !data_only, "Unexpected input from " + name);
 #endif
+
+  if (hasGenerateData())
+    generateData();
+
+  if (data_only)
+    return nullptr;
 
   auto mesh = generate();
   mooseAssert(mesh, "Null output");
@@ -379,4 +402,11 @@ const std::string &
 MeshGenerator::getSavedMeshName() const
 {
   return _save_with_name;
+}
+
+void
+MeshGenerator::generateData()
+{
+  mooseAssert(!hasGenerateData(), "Inconsistent flag");
+  mooseError("This MeshGenerator does not have a generateData() implementation.");
 }

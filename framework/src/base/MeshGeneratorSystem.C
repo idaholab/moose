@@ -19,6 +19,7 @@ MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
     _app(app),
+    _data_only(false),
     _has_bmbb(false)
 {
 }
@@ -163,18 +164,24 @@ MeshGeneratorSystem::createAddedMeshGenerators()
   // Set the final generator if we have one set by the user
   // and if so make sure it also exists
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
-  if (moose_mesh->parameters().have_parameter<std::string>("final_generator") &&
-      moose_mesh->isParamValid("final_generator"))
+  if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh"))
   {
-    mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
-                "Assumption for mesh type is now invalid");
+    // Set the final generator if set, and if so, see if it exists
+    if (moose_mesh->isParamValid("final_generator"))
+    {
+      mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
+                  "Assumption for mesh type is now invalid");
 
-    _final_generator_name = moose_mesh->getParam<std::string>("final_generator");
-    if (!hasMeshGenerator(_final_generator_name))
-      moose_mesh->paramError("final_generator",
-                             "The forced final MeshGenerator '",
-                             _final_generator_name,
-                             "' does not exist");
+      _final_generator_name = moose_mesh->getParam<std::string>("final_generator");
+      if (!hasMeshGenerator(_final_generator_name))
+        moose_mesh->paramError("final_generator",
+                               "The forced final MeshGenerator '",
+                               _final_generator_name,
+                               "' does not exist");
+    }
+
+    // Set the data only flag
+    _data_only = moose_mesh->parameters().get<bool>("data_only");
   }
 }
 
@@ -327,17 +334,27 @@ MeshGeneratorSystem::executeMeshGenerators()
 
   std::map<std::string, std::unique_ptr<MeshBase> *> to_save_in_meshes;
 
-  // Loop over the MeshGenerators and save all meshes marked to to_save_in_meshes
+  // Loop over the MeshGenerators to:
+  // - Save all meshes marked to to_save_in_meshes
+  // - Check for data_only sanity
   for (const auto & generator_set : _ordered_mesh_generators)
     for (const auto & generator : generator_set)
+    {
       if (generator->hasSaveMesh())
       {
+        if (_data_only)
+          generator->paramError("save_with_name",
+                                "Cannot use the save in capability with data only generation");
         if (_final_generator_name == generator->name())
           generator->paramError("save_with_name",
                                 "Cannot use the save in capability with the final mesh generator");
         to_save_in_meshes.emplace(generator->getSavedMeshName(),
                                   &getMeshGeneratorOutput(generator->name()));
       }
+      if (_data_only && !generator->hasGenerateData())
+        generator->mooseError(
+            "Cannot use data only generation because this generator does not support it");
+    }
 
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick it up
   to_save_in_meshes.emplace(mainMeshGeneratorName(),
@@ -350,7 +367,16 @@ MeshGeneratorSystem::executeMeshGenerators()
     {
       const auto & name = generator->name();
 
-      auto current_mesh = generator->generateInternal();
+      const auto data_only = _data_only && (name != _final_generator_name);
+      auto current_mesh = generator->generateInternal(data_only);
+
+      // Only generating data for this generator
+      if (data_only)
+      {
+        mooseAssert(!current_mesh, "Should not have a mesh");
+        continue;
+      }
+
 #ifdef DEBUG
       // Assert that the mesh is either marked as not prepared or if it is marked as prepared,
       // that it's *actually* prepared
