@@ -146,6 +146,10 @@ class JobDAG(object):
                 # test file has invalid prereq set
                 except KeyError:
                     job.setStatus(job.error, 'unknown dependency')
+                    return
+
+                # Modify prereq_job tester spec params
+                self._align_params(self.__name_to_job[prereq_job], job)
 
     def _hasDownStreamsWithFailures(self, job):
         """ Return True if any dependents of job has previous failures """
@@ -236,6 +240,32 @@ class JobDAG(object):
                 for job in job_list:
                     job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')
+
+    def _align_params(self, prereq_job, job):
+        """
+        Align Test specification parameters for prereq_job with job.
+
+        This method uses Tester().ignore_skip_params to determine which params are acceptably safe
+        to add to `prereq_job` if `job` contains such param(s). Thus allowing prereq_job to launch
+        when it might not otherwise.
+        """
+        prereq_tester = prereq_job.getTester()
+        tester = job.getTester()
+        for param in tester.ignore_skip_params:
+            # if param is valid and param value for both prereq tester and tester are not the same,
+            # and if prereq tester is already slated not to launch...
+            if (tester.specs.isValid(param)
+                and tester.specs[param] != prereq_tester.specs[param]
+                and not prereq_tester.checkRunnableBase(self.options)):
+                # ...add param value to prereq tester in an attempt to allow prereq tester to launch
+                prereq_tester.specs[param] = tester.specs[param]
+
+                # After running checkRunnableBase it is necessary to 'reset' some tester attributes
+                # TODO: Maybe add a feature to checkRunnableBase, indicating not to cache settings
+                #       so all we have to do is add the missing param
+                prereq_tester.setStatus(prereq_tester.no_status)
+                prereq_tester.addCaveats(f'{param} param added to satisfy dependency')
+                prereq_tester.runnable = None
 
     def _skipPrereqs(self):
         """

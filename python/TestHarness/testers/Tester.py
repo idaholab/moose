@@ -134,7 +134,12 @@ class Tester(MooseObject):
         self.__tester_message = ''
 
         # Bool if test can run
-        self._runnable = None
+        self.runnable = None
+
+        # List of skippable params to ignore when a prerequisite test is being skipped while it's
+        # dependency test(s) are not. e.g: foo <-- bar. bar is heavy and foo is not, foo should be
+        # allowed to run in this scenario.
+        self.ignore_skip_params = ['heavy']
 
         # Set up common paramaters
         self.should_execute = self.specs['should_execute']
@@ -238,9 +243,9 @@ class Tester(MooseObject):
 
     def getRunnable(self, options):
         """ return bool and cache results, if this test can run """
-        if self._runnable is None:
-            self._runnable = self.checkRunnableBase(options)
-        return self._runnable
+        if self.runnable is None:
+            self.runnable = self.checkRunnableBase(options)
+        return self.runnable
 
     def getInputFile(self):
         """ return the input file if applicable to this Tester """
@@ -725,5 +730,5 @@ class Tester(MooseObject):
             return False
 
         # Check the return values of the derived classes
-        self._runnable = self.checkRunnable(options)
-        return self._runnable
+        self.runnable = self.checkRunnable(options)
+        return self.runnable
