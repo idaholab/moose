@@ -36,8 +36,7 @@ InterfacialSource::InterfacialSource(const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _scale(getParam<Real>("value")),
     _function(getFunction("function")),
-    _postprocessor(getPostprocessorValue("postprocessor")),
-    _neighbor_JxW(_assembly.JxWNeighbor())
+    _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }
 
@@ -66,19 +65,7 @@ InterfacialSource::computeQpResidual(Moose::DGResidualType type)
 void
 InterfacialSource::computeElemNeighResidual(Moose::DGResidualType type)
 {
-  bool is_elem;
-  const MooseArray<Real> * JxW;
-
-  if (type == Moose::Element)
-  {
-    is_elem = true;
-    JxW = &_JxW;
-  }
-  else
-  {
-    is_elem = false;
-    JxW = &_neighbor_JxW;
-  }
+  const bool is_elem = (type == Moose::Element);
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
 
@@ -89,7 +76,7 @@ InterfacialSource::computeElemNeighResidual(Moose::DGResidualType type)
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      _local_re(_i) += (*JxW)[_qp] * _coord[_qp] * computeQpResidual(type);
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
 
   accumulateTaggedLocalResidual();
 
@@ -109,4 +96,7 @@ InterfacialSource::computeElemNeighResidual(Moose::DGResidualType type)
   }
 }
 
-void InterfacialSource::computeElemNeighJacobian(Moose::DGJacobianType) {}
+void
+InterfacialSource::computeElemNeighJacobian(Moose::DGJacobianType)
+{
+}

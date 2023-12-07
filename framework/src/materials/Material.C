@@ -40,7 +40,7 @@ Material::Material(const InputParameters & parameters)
                   : _assembly.qPoints()),
     _qrule(_bnd ? (_neighbor ? _assembly.qRuleNeighbor() : _assembly.qRuleFace())
                 : _assembly.qRule()),
-    _JxW(_bnd ? (_neighbor ? _assembly.JxWNeighbor() : _assembly.JxWFace()) : _assembly.JxW()),
+    _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
     _current_elem(_neighbor ? _assembly.neighbor() : _assembly.elem()),
     _current_subdomain_id(_neighbor ? _assembly.currentNeighborSubdomainID()
                                     : _assembly.currentSubdomainID()),
