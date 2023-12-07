@@ -1983,22 +1983,19 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  const std::vector<Point> * reference_points_ptr;
-  std::vector<Point> reference_points;
-
   if (neighbor_reference_points)
-    reference_points_ptr = neighbor_reference_points;
+    _current_neighbor_ref_points = *neighbor_reference_points;
   else
-  {
-    FEInterface::inverse_map(
-        neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
-    reference_points_ptr = &reference_points;
-  }
+    FEInterface::inverse_map(neighbor_dim,
+                             FEType(),
+                             neighbor,
+                             _current_q_points_face.stdVector(),
+                             _current_neighbor_ref_points);
 
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
-  reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
-  reinitNeighbor(neighbor, *reference_points_ptr);
+  reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
 }
 
 void
@@ -2402,17 +2399,16 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
 {
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
-  std::vector<Point> reference_points;
-
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+  FEInterface::inverse_map(
+      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
 
   // first do the side element
-  reinitFEFaceNeighbor(_current_neighbor_side_elem, reference_points);
-  reinitNeighbor(_current_neighbor_side_elem, reference_points);
+  reinitFEFaceNeighbor(_current_neighbor_side_elem, _current_neighbor_ref_points);
+  reinitNeighbor(_current_neighbor_side_elem, _current_neighbor_ref_points);
 
-  reinitFEFaceNeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+  reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
 
   // Save off the physical points
   _current_physical_points = physical_points;
@@ -2422,13 +2418,12 @@ void
 Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    const std::vector<Point> & physical_points)
 {
-  std::vector<Point> reference_points;
-
   unsigned int neighbor_dim = neighbor->dim();
-  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+  FEInterface::inverse_map(
+      neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
 
-  reinitFENeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+  reinitFENeighbor(neighbor, _current_neighbor_ref_points);
+  reinitNeighbor(neighbor, _current_neighbor_ref_points);
   // Save off the physical points
   _current_physical_points = physical_points;
 }

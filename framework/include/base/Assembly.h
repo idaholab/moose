@@ -2821,6 +2821,9 @@ protected:
 
   /// Whether we have ever conducted p-refinement
   bool _have_p_refinement;
+
+  /// The current reference points on the neighbor element
+  std::vector<Point> _current_neighbor_ref_points;
 };
 
 template <typename OutputType>
