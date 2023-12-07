@@ -32,6 +32,8 @@
 #include "ComputeNodalKernelBcsThread.h"
 #include "ComputeNodalKernelJacobiansThread.h"
 #include "ComputeNodalKernelBCJacobiansThread.h"
+#include "ComputeLinearFVElementalThread.h"
+#include "ComputeLinearFVFaceThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "DirichletBCBase.h"
@@ -118,7 +120,7 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 {
   getRightHandSideNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
-  _system_matrix_system_tag = _fe_problem.addMatrixTag("SYSTEM");
+  _system_matrix_tag = _fe_problem.addMatrixTag("SYSTEM");
 
   // The time matrix tag is not normally used - but must be added to the system
   // in case it is so that objects can have 'time' in their matrix tags by default
@@ -183,37 +185,76 @@ LinearSystem::addTimeIntegrator(const std::string & type,
 }
 
 void
-LinearSystem::addLinearFVKernel(const std::string & kernel_name,
-                                const std::string & name,
-                                InputParameters & parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // Create the kernel object via the factory and add to warehouse
-    std::shared_ptr<LinearFVKernel> kernel =
-        _factory.create<LinearFVKernel>(kernel_name, name, parameters, tid);
-    _linear_fv_kernels.addObject(kernel, tid);
-  }
-}
-
-void
-LinearSystem::addBoundaryCondition(const std::string & /*bc_name*/,
-                                   const std::string & /*name*/,
-                                   InputParameters & /*parameters*/)
-{
-}
-
-void
 LinearSystem::computeRightHandSideTag(NumericVector<Number> & /*residual*/, TagID /*tag_id*/)
 {
 }
 
 void
-LinearSystem::computeRightHandSideTags(const std::set<TagID> & /*tags*/)
+LinearSystem::computeRightHandSideTags(const std::set<TagID> & tags)
 {
   parallel_object_only();
 
-  TIME_SECTION("nl::computeResidualTags", 5);
+  TIME_SECTION("nl::computeRightHandSideTags", 5);
+
+  _fe_problem.setCurrentLinearSystem(number());
+
+  // not suppose to do anythin on matrix
+  deactiveAllMatrixTags();
+
+  FloatingPointExceptionGuard fpe_guard(_app);
+
+  try
+  {
+    zeroTaggedVectors(tags);
+    computeRightHandSideInternal(tags);
+    closeTaggedVectors(tags);
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+
+  // not supposed to do anything on matrix
+  activeAllMatrixTags();
+}
+
+void
+LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
+{
+  parallel_object_only();
+
+  TIME_SECTION("computeRightHandSideInternal", 3);
+
+  residualSetup();
+
+  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
+
+  // residual contributions from the domain
+  PARALLEL_TRY
+  {
+    TIME_SECTION("LinearFVKernels", 3 /*, "Computing LinearFVKernels"*/);
+
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                  _fe_problem.mesh().ownedFaceInfoEnd());
+
+    ComputeLinearFVElementalThread elem_thread(_fe_problem, number(), tags);
+    Threads::parallel_reduce(elem_info_range, elem_thread);
+
+    ComputeLinearFVFaceThread face_thread(_fe_problem, number(), tags);
+    Threads::parallel_reduce(face_info_range, face_thread);
+  }
+  PARALLEL_CATCH;
+
+  // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
+  // counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
 void
@@ -248,12 +289,6 @@ NumericVector<Number> &
 LinearSystem::getRightHandSideNonTimeVector()
 {
   return *_rhs_non_time;
-}
-
-void
-LinearSystem::computeRightHandSideInternal(const std::set<TagID> & /*tags*/)
-{
-  parallel_object_only();
 }
 
 void
@@ -374,14 +409,6 @@ LinearSystem::getPreconditioner() const
 void
 LinearSystem::checkKernelCoverage(const std::set<SubdomainID> & /*mesh_subdomains*/) const
 {
-}
-
-bool
-LinearSystem::containsTimeKernel()
-{
-  auto & time_kernels = _linear_fv_kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
-
-  return time_kernels.hasActiveObjects();
 }
 
 void

@@ -6953,6 +6953,96 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
 }
 
 void
+FEProblemBase::computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
+                                                   NumericVector<Number> & rhs)
+{
+  parallel_object_only();
+
+  TIME_SECTION("computeLinearSystemRightHandSideSys", 5);
+
+  setCurrentLinearSystem(sys.number());
+
+  // We associate the RHS tag with the given RHS vector to make sure we
+  // don't filter it out below
+  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
+
+  // We are using the residual tag system for right hand sides so we fetch everything
+  const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+
+  // We filter out tags which do not have associated vectors in the current nonlinear
+  // system. This is essential to be able to use system-dependent residual tags.
+  selectVectorTagsFromSystem(*_current_linear_sys, vector_tags, _linear_vector_tags);
+
+  computeLinearSystemRightHandSideTags(
+      *(_current_linear_sys->currentSolution()), rhs, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
+                                                    NumericVector<Number> & rhs,
+                                                    const std::set<TagID> & tags)
+{
+  TIME_SECTION("computeLinearSystemRightHandSideTags", 5, "Computing Right Hand Side");
+
+  _current_linear_sys->setSolution(soln);
+
+  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
+
+  _aux->zeroVariablesForResidual();
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  _current_execute_on_flag = EXEC_LINEAR;
+
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_LINEAR);
+
+  execTransfers(EXEC_LINEAR);
+
+  execMultiApps(EXEC_LINEAR);
+
+  computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
+
+  _aux->residualSetup();
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    _functions.residualSetup(tid);
+
+  try
+  {
+    _aux->compute(EXEC_LINEAR);
+  }
+  catch (MooseException & e)
+  {
+    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+             << std::endl;
+
+    // We know the next solve is going to fail, so there's no point in
+    // computing anything else after this.  Plus, using incompletely
+    // computed AuxVariables in subsequent calculations could lead to
+    // other errors or unhandled exceptions being thrown.
+    _current_execute_on_flag = EXEC_NONE;
+    return;
+  }
+
+  computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
+
+  executeControls(EXEC_LINEAR);
+
+  _app.getOutputWarehouse().residualSetup();
+
+  _safe_access_tagged_vectors = false;
+  _current_linear_sys->computeRightHandSideTags(tags);
+  _safe_access_tagged_vectors = true;
+
+  _current_execute_on_flag = EXEC_NONE;
+  _current_linear_sys->disassociateVectorFromTag(rhs,
+                                                 _current_linear_sys->rightHandSideVectorTag());
+}
+
+void
 FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                     std::vector<NumericVector<Number> *> & sp)
 {

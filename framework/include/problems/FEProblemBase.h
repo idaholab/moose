@@ -93,6 +93,7 @@ namespace libMesh
 {
 class CouplingMatrix;
 class NonlinearImplicitSystem;
+class LinearImplicitSystem;
 } // namespace libMesh
 
 /// Enumeration for nonlinear convergence reasons
@@ -1345,6 +1346,30 @@ public:
                                     unsigned int ivar,
                                     unsigned int jvar);
 
+  virtual void computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
+                                                   NumericVector<Number> & rhs);
+
+  virtual void computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
+                                            SparseMatrix<Number> & system_matrix);
+
+  virtual void computeLinearSystemSys(LinearImplicitSystem & sys,
+                                      SparseMatrix<Number> & system_matrix,
+                                      NumericVector<Number> & rhs);
+
+  virtual void computeLinearSystemTags(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & system_matrix,
+                                       NumericVector<Number> & rhs,
+                                       const std::set<TagID> & vector_tags,
+                                       const std::set<TagID> & matrix_tags);
+
+  virtual void computeLinearSystemRightHandSideTags(const NumericVector<Number> & soln,
+                                                    NumericVector<Number> & rhs,
+                                                    const std::set<TagID> & tags);
+
+  virtual void computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
+                                             SparseMatrix<Number> & system_matrix,
+                                             const std::set<TagID> & tags);
+
   virtual Real computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update);
 
@@ -2216,6 +2241,12 @@ protected:
   std::set<TagID> _fe_vector_tags;
 
   std::set<TagID> _fe_matrix_tags;
+
+  /// Temporary storage for filtered vector tags for linear systems
+  std::set<TagID> _linear_vector_tags;
+
+  /// Temporary storage for filtered matrix tags for linear systems
+  std::set<TagID> _linear_matrix_tags;
 
   /// Whether or not to actually solve the nonlinear system
   const bool & _solve;

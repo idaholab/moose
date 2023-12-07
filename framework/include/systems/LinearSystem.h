@@ -103,26 +103,6 @@ public:
                          InputParameters & parameters) override;
   using SystemBase::addTimeIntegrator;
 
-  /**
-   * Adds a kernel
-   * @param kernel_name The type of the kernel
-   * @param name The name of the kernel
-   * @param parameters Kernel parameters
-   */
-  virtual void addLinearFVKernel(const std::string & kernel_name,
-                                 const std::string & name,
-                                 InputParameters & parameters);
-
-  /**
-   * Adds a boundary condition
-   * @param bc_name The type of the boundary condition
-   * @param name The name of the boundary condition
-   * @param parameters Boundary condition parameters
-   */
-  void addBoundaryCondition(const std::string & bc_name,
-                            const std::string & name,
-                            InputParameters & parameters);
-
   void setInitialSolution();
 
   /**
@@ -149,7 +129,7 @@ public:
   void computeRightHandSide(NumericVector<Number> & rhs, TagID tag_id);
 
   /**
-   * Computes multiple (tag associated) system matricese
+   * Computes multiple (tag associated) system matrices
    */
   void computeSystemMatrixTags(const std::set<TagID> & tags);
 
@@ -209,7 +189,6 @@ public:
   ///@{
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
-  bool containsTimeKernel();
   ///@}
 
   /**
@@ -228,23 +207,13 @@ public:
 
   Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
 
-  //@{
-  /**
-   * Access functions to Warehouses from outside LinearSystem
-   */
-  MooseObjectTagWarehouse<LinearFVKernel> & getLinearFVKernelWarehouse()
-  {
-    return _linear_fv_kernels;
-  }
-  //@}
-
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
-  TagID timeVectorTag() const override { return _rhs_time_tag; }
-  TagID nonTimeVectorTag() const override { return _rhs_non_time_tag; }
+  TagID rightHandSideTimeVectorTag() const { return _rhs_time_tag; }
+  TagID rightHandSideNonTimeVectorTag() const { return _rhs_non_time_tag; }
   TagID rightHandSideVectorTag() const { return _rhs_tag; }
-  TagID systemMatrixTag() const override { return _system_matrix_system_tag; }
+  TagID systemMatrixTag() const override { return _system_matrix_tag; }
 
   // non-const getters
   NumericVector<Number> * solutionUDot() override { return nullptr; }
@@ -282,14 +251,14 @@ protected:
   /// solution vector from linear solver
   const NumericVector<Number> * _current_solution;
 
-  /// Tag for time contribution rhs
-  TagID _rhs_time_tag;
-
   /// Vector tags to temporarily store all tags associated with the current system.
   std::set<TagID> _vector_tags;
 
   /// Matrix tags to temporarily store all tags associated with the current system.
   std::set<TagID> _matrix_tags;
+
+  /// Tag for time contribution rhs
+  TagID _rhs_time_tag;
 
   /// right hand side vector for time contributions
   NumericVector<Number> * _rhs_time;
@@ -307,19 +276,7 @@ protected:
   TagID _system_matrix_non_time_tag;
 
   /// Tag for every contribution to system matrix
-  TagID _system_matrix_system_tag;
-
-  ///@{
-  /// Kernel Storage
-  MooseObjectTagWarehouse<LinearFVKernel> _linear_fv_kernels;
-
-  ///@}
-
-  ///@{
-  /// BoundaryCondition Warhouses
-  MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
-  MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  ///@}
+  TagID _system_matrix_tag;
 
   /// Preconditioner
   std::shared_ptr<MoosePreconditioner> _preconditioner;
