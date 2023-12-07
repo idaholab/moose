@@ -1928,6 +1928,14 @@ private:
 
   void reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
+  /**
+   * Compute JxW from a \p neighbor_side_elem, e.g. compute a *lower-dimensional* JxW for the
+   * higher-d neighbor element. \p neighbor_subdomain_id should be the subdomain ID of the higher-d
+   * neighbor which we will use to select the proper quadrature rule
+   */
+  void computeNeighborJxW(const Elem * const neighbor_side_elem,
+                          const SubdomainID neighbor_subdomain_id);
+
   template <typename Points, typename Coords>
   void setCoordinateTransformation(const QBase * qrule,
                                    const Points & q_points,

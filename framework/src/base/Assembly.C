@@ -1672,6 +1672,28 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
 }
 
 void
+Assembly::computeNeighborJxW(const Elem * const neighbor_side_elem,
+                             const SubdomainID neighbor_subdomain_id)
+{
+  const auto dim = neighbor_side_elem->dim();
+  FEBase & fe = *_holder_fe_neighbor_helper[dim];
+  QBase * qrule = qrules(dim, neighbor_subdomain_id).vol.get();
+
+  const auto & JxW = fe.get_JxW();
+  fe.attach_quadrature_rule(qrule);
+  fe.reinit(neighbor_side_elem);
+
+  // I'm not confident the underlying data won't change before this gets used (e.g. someone might
+  // call reinit on a higher-d neighbor which would reinit _holder_fe_neighbor_helper...but with a
+  // higher dim...so there might actually not be a problem.... But to be safe let's so do a real
+  // (not shallow) copy
+  _current_JxW_neighbor = JxW;
+
+  const auto volume = neighbor_side_elem->volume();
+  libmesh_ignore(volume);
+}
+
+void
 Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
 {
   unsigned int neighbor_dim = neighbor->dim();
@@ -2411,11 +2433,31 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    unsigned int neighbor_side,
                                    const std::vector<Point> & physical_points)
 {
+  // We leverage _current_neighbor_subdomain_id in both computeNeighborJxW and reinitNeighbor, so
+  // make sure it's correct
+  mooseAssert(_current_neighbor_subdomain_id == neighbor->subdomain_id(),
+              "Neighbor subdomain ID has not been correctly set");
+
   _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
   unsigned int neighbor_dim = neighbor->dim();
   FEInterface::inverse_map(
       neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
+
+  // Compute JxW if requested
+  if (_need_JxW_neighbor)
+  {
+    mooseAssert(
+        physical_points.size() == 1,
+        "If reinitializing with more than one point, then I am dubious of your use case. Perhaps "
+        "you are performing a DG type method and you are reinitializing using points from the "
+        "element face. In such a case your neighbor JxW must have its index order 'match' the "
+        "element JxW index order, e.g. imagining a vertical 1D face with two quadrature points, if "
+        "index 0 for elem JxW corresponds to the 'top' quadrature point, then index 0 for neighbor "
+        "JxW must also correspond to the 'top' quadrature point. And libMesh/MOOSE has no way to "
+        "guarantee that with multiple quadrature points.");
+    computeNeighborJxW(_current_neighbor_side_elem, _current_neighbor_subdomain_id);
+  }
 
   reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
   reinitNeighbor(neighbor, _current_neighbor_ref_points);
