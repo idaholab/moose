@@ -112,5 +112,38 @@ NestedSolveTempl<is_ad>::normSquare(const NSRealVectorValue & v)
   return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
 }
 
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const NSReal & a, const NSReal & b, const NSReal & c)
+{
+  return (MetaPhysicL::raw_value(a) * MetaPhysicL::raw_value(a) <
+          MetaPhysicL::raw_value(c) * MetaPhysicL::raw_value(c) * MetaPhysicL::raw_value(b) *
+              MetaPhysicL::raw_value(b));
+}
+
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const NSRealVectorValue & a,
+                                    const NSRealVectorValue & b,
+                                    const NSReal & c)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    if (abs(MetaPhysicL::raw_value(a)(i)) >=
+        abs(MetaPhysicL::raw_value(b)(i) * MetaPhysicL::raw_value(c)))
+      return false;
+  }
+  return true;
+}
+
+template <bool is_ad>
+bool
+NestedSolveTempl<is_ad>::isRelSmall(const DynamicVector & a,
+                                    const DynamicVector & b,
+                                    const NSReal & c)
+{
+  return (a.cwiseAbs().array() < b.cwiseAbs().array() * MetaPhysicL::raw_value(c)).all();
+}
+
 template class NestedSolveTempl<false>;
 template class NestedSolveTempl<true>;

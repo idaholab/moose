@@ -172,6 +172,15 @@ public:
   static Real normSquare(const NSRealVectorValue & v);
   ///@}
 
+  ///@{ Check if |a| < |b * c| for all elements in a and b. This checks if 'a' is small relative to 'b' by a factor of 'c'
+  template <typename V>
+  static bool isRelSmall(const V & a, const V & b, const V & c);
+  static bool isRelSmall(const NSReal & a, const NSReal & b, const NSReal & c);
+  static bool
+  isRelSmall(const NSRealVectorValue & a, const NSRealVectorValue & b, const NSReal & c);
+  static bool isRelSmall(const DynamicVector & a, const DynamicVector & b, const NSReal & c);
+  ///@}
+
 protected:
   /// current solver state
   State _state;
@@ -445,7 +454,7 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
     linear(jacobian, delta, residual);
 
     // // Check if step size is smaller than the floating point tolerance
-    if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
+    if (isRelSmall(delta, guess, _delta_thresh))
     {
       _state = State::CONVERGED_XTOL;
       return;
@@ -498,8 +507,8 @@ NestedSolveTempl<is_ad>::nonlinearDamped(V & guess, T && compute, C && computeCo
     // solve and apply next increment
     linear(jacobian, delta, residual);
 
-    // Check if step size is smaller than the floating point tolerance
-    if ((delta.cwiseAbs().array() < guess.cwiseAbs().array() * _delta_thresh).all())
+    // // Check if step size is smaller than the floating point tolerance
+    if (isRelSmall(delta, guess, _delta_thresh))
     {
       _state = State::CONVERGED_XTOL;
       return;
