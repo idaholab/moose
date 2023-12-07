@@ -2409,10 +2409,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
   FEInterface::inverse_map(
       neighbor_dim, FEType(), neighbor, physical_points, _current_neighbor_ref_points);
 
-  // first do the side element
-  reinitFEFaceNeighbor(_current_neighbor_side_elem, _current_neighbor_ref_points);
-  reinitNeighbor(_current_neighbor_side_elem, _current_neighbor_ref_points);
-
   reinitFEFaceNeighbor(neighbor, _current_neighbor_ref_points);
   reinitNeighbor(neighbor, _current_neighbor_ref_points);
 
