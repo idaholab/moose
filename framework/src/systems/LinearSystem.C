@@ -116,7 +116,9 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _rhs_non_time(NULL),
     _pc_side(Moose::PCS_DEFAULT),
     _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
-    _n_linear_iters(0)
+    _n_linear_iters(0),
+    _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name)),
+    _solution_is_invalid(false)
 {
   getRightHandSideNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -457,9 +459,7 @@ void
 LinearSystem::computeSystemMatrix(SparseMatrix<Number> & matrix, const std::set<TagID> & tags)
 {
   associateMatrixToTag(matrix, systemMatrixTag());
-
   computeSystemMatrixTags(tags);
-
   disassociateMatrixFromTag(matrix, systemMatrixTag());
 }
 
@@ -564,4 +564,38 @@ LinearSystem::setMooseKSPNormType(MooseEnum kspnorm)
     _ksp_norm = Moose::KSPN_DEFAULT;
   else
     mooseError("Unknown ksp norm type specified.");
+}
+
+void
+LinearSystem::solve()
+{
+  // Clear the iteration counters
+  _current_l_its = 0;
+
+  PetscLinearSolver<Real> & solver =
+      static_cast<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+
+  system().solve();
+
+  _n_linear_iters = _linear_implicit_system.n_linear_iterations();
+
+  // store info about the solve
+  _final_linear_residual = _linear_implicit_system.final_linear_residual();
+
+  // determine whether solution invalid occurs in the converged solution
+  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
+
+  // output the solution invalid summary
+  if (_solution_is_invalid)
+  {
+    // sync all solution invalid counts to rank 0 process
+    _app.solutionInvalidity().sync();
+
+    if (_fe_problem.allowInvalidSolution())
+      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
+                   "Use Problem/allow_invalid_solution=false to activate ");
+    else
+      // output the occurrence of solution invalid in a summary table
+      _app.solutionInvalidity().print(_console);
+  }
 }

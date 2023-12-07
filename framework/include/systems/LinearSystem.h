@@ -67,7 +67,7 @@ public:
 
   virtual void init() override;
 
-  virtual void solve() override{};
+  virtual void solve() override;
   virtual void restoreSolutions() override;
 
   /**
@@ -287,8 +287,12 @@ protected:
 
   unsigned int _n_linear_iters;
 
+  Real _final_linear_residual;
+
   /// If predictor is active, this is non-NULL
   std::shared_ptr<Predictor> _predictor;
+
+  LinearImplicitSystem & _linear_implicit_system;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)
@@ -297,4 +301,6 @@ private:
   /// Serialized version of the solution vector, or nullptr if a
   /// serialized solution is not needed
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
+
+  bool _solution_is_invalid;
 };
