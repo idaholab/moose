@@ -414,6 +414,9 @@ registerActions(Syntax & syntax,
 void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
+  registerSyntax("DiffusionCG", "Physics/DiffusionCG/*");
+  registerSyntax("DiffusionFV", "Physics/DiffusionFV/*");
+
   /**
    * Note: the optional third parameter is used to differentiate which task is
    * satisfied based on the syntax encountered for classes which are registered
