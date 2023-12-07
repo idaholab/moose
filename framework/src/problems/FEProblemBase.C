@@ -6079,6 +6079,48 @@ FEProblemBase::resetState()
   }
 }
 
+void
+FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num)
+{
+  TIME_SECTION("solve", 1, "Solving", false);
+
+  setCurrentLinearSystem(linear_sys_num);
+
+  // This prevents stale dof indices from lingering around and possibly leading to invalid reads
+  // and writes. Dof indices may be made stale through operations like mesh adaptivity
+
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  Moose::PetscSupport::petscSetOptions(
+      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
+#else
+  // Now this database will be the default
+  // Each app should have only one database
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_petsc_option_data_base);
+  // We did not add PETSc options to database yet
+  if (!_is_petsc_options_inserted)
+  {
+    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
+    _is_petsc_options_inserted = true;
+  }
+#endif
+  Moose::setSolverDefaults(*this);
+
+  // Setup the output system for printing linear/nonlinear iteration information
+  initPetscOutput();
+
+  if (_solve)
+    _current_linear_sys->solve();
+
+  if (_solve)
+    _current_linear_sys->update();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+}
+
 bool
 FEProblemBase::nlConverged(const unsigned int nl_sys_num)
 {
@@ -6361,6 +6403,23 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
                                           NumericVector<Number> & residual,
                                           SparseMatrix<Number> & jacobian)
 {
+  // vector tags
+  {
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+    const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+
+    // We filter out tags which do not have associated vectors in the current nonlinear
+    // system. This is essential to be able to use system-dependent residual tags.
+    selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
+
+    setCurrentResidualVectorTags(_fe_vector_tags);
+  }
+
+  // matrix tags
+  {
+    selectMatrixTagsFromSystem(*_current_nl_sys, getMatrixTags(), _fe_matrix_tags);
+  }
+
   try
   {
     try
@@ -7112,6 +7171,108 @@ FEProblemBase::computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
   _current_execute_on_flag = EXEC_NONE;
   _current_linear_sys->disassociateMatrixFromTag(system_matrix,
                                                  _current_linear_sys->systemMatrixTag());
+}
+
+void
+FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
+                                      SparseMatrix<Number> & system_matrix,
+                                      NumericVector<Number> & rhs)
+{
+  TIME_SECTION("computeLinearSystemSys", 5);
+
+  setCurrentNonlinearSystem(sys.number());
+
+  // We are using the residual tag system for right hand sides so we fetch everything
+  const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+
+  // We filter out tags which do not have associated vectors in the current
+  // system. This is essential to be able to use system-dependent vector tags.
+  selectVectorTagsFromSystem(*_current_linear_sys, vector_tags, _linear_vector_tags);
+  selectMatrixTagsFromSystem(*_current_linear_sys, getMatrixTags(), _linear_matrix_tags);
+
+  computeLinearSystemTags(*(_current_linear_sys->currentSolution()),
+                          system_matrix,
+                          rhs,
+                          _linear_vector_tags,
+                          _linear_matrix_tags);
+}
+
+void
+FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & system_matrix,
+                                       NumericVector<Number> & rhs,
+                                       const std::set<TagID> & vector_tags,
+                                       const std::set<TagID> & matrix_tags)
+{
+  TIME_SECTION("computeLinearSystemTags", 5, "Computing Linear System");
+
+  _current_linear_sys->setSolution(soln);
+
+  _current_linear_sys->associateVectorToTag(rhs, _current_nl_sys->residualVectorTag());
+  _current_linear_sys->associateMatrixToTag(system_matrix, _current_nl_sys->systemMatrixTag());
+
+  for (const auto tag : matrix_tags)
+  {
+    auto & matrix = _current_nl_sys->getMatrix(tag);
+    matrix.zero();
+  }
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  _current_execute_on_flag = EXEC_NONLINEAR;
+
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_NONLINEAR);
+
+  execTransfers(EXEC_NONLINEAR);
+  execMultiApps(EXEC_NONLINEAR);
+
+  computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
+
+  _aux->residualSetup();
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  {
+    _functions.residualSetup(tid);
+  }
+
+  try
+  {
+    _aux->compute(EXEC_NONLINEAR);
+  }
+  catch (MooseException & e)
+  {
+    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+             << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+             << std::endl;
+
+    // We know the next solve is going to fail, so there's no point in
+    // computing anything else after this.  Plus, using incompletely
+    // computed AuxVariables in subsequent calculations could lead to
+    // other errors or unhandled exceptions being thrown.
+    return;
+  }
+
+  computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
+  executeControls(EXEC_NONLINEAR);
+
+  _app.getOutputWarehouse().residualSetup();
+
+  _safe_access_tagged_vectors = false;
+  _safe_access_tagged_matrices = false;
+
+  _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags);
+
+  _safe_access_tagged_vectors = true;
+  _safe_access_tagged_matrices = true;
+
+  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
+                                                 _current_linear_sys->systemMatrixTag());
+  _current_linear_sys->disassociateVectorFromTag(rhs, _current_linear_sys->residualVectorTag());
+
+  // Reset execution flag as after this point we are no longer on LINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void

@@ -341,9 +341,83 @@ LinearSystem::computeSystemMatrixInternal(const std::set<TagID> & tags)
 }
 
 void
-LinearSystem::computeLinearSystemTags(const std::set<TagID> & /*vector_tags*/,
-                                      const std::set<TagID> & /*matrix_tags*/)
+LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags)
 {
+  parallel_object_only();
+
+  TIME_SECTION("LinearSystem::computeLinearSystemTags", 5);
+
+  _fe_problem.setCurrentLinearSystem(number());
+
+  FloatingPointExceptionGuard fpe_guard(_app);
+
+  try
+  {
+    computeLinearSystemInternal(vector_tags, matrix_tags);
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
+}
+
+void
+LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags)
+{
+  TIME_SECTION("computeLinearSystemInternal", 3);
+
+  // Make matrix ready to use
+  activeAllMatrixTags();
+
+  for (auto tag : matrix_tags)
+  {
+    auto & matrix = getMatrix(tag);
+    // Necessary for speed
+    if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&matrix))
+    {
+      MatSetOption(petsc_matrix->mat(),
+                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   PETSC_TRUE);
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    }
+  }
+
+  residualSetup();
+  jacobianSetup();
+
+  // residual contributions from the domain
+  PARALLEL_TRY
+  {
+    TIME_SECTION("LinearFVKernels_FullSystem", 3 /*, "Computing LinearFVKernels"*/);
+
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                  _fe_problem.mesh().ownedFaceInfoEnd());
+
+    ComputeLinearFVElementalThread elem_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::FullSystem, vector_tags);
+    Threads::parallel_reduce(elem_info_range, elem_thread);
+
+    ComputeLinearFVFaceThread face_thread(
+        _fe_problem, number(), Moose::FV::LinearFVComputationMode::FullSystem, vector_tags);
+    Threads::parallel_reduce(face_info_range, face_thread);
+  }
+  PARALLEL_CATCH;
+
+  closeTaggedMatrices(matrix_tags);
+
+  // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
+  // counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
 void
@@ -372,13 +446,6 @@ NumericVector<Number> &
 LinearSystem::getRightHandSideNonTimeVector()
 {
   return *_rhs_non_time;
-}
-
-void
-LinearSystem::computeLinearSystemTagsInternal(const std::set<TagID> & /*vector_tags*/,
-                                              const std::set<TagID> & /*matrix_tags*/)
-{
-  TIME_SECTION("computeLinearSystemInternal", 3);
 }
 
 void

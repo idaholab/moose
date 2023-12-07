@@ -25,6 +25,7 @@ public:
                             const unsigned int linear_system_num,
                             const Moose::FV::LinearFVComputationMode mode,
                             const std::set<TagID> & tags);
+
   // Splitting Constructor
   ComputeLinearFVFaceThread(ComputeLinearFVFaceThread & x, Threads::split split);
   using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;

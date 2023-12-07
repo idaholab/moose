@@ -120,8 +120,8 @@ public:
   void computeLinearSystemTags(const std::set<TagID> & vector_tags,
                                const std::set<TagID> & matrix_tags);
 
-  void computeLinearSystemTagsInternal(const std::set<TagID> & vector_tags,
-                                       const std::set<TagID> & matrix_tags);
+  void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
+                                   const std::set<TagID> & matrix_tags);
 
   /**
    * Form a right hand side vector for a given tag
