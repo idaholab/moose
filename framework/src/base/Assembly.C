@@ -2185,11 +2185,8 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  mooseAssert(_current_neighbor_subdomain_id == neighbor->subdomain_id(),
-              "Neighbor subdomain ID has not been correctly set");
-
   ArbitraryQuadrature * neighbor_rule =
-      qrules(neighbor_dim, _current_neighbor_subdomain_id).neighbor.get();
+      qrules(neighbor_dim, neighbor->subdomain_id()).neighbor.get();
   neighbor_rule->setPoints(*pts);
 
   // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
