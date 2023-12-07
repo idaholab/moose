@@ -2512,7 +2512,6 @@ private:
   /// Flag specifying whether a custom quadrature rule has been specified for mortar segment mesh
   bool _custom_mortar_qrule;
 
-private:
   /// quadrature rule used on lower dimensional elements. This should always be
   /// the same as the face qrule
   QBase * _current_qrule_lower;
