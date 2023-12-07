@@ -467,6 +467,12 @@ public:
   QBase * const & writeableQRuleNeighbor() { return _current_qrule_neighbor; }
 
   /**
+   * Returns the reference to the transformed jacobian weights on a current face
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<Real> & JxWNeighbor() const;
+
+  /**
    * Returns the reference to the current quadrature points being used on the neighbor face
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -2492,6 +2498,10 @@ private:
   QBase * _current_qrule_neighbor;
   /// The current quadrature points on the neighbor face
   MooseArray<Point> _current_q_points_face_neighbor;
+  /// Flag to indicate that JxW_neighbor is needed
+  mutable bool _need_JxW_neighbor;
+  /// The current transformed jacobian weights on a neighbor's face
+  MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord_neighbor;
   /// The coordinate transformation coefficients evaluated on the quadrature points of the mortar

@@ -100,6 +100,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule_face(nullptr),
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
+    _need_JxW_neighbor(false),
     _qrule_msm(nullptr),
     _custom_mortar_qrule(false),
     _current_qrule_lower(nullptr),
@@ -250,6 +251,13 @@ Assembly::~Assembly()
   _ad_coord.release();
 
   delete _qrule_msm;
+}
+
+const MooseArray<Real> &
+Assembly::JxWNeighbor() const
+{
+  _need_JxW_neighbor = true;
+  return _current_JxW_neighbor;
 }
 
 void

@@ -278,6 +278,9 @@ protected:
    */
   bool _overwrite_secondary_residual;
 
+  /// JxW on the primary face
+  const MooseArray<Real> & _primary_JxW;
+
   /// Whether the secondary residual has been computed
   bool _secondary_residual_computed;
 
