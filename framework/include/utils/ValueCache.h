@@ -30,6 +30,7 @@ public:
 
   void insert(const std::vector<Real> & in_val, const T & out_val);
   bool guess(const std::vector<Real> & in_val, T & out_val, Real & distance_sqr);
+  bool guess(const std::vector<Real> & in_val, std::vector<std::pair<T, Real>> & output);
 
 protected:
   struct PointCloud
@@ -79,6 +80,8 @@ template <typename T>
 void
 ValueCache<T>::insert(const std::vector<Real> & in_val, const T & out_val)
 {
+  mooseAssert(in_val.size() == _in_dim, "Key dimensions do not match cache dimensions");
+
   auto id = _point_cloud._pts.size();
   mooseAssert(_data.size() == id, "Inconsistent cache data size.");
 
@@ -112,12 +115,44 @@ ValueCache<T>::guess(const std::vector<Real> & in_val, T & out_val, Real & dista
   result_set.init(&return_index, &distance_sqr);
 
   // perform search
-  _kd_tree->findNeighbors(result_set, in_val.data(), {10});
+  _kd_tree->findNeighbors(result_set, in_val.data());
 
   // no result found
   if (result_set.size() != 1)
     return false;
 
   out_val = _data[return_index];
+  return true;
+}
+
+template <typename T>
+bool
+ValueCache<T>::guess(const std::vector<Real> & in_val, std::vector<std::pair<T, Real>> & output)
+{
+  // Number of nearest neighbors to look for using kNN
+  auto k = output.size();
+
+  // cache is empty
+  if (_data.empty())
+    return false;
+
+  nanoflann::KNNResultSet<Real> result_set(k);
+
+  std::vector<std::size_t> return_indices(k);
+  std::vector<Real> distances(k);
+  result_set.init(return_indices.data(), distances.data());
+
+  // perform search
+  _kd_tree->findNeighbors(result_set, in_val.data());
+
+  // no result found
+  if (result_set.size() != k)
+    return false;
+
+  for (std::size_t i = 0; i < result_set.size(); ++i)
+  {
+    output[i].first = _data[return_indices[i]];
+    output[i].second = distances[i];
+  }
   return true;
 }
