@@ -136,6 +136,11 @@ public:
   //////////////////////////////////// Solution getters /////////////////////////////////////
 
   /**
+   * Local solution value
+   */
+  const FieldVariableValue & sln(Moose::SolutionState state) const;
+
+  /**
    * Local time derivative of solution gradient getter
    */
   const FieldVariableGradient & gradSlnDot() const;
