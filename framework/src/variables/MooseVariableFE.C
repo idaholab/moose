@@ -60,15 +60,15 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
                                                                   this->_assembly.qRuleFace(),
                                                                   this->_assembly.node(),
                                                                   this->_assembly.elem());
-  _neighbor_data =
-      std::make_unique<MooseVariableData<OutputType>>(*this,
-                                                      _sys,
-                                                      _tid,
-                                                      Moose::ElementType::Neighbor,
-                                                      this->_assembly.qRuleFace(), // Place holder
-                                                      this->_assembly.qRuleFace(),
-                                                      this->_assembly.nodeNeighbor(),
-                                                      this->_assembly.neighbor());
+  _neighbor_data = std::make_unique<MooseVariableData<OutputType>>(
+      *this,
+      _sys,
+      _tid,
+      Moose::ElementType::Neighbor,
+      this->_assembly.qRuleNeighbor(), // Place holder
+      this->_assembly.qRuleNeighbor(),
+      this->_assembly.nodeNeighbor(),
+      this->_assembly.neighbor());
   _lower_data =
       std::make_unique<MooseVariableData<OutputType>>(*this,
                                                       _sys,
