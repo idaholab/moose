@@ -38,9 +38,7 @@ SubdomainsDivision::initialize()
   if (!blockRestricted())
   {
     // The subdomains may not be contiguously numbered
-    std::set<libMesh::subdomain_id_type> subdomain_ids;
-    _mesh.getMesh().subdomain_ids(subdomain_ids, /*global=*/true);
-
+    const auto & subdomain_ids = blockIDs();
     setNumDivisions(subdomain_ids.size());
     unsigned int i = 0;
     for (const auto sub_id : subdomain_ids)
@@ -49,7 +47,7 @@ SubdomainsDivision::initialize()
   else
   {
     // Follow the user input order, use a vector instead of a set
-    const auto subdomain_ids = _mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("block"));
+    const auto subdomain_ids = _mesh.getSubdomainIDs(blocks());
     setNumDivisions(subdomain_ids.size());
     unsigned int i = 0;
     for (const auto sub_id : subdomain_ids)
@@ -60,9 +58,9 @@ SubdomainsDivision::initialize()
 unsigned int
 SubdomainsDivision::divisionIndex(const Elem & elem) const
 {
-  auto id = _subdomain_ids_to_division_index.find(elem.subdomain_id());
-  if (id != _subdomain_ids_to_division_index.end())
-    return id->second;
+  const auto id_it = _subdomain_ids_to_division_index.find(elem.subdomain_id());
+  if (id_it != _subdomain_ids_to_division_index.end())
+    return id_it->second;
   else
   {
     mooseAssert(blockRestricted(), "We should be block restricted");
