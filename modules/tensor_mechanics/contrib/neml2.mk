@@ -92,7 +92,10 @@ $(NEML2_DIR)/src/%.$(obj-suffix) : $(NEML2_DIR)/src/%.cxx
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 ADDITIONAL_INCLUDES  += -iquote$(NEML2_INCLUDE)
-ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD) -lstdc++fs
 ADDITIONAL_CPPFLAGS  += -DNEML2_ENABLED -DDTYPE=Float64
+ADDITIONAL_LIBS      += -L$(NEML2_DIR) -lNEML2-$(METHOD)
+ifeq ($(compilertype),gcc)
+ADDITIONAL_LIBS      += -lstdc++fs
+endif
 
 endif
