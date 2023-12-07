@@ -298,7 +298,6 @@ private:
     unsigned int problem_id;   // problem id
     dof_id_type dof_object_id; // node or elem id
     dof_id_type offset; // Useful when there are more than one point in a given dof object (unused)
-    unsigned int spatial_restriction_id; // id of the spatial restriction this point belongs to
   };
 
   /// InterpInfo

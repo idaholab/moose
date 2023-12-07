@@ -136,7 +136,8 @@ MultiAppGeneralFieldTransfer::validParams()
                         "source values for any target point");
 
   params.addParamNamesToGroup(
-      "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
+      "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction "
+      "from_mesh_division from_mesh_division_usage to_mesh_division to_mesh_division_usage",
       "Transfer spatial restriction");
   params.addParamNamesToGroup(
       "greedy_search use_bounding_boxes use_nearest_app use_nearest_position "
@@ -636,8 +637,8 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
              _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
              _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
-      required_source_division =
-          _to_mesh_divisions[problem_id]->divisionIndex(_to_transforms[problem_id]->mapBack(point));
+      required_source_division = _to_mesh_divisions[problem_id]->divisionIndex(
+          _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(point));
 
     // Skip if we already know we don't want the point
     if (required_source_division == MooseMeshDivision::INVALID_DIVISION_INDEX)
@@ -652,8 +653,6 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
-    if (_from_mesh_divisions.size())
-      pointinfo.spatial_restriction_id = required_source_division;
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }

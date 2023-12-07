@@ -264,6 +264,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
             // only accept source data from the division index
             else if ((_from_mesh_division_behavior ==
                           MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+                      _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
                       _from_mesh_division_behavior ==
                           MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
                      tree_division_index != _from_mesh_divisions[i_from]->divisionIndex(*node))
