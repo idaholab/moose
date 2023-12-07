@@ -109,6 +109,10 @@ protected:
   /// Whether to output additional information
   const bool _verbose;
 
+  /// Whether to add a default preconditioning.
+  /// The implementation of the default is defined by the derived class
+  const MooseEnum & _preconditioning;
+
   /// Keep track of the subdomains the Physics is defined on
   std::vector<SubdomainName> _blocks;
 
