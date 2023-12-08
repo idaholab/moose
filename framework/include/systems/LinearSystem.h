@@ -146,7 +146,7 @@ public:
   /**
    * Return a reference to the stored linear implicit system
    */
-  LinearImplicitSystem & linearImplicitSystem();
+  LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
 
   /**
    * Called at the beginning of the time step

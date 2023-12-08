@@ -6099,14 +6099,13 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num)
   // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params);
+    SolverParams solver_params;
+    solver_params._type = Moose::SolveType::ST_LINEAR;
+    solver_params._line_search = Moose::LineSearchType::LS_NONE;
+    Moose::PetscSupport::petscSetOptions(_petsc_options, solver_params);
     _is_petsc_options_inserted = true;
   }
 #endif
-  Moose::setSolverDefaults(*this);
-
-  // Setup the output system for printing linear/nonlinear iteration information
-  initPetscOutput();
 
   if (_solve)
     _current_linear_sys->solve();
@@ -7018,7 +7017,7 @@ FEProblemBase::computeLinearSystemRightHandSideSys(LinearImplicitSystem & sys,
 
   TIME_SECTION("computeLinearSystemRightHandSideSys", 5);
 
-  setCurrentLinearSystem(sys.number());
+  setCurrentLinearSystem(linearSysNum(sys.name()));
 
   // We associate the RHS tag with the given RHS vector to make sure we
   // don't filter it out below
@@ -7104,7 +7103,7 @@ FEProblemBase::computeLinearSystemMatrixSys(LinearImplicitSystem & sys,
 {
   TIME_SECTION("computeLinearSystemMatrixSys", 5);
 
-  setCurrentNonlinearSystem(sys.number());
+  setCurrentLinearSystem(linearSysNum(sys.name()));
 
   const auto & matrix_tags = getMatrixTags();
 
@@ -7128,7 +7127,7 @@ FEProblemBase::computeLinearSystemMatrixTags(const NumericVector<Number> & soln,
   _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
 
   for (auto tag : tags)
-    if (_current_nl_sys->hasMatrix(tag))
+    if (_current_linear_sys->hasMatrix(tag))
     {
       auto & matrix = _current_linear_sys->getMatrix(tag);
       matrix.zero();
@@ -7179,7 +7178,7 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
 {
   TIME_SECTION("computeLinearSystemSys", 5);
 
-  setCurrentNonlinearSystem(sys.number());
+  setCurrentLinearSystem(linearSysNum(sys.name()));
 
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
@@ -7207,12 +7206,12 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->setSolution(soln);
 
-  _current_linear_sys->associateVectorToTag(rhs, _current_nl_sys->residualVectorTag());
-  _current_linear_sys->associateMatrixToTag(system_matrix, _current_nl_sys->systemMatrixTag());
+  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
 
   for (const auto tag : matrix_tags)
   {
-    auto & matrix = _current_nl_sys->getMatrix(tag);
+    auto & matrix = _current_linear_sys->getMatrix(tag);
     matrix.zero();
   }
 
@@ -7268,7 +7267,8 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->disassociateMatrixFromTag(system_matrix,
                                                  _current_linear_sys->systemMatrixTag());
-  _current_linear_sys->disassociateVectorFromTag(rhs, _current_linear_sys->residualVectorTag());
+  _current_linear_sys->disassociateVectorFromTag(rhs,
+                                                 _current_linear_sys->rightHandSideVectorTag());
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;

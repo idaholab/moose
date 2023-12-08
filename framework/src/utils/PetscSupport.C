@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
 #include "DisplacedProblem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
@@ -526,6 +527,16 @@ petscSetDefaults(FEProblemBase & problem)
       CHKERRABORT(nl.comm().get(), ierr);
     }
 
+    petscSetKSPDefaults(problem, ksp);
+  }
+
+  for (auto sys_index : make_range(problem.numLinearSystems()))
+  {
+    // dig out PETSc solver
+    LinearSystem & lin_sys = problem.getLinearSystem(sys_index);
+    PetscLinearSolver<Number> * petsc_solver = dynamic_cast<PetscLinearSolver<Number> *>(
+        lin_sys.linearImplicitSystem().get_linear_solver());
+    KSP ksp = petsc_solver->ksp();
     petscSetKSPDefaults(problem, ksp);
   }
 }

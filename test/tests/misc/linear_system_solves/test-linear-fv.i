@@ -64,4 +64,11 @@
 
 [Outputs]
   exodus = true
+  [pgraph]
+    type = PerfGraphOutput
+    execute_on = 'final'  # Default is "final"
+    level = 5                     # Default is 1
+    heaviest_branch = false        # Default is false
+    heaviest_sections = 10         # Default is 0
+  []
 []

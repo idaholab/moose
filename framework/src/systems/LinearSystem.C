@@ -111,9 +111,13 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 {
   FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
   auto & sys = p->getLinearSystem(p->linearSysNum(system_name));
-  p->computeLinearSystemSys(sys.linearImplicitSystem(),
-                            *(sys.linearImplicitSystem().matrix),
-                            *(sys.linearImplicitSystem().rhs));
+  auto & lin_sys = sys.linearImplicitSystem();
+  auto & matrix = *(sys.linearImplicitSystem().matrix);
+  auto & rhs = *(sys.linearImplicitSystem().rhs);
+  // p->computeLinearSystemSys(sys.linearImplicitSystem(),
+  //                           *(sys.linearImplicitSystem().matrix),
+  //                           *(sys.linearImplicitSystem().rhs));
+  p->computeLinearSystemSys(lin_sys, matrix, rhs);
 }
 }
 
@@ -213,7 +217,7 @@ LinearSystem::computeRightHandSideTags(const std::set<TagID> & tags)
 
   TIME_SECTION("nl::computeRightHandSideTags", 5);
 
-  _fe_problem.setCurrentLinearSystem(number());
+  _fe_problem.setCurrentLinearSystem(_fe_problem.linearSysNum(name()));
 
   // not suppose to do anythin on matrix
   deactiveAllMatrixTags();
@@ -261,12 +265,16 @@ LinearSystem::computeRightHandSideInternal(const std::set<TagID> & tags)
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVElementalThread elem_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::RHS, tags);
+    ComputeLinearFVElementalThread elem_thread(_fe_problem,
+                                               _fe_problem.linearSysNum(name()),
+                                               Moose::FV::LinearFVComputationMode::RHS,
+                                               tags);
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
-    ComputeLinearFVFaceThread face_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::RHS, tags);
+    ComputeLinearFVFaceThread face_thread(_fe_problem,
+                                          _fe_problem.linearSysNum(name()),
+                                          Moose::FV::LinearFVComputationMode::RHS,
+                                          tags);
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;
@@ -283,7 +291,7 @@ LinearSystem::computeSystemMatrixTags(const std::set<TagID> & tags)
 
   TIME_SECTION("LinearSystem::computeJacobianTags", 5);
 
-  _fe_problem.setCurrentLinearSystem(number());
+  _fe_problem.setCurrentLinearSystem(_fe_problem.linearSysNum(name()));
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -340,12 +348,16 @@ LinearSystem::computeSystemMatrixInternal(const std::set<TagID> & tags)
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVElementalThread elem_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::Matrix, tags);
+    ComputeLinearFVElementalThread elem_thread(_fe_problem,
+                                               _fe_problem.linearSysNum(name()),
+                                               Moose::FV::LinearFVComputationMode::Matrix,
+                                               tags);
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
-    ComputeLinearFVFaceThread face_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::Matrix, tags);
+    ComputeLinearFVFaceThread face_thread(_fe_problem,
+                                          _fe_problem.linearSysNum(name()),
+                                          Moose::FV::LinearFVComputationMode::Matrix,
+                                          tags);
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;
@@ -365,7 +377,7 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 
   TIME_SECTION("LinearSystem::computeLinearSystemTags", 5);
 
-  _fe_problem.setCurrentLinearSystem(number());
+  _fe_problem.setCurrentLinearSystem(_fe_problem.linearSysNum(name()));
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -420,12 +432,16 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVElementalThread elem_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::FullSystem, vector_tags);
+    ComputeLinearFVElementalThread elem_thread(_fe_problem,
+                                               _fe_problem.linearSysNum(name()),
+                                               Moose::FV::LinearFVComputationMode::FullSystem,
+                                               vector_tags);
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
-    ComputeLinearFVFaceThread face_thread(
-        _fe_problem, number(), Moose::FV::LinearFVComputationMode::FullSystem, vector_tags);
+    ComputeLinearFVFaceThread face_thread(_fe_problem,
+                                          _fe_problem.linearSysNum(name()),
+                                          Moose::FV::LinearFVComputationMode::FullSystem,
+                                          vector_tags);
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;
@@ -584,6 +600,8 @@ LinearSystem::setMooseKSPNormType(MooseEnum kspnorm)
 void
 LinearSystem::solve()
 {
+  TIME_SECTION("LinearSystem::solve", 2, "Solving linear system");
+
   // Clear the iteration counters
   _current_l_its = 0;
 
