@@ -253,18 +253,18 @@ class JobDAG(object):
         tester = job.getTester()
         for param in tester.ignore_skip_params:
             # if param is valid and param value for both prereq tester and tester are not the same,
-            # and if prereq tester is already slated not to launch...
+            # and if prereq tester is slated not to launch...
             if (tester.specs.isValid(param)
                 and tester.specs[param] != prereq_tester.specs[param]
                 and not prereq_tester.checkRunnableBase(self.options)):
-                # ...add param value to prereq tester in an attempt to allow prereq tester to launch
+                # ...add differentiating param value to prereq tester in an attempt to allow prereq
+                # tester to launch (other caveats may still label this as not runnable)
                 prereq_tester.specs[param] = tester.specs[param]
-
-                # After running checkRunnableBase it is necessary to 'reset' some tester attributes
-                # TODO: Maybe add a feature to checkRunnableBase, indicating not to cache settings
-                #       so all we have to do is add the missing param
+                # After running checkRunnableBase it is necessary to 'reset' attributes so it can be
+                # scrutinized again now that it has a new param/value
+                prereq_tester.clearCaveats()
                 prereq_tester.setStatus(prereq_tester.no_status)
-                prereq_tester.addCaveats(f'{param} param added to satisfy dependency')
+                prereq_tester.addCaveats(f'Implicit {param}')
                 prereq_tester.runnable = None
 
     def _skipPrereqs(self):

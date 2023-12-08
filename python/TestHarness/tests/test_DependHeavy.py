@@ -27,5 +27,5 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         output = self.runTests('--no-color', '-i', 'depend_heavy_tests', '--heavy').decode('utf-8')
         self.assertRegex(output, r'test_harness\.heavy.*? OK')
-        self.assertRegex(output, r'test_harness\.not_heavy.*? \[.*SATISFY DEPENDENCY.*\] OK')
+        self.assertRegex(output, r'test_harness\.not_heavy.*? \[IMPLICIT HEAVY\] OK')
         self.assertNotRegex(output, r'test_harness\.no_relation.*?')
