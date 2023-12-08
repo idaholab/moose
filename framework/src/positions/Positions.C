@@ -9,6 +9,7 @@
 
 #include "Positions.h"
 #include "libmesh/parallel_algebra.h"
+#include "MooseMeshUtils.h"
 
 InputParameters
 Positions::validParams()
@@ -234,4 +235,22 @@ Positions::finalize()
   // Sort positions by X then Y then Z
   if (_need_sort)
     std::sort(_positions.begin(), _positions.end());
+}
+
+Real
+Positions::getMinDistanceBetweenPositions() const
+{
+  // Dumb nested loops. We can revisit this once we have a KDTree for nearest position searching
+  // These nested loops are still faster than calling getNearestPositions on each position for now
+  Real min_distance_sq = std::numeric_limits<Real>::max();
+  for (const auto i1 : index_range(_positions))
+    for (auto i2 = i1 + 1; i2 < _positions.size(); i2++)
+      min_distance_sq = std::min(min_distance_sq, (_positions[i1] - _positions[i2]).norm_sq());
+  return std::sqrt(min_distance_sq);
+}
+
+bool
+Positions::arePositionsCoplanar() const
+{
+  return MooseMeshUtils::isCoPlanar(_positions);
 }

@@ -44,6 +44,12 @@ public:
   /// Find the nearest Position index for a given point
   unsigned int getNearestPositionIndex(const Point & target, bool initial) const;
 
+  /// Find the minimum distance between positions
+  Real getMinDistanceBetweenPositions() const;
+
+  /// Report if the positions are co-planar or not
+  bool arePositionsCoplanar() const;
+
 protected:
   /// In charge of computing / loading the positions.
   virtual void initialize() override = 0;

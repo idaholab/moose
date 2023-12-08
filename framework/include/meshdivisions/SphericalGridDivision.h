@@ -11,6 +11,8 @@
 
 #include "MeshDivision.h"
 
+class Positions;
+
 /**
  * Divides the mesh based on a spherical grid
  */
@@ -27,7 +29,9 @@ public:
 
 protected:
   /// Point at the center of the sphere, serving as the coordinate frame center
-  const Point _center;
+  const Point * const _center;
+  /// Positions giving all the centers of the spheres, serving as the coordinate frame center
+  const Positions * const _center_positions;
 
   /// Minimal radial extent of the sphere
   const Real _min_r;

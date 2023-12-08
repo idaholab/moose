@@ -9,6 +9,8 @@
 
 #include "CartesianGridDivision.h"
 #include "MooseMesh.h"
+#include "Positions.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/elem.h"
 
@@ -21,8 +23,12 @@ CartesianGridDivision::validParams()
   params.addClassDescription("Divide the mesh along a Cartesian grid. Numbering increases from "
                              "bottom to top and from left to right and from back to front. The "
                              "inner ordering is X, then Y, then Z");
-  params.addRequiredParam<Point>("bottom_left", "Bottom-back-left corner of the grid");
-  params.addRequiredParam<Point>("top_right", "Top-front-right corner of the grid");
+  params.addParam<Point>("bottom_left", "Bottom-back-left corner of the grid");
+  params.addParam<Point>("top_right", "Top-front-right corner of the grid");
+  params.addParam<Point>("center", "Center of the Cartesian grid");
+  params.addParam<PositionsName>("center_positions",
+                                 "Positions of the centers of divided Cartesian grids");
+  params.addParam<Point>("widths", "Widths in the X, Y and Z directions");
   params.addRequiredRangeCheckedParam<unsigned int>("nx", "nx>0", "Number of divisions in X");
   params.addRequiredRangeCheckedParam<unsigned int>("ny", "ny>0", "Number of divisions in Y");
   params.addRequiredRangeCheckedParam<unsigned int>("nz", "nz>0", "Number of divisions in Z");
@@ -36,15 +42,36 @@ CartesianGridDivision::validParams()
 
 CartesianGridDivision::CartesianGridDivision(const InputParameters & parameters)
   : MeshDivision(parameters),
-    _bottom_left(getParam<Point>("bottom_left")),
-    _top_right(getParam<Point>("top_right")),
-    _widths(_top_right - _bottom_left),
+    _bottom_left(isParamValid("bottom_left") ? getParam<Point>("bottom_left") : Point(0, 0, 0)),
+    _top_right(isParamValid("top_right") ? getParam<Point>("top_right") : Point(0, 0, 0)),
+    _center(isParamValid("center") ? &getParam<Point>("center") : nullptr),
+    _center_positions(
+        isParamValid("center_positions")
+            ? &_fe_problem->getPositionsObject(getParam<PositionsName>("center_positions"))
+            : nullptr),
+    _widths(isParamValid("widths") ? getParam<Point>("widths") : Point(_top_right - _bottom_left)),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _nz(getParam<unsigned int>("nz")),
     _outside_grid_counts_as_border(getParam<bool>("assign_domain_outside_grid_to_border"))
 {
   CartesianGridDivision::initialize();
+
+  // Check non-overlapping inputs for the dimensions of the grid
+  if ((_center || _center_positions) && (isParamValid("bottom_left") || isParamValid("top_right")))
+    mooseError("Either the center or the edges of the grids must be specified");
+  if ((isParamValid("top_right") + isParamValid("bottom_left") == 1) && !isParamValid("widths"))
+    paramError("bottom_left",
+               "Both bottom_left and top_right must be passed to be able to determine the width");
+
+  // Pre-determine the bounds if we can
+  if (!_center_positions && _center)
+  {
+    _bottom_left = *_center - _widths / 2;
+    _top_right = *_center + _widths / 2;
+  }
+
+  // Check widths
   if (_widths(0) < 0)
     paramError("top_right",
                "Top-front-right corner must be right (X axis) of bottom-left-back corner");
@@ -66,6 +93,20 @@ void
 CartesianGridDivision::initialize()
 {
   setNumDivisions(_nx * _ny * _nz);
+
+  // Check that the grid is well-defined
+  if (_center_positions)
+  {
+    Real min_dist = _widths.norm();
+    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    // Note that if the positions are not co-planar, the distance reported would be bigger but there
+    // could still be an overlap. Looking at min_center_dist is not enough
+    if (min_dist > min_center_dist)
+      mooseError(
+          "Cartesian grids centered on the positions are too close to each other (min distance: ",
+          min_center_dist,
+          "), closer than the extent of each grid. Mesh division is ill-defined");
+  }
 }
 
 unsigned int
@@ -77,16 +118,39 @@ CartesianGridDivision::divisionIndex(const Elem & elem) const
 unsigned int
 CartesianGridDivision::divisionIndex(const Point & pt) const
 {
+  unsigned int offset = 0;
+  // Determine the local grid bounds
+  Point bottom_left, top_right, p;
+  if (_center_positions)
+  {
+    // If dividing using positions, find the closest position and
+    // look at the relative position of the point compared to that position
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    const auto nearest_grid_center_index = _center_positions->getNearestPositionIndex(pt, initial);
+    offset = nearest_grid_center_index * getNumDivisions();
+    const auto nearest_grid_center =
+        _center_positions->getPosition(nearest_grid_center_index, initial);
+    bottom_left = -_widths / 2;
+    top_right = _widths / 2;
+    p = pt - nearest_grid_center;
+  }
+  else
+  {
+    bottom_left = _bottom_left;
+    top_right = _top_right;
+    p = pt;
+  }
+
   if (!_outside_grid_counts_as_border)
   {
-    if (MooseUtils::absoluteFuzzyLessThan(pt(0), _bottom_left(0)) ||
-        MooseUtils::absoluteFuzzyGreaterThan(pt(0), _top_right(0)))
+    if (MooseUtils::absoluteFuzzyLessThan(p(0), bottom_left(0)) ||
+        MooseUtils::absoluteFuzzyGreaterThan(p(0), top_right(0)))
       return MooseMeshDivision::INVALID_DIVISION_INDEX;
-    if (MooseUtils::absoluteFuzzyLessThan(pt(1), _bottom_left(1)) ||
-        MooseUtils::absoluteFuzzyGreaterThan(pt(1), _top_right(1)))
+    if (MooseUtils::absoluteFuzzyLessThan(p(1), bottom_left(1)) ||
+        MooseUtils::absoluteFuzzyGreaterThan(p(1), top_right(1)))
       return MooseMeshDivision::INVALID_DIVISION_INDEX;
-    if (MooseUtils::absoluteFuzzyLessThan(pt(2), _bottom_left(2)) ||
-        MooseUtils::absoluteFuzzyGreaterThan(pt(2), _top_right(2)))
+    if (MooseUtils::absoluteFuzzyLessThan(p(2), bottom_left(2)) ||
+        MooseUtils::absoluteFuzzyGreaterThan(p(2), top_right(2)))
       return MooseMeshDivision::INVALID_DIVISION_INDEX;
   }
 
@@ -96,12 +160,12 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   // Look inside the grid and on the left / back / bottom
   for (const auto jx : make_range(_nx + 1))
   {
-    const auto border_x = _bottom_left(0) + _widths(0) * jx / _nx;
-    if (jx > 0 && jx < _nx && MooseUtils::absoluteFuzzyEqual(border_x, pt(0)))
+    const auto border_x = bottom_left(0) + _widths(0) * jx / _nx;
+    if (jx > 0 && jx < _nx && MooseUtils::absoluteFuzzyEqual(border_x, p(0)))
       mooseWarning(
           "Querying the division index for a point of a boundary between two regions in X: " +
-          Moose::stringify(pt));
-    if (border_x >= pt(0))
+          Moose::stringify(p));
+    if (border_x >= p(0))
     {
       ix = (jx > 0) ? jx - 1 : 0;
       break;
@@ -109,12 +173,12 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   }
   for (const auto jy : make_range(_ny + 1))
   {
-    const auto border_y = _bottom_left(1) + _widths(1) * jy / _ny;
-    if (jy > 0 && jy < _ny && MooseUtils::absoluteFuzzyEqual(border_y, pt(1)))
+    const auto border_y = bottom_left(1) + _widths(1) * jy / _ny;
+    if (jy > 0 && jy < _ny && MooseUtils::absoluteFuzzyEqual(border_y, p(1)))
       mooseWarning(
           "Querying the division index for a point of a boundary between two regions in Y: " +
-          Moose::stringify(pt));
-    if (border_y >= pt(1))
+          Moose::stringify(p));
+    if (border_y >= p(1))
     {
       iy = (jy > 0) ? jy - 1 : 0;
       break;
@@ -122,12 +186,12 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   }
   for (const auto jz : make_range(_nz + 1))
   {
-    const auto border_z = _bottom_left(2) + _widths(2) * jz / _nz;
-    if (jz > 0 && jz < _nz && MooseUtils::absoluteFuzzyEqual(border_z, pt(2)))
+    const auto border_z = bottom_left(2) + _widths(2) * jz / _nz;
+    if (jz > 0 && jz < _nz && MooseUtils::absoluteFuzzyEqual(border_z, p(2)))
       mooseWarning(
           "Querying the division index for a point of a boundary between two regions in Z: " +
-          Moose::stringify(pt));
-    if (border_z >= pt(2))
+          Moose::stringify(p));
+    if (border_z >= p(2))
     {
       iz = (jz > 0) ? jz - 1 : 0;
       break;
@@ -135,11 +199,11 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   }
 
   // Look on the right / front / top of the grid
-  if (MooseUtils::absoluteFuzzyGreaterEqual(pt(0), _top_right(0)))
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(0), top_right(0)))
     ix = _nx - 1;
-  if (MooseUtils::absoluteFuzzyGreaterEqual(pt(1), _top_right(1)))
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(1), top_right(1)))
     iy = _ny - 1;
-  if (MooseUtils::absoluteFuzzyGreaterEqual(pt(2), _top_right(2)))
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), top_right(2)))
     iz = _nz - 1;
 
   // Handle edge case on widths
@@ -153,5 +217,5 @@ CartesianGridDivision::divisionIndex(const Point & pt) const
   mooseAssert(iy != not_found, "We should have found a mesh division bin in Y");
   mooseAssert(iz != not_found, "We should have found a mesh division bin in Z");
 
-  return ix + _nx * iy + iz * _nx * _ny;
+  return offset + ix + _nx * iy + iz * _nx * _ny;
 }

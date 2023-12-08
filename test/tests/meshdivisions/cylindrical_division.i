@@ -14,6 +14,7 @@
 []
 
 [MeshDivisions]
+  active = 'cylindrical_div'
   [cylindrical_div]
     type = CylindricalGridDivision
     axis_direction = '0 0 1'
@@ -30,6 +31,30 @@
     cylinder_axial_max = 2
     r_min = 0.5
     r_max = 4
+  []
+  [cylindrical_div_positions]
+    type = CylindricalGridDivision
+    axis_direction = '0 0 1'
+    center_positions = center
+    azimuthal_start = '1 0 0'
+
+    # Number of bins
+    n_radial = 3
+    n_azimuthal = 4
+    n_axial = 8
+
+    # Extent of the cylinder
+    cylinder_axial_min = 0.5
+    cylinder_axial_max = 2
+    r_min = 0.5
+    r_max = 4
+  []
+[]
+
+[Positions]
+  [center]
+    type = InputPositions
+    positions = '1 1 0'
   []
 []
 

@@ -19,6 +19,7 @@ InputParameters
 SubdomainsDivision::validParams()
 {
   InputParameters params = MeshDivision::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Divide the mesh by increasing subdomain ids. The division will be contiguously "
       "numbered even if the subdomain ids are not");
@@ -26,7 +27,7 @@ SubdomainsDivision::validParams()
 }
 
 SubdomainsDivision::SubdomainsDivision(const InputParameters & parameters)
-  : MeshDivision(parameters)
+  : MeshDivision(parameters), BlockRestrictable(this)
 {
   SubdomainsDivision::initialize();
 }
@@ -34,20 +35,37 @@ SubdomainsDivision::SubdomainsDivision(const InputParameters & parameters)
 void
 SubdomainsDivision::initialize()
 {
-  // The subdomains may not be contiguously numbered
-  std::set<libMesh::subdomain_id_type> subdomain_ids;
-  _mesh.getMesh().subdomain_ids(subdomain_ids, /*global=*/true);
-  setNumDivisions(subdomain_ids.size());
-
-  unsigned int i = 0;
-  for (const auto sub_id : subdomain_ids)
-    _subdomain_ids_to_division_index[sub_id] = i++;
+  if (!blockRestricted())
+  {
+    // The subdomains may not be contiguously numbered
+    const auto & subdomain_ids = blockIDs();
+    setNumDivisions(subdomain_ids.size());
+    unsigned int i = 0;
+    for (const auto sub_id : subdomain_ids)
+      _subdomain_ids_to_division_index[sub_id] = i++;
+  }
+  else
+  {
+    // Follow the user input order, use a vector instead of a set
+    const auto subdomain_ids = _mesh.getSubdomainIDs(blocks());
+    setNumDivisions(subdomain_ids.size());
+    unsigned int i = 0;
+    for (const auto sub_id : subdomain_ids)
+      _subdomain_ids_to_division_index[sub_id] = i++;
+  }
 }
 
 unsigned int
 SubdomainsDivision::divisionIndex(const Elem & elem) const
 {
-  return libmesh_map_find(_subdomain_ids_to_division_index, elem.subdomain_id());
+  const auto id_it = _subdomain_ids_to_division_index.find(elem.subdomain_id());
+  if (id_it != _subdomain_ids_to_division_index.end())
+    return id_it->second;
+  else
+  {
+    mooseAssert(blockRestricted(), "We should be block restricted");
+    return MooseMeshDivision::INVALID_DIVISION_INDEX;
+  }
 }
 
 unsigned int
