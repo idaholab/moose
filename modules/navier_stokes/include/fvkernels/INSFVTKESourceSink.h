@@ -72,6 +72,5 @@ protected:
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
 
   /// -- Constants of the method
-  static constexpr Real _von_karman{0.4187};
   static constexpr Real E{9.793};
 };

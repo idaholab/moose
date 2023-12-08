@@ -87,8 +87,8 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
   auto mu = _mu(makeElemArg(_current_elem), state);
   auto nu = mu / rho;
 
-  const ADReal a_c = 1 / _von_karman;
-  const ADReal b_c = 1 / _von_karman * (std::log(_E * dist / mu) + 1.0);
+  const ADReal a_c = 1 / NS::von_karman_constant;
+  const ADReal b_c = 1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
   const ADReal c_c = u;
 
   /// Satrting with linear guess
@@ -103,13 +103,13 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
     ADReal residual;
     for (int i = 0; i < _MAX_ITERS_U_TAU; ++i)
     {
-      residual = u / u_tau - 1 / _von_karman * std::log(_E * dist * u_tau / nu);
+      residual = u / u_tau - 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist * u_tau / nu);
 
       if (residual < _REL_TOLERANCE)
         return u_tau;
 
       ADReal residual_derivative =
-          -1 / u_tau * (u / u_tau + 1 / _von_karman * std::log(_E * dist / nu));
+          -1 / u_tau * (u / u_tau + 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist / nu));
       ADReal new_u_tau = std::max(1e-20, u_tau - residual / residual_derivative);
       u_tau = new_u_tau;
     }
@@ -172,7 +172,7 @@ kEpsilonViscosityAux::computeValue()
       y_plus = _rho(current_argument, state) * std::pow(_C_mu, 0.25) *
                std::pow(_k(current_argument, state), 0.5) * min_wall_dist /
                _mu(current_argument, state);
-      auto von_karman_value = (1 / _von_karman + std::log(_E * y_plus));
+      auto von_karman_value = (1 / NS::von_karman_constant + std::log(NS::E_turb_constant * y_plus));
       u_tau = std::sqrt(std::pow(_C_mu, 0.25) * std::pow(_k(current_argument, state), 0.5) *
                         parallel_speed / von_karman_value);
     }
@@ -190,14 +190,14 @@ kEpsilonViscosityAux::computeValue()
     else if (y_plus >= 30.0) // log-layer
     {
       auto wall_val = _rho(current_argument, state) * u_tau * min_wall_dist /
-                          (1 / _von_karman * std::log(_E * y_plus)) -
+                          (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
                       _mu(current_argument, state);
       mu_t_wall = wall_val.value();
     }
     else // buffer layer
     {
       auto wall_val_log = _rho(current_argument, state) * u_tau * min_wall_dist /
-                              (1 / _von_karman * std::log(_E * y_plus)) -
+                              (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
                           _mu(current_argument, state);
       auto blending_function = (y_plus - 5.0) / 25.0;
       auto wall_val = blending_function * wall_val_log;

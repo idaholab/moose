@@ -49,8 +49,4 @@ protected:
 
   /// Linearized equation to find the wall function?
   const bool _linearized_yplus;
-
-  /// Constant expressions
-  static constexpr Real _von_karman{0.4187};
-  static constexpr Real _E{9.793};
 };

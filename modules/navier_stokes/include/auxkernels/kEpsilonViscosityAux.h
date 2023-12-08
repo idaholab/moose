@@ -13,6 +13,7 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
+
 /**
  * Computes the turbuent viscosity for the k-Epsilon model.
  * Implements two near-wall treatments: equilibrium and non-equilibrium wall functions.
@@ -75,10 +76,6 @@ protected:
 
   /// Relative tolerance to find the friction velocity
   static constexpr Real _REL_TOLERANCE{1e-4};
-
-  /// -- Constants of the method
-  static constexpr Real _von_karman{0.4187};
-  static constexpr Real _E{9.793};
 
   /// --- Maps for wall bounded elements
   std::map<const Elem *, bool> _wall_bounded;

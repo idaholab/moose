@@ -164,7 +164,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       else
         destruction += std::pow(_C_mu, 0.75) * _rho(makeElemArg(_current_elem), state) *
                        std::pow(_k(makeElemArg(_current_elem), state), 1.5) /
-                       (_von_karman * _dist[_current_elem][i]) / tot_weight;
+                       (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;

@@ -104,7 +104,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     auto Pr_ratio = Pr / _Pr_t(current_argument, state);
     auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
-    auto wall_scaling = 1.0 / _von_karman * std::log(_E * y_plus) + jayatilleke_P;
+    auto wall_scaling =
+        1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
     alpha = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
   }
   else // buffer layer
@@ -116,7 +117,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
     auto Pr_ratio = Pr / _Pr_t(current_argument, state);
     auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
-    auto wall_scaling = 1.0 / _von_karman * std::log(_E * y_plus) + jayatilleke_P;
+    auto wall_scaling =
+        1.0 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus) + jayatilleke_P;
     auto alpha_turb = u_tau * wall_dist / (_Pr_t(current_argument, state) * wall_scaling);
     auto blending_function = (y_plus - 5.0) / 25.0;
     alpha = blending_function * alpha_turb + (1.0 - blending_function) * alpha_lam;

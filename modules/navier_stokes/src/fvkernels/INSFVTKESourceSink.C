@@ -172,7 +172,7 @@ INSFVTKESourceSink::computeQpResidual()
           2.0 * wall_mut / Utility::pow<2>(_dist[_current_elem][i]) / tot_weight;
       auto destruction_log = std::pow(_C_mu, 0.75) * _rho(makeElemArg(_current_elem), state) *
                              std::pow(_var(makeElemArg(_current_elem), old_state), 0.5) /
-                             (_von_karman * _dist[_current_elem][i]) / tot_weight;
+                             (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
 
       if (y_plus < 11.25)
         destruction += destruction_visc;
@@ -181,7 +181,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       production += wall_mut * velocity_grad_norm_vec[i] * std::pow(_C_mu, 0.25) /
                     std::sqrt(_var(makeElemArg(_current_elem), old_state) + 1e-10) /
-                    (_von_karman * _dist[_current_elem][i]) / tot_weight;
+                    (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
     }
 
     residual = (destruction - production) * _var(makeElemArg(_current_elem), state);
