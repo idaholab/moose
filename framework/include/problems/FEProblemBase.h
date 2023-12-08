@@ -2144,7 +2144,7 @@ public:
   /**
    * @return the nonlinear system number corresponding to the provided \p nl_sys_name
    */
-  unsigned int linearSysNum(const NonlinearSystemName & linear_sys_name) const override;
+  unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const override;
 
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
@@ -2288,7 +2288,7 @@ protected:
   NonlinearSystemBase * _current_nl_sys;
 
   /// The linear system names
-  const std::vector<NonlinearSystemName> _linear_sys_names;
+  const std::vector<LinearSystemName> _linear_sys_names;
 
   /// The number of linear systems
   const std::size_t _num_linear_sys;
@@ -2297,7 +2297,7 @@ protected:
   std::vector<std::shared_ptr<LinearSystem>> _linear_systems;
 
   /// Map from linear system name to number
-  std::map<NonlinearSystemName, unsigned int> _linear_sys_name_to_num;
+  std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
 
   /// Map from linear variable name to nonlinear system number
   std::map<NonlinearVariableName, unsigned int> _linear_var_to_sys_num;

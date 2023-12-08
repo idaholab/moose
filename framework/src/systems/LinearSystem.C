@@ -83,7 +83,7 @@
 #include "OffDiagonalScalingMatrix.h"
 
 // libMesh
-#include "libmesh/nonlinear_solver.h"
+#include "libmesh/linear_solver.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/dense_vector.h"
 #include "libmesh/boundary_info.h"
@@ -103,6 +103,19 @@
 #include <ios>
 
 #include "petscsnes.h"
+
+namespace Moose
+{
+void
+compute_linear_system(libMesh::EquationSystems & es, const std::string & system_name)
+{
+  FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
+  auto & sys = p->getLinearSystem(p->linearSysNum(system_name));
+  p->computeLinearSystemSys(sys.linearImplicitSystem(),
+                            *(sys.linearImplicitSystem().matrix),
+                            *(sys.linearImplicitSystem().rhs));
+}
+}
 
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SystemBase(fe_problem, name, Moose::VAR_LINEAR),
@@ -130,6 +143,8 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 
   // We create a tag for the right hand side, the vector is already in the libmesh system
   _rhs_tag = _fe_problem.addVectorTag("RHS");
+
+  _linear_implicit_system.attach_assemble_function(Moose::compute_linear_system);
 }
 
 LinearSystem::~LinearSystem() = default;
@@ -571,9 +586,6 @@ LinearSystem::solve()
 {
   // Clear the iteration counters
   _current_l_its = 0;
-
-  PetscLinearSolver<Real> & solver =
-      static_cast<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
 
   system().solve();
 

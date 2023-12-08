@@ -42,6 +42,9 @@ public:
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
+  void originalSolve();
+  void newSolve();
+
   FEProblemBase & _problem;
 
   Real _system_time;

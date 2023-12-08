@@ -26,8 +26,8 @@ InputParameters
 LinearPicardSteady::validParams()
 {
   InputParameters params = Executioner::validParams();
-  params.addRequiredParam<NonlinearSystemName>("linear_sys_to_solve",
-                                               "The first nonlinear system to solve");
+  params.addRequiredParam<LinearSystemName>("linear_sys_to_solve",
+                                            "The first nonlinear system to solve");
   params.addRangeCheckedParam<unsigned int>("number_of_iterations",
                                             1,
                                             "number_of_iterations>0",
@@ -40,7 +40,7 @@ LinearPicardSteady::LinearPicardSteady(const InputParameters & parameters)
     _problem(_fe_problem),
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
-    _linear_sys_number(_problem.linearSysNum(getParam<NonlinearSystemName>("linear_sys_to_solve"))),
+    _linear_sys_number(_problem.linearSysNum(getParam<LinearSystemName>("linear_sys_to_solve"))),
     _number_of_iterations(getParam<unsigned int>("number_of_iterations"))
 {
   _time = 0;
@@ -81,47 +81,7 @@ LinearPicardSteady::execute()
 
   for (unsigned int i = 0; i < _number_of_iterations; i++)
   {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_problem.mesh().ownedElemInfoBegin(),
-                                  _problem.mesh().ownedElemInfoEnd());
-
-    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    FaceInfoRange face_info_range(_problem.mesh().ownedFaceInfoBegin(),
-                                  _problem.mesh().ownedFaceInfoEnd());
-
-    // FEProblemBase &fe_problem, const unsigned int linear_system_num,
-    //     const std::set<TagID> &tags
-
-    ComputeLinearFVElementalThread elem_thread(_problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
-    Threads::parallel_reduce(elem_info_range, elem_thread);
-
-    ComputeLinearFVFaceThread face_thread(_problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
-    Threads::parallel_reduce(face_info_range, face_thread);
-
-    auto & sys = _problem.getLinearSystem(0);
-    LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
-
-    lisystem.matrix->close();
-    lisystem.rhs->close();
-
-    PetscLinearSolver<Real> & linear_solver =
-        libMesh::cast_ref<PetscLinearSolver<Real> &>(*lisystem.get_linear_solver());
-
-    KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-
-    // LinearPicardSolverConfiguration solver_config;
-    // solver_config.real_valued_data["abs_tol"] = 1e-7;
-    // linear_solver.set_solver_configuration(solver_config);
-
-    linear_solver.solve(
-        *lisystem.matrix, *lisystem.matrix, *lisystem.solution, *lisystem.rhs, 1e-10, 500);
-    lisystem.update();
-
-    lisystem.matrix->print();
-    lisystem.rhs->print();
-    lisystem.solution->print();
-
-    _console << "Will solve al inear problem here" << std::endl;
+    newSolve();
   }
 
   // need to keep _time in sync with _time_step to get correct output
@@ -138,4 +98,60 @@ LinearPicardSteady::execute()
   }
 
   postExecute();
+}
+
+void
+LinearPicardSteady::originalSolve()
+{
+  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+  ElemInfoRange elem_info_range(_problem.mesh().ownedElemInfoBegin(),
+                                _problem.mesh().ownedElemInfoEnd());
+
+  using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+  FaceInfoRange face_info_range(_problem.mesh().ownedFaceInfoBegin(),
+                                _problem.mesh().ownedFaceInfoEnd());
+
+  ComputeLinearFVElementalThread elem_thread(
+      _problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
+  Threads::parallel_reduce(elem_info_range, elem_thread);
+
+  ComputeLinearFVFaceThread face_thread(
+      _problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
+  Threads::parallel_reduce(face_info_range, face_thread);
+
+  auto & sys = _problem.getLinearSystem(0);
+  LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
+
+  lisystem.matrix->close();
+  lisystem.rhs->close();
+
+  PetscLinearSolver<Real> & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*lisystem.get_linear_solver());
+
+  KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
+
+  // LinearPicardSolverConfiguration solver_config;
+  // solver_config.real_valued_data["abs_tol"] = 1e-7;
+  // linear_solver.set_solver_configuration(solver_config);
+
+  linear_solver.solve(
+      *lisystem.matrix, *lisystem.matrix, *lisystem.solution, *lisystem.rhs, 1e-10, 500);
+  lisystem.update();
+
+  lisystem.matrix->print();
+  lisystem.rhs->print();
+  lisystem.solution->print();
+}
+
+void
+LinearPicardSteady::newSolve()
+{
+  auto & sys = _problem.getLinearSystem(0);
+  LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
+
+  sys.solve();
+
+  lisystem.matrix->print();
+  lisystem.rhs->print();
+  lisystem.solution->print();
 }

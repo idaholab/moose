@@ -78,7 +78,7 @@ public:
   virtual void init() override;
   virtual bool nlConverged(const unsigned int nl_sys_num) override;
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
-  virtual unsigned int linearSysNum(const NonlinearSystemName & sys_name) const override;
+  virtual unsigned int linearSysNum(const LinearSystemName & sys_name) const override;
 
   /**
    * Allocate vectors and save old solutions into them.

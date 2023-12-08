@@ -1365,7 +1365,7 @@ DisplacedProblem::nlSysNum(const NonlinearSystemName & nl_sys_name) const
 }
 
 unsigned int
-DisplacedProblem::linearSysNum(const NonlinearSystemName & sys_name) const
+DisplacedProblem::linearSysNum(const LinearSystemName & sys_name) const
 {
   return _mproblem.linearSysNum(sys_name);
 }

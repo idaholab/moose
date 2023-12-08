@@ -106,9 +106,9 @@ public:
   virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const = 0;
 
   /**
-   * @return the linear system number corresponding to the provided \p sys_name
+   * @return the linear system number corresponding to the provided \p linear_sys_name
    */
-  virtual unsigned int linearSysNum(const NonlinearSystemName & sys_name) const = 0;
+  virtual unsigned int linearSysNum(const LinearSystemName & linear_sys_name) const = 0;
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
