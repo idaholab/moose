@@ -170,9 +170,7 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
                                     -1 /* fd */,
                                     0 /* offset */));
   if (shared_mem == MAP_FAILED)
-    mooseError(
-        "Failed to allocate shared memory for thermochimica in ThermochimicaNodalData object ",
-        this->name());
+    mooseError("Failed to allocate shared memory for thermochimica IPC.");
 
   // set up buffer partitions
   _shared_dofid_mem = reinterpret_cast<dof_id_type *>(shared_mem);
@@ -181,12 +179,12 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
   // set up a bidirectional communication socket
   int sockets[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
-    mooseError("Failed to create socketpair in ThermochimicaNodalData object ", this->name());
+    mooseError("Failed to create socketpair for thermochimica IPC.");
 
   // fork child process that will manage thermochimica calls
   _pid = fork();
   if (_pid < 0)
-    mooseError("Fork failed in ThermochimicaNodalData object ", this->name());
+    mooseError("Fork failed for thermochimica library.");
   if (_pid == 0)
   {
     // here we are in the child process
