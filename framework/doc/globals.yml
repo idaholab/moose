@@ -22,6 +22,7 @@ Transfers: /Transfers/index.md
 Controls: /Controls/index.md
 Distributions: /Distributions/index.md
 Mesh: /Mesh/index.md
+MeshDivisions: /MeshDivisions/index.md
 Outputs: /syntax/Outputs/index.md
 ScalarKernels: /ScalarKernels/index.md
 FVKernels: /FVKernels/index.md
