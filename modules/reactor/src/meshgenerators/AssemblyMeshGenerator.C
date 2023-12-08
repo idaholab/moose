@@ -479,15 +479,6 @@ AssemblyMeshGenerator::generate()
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
 
-  // Return default mesh if option to bypass mesh generation is chosen and free all input meshes
-  if (getReactorParam<bool>(RGMB::bypass_meshgen))
-  {
-    for (const auto & mesh_ptr : _mesh_ptrs)
-      mesh_ptr->reset();
-    auto mesh = buildMeshBaseObject();
-    return dynamic_pointer_cast<MeshBase>(mesh);
-  }
-
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))

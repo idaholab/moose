@@ -70,6 +70,8 @@ public:
 
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
 
+  void generateData() override;
+
 protected:
   /**
    * Initializes extra element integer from id name for a given mesh and throws an error

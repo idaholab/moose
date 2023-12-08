@@ -21,6 +21,8 @@ ReactorGeometryMeshBuilderBase::validParams()
   params.addClassDescription("A base class that contains common members and methods for Reactor "
                              "Geometry Mesh Builder mesh generators.");
 
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 
@@ -315,4 +317,9 @@ ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
   const auto depl_id_index = input_mesh.add_elem_integer("depletion_id");
   for (Elem * const elem : input_mesh.active_element_ptr_range())
     elem->set_extra_integer(depl_id_index, depl_ids.at(elem->id()));
+}
+
+void
+ReactorGeometryMeshBuilderBase::generateData()
+{
 }

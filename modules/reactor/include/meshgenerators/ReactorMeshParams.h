@@ -24,6 +24,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  void generateData() override;
+
 protected:
   /// The number of dimension in the mesh
   const MooseEnum _dim;
@@ -33,9 +35,6 @@ protected:
 
   /// The the flat-to-flat size of assemblies in the reactor.
   const Real _assembly_pitch;
-
-  /// Whether or not to bypass mesh generation step in RGMB calls
-  const bool _bypass_meshgen;
 
   ///The heights of the axial regions.
   std::vector<Real> _axial_regions;

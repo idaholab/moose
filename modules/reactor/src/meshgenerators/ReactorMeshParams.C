@@ -43,11 +43,11 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
-  params.addParam<bool>("bypass_mesh_generation",
-                        false,
-                        "Whether or not to bypass mesh generation when running RGMB workflow");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
+
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
   return params;
 }
 
@@ -55,8 +55,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _geom(getParam<MooseEnum>("geom")),
-    _assembly_pitch(getParam<Real>("assembly_pitch")),
-    _bypass_meshgen(getParam<bool>("bypass_mesh_generation"))
+    _assembly_pitch(getParam<Real>("assembly_pitch"))
 {
   if (int(_dim) == 2)
   {
@@ -82,7 +81,11 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty("name_id_map", _name_id_map);
-  this->declareMeshProperty(RGMB::bypass_meshgen, _bypass_meshgen);
+
+  // Option to bypass mesh generation depends on value of Mesh/data_only
+  const auto & moose_mesh = _app.actionWarehouse().getMesh();
+  const auto data_only = moose_mesh->parameters().get<bool>("data_only");
+  this->declareMeshProperty(RGMB::bypass_meshgen, data_only);
 
   if (isParamValid("top_boundary_id"))
   {
@@ -113,4 +116,9 @@ ReactorMeshParams::generate()
 {
   auto mesh = buildMeshBaseObject();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+ReactorMeshParams::generateData()
+{
 }
