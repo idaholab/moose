@@ -72,28 +72,6 @@
     input = secondary
   []
 
-  #  [nodeset_bottom]
-  # type = ExtraNodesetGenerator
-  #
-  #    []
-  #  [sideset_bottom]
-  # type = SideSetsFromNodeSetsGenerator
-  #
-  #    []
-  # [secondary]
-  #   type = LowerDBlockFromSidesetGenerator
-  #   new_block_id = 10001
-  #   new_block_name = 'secondary_lower'
-  #   sidesets = '10'
-  #   input = input_file
-  # []
-  # [primary]
-  #   type = LowerDBlockFromSidesetGenerator
-  #   new_block_id = 10000
-  #   sidesets = '20'
-  #   new_block_name = 'primary_lower'
-  #   input = secondary
-  # []
   patch_update_strategy = auto
   patch_size = 20
   allow_renumbering = false
@@ -220,7 +198,7 @@
     disp_y = disp_y
     friction_coefficient = 0.1 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 1e7
+    penalty = 1e6
     czm_normal_stiffness = 1e4
     penalty_friction = 1e4
     czm_tangential_stiffness = 1e5
@@ -228,6 +206,7 @@
     # unused
     czm_normal_strength = 1e3
     czm_tangential_strength = 1e3
+    displacements = 'disp_x disp_y'
 
   []
 []

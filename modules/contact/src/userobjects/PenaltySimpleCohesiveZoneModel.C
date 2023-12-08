@@ -16,6 +16,8 @@
 #include "MortarContactUtils.h"
 #include "ADReal.h"
 
+#include "CohesiveZoneModelTools.h"
+
 #include <Eigen/Core>
 
 registerMooseObject("ContactApp", PenaltySimpleCohesiveZoneModel);
@@ -65,6 +67,8 @@ PenaltySimpleCohesiveZoneModel::validParams()
       "the cohesive zone traction.");
   params.addRequiredParam<Real>("czm_normal_strength",
                                 "The normal strength that determines the traction-separation law.");
+  params.addRequiredCoupledVar("displacements",
+                               "The string of displacements suitable for the problem statement");
   params.addRequiredParam<Real>(
       "czm_tangential_strength",
       "The tangential strength that determines the traction-separation law.");
@@ -74,7 +78,7 @@ PenaltySimpleCohesiveZoneModel::validParams()
 PenaltySimpleCohesiveZoneModel::PenaltySimpleCohesiveZoneModel(const InputParameters & parameters)
   /*
    * We are using virtual inheritance to avoid the "Diamond inheritance" problem. This means that
-   * that we have to construct WeightedGapUserObject explicitly as it will_not_ be constructed in
+   * that we have to construct WeightedGapUserObject explicitly as it will _not_ be constructed in
    * the intermediate base classes PenaltyWeightedGapUserObject and WeightedVelocitiesUserObject.
    * Virtual inheritance ensures that only one instance of WeightedGapUserObject is included in this
    * class. The inheritance diagram is as follows:
@@ -99,11 +103,82 @@ PenaltySimpleCohesiveZoneModel::PenaltySimpleCohesiveZoneModel(const InputParame
     _czm_normal_stiffness(getParam<Real>("czm_normal_stiffness")),
     _czm_tangential_stiffness(getParam<Real>("czm_tangential_stiffness")),
     _czm_normal_strength(getParam<Real>("czm_normal_strength")),
-    _czm_tangential_strength(getParam<Real>("czm_tangential_strength"))
+    _czm_tangential_strength(getParam<Real>("czm_tangential_strength")),
+    // _stress(getADMaterialProperty<RankTwoTensor>("stress")),
+    _ndisp(coupledComponents("displacements"))
 {
   if (_augmented_lagrange_problem)
     mooseError("PenaltySimpleCohesiveZoneModel constraints cannot be enforced with an augmented "
                "Lagrange approach.");
+
+  for (unsigned int i = 0; i < _ndisp; ++i)
+  {
+    _grad_disp.push_back(&adCoupledGradient("displacements", i));
+    _grad_disp_neighbor.push_back(&adCoupledGradient("displacements", i));
+  }
+
+  // Set non-intervening components to zero
+  for (unsigned int i = _ndisp; i < 3; i++)
+  {
+    _grad_disp.push_back(&adZeroGradient());
+    _grad_disp_neighbor.push_back(&adZeroGradient());
+  }
+}
+
+void
+PenaltySimpleCohesiveZoneModel::prepareJumpKinematicQuantities()
+{
+  // Compute rotation matrix from secondary surface
+  // Rotation matrices and local interface displacement jump.
+  for (const auto i : make_range(_test->size()))
+  {
+    const Node * const node = _lower_secondary_elem->node_ptr(i);
+
+    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<true>(
+        _normals[_i], _subproblem.mesh().dimension());
+
+    _dof_to_interface_displacement_jump[node] =
+        _dof_to_rotation_matrix[node].transpose() *
+        (adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) * _normals[_i]);
+  }
+}
+
+void
+PenaltySimpleCohesiveZoneModel::computeQpPropertiesLocal()
+{
+  // Called after computeQpProperties() within the same algorithmic step.
+
+  // Compute F and R.
+  const auto F = (ADRankTwoTensor::Identity() +
+                  ADRankTwoTensor::initializeFromRows(
+                      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
+  const auto F_neighbor = (ADRankTwoTensor::Identity() +
+                           ADRankTwoTensor::initializeFromRows((*_grad_disp_neighbor[0])[_qp],
+                                                               (*_grad_disp_neighbor[1])[_qp],
+                                                               (*_grad_disp_neighbor[2])[_qp]));
+
+  // TODO in follow-on PRs: Trim interior node variable derivatives
+  _F_interpolation = F * (_JxW_msm[_qp] * _coord[_qp]);
+  _F_neighbor_interpolation = F_neighbor * (_JxW_msm[_qp] * _coord[_qp]);
+  // Member variable _qp_factor needed for averaging
+}
+
+void
+PenaltySimpleCohesiveZoneModel::computeQpIPropertiesLocal()
+{
+  // Get the _dof_to_weighted_gap map
+  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+  // _F_interpolation.zero();
+  // TODO: Probably better to interpolate the deformation gradients.
+  _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
+  _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
+}
+
+ADRankTwoTensor
+PenaltySimpleCohesiveZoneModel::normalizeRankTwoTensorQuantity(
+    const std::unordered_map<const DofObject *, ADRankTwoTensor> & map, const Node * const node)
+{
+  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
 }
 
 const VariableTestValue &
@@ -122,6 +197,18 @@ PenaltySimpleCohesiveZoneModel::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
+  // Beginning of CZM properties
+  for (auto & map_pr : _dof_to_czm_normal_traction)
+    map_pr.second = {0.0};
+
+  for (auto & map_pr : _dof_to_rotation_matrix)
+    map_pr.second.setToIdentity();
+
+  for (auto & map_pr : _dof_to_interface_displacement_jump)
+    map_pr.second = 0.0;
+
+  // End of CZM properties
+
   // Clear step slip (values used in between AL iterations for penalty adaptivity)
   for (auto & map_pr : _dof_to_step_slip)
   {
@@ -129,9 +216,6 @@ PenaltySimpleCohesiveZoneModel::timestepSetup()
     old_step_slip = {0.0, 0.0};
     step_slip = {0.0, 0.0};
   }
-
-  for (auto & map_pr : _dof_to_czm_normal_traction)
-    map_pr.second = {0.0};
 
   // save off accumulated slip from the last timestep
   for (auto & map_pr : _dof_to_accumulated_slip)
@@ -165,6 +249,13 @@ PenaltySimpleCohesiveZoneModel::initialize()
 
   // instead we call it explicitly here
   WeightedGapUserObject::initialize();
+
+  // Avoid accumulating interpolation over the time step
+  for (auto & map_pr : _dof_to_F)
+    map_pr.second.zero();
+
+  for (auto & map_pr : _dof_to_F_neighbor)
+    map_pr.second.zero();
 }
 
 void
@@ -172,6 +263,9 @@ PenaltySimpleCohesiveZoneModel::reinit()
 {
   // Normal contact pressure with penalty
   PenaltyWeightedGapUserObject::reinit();
+
+  // Compute all rotations that were created as material properties in CZMComputeDisplacementJump
+  prepareJumpKinematicQuantities();
 
   // Reset frictional pressure
   _frictional_contact_traction_one.resize(_qrule_msm->n_points());
@@ -190,6 +284,15 @@ PenaltySimpleCohesiveZoneModel::reinit()
   {
     // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
+
+    // Debug
+    const auto normalized_F = normalizeRankTwoTensorQuantity(_dof_to_F, node);
+    Moose::out << "Normalized F: " << normalized_F(0, 0) << " " << normalized_F(1, 1) << " "
+               << normalized_F(2, 2) << "\n";
+    Moose::out << "Map F: " << libmesh_map_find(_dof_to_F, node)(0, 0) << " "
+               << libmesh_map_find(_dof_to_F, node)(1, 1) << " "
+               << libmesh_map_find(_dof_to_F, node)(2, 2) << "\n";
+    // End debug
 
     const auto penalty_friction = findValue(
         _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
@@ -223,8 +326,12 @@ PenaltySimpleCohesiveZoneModel::reinit()
       // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
       // capacity)
       ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
-      if (penalty_friction * slip_distance.norm() >
-          0.4 * _friction_coefficient * std::abs(normal_pressure))
+
+      const auto slip_metric = std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
+                               std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
+
+      if (slip_metric > 1.0e-40 && penalty_friction * slip_distance.norm() >
+                                       0.4 * _friction_coefficient * std::abs(normal_pressure))
       {
         inner_iteration_penalty_friction =
             MetaPhysicL::raw_value(0.4 * _friction_coefficient * std::abs(normal_pressure) /

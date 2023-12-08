@@ -37,9 +37,14 @@ public:
   // virtual bool isAugmentedLagrangianConverged() override;
 
 protected:
+  virtual void computeQpPropertiesLocal() override;
+  virtual void computeQpIPropertiesLocal() override;
+
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
   virtual void applyTractionSeparationLaw(const Node * const node);
+  virtual void prepareJumpKinematicQuantities();
+  virtual ADRankTwoTensor normalizeRankTwoTensorQuantity(const std::unordered_map<const DofObject *, ADRankTwoTensor> & map, const Node * const node);
 
   /// The normal penalty factor
   const Real _penalty;
@@ -95,4 +100,35 @@ protected:
 
   /// Strength for tangential cohesive zone model
   const Real _czm_tangential_strength;
+
+  /// The stress tensor on the interface
+  // const ADMaterialProperty<RankTwoTensor> & _stress;
+
+  /// Number of displacement components
+  const unsigned int _ndisp;
+
+  /// Coupled displacement gradients
+  std::vector<const GenericVariableGradient<true> *> _grad_disp;
+
+  /// Coupled displacement and neighbor displacement gradient
+  std::vector<const GenericVariableGradient<true> *> _grad_disp_neighbor;
+
+  /// *** Kinematics/displacement jump quantities ***
+  /// Map from degree of freedom to rotation matrix
+  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_rotation_matrix;
+
+  /// Map from degree of freedom to local displacement jump
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_interface_displacement_jump;
+
+  /// Deformation gradient for interpolation
+  ADRankTwoTensor _F_interpolation;
+
+  /// Deformation gradient for interpolation of the neighbor projection
+  ADRankTwoTensor _F_neighbor_interpolation;
+
+  /// Map from degree of freedom to secondary, interpolated deformation gradient tensor
+  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F;
+
+  /// Map from degree of freedom to neighbor, interpolated deformation gradient tensor
+  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F_neighbor;
 };
