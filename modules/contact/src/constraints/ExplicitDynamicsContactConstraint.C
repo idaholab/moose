@@ -278,7 +278,7 @@ ExplicitDynamicsContactConstraint::computeContactForce(const Node & node,
 void
 ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
                                                         PenetrationInfo * pinfo,
-                                                        const RealVectorValue & distance_gap)
+                                                        const RealVectorValue & /*distance_gap*/)
 {
   // Momentum balance, uncoupled normal pressure
   // See Heinstein et al, 2000, Contact-impact modeling in explicit transient dynamics.
@@ -295,9 +295,8 @@ ExplicitDynamicsContactConstraint::solveImpactEquations(const Node & node,
   Real mass_contact_pressure(0.0);
 
   Real gap_rate(0.0);
-  Real gap(0.0);
-
-  gap = distance_gap * pinfo->_normal;
+  // Real gap(0.0);
+  // gap = distance_gap * pinfo->_normal;
 
   mass_contact_pressure =
       density_secondary * _neighbor_density[0] * wave_speed_secondary * _neighbor_wave_speed[0];
