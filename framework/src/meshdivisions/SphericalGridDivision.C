@@ -9,6 +9,8 @@
 
 #include "SphericalGridDivision.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
+#include "Positions.h"
 
 #include "libmesh/elem.h"
 #include <math.h>
@@ -21,8 +23,9 @@ SphericalGridDivision::validParams()
   InputParameters params = MeshDivision::validParams();
   params.addClassDescription("Divide the mesh along a spherical grid.");
 
-  // Definition of the sphere
-  params.addRequiredParam<Point>("center", "Center of the sphere");
+  // Definition of the sphere(s)
+  params.addParam<Point>("center", "Center of the sphere");
+  params.addParam<PositionsName>("center_positions", "Positions of the centers of the spheres");
 
   // Spatial bounds of the sphere
   params.addRangeCheckedParam<Real>(
@@ -43,13 +46,21 @@ SphericalGridDivision::validParams()
 
 SphericalGridDivision::SphericalGridDivision(const InputParameters & parameters)
   : MeshDivision(parameters),
-    _center(getParam<Point>("center")),
+    _center(isParamValid("center") ? &getParam<Point>("center") : nullptr),
+    _center_positions(
+        isParamValid("center_positions")
+            ? &_fe_problem->getPositionsObject(getParam<PositionsName>("center_positions"))
+            : nullptr),
     _min_r(getParam<Real>("r_min")),
     _max_r(getParam<Real>("r_max")),
     _n_radial(getParam<unsigned int>("n_radial")),
     _outside_grid_counts_as_border(getParam<bool>("assign_domain_outside_grid_to_border"))
 {
   SphericalGridDivision::initialize();
+
+  // Check that we know the centers
+  if (!_center && !_center_positions)
+    paramError("center", "You must pass a parameter for the center of the spherical frame");
 
   // Check non-negative size
   if (_max_r < _min_r)
@@ -64,6 +75,20 @@ void
 SphericalGridDivision::initialize()
 {
   setNumDivisions(_n_radial);
+
+  // Check that the grid is well-defined
+  if (_center_positions)
+  {
+    Real min_dist = 2 * _max_r;
+    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    // Note that if the positions are not co-planar, the distance reported would be bigger but there
+    // could still be an overlap. Looking at min_center_dist is not enough
+    if (min_dist > min_center_dist)
+      mooseError(
+          "Spherical grids centered on the positions are too close to each other (min distance: ",
+          min_center_dist,
+          "), closer than the radial extent of each grid. Mesh division is ill-defined");
+  }
 }
 
 unsigned int
@@ -77,7 +102,17 @@ SphericalGridDivision::divisionIndex(const Point & pt) const
 {
   // Compute coordinates of the point in the spherical coordinates
   Point pc;
-  pc(0) = (pt - _center).norm();
+  unsigned int offset = 0;
+  if (_center)
+    pc(0) = (pt - *_center).norm();
+  else
+  {
+    // If distributing using positions, find the closest position
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
+    offset = nearest_center_index * getNumDivisions();
+    pc(0) = (pt - _center_positions->getPosition(nearest_center_index, initial)).norm();
+  }
 
   if (!_outside_grid_counts_as_border)
   {
@@ -114,5 +149,5 @@ SphericalGridDivision::divisionIndex(const Point & pt) const
     ir = 0;
 
   mooseAssert(ir != not_found, "We should have found a mesh division bin radially");
-  return ir;
+  return offset + ir;
 }

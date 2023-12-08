@@ -14,6 +14,7 @@
 []
 
 [MeshDivisions]
+  active = 'spherical_div'
   [spherical_div]
     type = SphericalGridDivision
     center = '1 1 0'
@@ -24,6 +25,24 @@
     # Extent of the sphere
     r_min = 0.5
     r_max = 4
+  []
+  [spherical_div_positions]
+    type = SphericalGridDivision
+    center_positions = center
+
+    # Number of bins
+    n_radial = 3
+
+    # Extent of the sphere
+    r_min = 0.5
+    r_max = 4
+  []
+[]
+
+[Positions]
+  [center]
+    type = InputPositions
+    positions = '1 1 0'
   []
 []
 

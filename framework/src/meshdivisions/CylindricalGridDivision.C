@@ -9,6 +9,8 @@
 
 #include "CylindricalGridDivision.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
+#include "Positions.h"
 
 #include "libmesh/elem.h"
 #include <math.h>
@@ -23,16 +25,20 @@ CylindricalGridDivision::validParams()
       "Divide the mesh along a cylindrical grid. The innermost numbering of divisions is the "
       "radial bins, then comes the azimuthal bins, then the axial bins");
 
-  // Definition of the cylinder
+  // Definition of the cylinder(s)
   params.addRequiredParam<Point>("axis_direction", "Direction of the cylinder's axis");
   params.addRequiredParam<Point>(
       "azimuthal_start",
       "Direction of the 0-azimuthal-angle vector, normal to the cylinder's axis");
-  params.addRequiredParam<Point>("center",
-                                 "Point on the cylinder's axis, acting as the center of this local "
-                                 "R-theta-Z coordinate based division");
+  params.addParam<Point>("center",
+                         "Point on the cylinder's axis, acting as the center of this local "
+                         "R-theta-Z coordinate based division");
+  params.addParam<PositionsName>("center_positions",
+                                 "Positions of the points on the cylinders' respective axis, "
+                                 "acting as the center of the local "
+                                 "R-theta-Z coordinate based divisions");
 
-  // Spatial bounds of the cylinder
+  // Spatial bounds of the cylinder(s)
   params.addRangeCheckedParam<Real>(
       "r_min", 0, "r_min>=0", "Minimum radial coordinate (for a hollow cylinder)");
   params.addRequiredRangeCheckedParam<Real>("r_max", "r_max>0", "Maximum radial coordinate");
@@ -60,7 +66,11 @@ CylindricalGridDivision::validParams()
 CylindricalGridDivision::CylindricalGridDivision(const InputParameters & parameters)
   : MeshDivision(parameters),
     _direction(getParam<Point>("axis_direction")),
-    _center(getParam<Point>("center")),
+    _center(isParamValid("center") ? &getParam<Point>("center") : nullptr),
+    _center_positions(
+        isParamValid("center_positions")
+            ? &_fe_problem->getPositionsObject(getParam<PositionsName>("center_positions"))
+            : nullptr),
     _azim_dir(getParam<Point>("azimuthal_start")),
     _min_r(getParam<Real>("r_min")),
     _max_r(getParam<Real>("r_max")),
@@ -72,6 +82,10 @@ CylindricalGridDivision::CylindricalGridDivision(const InputParameters & paramet
     _outside_grid_counts_as_border(getParam<bool>("assign_domain_outside_grid_to_border"))
 {
   CylindricalGridDivision::initialize();
+
+  // Check that we know the centers
+  if (!_center && !_center_positions)
+    paramError("center", "You must pass a parameter for the center of the cylindrical frame");
 
   // Check axis
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1))
@@ -104,6 +118,20 @@ void
 CylindricalGridDivision::initialize()
 {
   setNumDivisions(_n_radial * _n_azim * _n_axial);
+
+  // Check that the grid is well-defined
+  if (_center_positions)
+  {
+    Real min_dist = 2 * _max_r;
+    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    // Note that if the positions are not co-planar, the distance reported would be bigger but there
+    // could still be an overlap. Looking at min_center_dist is not enough
+    if (min_dist > min_center_dist)
+      mooseError(
+          "Cylindrical grids centered on the positions are too close to each other (min distance: ",
+          min_center_dist,
+          "), closer than the radial extent of each grid. Mesh division is ill-defined");
+  }
 }
 
 unsigned int
@@ -117,8 +145,24 @@ CylindricalGridDivision::divisionIndex(const Point & pt) const
 {
   // Compute coordinates of the point in the cylindrical coordinates
   Point pc;
-  pc(2) = (pt - _center) * _direction;
-  const Point in_plane = (pt - _center) - pc(2) * _direction;
+  Point in_plane;
+  unsigned int offset = 0;
+  if (_center)
+  {
+    pc(2) = (pt - *_center) * _direction;
+    in_plane = (pt - *_center) - pc(2) * _direction;
+  }
+  else
+  {
+    // If dividing using positions, find the closest position
+    const bool initial = _fe_problem->getCurrentExecuteOnFlag() == EXEC_INITIAL;
+    const auto nearest_center_index = _center_positions->getNearestPositionIndex(pt, initial);
+    offset = nearest_center_index * getNumDivisions();
+    const auto new_center = _center_positions->getPosition(nearest_center_index, initial);
+    pc(2) = (pt - new_center) * _direction;
+    in_plane = (pt - new_center) - pc(2) * _direction;
+  }
+
   pc(0) = in_plane.norm();
   const Point pi2_dir = _azim_dir.cross(_direction);
   pc(1) = std::atan2(in_plane * pi2_dir, in_plane * _azim_dir) + libMesh::pi;
@@ -193,5 +237,5 @@ CylindricalGridDivision::divisionIndex(const Point & pt) const
   mooseAssert(ia != not_found, "We should have found a mesh division bin azimuthally");
   mooseAssert(iz != not_found, "We should have found a mesh division bin axially");
 
-  return ir + _n_radial * ia + iz * _n_radial * _n_azim;
+  return offset + ir + _n_radial * ia + iz * _n_radial * _n_azim;
 }
