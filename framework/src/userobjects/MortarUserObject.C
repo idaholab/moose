@@ -21,7 +21,7 @@ MortarUserObject::validParams()
 MortarUserObject::MortarUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     MortarConsumerInterface(this),
-    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, {_secondary_id}),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, _secondary_set),
     NeighborCoupleable(this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/false)
 {
 }

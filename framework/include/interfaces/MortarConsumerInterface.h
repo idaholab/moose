@@ -113,6 +113,9 @@ protected:
   /// Subdomain ID for the primary surface
   const SubdomainID _primary_subdomain_id;
 
+  /// the secondaryid set
+  std::set<BoundaryID> _secondary_set;
+
   /// the union of the secondary and primary boundary ids
   std::set<BoundaryID> _boundary_ids;
 
