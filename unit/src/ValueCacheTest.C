@@ -39,13 +39,16 @@ TEST(ValueCacheTest, guess)
 TEST(ValueCacheTest, kNN)
 {
   ValueCache<std::vector<Real>> cache(3);
+  std::vector<std::pair<std::vector<Real>, Real>> nearest_neighbors(3);
+
   cache.insert({4.2, 2.7, 1.6}, {1, 2});  // 27.49
   cache.insert({3.1, 1.2, 0.1}, {3, 4});  // 11.06
+
+  EXPECT_EQ(cache.guess({0, 0, 0}, nearest_neighbors), false);
+
   cache.insert({5.8, 1.9, 3.6}, {5, 6});  // 50.21
   cache.insert({7.1, 2.2, 4.1}, {7, 8});  // 72.06
   cache.insert({2.8, 2.1, 0.6}, {9, 10}); // 12.61
-
-  std::vector<std::pair<std::vector<Real>, Real>> nearest_neighbors(3);
 
   EXPECT_EQ(cache.guess({0, 0, 0}, nearest_neighbors), true);
 

@@ -132,8 +132,8 @@ ValueCache<T>::guess(const std::vector<Real> & in_val, std::vector<std::pair<T, 
   // Number of nearest neighbors to look for using kNN
   auto k = output.size();
 
-  // cache is empty
-  if (_data.empty())
+  // cache size is smaller than the number of neighbors requested
+  if (_data.size() < k)
     return false;
 
   nanoflann::KNNResultSet<Real> result_set(k);
