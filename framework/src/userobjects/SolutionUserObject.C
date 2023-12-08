@@ -146,7 +146,7 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   // the following is an anticlockwise rotation about z
   RealTensorValue rot0_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation0_vector to the z axis
-  RealTensorValue vec0_to_z = RotationMatrix::rotVecToZ(_rotation0_vector);
+  RealTensorValue vec0_to_z = RotationMatrix::rotVecToZTempl<false>(_rotation0_vector);
   // _r0 is then: rotate points so vec0 lies along z; then rotate about angle0; then rotate points
   // back
   _r0 = vec0_to_z.transpose() * (rot0_z * vec0_to_z);
@@ -156,7 +156,7 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   // the following is an anticlockwise rotation about z
   RealTensorValue rot1_z(a, -b, 0, b, a, 0, 0, 0, 1);
   // form the rotation matrix that will take rotation1_vector to the z axis
-  RealTensorValue vec1_to_z = RotationMatrix::rotVecToZ(_rotation1_vector);
+  RealTensorValue vec1_to_z = RotationMatrix::rotVecToZTempl<false>(_rotation1_vector);
   // _r1 is then: rotate points so vec1 lies along z; then rotate about angle1; then rotate points
   // back
   _r1 = vec1_to_z.transpose() * (rot1_z * vec1_to_z);

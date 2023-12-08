@@ -48,11 +48,11 @@ CZMRealVectorScalar::computeQpProperties()
   {
     case DirectionType::Normal:
       _property[_qp] =
-          CohesiveZoneModelTools::computeNormalComponents(normal, _vector[_qp]) * normal;
+          CohesiveZoneModelTools::computeNormalComponentsTempl<false>(normal, _vector[_qp]) * normal;
       break;
     case DirectionType::Tangent:
       _property[_qp] =
-          CohesiveZoneModelTools::computeTangentComponents(normal, _vector[_qp]).norm();
+          CohesiveZoneModelTools::computeTangentComponentsTempl<false>(normal, _vector[_qp]).norm();
       break;
     default:
       mooseError("ScalarType type not recognized");

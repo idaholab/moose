@@ -562,6 +562,8 @@ using GenericChainedReal = typename Moose::GenericType<ChainedReal, is_ad>;
 template <bool is_ad>
 using GenericRealVectorValue = typename Moose::GenericType<RealVectorValue, is_ad>;
 template <bool is_ad>
+using GenericRealTensorValue = typename Moose::GenericType<RealTensorValue, is_ad>;
+template <bool is_ad>
 using GenericRankTwoTensor = typename Moose::GenericType<RankTwoTensor, is_ad>;
 template <bool is_ad>
 using GenericRankThreeTensor = typename Moose::GenericType<RankThreeTensor, is_ad>;

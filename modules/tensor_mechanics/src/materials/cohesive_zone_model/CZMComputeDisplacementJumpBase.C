@@ -100,7 +100,7 @@ void
 CZMComputeDisplacementJumpBase<is_ad>::computeRotationMatrices()
 {
   _czm_total_rotation[_qp] =
-      CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _mesh.dimension());
+      CohesiveZoneModelTools::computeReferenceRotationTempl<is_ad>(_normals[_qp], _mesh.dimension());
 }
 
 template class CZMComputeDisplacementJumpBase<false>;

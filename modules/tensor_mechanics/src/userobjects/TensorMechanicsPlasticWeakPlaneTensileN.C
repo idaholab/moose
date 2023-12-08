@@ -38,7 +38,7 @@ TensorMechanicsPlasticWeakPlaneTensileN::TensorMechanicsPlasticWeakPlaneTensileN
     mooseError("Weak-plane normal vector must not have zero length");
   else
     _input_n /= _input_n.norm();
-  _rot = RotationMatrix::rotVecToZ(_input_n);
+  _rot = RotationMatrix::rotVecToZTempl<false>(_input_n);
 
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)

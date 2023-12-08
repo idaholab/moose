@@ -12,6 +12,7 @@
 
 registerMooseObject("TensorMechanicsApp", CZMComputeGlobalTractionTotalLagrangian);
 
+
 InputParameters
 CZMComputeGlobalTractionTotalLagrangian::validParams()
 {
@@ -48,7 +49,7 @@ CZMComputeGlobalTractionTotalLagrangian::computeEquilibriumTracionAndDerivatives
   _J = _F[_qp].det();
   _F_inv = _F[_qp].inverse();
 
-  _area_ratio = CohesiveZoneModelTools::computeAreaRatio(_F_inv.transpose(), _J, _normals[_qp]);
+  _area_ratio = CohesiveZoneModelTools::computeAreaRatioTempl<false>(_F_inv.transpose(), _J, _normals[_qp]);
 
   _traction_global[_qp] = (_czm_total_rotation[_qp] * _interface_traction[_qp]);
   _PK1traction[_qp] = _traction_global[_qp] * _area_ratio;
@@ -72,14 +73,14 @@ CZMComputeGlobalTractionTotalLagrangian::computedTPK1dJumpGlobal()
 void
 CZMComputeGlobalTractionTotalLagrangian::computeAreaRatioAndDerivatives()
 {
-  _dR_dF = CohesiveZoneModelTools::computedRdF(_R[_qp], _R[_qp].transpose() * _F[_qp]);
+  _dR_dF = CohesiveZoneModelTools::computedRdFTempl<false>(_R[_qp], _R[_qp].transpose() * _F[_qp]);
   usingTensorIndices(i_, j_, k_, l_, m_);
   _dczm_total_rotation_dF = _czm_reference_rotation[_qp].times<m_, j_, i_, m_, k_, l_>(_dR_dF);
 
-  const RankFourTensor dFinv_dF = CohesiveZoneModelTools::computedFinversedF(_F_inv);
+  const GenericRankFourTensor<false> dFinv_dF = CohesiveZoneModelTools::computedFinversedF(_F_inv);
 
   _d_area_ratio_dF =
-      CohesiveZoneModelTools::computeDAreaRatioDF(_F_inv.transpose(), _normals[_qp], _J, dFinv_dF);
+      CohesiveZoneModelTools::computeDAreaRatioDFTempl<false>(_F_inv.transpose(), _normals[_qp], _J, dFinv_dF);
 }
 
 void
