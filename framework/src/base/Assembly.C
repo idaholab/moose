@@ -4549,7 +4549,8 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 void
 Assembly::hasScalingVector()
 {
-  _scaling_vector = &_sys.getVector("scaling_factors");
+  if (_sys.hasVector("scaling_factors"))
+    _scaling_vector = &_sys.getVector("scaling_factors");
 }
 
 void

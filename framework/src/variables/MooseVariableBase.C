@@ -109,7 +109,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
-
   if (getParam<bool>("fv") && getParam<bool>("eigen"))
     paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
   if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
@@ -194,5 +193,6 @@ MooseVariableBase::initialSetup()
                                                          return !MooseUtils::absoluteFuzzyEqual(
                                                              element, 1.);
                                                        }) != _scaling_factor.end())))
+
     _sys.addScalingVector();
 }
