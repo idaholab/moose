@@ -122,7 +122,7 @@ public:
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
   static Real absoluteToleranceDefault() { return 1e-13; }
-  static Real xToleranceDefault() { return 1e-8; }
+  static Real xToleranceDefault() { return 1e-15; }
   static unsigned int minIterationsDefault() { return 3; }
   static unsigned int maxIterationsDefault() { return 1000; }
   static Real acceptableMultiplierDefault() { return 10.0; }
