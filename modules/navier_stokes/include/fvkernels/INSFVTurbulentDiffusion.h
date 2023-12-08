@@ -39,7 +39,7 @@ protected:
   const Moose::Functor<ADReal> & _scaling_coef;
 
   /// Wall boundaries
-  std::vector<BoundaryName> _wall_boundary_names;
+  const std::vector<BoundaryName> & _wall_boundary_names;
 
   /// Maps for wall treatement
   std::map<const Elem *, bool> _wall_bounded;

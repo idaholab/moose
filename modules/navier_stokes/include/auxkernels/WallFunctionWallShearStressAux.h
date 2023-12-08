@@ -42,5 +42,5 @@ protected:
   const Moose::Functor<ADReal> & _mu;
 
   /// Wall boundaries
-  std::vector<BoundaryName> _wall_boundary_names;
+  const std::vector<BoundaryName> & _wall_boundary_names;
 };

@@ -58,7 +58,7 @@ protected:
   const Real _C_mu;
 
   /// Wall boundaries
-  std::vector<BoundaryName> _wall_boundary_names;
+  const std::vector<BoundaryName> & _wall_boundary_names;
 
   /// If the user wants the linearized computation of y_plus
   const bool _linearized_yplus;

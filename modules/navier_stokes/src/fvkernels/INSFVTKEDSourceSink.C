@@ -24,7 +24,7 @@ INSFVTKEDSourceSink::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("k", "Coupled turbulent kinetic energy.");
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("mu_t", "Turbulent viscosity.");
@@ -60,7 +60,7 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _k(getFunctor<ADReal>("k")),
+    _k(getFunctor<ADReal>(NS::TKE)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>("mu_t")),

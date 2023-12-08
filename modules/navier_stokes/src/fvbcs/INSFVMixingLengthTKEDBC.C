@@ -16,7 +16,7 @@ INSFVMixingLengthTKEDBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
-  params.addRequiredParam<MooseFunctorName>("k", "The turbulent kinetic energy.");
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>("characteristic_length",
                                             "Characteristic length of the inlet in the problem.");
   return params;
@@ -25,7 +25,7 @@ INSFVMixingLengthTKEDBC::validParams()
 INSFVMixingLengthTKEDBC::INSFVMixingLengthTKEDBC(const InputParameters & params)
   : FVDirichletBCBase(params),
     _C_mu(getFunctor<ADReal>("C_mu")),
-    _k(getFunctor<ADReal>("k")),
+    _k(getFunctor<ADReal>(NS::TKE)),
     _characteristic_length(getFunctor<ADReal>("characteristic_length"))
 {
 }

@@ -24,8 +24,8 @@ kEpsilonViscosityAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("k", "Coupled turbulent kinetic energy.");
-  params.addRequiredParam<MooseFunctorName>("epsilon",
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
+  params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
@@ -54,8 +54,8 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _k(getFunctor<ADReal>("k")),
-    _epsilon(getFunctor<ADReal>("epsilon")),
+    _k(getFunctor<ADReal>(NS::TKE)),
+    _epsilon(getFunctor<ADReal>(NS::TKED)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>("mu")),
     _C_mu(getParam<Real>("C_mu")),
@@ -88,7 +88,8 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
   auto nu = mu / rho;
 
   const ADReal a_c = 1 / NS::von_karman_constant;
-  const ADReal b_c = 1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
+  const ADReal b_c =
+      1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
   const ADReal c_c = u;
 
   /// Satrting with linear guess
@@ -103,13 +104,15 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
     ADReal residual;
     for (int i = 0; i < _MAX_ITERS_U_TAU; ++i)
     {
-      residual = u / u_tau - 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist * u_tau / nu);
+      residual = u / u_tau -
+                 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist * u_tau / nu);
 
       if (residual < _REL_TOLERANCE)
         return u_tau;
 
       ADReal residual_derivative =
-          -1 / u_tau * (u / u_tau + 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist / nu));
+          -1 / u_tau *
+          (u / u_tau + 1 / NS::von_karman_constant * std::log(NS::E_turb_constant * dist / nu));
       ADReal new_u_tau = std::max(1e-20, u_tau - residual / residual_derivative);
       u_tau = new_u_tau;
     }
@@ -172,7 +175,8 @@ kEpsilonViscosityAux::computeValue()
       y_plus = _rho(current_argument, state) * std::pow(_C_mu, 0.25) *
                std::pow(_k(current_argument, state), 0.5) * min_wall_dist /
                _mu(current_argument, state);
-      auto von_karman_value = (1 / NS::von_karman_constant + std::log(NS::E_turb_constant * y_plus));
+      auto von_karman_value =
+          (1 / NS::von_karman_constant + std::log(NS::E_turb_constant * y_plus));
       u_tau = std::sqrt(std::pow(_C_mu, 0.25) * std::pow(_k(current_argument, state), 0.5) *
                         parallel_speed / von_karman_value);
     }
@@ -196,9 +200,10 @@ kEpsilonViscosityAux::computeValue()
     }
     else // buffer layer
     {
-      auto wall_val_log = _rho(current_argument, state) * u_tau * min_wall_dist /
-                              (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
-                          _mu(current_argument, state);
+      auto wall_val_log =
+          _rho(current_argument, state) * u_tau * min_wall_dist /
+              (1 / NS::von_karman_constant * std::log(NS::E_turb_constant * y_plus)) -
+          _mu(current_argument, state);
       auto blending_function = (y_plus - 5.0) / 25.0;
       auto wall_val = blending_function * wall_val_log;
       mu_t_wall = wall_val.value();

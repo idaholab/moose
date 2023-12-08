@@ -53,7 +53,7 @@ protected:
   const Moose::Functor<ADReal> & _mu_t;
 
   /// Wall boundaries
-  std::vector<BoundaryName> _wall_boundary_names;
+  const std::vector<BoundaryName> & _wall_boundary_names;
 
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
