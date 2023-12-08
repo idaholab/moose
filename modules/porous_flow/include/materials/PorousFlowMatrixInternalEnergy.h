@@ -18,12 +18,13 @@
  * heat capacity of the rock in a rock-fluid system, the result must
  * be multiplied by (1 - porosity).
  */
-class PorousFlowMatrixInternalEnergy : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowMatrixInternalEnergyTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowMatrixInternalEnergy(const InputParameters & parameters);
+  PorousFlowMatrixInternalEnergyTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -39,14 +40,17 @@ protected:
   const Real _heat_cap;
 
   /// Temperature at the nodes
-  const MaterialProperty<Real> & _temperature_nodal;
+  const GenericMaterialProperty<Real, is_ad> & _temperature;
 
   /// d(temperature at the nodes)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dtemperature_nodal_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Matrix internal_energy at the nodes
-  MaterialProperty<Real> & _en_nodal;
+  GenericMaterialProperty<Real, is_ad> & _energy;
 
   /// d(matrix internal energy)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real>> & _den_nodal_dvar;
+  MaterialProperty<std::vector<Real>> * const _denergy_dvar;
 };
+
+typedef PorousFlowMatrixInternalEnergyTempl<false> PorousFlowMatrixInternalEnergy;
+typedef PorousFlowMatrixInternalEnergyTempl<true> ADPorousFlowMatrixInternalEnergy;
