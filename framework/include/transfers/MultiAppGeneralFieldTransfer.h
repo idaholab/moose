@@ -252,6 +252,10 @@ protected:
   /// Point locators, useful to examine point location with regards to domain restriction
   std::vector<std::unique_ptr<PointLocatorBase>> _from_point_locators;
 
+  /// First app each processor owns, indexed by processor
+  /// If no app on the processor, will have a -1 for the app start instead
+  std::vector<unsigned int> _global_app_start_per_proc;
+
   /// Whether or not a greedy strategy will be used
   /// If true, all the partitions will be checked for a given
   /// outgoing point
@@ -337,10 +341,10 @@ private:
   /// Set the bounding box sizes manually
   std::vector<Real> _fixed_bbox_size;
 
-  /// Number of froms per processor
+  /// Number of froms per processor. Outer indexing is processor number, inner is local app
   std::vector<unsigned int> _froms_per_proc;
 
-  /// Bounding boxes for all source applications (indexed with global source app)
+  /// Bounding boxes for all source applications. Outer indexing is processor number, inner is local app
   std::vector<BoundingBox> _from_bboxes;
 
   /// A map from processor to pointInfo vector
@@ -443,14 +447,14 @@ private:
    * @param p the point of interest
    * @param bbox the bounding box to find the minimum distance from
    */
-  Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
+  Real bboxMinDistance(const Point & p, const BoundingBox & bbox) const;
 
   /**
    * Compute max distance
    * @param p the point of interest
    * @param bbox the bounding box to find the maximum distance from
    */
-  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
+  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox) const;
 
   /**
    * @brief Obtains the max dimensions to scale all points in the mesh
@@ -461,7 +465,13 @@ private:
   /**
    * Get from bounding boxes for given domains and boundaries
    */
-  std::vector<BoundingBox> getRestrictedFromBoundingBoxes();
+  std::vector<BoundingBox> getRestrictedFromBoundingBoxes() const;
+
+  /**
+   * Get global index for the first app each processes owns
+   * Requires a global communication, must be called on every domain simultaneously
+   */
+  std::vector<unsigned int> getGlobalStartAppPerProc() const;
 };
 
 // Anonymous namespace for data, functors to use with GenericProjector.

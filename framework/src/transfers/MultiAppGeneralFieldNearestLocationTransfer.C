@@ -604,23 +604,17 @@ MultiAppGeneralFieldNearestLocationTransfer::checkRestrictionsForSource(
     // If matching source mesh divisions to target mesh divisions, we check that the index of the
     // target mesh division, which was passed in the point request, is equal to the current mesh
     // division
-    else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+    else if ((_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+              _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX) &&
              mesh_div != kd_div_index)
       return false;
   }
-  if (!_to_mesh_divisions.empty())
-  {
-    // If matching target apps to source mesh divisions, we check that the global index of the
-    // application is equal to the target mesh division index, which was passed in the point request
-    if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
-        mesh_div != getGlobalSourceAppIndex(app_index))
-      return false;
-    // If matching source mesh divisions to target mesh divisions, we check that the index of the
-    // target mesh division, which was passed in the point request, is equal to the current mesh
-    // division
-    else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
-             mesh_div != (i_from % getNumDivisions()))
-      return false;
-  }
+
+  // If matching target apps to source mesh divisions, we check that the global index of the
+  // application is equal to the target mesh division index, which was passed in the point request
+  if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+      mesh_div != getGlobalSourceAppIndex(app_index))
+    return false;
+
   return true;
 }

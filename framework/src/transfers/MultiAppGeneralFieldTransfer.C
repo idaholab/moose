@@ -459,6 +459,9 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   _froms_per_proc.clear();
   _froms_per_proc = getFromsPerProc();
 
+  // Get the index for the first source app every processor owns
+  _global_app_start_per_proc = getGlobalStartAppPerProc();
+
   // Find outgoing target points
   // We need to know what points we need to send which processors
   // One processor will receive many points from many processors
@@ -544,6 +547,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
     // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
     // considered a potential source.
     // NOTE: This is a heuristic. We could try others
+    // NOTE: from_bboxes are in the reference space, as is the point
     Real nearest_max_distance = std::numeric_limits<Real>::max();
     for (const auto & bbox : _from_bboxes)
     {
@@ -585,7 +589,8 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
     auto saved_target_div = MooseMeshDivision::INVALID_DIVISION_INDEX;
     for (const auto i_to : index_range(_to_meshes))
     {
-      const auto target_div = _to_mesh_divisions[i_to]->divisionIndex(point);
+      const auto target_div = _to_mesh_divisions[i_to]->divisionIndex(
+          _to_transforms[getGlobalTargetAppIndex(i_to)]->mapBack(point));
       // If it's the same division index, do not redo the search
       if (target_div == saved_target_div)
         continue;
@@ -593,11 +598,9 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
         saved_target_div = target_div;
 
       // Look for the processors owning a source-app with an index equal to the target mesh division
-      unsigned int from0 = 0;
-      for (processor_id_type i_proc = 0; i_proc < n_processors();
-           from0 += _froms_per_proc[i_proc], ++i_proc)
-        for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
-          if (target_div == i_from)
+      for (const auto i_proc : make_range(n_processors()))
+        for (const auto i_from : make_range(_froms_per_proc[i_proc]))
+          if (target_div == _global_app_start_per_proc[i_proc] + i_from)
           {
             processors.insert(i_proc);
             found = true;
@@ -1393,11 +1396,22 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         // This will happen if meshes are mismatched
         if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         {
+          const auto target_location =
+              hasToMultiApp()
+                  ? " on target app " + std::to_string(getGlobalTargetAppIndex(problem_id))
+                  : " on parent app ";
           if (is_nodal)
-            mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
+            mooseError("No source value could be found for node ",
+                       dof_object_id,
+                       target_location,
+                       "could not be located. Node details:\n",
+                       _to_meshes[problem_id]->nodePtr(dof_object_id)->get_info());
           else
-            mooseError(
-                "Element ", dof_object_id, " for app ", problem_id, " could not be located ");
+            mooseError("No source value could be found for element ",
+                       dof_object_id,
+                       target_location,
+                       "could not be located. Element details:\n",
+                       _to_meshes[problem_id]->elemPtr(dof_object_id)->get_info());
         }
 
         // We should not put garbage into our solution vector
@@ -1643,7 +1657,7 @@ MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Po
 }
 
 Real
-MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox)
+MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox) const
 {
   std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
@@ -1667,7 +1681,7 @@ MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox
 }
 
 Real
-MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox & bbox)
+MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox & bbox) const
 {
   std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
@@ -1691,7 +1705,7 @@ MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox
 }
 
 std::vector<BoundingBox>
-MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
+MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes() const
 {
   std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
   const Real min_r = std::numeric_limits<Real>::lowest();
@@ -1772,6 +1786,16 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
         }
 
   return bboxes;
+}
+
+std::vector<unsigned int>
+MultiAppGeneralFieldTransfer::getGlobalStartAppPerProc() const
+{
+  std::vector<unsigned int> global_app_start_per_proc(1, -1);
+  if (_from_local2global_map.size())
+    global_app_start_per_proc[0] = _from_local2global_map[0];
+  _communicator.allgather(global_app_start_per_proc, true);
+  return global_app_start_per_proc;
 }
 
 VariableName

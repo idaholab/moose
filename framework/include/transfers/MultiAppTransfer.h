@@ -168,9 +168,13 @@ protected:
   ///@{
   /**
    * Return the bounding boxes of all the "from" domains, including all the domains not local to
-   * this processor. The is a boundary restricted version which will return a degenerate minimum
+   * this processor. There is a boundary restricted version which will return a degenerate minimum
    * boundary box (min, min, min, min, min, min) in the case where the source domain doesn't
    * have any active nodes on the boundary.
+   * Note: bounding boxes are in the reference space when using coordinate transformations /
+   * positions
+   * Note: global bounding boxes are not indexed by app number. But rather outer indexing is by
+   * process, then the inner indexing is by local app number.
    */
   std::vector<BoundingBox> getFromBoundingBoxes();
   std::vector<BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
@@ -178,6 +182,7 @@ protected:
 
   /**
    * Return the number of "from" domains that each processor owns.
+   * Note: same indexing as getFromBoundingBoxes
    */
   std::vector<unsigned int> getFromsPerProc();
 
@@ -195,11 +200,15 @@ protected:
   /// Return the global app index from the local index in the "from-multiapp" transfer direction
   unsigned int getGlobalSourceAppIndex(unsigned int i_from) const
   {
+    mooseAssert(_current_direction == TO_MULTIAPP || i_from < _from_local2global_map.size(),
+                "Out of bounds local from-app index");
     return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
   }
   /// Return the global app index from the local index in the "to-multiapp" transfer direction
   unsigned int getGlobalTargetAppIndex(unsigned int i_to) const
   {
+    mooseAssert(_current_direction == FROM_MULTIAPP || i_to < _to_local2global_map.size(),
+                "Out of bounds local to-app index");
     return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
   }
   /// Return the local app index from the global index in the "from-multiapp" transfer direction
