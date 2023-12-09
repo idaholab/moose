@@ -32,6 +32,7 @@ class ThermochimicaDataBase : public ThermochimicaDataBaseParent<is_nodal>
 public:
   static InputParameters validParams();
   ThermochimicaDataBase(const InputParameters & parameters);
+  ~ThermochimicaDataBase();
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -70,8 +71,16 @@ public:
   const Data & getData(dof_id_type id) const;
 
 protected:
-  // get current node or element ID
-  auto currentID();
+  // child process routine to dispatch thermochimica calculations
+  void server();
+
+  // helper to wait on a socket read
+  template <typename T>
+  void expect(T expect_msg);
+
+  // send message to socket
+  template <typename T>
+  void notify(T send_msg);
 
   const VariableValue & _pressure;
   const VariableValue & _temperature;
@@ -123,6 +132,21 @@ protected:
 
   /// Mass unit for output species
   const enum class OutputMassUnit { MOLES, FRACTION } _output_mass_unit;
+
+  /// communication socket
+  int _socket;
+
+  /// child PID
+  pid_t _pid;
+
+  /// shared memory pointer for dof_id_type values
+  dof_id_type * _shared_dofid_mem;
+
+  /// shared memory pointer for Real values
+  Real * _shared_real_mem;
+
+  // current node or element ID
+  dof_id_type _current_id;
 
   using ThermochimicaDataBaseParent<is_nodal>::isCoupled;
   using ThermochimicaDataBaseParent<is_nodal>::isParamValid;
