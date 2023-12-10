@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVTurbulentDiffusion.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", INSFVTurbulentDiffusion);
 
@@ -36,24 +37,7 @@ void
 INSFVTurbulentDiffusion::initialSetup()
 {
   FVDiffusion::initialSetup();
-  for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
-  {
-    auto wall_bounded = false;
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
-    {
-      const std::vector<BoundaryID> side_bnds = _subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : _wall_boundary_names)
-      {
-        BoundaryID wall_id = _subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-        {
-          if (side_id == wall_id)
-            wall_bounded = true;
-        }
-      }
-    }
-    _wall_bounded[elem] = wall_bounded;
-  }
+  NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem, _wall_bounded);
 }
 
 ADReal
@@ -62,7 +46,7 @@ INSFVTurbulentDiffusion::computeQpResidual()
   using namespace Moose::FV;
   const auto state = determineState();
 
-  auto dudn = gradUDotNormal(state);
+  const auto dudn = gradUDotNormal(state);
   ADReal coeff;
   ADReal scaling_coef;
 
@@ -97,7 +81,6 @@ INSFVTurbulentDiffusion::computeQpResidual()
 void
 INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
 {
-
   if (skipForBoundary(fi))
     return;
 
@@ -113,7 +96,6 @@ INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
     if (!bounded_elem)
     {
       // residual contribution of this kernel to the elem element
@@ -121,10 +103,8 @@ INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
       _local_re(0) = r;
       accumulateTaggedLocalResidual();
     }
-  }
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
     if (!bounded_neigh)
     {
       // residual contribution of this kernel to the neighbor element
@@ -132,7 +112,6 @@ INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
       _local_re(0) = -r;
       accumulateTaggedLocalResidual();
     }
-  }
 }
 
 void

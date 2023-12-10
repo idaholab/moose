@@ -19,7 +19,7 @@ InputParameters
 INSFVTKESourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Elental kernel to compute the production and destruction "
+  params.addClassDescription("Elemental kernel to compute the production and destruction "
                              " terms of turbulent kinetic energy (TKE).");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
@@ -40,10 +40,9 @@ INSFVTKESourceSink::validParams()
       "linearized_model",
       true,
       "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
-  params.addParam<bool>(
-      "non_equilibrium_treatment",
-      false,
-      "Use non-equilibrium wall treatement (faster than standard wall treatement)");
+  params.addParam<bool>("non_equilibrium_treatment",
+                        false,
+                        "Use non-equilibrium wall treatment (faster than standard wall treatment)");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   params.set<unsigned short>("ghost_layers") = 2;

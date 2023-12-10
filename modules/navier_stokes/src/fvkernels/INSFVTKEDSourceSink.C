@@ -123,7 +123,7 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < _normal[_current_elem].size(); i++)
     {
-      auto distance = _dist[_current_elem][i];
+      const auto distance = _dist[_current_elem][i];
 
       ADReal y_plus;
       if (_non_equilibrium_treatment)

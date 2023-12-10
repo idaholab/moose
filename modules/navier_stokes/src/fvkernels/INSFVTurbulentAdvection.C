@@ -74,7 +74,6 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
     if (!bounded_elem)
     {
       // residual contribution of this kernel to the elem element
@@ -82,10 +81,8 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
       _local_re(0) = r;
       accumulateTaggedLocalResidual();
     }
-  }
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
     if (!bounded_neigh)
     {
       // residual contribution of this kernel to the neighbor element
@@ -93,7 +90,6 @@ INSFVTurbulentAdvection::computeResidual(const FaceInfo & fi)
       _local_re(0) = -r;
       accumulateTaggedLocalResidual();
     }
-  }
 }
 
 void
