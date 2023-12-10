@@ -22,6 +22,7 @@ public:
   static InputParameters validParams();
   INSFVMomentumAdvectionSlip(const InputParameters & params);
 
+  using INSFVMomentumAdvection::computeResidual;
   void computeResidual(const FaceInfo & fi) override;
 
 protected:

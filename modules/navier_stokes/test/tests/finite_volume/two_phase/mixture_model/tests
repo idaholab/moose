@@ -1,6 +1,6 @@
 [Tests]
-  design = ''
-  issues = ''
+  issues = '#22637'
+  design = 'INSFVSlipVelocityAux.md INSFVMomentumAdvectionSlip.md INSFVMomentumDriftFlux.md INSFVScalarFieldAdvection.md NSFVInterfaceTransfer.md NSFVDispersePhaseDragMaterial.md'
   [mixture_lid_driven_two_phase]
     type = 'CSVDiff'
     input = 'lid-driven-two-phase.i'
