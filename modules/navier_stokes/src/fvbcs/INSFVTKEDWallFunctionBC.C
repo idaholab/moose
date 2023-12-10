@@ -19,7 +19,7 @@ INSFVTKEDWallFunctionBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
   params.addClassDescription("Adds Reichardt extrapolated wall values to set up directly the"
-                             "Dirichlet BC for the turbulent kinetic energy.");
+                             "Dirichlet BC for the turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -48,16 +48,18 @@ INSFVTKEDWallFunctionBC::INSFVTKEDWallFunctionBC(const InputParameters & params)
 ADReal
 INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
 {
-  Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
+  const Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
   const auto state = determineState();
+  const auto mu = _mu(makeElemArg(&_current_elem), state);
+  const auto rho = _rho(makeElemArg(&_current_elem), state);
 
   // Assign boundary weights to element
+  // This is based on the theory of linear TKE development for each boundary
+  // This is, it assumes no interation across turbulence production from boundaries
   Real weight = 0.0;
   for (unsigned int i_side = 0; i_side < _current_elem.n_sides(); ++i_side)
-  {
     weight += static_cast<Real>(_subproblem.mesh().getBoundaryIDs(&_current_elem, i_side).size());
-  }
 
   // Get the velocity vector
   ADRealVectorValue velocity(_u_var(makeElemArg(&_current_elem), state));
@@ -67,24 +69,24 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
     velocity(2) = (*_w_var)(makeElemArg(&_current_elem), state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
+  const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
 
   // Get friction velocity
-  ADReal u_star = NS::findUStar(_mu(makeElemArg(&_current_elem), state),
-                                _rho(makeElemArg(&_current_elem), state),
-                                parallel_speed,
-                                dist);
+  const ADReal u_star = NS::findUStar(mu,
+                                      rho,
+                                      parallel_speed,
+                                      dist);
 
   // Get associated non-dimensional wall distance
-  ADReal y_plus = dist * u_star * _rho(makeElemArg(&_current_elem), state) /
-                  _mu(makeElemArg(&_current_elem), state);
+  const ADReal y_plus = dist * u_star * rho /
+                        mu;
 
-  auto TKE = _k(makeElemArg(&_current_elem), state);
+  const auto TKE = _k(makeElemArg(&_current_elem), state);
 
   if (y_plus <= 5.0) // sub-laminar layer
   {
     const auto laminar_value =
-        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem), state) / std::pow(dist, 2);
+        2.0 * weight * TKE * mu / std::pow(dist, 2);
     return laminar_value.value();
   }
   else if (y_plus >= 30.0) // log-layer
@@ -97,7 +99,7 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
   else // blending function
   {
     const auto laminar_value =
-        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem), state) / std::pow(dist, 2);
+        2.0 * weight * TKE * mu / std::pow(dist, 2);
     const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem), state) *
                                  std::pow(std::abs(TKE), 1.5) /
                                  (_mu_t(makeElemArg(&_current_elem), state) * dist);

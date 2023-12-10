@@ -15,7 +15,8 @@ InputParameters
 INSFVInletIntensityTKEBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
-  params.addClassDescription("Adds inlet boudnary conditon for k based on turbulent intensity.");
+  params.addClassDescription("Adds inlet boudnary conditon for the turbulent kinetic energy based "
+                             "on turbulent intensity.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
