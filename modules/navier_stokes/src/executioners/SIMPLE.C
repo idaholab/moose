@@ -46,7 +46,7 @@ SIMPLE::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
   params.addParam<std::vector<NonlinearSystemName>>(
-      "turbulence_systems", "The nonlinear system(s) for the passive scalar equation(s).");
+      "turbulence_systems", "The nonlinear system(s) for the turbulence equation(s).");
   params.addParam<TagName>("pressure_gradient_tag",
                            "pressure_momentum_kernels",
                            "The name of the tags associated with the kernels in the momentum "
@@ -153,11 +153,11 @@ SIMPLE::validParams()
                                   "Singleton PETSc options for the turbulence equation(s)");
   params.addParam<MultiMooseEnum>("turbulence_petsc_options_iname",
                                   Moose::PetscSupport::getCommonPetscKeys(),
-                                  "Names of PETSc name/value pairs for the energy equation(s)");
+                                  "Names of PETSc name/value pairs for the turbulence equation(s)");
   params.addParam<std::vector<std::string>>(
       "turbulence_petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
-      "energy equation");
+      "turbulence equation");
 
   params.addParamNamesToGroup(
       "momentum_petsc_options momentum_petsc_options_iname momentum_petsc_options_value "
@@ -872,7 +872,7 @@ SIMPLE::findDoFID(const VariableName & var_name, const Point & point)
 }
 
 void
-SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
+SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, const Real relaxation_factor)
 {
   // We will need the latest and the second latest solution for the relaxation
   NumericVector<Number> & solution = *(system_in.system().current_local_solution.get());
@@ -898,7 +898,9 @@ SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_fac
 }
 
 void
-SIMPLE::limitSolutionUpdate(NonlinearSystemBase & system_in, Real min_limit, Real max_limit)
+SIMPLE::limitSolutionUpdate(NonlinearSystemBase & system_in,
+                            const Real min_limit,
+                            const Real max_limit)
 {
   // We will need the latest solution
   NumericVector<Number> & solution = *(system_in.system().solution.get());
@@ -1258,10 +1260,8 @@ SIMPLE::execute()
         ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
     }
     if (_has_turbulence_systems)
-    {
       for (auto system_i : index_range(_turbulence_absolute_tolerance))
         ns_abs_tols.push_back(_turbulence_absolute_tolerance[system_i]);
-    }
 
     // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
@@ -1284,10 +1284,8 @@ SIMPLE::execute()
 
       // If we solve for turbulence, we clear the caches there too
       if (_has_turbulence_systems)
-      {
         for (auto system_i : index_range(_turbulence_systems))
           _turbulence_systems[system_i]->residualSetup();
-      }
 
       iteration_counter++;
 
@@ -1326,6 +1324,9 @@ SIMPLE::execute()
       // Update resdiual index
       residual_index = momentum_residual.size();
 
+      // Execute all objects tagged as nonlinear
+      _problem.execute(EXEC_NONLINEAR);
+
       // If we have an energy equation, solve it here. We assume the material properties in the
       // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
       // outside of the velocity-pressure loop
@@ -1355,7 +1356,6 @@ SIMPLE::execute()
       // momentum-pressure loop because it affects the turbulent viscosity
       if (_has_turbulence_systems)
       {
-        _problem.execute(EXEC_NONLINEAR);
         Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
 
         for (auto system_i : index_range(_turbulence_systems))
@@ -1376,7 +1376,7 @@ SIMPLE::execute()
         }
       }
 
-      // Printing resdiuals
+      // Printing residuals
       residual_index = 0;
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
@@ -1402,6 +1402,7 @@ SIMPLE::execute()
                    << COLOR_DEFAULT << std::endl;
         }
       }
+
       if (_has_turbulence_systems)
       {
         _console << "Turbulence Iteration " << std::endl;
@@ -1451,45 +1452,6 @@ SIMPLE::execute()
                    << passive_scalar_residuals[system_i] << COLOR_DEFAULT << std::endl;
       }
     }
-
-    // // Now we solve for the turbulence equations, they should not influence the solution of the
-    // // system above. The reason why we need more than one iteration is due to the matrix relaxation
-    // // which can be used to stabilize the equations
-    // if (_has_turbulence_systems)
-    // {
-    //   _console << " Passive Scalar Iteration " << iteration_counter << std::endl;
-
-    //   // We set the options used by Petsc (preconditioners etc). We assume that every passive
-    //   // scalar equation uses the same options for now.
-    //   Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
-
-    //   iteration_counter = 0;
-    //   std::vector<Real> turbulence_residuals(_turbulence_systems.size(), 1.0);
-    //   while (iteration_counter < _num_iterations &&
-    //          !converged(turbulence_residuals, _turbulence_absolute_tolerance))
-    //   {
-    //     // We clear the caches in the passive scalar variables
-    //     for (auto system_i : index_range(_turbulence_systems))
-    //       _turbulence_systems[system_i]->residualSetup();
-
-    //     iteration_counter++;
-
-    //     // Solve the passive scalar equations
-    //     for (auto system_i : index_range(_turbulence_systems))
-    //       turbulence_residuals[system_i] =
-    //           solveAdvectedSystem(_turbulence_system_numbers[system_i],
-    //                               *_turbulence_systems[system_i],
-    //                               _turbulence_equation_relaxation[system_i],
-    //                               _turbulence_linear_control,
-    //                               _turbulence_l_abs_tol);
-
-    //     _console << "Turbulence Iteration " << iteration_counter
-    //              << " Initial residual norms:" << std::endl;
-    //     for (auto system_i : index_range(_turbulence_systems))
-    //       _console << _turbulence_systems[system_i]->name() << " " << COLOR_GREEN
-    //                << turbulence_residuals[system_i] << COLOR_DEFAULT << std::endl;
-    //   }
-    // }
   }
 
   _time = _time_step;
