@@ -86,9 +86,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   ADReal face_mu;
 
   if (onBoundary(*_face_info))
-  {
     face_mu = std::max(_mu(makeCDFace(*_face_info), state), 0.0);
-  }
   else
     Moose::FV::interpolate(_mu_interp_method,
                            face_mu,
@@ -134,23 +132,17 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     ADRealTensorValue gradient;
     if (_dim == 1)
     {
-      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
       const auto & grad_u = _u_var->gradient(face, state);
       gradient = ADRealTensorValue(grad_u, ADRealVectorValue(0, 0, 0), ADRealVectorValue(0, 0, 0));
     }
     else if (_dim == 2)
     {
-      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
-      // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
       const auto & grad_u = _u_var->gradient(face, state);
       const auto & grad_v = _v_var->gradient(face, state);
       gradient = ADRealTensorValue(grad_u, grad_v, ADRealVectorValue(0, 0, 0));
     }
     else // if (_dim == 3)
     {
-      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
-      // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
-      // const auto & grad_w = _w_var->adGradSln(face_info, skewness_correction);
       const auto & grad_u = _u_var->gradient(face, state);
       const auto & grad_v = _v_var->gradient(face, state);
       const auto & grad_w = _w_var->gradient(face, state);
