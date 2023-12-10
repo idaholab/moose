@@ -34,7 +34,7 @@ k_init = '${fparse 1.5*(internsity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
 
 ### Modeling parameters ###
-non_equilibrium_treatement = false
+non_equilibrium_treatment = false
 bulk_wall_treatment = false
 walls = 'bottom wall-side top'
 max_mixing_length = 1e10
@@ -223,7 +223,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatement = ${non_equilibrium_treatement}
+    non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
   []
 
@@ -258,7 +258,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatement = ${non_equilibrium_treatement}
+    non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
   []
 
@@ -356,7 +356,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
     linearized_yplus = ${linearized_yplus_mu_t}
-    non_equilibrium_treatement = ${non_equilibrium_treatement}
+    non_equilibrium_treatment = ${non_equilibrium_treatment}
     execute_on = 'NONLINEAR'
   []
 []

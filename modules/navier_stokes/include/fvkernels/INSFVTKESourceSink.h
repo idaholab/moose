@@ -60,7 +60,7 @@ protected:
   const bool _linearized_model;
 
   /// No equilibrium treatement
-  const bool _non_equilibrium_treatement;
+  const bool _non_equilibrium_treatment;
 
   /// C_mu constant
   const Real _C_mu;

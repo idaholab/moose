@@ -67,7 +67,7 @@ protected:
   const bool _bulk_wall_treatment;
 
   /// IF the user requested non-equilibrium wall treatment
-  const bool _non_equilibrium_treatement;
+  const bool _non_equilibrium_treatment;
 
   // -- Parameters of the wall function method
 

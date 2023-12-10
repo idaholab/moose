@@ -44,9 +44,9 @@ A separate formulation is used for the `sub-laminar` and `logarithmic` boundary 
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
 The non-dimensional wall distance ca be as defined differently according to the
-[!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatement) parameter.
+[!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) parameter.
 
-If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatement) is `false`, the
+If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) is `false`, the
 standard wall function formulations is used in
 which $y^+$ is found by an incremental fixed point algorithm as follows:
 
@@ -61,7 +61,7 @@ where:
 - $u_{\tau}$ is the friction velocity, defined as $u_{\tau} = \sqrt{\frac{\tau_w}{\rho}}$ with $\tau_w$ the shear stress at the wall for which the condition is applied,
 - $\mu$ is the dynamic molecular viscosity.
 
-If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatement) is `true`,
+If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) is `true`,
 non-equilibrium wall function formulations is used in which the $y^+$ is defined as follows:
 
 \begin{equation}

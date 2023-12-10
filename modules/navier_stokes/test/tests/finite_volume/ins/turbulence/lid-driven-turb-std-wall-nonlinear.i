@@ -30,7 +30,7 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Modeling parameters ###
-non_equilibrium_treatement = false
+non_equilibrium_treatment = false
 walls = ''
 max_mixing_length = 1e10
 linearized_model = false
@@ -209,7 +209,7 @@ velocity_interp_method = 'rc'
     mu = ${mu}
     mu_t = 'mu_t'
     walls = ${walls}
-    non_equilibrium_treatement = ${non_equilibrium_treatement}
+    non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
     linearized_model = ${linearized_model}
   []
@@ -250,7 +250,7 @@ velocity_interp_method = 'rc'
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     walls = ${walls}
-    non_equilibrium_treatement = ${non_equilibrium_treatement}
+    non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
     linearized_model = ${linearized_model}
   []

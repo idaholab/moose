@@ -41,7 +41,7 @@ INSFVTKESourceSink::validParams()
       true,
       "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
   params.addParam<bool>(
-      "non_equilibrium_treatement",
+      "non_equilibrium_treatment",
       false,
       "Use non-equilibrium wall treatement (faster than standard wall treatement)");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
@@ -68,7 +68,7 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
-    _non_equilibrium_treatement(getParam<bool>("non_equilibrium_treatement")),
+    _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment")),
     _C_mu(getParam<Real>("C_mu"))
 {
 

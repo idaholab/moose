@@ -62,7 +62,7 @@ protected:
   const bool _linearized_model;
 
   /// No equilibrium treatement
-  const bool _non_equilibrium_treatement;
+  const bool _non_equilibrium_treatment;
 
   /// Value of the first epsilon closure coefficient
   const Real _C1_eps;

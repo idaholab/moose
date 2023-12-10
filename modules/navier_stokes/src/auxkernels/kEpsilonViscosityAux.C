@@ -38,7 +38,7 @@ kEpsilonViscosityAux::validParams()
       "Boolean to indicate if yplus must be estimate locally for the blending functions.");
   params.addParam<bool>("bulk_wall_treatment", false, "Activate bulk wall treatment.");
   params.addParam<bool>(
-      "non_equilibrium_treatement",
+      "non_equilibrium_treatment",
       false,
       "Use non-equilibrium wall treatement (faster than standard wall treatement)");
   return params;
@@ -62,7 +62,7 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _linearized_yplus(getParam<bool>("linearized_yplus")),
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
-    _non_equilibrium_treatement(getParam<bool>("non_equilibrium_treatement"))
+    _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment"))
 {
 }
 
@@ -169,7 +169,7 @@ kEpsilonViscosityAux::computeValue()
     const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
 
     ADReal y_plus, u_tau;
-    if (_non_equilibrium_treatement)
+    if (_non_equilibrium_treatment)
     {
       // Computing non-equilibrium nondimensional wall distance and friction velocity
       y_plus = _rho(current_argument, state) * std::pow(_C_mu, 0.25) *
