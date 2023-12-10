@@ -150,7 +150,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     }
 
     // Getting transpose of the gradient matrix
-    auto gradient_transpose = gradient.transpose();
+    const auto gradient_transpose = gradient.transpose();
 
     dudn_transpose += gradient_transpose.row(_index) * _face_info->normal();
   }

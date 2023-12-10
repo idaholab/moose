@@ -71,7 +71,6 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment")),
     _C_mu(getParam<Real>("C_mu"))
 {
-
   if (!_u_var)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 
@@ -98,13 +97,13 @@ INSFVTKESourceSink::initialSetup()
 ADReal
 INSFVTKESourceSink::computeQpResidual()
 {
-
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
   const Moose::StateArg state = determineState();
-  auto old_state =
+  const auto old_state =
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
+  const auto rho = _rho(makeElemArg(_current_elem), state);
 
   if (_wall_bounded[_current_elem])
   {
@@ -120,22 +119,20 @@ INSFVTKESourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < _normal[_current_elem].size(); i++)
     {
-      auto parallel_speed =
+      const auto parallel_speed =
           (velocity - velocity * _normal[_current_elem][i] * _normal[_current_elem][i]).norm();
-      auto distance = _dist[_current_elem][i];
+      const auto distance = _dist[_current_elem][i];
 
-      auto y_plus = NS::findyPlus(_mu(makeElemArg(_current_elem), state),
-                                  _rho(makeElemArg(_current_elem), state),
-                                  std::max(parallel_speed, 1e-10),
-                                  distance);
+      const auto y_plus = NS::findyPlus(
+          _mu(makeElemArg(_current_elem), state), rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(y_plus);
 
-      ADReal velocity_grad_norm = parallel_speed / _dist[_current_elem][i];
+      const ADReal velocity_grad_norm = parallel_speed / _dist[_current_elem][i];
 
       /// Do not erase!!
-      /// More complete expansion for velocity gradient. Leave commented for now.
-      //// Will be useful later when doing two-phase or compressible flow
+      // More complete expansion for velocity gradient. Leave commented for now.
+      // Will be useful later when doing two-phase or compressible flow
       // ADReal velocity_grad_norm_sq =
       //     Utility::pow<2>(_u_var->gradient(makeElemArg(_current_elem), state) *
       //                     _normal[_current_elem][i]);
@@ -159,20 +156,20 @@ INSFVTKESourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < y_plus_vec.size(); i++)
     {
-      auto y_plus = y_plus_vec[i];
+      const auto y_plus = y_plus_vec[i];
 
-      auto fi = _face_infos[_current_elem][i];
+      const auto fi = _face_infos[_current_elem][i];
       const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
       const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
-      Moose::FaceArg facearg = {
+      const Moose::FaceArg facearg = {
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
-      ADReal wall_mut = _mu_t(facearg, state);
+      const ADReal wall_mut = _mu_t(facearg, state);
 
-      auto destruction_visc =
+      const auto destruction_visc =
           2.0 * wall_mut / Utility::pow<2>(_dist[_current_elem][i]) / tot_weight;
-      auto destruction_log = std::pow(_C_mu, 0.75) * _rho(makeElemArg(_current_elem), state) *
-                             std::pow(_var(makeElemArg(_current_elem), old_state), 0.5) /
-                             (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
+      const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
+                                   std::pow(_var(makeElemArg(_current_elem), old_state), 0.5) /
+                                   (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
 
       if (y_plus < 11.25)
         destruction += destruction_visc;
@@ -190,14 +187,14 @@ INSFVTKESourceSink::computeQpResidual()
   {
 
     const auto & grad_u = _u_var->adGradSln(_current_elem, state);
-    auto Sij_xx = 2.0 * grad_u(0);
+    const auto Sij_xx = 2.0 * grad_u(0);
     ADReal Sij_xy = 0.0;
     ADReal Sij_xz = 0.0;
     ADReal Sij_yy = 0.0;
     ADReal Sij_yz = 0.0;
     ADReal Sij_zz = 0.0;
 
-    auto grad_xx = grad_u(0);
+    const auto grad_xx = grad_u(0);
     ADReal grad_xy = 0.0;
     ADReal grad_xz = 0.0;
     ADReal grad_yx = 0.0;
@@ -239,26 +236,24 @@ INSFVTKESourceSink::computeQpResidual()
       }
     }
 
-    auto symmetric_strain_tensor_sq_norm =
+    const auto symmetric_strain_tensor_sq_norm =
         (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
         (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
         (Sij_zz - trace) * grad_zz;
 
     production = _mu_t(makeElemArg(_current_elem), state) * symmetric_strain_tensor_sq_norm;
 
-    auto time_scale = raw_value(_var(makeElemArg(_current_elem), old_state) /
-                                    (_epsilon(makeElemArg(_current_elem), old_state) + 1e-15) +
-                                1e-15);
+    const auto time_scale =
+        raw_value(_var(makeElemArg(_current_elem), old_state) /
+                      (_epsilon(makeElemArg(_current_elem), old_state) + 1e-15) +
+                  1e-15);
 
-    destruction = _rho(makeElemArg(_current_elem), state) *
-                  _var(makeElemArg(_current_elem), state) / time_scale;
+    destruction = rho * _var(makeElemArg(_current_elem), state) / time_scale;
 
     // Production limiter - not needed for most applications
     if (_max_mixing_length < 1e10)
-    {
       if (std::pow(std::abs(production), 1.5) / std::abs(destruction) > _max_mixing_length)
         production = std::pow(_max_mixing_length * std::abs(destruction.value()) + 1e-10, 2. / 3.);
-    }
 
     residual = destruction - production;
   }
