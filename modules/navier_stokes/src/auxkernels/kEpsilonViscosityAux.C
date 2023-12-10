@@ -188,9 +188,7 @@ kEpsilonViscosityAux::computeValue()
 
     Real mu_t_wall;
     if (y_plus <= 5.0) // sub-laminar layer
-    {
       mu_t_wall = 0.0;
-    }
     else if (y_plus >= 30.0) // log-layer
     {
       const auto wall_val =
@@ -209,14 +207,18 @@ kEpsilonViscosityAux::computeValue()
       const auto wall_val = blending_function * wall_val_log;
       mu_t_wall = wall_val.value();
     }
-
+    // Limiting the minimum turbulent viscosity to 1e-10
+    // The reason is that smaller values can result in over dissipation
+    // when solving the epsilon equation, leading to an instable coupling
+    // in the k-epsilon system
+    // Note: 1e-10 is 10e7 times smaller than the viscosity of water
     mu_t = std::max(mu_t_wall, 1e-10);
   }
   else
   {
     // Computing bulk value for turbulent dynamic visocisity
     const auto time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
-    ADReal mu_t_nl =
+    const ADReal mu_t_nl =
         _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
     mu_t = mu_t_nl.value();
   }
