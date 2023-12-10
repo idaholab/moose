@@ -63,7 +63,7 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   const auto state = determineState();
   const auto mu = _mu(current_argument, state);
   const auto rho = _rho(current_argument, state);
-  const auto cp =  _cp(current_argument, state);
+  const auto cp = _cp(current_argument, state);
   const auto kappa = _kappa(current_argument, state);
 
   // Get the velocity vector
@@ -82,14 +82,12 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   {
     const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c =
-        1 / NS::von_karman_constant *
-        (std::log(NS::E_turb_constant * wall_dist / mu) + 1.0);
+        1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * wall_dist / mu) + 1.0);
     const ADReal c_c = parallel_speed;
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
   }
   else
-    u_tau = NS::findUStar(
-        mu, rho, parallel_speed, wall_dist);
+    u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
 
   // Computing non-dimensional wall distance
   const ADReal y_plus = wall_dist * u_tau * rho / mu;
@@ -97,13 +95,11 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   ADReal alpha;
   if (y_plus <= 5.0) // sub-laminar layer
   {
-    alpha = kappa /
-            (rho * cp);
+    alpha = kappa / (rho * cp);
   }
   else if (y_plus >= 30.0) // log-layer
   {
-    const auto Pr = cp * mu /
-              kappa;
+    const auto Pr = cp * mu / kappa;
     const auto Pr_ratio = Pr / _Pr_t(current_argument, state);
     const auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
@@ -113,10 +109,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   }
   else // buffer layer
   {
-    const auto alpha_lam = kappa /
-                     (rho * cp);
-    const auto Pr = cp * mu /
-              kappa;
+    const auto alpha_lam = kappa / (rho * cp);
+    const auto Pr = cp * mu / kappa;
     const auto Pr_ratio = Pr / _Pr_t(current_argument, state);
     const auto jayatilleke_P =
         9.24 * (std::pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * std::exp(-0.007 * Pr_ratio));
@@ -128,6 +122,5 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   }
 
   const auto face_arg = singleSidedFaceArg();
-  return -rho * cp * alpha *
-         (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;
+  return -rho * cp * alpha * (_T_w(face_arg, state) - _var(current_argument, state)) / wall_dist;
 }

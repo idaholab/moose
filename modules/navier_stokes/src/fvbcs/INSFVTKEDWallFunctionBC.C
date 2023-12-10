@@ -72,21 +72,16 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
   const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
 
   // Get friction velocity
-  const ADReal u_star = NS::findUStar(mu,
-                                      rho,
-                                      parallel_speed,
-                                      dist);
+  const ADReal u_star = NS::findUStar(mu, rho, parallel_speed, dist);
 
   // Get associated non-dimensional wall distance
-  const ADReal y_plus = dist * u_star * rho /
-                        mu;
+  const ADReal y_plus = dist * u_star * rho / mu;
 
   const auto TKE = _k(makeElemArg(&_current_elem), state);
 
   if (y_plus <= 5.0) // sub-laminar layer
   {
-    const auto laminar_value =
-        2.0 * weight * TKE * mu / std::pow(dist, 2);
+    const auto laminar_value = 2.0 * weight * TKE * mu / std::pow(dist, 2);
     return laminar_value.value();
   }
   else if (y_plus >= 30.0) // log-layer
@@ -98,8 +93,7 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
   }
   else // blending function
   {
-    const auto laminar_value =
-        2.0 * weight * TKE * mu / std::pow(dist, 2);
+    const auto laminar_value = 2.0 * weight * TKE * mu / std::pow(dist, 2);
     const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem), state) *
                                  std::pow(std::abs(TKE), 1.5) /
                                  (_mu_t(makeElemArg(&_current_elem), state) * dist);

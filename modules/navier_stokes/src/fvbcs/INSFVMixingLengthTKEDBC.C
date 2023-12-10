@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMixingLengthTKEDBC.h"
+#include "NavierStokesMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVMixingLengthTKEDBC);
 
