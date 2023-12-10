@@ -19,10 +19,10 @@ INSFVkEpsilonViscosityMaterial::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes the turbulent dynamic viscosity given k and epsilon.");
   params.addRequiredParam<MooseFunctorName>(NS::density,
-                                            "The liquid density (not the mixture one).");
+                                            "The liquid density.");
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulence kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
-                                            "The turbulent kinetic energy disipation rate.");
+                                            "The turbulent kinetic energy dissipation rate.");
   params.addParam<MooseFunctorName>("C_mu", 0.09, "C_mu closure parameter");
   return params;
 }
