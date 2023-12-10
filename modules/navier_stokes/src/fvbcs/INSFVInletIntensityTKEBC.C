@@ -15,6 +15,7 @@ InputParameters
 INSFVInletIntensityTKEBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
+  params.addClassDescription("Adds inlet boudnary conditon for k based on turbulent intensity.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -30,7 +31,6 @@ INSFVInletIntensityTKEBC::INSFVInletIntensityTKEBC(const InputParameters & param
     _intensity(getFunctor<ADReal>("intensity")),
     _dim(_subproblem.mesh().dimension())
 {
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
@@ -50,7 +50,7 @@ INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi) const
   if (_w)
     velocity(2) = (*_w)(boundary_face, state);
 
-  auto velocity_normal = fi.normal() * velocity;
+  const auto velocity_normal = fi.normal() * velocity;
 
   return 1.5 * Utility::pow<2>(_intensity(boundary_face, state) * velocity_normal);
 }

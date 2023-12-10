@@ -15,6 +15,8 @@ InputParameters
 INSFVMixingLengthTKEDBC::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
+  params.addClassDescription(
+      "Adds inlet boudnary conditon for epsilon based on characterisitc length.");
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>("characteristic_length",
