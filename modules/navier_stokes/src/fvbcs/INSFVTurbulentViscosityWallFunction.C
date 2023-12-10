@@ -18,8 +18,7 @@ InputParameters
 INSFVTurbulentViscosityWallFunction::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
-  params.addClassDescription("Adds Reichardt extrapolated wall values to set up directly the"
-                             "Dirichlet BC for the turbulent kinetic energy.");
+  params.addClassDescription("Adds Dirichlet BC for wall values of the turbulent viscosity.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -30,14 +29,10 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
-  params.addParam<MooseEnum>(
-      "wall_treatment",
-      wall_treatment,
-      "The method used for computing the wall functions "
-      "'eq_newton' = full Newton solve for equilibrium functions, "
-      "'eq_incremental' = incremental fixed point solve for equilibrium functions, "
-      "'eq_linearized' = linearized approximation for eqilibrium functions, "
-      "'neq' = non-equilibrium wall functions. ");
+  params.addParam<MooseEnum>("wall_treatment",
+                             wall_treatment,
+                             "The method used for computing the wall functions "
+                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
   return params;
 }
 
@@ -60,13 +55,12 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
 ADReal
 INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
 {
-  Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
+  const Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
-  auto current_argument = makeElemArg(&_current_elem);
+  const auto current_argument = makeElemArg(&_current_elem);
   const auto state = determineState();
-
-  constexpr Real karman_cte = 0.4187;
-  constexpr Real E = 9.793;
+  const auto mu = _mu(current_argument, state);
+  const auto rho = _rho(current_argument, state);
 
   // Get the velocity vector
   ADRealVectorValue velocity(_u_var(current_argument, state));
@@ -76,67 +70,60 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     velocity(2) = (*_w_var)(current_argument, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
+  const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
   ADReal u_tau;
   ADReal y_plus;
-  ADReal mut_visc = _mu(current_argument, state); // laminar sublayer viscosity
-  ADReal mut_log;                                 // turbulent log-layer viscosity
+  const ADReal mut_visc = mu; // laminar sublayer viscosity
+  ADReal mut_log;             // turbulent log-layer viscosity
 
   if (_wall_treatment == "eq_newton")
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    u_tau = NS::findUStar(
-        _mu(current_argument, state), _rho(current_argument, state), parallel_speed, wall_dist);
-    y_plus = wall_dist * u_tau * _rho(current_argument, state) / _mu(current_argument, state);
-    mut_log = _rho(current_argument, state) * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    y_plus = wall_dist * u_tau * rho / mu;
+    mut_log = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
   }
   else if (_wall_treatment == "eq_incremental")
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(_mu(current_argument, state),
-                           _rho(current_argument, state),
-                           std::max(parallel_speed, 1e-10),
-                           wall_dist);
-    mut_log = _mu(current_argument, state) *
-              (karman_cte * y_plus / std::log(std::max(E * y_plus, 1 + 1e-4)) - 1.0);
+    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    mut_log = mu * (NS::von_karman_constant * y_plus /
+                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)) -
+                    1.0);
   }
   else if (_wall_treatment == "eq_linearized")
   {
     // Linearized approximation to the wall function to find the near-wall quantities faster
-    const ADReal a_c = 1 / karman_cte;
+    const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c =
-        1 / karman_cte * (std::log(E * wall_dist / _mu(current_argument, state)) + 1.0);
+        1 / NS::von_karman_constant * (std::log(NS::E_turb_constant * wall_dist / mu) + 1.0);
     const ADReal c_c = parallel_speed;
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
-    y_plus = wall_dist * u_tau * _rho(current_argument, state) / _mu(current_argument, state);
-    mut_log = _rho(current_argument, state) * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
+    y_plus = wall_dist * u_tau * rho / mu;
+    mut_log = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
   }
   else if (_wall_treatment == "neq")
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, state)) *
-             _rho(current_argument, state) / _mu(current_argument, state);
-    mut_log = _mu(current_argument, state) *
-              (karman_cte * wall_dist / std::log(std::max(E * y_plus, 1 + 1e-4)) - 1.0);
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, state)) * rho / mu;
+    mut_log = mu * (NS::von_karman_constant * wall_dist /
+                        std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)) -
+                    1.0);
   }
 
   if (y_plus <= 5.0)
-  {
     // sub-laminar layer
     return mut_visc;
-  }
   else if (y_plus >= 30.0)
-  {
     // log-layer
     return mut_log + mut_visc;
-  }
   else
   {
     // buffer layer
-    auto blending_function = (y_plus - 5.0) / 25.0;
+    const auto blending_function = (y_plus - 5.0) / 25.0;
     return blending_function * mut_log + mut_visc;
   }
 }
