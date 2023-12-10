@@ -76,11 +76,10 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
   ADReal u_tau;
   if (_linearized_yplus)
   {
-    constexpr Real karman_cte = 0.4187;
-    constexpr Real E = 9.793;
-    const ADReal a_c = 1 / karman_cte;
+    const ADReal a_c = 1 / NS::von_karman_constant;
     const ADReal b_c =
-        1 / karman_cte * (std::log(E * wall_dist / _mu(current_argument, state)) + 1.0);
+        1 / NS::von_karman_constant *
+        (std::log(NS::E_turb_constant * wall_dist / _mu(current_argument, state)) + 1.0);
     const ADReal c_c = parallel_speed;
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
   }

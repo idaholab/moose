@@ -36,7 +36,7 @@ void
 INSFVTurbulentAdvection::initialSetup()
 {
   INSFVAdvectionKernel::initialSetup();
-  _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem);
+  NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem, _wall_bounded);
 }
 
 ADReal

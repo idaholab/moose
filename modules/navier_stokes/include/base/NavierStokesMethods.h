@@ -121,33 +121,37 @@ ADReal computeSpeed(const ADRealVectorValue & velocity);
 
 /**
  * Map marking wall bounded elements
+ * The map passed in wall_bounded_map gets cleared and re-populated
  */
-std::map<const Elem *, bool>
-getWallBoundedElements(const std::vector<BoundaryName> & _wall_boundary_name,
-                       const FEProblemBase & _fe_problem,
-                       const SubProblem & _subproblem);
+void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
+                            const FEProblemBase & fe_problem,
+                            const SubProblem & subproblem,
+                            std::map<const Elem *, bool> & wall_bounded_map);
 
 /**
  * Map storing wall ditance for near-wall marked elements
+ * The map passed in dist_map gets cleared and re-populated
  */
-std::map<const Elem *, std::vector<Real>>
-getWallDistance(const std::vector<BoundaryName> & _wall_boundary_name,
-                const FEProblemBase & _fe_problem,
-                const SubProblem & _subproblem);
+void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
+                     const FEProblemBase & fe_problem,
+                     const SubProblem & subproblem,
+                     std::map<const Elem *, std::vector<Real>> & dist_map);
 
 /**
  * Map storing faces normals for wall bounded elements
+ * The map passed in normalmap gets cleared and re-populated
  */
-std::map<const Elem *, std::vector<Point>>
-getElementFaceNormal(const std::vector<BoundaryName> & _wall_boundary_name,
-                     const FEProblemBase & _fe_problem,
-                     const SubProblem & _subproblem);
+void getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
+                          const FEProblemBase & fe_problem,
+                          const SubProblem & subproblem,
+                          std::map<const Elem *, std::vector<Point>> & normal_map);
 
 /**
  * Map storing face arguments to wall bounded faces
+ * The map passed in face_info_map gets cleared and re-populated
  */
-std::map<const Elem *, std::vector<const FaceInfo *>>
-getElementFaceArgs(const std::vector<BoundaryName> & _wall_boundary_name,
-                   const FEProblemBase & _fe_problem,
-                   const SubProblem & _subproblem);
+void getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
+                        const FEProblemBase & fe_problem,
+                        const SubProblem & subproblem,
+                        std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map);
 }

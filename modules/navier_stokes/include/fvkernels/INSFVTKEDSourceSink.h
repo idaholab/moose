@@ -85,7 +85,4 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<Point>> _normal;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
-
-  /// -- Constants of the method
-  static constexpr Real E{9.793};
 };

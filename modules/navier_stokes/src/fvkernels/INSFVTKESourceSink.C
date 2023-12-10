@@ -89,10 +89,10 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
 void
 INSFVTKESourceSink::initialSetup()
 {
-  _wall_bounded = NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem);
-  _normal = NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem);
-  _dist = NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem);
-  _face_infos = NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem);
+  NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem, _wall_bounded);
+  NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem, _normal);
+  NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, _dist);
+  NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, _face_infos);
 }
 
 ADReal
