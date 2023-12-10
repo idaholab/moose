@@ -18,6 +18,8 @@
                  "Transfers/from_sub/from_mesh_division=middle_sub "
                  "Transfers/from_sub_elem/from_mesh_division=middle_sub"
       detail = 'to restrict the source domain for the transfered field,'
+      # See #26289. Issue with the search value conflict
+      max_parallel = 8
     []
     [restriction_target]
       type = Exodiff
