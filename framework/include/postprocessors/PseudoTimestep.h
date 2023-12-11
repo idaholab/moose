@@ -26,9 +26,18 @@ public:
   using Postprocessor::getValue;
   virtual Real getValue() const override;
 
+  /// Enum class containing the different options for selecting the timestep
+  /// size for pseudo-transient simulations
+  enum class PseudotimeMethod
+  {
+    SER,
+    RDM,
+    EXP
+  };
+
 protected:
-  /// Enum that is used to select the timestep-selection method.
-  const MooseEnum _method;
+  /// The timestep selection method.
+  const PseudotimeMethod _method;
 
   /// Required parameters for the pseudotimestepper
   const Real _initial_dt;

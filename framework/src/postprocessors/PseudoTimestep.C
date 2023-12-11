@@ -10,6 +10,7 @@
 #include "PseudoTimestep.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+#include "MathUtils.h"
 #include "Transient.h"
 #include "Restartable.h"
 #include "libmesh/enum_norm_type.h"
@@ -22,18 +23,21 @@ PseudoTimestep::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
 
   /// Enum that is used to select the timestep-selection method.
-  MooseEnum method("SER=1 EXP=2 RDM=3");
+  MooseEnum method("SER RDM EXP", "SER");
+
   method.addDocumentation("SER", "Switched evolution relaxation");
   method.addDocumentation("EXP", "Exponential progression");
   method.addDocumentation("RDM", "Residual difference method");
-  params.addRequiredParam<MooseEnum>("method", method, "The method used for CFL scaling");
+
+  params.addRequiredParam<MooseEnum>(
+      "method", method, "The method used for pseudotimestep timemarching");
   params.addRequiredRangeCheckedParam<Real>("initial_dt", "initial_dt > 0", "Initial timestep");
   params.addRequiredRangeCheckedParam<Real>(
       "alpha", "alpha > 0", "The parameter alpha used in the scaling of the timestep");
   params.addParam<Real>("max_dt", "The largest timestep allowed");
   params.addParam<unsigned int>(
       "iterations_window",
-      "For how many iterations should the CFL be tracked (only applies to the SER method)");
+      "For how many iterations should the residual be tracked (only applies to the SER method)");
   // Because this post-processor is meant to be used with PostprocessorDT, it
   // should be executed on initial (not included by default) and timestep end.
   params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_INITIAL};
@@ -47,7 +51,7 @@ PseudoTimestep::validParams()
 
 PseudoTimestep::PseudoTimestep(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _method(getParam<MooseEnum>("method")),
+    _method(getParam<MooseEnum>("method").getEnum<PseudotimeMethod>()),
     _initial_dt(getParam<Real>("initial_dt")),
     _alpha(getParam<Real>("alpha")),
     _bound(isParamValid("max_dt")),
@@ -59,7 +63,7 @@ PseudoTimestep::PseudoTimestep(const InputParameters & parameters)
     mooseError("This pseudotimestepper can only be used if the steady state is computed via time "
                "integration.");
 
-  if (_method == "SER")
+  if (_method == PseudotimeMethod::SER)
   {
     if (parameters.isParamValid("iterations_window"))
       _iterations_window = getParam<unsigned int>("iterations_window");
@@ -145,7 +149,7 @@ PseudoTimestep::timestepRDM() const
 Real
 PseudoTimestep::timestepEXP() const
 {
-  const Real factor = std::pow(_alpha, _fe_problem.timeStep() - 1);
+  const Real factor = MathUtils::pow(_alpha, _fe_problem.timeStep() - 1);
 
   const Real update_dt = _initial_dt * factor;
   return update_dt;
@@ -182,13 +186,13 @@ PseudoTimestep::execute()
       update_dt = curr_dt;
       switch (_method)
       {
-        case 1:
+        case PseudotimeMethod::SER:
           update_dt = timestepSER();
           break;
-        case 2:
+        case PseudotimeMethod::EXP:
           update_dt = timestepEXP();
           break;
-        case 3:
+        case PseudotimeMethod::RDM:
           update_dt = timestepRDM();
           break;
       }
