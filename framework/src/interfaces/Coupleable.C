@@ -2544,6 +2544,13 @@ Coupleable::coupledValuesOld(const std::string & var_name) const
   return coupledVectorHelper<const VariableValue *>(var_name, func);
 }
 
+std::vector<const VariableValue *>
+Coupleable::coupledValuesOlder(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledValueOlder(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
 std::vector<const VariableGradient *>
 Coupleable::coupledGradients(const std::string & var_name) const
 {

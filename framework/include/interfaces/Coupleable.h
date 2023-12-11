@@ -552,6 +552,13 @@ protected:
                                                   unsigned int comp = 0) const;
 
   /**
+   * Returns the older values for all of a coupled variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VariableValue *> coupledValuesOlder(const std::string & var_name) const;
+
+  /**
    * Returns value of previous Newton iterate of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
