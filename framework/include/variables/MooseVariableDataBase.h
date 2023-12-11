@@ -141,6 +141,11 @@ public:
 
 protected:
   /**
+   * @returns The variable to which the data in this class belongs to
+   */
+  virtual const MooseVariableField<OutputType> & var() const { return _var; }
+
+  /**
    * insert a solution tag into our tag containers
    */
   void insertSolutionTag(TagID tag_id);
@@ -172,9 +177,6 @@ protected:
    * resize the vector tag need flags and data containers to accomodate this tag index
    */
   void resizeVectorTagData(TagID tag);
-
-  /// A const reference to the owning MooseVariableField object
-  const MooseVariableField<OutputType> & _var;
 
   /// The MOOSE system which ultimately holds the vectors and matrices relevant to this variable
   /// data
@@ -288,6 +290,10 @@ protected:
 
   /// The set of solution tags we need to evaluate
   std::set<TagID> _solution_tags;
+
+private:
+  /// A const reference to the owning MooseVariableField object
+  const MooseVariableField<OutputType> & _var;
 };
 
 template <>
