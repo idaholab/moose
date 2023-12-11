@@ -165,7 +165,8 @@ POD::determineNumberOfModes(const std::vector<Real> & singular_values,
   dof_id_type num_modes = 0;
   // We either use the number of modes defined by the user or the maximum number of converged
   // modes. We don't want to use modes which are unconverged.
-  std::size_t num_requested_modes = std::min(num_modes_compute, singular_values.size());
+  std::size_t num_requested_modes =
+      std::min((std::size_t)num_modes_compute, singular_values.size());
   // Grab a cumulative sum of singular value squared
   std::vector<Real> ev_sum(singular_values.begin(), singular_values.begin() + num_requested_modes);
   std::partial_sum(ev_sum.cbegin(),
