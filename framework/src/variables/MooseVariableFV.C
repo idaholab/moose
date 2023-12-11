@@ -691,7 +691,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi,
   // scheme to approximate it.
   auto face_grad = ((side_two_value - side_one_value) / delta) * fi.eCN();
 
-  // We only need nonorthogonal correctors in 2+ dimensions
+  // We only need non-orthogonal correctors in 2+ dimensions
   if (this->_mesh.dimension() > 1)
   {
     // We are using an orthogonal approach for the non-orthogonal correction, for more information
@@ -751,7 +751,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & sta
   if (isDirichletBoundaryFace(*fi, face.face_side, state))
   {
     mooseAssert(state.state == 0,
-                "We have not yet added support for evaluting Dirichlet boundary conditions at "
+                "We have not yet added support for evaluating Dirichlet boundary conditions at "
                 "states other than the current solution state (e.g. current time)");
     return getDirichletBoundaryFaceValue(*fi, face.face_side, state);
   }

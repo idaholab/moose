@@ -152,7 +152,7 @@ public:
    */
   const MappedArrayVariablePhiGradient & arrayGradPhi() const
   {
-    mooseAssert(_var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY, "Not an array variable");
+    mooseAssert(var().fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY, "Not an array variable");
     return _mapped_grad_phi;
   }
 
@@ -166,7 +166,7 @@ public:
    */
   const MappedArrayVariablePhiGradient & arrayGradPhiFace() const
   {
-    mooseAssert(_var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY, "Not an array variable");
+    mooseAssert(var().fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY, "Not an array variable");
     return _mapped_grad_phi_face;
   }
 
@@ -665,7 +665,7 @@ private:
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;
 
-  using MooseVariableDataBase<OutputType>::_var;
+  using MooseVariableDataBase<OutputType>::var;
   using MooseVariableDataBase<OutputType>::_sys;
   using MooseVariableDataBase<OutputType>::_subproblem;
   using MooseVariableDataBase<OutputType>::_need_vector_tag_dof_u;

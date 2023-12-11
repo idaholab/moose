@@ -33,8 +33,8 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableField<Output
                                                  const Elem * const & elem)
 
   : MooseVariableDataBase<OutputType>(var, sys, tid),
-    _fe_type(_var.feType()),
-    _var_num(_var.number()),
+    _fe_type(var.feType()),
+    _var_num(var.number()),
     _assembly(_subproblem.assembly(_tid, var.kind() == Moose::VAR_NONLINEAR ? sys.number() : 0)),
     _element_type(element_type),
     _ad_zero(0),
@@ -1694,7 +1694,7 @@ MooseVariableData<OutputType>::nodalValueDot() const
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
-               _var.name(),
+               var().name(),
                "' is not nodal.");
 }
 
@@ -1717,7 +1717,7 @@ MooseVariableData<OutputType>::nodalValueDotDot() const
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
-               _var.name(),
+               var().name(),
                "' is not nodal.");
 }
 
@@ -1739,7 +1739,7 @@ MooseVariableData<OutputType>::nodalValueDotOld() const
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
-               _var.name(),
+               var().name(),
                "' is not nodal.");
 }
 
@@ -1762,7 +1762,7 @@ MooseVariableData<OutputType>::nodalValueDotDotOld() const
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
-               _var.name(),
+               var().name(),
                "' is not nodal.");
 }
 
