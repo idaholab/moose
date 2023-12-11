@@ -49,7 +49,7 @@ NestedKKSMultiSplitCHCRes::NestedKKSMultiSplitCHCRes(const InputParameters & par
     _d2F1dc1darg(_n_args)
 
 {
-  for (unsigned int i = 0; i < _num_c; ++i)
+  for (const auto i : make_range(_num_c))
   {
     // Set _o to the position of the nonlinear variable in the list of global_cs
     if (coupled("global_cs", i) == _var.number())
@@ -57,19 +57,19 @@ NestedKKSMultiSplitCHCRes::NestedKKSMultiSplitCHCRes(const InputParameters & par
   }
 
   // _dcideta and _dcidb are computed in KKSPhaseConcentrationDerivatives
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
   {
     _dc1detaj[m].resize(_num_j);
-    for (unsigned int n = 0; n < _num_j; ++n)
+    for (const auto n : make_range(_num_j))
       _dc1detaj[m][n] = &getMaterialPropertyDerivative<Real>(_c1_names[m], _eta_names[n]);
 
     _dc1db[m].resize(_num_c);
-    for (unsigned int n = 0; n < _num_c; ++n)
+    for (const auto n : make_range(_num_c))
       _dc1db[m][n] = &getMaterialPropertyDerivative<Real>(_c1_names[m], _c_names[n]);
   }
 
   // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMaterial
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
   {
     _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[m]);
     _d2F1dc1db1[m] =
@@ -77,7 +77,7 @@ NestedKKSMultiSplitCHCRes::NestedKKSMultiSplitCHCRes(const InputParameters & par
   }
 
   // _d2F1dc1darg is computed in KKSPhaseConcentrationMaterial
-  for (unsigned int m = 0; m < _n_args; ++m)
+  for (const auto m : make_range(_n_args))
     _d2F1dc1darg[m] = &getMaterialPropertyDerivative<Real>("cp" + _F1_name, _c1_names[_o], m);
 }
 
@@ -92,7 +92,7 @@ NestedKKSMultiSplitCHCRes::computeQpJacobian()
 {
   Real sum = 0.0;
 
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
     sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1db[m][_o])[_qp];
 
   return sum * _phi[_j][_qp] * _test[_i][_qp];
@@ -111,7 +111,7 @@ NestedKKSMultiSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   auto compvar = mapJvarToCvar(jvar, _c_map);
   if (compvar >= 0)
   {
-    for (unsigned int m = 0; m < _num_c; ++m)
+    for (const auto m : make_range(_num_c))
       sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1db[m][compvar])[_qp];
 
     return sum * _phi[_j][_qp] * _test[_i][_qp];
@@ -121,7 +121,7 @@ NestedKKSMultiSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
   auto etavar = mapJvarToCvar(jvar, _eta_map);
   if (etavar >= 0)
   {
-    for (unsigned int m = 0; m < _num_c; ++m)
+    for (const auto m : make_range(_num_c))
       sum += (*_d2F1dc1db1[m])[_qp] * (*_dc1detaj[m][etavar])[_qp];
 
     return sum * _phi[_j][_qp] * _test[_i][_qp];
@@ -129,5 +129,6 @@ NestedKKSMultiSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
 
   // for all other vars get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
+
   return (*_d2F1dc1darg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

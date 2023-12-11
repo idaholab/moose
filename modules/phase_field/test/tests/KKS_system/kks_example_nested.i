@@ -1,5 +1,5 @@
 #
-# KKS toy problem in the split form
+# Two-phase nested KKS toy problem
 #
 
 [Mesh]

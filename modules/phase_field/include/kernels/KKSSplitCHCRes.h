@@ -41,7 +41,7 @@ protected:
   virtual void initialSetup();
 
 private:
-  ///@{ Phase concnetration variable
+  ///@{ Phase concentration variable
   unsigned int _ca_var;
   VariableName _ca_name;
   ///@}

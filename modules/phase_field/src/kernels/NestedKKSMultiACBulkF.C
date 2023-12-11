@@ -48,7 +48,7 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
     _dF1dc1(_num_c),
     _dFidarg(_num_j)
 {
-  for (unsigned int i = 0; i < _num_j; ++i)
+  for (const auto i : make_range(_num_j))
   {
     // get order parameter names and variable indices
     _eta_names[i] = getVar("all_etas", i)->name();
@@ -59,45 +59,45 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
   }
 
   // _dcideta and _dcidb are computed in KKSPhaseConcentrationDerivatives
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
   {
     _dcidetaj[m].resize(_num_j);
     _dcidb[m].resize(_num_j);
 
-    for (unsigned int n = 0; n < _num_j; ++n)
+    for (const auto n : make_range(_num_j))
     {
       _dcidetaj[m][n].resize(_num_j);
       _dcidb[m][n].resize(_num_c);
 
-      for (unsigned int l = 0; l < _num_j; ++l)
+      for (const auto l : make_range(_num_j))
         _dcidetaj[m][n][l] =
             &getMaterialPropertyDerivative<Real>(_ci_names[n + m * _num_j], _eta_names[l]);
 
-      for (unsigned int l = 0; l < _num_c; ++l)
+      for (const auto l : make_range(_num_c))
         _dcidb[m][n][l] =
             &getMaterialPropertyDerivative<Real>(_ci_names[n + m * _num_j], _c_names[l]);
     }
   }
 
   // _dF1dc1 is computed in KKSPhaseConcentrationMaterial
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
     _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
 
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
     _d2hjdetaidetap[m].resize(_num_j);
 
-    for (unsigned int n = 0; n < _num_j; ++n)
+    for (const auto n : make_range(_num_j))
       _d2hjdetaidetap[m][n] =
           &getMaterialPropertyDerivative<Real>(_hj_names[m], _eta_names[_k], _eta_names[n]);
   }
 
   // _dFidarg is computed in KKSPhaseConcentrationMaterial
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
     _dFidarg[m].resize(_n_args);
 
-    for (unsigned int n = 0; n < _n_args; ++n)
+    for (const auto n : make_range(_n_args))
       _dFidarg[m][n] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[m], m);
   }
 }
@@ -110,23 +110,23 @@ NestedKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
-      for (unsigned int m = 0; m < _num_j; ++m)
+      for (const auto m : make_range(_num_j))
         sum += (*_prop_dhjdetai[m])[_qp] * (*_prop_Fj[m])[_qp];
 
       return sum + _wi * _dgi[_qp];
 
     case Jacobian:
-      // For when this kernel is used in the Lagrange multiplier equation
-      // In that case the Lagrange multiplier is the nonlinear variable
+      // For when this kernel is used in the Lagrange multiplier equation. In that case the
+      // Lagrange multiplier is the nonlinear variable
       if (_etai_var != _var.number())
         return 0.0;
 
       // if eta_i is the nonlinear variable
-      for (unsigned int m = 0; m < _num_j; ++m)
+      for (const auto m : make_range(_num_j))
       {
         Real sum1 = 0.0;
 
-        for (unsigned int n = 0; n < _num_c; ++n)
+        for (const auto n : make_range(_num_c))
           sum1 += (*_dF1dc1[n])[_qp] * (*_dcidetaj[n][m][_k])[_qp];
 
         sum +=
@@ -142,8 +142,7 @@ NestedKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
 Real
 NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // first get dependence of mobility _L on other variables using parent class
-  // member function Real
+  // first get dependence of mobility _L on other variables using parent class member function Real
   Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);
 
   Real sum = 0.0;
@@ -152,11 +151,11 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   auto compvar = mapJvarToCvar(jvar, _c_map);
   if (compvar >= 0)
   {
-    for (unsigned int m = 0; m < _num_j; ++m)
+    for (const auto m : make_range(_num_j))
     {
       Real sum1 = 0.0;
 
-      for (unsigned int n = 0; n < _num_c; ++n)
+      for (const auto n : make_range(_num_c))
         sum1 += (*_dF1dc1[n])[_qp] * (*_dcidb[n][m][compvar])[_qp];
 
       sum += (*_prop_dhjdetai[m])[_qp] * sum1;
@@ -171,11 +170,11 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   auto etavar = mapJvarToCvar(jvar, _eta_map);
   if (etavar >= 0)
   {
-    for (unsigned int m = 0; m < _num_j; ++m)
+    for (const auto m : make_range(_num_j))
     {
       Real sum1 = 0.0;
 
-      for (unsigned int n = 0; n < _num_c; ++n)
+      for (const auto n : make_range(_num_c))
         sum1 += (*_dF1dc1[n])[_qp] * (*_dcidetaj[n][m][etavar])[_qp];
 
       sum += (*_d2hjdetaidetap[m][etavar])[_qp] * (*_prop_Fj[m])[_qp] +
@@ -187,9 +186,8 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
     return res;
   }
 
-  // Handle the case when this kernel is used in the Lagrange multiplier
-  // equation In this case the second derivative of the barrier function
-  // contributes to the off-diagonal Jacobian
+  // Handle the case when this kernel is used in the Lagrange multiplier equation. In this case
+  // the second derivative of the barrier function contributes to the off-diagonal Jacobian
   if (jvar == _etai_var)
   {
     sum += _wi * _d2gi[_qp];
@@ -199,7 +197,7 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 
   // for all other vars get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
     res -= _L[_qp] * (*_prop_dhjdetai[m])[_qp] * (*_dFidarg[m][cvar])[_qp] * _phi[_j][_qp] *
            _test[_i][_qp];
 

@@ -11,8 +11,6 @@
 
 #include "KKSMultiACBulkBase.h"
 
-// Forward Declarations
-
 /**
  * KKSMultiACBulkBase child class for the free energy term
  * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg_i}{d\eta_i}
@@ -31,16 +29,19 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Global concentrations
+  ///@{ Global concentrations
   std::vector<VariableName> _c_names;
   const JvarMap & _c_map;
+  ///@}
 
   /// Number of global concentrations
   unsigned int _num_c;
 
-  /// Phase parameters
+  ///@{ Phase parameters
   std::vector<VariableName> _eta_names;
   const JvarMap & _eta_map;
+  ///@}
+
   /// Position of the nonlinear variable in the list of cj's
   int _k;
 

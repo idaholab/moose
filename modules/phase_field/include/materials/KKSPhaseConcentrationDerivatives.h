@@ -31,9 +31,10 @@ protected:
   /// Phase parameter
   const VariableName _eta_name;
 
-  /// Phase concentrations
+  ///@{ Phase concentrations
   const std::vector<MaterialPropertyName> _ci_names;
   std::vector<const MaterialProperty<Real> *> _prop_ci;
+  ///@}
 
   /// Derivative of phase concentrations wrt global concentrations \f$ \frac d{db} c_i \f$
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _dcidb;
@@ -41,12 +42,14 @@ protected:
   /// Derivative of phase concentrations wrt eta \f$ \frac d{d{eta}} c_i \f$
   std::vector<std::vector<MaterialProperty<Real> *>> _dcideta;
 
-  /// Free energy names
+  ///@{ Free energy names
   const MaterialName _Fa_name;
   const MaterialName _Fb_name;
+  ///@}
 
-  /// Second derivative of phase concentrations wrt two phase concentrations \f$ \frac {d^2}{dc_i
-  /// db_i} F_i \f$
+  /** Second derivative of phase concentrations wrt two phase concentrations \f$ \frac {d^2}{dc_i
+   db_i} F_i \f$
+  */
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d2Fidcidbi;
 
   /// Switching function

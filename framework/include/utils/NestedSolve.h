@@ -47,13 +47,17 @@ public:
   NestedSolveTempl();
   NestedSolveTempl(const InputParameters & params);
 
-  /// AD/non-AD switched type shortcuts
+  ///@{ AD/non-AD switched type shortcuts
   using NSReal = Moose::GenericType<Real, is_ad>;
   using NSRealVectorValue = Moose::GenericType<RealVectorValue, is_ad>;
   using NSRankTwoTensor = Moose::GenericType<RankTwoTensor, is_ad>;
-  /// Eigen type shortcuts
+  ///@}
+
+  ///@{ Eigen type shortcuts
   using DynamicVector = Eigen::Matrix<NSReal, Eigen::Dynamic, 1>;
   using DynamicMatrix = Eigen::Matrix<NSReal, Eigen::Dynamic, Eigen::Dynamic>;
+  ///@}
+
   ///@{ Deduce the Jacobian type from the solution type
   template <typename T>
   struct CorrespondingJacobianTempl;
@@ -82,12 +86,12 @@ public:
   /// Solve the N*N nonlinear equation system using a built-in Netwon-Raphson loop
   template <typename V, typename T>
   void nonlinear(V & guess, T && compute);
-  /// @{ Solve the N*N nonlinear equation system using the damped Netwon-Raphson loop
+
+  /// Solve the N*N nonlinear equation system using the damped Netwon-Raphson loop
   template <typename V, typename T, typename C>
   void nonlinearDamped(V & guess, T && compute, C && computeCondition);
-  ///@}
 
-  /// @{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
+  ///@{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
   /// with a custom backwards compatible convergence check that allows for looser tolerances.
   template <typename R, typename J>
   void nonlinear(DynamicVector & guess, R & computeResidual, J & computeJacobian);
@@ -97,7 +101,7 @@ public:
   void nonlinear(NSRealVectorValue & guess, R & computeResidual, J & computeJacobian);
   ///@}
 
-  /// @{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
+  ///@{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
   /// with the built-in convergence check to tight numerical tolerance.
   template <typename R, typename J>
   void nonlinearTight(DynamicVector & guess, R & computeResidual, J & computeJacobian);
@@ -107,17 +111,10 @@ public:
   void nonlinearTight(NSRealVectorValue & guess, R & computeResidual, J & computeJacobian);
   ///@}
 
-  /// @{ Perform a bounded solve use Eigen::HybridNonLinearSolver
+  ///@{ Perform a bounded solve use Eigen::HybridNonLinearSolver
   template <typename R, typename J, typename B>
   void
   nonlinearBounded(NSReal & guess, R & computeResidual, J & computeJacobian, B & computeBounds);
-  ///@}
-  // @{ Perform a damped newton solve
-  template <typename R, typename J, typename C>
-  void nonlinearDamped(NSRealVectorValue & guess,
-                       R & computeResidual,
-                       J & computeJacobian,
-                       C & computeCondition);
   ///@}
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -136,9 +133,9 @@ public:
 
   Real _relative_tolerance_square;
   Real _absolute_tolerance_square;
-  // Threshold for minimum step size of linear iterations
+  /// Threshold for minimum step size of linear iterations
   Real _delta_thresh;
-  // Damping factor
+  /// Damping factor
   Real _damping_factor;
   unsigned int _max_damping_iterations;
 
@@ -172,7 +169,8 @@ public:
   static Real normSquare(const NSRealVectorValue & v);
   ///@}
 
-  ///@{ Check if |a| < |b * c| for all elements in a and b. This checks if 'a' is small relative to 'b' by a factor of 'c'
+  ///@{ Check if |a| < |b * c| for all elements in a and b. This checks if 'a' is small relative to
+  //'b' by a factor of 'c'
   template <typename V>
   static bool isRelSmall(const V & a, const V & b, const V & c);
   static bool isRelSmall(const NSReal & a, const NSReal & b, const NSReal & c);
@@ -210,13 +208,14 @@ protected:
   bool isConverged(Real r0_square, Real r_square, bool acceptable);
 
 private:
-  /// Build a suitable Eigen adaptor functors to interface between moose and Eigen types
+  ///@{ Build a suitable Eigen adaptor functors to interface between moose and Eigen types
   template <bool store_residual_norm, typename R, typename J>
   auto make_adaptor(R & residual, J & jacobian);
   template <bool store_residual_norm, typename R, typename J>
   auto make_real_adaptor(R & residual, J & jacobian);
   template <bool store_residual_norm, typename R, typename J>
   auto make_realvector_adaptor(R & residual, J & jacobian);
+  ///@}
 };
 
 template <bool is_ad>
@@ -274,8 +273,9 @@ NestedSolveTempl<is_ad>::nonlinear(NSReal & guess, R & computeResidual, J & comp
     _n_iterations++;
   }
 
-  // if we exceed the max iterations, we could still be converged
-  // (considering the acceptable multiplier)
+  /** if we exceed the max iterations, we could still be converged
+  (considering the acceptable multiplier)
+  */
   if (!isConverged(r0_square, r_square, /*acceptable=*/true))
     _state = State::NOT_CONVERGED;
 
@@ -453,7 +453,7 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
     // solve and apply next increment
     linear(jacobian, delta, residual);
 
-    // // Check if step size is smaller than the floating point tolerance
+    // Check if step size is smaller than the floating point tolerance
     if (isRelSmall(delta, guess, _delta_thresh))
     {
       _state = State::CONVERGED_XTOL;
@@ -469,8 +469,9 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T && compute)
     r_square = normSquare(residual);
   }
 
-  // if we exceed the max iterations, we could still be converged
-  // (considering the acceptable multiplier)
+  /** if we exceed the max iterations, we could still be converged
+  (considering the acceptable multiplier)
+  */
   if (!isConverged(r0_square, r_square, /*acceptable=*/true))
     _state = State::NOT_CONVERGED;
 }
@@ -507,7 +508,7 @@ NestedSolveTempl<is_ad>::nonlinearDamped(V & guess, T && compute, C && computeCo
     // solve and apply next increment
     linear(jacobian, delta, residual);
 
-    // // Check if step size is smaller than the floating point tolerance
+    // Check if step size is smaller than the floating point tolerance
     if (isRelSmall(delta, guess, _delta_thresh))
     {
       _state = State::CONVERGED_XTOL;
@@ -533,8 +534,8 @@ NestedSolveTempl<is_ad>::nonlinearDamped(V & guess, T && compute, C && computeCo
     r_square = normSquare(residual);
   }
 
-  // if we exceed the max iterations, we could still be converged
-  // (considering the acceptable multiplier)
+  // if we exceed the max iterations, we could still be converged (considering the acceptable
+  // multiplier)
   if (!isConverged(r0_square, r_square, /*acceptable=*/true))
     _state = State::NOT_CONVERGED;
 }

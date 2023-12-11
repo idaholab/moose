@@ -33,28 +33,34 @@ protected:
   /// Number of phase parameters
   const unsigned int _num_j;
 
-  /// Switching functions
+  ///@{Switching functions
   std::vector<MaterialPropertyName> _hj_names;
   std::vector<const MaterialProperty<Real> *> _prop_hj;
+  ///@}
 
-  /// Free energies
+  ///@{Free energies
   const std::vector<MaterialName> _Fj_names;
   std::vector<const MaterialProperty<Real> *> _prop_Fi;
   std::vector<MaterialProperty<Real> *> _Fi_copy;
+  ///@}
 
-  /// Phase concentrations
+  ///@{Phase concentrations
   std::vector<MaterialPropertyName> _ci_names;
   std::vector<MaterialProperty<Real> *> _prop_ci;
   std::vector<const MaterialProperty<Real> *> _ci_old;
   std::vector<Real> _ci_IC;
+  ///@}
 
-  /// Derivative of free energies wrt phase concentrations \f$ \frac d{dc_i} F_i \f$
+  ///@{Derivative of free energies wrt phase concentrations \f$ \frac d{dc_i} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidci;
   std::vector<std::vector<MaterialProperty<Real> *>> _dFidci_copy;
+  ///@}
 
-  /// Second derivative of free energies wrt phase concentrations \f$ \frac {d^2}{dc_i db_i} F_i \f$
+  ///@{Second derivative of free energies wrt phase concentrations \f$ \frac {d^2}{dc_i db_i} F_i
+  /// \f$
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d2Fidcidbi;
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _d2Fidcidbi_copy;
+  ///@}
 
   /// Coupled variables of free energies
   const std::vector<VariableName> _args_names;
@@ -62,28 +68,33 @@ protected:
   /// Number of coupled variables of free energies
   const unsigned int _n_args;
 
-  /// Derivative of free energies wrt coupled variables \f$ \frac d{dq} F_i \f$
+  ///@{Derivative of free energies wrt coupled variables \f$ \frac d{dq} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidarg;
   std::vector<std::vector<MaterialProperty<Real> *>> _dFidarg_copy;
+  ///@}
 
-  /// Second derivative of free energy Fa wrt phase concentration ca and a coupled variable \f$ \frac
-  /// {d^2}{dc_a dq} F_a \f$
+  ///@{Second derivative of free energy Fa wrt phase concentration ca and a coupled variable \f$
+  /// \frac{d^2}{dc_a dq} F_a \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _d2F1dc1darg;
   std::vector<std::vector<MaterialProperty<Real> *>> _d2F1dc1darg_copy;
+  ///@}
 
   /// Number of nested Newton iteration
   MaterialProperty<Real> & _iter;
 
-  /// Absolute and relative tolerance of nested Newton iteration
+  ///@{Absolute and relative tolerance of nested Newton iteration
   const Real _abs_tol;
   const Real _rel_tol;
+  ///@}
 
+  /// Check whether to use damping
   const bool _damped_newton;
-  // const Real _damping_factor;
 
+  ///@{Condition that must be violated for damping to occur
   MaterialName _condition_name;
   MaterialBase * _condition;
   const MaterialProperty<Real> * _C;
+  ///@}
 
   /// Instantiation of the NestedSolve class
   NestedSolve _nested_solve;

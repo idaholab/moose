@@ -1,5 +1,5 @@
 #
-# This test is for the nested solve of 3-phase KKS model
+# This test is for the damped nested solve of 3-phase KKS model, and uses log-based free energies.
 # The split-form of the Cahn-Hilliard equation instead of the Fick's diffusion equation is solved
 
 [Mesh]

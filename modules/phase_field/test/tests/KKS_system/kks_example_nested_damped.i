@@ -1,5 +1,5 @@
 #
-# KKS toy problem in the split form
+# Two-phase damped nested KKS with log-free energies
 #
 
 [Mesh]
@@ -235,15 +235,10 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  #   solve_type = 'PJFNK'
+    solve_type = 'PJFNK'
 
-  #   petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
-  #   petsc_options_value = ' asm    lu          nonzero                    nonzero'
-
-  solve_type = 'NEWTON'
-
-  petsc_options_iname = '-pctype'
-  petsc_options_value = ' lu'
+    petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
+    petsc_options_value = ' asm    lu          nonzero                    nonzero'
 
   l_max_its = 100
   nl_max_its = 100

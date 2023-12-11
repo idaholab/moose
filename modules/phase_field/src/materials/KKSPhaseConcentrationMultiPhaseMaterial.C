@@ -39,7 +39,6 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
   params.addCoupledVar("args", "The coupled variables of free energies.");
   params.addParam<bool>(
       "damped_Newton", false, "Whether or not to use the damped Newton's method.");
-  // params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
   params.addParam<MaterialName>("conditions",
                                 "C",
                                 "Material property that checks bounds and conditions on the "
@@ -77,36 +76,35 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
     _damped_newton(getParam<bool>("damped_Newton")),
-    // _damping_factor(getParam<Real>("damping_factor")),
     _condition_name(getParam<MaterialName>("conditions")),
     _nested_solve(NestedSolve(parameters))
 
 {
   // phase concentrations
-  for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+  for (const auto m : make_range(_num_c * _num_j))
   {
     _ci_old[m] = &getMaterialPropertyOld<Real>(_ci_names[m]);
     _prop_ci[m] = &declareProperty<Real>(_ci_names[m]);
   }
 
   // free energies
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
     _prop_Fi[m] = &getMaterialPropertyByName<Real>(_Fj_names[m]);
     _Fi_copy[m] = &declareProperty<Real>("cp" + _Fj_names[m]);
   }
 
-  for (unsigned int m = 0; m < _num_j; ++m)
+  // free energy derivatives w.r.t. phase concentrations
+  for (const auto m : make_range(_num_j))
   {
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
 
-    // derivative of free energies wrt phase concentrations
     _dFidci[m].resize(_num_c);
     _dFidci_copy[m].resize(_num_c);
     _d2Fidcidbi[m].resize(_num_c);
     _d2Fidcidbi_copy[m].resize(_num_c);
 
-    for (unsigned int n = 0; n < _num_c; ++n)
+    for (const auto n : make_range(_num_c))
     {
       _dFidci[m][n] = &getMaterialPropertyDerivative<Real>(_Fj_names[m], _ci_names[m + n * _num_j]);
       _dFidci_copy[m][n] =
@@ -126,12 +124,12 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   }
 
   // derivative of free energies wrt coupled variables
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
     _dFidarg[m].resize(_n_args);
     _dFidarg_copy[m].resize(_n_args);
 
-    for (unsigned int n = 0; n < _n_args; ++n)
+    for (const auto n : make_range(_n_args))
     {
       _dFidarg[m][n] = &getMaterialPropertyDerivative<Real>(_Fj_names[m], _args_names[n]);
       _dFidarg_copy[m][n] = &declarePropertyDerivative<Real>("cp" + _Fj_names[m], _args_names[n]);
@@ -139,12 +137,12 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   }
 
   // second derivatives of F1 wrt c1 and other coupled variables
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
   {
     _d2F1dc1darg[m].resize(_n_args);
     _d2F1dc1darg_copy[m].resize(_n_args);
 
-    for (unsigned int n = 0; n < _n_args; ++n)
+    for (const auto n : make_range(_n_args))
     {
       _d2F1dc1darg[m][n] =
           &getMaterialPropertyDerivative<Real>(_Fj_names[0], _ci_names[m * _num_j], _args_names[n]);
@@ -152,16 +150,17 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
           "cp" + _Fj_names[0], _ci_names[m * _num_j], _args_names[n]);
     }
   }
+
   if (_damped_newton)
     _C = &getMaterialPropertyByName<Real>(_condition_name);
   else
-    _C = NULL;
+    _C = nullptr;
 }
 
 void
 KKSPhaseConcentrationMultiPhaseMaterial::initQpStatefulProperties()
 {
-  for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+  for (const auto m : make_range(_num_c * _num_j))
     (*_prop_ci[m])[_qp] = _ci_IC[m];
 }
 
@@ -182,7 +181,8 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
   // parameters for nested Newton iteration
   NestedSolve::Value<> solution(_num_c * _num_j);
 
-  for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+  // initialize first guess using the solution from previous step
+  for (const auto m : make_range(_num_c * _num_j))
     solution(m) = (*_ci_old[m])[_qp];
 
   _nested_solve.setAbsoluteTolerance(_abs_tol);
@@ -192,33 +192,33 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
                      NestedSolve::Value<> & residual,
                      NestedSolve::Jacobian<> & jacobian)
   {
-    for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+    for (const auto m : make_range(_num_c * _num_j))
       (*_prop_ci[m])[_qp] = guess(m);
 
-    for (unsigned int m = 0; m < _num_j; ++m)
+    for (const auto m : make_range(_num_j))
       _Fj_mat[m]->computePropertiesAtQp(_qp);
 
     // assign residual functions
-    for (unsigned int m = 0; m < _num_c; ++m)
+    for (const auto m : make_range(_num_c))
     {
-      for (unsigned int n = 0; n < _num_j - 1; ++n)
+      for (const auto n : make_range(_num_j - 1))
         residual(m * _num_j + n) = (*_dFidci[n][m])[_qp] - (*_dFidci[n + 1][m])[_qp];
 
       residual((m + 1) * _num_j - 1) = -(*_prop_c[m])[_qp];
 
-      for (unsigned int l = 0; l < _num_j; ++l)
+      for (const auto l : make_range(_num_j))
         residual((m + 1) * _num_j - 1) += (*_prop_hj[l])[_qp] * (*_prop_ci[m * _num_j + l])[_qp];
     }
 
     jacobian.setZero();
 
     // fill in the non-zero terms in jacobian
-    for (unsigned int m = 0; m < _num_c; ++m)
+    for (const auto m : make_range(_num_c))
     {
       // equal chemical potential derivative equations
-      for (unsigned int n = 0; n < (_num_j - 1); ++n)
+      for (const auto n : make_range(_num_j - 1))
       {
-        for (unsigned int l = 0; l < _num_c; ++l)
+        for (const auto l : make_range(_num_c))
         {
           jacobian(m * _num_j + n, n + l * _num_j) = (*_d2Fidcidbi[n][m][l])[_qp];
           jacobian(m * _num_j + n, n + l * _num_j + 1) = -(*_d2Fidcidbi[n + 1][m][l])[_qp];
@@ -226,14 +226,14 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
       }
 
       // concentration conservation derivative equations
-      for (unsigned int n = 0; n < _num_j; ++n)
+      for (const auto n : make_range(_num_j))
         jacobian((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
     }
   };
 
   auto computeCondition = [&](const NestedSolve::Value<> & guess) -> Real
   {
-    for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+    for (const auto m : make_range(_num_c * _num_j))
       (*_prop_ci[m])[_qp] = guess(m);
     _condition->computePropertiesAtQp(_qp);
     return ((*_C)[_qp]);
@@ -245,40 +245,39 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
   else
     _nested_solve.nonlinearDamped(solution, compute, computeCondition);
 
-  // _nested_solve.nonlinear(solution, compute);
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
     mooseException("Nested Newton iteration did not converge.");
 
   // assign solution to ci
-  for (unsigned int m = 0; m < _num_c * _num_j; ++m)
+  for (const auto m : make_range(_num_c * _num_j))
     (*_prop_ci[m])[_qp] = solution[m];
 
   // assign to the copied parameters to be used in kernels
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
     (*_Fi_copy[m])[_qp] = (*_prop_Fi[m])[_qp];
 
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
-    for (unsigned int n = 0; n < _num_c; ++n)
+    for (const auto n : make_range(_num_c))
     {
       (*_dFidci_copy[m][n])[_qp] = (*_dFidci[m][n])[_qp];
 
-      for (unsigned int l = 0; l < _num_c; ++l)
+      for (const auto l : make_range(_num_c))
         (*_d2Fidcidbi_copy[m][n][l])[_qp] = (*_d2Fidcidbi[m][n][l])[_qp];
     }
   }
 
-  for (unsigned int m = 0; m < _num_j; ++m)
+  for (const auto m : make_range(_num_j))
   {
-    for (unsigned int n = 0; n < _n_args; ++n)
+    for (const auto n : make_range(_n_args))
       (*_dFidarg_copy[m][n])[_qp] = (*_dFidarg[m][n])[_qp];
   }
 
-  for (unsigned int m = 0; m < _num_c; ++m)
+  for (const auto m : make_range(_num_c))
   {
-    for (unsigned int n = 0; n < _n_args; ++n)
+    for (const auto n : make_range(_n_args))
       (*_d2F1dc1darg_copy[m][n])[_qp] = (*_d2F1dc1darg[m][n])[_qp];
   }
 }

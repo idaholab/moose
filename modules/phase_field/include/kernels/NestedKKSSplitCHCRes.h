@@ -45,13 +45,16 @@ protected:
   /// Global concentrations
   const std::vector<VariableName> _c_names;
 
-  /// Number of global concentrations
+  ///@{ Number of global concentrations
   const unsigned int _num_c;
   const JvarMap & _c_map;
   int _o;
-  /// Chemical potential
+  ///@}
+
+  ///@{ Chemical potential
   const unsigned int _w_var;
   const VariableValue & _w;
+  ///@}
 
   /// Phase concentration of the first phase in _eta_names
   const std::vector<MaterialPropertyName> _ca_names;
