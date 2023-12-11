@@ -19,7 +19,7 @@ MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
     _app(app),
-    _data_only(false),
+    _data_driven(false),
     _has_bmbb(false)
 {
 }
@@ -180,8 +180,8 @@ MeshGeneratorSystem::createAddedMeshGenerators()
                                "' does not exist");
     }
 
-    // Set the data only flag
-    _data_only = moose_mesh->parameters().get<bool>("data_only");
+    // Set the data-driven flag
+    _data_driven = moose_mesh->parameters().get<bool>("data_driven");
   }
 }
 
@@ -342,18 +342,18 @@ MeshGeneratorSystem::executeMeshGenerators()
     {
       if (generator->hasSaveMesh())
       {
-        if (_data_only)
+        if (_data_driven)
           generator->paramError("save_with_name",
-                                "Cannot use the save in capability with data only generation");
+                                "Cannot use the save in capability with data-driven generation");
         if (_final_generator_name == generator->name())
           generator->paramError("save_with_name",
                                 "Cannot use the save in capability with the final mesh generator");
         to_save_in_meshes.emplace(generator->getSavedMeshName(),
                                   &getMeshGeneratorOutput(generator->name()));
       }
-      if (_data_only && !generator->hasGenerateData())
+      if (_data_driven && !generator->hasGenerateData())
         generator->mooseError(
-            "Cannot use data only generation because this generator does not support it");
+            "Cannot use data-driven generation because this generator does not support it");
     }
 
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick it up
@@ -367,7 +367,7 @@ MeshGeneratorSystem::executeMeshGenerators()
     {
       const auto & name = generator->name();
 
-      const auto data_only = _data_only && (name != _final_generator_name);
+      const auto data_only = _data_driven && (name != _final_generator_name);
       auto current_mesh = generator->generateInternal(data_only);
 
       // Only generating data for this generator
