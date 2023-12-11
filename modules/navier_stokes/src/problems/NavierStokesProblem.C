@@ -24,6 +24,7 @@ NavierStokesProblem::validParams()
       "The matrix tag name corresponding to the diffusive part of the velocity equations.");
   params.addParam<std::vector<unsigned int>>(
       "schur_fs_index",
+      {},
       "if not provided then the top field split is assumed to be the "
       "Schur split. This is a vector allow recursive nesting");
   params.addParam<bool>("use_pressure_mass_matrix",
