@@ -13,6 +13,7 @@
 #include "libmesh/nanoflann.hpp"
 #include <memory>
 #include <vector>
+#include <tuple>
 
 /**
  * ValueCache is a generic helper template to implement an unstructured data
@@ -30,7 +31,9 @@ public:
 
   void insert(const std::vector<Real> & in_val, const T & out_val);
   bool guess(const std::vector<Real> & in_val, T & out_val, Real & distance_sqr);
-  bool guess(const std::vector<Real> & in_val, std::vector<std::pair<T, Real>> & output);
+  // bool guess(const std::vector<Real> & in_val, std::vector<std::pair<T, Real>> & output);
+  std::vector<std::tuple<std::vector<Real> &, T &, Real>>
+  kNearestNeighbors(const std::vector<Real> & in_val, const std::size_t k);
 
 protected:
   struct PointCloud
@@ -126,33 +129,27 @@ ValueCache<T>::guess(const std::vector<Real> & in_val, T & out_val, Real & dista
 }
 
 template <typename T>
-bool
-ValueCache<T>::guess(const std::vector<Real> & in_val, std::vector<std::pair<T, Real>> & output)
+std::vector<std::tuple<std::vector<Real> &, T &, Real>>
+ValueCache<T>::kNearestNeighbors(const std::vector<Real> & in_val, const std::size_t k)
 {
-  // Number of nearest neighbors to look for using kNN
-  auto k = output.size();
+  std::vector<std::tuple<std::vector<Real> &, T &, Real>> nearest_neighbors;
 
-  // cache size is smaller than the number of neighbors requested
-  if (_data.size() < k)
-    return false;
+  nanoflann::KNNResultSet<Real> result_set(std::min(k, _data.size()));
+  std::vector<std::size_t> return_indices(std::min(k, _data.size()));
+  std::vector<Real> distances(std::min(k, _data.size()));
 
-  nanoflann::KNNResultSet<Real> result_set(k);
-
-  std::vector<std::size_t> return_indices(k);
-  std::vector<Real> distances(k);
   result_set.init(return_indices.data(), distances.data());
 
-  // perform search
+  // kNN search
   _kd_tree->findNeighbors(result_set, in_val.data());
 
-  // no result found
-  if (result_set.size() != k)
-    return false;
+  if (result_set.size() < k)
+    mooseWarning(
+        "Requested ", k, " nearest neighbors but current cache size is ", result_set.size());
 
   for (std::size_t i = 0; i < result_set.size(); ++i)
-  {
-    output[i].first = _data[return_indices[i]];
-    output[i].second = distances[i];
-  }
-  return true;
+    nearest_neighbors.push_back(
+        std::tie((_point_cloud._pts[return_indices[i]]), (_data[return_indices[i]]), distances[i]));
+
+  return nearest_neighbors;
 }

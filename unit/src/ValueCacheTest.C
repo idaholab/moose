@@ -39,28 +39,35 @@ TEST(ValueCacheTest, guess)
 TEST(ValueCacheTest, kNN)
 {
   ValueCache<std::vector<Real>> cache(3);
-  std::vector<std::pair<std::vector<Real>, Real>> nearest_neighbors(3);
 
-  cache.insert({4.2, 2.7, 1.6}, {1, 2});  // 27.49
-  cache.insert({3.1, 1.2, 0.1}, {3, 4});  // 11.06
+  cache.insert({4.2, 2.7, 1.6}, {1, 2});
+  cache.insert({3.1, 1.2, 0.1}, {3, 4});
 
-  EXPECT_EQ(cache.guess({0, 0, 0}, nearest_neighbors), false);
+  EXPECT_ANY_THROW(cache.kNearestNeighbors({0, 0, 0}, 3));
 
-  cache.insert({5.8, 1.9, 3.6}, {5, 6});  // 50.21
-  cache.insert({7.1, 2.2, 4.1}, {7, 8});  // 72.06
-  cache.insert({2.8, 2.1, 0.6}, {9, 10}); // 12.61
+  cache.insert({5.8, 1.9, 3.6}, {5, 6});
+  cache.insert({7.1, 2.2, 4.1}, {7, 8});
+  cache.insert({2.8, 2.1, 0.6}, {9, 10});
 
-  EXPECT_EQ(cache.guess({0, 0, 0}, nearest_neighbors), true);
+  auto nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
 
   // First nearest neighbor
-  EXPECT_EQ(nearest_neighbors[0].first[0], 3);
-  EXPECT_EQ(nearest_neighbors[0].first[1], 4);
-  EXPECT_NEAR(nearest_neighbors[0].second, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
+  auto [key, value, distance] = nearest_neighbors[0];
+  EXPECT_NEAR(key[0], 3.1, 1e-9);
+  EXPECT_NEAR(key[1], 1.2, 1e-9);
+  EXPECT_NEAR(key[2], 0.1, 1e-9);
+  EXPECT_EQ(value[0], 3);
+  EXPECT_EQ(value[1], 4);
+  EXPECT_NEAR(distance, 3.1 * 3.1 + 1.2 * 1.2 + 0.1 * 0.1, 1e-9);
 
   // Second nearest neighbor
-  EXPECT_EQ(nearest_neighbors[1].first[0], 9);
-  EXPECT_EQ(nearest_neighbors[1].first[1], 10);
-  EXPECT_NEAR(nearest_neighbors[1].second, 2.8 * 2.8 + 2.1 * 2.1 + 0.6 * 0.6, 1e-9);
+  std::tie(key, value, distance) = nearest_neighbors[1];
+  EXPECT_NEAR(key[0], 2.8, 1e-9);
+  EXPECT_NEAR(key[1], 2.1, 1e-9);
+  EXPECT_NEAR(key[2], 0.6, 1e-9);
+  EXPECT_EQ(value[0], 9);
+  EXPECT_EQ(value[1], 10);
+  EXPECT_NEAR(distance, 2.8 * 2.8 + 2.1 * 2.1 + 0.6 * 0.6, 1e-9);
 }
 
 TEST(ValueCacheTest, rebuildTree)
