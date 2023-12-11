@@ -159,7 +159,7 @@ POD::computePOD(const VariableName & vname,
 
 dof_id_type
 POD::determineNumberOfModes(const std::vector<Real> & singular_values,
-                            const std::size_t num_modes_compute,
+                            const dof_id_type num_modes_compute,
                             const Real & energy) const
 {
   dof_id_type num_modes = 0;
