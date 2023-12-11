@@ -21,41 +21,41 @@ n=2789
     ny = ${n}
     elem_type = QUAD4
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = gen
-  [../]
+  []
   second_order = true
   parallel_type = distributed
 []
 
 [Variables]
-  [./vel_x]
+  [vel_x]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     order = SECOND
     family = LAGRANGE
-  [../]
-  [./p]
+  []
+  [p]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = INSMass
     variable = p
     u = vel_x
     v = vel_y
     pressure = p
-  [../]
+  []
 
-  [./x_momentum_space]
+  [x_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
@@ -63,14 +63,14 @@ n=2789
     pressure = p
     component = 0
     extra_matrix_tags = 'L'
-  [../]
+  []
   [momentum_x_mass]
     type = MassKernel
     variable = vel_x
     density = ${rho}
     matrix_tags = 'mass'
   []
-  [./y_momentum_space]
+  [y_momentum_space]
     type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
@@ -78,7 +78,7 @@ n=2789
     pressure = p
     component = 1
     extra_matrix_tags = 'L'
-  [../]
+  []
   [momentum_y_mass]
     type = MassKernel
     variable = vel_y
@@ -89,52 +89,52 @@ n=2789
 
 [BCs]
   inactive = 'pressure_pin'
-  [./x_no_slip]
+  [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
-  [../]
+  []
 
-  [./lid]
+  [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
-  [../]
+  []
 
-  [./y_no_slip]
+  [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  [../]
+  []
 
-  [./pressure_pin]
+  [pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
-  [../]
+  []
 []
 
 [Functions]
-  [./lid_function]
+  [lid_function]
     # We pick a function that is exactly represented in the velocity
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
     type = ParsedFunction
     expression = '${prefactor}*${U}*x*(${l}-x)'
-  [../]
+  []
 []
 
 [Problem]
