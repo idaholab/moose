@@ -38,7 +38,8 @@ NavierStokesProblem::validParams()
   params.addParam<bool>("use_mass_matrix_for_scaling",
                         true,
                         "Whether to use the mass matrix for scaling. This should always be true if "
-                        "'commute_lsc' is true. If this is false, then the diagonal of A will be "
+                        "'commute_lsc' is true. If this is false (and 'commute_lsc' is false), "
+                        "then the diagonal of A will be "
                         "used for scaling if scaling is requested.");
   return params;
 }
