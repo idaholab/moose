@@ -32,7 +32,6 @@ public:
   /**
    * This will return the degrees of freedom in the system.
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

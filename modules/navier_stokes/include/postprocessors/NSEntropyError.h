@@ -20,7 +20,6 @@ public:
   static InputParameters validParams();
 
   NSEntropyError(const InputParameters & parameters);
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

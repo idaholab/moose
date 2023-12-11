@@ -61,22 +61,6 @@ Postprocessor::declareValue(const MooseObject & moose_object)
   return fe_problem.getReporterData().getReporterValue<PostprocessorValue>(r_name);
 }
 
-PostprocessorValue
-Postprocessor::getValue()
-{
-  mooseError(
-      "The non-const 'Postprocessor::getValue()' method is deprecated and should not be called.");
-}
-
-PostprocessorValue
-Postprocessor::getValue() const
-{
-  mooseDeprecated("The non-const 'Postprocessor::getValue()' method is deprecated. Please override "
-                  "the 'Postprocessor::getValue() const' method instead.");
-
-  return const_cast<Postprocessor *>(this)->getValue();
-}
-
 typename Postprocessor::ValueType
 Postprocessor::evaluate(const ElemArg & /*elem_arg*/, const Moose::StateArg & /*state*/) const
 {

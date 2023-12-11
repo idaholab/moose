@@ -34,7 +34,6 @@ public:
   /**
    * Return the summed value.
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

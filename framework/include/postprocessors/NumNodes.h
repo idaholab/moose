@@ -24,7 +24,6 @@ public:
   /**
    * This will return the number of nodes in the system
    */
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 private:
