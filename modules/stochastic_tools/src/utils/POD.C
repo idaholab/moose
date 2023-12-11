@@ -17,8 +17,8 @@ POD::POD(const ParallelSolutionStorage * const parallel_storage,
     _extra_slepc_options(extra_slepc_options),
     _communicator(comm)
 {
-  // Constructor implementation (if needed)
 }
+
 void
 POD::computePOD(const VariableName & vname,
                 std::vector<DenseVector<Real>> & left_basis_functions,
