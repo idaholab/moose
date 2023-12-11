@@ -23,7 +23,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # Skipped caveat test which returns skipped instead of 'DRY RUN'
         output = self.runTests('--no-color', '-i', 'depend_skip_tests', '--dry-run')
         self.assertRegex(output.decode('utf-8'), r'tests/test_harness.always_skipped.*? \[ALWAYS SKIPPED\] SKIP')
-        self.assertRegex(output.decode('utf-8'), r'tests/test_harness.needs_always_skipped.*? \[SKIPPED DEPENDENCY\] SKIP')
+        self.assertRegex(output.decode('utf-8'), r'tests/test_harness.needs_always_skipped.*?SKIPPED DEPENDENCY.*? SKIP')
 
         # Deleted caveat test which returns a deleted failing tests while
         # performing a dry run

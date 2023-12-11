@@ -36,15 +36,19 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for duplicate output files in the same directory that will _not_ overwrite eachother due to
         proper prereqs set.
         """
-        output = self.runTests('-i', 'duplicate_outputs_ok')
-        output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('-i', 'duplicate_outputs_ok')
+        e = cm.exception
+        output = e.output.decode('utf-8')
+
+        output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy').decode('utf-8')
 
         # skip case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'skipped_out.e')
+        self.assertNotRegexpMatches(output, 'skipped_out.e')
         # heavy case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'heavy_out.e')
+        self.assertNotRegexpMatches(output, 'heavy_out.e')
         # all
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'FATAL TEST HARNESS ERROR')
+        self.assertNotRegexpMatches(output, 'FATAL TEST HARNESS ERROR')
 
     def testDelayedDuplicateOutputs(self):
         """

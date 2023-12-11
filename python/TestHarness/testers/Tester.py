@@ -136,11 +136,6 @@ class Tester(MooseObject):
         # Bool if test can run
         self.runnable = None
 
-        # List of skippable params to ignore when a prerequisite test is being skipped while it's
-        # dependency test(s) are not. e.g: foo <-- bar. bar is heavy and foo is not, foo should be
-        # allowed to run in this scenario.
-        self.ignore_skip_params = ['heavy']
-
         # Set up common paramaters
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
@@ -432,6 +427,41 @@ class Tester(MooseObject):
         self.__caveats = set([])
         return self.getCaveats()
 
+    @staticmethod
+    def localChecks():
+        """
+        Return a list of params that can be a reason for a test to be skipped.
+
+        TODO: This will eventually be replaced by skippableClauses below, when I fully understand
+              why there are fewer checks performed in checkRunnableBase, than what I found possible
+              when building the new doCheckDependencies method in the JobDAG.
+        """
+        return ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
+                'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
+                'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
+                'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
+                'threading', 'libpng', 'libtorch']
+
+    @staticmethod
+    def skippableClauses():
+        """
+        Return a list of params that can be a reason for a test to be skipped.
+
+        TODO: Come up with a way to alert the developer possibly adding a new param, to visit this
+              method and determine if it should be an addition.
+        """
+        return set(['asio', 'boost', 'chaco', 'compiler', 'curl', 'cxx11', 'deleted',
+                    'depend_files', 'display_required', 'dof_id_bytes', 'dtk', 'env_vars',
+                    'env_vars_not_set', 'exodus_version', 'fparser_jit', 'heavy',
+                    'installation_type', 'libpng', 'library_mode', 'libtorch', 'libtorch_version',
+                    'machine', 'max_ad_size', 'mesh_mode', 'method', 'min_ad_size', 'mumps',
+                    'parmetis', 'party', 'petsc_debug', 'petsc_version', 'petsc_version_release',
+                    'platform', 'ptsctoch', 'python', 'recover', 'required_applications',
+                    'required_objects', 'required_python_packages', 'required_submodule',
+                    'requires', 'should_execute', 'skip', 'slepc', 'slepc_version', 'strumpack',
+                    'superlu', 'tecplot', 'threading', 'unique_id', 'valgrind', 'vtk',
+                    'vtk_version'])
+
     def checkRunnableBase(self, options):
         """
         Method to check for caveats that would prevent this tester from
@@ -564,14 +594,8 @@ class Tester(MooseObject):
         if not libtorch_status:
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
-        # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
-                        'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
-                        'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
-                        'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
-                        'threading', 'libpng', 'libtorch']
-
-        for check in local_checks:
+        # Various checks a test should be skipped
+        for check in self.localChecks():
             test_platforms = set()
             operator_display = '!='
             inverse_set = False

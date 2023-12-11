@@ -18,6 +18,28 @@ class JobDAG(object):
         self.__job_dag = dag.DAG()
         self.__parallel_scheduling = None
         self.options = options
+        # cache our ignored caveats set, as this should be immutable after first launch
+        self.implict_caveats = self._generateSkips()
+
+    def _generateSkips(self):
+        """
+        Return a set of caveats which are to be ignored when verifying dependencies
+        """
+        implict_caveats = set([])
+        # If all prereqs are to be ignore, then there is no reason to continue
+        if self._skipPrereqs():
+            return implict_caveats
+
+        # Handle user supplied acceptable caveats to skip
+        if self.options.ignored_caveats is not None:
+            implict_caveats.update([*[(x, True) for x in self.options.ignored_caveats.split()]])
+
+        # Special case for --heavy
+        if (self.options.heavy_tests and
+            'heavy' not in [x[0] for x in implict_caveats]):
+            implict_caveats.add(('heavy', True))
+
+        return implict_caveats
 
     def _setParallel(self):
         """ Read the test spec file and determine if parallel_scheduling is set. """
@@ -148,8 +170,66 @@ class JobDAG(object):
                     job.setStatus(job.error, 'unknown dependency')
                     return
 
-                # Modify prereq_job tester spec params
-                self._align_params(self.__name_to_job[prereq_job], job)
+                # verify dependencies are correct
+                self._doCheckDependencies(self.__name_to_job[prereq_job], job)
+
+    def _doCheckDependencies(self, prereq_job, dep_job):
+        """
+        Label job(s) as a failure if a never-run scenario is detected.
+        """
+        # If we're skipping everything, move on.
+        if self._skipPrereqs():
+            return
+
+        prereq_tester = prereq_job.getTester()
+        tester = dep_job.getTester()
+
+        # Get all params involved in both tests, intersect those with params that cause skips
+        all_params = set([*dep_job.getSpecs().keys(),
+                          *prereq_job.getSpecs().keys()]).intersection(tester.skippableClauses())
+
+        # If tester is slated to run and prereq tester is not, begin investigation
+        if (tester.checkRunnableBase(self.options)
+            and not prereq_tester.checkRunnableBase(self.options)):
+            # Clear caveats in preperation for more accurate ones
+            prereq_tester.clearCaveats()
+            tester.clearCaveats()
+            for valid_spec, is_valid in self.implict_caveats:
+                if is_valid:
+                    # Add missing param/value possibly preventing this tester from launching
+                    if (isinstance(True, type(tester.specs[valid_spec])) and
+                        tester.specs[valid_spec]):
+                        prereq_tester.specs[valid_spec] = True
+                    else:
+                        prereq_tester.specs[valid_spec] = tester.specs[valid_spec]
+                    # Reset tester status, so it can be re-checked
+                    prereq_tester.setStatus(prereq_tester.no_status)
+                    prereq_tester.addCaveats(f'implicit {valid_spec}')
+
+            # Check for never-run scenarios
+            failing_specs = []
+            # Obvious check for prereq having skip set:
+            if prereq_tester.specs.isValid('skip'):
+                failing_specs.append('skip')
+
+            for spec in all_params:
+                if tester.specs.isValid(spec) and prereq_tester.specs.isValid(spec):
+                    # Bools
+                    if (isinstance(True, type(prereq_tester.specs[spec])) and
+                        tester.specs[spec] != prereq_tester.specs[spec]):
+                        failing_specs.append(spec)
+                    # Lists; ['ALL',]
+                    if (isinstance([], type(prereq_tester.specs[spec])) and
+                        'ALL' not in prereq_tester.specs[spec]):
+                        if tester.specs[spec] != prereq_tester.specs[spec]:
+                            failing_specs.append(spec)
+
+            if failing_specs:
+                fail_message = f'prereq test parameter: {", ".join(failing_specs)}'
+                if self.options.dry_run:
+                    tester.addCaveats(fail_message)
+                else:
+                    tester.setStatus(tester.fail, fail_message)
 
     def _hasDownStreamsWithFailures(self, job):
         """ Return True if any dependents of job has previous failures """
@@ -240,32 +320,6 @@ class JobDAG(object):
                 for job in job_list:
                     job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')
-
-    def _align_params(self, prereq_job, job):
-        """
-        Align Test specification parameters for prereq_job with job.
-
-        This method uses Tester().ignore_skip_params to determine which params are acceptably safe
-        to add to `prereq_job` if `job` contains such param(s). Thus allowing prereq_job to launch
-        when it might not otherwise.
-        """
-        prereq_tester = prereq_job.getTester()
-        tester = job.getTester()
-        for param in tester.ignore_skip_params:
-            # if param is valid and param value for both prereq tester and tester are not the same,
-            # and if prereq tester is slated not to launch...
-            if (tester.specs.isValid(param)
-                and tester.specs[param] != prereq_tester.specs[param]
-                and not prereq_tester.checkRunnableBase(self.options)):
-                # ...add differentiating param value to prereq tester in an attempt to allow prereq
-                # tester to launch (other caveats may still label this as not runnable)
-                prereq_tester.specs[param] = tester.specs[param]
-                # After running checkRunnableBase it is necessary to 'reset' attributes so it can be
-                # scrutinized again now that it has a new param/value
-                prereq_tester.clearCaveats()
-                prereq_tester.setStatus(prereq_tester.no_status)
-                prereq_tester.addCaveats(f'Implicit {param}')
-                prereq_tester.runnable = None
 
     def _skipPrereqs(self):
         """

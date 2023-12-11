@@ -1,5 +1,5 @@
 [Tests]
-  [./no_relation]
+  [./singleton]
     type = RunApp
     input = good.i
   [../]
@@ -10,7 +10,28 @@
   [./heavy]
     type = RunApp
     input = good.i
+    heavy = true
+  [../]
+  [./heavy_on_not_heavy]
+    type = RunApp
+    input = good.i
     prereq = not_heavy
     heavy = true
+  [../]
+  [./not_heavy_on_heavy]
+    type = RunApp
+    input = good.i
+    prereq = heavy
+  [../]
+  [./dbg]
+    type = RunApp
+    input = good.i
+    method = dbg
+  [../]
+  [./opt_on_dbg]
+    type = RunApp
+    input = good.i
+    prereq = dbg
+    method = opt
   [../]
 []
