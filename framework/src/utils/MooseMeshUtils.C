@@ -484,4 +484,41 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
     }
   }
 }
+
+void
+swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2)
+{
+  Node * n_temp = elem.node_ptr(nd1);
+  elem.set_node(nd1) = elem.node_ptr(nd2);
+  elem.set_node(nd2) = n_temp;
+}
+
+void
+extraElemIntegerSwapParametersProcessor(
+    const std::string & class_name,
+    const unsigned int num_sections,
+    const unsigned int num_integers,
+    const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
+    std::vector<std::unordered_map<unsigned int, unsigned int>> & elem_integers_swap_pairs)
+{
+  elem_integers_swap_pairs.resize(num_sections * num_integers);
+  for (unsigned int i = 0; i < num_integers; i++)
+  {
+    for (unsigned int j = 0; j < num_sections; j++)
+    {
+      const auto & extra_swaps = elem_integers_swaps[i][j];
+      auto & extra_swap_pairs = elem_integers_swap_pairs[i * num_sections + j];
+
+      if (extra_swaps.size() % 2)
+        throw MooseException("Row ",
+                             i * num_sections + j + 1,
+                             " of elem_integers_swaps in ",
+                             class_name,
+                             " does not contain an even number of entries! Num entries: ",
+                             extra_swaps.size());
+      for (unsigned int k = 0; k < extra_swaps.size(); k += 2)
+        extra_swap_pairs[extra_swaps[k]] = extra_swaps[k + 1];
+    }
+  }
+}
 }
