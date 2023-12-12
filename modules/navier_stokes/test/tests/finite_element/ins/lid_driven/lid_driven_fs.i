@@ -62,7 +62,6 @@ n=2789
     v = vel_y
     pressure = p
     component = 0
-    extra_matrix_tags = 'L'
   []
   [momentum_x_mass]
     type = MassKernel
@@ -77,7 +76,6 @@ n=2789
     v = vel_y
     pressure = p
     component = 1
-    extra_matrix_tags = 'L'
   []
   [momentum_y_mass]
     type = MassKernel
@@ -140,8 +138,7 @@ n=2789
 [Problem]
   type = NavierStokesProblem
   mass_matrix = 'mass'
-  L_matrix = 'L'
-  extra_tag_matrices = 'mass L'
+  extra_tag_matrices = 'mass'
 []
 
 [Preconditioning]

@@ -17,10 +17,13 @@ InputParameters
 NavierStokesProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
-  params.addRequiredParam<TagName>("mass_matrix",
-                                   "The matrix tag name corresponding to the mass matrix.");
-  params.addRequiredParam<TagName>(
+  params.addClassDescription("A problem that handles Schur complement preconditioning of the "
+                             "incompressible Navier-Stokes equations");
+  params.addParam<TagName>(
+      "mass_matrix", "", "The matrix tag name corresponding to the mass matrix.");
+  params.addParam<TagName>(
       "L_matrix",
+      "",
       "The matrix tag name corresponding to the diffusive part of the velocity equations.");
   params.addParam<std::vector<unsigned int>>(
       "schur_fs_index",
@@ -35,24 +38,39 @@ NavierStokesProblem::validParams()
       "commute_lsc",
       false,
       "Whether to use the commuted form of the LSC preconditioner, created by Olshanskii");
-  params.addParam<bool>("use_mass_matrix_for_scaling",
-                        true,
-                        "Whether to use the mass matrix for scaling. This should always be true if "
-                        "'commute_lsc' is true. If this is false (and 'commute_lsc' is false), "
-                        "then the diagonal of A will be "
-                        "used for scaling if scaling is requested.");
   return params;
 }
 
 NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters)
   : FEProblem(parameters),
+    _commute_lsc(getParam<bool>("commute_lsc")),
     _mass_matrix(getParam<TagName>("mass_matrix")),
     _L_matrix(getParam<TagName>("L_matrix")),
+    _have_mass_matrix(!_mass_matrix.empty()),
+    _have_L_matrix(!_L_matrix.empty()),
+    _pressure_mass_matrix_as_pre(getParam<bool>("use_pressure_mass_matrix")),
     _schur_fs_index(getParam<std::vector<unsigned int>>("schur_fs_index"))
 {
-  if (getParam<bool>("commute_lsc") && !getParam<bool>("use_mass_matrix_for_scaling"))
-    paramError("use_mass_matrix_for_scaling",
-               "This must be true if we are commuting the LSC commutator.");
+  if (_commute_lsc)
+  {
+    if (!_have_mass_matrix)
+      paramError("mass_matrix",
+                 "A pressure mass matrix must be provided if we are commuting the LSC commutator.");
+    if (!_have_L_matrix)
+      paramError("L_matrix",
+                 "A matrix corresponding to the viscous component of the momentum equation must be "
+                 "provided if we are commuting the LSC commutator.");
+  }
+  else if (_have_L_matrix)
+    paramError("L_matrix",
+               "If not commuting the LSC commutator, then the 'L_matrix' should not be provided "
+               "because it will not be used. For Elman LSC preconditioning, L will be computed "
+               "automatically using system matrix data (e.g. the off-diagonal blocks in the "
+               "velocity-pressure system).");
+
+  if (_pressure_mass_matrix_as_pre && !_have_mass_matrix)
+    paramError("mass_matrix",
+               "If 'use_pressure_mass_matrix', then a pressure 'mass_matrix' must be provided");
 }
 
 NavierStokesProblem::~NavierStokesProblem()
@@ -127,17 +145,21 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
 
   // The mass matrix
-  auto global_Q =
-      static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
-          .mat();
-  auto global_L =
-      static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(LMatrixTagID())).mat();
-  // The velocity block of the mass matrix
-  auto & Q_scale = getQscale();
-  auto & L = getL();
+  Mat global_Q = nullptr;
+  if (_have_mass_matrix)
+    global_Q =
+        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
+            .mat();
+  // The Poisson operator matrix
+  Mat global_L = nullptr;
+  if (_have_L_matrix)
+    global_L =
+        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(LMatrixTagID()))
+            .mat();
 
   auto process_intermediate_mats = [this, &ierr](auto & intermediate_mats, auto parent_mat)
   {
+    mooseAssert(parent_mat, "This should be non-null");
     intermediate_mats.resize(_index_sets.size());
     for (const auto i : index_range(_index_sets))
     {
@@ -154,8 +176,12 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     return _index_sets.empty() ? parent_mat : intermediate_mats.back();
   };
 
-  auto our_parent_Q = process_intermediate_mats(intermediate_Qs, global_Q);
-  auto our_parent_L = process_intermediate_mats(intermediate_Ls, global_L);
+  Mat our_parent_Q = nullptr;
+  if (_have_mass_matrix)
+    our_parent_Q = process_intermediate_mats(intermediate_Qs, global_Q);
+  Mat our_parent_L = nullptr;
+  if (_have_L_matrix)
+    our_parent_L = process_intermediate_mats(intermediate_Ls, global_L);
 
   // Need to call this before getting index sets or sub ksps, etc.
   ierr = PCSetUp(schur_pc);
@@ -166,49 +192,54 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   ierr = MatGetOwnershipRange(our_parent_Q, &rstart, &rend);
   LIBMESH_CHKERR2(this->comm(), ierr);
 
-  const auto commute_lsc = getParam<bool>("commute_lsc");
-
-  if (commute_lsc)
+  if (_commute_lsc)
   {
-    if (!L)
+    mooseAssert(our_parent_L, "This should be non-null");
+    if (!_L)
     {
-      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &L);
+      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &_L);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
     else
     {
-      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_REUSE_MATRIX, &L);
+      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_REUSE_MATRIX, &_L);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
   }
 
   ierr = ISComplement(velocity_is, rstart, rend, &pressure_is);
   LIBMESH_CHKERR2(this->comm(), ierr);
-  if (!Q_scale)
+  if (!_Q_scale)
   {
-    if (commute_lsc)
+    if (_commute_lsc)
     {
+      mooseAssert(our_parent_Q, "This should be non-null");
       ierr =
-          MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, MAT_INITIAL_MATRIX, &Q_scale);
+          MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, MAT_INITIAL_MATRIX, &_Q_scale);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
-    else
+    else if (_have_mass_matrix) // If we don't have a mass matrix and the user has requested scaling
+                                // then the diagonal of A will be used
     {
+      mooseAssert(our_parent_Q, "This should be non-null");
       ierr =
-          MatCreateSubMatrix(our_parent_Q, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &Q_scale);
+          MatCreateSubMatrix(our_parent_Q, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &_Q_scale);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
   }
   else
   {
-    if (commute_lsc)
+    mooseAssert(our_parent_Q, "This should be non-null");
+    if (_commute_lsc)
     {
-      ierr = MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, MAT_REUSE_MATRIX, &Q_scale);
+      ierr =
+          MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, MAT_REUSE_MATRIX, &_Q_scale);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
     else
     {
-      ierr = MatCreateSubMatrix(our_parent_Q, velocity_is, velocity_is, MAT_REUSE_MATRIX, &Q_scale);
+      ierr =
+          MatCreateSubMatrix(our_parent_Q, velocity_is, velocity_is, MAT_REUSE_MATRIX, &_Q_scale);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
   }
@@ -232,17 +263,18 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     mooseError("The number of splits should be two");
   schur_complement_ksp = subksp[1];
 
-  if (getParam<bool>("use_pressure_mass_matrix"))
+  if (_pressure_mass_matrix_as_pre)
   {
+    mooseAssert(_Q_scale, "This should be non-null");
     Mat S;
-    ierr = PCFieldSplitSetSchurPre(schur_pc, PC_FIELDSPLIT_SCHUR_PRE_USER, Q_scale);
+    ierr = PCFieldSplitSetSchurPre(schur_pc, PC_FIELDSPLIT_SCHUR_PRE_USER, _Q_scale);
     LIBMESH_CHKERR2(this->comm(), ierr);
     ierr = KSPGetOperators(schur_complement_ksp, &S, NULL);
     LIBMESH_CHKERR2(this->comm(), ierr);
-    ierr = KSPSetOperators(schur_complement_ksp, S, Q_scale);
+    ierr = KSPSetOperators(schur_complement_ksp, S, _Q_scale);
     LIBMESH_CHKERR2(this->comm(), ierr);
   }
-  else
+  else // We are doing LSC preconditioning
   {
     ierr = KSPGetPC(schur_complement_ksp, &lsc_pc);
     LIBMESH_CHKERR2(this->comm(), ierr);
@@ -253,17 +285,23 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     ierr = PCGetOperators(lsc_pc, NULL, &lsc_pc_pmat);
     LIBMESH_CHKERR2(this->comm(), ierr);
 
-    if (commute_lsc)
+    if (_commute_lsc)
     {
-      ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_L", (PetscObject)L);
+      mooseAssert(_L, "This should be non-null");
+      ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_L", (PetscObject)_L);
+      LIBMESH_CHKERR2(this->comm(), ierr);
+      mooseAssert(_have_mass_matrix, "This is to verify we will enter the next conditional");
+    }
+    if (_have_mass_matrix)
+    {
+      mooseAssert(_Q_scale, "This should be non-null");
+      ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_Qscale", (PetscObject)_Q_scale);
       LIBMESH_CHKERR2(this->comm(), ierr);
     }
-    ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_Qscale", (PetscObject)Q_scale);
-    LIBMESH_CHKERR2(this->comm(), ierr);
-
-    ierr = PetscFree(subksp);
-    LIBMESH_CHKERR2(this->comm(), ierr);
   }
+
+  ierr = PetscFree(subksp);
+  LIBMESH_CHKERR2(this->comm(), ierr);
 }
 
 PetscErrorCode
@@ -284,8 +322,15 @@ NavierStokesProblem::initPetscOutput()
 {
   FEProblem::initPetscOutput();
 
-  if (!getParam<bool>("commute_lsc") && !getParam<bool>("use_mass_matrix_for_scaling"))
+  if (!_have_mass_matrix)
+  {
+    mooseAssert(
+        !_have_L_matrix,
+        "If we don't have a mass matrix, which is only supported for traditional LSC "
+        "preconditioning (e.g. Elman, not Olshanskii), then we also shouldn't have an L matrix "
+        "because we automatically form the L matrix when doing traditional LSC preconditioning");
     return;
+  }
 
   PetscErrorCode ierr = 0;
   KSP ksp;
