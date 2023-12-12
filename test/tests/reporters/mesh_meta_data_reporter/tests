@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#26304'
+  design = 'MeshMetaDataReporter.md'
+
+  [test]
+    type = JSONDiff
+    input = 'mesh_meta_data_reporter.i'
+    jsondiff = 'mesh_meta_data_reporter_out.json'
+
+    requirement = 'The system shall support the output of mesh metadata in a human-readable form.'
+  []
+[]
