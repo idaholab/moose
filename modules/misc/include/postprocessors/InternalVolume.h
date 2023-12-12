@@ -33,7 +33,6 @@ public:
 
 protected:
   virtual Real computeQpIntegral() override;
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
   const unsigned int _component;

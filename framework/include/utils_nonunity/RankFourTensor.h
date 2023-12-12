@@ -73,6 +73,7 @@ public:
   ///@}
 
   typedef tuple_of<4, unsigned int> index_type;
+  typedef T value_type;
 
   /// Initialization method
   enum InitMethod

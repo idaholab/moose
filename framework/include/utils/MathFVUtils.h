@@ -159,7 +159,7 @@ linearInterpolation(const T & value1,
  * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
  * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
  * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
- * elementcorresponding to value1
+ * element corresponding to value1
  * @return The interpolated value
  */
 template <typename T1, typename T2>
@@ -202,7 +202,7 @@ harmonicInterpolation(const T1 & value1,
     {
 #ifndef NDEBUG
       if (value1(i) * value2(i) <= 0)
-        mooseWarning("Component " + std::to_string(i) + "of input values (" +
+        mooseWarning("Component " + std::to_string(i) + " of input values (" +
                      Moose::stringify(MetaPhysicL::raw_value(value1(i))) + " & " +
                      Moose::stringify(MetaPhysicL::raw_value(value2(i))) +
                      ") must be of the same sign for harmonic interpolation");

@@ -31,8 +31,8 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void threadJoin(const UserObject &) override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject &) override {}
 
 protected:
   /// Compute the quantity to recover using nodal patch recovery

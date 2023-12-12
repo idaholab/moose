@@ -94,7 +94,7 @@ public:
   virtual bool isFV() const override { return true; }
 
   // TODO: many of these functions are not relevant to FV variables but are
-  // still called at various points from existing moose codepaths.  Ideally we
+  // still called at various points from existing moose code paths.  Ideally we
   // would figure out how to remove calls to these functions and then allow
   // throwing mooseError's from them instead of silently doing nothing (e.g.
   // reinitNodes, reinitAux, prepareLowerD, etc.).
@@ -471,7 +471,7 @@ public:
    * default for this base class but derived variable classes may choose not to unless this API is
    * called
    */
-  virtual void requireQpComputations() {}
+  virtual void requireQpComputations() const {}
 
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base

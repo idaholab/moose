@@ -28,7 +28,6 @@ public:
   virtual void execute() override;
 
   /// returns the value of the RichardsSumQuantity
-  using Postprocessor::getValue;
   virtual PostprocessorValue getValue() const override;
 
 protected:

@@ -18,7 +18,6 @@ public:
 
   ElementL2Norm(const InputParameters & parameters);
 
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

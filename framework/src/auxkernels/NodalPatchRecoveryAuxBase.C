@@ -7,13 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodalPatchRecoveryAux.h"
-#include "NodalPatchRecoveryBase.h"
-
-registerMooseObject("TensorMechanicsApp", NodalPatchRecoveryAux);
+#include "NodalPatchRecoveryAuxBase.h"
 
 InputParameters
-NodalPatchRecoveryAux::validParams()
+NodalPatchRecoveryAuxBase::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("This Auxkernel solves a least squares problem at each node to fit a "
@@ -24,54 +21,49 @@ NodalPatchRecoveryAux::validParams()
   return params;
 }
 
-NodalPatchRecoveryAux::NodalPatchRecoveryAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _npr(getUserObject<NodalPatchRecoveryBase>("nodal_patch_recovery_uo"))
-{
-  // Check user object block restriction for consistency
-  if (!isBlockSubset(_npr.blockIDs()))
-    paramError("nodal_patch_recovery_uo",
-               "Nodal patch recovery auxiliary kernel is not defined in a subset of blocks of the "
-               "associateduser object. Revise your input file.");
-}
-
-Real
-NodalPatchRecoveryAux::computeValue()
+NodalPatchRecoveryAuxBase::NodalPatchRecoveryAuxBase(const InputParameters & parameters)
+  : AuxKernel(parameters)
 {
   if (!isNodal())
     mooseError(name(), " only runs on nodal variables.");
+}
 
+Real
+NodalPatchRecoveryAuxBase::computeValue()
+{
   // get node-to-conneted-elem map
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
 
-  std::vector<dof_id_type> elem_ids;
-  blockRestrictElements(elem_ids, node_to_elem_pair->second);
+  _elem_ids.clear();
+  blockRestrictElements(_elem_ids, node_to_elem_pair->second);
 
   // consider the case for corner node
-  if (elem_ids.size() == 1)
+  if (_elem_ids.size() == 1)
   {
-    dof_id_type elem_id = elem_ids[0];
+    const dof_id_type elem_id = _elem_ids[0];
     for (auto & n : _mesh.elemPtr(elem_id)->node_ref_range())
     {
       node_to_elem_pair = node_to_elem_map.find(n.id());
       std::vector<dof_id_type> elem_ids_candidate = node_to_elem_pair->second;
-      if (elem_ids_candidate.size() > elem_ids.size())
+      if (elem_ids_candidate.size() > _elem_ids.size())
       {
         std::vector<dof_id_type> elem_ids_candidate_restricted;
         blockRestrictElements(elem_ids_candidate_restricted, elem_ids_candidate);
 
-        if (elem_ids_candidate_restricted.size() > elem_ids.size())
-          elem_ids = elem_ids_candidate_restricted;
+        if (elem_ids_candidate_restricted.size() > _elem_ids.size())
+          _elem_ids = elem_ids_candidate_restricted;
       }
     }
   }
 
-  return _npr.nodalPatchRecovery(*_current_node, elem_ids);
+  // get the value from a userobject (overridden in derived class)
+  return nodalPatchRecovery();
 }
 
 void
-NodalPatchRecoveryAux::blockRestrictElements(
+NodalPatchRecoveryAuxBase::blockRestrictElements(
     std::vector<dof_id_type> & elem_ids,
     const std::vector<dof_id_type> & node_to_elem_pair_elems) const
 {

@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#26053'
+  design = 'ProjectedStatefulMaterialStorageAction.md'
+
+  [monomial_first]
+    type = CSVDiff
+    input = test.i
+    cli_args = 'Outputs/file_base=monomial_first'
+    csvdiff = monomial_first.csv
+    allow_test_objects = true
+    requirement = "The system shall support the storage of old material property states projected "
+                  "onto a first order monomial basis."
+  []
+  [monomial_constant]
+    type = CSVDiff
+    input = test.i
+    cli_args = 'Outputs/file_base=monomial_constant ProjectedStatefulMaterialStorage/all/order=CONSTANT'
+    csvdiff = monomial_constant.csv
+    allow_test_objects = true
+    requirement = "The system shall support the storage of old material property states projected "
+                  "onto a constant monomial basis."
+  []
+  [lagrange_first]
+    type = CSVDiff
+    input = test.i
+    cli_args = 'Outputs/file_base=lagrange_first ProjectedStatefulMaterialStorage/all/family=LAGRANGE'
+    csvdiff = lagrange_first.csv
+    allow_test_objects = true
+    requirement = "The system shall support the storage of old material property states projected "
+                  "onto a first order lagrange basis."
+  []
+[]

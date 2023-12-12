@@ -9,7 +9,7 @@
 
 #include "NodalPatchRecoveryMaterialProperty.h"
 
-registerMooseObject("TensorMechanicsApp", NodalPatchRecoveryMaterialProperty);
+registerMooseObject("MooseApp", NodalPatchRecoveryMaterialProperty);
 
 InputParameters
 NodalPatchRecoveryMaterialProperty::validParams()

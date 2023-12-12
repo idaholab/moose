@@ -57,8 +57,7 @@ public:
   /**
    * Return the count base on the count type supplied in the input file.
    */
-  using Postprocessor::getValue;
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
 
 private:
   /// The type of count to report
@@ -102,7 +101,7 @@ SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters)
 
 template <class T>
 PostprocessorValue
-SetupInterfaceCount<T>::getValue()
+SetupInterfaceCount<T>::getValue() const
 {
   return _counts.at(_count_type);
 }

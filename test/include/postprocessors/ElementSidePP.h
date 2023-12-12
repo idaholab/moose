@@ -19,7 +19,6 @@ public:
   ElementSidePP(const InputParameters & parameters);
 
 protected:
-  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
   virtual Real computeQpIntegral() override;

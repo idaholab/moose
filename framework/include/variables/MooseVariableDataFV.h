@@ -136,6 +136,11 @@ public:
   //////////////////////////////////// Solution getters /////////////////////////////////////
 
   /**
+   * Local solution value
+   */
+  const FieldVariableValue & sln(Moose::SolutionState state) const;
+
+  /**
    * Local time derivative of solution gradient getter
    */
   const FieldVariableGradient & gradSlnDot() const;
@@ -262,6 +267,9 @@ public:
 
   void meshChanged() override;
 
+protected:
+  virtual const MooseVariableFV<OutputType> & var() const override { return _var; }
+
 private:
   void initializeSolnVars();
 
@@ -276,6 +284,9 @@ private:
    * Helper method that tells us whether it's safe to compute _ad_u_dot
    */
   bool safeToComputeADUDot() const;
+
+  /// A const reference to the owning MooseVariableFV object
+  const MooseVariableFV<OutputType> & _var;
 
   const FEType & _fe_type;
 
@@ -390,7 +401,6 @@ private:
   /// Cached warehouse query for FVFluxKernels
   TheWarehouse::QueryCache<> _fv_flux_kernel_query_cache;
 
-  using MooseVariableDataBase<OutputType>::_var;
   using MooseVariableDataBase<OutputType>::_sys;
   using MooseVariableDataBase<OutputType>::_subproblem;
   using MooseVariableDataBase<OutputType>::_need_vector_tag_dof_u;
