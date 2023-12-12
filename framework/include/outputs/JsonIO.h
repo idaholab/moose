@@ -11,6 +11,8 @@
 
 #include "nlohmann/json.h"
 
+#include "libmesh/libmesh_common.h"
+
 #include <memory>
 
 class MooseApp;
