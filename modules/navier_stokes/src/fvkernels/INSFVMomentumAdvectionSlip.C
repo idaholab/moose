@@ -8,7 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMomentumAdvectionSlip.h"
-#include "Function.h"
+#include "NS.h"
+#include "FVUtils.h"
+#include "INSFVRhieChowInterpolator.h"
+#include "SystemBase.h"
+#include "NSFVUtils.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvectionSlip);
 
