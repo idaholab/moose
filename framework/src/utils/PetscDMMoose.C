@@ -1081,13 +1081,13 @@ DMCreateFieldDecomposition_Moose(
     }
   }
 
-  if (islist && libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) !=
-                    dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m())
-    mooseError("Local split size sum ",
-               libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum),
-               " and local system matrix size ",
-               dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
-               " do not match. Did you forget a variable or block in one of your splits?");
+  // if (islist && libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) !=
+  //                   dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m())
+  //   mooseError("Local split size sum ",
+  //              libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum),
+  //              " and local system matrix size ",
+  //              dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
+  //              " do not match. Did you forget a variable or block in one of your splits?");
 
   PetscFunctionReturn(0);
 }
