@@ -40,10 +40,10 @@ protected:
   /// Pitch between fuel pins
   const Real _pin_pitch;
 
-  /// A radial axis in the lattice
-  const Point _x_axis;
   /// Axial axis for the lattice
   const Point _z_axis;
+  /// Axial component for the Z axis
+  const MooseEnum _z_axis_index;
 
   /// Minimal axial coordinate
   const Real _min_z;
