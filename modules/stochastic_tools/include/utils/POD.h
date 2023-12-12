@@ -24,7 +24,6 @@ public:
       const std::string & extra_slepc_options,
       const Parallel::Communicator & comm);
   /**
-   *
    * @param vname Variable name to extract snapshot data
    * @param left_basis_functions Vector for left basis functions
    * @param right_basis_functions Vector for right basis functions
