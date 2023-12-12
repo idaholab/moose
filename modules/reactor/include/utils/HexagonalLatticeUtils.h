@@ -440,7 +440,7 @@ public:
 
   /**
    * Get the side length of a hexagon with given flat-to-flat distance (pitch)
-   * @param[in] pitch hexgaon flat-to-flat distance, or pitch
+   * @param[in] pitch hexagon flat-to-flat distance, or pitch
    * @return side length of hexagon, to give 1/6 of the hexagon's perimeter
    */
   Real hexagonSide(const Real pitch) const;
@@ -567,11 +567,24 @@ public:
   unsigned int pinIndex(const Point & point) const;
 
   /**
+   * Get the closest pin index given a point outside the lattice
+   * @param[in] point point
+   * @return pin index
+   */
+  unsigned int closestPinIndex(const Point & point) const;
+
+  /**
    * Get the channel index given a point
    * @param[in] point point
    * @return channel index
    */
   unsigned int channelIndex(const Point & point) const;
+
+  /**
+   * Whether the point is inside the lattice
+   * @param point point being examined
+   */
+  bool insideLattice(const Point & point) const;
 
   std::pair<int, int> sortedGap(const int & id0, const int & id1) const;
 

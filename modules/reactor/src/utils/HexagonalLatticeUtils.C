@@ -287,8 +287,8 @@ HexagonalLatticeUtils::computePinAndDuctCoordinates()
         d = 0;
 
       Point center = geom_utils::projectPoint(corner_shiftx[side] * _pin_pitch * (i - 1),
-                                                corner_shifty[side] * _pin_pitch * (i - 1),
-                                                _axis);
+                                              corner_shifty[side] * _pin_pitch * (i - 1),
+                                              _axis);
 
       // additional shift for the edge sides
       if (d != 0)
@@ -312,7 +312,7 @@ HexagonalLatticeUtils::computePinAndDuctCoordinates()
     {
       Point translation =
           geom_utils::projectPoint(_translation_x[i] * side, _translation_y[i] * side, _axis);
-      ;
+
       _pin_centered_corner_coordinates[pin].push_back(translation + _pin_centers[pin]);
     }
   }
@@ -623,6 +623,33 @@ HexagonalLatticeUtils::pinIndex(const Point & point) const
 }
 
 unsigned int
+HexagonalLatticeUtils::closestPinIndex(const Point & point) const
+{
+  // If within the lattice, use the pin index
+  if (insideLattice(point))
+    return pinIndex(point);
+
+  auto min_distance = std::numeric_limits<Real>::max();
+  unsigned int index_min = 0;
+
+  for (unsigned int i = firstPinInRing(_n_rings); i < _n_pins; ++i)
+  {
+    const auto & center = _pin_centers[i];
+    Real dx = center(_ix) - point(_ix);
+    Real dy = center(_iy) - point(_iy);
+    Real distance_from_pin = std::sqrt(dx * dx + dy * dy);
+
+    if (distance_from_pin < min_distance)
+    {
+      min_distance = distance_from_pin;
+      index_min = i;
+    }
+  }
+
+  return index_min;
+}
+
+unsigned int
 HexagonalLatticeUtils::channelIndex(const Point & point) const
 {
   auto channel = channelType(point);
@@ -674,6 +701,20 @@ HexagonalLatticeUtils::channelIndex(const Point & point) const
       "increasing the bundle pitch.");
 }
 
+bool
+HexagonalLatticeUtils::insideLattice(const Point & point) const
+{
+  std::vector<Point> lattice_corners(6);
+  auto side = hexagonSide(_bundle_pitch);
+  for (unsigned int i = 0; i < NUM_SIDES; ++i)
+  {
+    Point translation =
+        geom_utils::projectPoint(_translation_x[i] * side, _translation_y[i] * side, _axis);
+    lattice_corners[i] = translation;
+  }
+  return geom_utils::pointInPolygon(point, lattice_corners, _axis);
+}
+
 void
 HexagonalLatticeUtils::computeGapIndices()
 {
@@ -710,7 +751,8 @@ HexagonalLatticeUtils::computeGapIndices()
   _gap_indices.back() = {totalPins(_n_rings - 1), -int(NUM_SIDES)};
   _n_gaps = _gap_indices.size();
 
-  // for each channel, determine which gaps are on that channel to find the local-to-global indexing
+  // for each channel, determine which gaps are on that channel to find the local-to-global
+  // indexing
   for (const auto & pins : _interior_channel_pin_indices)
   {
     std::pair<int, int> gap0 = {std::min(pins[0], pins[1]), std::max(pins[0], pins[1])};
@@ -852,6 +894,7 @@ HexagonalLatticeUtils::gapIndexAndDistance(const Point & point,
 unsigned int
 HexagonalLatticeUtils::firstPinInRing(const unsigned int & ring) const
 {
+  mooseAssert(ring > 0, "Ring indexing starts at 1");
   if (ring == 1)
     return 0;
   else
@@ -861,6 +904,7 @@ HexagonalLatticeUtils::firstPinInRing(const unsigned int & ring) const
 unsigned int
 HexagonalLatticeUtils::lastPinInRing(const unsigned int & ring) const
 {
+  mooseAssert(ring > 0, "Ring indexing starts at 1");
   if (ring == 1)
     return 0;
   else
