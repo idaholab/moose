@@ -403,10 +403,11 @@ PenaltySimpleCohesiveZoneModel::computeFandR(const Node * const node)
             "The deformation gradient on the secondary surface is not finite in "
             "PenaltySimpleCohesiveZoneModel. MOOSE needs to cut the time step size.");
 
-  const ADFactorizedRankTwoTensor C =
-      _dof_to_interface_F[node].transpose() * _dof_to_interface_F[node];
+  const auto dof_to_interface_F_node = libmesh_map_find(_dof_to_interface_F, node);
+
+  const ADFactorizedRankTwoTensor C = dof_to_interface_F_node.transpose() * dof_to_interface_F_node;
   const auto Uinv = MathUtils::sqrt(C).inverse().get();
-  _dof_to_interface_R[node] = _dof_to_interface_F[node] * Uinv;
+  _dof_to_interface_R[node] = dof_to_interface_F_node * Uinv;
 }
 
 void
@@ -466,6 +467,7 @@ PenaltySimpleCohesiveZoneModel::computeCriticalDisplacementJump(const Node * con
 {
   const auto interface_displacement_jump =
       libmesh_map_find(_dof_to_interface_displacement_jump, node);
+  const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
   const auto delta_normal_knot =
       normalizeRealQuantity(_dof_to_normal_strength, node) / _penalty_stiffness_czm;
@@ -476,14 +478,11 @@ PenaltySimpleCohesiveZoneModel::computeCriticalDisplacementJump(const Node * con
 
   if (std::abs(interface_displacement_jump(0)) > _epsilon_tolerance)
   {
-    const auto delta_mixed =
-        std::sqrt(delta_shear_knot * delta_shear_knot +
-                  Utility::pow<2>(_dof_to_mode_mixity_ratio[node] * delta_normal_knot));
+    const auto delta_mixed = std::sqrt(delta_shear_knot * delta_shear_knot +
+                                       Utility::pow<2>(mixity_ratio * delta_normal_knot));
 
-    _dof_to_delta_initial[node] =
-        delta_normal_knot * delta_shear_knot *
-        std::sqrt(1.0 + _dof_to_mode_mixity_ratio[node] * _dof_to_mode_mixity_ratio[node]) /
-        delta_mixed;
+    _dof_to_delta_initial[node] = delta_normal_knot * delta_shear_knot *
+                                  std::sqrt(1.0 + mixity_ratio * mixity_ratio) / delta_mixed;
   }
 }
 
@@ -492,6 +491,8 @@ PenaltySimpleCohesiveZoneModel::computeFinalDisplacementJump(const Node * const 
 {
   const auto interface_displacement_jump =
       libmesh_map_find(_dof_to_interface_displacement_jump, node);
+
+  const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
   const auto normalized_GI_c = normalizeRealQuantity(_dof_to_GI_c, node);
   const auto normalized_GII_c = normalizeRealQuantity(_dof_to_GII_c, node);
@@ -507,22 +508,18 @@ PenaltySimpleCohesiveZoneModel::computeFinalDisplacementJump(const Node * const 
           2.0 / _penalty_stiffness_czm / libmesh_map_find(_dof_to_delta_initial, node) *
           (normalized_GI_c +
            (normalized_GII_c - normalized_GI_c) *
-               std::pow(libmesh_map_find(_dof_to_mode_mixity_ratio, node) *
-                            libmesh_map_find(_dof_to_mode_mixity_ratio, node) /
-                            (1 + libmesh_map_find(_dof_to_mode_mixity_ratio, node) *
-                                     libmesh_map_find(_dof_to_mode_mixity_ratio, node)),
+               std::pow(mixity_ratio * mixity_ratio / (1 + mixity_ratio * mixity_ratio),
                         _power_law_parameter));
     }
     else if (_mix_mode_criterion == MixedModeCriterion::POWER_LAW)
     {
-      const auto Gc_mixed = std::pow(1.0 / normalized_GI_c, _power_law_parameter) +
-                            std::pow(_dof_to_mode_mixity_ratio[node] *
-                                         _dof_to_mode_mixity_ratio[node] / normalized_GII_c,
-                                     _power_law_parameter);
-      _dof_to_delta_final[node] =
-          (2.0 + 2.0 * _dof_to_mode_mixity_ratio[node] * _dof_to_mode_mixity_ratio[node]) /
-          _penalty_stiffness_czm / libmesh_map_find(_dof_to_delta_initial, node) *
-          std::pow(Gc_mixed, -1.0 / _power_law_parameter);
+      const auto Gc_mixed =
+          std::pow(1.0 / normalized_GI_c, _power_law_parameter) +
+          std::pow(mixity_ratio * mixity_ratio / normalized_GII_c, _power_law_parameter);
+      _dof_to_delta_final[node] = (2.0 + 2.0 * mixity_ratio * mixity_ratio) /
+                                  _penalty_stiffness_czm /
+                                  libmesh_map_find(_dof_to_delta_initial, node) *
+                                  std::pow(Gc_mixed, -1.0 / _power_law_parameter);
     }
   }
 }
@@ -545,14 +542,17 @@ PenaltySimpleCohesiveZoneModel::computeEffectiveDisplacementJump(const Node * co
 void
 PenaltySimpleCohesiveZoneModel::computeDamage(const Node * const node)
 {
-  if (_dof_to_delta_medium[node] < _dof_to_delta_initial[node])
+  const auto delta_medium = libmesh_map_find(_dof_to_delta_medium, node);
+  const auto delta_initial = libmesh_map_find(_dof_to_delta_initial, node);
+  const auto delta_final = libmesh_map_find(_dof_to_delta_final, node);
+
+  if (delta_medium < delta_initial)
     _dof_to_damage[node].first = 0;
-  else if (_dof_to_delta_medium[node] > _dof_to_delta_final[node])
+  else if (delta_medium > delta_final)
     _dof_to_damage[node].first = 1.0;
   else
     _dof_to_damage[node].first =
-        _dof_to_delta_final[node] * (_dof_to_delta_medium[node] - _dof_to_delta_initial[node]) /
-        _dof_to_delta_medium[node] / (_dof_to_delta_final[node] - _dof_to_delta_initial[node]);
+        delta_final * (delta_medium - delta_initial) / delta_medium / (delta_final - delta_initial);
 
   if (_dof_to_damage[node].first < _dof_to_damage[node].second)
     // Irreversibility
