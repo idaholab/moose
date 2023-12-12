@@ -46,13 +46,13 @@ Component1DJunction::setupMesh()
     {
       const Component1D & comp = getComponentByName<Component1D>(comp_name);
       for (auto && conn : comp.getConnections(connection._end_type))
-        // add connection's node to nodeset of all nodes connected to this zero-D component
-        boundary_info.add_node(conn._node, boundary_id);
+        // add connection's side to sideset of all sides connected to this zero-D component
+        boundary_info.add_side(conn._elem, conn._side, boundary_id);
     }
   }
 
-  // name the nodeset/sideset corresponding to the nodes of all connected component ends
-  boundary_info.nodeset_name(boundary_id) = name();
+  // name the sideset corresponding to the sides of all connected component ends
+  boundary_info.sideset_name(boundary_id) = name();
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = mesh().nodeToElemMap();
   for (auto & nid : _nodes)
