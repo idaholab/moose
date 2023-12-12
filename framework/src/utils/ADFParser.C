@@ -28,21 +28,23 @@ ADFParser::JITCompile()
 {
 #if LIBMESH_HAVE_FPARSER_JIT
   std::string includes;
+  const auto type_hash = typeid(ADReal).hash_code();
   bool result;
 
   const auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
   if (include_path_env)
-    result = JITCompileHelper("ADReal", "", "#include \"" + std::string(include_path_env) + "\"\n");
+    result = JITCompileHelper(
+        "ADReal", "", "#include \"" + std::string(include_path_env) + "\"\n", type_hash);
   else
   {
     // check if we can find an installed version of the monolithic include
     const auto include_path =
         MooseUtils::pathjoin(Moose::getExecutablePath(), "../include/moose/ADRealMonolithic.h");
     if (MooseUtils::checkFileReadable(include_path, false, false, false))
-      result = JITCompileHelper("ADReal", "", "#include \"" + include_path + "\"\n");
+      result = JITCompileHelper("ADReal", "", "#include \"" + include_path + "\"\n", type_hash);
     else
       // otherwise use the compiled in location from the source tree
-      result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+      result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n", type_hash);
   }
 
   if (!result)
