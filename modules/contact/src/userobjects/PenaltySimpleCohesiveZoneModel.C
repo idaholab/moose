@@ -691,7 +691,8 @@ PenaltySimpleCohesiveZoneModel::reinit()
       tangential_traction.setZero();
     }
 
-    applyTractionSeparationLaw(node);
+    if (!_use_bilinear_mixed_mode_traction)
+      applyTractionSeparationLaw(node);
 
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.

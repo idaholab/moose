@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#26283'
+  design = 'UserObjects/PenaltySimpleCohesiveZoneModel.md'
+  [only_czm]
+    type = Exodiff
+    input = bilinear_mixed_mortar_only_czm.i
+    exodiff = bilinear_mixed_mortar_only_czm_out.e
+    requirement = 'The system shall be able to appy cohesive zone modeling with bilinear mixed mode '
+                  'traction to a simple model.'
+    map = false
+
+  []
+  [czm_contact]
+    type = Exodiff
+    input = bilinear_mixed_mortar_only_czm.i
+    exodiff = bilinear_mixed_mortar_only_czm_contact_out.e
+    requirement = 'The system shall be able to appy cohesive zone modeling with bilinear mixed mode '
+                  'traction and mechanical contact to a simple model.'
+    cli_args = "UserObjects/czm_uo/penalty=1e6 Outputs/file_base=bilinear_mixed_mortar_only_czm_contact_out"
+    map = false
+  []
+[]

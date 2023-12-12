@@ -197,7 +197,7 @@
 []
 
 [UserObjects]
-  [friction_uo]
+  [czm_uo]
     type = PenaltySimpleCohesiveZoneModel
     primary_boundary = 101
     secondary_boundary = 'top_base'
@@ -210,7 +210,7 @@
     disp_y = disp_y
     friction_coefficient = 0.1 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 1e6
+    penalty = 0e6
     czm_normal_stiffness = 1e4
     penalty_friction = 1e4
     czm_tangential_stiffness = 1e5
@@ -243,7 +243,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = friction_uo
+    weighted_gap_uo = czm_uo
   []
   [y]
     type = NormalMortarMechanicalContact
@@ -255,7 +255,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = friction_uo
+    weighted_gap_uo = czm_uo
   []
   [t_x]
     type = TangentialMortarMechanicalContact
@@ -267,7 +267,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = friction_uo
+    weighted_velocities_uo = czm_uo
   []
   [t_y]
     type = TangentialMortarMechanicalContact
@@ -279,7 +279,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = friction_uo
+    weighted_velocities_uo = czm_uo
   []
   [c_x]
     type = MortarGenericTraction
@@ -291,7 +291,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    cohesive_zone_uo = friction_uo
+    cohesive_zone_uo = czm_uo
   []
   [c_y]
     type = MortarGenericTraction
@@ -303,6 +303,6 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    cohesive_zone_uo = friction_uo
+    cohesive_zone_uo = czm_uo
   []
 []
