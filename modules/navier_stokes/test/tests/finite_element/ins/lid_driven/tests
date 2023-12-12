@@ -1,6 +1,6 @@
 [Tests]
   design = 'modules/navier_stokes/index.md'
-  [./lid_driven]
+  [lid_driven]
     type = 'Exodiff'
     input = 'lid_driven.i'
     exodiff = 'lid_driven_out.e'
@@ -8,8 +8,8 @@
     issues = '#000'
     requirement = 'We shall be able to solve a canonical lid-driven problem without stabilization, using mixed order \
 finite elements for velocity and pressure.'
-  [../]
-  [./lid_driven_fsp]
+  []
+  [lid_driven_fsp]
     type = 'Exodiff'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
@@ -18,16 +18,16 @@ finite elements for velocity and pressure.'
     absent_out = 'iterations 14'
     exodiff = 'fsp_transient_low_Re.e'
     recover = false
-  [../]
-  [./lid_driven_fsp_picard_short]
+  []
+  [lid_driven_fsp_picard_short]
     type = 'RunApp'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
     requirement = 'LSC preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500.'
     cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Executioner/num_steps=3 Outputs/active=''"
     absent_out = '4 iterations'
-  [../]
-  [./lid_driven_fsp_picard_long]
+  []
+  [lid_driven_fsp_picard_long]
     type = 'Exodiff'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
@@ -38,15 +38,15 @@ finite elements for velocity and pressure.'
     recover = false
     heavy = true
     valgrind = none
-  [../]
-  [./lid_driven_md]
+  []
+  [lid_driven_md]
     type = 'Exodiff'
     input = 'lid_driven_md.i'
     exodiff = 'lid_driven_md_out.e'
     custom_cmp = 'lid_driven.cmp'
     issues = '#23121'
     requirement = 'The system shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
-  [../]
+  []
   [lid_driven_fs]
     type = 'Exodiff'
     input = 'lid_driven_fs.i'
@@ -55,7 +55,7 @@ finite elements for velocity and pressure.'
     requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves.'
     cli_args = "n=20 BCs/inactive='' Outputs/exodus=true"
   []
-  [./ad_lid_driven]
+  [ad_lid_driven]
     type = 'Exodiff'
     input = 'ad_lid_driven.i'
     exodiff = 'lid_driven_out.e'
@@ -66,16 +66,16 @@ finite elements for velocity and pressure.'
     issues = '#13025'
     requirement = 'We shall be able to reproduce the results from the hand-coded lid-driven simulation using automatic differentiation objects.'
     recover = false # Same output as lid_driven
-  [../]
-  [./ad_lid_driven_mean_zero_pressure]
+  []
+  [ad_lid_driven_mean_zero_pressure]
     type = 'Exodiff'
     input = 'ad_lid_driven_mean_zero_pressure.i'
     exodiff = 'ad_lid_driven_mean_zero_pressure_out.e'
     method = 'OPT'
     issues = '#15549'
     requirement = 'We shall be able to run lid-dirven simulation using a global mean-zero pressure constraint approach.'
-  [../]
-  [./ad_lid_driven_jacobian]
+  []
+  [ad_lid_driven_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_lid_driven.i'
     cli_args = 'Outputs/exodus=false Mesh/gen/nx=3 Mesh/gen/ny=3'
@@ -83,16 +83,16 @@ finite elements for velocity and pressure.'
     difference_tol = 1e-7
     issues = '#13025'
     requirement = 'The Jacobian for the mixed-order INS problem shall be perfect when provided through automatic differentiation.'
-  [../]
-  [./lid_driven_stabilized]
+  []
+  [lid_driven_stabilized]
     type = 'Exodiff'
     input = 'lid_driven_stabilized.i'
     exodiff = 'lid_driven_stabilized_out.e'
     custom_cmp = 'lid_driven_stabilized.cmp'
     issues = '#9687'
     requirement = 'We shall be able to solve the lid-driven problem using equal order shape functions with pressure-stabilized petrov-galerkin stabilization. We shall also demonstrate SUPG stabilization.'
-  [../]
-  [./ad_lid_driven_stabilized]
+  []
+  [ad_lid_driven_stabilized]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -102,8 +102,8 @@ finite elements for velocity and pressure.'
     requirement = 'We shall be able to reproduce the hand-coded stabilized results with automatic differentiation objects.'
     recover = false # Same output as lid_driven_stabilized
     valgrind = HEAVY
-  [../]
-  [./ad_lid_driven_stabilized_jacobian]
+  []
+  [ad_lid_driven_stabilized_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_lid_driven_stabilized.i'
     run_sim = True
@@ -111,8 +111,8 @@ finite elements for velocity and pressure.'
     difference_tol = 1e-7
     issues = '#13025'
     requirement = 'The Jacobian for the automatic differentiation stabilized lid-driven problem shall be perfect.'
-  [../]
-  [./still_unstable]
+  []
+  [still_unstable]
     type = 'RunApp'
     input = 'lid_driven_stabilized.i'
     expect_out = 'Aborting as solve did not converge'
@@ -120,16 +120,16 @@ finite elements for velocity and pressure.'
     method = 'OPT'
     issues = '#9687'
     requirement = 'Simulation with equal-order shape functions without pressure stabilization shall be unstable.'
-  [../]
-  [./lid_driven_chorin]
+  []
+  [lid_driven_chorin]
     type = 'Exodiff'
     input = 'lid_driven_chorin.i'
     exodiff = 'lid_driven_chorin_out.e'
     issues = '#000'
     requirement = 'We shall be able to solve the INS equations using the classical Chorin splitting algorithm.'
-  [../]
+  []
 
-  [./lid_driven_action]
+  [lid_driven_action]
     type = 'Exodiff'
     input = 'lid_driven_action.i'
     exodiff = 'lid_driven_out.e'
@@ -138,8 +138,8 @@ finite elements for velocity and pressure.'
     issues = '#15159'
     requirement = 'The system shall be able to reproduce unstabilized incompressible Navier-Stokes results with hand-coded Jacobian using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven
-  [../]
-  [./lid_driven_stabilized_action]
+  []
+  [lid_driven_stabilized_action]
     type = 'Exodiff'
     input = 'lid_driven_stabilized_action.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -148,8 +148,8 @@ finite elements for velocity and pressure.'
     issues = '#15159'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with hand-coded Jacobian using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven_stabilized
-  [../]
-  [./ad_lid_driven_action]
+  []
+  [ad_lid_driven_action]
     type = 'Exodiff'
     input = 'ad_lid_driven_action.i'
     exodiff = 'lid_driven_out.e'
@@ -159,8 +159,8 @@ finite elements for velocity and pressure.'
     issues = '#15159'
     requirement = 'The system shall be able to reproduce unstabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven
-  [../]
-  [./ad_lid_driven_stabilized_action]
+  []
+  [ad_lid_driven_stabilized_action]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized_action.i'
     exodiff = 'lid_driven_stabilized_out.e'
@@ -170,7 +170,7 @@ finite elements for velocity and pressure.'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven_stabilized
     valgrind = HEAVY
-  [../]
+  []
   [ad_stabilized_energy_steady]
     type = 'Exodiff'
     input = 'ad_lid_driven_stabilized_with_temp.i'
