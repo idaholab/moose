@@ -27,12 +27,6 @@ mu=2e-3
     ny = ${n}
     elem_type = QUAD9
   []
-  [corner_node]
-    type = ExtraNodesetGenerator
-    new_boundary = 'pinned_node'
-    nodes = '0'
-    input = gen
-  []
 []
 
 [Variables]
@@ -40,12 +34,10 @@ mu=2e-3
     order = SECOND
     family = LAGRANGE
   []
-
   [vel_y]
     order = SECOND
     family = LAGRANGE
   []
-
   [p]
     order = FIRST
     family = LAGRANGE
@@ -106,27 +98,18 @@ mu=2e-3
     boundary = 'bottom right left'
     value = 0.0
   []
-
   [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
   []
-
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
   []
-
-  # [pressure_pin]
-  #   type = DirichletBC
-  #   variable = p
-  #   boundary = 'pinned_node'
-  #   value = 0
-  # []
 []
 
 [Materials]
@@ -149,7 +132,6 @@ mu=2e-3
 []
 
 [Preconditioning]
-  active = 'FSP'
   [FSP]
     type = FSP
     topsplit = 'by_diri_others'
@@ -169,7 +151,7 @@ mu=2e-3
         splitting = 'u p'
         splitting_type  = schur
         petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_rtol -ksp_type -ksp_atol'
-        petsc_options_value = 'full                            self                             300                1e-5      fgmres 1e-9'
+        petsc_options_value = 'full                            self                              300                1e-5      fgmres    1e-9'
         unside_by_var_boundary_name = 'left top right bottom left top right bottom'
         unside_by_var_var_name = 'vel_x vel_x vel_x vel_x vel_y vel_y vel_y vel_y'
       []
@@ -177,22 +159,32 @@ mu=2e-3
           vars = 'vel_x vel_y'
           unside_by_var_boundary_name = 'left top right bottom left top right bottom'
           unside_by_var_var_name = 'vel_x vel_x vel_x vel_x vel_y vel_y vel_y vel_y'
-          petsc_options = '-ksp_converged_reason'
-          petsc_options_iname = '-pc_type -ksp_pc_side -ksp_type -ksp_rtol -pc_hypre_type -pc_hypre_boomeramg_grid_sweeps_up -pc_hypre_boomeramg_relax_type_all -pc_hypre_boomeramg_grid_sweeps_down -pc_hypre_boomeramg_relax_weight_all'
-          petsc_options_value = 'hypre    right        gmres     1e-5      boomeramg      3                                  Jacobi                         2                                        0.5'
+          # petsc_options = '-ksp_converged_reason'
+          petsc_options_iname = '-pc_type -ksp_pc_side -ksp_type -ksp_rtol -pc_hypre_type -ksp_gmres_restart'
+          petsc_options_value = 'hypre    right        gmres     1e-2      boomeramg      300'
         []
         [p]
           vars = 'p'
-          petsc_options = '-pc_lsc_scale_diag -ksp_converged_reason'
+          petsc_options = '-pc_lsc_scale_diag -ksp_converged_reason'# -lsc_ksp_converged_reason -lsc_ksp_monitor_true_residual
           petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -pc_type  -lsc_pc_type -lsc_pc_hypre_type -lsc_ksp_type -lsc_ksp_rtol -lsc_ksp_pc_side -lsc_ksp_gmres_restart'
-          petsc_options_value = 'fgmres     300                1e-5     lsc      right        lsc       hypre        boomeramg          gmres         1e-5          right            300'
+          petsc_options_value = 'fgmres    300                1e-2      lsc      right        lsc       hypre        boomeramg          gmres         1e-1          right            300'
         []
   []
-  [SMP]
-    type = SMP
-    full = true
-    petsc_options_iname = '-pc_type -pc_factor_shift_type'
-    petsc_options_value = 'lu       NONZERO'
+[]
+
+[Postprocessors]
+  [pavg]
+    type = ElementAverageValue
+    variable = p
+  []
+[]
+
+[UserObjects]
+  [set_pressure]
+    type = NSFVPressurePin
+    pin_type = 'average'
+    variable = p
+    pressure_average = 'pavg'
   []
 []
 
@@ -204,6 +196,7 @@ mu=2e-3
   line_search = 'none'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
+  abort_on_solve_fail = true
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 6
@@ -213,6 +206,9 @@ mu=2e-3
 []
 
 [Outputs]
-  exodus = true
-  checkpoint = true
+  [exo]
+    type = Exodus
+    execute_on = 'final'
+    hide = 'pavg'
+  []
 []

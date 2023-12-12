@@ -21,12 +21,6 @@ n=2789
     ny = ${n}
     elem_type = QUAD4
   []
-  [corner_node]
-    type = ExtraNodesetGenerator
-    new_boundary = 'pinned_node'
-    nodes = '0'
-    input = gen
-  []
   second_order = true
   parallel_type = distributed
 []
@@ -86,33 +80,23 @@ n=2789
 []
 
 [BCs]
-  inactive = 'pressure_pin'
   [x_no_slip]
     type = DirichletBC
     variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
   []
-
   [lid]
     type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
     function = 'lid_function'
   []
-
   [y_no_slip]
     type = DirichletBC
     variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
-  []
-
-  [pressure_pin]
-    type = DirichletBC
-    variable = p
-    boundary = 'pinned_node'
-    value = 0
   []
 []
 
@@ -142,7 +126,6 @@ n=2789
 []
 
 [Preconditioning]
-  active = FSP
   [FSP]
     type = FSP
     topsplit = 'up'
@@ -173,6 +156,5 @@ n=2789
 []
 
 [Outputs]
-  exodus = false
-  perf_graph = true
+  exodus = true
 []
