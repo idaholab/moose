@@ -20,13 +20,13 @@
 class POD
 {
 public:
-  POD(const ParallelSolutionStorage * const _parallel_storage,
-      const std::string & _extra_slepc_options,
-      const Parallel::Communicator & communicator);
+  POD(const ParallelSolutionStorage * const parallel_storage,
+      const std::string & extra_slepc_options,
+      const Parallel::Communicator & comm);
   /**
    *
    * @param vname Variable name to extract snapshot data
-   * @param left_basis_functions Vector for left basis function
+   * @param left_basis_functions Vector for left basis functions
    * @param right_basis_functions Vector for right basis functions
    * @param singular_values Vector for singular values
    * @param num_modes Max number of modes to compute
@@ -36,8 +36,8 @@ public:
                   std::vector<DenseVector<Real>> & left_basis_functions,
                   std::vector<DenseVector<Real>> & right_basis_functions,
                   std::vector<Real> & singular_values,
-                  const dof_id_type & num_modes,
-                  const Real & energy) const;
+                  const dof_id_type num_modes,
+                  const Real energy) const;
 
 private:
   /**
@@ -50,7 +50,7 @@ private:
    */
   dof_id_type determineNumberOfModes(const std::vector<Real> & singular_values,
                                      const dof_id_type num_modes_compute,
-                                     const Real & energy) const;
+                                     const Real energy) const;
 
   const ParallelSolutionStorage * const _parallel_storage;
   const std::string & _extra_slepc_options;

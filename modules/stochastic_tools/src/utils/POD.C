@@ -24,8 +24,8 @@ POD::computePOD(const VariableName & vname,
                 std::vector<DenseVector<Real>> & left_basis_functions,
                 std::vector<DenseVector<Real>> & right_basis_functions,
                 std::vector<Real> & singular_values,
-                const dof_id_type & num_modes,
-                const Real & energy) const
+                const dof_id_type num_modes,
+                const Real energy) const
 {
   // Define the petsc matrix which needs and SVD, we will populate it using the snapshots
   Mat mat;
@@ -160,7 +160,7 @@ POD::computePOD(const VariableName & vname,
 dof_id_type
 POD::determineNumberOfModes(const std::vector<Real> & singular_values,
                             const dof_id_type num_modes_compute,
-                            const Real & energy) const
+                            const Real energy) const
 {
   dof_id_type num_modes = 0;
   // We either use the number of modes defined by the user or the maximum number of converged
