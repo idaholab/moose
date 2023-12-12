@@ -65,10 +65,10 @@ HexagonalLatticeUtils::HexagonalLatticeUtils(const Real & bundle_inner_flat_to_f
                " cannot fit between pin-pin space of " +
                std::to_string(_pin_pitch - _pin_diameter) + "!");
 
-  _translation_x = {0.0, -SIN60, -SIN60, 0.0, SIN60, SIN60};
-  _translation_y = {1.0, COS60, -COS60, -1.0, -COS60, COS60};
+  _unit_translation_x = {0.0, -SIN60, -SIN60, 0.0, SIN60, SIN60};
+  _unit_translation_y = {1.0, COS60, -COS60, -1.0, -COS60, COS60};
 
-  // compute number of each pin and channe and channell type (interior, edge channel)
+  // compute number of each pin and channel and channel type (interior, edge channel)
   computePinAndChannelTypes();
 
   _corner_edge_length = (_bundle_side_length - _n_edge_channels / NUM_SIDES * _pin_pitch) / 2.0;
@@ -310,8 +310,8 @@ HexagonalLatticeUtils::computePinAndDuctCoordinates()
   {
     for (unsigned int i = 0; i < NUM_SIDES; ++i)
     {
-      Point translation =
-          geom_utils::projectPoint(_translation_x[i] * side, _translation_y[i] * side, _axis);
+      Point translation = geom_utils::projectPoint(
+          _unit_translation_x[i] * side, _unit_translation_y[i] * side, _axis);
 
       _pin_centered_corner_coordinates[pin].push_back(translation + _pin_centers[pin]);
     }
@@ -559,8 +559,10 @@ HexagonalLatticeUtils::edgeChannelCornerCoordinates(const unsigned int & edge_ch
   corners.push_back(pin2);
 
   unsigned int sector = edge_channel_id / (_n_rings - 1);
-  corners.push_back(pin2 + Point(d * _translation_x[sector], d * _translation_y[sector], 0.0));
-  corners.push_back(pin1 + Point(d * _translation_x[sector], d * _translation_y[sector], 0.0));
+  corners.push_back(pin2 +
+                    Point(d * _unit_translation_x[sector], d * _unit_translation_y[sector], 0.0));
+  corners.push_back(pin1 +
+                    Point(d * _unit_translation_x[sector], d * _unit_translation_y[sector], 0.0));
 
   return corners;
 }
@@ -579,9 +581,11 @@ HexagonalLatticeUtils::cornerChannelCornerCoordinates(const unsigned int & corne
   unsigned int side1 = corner_channel_id == 0 ? NUM_SIDES - 1 : corner_channel_id - 1;
   unsigned int side2 = corner_channel_id;
 
-  corners.push_back(pin + Point(d * _translation_x[side1], d * _translation_y[side1], 0.0));
+  corners.push_back(pin +
+                    Point(d * _unit_translation_x[side1], d * _unit_translation_y[side1], 0.0));
   corners.push_back(_duct_corners[corner_channel_id]);
-  corners.push_back(pin + Point(d * _translation_x[side2], d * _translation_y[side2], 0.0));
+  corners.push_back(pin +
+                    Point(d * _unit_translation_x[side2], d * _unit_translation_y[side2], 0.0));
 
   return corners;
 }
@@ -608,13 +612,16 @@ HexagonalLatticeUtils::pinIndex(const Point & point) const
     Real dx = center(_ix) - point(_ix);
     Real dy = center(_iy) - point(_iy);
     Real distance_from_pin = std::sqrt(dx * dx + dy * dy);
+    auto corners = _pin_centered_corner_coordinates[i];
+
+    std::cout << point << " " << center << " " << distance_from_pin << " " << side << " "
+              << geom_utils::pointInPolygon(point, corners, _axis) << std::endl;
 
     // if we're outside the circumference of the hexagon, we're certain not to
     // be within the hexagon for this pin
     if (distance_from_pin > side)
       continue;
 
-    auto corners = _pin_centered_corner_coordinates[i];
     if (geom_utils::pointInPolygon(point, corners, _axis))
       return i;
   }
@@ -708,8 +715,8 @@ HexagonalLatticeUtils::insideLattice(const Point & point) const
   auto side = hexagonSide(_bundle_pitch);
   for (unsigned int i = 0; i < NUM_SIDES; ++i)
   {
-    Point translation =
-        geom_utils::projectPoint(_translation_x[i] * side, _translation_y[i] * side, _axis);
+    Point translation = geom_utils::projectPoint(
+        _unit_translation_x[i] * side, _unit_translation_y[i] * side, _axis);
     lattice_corners[i] = translation;
   }
   return geom_utils::pointInPolygon(point, lattice_corners, _axis);
@@ -819,7 +826,8 @@ HexagonalLatticeUtils::computeGapIndices()
     int side = std::abs(pins.second) - 1;
 
     const auto & pt1 = _pin_centers[pins.first];
-    const Point pt2 = pt1 + Point(d * _translation_x[side], d * _translation_y[side], 0.0);
+    const Point pt2 =
+        pt1 + Point(d * _unit_translation_x[side], d * _unit_translation_y[side], 0.0);
     _gap_centers.push_back(0.5 * (pt2 + pt1));
 
     _gap_points[i] = {pt1, pt2};

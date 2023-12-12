@@ -37,6 +37,12 @@ enum ChannelTypeEnum
 /**
  * Class providing various utility functions related to triangular lattices of pins
  * enclosed in a hexagonal duct.
+ * Notes:
+ * - the lattice is centered around an axis (X, Y, Z) going through the origin
+ *   If calling the utility for a lattice that is not centered around the origin
+ *   Then the point arguments must first be translated: p -= lattice_center
+ * - You should never have to rotate the point to place it in the lattice frame
+ *   before calling a routine with a point argument.
  */
 class HexagonalLatticeUtils
 {
@@ -51,7 +57,7 @@ public:
 
   /**
    * Distance from a point and a gap
-   * @param[in] pt point
+   * @param[in] pt point, must already be translated to lattice frame
    * @param[in] gap_index gap index
    * @ return distance from gap
    */
@@ -59,14 +65,14 @@ public:
 
   /**
    * Get the index for the gap closest to the point
-   * @param[in] point point
+   * @param[in] point point, must already be translated to lattice frame
    * @return index of closest gap
    */
   unsigned int gapIndex(const Point & point) const;
 
   /**
    * Get the gap index and distance to that gap for a given point
-   * @param[in] point point
+   * @param[in] point point, must already be translated to lattice frame
    * @param[out] index index of closest gap
    * @param[out] distance distance to closest gap
    */
@@ -137,7 +143,7 @@ public:
   /**
    * Get the number of interior channels between ring and ring - 1 (0 indexing)
    * @param[in] ring ring number (relative to 0 indexing)
-   * @reutrn number of interior channels
+   * @return number of interior channels
    */
   unsigned int interiorChannels(const unsigned int ring);
 
@@ -238,7 +244,7 @@ public:
   const unsigned int & nCornerPins() const { return _n_corner_pins; }
 
   /**
-   * Get the total number of pins
+   * Get the total number of pins for the lattice
    * @return total number of pins
    */
   const unsigned int & nPins() const { return _n_pins; }
@@ -392,21 +398,21 @@ public:
 
   /**
    * Get the minimum distance from a point to the duct inner surface
-   * @param[in] p point
+   * @param[in] p point, must already be translated to lattice frame
    * @return distance to duct
    */
   Real minDuctWallDistance(const Point & p) const;
 
   /**
    * Get the minimum distance from a point to the duct corners
-   * @param[in] p point
+   * @param[in] p point, must already be translated to lattice frame
    * @return distance to duct corner
    */
   Real minDuctCornerDistance(const Point & p) const;
 
   /**
    * Get the channel type (interior, edge, corner) given a point
-   * @param[in] p point
+   * @param[in] p point, must already be translated to lattice frame
    * @return channel type
    */
   channel_type::ChannelTypeEnum channelType(const Point & p) const;
@@ -561,28 +567,28 @@ public:
 
   /**
    * Get the pin index given a point
-   * @param[in] point point
+   * @param[in] point point, must already be translated to lattice frame
    * @return pin index
    */
   unsigned int pinIndex(const Point & point) const;
 
   /**
    * Get the closest pin index given a point outside the lattice
-   * @param[in] point point
+   * @param[in] point point, must already be translated to lattice frame
    * @return pin index
    */
   unsigned int closestPinIndex(const Point & point) const;
 
   /**
    * Get the channel index given a point
-   * @param[in] point point
+   * @param[in] point point, must already be translated to lattice frame
    * @return channel index
    */
   unsigned int channelIndex(const Point & point) const;
 
   /**
    * Whether the point is inside the lattice
-   * @param point point being examined
+   * @param point point being examined, must already be translated to lattice frame
    */
   bool insideLattice(const Point & point) const;
 
@@ -777,10 +783,10 @@ protected:
   static const unsigned int NUM_SIDES;
 
   /// (unitless) x-translations to apply to move from a center point to a side of a hexagon
-  std::vector<Real> _translation_x;
+  std::vector<Real> _unit_translation_x;
 
   /// (unitless) y-translations to apply to move from a center point to a side of a hexagon
-  std::vector<Real> _translation_y;
+  std::vector<Real> _unit_translation_y;
 
   /// Center points of all the gaps
   std::vector<Point> _gap_centers;
