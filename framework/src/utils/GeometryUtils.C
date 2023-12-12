@@ -91,7 +91,7 @@ pointInPolygon(const Point & point, const std::vector<Point> & corners, const un
 
   std::vector<bool> negative_half_space;
   std::vector<bool> positive_half_space;
-  for (unsigned int i = 0; i < corners.size(); ++i)
+  for (const auto i : index_range(corners))
   {
     int next = (i == n_pts - 1) ? 0 : i + 1;
     auto half = projectedLineHalfSpace(point, corners[i], corners[next], axis);
@@ -108,9 +108,8 @@ pointInPolygon(const Point & point, const std::vector<Point> & corners, const un
   if (in_polygon)
     return true;
 
-  for (unsigned int i = 0; i < corners.size(); ++i)
-    if (pointOnEdge(point, corners, axis))
-      return true;
+  if (pointOnEdge(point, corners, axis))
+    return true;
 
   return false;
 }
@@ -122,7 +121,7 @@ pointOnEdge(const Point & point, const std::vector<Point> & corners, const unsig
   auto idx = projectedIndices(axis);
 
   Real tol = 1e-8;
-  for (unsigned int i = 0; i < corners.size(); ++i)
+  for (const auto i : index_range(corners))
   {
     int next = (i == n_pts - 1) ? 0 : i + 1;
     const auto & pt1 = corners[i];
@@ -226,7 +225,7 @@ polygonCorners(const unsigned int & num_sides, const Real & radius, const unsign
   Real theta = 2.0 * M_PI / num_sides;
   Real first_angle = M_PI / 2.0 - theta / 2.0;
 
-  for (unsigned int i = 0; i < num_sides; ++i)
+  for (const auto i : make_range(num_sides))
   {
     Real angle = first_angle + i * theta;
     Real x = radius * cos(angle);
@@ -273,7 +272,7 @@ boxCorners(const BoundingBox & box, const Real & factor)
   Point diff = (box.max() - box.min()) / 2.0;
   Point origin = box.min() + diff;
 
-  // Rescale sidelength of box by specified factor
+  // Rescale side length of box by specified factor
   diff *= factor;
 
   // Vectors for sides of box
@@ -283,9 +282,9 @@ boxCorners(const BoundingBox & box, const Real & factor)
 
   std::vector<Point> verts(8, origin - diff);
   const unsigned int pts_per_dim = 2;
-  for (unsigned int z = 0; z < pts_per_dim; z++)
-    for (unsigned int y = 0; y < pts_per_dim; y++)
-      for (unsigned int x = 0; x < pts_per_dim; x++)
+  for (const auto z : make_range(pts_per_dim))
+    for (const auto y : make_range(pts_per_dim))
+      for (const auto x : make_range(pts_per_dim))
         verts[pts_per_dim * pts_per_dim * z + pts_per_dim * y + x] += x * dx + y * dy + z * dz;
 
   return verts;

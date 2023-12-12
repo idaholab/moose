@@ -83,14 +83,14 @@ public:
    * @param[in] side duct side
    * @return x-component translation
    */
-  Real sideTranslationX(const unsigned int & side) const { return _translation_x[side]; }
+  Real sideTranslationX(const unsigned int & side) const { return _unit_translation_x[side]; }
 
   /**
    * Get the unit vector translation to move a center point to a duct wall
    * @param[in] side duct side
    * @return y-component translation
    */
-  Real sideTranslationY(const unsigned int & side) const { return _translation_y[side]; }
+  Real sideTranslationY(const unsigned int & side) const { return _unit_translation_y[side]; }
 
   /**
    * Get the index of the "first" pin in a ring
@@ -566,7 +566,7 @@ public:
   Point channelCentroid(const std::vector<Point> & corners) const;
 
   /**
-   * Get the pin index given a point
+   * Get the pin index given a point. The pin index is for the entire hexagon around the pin
    * @param[in] point point, must already be translated to lattice frame
    * @return pin index
    */
