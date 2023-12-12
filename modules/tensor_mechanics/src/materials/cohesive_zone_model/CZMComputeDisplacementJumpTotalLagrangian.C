@@ -82,8 +82,8 @@ template <bool is_ad>
 void
 CZMComputeDisplacementJumpTotalLagrangianTempl<is_ad>::computeRotationMatrices()
 {
-  _czm_reference_rotation[_qp] =
-      CohesiveZoneModelTools::computeReferenceRotationTempl<is_ad>(_normals[_qp], this->_mesh.dimension());
+  _czm_reference_rotation[_qp] = CohesiveZoneModelTools::computeReferenceRotationTempl<is_ad>(
+      _normals[_qp], this->_mesh.dimension());
   computeFandR();
   _czm_total_rotation[_qp] = _R[_qp] * _czm_reference_rotation[_qp];
 }

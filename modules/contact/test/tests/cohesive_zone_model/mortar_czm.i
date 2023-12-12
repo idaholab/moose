@@ -210,13 +210,11 @@
     czm_normal_stiffness = 1e4
     penalty_friction = 1e4
     use_physical_gap = true
- 
     czm_normal_strength = 1e3
     czm_tangential_strength = 1e3
 
     use_bilinear_mixed_mode_traction = true
     correct_edge_dropping = true
-  
     normal_strength = N
     shear_strength = 1e3
     viscosity = 1e-3

@@ -52,8 +52,7 @@ computedRdFTempl(const GenericRankTwoTensor<is_ad> & R, const GenericRankTwoTens
 }
 
 /// compute the derivative of F^-1 w.r.t. to F
-RankFourTensor
-computedFinversedF(const RankTwoTensor & F_inv);
+RankFourTensor computedFinversedF(const RankTwoTensor & F_inv);
 
 /// compute the area ratio betweeen the deformed and undeformed configuration, and its derivatives w.r.t. the deformation gradient, F
 ///@{
@@ -67,9 +66,9 @@ computeAreaRatioTempl(const RankTwoTensor & FinvT, const Real & J, const RealVec
 template <bool is_ad>
 GenericRankTwoTensor<is_ad>
 computeDAreaRatioDFTempl(const GenericRankTwoTensor<is_ad> & FinvT,
-                    const GenericRealVectorValue<is_ad> & N,
-                    const GenericReal<is_ad> & J,
-                    const GenericRankFourTensor<is_ad> & DFinv_DF)
+                         const GenericRealVectorValue<is_ad> & N,
+                         const GenericReal<is_ad> & J,
+                         const GenericRankFourTensor<is_ad> & DFinv_DF)
 {
   const auto Fitr_N = FinvT * N;
   const auto Fitr_N_norm = Fitr_N.norm();
@@ -92,7 +91,8 @@ computeDAreaRatioDFTempl(const GenericRankTwoTensor<is_ad> & FinvT,
 /// compute the normal componets of a vector
 template <bool is_ad>
 GenericRealVectorValue<is_ad>
-computeNormalComponentsTempl(const GenericRealVectorValue<is_ad> & normal, const GenericRealVectorValue<is_ad> & vector)
+computeNormalComponentsTempl(const GenericRealVectorValue<is_ad> & normal,
+                             const GenericRealVectorValue<is_ad> & vector)
 {
   return (normal * vector) * normal;
 }
@@ -100,7 +100,8 @@ computeNormalComponentsTempl(const GenericRealVectorValue<is_ad> & normal, const
 /// compute the tangent componets of a vector
 template <bool is_ad>
 GenericRealVectorValue<is_ad>
-computeTangentComponentsTempl(const GenericRealVectorValue<is_ad> & normal, const GenericRealVectorValue<is_ad> & vector)
+computeTangentComponentsTempl(const GenericRealVectorValue<is_ad> & normal,
+                              const GenericRealVectorValue<is_ad> & vector)
 {
   return vector - computeNormalComponentsTempl<is_ad>(normal, vector);
 }
@@ -108,13 +109,15 @@ computeTangentComponentsTempl(const GenericRealVectorValue<is_ad> & normal, cons
 /// compute the czm reference rotation based on the normal in the undeformed configuration and the mesh dimension
 template <bool is_ad>
 GenericRankTwoTensor<is_ad>
-computeReferenceRotationTempl(const GenericRealVectorValue<is_ad> & normal, const unsigned int mesh_dimension)
+computeReferenceRotationTempl(const GenericRealVectorValue<is_ad> & normal,
+                              const unsigned int mesh_dimension)
 {
   GenericRankTwoTensor<is_ad> rot;
   switch (mesh_dimension)
   {
     case 3:
-      rot = RotationMatrix::rotVec1ToVec2Templ<is_ad>(GenericRealVectorValue<false>(1, 0, 0), normal);
+      rot =
+          RotationMatrix::rotVec1ToVec2Templ<is_ad>(GenericRealVectorValue<false>(1, 0, 0), normal);
       break;
     case 2:
       rot = RotationMatrix::rotVec2DToXTempl<is_ad>(normal).transpose();

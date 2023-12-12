@@ -48,7 +48,8 @@ CZMRealVectorScalar::computeQpProperties()
   {
     case DirectionType::Normal:
       _property[_qp] =
-          CohesiveZoneModelTools::computeNormalComponentsTempl<false>(normal, _vector[_qp]) * normal;
+          CohesiveZoneModelTools::computeNormalComponentsTempl<false>(normal, _vector[_qp]) *
+          normal;
       break;
     case DirectionType::Tangent:
       _property[_qp] =

@@ -31,9 +31,9 @@ rotVecToZTempl(GenericRealVectorValue<is_ad> vec)
   // and form a RH basis, that is, so v1 x vec = v0
 
   // Use Gram-Schmidt method to find v1.
-  GenericRealVectorValue<is_ad>  v1;
+  GenericRealVectorValue<is_ad> v1;
   // Need a prototype for v1 first, and this is done by looking at the smallest component of vec
-  GenericRealVectorValue<is_ad>  w(std::abs(vec(0)), std::abs(vec(1)), std::abs(vec(2)));
+  GenericRealVectorValue<is_ad> w(std::abs(vec(0)), std::abs(vec(1)), std::abs(vec(2)));
   if ((w(2) >= w(1) && w(1) >= w(0)) || (w(1) >= w(2) && w(2) >= w(0)))
     // vec(0) is the smallest component
     v1(0) = 1;
@@ -48,20 +48,21 @@ rotVecToZTempl(GenericRealVectorValue<is_ad> vec)
   v1 /= std::sqrt(v1 * v1);
 
   // now use v0 = v1 x vec
-  GenericRealVectorValue<is_ad>  v0;
+  GenericRealVectorValue<is_ad> v0;
   v0(0) = v1(1) * vec(2) - v1(2) * vec(1);
   v0(1) = v1(2) * vec(0) - v1(0) * vec(2);
   v0(2) = v1(0) * vec(1) - v1(1) * vec(0);
 
   // the desired rotation matrix is just
-  GenericRealTensorValue<is_ad> rot(v0(0), v0(1), v0(2), v1(0), v1(1), v1(2), vec(0), vec(1), vec(2));
+  GenericRealTensorValue<is_ad> rot(
+      v0(0), v0(1), v0(2), v1(0), v1(1), v1(2), vec(0), vec(1), vec(2));
   return rot;
 }
 
 /// provides a rotation matrix that will rotate the vector vec1 to vec2
 template <bool is_ad>
 GenericRealTensorValue<is_ad>
-rotVec1ToVec2Templ(GenericRealVectorValue<is_ad>  vec1, GenericRealVectorValue<is_ad>  vec2)
+rotVec1ToVec2Templ(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
 // provides a rotation matrix that will rotate the vector vec1 to the vector vec2
 {
   GenericRealTensorValue<is_ad> rot1_to_z = rotVecToZTempl<is_ad>(vec1);
@@ -72,7 +73,7 @@ rotVec1ToVec2Templ(GenericRealVectorValue<is_ad>  vec1, GenericRealVectorValue<i
 /// provides a rotation matrix that will rotate the vector vec1 to the [1,0,0], assuming vec1[2]==0
 template <bool is_ad>
 GenericRealTensorValue<is_ad>
-rotVec2DToXTempl(const GenericRealVectorValue<is_ad>  & vec)
+rotVec2DToXTempl(const GenericRealVectorValue<is_ad> & vec)
 // provides a rotation matrix that will rotate the vector `vec` to the [1,0,0], assuming vec[2]==0
 {
   const GenericReal<is_ad> theta = std::atan2(vec(1), vec(0));

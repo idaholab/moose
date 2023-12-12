@@ -219,7 +219,6 @@
     czm_normal_strength = 1e3
     czm_tangential_strength = 1e3
     use_bilinear_mixed_mode_traction = true
-    
     # bilinear stuff
     normal_strength = 'normal_strength'
     shear_strength = 'shear_strength'
