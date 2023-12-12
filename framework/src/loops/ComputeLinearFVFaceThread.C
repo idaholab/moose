@@ -49,9 +49,20 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   else
     base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
 
+  _subdomain = Moose::INVALID_BLOCK_ID;
+  _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
+
   // Iterate over all the elements in the range
   for (const auto & face_info : range)
-    for (auto kernel : kernels)
+  {
+    _subdomain = face_info->elem().subdomain_id();
+    _neighbor_subdomain = face_info->neighborPtr() ? face_info->elem().subdomain_id() : _subdomain;
+
+    if (_subdomain != _old_subdomain || _subdomain != _neighbor_subdomain ||
+        _neighbor_subdomain != _old_neighbor_subdomain)
+      fetchSystemContributionObjects();
+
+    for (auto kernel : _fv_flux_kernels)
     {
       kernel->setCurrentFaceInfo(face_info);
       if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
@@ -61,9 +72,57 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
           _mode == Moose::FV::LinearFVComputationMode::FullSystem)
         kernel->addRightHandSideContribution();
     }
+
+    _old_subdomain = _subdomain;
+    _old_neighbor_subdomain = _neighbor_subdomain;
+  }
 }
 
 void
 ComputeLinearFVFaceThread::join(const ComputeLinearFVFaceThread & /*y*/)
 {
+}
+
+void
+ComputeLinearFVFaceThread::fetchSystemContributionObjects()
+{
+  const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
+  _fv_flux_kernels.clear();
+
+  if (_subdomain != _old_subdomain)
+  {
+    _elem_fv_flux_kernels.clear();
+    auto base_query = _fe_problem.theWarehouse()
+                          .query()
+                          .template condition<AttribSysNum>(system_number)
+                          .template condition<AttribSubdomains>(_subdomain)
+                          .template condition<AttribSystem>("LinearFVFluxKernel")
+                          .template condition<AttribThread>(_tid);
+
+    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
+      base_query.condition<AttribMatrixTags>(_tags).queryInto(_elem_fv_flux_kernels);
+    else
+      base_query.condition<AttribVectorTags>(_tags).queryInto(_elem_fv_flux_kernels);
+  }
+  _fv_flux_kernels.insert(_elem_fv_flux_kernels.begin(), _elem_fv_flux_kernels.end());
+
+  if (_subdomain != _neighbor_subdomain)
+  {
+    if (_neighbor_subdomain != _old_neighbor_subdomain)
+    {
+      _neighbor_fv_flux_kernels.clear();
+      auto base_query = _fe_problem.theWarehouse()
+                            .query()
+                            .template condition<AttribSysNum>(system_number)
+                            .template condition<AttribSubdomains>(_subdomain)
+                            .template condition<AttribSystem>("LinearFVFluxKernel")
+                            .template condition<AttribThread>(_tid);
+
+      if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
+        base_query.condition<AttribMatrixTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
+      else
+        base_query.condition<AttribVectorTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
+    }
+    _fv_flux_kernels.insert(_neighbor_fv_flux_kernels.begin(), _neighbor_fv_flux_kernels.end());
+  }
 }

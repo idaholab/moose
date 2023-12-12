@@ -17,6 +17,7 @@
 #include "libmesh/threads.h"
 
 class FEProblemBase;
+class LinearFVFluxKernel;
 
 class ComputeLinearFVFaceThread
 {
@@ -32,10 +33,31 @@ public:
   void operator()(const FaceInfoRange & range);
   void join(const ComputeLinearFVFaceThread & /*y*/);
 
+  void fetchSystemContributionObjects();
+
 protected:
   FEProblemBase & _fe_problem;
   const unsigned int _linear_system_number;
   const Moose::FV::LinearFVComputationMode _mode;
   const std::set<TagID> _tags;
+
+  /// The subdomain for the current element
+  SubdomainID _subdomain;
+
+  /// The subdomain for the last element
+  SubdomainID _old_subdomain;
+
+  /// The subdomain for the current neighbor
+  SubdomainID _neighbor_subdomain;
+
+  /// The subdomain for the last neighbor
+  SubdomainID _old_neighbor_subdomain;
+
+  // Thread ID
   THREAD_ID _tid;
+
+  /// LinearFVFluxKernels
+  std::vector<LinearFVFluxKernel *> _elem_fv_flux_kernels;
+  std::vector<LinearFVFluxKernel *> _neighbor_fv_flux_kernels;
+  std::set<LinearFVFluxKernel *> _fv_flux_kernels;
 };

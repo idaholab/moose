@@ -1282,8 +1282,6 @@ public:
    */
   bool isFiniteVolumeInfoDirty() const { return _finite_volume_info_dirty; }
 
-  bool cachedLinearFVDoFs() { return _linear_finite_volume_dofs_cached; }
-
   /**
    * @return the coordinate transformation object that describes how to transform this problem's
    * coordinate system into the canonical/reference coordinate system

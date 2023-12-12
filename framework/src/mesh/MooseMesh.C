@@ -3523,8 +3523,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   for (const Elem * elem : as_range(begin, end))
     _elem_to_elem_info.emplace(elem->id(), elem);
 
-  _linear_finite_volume_dofs_cached = false;
-
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
