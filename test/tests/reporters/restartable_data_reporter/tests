@@ -19,7 +19,7 @@
     cli_args = 'Reporters/data/exclude=FEProblemBase/*/time_*
                 Outputs/file_base=exclude'
 
-    requirement = 'The system shall support excluding names when ouputting restartable data in a human-readable form.'
+    requirement = 'The system shall support excluding names when outputting restartable data in a human-readable form.'
   []
 
   [allow_unimplemented]
@@ -52,7 +52,7 @@
                 Outputs/file_base=detailed'
     recover = false # loaded flag changes in recover
 
-    requirement = 'The system shall support excluding names when ouputting restartable data in a human-readable form.'
+    requirement = 'The system shall support a detailed output including state flags when outputting restartable data in a human-readable form.'
   []
 
   [map]
