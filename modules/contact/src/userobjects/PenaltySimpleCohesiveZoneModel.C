@@ -283,10 +283,6 @@ PenaltySimpleCohesiveZoneModel::reinit()
       _frictional_contact_traction_one[qp] += test_i[qp] * tangential_traction(0);
       _frictional_contact_traction_two[qp] += test_i[qp] * tangential_traction(1);
 
-      // Generate no tangential traction for CZM initially
-      _frictional_contact_traction_one[qp] = 0.0;
-      _frictional_contact_traction_two[qp] = 0.0;
-
       _contact_pressure[qp] += test_i[qp] * _dof_to_czm_normal_traction[node];
     }
   }
