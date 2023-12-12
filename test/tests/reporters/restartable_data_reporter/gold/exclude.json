@@ -1,0 +1,45 @@
+{
+    "reporters": {
+        "data": {
+            "type": "RestartableDataReporter",
+            "values": {
+                "values": {
+                    "type": "std::map<std::string, RestartableDataReporter::Value, std::less<std::string>, std::allocator<std::pair<std::stringconst, RestartableDataReporter::Value>>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "data": {
+                "values": {}
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/time": {
+                        "type": "double",
+                        "value": 1.0
+                    }
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/time": {
+                        "type": "double",
+                        "value": 2.0
+                    }
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

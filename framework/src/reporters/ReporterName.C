@@ -9,6 +9,8 @@
 
 #include "ReporterName.h"
 
+const std::string ReporterName::REPORTER_RESTARTABLE_DATA_PREFIX = "ReporterData";
+
 ReporterName::ReporterName(const std::string & object_name, const std::string & value_name)
   : _object_name(object_name), _value_name(value_name)
 {
@@ -49,7 +51,7 @@ ReporterName::getCombinedName() const
 std::string
 ReporterName::getRestartableName() const
 {
-  return "ReporterData/" + getCombinedName();
+  return REPORTER_RESTARTABLE_DATA_PREFIX + "/" + getCombinedName();
 }
 
 ReporterName::operator std::string() const { return getCombinedName(); }
