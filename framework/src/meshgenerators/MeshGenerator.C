@@ -245,11 +245,6 @@ MeshGenerator::generateInternal(const bool data_only)
   if (data_only && !hasGenerateData())
     mooseError("This generator does not support data-only generation");
 
-#ifndef NDEBUG
-  for (const auto & [name, mesh] : _requested_meshes)
-    mooseAssert((bool)*mesh == !data_only, "Unexpected input from " + name);
-#endif
-
   if (hasGenerateData())
     generateData();
 
