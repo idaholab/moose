@@ -17,6 +17,7 @@
 #include "libmesh/threads.h"
 
 class FEProblemBase;
+class LinearFVElementalKernel;
 
 class ComputeLinearFVElementalThread
 {
@@ -31,10 +32,20 @@ public:
   void operator()(const ElemInfoRange & range);
   void join(const ComputeLinearFVElementalThread & /*y*/);
 
+  void fetchSystemContributionObjects();
+
 protected:
   FEProblemBase & _fe_problem;
   const unsigned int _linear_system_number;
   const Moose::FV::LinearFVComputationMode _mode;
   const std::set<TagID> & _tags;
   THREAD_ID _tid;
+
+  /// The subdomain for the current element
+  SubdomainID _subdomain;
+
+  /// The subdomain for the last element
+  SubdomainID _old_subdomain;
+
+  std::set<LinearFVElementalKernel *> _fv_kernels;
 };

@@ -36,19 +36,6 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  std::vector<LinearFVFluxKernel *> kernels;
-  auto base_query = _fe_problem.theWarehouse()
-                        .query()
-                        .template condition<AttribSysNum>(
-                            _fe_problem.getLinearSystem(_linear_system_number).number())
-                        .template condition<AttribSystem>("LinearFVFluxKernel")
-                        .template condition<AttribThread>(_tid);
-
-  if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-    base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
-  else
-    base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
-
   _subdomain = Moose::INVALID_BLOCK_ID;
   _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
