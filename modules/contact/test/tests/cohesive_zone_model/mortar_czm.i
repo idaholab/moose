@@ -195,7 +195,7 @@
 
 [UserObjects]
   [czm_uo]
-    type = PenaltySimpleCohesiveZoneModel
+    type = BilinearMixedModeCohesiveZoneModel
     primary_boundary = 'top_bottom'
     secondary_boundary = 'bottom_top'
     primary_subdomain = 10000

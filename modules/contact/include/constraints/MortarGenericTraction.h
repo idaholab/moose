@@ -11,7 +11,7 @@
 
 #include "ADMortarLagrangeConstraint.h"
 
-class PenaltySimpleCohesiveZoneModel;
+class BilinearMixedModeCohesiveZoneModel;
 
 class MortarGenericTraction : public ADMortarLagrangeConstraint
 {
@@ -27,5 +27,5 @@ protected:
   const MooseEnum _component;
 
   /// The cohesive zone user object that provides the surface traction
-  const PenaltySimpleCohesiveZoneModel & _cohesize_zone_uo;
+  const BilinearMixedModeCohesiveZoneModel & _cohesize_zone_uo;
 };

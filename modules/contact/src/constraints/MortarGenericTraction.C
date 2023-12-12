@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MortarGenericTraction.h"
-#include "PenaltySimpleCohesiveZoneModel.h"
+#include "BilinearMixedModeCohesiveZoneModel.h"
 
 registerMooseObject("ContactApp", MortarGenericTraction);
 
@@ -31,8 +31,8 @@ MortarGenericTraction::validParams()
 MortarGenericTraction::MortarGenericTraction(const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
-    _cohesize_zone_uo(const_cast<PenaltySimpleCohesiveZoneModel &>(
-        getUserObject<PenaltySimpleCohesiveZoneModel>("cohesive_zone_uo")))
+    _cohesize_zone_uo(const_cast<BilinearMixedModeCohesiveZoneModel &>(
+        getUserObject<BilinearMixedModeCohesiveZoneModel>("cohesive_zone_uo")))
 {
 }
 
