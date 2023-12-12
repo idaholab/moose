@@ -1,21 +1,11 @@
-/********************************************************************/
-/*                  SOFTWARE COPYRIGHT NOTIFICATION                 */
-/*                             Cardinal                             */
-/*                                                                  */
-/*                  (c) 2021 UChicago Argonne, LLC                  */
-/*                        ALL RIGHTS RESERVED                       */
-/*                                                                  */
-/*                 Prepared by UChicago Argonne, LLC                */
-/*               Under Contract No. DE-AC02-06CH11357               */
-/*                With the U. S. Department of Energy               */
-/*                                                                  */
-/*             Prepared by Battelle Energy Alliance, LLC            */
-/*               Under Contract No. DE-AC07-05ID14517               */
-/*                With the U. S. Department of Energy               */
-/*                                                                  */
-/*                 See LICENSE for full restrictions                */
-/********************************************************************/
-// Cardinal copyright as this was moved over from Cardinal
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeometryUtils.h"
 #include "MooseUtils.h"
