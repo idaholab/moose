@@ -60,8 +60,8 @@ SelfShadowSideUserObject::initialize()
   RealVectorValue direction;
   for (const auto i : index_range(_raw_direction))
     direction(i) = *_raw_direction[i];
-  _rotation =
-      _dim == 2 ? RotationMatrix::rotVec2DToX(direction) : RotationMatrix::rotVecToZ(direction);
+  _rotation = _dim == 2 ? RotationMatrix::rotVec2DToXTempl<false>(direction)
+                        : RotationMatrix::rotVecToZTempl<false>(direction);
 }
 
 void

@@ -147,10 +147,10 @@ PeacemanBorehole::PeacemanBorehole(const InputParameters & parameters)
   for (unsigned int i = 0; i + 1 < _xs.size(); ++i)
   {
     const RealVectorValue v2(_xs[i + 1] - _xs[i], _ys[i + 1] - _ys[i], _zs[i + 1] - _zs[i]);
-    _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
+    _rot_matrix[i] = RotationMatrix::rotVecToZTempl<false>(v2);
   }
   if (num_pts == 1)
-    _rot_matrix[0] = RotationMatrix::rotVecToZ(_borehole_direction);
+    _rot_matrix[0] = RotationMatrix::rotVecToZTempl<false>(_borehole_direction);
 }
 
 bool

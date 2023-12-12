@@ -17,7 +17,7 @@ rotVtoU(RealVectorValue v, RealVectorValue u)
   RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
   RealVectorValue vhat = v / v.norm();
   RealVectorValue uhat = u / u.norm();
-  RealTensorValue r = RotationMatrix::rotVec1ToVec2(v, u);
+  RealTensorValue r = RotationMatrix::rotVec1ToVec2Templ<false>(v, u);
   RealVectorValue rotated_v = r * vhat;
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
     EXPECT_NEAR(rotated_v(i), uhat(i), 0.0001);
@@ -31,7 +31,7 @@ rotV2DtoX(RealVectorValue v)
   RealVectorValue u(1, 0, 0);
   RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
   RealVectorValue vhat = v / v.norm();
-  RealTensorValue r = RotationMatrix::rotVec2DToX(v);
+  RealTensorValue r = RotationMatrix::rotVec2DToXTempl<false>(v);
   RealVectorValue rotated_v = r * vhat;
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
     EXPECT_NEAR(rotated_v(i), u(i), 0.0001);

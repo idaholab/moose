@@ -115,10 +115,10 @@ PorousFlowPeacemanBorehole::initialSetup()
   for (unsigned int i = 0; i + 1 < num_pts; ++i)
   {
     const RealVectorValue v2(_xs[i + 1] - _xs[i], _ys[i + 1] - _ys[i], _zs[i + 1] - _zs[i]);
-    _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
+    _rot_matrix[i] = RotationMatrix::rotVecToZTempl<false>(v2);
   }
   if (num_pts == (unsigned)1)
-    _rot_matrix[0] = RotationMatrix::rotVecToZ(_line_direction);
+    _rot_matrix[0] = RotationMatrix::rotVecToZTempl<false>(_line_direction);
 }
 
 Real

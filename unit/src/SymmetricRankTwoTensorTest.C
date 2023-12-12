@@ -273,7 +273,7 @@ TEST_F(SymmetricRankTwoTensorTest, operators)
 
 TEST_F(SymmetricRankTwoTensorTest, rotate)
 {
-  auto R = RotationMatrix::rotVecToZ(RealVectorValue(2, -5, 1));
+  auto R = RotationMatrix::rotVecToZTempl<false>(RealVectorValue(2, -5, 1));
 
   auto A = _m3;
   A.rotate(R);
