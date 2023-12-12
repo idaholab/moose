@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseError.h"
+
 #include "nlohmann/json_fwd.h"
 
 #include "libmesh/libmesh_common.h"
