@@ -1,48 +1,38 @@
 [Mesh]
-  [base]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 2
-    xmax = 1.1
+    xmax = 1
     ymax = 1
-    xmin = -0.1
-    nx = 1
-    ny = 1
+    nx = 5
+    ny = 5
+    boundary_name_prefix = bottom
   []
-  [rename_base]
-    type = RenameBoundaryGenerator
-    input = base
-    old_boundary = 'top bottom left right'
-    new_boundary = 'top_base bottom_base left_base right_base'
-  []
-  [base_id]
+  [msh_id]
     type = SubdomainIDGenerator
-    input = rename_base
+    input = msh
     subdomain_id = 1
   []
 
-  [top]
+  [msh_two]
     type = GeneratedMeshGenerator
     dim = 2
     xmax = 1
     ymin = 1
     ymax = 2
-    nx = 1
-    ny = 1
+    nx = 5
+    ny = 5
+    boundary_name_prefix = top
+    boundary_id_offset = 10
   []
-  [rename_top]
-    type = RenameBoundaryGenerator
-    input = top
-    old_boundary = 'top bottom left right'
-    new_boundary = '100 101 102 103'
-  []
-  [top_id]
+  [msh_two_id]
     type = SubdomainIDGenerator
-    input = rename_top
+    input = msh_two
     subdomain_id = 2
   []
   [combined]
     type = MeshCollectionGenerator
-    inputs = 'base_id top_id'
+    inputs = 'msh_id msh_two_id'
   []
   [top_node]
     type = ExtraNodesetGenerator
@@ -52,29 +42,26 @@
   []
   [bottom_node]
     type = ExtraNodesetGenerator
-    coord = '-0.1 0 0'
+    coord = '0 0 0'
     input = top_node
     new_boundary = bottom_node
   []
-
+  # Build subdomains
   [secondary]
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 10001
     new_block_name = 'secondary_lower'
-    sidesets = 'top_base'
+    sidesets = 'bottom_top'
     input = bottom_node
   []
   [primary]
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 10000
-    sidesets = '101'
+    sidesets = 'top_bottom'
     new_block_name = 'primary_lower'
     input = secondary
   []
 
-  patch_update_strategy = auto
-  patch_size = 20
-  allow_renumbering = false
 []
 
 [GlobalParams]
@@ -90,7 +77,6 @@
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
-        generate_output = 'vonmises_stress'
       []
     []
   []
@@ -108,14 +94,14 @@
   [fix_top]
     type = DirichletBC
     preset = true
-    boundary = 100
+    boundary = top_top
     variable = disp_x
     value = 0
   []
 
   [top]
     type = FunctionDirichletBC
-    boundary = 100
+    boundary = top_top
     variable = disp_y
     function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),0.6-t))'
     preset = true
@@ -123,24 +109,42 @@
 
   [bottom]
     type = DirichletBC
-    boundary = bottom_base
+    boundary = bottom_bottom
     variable = disp_y
     value = 0
     preset = true
   []
 []
 
+[AuxVariables]
+  # [mode_mixity_ratio]
+  #   order = CONSTANT
+  #   family = MONOMIAL
+  # []
+  # [damage]
+  #   order = CONSTANT
+  #   family = MONOMIAL
+  # []
+[]
+
+[AuxKernels]
+  # [mode_mixity_ratio]
+  #   type = MaterialRealAux
+  #   variable = mode_mixity_ratio
+  #   property = mode_mixity_ratio
+  #   execute_on = timestep_end
+  #   boundary = interface
+  # []
+  # [damage]
+  #   type = MaterialRealAux
+  #   variable = damage
+  #   property = damage
+  #   execute_on = timestep_end
+  #   boundary = interface
+  # []
+[]
+
 [Materials]
-  [normal_strength]
-    type = GenericConstantMaterial
-    prop_names = 'normal_strength'
-    prop_values = '1e3'
-  []
-  [shear_strength]
-    type = GenericConstantMaterial
-    prop_names = 'shear_strength'
-    prop_values = '7.5e2'
-  []
   [stress]
     type = ADComputeFiniteStrainElasticStress
   []
@@ -149,18 +153,11 @@
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   []
-  # [czm]
-  #   type = BiLinearMixedModeTraction
-  #   boundary = 'interface'
-  #   penalty_stiffness = 1e6
-  #   GI_c = 1e3
-  #   GII_c = 1e2
-  #   normal_strength = 1e4
-  #   shear_strength = 1e3
-  #   displacements = 'disp_x disp_y'
-  #   eta = 2.2
-  #   viscosity = 1e-3
-  # []
+  [normal_strength]
+    type = GenericFunctionMaterial
+    prop_names = 'N'
+    prop_values = 'if(x<0.5,1,100)*1e4'
+  []
 []
 
 [Preconditioning]
@@ -183,13 +180,13 @@
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 150
-  nl_rel_tol = 1e-12
+  nl_max_its = 30
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
   start_time = 0.0
-  dt = 0.1
-  end_time = 1.0
-  dtmin = 0.1
+  dt = 0.01
+  end_time = 0.05
+  dtmin = 0.01
 []
 
 [Outputs]
@@ -199,17 +196,16 @@
 [UserObjects]
   [czm_uo]
     type = PenaltySimpleCohesiveZoneModel
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
-
-    correct_edge_dropping = true
 
     disp_x = disp_x
     disp_y = disp_y
     friction_coefficient = 0.1 # with 2.0 works
     secondary_variable = disp_x
+
     penalty = 0e6
     czm_normal_stiffness = 1e4
     penalty_friction = 1e4
@@ -217,25 +213,27 @@
     # unused
     czm_normal_strength = 1e3
     czm_tangential_strength = 1e3
+
     use_bilinear_mixed_mode_traction = true
-
+    correct_edge_dropping = true
     # bilinear stuff
-    normal_strength = 'normal_strength'
-    shear_strength = 'shear_strength'
-    penalty_stiffness = 200
-    power_law_parameter = 0.1
-    GI_c = 123
-    GII_c = 54
-    displacements = 'disp_x disp_y'
+    normal_strength = N
+    shear_strength = 1e3
+    viscosity = 1e-3
+    penalty_stiffness = 1e6
 
+    power_law_parameter = 2.2
+    GI_c = 1e3
+    GII_c = 1e2
+    displacements = 'disp_x disp_y'
   []
 []
 
 [Constraints]
   [x]
     type = NormalMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_x
@@ -243,11 +241,12 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = czm_uo
+    correct_edge_dropping = true
   []
   [y]
     type = NormalMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_y
@@ -255,11 +254,12 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = czm_uo
+    correct_edge_dropping = true
   []
   [t_x]
     type = TangentialMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_x
@@ -267,11 +267,12 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = czm_uo
+    correct_edge_dropping = true
   []
   [t_y]
     type = TangentialMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_y
@@ -279,11 +280,12 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = czm_uo
+    correct_edge_dropping = true
   []
   [c_x]
     type = MortarGenericTraction
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_x
@@ -291,11 +293,12 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
+    correct_edge_dropping = true
   []
   [c_y]
     type = MortarGenericTraction
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
+    primary_boundary = 'top_bottom'
+    secondary_boundary = 'bottom_top'
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_y
@@ -303,5 +306,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
+    correct_edge_dropping = true
   []
 []

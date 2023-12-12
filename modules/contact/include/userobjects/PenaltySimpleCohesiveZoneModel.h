@@ -79,9 +79,6 @@ protected:
   /// The penalty factor for the frictional constraints
   const Real _penalty_friction;
 
-  /// Acceptable slip distance for augmented Lagrange convergence
-  const Real _slip_tolerance;
-
   /// The friction coefficient
   const Real _friction_coefficient;
 
@@ -110,17 +107,8 @@ protected:
   /// Map from degree of freedom to local friction penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
 
-  /// Penalty growth factor for augmented Lagrange
-  const Real _penalty_multiplier_friction;
-
-  /// The adaptivity method for the penalty factor at augmentations
-  const enum class AdaptivityFrictionalPenalty { SIMPLE, FRICTION_LIMIT } _adaptivity_friction;
-
   /// Penalty for normal cohesive zone model
   const Real _czm_normal_stiffness;
-
-  /// Penalty for tangential cohesive zone model
-  const Real _czm_tangential_stiffness;
 
   /// Strength for normal cohesive zone model
   const Real _czm_normal_strength;

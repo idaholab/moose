@@ -38,36 +38,10 @@ PenaltySimpleCohesiveZoneModel::validParams()
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
-  params.addRangeCheckedParam<Real>(
-      "slip_tolerance",
-      "slip_tolerance > 0",
-      "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
-  MooseEnum adaptivity_penalty_friction("SIMPLE FRICTION_LIMIT", "FRICTION_LIMIT");
-  adaptivity_penalty_friction.addDocumentation(
-      "SIMPLE", "Keep multiplying by the frictional penalty multiplier between AL iterations");
-  adaptivity_penalty_friction.addDocumentation(
-      "FRICTION_LIMIT",
-      "This strategy will be guided by the Coulomb limit and be less reliant on the initial "
-      "penalty factor provided by the user.");
-  params.addParam<MooseEnum>(
-      "adaptivity_penalty_friction",
-      adaptivity_penalty_friction,
-      "The augmented Lagrange update strategy used on the frictional penalty coefficient.");
-  params.addRangeCheckedParam<Real>(
-      "penalty_multiplier_friction",
-      1.0,
-      "penalty_multiplier_friction > 0",
-      "The penalty growth factor between augmented Lagrange "
-      "iterations for penalizing relative slip distance if the node is under stick conditions.");
-
   // Cohesive Zone Model parameters
   params.addRequiredParam<Real>("czm_normal_stiffness",
                                 "The normal stiffness that determines the traction that initiates "
                                 "the cohesive zone traction.");
-  params.addRequiredParam<Real>(
-      "czm_tangential_stiffness",
-      "The tangential stiffness that determines the traction that initiates "
-      "the cohesive zone traction.");
   params.addRequiredParam<Real>("czm_normal_strength",
                                 "The normal strength that determines the traction-separation law.");
   params.addRequiredCoupledVar("displacements",
@@ -135,13 +109,8 @@ PenaltySimpleCohesiveZoneModel::PenaltySimpleCohesiveZoneModel(const InputParame
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
-    _slip_tolerance(isParamValid("slip_tolerance") ? getParam<Real>("slip_tolerance") : 0.0),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
-    _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
-    _adaptivity_friction(
-        getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
     _czm_normal_stiffness(getParam<Real>("czm_normal_stiffness")),
-    _czm_tangential_stiffness(getParam<Real>("czm_tangential_stiffness")),
     _czm_normal_strength(getParam<Real>("czm_normal_strength")),
     _czm_tangential_strength(getParam<Real>("czm_tangential_strength")),
     // _stress(getADMaterialProperty<RankTwoTensor>("stress")),
@@ -274,16 +243,7 @@ PenaltySimpleCohesiveZoneModel::timestepSetup()
 
   for (auto & map_pr : _dof_to_interface_R)
     map_pr.second = 0.0;
-
   // End of CZM properties
-
-  // Clear step slip (values used in between AL iterations for penalty adaptivity)
-  for (auto & map_pr : _dof_to_step_slip)
-  {
-    auto & [step_slip, old_step_slip] = map_pr.second;
-    old_step_slip = {0.0, 0.0};
-    step_slip = {0.0, 0.0};
-  }
 
   // save off accumulated slip from the last timestep
   for (auto & map_pr : _dof_to_accumulated_slip)
@@ -679,10 +639,6 @@ PenaltySimpleCohesiveZoneModel::reinit()
 
       // track accumulated slip for output purposes
       accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
-
-      // Keep track of slip vector for adaptive penalty
-      auto & [step_slip, old_step_slip] = _dof_to_step_slip[node];
-      step_slip = MetaPhysicL::raw_value(slip_distance);
     }
     else
     {
