@@ -219,7 +219,7 @@
     czm_normal_strength = 1e3
     czm_tangential_strength = 1e3
     use_bilinear_mixed_mode_traction = true
-    
+
     # bilinear stuff
     normal_strength = 'normal_strength'
     shear_strength = 'shear_strength'
@@ -280,5 +280,29 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = friction_uo
+  []
+  [c_x]
+    type = MortarGenericTraction
+    primary_boundary = 101
+    secondary_boundary = 'top_base'
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    secondary_variable = disp_x
+    component = x
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    cohesive_zone_uo = friction_uo
+  []
+  [c_y]
+    type = MortarGenericTraction
+    primary_boundary = 101
+    secondary_boundary = 'top_base'
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    secondary_variable = disp_y
+    component = y
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    cohesive_zone_uo = friction_uo
   []
 []
