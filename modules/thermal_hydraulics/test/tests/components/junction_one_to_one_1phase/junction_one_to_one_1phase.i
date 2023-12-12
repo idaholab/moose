@@ -151,6 +151,14 @@
     boundary = right_channel:in
     execute_on = 'initial timestep_end'
   []
+
+  # This is present to test that junction sidesets work properly
+  [p_avg_junction]
+    type = SideAverageValue
+    boundary = 'junction'
+    variable = p
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Outputs]
