@@ -22,7 +22,7 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
   instructions and then install our MOOSE Conda packages:
 
   !package! code
-  mamba create -n moose moose-dev=__MOOSE_DEV__
+  conda create -n moose moose-dev=__MOOSE_DEV__
   !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
@@ -118,10 +118,10 @@ either a Conda update, or rebuild PETSc/libMesh:
 - If +Personal Machine (Conda)+:
 
   !package! code
-  mamba activate base
-  mamba env remove -n moose
-  mamba create -n moose moose-dev=__MOOSE_DEV__
-  mamba activate moose
+  conda activate base
+  conda env remove -n moose
+  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda activate moose
   !package-end!
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:

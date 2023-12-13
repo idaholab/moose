@@ -8,13 +8,13 @@ date.
   packages:
 
   !package! code
-  mamba activate base
-  mamba env remove -n moose
-  mamba create -n moose moose-dev=__MOOSE_DEV__
-  mamba activate moose
+  conda activate base
+  conda env remove -n moose
+  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda activate moose
   !package-end!
 
-  if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
+  if `conda activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
   !alert note
   Whenever an update is performed in Conda, an update should also be performed on your MOOSE
@@ -94,7 +94,7 @@ date.
   ```
 
   If the above build fails, and you have the correct Conda environment loaded
-  (`mamba activate moose`), then something is failing beyond the scope of this document, and you
+  (`conda activate moose`), then something is failing beyond the scope of this document, and you
   should now contact us via the [disussion forum](faq/discussion_forum.md).
 
   If the build was successfull, attempt to execute the hello word example:
