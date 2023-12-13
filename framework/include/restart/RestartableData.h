@@ -331,5 +331,3 @@ RestartableData<T>::storeJSONValue(nlohmann::json & json) const
 }
 
 using DataNames = std::unordered_set<std::string>;
-
-void to_json(nlohmann::json & json, const RestartableDataValue & value);

@@ -62,9 +62,3 @@ RestartableDataValue::store(nlohmann::json & json, const StoreJSONParams & param
   if (params.has_context)
     json["has_context"] = hasContext();
 }
-
-void
-to_json(nlohmann::json & json, const RestartableDataValue & value)
-{
-  value.store(json);
-}
