@@ -38,9 +38,9 @@ TEST(JSONIOTest, libMeshDenseMatrix)
 }
 
 // This is guarded because there are issues with early implementations of
-// filesystem in the standard library that we have with gcc 10's stdlib in dbg
-// (error: call to '__is_path_src' is ambiguous)
-#if __GLIBCXX__ > 20210514 || defined(NDEBUG)
+// filesystem in the standard library that we have with our minimum
+// GCC and clang compilers
+#if __GLIBCXX__ > 20210514 || (!defined(__clang__) && defined(NDEBUG))
 template <typename T>
 void
 testDerivativeStringClass()
