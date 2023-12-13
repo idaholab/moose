@@ -45,7 +45,7 @@ TEST(JSONIOTest, derivativeStringClasses)
 {
   const auto test = [](const auto & valuetype)
   {
-    const decltype(valuetype) value = "some_" + (std::string)typeid(valuetype).name();
+    const decltype(valuetype) value = "some_" + (std::string) typeid(valuetype).name();
     nlohmann::json json;
     nlohmann::to_json(json, value);
     const std::string json_value = json;
