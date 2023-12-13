@@ -60,7 +60,7 @@ private:
       const std::vector<std::pair<Point, unsigned int>> & incoming_points,
       std::vector<std::pair<Real, Real>> & outgoing_vals);
 
-  /// Number of KDTrees used to hold the locations & variable value data
+  /// Number of KDTrees used to hold the locations and variable value data
   unsigned int getNumSources() const;
 
   /// Transform a point towards the local frame

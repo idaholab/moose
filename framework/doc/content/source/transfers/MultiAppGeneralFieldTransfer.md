@@ -134,7 +134,7 @@ may be leveraged in several ways by specifying the [!param](/Transfers/MultiAppG
 and the [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division_usage)
 parameters.
 
-- Mesh divisions for spatial transfer restriction (usage = 'spatial_restriction')
+- Mesh divisions for spatial transfer restriction (usage = `spatial_restriction`)
 
 Source and target mesh divisions, specified using the [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/from_mesh_division) and [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division) parameters respectively, can be used
 to limit the spatial domain that will provide data for the transfer (origin spatial restriction)
@@ -145,7 +145,7 @@ index in the mesh division.
 The spatial restriction effect of the mesh divisions is active for all usages!
 If some data lies outside the source mesh division, it will not be transferred.
 
-- Matching regions using a source and target mesh divisions (usage = 'matching_division')
+- Matching regions using a source and target mesh divisions (usage = `matching_division`)
 
 The source domain for the values to be transferred and the target domain can also be matched on
 a one-to-one basis using the [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/from_mesh_division) and [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division) parameters.
@@ -156,7 +156,7 @@ It is advised to keep the number of mesh divisions the same in the two mesh divi
 
 - Matching source applications and target regions using a mesh division
 
-Set [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division_usage) to 'matching_subapp_index'
+Set [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division_usage) to `matching_subapp_index`
 
 The application providing values to transfer to a target region can be restricted to the
 index of the points in the target region given by a mesh division specified by the [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/to_mesh_division) parameter.
@@ -165,7 +165,7 @@ It is advised to keep the number of target mesh divisions the same as the number
 
 - Matching target applications and source regions using a mesh division
 
-Set [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/from_mesh_division_usage) to 'matching_subapp_index'
+Set [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/from_mesh_division_usage) to `matching_subapp_index`
 
 The spatial region providing values to transfer to a target application can be restricted using a mesh division specified by the [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/from_mesh_division) parameter.
 The target subapp will then only receive data that comes from the region at the same index, as the subapp,
