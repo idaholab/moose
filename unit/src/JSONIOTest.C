@@ -86,3 +86,19 @@ TEST(JSONIOTest, derivativeStringClasses)
   test(NonlinearSystemName());
   test(CLIArgString());
 }
+
+TEST(JSONIOTest, uniquePtrSerializer)
+{
+  {
+    auto value = std::make_unique<unsigned int>(5);
+    nlohmann::json json = value;
+    const unsigned int json_value = json;
+    EXPECT_EQ(json_value, *value);
+  }
+
+  {
+    std::unique_ptr<unsigned int> null_value;
+    nlohmann::json json = null_value;
+    EXPECT_TRUE(json.is_null());
+  }
+}
