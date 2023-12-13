@@ -61,6 +61,11 @@ public:
   MeshGenerator(const InputParameters & parameters);
 
   /**
+   * Generate / modify the mesh
+   */
+  virtual std::unique_ptr<MeshBase> generate() = 0;
+
+  /**
    * Internal generation method - this is what is actually called
    * within MooseApp to execute the MeshGenerator.
    */
@@ -175,11 +180,6 @@ protected:
    * Generate the mesh data
    */
   virtual void generateData();
-
-  /**
-   * Generate / modify the mesh
-   */
-  virtual std::unique_ptr<MeshBase> generate() = 0;
 
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
