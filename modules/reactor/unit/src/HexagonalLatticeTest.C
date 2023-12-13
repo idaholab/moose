@@ -9,6 +9,9 @@
 
 #include "HexagonalLatticeTest.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 TEST_F(HexagonalLatticeTest, rings_and_pins)
 {
   Real bp = 10.0, pp = 0.1, pd = 0.04, wd = 0.01, wp = 50.0;
@@ -1837,3 +1840,5 @@ TEST_F(HexagonalLatticeTest, constructor)
   EXPECT_DOUBLE_EQ(hl.wireDiameter(), 0.05);
   EXPECT_DOUBLE_EQ(hl.wirePitch(), 50.0);
 }
+
+#pragma GCC diagnostic pop
