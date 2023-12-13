@@ -4,6 +4,8 @@ A Reporter object for outputting mesh metadata in a human-readable form. By defa
 
 This object is a specialization of [RestartableDataReporter.md], which you can see for a more detailed parameter description.
 
+See [MeshMetaDataInterface.md] for more information on the use of mesh metadata.
+
 ## Example Input Syntax
 
 The following input file snippet demonstrates the use of the `MeshMetaDataReporter` object.
