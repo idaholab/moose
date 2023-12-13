@@ -9,11 +9,15 @@
 
 #include "gtest/gtest.h"
 
-#include "JsonIO.h"
 #include "nlohmann/json.h"
 
 #include "libmesh/int_range.h"
 #include "libmesh/dense_matrix.h"
+
+#include "JsonIO.h"
+#include "MooseTypes.h"
+
+#include <type_traits>
 
 TEST(JSONIOTest, libMeshDenseMatrix)
 {
@@ -35,4 +39,50 @@ TEST(JSONIOTest, libMeshDenseMatrix)
   nlohmann::to_json(json, matrix);
   const std::vector<std::vector<Real>> json_values = json;
   EXPECT_EQ(json_values, values);
+}
+
+TEST(JSONIOTest, derivativeStringClasses)
+{
+  const auto test = [](const auto & valuetype)
+  {
+    const decltype(valuetype) value = "some_" + (std::string)typeid(valuetype).name();
+    nlohmann::json json;
+    nlohmann::to_json(json, value);
+    const std::string json_value = json;
+    EXPECT_EQ(json_value, static_cast<std::string>(value));
+  };
+
+  test(FileName());
+  test(FileNameNoExtension());
+  test(MeshFileName());
+  test(OutFileBase());
+  test(NonlinearVariableName());
+  test(AuxVariableName());
+  test(VariableName());
+  test(BoundaryName());
+  test(SubdomainName());
+  test(PostprocessorName());
+  test(VectorPostprocessorName());
+  test(MeshDivisionName());
+  test(FunctionName());
+  test(DistributionName());
+  test(SamplerName());
+  test(UserObjectName());
+  test(IndicatorName());
+  test(MarkerName());
+  test(MultiAppName());
+  test(OutputName());
+  test(MaterialPropertyName());
+  test(MooseFunctorName());
+  test(MaterialName());
+  test(TagName());
+  test(MeshGeneratorName());
+  test(ExtraElementIDName());
+  test(ReporterValueName());
+  test(PositionsName());
+  test(TimesName());
+  test(ExecutorName());
+  test(ParsedFunctionExpression());
+  test(NonlinearSystemName());
+  test(CLIArgString());
 }
