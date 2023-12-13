@@ -119,5 +119,6 @@ private:
   /// Link to the parallel storage which holds the solution fields that are used for the SVD
   const ParallelSolutionStorage * const _parallel_storage;
 
+  /// The POD object which can be used to compute the basis functions/vectors
   const POD _pod;
 };
