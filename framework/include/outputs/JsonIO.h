@@ -47,7 +47,8 @@ struct adl_serializer<std::unique_ptr<T>>
 {
   /// Serializer that will output a unique ptr if it exists. We wrap this
   /// with is_constructible_v so that we don't specialize types that
-  /// don't already have a specialization
+  /// don't already have a specialization. This is required for some earlier
+  /// compilers, even though we're not using it at the moment
   static void to_json(json & j, const std::unique_ptr<T> & v)
   {
     if constexpr (std::is_constructible_v<nlohmann::json, T>)
