@@ -18,7 +18,7 @@ TEST(RestartableDataJSONIOTest, store)
   RestartableData<unsigned int> data("cool_data", nullptr, 5);
 
   const auto test_values =
-      [this](const auto & data, const RestartableDataValue::StoreJSONParams & params)
+      [](const auto & data, const RestartableDataValue::StoreJSONParams & params)
   {
     nlohmann::json json;
     data.store(json, params);
