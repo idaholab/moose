@@ -21,6 +21,7 @@
                   Outputs/file_base=main_constant_out'
       exodiff = main_constant_out_forward0.e
       prereq = 'mesh_source/mesh'
+      recover = False
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a piece-wise source;'
     []
@@ -29,6 +30,7 @@
       input = main.i
       exodiff = main_out_forward0.e
       prereq = 'mesh_source/mesh'
+      recover = False
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a linearly varying source;'
     []
@@ -41,6 +43,7 @@
                   Outputs/file_base=main_second_out'
       exodiff = main_second_out_forward0.e
       prereq = 'mesh_source/mesh'
+      recover = False
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a quadratically varying source;'
     []
@@ -53,6 +56,7 @@
       exodiff = main_bounded_out_forward0.e
       max_threads = 1 # Optimize executioner does not support multiple threads
       prereq = 'mesh_source/mesh'
+      recover = False
       detail = 'performing the inverse optimization with bounds;'
     []
     [auto_adjoint]
@@ -60,6 +64,7 @@
       input = main_auto_adjoint.i
       exodiff = main_auto_adjoint_out_forward0.e
       prereq = 'mesh_source/mesh'
+      recover = False
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with an automatically computed adjoint;'
     []
@@ -77,6 +82,7 @@
       csvdiff = main_linearRestart_out_optInfo_0001.csv
       abs_zero = 1e-4
       prereq = 'mesh_source/restartMesh'
+      recover = False
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with exact solution initial conditions that will make it converge in a single step;'
     []

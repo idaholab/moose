@@ -21,6 +21,7 @@
       jsondiff = paramMeshOptRep_outjson.json
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "with initial conditions, upper and lower bounds defined on the mesh for all "
                "timesteps; "
     []
@@ -36,6 +37,7 @@
                   UserObjects/optReporterTester/expected_upper_bounds=\'7 7 7 7 7 7\''
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "with initial conditions, upper and lower bounds defined in input file; "
     []
     [mixedParams]
@@ -50,6 +52,7 @@
                   UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5\''
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "with initial conditions and lower bound read from input file and upper bound read "
                "from the last timestep in the mesh."
     []
@@ -68,6 +71,7 @@
       jsondiff = twoParamMeshOptRep_outjson.json
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "for initial conditions, upper and lower bounds defined on the mesh for all "
                "timesteps; "
     []
@@ -83,6 +87,7 @@
                   UserObjects/optReporterTester/expected_upper_bounds=\'8 8 8 8 8 8 9 9\''
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "for initial conditions, upper and lower bounds defined in input file; "
     []
     [mixedTwoParams]
@@ -97,6 +102,7 @@
                   UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5 2.75 4.25\''
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "for initial conditions and lower bound read from input file and upper bound read "
                "from the last timestep in the mesh; "
     []
@@ -114,6 +120,7 @@
                   UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5 2 2 5 5 2 3.5 5 3.5 3.5 2 5 2 3.5 5 3.50\''
       allow_test_objects = true
       prereq = 'oneParameterGroup/mesh'
+      recover = False
       detail = "for the first group being first order Lagrange and second group being second order "
                "Lagrange nodal variables."
     []

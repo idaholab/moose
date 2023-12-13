@@ -19,6 +19,7 @@
       input = optimize_nograd.i
       exodiff = optimize_nograd_out_forward0.e
       prereq = material_transient/forward
+      recover = False
       method = '!dbg'
       valgrind = none
       max_threads = 1 # Optimize executioner does not support multiple threads
@@ -29,6 +30,7 @@
       input = optimize_grad.i
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
+      recover = False
       method = '!dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
@@ -40,6 +42,7 @@
       cli_args = 'Outputs/file_base=optimize_grad_out'
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
+      recover = False
       method = '!dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
@@ -56,6 +59,7 @@
                   forward:Problem/nl_sys_names=\'forward adjoint\''
       exodiff = optimize_grad_out_forward0.e
       prereq = material_transient/forward
+      recover = False
       method = '!dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
