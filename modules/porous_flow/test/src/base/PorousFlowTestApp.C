@@ -13,6 +13,10 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "FluidPropertiesTestApp.h"
+#include "ChemicalReactionsTestApp.h"
+#include "TensorMechanicsTestApp.h"
+
 InputParameters
 PorousFlowTestApp::validParams()
 {
@@ -46,6 +50,10 @@ PorousFlowTestApp::registerApps()
 {
   registerApp(PorousFlowApp);
   registerApp(PorousFlowTestApp);
+
+  TensorMechanicsTestApp::registerApps();
+  FluidPropertiesTestApp::registerApps();
+  ChemicalReactionsTestApp::registerApps();
 }
 
 void

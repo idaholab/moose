@@ -13,6 +13,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "TensorMechanicsTestApp.h"
+
 InputParameters
 PeridynamicsTestApp::validParams()
 {
@@ -47,6 +49,8 @@ PeridynamicsTestApp::registerApps()
 {
   registerApp(PeridynamicsApp);
   registerApp(PeridynamicsTestApp);
+
+  TensorMechanicsTestApp::registerApps();
 }
 
 void

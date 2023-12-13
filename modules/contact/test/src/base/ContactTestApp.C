@@ -9,6 +9,7 @@
 
 #include "ContactTestApp.h"
 #include "ContactApp.h"
+#include "TensorMechanicsTestApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -46,6 +47,8 @@ ContactTestApp::registerApps()
 {
   registerApp(ContactApp);
   registerApp(ContactTestApp);
+
+  TensorMechanicsTestApp::registerApps();
 }
 
 void

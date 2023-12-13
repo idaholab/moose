@@ -13,6 +13,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "FluidPropertiesTestApp.h"
+
 InputParameters
 NavierStokesTestApp::validParams()
 {
@@ -46,6 +48,8 @@ NavierStokesTestApp::registerApps()
 {
   registerApp(NavierStokesApp);
   registerApp(NavierStokesTestApp);
+
+  FluidPropertiesTestApp::registerApps();
 }
 
 void

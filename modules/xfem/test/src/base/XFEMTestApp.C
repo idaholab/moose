@@ -14,6 +14,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "TensorMechanicsTestApp.h"
+
 InputParameters
 XFEMTestApp::validParams()
 {
@@ -47,6 +49,8 @@ XFEMTestApp::registerApps()
 {
   registerApp(XFEMApp);
   registerApp(XFEMTestApp);
+
+  TensorMechanicsTestApp::registerApps();
 }
 
 void

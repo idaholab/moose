@@ -12,6 +12,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "NavierStokesTestApp.h"
+#include "TensorMechanicsTestApp.h"
+
 InputParameters
 FsiTestApp::validParams()
 {
@@ -42,6 +45,9 @@ FsiTestApp::registerApps()
 {
   registerApp(FsiApp);
   registerApp(FsiTestApp);
+
+  NavierStokesTestApp::registerApps();
+  TensorMechanicsTestApp::registerApps();
 }
 
 /***************************************************************************************************

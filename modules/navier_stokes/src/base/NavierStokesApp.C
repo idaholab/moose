@@ -13,7 +13,6 @@
 #include "MooseSyntax.h"
 
 #include "FluidPropertiesApp.h"
-#include "HeatConductionApp.h"
 
 InputParameters
 NavierStokesApp::validParams()
@@ -40,6 +39,8 @@ void
 NavierStokesApp::registerApps()
 {
   registerApp(NavierStokesApp);
+
+  FluidPropertiesApp::registerApps();
 }
 
 static void
@@ -104,7 +105,6 @@ void
 NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   FluidPropertiesApp::registerAll(f, af, s);
-  HeatConductionApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"NavierStokesApp"});
   Registry::registerActionsTo(af, {"NavierStokesApp"});
   associateSyntaxInner(s, af);

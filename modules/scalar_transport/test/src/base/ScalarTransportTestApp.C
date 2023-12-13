@@ -13,6 +13,16 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "ChemicalReactionsTestApp.h"
+#include "NavierStokesTestApp.h"
+#include "ThermalHydraulicsTestApp.h"
+#include "FluidPropertiesTestApp.h"
+#include "HeatTransferTestApp.h"
+#include "RdgTestApp.h"
+#include "RayTracingTestApp.h"
+#include "SolidPropertiesTestApp.h"
+#include "MiscTestApp.h"
+
 InputParameters
 ScalarTransportTestApp::validParams()
 {
@@ -45,6 +55,16 @@ ScalarTransportTestApp::registerApps()
 {
   ScalarTransportApp::registerApps();
   registerApp(ScalarTransportTestApp);
+
+  ChemicalReactionsTestApp::registerApps();
+  NavierStokesTestApp::registerApps();
+  ThermalHydraulicsTestApp::registerApps();
+  FluidPropertiesTestApp::registerApps();
+  HeatTransferTestApp::registerApps();
+  RdgTestApp::registerApps();
+  RayTracingTestApp::registerApps();
+  SolidPropertiesTestApp::registerApps();
+  MiscTestApp::registerApps();
 }
 
 /***************************************************************************************************

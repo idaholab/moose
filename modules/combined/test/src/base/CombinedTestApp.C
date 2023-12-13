@@ -37,6 +37,8 @@
 #include "ReactorTestApp.h"
 #include "RichardsTestApp.h"
 #include "StochasticToolsTestApp.h"
+#include "ScalarTransportTestApp.h"
+#include "SolidPropertiesTestApp.h"
 #include "TensorMechanicsTestApp.h"
 #include "ThermalHydraulicsTestApp.h"
 #include "XFEMTestApp.h"
@@ -100,14 +102,32 @@ CombinedTestApp::registerApps()
   registerApp(CombinedApp);
   registerApp(CombinedTestApp);
 
-  // Terrible Hack:
-  // Right now we aren't automatically registering dependent apps to build. We
-  // need a way to do this so that Multiapp types work automatically. We have a
-  // few regression tests in THM that create ThermalHydraulicsApp that fail to work with the
-  // combined module. For now, I'm going to manually register ThermalHydraulicsApp. We'll
-  // need to design the API so that all registered apps and modules also get
-  // immediate access to the buildable apps for use in Multiapps.
-  registerApp(ThermalHydraulicsApp);
+  ChemicalReactionsTestApp::registerApps();
+  ContactTestApp::registerApps();
+  ElectromagneticsTestApp::registerApps();
+  ExternalPetscSolverTestApp::registerApps();
+  FluidPropertiesTestApp::registerApps();
+  FsiTestApp::registerApps();
+  FunctionalExpansionToolsTestApp::registerApps();
+  GeochemistryTestApp::registerApps();
+  HeatTransferTestApp::registerApps();
+  LevelSetTestApp::registerApps();
+  MiscTestApp::registerApps();
+  NavierStokesTestApp::registerApps();
+  OptimizationTestApp::registerApps();
+  PeridynamicsTestApp::registerApps();
+  PhaseFieldTestApp::registerApps();
+  PorousFlowTestApp::registerApps();
+  RayTracingTestApp::registerApps();
+  RdgTestApp::registerApps();
+  ReactorTestApp::registerApps();
+  RichardsTestApp::registerApps();
+  ScalarTransportTestApp::registerApps();
+  SolidPropertiesTestApp::registerApps();
+  StochasticToolsTestApp::registerApps();
+  TensorMechanicsTestApp::registerApps();
+  ThermalHydraulicsTestApp::registerApps();
+  XFEMTestApp::registerApps();
 }
 
 std::string

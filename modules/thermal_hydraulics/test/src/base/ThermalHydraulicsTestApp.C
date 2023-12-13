@@ -13,6 +13,15 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "ThermalHydraulicsTestApp.h"
+#include "HeatTransferTestApp.h"
+#include "FluidPropertiesTestApp.h"
+#include "NavierStokesTestApp.h"
+#include "RayTracingTestApp.h"
+#include "RdgTestApp.h"
+#include "SolidPropertiesTestApp.h"
+#include "MiscTestApp.h"
+
 InputParameters
 ThermalHydraulicsTestApp::validParams()
 {
@@ -56,6 +65,14 @@ ThermalHydraulicsTestApp::registerApps()
 {
   registerApp(ThermalHydraulicsApp);
   registerApp(ThermalHydraulicsTestApp);
+
+  HeatTransferTestApp::registerApps();
+  FluidPropertiesTestApp::registerApps();
+  NavierStokesTestApp::registerApps();
+  RayTracingTestApp::registerApps();
+  RdgTestApp::registerApps();
+  SolidPropertiesTestApp::registerApps();
+  MiscTestApp::registerApps();
 }
 
 /***************************************************************************************************

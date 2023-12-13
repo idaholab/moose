@@ -35,6 +35,9 @@ void
 FsiApp::registerApps()
 {
   registerApp(FsiApp);
+
+  NavierStokesApp::registerApps();
+  TensorMechanicsApp::registerApps();
 }
 
 /***************************************************************************************************
