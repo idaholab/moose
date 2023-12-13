@@ -15,8 +15,6 @@
 #include "libmesh/int_range.h"
 #include "libmesh/dense_matrix.h"
 
-#include <type_traits>
-
 TEST(JSONIOTest, libMeshDenseMatrix)
 {
   const std::size_t m = 2;
@@ -39,51 +37,58 @@ TEST(JSONIOTest, libMeshDenseMatrix)
   EXPECT_EQ(json_values, values);
 }
 
+// This is guarded because there are issues with early implementations of
+// filesystem in the standard library that we have with gcc 10's stdlib in dbg
+// (error: call to '__is_path_src' is ambiguous)
+#if __GLIBCXX__ > 20210514 || defined(NDEBUG)
+template <typename T>
+void
+testDerivativeStringClass()
+{
+  const T value("some_" + (std::string) typeid(T).name());
+  nlohmann::json json;
+  nlohmann::to_json(json, value);
+  const std::string json_value = json;
+  EXPECT_EQ(json_value, static_cast<std::string>(value));
+}
+
 TEST(JSONIOTest, derivativeStringClasses)
 {
-  const auto test = [](const auto & valuetype)
-  {
-    const decltype(valuetype) value = "some_" + (std::string) typeid(valuetype).name();
-    nlohmann::json json;
-    nlohmann::to_json(json, value);
-    const std::string json_value = json;
-    EXPECT_EQ(json_value, static_cast<std::string>(value));
-  };
-
-  test(FileName());
-  test(FileNameNoExtension());
-  test(MeshFileName());
-  test(OutFileBase());
-  test(NonlinearVariableName());
-  test(AuxVariableName());
-  test(VariableName());
-  test(BoundaryName());
-  test(SubdomainName());
-  test(PostprocessorName());
-  test(VectorPostprocessorName());
-  test(MeshDivisionName());
-  test(FunctionName());
-  test(DistributionName());
-  test(SamplerName());
-  test(UserObjectName());
-  test(IndicatorName());
-  test(MarkerName());
-  test(MultiAppName());
-  test(OutputName());
-  test(MaterialPropertyName());
-  test(MooseFunctorName());
-  test(MaterialName());
-  test(TagName());
-  test(MeshGeneratorName());
-  test(ExtraElementIDName());
-  test(ReporterValueName());
-  test(PositionsName());
-  test(TimesName());
-  test(ExecutorName());
-  test(ParsedFunctionExpression());
-  test(NonlinearSystemName());
-  test(CLIArgString());
+  testDerivativeStringClass<FileName>();
+  testDerivativeStringClass<FileNameNoExtension>();
+  testDerivativeStringClass<MeshFileName>();
+  testDerivativeStringClass<OutFileBase>();
+  testDerivativeStringClass<NonlinearVariableName>();
+  testDerivativeStringClass<AuxVariableName>();
+  testDerivativeStringClass<VariableName>();
+  testDerivativeStringClass<BoundaryName>();
+  testDerivativeStringClass<SubdomainName>();
+  testDerivativeStringClass<PostprocessorName>();
+  testDerivativeStringClass<VectorPostprocessorName>();
+  testDerivativeStringClass<MeshDivisionName>();
+  testDerivativeStringClass<FunctionName>();
+  testDerivativeStringClass<DistributionName>();
+  testDerivativeStringClass<SamplerName>();
+  testDerivativeStringClass<UserObjectName>();
+  testDerivativeStringClass<IndicatorName>();
+  testDerivativeStringClass<MarkerName>();
+  testDerivativeStringClass<MultiAppName>();
+  testDerivativeStringClass<OutputName>();
+  testDerivativeStringClass<MaterialPropertyName>();
+  testDerivativeStringClass<MooseFunctorName>();
+  testDerivativeStringClass<MaterialName>();
+  testDerivativeStringClass<TagName>();
+  testDerivativeStringClass<MeshGeneratorName>();
+  testDerivativeStringClass<ExtraElementIDName>();
+  testDerivativeStringClass<ReporterValueName>();
+  testDerivativeStringClass<PositionsName>();
+  testDerivativeStringClass<TimesName>();
+  testDerivativeStringClass<ExecutorName>();
+  testDerivativeStringClass<ParsedFunctionExpression>();
+  testDerivativeStringClass<NonlinearSystemName>();
+  testDerivativeStringClass<CLIArgString>();
 }
+#endif
 
 TEST(JSONIOTest, uniquePtrSerializer)
 {
