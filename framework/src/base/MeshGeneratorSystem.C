@@ -181,7 +181,8 @@ MeshGeneratorSystem::createAddedMeshGenerators()
     }
 
     // Set the data-driven flag
-    _data_driven = moose_mesh->parameters().get<bool>("data_driven");
+    if (moose_mesh->isParamValid("data_driven"))
+      _data_driven = moose_mesh->parameters().get<bool>("data_driven");
   }
 }
 
