@@ -17,7 +17,7 @@ template <bool is_ad>
 InputParameters
 PorousFlowMultiComponentFluidTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowFluidPropertiesBaseTempl<is_ad>::validParams();
+  InputParameters params = PorousFlowMultiComponentFluidBaseTempl<is_ad>::validParams();
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addCoupledVar("x", 0, "The mass fraction variable");
   params.addClassDescription(
@@ -28,40 +28,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::validParams()
 template <bool is_ad>
 PorousFlowMultiComponentFluidTempl<is_ad>::PorousFlowMultiComponentFluidTempl(
     const InputParameters & parameters)
-  : PorousFlowFluidPropertiesBaseTempl<is_ad>(parameters),
-    _ddensity_dX(_compute_rho_mu
-                     ? (_nodal_material ? &this->template declarePropertyDerivative<Real>(
-                                              "PorousFlow_fluid_phase_density_nodal" + _phase,
-                                              _mass_fraction_variable_name)
-                                        : &this->template declarePropertyDerivative<Real>(
-                                              "PorousFlow_fluid_phase_density_qp" + _phase,
-                                              _mass_fraction_variable_name))
-                     : nullptr),
-    _dviscosity_dX(
-        _compute_rho_mu
-            ? (_nodal_material
-                   ? &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_viscosity_nodal" + _phase, _mass_fraction_variable_name)
-                   : &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_viscosity_qp" + _phase, _mass_fraction_variable_name))
-            : nullptr),
-    _dinternal_energy_dX(_compute_internal_energy
-                             ? (_nodal_material
-                                    ? &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_nodal" + _phase,
-                                          _mass_fraction_variable_name)
-                                    : &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_qp" + _phase,
-                                          _mass_fraction_variable_name))
-                             : nullptr),
-    _denthalpy_dX(_compute_enthalpy
-                      ? (_nodal_material ? &this->template declarePropertyDerivative<Real>(
-                                               "PorousFlow_fluid_phase_enthalpy_nodal" + _phase,
-                                               _mass_fraction_variable_name)
-                                         : &this->template declarePropertyDerivative<Real>(
-                                               "PorousFlow_fluid_phase_enthalpy_qp" + _phase,
-                                               _mass_fraction_variable_name))
-                      : nullptr),
+  : PorousFlowMultiComponentFluidBaseTempl<is_ad>(parameters),
     _fp(this->template getUserObject<MultiComponentFluidProperties>("fp")),
     _is_X_nodal(isCoupled("x") ? getFieldVar("x", 0)->isNodal() : false),
     _X(_nodal_material && _is_X_nodal ? this->template coupledGenericDofValue<is_ad>("x")
@@ -106,6 +73,8 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
     {
       // Density and derivatives wrt pressure and temperature
       Real rho, drho_dp, drho_dT, drho_dx;
+      (*_dviscosity_dX)[_qp].resize(1);
+      (*_ddensity_dX)[_qp].resize(1);
       _fp.rho_from_p_T_X(MetaPhysicL::raw_value(_porepressure[_qp][_phase_num]) *
                              _pressure_to_Pascals,
                          MetaPhysicL::raw_value(Tk),
@@ -117,7 +86,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
       (*_density)[_qp] = rho;
       (*_ddensity_dp)[_qp] = drho_dp * _pressure_to_Pascals;
       (*_ddensity_dT)[_qp] = drho_dT;
-      (*_ddensity_dX)[_qp] = drho_dx;
+      (*_ddensity_dX)[_qp][0] = drho_dx;
 
       // Viscosity and derivatives wrt pressure and temperature
       Real mu, dmu_dp, dmu_dT, dmu_dx;
@@ -132,7 +101,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
       (*_viscosity)[_qp] = mu / _pressure_to_Pascals / _time_to_seconds;
       (*_dviscosity_dp)[_qp] = dmu_dp / _time_to_seconds;
       (*_dviscosity_dT)[_qp] = dmu_dT / _pressure_to_Pascals / _time_to_seconds;
-      (*_dviscosity_dX)[_qp] = dmu_dx / _pressure_to_Pascals / _time_to_seconds;
+      (*_dviscosity_dX)[_qp][0] = dmu_dx / _pressure_to_Pascals / _time_to_seconds;
     }
   }
 
@@ -144,6 +113,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
           _fp.e_from_p_T_X(_porepressure[_qp][_phase_num] * _pressure_to_Pascals, Tk, _X[_qp]);
     else
     {
+      (*_dinternal_energy_dX)[_qp].resize(1);
       Real e, de_dp, de_dT, de_dx;
       _fp.e_from_p_T_X(MetaPhysicL::raw_value(_porepressure[_qp][_phase_num]) *
                            _pressure_to_Pascals,
@@ -156,7 +126,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
       (*_internal_energy)[_qp] = e;
       (*_dinternal_energy_dp)[_qp] = de_dp * _pressure_to_Pascals;
       (*_dinternal_energy_dT)[_qp] = de_dT;
-      (*_dinternal_energy_dX)[_qp] = de_dx;
+      (*_dinternal_energy_dX)[_qp][0] = de_dx;
     }
   }
 
@@ -169,6 +139,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
     else
     {
       Real h, dh_dp, dh_dT, dh_dx;
+      (*_denthalpy_dX)[_qp].resize(1);
       _fp.h_from_p_T_X(MetaPhysicL::raw_value(_porepressure[_qp][_phase_num]) *
                            _pressure_to_Pascals,
                        MetaPhysicL::raw_value(Tk),
@@ -180,7 +151,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
       (*_enthalpy)[_qp] = h;
       (*_denthalpy_dp)[_qp] = dh_dp * _pressure_to_Pascals;
       (*_denthalpy_dT)[_qp] = dh_dT;
-      (*_denthalpy_dX)[_qp] = dh_dx;
+      (*_denthalpy_dX)[_qp][0] = dh_dx;
     }
   }
 }
