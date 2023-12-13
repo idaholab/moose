@@ -117,7 +117,10 @@ CylindricalGridDivision::CylindricalGridDivision(const InputParameters & paramet
 void
 CylindricalGridDivision::initialize()
 {
-  setNumDivisions(_n_radial * _n_azim * _n_axial);
+  if (!_center_positions)
+    setNumDivisions(_n_radial * _n_azim * _n_axial);
+  else
+    setNumDivisions(_center_positions->getNumPositions() * _n_radial * _n_azim * _n_axial);
 
   // Check that the grid is well-defined
   if (_center_positions)

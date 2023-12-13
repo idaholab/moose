@@ -92,7 +92,10 @@ CartesianGridDivision::CartesianGridDivision(const InputParameters & parameters)
 void
 CartesianGridDivision::initialize()
 {
-  setNumDivisions(_nx * _ny * _nz);
+  if (!_center_positions)
+    setNumDivisions(_nx * _ny * _nz);
+  else
+    setNumDivisions(_center_positions->getNumPositions() * _nx * _ny * _nz);
 
   // Check that the grid is well-defined
   if (_center_positions)

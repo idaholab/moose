@@ -74,7 +74,10 @@ SphericalGridDivision::SphericalGridDivision(const InputParameters & parameters)
 void
 SphericalGridDivision::initialize()
 {
-  setNumDivisions(_n_radial);
+  if (!_center_positions)
+    setNumDivisions(_n_radial);
+  else
+    setNumDivisions(_center_positions->getNumPositions() * _n_radial);
 
   // Check that the grid is well-defined
   if (_center_positions)
