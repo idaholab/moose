@@ -3208,6 +3208,14 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
   if (parameters().template get<MooseEnum>("porosity_interface_pressure_treatment") != "bernoulli")
     checkDependentParameterError("porosity_interface_pressure_treatment",
                                  {"pressure_allow_expansion_on_bernoulli_faces"});
+
+  if (!_create_velocity && _porous_medium_treatment)
+    for (const auto & name : _velocity_name)
+      if (NS::velocity_vector.find(name) != NS : NS::velocity_vector.end())
+        paramError("velocity_variable",
+                   "For porous medium simulations, functor name name is already reserved for the "
+                   "automatically-computed interstitial velocity. Please choose another name for "
+                   "your external velocity variable!");
 }
 
 template <class BaseType>
