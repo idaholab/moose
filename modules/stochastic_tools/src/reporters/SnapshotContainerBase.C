@@ -50,5 +50,5 @@ void
 SnapshotContainerBase::execute()
 {
   // Store the cloned snapshot. Each derived class has to implement the cloneSnapshot() method.
-  _accumulated_data.push_back(std::move(cloneSnapshot()));
+  _accumulated_data.push_back(cloneSnapshot());
 }
