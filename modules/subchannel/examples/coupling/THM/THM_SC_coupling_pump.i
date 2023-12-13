@@ -1,9 +1,9 @@
 # THM file based on https://mooseframework.inl.gov/modules/thermal_hydraulics/tutorials/single_phase_flow/step05.html
 # Used to couple THM with SC
-# This is a simple loop with fixed massflow at the inlet and pressure at the outlet.
+# This is a simple closed loop with a pump providing pressure head, core, pressurizer and HX.
 # THM sends massflux and temperature at the inlet of the core, and pressure at the outlet of the core
-# to subchannel. Subchannel returns total pressure drop of the assembly to THM and THM calculates an
-# average friction factor.
+# to subchannel. Subchannel returns total pressure drop of the assembly and total power to THM and THM calculates an
+# average friction factor for the core region.
 T_in = 583.0 # K
 press = 2e5 # Pa
 SC_core = 0.0004980799633447909 #m2
@@ -11,17 +11,11 @@ SC_core = 0.0004980799633447909 #m2
 # core parameters
 core_length = 1. # m
 core_n_elems = 1
-core_dia = '${units 2. cm -> m}'
-core_pitch = '${units 8.7 cm -> m}'
-A_core = '${fparse core_pitch^2 - 0.25 *pi * core_dia^2}'
-P_wet_core = '${fparse 4*core_pitch + pi * core_dia}'
-Dh_core = '${fparse 4 * A_core / P_wet_core}'
+A_core = 0.005 #dummy
 
 # pipe parameters
 pipe_dia = '${units 10. cm -> m}'
 A_pipe = '${fparse 0.25 * pi * pipe_dia^2}'
-
-tot_power = 2000 # W
 
 # heat exchanger parameters
 hx_dia_inner = '${units 12. cm -> m}'
@@ -54,11 +48,11 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Functions]
-  [m_dot_sec_fn]
-    type = PiecewiseLinear
-    xy_data = '
-      0    0
-      10 ${m_dot_sec_in}'
+  [q_wall_fn]
+    type = ParsedFunction
+    symbol_names = 'core_power length'
+    symbol_values = 'core_power  ${core_length}'
+    expression = 'core_power/length'
   []
 []
 
@@ -101,10 +95,6 @@ m_dot_sec_in = 1. # kg/s
     expression = 'core_f'
     block = 'core_chan'
   []
-  [Hw_mat]
-    type = ADWallHeatTransferCoefficientLyonMaterial
-    block = 'core_chan'
-  []
 []
 
 [HeatStructureMaterials]
@@ -117,10 +107,6 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Components]
-  [total_power]
-    type = TotalPower
-    power = ${tot_power}
-  []
   [up_pipe_1]
     type = FlowChannel1Phase
     position = '0 0 -0.5'
@@ -137,43 +123,22 @@ m_dot_sec_in = 1. # kg/s
     connections = 'up_pipe_1:out core_chan:in'
     volume = 1e-5
   []
+
   [core_chan]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '0 0 1'
     length = ${core_length}
     n_elems = ${core_n_elems}
-    roughness = .0001
     A = ${A_core}
-    D_h = ${Dh_core}
     closures = none_closures
   []
 
-  [core_hs]
-    type = HeatStructureCylindrical
-    position = '0 0 0'
-    orientation = '0 0 1'
-    length = ${core_length}
-    n_elems = ${core_n_elems}
-    names = 'block'
-    widths = '${fparse core_dia / 2.}'
-    materials = 'steel'
-    n_part_elems = 3
-  []
-
-  [core_heating]
-    type = HeatSourceFromTotalPower
-    hs = core_hs
-    regions = block
-    power = total_power
-  []
-
   [core_ht]
-    type = HeatTransferFromHeatStructure1Phase
+    type = HeatTransferFromHeatFlux1Phase
     flow_channel = core_chan
-    hs = core_hs
-    hs_side = outer
-    P_hf = '${fparse pi * core_dia}'
+    q_wall = q_wall_fn
+    P_hf = 1
   []
 
   [jct2]
@@ -237,7 +202,7 @@ m_dot_sec_in = 1. # kg/s
   [pressurizer]
     type = InletStagnationPressureTemperature1Phase
     p0 = ${press}
-    T0 = ${T_in}
+    T0 = 580
     input = press_pipe:out
   []
 
@@ -355,7 +320,6 @@ m_dot_sec_in = 1. # kg/s
     volume = 1e-4
     A_ref = ${A_pipe}
     head = 3.56
-    K = 10.0
   []
 
   [bottom_2]
@@ -376,7 +340,7 @@ m_dot_sec_in = 1. # kg/s
   [inlet_sec]
     type = InletMassFlowRateTemperature1Phase
     input = 'hx/sec:in'
-    m_dot = 0
+    m_dot = ${m_dot_sec_in}
     T = 300
   []
 
@@ -389,9 +353,10 @@ m_dot_sec_in = 1. # kg/s
 
 [Postprocessors]
   [power_to_coolant]
-    type = ADHeatRateConvection1Phase
+    type = ADHeatRateDirectFlowChannel
+    q_wall_prop = q_wall
     block = core_chan
-    P_hf = '${fparse pi *core_dia}'
+    P_hf = 1
   []
 
   [core_T_out]
@@ -466,16 +431,18 @@ m_dot_sec_in = 1. # kg/s
     function = '2.0 * core_delta_p_tgt * av_rho * ${A_core} * ${A_core} / (av_rhouA * av_rhouA)'
   []
 
-  [core_f]
-    type = ParsedPostprocessor
-    pp_names = 'Kloss'
-    function = 'Kloss * ${Dh_core} / ${core_length}'
+  [Dh]
+    type = ADElementAverageMaterialProperty
+    mat_prop = D_h
+    block = core_chan
   []
 
-  [dt_limit]
-    type = Receiver
-    default = 0.1
+  [core_f]
+    type = ParsedPostprocessor
+    pp_names = 'Kloss Dh'
+    function = 'Kloss * Dh / ${core_length}'
   []
+
   ### INFO to send to SC
   [outlet_pressure]
     type = SideAverageValue
@@ -508,6 +475,10 @@ m_dot_sec_in = 1. # kg/s
     type = Receiver
     default = 100
   []
+  [core_power]
+    type = Receiver
+    default = 100
+  []
 []
 
 [Preconditioning]
@@ -521,13 +492,12 @@ m_dot_sec_in = 1. # kg/s
   type = Transient
   start_time = 0
 
-  # [TimeStepper]
-  #   type = IterationAdaptiveDT
-  #   dt = 0.01
-  # []
-  # dtmax = 5
-  dt = 5
-  end_time = 1000
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 2
+  []
+  dtmax = 50
+  end_time = 3000
 
   line_search = basic
   solve_type = NEWTON
@@ -539,10 +509,11 @@ m_dot_sec_in = 1. # kg/s
   nl_abs_tol = 1e-7
   nl_max_its = 25
 
-  # fixed_point_min_its = 1
-  # fixed_point_max_its = 2
-  # auto_advance = true
-  # relaxation_factor = 0.5
+  fixed_point_min_its = 1
+  fixed_point_max_its = 5
+  accept_on_max_fixed_point_iteration = true
+  auto_advance = true
+  relaxation_factor = 0.5
 []
 
 [Outputs]
@@ -561,6 +532,7 @@ m_dot_sec_in = 1. # kg/s
 ################################################################################
 
 [MultiApps]
+  # active = ''
   [subchannel]
     type = FullSolveMultiApp
     input_files = 'subchannel.i'
@@ -573,11 +545,21 @@ m_dot_sec_in = 1. # kg/s
 []
 
 [Transfers]
+  # active = ''
   [pressure_drop_transfer] # Get pressure drop to THM from subchannel
     type = MultiAppPostprocessorTransfer
     from_multi_app = subchannel
     from_postprocessor = total_pressure_drop_SC
     to_postprocessor = core_delta_p_tgt
+    reduction_type = average
+    execute_on = 'timestep_end'
+  []
+
+  [power_transfer] # Get Total power to THM from subchannel
+    type = MultiAppPostprocessorTransfer
+    from_multi_app = subchannel
+    from_postprocessor = Total_power
+    to_postprocessor = core_power
     reduction_type = average
     execute_on = 'timestep_end'
   []
