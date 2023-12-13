@@ -359,7 +359,7 @@ petscNonlinearConverged(SNES snes,
                                         atol,
                                         nfuncs,
                                         maxf,
-                                        system._initial_residual_before_preset_bcs,
+                                        system._fnorm0_before_smo,
                                         std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)

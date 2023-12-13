@@ -4,61 +4,62 @@
 []
 
 [Variables]
-  [./temp]
-  [../]
+  [temp]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [Functions]
-  [./disp_y]
+  [disp_y]
     type = ParsedFunction
     expression = 0.1*t
-  [../]
-  [./left_temp]
+  []
+  [left_temp]
     type = ParsedFunction
     expression = 1000+t
-  [../]
+  []
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./disp_y]
+  [disp_y]
     type = FunctionAux
     variable = disp_y
     function = disp_y
     block = left
-  [../]
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = FunctionDirichletBC
     variable = temp
     boundary = leftleft
     function = left_temp
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = temp
     boundary = rightright
     value = 400
-  [../]
+  []
 []
 
 [ThermalContact]
-  [./left_to_right]
+  [left_to_right]
     secondary = leftright
     quadrature = true
     primary = rightleft
@@ -66,32 +67,32 @@
     emissivity_secondary = 0
     variable = temp
     type = GapHeatTransfer
-  [../]
+  []
 []
 
 [Materials]
-  [./hcm]
+  [hcm]
     type = HeatConductionMaterial
     block = 'left right'
     specific_heat = 1
     thermal_conductivity = 1
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./left]
+  [left]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = leftright
     diffusivity = thermal_conductivity
-  [../]
-  [./right]
+  []
+  [right]
     type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = rightleft
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Executioner]

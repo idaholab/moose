@@ -113,10 +113,10 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _fe_problem(fe_problem),
     _sys(sys),
     _last_nl_rnorm(0.),
-    _initial_residual_before_preset_bcs(0.),
-    _initial_residual_after_preset_bcs(0.),
+    _fnorm0_before_smo(0),
+    _fnorm0_after_smo(0),
     _current_nl_its(0),
-    _compute_initial_residual_before_preset_bcs(true),
+    _use_fnorm0_before_smo(false),
     _current_solution(NULL),
     _residual_ghosted(NULL),
     _u_dot(NULL),
@@ -878,12 +878,17 @@ NonlinearSystemBase::setInitialSolution()
   deactiveAllMatrixTags();
 
   NumericVector<Number> & initial_solution(solution());
-  if (_predictor.get() && _predictor->shouldApply())
+  if (_predictor.get())
   {
-    TIME_SECTION("applyPredictor", 2, "Applying Predictor");
+    if (_predictor->shouldApply())
+    {
+      TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
-    _predictor->apply(initial_solution);
-    _fe_problem.predictorCleanup(initial_solution);
+      _predictor->apply(initial_solution);
+      _fe_problem.predictorCleanup(initial_solution);
+    }
+    else
+      _console << " Skipping predictor this step" << std::endl;
   }
 
   // do nodal BC
@@ -1746,6 +1751,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
+  _app.solutionInvalidity().sync();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -2926,6 +2932,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
+  _app.solutionInvalidity().sync();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -3589,6 +3596,59 @@ NonlinearSystemBase::setMooseKSPNormType(MooseEnum kspnorm)
     _ksp_norm = Moose::KSPN_DEFAULT;
   else
     mooseError("Unknown ksp norm type specified.");
+}
+
+bool
+NonlinearSystemBase::shouldEvaluateFNormBeforeSMO() const
+{
+  // This complies with the legacy behavior: always do the redundant residual evaluation
+  if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+    return true;
+
+  // If solve_type == LINEAR, there is no need to evaluate the initial residual.
+  if (_fe_problem.solverParams()._type == Moose::ST_LINEAR)
+    return false;
+
+  // If the user explicitly specifies this parameter, do as the user says
+  if (_use_fnorm0_before_smo_set_by_user)
+    return _use_fnorm0_before_smo;
+
+  // Otherwise, we can try to be smart:
+  // If there are active solution-modifying objects, we compute the pre-initial residual
+  // and use it in the relative convergence check.
+  if (!_use_fnorm0_before_smo)
+    return false;
+  else if (hasActiveSolutionModifyingObjects())
+    return true;
+
+  return false;
+}
+
+bool
+NonlinearSystemBase::hasActiveSolutionModifyingObjects() const
+{
+  // List of solution-modifying objects (which may directly modify the solution vector):
+  // - (AD) preset BC
+  // - constraints
+  // - predictors
+
+  // (AD) nodal preset BCs
+  for (const auto & preset_nodal_bc : _preset_nodal_bcs.getActiveObjects())
+    if (preset_nodal_bc->shouldApply())
+      return true;
+  for (const auto & ad_preset_nodal_bc : _ad_preset_nodal_bcs.getActiveObjects())
+    if (ad_preset_nodal_bc->shouldApply())
+      return true;
+
+  // constraints
+  if (_constraints.hasActiveObjects())
+    return true;
+
+  // predictors
+  if (_predictor.get() && _predictor->shouldApply())
+    return true;
+
+  return false;
 }
 
 bool

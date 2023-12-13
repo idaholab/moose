@@ -20,7 +20,9 @@ Residual::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report the non-linear residual.");
-  MooseEnum residual_types("FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET", "FINAL");
+  MooseEnum residual_types(
+      "FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET INITIAL_BEFORE_SMO INITIAL_AFTER_SMO",
+      "FINAL");
   params.addParam<MooseEnum>("residual_type", residual_types, "Type of residual to be reported.");
   return params;
 }
@@ -28,6 +30,10 @@ Residual::validParams()
 Residual::Residual(const InputParameters & parameters)
   : GeneralPostprocessor(parameters), _residual_type(getParam<MooseEnum>("residual_type"))
 {
+  if (_residual_type == "INITIAL_BEFORE_PRESET")
+    mooseDeprecated("INITIAL_BEFORE_PRESET is deprecated, use INITIAL_BEFORE_SMO instead.");
+  if (_residual_type == "INITIAL_AFTER_PRESET")
+    mooseDeprecated("INITIAL_AFTER_PRESET is deprecated, use INITIAL_AFTER_SMO instead.");
 }
 
 Real
@@ -41,12 +47,10 @@ Residual::getValue() const
     FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
     if (!fe_problem)
       mooseError("Dynamic cast to FEProblemBase failed in Residual Postprocessor");
-    if (_residual_type == "INITIAL_BEFORE_PRESET")
-      residual =
-          fe_problem->getNonlinearSystemBase(_sys.number())._initial_residual_before_preset_bcs;
-    else if (_residual_type == "INITIAL_AFTER_PRESET")
-      residual =
-          fe_problem->getNonlinearSystemBase(_sys.number())._initial_residual_after_preset_bcs;
+    if (_residual_type == "INITIAL_BEFORE_PRESET" || _residual_type == "INITIAL_BEFORE_SMO")
+      residual = fe_problem->getNonlinearSystemBase(_sys.number())._fnorm0_before_smo;
+    else if (_residual_type == "INITIAL_AFTER_PRESET" || _residual_type == "INITIAL_AFTER_SMO")
+      residual = fe_problem->getNonlinearSystemBase(_sys.number())._fnorm0_after_smo;
     else
       mooseError("Invalid residual_type option in Residual Postprocessor: ", _residual_type);
   }

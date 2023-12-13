@@ -225,6 +225,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
     function = heat_source_distribution_function
     block = 'solid'
     use_displaced_mesh = true
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
