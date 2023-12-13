@@ -223,6 +223,12 @@ heated_length = 1.0
     execute_on = "timestep_end"
   []
 
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
+    block = fuel_pins
+  []
+
   [report_mass_flux_inlet]
     type = Receiver
     default = ${mass_flux_in}
