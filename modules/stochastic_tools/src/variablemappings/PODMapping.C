@@ -59,7 +59,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
     _parallel_storage(isParamValid("solution_storage")
                           ? &getUserObject<ParallelSolutionStorage>("solution_storage")
                           : nullptr),
-    _pod(POD(_parallel_storage, _extra_slepc_options, _communicator))
+    _pod(StochasticTools::POD(_parallel_storage, _extra_slepc_options, _communicator))
 {
   if (!isParamValid("filename"))
   {

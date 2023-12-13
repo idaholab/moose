@@ -13,6 +13,9 @@
 #include <slepcsvd.h>
 #include "libmesh/petsc_vector.h"
 #include <MooseTypes.h>
+
+namespace StochasticTools
+{
 /**
  * Class which computes a Proper Orthogonal Decomposition (POD) for snapshots
  * stored in ParallelSolutionStorage.
@@ -58,3 +61,4 @@ private:
   /// The communicator for parallel routines
   const Parallel::Communicator & _communicator;
 };
+}

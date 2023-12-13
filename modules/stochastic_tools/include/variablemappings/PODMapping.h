@@ -120,5 +120,5 @@ private:
   const ParallelSolutionStorage * const _parallel_storage;
 
   /// The POD object which can be used to compute the basis functions/vectors
-  const POD _pod;
+  const StochasticTools::POD _pod;
 };

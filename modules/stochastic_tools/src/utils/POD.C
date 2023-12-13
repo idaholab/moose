@@ -10,6 +10,9 @@
 
 #include "POD.h"
 
+namespace StochasticTools
+{
+
 POD::POD(const ParallelSolutionStorage * const parallel_storage,
          const std::string & extra_slepc_options,
          const Parallel::Communicator & comm)
@@ -181,4 +184,5 @@ POD::determineNumberOfModes(const std::vector<Real> & singular_values,
       break;
 
   return num_modes + 1;
+}
 }
