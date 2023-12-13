@@ -13,6 +13,10 @@ engaging in the community will certainly be beneficial.
 
 !alert-end!
 
+!alert note title=Authorship in MOOSE-development papers
+MOOSE being a collaborative effort, the authorship of MOOSE is shared within the community. Please see the [authorship guidelines](framework_development/authorship_guidelines.md optional=True)
+for more information.
+
 ## Code Standards
 
 When modifying or adding to MOOSE you need to follow the strict [MOOSE Code Standard](sqa/framework_scs.md).  These guidelines ensure a common look and feel to all of the code in MOOSE allowing developers to seamlessly move between sections of code and giving users a consistent interface.
