@@ -9,13 +9,11 @@
 
 #include "gtest/gtest.h"
 
-#include "nlohmann/json.h"
+#include "JsonIO.h"
+#include "MooseTypes.h"
 
 #include "libmesh/int_range.h"
 #include "libmesh/dense_matrix.h"
-
-#include "JsonIO.h"
-#include "MooseTypes.h"
 
 #include <type_traits>
 

@@ -11,7 +11,7 @@
 
 #include "MooseError.h"
 
-#include "nlohmann/json_fwd.h"
+#include "nlohmann/json.h"
 
 #include "libmesh/libmesh_common.h"
 
