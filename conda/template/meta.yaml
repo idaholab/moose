@@ -17,6 +17,7 @@ build:
   skip: true # [win]
   script_env:
     - MOOSE_JOBS
+    - MOOSE_OPTIONS
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
 

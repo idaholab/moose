@@ -17,6 +17,10 @@ InputParameters
 Closures1PhaseNone::validParams()
 {
   InputParameters params = Closures1PhaseBase::validParams();
+  params.addParam<bool>("add_wall_temperature_property",
+                        true,
+                        "If true, create a material property for the wall temperature (average if "
+                        "multiple heat transfers)");
   params.addClassDescription("No 1-phase closures. Useful for testing with one-time correlations.");
   return params;
 }
@@ -39,16 +43,19 @@ Closures1PhaseNone::checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/
 void
 Closures1PhaseNone::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
 {
-  const FlowChannel1Phase & flow_channel_1phase =
-      dynamic_cast<const FlowChannel1Phase &>(flow_channel);
-
-  const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
-  if ((n_ht_connections > 0) && (flow_channel.getTemperatureMode()))
+  if (getParam<bool>("add_wall_temperature_property"))
   {
-    if (flow_channel.getNumberOfHeatTransferConnections() > 1)
-      addAverageWallTemperatureMaterial(flow_channel_1phase);
-    else
-      addWallTemperatureFromAuxMaterial(flow_channel_1phase);
+    const FlowChannel1Phase & flow_channel_1phase =
+        dynamic_cast<const FlowChannel1Phase &>(flow_channel);
+
+    const unsigned int n_ht_connections = flow_channel_1phase.getNumberOfHeatTransferConnections();
+    if ((n_ht_connections > 0) && (flow_channel.getTemperatureMode()))
+    {
+      if (flow_channel.getNumberOfHeatTransferConnections() > 1)
+        addAverageWallTemperatureMaterial(flow_channel_1phase);
+      else
+        addWallTemperatureFromAuxMaterial(flow_channel_1phase);
+    }
   }
 }
 

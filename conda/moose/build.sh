@@ -4,7 +4,7 @@ set -eu
 if [ "$(echo $SKIP_DOCS | tr '[:lower:]' '[:upper:]')" == "TRUE" ]; then
     export MOOSE_SKIP_DOCS=True
 fi
-./configure --prefix=${PREFIX}/moose
+./configure --prefix=${PREFIX}/moose ${MOOSE_OPTIONS:-''}
 cd modules/combined
 
 CORES=${MOOSE_JOBS:-2}

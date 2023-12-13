@@ -125,6 +125,15 @@
     variable = rhoEA
     block = pipe
   []
+  # This is included to test the naming of heat transfer quantities in the case
+  # of multiple heat transfers connected to a flow channel. This PP is not used
+  # in output but just included to ensure that an error does not occur (which is
+  # the case if the expected material property name does not exist).
+  # See https://github.com/idaholab/moose/issues/26286.
+  [q_wall_name_check]
+    type = ADElementAverageMaterialProperty
+    mat_prop = 'q_wall:2'
+  []
 []
 
 [Outputs]
