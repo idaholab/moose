@@ -37,9 +37,12 @@
     input = 'ad_stateful_material.i'
     should_execute = false
     delete_output_before_running = false
-    prereq = 'stateful_jacobian'
     requirement = 'The time evolution of the stateful diffusivity property shall show that AD works with stateful material properties'
     issues = "#5658"
+    prereq = 'stateful_jacobian'
+    # prereq test being a different tester type (inherits its own default params), now requires the following params for this tester
+    method = OPT
+    valgrind = NONE
   [../]
   [default_material_value]
     type = 'Exodiff'
