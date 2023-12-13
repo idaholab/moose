@@ -1,8 +1,7 @@
 
 Follow the steps below depending on your platform to install Miniforge. If you run into issues
 during these steps, please visit our [Conda Troubleshooting](help/faq/conda_issues.md optional=True)
-guide. This installation guide relies on the utilization of `conda`, an optimized package manager
-for Conda.
+guide.
 
 - +Linux Users:+
 
