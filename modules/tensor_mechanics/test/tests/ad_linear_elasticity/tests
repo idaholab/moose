@@ -17,6 +17,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = linear_elastic_material
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD linear elastic stress problem shall be perfect'
     design = 'ADComputeLinearElasticStress.md'
   [../]
@@ -55,6 +56,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = applied_strain
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD eigenstrain problem shall be perfect'
     design = 'ComputeEigenstrain.md'
   [../]
@@ -76,6 +78,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = tensor
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD small strain with specified tensors problem shall be perfect'
     design = 'ADComputeLinearElasticStress.md'
   [../]
@@ -96,6 +99,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = thermal_expansion
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD thermal eigenstrain problem shall be perfect'
     design = 'ComputeEigenstrain.md'
   [../]

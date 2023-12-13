@@ -72,6 +72,7 @@
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_single
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD lps single problem shall be perfect'
   [../]
 
@@ -91,6 +92,7 @@
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_single_split
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD lps single split problem shall be perfect'
   [../]
 
@@ -110,6 +112,7 @@
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_dual
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD lps dual problem shall be perfect'
   [../]
 
@@ -129,6 +132,7 @@
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = gtn_single
+    installation_type = in_tree
     requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
   [../]
 
