@@ -3210,12 +3210,15 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
                                  {"pressure_allow_expansion_on_bernoulli_faces"});
 
   if (!_create_velocity && _porous_medium_treatment)
-    for (const auto & name : _velocity_name)
-      if (NS::velocity_vector.find(name) != NS : NS::velocity_vector.end())
+    for (const auto & name : NS::velocity_vector)
+    {
+      const auto & it = std::find(_velocity_name.begin(), _velocity_name.end(), name);
+      if (it != _velocity_name.end())
         paramError("velocity_variable",
-                   "For porous medium simulations, functor name name is already reserved for the "
-                   "automatically-computed interstitial velocity. Please choose another name for "
-                   "your external velocity variable!");
+                   "For porous medium simulations, functor name " + *it +
+                       " is already reserved for the automatically-computed interstitial velocity. "
+                       "Please choose another name for your external velocity variable!");
+    }
 }
 
 template <class BaseType>
