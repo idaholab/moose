@@ -29,14 +29,18 @@ SolutionContainer::validParams()
 SolutionContainer::SolutionContainer(const InputParameters & parameters)
   : SnapshotContainerBase(parameters), _system_type(getParam<MooseEnum>("system"))
 {
+  if (isParamSetByUser("nonlinear_system_name") && _system_type == "aux")
+    paramError(
+        "The 'nonlinear_system_name' parameter should not be set when '_system_type' is 'aux'. The "
+        "'nonlinear_system_name' parameter is only applicable to nonlinear systems.");
 }
 
 std::unique_ptr<NumericVector<Number>>
-SolutionContainer::cloneSnapshot()
+SolutionContainer::collectSnapshot()
 {
   std::unique_ptr<NumericVector<Number>> cloned_solution;
 
-  // Clone the current solution and append it to the vector
+  // Clone the current solution
   if (_system_type == "nonlinear")
     cloned_solution =
         _fe_problem.getNonlinearSystemBase(_nonlinear_system_number).solution().clone();

@@ -40,8 +40,8 @@ public:
   }
 
   /**
-   * Return one of the stored solution vectors
-   * @param local_i The index of the locally stored solution vector
+   * Return one of the stored snapshot vectors
+   * @param local_i The index of the locally stored numeric data container
    */
   const std::unique_ptr<NumericVector<Number>> & getSnapshot(unsigned int local_i) const;
 
@@ -50,7 +50,7 @@ protected:
    * Clone the current snapshot vector.
    * @return std::unique_ptr<NumericVector<Number>>
    */
-  virtual std::unique_ptr<NumericVector<Number>> cloneSnapshot() = 0;
+  virtual std::unique_ptr<NumericVector<Number>> collectSnapshot() = 0;
 
   /// Dynamic container for snapshot vectors. We store pointers to make sure that the change in size
   /// comes with little overhead. This is a reference because we need it to be restartable for

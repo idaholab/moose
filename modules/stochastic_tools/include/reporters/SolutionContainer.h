@@ -25,7 +25,7 @@ public:
   SolutionContainer(const InputParameters & parameters);
 
 protected:
-  virtual std::unique_ptr<NumericVector<Number>> cloneSnapshot() override;
+  virtual std::unique_ptr<NumericVector<Number>> collectSnapshot() override;
   /// Enum to switch between collecting the solution vectors of auxiliary and nonlinear
   /// systems
   const MooseEnum _system_type;
