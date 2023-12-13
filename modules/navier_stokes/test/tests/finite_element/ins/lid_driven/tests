@@ -11,7 +11,7 @@ finite elements for velocity and pressure.'
   []
   [transient_lid_driven_fsp_low_Re]
     type = 'Exodiff'
-    input = 'lid_driven_fsp.i'
+    input = 'transient_fsp.i'
     issues = '#24548'
     requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of unity, performing a transient march to steady-state.'
     cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_transient_low_Re"
@@ -21,7 +21,7 @@ finite elements for velocity and pressure.'
   []
   [transient_lid_driven_fsp_high_Re_picard_non_ss]
     type = 'RunApp'
-    input = 'lid_driven_fsp.i'
+    input = 'transient_fsp.i'
     issues = '#24548'
     requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500, performing a few timesteps in a transient.'
     cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Executioner/num_steps=3 Outputs/active=''"
@@ -29,7 +29,7 @@ finite elements for velocity and pressure.'
   []
   [transient_lid_driven_fsp_high_Re_newton_ss]
     type = 'Exodiff'
-    input = 'lid_driven_fsp.i'
+    input = 'transient_fsp.i'
     issues = '#24548'
     requirement = 'Least Squares Commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of 500, performing a transient march to steady-state.'
     cli_args = "n=8 -fieldsplit_others_fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_transient_high_Re"
@@ -47,7 +47,7 @@ finite elements for velocity and pressure.'
   []
   [steady_lid_driven_fsp_low_Re]
     type = 'Exodiff'
-    input = 'lid_driven_fs.i'
+    input = 'steady_fsp.i'
     exodiff = 'fsp_steady_low_Re.e'
     custom_cmp = 'fsp.cmp'
     issues = '#24548'
@@ -56,7 +56,7 @@ finite elements for velocity and pressure.'
   []
   [steady_lid_driven_fsp_high_Re]
     type = 'Exodiff'
-    input = 'lid_driven_fs.i'
+    input = 'steady_fsp.i'
     exodiff = 'fsp_steady_high_Re.e'
     custom_cmp = 'fsp.cmp'
     issues = '#24548'
