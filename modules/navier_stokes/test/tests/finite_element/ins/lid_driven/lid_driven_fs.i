@@ -1,9 +1,9 @@
 rho=1
-mu=1
+mu=2e-3
 U=1
 l=1
 prefactor=${fparse 1/(l/2)^2}
-n=2789
+n=64
 
 [GlobalParams]
   gravity = '0 0 0'
@@ -135,18 +135,34 @@ n=2789
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol'
       petsc_options_value = 'full                            self                              300                fgmres    right        1e-4'
     []
-    [u]
-      vars = 'vel_x vel_y'
-      petsc_options = '-ksp_monitor'
-      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side'
-      petsc_options_value = 'hypre    boomeramg      gmres     1e-2      300                right'
-    []
-    [p]
-      vars = 'p'
-      petsc_options = '-pc_lsc_scale_diag -ksp_monitor -lsc_ksp_monitor'
-      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -lsc_pc_type -lsc_ksp_type -lsc_ksp_pc_side -lsc_ksp_rtol'
-      petsc_options_value = 'fgmres    300                1e-2      lsc      right        hypre        gmres         right            1e-1'
-    []
+      [u]
+        vars = 'vel_x vel_y'
+        # petsc_options = '-ksp_converged_reason'
+        petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side'
+        petsc_options_value = 'hypre    boomeramg      gmres     1e-2      300                right'
+      []
+      [p]
+        vars = 'p'
+        petsc_options = '-pc_lsc_scale_diag -ksp_converged_reason'# -lsc_ksp_converged_reason -lsc_ksp_monitor_true_residual
+        petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -lsc_pc_type -lsc_pc_hypre_type -lsc_ksp_type -lsc_ksp_rtol -lsc_ksp_pc_side -lsc_ksp_gmres_restart'
+        petsc_options_value = 'fgmres    300                1e-2      lsc      right        hypre        boomeramg          gmres         1e-1          right            300'
+      []
+  []
+[]
+
+[Postprocessors]
+  [pavg]
+    type = ElementAverageValue
+    variable = p
+  []
+[]
+
+[UserObjects]
+  [set_pressure]
+    type = NSFVPressurePin
+    pin_type = 'average'
+    variable = p
+    pressure_average = 'pavg'
   []
 []
 
@@ -156,5 +172,9 @@ n=2789
 []
 
 [Outputs]
-  exodus = true
+  [exo]
+    type = Exodus
+    execute_on = 'final'
+    hide = 'pavg'
+  []
 []

@@ -155,7 +155,7 @@ mu=2e-3
         unside_by_var_boundary_name = 'left top right bottom left top right bottom'
         unside_by_var_var_name = 'vel_x vel_x vel_x vel_x vel_y vel_y vel_y vel_y'
       []
-      [u]
+        [u]
           vars = 'vel_x vel_y'
           unside_by_var_boundary_name = 'left top right bottom left top right bottom'
           unside_by_var_var_name = 'vel_x vel_x vel_x vel_x vel_y vel_y vel_y vel_y'
@@ -166,8 +166,8 @@ mu=2e-3
         [p]
           vars = 'p'
           petsc_options = '-pc_lsc_scale_diag -ksp_converged_reason'# -lsc_ksp_converged_reason -lsc_ksp_monitor_true_residual
-          petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -pc_type  -lsc_pc_type -lsc_pc_hypre_type -lsc_ksp_type -lsc_ksp_rtol -lsc_ksp_pc_side -lsc_ksp_gmres_restart'
-          petsc_options_value = 'fgmres    300                1e-2      lsc      right        lsc       hypre        boomeramg          gmres         1e-1          right            300'
+          petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -lsc_pc_type -lsc_pc_hypre_type -lsc_ksp_type -lsc_ksp_rtol -lsc_ksp_pc_side -lsc_ksp_gmres_restart'
+          petsc_options_value = 'fgmres    300                1e-2      lsc      right        hypre        boomeramg          gmres         1e-1          right            300'
         []
   []
 []
@@ -195,8 +195,9 @@ mu=2e-3
   petsc_options_value = '100'
   line_search = 'none'
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-9
   abort_on_solve_fail = true
+  normalize_solution_diff_norm_by_dt = false
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 6

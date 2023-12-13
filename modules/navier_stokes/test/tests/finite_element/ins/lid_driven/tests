@@ -9,35 +9,33 @@
     requirement = 'We shall be able to solve a canonical lid-driven problem without stabilization, using mixed order \
 finite elements for velocity and pressure.'
   []
-  [lid_driven_fsp]
+  [transient_lid_driven_fsp_low_Re]
     type = 'Exodiff'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
-    requirement = 'LSC preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of unity.'
+    requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of unity, performing a transient march to steady-state.'
     cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_transient_low_Re"
     absent_out = 'iterations 14'
     exodiff = 'fsp_transient_low_Re.e'
-    recover = false
+    recover = false # executes on final
   []
-  [lid_driven_fsp_picard_short]
+  [transient_lid_driven_fsp_high_Re_picard_non_ss]
     type = 'RunApp'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
-    requirement = 'LSC preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500.'
+    requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500, performing a few timesteps in a transient.'
     cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Executioner/num_steps=3 Outputs/active=''"
     absent_out = '4 iterations'
   []
-  [lid_driven_fsp_picard_long]
+  [transient_lid_driven_fsp_high_Re_newton_ss]
     type = 'Exodiff'
     input = 'lid_driven_fsp.i'
     issues = '#24548'
-    requirement = 'LSC preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500.'
-    cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_transient_high_Re"
+    requirement = 'Least Squares Commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of 500, performing a transient march to steady-state.'
+    cli_args = "n=8 -fieldsplit_others_fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_transient_high_Re"
     absent_out = '30 iterations'
     exodiff = 'fsp_transient_high_Re.e'
-    recover = false
-    heavy = true
-    valgrind = none
+    recover = false # executes on final
   []
   [lid_driven_md]
     type = 'Exodiff'
@@ -47,13 +45,23 @@ finite elements for velocity and pressure.'
     issues = '#23121'
     requirement = 'The system shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
   []
-  [lid_driven_fs]
+  [steady_lid_driven_fsp_low_Re]
     type = 'Exodiff'
     input = 'lid_driven_fs.i'
-    exodiff = 'lid_driven_fs_out.e'
+    exodiff = 'fsp_steady_low_Re.e'
+    custom_cmp = 'fsp.cmp'
     issues = '#24548'
-    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves.'
-    cli_args = "n=20 BCs/inactive='' Outputs/exodus=true"
+    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity.'
+    cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_steady_low_Re"
+  []
+  [steady_lid_driven_fsp_high_Re]
+    type = 'Exodiff'
+    input = 'lid_driven_fs.i'
+    exodiff = 'fsp_steady_high_Re.e'
+    custom_cmp = 'fsp.cmp'
+    issues = '#24548'
+    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of 500.'
+    cli_args = "n=8 -fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_steady_high_Re"
   []
   [ad_lid_driven]
     type = 'Exodiff'
