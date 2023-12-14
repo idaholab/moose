@@ -104,8 +104,8 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
   // Set non-intervening components to zero
   for (unsigned int i = _ndisp; i < 3; i++)
   {
-    _grad_disp.push_back(&adZeroGradient());
-    _grad_disp_neighbor.push_back(&adZeroGradient());
+    _grad_disp.push_back(&_ad_grad_zero);
+    _grad_disp_neighbor.push_back(&_ad_grad_zero);
   }
 
   // Checks for bilinear traction input.
@@ -243,9 +243,6 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   for (auto & map_pr : _dof_to_delta_medium)
     map_pr.second = 0.0;
 
-  for (auto & map_pr : _dof_to_damage)
-    map_pr.second.second = 0.0;
-
   for (auto & map_pr : _dof_to_czm_traction)
     map_pr.second = {0.0, 0.0, 0.0};
 
@@ -267,8 +264,12 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
     _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<true>(
         _normals[i], _subproblem.mesh().dimension());
 
+    // TODO: It is not cleat to me how the previous CZM implementation accounts for a proper mixity
+    // ratio. It computes the jump distance in the current undisplaced mesh and always projects
+    // locally with the normal vector. Since the normal vector is used for computing neighbor
+    // distances, it seems that shearing may be neglected.
     _dof_to_interface_displacement_jump[node] =
-        _dof_to_rotation_matrix[node].transpose() *
+        (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
         (-1.0 * adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) * _normals[i]);
   }
 
@@ -373,7 +374,7 @@ BilinearMixedModeCohesiveZoneModel::computeCriticalDisplacementJump(const Node *
 
   _dof_to_delta_initial[node] = delta_shear_knot;
 
-  if (std::abs(interface_displacement_jump(0)) > _epsilon_tolerance)
+  if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
     const auto delta_mixed = std::sqrt(delta_shear_knot * delta_shear_knot +
                                        Utility::pow<2>(mixity_ratio * delta_normal_knot));
@@ -510,12 +511,32 @@ void
 BilinearMixedModeCohesiveZoneModel::finalize()
 {
   PenaltySimpleCohesiveZoneModel::finalize();
+
+  const bool send_data_back = !constrainedByOwner();
+
+  Moose::Mortar::Contact::communicateR2T(
+      _dof_to_F, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateR2T(
+      _dof_to_F_neighbor, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateSingleADReal(
+      _dof_to_normal_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateSingleADReal(
+      _dof_to_shear_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateSingleADReal(
+      _dof_to_GI_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateSingleADReal(
+      _dof_to_GII_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
 const ADVariableValue &
 BilinearMixedModeCohesiveZoneModel::czmGlobalTraction(const unsigned int i) const
 {
-  if (i > 3)
+  if (i >= 3)
     mooseError("Internal error in czmGlobalTraction.");
 
   if (i == 0)
@@ -524,4 +545,27 @@ BilinearMixedModeCohesiveZoneModel::czmGlobalTraction(const unsigned int i) cons
     return _czm_interpolated_traction_y;
   else
     return _czm_interpolated_traction_z;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getModeMixityRatio(const Node * const node) const
+{
+
+  const auto it = _dof_to_mode_mixity_ratio.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_mode_mixity_ratio.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveDamage(const Node * const node) const
+{
+  const auto it = _dof_to_damage.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_damage.end())
+    return MetaPhysicL::raw_value(it->second.first);
+  else
+    return 0.0;
 }
