@@ -165,7 +165,13 @@ POD::computePOD(const VariableName & vname,
   }
   MatDestroy(&mat);
   SVDDestroy(&svd);
-
+#else
+  // These variables would otherwise be unused
+  (void)vname;
+  (void)left_basis_functions;
+  (void)right_basis_functions;
+  (void)num_nodes;
+  (void)energy;
 #endif
 }
 
