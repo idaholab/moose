@@ -13,6 +13,7 @@
 #include "FaceCenteredMapFunctor.h"
 #include "AppFactory.h"
 #include "libmesh/quadrature_gauss.h"
+#include "MooseMain.h"
 
 using namespace libMesh;
 using namespace Moose;

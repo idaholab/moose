@@ -18,6 +18,7 @@
 #include "MooseParsedFunction.h"
 #include "PhaseFieldApp.h"
 #include "AppFactory.h"
+#include "MooseMain.h"
 
 class EBSDMeshErrorTest : public ::testing::Test
 {
