@@ -208,7 +208,6 @@ communicateSingleADReal(std::unordered_map<const DofObject *, ADReal> & dof_to_a
   };
   TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
 }
-
 }
 }
 }
