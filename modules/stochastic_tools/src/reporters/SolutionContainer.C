@@ -30,9 +30,9 @@ SolutionContainer::SolutionContainer(const InputParameters & parameters)
   : SnapshotContainerBase(parameters), _system_type(getParam<MooseEnum>("system"))
 {
   if (isParamSetByUser("nonlinear_system_name") && _system_type == "aux")
-    paramError(
-        "The 'nonlinear_system_name' parameter should not be set when '_system_type' is 'aux'. The "
-        "'nonlinear_system_name' parameter is only applicable to nonlinear systems.");
+    paramError("nonlinear_system_name",
+               "This should not be set when 'system_type' is 'aux'. This parameter is only "
+               "applicable to nonlinear systems.");
 }
 
 std::unique_ptr<NumericVector<Number>>
