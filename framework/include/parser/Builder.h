@@ -114,7 +114,9 @@ public:
    */
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
 
-  hit::Node * root() { return _root; };
+  hit::Node * root() { return _parser.getRootNode(); };
+
+  // void setRootNode(hit::Node * root) { _root = root; }
 
 protected:
   /**
