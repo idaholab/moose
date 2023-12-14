@@ -54,6 +54,9 @@ protected:
                                                      diagnostic_source,
                                                      diagnostic_message));
 
+      // trim any ending whitespace off message which is guaranteed non-empty
+      diagnostic_message.erase(diagnostic_message.find_last_not_of(" \t") + 1);
+
       diagnostics_stream << "line:" << diagnostic_start_line
                          << " column:" << diagnostic_start_character << " - " << diagnostic_message
                          << "\n";
@@ -716,8 +719,8 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
   std::string diagnostics_expect = R"INPUT(
 line:18 column:0 - (BCs/all/boundary):
 line:18 column:0 -     the following side sets (ids) do not exist on the mesh: top (2), bottom (3)
-line:18 column:0 -     MOOSE distinguishes between "node sets" and "side sets" depending on whether 
-line:18 column:0 -     you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding 
+line:18 column:0 -     MOOSE distinguishes between "node sets" and "side sets" depending on whether
+line:18 column:0 -     you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding
 line:18 column:0 -     to your side sets are constructed for you by default.
 line:18 column:0 -     Try setting "Mesh/construct_side_list_from_node_list=true" if you see this error.
 line:18 column:0 -     Note: If you are running with adaptivity you should prefer using side sets.
