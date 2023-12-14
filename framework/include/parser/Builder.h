@@ -79,7 +79,7 @@ public:
    * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void builder();
+  void build();
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -114,7 +114,7 @@ public:
    */
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
 
-  hit::Node * root() { return _parser.getRootNode(); };
+  hit::Node * root() { return _parser.root(); };
 
   // void setRootNode(hit::Node * root) { _root = root; }
 
@@ -285,8 +285,5 @@ private:
   std::string _errmsg;
   std::string _warnmsg;
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
-
-  // Allow the MooseServer class to access the root node of the hit parse tree
-  friend class MooseServer;
 };
 }

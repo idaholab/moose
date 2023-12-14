@@ -964,12 +964,12 @@ MooseApp::setupOptions()
     {
       if (_input_filenames.empty())
         mooseError("No input files specified. Add -i <inputfile> to your command line.");
-      _builder.builder();
+      _builder.build();
     }
     else
     {
       _parser->parse(_input_filenames, getParam<std::string>("_input_text"));
-      _builder.builder();
+      _builder.build();
     }
     if (isParamValid("mesh_only"))
     {

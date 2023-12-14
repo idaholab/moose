@@ -408,7 +408,7 @@ Builder::hitCLIFilter(std::string appname, const std::vector<std::string> & argv
 }
 
 void
-Builder::builder()
+Builder::build()
 {
   // add in command line arguments
   try

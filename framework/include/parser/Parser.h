@@ -119,7 +119,7 @@ public:
   /**
    * Get the root pointer from front parser
    */
-  hit::Node * getRootNode()
+  hit::Node * root()
   {
     // normal input file is provided, front parser is set to parse input file
     if (_root)
@@ -156,7 +156,4 @@ private:
   std::string _errmsg;
 
   std::vector<std::string> _dw_errmsg;
-
-  // Allow the MooseServer class to access the root node of the hit parse tree
-  friend class MooseServer;
 };
