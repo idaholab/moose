@@ -15,6 +15,7 @@
 #include "MooseUtils.h"
 #include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
+#include "BlockRestrictable.h"
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
@@ -34,6 +35,7 @@ InputParameters
 ChemicalCompositionAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params += BlockRestrictable::validParams();
 
   ThermochimicaUtils::addClassDescription(params,
                                           "Sets up the thermodynamic model and variables for the "
