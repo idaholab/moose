@@ -1,7 +1,5 @@
 # INSFVTurbulentViscosityWallFunction
 
-!syntax description /FVBCs/INSFVTurbulentViscosityWallFunction
-
 Implements wall function boundary condition for the turbulent
 dynamic viscosity $\mu_t$.
 
@@ -74,9 +72,9 @@ of the near wall cells are in the buffer layer. However, using a mesh that
 contains nodes in the buffer layer is not recommended.
 
 
-## Equilibrium wall functions using a fixed-point solve*
+## Equilibrium wall functions using a fixed-point solve
 
-hese treatment is enabled by setting parameter
+This treatment is enabled by setting parameter
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_incremental`.
 The method uses the same equilibrium wall treatement than the Newton solve.
 However, the main difference is that, instead of computing $u_{\tau}$ for the
@@ -91,7 +89,7 @@ solve to converge. Using a mesh that contains nodes in the buffer layer is
 not recommended.
 
 
-## Equilibrium wall functions using linearized wall function*
+## Equilibrium wall functions using linearized wall function
 
 This treatment is enabled by setting parameter
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_linearized`.
@@ -106,7 +104,7 @@ the near-wall region. However, the method may introduce significant
 near-wall errors. The method is designed to be used in conjunction
 with porous media treatement and not necessairly for free flow.
 
-## Non-equilibrium wall functions*
+## Non-equilibrium wall functions
 
 This treatment is enabled by setting parameter
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `neq`.

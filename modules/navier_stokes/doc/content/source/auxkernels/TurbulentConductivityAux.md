@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is the auxiliary kernel used to compute the thermal effective turbulence conductivity
+This is the auxiliary kernel used to compute the thermal effective turbulent conductivity
 
 \begin{equation}
 k_t = \frac{c_p \mu_t}{Pr_t} \,,

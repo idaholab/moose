@@ -1,7 +1,5 @@
 # INSFVkEpsilonViscosityMaterial
 
-!syntax description /Materials/INSFVkEpsilonViscosityMaterial
-
 This is the material class used to compute the dynamic turbulent viscosity
 
 \begin{equation}

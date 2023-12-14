@@ -1,7 +1,5 @@
 # INSFVTKEDSourceSink
 
-!syntax description /FVKernels/INSFVTKEDSourceSink
-
 The object computes the turbulent source and sink term for the turbulent kinetic energy dissipation rate equation.
 
 Two terms are computed: `destruction` and `production` and the term `destruction - production` is
@@ -38,12 +36,12 @@ where:
 
 ## Wall formulation:
 
-All cells in contact with a boundary identified in the `walls` list are applied a different
+All cells in contact with a boundary identified in the [!param](/FVKernels/INSFVTKEDSourceSink/walls) list are applied a different
 treatment in which the equilibrium value for the $\epsilon = \epsilon_{eq}$ is set.
 A separate formulation is used for the `sub-laminar` and `logarithmic` boundary layers.
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
-The non-dimensional wall distance ca be as defined differently according to the
+The non-dimensional wall distance can be as defined differently according to the
 [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) parameter.
 
 If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) is `false`, the
@@ -57,7 +55,7 @@ y^+ = \frac{\rho y_p u_{\tau}}{\mu} \,,
 where:
 
 - $\rho$ is the density,
-- $y_p$ is the distance to the wall to the centroid of the next-to-wall cell,
+- $y_p$ is the distance from the wall to the centroid of the next-to-wall cell,
 - $u_{\tau}$ is the friction velocity, defined as $u_{\tau} = \sqrt{\frac{\tau_w}{\rho}}$ with $\tau_w$ the shear stress at the wall for which the condition is applied,
 - $\mu$ is the dynamic molecular viscosity.
 
@@ -104,7 +102,7 @@ In other words, there is no need to impose boundary conditions for $\epsilon$ wh
 is specified in his kernel.
 
 !alert note
-When using near-wall treatment, we assume that the $\mu_t$ funtor is computed by an object
+When using near-wall treatment, we assume that the $\mu_t$ functor is computed by an object
 that performs near-wall treatment. Otherwise, the results obtained won't be physically correct.
 
 !syntax parameters /FVKernels/INSFVTKEDSourceSink

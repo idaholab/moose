@@ -8,7 +8,7 @@ for near-wall elements. The key for this skip are the boundaries identified in
 the [!param](/FVKernels/INSFVTurbulentDiffusion/walls) list.
 For any element that is in contact with a boundary identified
 in the [!param](/FVKernels/INSFVTurbulentDiffusion/walls) list,
-diffusion will be skipped for that element over all faces.
+diffusion contributions will be skipped for that element over all faces.
 
 !syntax parameters /FVKernels/INSFVTurbulentDiffusion
 

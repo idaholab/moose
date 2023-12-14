@@ -1,7 +1,5 @@
 # INSFVMixingLengthTKEDBC
 
-!syntax description /FVBCs/INSFVMixingLengthTKEDBC
-
 This object wraps [`FVFunctionDirichletBC`](FVFunctionDirichletBC.md),
 to impose a precomputed value for the turbulent kinetic energy dissipation rate.
 

@@ -1,7 +1,5 @@
 # INSFVTurbulentTemperatureWallFunction
 
-!syntax description /FVBCs/INSFVTurbulentTemperatureWallFunction
-
 The function sets up the equivalent heat flux of the near-wall
 boundary layer when the wall temperature is set by the `T_w` parameter.
 

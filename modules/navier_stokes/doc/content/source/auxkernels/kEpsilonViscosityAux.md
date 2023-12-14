@@ -1,8 +1,6 @@
 # kEpsilonViscosityAux
 
-!syntax description /AuxKernels/kEpsilonViscosityAux
-
-This is the axiliary kernel used to compute the dynamic turbulent viscosity
+This is the auxiliary kernel used to compute the dynamic turbulent viscosity
 
 \begin{equation}
 \mu_t = \rho C_{\mu} \frac{k^2}{\epsilon} \,,

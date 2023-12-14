@@ -1,7 +1,5 @@
 # INSFVTKESourceSink
 
-!syntax description /FVKernels/INSFVTKESourceSink
-
 The object computes the turbulent source and sink term for the turbulent kinetic energy equation.
 
 Two terms are computed `destruction` = $\epsilon$ and `production` = $G_k$ and the term $\epsilon - G_k$ is
@@ -28,7 +26,7 @@ the user can utilize predefined fields through functors in MOOSE.
 
 ## Wall formulation:
 
-All cells in contact with a boundary identified in the `walls` list are applied a different
+All cells in contact with a boundary identified in the [!param](/FVKernels/INSFVTKESourceSink/walls) list are applied a different
 treatment for production and destruction.
 A different formulation is used for the `sub-laminar` and `logarithmic` boundary layers.
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
@@ -77,10 +75,10 @@ where:
 
 - $k_{old}$ is the value of the turbulent kinetic energy in the previous iteration.
 
-Whereas the linear or nonlinear formulation is used is controled by the
+Whether the linear or nonlinear formulation is used can be controlled by the
 [!param](/FVKernels/INSFVTKESourceSink/linearized_model) parameter.
 
-For the destruction formulation is different for the `sub-laminar` and `logarithmic` layers.
+For the destruction, formulation is different for the `sub-laminar` and `logarithmic` layers.
 For the `sub-laminar` layer, the destruction is defined as follows:
 
 \begin{equation}

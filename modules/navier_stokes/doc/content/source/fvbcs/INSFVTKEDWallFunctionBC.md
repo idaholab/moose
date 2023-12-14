@@ -1,7 +1,5 @@
 # INSFVTKEDWallFunctionBC
 
-!syntax description /FVBCs/INSFVTKEDWallFunctionBC
-
 This boundary condtion should only be used if no wall treatment is added.
 Implements wall boundary conditions for the turbulent kinetic energy dissipation rate.
 A separate treatment is used for the laminar and logarithmic layers.
