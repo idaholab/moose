@@ -31,8 +31,9 @@ public:
   virtual void reinit() override;
   virtual void timestepSetup() override;
 
-  // Check that we are *not* doing AL
-  // virtual bool isAugmentedLagrangianConverged() override;
+  // Getters for analysis output
+  Real getModeMixityRatio(const Node * const node) const;
+  Real getCohesiveDamage(const Node * const node) const;
 
 protected:
   virtual void computeQpPropertiesLocal() override;
@@ -188,4 +189,6 @@ protected:
 
   /// Total Lagrangian stress to be applied on CZM interface
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_czm_traction;
+
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
 };
