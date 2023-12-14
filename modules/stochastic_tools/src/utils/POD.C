@@ -170,6 +170,7 @@ POD::computePOD(const VariableName & vname,
   (void)vname;
   (void)left_basis_functions;
   (void)right_basis_functions;
+  (void)singular_values;
   (void)num_nodes;
   (void)energy;
 #endif
