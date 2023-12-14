@@ -253,7 +253,11 @@ PenaltySimpleCohesiveZoneModel::reinit()
           old_tangential_traction + tangential_lm + inner_iteration_penalty_friction;
 
       // Nonlinearity below
-      ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
+      ADReal tangential_trial_traction_norm = 0;
+      if (std::abs(tangential_trial_traction(0)) + std::abs(tangential_trial_traction(1)) >
+          _epsilon_tolerance)
+        tangential_trial_traction_norm = tangential_trial_traction.norm();
+
       ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
       tangential_traction = tangential_trial_traction;
 
