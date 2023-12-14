@@ -255,24 +255,6 @@ BilinearMixedModeCohesiveZoneModel::initialize()
 void
 BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
 {
-  // Compute rotation matrix from secondary surface
-  // Rotation matrices and local interface displacement jump.
-  for (const auto i : make_range(_test->size()))
-  {
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-
-    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<true>(
-        _normals[i], _subproblem.mesh().dimension());
-
-    // TODO: It is not cleat to me how the previous CZM implementation accounts for a proper mixity
-    // ratio. It computes the jump distance in the current undisplaced mesh and always projects
-    // locally with the normal vector. Since the normal vector is used for computing neighbor
-    // distances, it seems that shearing may be neglected.
-    _dof_to_interface_displacement_jump[node] =
-        (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
-        (-1.0 * adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) * _normals[i]);
-  }
-
   _czm_interpolated_traction_x.resize(_qrule_msm->n_points());
   _czm_interpolated_traction_y.resize(_qrule_msm->n_points());
   _czm_interpolated_traction_z.resize(_qrule_msm->n_points());
@@ -283,11 +265,40 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
     _czm_interpolated_traction_y[qp] = 0.0;
     _czm_interpolated_traction_z[qp] = 0.0;
   }
+
+  // Compute rotation matrix from secondary surface
+  // Rotation matrices and local interface displacement jump.
+  for (const auto i : make_range(_test->size()))
+  {
+    const Node * const node = _lower_secondary_elem->node_ptr(i);
+
+    // First call does not have maps available
+    const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
+    if (return_boolean)
+      return;
+
+    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<true>(
+        _normals[i], _subproblem.mesh().dimension());
+
+    // TODO: It is not clear to me how the previous CZM implementation accounts for a proper mixity
+    // ratio. It computes the jump distance in the current undisplaced mesh and always projects
+    // locally with the normal vector. Since the normal vector is used for computing neighbor
+    // distances, it seems that shearing may be neglected.
+
+    if (_dof_to_weighted_gap.find(node) != _dof_to_weighted_gap.end())
+      _dof_to_interface_displacement_jump[node] =
+          (-1.0 * adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) * _normals[i]);
+  }
 }
 
 void
 BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
 {
+  // First call does not have maps available
+  const bool return_boolean = _dof_to_F.find(node) == _dof_to_F.end();
+  if (return_boolean)
+    return;
+
   const auto normalized_F = normalizeRankTwoTensorQuantity(_dof_to_F, node);
   const auto normalized_F_neighbor = normalizeRankTwoTensorQuantity(_dof_to_F_neighbor, node);
 
@@ -306,11 +317,21 @@ BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
   const ADFactorizedRankTwoTensor C = dof_to_interface_F_node.transpose() * dof_to_interface_F_node;
   const auto Uinv = MathUtils::sqrt(C).inverse().get();
   _dof_to_interface_R[node] = dof_to_interface_F_node * Uinv;
+
+  // Transform interface jump according to two rotation matrices
+  _dof_to_interface_displacement_jump[node] =
+      (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
+      _dof_to_interface_displacement_jump[node];
 }
 
 void
 BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node * const node)
 {
+  // First call does not have maps available
+  const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
+  if (return_boolean)
+    return;
+
   computeModeMixity(node);                // Done
   computeCriticalDisplacementJump(node);  // Done
   computeFinalDisplacementJump(node);     // Done
@@ -335,6 +356,11 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
 void
 BilinearMixedModeCohesiveZoneModel::computeGlobalTraction(const Node * const node)
 {
+
+  // First call does not have maps available
+  const bool return_boolean = _dof_to_czm_traction.find(node) == _dof_to_czm_traction.end();
+  if (return_boolean)
+    return;
 
   const auto local_traction_vector = libmesh_map_find(_dof_to_czm_traction, node);
   const auto rotation_matrix = libmesh_map_find(_dof_to_rotation_matrix, node);
@@ -468,33 +494,15 @@ BilinearMixedModeCohesiveZoneModel::reinit()
   // Normal contact pressure with penalty
   PenaltySimpleCohesiveZoneModel::reinit();
 
-  // Compute all rotations that were created as material properties in CZMComputeDisplacementJump
-  prepareJumpKinematicQuantities();
-
-  // zero vector
-  const static TwoVector zero{0.0, 0.0};
-
   // iterate over nodes
   for (const auto i : make_range(_test->size()))
   {
     // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    if (_use_bilinear_mixed_mode_traction)
-    {
-      // Compute the weighted nodal deformation gradient and rotation tensors.
-      // *** TODO: Perform parallel communication ***
-      computeFandR(node);
-
-      // The call below is a 'macro' call. Create a utility function or user object for it.
-      // *** TODO: Perform parallel communication ***
-      computeBilinearMixedModeTraction(node);
-
-      // Build final traction vector
-      computeGlobalTraction(node);
-    }
-
     // End of CZM bilinear computations
+    if (_dof_to_czm_traction.find(node) == _dof_to_czm_traction.end())
+      return;
 
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))

@@ -17,7 +17,7 @@
  */
 class BilinearMixedModeCohesiveZoneModel : virtual public PenaltyWeightedGapUserObject,
                                            virtual public WeightedVelocitiesUserObject,
-                                           virtual PenaltySimpleCohesiveZoneModel
+                                           virtual public PenaltySimpleCohesiveZoneModel
 {
 public:
   static InputParameters validParams();

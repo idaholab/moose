@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26283'
-  design = 'UserObjects/PenaltySimpleCohesiveZoneModel.md'
+  design = 'userobjects/PenaltySimpleCohesiveZoneModel.md userobjects/BilinearMixedModeCohesiveZoneModel.md'
   [only_czm]
     type = Exodiff
     input = bilinear_mixed_mortar_only_czm.i

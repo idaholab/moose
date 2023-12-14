@@ -61,7 +61,7 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
-
+  allow_renumbering = false
 []
 
 [GlobalParams]
