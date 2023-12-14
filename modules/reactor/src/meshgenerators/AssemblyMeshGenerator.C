@@ -422,9 +422,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
   }
-  // If mesh generation should be bypassed, then store the input meshes to free later
+  // If mesh generation should be bypassed, call getMeshes to resolve MeshGeneratorSystem
+  // dependencies
   else
-    _mesh_ptrs = getMeshes("inputs");
+    auto input_meshes = getMeshes("inputs");
 
   generateMetadata();
 }

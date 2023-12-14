@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "CastUniquePointer.h"
 #include "libmesh/elem.h"
 
 namespace RGMB

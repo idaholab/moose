@@ -189,7 +189,7 @@
     expect_out = 'Global metadata.+mesh_dimensions: 2.+mesh_geometry: Hex.+Core-level metadata.+cmg.+peripheral_ring_radius: 7.+peripheral_ring_region_id: 5.+assembly_names: amg1.+assembly_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin1.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
   []
   [hex_metadata_2d_bypass_meshgen]
-    requirement = 'The system shall output reactor-related metadata to for a full 3D hexagonal core mesh in data driven mode and default mesh as the final generator'
+    requirement = 'The system shall output reactor-related metadata to for a 2D hexagonal core mesh in data driven mode and default mesh as the final generator'
     type = 'JSONDiff'
     input = 'core_hex_2d_datadriven.i'
     jsondiff = 'core_hex_2d_datadriven_out.json'

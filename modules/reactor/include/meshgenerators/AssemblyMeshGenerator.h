@@ -46,9 +46,6 @@ protected:
   ///The number of divisions in the meshes of the ducts
   const std::vector<unsigned int> _duct_intervals;
 
-  ///Temporary container for mesh pointers pointing to input meshes
-  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
-
   ///Vector used to set the "region_id" extra-element integer of the assembly background elements
   std::vector<subdomain_id_type> _background_region_id;
 
