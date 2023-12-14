@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeneralReporter.h"
+#include "SnapshotContainerBase.h"
 #include "libmesh/petsc_vector.h"
 
 /**
@@ -18,48 +18,15 @@
  * The whole solution vector is stored, which may contain multiple variables.
  * The saving frequency can be defined using the `execute_on` parameter.
  */
-class SolutionContainer : public GeneralReporter
+class SolutionContainer : public SnapshotContainerBase
 {
 public:
   static InputParameters validParams();
   SolutionContainer(const InputParameters & parameters);
-  virtual void initialSetup() override;
-  virtual void initialize() override {}
-  virtual void execute() override;
-  virtual void finalize() override {}
-
-  /// Return the whole solution container
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & getContainer()
-  {
-    return _accumulated_solutions;
-  }
-
-  /**
-   * Return one of the stored solution vectors
-   * @param local_i The index of the locally stored solution vector
-   */
-  const std::unique_ptr<NumericVector<Number>> & getSolution(unsigned int local_i) const;
-
-  /**
-   * Return the type of the system whose solution is collected
-   */
-  const MooseEnum & systemType() const { return _system_type; }
-
-  /**
-   * Return the number of the nonlinear system whose solution is collected
-   */
-  unsigned int nonlinearSystemNumber() const { return _nonlinear_system_number; }
 
 protected:
-  /// Dynamic container for solution vectors. We store pointers to make sure that the change in size
-  /// comes with little overhead. This is a reference because we need it to be restartable for
-  /// stochastic runs in batch mode.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _accumulated_solutions;
-
+  virtual std::unique_ptr<NumericVector<Number>> collectSnapshot() override;
   /// Enum to switch between collecting the solution vectors of auxiliary and nonlinear
   /// systems
   const MooseEnum _system_type;
-
-  /// The nonlinear system's number whose solution shall be collected
-  const unsigned int _nonlinear_system_number;
 };
