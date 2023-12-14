@@ -14,7 +14,7 @@
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", HexagonalGridDivision);
+registerMooseObject("ReactorApp", HexagonalGridDivision);
 
 InputParameters
 HexagonalGridDivision::validParams()
@@ -166,10 +166,12 @@ HexagonalGridDivision::divisionIndex(const Point & pt) const
   for (const auto jz : make_range(_nz + 1))
   {
     const auto border_z = _min_z + (_max_z - _min_z) * jz / _nz;
-    if (jz > 0 && jz < _nz && MooseUtils::absoluteFuzzyEqual(border_z, pc(2)))
+    if (jz > 0 && jz < _nz && MooseUtils::absoluteFuzzyEqual(border_z, pc(_z_axis_index)))
       mooseWarning(
           "Querying the division index for a point of a boundary between two regions in Z: " +
-          Moose::stringify(pt));
+              Moose::stringify(pt),
+          ", in local hex grid frame: ",
+          Moose::stringify(pc));
     if (border_z >= pc(_z_axis_index))
     {
       iz = (jz > 0) ? jz - 1 : 0;
