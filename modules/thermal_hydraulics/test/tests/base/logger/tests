@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LogWarningComponent.md'
+  design = 'syntax/Components/index.md'
   issues = '#19747'
   [warning]
     type = 'RunApp'
