@@ -19,11 +19,15 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "JsonSyntaxTree.h"
+#include "FileLineInfo.h"
 #include "pcrecpp.h"
+#include "hit.h"
 #include "waspcore/utils.h"
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <functional>
 
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app), _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this))
@@ -32,6 +36,15 @@ MooseServer::MooseServer(MooseApp & moose_app)
   server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
   server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
   server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
+
+  // notify completion, symbol, formatting, definition capabilities support
+  server_capabilities[wasp::lsp::m_completion_provider] = wasp::DataObject();
+  server_capabilities[wasp::lsp::m_completion_provider][wasp::lsp::m_resolve_provider] = false;
+  server_capabilities[wasp::lsp::m_doc_symbol_provider] = true;
+  server_capabilities[wasp::lsp::m_doc_format_provider] = true;
+  server_capabilities[wasp::lsp::m_definition_provider] = true;
+  server_capabilities[wasp::lsp::m_references_provider] = false;
+  server_capabilities[wasp::lsp::m_hover_provider] = false;
 }
 
 bool
@@ -39,8 +52,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 {
   // strip prefix from document uri if it exists to get parse file path
   std::string parse_file_path = document_path;
-  if (parse_file_path.rfind(wasp::lsp::m_uri_prefix, 0) == 0)
-    parse_file_path.erase(0, std::string(wasp::lsp::m_uri_prefix).size());
+  pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
   // copy parent application parameters and modify to set up input check
   InputParameters app_params = _moose_app.parameters();
@@ -393,9 +405,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
     std::string dirty_type = valid_params.type(param_name);
     std::string clean_type = MooseUtils::prettyCppType(dirty_type);
     std::string basic_type = JsonSyntaxTree::basicCppType(clean_type);
-    bool is_require = valid_params.isParamRequired(param_name);
-    std::string doc_string =
-        (is_require ? "(REQUIRED) " : "           ") + valid_params.getDocString(param_name);
+    std::string doc_string = valid_params.getDocString(param_name);
     MooseUtils::escape(doc_string);
 
     // use basic type to decide if parameter is array and quotes are needed
@@ -403,6 +413,12 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
 
     // remove any array prefixes from basic type string and leave base type
     pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
+
+    // prepare clean cpp type string to be used for key to find input paths
+    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+    // decide completion item kind that client may use to display list icon
+    int complete_kind = getCompletionItemKind(valid_params, param_name, clean_type, true);
 
     // default value for completion to be built using parameter information
     std::string default_value;
@@ -473,7 +489,7 @@ MooseServer::addParametersToList(wasp::DataArray & completionItems,
                                              request_line,
                                              request_char,
                                              embed_text,
-                                             1,
+                                             complete_kind,
                                              "",
                                              doc_string,
                                              false,
@@ -527,17 +543,20 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
     {
       std::string doc_string;
       std::string embed_text;
+      int complete_kind;
 
       // customize description and insert text for star and named subblocks
       if (subblock_name == "*")
       {
-        doc_string = "           custom user named block";
+        doc_string = "custom user named block";
         embed_text = "[block_name]\n  \n[]";
+        complete_kind = wasp::lsp::m_comp_kind_variable;
       }
       else
       {
-        doc_string = "           application named block";
+        doc_string = "application named block";
         embed_text = "[" + subblock_name + "]\n  \n[]";
+        complete_kind = wasp::lsp::m_comp_kind_struct;
       }
 
       // add subblock name, insert text, and description to completion list
@@ -551,7 +570,7 @@ MooseServer::addSubblocksToList(wasp::DataArray & completionItems,
                                                request_line,
                                                request_char,
                                                embed_text,
-                                               1,
+                                               complete_kind,
                                                "",
                                                doc_string,
                                                false,
@@ -583,6 +602,12 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
   // remove any array prefixes from basic type string and replace with base
   pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
+
+  // prepare clean cpp type string to be used for a key to find input paths
+  pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+  // decide completion item kind that client may use to display a list icon
+  int complete_kind = getCompletionItemKind(valid_params, param_name, clean_type, false);
 
   // map used to gather options and descriptions for value completion items
   std::map<std::string, std::string> options_and_descs;
@@ -650,9 +675,6 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
       }
     }
 
-    // prepare clean cpp type string to be used for key finding input paths
-    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
-
     // check for input lookup paths that are associated with parameter type
     const auto & input_path_iter = _type_to_input_paths.find(clean_type);
 
@@ -697,7 +719,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              replace_line_end,
                                              replace_char_end,
                                              option,
-                                             1,
+                                             complete_kind,
                                              "",
                                              dscrpt,
                                              false,
@@ -721,13 +743,177 @@ MooseServer::getEnumsAndDocs(MooseEnumType & moose_enum_param,
 }
 
 bool
-MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & /* definitionLocations */,
-                                               int /* line */,
-                                               int /* character */)
+MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocations,
+                                               int line,
+                                               int character)
+{
+  Factory & factory = _check_app->getFactory();
+
+  // return without any definition locations added when parser root is null
+  if (!_check_app || !_check_app->parser()._root ||
+      _check_app->parser()._root->getNodeView().is_null())
+    return true;
+
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // return without any definition locations added when node not value type
+  if (request_context.type() != wasp::VALUE)
+    return true;
+
+  // get name of parameter node parent of value and value string from input
+  std::string param_name = request_context.has_parent() ? request_context.parent().name() : "";
+  std::string val_string = request_context.last_as_string();
+
+  // add source code location if type parameter with registered object name
+  if (param_name == "type" && factory.isRegistered(val_string))
+  {
+    // get file path and line number of source code registering object type
+    FileLineInfo file_line_info = factory.getLineInfo(val_string);
+
+    // return without any definition locations added if file cannot be read
+    if (!file_line_info.isValid() ||
+        !MooseUtils::checkFileReadable(file_line_info.file(), false, false, false))
+      return true;
+
+    // add file scheme prefix to front of file path to build definition uri
+    auto location_uri = wasp::lsp::m_uri_prefix + file_line_info.file();
+
+    // add file uri and zero based line and column range to definition list
+    definitionLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = definitionLocations.back().to_object();
+    return wasp::lsp::buildLocationObject(*location,
+                                          errors,
+                                          location_uri,
+                                          file_line_info.line() - 1,
+                                          0,
+                                          file_line_info.line() - 1,
+                                          1000);
+  }
+
+  // get object context and value of type parameter for request if provided
+  wasp::HITNodeView object_context = request_context;
+  while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  const std::string & object_path = object_context.path();
+  wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+  const std::string & object_type = type_node.is_null() ? "" : type_node.last_as_string();
+
+  // set used to gather all parameters valid from object context of request
+  InputParameters valid_params = emptyInputParameters();
+
+  // set used to gather MooseObjectAction tasks to verify object parameters
+  std::set<std::string> obj_act_tasks;
+
+  // get set of global parameters, action parameters, and object parameters
+  getAllValidParameters(valid_params, object_path, object_type, obj_act_tasks);
+
+  // set used to gather nodes from input lookups custom sorted by locations
+  SortedLocationNodes location_nodes(
+      [](const wasp::HITNodeView & l, const wasp::HITNodeView & r)
+      {
+        const std::string & l_file = l.node_pool()->stream_name();
+        const std::string & r_file = r.node_pool()->stream_name();
+        return (l_file < r_file || (l_file == r_file && l.line() < r.line()) ||
+                (l_file == r_file && l.line() == r.line() && l.column() < r.column()));
+      });
+
+  // gather all lookup path nodes matching value if parameter name is valid
+  for (const auto & valid_params_iter : valid_params)
+  {
+    if (valid_params_iter.first == param_name)
+    {
+      // get cpp type and prepare string for use as key finding input paths
+      std::string dirty_type = valid_params.type(param_name);
+      std::string clean_type = MooseUtils::prettyCppType(dirty_type);
+      pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &clean_type);
+
+      // get set of nodes from associated path lookups matching input value
+      getInputLookupDefinitionNodes(location_nodes, clean_type, val_string);
+      break;
+    }
+  }
+
+  // add parameter declarator to set if none were gathered by input lookups
+  if (location_nodes.empty() && request_context.has_parent() &&
+      request_context.parent().child_count_by_name("decl"))
+    location_nodes.insert(request_context.parent().first_child_by_name("decl"));
+
+  // add locations to definition list using lookups or parameter declarator
+  return addLocationNodesToList(definitionLocations, location_nodes);
+}
+
+void
+MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
+                                           const std::string & clean_type,
+                                           const std::string & val_string)
+{
+  Syntax & syntax = _check_app->syntax();
+
+  // build map from parameter types to input lookup paths and save to reuse
+  if (_type_to_input_paths.empty())
+  {
+    for (const auto & associated_types_iter : syntax.getAssociatedTypes())
+    {
+      const std::string & type = associated_types_iter.second;
+      const std::string & path = associated_types_iter.first;
+      _type_to_input_paths[type].insert(path);
+    }
+  }
+
+  // find set of input lookup paths that are associated with parameter type
+  const auto & input_path_iter = _type_to_input_paths.find(clean_type);
+
+  // return without any definition locations added when no paths associated
+  if (input_path_iter == _type_to_input_paths.end())
+    return;
+
+  // get root node from input to use in input lookups with associated paths
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+
+  // walk over all syntax paths that are associated with parameter type
+  for (const auto & input_path : input_path_iter->second)
+  {
+    // use wasp siren to gather all nodes from current lookup path in input
+    wasp::SIRENInterpreter<> selector;
+    if (!selector.parseString(input_path))
+      continue;
+    wasp::SIRENResultSet<wasp::HITNodeView> results;
+    std::size_t count = selector.evaluate(view_root, results);
+
+    // walk over results and add nodes that have name matching value to set
+    for (std::size_t i = 0; i < count; i++)
+      if (results.adapted(i).type() == wasp::OBJECT && results.adapted(i).name() == val_string &&
+          results.adapted(i).child_count_by_name("decl"))
+        location_nodes.insert(results.adapted(i).first_child_by_name("decl"));
+  }
+}
+
+bool
+MooseServer::addLocationNodesToList(wasp::DataArray & definitionLocations,
+                                    const SortedLocationNodes & location_nodes)
 {
   bool pass = true;
 
-  // TODO - hook up this capability by adding server specific logic here
+  // walk over set of nodes with locations to add and build definition list
+  for (const auto & location_nodes_iter : location_nodes)
+  {
+    // add file scheme prefix to front of file path to build definition uri
+    auto location_uri = wasp::lsp::m_uri_prefix + location_nodes_iter.node_pool()->stream_name();
+
+    // add file uri and zero based line and column range to definition list
+    definitionLocations.push_back(wasp::DataObject());
+    wasp::DataObject * location = definitionLocations.back().to_object();
+    pass &= wasp::lsp::buildLocationObject(*location,
+                                           errors,
+                                           location_uri,
+                                           location_nodes_iter.line() - 1,
+                                           location_nodes_iter.column() - 1,
+                                           location_nodes_iter.last_line() - 1,
+                                           location_nodes_iter.last_column());
+  }
 
   return pass;
 }
@@ -746,14 +932,48 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLo
 }
 
 bool
-MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTextEdits */,
-                                               int /* tab_size */,
+MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextEdits,
+                                               int tab_size,
                                                bool /* insert_spaces */)
 {
-  bool pass = true;
+  // return without adding any formatting text edits if parser root is null
+  if (!_check_app || !_check_app->parser()._root ||
+      _check_app->parser()._root->getNodeView().is_null())
+    return true;
 
-  // TODO - hook up this capability by adding server specific logic here
+  // get input root node line and column range to represent entire document
+  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  int document_start_line = view_root.line() - 1;
+  int document_start_char = view_root.column() - 1;
+  int document_last_line = view_root.last_line() - 1;
+  int document_last_char = view_root.last_column();
 
+  // lambda that traverses hit tree clearing legacy markers and blank lines
+  std::function<void(hit::Section *)> format_document = [&](hit::Section * section)
+  {
+    section->clearLegacyMarkers();
+    for (auto child : section->children())
+      if (child->type() == hit::NodeType::Blank)
+        delete child;
+      else if (child->type() == hit::NodeType::Section)
+        format_document(static_cast<hit::Section *>(child));
+  };
+
+  // clear legacy markers and blank lines, use tab size to render, and trim
+  format_document(static_cast<hit::Section *>(_check_app->parser()._root.get()));
+  std::string document_format = _check_app->parser()._root->render(0, std::string(tab_size, ' '));
+  document_format = MooseUtils::trim(document_format);
+
+  // add formatted text with whole line and column range to formatting list
+  formattingTextEdits.push_back(wasp::DataObject());
+  wasp::DataObject * item = formattingTextEdits.back().to_object();
+  bool pass = wasp::lsp::buildTextEditObject(*item,
+                                             errors,
+                                             document_start_line,
+                                             document_start_char,
+                                             document_last_line,
+                                             document_last_char,
+                                             document_format);
   return pass;
 }
 
@@ -770,28 +990,21 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
   bool pass = true;
 
   // walk over all children of root node context and build document symbols
-  for (auto itr = view_root.begin(); itr != view_root.end(); itr.next())
+  for (const auto i : make_range(view_root.child_count()))
   {
-    wasp::HITNodeView view_child = itr.get();
+    // walk must be index based to catch file include and skip its children
+    wasp::HITNodeView view_child = view_root.child_at(i);
 
-    // get child name / detail / line / column / last_line / last_column
+    // set up name, zero based line and column range, kind, and detail info
     std::string name = view_child.name();
+    int line = view_child.line() - 1;
+    int column = view_child.column() - 1;
+    int last_line = view_child.last_line() - 1;
+    int last_column = view_child.last_column();
+    int symbol_kind = getDocumentSymbolKind(view_child);
     std::string detail = !view_child.first_child_by_name("type").is_null()
                              ? view_child.first_child_by_name("type").last_as_string()
                              : "";
-    int line = view_child.line();
-    int column = view_child.column();
-    int last_line = view_child.last_line();
-    int last_column = view_child.last_column();
-
-    // according to the protocol line and column number are zero based
-    line--;
-    column--;
-    last_line--;
-    last_column--;
-
-    // according to the protocol last_column is right AFTER last character
-    last_column++;
 
     // build document symbol object from node child info and push to array
     documentSymbols.push_back(wasp::DataObject());
@@ -800,7 +1013,7 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
                                                  errors,
                                                  name,
                                                  detail,
-                                                 1,
+                                                 symbol_kind,
                                                  false,
                                                  line,
                                                  column,
@@ -822,31 +1035,28 @@ bool
 MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                              wasp::DataObject & data_parent)
 {
+  // return without adding any children if parent node is file include type
+  if (wasp::is_nested_file(view_parent))
+    return true;
+
   bool pass = true;
 
   // walk over all children of this node context and build document symbols
-  for (auto itr = view_parent.begin(); itr != view_parent.end(); itr.next())
+  for (const auto i : make_range(view_parent.child_count()))
   {
-    wasp::HITNodeView view_child = itr.get();
+    // walk must be index based to catch file include and skip its children
+    wasp::HITNodeView view_child = view_parent.child_at(i);
 
-    // get child name / detail / line / column / last_line / last_column
+    // set up name, zero based line and column range, kind, and detail info
     std::string name = view_child.name();
+    int line = view_child.line() - 1;
+    int column = view_child.column() - 1;
+    int last_line = view_child.last_line() - 1;
+    int last_column = view_child.last_column();
+    int symbol_kind = getDocumentSymbolKind(view_child);
     std::string detail = !view_child.first_child_by_name("type").is_null()
                              ? view_child.first_child_by_name("type").last_as_string()
                              : "";
-    int line = view_child.line();
-    int column = view_child.column();
-    int last_line = view_child.last_line();
-    int last_column = view_child.last_column();
-
-    // according to the protocol line and column number are zero based
-    line--;
-    column--;
-    last_line--;
-    last_column--;
-
-    // according to the protocol last_column is right AFTER last character
-    last_column++;
 
     // build document symbol object from node child info and push to array
     wasp::DataObject & data_child = wasp::lsp::addDocumentSymbolChild(data_parent);
@@ -854,7 +1064,7 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                                  errors,
                                                  name,
                                                  detail,
-                                                 1,
+                                                 symbol_kind,
                                                  false,
                                                  line,
                                                  column,
@@ -870,4 +1080,72 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
   }
 
   return pass;
+}
+
+int
+MooseServer::getCompletionItemKind(const InputParameters & valid_params,
+                                   const std::string & param_name,
+                                   const std::string & clean_type,
+                                   bool is_param)
+{
+  // set up completion item kind value that client may use for icon in list
+  auto associated_types = _check_app->syntax().getAssociatedTypes();
+  if (is_param && valid_params.isParamRequired(param_name))
+    return wasp::lsp::m_comp_kind_event;
+  else if (param_name == "active" || param_name == "inactive")
+    return wasp::lsp::m_comp_kind_class;
+  else if (clean_type == "bool")
+    return wasp::lsp::m_comp_kind_interface;
+  else if (valid_params.have_parameter<MooseEnum>(param_name) ||
+           valid_params.have_parameter<MultiMooseEnum>(param_name) ||
+           valid_params.have_parameter<ExecFlagEnum>(param_name) ||
+           valid_params.have_parameter<std::vector<MooseEnum>>(param_name))
+    return is_param ? wasp::lsp::m_comp_kind_enum : wasp::lsp::m_comp_kind_enum_member;
+  else if (param_name == "type")
+    return wasp::lsp::m_comp_kind_type_param;
+  else if (std::find_if(associated_types.begin(),
+                        associated_types.end(),
+                        [&](const auto & entry)
+                        { return entry.second == clean_type; }) != associated_types.end())
+    return wasp::lsp::m_comp_kind_reference;
+  else
+    return is_param ? wasp::lsp::m_comp_kind_keyword : wasp::lsp::m_comp_kind_value;
+}
+
+int
+MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
+{
+  // lambdas that check if parameter is a boolean or number for symbol kind
+  auto is_boolean = [](wasp::HITNodeView symbol_node)
+  {
+    bool convert;
+    std::istringstream iss(MooseUtils::toLower(symbol_node.last_as_string()));
+    return (iss >> std::boolalpha >> convert && !iss.fail());
+  };
+  auto is_number = [](wasp::HITNodeView symbol_node)
+  {
+    double convert;
+    std::istringstream iss(symbol_node.last_as_string());
+    return (iss >> convert && iss.eof());
+  };
+
+  // set up document symbol kind value that client may use for outline icon
+  if (symbol_node.type() == wasp::OBJECT)
+    return wasp::lsp::m_symbol_kind_struct;
+  else if (symbol_node.type() == wasp::FILE)
+    return wasp::lsp::m_symbol_kind_file;
+  else if (symbol_node.type() == wasp::ARRAY)
+    return wasp::lsp::m_symbol_kind_array;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && symbol_node.name() == std::string("type"))
+    return wasp::lsp::m_symbol_kind_type_param;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && is_boolean(symbol_node))
+    return wasp::lsp::m_symbol_kind_boolean;
+  else if (symbol_node.type() == wasp::KEYED_VALUE && is_number(symbol_node))
+    return wasp::lsp::m_symbol_kind_number;
+  else if (symbol_node.type() == wasp::KEYED_VALUE)
+    return wasp::lsp::m_symbol_kind_key;
+  else if (symbol_node.type() == wasp::VALUE)
+    return wasp::lsp::m_symbol_kind_string;
+  else
+    return wasp::lsp::m_symbol_kind_property;
 }

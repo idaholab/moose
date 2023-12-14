@@ -13,6 +13,7 @@
 #include "MooseApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "pcrecpp.h"
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
 #include "wasplsp/SymbolIterator.h"
@@ -53,6 +54,9 @@ protected:
                                                      diagnostic_source,
                                                      diagnostic_message));
 
+      // trim any ending whitespace off message which is guaranteed non-empty
+      diagnostic_message.erase(diagnostic_message.find_last_not_of(" \t") + 1);
+
       diagnostics_stream << "line:" << diagnostic_start_line
                          << " column:" << diagnostic_start_character << " - " << diagnostic_message
                          << "\n";
@@ -70,7 +74,37 @@ protected:
     {
       si.moveToChildAt(indices.back());
       indices.push_back(-1);
-      paths_stream << si.getPath() << "\n";
+
+      std::string symbol_name;
+      std::string symbol_detail;
+      int symbol_kind;
+      bool symbol_deprecated;
+      int symbol_start_line;
+      int symbol_start_character;
+      int symbol_end_line;
+      int symbol_end_character;
+      int symbol_selection_start_line;
+      int symbol_selection_start_character;
+      int symbol_selection_end_line;
+      int symbol_selection_end_character;
+
+      EXPECT_TRUE(si.dissectCurrentSymbol(symbol_name,
+                                          symbol_detail,
+                                          symbol_kind,
+                                          symbol_deprecated,
+                                          symbol_start_line,
+                                          symbol_start_character,
+                                          symbol_end_line,
+                                          symbol_end_character,
+                                          symbol_selection_start_line,
+                                          symbol_selection_start_character,
+                                          symbol_selection_end_line,
+                                          symbol_selection_end_character));
+
+      paths_stream << std::setw(34) << std::left << si.getPath() << " detail: " << std::setw(13)
+                   << std::left << symbol_detail << " kind: " << std::setw(2) << std::right
+                   << symbol_kind << "\n";
+
       if (si.getChildSize() == 0)
       {
         while (indices.back() + 1 == (int)si.getChildSize() && si.moveToParent())
@@ -94,6 +128,7 @@ protected:
       int start_character;
       int end_line;
       int end_character;
+      int kind;
     };
 
     std::vector<CompletionInfo> completions;
@@ -134,9 +169,9 @@ protected:
 
       // truncate long descriptions and escape text newlines for easy viewing
 
-      if (completion_documentation.length() > 50)
+      if (completion_documentation.length() > 40)
       {
-        completion_documentation.resize(47);
+        completion_documentation.resize(37);
         completion_documentation += "...";
       }
 
@@ -157,7 +192,8 @@ protected:
                              completion_start_line,
                              completion_start_character,
                              completion_end_line,
-                             completion_end_character});
+                             completion_end_character,
+                             completion_kind});
     }
 
     for (const auto & completion : completions)
@@ -167,7 +203,76 @@ protected:
                          << " desc: " << std::setw(max_doc) << std::left << completion.documentation
                          << " pos: [" << completion.start_line << "." << completion.start_character
                          << "]-[" << completion.end_line << "." << completion.end_character << "]"
-                         << "\n";
+                         << " kind: " << std::setw(2) << std::right << completion.kind << "\n";
+    }
+  }
+
+  // traverse locations and make formatted list for easy testing and viewing
+  void format_locations(const wasp::DataArray & locations_array,
+                        std::ostringstream & locations_stream) const
+  {
+    std::string uri_pattern = "(" + std::string(wasp::lsp::m_uri_prefix) + ")(/.*/framework/)(.*)";
+    std::string uri_replace = "\\1...absolute.../framework/\\3";
+
+    std::size_t locations_size = locations_array.size();
+
+    for (std::size_t i = 0; i < locations_size; i++)
+    {
+      std::stringstream location_errors;
+      std::string location_uri;
+      int location_start_line;
+      int location_start_character;
+      int location_end_line;
+      int location_end_character;
+
+      EXPECT_TRUE(wasp::lsp::dissectLocationObject(*(locations_array.at(i).to_object()),
+                                                   location_errors,
+                                                   location_uri,
+                                                   location_start_line,
+                                                   location_start_character,
+                                                   location_end_line,
+                                                   location_end_character));
+
+      // remove machine specific parts from absolute path for source code uri
+
+      pcrecpp::RE(uri_pattern).Replace(uri_replace, &location_uri);
+
+      locations_stream << "document_uri: \"" << location_uri << "\""
+                       << "    definition_start: [" << location_start_line << "."
+                       << location_start_character << "]    definition_end: [" << location_end_line
+                       << "." << location_end_character << "]"
+                       << "\n";
+    }
+  }
+
+  // traverse textedits and make formatted list for easy testing and viewing
+  void format_textedits(const wasp::DataArray & textedits_array,
+                        std::ostringstream & textedits_stream) const
+  {
+    std::size_t textedits_size = textedits_array.size();
+
+    for (std::size_t i = 0; i < textedits_size; i++)
+    {
+      std::stringstream textedit_errors;
+      int textedit_beg_line;
+      int textedit_beg_char;
+      int textedit_end_line;
+      int textedit_end_char;
+      std::string textedit_new_text;
+
+      EXPECT_TRUE(wasp::lsp::dissectTextEditObject(*(textedits_array.at(i).to_object()),
+                                                   textedit_errors,
+                                                   textedit_beg_line,
+                                                   textedit_beg_char,
+                                                   textedit_end_line,
+                                                   textedit_end_char,
+                                                   textedit_new_text));
+
+      textedits_stream << "textedit_position:"
+                       << " [" << textedit_beg_line << "." << textedit_beg_char << "]"
+                       << "-[" << textedit_end_line << "." << textedit_end_char << "]\n"
+                       << "textedit_new_text:\n"
+                       << textedit_new_text << "\n";
     }
   }
 
@@ -238,11 +343,39 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close].is_bool());
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close].to_bool());
+  EXPECT_EQ(7u, server_capabilities.size());
 
-  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change].is_int());
-  EXPECT_EQ(1, server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change].to_int());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync].is_object());
+  const auto & text_doc_sync_caps = *(server_capabilities[wasp::lsp::m_text_doc_sync].to_object());
+  EXPECT_EQ(2u, text_doc_sync_caps.size());
+
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_open_close].is_bool());
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_open_close].to_bool());
+
+  EXPECT_TRUE(text_doc_sync_caps[wasp::lsp::m_change].is_int());
+  EXPECT_EQ(wasp::lsp::m_change_full, text_doc_sync_caps[wasp::lsp::m_change].to_int());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_completion_provider].is_object());
+  const auto & comp_caps = *(server_capabilities[wasp::lsp::m_completion_provider].to_object());
+  EXPECT_EQ(1u, comp_caps.size());
+
+  EXPECT_TRUE(comp_caps[wasp::lsp::m_resolve_provider].is_bool());
+  EXPECT_FALSE(comp_caps[wasp::lsp::m_resolve_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_symbol_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_symbol_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_format_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_doc_format_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_definition_provider].is_bool());
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_definition_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_references_provider].is_bool());
+  EXPECT_FALSE(server_capabilities[wasp::lsp::m_references_provider].to_bool());
+
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].is_bool());
+  EXPECT_FALSE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
 
   // build initialized notification which takes no extra parameters
 
@@ -394,93 +527,93 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
   // expected paths with zero-based lines and columns - note variable u twice
 
   std::string paths_expect = R"INPUT(
-/Mesh (1:0)
-/Mesh/[ (1:0)
-/Mesh/decl (1:1)
-/Mesh/] (1:5)
-/Mesh/type (2:2)
-/Mesh/type/decl (2:2)
-/Mesh/type/= (2:7)
-/Mesh/type/value (2:9)
-/Mesh/dim (3:2)
-/Mesh/dim/decl (3:2)
-/Mesh/dim/= (3:6)
-/Mesh/dim/value (3:8)
-/Mesh/term (4:0)
-/Variables (5:0)
-/Variables/[ (5:0)
-/Variables/decl (5:1)
-/Variables/] (5:10)
-/Variables/u (6:2)
-/Variables/u/[ (6:2)
-/Variables/u/decl (6:3)
-/Variables/u/] (6:4)
-/Variables/u/order (7:4)
-/Variables/u/order/decl (7:4)
-/Variables/u/order/= (7:10)
-/Variables/u/order/value (7:12)
-/Variables/u/family (8:4)
-/Variables/u/family/decl (8:4)
-/Variables/u/family/= (8:11)
-/Variables/u/family/value (8:13)
-/Variables/u/term (9:2)
-/Variables/u (10:2)
-/Variables/u/[ (10:2)
-/Variables/u/decl (10:3)
-/Variables/u/] (10:4)
-/Variables/u/order (11:4)
-/Variables/u/order/decl (11:4)
-/Variables/u/order/= (11:10)
-/Variables/u/order/value (11:12)
-/Variables/u/family (12:4)
-/Variables/u/family/decl (12:4)
-/Variables/u/family/= (12:11)
-/Variables/u/family/value (12:13)
-/Variables/u/term (13:2)
-/Variables/term (14:0)
-/BCs (15:0)
-/BCs/[ (15:0)
-/BCs/decl (15:1)
-/BCs/] (15:4)
-/BCs/all (16:2)
-/BCs/all/[ (16:2)
-/BCs/all/decl (16:3)
-/BCs/all/] (16:6)
-/BCs/all/type (17:4)
-/BCs/all/type/decl (17:4)
-/BCs/all/type/= (17:9)
-/BCs/all/type/value (17:11)
-/BCs/all/boundary (18:4)
-/BCs/all/boundary/decl (18:4)
-/BCs/all/boundary/= (18:13)
-/BCs/all/boundary/' (18:15)
-/BCs/all/boundary/value (18:16)
-/BCs/all/boundary/value (18:21)
-/BCs/all/boundary/' (18:26)
-/BCs/all/variable (19:4)
-/BCs/all/variable/decl (19:4)
-/BCs/all/variable/= (19:13)
-/BCs/all/variable/value (19:15)
-/BCs/all/term (20:2)
-/BCs/term (21:0)
-/Executioner (22:0)
-/Executioner/[ (22:0)
-/Executioner/decl (22:1)
-/Executioner/] (22:12)
-/Executioner/type (23:2)
-/Executioner/type/decl (23:2)
-/Executioner/type/= (23:7)
-/Executioner/type/value (23:9)
-/Executioner/term (24:0)
-/Problem (25:0)
-/Problem/[ (25:0)
-/Problem/decl (25:1)
-/Problem/] (25:8)
-/Problem/solve (26:2)
-/Problem/solve/decl (26:2)
-/Problem/solve/= (26:8)
-/Problem/solve/value (26:10)
-/Problem/term (27:0)
+/Mesh (1:0)                        detail: GeneratedMesh kind: 23
+/Mesh/[ (1:0)                      detail:               kind:  7
+/Mesh/decl (1:1)                   detail:               kind:  7
+/Mesh/] (1:5)                      detail:               kind:  7
+/Mesh/type (2:2)                   detail:               kind: 26
+/Mesh/type/decl (2:2)              detail:               kind:  7
+/Mesh/type/= (2:7)                 detail:               kind:  7
+/Mesh/type/value (2:9)             detail:               kind: 15
+/Mesh/dim (3:2)                    detail:               kind: 16
+/Mesh/dim/decl (3:2)               detail:               kind:  7
+/Mesh/dim/= (3:6)                  detail:               kind:  7
+/Mesh/dim/value (3:8)              detail:               kind: 15
+/Mesh/term (4:0)                   detail:               kind:  7
+/Variables (5:0)                   detail:               kind: 23
+/Variables/[ (5:0)                 detail:               kind:  7
+/Variables/decl (5:1)              detail:               kind:  7
+/Variables/] (5:10)                detail:               kind:  7
+/Variables/u (6:2)                 detail:               kind: 23
+/Variables/u/[ (6:2)               detail:               kind:  7
+/Variables/u/decl (6:3)            detail:               kind:  7
+/Variables/u/] (6:4)               detail:               kind:  7
+/Variables/u/order (7:4)           detail:               kind: 20
+/Variables/u/order/decl (7:4)      detail:               kind:  7
+/Variables/u/order/= (7:10)        detail:               kind:  7
+/Variables/u/order/value (7:12)    detail:               kind: 15
+/Variables/u/family (8:4)          detail:               kind: 20
+/Variables/u/family/decl (8:4)     detail:               kind:  7
+/Variables/u/family/= (8:11)       detail:               kind:  7
+/Variables/u/family/value (8:13)   detail:               kind: 15
+/Variables/u/term (9:2)            detail:               kind:  7
+/Variables/u (10:2)                detail:               kind: 23
+/Variables/u/[ (10:2)              detail:               kind:  7
+/Variables/u/decl (10:3)           detail:               kind:  7
+/Variables/u/] (10:4)              detail:               kind:  7
+/Variables/u/order (11:4)          detail:               kind: 20
+/Variables/u/order/decl (11:4)     detail:               kind:  7
+/Variables/u/order/= (11:10)       detail:               kind:  7
+/Variables/u/order/value (11:12)   detail:               kind: 15
+/Variables/u/family (12:4)         detail:               kind: 20
+/Variables/u/family/decl (12:4)    detail:               kind:  7
+/Variables/u/family/= (12:11)      detail:               kind:  7
+/Variables/u/family/value (12:13)  detail:               kind: 15
+/Variables/u/term (13:2)           detail:               kind:  7
+/Variables/term (14:0)             detail:               kind:  7
+/BCs (15:0)                        detail:               kind: 23
+/BCs/[ (15:0)                      detail:               kind:  7
+/BCs/decl (15:1)                   detail:               kind:  7
+/BCs/] (15:4)                      detail:               kind:  7
+/BCs/all (16:2)                    detail: VacuumBC      kind: 23
+/BCs/all/[ (16:2)                  detail:               kind:  7
+/BCs/all/decl (16:3)               detail:               kind:  7
+/BCs/all/] (16:6)                  detail:               kind:  7
+/BCs/all/type (17:4)               detail:               kind: 26
+/BCs/all/type/decl (17:4)          detail:               kind:  7
+/BCs/all/type/= (17:9)             detail:               kind:  7
+/BCs/all/type/value (17:11)        detail:               kind: 15
+/BCs/all/boundary (18:4)           detail:               kind: 18
+/BCs/all/boundary/decl (18:4)      detail:               kind:  7
+/BCs/all/boundary/= (18:13)        detail:               kind:  7
+/BCs/all/boundary/' (18:15)        detail:               kind:  7
+/BCs/all/boundary/value (18:16)    detail:               kind: 15
+/BCs/all/boundary/value (18:21)    detail:               kind: 15
+/BCs/all/boundary/' (18:26)        detail:               kind:  7
+/BCs/all/variable (19:4)           detail:               kind: 20
+/BCs/all/variable/decl (19:4)      detail:               kind:  7
+/BCs/all/variable/= (19:13)        detail:               kind:  7
+/BCs/all/variable/value (19:15)    detail:               kind: 15
+/BCs/all/term (20:2)               detail:               kind:  7
+/BCs/term (21:0)                   detail:               kind:  7
+/Executioner (22:0)                detail: Transient     kind: 23
+/Executioner/[ (22:0)              detail:               kind:  7
+/Executioner/decl (22:1)           detail:               kind:  7
+/Executioner/] (22:12)             detail:               kind:  7
+/Executioner/type (23:2)           detail:               kind: 26
+/Executioner/type/decl (23:2)      detail:               kind:  7
+/Executioner/type/= (23:7)         detail:               kind:  7
+/Executioner/type/value (23:9)     detail:               kind: 15
+/Executioner/term (24:0)           detail:               kind:  7
+/Problem (25:0)                    detail:               kind: 23
+/Problem/[ (25:0)                  detail:               kind:  7
+/Problem/decl (25:1)               detail:               kind:  7
+/Problem/] (25:8)                  detail:               kind:  7
+/Problem/solve (26:2)              detail:               kind: 17
+/Problem/solve/decl (26:2)         detail:               kind:  7
+/Problem/solve/= (26:8)            detail:               kind:  7
+/Problem/solve/value (26:10)       detail:               kind: 15
+/Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 
   EXPECT_EQ(paths_expect, "\n" + paths_actual.str());
@@ -586,8 +719,8 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
   std::string diagnostics_expect = R"INPUT(
 line:18 column:0 - (BCs/all/boundary):
 line:18 column:0 -     the following side sets (ids) do not exist on the mesh: top (2), bottom (3)
-line:18 column:0 -     MOOSE distinguishes between "node sets" and "side sets" depending on whether 
-line:18 column:0 -     you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding 
+line:18 column:0 -     MOOSE distinguishes between "node sets" and "side sets" depending on whether
+line:18 column:0 -     you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding
 line:18 column:0 -     to your side sets are constructed for you by default.
 line:18 column:0 -     Try setting "Mesh/construct_side_list_from_node_list=true" if you see this error.
 line:18 column:0 -     Note: If you are running with adaptivity you should prefer using side sets.
@@ -630,95 +763,95 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
   // expected paths with zero-based lines and columns - note bad bcs boundary
 
   std::string paths_expect = R"INPUT(
-/Mesh (1:0)
-/Mesh/[ (1:0)
-/Mesh/decl (1:1)
-/Mesh/] (1:5)
-/Mesh/type (2:2)
-/Mesh/type/decl (2:2)
-/Mesh/type/= (2:7)
-/Mesh/type/value (2:9)
-/Mesh/dim (3:2)
-/Mesh/dim/decl (3:2)
-/Mesh/dim/= (3:6)
-/Mesh/dim/value (3:8)
-/Mesh/term (4:0)
-/Variables (5:0)
-/Variables/[ (5:0)
-/Variables/decl (5:1)
-/Variables/] (5:10)
-/Variables/u (6:2)
-/Variables/u/[ (6:2)
-/Variables/u/decl (6:3)
-/Variables/u/] (6:4)
-/Variables/u/order (7:4)
-/Variables/u/order/decl (7:4)
-/Variables/u/order/= (7:10)
-/Variables/u/order/value (7:12)
-/Variables/u/family (8:4)
-/Variables/u/family/decl (8:4)
-/Variables/u/family/= (8:11)
-/Variables/u/family/value (8:13)
-/Variables/u/term (9:2)
-/Variables/v (10:2)
-/Variables/v/[ (10:2)
-/Variables/v/decl (10:3)
-/Variables/v/] (10:4)
-/Variables/v/order (11:4)
-/Variables/v/order/decl (11:4)
-/Variables/v/order/= (11:10)
-/Variables/v/order/value (11:12)
-/Variables/v/family (12:4)
-/Variables/v/family/decl (12:4)
-/Variables/v/family/= (12:11)
-/Variables/v/family/value (12:13)
-/Variables/v/term (13:2)
-/Variables/term (14:0)
-/BCs (15:0)
-/BCs/[ (15:0)
-/BCs/decl (15:1)
-/BCs/] (15:4)
-/BCs/all (16:2)
-/BCs/all/[ (16:2)
-/BCs/all/decl (16:3)
-/BCs/all/] (16:6)
-/BCs/all/type (17:4)
-/BCs/all/type/decl (17:4)
-/BCs/all/type/= (17:9)
-/BCs/all/type/value (17:11)
-/BCs/all/boundary (18:4)
-/BCs/all/boundary/decl (18:4)
-/BCs/all/boundary/= (18:13)
-/BCs/all/boundary/' (18:15)
-/BCs/all/boundary/value (18:16)
-/BCs/all/boundary/value (18:21)
-/BCs/all/boundary/value (18:27)
-/BCs/all/boundary/value (18:31)
-/BCs/all/boundary/' (18:37)
-/BCs/all/variable (19:4)
-/BCs/all/variable/decl (19:4)
-/BCs/all/variable/= (19:13)
-/BCs/all/variable/value (19:15)
-/BCs/all/term (20:2)
-/BCs/term (21:0)
-/Executioner (22:0)
-/Executioner/[ (22:0)
-/Executioner/decl (22:1)
-/Executioner/] (22:12)
-/Executioner/type (23:2)
-/Executioner/type/decl (23:2)
-/Executioner/type/= (23:7)
-/Executioner/type/value (23:9)
-/Executioner/term (24:0)
-/Problem (25:0)
-/Problem/[ (25:0)
-/Problem/decl (25:1)
-/Problem/] (25:8)
-/Problem/solve (26:2)
-/Problem/solve/decl (26:2)
-/Problem/solve/= (26:8)
-/Problem/solve/value (26:10)
-/Problem/term (27:0)
+/Mesh (1:0)                        detail: GeneratedMesh kind: 23
+/Mesh/[ (1:0)                      detail:               kind:  7
+/Mesh/decl (1:1)                   detail:               kind:  7
+/Mesh/] (1:5)                      detail:               kind:  7
+/Mesh/type (2:2)                   detail:               kind: 26
+/Mesh/type/decl (2:2)              detail:               kind:  7
+/Mesh/type/= (2:7)                 detail:               kind:  7
+/Mesh/type/value (2:9)             detail:               kind: 15
+/Mesh/dim (3:2)                    detail:               kind: 16
+/Mesh/dim/decl (3:2)               detail:               kind:  7
+/Mesh/dim/= (3:6)                  detail:               kind:  7
+/Mesh/dim/value (3:8)              detail:               kind: 15
+/Mesh/term (4:0)                   detail:               kind:  7
+/Variables (5:0)                   detail:               kind: 23
+/Variables/[ (5:0)                 detail:               kind:  7
+/Variables/decl (5:1)              detail:               kind:  7
+/Variables/] (5:10)                detail:               kind:  7
+/Variables/u (6:2)                 detail:               kind: 23
+/Variables/u/[ (6:2)               detail:               kind:  7
+/Variables/u/decl (6:3)            detail:               kind:  7
+/Variables/u/] (6:4)               detail:               kind:  7
+/Variables/u/order (7:4)           detail:               kind: 20
+/Variables/u/order/decl (7:4)      detail:               kind:  7
+/Variables/u/order/= (7:10)        detail:               kind:  7
+/Variables/u/order/value (7:12)    detail:               kind: 15
+/Variables/u/family (8:4)          detail:               kind: 20
+/Variables/u/family/decl (8:4)     detail:               kind:  7
+/Variables/u/family/= (8:11)       detail:               kind:  7
+/Variables/u/family/value (8:13)   detail:               kind: 15
+/Variables/u/term (9:2)            detail:               kind:  7
+/Variables/v (10:2)                detail:               kind: 23
+/Variables/v/[ (10:2)              detail:               kind:  7
+/Variables/v/decl (10:3)           detail:               kind:  7
+/Variables/v/] (10:4)              detail:               kind:  7
+/Variables/v/order (11:4)          detail:               kind: 20
+/Variables/v/order/decl (11:4)     detail:               kind:  7
+/Variables/v/order/= (11:10)       detail:               kind:  7
+/Variables/v/order/value (11:12)   detail:               kind: 15
+/Variables/v/family (12:4)         detail:               kind: 20
+/Variables/v/family/decl (12:4)    detail:               kind:  7
+/Variables/v/family/= (12:11)      detail:               kind:  7
+/Variables/v/family/value (12:13)  detail:               kind: 15
+/Variables/v/term (13:2)           detail:               kind:  7
+/Variables/term (14:0)             detail:               kind:  7
+/BCs (15:0)                        detail:               kind: 23
+/BCs/[ (15:0)                      detail:               kind:  7
+/BCs/decl (15:1)                   detail:               kind:  7
+/BCs/] (15:4)                      detail:               kind:  7
+/BCs/all (16:2)                    detail: VacuumBC      kind: 23
+/BCs/all/[ (16:2)                  detail:               kind:  7
+/BCs/all/decl (16:3)               detail:               kind:  7
+/BCs/all/] (16:6)                  detail:               kind:  7
+/BCs/all/type (17:4)               detail:               kind: 26
+/BCs/all/type/decl (17:4)          detail:               kind:  7
+/BCs/all/type/= (17:9)             detail:               kind:  7
+/BCs/all/type/value (17:11)        detail:               kind: 15
+/BCs/all/boundary (18:4)           detail:               kind: 18
+/BCs/all/boundary/decl (18:4)      detail:               kind:  7
+/BCs/all/boundary/= (18:13)        detail:               kind:  7
+/BCs/all/boundary/' (18:15)        detail:               kind:  7
+/BCs/all/boundary/value (18:16)    detail:               kind: 15
+/BCs/all/boundary/value (18:21)    detail:               kind: 15
+/BCs/all/boundary/value (18:27)    detail:               kind: 15
+/BCs/all/boundary/value (18:31)    detail:               kind: 15
+/BCs/all/boundary/' (18:37)        detail:               kind:  7
+/BCs/all/variable (19:4)           detail:               kind: 20
+/BCs/all/variable/decl (19:4)      detail:               kind:  7
+/BCs/all/variable/= (19:13)        detail:               kind:  7
+/BCs/all/variable/value (19:15)    detail:               kind: 15
+/BCs/all/term (20:2)               detail:               kind:  7
+/BCs/term (21:0)                   detail:               kind:  7
+/Executioner (22:0)                detail: Transient     kind: 23
+/Executioner/[ (22:0)              detail:               kind:  7
+/Executioner/decl (22:1)           detail:               kind:  7
+/Executioner/] (22:12)             detail:               kind:  7
+/Executioner/type (23:2)           detail:               kind: 26
+/Executioner/type/decl (23:2)      detail:               kind:  7
+/Executioner/type/= (23:7)         detail:               kind:  7
+/Executioner/type/value (23:9)     detail:               kind: 15
+/Executioner/term (24:0)           detail:               kind:  7
+/Problem (25:0)                    detail:               kind: 23
+/Problem/[ (25:0)                  detail:               kind:  7
+/Problem/decl (25:1)               detail:               kind:  7
+/Problem/] (25:8)                  detail:               kind:  7
+/Problem/solve (26:2)              detail:               kind: 17
+/Problem/solve/decl (26:2)         detail:               kind:  7
+/Problem/solve/= (26:8)            detail:               kind:  7
+/Problem/solve/value (26:10)       detail:               kind: 15
+/Problem/term (27:0)               detail:               kind:  7
 )INPUT";
 
   EXPECT_EQ(paths_expect, "\n" + paths_actual.str());
@@ -746,10 +879,10 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
   []
 []
 [AuxVariables]
-  [disp_x]
-  []
-  [disp_y]
-  []
+   [disp_x][]
+      [disp_x][]
+  [disp_y][]
+    [disp_x][]
 []
 [BCs]
   [all]
@@ -837,53 +970,53 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: active                                 text: active = '__all__'                             desc:            If specified only the blocks named w... pos: [6.0]-[6.0]
-label: add_subdomain_ids                      text: add_subdomain_ids = '0'                        desc:            The listed subdomains will be assume... pos: [6.0]-[6.0]
-label: allow_renumbering                      text: allow_renumbering = true                       desc:            If allow_renumbering=false, node and... pos: [6.0]-[6.0]
-label: alpha_rotation                         text: alpha_rotation = 0.0                           desc:            The number of degrees that the domai... pos: [6.0]-[6.0]
-label: beta_rotation                          text: beta_rotation = 0.0                            desc:            The number of degrees that the domai... pos: [6.0]-[6.0]
-label: block_id                               text: block_id = '0'                                 desc:            IDs of the block id/name pairs          pos: [6.0]-[6.0]
-label: block_name                             text: block_name = 'value'                           desc:            Names of the block id/name pairs (mu... pos: [6.0]-[6.0]
-label: boundary_id                            text: boundary_id = '0'                              desc:            IDs of the boundary id/name pairs       pos: [6.0]-[6.0]
-label: boundary_name                          text: boundary_name = 'value'                        desc:            Names of the boundary id/name pairs ... pos: [6.0]-[6.0]
-label: build_all_side_lowerd_mesh             text: build_all_side_lowerd_mesh = false             desc:            True to build the lower-dimensional ... pos: [6.0]-[6.0]
-label: centroid_partitioner_direction         text: centroid_partitioner_direction = RADIAL        desc:            Specifies the sort direction if usin... pos: [6.0]-[6.0]
-label: clear_spline_nodes                     text: clear_spline_nodes = false                     desc:            If clear_spline_nodes=true, IsoGeome... pos: [6.0]-[6.0]
-label: construct_node_list_from_side_list     text: construct_node_list_from_side_list = true      desc:            Whether or not to generate nodesets ... pos: [6.0]-[6.0]
-label: construct_side_list_from_node_list     text: construct_side_list_from_node_list = false     desc:            If true, construct side lists from t... pos: [6.0]-[6.0]
-label: control_tags                           text: control_tags = 'value'                         desc:            Adds user-defined labels for accessi... pos: [6.0]-[6.0]
-label: coord_block                            text: coord_block = 'value'                          desc:            Block IDs for the coordinate systems... pos: [6.0]-[6.0]
-label: coord_type                             text: coord_type = 'XYZ'                             desc:            Type of the coordinate system per bl... pos: [6.0]-[6.0]
-label: enable                                 text: enable = true                                  desc:            Set the enabled status of the MooseO... pos: [6.0]-[6.0]
-label: file                                   text: file = value                                   desc: (REQUIRED) The name of the mesh file to read       pos: [6.0]-[6.0]
-label: gamma_rotation                         text: gamma_rotation = 0.0                           desc:            The number of degrees that the domai... pos: [6.0]-[6.0]
-label: ghosted_boundaries                     text: ghosted_boundaries = 'value'                   desc:            Boundaries to be ghosted if using Ne... pos: [6.0]-[6.0]
-label: ghosted_boundaries_inflation           text: ghosted_boundaries_inflation = '0.0'           desc:            If you are using ghosted boundaries ... pos: [6.0]-[6.0]
-label: ghosting_patch_size                    text: ghosting_patch_size = 0                        desc:            The number of nearest neighbors cons... pos: [6.0]-[6.0]
-label: inactive                               text: inactive = 'value'                             desc:            If specified blocks matching these i... pos: [6.0]-[6.0]
-label: include_local_in_ghosting              text: include_local_in_ghosting = false              desc:            Boolean used to toggle on the inclus... pos: [6.0]-[6.0]
-label: length_unit                            text: length_unit = value                            desc:            How much distance one mesh length un... pos: [6.0]-[6.0]
-label: max_leaf_size                          text: max_leaf_size = 10                             desc:            The maximum number of points in each... pos: [6.0]-[6.0]
-label: nemesis                                text: nemesis = false                                desc:            If nemesis=true and file=foo.e, actu... pos: [6.0]-[6.0]
-label: output_ghosting                        text: output_ghosting = false                        desc:            Boolean to turn on ghosting auxiliar... pos: [6.0]-[6.0]
-label: partitioner                            text: partitioner = default                          desc:            Specifies a mesh partitioner to use ... pos: [6.0]-[6.0]
-label: patch_size                             text: patch_size = 40                                desc:            The number of nodes to consider in t... pos: [6.0]-[6.0]
-label: rz_coord_axis                          text: rz_coord_axis = Y                              desc:            The rotation axis (X | Y) for axisym... pos: [6.0]-[6.0]
-label: rz_coord_blocks                        text: rz_coord_blocks = 'value'                      desc:            Blocks using general axisymmetric co... pos: [6.0]-[6.0]
-label: rz_coord_directions                    text: rz_coord_directions = '0.0'                    desc:            Axis directions for each block in 'r... pos: [6.0]-[6.0]
-label: rz_coord_origins                       text: rz_coord_origins = '0.0'                       desc:            Axis origin points for each block in... pos: [6.0]-[6.0]
-label: second_order                           text: second_order = false                           desc:            Converts a first order mesh to a sec... pos: [6.0]-[6.0]
-label: skip_deletion_repartition_after_refine text: skip_deletion_repartition_after_refine = false desc:            If the flag is true, uniform refinem... pos: [6.0]-[6.0]
-label: skip_partitioning                      text: skip_partitioning = false                      desc:            If true the mesh won't be partitione... pos: [6.0]-[6.0]
-label: skip_refine_when_use_split             text: skip_refine_when_use_split = true              desc:            True to skip uniform refinements whe... pos: [6.0]-[6.0]
-label: split_file                             text: split_file = value                             desc:            Optional name of split mesh file(s) ... pos: [6.0]-[6.0]
-label: type                                   text: type = FileMesh                                desc:            A string representing the Moose Obje... pos: [6.0]-[6.0]
-label: uniform_refine                         text: uniform_refine = 0                             desc:            Specify the level of uniform refinem... pos: [6.0]-[6.0]
-label: up_direction                           text: up_direction = X                               desc:            Specify what axis corresponds to the... pos: [6.0]-[6.0]
-label: use_displaced_mesh                     text: use_displaced_mesh = true                      desc:            Create the displaced mesh if the 'di... pos: [6.0]-[6.0]
-label: use_split                              text: use_split = false                              desc:            Use split distributed mesh files; is... pos: [6.0]-[6.0]
-label: *                                      text: [block_name]\n  \n[]                           desc:            custom user named block                 pos: [6.0]-[6.0]
-label: Partitioner                            text: [Partitioner]\n  \n[]                          desc:            application named block                 pos: [6.0]-[6.0]
+label: active                                 text: active = '__all__'                             desc: If specified only the blocks named wi... pos: [6.0]-[6.0] kind:  7
+label: add_subdomain_ids                      text: add_subdomain_ids = '0'                        desc: The listed subdomains will be assumed... pos: [6.0]-[6.0] kind: 14
+label: allow_renumbering                      text: allow_renumbering = true                       desc: If allow_renumbering=false, node and ... pos: [6.0]-[6.0] kind:  8
+label: alpha_rotation                         text: alpha_rotation = 0.0                           desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: beta_rotation                          text: beta_rotation = 0.0                            desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: block_id                               text: block_id = '0'                                 desc: IDs of the block id/name pairs           pos: [6.0]-[6.0] kind: 14
+label: block_name                             text: block_name = 'value'                           desc: Names of the block id/name pairs (mus... pos: [6.0]-[6.0] kind: 14
+label: boundary_id                            text: boundary_id = '0'                              desc: IDs of the boundary id/name pairs        pos: [6.0]-[6.0] kind: 14
+label: boundary_name                          text: boundary_name = 'value'                        desc: Names of the boundary id/name pairs (... pos: [6.0]-[6.0] kind: 14
+label: build_all_side_lowerd_mesh             text: build_all_side_lowerd_mesh = false             desc: True to build the lower-dimensional m... pos: [6.0]-[6.0] kind:  8
+label: centroid_partitioner_direction         text: centroid_partitioner_direction = RADIAL        desc: Specifies the sort direction if using... pos: [6.0]-[6.0] kind: 13
+label: clear_spline_nodes                     text: clear_spline_nodes = false                     desc: If clear_spline_nodes=true, IsoGeomet... pos: [6.0]-[6.0] kind:  8
+label: construct_node_list_from_side_list     text: construct_node_list_from_side_list = true      desc: Whether or not to generate nodesets f... pos: [6.0]-[6.0] kind:  8
+label: construct_side_list_from_node_list     text: construct_side_list_from_node_list = false     desc: If true, construct side lists from th... pos: [6.0]-[6.0] kind:  8
+label: control_tags                           text: control_tags = 'value'                         desc: Adds user-defined labels for accessin... pos: [6.0]-[6.0] kind: 14
+label: coord_block                            text: coord_block = 'value'                          desc: Block IDs for the coordinate systems.... pos: [6.0]-[6.0] kind: 14
+label: coord_type                             text: coord_type = 'XYZ'                             desc: Type of the coordinate system per blo... pos: [6.0]-[6.0] kind: 13
+label: enable                                 text: enable = true                                  desc: Set the enabled status of the MooseOb... pos: [6.0]-[6.0] kind:  8
+label: file                                   text: file = value                                   desc: The name of the mesh file to read        pos: [6.0]-[6.0] kind: 23
+label: gamma_rotation                         text: gamma_rotation = 0.0                           desc: The number of degrees that the domain... pos: [6.0]-[6.0] kind: 14
+label: ghosted_boundaries                     text: ghosted_boundaries = 'value'                   desc: Boundaries to be ghosted if using Nem... pos: [6.0]-[6.0] kind: 14
+label: ghosted_boundaries_inflation           text: ghosted_boundaries_inflation = '0.0'           desc: If you are using ghosted boundaries y... pos: [6.0]-[6.0] kind: 14
+label: ghosting_patch_size                    text: ghosting_patch_size = 0                        desc: The number of nearest neighbors consi... pos: [6.0]-[6.0] kind: 14
+label: inactive                               text: inactive = 'value'                             desc: If specified blocks matching these id... pos: [6.0]-[6.0] kind:  7
+label: include_local_in_ghosting              text: include_local_in_ghosting = false              desc: Boolean used to toggle on the inclusi... pos: [6.0]-[6.0] kind:  8
+label: length_unit                            text: length_unit = value                            desc: How much distance one mesh length uni... pos: [6.0]-[6.0] kind: 14
+label: max_leaf_size                          text: max_leaf_size = 10                             desc: The maximum number of points in each ... pos: [6.0]-[6.0] kind: 14
+label: nemesis                                text: nemesis = false                                desc: If nemesis=true and file=foo.e, actua... pos: [6.0]-[6.0] kind:  8
+label: output_ghosting                        text: output_ghosting = false                        desc: Boolean to turn on ghosting auxiliary... pos: [6.0]-[6.0] kind:  8
+label: partitioner                            text: partitioner = default                          desc: Specifies a mesh partitioner to use w... pos: [6.0]-[6.0] kind: 13
+label: patch_size                             text: patch_size = 40                                desc: The number of nodes to consider in th... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_axis                          text: rz_coord_axis = Y                              desc: The rotation axis (X | Y) for axisymm... pos: [6.0]-[6.0] kind: 13
+label: rz_coord_blocks                        text: rz_coord_blocks = 'value'                      desc: Blocks using general axisymmetric coo... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_directions                    text: rz_coord_directions = '0.0'                    desc: Axis directions for each block in 'rz... pos: [6.0]-[6.0] kind: 14
+label: rz_coord_origins                       text: rz_coord_origins = '0.0'                       desc: Axis origin points for each block in ... pos: [6.0]-[6.0] kind: 14
+label: second_order                           text: second_order = false                           desc: Converts a first order mesh to a seco... pos: [6.0]-[6.0] kind:  8
+label: skip_deletion_repartition_after_refine text: skip_deletion_repartition_after_refine = false desc: If the flag is true, uniform refineme... pos: [6.0]-[6.0] kind:  8
+label: skip_partitioning                      text: skip_partitioning = false                      desc: If true the mesh won't be partitioned... pos: [6.0]-[6.0] kind:  8
+label: skip_refine_when_use_split             text: skip_refine_when_use_split = true              desc: True to skip uniform refinements when... pos: [6.0]-[6.0] kind:  8
+label: split_file                             text: split_file = value                             desc: Optional name of split mesh file(s) t... pos: [6.0]-[6.0] kind: 14
+label: type                                   text: type = FileMesh                                desc: A string representing the Moose Objec... pos: [6.0]-[6.0] kind: 25
+label: uniform_refine                         text: uniform_refine = 0                             desc: Specify the level of uniform refineme... pos: [6.0]-[6.0] kind: 14
+label: up_direction                           text: up_direction = X                               desc: Specify what axis corresponds to the ... pos: [6.0]-[6.0] kind: 13
+label: use_displaced_mesh                     text: use_displaced_mesh = true                      desc: Create the displaced mesh if the 'dis... pos: [6.0]-[6.0] kind:  8
+label: use_split                              text: use_split = false                              desc: Use split distributed mesh files; is ... pos: [6.0]-[6.0] kind:  8
+label: *                                      text: [block_name]\n  \n[]                           desc: custom user named block                  pos: [6.0]-[6.0] kind:  6
+label: Partitioner                            text: [Partitioner]\n  \n[]                          desc: application named block                  pos: [6.0]-[6.0] kind: 22
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -893,7 +1026,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 {
   // completion test parameters - at document root level outside of all blocks
 
-  int request_id = 4;
+  int request_id = 5;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 42;
   int character = 0;
@@ -942,54 +1075,54 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: active                           text: active = '__all__'                         desc:            If specified only the blocks named w... pos: [42.0]-[42.0]
-label: inactive                         text: inactive = 'value'                         desc:            If specified blocks matching these i... pos: [42.0]-[42.0]
-label: Adaptivity                       text: [Adaptivity]\n  \n[]                       desc:            application named block                 pos: [42.0]-[42.0]
-label: AuxKernels                       text: [AuxKernels]\n  \n[]                       desc:            application named block                 pos: [42.0]-[42.0]
-label: AuxScalarKernels                 text: [AuxScalarKernels]\n  \n[]                 desc:            application named block                 pos: [42.0]-[42.0]
-label: AuxVariables                     text: [AuxVariables]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
-label: BCs                              text: [BCs]\n  \n[]                              desc:            application named block                 pos: [42.0]-[42.0]
-label: Bounds                           text: [Bounds]\n  \n[]                           desc:            application named block                 pos: [42.0]-[42.0]
-label: Constraints                      text: [Constraints]\n  \n[]                      desc:            application named block                 pos: [42.0]-[42.0]
-label: Controls                         text: [Controls]\n  \n[]                         desc:            application named block                 pos: [42.0]-[42.0]
-label: DGKernels                        text: [DGKernels]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: Dampers                          text: [Dampers]\n  \n[]                          desc:            application named block                 pos: [42.0]-[42.0]
-label: Debug                            text: [Debug]\n  \n[]                            desc:            application named block                 pos: [42.0]-[42.0]
-label: DeprecatedBlock                  text: [DeprecatedBlock]\n  \n[]                  desc:            application named block                 pos: [42.0]-[42.0]
-label: DiracKernels                     text: [DiracKernels]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
-label: Distributions                    text: [Distributions]\n  \n[]                    desc:            application named block                 pos: [42.0]-[42.0]
-label: Executioner                      text: [Executioner]\n  \n[]                      desc:            application named block                 pos: [42.0]-[42.0]
-label: Executors                        text: [Executors]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: FVBCs                            text: [FVBCs]\n  \n[]                            desc:            application named block                 pos: [42.0]-[42.0]
-label: FVICs                            text: [FVICs]\n  \n[]                            desc:            application named block                 pos: [42.0]-[42.0]
-label: FVInterfaceKernels               text: [FVInterfaceKernels]\n  \n[]               desc:            application named block                 pos: [42.0]-[42.0]
-label: FVKernels                        text: [FVKernels]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: Functions                        text: [Functions]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: FunctorMaterials                 text: [FunctorMaterials]\n  \n[]                 desc:            application named block                 pos: [42.0]-[42.0]
-label: GlobalParams                     text: [GlobalParams]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
-label: ICs                              text: [ICs]\n  \n[]                              desc:            application named block                 pos: [42.0]-[42.0]
-label: InterfaceKernels                 text: [InterfaceKernels]\n  \n[]                 desc:            application named block                 pos: [42.0]-[42.0]
-label: Kernels                          text: [Kernels]\n  \n[]                          desc:            application named block                 pos: [42.0]-[42.0]
-label: Materials                        text: [Materials]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: Mesh                             text: [Mesh]\n  \n[]                             desc:            application named block                 pos: [42.0]-[42.0]
-label: MeshDivisions                    text: [MeshDivisions]\n  \n[]                    desc:            application named block                 pos: [42.0]-[42.0]
-label: MultiApps                        text: [MultiApps]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: NodalKernels                     text: [NodalKernels]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
-label: NodalNormals                     text: [NodalNormals]\n  \n[]                     desc:            application named block                 pos: [42.0]-[42.0]
-label: Outputs                          text: [Outputs]\n  \n[]                          desc:            application named block                 pos: [42.0]-[42.0]
-label: Positions                        text: [Positions]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: Postprocessors                   text: [Postprocessors]\n  \n[]                   desc:            application named block                 pos: [42.0]-[42.0]
-label: Preconditioning                  text: [Preconditioning]\n  \n[]                  desc:            application named block                 pos: [42.0]-[42.0]
-label: Problem                          text: [Problem]\n  \n[]                          desc:            application named block                 pos: [42.0]-[42.0]
-label: ProjectedStatefulMaterialStorage text: [ProjectedStatefulMaterialStorage]\n  \n[] desc:            application named block                 pos: [42.0]-[42.0]
-label: Reporters                        text: [Reporters]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: Samplers                         text: [Samplers]\n  \n[]                         desc:            application named block                 pos: [42.0]-[42.0]
-label: ScalarKernels                    text: [ScalarKernels]\n  \n[]                    desc:            application named block                 pos: [42.0]-[42.0]
-label: Times                            text: [Times]\n  \n[]                            desc:            application named block                 pos: [42.0]-[42.0]
-label: Transfers                        text: [Transfers]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: UserObjects                      text: [UserObjects]\n  \n[]                      desc:            application named block                 pos: [42.0]-[42.0]
-label: Variables                        text: [Variables]\n  \n[]                        desc:            application named block                 pos: [42.0]-[42.0]
-label: VectorPostprocessors             text: [VectorPostprocessors]\n  \n[]             desc:            application named block                 pos: [42.0]-[42.0]
+label: active                           text: active = '__all__'                         desc: If specified only the blocks named wi... pos: [42.0]-[42.0] kind:  7
+label: inactive                         text: inactive = 'value'                         desc: If specified blocks matching these id... pos: [42.0]-[42.0] kind:  7
+label: Adaptivity                       text: [Adaptivity]\n  \n[]                       desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: AuxKernels                       text: [AuxKernels]\n  \n[]                       desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: AuxScalarKernels                 text: [AuxScalarKernels]\n  \n[]                 desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: AuxVariables                     text: [AuxVariables]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: BCs                              text: [BCs]\n  \n[]                              desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Bounds                           text: [Bounds]\n  \n[]                           desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Constraints                      text: [Constraints]\n  \n[]                      desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Controls                         text: [Controls]\n  \n[]                         desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: DGKernels                        text: [DGKernels]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Dampers                          text: [Dampers]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Debug                            text: [Debug]\n  \n[]                            desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: DeprecatedBlock                  text: [DeprecatedBlock]\n  \n[]                  desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: DiracKernels                     text: [DiracKernels]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Distributions                    text: [Distributions]\n  \n[]                    desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Executioner                      text: [Executioner]\n  \n[]                      desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Executors                        text: [Executors]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: FVBCs                            text: [FVBCs]\n  \n[]                            desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: FVICs                            text: [FVICs]\n  \n[]                            desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: FVInterfaceKernels               text: [FVInterfaceKernels]\n  \n[]               desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: FVKernels                        text: [FVKernels]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Functions                        text: [Functions]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: FunctorMaterials                 text: [FunctorMaterials]\n  \n[]                 desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: GlobalParams                     text: [GlobalParams]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: ICs                              text: [ICs]\n  \n[]                              desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: InterfaceKernels                 text: [InterfaceKernels]\n  \n[]                 desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Kernels                          text: [Kernels]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Materials                        text: [Materials]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Mesh                             text: [Mesh]\n  \n[]                             desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: MeshDivisions                    text: [MeshDivisions]\n  \n[]                    desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: MultiApps                        text: [MultiApps]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: NodalKernels                     text: [NodalKernels]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: NodalNormals                     text: [NodalNormals]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Outputs                          text: [Outputs]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Positions                        text: [Positions]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Postprocessors                   text: [Postprocessors]\n  \n[]                   desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Preconditioning                  text: [Preconditioning]\n  \n[]                  desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Problem                          text: [Problem]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: ProjectedStatefulMaterialStorage text: [ProjectedStatefulMaterialStorage]\n  \n[] desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Reporters                        text: [Reporters]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Samplers                         text: [Samplers]\n  \n[]                         desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: ScalarKernels                    text: [ScalarKernels]\n  \n[]                    desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Times                            text: [Times]\n  \n[]                            desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Transfers                        text: [Transfers]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: UserObjects                      text: [UserObjects]\n  \n[]                      desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Variables                        text: [Variables]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: VectorPostprocessors             text: [VectorPostprocessors]\n  \n[]             desc: application named block                  pos: [42.0]-[42.0] kind: 22
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -999,7 +1132,7 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 {
   // completion test parameters - on active parameter value in Variables block
 
-  int request_id = 4;
+  int request_id = 6;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 9;
   int character = 12;
@@ -1048,8 +1181,8 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: u text: u desc: subblock name pos: [9.12]-[9.19]
-label: v text: v desc: subblock name pos: [9.12]-[9.19]
+label: u text: u desc: subblock name pos: [9.12]-[9.19] kind:  7
+label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1059,7 +1192,7 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
 {
   // completion test parameters - on boolean value of solve param from Problem
 
-  int request_id = 4;
+  int request_id = 7;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 33;
   int character = 10;
@@ -1108,8 +1241,8 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: false text: false desc:  pos: [33.10]-[33.15]
-label: true  text: true  desc:  pos: [33.10]-[33.15]
+label: false text: false desc:  pos: [33.10]-[33.15] kind:  8
+label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1119,7 +1252,7 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 {
   // completion test parameters - on error_level enum in Terminator UserObject
 
-  int request_id = 4;
+  int request_id = 8;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 39;
   int character = 18;
@@ -1168,10 +1301,10 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: ERROR   text: ERROR   desc: Throw a MOOSE error, resulting in the terminati... pos: [39.18]-[39.22]
-label: INFO    text: INFO    desc: Output an information message once.                pos: [39.18]-[39.22]
-label: NONE    text: NONE    desc: No message will be printed.                        pos: [39.18]-[39.22]
-label: WARNING text: WARNING desc: Output a warning message once.                     pos: [39.18]-[39.22]
+label: ERROR   text: ERROR   desc: Throw a MOOSE error, resulting in the... pos: [39.18]-[39.22] kind: 20
+label: INFO    text: INFO    desc: Output an information message once.      pos: [39.18]-[39.22] kind: 20
+label: NONE    text: NONE    desc: No message will be printed.              pos: [39.18]-[39.22] kind: 20
+label: WARNING text: WARNING desc: Output a warning message once.           pos: [39.18]-[39.22] kind: 20
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1181,7 +1314,7 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 {
   // completion test parameters - on type parameter value in Executioner block
 
-  int request_id = 4;
+  int request_id = 9;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 30;
   int character = 9;
@@ -1230,11 +1363,11 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: Eigenvalue         text: Eigenvalue         desc: Eigenvalue solves a standard/generalized linear... pos: [30.9]-[30.18]
-label: InversePowerMethod text: InversePowerMethod desc: Inverse power method for eigenvalue problems.      pos: [30.9]-[30.18]
-label: NonlinearEigen     text: NonlinearEigen     desc: Executioner for eigenvalue problems.               pos: [30.9]-[30.18]
-label: Steady             text: Steady             desc: Executioner for steady-state simulations.          pos: [30.9]-[30.18]
-label: Transient          text: Transient          desc: Executioner for time varying simulations.          pos: [30.9]-[30.18]
+label: Eigenvalue         text: Eigenvalue         desc: Eigenvalue solves a standard/generali... pos: [30.9]-[30.18] kind: 25
+label: InversePowerMethod text: InversePowerMethod desc: Inverse power method for eigenvalue p... pos: [30.9]-[30.18] kind: 25
+label: NonlinearEigen     text: NonlinearEigen     desc: Executioner for eigenvalue problems.     pos: [30.9]-[30.18] kind: 25
+label: Steady             text: Steady             desc: Executioner for steady-state simulati... pos: [30.9]-[30.18] kind: 25
+label: Transient          text: Transient          desc: Executioner for time varying simulati... pos: [30.9]-[30.18] kind: 25
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
@@ -1244,7 +1377,7 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
   // completion test parameters - on displacements parameter value in VacuumBC
 
-  int request_id = 4;
+  int request_id = 10;
   std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 26;
   int character = 21;
@@ -1293,23 +1426,23 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
   // expected completions with zero-based lines and columns
 
   std::string completions_expect = R"INPUT(
-label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27]
-label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27]
-label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27]
-label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27]
+label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18
+label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18
+label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18
+label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18
 )INPUT";
 
   EXPECT_EQ(completions_expect, "\n" + completions_actual.str());
 }
 
-TEST_F(MooseServerTest, DocumentDefinitionRequest)
+TEST_F(MooseServerTest, DefinitionObjectTypeSource)
 {
-  // definition test parameters
+  // definition test parameters - on Transient.C defined object type Transient
 
-  int request_id = 5;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
-  int line = 0;
-  int character = 0;
+  int request_id = 11;
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int line = 30;
+  int character = 9;
 
   // build definition request with the test parameters
 
@@ -1317,7 +1450,7 @@ TEST_F(MooseServerTest, DocumentDefinitionRequest)
   std::stringstream definition_errors;
 
   EXPECT_TRUE(wasp::lsp::buildDefinitionRequest(
-      definition_request, definition_errors, request_id, document_uri, line, character));
+      definition_request, definition_errors, request_id, doc_uri, line, character));
 
   EXPECT_TRUE(definition_errors.str().empty());
 
@@ -1329,14 +1462,96 @@ TEST_F(MooseServerTest, DocumentDefinitionRequest)
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 
-  // definition response will be checked when capability is implemented
+  // check the dissected values of the moose_server definition response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray locations_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectLocationsResponse(
+      definition_response, response_errors, response_id, locations_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(1u, locations_array.size());
+
+  std::ostringstream locations_actual;
+
+  format_locations(locations_array, locations_actual);
+
+  // expected locations with zero-based lines and columns
+
+  std::string locations_expect = R"INPUT(
+document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    definition_start: [38.0]    definition_end: [38.1000]
+)INPUT";
+
+  EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
+}
+
+TEST_F(MooseServerTest, DefinitionInputFileLookups)
+{
+  // definition test parameters - on AuxVariables defined displacements disp_x
+
+  int request_id = 12;
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int line = 26;
+  int character = 21;
+
+  // build definition request with the test parameters
+
+  wasp::DataObject definition_request;
+  std::stringstream definition_errors;
+
+  EXPECT_TRUE(wasp::lsp::buildDefinitionRequest(
+      definition_request, definition_errors, request_id, doc_uri, line, character));
+
+  EXPECT_TRUE(definition_errors.str().empty());
+
+  // handle the built definition request with the moose_server
+
+  wasp::DataObject definition_response;
+
+  EXPECT_TRUE(moose_server->handleDefinitionRequest(definition_request, definition_response));
+
+  EXPECT_TRUE(moose_server->getErrors().empty());
+
+  // check the dissected values of the moose_server definition response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray locations_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectLocationsResponse(
+      definition_response, response_errors, response_id, locations_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(3u, locations_array.size());
+
+  std::ostringstream locations_actual;
+
+  format_locations(locations_array, locations_actual);
+
+  // expected locations with zero-based lines and columns
+
+  std::string locations_expect = R"INPUT(
+document_uri: "file:///test/input/path"    definition_start: [16.4]    definition_end: [16.10]
+document_uri: "file:///test/input/path"    definition_start: [17.7]    definition_end: [17.13]
+document_uri: "file:///test/input/path"    definition_start: [19.5]    definition_end: [19.11]
+)INPUT";
+
+  EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
 
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // references test parameters
 
-  int request_id = 6;
+  int request_id = 13;
   std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
   int line = 0;
   int character = 0;
@@ -1370,10 +1585,70 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 
 TEST_F(MooseServerTest, DocumentFormattingRequest)
 {
+  // didchange test parameters - update input to set up document formatting
+
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int doc_version = 4;
+  std::string doc_text_change = R"INPUT(
+
+[./Mesh] type = GeneratedMesh
+       dim =   2         patch_size  =    40
+patch_update_strategy = AUTO
+
+        displacements = 'disp_x disp_y'
+     parallel_type = REPLICATED   bias_x = 1
+[../]
+
+[./Variables] [u]
+  [../]      [./v] [] [abc]
+
+
+    order     = CONSTANT
+    type = MooseVariableConstMonomial
+  []   []
+[AuxVariables]  [aux_name]
+type = MooseVariableBase family =   LAGRANGE
+
+                []       [] [./AuxVariables]
+  [disp_x]   [] [./xyz]
+type  = MooseVariable   family  =   MONOMIAL
+      []
+ [disp_y] []    [disp_z]
+    type = MooseVariableBase    [../]
+[../]      [BCs]
+
+    [./all]  type = VacuumBC
+  boundary   =   'left right' variable = abc
+
+   displacements  =  'xyz abc xyz disp_x' []
+[../] [./Executioner]
+type = Transient
+       [../]    [Problem] solve = false   []
+
+
+[./UserObjects] [./term_uo]
+    type =   Terminator expression  = 'expr'
+  error_level = NONE []
+
+      [../]
+
+)INPUT";
+
+  // build didchange notification and handle it with the moose_server
+
+  wasp::DataObject didchange_notification;
+  std::stringstream errors;
+  wasp::DataObject diagnostics_notification;
+
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
   // formatting test parameters
 
-  int request_id = 7;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  int request_id = 14;
   int tab_size = 4;
   int insert_spaces = true;
 
@@ -1383,7 +1658,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
   std::stringstream formatting_errors;
 
   EXPECT_TRUE(wasp::lsp::buildFormattingRequest(
-      formatting_request, formatting_errors, request_id, document_uri, tab_size, insert_spaces));
+      formatting_request, formatting_errors, request_id, doc_uri, tab_size, insert_spaces));
 
   EXPECT_TRUE(formatting_errors.str().empty());
 
@@ -1395,7 +1670,90 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 
   EXPECT_TRUE(moose_server->getErrors().empty());
 
-  // formatting response will be checked when capability is implemented
+  // check the dissected values of the moose_server formatting response
+
+  std::stringstream response_errors;
+  int response_id;
+  wasp::DataArray textedits_array;
+
+  EXPECT_TRUE(wasp::lsp::dissectFormattingResponse(
+      formatting_response, response_errors, response_id, textedits_array));
+
+  EXPECT_TRUE(response_errors.str().empty());
+
+  EXPECT_EQ(request_id, response_id);
+
+  EXPECT_EQ(1u, textedits_array.size());
+
+  std::ostringstream textedits_actual;
+
+  format_textedits(textedits_array, textedits_actual);
+
+  // expected textedits with zero-based lines and columns
+
+  std::string textedits_expect = R"INPUT(
+textedit_position: [2.0]-[41.11]
+textedit_new_text:
+[Mesh]
+    type = GeneratedMesh
+    dim = 2
+    patch_size = 40
+    patch_update_strategy = AUTO
+    displacements = 'disp_x disp_y'
+    parallel_type = REPLICATED
+    bias_x = 1
+[]
+[Variables]
+    [u]
+    []
+    [v]
+    []
+    [abc]
+        order = CONSTANT
+        type = MooseVariableConstMonomial
+    []
+[]
+[AuxVariables]
+    [aux_name]
+        type = MooseVariableBase
+        family = LAGRANGE
+    []
+    [disp_x]
+    []
+    [xyz]
+        type = MooseVariable
+        family = MONOMIAL
+    []
+    [disp_y]
+    []
+    [disp_z]
+        type = MooseVariableBase
+    []
+[]
+[BCs]
+    [all]
+        type = VacuumBC
+        boundary = 'left right'
+        variable = abc
+        displacements = 'xyz abc xyz disp_x'
+    []
+[]
+[Executioner]
+    type = Transient
+[]
+[Problem]
+    solve = false
+[]
+[UserObjects]
+    [term_uo]
+        type = Terminator
+        expression = 'expr'
+        error_level = NONE
+    []
+[]
+)INPUT";
+
+  EXPECT_EQ(textedits_expect, "\n" + textedits_actual.str());
 }
 
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
@@ -1426,7 +1784,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 8;
+  int request_id = 15;
 
   // build shutdown request with the test parameters
 
