@@ -12,8 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "HeatTransferTestApp.h"
-
 InputParameters
 SolidPropertiesTestApp::validParams()
 {
@@ -45,8 +43,6 @@ SolidPropertiesTestApp::registerApps()
 {
   registerApp(SolidPropertiesApp);
   registerApp(SolidPropertiesTestApp);
-
-  HeatTransferTestApp::registerApps();
 }
 
 /***************************************************************************************************

@@ -110,6 +110,90 @@ void
 ModulesApp::registerApps()
 {
   registerApp(ModulesApp);
+
+#ifdef CHEMICAL_REACTIONS_ENABLED
+  ChemicalReactionsApp::registerApps();
+#endif
+
+#ifdef CONTACT_ENABLED
+  ContactApp::registerApps();
+#endif
+
+#ifdef ELECTROMAGNETICS_ENABLED
+  ElectromagneticsApp::registerApps();
+#endif
+
+#ifdef FLUID_PROPERTIES_ENABLED
+  FluidPropertiesApp::registerApps();
+#endif
+
+#ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
+  FunctionalExpansionToolsApp::registerApps();
+#endif
+
+#ifdef HEAT_TRANSFER_ENABLED
+  HeatTransferApp::registerApps();
+#endif
+
+#ifdef LEVEL_SET_ENABLED
+  LevelSetApp::registerApps();
+#endif
+
+#ifdef MISC_ENABLED
+  MiscApp::registerApps();
+#endif
+
+#ifdef NAVIER_STOKES_ENABLED
+  NavierStokesApp::registerApps();
+#endif
+
+#ifdef PERIDYNAMICS_ENABLED
+  PeridynamicsApp::registerApps();
+#endif
+
+#ifdef PHASE_FIELD_ENABLED
+  PhaseFieldApp::registerApps();
+#endif
+
+#ifdef POROUS_FLOW_ENABLED
+  PorousFlowApp::registerApps();
+#endif
+
+#ifdef RAY_TRACING_ENABLED
+  RayTracingApp::registerApps();
+#endif
+
+#ifdef RDG_ENABLED
+  RdgApp::registerApps();
+#endif
+
+#ifdef REACTOR_ENABLED
+  ReactorApp::registerApps();
+#endif
+
+#ifdef RICHARDS_ENABLED
+  RichardsApp::registerApps();
+#endif
+
+#ifdef SOLID_PROPERTIES_ENABLED
+  SolidPropertiesApp::registerApps();
+#endif
+
+#ifdef STOCHASTIC_TOOLS_ENABLED
+  StochasticToolsApp::registerApps();
+#endif
+
+#ifdef TENSOR_MECHANICS_ENABLED
+  TensorMechanicsApp::registerApps();
+#endif
+
+#ifdef THERMAL_HYDRAULICS_ENABLED
+  ThermalHydraulicsApp::registerApps();
+#endif
+
+#ifdef XFEM_ENABLED
+  XFEMApp::registerApps();
+#endif
 }
 
 void
