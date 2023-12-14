@@ -22,7 +22,7 @@ POD::POD(const ParallelSolutionStorage * const parallel_storage,
     _communicator(comm)
 {
 #if PETSC_VERSION_LESS_THAN(3, 14, 0)
-  MooseError("PETSc-3.14.0 or higher is required for using StochasticTools::POD.")
+  mooseError("PETSc-3.14.0 or higher is required for using StochasticTools::POD.")
 #endif
 }
 
