@@ -54,7 +54,7 @@ From: {{ APPTAINER_FROM }}
         mkdir ${MOOSE_BUILD_DIR}
         cp -r ${MOOSE_DIR}/. ${MOOSE_BUILD_DIR}
     # MOOSE_DIR is the application (combined-opt)
-    elif [[ '{{ BINARY_NAME }}' == 'moose-combined' ]]; then
+    elif [[ '{{ BINARY_NAME }}' == 'moose' ]]; then
         # do nothing
         :
     # MOOSE_DIR is in the application, setup a symlink
@@ -69,7 +69,7 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
-{%- if BINARY_NAME == 'moose-combined' %}
+{%- if BINARY_NAME == 'moose' %}
     export PATH=/opt/moose/bin:$PATH
 {%- else %}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
@@ -113,7 +113,7 @@ From: {{ APPTAINER_FROM }}
     done
 
     # Setup install
-{%- if BINARY_NAME == 'moose-combined' %}
+{%- if BINARY_NAME == 'moose' %}
     MOOSE_PREFIX=/opt/moose
 {%- else %}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
@@ -121,7 +121,7 @@ From: {{ APPTAINER_FROM }}
     cd ${MOOSE_DIR}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
     # Build and install
-{%- if BINARY_NAME == 'moose-combined' %}
+{%- if BINARY_NAME == 'moose' %}
     cd ${APPLICATION_DIR}/modules
 {%- else %}
     cd ${APPLICATION_DIR}
@@ -140,7 +140,7 @@ From: {{ APPTAINER_FROM }}
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
-{%- if BINARY_NAME == 'moose-combined' %}
+{%- if BINARY_NAME == 'moose' %}
     # Create moose-opt symlink to combined-opt
     cd /opt/moose/bin
     ln -s combined-opt moose-opt
@@ -154,13 +154,13 @@ From: {{ APPTAINER_FROM }}
 
 %test
     # Load jinja vars
-{%- if BINARY_NAME == 'moose-combined' %}
+{%- if BINARY_NAME == 'moose' %}
     BINARY_NAME=combined
 {%- else %}
     BINARY_NAME={{ BINARY_NAME }}
 {%- endif %}
     export METHOD={{ METHOD or "opt" }}
-    TEST_DIRS={{ TEST_DIRS or "tests" }}
+    TEST_DIRS="{{ TEST_DIRS or "tests" }}"
     # Temp location for copying and running in
     TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
