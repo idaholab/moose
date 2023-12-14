@@ -1,0 +1,1114 @@
+{
+    "app_name": "main",
+    "current_time": "Thu Dec 14 16:58:00 2023",
+    "executable": "/Users/shikharkumar/Documents/Codes/moose/modules/reactor/reactor-opt",
+    "executable_time": "Thu Dec 14 16:47:00 2023",
+    "libmesh_version": "",
+    "moose_version": "git commit 3cb1b71d1c on 2023-12-14",
+    "petsc_version": "3.20.1",
+    "reporters": {
+        "metadata": {
+            "type": "MeshMetaDataReporter",
+            "values": {
+                "values": {
+                    "type": "std::map<std::string, RestartableDataReporter::Value, std::less<std::string>, std::allocator<std::pair<std::stringconst, RestartableDataReporter::Value>>>"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.20.0",
+    "time_steps": [
+        {
+            "metadata": {
+                "values": {
+                    "MeshMetaData/amg1/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/amg1/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "A1_R41",
+                            "A1_R141"
+                        ]
+                    },
+                    "MeshMetaData/amg1/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            41,
+                            141
+                        ]
+                    },
+                    "MeshMetaData/amg1/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/pin_block_name_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/pin_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg1/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin2"
+                        ]
+                    },
+                    "MeshMetaData/amg1/pin_region_id_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/amg1/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/amg2/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 2
+                    },
+                    "MeshMetaData/amg2/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "A2_R51",
+                            "A2_R151"
+                        ]
+                    },
+                    "MeshMetaData/amg2/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            51,
+                            151
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "A2_R52"
+                            ],
+                            [
+                                "A2_R152"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            3.5
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                52
+                            ],
+                            [
+                                152
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/pin_block_name_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg2/pin_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                1,
+                                0
+                            ],
+                            [
+                                0,
+                                0
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin1",
+                            "pin3"
+                        ]
+                    },
+                    "MeshMetaData/amg2/pin_region_id_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg2/pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/amg2/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/cmg/assembly_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                -1,
+                                1
+                            ],
+                            [
+                                1,
+                                0,
+                                -1
+                            ],
+                            [
+                                -1,
+                                1
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/cmg/assembly_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "amg1",
+                            "amg2"
+                        ]
+                    },
+                    "MeshMetaData/cmg/extruded": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/cmg/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin2",
+                            "pin1",
+                            "pin3"
+                        ]
+                    },
+                    "MeshMetaData/cmg/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin1/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            12,
+                            112
+                        ]
+                    },
+                    "MeshMetaData/pin1/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.68
+                        ]
+                    },
+                    "MeshMetaData/pin1/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                13
+                            ],
+                            [
+                                113
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P1_R11",
+                                "P1_R12",
+                                "P1_R13"
+                            ],
+                            [
+                                "P1_R111",
+                                "P1_R112",
+                                "P1_R113"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                1,
+                                [
+                                    [
+                                        11,
+                                        12,
+                                        13
+                                    ],
+                                    [
+                                        111,
+                                        112,
+                                        113
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/pin_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/pin1/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin1/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin1/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.2
+                        ]
+                    },
+                    "MeshMetaData/pin1/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                11
+                            ],
+                            [
+                                111
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            21,
+                            121
+                        ]
+                    },
+                    "MeshMetaData/pin2/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin2/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin2/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P2_R21"
+                            ],
+                            [
+                                "P2_R121"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                2,
+                                [
+                                    [
+                                        21
+                                    ],
+                                    [
+                                        121
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/pin_type": {
+                        "type": "unsigned short",
+                        "value": 2
+                    },
+                    "MeshMetaData/pin2/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin2/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin2/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin2/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin3/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            32,
+                            132
+                        ]
+                    },
+                    "MeshMetaData/pin3/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin3/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin3/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P3_R31",
+                                "P3_R32"
+                            ],
+                            [
+                                "P3_R131",
+                                "P3_R132"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin3/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                3,
+                                [
+                                    [
+                                        31,
+                                        32
+                                    ],
+                                    [
+                                        131,
+                                        132
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin3/pin_type": {
+                        "type": "unsigned short",
+                        "value": 3
+                    },
+                    "MeshMetaData/pin3/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin3/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin3/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.3818
+                        ]
+                    },
+                    "MeshMetaData/pin3/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                31
+                            ],
+                            [
+                                131
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/rmp/assembly_pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/rmp/axial_mesh_intervals": {
+                        "type": "std::vector<unsigned int>",
+                        "value": [
+                            1,
+                            1
+                        ]
+                    },
+                    "MeshMetaData/rmp/axial_mesh_sizes": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "MeshMetaData/rmp/bottom_boundary_id": {
+                        "type": "short",
+                        "value": 202
+                    },
+                    "MeshMetaData/rmp/bypass_meshgen": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/rmp/mesh_dimensions": {
+                        "type": "int",
+                        "value": 3
+                    },
+                    "MeshMetaData/rmp/mesh_geometry": {
+                        "type": "std::string",
+                        "value": "Hex"
+                    },
+                    "MeshMetaData/rmp/name_id_map": {
+                        "type": "std::map<std::string, std::pair<unsigned short, unsigned long long>, std::less<std::string>, std::allocator<std::pair<std::stringconst, std::pair<unsigned short, unsigned long long>>>>",
+                        "value": {}
+                    },
+                    "MeshMetaData/rmp/radial_boundary_id": {
+                        "type": "short",
+                        "value": 200
+                    },
+                    "MeshMetaData/rmp/top_boundary_id": {
+                        "type": "short",
+                        "value": 201
+                    }
+                }
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "metadata": {
+                "values": {
+                    "MeshMetaData/amg1/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/amg1/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "A1_R41",
+                            "A1_R141"
+                        ]
+                    },
+                    "MeshMetaData/amg1/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            41,
+                            141
+                        ]
+                    },
+                    "MeshMetaData/amg1/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg1/pin_block_name_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/pin_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                0
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg1/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin2"
+                        ]
+                    },
+                    "MeshMetaData/amg1/pin_region_id_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg1/pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/amg1/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/amg2/assembly_type": {
+                        "type": "unsigned short",
+                        "value": 2
+                    },
+                    "MeshMetaData/amg2/background_block_name": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "A2_R51",
+                            "A2_R151"
+                        ]
+                    },
+                    "MeshMetaData/amg2/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            51,
+                            151
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "A2_R52"
+                            ],
+                            [
+                                "A2_R152"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            3.5
+                        ]
+                    },
+                    "MeshMetaData/amg2/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                52
+                            ],
+                            [
+                                152
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/amg2/pin_block_name_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<std::string>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<std::string>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg2/pin_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                0,
+                                1,
+                                0
+                            ],
+                            [
+                                0,
+                                0
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/amg2/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin1",
+                            "pin3"
+                        ]
+                    },
+                    "MeshMetaData/amg2/pin_region_id_map": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": []
+                    },
+                    "MeshMetaData/amg2/pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/amg2/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/cmg/assembly_lattice": {
+                        "type": "std::vector<std::vector<int>>",
+                        "value": [
+                            [
+                                -1,
+                                1
+                            ],
+                            [
+                                1,
+                                0,
+                                -1
+                            ],
+                            [
+                                -1,
+                                1
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/cmg/assembly_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "amg1",
+                            "amg2"
+                        ]
+                    },
+                    "MeshMetaData/cmg/extruded": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/cmg/pin_names": {
+                        "type": "std::vector<std::string>",
+                        "value": [
+                            "pin2",
+                            "pin1",
+                            "pin3"
+                        ]
+                    },
+                    "MeshMetaData/cmg/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin1/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            12,
+                            112
+                        ]
+                    },
+                    "MeshMetaData/pin1/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.68
+                        ]
+                    },
+                    "MeshMetaData/pin1/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                13
+                            ],
+                            [
+                                113
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin1/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P1_R11",
+                                "P1_R12",
+                                "P1_R13"
+                            ],
+                            [
+                                "P1_R111",
+                                "P1_R112",
+                                "P1_R113"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                1,
+                                [
+                                    [
+                                        11,
+                                        12,
+                                        13
+                                    ],
+                                    [
+                                        111,
+                                        112,
+                                        113
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin1/pin_type": {
+                        "type": "unsigned short",
+                        "value": 1
+                    },
+                    "MeshMetaData/pin1/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin1/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin1/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.2
+                        ]
+                    },
+                    "MeshMetaData/pin1/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                11
+                            ],
+                            [
+                                111
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            21,
+                            121
+                        ]
+                    },
+                    "MeshMetaData/pin2/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin2/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin2/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin2/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P2_R21"
+                            ],
+                            [
+                                "P2_R121"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                2,
+                                [
+                                    [
+                                        21
+                                    ],
+                                    [
+                                        121
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin2/pin_type": {
+                        "type": "unsigned short",
+                        "value": 2
+                    },
+                    "MeshMetaData/pin2/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin2/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin2/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin2/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin3/background_region_id": {
+                        "type": "std::vector<unsigned short>",
+                        "value": [
+                            32,
+                            132
+                        ]
+                    },
+                    "MeshMetaData/pin3/duct_halfpitches": {
+                        "type": "std::vector<double>",
+                        "value": []
+                    },
+                    "MeshMetaData/pin3/duct_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [],
+                            []
+                        ]
+                    },
+                    "MeshMetaData/pin3/extruded": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/is_homogenized": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/is_single_pin": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "MeshMetaData/pin3/pin_block_names": {
+                        "type": "std::vector<std::vector<std::string>>",
+                        "value": [
+                            [
+                                "P3_R31",
+                                "P3_R32"
+                            ],
+                            [
+                                "P3_R131",
+                                "P3_R132"
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin3/pin_region_ids": {
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "value": [
+                            [
+                                3,
+                                [
+                                    [
+                                        31,
+                                        32
+                                    ],
+                                    [
+                                        131,
+                                        132
+                                    ]
+                                ]
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/pin3/pin_type": {
+                        "type": "unsigned short",
+                        "value": 3
+                    },
+                    "MeshMetaData/pin3/pitch": {
+                        "type": "double",
+                        "value": 1.42063
+                    },
+                    "MeshMetaData/pin3/reactor_params_name": {
+                        "type": "std::string",
+                        "value": "rmp"
+                    },
+                    "MeshMetaData/pin3/ring_radii": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            0.3818
+                        ]
+                    },
+                    "MeshMetaData/pin3/ring_region_ids": {
+                        "type": "std::vector<std::vector<unsigned short>>",
+                        "value": [
+                            [
+                                31
+                            ],
+                            [
+                                131
+                            ]
+                        ]
+                    },
+                    "MeshMetaData/rmp/assembly_pitch": {
+                        "type": "double",
+                        "value": 7.10315
+                    },
+                    "MeshMetaData/rmp/axial_mesh_intervals": {
+                        "type": "std::vector<unsigned int>",
+                        "value": [
+                            1,
+                            1
+                        ]
+                    },
+                    "MeshMetaData/rmp/axial_mesh_sizes": {
+                        "type": "std::vector<double>",
+                        "value": [
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "MeshMetaData/rmp/bottom_boundary_id": {
+                        "type": "short",
+                        "value": 202
+                    },
+                    "MeshMetaData/rmp/bypass_meshgen": {
+                        "type": "bool",
+                        "value": true
+                    },
+                    "MeshMetaData/rmp/mesh_dimensions": {
+                        "type": "int",
+                        "value": 3
+                    },
+                    "MeshMetaData/rmp/mesh_geometry": {
+                        "type": "std::string",
+                        "value": "Hex"
+                    },
+                    "MeshMetaData/rmp/name_id_map": {
+                        "type": "std::map<std::string, std::pair<unsigned short, unsigned long long>, std::less<std::string>, std::allocator<std::pair<std::stringconst, std::pair<unsigned short, unsigned long long>>>>",
+                        "value": {}
+                    },
+                    "MeshMetaData/rmp/radial_boundary_id": {
+                        "type": "short",
+                        "value": 200
+                    },
+                    "MeshMetaData/rmp/top_boundary_id": {
+                        "type": "short",
+                        "value": 201
+                    }
+                }
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
