@@ -1,9 +1,12 @@
 [Tests]
-  [./flow_channel_parameters_calculator]
+  issues = '#19756'
+  design = 'FlowChannelParametersCalculator.md'
+  [flow_channel_parameters_calculator]
     type = PythonUnitTest
     input = test_FlowChannelParametersCalculator.py
     separate = True
     display_required = True
     required_python_packages = PyQt5
-  [../]
+    requirement = 'The system shall be able to compute flow channel parameters from a selection of user inputs in the peacock graphical interface.'
+  []
 []
