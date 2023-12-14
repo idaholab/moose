@@ -44,6 +44,13 @@ are in the base environment, and Conda is ready for operation:
 $ (base) ~>
 ```
 
+The next thing you should do after a fresh install, is perform an update to the base Conda
+environment:
+
+```bash
+conda update --all --yes
+```
+
 Add [!ac](INL)'s public channel to gain access to [!ac](INL)'s Conda package library:
 
 ```bash
