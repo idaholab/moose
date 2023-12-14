@@ -82,10 +82,10 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty("name_id_map", _name_id_map);
 
-  // Option to bypass mesh generation depends on value of Mesh/data_only
+  // Option to bypass mesh generation depends on value of Mesh/data_driven
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
-  const auto data_only = moose_mesh->parameters().get<bool>("data_only");
-  this->declareMeshProperty(RGMB::bypass_meshgen, data_only);
+  const auto data_driven = moose_mesh->parameters().get<bool>("data_driven");
+  this->declareMeshProperty(RGMB::bypass_meshgen, data_driven);
 
   if (isParamValid("top_boundary_id"))
   {

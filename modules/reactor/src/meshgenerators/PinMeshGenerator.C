@@ -523,6 +523,14 @@ PinMeshGenerator::generate()
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
 
+  // If mesh generation is requested and bypass_mesh is true, return a null mesh. RGMB
+  // mesh should not be the final mesh generator with this option specified
+  if (getReactorParam<bool>(RGMB::bypass_meshgen))
+  {
+    auto null_mesh = nullptr;
+    return null_mesh;
+  }
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");

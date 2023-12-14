@@ -107,10 +107,6 @@ MooseApp::validParams()
       "mesh_only",
       "--mesh-only [mesh_file_name]",
       "Setup and Output the input mesh only (Default: \"<input_file_name>_in.e\")");
-  params.addCommandLineParam<std::string>(
-      "metadata_only",
-      "--metadata-only",
-      "Setup and output the metadata defined on input mesh only");
 
   params.addCommandLineParam<bool>("show_input",
                                    "--show-input",
@@ -957,14 +953,7 @@ MooseApp::setupOptions()
 
     _builder.build();
 
-    if (isParamValid("metadata_only"))
-    {
-      _action_warehouse.setFinalTask("create_added_mesh_generators");
-      if (isParamValid("mesh_only"))
-        mooseWarning(
-            "--metadata-only mode does not create an output mesh and --mesh-only will be ignored");
-    }
-    else if (isParamValid("mesh_only"))
+    if (isParamValid("mesh_only"))
     {
       _syntax.registerTaskName("mesh_only", true);
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
@@ -1100,7 +1089,7 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  if (isParamValid("mesh_only") || isParamValid("split_mesh") || isParamValid("metadata_only"))
+  if (isParamValid("mesh_only") || isParamValid("split_mesh"))
     _ready_to_exit = true;
   else if (getParam<bool>("list_constructed_objects"))
   {
