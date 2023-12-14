@@ -11,6 +11,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/libmesh.h"
 
+#include "nlohmann/json.h"
+
 namespace Moose
 {
 const processor_id_type INVALID_PROCESSOR_ID = libMesh::DofObject::invalid_processor_id;
@@ -27,3 +29,50 @@ const TagName OLD_SOLUTION_TAG = "SOLUTION_STATE_1";
 const TagName OLDER_SOLUTION_TAG = "SOLUTION_STATE_2";
 const TagName PREVIOUS_NL_SOLUTION_TAG = "U_PREVIOUS_NL_NEWTON";
 }
+
+/**
+ * Defines to_json for the derivative string classes defined in MooseTypes.h via the
+ * DerivativeStringClass macro.
+ */
+#define DerivativeStringToJSON(TheName)                                                            \
+  namespace nlohmann                                                                               \
+  {                                                                                                \
+  void adl_serializer<TheName>::to_json(json & j, const TheName & v)                               \
+  {                                                                                                \
+    j = static_cast<std::string>(v);                                                               \
+  }                                                                                                \
+  }                                                                                                \
+  static_assert(true, "")
+DerivativeStringToJSON(FileName);
+DerivativeStringToJSON(FileNameNoExtension);
+DerivativeStringToJSON(MeshFileName);
+DerivativeStringToJSON(OutFileBase);
+DerivativeStringToJSON(NonlinearVariableName);
+DerivativeStringToJSON(AuxVariableName);
+DerivativeStringToJSON(VariableName);
+DerivativeStringToJSON(BoundaryName);
+DerivativeStringToJSON(SubdomainName);
+DerivativeStringToJSON(PostprocessorName);
+DerivativeStringToJSON(VectorPostprocessorName);
+DerivativeStringToJSON(MeshDivisionName);
+DerivativeStringToJSON(FunctionName);
+DerivativeStringToJSON(DistributionName);
+DerivativeStringToJSON(SamplerName);
+DerivativeStringToJSON(UserObjectName);
+DerivativeStringToJSON(IndicatorName);
+DerivativeStringToJSON(MarkerName);
+DerivativeStringToJSON(MultiAppName);
+DerivativeStringToJSON(OutputName);
+DerivativeStringToJSON(MaterialPropertyName);
+DerivativeStringToJSON(MooseFunctorName);
+DerivativeStringToJSON(MaterialName);
+DerivativeStringToJSON(TagName);
+DerivativeStringToJSON(MeshGeneratorName);
+DerivativeStringToJSON(ExtraElementIDName);
+DerivativeStringToJSON(ReporterValueName);
+DerivativeStringToJSON(PositionsName);
+DerivativeStringToJSON(TimesName);
+DerivativeStringToJSON(ExecutorName);
+DerivativeStringToJSON(ParsedFunctionExpression);
+DerivativeStringToJSON(NonlinearSystemName);
+DerivativeStringToJSON(CLIArgString);

@@ -44,6 +44,8 @@
 #include <type_traits>
 #include <functional>
 
+#include "nlohmann/json_fwd.h"
+
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
 #define MooseSharedNamespace std
@@ -924,6 +926,9 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * This Macro is used to generate std::string derived types useful for
  * strong type checking and special handling in the GUI.  It does not
  * extend std::string in any way so it is generally "safe"
+ *
+ * Be sure to use the DerivativeStringToJSON macro for new types in
+ * MooseTypes.C to also define to_json for each
  */
 #define DerivativeStringClass(TheName)                                                             \
   class TheName : public std::string                                                               \
@@ -935,7 +940,16 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
     TheName(const char * s, size_t n) : std::string(s, n) {}                                       \
     TheName(const char * s) : std::string(s) {}                                                    \
     TheName(size_t n, char c) : std::string(n, c) {}                                               \
-  } /* No semicolon here because this is a macro */
+  };                                                                                               \
+  namespace nlohmann                                                                               \
+  {                                                                                                \
+  template <>                                                                                      \
+  struct adl_serializer<TheName>                                                                   \
+  {                                                                                                \
+    static void to_json(json & j, const TheName & v);                                              \
+  };                                                                                               \
+  }                                                                                                \
+  static_assert(true, "")
 
 // Instantiate new Types
 

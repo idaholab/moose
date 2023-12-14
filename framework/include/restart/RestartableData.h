@@ -19,6 +19,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include "nlohmann/json.h"
+
 class RestartableDataReader;
 class RestartableDataWriter;
 class MooseApp;
@@ -153,7 +155,41 @@ public:
    */
   virtual void loadInternal(std::istream & stream) = 0;
 
+  /**
+   * @return Whether or not this value supports storing JSON via \p store
+   */
+  virtual bool hasStoreJSON() const = 0;
+
+  /**
+   * Struct that represents parameters for how to store the JSON value via \p store
+   */
+  struct StoreJSONParams
+  {
+    StoreJSONParams() {} // fixes a compiler bug with default constructors
+    bool value = true;
+    bool type = true;
+    bool name = false;
+    bool declared = false;
+    bool loaded = false;
+    bool stored = false;
+    bool has_context = false;
+  };
+
+  /**
+   * Stores this restartable data in the JSON entry \p json, with the options
+   * set by \p params (optional; defaults to just the type and underlying value)
+   *
+   * If the underlying type is not supported for JSON output (if hasStoreJSON() == false),
+   * and the parameters have the value output as enabled, this will error.
+   */
+  void store(nlohmann::json & json, const StoreJSONParams & params = StoreJSONParams{}) const;
+
 protected:
+  /**
+   * Internal method for storing the underlying JSON value
+   */
+  virtual void storeJSONValue(nlohmann::json & json) const = 0;
+
   /// The full (unique) name of this particular piece of data.
   const std::string _name;
 
@@ -179,6 +215,9 @@ template <typename T>
 class RestartableData : public RestartableDataValue
 {
 public:
+  /// Whether or not this type has a JSON store method implemented
+  static constexpr bool has_store_json = std::is_constructible_v<nlohmann::json, T>;
+
   /**
    * Constructor
    * @param name The full (unique) name for this piece of data.
@@ -214,6 +253,9 @@ public:
 
   virtual const std::type_info & typeId() const override final { return typeid(T); }
 
+  virtual bool hasStoreJSON() const override final { return has_store_json; }
+
+protected:
   /**
    * Store the RestartableData into a binary stream
    */
@@ -223,6 +265,8 @@ public:
    * Load the RestartableData from a binary stream
    */
   virtual void loadInternal(std::istream & stream) override;
+
+  virtual void storeJSONValue(nlohmann::json & json) const override final;
 
 private:
   /// Stored value.
@@ -274,6 +318,16 @@ inline void
 RestartableData<T>::loadInternal(std::istream & stream)
 {
   loadHelper(stream, set(), _context);
+}
+
+template <typename T>
+inline void
+RestartableData<T>::storeJSONValue(nlohmann::json & json) const
+{
+  if constexpr (RestartableData<T>::has_store_json)
+    nlohmann::to_json(json, get());
+  else
+    mooseAssert(false, "Should not be called");
 }
 
 using DataNames = std::unordered_set<std::string>;

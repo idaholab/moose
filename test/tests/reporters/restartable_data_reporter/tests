@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#26304'
+  design = 'RestartableDataReporter.md'
+
+  [test]
+    type = JSONDiff
+    input = 'restartable_data_reporter.i'
+    jsondiff = 'restartable_data_reporter_out.json'
+    skip_keys = 'part number_of_parts' # for parallel
+
+    requirement = 'The system shall support the output of restartable data in a human-readable form.'
+  []
+
+  [exclude]
+    type = JSONDiff
+    input = 'restartable_data_reporter.i'
+    jsondiff = 'exclude.json'
+    skip_keys = 'part number_of_parts' # for parallel
+    cli_args = 'Reporters/data/exclude=FEProblemBase/*/time_*
+                Outputs/file_base=exclude'
+
+    requirement = 'The system shall support excluding names when outputting restartable data in a human-readable form.'
+  []
+
+  [allow_unimplemented]
+    type = JSONDiff
+    input = 'restartable_data_reporter.i'
+    jsondiff = 'allow_unimplemented.json'
+    skip_keys = 'part number_of_parts' # for parallel
+    cli_args = 'Reporters/data/allow_unimplemented=true
+                Reporters/data/include=perf_graph
+                Outputs/file_base=allow_unimplemented'
+
+    requirement = 'The system shall support omitting data values for data that is missing an output method when outputting restartable data in human-readable form.'
+  []
+
+  [unimplemented_error]
+    type = RunException
+    input = 'restartable_data_reporter.i'
+    cli_args = 'Reporters/data/include=solution_invalidity'
+    expect_err = 'The method for outputting restartable data of type \'SolutionInvalidity\' is not implemented'
+
+    requirement = 'The system shall support reporting a reasonable error when trying to output restartable data in human-readable form for a data type that does not have an output specialization'
+  []
+
+  [detailed]
+    type = JSONDiff
+    input = 'restartable_data_reporter.i'
+    jsondiff = 'detailed.json'
+    skip_keys = 'part number_of_parts' # for parallel
+    cli_args = 'Reporters/data/entries="value type declared loaded stored has_context"
+                Outputs/file_base=detailed'
+    recover = false # loaded flag changes in recover
+
+    requirement = 'The system shall support a detailed output including state flags when outputting restartable data in a human-readable form.'
+  []
+
+  [map]
+    type = JSONDiff
+    input = 'restartable_data_reporter.i'
+    jsondiff = 'map.json'
+    cli_args = 'Reporters/data/map=MeshMetaData
+                Reporters/data/include=
+                Outputs/file_base=map'
+
+    requirement = 'The system shall support the output of restartable meta data in a human-readable form.'
+  []
+[]
