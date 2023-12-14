@@ -14,8 +14,7 @@
 #include "UserObjectInterface.h"
 
 #include <slepcsvd.h>
-#include "libmesh/parallel_object.h"
-#include "libmesh/petsc_vector.h"
+#include "POD.h"
 
 /**
  * Class which provides a Proper Orthogonal Decomposition (POD)-based mapping between
@@ -26,8 +25,6 @@ class PODMapping : public VariableMappingBase, public UserObjectInterface
 public:
   static InputParameters validParams();
   PODMapping(const InputParameters & parameters);
-
-  virtual ~PODMapping();
 
   virtual void buildMapping(const VariableName & vname) override;
 
@@ -100,15 +97,6 @@ public:
                                                const unsigned int base_i);
 
 protected:
-  /**
-   * Determine the number of basis functions needed for a given variable based on the information
-   * on the eigenvalues.
-   * @param vname The name of the variable
-   * @param converged_evs Vector of converged eigenvalues
-   */
-  dof_id_type determineNumberOfModes(const VariableName & vname,
-                                     const std::vector<Real> & converged_evs);
-
   /// The number of modes which need to be computed
   const std::vector<dof_id_type> _num_modes;
 
@@ -131,8 +119,6 @@ private:
   /// Link to the parallel storage which holds the solution fields that are used for the SVD
   const ParallelSolutionStorage * const _parallel_storage;
 
-#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
-  /// Storage for SLEPC's SVD objects for each variable.
-  std::map<VariableName, SVD> _svds;
-#endif
+  /// The POD object which can be used to compute the basis functions/vectors
+  const StochasticTools::POD _pod;
 };
