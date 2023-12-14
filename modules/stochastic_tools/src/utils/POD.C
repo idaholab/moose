@@ -8,6 +8,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseError.h"
 #include "POD.h"
 
 namespace StochasticTools
@@ -20,6 +21,9 @@ POD::POD(const ParallelSolutionStorage * const parallel_storage,
     _extra_slepc_options(extra_slepc_options),
     _communicator(comm)
 {
+#if PETSC_VERSION_LESS_THAN(3, 14, 0)
+  mooseError("PETSc-3.14.0 or higher is required for using StochasticTools::POD.");
+#endif
 }
 
 void
@@ -30,6 +34,9 @@ POD::computePOD(const VariableName & vname,
                 const dof_id_type num_modes,
                 const Real energy) const
 {
+
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
+
   // Define the petsc matrix which needs and SVD, we will populate it using the snapshots
   Mat mat;
 
@@ -158,6 +165,15 @@ POD::computePOD(const VariableName & vname,
   }
   MatDestroy(&mat);
   SVDDestroy(&svd);
+#else
+  // These variables would otherwise be unused
+  (void)vname;
+  (void)left_basis_functions;
+  (void)right_basis_functions;
+  (void)singular_values;
+  (void)num_modes;
+  (void)energy;
+#endif
 }
 
 dof_id_type
