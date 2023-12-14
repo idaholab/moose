@@ -1,0 +1,16 @@
+[Tests]
+  [./singleton]
+    type = RunApp
+    input = good.i
+  [../]
+  [./not_heavy]
+    type = RunApp
+    input = good.i
+  [../]
+  [./heavy]
+    type = RunApp
+    input = good.i
+    heavy = true
+    prereq = not_heavy
+  [../]
+[]

@@ -281,4 +281,10 @@
     requirement = "The system shall skip tests not capable of being run depending on micro architecture"
     issues = '#25317'
   []
+  [test_soft_heavy]
+    type = PythonUnitTest
+    input = test_SoftHeavyDependency.py
+    requirement = "The system shall not skip non-heavy tests for which heavy tests depend on"
+    issues = '#26215'
+  []
 []
