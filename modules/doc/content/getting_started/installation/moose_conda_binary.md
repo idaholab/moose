@@ -23,17 +23,17 @@ With Conda initialized, create the `moose` environment and install `moose`:
 !style-end!
 
 ```bash
-mamba create -n moose moose
+conda create -n moose moose
 ```
 
 After the installation completes, activate the new environment:
 
 ```bash
-mamba activate moose
+conda activate moose
 ```
 
 !alert note
-Know that you will need to `mamba activate moose` for +each terminal window you open, and each time
+Know that you will need to `conda activate moose` for +each terminal window you open, and each time
 you wish to perform MOOSE related work+. If you wish to make this automatic, you can add that
 command to the end of your shell profile.
 
@@ -70,9 +70,9 @@ While in the other, you have `paraview` activated. Open a new terminal window no
 new `paraview` environment:
 
 ```bash
-mamba activate base # just in case you have `moose` auto-activating
-mamba create -n paraview paraview
-mamba activate paraview
+conda activate base # just in case you have `moose` auto-activating
+conda create -n paraview paraview
+conda activate paraview
 ```
 
 With paraview installed, you can now open `<the input file you chose>_in.e` with the following

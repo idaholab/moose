@@ -81,4 +81,4 @@ The following settings are recommended to pass the MOOSE GitHub CI pre-checks:
 }
 ```
 
-The `editor.formatOnSave` , `files.insertFinalNewline` , and  `files.trimTrailingWhitespace` options are helpful to avoid failing the automated code check in MOOSE's test suite. The `C_Cpp.default.includePath` settings ensure that includes installed with Conda/Mamba are found. The _Atom One Dark_ theme is available as an extension and provides the familiar Atom colors. [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) is an extension that provides extensive git integration.
+The `editor.formatOnSave` , `files.insertFinalNewline` , and  `files.trimTrailingWhitespace` options are helpful to avoid failing the automated code check in MOOSE's test suite. The `C_Cpp.default.includePath` settings ensure that includes installed with Conda are found. The _Atom One Dark_ theme is available as an extension and provides the familiar Atom colors. [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) is an extension that provides extensive git integration.

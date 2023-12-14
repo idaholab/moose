@@ -4,7 +4,7 @@ use our `moose-peacock` package available from INL's public Conda channel.
 
 ```bash
 conda config --add channels https://conda.software.inl.gov/public
-mamba create -n peacock moose-peacock
+config create -n peacock moose-peacock
 ```
 
 !alert note title
@@ -18,7 +18,7 @@ not install `moose-peacock` while inside the `moose` environment (or any environ
 Activate the newly created `peacock` environment:
 
 ```bash
-mamba activate peacock
+config activate peacock
 ```
 
 !alert note
