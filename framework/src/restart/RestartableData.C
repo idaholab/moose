@@ -34,3 +34,31 @@ RestartableDataValue::load(std::istream & stream)
   loadInternal(stream);
   _loaded = true;
 }
+
+void
+RestartableDataValue::store(nlohmann::json & json, const StoreJSONParams & params) const
+{
+  if (params.value)
+  {
+    if (hasStoreJSON())
+      storeJSONValue(json["value"]);
+    else
+      mooseError("Failed to output restartable data '",
+                 name(),
+                 "' as JSON because a to_json method is not implemented for the type '",
+                 type(),
+                 "'");
+  }
+  if (params.type)
+    json["type"] = type();
+  if (params.name)
+    json["name"] = name();
+  if (params.declared)
+    json["declared"] = declared();
+  if (params.loaded)
+    json["loaded"] = loaded();
+  if (params.stored)
+    json["stored"] = stored();
+  if (params.has_context)
+    json["has_context"] = hasContext();
+}

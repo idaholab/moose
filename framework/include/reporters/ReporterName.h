@@ -50,6 +50,9 @@ public:
    */
   const std::string getCombinedName() const;
 
+  /// The prefix for reporter data in the restartable system
+  static const std::string REPORTER_RESTARTABLE_DATA_PREFIX;
+
   /**
    * Return the name used for registration of this Reporter in the restartable data system.
    */
