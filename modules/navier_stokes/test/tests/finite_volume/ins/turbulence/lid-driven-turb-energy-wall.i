@@ -40,13 +40,12 @@ max_mixing_length = 1e10
 linearized_yplus_mu_t = false
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
-advected_interp_method = 'upwind'
-velocity_interp_method = 'rc'
-
 pressure_tag = "pressure_grad"
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
+  advected_interp_method = 'upwind'
+  velocity_interp_method = 'rc'
 []
 
 [Mesh]
@@ -117,8 +116,6 @@ pressure_tag = "pressure_grad"
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -148,8 +145,6 @@ pressure_tag = "pressure_grad"
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -192,8 +187,6 @@ pressure_tag = "pressure_grad"
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T_fluid
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
   []
   [temp_conduction]
     type = FVDiffusion

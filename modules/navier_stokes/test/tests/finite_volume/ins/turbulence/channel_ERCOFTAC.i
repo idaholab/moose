@@ -19,7 +19,6 @@ bulk_u = 1
 mu = '${fparse rho * bulk_u * 2 * H / Re}'
 
 advected_interp_method = 'upwind'
-velocity_interp_method = 'rc'
 
 pressure_tag = "pressure_grad"
 
@@ -65,7 +64,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 [GlobalParams]
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
-  velocity_interp_method = ${velocity_interp_method}
+  velocity_interp_method = 'rc'
 []
 
 [UserObjects]
@@ -113,8 +112,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -144,8 +141,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'y'
   []

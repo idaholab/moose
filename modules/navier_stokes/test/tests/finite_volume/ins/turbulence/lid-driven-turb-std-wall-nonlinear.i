@@ -35,11 +35,10 @@ walls = ''
 max_mixing_length = 1e10
 linearized_model = false
 
-advected_interp_method = 'upwind'
-velocity_interp_method = 'rc'
-
 [GlobalParams]
   rhie_chow_user_object = 'rc'
+  advected_interp_method = 'upwind'
+  velocity_interp_method = 'rc'
 []
 
 [Mesh]
@@ -115,8 +114,6 @@ velocity_interp_method = 'rc'
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -144,8 +141,6 @@ velocity_interp_method = 'rc'
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'y'
   []
