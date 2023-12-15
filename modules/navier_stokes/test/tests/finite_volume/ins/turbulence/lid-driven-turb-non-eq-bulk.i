@@ -278,11 +278,6 @@ pressure_tag = "pressure_grad"
 []
 
 [AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
   [mu_t]
     type = MooseVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
@@ -291,12 +286,6 @@ pressure_tag = "pressure_grad"
 []
 
 [AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
   [compute_mu_t]
     type = kEpsilonViscosityAux
     variable = mu_t

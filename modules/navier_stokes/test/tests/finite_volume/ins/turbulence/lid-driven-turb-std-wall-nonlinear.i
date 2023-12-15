@@ -289,23 +289,6 @@ velocity_interp_method = 'rc'
   []
 []
 
-[AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-[]
-
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
-[]
-
 [Materials]
   [mu_t_material]
     type = INSFVkEpsilonViscosityMaterial

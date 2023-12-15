@@ -77,7 +77,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
   velocity_interp_method = ${velocity_interp_method}
-  two_term_boundary_expansion = true
 []
 
 [UserObjects]
@@ -325,11 +324,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
   [mu_t]
     type = MooseVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
@@ -337,12 +331,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
   [compute_mu_t]
     type = kEpsilonViscosityAux
     variable = mu_t
