@@ -35,7 +35,7 @@ TurbulentConductivityAux::TurbulentConductivityAux(const InputParameters & param
 Real
 TurbulentConductivityAux::computeValue()
 {
-  auto current_argument = makeElemArg(_current_elem);
+  const auto current_argument = makeElemArg(_current_elem);
   const auto state = determineState();
 
   return raw_value(_cp(current_argument, state) * _mu_t(current_argument, state) /

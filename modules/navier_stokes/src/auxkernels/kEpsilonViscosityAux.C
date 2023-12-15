@@ -28,7 +28,7 @@ kEpsilonViscosityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
-  params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addParam<Real>("C_mu", "Coupled turbulent kinetic energy closure.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
