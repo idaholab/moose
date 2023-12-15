@@ -8,6 +8,14 @@
     requirement = 'The system shall be able to solve turbulence in enclosures with standard wall functions.'
     abs_zero = 1e-6
   []
+  [lid_driven_turb_std_wall_bulk]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-std-wall.i'
+    exodiff = 'bulk_treatement.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with standard wall functions using bulk wall treatement for mu_t.'
+    cli_args = 'bulk_wall_treatment=true mu=1e-3 Outputs/file_base=bulk_treatement'
+    abs_zero = 1e-6
+  []
   [lid_driven_turb_non_eq_wall]
     type = 'Exodiff'
     input = 'lid-driven-turb-non-eq-wall.i'
@@ -30,6 +38,15 @@
     exodiff = 'lid-driven-turb-inc-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with incremental wall functions.'
     abs_zero = 1e-6
+    heavy = true
+  []
+  [lid_driven_turb_no_wall_log_first_layer]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-no-wall.i'
+    exodiff = 'no_wall_log_layer.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with no wall treatement with the first cell on the logarithmic regime.'
+    abs_zero = 1e-6
+    cli_args = 'lid_velocity=10.0 Executioner/num_iterations=2000 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer'
     heavy = true
   []
   [lid_driven_turb_no_wall]
@@ -60,7 +77,25 @@
     type = 'Exodiff'
     input = 'lid-driven-turb-energy-wall.i'
     exodiff = 'lid-driven-turb-energy-wall_out.e'
-    requirement = 'The system shall be able to solve turbulence in enclosures temperature wall functions.'
+    requirement = 'The system shall be able to solve turbulence in enclosures with temperature wall functions.'
+    abs_zero = 1e-6
+    heavy = true
+  []
+  [lid_driven_turb_energy_wall_linear]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-energy-wall.i'
+    exodiff = 'linear_temperature_wall_function.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with linearized temperature wall functions.'
+    cli_args = 'FVBCs/T_hot/linearized_yplus=true FVBCs/T_cold/linearized_yplus=true Outputs/file_base=linear_temperature_wall_function'
+    abs_zero = 1e-6
+    heavy = true
+  []
+  [lid_driven_turb_energy_wall_log]
+    type = 'Exodiff'
+    input = 'lid-driven-turb-energy-wall.i'
+    exodiff = 'temperature_wall_function_log.e'
+    requirement = 'The system shall be able to solve turbulence in enclosures with temperature wall functions in the log-layer regime.'
+    cli_args = 'lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=temperature_wall_function_log'
     abs_zero = 1e-6
     heavy = true
   []
