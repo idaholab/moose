@@ -77,10 +77,10 @@ protected:
   /// Relative tolerance to find the friction velocity
   static constexpr Real _REL_TOLERANCE{1e-4};
 
-///@{
+  ///@{
   /// Maps for wall bounded elements
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
-///@}
+  ///@}
 };
