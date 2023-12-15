@@ -28,17 +28,20 @@
 
   [vectors_to_dot]
     type = ConstantReporter
-    real_vector_names = 'vec_a vec_b'
-    real_vector_values = '1 2 3; 10 20 30'
+    real_vector_names = 'vec_a vec_b vec_c vec_d'
+    real_vector_values = '1 2 3; 10 20 30; 100 10 1; -1 -2'
     outputs=none
   []
   [innerProduct]
     type = VectorDotProduct
     name = inner
-    vector_a = vectors_to_dot/vec_a
-    vector_b = vectors_to_dot/vec_b
-    scale = 0.5
+    reporter_names = 'vectors_to_dot/vec_a vectors_to_dot/vec_b vectors_to_dot/vec_c'
+    reporter_symbols = 'a b c'
+    constant_names = 'constant1 constant2'
+    constant_expressions = '10 20'
+    expression = '(a+b)*c+constant1+constant2'
   []
+
   [vector_sum]
     type = VectorSum
     name = sum

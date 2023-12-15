@@ -10,11 +10,12 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "FunctionParserUtils.h"
 
 /**
- * Reporter containing row sum of a vector of vectors from another Reporter
+ * Reporter containing operation between vectors from another Reporter
  */
-class VectorDotProduct : public GeneralReporter
+class VectorDotProduct : public GeneralReporter, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -26,13 +27,19 @@ public:
   virtual void finalize() override;
 
 private:
-  /// scaling factor for dot product
-  const Real & _scale;
-  /// Reporter containing dot product
-  Real & _dot_product;
+  // reporter names with vectors of data
+  const std::vector<ReporterName> & _reporter_names;
 
-  /// First vector in dot product
-  const std::vector<Real> & _vector_a;
-  /// Second vector in dot product
-  const std::vector<Real> & _vector_b;
+  /// whether time is part of the parsed expression
+  const bool _use_t;
+
+  /// output vector
+  std::vector<double> & _output_reporter;
+
+  /// function parser object
+  SymFunctionPtr _func_F;
+
+  std::vector<const std::vector<Real> *> _reporter_data;
+
+  usingFunctionParserUtilsMembers(false);
 };
