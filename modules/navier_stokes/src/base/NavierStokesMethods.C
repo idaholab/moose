@@ -134,6 +134,7 @@ void
 getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
                        const FEProblemBase & fe_problem,
                        const SubProblem & subproblem,
+                       const std::set<SubdomainID> & block_ids,
                        std::map<const Elem *, bool> & wall_bounded_map)
 {
 
@@ -141,19 +142,22 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
 
   for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
   {
-    auto wall_bounded = false;
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    if (block_ids.find(elem->subdomain_id()) != block_ids.end())
     {
-      const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : wall_boundary_name)
+      auto wall_bounded = false;
+      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
       {
-        const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-          if (side_id == wall_id)
-            wall_bounded = true;
+        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const BoundaryName & name : wall_boundary_name)
+        {
+          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
+          for (BoundaryID side_id : side_bnds)
+            if (side_id == wall_id)
+              wall_bounded = true;
+        }
       }
+      wall_bounded_map[elem] = wall_bounded;
     }
-    wall_bounded_map[elem] = wall_bounded;
   }
 }
 
@@ -162,52 +166,29 @@ void
 getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                 const FEProblemBase & fe_problem,
                 const SubProblem & subproblem,
+                const std::set<SubdomainID> & block_ids,
                 std::map<const Elem *, std::vector<Real>> & dist_map)
 {
 
   dist_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    if (block_ids.find(elem->subdomain_id()) != block_ids.end())
     {
-      const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : wall_boundary_name)
+      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
       {
-        const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-          if (side_id == wall_id)
-          {
-            const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
-            Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
-            dist_map[elem].push_back(dist);
-          }
-      }
-    }
-}
-
-/// Bounded element face normals for wall treatement
-void
-getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
-                     const FEProblemBase & fe_problem,
-                     const SubProblem & subproblem,
-                     std::map<const Elem *, std::vector<Point>> & normal_map)
-{
-
-  normal_map.clear();
-
-  for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
-    {
-      const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : wall_boundary_name)
-      {
-        const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-          if (side_id == wall_id)
-          {
-            const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
-            normal_map[elem].push_back(fi->normal());
-          }
+        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const BoundaryName & name : wall_boundary_name)
+        {
+          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
+          for (BoundaryID side_id : side_bnds)
+            if (side_id == wall_id)
+            {
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
+              Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
+              dist_map[elem].push_back(dist);
+            }
+        }
       }
     }
 }
@@ -217,24 +198,28 @@ void
 getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                    const FEProblemBase & fe_problem,
                    const SubProblem & subproblem,
+                   const std::set<SubdomainID> & block_ids,
                    std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map)
 {
 
   face_info_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
-    for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+    if (block_ids.find(elem->subdomain_id()) != block_ids.end())
     {
-      const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-      for (const BoundaryName & name : wall_boundary_name)
+      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
       {
-        const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-        for (BoundaryID side_id : side_bnds)
-          if (side_id == wall_id)
-          {
-            const FaceInfo * fi = subproblem.mesh().faceInfo(elem, i_side);
-            face_info_map[elem].push_back(fi);
-          }
+        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const BoundaryName & name : wall_boundary_name)
+        {
+          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
+          for (BoundaryID side_id : side_bnds)
+            if (side_id == wall_id)
+            {
+              const FaceInfo * fi = subproblem.mesh().faceInfo(elem, i_side);
+              face_info_map[elem].push_back(fi);
+            }
+        }
       }
     }
 }

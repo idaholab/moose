@@ -89,10 +89,10 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
 void
 INSFVTKEDSourceSink::initialSetup()
 {
-  NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem, _wall_bounded);
-  NS::getElementFaceNormal(_wall_boundary_names, _fe_problem, _subproblem, _normal);
-  NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, _dist);
-  NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, _face_infos);
+  NS::getWallBoundedElements(
+      _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
+  NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _dist);
+  NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _face_infos);
 }
 
 ADReal
@@ -121,7 +121,7 @@ INSFVTKEDSourceSink::computeQpResidual()
     if (_w_var)
       velocity(2) = _w_var->getElemValue(_current_elem, state);
 
-    for (unsigned int i = 0; i < _normal[_current_elem].size(); i++)
+    for (unsigned int i = 0; i < _dist[_current_elem].size(); i++)
     {
       const auto distance = _dist[_current_elem][i];
 
@@ -130,8 +130,9 @@ INSFVTKEDSourceSink::computeQpResidual()
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(TKE) / mu;
       else
       {
-        const auto parallel_speed =
-            (velocity - velocity * _normal[_current_elem][i] * _normal[_current_elem][i]).norm();
+        const auto parallel_speed = (velocity - velocity * _face_infos[_current_elem][i]->normal() *
+                                                    _face_infos[_current_elem][i]->normal())
+                                        .norm();
 
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
       }

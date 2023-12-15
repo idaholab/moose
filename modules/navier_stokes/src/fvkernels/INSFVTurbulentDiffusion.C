@@ -37,7 +37,8 @@ void
 INSFVTurbulentDiffusion::initialSetup()
 {
   FVDiffusion::initialSetup();
-  NS::getWallBoundedElements(_wall_boundary_names, _fe_problem, _subproblem, _wall_bounded);
+  NS::getWallBoundedElements(
+      _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
 }
 
 ADReal

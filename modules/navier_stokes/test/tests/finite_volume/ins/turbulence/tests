@@ -14,6 +14,7 @@
     exodiff = 'lid-driven-turb-non-eq-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with non-equilibrium wall functions.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_linear_wall]
     type = 'Exodiff'
@@ -21,6 +22,7 @@
     exodiff = 'lid-driven-turb-linear-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with linear wall functions.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_inc_wall]
     type = 'Exodiff'
@@ -28,6 +30,7 @@
     exodiff = 'lid-driven-turb-inc-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with incremental wall functions.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_no_wall]
     type = 'Exodiff'
@@ -35,6 +38,7 @@
     exodiff = 'lid-driven-turb-no-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with no wall treatement.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_non_eq_bulk]
     type = 'Exodiff'
@@ -42,6 +46,7 @@
     exodiff = 'lid-driven-turb-non-eq-bulk_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with non-equilibrium bulk treatement.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_energy]
     type = 'Exodiff'
@@ -49,6 +54,7 @@
     exodiff = 'lid-driven-turb-energy_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with transported energy.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_energy_wall]
     type = 'Exodiff'
@@ -56,6 +62,7 @@
     exodiff = 'lid-driven-turb-energy-wall_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures temperature wall functions.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_capped]
     type = 'Exodiff'
@@ -63,6 +70,7 @@
     exodiff = 'lid-driven-turb-capped_out.e'
     requirement = 'The system shall be able to solve turbulence in enclosures with capped production.'
     abs_zero = 1e-6
+    heavy = true
   []
   [lid_driven_turb_std_wall_nonlinear]
     type = 'Exodiff'
@@ -70,6 +78,7 @@
     exodiff = 'lid-driven-turb-std-wall-nonlinear_out.e'
     requirement = 'The system shall be able to solve nonlinear turbulence in enclosures with standard wall functions.'
     abs_zero = 1e-6
+    heavy = true
   []
   [channel_ERCOFTAC]
     type = 'Exodiff'
@@ -84,5 +93,6 @@
     exodiff = 'BFS_ERCOFTAC_out.e'
     requirement = 'The system shall be able to solve standard ERCOFTAC backward facing step.'
     abs_zero = 1e-6
+    heavy = true
   []
 []

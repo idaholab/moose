@@ -126,6 +126,7 @@ ADReal computeSpeed(const ADRealVectorValue & velocity);
 void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
                             const FEProblemBase & fe_problem,
                             const SubProblem & subproblem,
+                            const std::set<SubdomainID> & block_ids,
                             std::map<const Elem *, bool> & wall_bounded_map);
 
 /**
@@ -135,16 +136,8 @@ void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name
 void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                      const FEProblemBase & fe_problem,
                      const SubProblem & subproblem,
+                     const std::set<SubdomainID> & block_ids,
                      std::map<const Elem *, std::vector<Real>> & dist_map);
-
-/**
- * Map storing faces normals for wall bounded elements
- * The map passed in \p normal_map gets cleared and re-populated
- */
-void getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
-                          const FEProblemBase & fe_problem,
-                          const SubProblem & subproblem,
-                          std::map<const Elem *, std::vector<Point>> & normal_map);
 
 /**
  * Map storing face arguments to wall bounded faces
@@ -153,5 +146,6 @@ void getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
 void getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                         const FEProblemBase & fe_problem,
                         const SubProblem & subproblem,
+                        const std::set<SubdomainID> & block_ids,
                         std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map);
 }

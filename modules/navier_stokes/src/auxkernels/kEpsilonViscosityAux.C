@@ -71,9 +71,11 @@ kEpsilonViscosityAux::initialSetup()
 {
   if (!_wall_boundary_names.empty())
   {
-    NS::getWallBoundedElements(_wall_boundary_names, _c_fe_problem, _subproblem, _wall_bounded);
-    NS::getElementFaceNormal(_wall_boundary_names, _c_fe_problem, _subproblem, _normal);
-    NS::getWallDistance(_wall_boundary_names, _c_fe_problem, _subproblem, _dist);
+    NS::getWallBoundedElements(
+        _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _wall_bounded);
+    NS::getWallDistance(_wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _dist);
+    NS::getElementFaceArgs(
+        _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _face_infos);
   }
 }
 
@@ -156,7 +158,7 @@ kEpsilonViscosityAux::computeValue()
         (std::min_element(elem_distances.begin(), elem_distances.end()));
     const auto min_wall_dist = *min_wall_distance_iterator;
     const size_t minIndex = std::distance(elem_distances.begin(), min_wall_distance_iterator);
-    const auto loc_normal = _normal[&elem][minIndex];
+    const auto loc_normal = _face_infos[&elem][minIndex]->normal();
 
     // Getting y_plus
     ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));
