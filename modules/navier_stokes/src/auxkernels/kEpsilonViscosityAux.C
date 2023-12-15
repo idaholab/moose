@@ -85,9 +85,9 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
 
   /// Setting up convenient parameters
   const auto state = determineState();
-  auto rho = _rho(makeElemArg(_current_elem), state);
-  auto mu = _mu(makeElemArg(_current_elem), state);
-  auto nu = mu / rho;
+  const auto rho = _rho(makeElemArg(_current_elem), state);
+  const auto mu = _mu(makeElemArg(_current_elem), state);
+  const auto nu = mu / rho;
 
   const Real a_c = 1 / NS::von_karman_constant;
   const ADReal b_c =
