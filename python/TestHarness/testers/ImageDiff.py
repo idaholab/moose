@@ -42,7 +42,7 @@ class ImageDiff(FileTester):
         """
 
         # Call base class processResults
-        output += FileTester.processResults(self, moose_dir, options, output)
+        FileTester.processResults(self, moose_dir, options, output)
         if self.isFail():
             return output
 
