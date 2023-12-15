@@ -24,7 +24,7 @@ INSFVTKEDWallFunctionBC::validParams()
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
-  params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addParam<MooseFunctorName>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
@@ -38,7 +38,7 @@ INSFVTKEDWallFunctionBC::INSFVTKEDWallFunctionBC(const InputParameters & params)
     _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
     _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>("mu")),
+    _mu(getFunctor<ADReal>(NS::mu)),
     _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getFunctor<ADReal>("C_mu"))
@@ -56,7 +56,7 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi) const
 
   // Assign boundary weights to element
   // This is based on the theory of linear TKE development for each boundary
-  // This is, it assumes no interation across turbulence production from boundaries
+  // This is, it assumes no interaction across turbulence production from boundaries
   Real weight = 0.0;
   for (unsigned int i_side = 0; i_side < _current_elem.n_sides(); ++i_side)
     weight += static_cast<Real>(_subproblem.mesh().getBoundaryIDs(&_current_elem, i_side).size());

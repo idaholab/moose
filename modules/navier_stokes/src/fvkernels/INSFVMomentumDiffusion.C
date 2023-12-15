@@ -120,7 +120,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   {
     // Computing the gradient from coupled variables
     // Normally, we can do this with `_var.gradient(face, state)` but we will need the transpose
-    // gradient So, we compute all at once
+    // gradient. So, we compute all at once
     Moose::FaceArg face;
     const bool skewness_correction =
         (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);

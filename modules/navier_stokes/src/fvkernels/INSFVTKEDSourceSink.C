@@ -20,7 +20,7 @@ INSFVTKEDSourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Elemental kernel to compute the production and destruction "
-                             " terms of turbulent kinetic energy disspation (TKED).");
+                             " terms of turbulent kinetic energy dissipation (TKED).");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -144,7 +144,7 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < y_plus_vec.size(); i++)
     {
-      auto y_plus = y_plus_vec[i];
+      const auto y_plus = y_plus_vec[i];
 
       if (y_plus < 11.25)
       {

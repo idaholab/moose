@@ -24,7 +24,7 @@ INSFVTurbulentTemperatureWallFunction::validParams()
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
-  params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "The spcific heat at constant pressure.");
   params.addParam<MooseFunctorName>(NS::kappa, "The thermal conductivity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.58, "The turbulent Prandtl number.");
@@ -44,7 +44,7 @@ INSFVTurbulentTemperatureWallFunction::INSFVTurbulentTemperatureWallFunction(
     _v_var(parameters.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
     _w_var(parameters.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>("mu")),
+    _mu(getFunctor<ADReal>(NS::mu),
     _cp(getFunctor<ADReal>(NS::cp)),
     _kappa(getFunctor<ADReal>(NS::kappa)),
     _Pr_t(getFunctor<ADReal>("Pr_t")),
