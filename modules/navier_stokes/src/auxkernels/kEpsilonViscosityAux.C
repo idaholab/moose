@@ -57,7 +57,7 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _k(getFunctor<ADReal>(NS::TKE)),
     _epsilon(getFunctor<ADReal>(NS::TKED)),
     _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>("mu")),
+    _mu(getFunctor<ADReal>(NS::mu)),
     _C_mu(getParam<Real>("C_mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _linearized_yplus(getParam<bool>("linearized_yplus")),
