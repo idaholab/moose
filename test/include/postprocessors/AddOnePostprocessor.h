@@ -21,13 +21,12 @@ public:
 
   AddOnePostprocessor(const InputParameters & params);
 
-  virtual void initialSetup() override { _value = 0; }
   virtual void timestepSetup() override { _value += 1; }
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual Real getValue() const override { return _value; }
-  virtual void problemRestoring() override { _value -= 1; }
+  virtual void restoringProblem() override { _value -= 1; }
 
 protected:
-  Real _value;
+  Real & _value;
 };

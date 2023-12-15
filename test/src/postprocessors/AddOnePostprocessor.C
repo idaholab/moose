@@ -19,6 +19,6 @@ AddOnePostprocessor::validParams()
 }
 
 AddOnePostprocessor::AddOnePostprocessor(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters), _value(0.)
+  : GeneralPostprocessor(parameters), _value(declareRestartableData<Real>("value", 0))
 {
 }

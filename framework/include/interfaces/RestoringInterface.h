@@ -31,7 +31,7 @@ public:
    * Called on this object when the problem is restoring to the previous state (i.e. previous time
    * step)
    */
-  virtual void problemRestoring() {}
+  virtual void restoringProblem() {}
 
 protected:
   /// Reference to FEProblemBase instance

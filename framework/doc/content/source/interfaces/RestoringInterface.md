@@ -11,7 +11,7 @@ responsible for defining the correct behavior when the problem is restoring. The
 - Mesh changes
 
 The framework handles adaptivity and stateful property restoration properly, and so the object does not need to account
-for them in the `problemRestoring` API (explained below).
+for them in the `restoringProblem` API (explained below).
 
 ## End Use API
 

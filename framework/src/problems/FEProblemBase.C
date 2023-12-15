@@ -7377,7 +7377,7 @@ FEProblemBase::restore()
 
   // Let the RestoringInterface notify the registered objects to restore data
   for (const auto & rsti : _notify_on_restore)
-    rsti->problemRestoring();
+    rsti->restoringProblem();
 }
 
 void
