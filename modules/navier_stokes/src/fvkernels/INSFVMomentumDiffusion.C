@@ -86,7 +86,13 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   ADReal face_mu;
 
   if (onBoundary(*_face_info))
-    face_mu = std::max(_mu(makeCDFace(*_face_info), state), 0.0);
+  {
+    face_mu = _mu(makeCDFace(*_face_info), state);
+    // Protecting from negative viscosity at interpolation
+    // to preserve convergence
+    if (face_mu < 0.0)
+      face_mu = 0.0;
+  }
   else
     Moose::FV::interpolate(_mu_interp_method,
                            face_mu,
