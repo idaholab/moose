@@ -405,6 +405,7 @@ Transient::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+    _problem.restore();
     _time_stepper->rejectStep();
     _time = _time_old;
   }

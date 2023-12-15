@@ -733,6 +733,12 @@ SubProblem::meshChanged()
   mooseError("This system does not support changing the mesh");
 }
 
+void
+SubProblem::restore()
+{
+  mooseError("This problem does not support restore");
+}
+
 std::string
 SubProblem::restrictionSubdomainCheckName(SubdomainID check_id)
 {

@@ -74,6 +74,7 @@ UserObject::UserObject(const InputParameters & parameters)
     Restartable(this, "UserObjects"),
     MeshMetaDataInterface(this),
     MeshChangedInterface(parameters),
+    RestoringInterface(parameters),
     ScalarCoupleable(this),
     PerfGraphInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

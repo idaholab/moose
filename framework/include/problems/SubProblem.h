@@ -474,6 +474,9 @@ public:
 
   virtual void meshChanged();
 
+  /// Restore data after a solve failure.
+  virtual void restore();
+
   /**
    * Adds the given material property to a storage map based on block ids
    *

@@ -51,6 +51,7 @@ class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
+class RestoringInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
@@ -1562,6 +1563,17 @@ public:
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
   /**
+   * Restore data after a solve failure.
+   */
+  virtual void restore() override;
+
+  /**
+   * Register an object that derives from RestoringInterface
+   * to be notified when the problem is restoring.
+   */
+  void notifyOnRestore(RestoringInterface * rsti);
+
+  /**
    * Initialize stateful properties for elements in a specific \p elem_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
@@ -2298,6 +2310,9 @@ protected:
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
+
+  /// Objects to be notified when the problem is restoring
+  std::vector<RestoringInterface *> _notify_on_restore;
 
   /**
    * Helper method to update some or all data after a mesh change.
