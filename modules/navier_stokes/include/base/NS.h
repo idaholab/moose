@@ -162,7 +162,7 @@ static const std::string TKED = "epsilon";
 
 // Turbulence constants
 static constexpr Real von_karman_constant = 0.4187;
-static constexpr Real E_turb_constant = 0.4187;
+static constexpr Real E_turb_constant = 9.793;
 }
 
 namespace NS_DEFAULT_VALUES

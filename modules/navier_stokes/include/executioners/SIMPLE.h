@@ -142,7 +142,7 @@ protected:
    * Limit a solution to its minimum and maximum bounds:
    * $u = min(max(u, min_limit), max_limit)$
    *
-   * @param system_in The system whose solution shall be relaxed
+   * @param system_in The system whose solution shall be limited
    * @param min_limit = 0.0 The minimum limit for the solution
    * @param max_limit = 1e10 The maximum limit for the solution
    */

@@ -121,7 +121,7 @@ ADReal computeSpeed(const ADRealVectorValue & velocity);
 
 /**
  * Map marking wall bounded elements
- * The map passed in wall_bounded_map gets cleared and re-populated
+ * The map passed in \p wall_bounded_map gets cleared and re-populated
  */
 void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
                             const FEProblemBase & fe_problem,
@@ -130,7 +130,7 @@ void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name
 
 /**
  * Map storing wall ditance for near-wall marked elements
- * The map passed in dist_map gets cleared and re-populated
+ * The map passed in \p dist_map gets cleared and re-populated
  */
 void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                      const FEProblemBase & fe_problem,
@@ -139,7 +139,7 @@ void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
 
 /**
  * Map storing faces normals for wall bounded elements
- * The map passed in normalmap gets cleared and re-populated
+ * The map passed in \p normal_map gets cleared and re-populated
  */
 void getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
                           const FEProblemBase & fe_problem,
@@ -148,7 +148,7 @@ void getElementFaceNormal(const std::vector<BoundaryName> & wall_boundary_name,
 
 /**
  * Map storing face arguments to wall bounded faces
- * The map passed in face_info_map gets cleared and re-populated
+ * The map passed in \p face_info_map gets cleared and re-populated
  */
 void getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                         const FEProblemBase & fe_problem,
