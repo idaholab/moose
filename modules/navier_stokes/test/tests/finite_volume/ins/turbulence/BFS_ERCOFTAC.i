@@ -283,7 +283,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKE
     u = vel_x
     v = vel_y
-    intensity = ${internsity}
+    intensity = ${intensity}
   []
   [inlet_TKED]
     type = INSFVMixingLengthTKEDBC

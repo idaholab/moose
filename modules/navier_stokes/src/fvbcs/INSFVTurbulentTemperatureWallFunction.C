@@ -44,7 +44,7 @@ INSFVTurbulentTemperatureWallFunction::INSFVTurbulentTemperatureWallFunction(
     _v_var(parameters.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
     _w_var(parameters.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>(NS::mu),
+    _mu(getFunctor<ADReal>(NS::mu)),
     _cp(getFunctor<ADReal>(NS::cp)),
     _kappa(getFunctor<ADReal>(NS::kappa)),
     _Pr_t(getFunctor<ADReal>("Pr_t")),

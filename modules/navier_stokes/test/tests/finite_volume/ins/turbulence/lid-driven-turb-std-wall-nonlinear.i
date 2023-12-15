@@ -18,8 +18,8 @@ lid_velocity = 1.0
 side_length = 0.1
 
 ### Initial Conditions ###
-internsity = 0.01
-k_init = '${fparse 1.5*(internsity * lid_velocity)^2}'
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
 ### k-epslilon Closure Parameters ###

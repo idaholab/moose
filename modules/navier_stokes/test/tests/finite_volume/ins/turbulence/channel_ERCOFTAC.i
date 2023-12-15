@@ -31,8 +31,8 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Initial and Boundary Conditions ###
-internsity = 0.01
-k_init = '${fparse 1.5*(internsity * bulk_u)^2}'
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
 
 ### Modeling parameters ###
@@ -290,7 +290,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKE
     u = vel_x
     v = vel_y
-    intensity = ${internsity}
+    intensity = ${intensity}
   []
   [inlet_TKED]
     type = INSFVMixingLengthTKEDBC
