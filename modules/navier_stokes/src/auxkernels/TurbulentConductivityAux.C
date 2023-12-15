@@ -19,7 +19,7 @@ TurbulentConductivityAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Calculates the turbulent heat conductivity.");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific Heat Capacity functor");
-  params.addRequiredParam<MooseFunctorName>("mu_t", "The turbulent viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.9, "Turbulent Prandtl number functor.");
   return params;
 }
@@ -28,7 +28,7 @@ TurbulentConductivityAux::TurbulentConductivityAux(const InputParameters & param
   : AuxKernel(params),
     _cp(getFunctor<ADReal>(NS::cp)),
     _Pr_t(getFunctor<ADReal>("Pr_t")),
-    _mu_t(getFunctor<ADReal>("mu_t"))
+    _mu_t(getFunctor<ADReal>(NS::mu_t))
 {
 }
 

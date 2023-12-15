@@ -120,6 +120,7 @@ static const std::string k_s = "k_s";
 static const std::string cp = "cp";
 static const std::string cv = "cv";
 static const std::string mu = "mu";
+static const std::string mu_t = "mu_t";
 static const std::string k = "k";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";

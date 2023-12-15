@@ -34,7 +34,7 @@ INSFVkEpsilonViscosityMaterial::INSFVkEpsilonViscosityMaterial(const InputParame
     _C_mu(getFunctor<ADReal>("C_mu"))
 {
   addFunctorProperty<ADReal>(
-      "mu_t",
+      NS::mu_t,
       [this](const auto & r, const auto & t) -> ADReal
       { return _C_mu(r, t) * _rho(r, t) * Utility::pow<2>(_k(r, t)) / _epsilon(r, t); });
 }

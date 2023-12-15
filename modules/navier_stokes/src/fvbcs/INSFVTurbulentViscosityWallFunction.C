@@ -24,7 +24,7 @@ INSFVTurbulentViscosityWallFunction::validParams()
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>("mu_t", "The turbulent viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
@@ -45,7 +45,7 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
     _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>("mu")),
-    _mu_t(getFunctor<ADReal>("mu_t")),
+    _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment"))

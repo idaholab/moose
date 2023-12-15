@@ -27,7 +27,7 @@ INSFVTKEDSourceSink::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
-  params.addRequiredParam<MooseFunctorName>("mu_t", "Turbulent viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
   params.addParam<Real>("max_mixing_length",
@@ -63,7 +63,7 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _k(getFunctor<ADReal>(NS::TKE)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _mu_t(getFunctor<ADReal>("mu_t")),
+    _mu_t(getFunctor<ADReal>(NS::mu_t)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
