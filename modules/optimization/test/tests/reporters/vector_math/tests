@@ -4,7 +4,8 @@
   [vectorMath]
     type = CSVDiff
     input = vectorMath.i
-    csvdiff = "vectorMath_out_vals_0001.csv vectorMath_out.csv"
+    csvdiff = "vectorMath_out.csv vectorMath_out_vecvec_max_0001.csv vectorMath_out_vecvec_multiply_0001.csv
+               vectorMath_out_vecvec_sum_0001.csv vectorMath_out_vecvec_sqsum_0001.csv"
     allow_test_objects = true
     requirement = "The system shall be able to row sum a vector of vectors into a single vector, perform a dot product between two vectors and sum all of the entries of a single vector."
   []
@@ -14,14 +15,14 @@
     cli_args = "Reporters/dataFromVofV/vector_of_vectors='101 201; 102 202; 103'"
     allow_test_objects = true
     expect_err = "Every vector in 'reporter_vector_of_vectors=dataFromVofV/v_of_v' must be the same size."
-    requirement = "The system shall throw an error when the vectors being summed are not the same size."
+    requirement = "The system shall throw an error when the vectors being operated on are not the same size."
   []
   [errorDotProduct]
     type = RunException
     input = vectorMath.i
-    cli_args = "Reporters/vectors_to_dot/real_vector_values='1 2 3; 10 20'"
+    cli_args = "Reporters/vectorOperation/reporter_names='vecs/vec_a vecs/vec_b vec_d/vec_d'"
     allow_test_objects = true
-    expect_err = "Vectors in dot product must be same size."
-    requirement = "The system shall throw an error when the vectors being dotted are not the same size."
+    expect_err = "All vectors being operated on must be the same size."
+    requirement = "The system shall throw an error when the vectors being operated on are not the same size."
   []
 []

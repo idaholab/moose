@@ -35,8 +35,10 @@ private:
 
   /// Vector being operated on
   const std::vector<Real> & _vector;
+
   /// output vector
   Real & _output_reporter;
+
   /// function parser object
   SymFunctionPtr _func_F;
 

@@ -10,11 +10,13 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "FunctionParserUtils.h"
+#include "ReporterName.h"
 
 /**
  * Reporter containing row sum of a vector of vectors from another Reporter
  */
-class VectorOfVectorRowSum : public GeneralReporter
+class VectorOfVectorRowSum : public GeneralReporter, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -26,10 +28,20 @@ public:
   virtual void finalize() override;
 
 private:
-  /// Reporter containing vector of vectors row sum
-  std::vector<double> & _row_sum;
-  /// Reporter name containing vector of vectors
-  const ReporterName & _rname;
-  /// Reporter data containing vector of vectors
-  const std::vector<std::vector<Real>> * _reporter_data;
+  /// whether time is part of the parsed expression
+  const bool _use_t;
+
+  // initial value of element-wise reduction
+  const Real _initial_value;
+
+  // reporter vector of vector w/ data
+  const ReporterName _vec_of_vec_name;
+
+  /// Vector being operated on
+  std::vector<Real> & _output_reporter;
+
+  /// function parser object
+  SymFunctionPtr _func_F;
+
+  usingFunctionParserUtilsMembers(false);
 };

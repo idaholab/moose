@@ -48,6 +48,12 @@ VectorDotProduct::VectorDotProduct(const InputParameters & parameters)
     _output_reporter(declareValueByName<std::vector<Real>>(getParam<std::string>("name"),
                                                            REPORTER_MODE_REPLICATED))
 {
+  // get reporters to operate on
+  _reporter_data.resize(_reporter_names.size());
+  for (unsigned int i = 0; i < _reporter_names.size(); i++)
+    _reporter_data[i] =
+        &getReporterValueByName<std::vector<Real>>(_reporter_names[i], REPORTER_MODE_REPLICATED);
+
   // Get symbols to corresponding reporter names
   // need symbols because reporter names have a "/" and that will not feed into fparser
   std::vector<std::string> reporter_symbols =
@@ -105,12 +111,6 @@ VectorDotProduct::VectorDotProduct(const InputParameters & parameters)
 
   // reserve storage for parameter passing buffer
   _func_params.resize(_reporter_names.size() + _use_t);
-
-  // get reporters to operate on
-  _reporter_data.resize(_reporter_names.size());
-  for (unsigned int i = 0; i < _reporter_names.size(); i++)
-    _reporter_data[i] =
-        &getReporterValueByName<std::vector<Real>>(_reporter_names[i], REPORTER_MODE_REPLICATED);
 }
 
 void
