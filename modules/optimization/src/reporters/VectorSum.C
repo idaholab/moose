@@ -71,7 +71,7 @@ VectorSum::VectorSum(const InputParameters & parameters)
   std::string function = getParam<std::string>("expression");
   // make sure the expression has the two required variables, vi and vplus
   if (function.find("vi") == std::string::npos || function.find("vplus") == std::string::npos)
-    mooseError("Parsed function must contain the two symbols 'vi' and 'vplus'.");
+    paramError("expression", "Parsed function must contain the two symbols 'vi' and 'vplus'.");
 
   if (_func_F->Parse(function, symbol_str) >= 0)
     mooseError("Invalid parsed function\n", function, "\n", _func_F->ErrorMsg());

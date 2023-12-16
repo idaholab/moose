@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'VectorOfVectorRowSum.md VectorDotProduct.md VectorSum.md'
+  design = 'VectorOfVectorRowSum.md VectorSum.md ParsedVectors.md ParsedScalars.md'
   [vectorMath]
     type = CSVDiff
     input = vectorMath.i
