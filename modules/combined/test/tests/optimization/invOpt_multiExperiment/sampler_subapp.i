@@ -52,12 +52,17 @@
   [grad_sum]
     type = VectorOfVectorRowSum
     name = row_sum
-    reporter_vector_of_vectors = "storage/fromForward:grad_f:grad_f"
+    reporter_vector_of_vectors= "storage/fromForward:grad_f:grad_f"
+    initial_value = 0
+    expression = 'vi+vplus'
   []
   [obj_sum]
     type = VectorSum
     name = value
-    vector = "storage/fromForward:obj_pp:value"
+    reporter_name= "storage/fromForward:obj_pp:value"
+    initial_value = 0
+    expression = 'vi+vplus'
+    outputs=none
   []
 []
 

@@ -139,12 +139,20 @@
     real_vector_names = 'left right'
     real_vector_values = '0 0; 0' # Dummy
   []
+  [vector_sqsum]
+    type = VectorSum
+    name = sqsum
+    reporter_name= 'measure_data/misfit_values'
+    initial_value = 0
+    expression = 'vi+vplus*vplus'
+    outputs=none
+  []
   [obj_sum]
-    type = VectorDotProduct
+    type = ParsedScalars
     name = value
-    vector_a = measure_data/misfit_values
-    vector_b = measure_data/misfit_values
-    scale = 0.5
+    reporter_names = 'vector_sqsum/sqsum'
+    reporter_symbols = 'a'
+    expression = '0.5*a'
   []
 []
 

@@ -15,21 +15,18 @@
 /**
  * Reporter containing operation between vectors from another Reporter
  */
-class VectorDotProduct : public GeneralReporter, public FunctionParserUtils<false>
+class ParsedVectors : public GeneralReporter, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
-  VectorDotProduct(const InputParameters & parameters);
+  ParsedVectors(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override;
 
 private:
-  // reporter names with vectors of data
-  const std::vector<ReporterName> & _reporter_names;
-
   /// whether time is part of the parsed expression
   const bool _use_t;
 

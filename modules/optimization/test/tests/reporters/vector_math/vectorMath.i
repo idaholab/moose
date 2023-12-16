@@ -53,12 +53,23 @@
     type = ConstantReporter
     real_vector_names = 'vec_a vec_b vec_c vec_d'
     real_vector_values = '1 2 3; 10 20 30; 100 10 1; 1 2 3 4'
+    real_names = 'a b c'
+    real_values='1 10 100'
     outputs=none
   []
   [vectorOperation]
-    type = VectorDotProduct
+    type = ParsedVectors
     name = inner
     reporter_names = 'vecs/vec_a vecs/vec_b vecs/vec_c'
+    reporter_symbols = 'a b c'
+    constant_names = 'constant1 constant2'
+    constant_expressions = '10 20'
+    expression = '(a+b)*c+constant1+constant2'
+  []
+  [scalarOperation]
+    type = ParsedScalars
+    name = inner
+    reporter_names = 'vecs/a vecs/b vecs/c'
     reporter_symbols = 'a b c'
     constant_names = 'constant1 constant2'
     constant_expressions = '10 20'
