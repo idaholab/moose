@@ -29,7 +29,7 @@
   [vectors_to_dot]
     type = ConstantReporter
     real_vector_names = 'vec_a vec_b vec_c vec_d'
-    real_vector_values = '1 2 3; 10 20 30; 100 10 1; -1 -2'
+    real_vector_values = '1 2 3; 10 20 30; 100 10 1; 1 2 3 4'
     outputs=none
   []
   [innerProduct]
@@ -45,8 +45,23 @@
   [vector_sum]
     type = VectorSum
     name = sum
-    vector= vectors_to_dot/vec_a
-    scale = 0.5
+    reporter_name= vectors_to_dot/vec_d
+    initial_value = 0
+    expression = 'vi+vplus'
+  []
+  [vector_multiply]
+    type = VectorSum
+    name = multiply
+    reporter_name= vectors_to_dot/vec_d
+    initial_value = 1
+    expression = 'vi*vplus'
+  []
+  [vector_max]
+    type = VectorSum
+    name = max
+    reporter_name= vectors_to_dot/vec_d
+    initial_value = -100000
+    expression = 'max(vi,vplus)'
   []
 []
 

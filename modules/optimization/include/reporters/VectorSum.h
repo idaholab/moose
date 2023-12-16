@@ -10,12 +10,12 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "FunctionParserUtils.h"
 
 /**
- * Reporter performing a reduction on a vector
- * currently only implements sum
+ * Reporter performing a reduction on a vector using a parsed function
  */
-class VectorSum : public GeneralReporter
+class VectorSum : public GeneralReporter, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -27,11 +27,18 @@ public:
   virtual void finalize() override;
 
 private:
-  /// scaling factor for dot product
-  const Real & _scale;
-  /// Reporter containing vector reduction
-  Real & _sum;
+  /// whether time is part of the parsed expression
+  const bool _use_t;
+
+  // initial value of element-wise reduction
+  const Real _initial_value;
 
   /// Vector being operated on
   const std::vector<Real> & _vector;
+  /// output vector
+  Real & _output_reporter;
+  /// function parser object
+  SymFunctionPtr _func_F;
+
+  usingFunctionParserUtilsMembers(false);
 };

@@ -47,7 +47,6 @@ VectorDotProduct::VectorDotProduct(const InputParameters & parameters)
     _use_t(getParam<bool>("use_t")),
     _output_reporter(declareValueByName<std::vector<Real>>(getParam<std::string>("name"),
                                                            REPORTER_MODE_REPLICATED))
-
 {
   // Get symbols to corresponding reporter names
   // need symbols because reporter names have a "/" and that will not feed into fparser
