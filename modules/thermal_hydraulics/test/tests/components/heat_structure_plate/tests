@@ -1,8 +1,11 @@
 [Tests]
+  design = 'HeatStructurePlate.md'
+  issues = '#19837'
   [phy:test]
     type = Exodiff
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
+    requirement = 'The system shall be able to model heat conduction in a plate.'
   []
 
   [phy:test_mats]
@@ -11,5 +14,6 @@
     exodiff = 'phy.test_out.e'
     cli_args = 'Outputs/file_base=phy.test_out'
     prereq = 'phy:test'
+    requirement = 'The system shall be able to model heat conduction in a plate using materials to define the solid properties.'
   []
 []

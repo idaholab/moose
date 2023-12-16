@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19788'
+  design = 'HSBoundaryExternalAppTemperature.md'
   [test]
     type = Exodiff
     input = 'phy.parent.i'
     exodiff = 'phy.parent_out.e phy.parent_out_thm0.e'
+    requirement = "The system shall be able to simulate convection on the boundary of a heat structure with an external temperature transferred from an external application."
   []
 []

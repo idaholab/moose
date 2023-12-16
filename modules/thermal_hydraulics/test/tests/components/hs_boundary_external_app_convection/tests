@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19816'
+  design = 'HSBoundaryExternalAppConvection.md'
   [energy_conservation_plate]
     type = Exodiff
     input = 'plate.parent.i'
     exodiff = 'plate.parent_out.e plate.parent_out_thm0.e'
+    requirement = "The system shall be able to simulate convection on the boundary of a heat structure with an external temperature and the wall heat transfer coefficient transferred from an external application."
   []
 []

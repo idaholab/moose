@@ -1,26 +1,32 @@
 [Tests]
+  issues = '#19798 #26336'
+  design = 'InletMassFlowRateTemperature1Phase.md'
   [phy:massflowrate_3eqn]
     type = 'Exodiff'
     input = 'phy.massflowrate_3eqn.i'
     exodiff = 'phy.massflowrate_3eqn.e'
     group = 'inlet_mass_flow_rate outlet pipe 1phase'
     max_time = 1000
+    requirement = "The system shall be able to model an inlet boundary condition for 1D single phase flow with a specified mass flow rate and temperature at the inlet."
   []
   [phy:reversed_flow]
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
+    requirement = "The system shall be able to model an inlet boundary condition for 1D single phase flow with a specified mass flow rate and temperature at the inlet, and handle flow reversal."
   []
 
   [clg:ctrl_m_dot_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_m_dot_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
+    requirement = "The system shall be able to control the mass flow rate at a 1D single phase flow inlet defined by a temperature and a mass flow rate."
   []
   [clg:ctrl_T_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_T_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
+    requirement = "The system shall be able to control the fluid temperature at a 1D single phase flow inlet defined by a temperature and a mass flow rate."
   []
 
   [jacobian]
@@ -30,6 +36,7 @@
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
+    requirement = "The system shall compute numerically accurate Jacobians when using an inlet with specified mass flow rate and temperature."
   []
   [jacobian-water97]
     type = PetscJacobianTester
@@ -38,5 +45,6 @@
     difference_tol = 1e6
     cli_args = 'Executioner/num_steps=3 Components/pipe/n_elems=3 -snes_test_err 1e-10'
     input = jac.massflowrate_3eqn_water97.i
+    requirement = "The system shall compute numerically accurate Jacobians when using an inlet with specified mass flow rate and temperature, when using IAPWS-97 water fluid properties."
   []
 []
