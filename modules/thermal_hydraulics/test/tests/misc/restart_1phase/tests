@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'application_usage/restart_recover.md'
   [part1]
     type = 'Exodiff'
     input = 'test.i'
@@ -17,6 +20,7 @@
       Outputs/file_base=part1_out'
     recover = false
     abs_zero = 1e-7
+    requirement = 'The system shall be able to create a checkpoint for restarting a single phase compressible flow simulation.'
   []
 
   [part2]
@@ -30,6 +34,7 @@
     abs_zero = 1e-7
     prereq = 'part1'
     recover = false
+    requirement = 'The system shall be able to restart from a checkpoint in a single phase compressible flow simulation.'
   []
 
   [part2_ics]
@@ -54,5 +59,6 @@
     prereq = 'part1'
     recover = false
     abs_zero = 1e-7
+    requirement = 'The system shall be able to restart from a checkpoint in a single phase compressible flow simulation, and override some of the restarted values with initial conditions.'
   []
 []
