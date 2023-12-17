@@ -1,14 +1,18 @@
 [Tests]
+  issues = '#19869'
+  design = 'modules/thermal_hydraulics/index.md'
   [without_junction]
     type = 'Exodiff'
     input = 'area_constriction.i'
     exodiff = 'area_constriction_out.e'
     max_parallel = 1
+    requirement = 'The system shall be able to simulate 1D single phase compressible flow in a channel with an area constriction.'
   []
   [with_junction]
     type = 'Exodiff'
     input = 'area_constriction_junction.i'
     exodiff = 'area_constriction_junction_out.e'
     max_parallel = 1
+    requirement = 'The system shall be able to simulate 1D single phase compressible flow in a channel with an area constriction, modeled using a junction between two components of different areas.'
   []
 []
