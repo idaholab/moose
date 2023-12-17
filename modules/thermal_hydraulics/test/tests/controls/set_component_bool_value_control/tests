@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#19850'
+  design = 'SetComponentBoolValueControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
     allow_test_objects = true
     recover = false
+    requirement = 'The system shall be able to set a component boolean parameter to the value of a boolean control data.'
   []
 []

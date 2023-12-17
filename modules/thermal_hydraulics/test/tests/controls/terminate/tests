@@ -1,9 +1,12 @@
 [Tests]
+  design = 'TerminateControl.md'
+  issues = '#19679'
   # Tests that TerminateControl can be used to exit gracefully (no error thrown)
   [no_error]
     type = 'RunApp'
     input = 'terminate.i'
     expect_out = 'Threshold exceeded'
+    requirement = 'The system shall be able to use control logic to terminate a simulation gracefully.'
 
     group = 'controls'
   []
@@ -16,6 +19,7 @@
       ControlLogic/terminate/throw_error=true
       ControlLogic/terminate/termination_message="Custom error message"'
     expect_err = 'Custom error message'
+    requirement = 'The system shall be able to use control logic to terminate a simulation with an error.'
 
     group = 'controls'
   []

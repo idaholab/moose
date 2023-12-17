@@ -1,7 +1,7 @@
 [Tests]
   # relap7 #636
   issues = '#26336'
-  design = 'HeatTransferFromSpecifiedTemperature1Phase'
+  design = 'HeatTransferFromSpecifiedTemperature1Phase.md'
   [phy.energy_walltemperature_ss_1phase]
     type = 'CSVDiff'
     input = 'phy.energy_walltemperature_ss_1phase.i'

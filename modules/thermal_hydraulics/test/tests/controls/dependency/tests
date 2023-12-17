@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'syntax/ControlLogic/index.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall use dependency resolution to execute Control objects in the correct order.'
   []
 []

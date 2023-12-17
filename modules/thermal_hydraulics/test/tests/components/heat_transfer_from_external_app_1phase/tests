@@ -1,7 +1,7 @@
 [Tests]
   # relap #636
   issues = '#26336'
-  design = 'HeatTransferFromExternalApp1Phase.md'
+  design = 'HeatTransferFromExternalAppTemperature1Phase.md HeatTransferFromExternalAppHeatFlux1Phase.md'
   [phy:q_wall_transfer_3eqn]
     type = Exodiff
     input = 'phy.q_wall_transfer_3eqn.parent.i'

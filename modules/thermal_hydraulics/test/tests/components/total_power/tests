@@ -1,6 +1,6 @@
 [Tests]
   issues = '#19762'
-  design = 'TotalPower'
+  design = 'TotalPower.md'
   [phy:constant_power]
     type = 'CSVDiff'
     input = 'phy.constant_power.i'
