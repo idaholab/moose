@@ -1,0 +1,44 @@
+[Tests]
+  [multi_component_gas_mixture]
+    type = RunApp
+    input = multi_component_gas_mixture.i
+    check_input = true
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media.'
+    issues = '#26795'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+  []
+
+  [multi_component_gas_mixture_2]
+    type = 'Exodiff'
+    input = 'multi_component_gas_mixture.i'
+    exodiff = 'multi_component_gas_mixture_out.e'
+    threading = '!pthreads'
+    requirement = 'PorousFlowMultipleComponentGasMixture should work and create an exodus output file'
+    rel_err = 5e-5
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+
+  [multi_component_gas_mixture_FV]
+    type = 'CSVDiff'
+    input = 'FVmulti_component_gas_mixture.i'
+    csvdiff = 'multi_component_gas_mixture_out.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlowMultipleComponentGasMixture should work and create an exodus output file with FV solver'
+    rel_err = 1e-1
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+
+  [multi_component_gas_mixture_MPA]
+    type = 'Exodiff'
+    input = 'multi_component_gas_mixture_MPA.i'
+    exodiff = 'multi_component_gas_mixture_MPA_out.e'
+    threading = '!pthreads'
+    requirement = 'PorousFlowMultipleComponentGasMixture should work with different pressure unit'
+    rel_err = 5e-5
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+[]
+

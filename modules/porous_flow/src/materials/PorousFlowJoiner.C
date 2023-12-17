@@ -87,8 +87,8 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
           &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _saturation_variable_name);
       _dphase_property_dt[ph] =
           &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _temperature_variable_name);
-      _dphase_property_dX[ph] =
-          &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _mass_fraction_variable_name);
+      _dphase_property_dX[ph] = &getMaterialPropertyDerivative<std::vector<Real>>(
+          _pf_prop + phase, _mass_fraction_variable_name);
     }
   }
 }
@@ -136,8 +136,9 @@ PorousFlowJoinerTempl<is_ad>::computeQpProperties()
         // Only add derivative wrt mass fraction if they exist
         if (_has_mass_fraction)
           if ((*_dphase_property_dX[ph]).size() > _qp)
-            (*_dproperty_dvar)[_qp][ph][v] +=
-                (*_dphase_property_dX[ph])[_qp] * (*_dmass_fraction_dvar)[_qp][ph][0][v];
+            for (unsigned i = 0; i < (*_dphase_property_dX[ph])[_qp].size(); ++i)
+              (*_dproperty_dvar)[_qp][ph][v] +=
+                  (*_dphase_property_dX[ph])[_qp][i] * (*_dmass_fraction_dvar)[_qp][ph][i][v];
       }
     }
   }

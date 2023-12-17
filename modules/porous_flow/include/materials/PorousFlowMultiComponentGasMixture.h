@@ -8,38 +8,36 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "PorousFlowMultiComponentFluidBase.h"
 
-/**
- * Fluid properties of Brine.
- * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints or nodes
- */
-
-class BrineFluidProperties;
 class SinglePhaseFluidProperties;
 template <bool is_ad>
-class PorousFlowBrineTempl : public PorousFlowMultiComponentFluidBaseTempl<is_ad>
+class PorousFlowMultiComponentGasMixtureTempl : public PorousFlowMultiComponentFluidBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowBrineTempl(const InputParameters & parameters);
+  PorousFlowMultiComponentGasMixtureTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Brine fluid properties UserObject
-  const BrineFluidProperties * _brine_fp;
+  /// Fluid properties UserObject
+  std::vector<const SinglePhaseFluidProperties *> _fp;
 
-  /// Water fluid properties UserObject
-  const SinglePhaseFluidProperties * _water_fp;
+  /// fluid name vector
+  const std::vector<UserObjectName> _fp_names;
 
-  /// Flag for nodal NaCl mass fraction
-  const bool _is_xnacl_nodal;
+  /// number of fluid component
+  const unsigned int _n_components;
 
-  /// NaCl mass fraction at the qps or nodes
-  const GenericVariableValue<is_ad> & _xnacl;
+  /// number of mass fraction variable
+  const unsigned int _x_components;
+
+  /// mass fraction variables
+  std::vector<const GenericVariableValue<is_ad> *> _x;
 
   usingPorousFlowFluidPropertiesMembers;
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_ddensity_dX;
@@ -48,6 +46,5 @@ protected:
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_denthalpy_dX;
   using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_console;
 };
-
-typedef PorousFlowBrineTempl<false> PorousFlowBrine;
-typedef PorousFlowBrineTempl<true> ADPorousFlowBrine;
+typedef PorousFlowMultiComponentGasMixtureTempl<false> PorousFlowMultiComponentGasMixture;
+typedef PorousFlowMultiComponentGasMixtureTempl<true> ADPorousFlowMultiComponentGasMixture;

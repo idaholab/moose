@@ -73,7 +73,6 @@
   []
 []
 
-
 [Preconditioning]
   [smp]
     type = SMP
