@@ -1,4 +1,6 @@
 [Tests]
+  design = 'ADVolumeJunctionAdvectionScalarKernel.md'
+  issues = '#26336'
   # 1-phase
   [rhoV]
     type = 'PetscJacobianTester'
@@ -8,6 +10,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian for a volume junction in 1D single phase compressible flow for the mass equation.'
   []
   [rhouV]
     type = 'PetscJacobianTester'
@@ -20,6 +23,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian for a volume junction in 1D single phase compressible flow for the momentum equation first component.'
   []
   [rhovV]
     type = 'PetscJacobianTester'
@@ -32,6 +36,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian for a volume junction in 1D single phase compressible flow for the momentum equation second component.'
   []
   [rhowV]
     type = 'PetscJacobianTester'
@@ -44,6 +49,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian for a volume junction in 1D single phase compressible flow for the momentum equation third component.'
   []
   [rhoEV]
     type = 'PetscJacobianTester'
@@ -56,5 +62,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian for a volume junction in 1D single phase compressible flow for the fluid energy equation.'
   []
 []

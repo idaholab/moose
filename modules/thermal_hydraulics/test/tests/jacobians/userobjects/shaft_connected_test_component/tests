@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#736
+  issues = '#26336'
+  requirement = 'ShaftConnectedTestComponent.md'
   [test]
     type = 'PetscJacobianTester'
     input = 'shaft_connected_test_component.i'
@@ -7,5 +10,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when using a shaft-connected component in a flow loop.'
   []
 []
