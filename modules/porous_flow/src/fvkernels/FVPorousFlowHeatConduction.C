@@ -41,7 +41,7 @@ FVPorousFlowHeatConduction::computeQpResidual()
   ADRealGradient gradT;
   ADRealTensorValue coeff;
 
-  // If we are on a boundary face, use the reconstructed gradient computed in _grad_T
+  // If we are on a boundary face, use the gradient computed in _grad_T
   if (onBoundary(*_face_info))
   {
     gradT = -_grad_T[_qp];

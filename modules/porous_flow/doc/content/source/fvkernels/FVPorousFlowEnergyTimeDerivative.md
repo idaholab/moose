@@ -8,6 +8,9 @@ This `FVKernel` implements the strong form of
 \end{equation*}
 where all parameters are defined in the [nomenclature](/nomenclature.md).
 
+!alert note
+Presently, a first-order accurate implicit Euler time derivative is hard-coded.
+
 !syntax parameters /FVKernels/FVPorousFlowEnergyTimeDerivative
 
 !syntax inputs /FVKernels/FVPorousFlowEnergyTimeDerivative

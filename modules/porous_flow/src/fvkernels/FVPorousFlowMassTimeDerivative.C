@@ -55,7 +55,7 @@ FVPorousFlowMassTimeDerivative::computeQpResidual()
   ADReal mass = 0.0;
   Real mass_old = 0.0;
 
-  for (unsigned int p = 0; p < _num_phases; ++p)
+  for (const auto p : make_range(_num_phases))
   {
     mass += _density[_qp][p] * _saturation[_qp][p] * _mass_fractions[_qp][p][_fluid_component];
     mass_old += _density_old[_qp][p] * _saturation_old[_qp][p] *

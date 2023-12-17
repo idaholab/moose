@@ -58,7 +58,7 @@ PorousFlowThermalConductivityFromPorosityTempl<is_ad>::computeQpProperties()
   if constexpr (!is_ad)
   {
     (*_dla_qp_dvar)[_qp].assign(_num_var, RealTensorValue());
-    for (unsigned v = 0; v < _num_var; ++v)
+    for (const auto v : make_range(_num_var))
       (*_dla_qp_dvar)[_qp][v] = (_la_f - _la_s) * (*_dporosity_qp_dvar)[_qp][v];
   }
 }

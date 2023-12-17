@@ -62,7 +62,7 @@ FVPorousFlowEnergyTimeDerivative::computeQpResidual()
 
   /// Add the fluid heat energy
   if (_fluid_present)
-    for (unsigned int p = 0; p < _num_phases; ++p)
+    for (const auto p : make_range(_num_phases))
     {
       energy += _porosity[_qp] * (*_density)[_qp][p] * (*_saturation)[_qp][p] * (*_energy)[_qp][p];
       energy_old += _porosity_old[_qp] * (*_density_old)[_qp][p] * (*_saturation_old)[_qp][p] *

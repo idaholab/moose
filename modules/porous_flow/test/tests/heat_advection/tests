@@ -15,7 +15,7 @@
     threading = '!pthreads'
     issues = '#7984'
     design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
-    requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilizatio.n'
+    requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilization'
   []
   [heat_advection_1d_fully_saturated_action_none]
     type = CSVDiff
@@ -26,7 +26,7 @@
     threading = '!pthreads'
     issues = '#10426'
     design = 'PorousFlowFullySaturated.md porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
-    requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilization, and the user should be able to activiate this stabilization using the PorousFlow Action system.'
+    requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilization, and the user should be able to activate this stabilization using the PorousFlow Action system.'
   []
   [heat_advection_1d]
     type = CSVDiff
@@ -44,7 +44,7 @@
     threading = '!pthreads'
     issues = '#7984 #21275'
     design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
-    requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization.'
+    requirement = 'The system shall correctly advect heat energy with a moving fluid using a finite volume discretization.'
   []
   [heat_advection_1d_fullsat]
     type = CSVDiff
@@ -66,7 +66,7 @@
     threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
-    requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization, in fully-saturated single-phase systems, and the user should be able to activiate this stabilization using the PorousFlow Action system.'
+    requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization, in fully-saturated single-phase systems, and the user should be able to activate this stabilization using the PorousFlow Action system.'
   []
   [heat_advection_1d_KT]
     type = CSVDiff
