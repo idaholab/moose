@@ -1,13 +1,17 @@
 [Tests]
+  issues = '#19868'
+  design = 'WallHeatTransferCoefficient3EqnDittusBoelterMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to compute the wall heat transfer coefficient using the Dittus Boelter correlation.'
   []
   [test_name]
     type = 'CSVDiff'
     cli_args = "Materials/Hw_material/Hw=htc AuxKernels/Hw_ak/property=htc"
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to rename the wall heat transfer coefficient computed with the Dittus Boelter correlation.'
   []
 []

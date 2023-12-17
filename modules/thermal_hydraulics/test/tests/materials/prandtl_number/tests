@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19682'
+  design = 'PrandtlNumberMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to compute the Prandtl number as a material property.'
   []
 []
