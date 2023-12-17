@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#613
+  issues = '#26336'
+  design = 'SimpleTurbine1Phase.md'
   [phy:conservation]
     type = 'CSVDiff'
     input = 'phy.conservation.i'
@@ -6,18 +9,21 @@
     override_columns = 'energy_diff mass_diff momentum_diff'
     override_abs_zero = '1e-6 2e-7 1e-4'
     override_rel_err = '0 0 0'
+    requirement = 'The system shall be able to model a simple turbine in 1D single phase compressible flow and show mass and energy conservation.'
   []
 
   [phy:test]
     type = 'Exodiff'
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
+    requirement = 'The system shall be able to model a simple turbine in 1D single phase compressible flow.'
   []
 
   [clg:test]
     type = 'CSVDiff'
     input = 'clg.test.i'
     csvdiff = 'clg.test_csv.csv'
+    requirement = 'The system shall be able to control the turbine power in a 1D single phase compressible flow simulation with a simple turbine.'
   []
 
   [jacobian]
@@ -29,5 +35,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when using a simple turbine model in a 1D single phase compressible flow simulation.'
   []
 []

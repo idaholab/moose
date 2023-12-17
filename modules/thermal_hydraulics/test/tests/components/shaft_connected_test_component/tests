@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#736
+  issues = '#26336'
+  design = 'Shaft.md'
   [jacobian]
     type = 'PetscJacobianTester'
     input = 'jacobian.i'
@@ -8,5 +11,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system shall be able to compute a numerically accurate Jacobian when using a shaft and components connected to the shaft in a 1D single phase compressible flow simulation.'
   []
 []
