@@ -1,8 +1,12 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'Sampler1DVector.md'
   [sampler_1d_vector]
     type = 'CSVDiff'
     input = 'sampler_1d_vector.i'
     csvdiff = 'out_test_property_vpp_0001.csv'
     allow_test_objects = true
+    requirement = "The system shall be able to sample a vector material property in a 1D mesh."
   []
 []

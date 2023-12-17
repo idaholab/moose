@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#19838'
+  design = 'THMOutputVectorVelocityAction.md'
   [test]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     recover = false
+    requirement = 'The system shall be able to output vector velocities, either as a vector or scalar variables, notably to view velocity in exodus files.'
   []
 []
