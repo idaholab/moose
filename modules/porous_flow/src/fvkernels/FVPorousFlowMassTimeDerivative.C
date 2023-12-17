@@ -29,13 +29,13 @@ FVPorousFlowMassTimeDerivative::FVPorousFlowMassTimeDerivative(const InputParame
     _num_phases(_dictator.numPhases()),
     _fluid_component(getParam<unsigned int>("fluid_component")),
     _porosity(getADMaterialProperty<Real>("PorousFlow_porosity_qp")),
+    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
     _density(getADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
+    _density_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
     _saturation(getADMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
+    _saturation_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")),
     _mass_fractions(
         getADMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")),
-    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
-    _density_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
-    _saturation_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")),
     _mass_fractions_old(
         getMaterialPropertyOld<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp"))
 {

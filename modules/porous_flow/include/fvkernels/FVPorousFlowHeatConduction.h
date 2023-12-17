@@ -13,6 +13,9 @@
 
 class PorousFlowDictator;
 
+/**
+ * Heat conduction kernel
+ */
 class FVPorousFlowHeatConduction : public FVFluxKernel
 {
 public:
@@ -22,6 +25,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// UserObject that holds information (number of phases, components, etc)
   const PorousFlowDictator & _dictator;
 
   /// Thermal conductivity

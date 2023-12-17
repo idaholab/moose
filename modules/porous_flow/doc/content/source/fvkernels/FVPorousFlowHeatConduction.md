@@ -2,7 +2,7 @@
 
 !syntax description /FVKernels/FVPorousFlowHeatConduction
 
-This `FVKernel` implements the weak form of
+This `FVKernel` implements the strong form of
 \begin{equation*}
   -\nabla\cdot \left(\lambda \nabla T\right)
 \end{equation*}

@@ -29,24 +29,24 @@ FVPorousFlowEnergyTimeDerivative::FVPorousFlowEnergyTimeDerivative(
     _num_phases(_dictator.numPhases()),
     _fluid_present(_num_phases > 0),
     _porosity(getADMaterialProperty<Real>("PorousFlow_porosity_qp")),
+    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
     _density(_fluid_present
                  ? &getADMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")
                  : nullptr),
-    _rock_energy(getADMaterialProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
-    _energy(_fluid_present ? &getADMaterialProperty<std::vector<Real>>(
-                                 "PorousFlow_fluid_phase_internal_energy_qp")
-                           : nullptr),
-    _saturation(_fluid_present
-                    ? &getADMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")
-                    : nullptr),
-    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
     _density_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real>>(
                                       "PorousFlow_fluid_phase_density_qp")
                                 : nullptr),
+    _rock_energy(getADMaterialProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
     _rock_energy_old(getMaterialPropertyOld<Real>("PorousFlow_matrix_internal_energy_nodal")),
+    _energy(_fluid_present ? &getADMaterialProperty<std::vector<Real>>(
+                                 "PorousFlow_fluid_phase_internal_energy_qp")
+                           : nullptr),
     _energy_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real>>(
                                      "PorousFlow_fluid_phase_internal_energy_qp")
                                : nullptr),
+    _saturation(_fluid_present
+                    ? &getADMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")
+                    : nullptr),
     _saturation_old(_fluid_present
                         ? &getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")
                         : nullptr)

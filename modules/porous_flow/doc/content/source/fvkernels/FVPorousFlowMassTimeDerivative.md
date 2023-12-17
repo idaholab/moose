@@ -2,7 +2,7 @@
 
 !syntax description /FVKernels/FVPorousFlowMassTimeDerivative
 
-This `FVKernel` implements the weak form of
+This `FVKernel` implements the strong form of
 \begin{equation*}
   \frac{\partial}{\partial t}\left(\phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}\right)
 \end{equation*}
