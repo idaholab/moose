@@ -37,7 +37,7 @@ FlipSidesetGenerator::generate()
   BoundaryInfo & boundary_info = _input->get_boundary_info();
   //get id of the input sideset
   boundary_id_type sideset_id = boundary_info.get_id_by_name(_sideset_name);
-  
+
   //Throw an error if the sideset doesn't exist
   if (sideset_id == libMesh::BoundaryInfo::invalid_id)
     mooseError("sideset doesn't exist in mesh");
@@ -61,27 +61,10 @@ FlipSidesetGenerator::generate()
         mooseError("elem " + std::to_string(old_elem_id) + " doesn't have a neighbor through side " + 
                     std::to_string(old_side_id) + " therefore it can't be flipped");
 
-      unsigned int new_elem_n_sides = new_elem->n_sides();
-      unsigned int new_side_id;
-      
-      //To find the new_side_id:
-      //loop over new_elem sides until you find the neighbor which have the same id as the old elem
-      for (unsigned int i = 0; i < new_elem_n_sides; ++i)
-      {
-        const Elem * neighbor = new_elem->neighbor_ptr(i);
-        if(neighbor)
-        {
-          dof_id_type neighbor_id = neighbor->id();
-          if(neighbor_id == old_elem_id)
-          {
-            new_side_id = i;
-            boundary_info.remove_side(old_elem, old_side_id, sideset_id);
-            boundary_info.add_side(new_elem, new_side_id, sideset_id);
-            break;
-          } 
-        }
-      }
-    }    
+      unsigned int new_side_id = new_elem->which_neighbor_am_i(old_elem);
+      boundary_info.remove_side(old_elem, old_side_id, sideset_id);
+      boundary_info.add_side(new_elem, new_side_id, sideset_id);
+    }
   } 
   return dynamic_pointer_cast<MeshBase>(_input);
 }
