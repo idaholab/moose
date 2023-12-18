@@ -77,6 +77,9 @@ require_total = 63
 [richards]
 require_total = 93
 
+[scalar_transport]
+require_total = 85
+
 [solid_properties]
 require_total = 83
 
@@ -91,6 +94,3 @@ require_total = 89
 
 [xfem]
 require_total = 80
-
-[scalar_transport]
-require_total = 85
