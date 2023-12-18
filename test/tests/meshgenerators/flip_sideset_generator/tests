@@ -6,7 +6,7 @@
       recover = false
       issues = '#25528'
       design = 'FlipSidesetGenerator.md'
-      requirement = 'This system allows the sideset to be flipped'
+      requirement = 'This system allows the sideset to be flipped for 2D mesh'
     []
 
     [flux_3D]
@@ -14,7 +14,7 @@
       input = 'flux_flip_3D.i'
       csvdiff = 'flux_flip_3D_out.csv'
       recover = false
-      requirement = 'This system allows the sideset to be flipped'
+      requirement = 'This system allows the sideset to be flipped for 3D mesh'
       design = 'FlipSidesetGenerator.md'
       issues = '#25528'
     []
@@ -23,7 +23,7 @@
       input = 'no_sideset.i'
       cli_args = '--mesh-only'
       expect_err = "sideset doesn't exist in mesh"
-      requirement = 'The system shall error'
+      requirement = 'The system shall error if sideset doesn't exist'
       design = 'FlipSidesetGenerator.md'
       issues = '#25528'
     []
@@ -31,8 +31,8 @@
       type = 'RunException'
       input = 'no_neighbor.i'
       cli_args = '--mesh-only'
-      expect_err = "neighbor"
-      requirement = 'The system shall error'
+      expect_err = "elem 0 doesn't have a neighbor through side 1 therefore it can't be flipped"
+      requirement = 'The system shall error if sideset is not viable for flipping'
       design = 'FlipSidesetGenerator.md'
       issues = '#25528'
     []
