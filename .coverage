@@ -91,3 +91,6 @@ require_total = 89
 
 [xfem]
 require_total = 80
+
+[scalar_transport]
+require_total = 85
