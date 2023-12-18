@@ -17,7 +17,12 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
     const unsigned int linear_system_num,
     const Moose::FV::LinearFVComputationMode mode,
     const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _mode(mode), _tags(tags)
+  : _fe_problem(fe_problem),
+    _linear_system_number(linear_system_num),
+    _mode(mode),
+    _tags(tags),
+    _subdomain(Moose::INVALID_BLOCK_ID),
+    _old_subdomain(Moose::INVALID_BLOCK_ID)
 {
 }
 
@@ -27,7 +32,9 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVEl
   : _fe_problem(x._fe_problem),
     _linear_system_number(x._linear_system_number),
     _mode(x._mode),
-    _tags(x._tags)
+    _tags(x._tags),
+    _subdomain(x._subdomain),
+    _old_subdomain(x._old_subdomain)
 {
 }
 
@@ -70,22 +77,18 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
 {
   const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
   _fv_kernels.clear();
+  std::vector<LinearFVElementalKernel *> kernels;
+  auto base_query = _fe_problem.theWarehouse()
+                        .query()
+                        .template condition<AttribSysNum>(system_number)
+                        .template condition<AttribSubdomains>(_subdomain)
+                        .template condition<AttribSystem>("LinearFVElementalKernel")
+                        .template condition<AttribThread>(_tid);
 
-  if (_subdomain != _old_subdomain)
-  {
-    std::vector<LinearFVElementalKernel *> kernels;
-    auto base_query = _fe_problem.theWarehouse()
-                          .query()
-                          .template condition<AttribSysNum>(system_number)
-                          .template condition<AttribSubdomains>(_subdomain)
-                          .template condition<AttribSystem>("LinearFVElementalKernel")
-                          .template condition<AttribThread>(_tid);
+  if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
+    base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
+  else
+    base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
 
-    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
-    else
-      base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
-
-    _fv_kernels = std::set<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
-  }
+  _fv_kernels = std::set<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
 }

@@ -33,7 +33,7 @@ LinearFVFunctorDirichletBC::computeBoundaryValue()
 Real
 LinearFVFunctorDirichletBC::computeCellToFaceDistance() const
 {
-  const auto is_on_mesh_boundary = _current_face_info->neighborPtr();
+  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
   const auto defined_on_elem =
       is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
   if (is_on_mesh_boundary)

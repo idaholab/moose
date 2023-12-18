@@ -1,7 +1,18 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 4
+  [mesh]
+    type = CartesianMeshGenerator
+    dim = 1
+    ix = '4 4'
+    dx = '1 1'
+    subdomain_id = '0 1'
+  []
+  [boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = mesh
+    new_boundary = right_middle
+    primary_block = 0
+    paired_block = 1
+  []
 []
 
 [Problem]
@@ -15,6 +26,7 @@
     type = MooseLinearVariableFVReal
     linear_sys = 'u_sys'
     initial_condition = 1.0
+    block = 0
   []
 []
 
@@ -52,7 +64,7 @@
   [right_dir]
     type = LinearFVFunctorDirichletBC
     variable = u
-    boundary = "right"
+    boundary = "right_middle"
     functor = 2.0
   []
 []
