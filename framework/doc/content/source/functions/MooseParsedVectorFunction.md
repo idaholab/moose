@@ -3,9 +3,9 @@
 !syntax description /Functions/ParsedVectorFunction
 
 The `ParsedVectorFunction` is a vectorized version of the [MooseParsedFunction.md].
-Both the vector components and the curl of the function may be specified.
-The inputs for the components of the vector and curl of the function follow the same rules as
-outlined for the [MooseParsedFunction.md].
+The vector components, the curl and the divergence of the function may be specified.
+The inputs for the components of the vector, the curl and the divergence of the
+function follow the same rules as outlined for the [MooseParsedFunction.md].
 
 ## Example input syntax
 

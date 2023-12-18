@@ -98,6 +98,13 @@ Function::curl(Real /*t*/, const Point & /*p*/) const
 }
 
 Real
+Function::div(Real /*t*/, const Point & /*p*/) const
+{
+  mooseError("div method not implemented");
+  return 0;
+}
+
+Real
 Function::integral() const
 {
   mooseError("Integral method not implemented for function ", name());

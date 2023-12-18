@@ -26,6 +26,7 @@ For vector valued functions
 
 - `RealVectorValue vectorValue(Real, Point)` - returning a vector value at a point in space and time
 - `RealVectorValue curl(Real, Point)` - returning the curl of the function at a point in space and time
+- `Real div(Real, Point)` - returning the divergence of the function at a point in space and time
 
 can be overridden. The optional `Real integral()` and `Real average()` methods
 can also be overridden. Note that two overloads exist for the `value()` member
