@@ -1,10 +1,19 @@
 [Tests]
-  [num_fails]
-    type = 'RunApp'
-    input = 'failed_timesteps.i'
-    expect_out = '|   1.100000e+00 |   6.000000e+00 |'
+  [tests]
     design = syntax/Postprocessors/index.md
-    requirement = 'The system shall count the number of failed timesteps when prompted.'
     issues = '#22017'
+    requirement = 'The system shall count the number of failed timesteps when prompted'
+    [num_fails]
+      type = 'RunApp'
+      input = 'failed_timesteps.i'
+      expect_out = '|   1.100000e+00 |   6.000000e+00 |'
+      detail = 'with the single time stepper,'
+    []
+    [num_fails_composition]
+      type = 'RunApp'
+      input = 'failed_timesteps_composition.i'
+      expect_out = '|   1.100000e+00 |   6.000000e+00 |'
+      detail = 'with a composition time stepper.'
+    []
   []
 []

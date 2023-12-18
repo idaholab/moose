@@ -245,7 +245,11 @@ void
 CompositionDT::step()
 {
   if (_current_time_stepper)
+  {
     _current_time_stepper->step();
+    if (!converged())
+      _failure_count++;
+  }
   else
     TimeStepper::step();
 }

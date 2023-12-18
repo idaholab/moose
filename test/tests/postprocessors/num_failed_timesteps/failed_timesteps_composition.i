@@ -44,9 +44,15 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 
-  [TimeStepper]
-    type = ConstantDT
-    dt = 0.2
+  [TimeSteppers]
+    [constant_1]
+      type = ConstantDT
+      dt = 0.2
+    []
+    [constant_2]
+      type = ConstantDT
+      dt = 0.2
+    []
   []
 []
 
