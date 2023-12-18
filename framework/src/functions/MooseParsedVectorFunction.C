@@ -54,7 +54,7 @@ MooseParsedVectorFunction::vectorValue(Real t, const Point & p) const
 }
 
 RealVectorValue
-MooseParsedVectorFunction::vectorCurl(Real t, const Point & p) const
+MooseParsedVectorFunction::curl(Real t, const Point & p) const
 {
   return _curl_function_ptr->evaluate<RealVectorValue>(t, p);
 }

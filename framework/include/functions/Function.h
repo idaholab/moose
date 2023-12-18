@@ -101,7 +101,7 @@ public:
    * \param p The Point in space (x,y,z)
    * \return A vector of the curl of the function evaluated at the time and location
    */
-  virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
+  virtual RealVectorValue curl(Real t, const Point & p) const;
 
   using Moose::FunctorBase<Real>::gradient;
   /**

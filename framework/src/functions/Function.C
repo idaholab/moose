@@ -91,9 +91,9 @@ Function::vectorValue(Real /*t*/, const Point & /*p*/) const
 }
 
 RealVectorValue
-Function::vectorCurl(Real /*t*/, const Point & /*p*/) const
+Function::curl(Real /*t*/, const Point & /*p*/) const
 {
-  mooseError("vectorCurl method not implemented");
+  mooseError("curl method not implemented");
   return RealVectorValue(0, 0, 0);
 }
 

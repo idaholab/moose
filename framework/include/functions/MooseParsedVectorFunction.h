@@ -30,7 +30,7 @@ public:
 
   virtual RealVectorValue vectorValue(Real t, const Point & p) const override;
 
-  virtual RealVectorValue vectorCurl(Real t, const Point & p) const override;
+  virtual RealVectorValue curl(Real t, const Point & p) const override;
 
   virtual RealGradient gradient(Real t, const Point & p) const override;
 
