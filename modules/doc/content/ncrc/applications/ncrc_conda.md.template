@@ -22,7 +22,7 @@ You will need to supply your INL HPC username, and your PIN+TOKEN to proceed.
 Once installation has finished (this can take a few minutes), you need to activate this environment:
 
 ```bash
-mamba activate {{ApplicationLower}}
+conda activate {{ApplicationLower}}
 $ ({{ApplicationLower}}) ~>
 ```
 

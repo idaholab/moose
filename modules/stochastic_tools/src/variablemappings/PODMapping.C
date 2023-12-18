@@ -9,9 +9,6 @@
 
 #include "PODMapping.h"
 #include <slepcsvd.h>
-#include "libmesh/parallel_object.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/dense_vector.h"
 #include "MooseTypes.h"
 #include <petscdmda.h>
 
@@ -61,7 +58,8 @@ PODMapping::PODMapping(const InputParameters & parameters)
     _extra_slepc_options(getParam<std::string>("extra_slepc_options")),
     _parallel_storage(isParamValid("solution_storage")
                           ? &getUserObject<ParallelSolutionStorage>("solution_storage")
-                          : nullptr)
+                          : nullptr),
+    _pod(StochasticTools::POD(_parallel_storage, _extra_slepc_options, _communicator))
 {
   if (!isParamValid("filename"))
   {
@@ -92,52 +90,10 @@ PODMapping::PODMapping(const InputParameters & parameters)
       _singular_values.emplace(vname, std::vector<Real>());
       _left_basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
       _right_basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
-      _svds.try_emplace(vname);
-      SVDCreate(_communicator.get(), &_svds[vname]);
       _mapping_ready_to_use.emplace(vname, false);
     }
 #endif
   }
-}
-
-PODMapping::~PODMapping()
-{
-#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
-  for (const auto & vname : _variable_names)
-    SVDDestroy(&_svds[vname]);
-#endif
-}
-
-dof_id_type
-PODMapping::determineNumberOfModes(const VariableName & vname,
-                                   const std::vector<Real> & converged_evs)
-{
-  dof_id_type num_modes = 0;
-
-  auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
-  mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
-
-  unsigned int var_i = std::distance(_variable_names.begin(), it);
-
-  // We either use the number of modes defined by the user or the maximum number of converged
-  // modes. We don't want to use modes which are unconverged.
-  std::size_t num_requested_modes = std::min((std::size_t)_num_modes[var_i], converged_evs.size());
-
-  // Grab a cumulative sum of singular value squared
-  std::vector<Real> ev_sum(converged_evs.begin(), converged_evs.begin() + num_requested_modes);
-  std::partial_sum(ev_sum.cbegin(),
-                   ev_sum.cend(),
-                   ev_sum.begin(),
-                   [](Real sum, Real ev) { return sum + ev * ev; });
-
-  // Find the first element that satisfies the threshold
-  const Real threshold = (_energy_threshold.empty() ? 0.0 : _energy_threshold[var_i]) +
-                         std::numeric_limits<Real>::epsilon();
-  for (num_modes = 0; num_modes < ev_sum.size(); ++num_modes)
-    if (ev_sum[num_modes] / ev_sum.back() > 1 - threshold)
-      break;
-
-  return num_modes + 1;
 }
 
 void
@@ -159,140 +115,23 @@ PODMapping::buildMapping(const VariableName &
     auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
     mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
     unsigned int var_i = std::distance(_variable_names.begin(), it);
-
-    // Define the petsc matrix which needs and SVD, we will populate it using the snapshots
-    Mat mat;
-
-    // We make sure every rank knows how many global and local samples we have and how long the
-    // snapshots are. At this point we assume that the snapshots are the same size so we don't
-    // need to map them to a reference domain.
-    dof_id_type local_rows = 0;
-    dof_id_type snapshot_size = 0;
-    dof_id_type global_rows = 0;
-    if (_parallel_storage->getStorage().size())
-    {
-      local_rows = _parallel_storage->getStorage(vname).size();
-      global_rows = local_rows;
-      if (_parallel_storage->getStorage(vname).size())
-        snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0].size();
-    }
-
-    comm().sum(global_rows);
-    comm().max(snapshot_size);
-
-    // The Lanczos method is preferred for symmetric semi positive definite matrices
-    // but it only works with sparse matrices at the moment (dense matrix leaks memory).
-    // So we create a sparse matrix with the distribution given in ParallelSolutionStorage.
-    // TODO: Figure out a way to use a dense matrix without leaking memory, that would
-    // avoid the overhead of using a sparse format for a dense matrix
-    PetscErrorCode ierr = MatCreateAIJ(_communicator.get(),
-                                       local_rows,
-                                       snapshot_size,
-                                       global_rows,
-                                       snapshot_size,
-                                       processor_id() == 0 ? snapshot_size : 0,
-                                       NULL,
-                                       processor_id() == 0 ? 0 : snapshot_size,
-                                       NULL,
-                                       &mat);
-    LIBMESH_CHKERR(ierr);
-
-    // Check where the local rows begin in the matrix, we use these to convert from local to
-    // global indices
-    dof_id_type local_beg = 0;
-    dof_id_type local_end = 0;
-    MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end));
-
-    unsigned int counter = 0;
-    if (local_rows)
-      for (const auto & row : _parallel_storage->getStorage(vname))
-      {
-        std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
-
-        // Fill the column indices with 0,1,...,snapshot_size-1
-        std::vector<PetscInt> columns(snapshot_size);
-        std::iota(std::begin(columns), std::end(columns), 0);
-
-        // Set the rows in the "sparse" matrix
-        MatSetValues(mat,
-                     1,
-                     rows.data(),
-                     snapshot_size,
-                     columns.data(),
-                     row.second[0].get_values().data(),
-                     INSERT_VALUES);
-      }
-
-    // Assemble the matrix
-    MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
-
-    // Now we set the operators for our SVD objects
-    SVDSetOperators(_svds[vname], mat, NULL);
-
-    // We want the Lanczos method, might give the choice to the user
-    // at some point
-    SVDSetType(_svds[vname], SVDTRLANCZOS);
-    ierr = PetscOptionsInsertString(NULL, _extra_slepc_options.c_str());
-    LIBMESH_CHKERR(ierr);
-
-    // Set the subspace size for the Lanczos method, we take twice as many
-    // basis vectors as the requested number of POD modes. This guarantees in most of the case the
-    // convergence of the singular triplets.
-    SVDSetFromOptions(_svds[vname]);
-    SVDSetDimensions(_svds[vname],
-                     _num_modes[var_i],
-                     std::min(2 * _num_modes[var_i], global_rows),
-                     std::min(2 * _num_modes[var_i], global_rows));
-
-    // Compute the singular value triplets
-    ierr = SVDSolve(_svds[vname]);
-    LIBMESH_CHKERR(ierr);
-
-    // Check how many singular triplets converged
-    PetscInt nconv;
-    ierr = SVDGetConverged(_svds[vname], &nconv);
-    LIBMESH_CHKERR(ierr);
-
-    // We start extracting the basis functions and the singular values. The left singular
-    // vectors are supposed to be all on the root processor
-    // PetscReal sigma;
-    PetscVector<Real> u(_communicator);
-    u.init(snapshot_size);
-
-    PetscVector<Real> v(_communicator);
-    v.init(global_rows, local_rows, false, PARALLEL);
-
+    // Clear storage containers for the basis functions and singular values.
     _left_basis_functions[vname].clear();
     _right_basis_functions[vname].clear();
     _singular_values[vname].clear();
-
-    auto & emplaced_singular_values =
-        _singular_values.emplace(vname, std::vector<Real>()).first->second;
-    emplaced_singular_values.resize(nconv);
-    // Fetch the singular value triplet and immediately save the singular value
-    for (PetscInt j = 0; j < nconv; ++j)
-    {
-      ierr = SVDGetSingularTriplet(_svds[vname], j, &emplaced_singular_values[j], NULL, NULL);
-      LIBMESH_CHKERR(ierr);
-    }
-    // Determine how many modes we need
-    unsigned int num_requested_modes = determineNumberOfModes(vname, emplaced_singular_values);
-    // Only save the basis functions which are needed. We serialize the modes
-    // on every processor so all of them have access to every mode.
-    _left_basis_functions[vname].resize(num_requested_modes);
-    _right_basis_functions[vname].resize(num_requested_modes);
-    for (PetscInt j = 0; j < cast_int<PetscInt>(num_requested_modes); ++j)
-    {
-      SVDGetSingularTriplet(_svds[vname], j, NULL, v.vec(), u.vec());
-      u.localize(_left_basis_functions[vname][j].get_values());
-      v.localize(_right_basis_functions[vname][j].get_values());
-    }
-
+    // Find the number of modes that we would want to compute
+    std::size_t num_modes_compute = (std::size_t)_num_modes[var_i];
+    // Find the first element that satisfies the threshold
+    const Real threshold = (_energy_threshold.empty() ? 0.0 : _energy_threshold[var_i]) +
+                           std::numeric_limits<Real>::epsilon();
+    // Use POD class to compute for a variable
+    _pod.computePOD(vname,
+                    _left_basis_functions[vname],
+                    _right_basis_functions[vname],
+                    _singular_values[vname],
+                    num_modes_compute,
+                    threshold);
     _mapping_ready_to_use[vname] = true;
-
-    MatDestroy(&mat);
-    SVDDestroy(&_svds[vname]);
   }
 
 #endif

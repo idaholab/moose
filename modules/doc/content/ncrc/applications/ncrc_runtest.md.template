@@ -5,7 +5,7 @@ With {{ApplicationName}} built, we can now run tests to verify a working binary 
 - If +Personal Machine+:
 
   ```bash
-  mamba activate moose
+  conda activate moose
   ```
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):

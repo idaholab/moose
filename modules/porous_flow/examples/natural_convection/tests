@@ -1,0 +1,10 @@
+[tests]
+  [natural_convection]
+    type = RunApp
+    input = natural_convection.i
+    check_input = true
+    requirement = 'The system shall be able to model a natural convection problem in porous media.'
+    issues = '#26238'
+    design = 'porous_flow/natural_convection.md'
+  []
+[]

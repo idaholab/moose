@@ -169,7 +169,7 @@ SerializedSolutionTransfer::transferInParallel(FEProblemBase & app_problem,
       // Localize the solution and add it to the local container on the rank
       // which is supposed to own it
 
-      solution_container.getSolution(solution_i)
+      solution_container.getSnapshot(solution_i)
           ->localize(serialized_solution.get_values(),
                      (local_app_index >= new_local_entries_begin &&
                       local_app_index < new_local_entries_end)
@@ -201,7 +201,7 @@ SerializedSolutionTransfer::transferToSubAppRoot(FEProblemBase & app_problem,
       DenseVector<Real> serialized_solution;
 
       // In this case we always serialize on the root processor of the application.
-      solution_container.getSolution(solution_i)
+      solution_container.getSnapshot(solution_i)
           ->localize(serialized_solution.get_values(),
                      getFromMultiApp()->isRootProcessor() ? system.getVariableGlobalDoFs()
                                                           : std::vector<dof_id_type>());

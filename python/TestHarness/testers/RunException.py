@@ -52,6 +52,6 @@ class RunException(RunApp):
             output += redirected_output
 
         output += self.testFileOutput(moose_dir, options, output)
-        self.testExitCodes(moose_dir, options, output)
+        output += self.testExitCodes(moose_dir, options, output)
 
         return output
