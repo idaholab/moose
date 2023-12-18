@@ -33,21 +33,22 @@ FlipSidesetGenerator::FlipSidesetGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 FlipSidesetGenerator::generate()
 {
-  //get boundary info
+  // get boundary info
   BoundaryInfo & boundary_info = _input->get_boundary_info();
-  //get id of the input sideset
+  // get id of the input sideset
   boundary_id_type sideset_id = boundary_info.get_id_by_name(_sideset_name);
 
-  //Throw an error if the sideset doesn't exist
+  // Throw an error if the sideset doesn't exist
   if (sideset_id == libMesh::BoundaryInfo::invalid_id)
     mooseError("sideset doesn't exist in mesh");
 
-  //get sideset map
-  std::multimap<const Elem *, std::pair<unsigned short int, boundary_id_type>> sideset_map = boundary_info.get_sideset_map();
+  // get sideset map
+  std::multimap<const Elem *, std::pair<unsigned short int, boundary_id_type>> sideset_map =
+      boundary_info.get_sideset_map();
 
-  //old_elem is the original element attached to the sideset before flipping
-  //new_elem is the element attached to the sideset after flipping
-  for(const auto & [old_elem, id_pair] : sideset_map)
+  // old_elem is the original element attached to the sideset before flipping
+  // new_elem is the element attached to the sideset after flipping
+  for (const auto & [old_elem, id_pair] : sideset_map)
   {
     boundary_id_type boundary_id = std::get<1>(id_pair);
     if (boundary_id == sideset_id)
@@ -56,10 +57,11 @@ FlipSidesetGenerator::generate()
       dof_id_type old_elem_id = old_elem->id();
       const Elem * new_elem = old_elem->neighbor_ptr(old_side_id);
 
-      //Throw an error if the old element doesn't have a neighbor on the old side
+      // Throw an error if the old element doesn't have a neighbor on the old side
       if (!new_elem)
-        mooseError("elem " + std::to_string(old_elem_id) + " doesn't have a neighbor through side " +
-                    std::to_string(old_side_id) + " therefore it can't be flipped");
+        mooseError("elem " + std::to_string(old_elem_id) +
+                   " doesn't have a neighbor through side " + std::to_string(old_side_id) +
+                   " therefore it can't be flipped");
 
       unsigned int new_side_id = new_elem->which_neighbor_am_i(old_elem);
       boundary_info.remove_side(old_elem, old_side_id, sideset_id);
