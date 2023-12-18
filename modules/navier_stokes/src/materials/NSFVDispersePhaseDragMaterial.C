@@ -37,6 +37,15 @@ NSFVDispersePhaseDragMaterial::NSFVDispersePhaseDragMaterial(const InputParamete
     _mu_mixture(getFunctor<ADReal>(NS::mu)),
     _particle_diameter(getFunctor<ADReal>("particle_diameter"))
 {
+  if (_dim >= 2 && !_v_var)
+    paramError("v",
+               "In two or more dimensions, the v velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
+
+  if (_dim >= 3 && !_w_var)
+    paramError("w",
+               "In three-dimensions, the w velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
 
   addFunctorProperty<ADReal>("Darcy_coefficient",
                              [this](const auto & r, const auto & t) -> ADReal
