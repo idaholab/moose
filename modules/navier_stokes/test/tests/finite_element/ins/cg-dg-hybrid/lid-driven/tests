@@ -9,7 +9,7 @@
       exodiff = hybrid-cg-dg_out.e
       detail = 'accurate results, and'
       installation_type = 'in_tree' # uses JIT
-      cli_args = "l=200 BCs/inactive=''"
+      cli_args = "l=200"
     []
     [hybrid-jac]
       type = PetscJacobianTester

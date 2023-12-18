@@ -15,12 +15,6 @@ n = 20
     nx = ${n}
     ny = ${n}
   []
-  [corner_node]
-    type = ExtraNodesetGenerator
-    new_boundary = 'pinned_node'
-    nodes = '0'
-    input = gen
-  []
 []
 
 [Variables]
@@ -44,7 +38,6 @@ n = 20
     type = MatDiffusion
     variable = u
     diffusivity = 'mu'
-    extra_matrix_tags = 'L'
   []
   [momentum_x_pressure]
     type = PressureGradient
@@ -69,7 +62,6 @@ n = 20
     type = MatDiffusion
     variable = v
     diffusivity = 'mu'
-    extra_matrix_tags = 'L'
   []
   [momentum_y_pressure]
     type = PressureGradient
@@ -105,7 +97,6 @@ n = 20
     sigma = 6
     epsilon = -1
     diff = 'mu'
-    extra_matrix_tags = 'L'
   []
   [momentum_y_convection]
     type = ADDGAdvection
@@ -119,12 +110,10 @@ n = 20
     sigma = 6
     epsilon = -1
     diff = 'mu'
-    extra_matrix_tags = 'L'
   []
 []
 
 [BCs]
-  inactive = 'pressure_pin'
   [u_walls]
     type = DGFunctionDiffusionDirichletBC
     boundary = 'left bottom right'
@@ -133,7 +122,6 @@ n = 20
     epsilon = -1
     function = '0'
     diff = 'mu'
-    extra_matrix_tags = 'L'
   []
   [v_walls]
     type = DGFunctionDiffusionDirichletBC
@@ -143,7 +131,6 @@ n = 20
     epsilon = -1
     function = '0'
     diff = 'mu'
-    extra_matrix_tags = 'L'
   []
   [u_top]
     type = DGFunctionDiffusionDirichletBC
@@ -153,13 +140,6 @@ n = 20
     epsilon = -1
     function = '${U}'
     diff = 'mu'
-    extra_matrix_tags = 'L'
-  []
-  [pressure_pin]
-    type = DirichletBC
-    variable = pressure
-    boundary = 'pinned_node'
-    value = 0
   []
 []
 
@@ -235,8 +215,7 @@ n = 20
 [Problem]
   type = NavierStokesProblem
   mass_matrix = 'mass'
-  L_matrix = 'L'
-  extra_tag_matrices = 'mass L'
+  extra_tag_matrices = 'mass'
 []
 
 [Preconditioning]
@@ -262,6 +241,15 @@ n = 20
       petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -lsc_pc_type -lsc_ksp_type -lsc_ksp_pc_side -lsc_ksp_rtol'
       petsc_options_value = 'fgmres    300                1e-2      lsc      right        hypre        gmres         right            1e-1'
     []
+  []
+[]
+
+[UserObjects]
+  [set_pressure]
+    type = NSFVPressurePin
+    pin_type = 'point-value'
+    variable = pressure
+    point = '0 0 0'
   []
 []
 
