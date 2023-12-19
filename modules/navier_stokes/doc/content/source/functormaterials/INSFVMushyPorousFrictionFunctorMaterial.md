@@ -1,6 +1,6 @@
-# INSFVMushyPorousFrictionMaterial
+# INSFVMushyPorousFrictionFunctorMaterial
 
-!syntax description /Materials/INSFVMushyPorousFrictionMaterial
+!syntax description /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 
 This material computes the `Darcy_coefficient` and the `Forchheimer_coefficient` for a solidification problem.
 The model uses a mushy-zone approach to compute the friction coefficients.
@@ -36,8 +36,8 @@ incoming Forchheimer coefficient by the velocity magnitude; it is *incompatible*
 with [PINSFVMomentumFriction.md] which assumes the incoming Forchheimer
 coefficient already includes multiplication by the velocity magnitude.
 
-!syntax parameters /Materials/INSFVMushyPorousFrictionMaterial
+!syntax parameters /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 
-!syntax inputs /Materials/INSFVMushyPorousFrictionMaterial
+!syntax inputs /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 
-!syntax children /Materials/INSFVMushyPorousFrictionMaterial
+!syntax children /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial

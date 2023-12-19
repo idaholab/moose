@@ -15,12 +15,12 @@
  *Class to compute the total viscosity which considers molecular and
  *mixing length model turbulent viscosity.
  */
-class MixingLengthTurbulentViscosityMaterial : public FunctorMaterial
+class MixingLengthTurbulentViscosityFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  MixingLengthTurbulentViscosityMaterial(const InputParameters & parameters);
+  MixingLengthTurbulentViscosityFunctorMaterial(const InputParameters & parameters);
 
 protected:
   const unsigned int _mesh_dimension;

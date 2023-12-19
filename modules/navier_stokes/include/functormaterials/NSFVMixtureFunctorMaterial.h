@@ -14,12 +14,12 @@
 /**
  * This is the material class used to compute phase averaged properties of mixtures
  */
-class NSFVMixtureMaterial : public FunctorMaterial
+class NSFVMixtureFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVMixtureMaterial(const InputParameters & parameters);
+  NSFVMixtureFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// Vector of phase 1 properties

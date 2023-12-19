@@ -1,14 +1,14 @@
-# NSFVFrictionFlowDiodeMaterial
+# NSFVFrictionFlowDiodeFunctorMaterial
 
-!syntax description /Materials/NSFVFrictionFlowDiodeMaterial
+!syntax description /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial
 
 This material is meant to be used to implement a simplistic volumetric flow diode. The
-parameter [!param](/Materials/NSFVFrictionFlowDiodeMaterial/additional_linear_resistance)
-and [!param](/Materials/NSFVFrictionFlowDiodeMaterial/additional_quadratic_resistance) should be chosen such that
+parameter [!param](/FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial/additional_linear_resistance)
+and [!param](/FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial/additional_quadratic_resistance) should be chosen such that
 the flow is sufficiently vanished in the direction opposite the diode.
 
 !alert warning
-The operation of the diode is controlled with the [!param](/Materials/NSFVFrictionFlowDiodeMaterial/turn_on_diode)
+The operation of the diode is controlled with the [!param](/FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial/turn_on_diode)
 parameter. If this parameter is false, the 'diode' does *NOT* create any flow restriction.
 
 ## Example input file syntax
@@ -47,8 +47,8 @@ The final strategy is to compute the mass flow rate through the diode, and block
 All these strategies are workarounds for the fact that looking at the local velocity (in multi-dimensional space)
 to apply a friction term based on this local velocity, rather than an average quantity, seems to be numerically unstable.
 
-!syntax parameters /Materials/NSFVFrictionFlowDiodeMaterial
+!syntax parameters /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial
 
-!syntax inputs /Materials/NSFVFrictionFlowDiodeMaterial
+!syntax inputs /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial
 
-!syntax children /Materials/NSFVFrictionFlowDiodeMaterial
+!syntax children /FunctorMaterials/NSFVFrictionFlowDiodeFunctorMaterial

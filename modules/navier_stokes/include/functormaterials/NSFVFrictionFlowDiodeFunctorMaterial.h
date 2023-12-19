@@ -12,14 +12,15 @@
 #include "FunctorMaterial.h"
 
 /**
- * Additional anistropic friction linear or quadratic terms
+ * Adds an anisotropic friction linear or quadratic terms to a region, that can be turned
+ * on or off using the Controls system
  */
-class NSFVFrictionFlowDiodeMaterial : public FunctorMaterial
+class NSFVFrictionFlowDiodeFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVFrictionFlowDiodeMaterial(const InputParameters & parameters);
+  NSFVFrictionFlowDiodeFunctorMaterial(const InputParameters & parameters);
 
 private:
   /// Direction of the diode

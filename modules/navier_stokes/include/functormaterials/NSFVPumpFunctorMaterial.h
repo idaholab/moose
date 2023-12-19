@@ -12,14 +12,14 @@
 #include "FunctorMaterial.h"
 
 /**
- * This is the material class used to compute phase averaged properties of mixtures
+ * Computes the effective pump body force as a functor
  */
-class NSFVPumpMaterial : public FunctorMaterial
+class NSFVPumpFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVPumpMaterial(const InputParameters & parameters);
+  NSFVPumpFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// Function providing the pressure head
@@ -62,6 +62,6 @@ protected:
   /// Symmetric pressure head function in the negative direction
   const bool _bool_symmetric_negative_pressure_head;
 
-  /// Homologous pressure head function in the ngative direction (in meters) vs. flow rate (in m3/s)
+  /// Homologous pressure head function in the negative direction (in meters) vs. flow rate (in m3/s)
   const Function * const _pressure_head_function_negative_rotation;
 };

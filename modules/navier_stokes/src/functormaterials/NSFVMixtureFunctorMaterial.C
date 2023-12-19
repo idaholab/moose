@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMixtureMaterial.h"
+#include "NSFVMixtureFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVMixtureMaterial);
+registerMooseObject("NavierStokesApp", NSFVMixtureFunctorMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           NSFVMixtureMaterial,
+                           "08/01/2024 00:00",
+                           NSFVMixtureFunctorMaterial);
 
 InputParameters
-NSFVMixtureMaterial::validParams()
+NSFVMixtureFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
@@ -28,7 +32,7 @@ NSFVMixtureMaterial::validParams()
   return params;
 }
 
-NSFVMixtureMaterial::NSFVMixtureMaterial(const InputParameters & parameters)
+NSFVMixtureFunctorMaterial::NSFVMixtureFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _phase_1_names(getParam<std::vector<MooseFunctorName>>("phase_1_names")),
     _phase_2_names(getParam<std::vector<MooseFunctorName>>("phase_2_names")),

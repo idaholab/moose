@@ -15,12 +15,12 @@
  * This is the material class used to compute the drag coefficients in mushy
  * (porous) regions during phase change
  */
-class INSFVMushyPorousFrictionMaterial : public FunctorMaterial
+class INSFVMushyPorousFrictionFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  INSFVMushyPorousFrictionMaterial(const InputParameters & parameters);
+  INSFVMushyPorousFrictionFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// The liquid fraction

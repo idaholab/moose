@@ -1,6 +1,6 @@
-# NSFVPumpMaterial
+# NSFVPumpFunctorMaterial
 
-!syntax description /Materials/NSFVPumpMaterial
+!syntax description /FunctorMaterials/NSFVPumpFunctorMaterial
 
 This is a functor material to set up the effective volume force of a pump. For a forward operating pump, the volume force model reads as follows:
 
@@ -32,8 +32,8 @@ The scaling of the model in the negative rotation condition is the same as the p
 However, for negative rotation, the user can provide the homologous pressure head curve via the `pressure_head_function_negative_rotation` function.
 If the pressure head function for the positive direction should be used for negative rotation, the user should set `symmetric_negative_pressure_head = true`.
 
-!syntax parameters /Materials/NSFVPumpMaterial
+!syntax parameters /FunctorMaterials/NSFVPumpFunctorMaterial
 
-!syntax inputs /Materials/NSFVPumpMaterial
+!syntax inputs /FunctorMaterials/NSFVPumpFunctorMaterial
 
-!syntax children /Materials/NSFVPumpMaterial
+!syntax children /FunctorMaterials/NSFVPumpFunctorMaterial

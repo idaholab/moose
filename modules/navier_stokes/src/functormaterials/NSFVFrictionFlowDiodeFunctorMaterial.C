@@ -7,15 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVFrictionFlowDiodeMaterial.h"
+#include "NSFVFrictionFlowDiodeFunctorMaterial.h"
 #include "NS.h"
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 
-registerMooseObject("NavierStokesApp", NSFVFrictionFlowDiodeMaterial);
+registerMooseObject("NavierStokesApp", NSFVFrictionFlowDiodeFunctorMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           NSFVFrictionFlowDiodeMaterial,
+                           "08/01/2024 00:00",
+                           NSFVFrictionFlowDiodeFunctorMaterial);
 
 InputParameters
-NSFVFrictionFlowDiodeMaterial::validParams()
+NSFVFrictionFlowDiodeFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Increases the anistropic friction coefficients, linear or quadratic, "
@@ -43,7 +47,8 @@ NSFVFrictionFlowDiodeMaterial::validParams()
   return params;
 }
 
-NSFVFrictionFlowDiodeMaterial::NSFVFrictionFlowDiodeMaterial(const InputParameters & params)
+NSFVFrictionFlowDiodeFunctorMaterial::NSFVFrictionFlowDiodeFunctorMaterial(
+    const InputParameters & params)
   : FunctorMaterial(params),
     _direction(getParam<RealVectorValue>("direction")),
     _linear_resistance(getParam<RealVectorValue>("additional_linear_resistance")),

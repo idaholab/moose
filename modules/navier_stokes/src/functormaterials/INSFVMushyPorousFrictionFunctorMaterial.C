@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMushyPorousFrictionMaterial.h"
+#include "INSFVMushyPorousFrictionFunctorMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSFVMushyPorousFrictionMaterial);
+registerMooseObject("NavierStokesApp", INSFVMushyPorousFrictionFunctorMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           INSFVMushyPorousFrictionMaterial,
+                           "08/01/2024 00:00",
+                           INSFVMushyPorousFrictionFunctorMaterial);
 
 InputParameters
-INSFVMushyPorousFrictionMaterial::validParams()
+INSFVMushyPorousFrictionFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
@@ -27,7 +31,7 @@ INSFVMushyPorousFrictionMaterial::validParams()
   return params;
 }
 
-INSFVMushyPorousFrictionMaterial::INSFVMushyPorousFrictionMaterial(
+INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fl(getFunctor<ADReal>("liquid_fraction")),

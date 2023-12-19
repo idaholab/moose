@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MixingLengthTurbulentViscosityMaterial.h"
+#include "MixingLengthTurbulentViscosityFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", MixingLengthTurbulentViscosityMaterial);
+registerMooseObject("NavierStokesApp", MixingLengthTurbulentViscosityFunctorMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           MixingLengthTurbulentViscosityMaterial,
+                           "08/01/2024 00:00",
+                           MixingLengthTurbulentViscosityFunctorMaterial);
 
 InputParameters
-MixingLengthTurbulentViscosityMaterial::validParams()
+MixingLengthTurbulentViscosityFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes the material property corresponding to the total viscosity"
@@ -28,7 +32,7 @@ MixingLengthTurbulentViscosityMaterial::validParams()
   return params;
 }
 
-MixingLengthTurbulentViscosityMaterial::MixingLengthTurbulentViscosityMaterial(
+MixingLengthTurbulentViscosityFunctorMaterial::MixingLengthTurbulentViscosityFunctorMaterial(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _mesh_dimension(_mesh.dimension()),
