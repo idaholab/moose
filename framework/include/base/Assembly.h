@@ -309,12 +309,6 @@ public:
    */
   const MooseArray<Point> & normals() const { return _current_normals; }
 
-  /**
-   * Returns the array of neighbor normals for quadrature points on a current side
-   * @return A _reference_.  Make sure to store this as a reference!
-   */
-  const MooseArray<Point> & neighborNormals() const { return _current_neighbor_normals; }
-
   /***
    * Returns the array of normals for quadrature points on a current side
    */
@@ -2469,8 +2463,6 @@ private:
   MooseArray<Real> _current_JxW_face;
   /// The current Normal vectors at the quadrature points.
   MooseArray<Point> _current_normals;
-  /// The current neighbor Normal vectors at the quadrature points.
-  MooseArray<Point> _current_neighbor_normals;
   /// Mapped normals
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
@@ -2530,7 +2522,6 @@ private:
   /// Flag specifying whether a custom quadrature rule has been specified for mortar segment mesh
   bool _custom_mortar_qrule;
 
-private:
   /// quadrature rule used on lower dimensional elements. This should always be
   /// the same as the face qrule
   QBase * _current_qrule_lower;
@@ -2840,6 +2831,9 @@ protected:
 
   /// Whether we have ever conducted p-refinement
   bool _have_p_refinement;
+
+  /// The current reference points on the neighbor element
+  std::vector<Point> _current_neighbor_ref_points;
 };
 
 template <typename OutputType>

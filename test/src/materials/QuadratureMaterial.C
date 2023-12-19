@@ -41,7 +41,7 @@ QuadratureMaterial::QuadratureMaterial(const InputParameters & parameters)
 void
 QuadratureMaterial::computeQpProperties()
 {
-  if (_qrule->get_order() < 8)
+  if (this->hasBlocks(_current_elem->subdomain_id()) && (_qrule->get_order() < 8))
     mooseError("This material expect quadrature order to be higher than 8");
   _mat_prop[_qp] = _qp;
 }
