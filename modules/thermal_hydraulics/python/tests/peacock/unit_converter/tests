@@ -1,16 +1,20 @@
 [Tests]
-  [./plugin]
+  issues = '#19790'
+  design = 'THMPlugins.md'
+  [plugin]
     type = PythonUnitTest
     input = test_UnitConverterPlugin.py
     separate = True
     display_required = True
     required_python_packages = PyQt5
-  [../]
+    requirement = 'The system shall be able to perform unit conversions from the Peacock graphical user interface.'
+  []
 
-  [./unit_conversion]
+  [unit_conversion]
     type = PythonUnitTest
     input = test_UnitConversion.py
     separate = True
     display_required = False
-  [../]
+    requirement = 'The system shall be able to perform unit conversions from the Python API, for energy, time, volume, speed and temperature units.'
+  []
 []

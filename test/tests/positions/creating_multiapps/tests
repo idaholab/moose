@@ -29,7 +29,7 @@
   []
 
   [error]
-    requirement = "The system shall error if"
+    requirement = "The system shall report an error if"
 
     [not_init]
       type = RunException

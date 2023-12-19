@@ -74,6 +74,6 @@
     input = around.i
     cli_args = 'Mesh/block_2/block="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = "The system shall error if the subdomain to create sidesets around does not exist in the mesh"
+    requirement = "The system shall report an error if the subdomain to create sidesets around does not exist in the mesh"
   []
 []

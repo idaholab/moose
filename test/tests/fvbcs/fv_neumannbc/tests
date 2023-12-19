@@ -15,7 +15,7 @@
     input = 'fv_neumannbc.i'
     cli_args = "FVBCs/inactive=''"
     expect_err = 'A FVFluxBC is being triggered on an internal face'
-    requirement = 'The system shall error out if a finite volume flux boundary condition, in this case a finite volume Neumann boundary condition, is used inside the domain.'
+    requirement = 'The system shall report an error if a finite volume flux boundary condition, in this case a finite volume Neumann boundary condition, is used inside the domain.'
     allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
   [fvbcs_disconnected_from_variable]
@@ -25,7 +25,7 @@
     input = 'fv_neumannbc.i'
     expect_err = 'A FVFluxBC is being triggered on a face which does not connect to a block with the relevant finite volume variable.'
     cli_args = "Mesh/mesh/subdomain_id='1 2' Problem/kernel_coverage_check=false"
-    requirement = 'The system shall error out if a finite volume flux boundary condition is used on a mesh element face that is not connected to an element with the corresponding finite volume variable.'
+    requirement = 'The system shall report an error if a finite volume flux boundary condition is used on a mesh element face that is not connected to an element with the corresponding finite volume variable.'
     allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
 []

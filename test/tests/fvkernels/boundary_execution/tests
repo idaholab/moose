@@ -35,7 +35,7 @@
     type = RunException
     input = 2d.i
     expect_err = 'A boundary may not be specified in both boundaries_to_avoid and boundaries_to_force'
-    requirement = 'The system shall error if conflictingly told to avoid and execute a flux kernel on the same boundary.'
+    requirement = 'The system shall report an error if conflictingly told to avoid and execute a flux kernel on the same boundary.'
     cli_args = "FVKernels/diff_all/boundaries_to_avoid='left' FVKernels/diff_all/boundaries_to_force='left'"
   []
 []

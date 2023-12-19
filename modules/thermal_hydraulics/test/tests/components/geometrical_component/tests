@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'Quadrature/index.md'
   [err:2nd_order]
     type = 'RunException'
     input = 'err.2nd_order.i'
     expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+    requirement = 'The system shall report an error if a TRAP quadrature is used with second order components.'
   []
 []

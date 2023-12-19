@@ -266,7 +266,7 @@
     cli_args = Outputs/screen/fit_mode=foo
     expect_err = "Unable to convert 'foo' to type int"
 
-    requirement = 'The system shall error when specifying an invalid table fit width option.'
+    requirement = 'The system shall report an error when specifying an invalid table fit width option.'
     issues = '#1927'
   [../]
   [./console_off]

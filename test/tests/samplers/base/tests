@@ -182,7 +182,7 @@
   []
 
   [reinit_errors]
-    requirement = "The system shall error when the expected size of a sampler is altered and accessed prior to initialization by accessing the"
+    requirement = "The system shall report an error when the expected size of a sampler is altered and accessed prior to initialization by accessing the"
     [getGlobalSamples]
       type = RunException
       input = errors.i

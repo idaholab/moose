@@ -26,7 +26,7 @@
     cli_args = 'Outputs/csv=false Functions/u/data_file=fred.csv'
     expect_err = "In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together"
 
-    requirement = 'The system shall error when a file and data are supplied simultaneously in the PiecewiseBilinear object.'
+    requirement = 'The system shall report an error when a file and data are supplied simultaneously in the PiecewiseBilinear object.'
     issues = '#5991'
   [../]
 
@@ -36,7 +36,7 @@
     cli_args = "Outputs/exodus=false Functions/u/x='0 2 3 4'"
     expect_err = "In PiecewiseBilinear: Size of z should be the size of x times the size of y"
 
-    requirement = 'The system shall error when there is a mismatch in vector lengths in the PiecewiseBilinear object.'
+    requirement = 'The system shall report an error when there is a mismatch in vector lengths in the PiecewiseBilinear object.'
     issues = '#5991'
   [../]
 
@@ -45,7 +45,7 @@
     input = 'xyz_error.i'
     expect_err = "In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified"
 
-    requirement = 'The system shall error when there are insufficient parameters supplied for the PiecewiseBilinear object.'
+    requirement = 'The system shall report an error when there are insufficient parameters supplied for the PiecewiseBilinear object.'
     issues = '#5991'
   [../]
 []

@@ -27,7 +27,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if"
+    requirement = "The system shall report an error if"
     [param_meant_for_file]
       type = RunException
       input = 'piecewise_constant_simple.i'

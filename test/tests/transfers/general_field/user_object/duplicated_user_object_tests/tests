@@ -74,7 +74,7 @@
     expect_err = 'could not be located'
     prereq = transfer/3d_1d
 
-    requirement = "The system shall error if a parent node/element is "
+    requirement = "The system shall report an error if a parent node/element is "
                   "not contained within any sub application domains/meshes when this condition is explicitly requested by the user."
   []
 []

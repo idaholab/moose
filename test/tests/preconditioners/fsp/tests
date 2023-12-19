@@ -36,7 +36,7 @@
     []
   []
   [missing_var_in_split]
-    requirement = 'The system shall error if a user has forgotten a variable in their field splits.'
+    requirement = 'The system shall report an error if a user has forgotten a variable in their field splits.'
     input = 'missing-var-in-split.i'
     type = RunException
     expect_err = 'Local split size sum.*and local system matrix size.*do not match. Did you forget a variable or block in one of your splits?'

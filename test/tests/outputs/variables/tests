@@ -14,7 +14,7 @@
     input = 'output_vars_hidden_shown_check.i'
     expect_err = 'Output\(s\) specified to be both shown and hidden: u'
 
-    requirement = "The system shall error if a variable is marked for output and output suppression."
+    requirement = "The system shall report an error if a variable is marked for output and output suppression."
   [../]
 
   [./test_nonexistent]
@@ -22,7 +22,7 @@
     input = 'output_vars_nonexistent.i'
     expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1 foo2'
 
-    requirement = "The system shall error if a variable is perscribed for output but does not exist."
+    requirement = "The system shall report an error if a variable is perscribed for output but does not exist."
   [../]
 
   [./block_hide]

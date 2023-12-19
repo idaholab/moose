@@ -17,7 +17,7 @@
     cli_args = "Reporters/b/int_reporter=wrong"
     expect_err = "The supplied name ReporterName 'Reporters/b/int_reporter' must contain the '/' delimiter."
 
-    requirement = "The system shall error if an invalid name is provided when retrieving aggregate value."
+    requirement = "The system shall report an error if an invalid name is provided when retrieving aggregate value."
    []
 
   [errors]

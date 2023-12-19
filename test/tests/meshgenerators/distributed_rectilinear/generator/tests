@@ -73,7 +73,7 @@
     max_parallel = 8
     issues = '#15464'
     cli_args = 'Mesh/gmg/num_cores_for_partition=10 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/hide="pid npid" '
-    requirement = 'The system shall error out if the number of cores for partition is larger than the total number of cores.'
+    requirement = 'The system shall report an error if the number of cores for partition is larger than the total number of cores.'
   [../]
 
   [./mesh_adaptivity]

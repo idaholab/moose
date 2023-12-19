@@ -33,7 +33,7 @@
                  'GlobalParams/order=SECOND Mesh/gmg/nx=5 Mesh/gmg/ny=5'
   []
   [dont_refine_before]
-    requirement = 'The system shall error if refinement generators are executed before lower dimensional elements are added.'
+    requirement = 'The system shall report an error if refinement generators are executed before lower dimensional elements are added.'
     issues = '#24638'
     type = 'RunException'
     cli_args = '--mesh-only'

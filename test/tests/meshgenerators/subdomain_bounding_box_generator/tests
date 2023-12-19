@@ -72,7 +72,7 @@
     input = subdomain_bounding_box_generator_restricted.i
     cli_args = "Mesh/subdomains2/restricted_subdomains='missing'"
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall error if a restricted subdomain of the bounding box subdomain generation does not exist in the mesh'
+    requirement = 'The system shall report an error if a restricted subdomain of the bounding box subdomain generation does not exist in the mesh'
     design = 'meshgenerators/SubdomainBoundingBoxGenerator.md'
     issues = '#22117'
     mesh_mode = 'REPLICATED'

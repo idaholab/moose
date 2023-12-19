@@ -68,7 +68,7 @@
     input = 'mat_cyclic_coupling.i'
     expect_err = 'Cyclic dependency detected in object ordering:'
 
-    requirement = "The system shall error if material property calculations result in a cyclic "
+    requirement = "The system shall report an error if material property calculations result in a cyclic "
                   "dependency."
   []
 
@@ -86,7 +86,7 @@
     input = 'material_check_test.i'
     expect_err = 'The following blocks from your input mesh do not contain an active material: 0'
 
-    requirement = "The system shall error if material properties are not computed on all subdomains."
+    requirement = "The system shall report an error if material properties are not computed on all subdomains."
   []
 
   [exception]

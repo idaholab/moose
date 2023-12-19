@@ -15,7 +15,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if"
+    requirement = "The system shall report an error if"
     [missing_block]
       type = RunException
       input = 'solution_ic.i'

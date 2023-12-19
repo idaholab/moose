@@ -15,7 +15,7 @@
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Postprocessors/num_dofs/outputs=garbage'
 
-    requirement = "The system shall error if an invalid output name is provided within the postprocessor input file block."
+    requirement = "The system shall report an error if an invalid output name is provided within the postprocessor input file block."
   [../]
   [./console]
     type = 'CSVDiff'
@@ -36,6 +36,6 @@
     input = 'output_pps_hidden_shown_check.i'
     expect_err = 'Output\(s\) specified to be both shown and hidden: elem_56'
 
-    requirement = "The system shall error if a postprocessor variable is listed for suppression and inclusion within an output object block in the input file."
+    requirement = "The system shall report an error if a postprocessor variable is listed for suppression and inclusion within an output object block in the input file."
   [../]
 []

@@ -1,4 +1,6 @@
 [Tests]
+  design = 'syntax/Components/index.md'
+  issues = '#19747'
   [warning]
     type = 'RunApp'
     input = 'test.i'
@@ -7,5 +9,6 @@
     method = 'OPT'
     allow_test_objects = true
     allow_warnings = true
+    requirement = 'The system shall be able to output warnings in group.'
   []
 []
