@@ -892,8 +892,6 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-
-
     // Get command line argument following --json on command line
     std::string json_following_arg = getParam<std::string>("json");
 
