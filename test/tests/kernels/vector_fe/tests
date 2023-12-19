@@ -161,6 +161,7 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_hex27.e
       cli_args = 'Outputs/file_base=coupled_electrostatics_hex27'
+      abs_zero = 1e-7
       detail = 'HEX27, '
     []
     [tet14]
@@ -168,7 +169,8 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_tet14.e
       cli_args = 'Mesh/gmg/elem_type=TET14 '
-                'Outputs/file_base=coupled_electrostatics_tet14'
+                 'Outputs/file_base=coupled_electrostatics_tet14'
+      abs_zero = 1e-7
       detail = 'TET14, '
     []
     [tri6]
@@ -176,8 +178,8 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_tri6.e
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI6 '
-                'BCs/sides/boundary="top bottom left right" '
-                'Outputs/file_base=coupled_electrostatics_tri6'
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_tri6'
       detail = 'TRI6, '
     []
     [tri7]
@@ -185,8 +187,8 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_tri7.e
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI7 '
-                'BCs/sides/boundary="top bottom left right" '
-                'Outputs/file_base=coupled_electrostatics_tri7'
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_tri7'
       detail = 'TRI7, '
     []
     [quad8]
@@ -194,8 +196,8 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_quad8.e
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD8 '
-                'BCs/sides/boundary="top bottom left right" '
-                'Outputs/file_base=coupled_electrostatics_quad8'
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_quad8'
       detail = 'QUAD8, '
     []
     [quad9]
@@ -203,8 +205,78 @@
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_quad9.e
       cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD9 '
-                'BCs/sides/boundary="top bottom left right" '
-                'Outputs/file_base=coupled_electrostatics_quad9'
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_quad9'
+      detail = 'and QUAD9.'
+    []
+  []
+  [coupled_electrostatics_errors]
+    design = 'ElementVectorL2Error.md ElementHDivSemiError.md ElementHDivError.md'
+    issues = '#26394'
+    requirement = 'The system shall be capable of estimating the L2 and H(div) '
+                  'errors for a div-grad problem in H(div) solved using the '
+                  'following Raviart-Thomas elements: '
+    [hex27]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_hex27.csv
+      cli_args = 'Outputs/file_base=coupled_electrostatics_hex27 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
+      detail = 'HEX27, '
+    []
+    [tet14]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_tet14.csv
+      cli_args = 'Mesh/gmg/elem_type=TET14 '
+                 'Outputs/file_base=coupled_electrostatics_tet14 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
+      detail = 'TET14, '
+    []
+    [tri6]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_tri6.csv
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI6 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_tri6 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
+      detail = 'TRI6, '
+    []
+    [tri7]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_tri7.csv
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI7 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_tri7 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
+      detail = 'TRI7, '
+    []
+    [quad8]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_quad8.csv
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD8 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_quad8 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
+      detail = 'QUAD8, '
+    []
+    [quad9]
+      type = CSVDiff
+      input = coupled_electrostatics.i
+      csvdiff = coupled_electrostatics_quad9.csv
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD9 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Outputs/file_base=coupled_electrostatics_quad9 '
+                 'Postprocessors/active="PP L2Error HDivSemiError HDivError" '
+                 'Outputs/exodus=false Outputs/csv=true'
       detail = 'and QUAD9.'
     []
   []
