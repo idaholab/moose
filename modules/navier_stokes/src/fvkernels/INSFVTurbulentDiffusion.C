@@ -91,28 +91,28 @@ INSFVTurbulentDiffusion::computeResidual(const FaceInfo & fi)
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   const Elem * elem = fi.elemPtr();
-  const Elem * neighor = fi.neighborPtr();
-  auto bounded_elem = _wall_bounded[elem];
-  auto bounded_neigh = _wall_bounded[neighor];
+  const Elem * neighbor = fi.neighborPtr();
+  const auto bounded_elem = _wall_bounded.find(elem) != _wall_bounded.end();
+  const auto bounded_neigh = _wall_bounded.find(neighbor) != _wall_bounded.end();
 
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    if (!bounded_elem)
-    {
-      // residual contribution of this kernel to the elem element
-      prepareVectorTag(_assembly, _var.number());
-      _local_re(0) = r;
-      accumulateTaggedLocalResidual();
-    }
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    if (!bounded_neigh)
-    {
-      // residual contribution of this kernel to the neighbor element
-      prepareVectorTagNeighbor(_assembly, _var.number());
-      _local_re(0) = -r;
-      accumulateTaggedLocalResidual();
-    }
+  if ((_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+       _face_type == FaceInfo::VarFaceNeighbors::BOTH) &&
+      (!bounded_elem))
+  {
+    // residual contribution of this kernel to the elem element
+    prepareVectorTag(_assembly, _var.number());
+    _local_re(0) = r;
+    accumulateTaggedLocalResidual();
+  }
+  if ((_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+       _face_type == FaceInfo::VarFaceNeighbors::BOTH) &&
+      (!bounded_neigh))
+  {
+    // residual contribution of this kernel to the neighbor element
+    prepareVectorTagNeighbor(_assembly, _var.number());
+    _local_re(0) = -r;
+    accumulateTaggedLocalResidual();
+  }
 }
 
 void
@@ -128,8 +128,8 @@ INSFVTurbulentDiffusion::computeJacobian(const FaceInfo & fi)
 
   const Elem * elem = fi.elemPtr();
   const Elem * neighbor = fi.neighborPtr();
-  auto bounded_elem = _wall_bounded[elem];
-  auto bounded_neigh = _wall_bounded[neighbor];
+  const auto bounded_elem = _wall_bounded.find(elem) != _wall_bounded.end();
+  const auto bounded_neigh = _wall_bounded.find(neighbor) != _wall_bounded.end();
 
   if ((_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
        _face_type == FaceInfo::VarFaceNeighbors::BOTH) &&

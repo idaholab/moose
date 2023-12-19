@@ -145,7 +145,7 @@ kEpsilonViscosityAux::computeValue()
 
   // Determine if the element is wall bounded
   // and if bulk wall treatment needs to be activated
-  const bool wall_bounded = _wall_bounded[&elem];
+  const bool wall_bounded = _wall_bounded.find(_current_elem) != _wall_bounded.end();
   Real mu_t;
 
   // Computing wall value for near-wall elements if bulk wall treatement is activated

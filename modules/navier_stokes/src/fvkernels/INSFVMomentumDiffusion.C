@@ -37,9 +37,9 @@ INSFVMomentumDiffusion::validParams()
       "complete_expansion",
       false,
       "Boolean parameter to use complete momentum expansion is the diffusion term.");
-  params.addCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   return params;
 }
 
@@ -48,15 +48,9 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
-    _u_var(params.isParamValid("u")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))
-               : nullptr),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _u_var(params.isParamValid("u") ? &getFunctor<ADReal>("u") : nullptr),
+    _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
     _dim(_subproblem.mesh().dimension())
 {

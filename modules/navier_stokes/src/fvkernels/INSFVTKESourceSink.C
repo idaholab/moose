@@ -104,7 +104,7 @@ INSFVTKESourceSink::computeQpResidual()
       _linearized_model ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear) : state;
   const auto rho = _rho(makeElemArg(_current_elem), state);
 
-  if (_wall_bounded[_current_elem])
+  if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
     std::vector<ADReal> y_plus_vec, velocity_grad_norm_vec;
 

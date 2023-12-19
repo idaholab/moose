@@ -98,7 +98,6 @@ INSFVTKEDSourceSink::initialSetup()
 ADReal
 INSFVTKEDSourceSink::computeQpResidual()
 {
-
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
@@ -109,7 +108,7 @@ INSFVTKEDSourceSink::computeQpResidual()
   const auto rho = _rho(makeElemArg(_current_elem), state);
   const auto TKE = _k(makeElemArg(_current_elem), state);
 
-  if (_wall_bounded[_current_elem])
+  if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
     std::vector<ADReal> y_plus_vec;
 

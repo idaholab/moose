@@ -153,10 +153,9 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
           const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
           for (BoundaryID side_id : side_bnds)
             if (side_id == wall_id)
-              wall_bounded = true;
+              wall_bounded_map[elem] = true;
         }
       }
-      wall_bounded_map[elem] = wall_bounded;
     }
   }
 }

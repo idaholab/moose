@@ -44,11 +44,11 @@ protected:
   ADReal _an = 0;
 
   /// x-velocity
-  const INSFVVelocityVariable * const _u_var;
+  const Moose::Functor<ADReal> * const _u_var;
   /// y-velocity
-  const INSFVVelocityVariable * const _v_var;
+  const Moose::Functor<ADReal> * const _v_var;
   /// z-velocity
-  const INSFVVelocityVariable * const _w_var;
+  const Moose::Functor<ADReal> * const _w_var;
 
   /// Boolean parameter to include the complete momentum expansion
   const bool _complete_expansion;
