@@ -31,7 +31,7 @@
   []
 
   [exception_checks]
-    requirement = 'The system shall error'
+    requirement = 'The system shall report an error'
     issues = '#19420'
     [ad_and_regular]
       type = RunException

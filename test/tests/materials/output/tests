@@ -90,7 +90,7 @@
     input = output_steady.i
     expect_err = "The material property output real_property has the same name as an existing variable, either use the material declare_suffix parameter to disambiguate"
     cli_args = "AuxVariables/real_property/order=CONSTANT AuxVariables/real_property/family=MONOMIAL"
-    requirement = "The system shall error if an existing variable shares the same name as an auxiliary variable used for material output"
+    requirement = "The system shall report an error if an existing variable shares the same name as an auxiliary variable used for material output"
   []
   [invalid_outputs]
     type = RunException
@@ -98,7 +98,7 @@
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Outputs/exodus=false Materials/test_material/outputs=garbage'
 
-    requirement = "The system shall error if the supplied output options for material data output "
+    requirement = "The system shall report an error if the supplied output options for material data output "
                   "are not consistent with the list of available outputs."
   []
   [warn_unsupported_types]

@@ -14,7 +14,7 @@
     requirement = 'The system shall be able to supply a functor capable of computing the norm of a vector functor.'
   []
   [multiple_provided]
-    requirement = 'The system shall error if a user provides to the vector magnitude functor material both a vector functor parameter and'
+    requirement = 'The system shall report an error if a user provides to the vector magnitude functor material both a vector functor parameter and'
     [x_functor]
       type = RunException
       input = vector-test.i

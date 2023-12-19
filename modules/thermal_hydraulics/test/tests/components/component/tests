@@ -6,7 +6,7 @@
     input = 'err.nonexisting_component.i'
     expect_err = "cmp: The component 'pipe' does not exist"
     allow_test_objects = true
-    requirement = 'The system shall error if a component specified in a parameter does not exist.'
+    requirement = 'The system shall report an error if a component specified in a parameter does not exist.'
   []
 
   [err:setup_status]
@@ -14,6 +14,6 @@
     input = 'err.setup_status.i'
     expect_err = "pipe: The component setup status \(1\) is less than the required status \(2\)"
     allow_test_objects = true
-    requirement = 'The system shall error if the components are not setup in the expected order and are not in the correct setup status for an operation.'
+    requirement = 'The system shall report an error if the components are not setup in the expected order and are not in the correct setup status for an operation.'
   []
 []

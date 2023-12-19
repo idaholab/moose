@@ -30,7 +30,7 @@
     []
   []
   [errors]
-    requirement = "The system shall error if "
+    requirement = "The system shall report an error if "
     [missing_boundary]
       type = 'RunException'
       input = 'test_multi.i'

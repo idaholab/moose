@@ -40,7 +40,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if "
+    requirement = "The system shall report an error if "
     [invalid_block]
       type = RunException
       input = test_single.i

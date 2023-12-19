@@ -20,7 +20,7 @@
     input = 'high_order_boundary_aux.i'
     cli_args = "AuxKernels/real_property/boundary='0 1' --color off"
     expect_err = "Boundary restricted auxiliary kernel 'real_property' has element \(id=[0-9]+\) connected with more than one boundary sides."
-    requirement = "The system shall error if a boundary restricted elemental auxiliary kernel is evaluated on an element with multiple boundary sides"
+    requirement = "The system shall report an error if a boundary restricted elemental auxiliary kernel is evaluated on an element with multiple boundary sides"
     issues = '#5061'
     design = 'syntax/AuxKernels/index.md'
   [../]

@@ -8,7 +8,7 @@
     cli_args = 'AuxVariables/a_very_unique_auxiliary_variable_name_good_for_error_checking/order=TENTH'
     expect_err = "Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH or NINTH order \(10 supplied\)"
 
-    requirement = "The system shall error if the supplied order of scalar auxiliary variable is of an unknown order."
+    requirement = "The system shall report an error if the supplied order of scalar auxiliary variable is of an unknown order."
   [../]
   [./high_order_scalar]
     type = RunApp

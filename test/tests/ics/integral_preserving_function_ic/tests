@@ -2,7 +2,7 @@
   issues = '#19476'
   design = 'IntegralPreservingFunctionIC.md'
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [missing_initial]
       type = RunException
       input = 'sinusoidal_z.i'

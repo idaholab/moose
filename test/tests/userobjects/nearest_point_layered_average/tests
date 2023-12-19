@@ -84,7 +84,7 @@
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/layer_bounding_block='0' UserObjects/npla/direction_min=0.0 UserObjects/npla/direction_max=1.0"
     expect_err = "Only one of 'layer_bounding_block' and the pair 'direction_max' and 'direction_min' can be provided"
-    requirement = 'The system shall error if user-set direction bounds conflict with block-type bound specifications'
+    requirement = 'The system shall report an error if user-set direction bounds conflict with block-type bound specifications'
     design = 'NearestPointLayeredAverage.md'
     issues = '#19122'
   []
@@ -94,7 +94,7 @@
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/direction_max=1.0"
     expect_err = "If providing the layer max/min directions, both 'direction_max' and 'direction_min' must be specified"
-    requirement = 'The system shall error if a direction bound is missing'
+    requirement = 'The system shall report an error if a direction bound is missing'
     design = 'NearestPointLayeredAverage.md'
     issues = '#19122'
   []
@@ -104,7 +104,7 @@
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/direction_max=0.0 UserObjects/npla/direction_min=1.0"
     expect_err = "'direction_max' must be larger than 'direction_min'"
-    requirement = 'The system shall error if the maximum bound is lower than the minimum bound'
+    requirement = 'The system shall report an error if the maximum bound is lower than the minimum bound'
     design = 'NearestPointLayeredAverage.md'
     issues = '#19122'
   []

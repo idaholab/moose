@@ -14,6 +14,6 @@
     expect_err = "Both 'points' and 'points_file' cannot be specified simultaneously."
     issues = '#19831'
     design = 'SpatialUserObjectVectorPostprocessor.md'
-    requirement = 'The system shall error if the points are specified in more than one manner for a spatial vector postprocessor.'
+    requirement = 'The system shall report an error if the points are specified in more than one manner for a spatial vector postprocessor.'
   []
 []

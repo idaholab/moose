@@ -29,7 +29,7 @@
     input = 2D.i
     cli_args = 'Mesh/explode/subdomains="100"'
     expect_err = "The block ID '100' was not found in the mesh"
-    requirement = "The system shall error if the subdomain to explode was not found in the mesh"
+    requirement = "The system shall report an error if the subdomain to explode was not found in the mesh"
     design = 'meshgenerators/ExplodeMeshGenerator.md'
     issues = '#22117'
   []

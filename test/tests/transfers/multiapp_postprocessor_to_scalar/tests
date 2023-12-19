@@ -25,7 +25,7 @@
   []
 
   [error]
-    requirement = "The system shall error during the transfer of scalar variable and postprocessor "
+    requirement = "The system shall report an error during the transfer of scalar variable and postprocessor "
                   "data if the number of sub-applications differs from the order of the scalar "
                   "variable if"
     [sub_to_parent_wrong_order]

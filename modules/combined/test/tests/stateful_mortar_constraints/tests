@@ -16,7 +16,7 @@
     cli_args = "UserObjects/stress_yy_patch/block='plank'"
     expect_err = 'Nodal patch recovery auxiliary kernel is not defined in a subset of blocks of'
     allow_test_objects = true
-    requirement = "The system shall error out if nodal patch recovery user object and auxiliary "
+    requirement = "The system shall report an error if nodal patch recovery user object and auxiliary "
                   "kernel are not compatibly block restricted."
   []
 []

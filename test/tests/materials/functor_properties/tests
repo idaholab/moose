@@ -12,7 +12,7 @@
     expect_err = 'No insertion for the functor material property'
     input = 1d_dirichlet.i
     prereq = 'exo'
-    requirement = 'The system shall error if multiple definitions are given for a functor material property on a given subdomain.'
+    requirement = 'The system shall report an error if multiple definitions are given for a functor material property on a given subdomain.'
     cli_args = "Materials/active='functor overlapping_functor'"
   []
   [qp_functor]
@@ -78,14 +78,14 @@
     type = RunException
     input = wrong-type.i
     expect_err = 'We are requesting a non-AD functor from an AD object, but the true functor is AD. This means we could be dropping important derivatives. We will not allow this'
-    requirement = 'The system shall error if an automatic differentiation (AD) object requests a non-AD functor when the functor is AD. This prevents potential dropping of derivative information.'
+    requirement = 'The system shall report an error if an automatic differentiation (AD) object requests a non-AD functor when the functor is AD. This prevents potential dropping of derivative information.'
     design = 'Materials/index.md'
   []
   [prop_name_issue]
     type = RunException
     input = 1d_dirichlet.i
     expect_err = 'prop_names should not be the same as any of the prop_values'
-    requirement = 'The system shall error if a functor material property is declared with the same name as another functor.'
+    requirement = 'The system shall report an error if a functor material property is declared with the same name as another functor.'
     design = 'Materials/index.md'
     cli_args = 'Materials/functor/prop_names=sink'
   []
@@ -93,7 +93,7 @@
     type = RunException
     input = functor-vector-mat-props.i
     expect_err = 'prop_names should not be the same as any of the prop_values'
-    requirement = 'The system shall error if a functor vector material property is declared with the same name as another functor.'
+    requirement = 'The system shall report an error if a functor vector material property is declared with the same name as another functor.'
     design = 'Materials/index.md'
     cli_args = "Materials/block0/prop_names='matprop mat_x' Materials/block0/prop_values='4 2 mat_x 3 4 1'"
   []

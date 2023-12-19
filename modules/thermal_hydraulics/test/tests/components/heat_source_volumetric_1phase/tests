@@ -19,7 +19,7 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=asdf"
     expect_err = "hs: The component 'asdf' does not exist"
-    requirement = 'The system shall error if the component specified to a volumetric heat source does not exist.'
+    requirement = 'The system shall report an error if the component specified to a volumetric heat source does not exist.'
   []
 
   [err:not_a_flow_channel]
@@ -27,6 +27,6 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=total_power"
     expect_err = "hs: The component 'total_power' is not of type 'FlowChannel1Phase'"
-    requirement = "The system shall error if the component specified to a volumetric heat is not of the supported flow channel type."
+    requirement = "The system shall report an error if the component specified to a volumetric heat is not of the supported flow channel type."
   []
 []

@@ -39,7 +39,7 @@
     input = 'scalar_material_damage.i'
     cli_args = 'Executioner/end_time=1.2'
     expect_err = 'damage_index must be between 0 and 1. Current value is:'
-    requirement = "The system shall error out when damage index is greater than 1."
+    requirement = "The system shall report an error when damage index is greater than 1."
   []
   [ad_scalar_damage_material_out_of_bounds]
     type = 'RunException'
@@ -47,7 +47,7 @@
     input = 'ad_scalar_material_damage.i'
     cli_args = 'Executioner/end_time=1.2'
     expect_err = 'damage_index must be between 0 and 1. Current value is:'
-    requirement = "The system shall error out when damage index is greater than 1 also when using "
+    requirement = "The system shall report an error when damage index is greater than 1 also when using "
                   "automatic differentiation."
   []
   [scalar_damage_incompatible_model]

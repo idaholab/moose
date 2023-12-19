@@ -12,7 +12,7 @@
                reduction_out_sample_max_0000.csv'
   []
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [more_than_one_spatial_value]
       type = RunException
       input = reduction.i

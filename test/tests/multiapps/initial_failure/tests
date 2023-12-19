@@ -7,6 +7,6 @@
     input = 'parent.i'
     expect_err = 'failed to converge initial MultiApp'
 
-    requirement = 'The system shall error if the execution of a sub-application fails during the initial execution.'
+    requirement = 'The system shall report an error if the execution of a sub-application fails during the initial execution.'
   [../]
 []

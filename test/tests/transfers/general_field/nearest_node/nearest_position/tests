@@ -31,7 +31,7 @@
   []
 
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [from_main_app]
       type = 'RunException'
       input = 'main.i'

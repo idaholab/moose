@@ -17,7 +17,7 @@
     cli_args = "Variables/u/block=1"
     expect_err = "The 'block' parameter of the object 'diff' must be a subset of the 'block' parameter of the variable 'u'"
 
-    requirement = "The system shall error if an object is restricted to a set of subdomains that differs from a dependant object."
+    requirement = "The system shall report an error if an object is restricted to a set of subdomains that differs from a dependant object."
   []
 
   [ids]

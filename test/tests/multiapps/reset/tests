@@ -37,6 +37,6 @@
     input = parent.i
     cli_args = "Outputs/file_base=multiple_times MultiApps/sub/reset_time='0.03 0.022 0.075'"
     expect_err = 'List of reset times must be sorted in increasing order'
-    requirement = "The system shall error if the reset times specified for a multiapp are not sorted, as this likely indicates a user error in their input"
+    requirement = "The system shall report an error if the reset times specified for a multiapp are not sorted, as this likely indicates a user error in their input"
   []
 []

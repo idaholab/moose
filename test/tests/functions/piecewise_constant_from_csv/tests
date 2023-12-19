@@ -57,7 +57,7 @@
     []
   []
   [errors]
-    requirement = 'The system shall error out if'
+    requirement = 'The system shall report an error if'
     [read_type]
       type = RunException
       input = 'piecewise_constant.i'

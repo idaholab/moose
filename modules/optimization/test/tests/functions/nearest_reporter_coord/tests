@@ -35,7 +35,7 @@
   [error]
     design = 'NearestReporterCoordinatesFunction.md'
     issues = '#22215'
-    requirement = 'The system shall error if '
+    requirement = 'The system shall report an error if '
     [v]
       type = RunException
       input = nearest_reporter_point.i

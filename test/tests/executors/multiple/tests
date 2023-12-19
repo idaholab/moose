@@ -16,7 +16,7 @@
     input = 'test.i'
     cli_args = 'Executors/i2/inner1=my_first_executor --executor'
     expect_err = 'Executor cycle detected'
-    requirement = "The system shall error if the Executor system contains an infinite cycle"
+    requirement = "The system shall report an error if the Executor system contains an infinite cycle"
   []
 
   [multi_root]

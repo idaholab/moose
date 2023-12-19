@@ -39,7 +39,7 @@
     type = RunException
     input = 'generate_radiation_patch.i'
     expect_err = "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!"
-    requirement = "The system shall error when centroid partitioner is used but centroid_partitioner_direction is not provided."
+    requirement = "The system shall report an error when centroid partitioner is used but centroid_partitioner_direction is not provided."
     design = 'source/meshgenerators/PatchSidesetGenerator.md'
     cli_args = 'Mesh/patch/partitioner=centroid --mesh-only generate_radiation_patch_centroid.e'
     mesh_mode = REPLICATED

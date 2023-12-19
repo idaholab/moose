@@ -14,7 +14,7 @@
     input = 'adaptivity.i'
     expect_err = 'Stateful neighbor material properties do not work with mesh adaptivity'
     cli_args = "Materials/active='stateful'"
-    requirement = "The system shall error if the triad of dg kernels, adaptivity, and stateful properties are used together."
+    requirement = "The system shall report an error if the triad of dg kernels, adaptivity, and stateful properties are used together."
     design = "/DGKernels/index.md"
     issues = '#10977'
   [../]

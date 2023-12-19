@@ -22,7 +22,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if a nodal variable is requested to be transfered"
+    requirement = "The system shall report an error if a nodal variable is requested to be transfered"
     [error_from_nodal]
       type = RunException
       input = bi_direction.i
@@ -43,7 +43,7 @@
   []
 
   [block_ids]
-    requirement = "The system shall error if a variable is required to be transferred"
+    requirement = "The system shall report an error if a variable is required to be transferred"
     [invalid_from_block_to_app]
       type = RunException
       input = bi_direction.i

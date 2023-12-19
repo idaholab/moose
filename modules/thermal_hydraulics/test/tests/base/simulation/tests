@@ -28,6 +28,6 @@
     input = 'err.no_smp.i'
     expect_err = "Single matrix preconditioning with full coupling is required to run\. Please, check that your input file has the following preconditioning block\:"
     deleted = "#190"
-    requirement = 'The system shall error if single matrix preconditioning is not in use in a thermal hydraulics simulation.'
+    requirement = 'The system shall report an error if single matrix preconditioning is not in use in a thermal hydraulics simulation.'
   []
 []
