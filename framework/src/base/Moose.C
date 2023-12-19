@@ -121,6 +121,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_functor_material",         FunctorMaterial,        false);
   registerMooseObjectTask("add_material",                 MaterialBase,           false);
+  appendDeprecatedMooseObjectTask("add_material",         FunctorMaterial);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
 
   registerMooseObjectTask("add_function",                 Function,               false);

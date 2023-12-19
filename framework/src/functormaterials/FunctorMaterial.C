@@ -23,7 +23,7 @@ FunctorMaterial::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
   // Do not allow functor materials in the regular Materials block
-  params.registerBase("FunctorMaterials");
+  params.registerBase("FunctorMaterial");
 
   return params;
 }

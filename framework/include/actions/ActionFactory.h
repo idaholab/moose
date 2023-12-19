@@ -30,7 +30,9 @@
 #define registerMooseObjectTask(name, moose_system, is_required)                                   \
   syntax.registerTaskName(name, stringifyName(moose_system), is_required)
 #define appendMooseObjectTask(name, moose_system)                                                  \
-  syntax.appendTaskName(name, stringifyName(moose_system))
+  syntax.appendTaskName(name, stringifyName(moose_system), false)
+#define appendDeprecatedMooseObjectTask(name, moose_system)                                        \
+  syntax.appendTaskName(name, stringifyName(moose_system), true)
 #define addTaskDependency(action, depends_on) syntax.addDependency(action, depends_on)
 
 // Forward Declaration

@@ -43,12 +43,17 @@ Syntax::registerTaskName(const std::string & task,
 }
 
 void
-Syntax::appendTaskName(const std::string & task, const std::string & moose_object_type)
+Syntax::appendTaskName(const std::string & task,
+                       const std::string & moose_object_type,
+                       bool deprecated)
 {
   if (_registered_tasks.find(task) == _registered_tasks.end())
     mooseError("A ", task, " is not a registered task name.");
 
-  _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
+  if (!deprecated)
+    _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
+  else
+    _deprecated_moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
 }
 
 void
@@ -313,6 +318,15 @@ Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task
   for (const auto & task_it : as_range(iters))
     if (task == task_it.second)
       return true;
+
+  iters = _deprecated_moose_systems_to_tasks.equal_range(base);
+  for (const auto & task_it : as_range(iters))
+    if (task == task_it.second)
+    {
+      mooseDeprecated("Adding '" + base + "' though task '" + task +
+                      "' is deprecated. The syntax you are using is deprecated.");
+      return true;
+    }
 
   return false;
 }

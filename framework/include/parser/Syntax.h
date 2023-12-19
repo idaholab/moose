@@ -51,8 +51,12 @@ public:
   /**
    * Method to associate another "allowed" pluggable MOOSE system to an existing registered task.
    * Each object created during a task is checked against associated systems.
+   * @param task the task to allow a new type of moose objects for
+   * @param moose_object_type the type of objects to allow with this task
+   * @param deprecated whether constructing this moose object with this task is deprecated
    */
-  void appendTaskName(const std::string & task, const std::string & moose_object_type);
+  void
+  appendTaskName(const std::string & task, const std::string & moose_object_type, bool deprecated);
 
   void addDependency(const std::string & task, const std::string & pre_req);
 
@@ -206,6 +210,10 @@ protected:
 
   /// The list of Moose system objects to tasks.  This map indicates which tasks are allowed to build certain MooseObjects.
   std::multimap<std::string, std::string> _moose_systems_to_tasks;
+
+  /// The list of deprecated Moose system objects to tasks. If an item is in this map, the task is still allowed to build
+  /// the object from the MOOSE system, but it is deprecated to do so.
+  std::multimap<std::string, std::string> _deprecated_moose_systems_to_tasks;
 
   /// The dependency resolver
   DependencyResolver<std::string> _tasks;

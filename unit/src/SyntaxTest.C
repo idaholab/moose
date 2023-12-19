@@ -60,7 +60,7 @@ TEST_F(SyntaxTest, errorChecks)
 
   try
   {
-    _syntax.appendTaskName("third", "MooseSystem");
+    _syntax.appendTaskName("third", "MooseSystem", false);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
