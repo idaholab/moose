@@ -432,6 +432,9 @@ MultiAppGeneralFieldTransfer::execute()
 {
   getAppInfo();
 
+  // Set up bounding boxes, etc
+  prepareToTransfer();
+
   // loop over the vector of variables and make the transfer one by one
   for (const auto i : make_range(_var_size))
     transferVariable(i);
@@ -440,12 +443,10 @@ MultiAppGeneralFieldTransfer::execute()
 }
 
 void
-MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+MultiAppGeneralFieldTransfer::prepareToTransfer()
 {
-  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
-
   // Get the bounding boxes for the "from" domains.
-  // Clean up _from_bboxes
+  // Clean up _from_bboxes from the previous transfer execution
   _from_bboxes.clear();
 
   // NOTE: This ignores the app's bounding box inflation and padding
@@ -461,6 +462,12 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Get the index for the first source app every processor owns
   _global_app_start_per_proc = getGlobalStartAppPerProc();
+}
+
+void
+MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+{
+  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 
   // Find outgoing target points
   // We need to know what points we need to send which processors
@@ -536,7 +543,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   // Additional process-restriction techniques we could use (TODOs):
   // - nearest_positions/_app could use its own heuristic
   // - from_mesh_divisions could be polled for which divisions they possess on each
-  //   process, depending on the behavior chosen. This could limit potential senders
+  //   process, depending on the behavior chosen. This could limit potential senders.
   //   This should be done ahead of this function call, for all points at once
 
   // Select the method for determining the apps receiving points/sending values
@@ -841,8 +848,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     bool is_nodal = _to_variables[var_index]->isNodal();
 
     // In the higher order elemental variable case, we receive point values, not nodal or
-    // elemental We use an InterpCache to store the values The distance_cache is necessary to
-    // choose between multiple origin problems sending values This code could be unified with the
+    // elemental. We use an InterpCache to store the values. The distance_cache is necessary to
+    // choose between multiple origin problems sending values. This code could be unified with the
     // lower order order case by using the dofobject_to_valsvec
     if (fe_type.order > CONSTANT && !is_nodal)
     {
@@ -1465,11 +1472,11 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
 
     // Get nearest position (often a subapp position) for the target point
     // We want values from the child app that is closest to the same position as the target
-    // TODO: use transformed point
     Point nearest_position_source;
     if (_nearest_positions_obj)
     {
       const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+      // The search for the nearest position is done in the reference frame
       const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
       nearest_position_source = _nearest_positions_obj->getNearestPosition(
           (*_from_transforms[from_global_num])(Point(0, 0, 0)), initial);

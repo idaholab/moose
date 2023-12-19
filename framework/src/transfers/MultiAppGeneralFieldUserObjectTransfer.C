@@ -103,6 +103,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
          (!point_found || _search_value_conflicts || _nearest_positions_obj);
          ++i_from)
     {
+      // User object spatialValue() evaluations do not provide a distance
       Real distance = 1;
       // Check spatial restrictions
       if (!acceptPointInOriginMesh(i_from, local_bboxes, pt, mesh_div, distance))

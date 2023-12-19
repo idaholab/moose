@@ -7,7 +7,7 @@
 
 # Explaining results on the main app:
 # Each value on the main app comes from a region with the same division index on a subapp
-# Because the subapp is not very discretized in Y, some source mesh divisions index
+# Because the subapp is not very discretized in Y, some source mesh division indices
 # are not represented in the subapps. Therefore these mesh divisions are not present in the
 # main app.
 # Explaining results on the sub apps:
@@ -20,7 +20,6 @@
   dim = 2
   nx = 10
   ny = 10
-  allow_renumbering = false
 []
 
 [MeshDivisions]

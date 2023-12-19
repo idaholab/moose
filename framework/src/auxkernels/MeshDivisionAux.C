@@ -39,11 +39,8 @@ MeshDivisionAux::MeshDivisionAux(const InputParameters & parameters)
 Real
 MeshDivisionAux::computeValue()
 {
-  unsigned int value;
-  if (isNodal())
-    value = _mesh_division.divisionIndex(*_current_node);
-  else
-    value = _mesh_division.divisionIndex(*_current_elem);
+  const auto value = isNodal() ? _mesh_division.divisionIndex(*_current_node)
+                               : _mesh_division.divisionIndex(*_current_elem);
   if (value == MooseMeshDivision::INVALID_DIVISION_INDEX)
     return _invalid_bin_value;
   else

@@ -365,6 +365,11 @@ private:
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _received_conflicts;
 
   /**
+   * Initialize supporting attributes like bounding boxes, processor app indexes etc
+   */
+  void prepareToTransfer();
+
+  /**
    * Performs the transfer for the variable of index i
    */
   void transferVariable(unsigned int i);

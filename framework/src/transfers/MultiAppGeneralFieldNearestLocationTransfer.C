@@ -57,7 +57,7 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
   // mesh-divisions based transfers
   params.addParam<bool>("group_subapps",
                         false,
-                        "Whether to group data from multiple subapps "
+                        "Whether to group data from subapps "
                         "when considering a nearest-position algorithm");
 
   return params;
@@ -88,7 +88,7 @@ MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocation
            (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
             _from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX))
     paramError("group_subapps",
-               "Cannot group subapps when considering nearest-location data as we would loose "
+               "Cannot group subapps when considering nearest-location data as we would lose "
                "track of the division index of the source locations");
 }
 
@@ -255,10 +255,10 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           if (!_from_mesh_divisions.empty())
           {
             const auto tree_division_index = i_source % getNumDivisions();
+            const auto node_div_index = _from_mesh_divisions[i_from]->divisionIndex(*node);
 
             // Spatial restriction is always active
-            if (_from_mesh_divisions[i_from]->divisionIndex(*node) ==
-                MooseMeshDivision::INVALID_DIVISION_INDEX)
+            if (node_div_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
               continue;
             // We fill one tree per division index for matching subapp index or division index. We
             // only accept source data from the division index
@@ -267,7 +267,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
                       _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
                       _from_mesh_division_behavior ==
                           MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
-                     tree_division_index != _from_mesh_divisions[i_from]->divisionIndex(*node))
+                     tree_division_index != node_div_index)
               continue;
           }
 
@@ -308,10 +308,10 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           if (!_from_mesh_divisions.empty())
           {
             const auto tree_division_index = i_source % getNumDivisions();
+            const auto elem_div_index = _from_mesh_divisions[i_from]->divisionIndex(*elem);
 
             // Spatial restriction is always active
-            if (_from_mesh_divisions[i_from]->divisionIndex(*elem) ==
-                MooseMeshDivision::INVALID_DIVISION_INDEX)
+            if (elem_div_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
               continue;
             // We fill one tree per division index for matching subapp index or division index. We
             // only accept source data from the division index
@@ -319,7 +319,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
                           MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
                       _from_mesh_division_behavior ==
                           MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
-                     tree_division_index != _from_mesh_divisions[i_from]->divisionIndex(*elem))
+                     tree_division_index != elem_div_index)
               continue;
           }
 

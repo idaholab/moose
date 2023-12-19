@@ -16,7 +16,6 @@ Positions::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
 
-  // leverage reporter interface to keep track of consumers
   params.addParam<PositionsName>("initial_positions",
                                  "Positions at the beginning of the simulation");
 
@@ -39,6 +38,7 @@ Positions::validParams()
 
 Positions::Positions(const InputParameters & parameters)
   : GeneralReporter(parameters),
+    // leverage reporter interface to keep track of consumers
     _initial_positions(isParamValid("initial_positions")
                            ? &getReporterValueByName<std::vector<Point>>(
                                  getParam<PositionsName>("initial_positions") + "/positions_1d")

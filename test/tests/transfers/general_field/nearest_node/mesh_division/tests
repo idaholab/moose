@@ -102,7 +102,7 @@
       expect_err = "Attempting to match source subapp index with the number of target mesh "
                    "divisions, which is 4 while there are 1 source subapp"
       detail = "the number of bins in the target mesh division and the number of source subapps to "
-               "match are not equal "
+               "match are not equal."
     []
   []
 
@@ -157,7 +157,7 @@
                  "Transfers/to_sub/to_mesh_division=middle_sub "
       expect_err = "We do not support using target subapp index for source division behavior and "
                    "matching the division index"
-      detail = 'the techniques for the target and source mesh divisions are incompatible,'
+      detail = 'the techniques for the target and source mesh divisions are incompatible.'
     []
   []
 []

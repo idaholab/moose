@@ -114,10 +114,16 @@ CartesianGridDivision::initialize()
     for (auto i : make_range(LIBMESH_DIM))
     {
       if (_center_positions)
+      {
         _mesh_fully_indexed = false;
+        break;
+      }
       else if (_bottom_left(i) > _mesh.getInflatedProcessorBoundingBox(0).first(i) ||
                _top_right(i) < _mesh.getInflatedProcessorBoundingBox(0).second(i))
+      {
         _mesh_fully_indexed = false;
+        break;
+      }
     }
 }
 
