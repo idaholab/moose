@@ -206,7 +206,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   # Testing this object
   [var_mat]
     type = PINSFVSpeedFunctorMaterial

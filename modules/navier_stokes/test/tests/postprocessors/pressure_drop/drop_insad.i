@@ -57,6 +57,9 @@
     prop_names = 'rho mu'
     prop_values = '1  1'
   []
+[]
+
+[FunctorMaterials]
   [ADconst]
     type = ADGenericFunctorMaterial
     block = '1 2 3'

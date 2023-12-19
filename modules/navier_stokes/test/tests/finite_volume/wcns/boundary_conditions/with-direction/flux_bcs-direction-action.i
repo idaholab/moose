@@ -132,7 +132,7 @@ inlet_scalar = 1.2
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'rho cp k mu'

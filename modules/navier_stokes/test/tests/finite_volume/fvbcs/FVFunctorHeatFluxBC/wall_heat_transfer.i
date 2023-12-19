@@ -137,7 +137,7 @@ flux=10
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [thermal_conductivities_k]
     type = ADGenericFunctorMaterial
     prop_names = 'k_mat'

@@ -197,7 +197,7 @@ velocity_interp_method='rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     temperature = 'temperature'

@@ -234,7 +234,7 @@ restricted_blocks = '1'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     temperature = 'temperature'

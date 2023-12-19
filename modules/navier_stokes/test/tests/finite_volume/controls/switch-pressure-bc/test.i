@@ -172,7 +172,7 @@ inlet_v = 1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'rho mu'

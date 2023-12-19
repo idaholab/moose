@@ -55,7 +55,7 @@ cp=1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [kappa]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'kappa'

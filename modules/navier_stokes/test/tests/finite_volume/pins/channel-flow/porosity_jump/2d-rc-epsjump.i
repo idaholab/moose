@@ -166,7 +166,7 @@ velocity_interp_method='rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   inactive = 'smooth'
   [jump]
     type = ADPiecewiseByBlockFunctorMaterial

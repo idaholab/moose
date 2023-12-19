@@ -1,6 +1,6 @@
 [Tests]
   issues = '#20695'
-  design = 'NSFVFrictionFlowDiodeMaterial.md'
+  design = 'NSFVFrictionFlowDiodeFunctorMaterial.md'
 
   [friction_flow_diode]
     type = Exodiff

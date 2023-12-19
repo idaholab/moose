@@ -284,7 +284,7 @@ restricted_blocks = '1'
   print_fields = false
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp'

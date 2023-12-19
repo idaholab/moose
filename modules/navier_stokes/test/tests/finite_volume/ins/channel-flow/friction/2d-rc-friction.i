@@ -153,7 +153,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   inactive = exponential_friction_coefficient
   [friction_coefficient]
     type = ADGenericFunctorMaterial
