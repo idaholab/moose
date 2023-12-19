@@ -234,6 +234,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 [Postprocessors]
   [total_pressure_drop_SC]
     type = SubChannelDelta
+    variable = P
     execute_on = "timestep_end"
   []
 

@@ -1,0 +1,17 @@
+[Tests]
+  [SC_check_syntax]
+    type = 'RunApp'
+    input = 'subchannel.i'
+    check_input = true
+  []
+  [THM_coupling_check_syntax]
+    type = 'RunApp'
+    input = 'THM_SC_coupling_pump.i'
+    check_input = true
+  []
+  [THM_check_syntax]
+    type = 'RunApp'
+    input = 'THM_SC_coupling.i'
+    check_input = true
+  []
+[]
