@@ -1,6 +1,6 @@
 # SetComponentBoolValueControl
 
-!syntax description /Controls/SetComponentBoolValueControl
+!syntax description /ControlLogic/SetComponentBoolValueControl
 
 !alert note
 [ControlData.md] is only defined by the thermal hydraulics module control logic.
@@ -12,8 +12,8 @@ using the `state` [ControlData.md] of the `trip_ctrl` ControlLogic.
 
 !listing test/tests/controls/set_component_bool_value_control/test.i block=Components ControlLogic
 
-!syntax parameters /Controls/SetComponentBoolValueControl
+!syntax parameters /ControlLogic/SetComponentBoolValueControl
 
-!syntax inputs /Controls/SetComponentBoolValueControl
+!syntax inputs /ControlLogic/SetComponentBoolValueControl
 
-!syntax children /Controls/SetComponentBoolValueControl
+!syntax children /ControlLogic/SetComponentBoolValueControl
