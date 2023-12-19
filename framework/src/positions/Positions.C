@@ -17,8 +17,8 @@ Positions::validParams()
   InputParameters params = GeneralReporter::validParams();
 
   // leverage reporter interface to keep track of consumers
-  params.addParam<ReporterName>("initial_positions",
-                                "Positions at the beginning of the simulation");
+  params.addParam<PositionsName>("initial_positions",
+                                 "Positions at the beginning of the simulation");
 
   // This parameter should be set by each derived class depending on whether the generation of
   // positions is replicated or distributed. We want positions to be replicated across all ranks
@@ -40,19 +40,22 @@ Positions::validParams()
 Positions::Positions(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _initial_positions(isParamValid("initial_positions")
-                           ? &getReporterValue<std::vector<Point>>("initial_positions")
+                           ? &getReporterValueByName<std::vector<Point>>(
+                                 getParam<PositionsName>("initial_positions") + "/positions_1d")
                            : nullptr),
     // Positions will be replicated on every rank so transfers may query positions from all ranks
     _positions(declareValueByName<std::vector<Point>, ReporterVectorContext<Point>>(
         "positions_1d", REPORTER_MODE_REPLICATED)),
     _need_broadcast(getParam<bool>("auto_broadcast")),
-    _need_sort(getParam<bool>("auto_sort"))
+    _need_sort(getParam<bool>("auto_sort")),
+    _initialized(false)
 {
 }
 
 const Point &
 Positions::getPosition(unsigned int index, bool initial) const
 {
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   // Check sizes of inital positions
   if (initial && _initial_positions && (*_initial_positions).size() < index)
     mooseError("Initial positions is not sized or initialized appropriately");
@@ -81,6 +84,7 @@ Positions::getPosition(unsigned int index, bool initial) const
 const Point &
 Positions::getNearestPosition(const Point & target, const bool initial) const
 {
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
   return positions[getNearestPositionIndex(target, initial)];
 }
@@ -88,6 +92,7 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
 unsigned int
 Positions::getNearestPositionIndex(const Point & target, const bool initial) const
 {
+  mooseAssert(initialized(initial), "Positions vector has not been initialized.");
   const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
   // To keep track of indetermination due to equidistant positions
   std::pair<int, int> conflict_index(-1, -1);
@@ -229,7 +234,7 @@ void
 Positions::finalize()
 {
   // Gather up the positions vector on all ranks
-
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
   if (_need_broadcast)
     // The consumer/producer reporter interface can keep track of whether a reduction is needed
     // (for example if a consumer needs replicated data, but the producer is distributed) however,
@@ -244,6 +249,7 @@ Positions::finalize()
 Real
 Positions::getMinDistanceBetweenPositions() const
 {
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
   // Dumb nested loops. We can revisit this once we have a KDTree for nearest position searching
   // These nested loops are still faster than calling getNearestPositions on each position for now
   Real min_distance_sq = std::numeric_limits<Real>::max();
@@ -256,5 +262,18 @@ Positions::getMinDistanceBetweenPositions() const
 bool
 Positions::arePositionsCoplanar() const
 {
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
   return MooseMeshUtils::isCoPlanar(_positions);
+}
+
+bool
+Positions::initialized(bool initial) const
+{
+  if (initial && _initial_positions)
+    // We do not forward the 'initial' status as we are not currently looking
+    // to support two level nesting for initial positions
+    return _fe_problem.getPositionsObject(getParam<PositionsName>("initial_positions"))
+        .initialized(false);
+  else
+    return _initialized;
 }

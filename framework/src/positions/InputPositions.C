@@ -29,4 +29,5 @@ InputPositions::validParams()
 InputPositions::InputPositions(const InputParameters & parameters) : Positions(parameters)
 {
   _positions = getParam<std::vector<Point>>("positions");
+  _initialized = true;
 }

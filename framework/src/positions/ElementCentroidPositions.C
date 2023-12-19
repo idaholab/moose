@@ -64,4 +64,5 @@ ElementCentroidPositions::initialize()
     for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
       _positions[i++] = elem->true_centroid();
   }
+  _initialized = true;
 }
