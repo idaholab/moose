@@ -79,8 +79,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
-  bool cached_logging_enabled = Moose::perf_log.logging_enabled();
-  Moose::perf_log.disable_logging();
   bool cached_throw_on_error = Moose::_throw_on_error;
   Moose::_throw_on_error = true;
 
@@ -151,8 +149,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   }
 
   // reset behaviors of performance logging and error exception throwing
-  if (cached_logging_enabled)
-    Moose::perf_log.enable_logging();
   Moose::_throw_on_error = cached_throw_on_error;
 
   // turn output back on since it was turned off and input check is done

@@ -246,7 +246,6 @@ Console::~Console()
   writeStreamToFile();
 
   // Disable logging so that the destructor in libMesh doesn't print
-  Moose::perf_log.disable_logging();
   libMesh::perflog.disable_logging();
 }
 
@@ -362,11 +361,7 @@ Console::output()
 
   // Write variable norms
   else if (type == EXEC_TIMESTEP_END)
-  {
-    if (_perf_log_interval && _t_step % _perf_log_interval == 0)
-      write(Moose::perf_log.get_perf_info(), false);
     writeVariableNorms();
-  }
 
   if (wantOutput("postprocessors", type))
     outputPostprocessors();

@@ -756,22 +756,17 @@ MooseApp::setupOptions()
 
   else if (getParam<bool>("display_version"))
   {
-    Moose::perf_log.disable_logging();
     Moose::out << getPrintableVersion() << std::endl;
     _ready_to_exit = true;
     return;
   }
   else if (getParam<bool>("help"))
   {
-    Moose::perf_log.disable_logging();
-
     _command_line->printUsage();
     _ready_to_exit = true;
   }
   else if (isParamValid("dump"))
   {
-    Moose::perf_log.disable_logging();
-
     // Get command line argument following --dump on command line
     std::string following_arg = getParam<std::string>("dump");
 
@@ -867,7 +862,6 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
     _builder.buildJsonSyntaxTree(tree);
     SONDefinitionFormatter formatter;
@@ -878,8 +872,6 @@ MooseApp::setupOptions()
   else if (isParamValid("yaml"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::perf_log.disable_logging();
 
     _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
 
@@ -900,7 +892,7 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
+
 
     // Get command line argument following --json on command line
     std::string json_following_arg = getParam<std::string>("json");
@@ -921,8 +913,6 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
-
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     Moose::out << "**START SYNTAX DATA**\n";
     for (const auto & it : syntax)
@@ -934,7 +924,6 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
@@ -1019,8 +1008,6 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
-
     // Reset output to the buffer what was cached before it was turned it off
     if (!Moose::out.rdbuf() && _output_buffer_cache)
       Moose::out.rdbuf(_output_buffer_cache);
@@ -1035,8 +1022,6 @@ MooseApp::setupOptions()
 
   else /* The catch-all case for bad options or missing options, etc. */
   {
-    Moose::perf_log.disable_logging();
-
     if (_check_input)
       mooseError("You specified --check-input, but did not provide an input file. Add -i "
                  "<inputfile> to your command line.");

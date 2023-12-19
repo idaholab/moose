@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "Moose.h"
 #include "MooseInit.h"
 #include "MooseApp.h"
 
