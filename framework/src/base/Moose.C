@@ -49,6 +49,9 @@ const ExecFlagType EXEC_PRE_KERNELS = registerExecFlag("PRE_KERNELS");
 namespace Moose
 {
 
+// Create a performance log
+PerfLog perf_log("Moose");
+
 void associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory);
 
 void
