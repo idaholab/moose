@@ -119,7 +119,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
-  registerMooseObjectTask("add_functor_material",         MaterialBase,           false);
+  registerMooseObjectTask("add_functor_material",         FunctorMaterial,        false);
   registerMooseObjectTask("add_material",                 MaterialBase,           false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
 
