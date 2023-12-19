@@ -5,6 +5,7 @@
   [test_options_not_left]
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
+    expect_out = 'PETSc Option Table'
     absent_out = "Option left.*value.*hypre"
     requirement = "The system shall use the default PETSc option database in the parent app to handle system-level PETSc parameters"
   []
