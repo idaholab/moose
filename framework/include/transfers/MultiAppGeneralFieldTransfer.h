@@ -61,9 +61,9 @@ protected:
 
   /*
    * Evaluate interpolation values for incoming points
-   * @incoming_points vector of point requests with an additional integer to add constraints
+   * @param incoming_points vector of point requests with an additional integer to add constraints
    *                  on the source regions
-   * @outgoing_vals vector of (evaluated value, distance to value location) for each of the
+   * @param outgoing_vals vector of (evaluated value, distance to value location) for each of the
    *                incoming point requests
    */
   virtual void
@@ -301,7 +301,6 @@ private:
   {
     unsigned int problem_id;   // problem id
     dof_id_type dof_object_id; // node or elem id
-    dof_id_type offset; // Useful when there are more than one point in a given dof object (unused)
   };
 
   /// InterpInfo
@@ -341,10 +340,13 @@ private:
   /// Set the bounding box sizes manually
   std::vector<Real> _fixed_bbox_size;
 
-  /// Number of froms per processor. Outer indexing is processor number, inner is local app
+  /// Number of source/from applications per processor. This vector is indexed by processor id
   std::vector<unsigned int> _froms_per_proc;
 
-  /// Bounding boxes for all source applications. Outer indexing is processor number, inner is local app
+  /// Bounding boxes for all source applications. The indexing of this vector is similar to
+  ///'processor_id * n_local_subapps + i_local_subapp', except the number of local subapps can
+  /// be different on each processor. Use the _from_per_proc vector to find the start/end index for a given
+  /// processor. See MultiAppGeneralFieldTransfer::locatePointReceivers() for an example
   std::vector<BoundingBox> _from_bboxes;
 
   /// A map from processor to pointInfo vector

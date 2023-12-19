@@ -198,27 +198,12 @@ protected:
   std::vector<unsigned int> _from_local2global_map;
 
   /// Return the global app index from the local index in the "from-multiapp" transfer direction
-  unsigned int getGlobalSourceAppIndex(unsigned int i_from) const
-  {
-    mooseAssert(_current_direction == TO_MULTIAPP || i_from < _from_local2global_map.size(),
-                "Out of bounds local from-app index");
-    return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
-  }
+  unsigned int getGlobalSourceAppIndex(unsigned int i_from) const;
   /// Return the global app index from the local index in the "to-multiapp" transfer direction
-  unsigned int getGlobalTargetAppIndex(unsigned int i_to) const
-  {
-    mooseAssert(_current_direction == FROM_MULTIAPP || i_to < _to_local2global_map.size(),
-                "Out of bounds local to-app index");
-    return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
-  }
+  unsigned int getGlobalTargetAppIndex(unsigned int i_to) const;
   /// Return the local app index from the global index in the "from-multiapp" transfer direction
   /// We use the fact that global app indexes are consecutive on a given rank
-  unsigned int getLocalSourceAppIndex(unsigned int i_from) const
-  {
-    return _current_direction == TO_MULTIAPP
-               ? 0
-               : _from_local2global_map[i_from] - _from_local2global_map[0];
-  }
+  unsigned int getLocalSourceAppIndex(unsigned int i_from) const;
 
   /**
    * Get the target app point from a point in the reference frame

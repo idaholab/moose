@@ -629,3 +629,27 @@ MultiAppTransfer::getPointInTargetAppFrame(const Point & p,
   else
     return to_transform->mapBack(p);
 }
+
+unsigned int
+MultiAppTransfer::getGlobalSourceAppIndex(unsigned int i_from) const
+{
+  mooseAssert(_current_direction == TO_MULTIAPP || i_from < _from_local2global_map.size(),
+              "Out of bounds local from-app index");
+  return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+}
+
+unsigned int
+MultiAppTransfer::getGlobalTargetAppIndex(unsigned int i_to) const
+{
+  mooseAssert(_current_direction == FROM_MULTIAPP || i_to < _to_local2global_map.size(),
+              "Out of bounds local to-app index");
+  return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+}
+
+unsigned int
+MultiAppTransfer::getLocalSourceAppIndex(unsigned int i_from) const
+{
+  return _current_direction == TO_MULTIAPP
+             ? 0
+             : _from_local2global_map[i_from] - _from_local2global_map[0];
+}

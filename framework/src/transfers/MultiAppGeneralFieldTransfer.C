@@ -655,7 +655,6 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
     PointInfo pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
-    pointinfo.offset = 0;
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }
