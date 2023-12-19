@@ -40,7 +40,7 @@ function create_env()
     conda config --env --set always_yes true
     conda config --env --add channels conda-forge
     conda config --env --add channels https://conda.software.inl.gov/public
-    conda install conda-build mamba boa
+    conda install conda-build
 }
 
 function clean_repo()
@@ -84,7 +84,7 @@ function conda_build()
         string_replace || exit 1
         cd "$TMP_DIR/$RECIPES" || exit 1
         mkdir -p "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
-        conda mambabuild . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
+        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
         printf "Built: ${SCRIPT_DIR}/packages/${APPLICATION}/${ARCH}/${PREFIX_PACKAGE_WITH}${FORMATTED_APPLICATION}-${VERSION}-build_${BUILD}.tar.bz2\n"
     else
         TMP_DIR="$BUILD_ROOT"
