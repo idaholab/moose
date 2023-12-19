@@ -42,6 +42,4 @@ protected:
 
   /// Optional Postprocessor value
   const PostprocessorValue & _postprocessor;
-
-  const MooseArray<Real> & _neighbor_JxW;
 };

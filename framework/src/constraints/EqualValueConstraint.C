@@ -66,10 +66,9 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
       auto residual = _lambda[_qp] * _test_primary[_i][_qp];
 
       if (_stabilize)
-        residual +=
-            _delta * _lower_primary_volume *
-            (_diff_primary[_qp] * _grad_test_primary[_i][_qp] * _normals_primary[_qp]) *
-            (-_lambda[_qp] - _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
+        residual -= _delta * _lower_primary_volume *
+                    (_diff_primary[_qp] * _grad_test_primary[_i][_qp] * _normals[_qp]) *
+                    (_diff_primary[_qp] * _grad_u_primary[_qp] * _normals[_qp] - _lambda[_qp]);
 
       return residual;
     }
@@ -85,9 +84,8 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
                     (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
 
         // primary
-        residual -=
-            _delta * _lower_primary_volume * _test[_i][_qp] *
-            (_lambda[_qp] + _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
+        residual -= _delta * _lower_primary_volume * _test[_i][_qp] *
+                    (_lambda[_qp] - _diff_primary[_qp] * _grad_u_primary[_qp] * _normals[_qp]);
       }
 
       return residual;

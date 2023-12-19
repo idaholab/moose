@@ -16,13 +16,4 @@
     requirement = 'When computing residuals and jacobians on an interface, the system shall be able to use element information from the reference mesh'
     issues = '#14876'
   []
-
-  [jxw_neighbor]
-    type = 'Exodiff'
-    input = 'different_jxw_displaced.i'
-    exodiff = 'different_jxw_displaced_out.e'
-    requirement = 'During mesh displacement, the system shall be able to compute different element Jacobians for different sides of an interface.'
-    issues = '#14870'
-    mesh_mode = 'REPLICATED'
-  []
 []

@@ -3580,7 +3580,7 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
                 "The provided blk_id " << blk_id << " and neighbor subdomain ID "
                                        << neighbor->subdomain_id() << " do not match.");
 
-    unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
+    unsigned int n_points = _assembly[tid][0]->qRuleNeighbor()->n_points();
 
     auto & neighbor_material_data = _neighbor_material_props.getMaterialData(tid);
     neighbor_material_data.resize(n_points);
