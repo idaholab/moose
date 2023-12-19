@@ -3,7 +3,7 @@
 # ”Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
 T_in = 588.5
 flow_area = 0.0004980799633447909 #m2
-mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
+mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
@@ -52,7 +52,7 @@ P_out = 2.0e5 # Pa
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
 
@@ -88,7 +88,7 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 16975 #${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
@@ -173,6 +173,7 @@ P_out = 2.0e5 # Pa
 [Postprocessors]
   [total_pressure_drop]
     type = SubChannelDelta
+    variable = P
     execute_on = "timestep_end"
   []
   [T]
