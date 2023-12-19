@@ -321,8 +321,6 @@ PolycrystalICTools::assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,
                                       unsigned int n_ops,
                                       const MooseEnum & coloring_algorithm)
 {
-  TIME_SECTION("assignOpsToGrains", 2, "Assigning OPs to grains")
-
   std::vector<unsigned int> grain_to_op(n_grains, GraphColoring::INVALID_COLOR);
 
   // Use a simple backtracking coloring algorithm
