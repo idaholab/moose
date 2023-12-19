@@ -27,7 +27,7 @@ DivField::DivField(const InputParameters & parameters)
   : Kernel(parameters),
     _u_var(*getVectorVar("coupled_vector_variable", 0)),
     _u_var_num(coupled("coupled_vector_variable")),
-    _div_u(_u_var.divSln()),
+    _div_u(_is_implicit ? _u_var.divSln() : _u_var.divSlnOld()),
     _div_phi(_assembly.divPhi(_u_var)),
     _coeff(getParam<Real>("coeff"))
 {
