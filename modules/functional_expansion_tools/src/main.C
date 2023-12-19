@@ -7,13 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Moose.h"
 #include "MooseMain.h"
-
 #include "FunctionalExpansionToolsTestApp.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("FunctionalExpansionTools");
 
 // Begin the main program.
 int

@@ -8,12 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExternalPetscSolverTestApp.h"
-#include "ExternalPetscSolverApp.h"
-#include "Moose.h"
 #include "MooseMain.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("ExternalPetscSolver");
 
 // Begin the main program.
 int

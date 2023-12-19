@@ -8,11 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReactorTestApp.h"
-#include "Moose.h"
 #include "MooseMain.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("Reactor");
 
 // Begin the main program.
 int

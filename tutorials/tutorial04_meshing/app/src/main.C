@@ -8,11 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshingTutorialTestApp.h"
-#include "Moose.h"
 #include "MooseMain.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("MeshingTutorial");
 
 // Begin the main program.
 int

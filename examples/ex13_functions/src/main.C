@@ -12,15 +12,7 @@
  */
 
 #include "ExampleApp.h"
-
-// Moose Includes
-#include "MooseInit.h"
-#include "MooseApp.h"
-#include "AppFactory.h"
 #include "MooseMain.h"
-
-// Create a performance log
-PerfLog Moose::perf_log("Example");
 
 // Begin the main program.
 int
