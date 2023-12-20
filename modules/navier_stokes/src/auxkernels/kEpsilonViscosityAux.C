@@ -21,9 +21,9 @@ kEpsilonViscosityAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Calculates the turbulent viscosity according to the k-epsilon model.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
   params.addRequiredParam<MooseFunctorName>(NS::TKED,
                                             "Coupled turbulent kinetic energy dissipation rate.");
@@ -47,13 +47,9 @@ kEpsilonViscosityAux::validParams()
 kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _u_var(getFunctor<ADReal>("u")),
+    _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
+    _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
     _k(getFunctor<ADReal>(NS::TKE)),
     _epsilon(getFunctor<ADReal>(NS::TKED)),
     _rho(getFunctor<ADReal>(NS::density)),
@@ -161,11 +157,11 @@ kEpsilonViscosityAux::computeValue()
     const auto loc_normal = _face_infos[&elem][minIndex]->normal();
 
     // Getting y_plus
-    ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));
+    ADRealVectorValue velocity(_u_var(current_argument, state));
     if (_v_var)
-      velocity(1) = _v_var->getElemValue(&elem, state);
+      velocity(1) = (*_v_var)(current_argument, state);
     if (_w_var)
-      velocity(2) = _w_var->getElemValue(&elem, state);
+      velocity(2) = (*_w_var)(current_argument, state);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
     const ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
