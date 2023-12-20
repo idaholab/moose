@@ -2112,7 +2112,8 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
     ierr = DMMooseSetBlocks(dm, blockset);
     CHKERRQ(ierr);
   }
-  PetscInt maxsides = dmm->_nl->system().get_mesh().get_boundary_info().get_boundary_ids().size();
+  PetscInt maxsides =
+      dmm->_nl->system().get_mesh().get_boundary_info().get_global_boundary_ids().size();
   char ** sides;
   ierr = PetscMalloc(maxsides * maxvars * sizeof(char *), &sides);
   CHKERRQ(ierr);
