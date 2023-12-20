@@ -1,5 +1,5 @@
 moose_dev:
-  - moose-dev 2023.12.13
+  - moose-dev 2023.12.19
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

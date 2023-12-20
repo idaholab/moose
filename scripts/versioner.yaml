@@ -60,6 +60,8 @@ packages:
       - conda/peacock/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
+      - conda/moose-dev/meta.yaml
+      - conda/moose-dev/conda_build_config.yaml
   app:
     dependencies:
       - moose-dev
