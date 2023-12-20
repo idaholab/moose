@@ -16,7 +16,7 @@
 #include "NavierStokesApp.h"
 #include "ThermalHydraulicsApp.h"
 #include "FluidPropertiesApp.h"
-#include "HeatConductionApp.h"
+#include "HeatTransferApp.h"
 #include "RdgApp.h"
 #include "RayTracingApp.h"
 #include "SolidPropertiesApp.h"
@@ -48,7 +48,7 @@ ScalarTransportApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   NavierStokesApp::registerAll(f, af, s);
   ThermalHydraulicsApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
-  HeatConductionApp::registerAll(f, af, s);
+  HeatTransferApp::registerAll(f, af, s);
   RdgApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
   SolidPropertiesApp::registerAll(f, af, s);
@@ -61,6 +61,16 @@ void
 ScalarTransportApp::registerApps()
 {
   registerApp(ScalarTransportApp);
+
+  ChemicalReactionsApp::registerApps();
+  NavierStokesApp::registerApps();
+  ThermalHydraulicsApp::registerApps();
+  FluidPropertiesApp::registerApps();
+  HeatTransferApp::registerApps();
+  RdgApp::registerApps();
+  RayTracingApp::registerApps();
+  SolidPropertiesApp::registerApps();
+  MiscApp::registerApps();
 }
 
 /***************************************************************************************************

@@ -38,6 +38,8 @@ void
 PeridynamicsApp::registerApps()
 {
   registerApp(PeridynamicsApp);
+
+  TensorMechanicsApp::registerApps();
 }
 
 void
