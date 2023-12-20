@@ -73,7 +73,7 @@
     expect_err = "The MultiApp object, 'sub', supplied to the 'cmdline' object is setup to run in "
                  "'batch-restore' mode, when using this mode command line arguments cannot be "
                  "modified; batch-reset mode should be used instead."
-    requirement = "The system shall error when the supplied sampler object operates in a mode that "
+    requirement = "The system shall report an error when the supplied sampler object operates in a mode that "
                   "does not allow for command line arguments to be modified."
     prereq = parent/multiple_batch
     max_parallel = 3
@@ -85,7 +85,7 @@
     cli_args = Samplers/sample/execute_on=INITIAL
     expect_err = "The sampler object, 'sample', is being used by the 'cmdline' object, thus the "
                  "'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'."
-    requirement = "The system shall error when the supplied sampler does not use the correct "
+    requirement = "The system shall report an error when the supplied sampler does not use the correct "
                   "execution flags."
     prereq = parent/multiple_batch
     max_parallel = 3
@@ -96,7 +96,7 @@
     input = parent_vector.i
     cli_args = "Controls/cmdline/param_names='Mesh/xmax[0] Materials/const/prop_values[1,(1.5),2,2] Mesh/ymax'"
     expect_err = "If the bracket is used, it must be provided to every parameter."
-    requirement = "The system shall error when '[]' syntax is not used for all parameters."
+    requirement = "The system shall report an error when '[]' syntax is not used for all parameters."
     max_parallel = 3
   []
   [vector_out_of_bound]
@@ -104,7 +104,7 @@
     input = parent_vector.i
     cli_args = "Controls/cmdline/param_names='Mesh/xmax[0] Materials/const/prop_values[1,(1.5),2,2] Mesh/ymax[4]'"
     expect_err = "The provided global column index \(4\) for Mesh/ymax is out of bound."
-    requirement = "The system shall error when provided global column index is out of bound."
+    requirement = "The system shall report an error when provided global column index is out of bound."
     max_parallel = 3
   []
 []

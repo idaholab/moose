@@ -10,7 +10,7 @@
   []
 
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [not_a_nodal_kernel]
       type = RunException
       input = 'test.i'

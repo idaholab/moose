@@ -92,7 +92,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if "
+    requirement = "The system shall report an error if "
     [cartesian_too_close]
       type = RunException
       input = 'cartesian_division.i'

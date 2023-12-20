@@ -24,7 +24,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if a variable, during a direct copy of auxiliary field variables, does not exist"
+    requirement = "The system shall report an error if a variable, during a direct copy of auxiliary field variables, does not exist"
     [error_from_sub_to_parent]
       type = RunException
       input = from_sub.i

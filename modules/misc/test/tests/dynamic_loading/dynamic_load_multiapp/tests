@@ -36,7 +36,7 @@
     allow_warnings = true
     library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
-    requirement = "The system shall error out if the type of application to dynamically load is not included in the dynamic library."
+    requirement = "The system shall report an error if the type of application to dynamically load is not included in the dynamic library."
   []
 
   [dynamic_load_bad_libary_name]

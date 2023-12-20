@@ -8,7 +8,7 @@
     cli_args = Mesh/nx=12
     expect_err = 'The meshes must be identical to utilize MultiAppDofCopyTransfer::transfer'
 
-    requirement = 'The system shall error when the MultiAppCopyTransfer object is used on non-identical meshes.'
+    requirement = 'The system shall report an error when the MultiAppCopyTransfer object is used on non-identical meshes.'
   [../]
   [./different_variable_type]
     type = RunException
@@ -16,6 +16,6 @@
     cli_args = 'sub0:Mesh/elem_type=QUAD8 sub0:Variables/u/order=SECOND Outputs/exodus=false'
     expect_err = 'must be the same type \(order and family\)'
 
-    requirement = 'The system shall error when the MultiAppCopyTransfer object is used on meshes with different variable types.'
+    requirement = 'The system shall report an error when the MultiAppCopyTransfer object is used on meshes with different variable types.'
   [../]
 []

@@ -16,31 +16,43 @@ and `NonlinearEigenSystem` in [NonlinearSystemBase.md].
 ## Solving Non-linear Systems id=newtons_method
 
 Application of the finite element method converts PDE(s) into a system of
-nonlinear equations, $R_i(u_h)=0, \qquad i=1,\ldots, N$
-  to solve for the coefficients $u_j, j=1,\dots,N$.
+nonlinear equations, $R_i(u_h)=0, \quad i=1,\ldots, N$
+  to solve for the coefficients $u_j, \quad j=1,\dots,N$.
 
 - Newton's method has good convergence properties, we use it to solve this system of nonlinear equations.
 - Newton's method is a "root finding" method: it finds zeros of nonlinear equations.
-- Newton's Method in "Update Form" for finding roots of the scalar equation
-  $\begin{array}{rl}f(x)&=0, f(x): \mathbb{R} &\rightarrow \mathbb{R}\textrm{ is given by}:\\
-  f'(x_n) \delta x_{n+1} &= -f(x_n) \\
-  x_{n+1} &= x_n + \delta x_{n+1}\end{array}$
+- Newton's Method in "Update Form" for finding roots of the scalar equation $f(x)=0, f(x): \mathbb{R} \rightarrow \mathbb{R}$ is given by:
+
+\begin{equation}
+\begin{split}   
+ f'(x_n) \delta x_{n+1} &= -f(x_n) \\
+  x_{n+1} &= x_n + \delta x_{n+1}
+\end{split}
+\end{equation}
+
 - We don't have just one scalar equation: we have a system of nonlinear equations.
 - This leads to the following form of Newton's Method:
 
-    $\begin{aligned}
-    \mathbf{J}(\vec{u}_n) \delta\vec{u}_{n+1} &= -\vec{R}(\vec{u}_n) \\
-    \vec{u}_{n+1} &= \vec{u}_n + \delta\vec{u}_{n+1}\end{aligned}$
+\begin{equation}
+\begin{split} 
+\mathbf{J}(\vec{u}_n) \delta\vec{u}_{n+1} &= -\vec{R}(\vec{u}_n) \\
+\vec{u}_{n+1} &= \vec{u}_n + \delta\vec{u}_{n+1}
+\end{split}
+\end{equation}
 
 - Where $\mathbf{J}(\vec{u}_n)$ is the Jacobian matrix evaluated at the current iterate:
-    $J_{ij}(\vec{u}_n) = \frac{\partial R_i(\vec{u}_n)}{\partial u_j}$
+    $J_{ij}(\vec{u}_n) = \dfrac{\partial R_i(\vec{u}_n)}{\partial u_j}$
 
 - Note that:
-    $\frac{\partial u_h}{\partial u_j} =
-      \sum_k\frac{\partial }{\partial u_j}\left(u_k \phi_k\right) = \phi_j
-    \qquad
-    \frac{\partial \left(\nabla u_h\right)}{\partial u_j} =
-      \sum_k \frac{\partial }{\partial u_j}\left(u_k \nabla \phi_k\right) = \nabla \phi_j$
+
+\begin{equation}
+\begin{split} 
+\dfrac{\partial u_h}{\partial u_j} &=
+\sum_k\dfrac{\partial }{\partial u_j}\left(u_k \phi_k\right) = \phi_j \\
+\dfrac{\partial \left(\nabla u_h\right)}{\partial u_j} &=
+\sum_k \dfrac{\partial }{\partial u_j}\left(u_k \nabla \phi_k\right) = \nabla \phi_j
+\end{split}
+\end{equation}
 
 
 ## Jacobian Definition id=jacobian_definition
@@ -94,7 +106,7 @@ we gave an explicit illustration of how the derivative of a variable `u` with
 respect to its jth degree of freedom ($u_j$) is equal to the jth shape function
 $\phi_j$. Similarly the derivative of $\nabla u$ with respect to $u_j$ is
 equal to $\nabla \phi_j$. The code expression  `_phi[_j][_qp]` represents
-$\frac{\partial u}{\partial u_j}$ in any MOOSE framework residual and Jacobian
+$\dfrac{\partial u}{\partial u_j}$ in any MOOSE framework residual and Jacobian
 computing objects such as kernels and boundary conditions.
 
 Any MOOSE kernel may have an arbitrary number of variables coupled into it. If
@@ -234,17 +246,25 @@ Note that only one member is needed to represent shape functions for standard
 ### Newton for a Simple Equation id=simple_newton
 
 - Consider the convection-diffusion equation with nonlinear $k$, $\vec{\beta}$, and $f$:
-    $\begin{aligned}- \nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u = f\end{aligned}$
+
+\begin{equation}
+- \nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u = f
+\end{equation}
 
 - The $i^{th}$ component of the residual vector is:
-    $\begin{aligned}
-    R_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
-    \left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)\end{aligned}$
 
+\begin{equation}
+R_i(u_h) = \left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
+\left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right)
+\end{equation}
 
-- Using the previously-defined rules for $\frac{\partial u_h}{\partial u_j}$ and $\frac{\partial \left(\nabla u_h\right)}{\partial u_j}$, the $(i,j)$ entry of the Jacobian is then:
+- Using the previously-defined rules for $\dfrac{\partial u_h}{\partial u_j}$ and $\dfrac{\partial \left(\nabla u_h\right)}{\partial u_j}$, the $(i,j)$ entry of the Jacobian is then:
 
-$\begin{aligned} J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h \right) + \left(\nabla\psi_i, k \nabla \phi_j \right) - \left \langle\psi_i, \frac{\partial k}{\partial u_j}\nabla u_h\cdot \hat{n} \right\rangle \\&- \left \langle\psi_i, k\nabla \phi_j\cdot \hat{n} \right\rangle + \left(\psi_i, \frac{\partial \vec{\beta}}{\partial u_j} \cdot\nabla u_h\right) + \left(\psi_i, \vec{\beta} \cdot \nabla \phi_j\right) - \left(\psi_i, \frac{\partial f}{\partial u_j}\right)\end{aligned}$
+\begin{equation}
+\begin{split} 
+J_{ij}(u_h) &= \left(\nabla\psi_i, \dfrac{\partial k}{\partial u_j}\nabla u_h \right) + \left(\nabla\psi_i, k \nabla \phi_j \right) - \left \langle\psi_i, \dfrac{\partial k}{\partial u_j}\nabla u_h\cdot \hat{n} \right\rangle \\&- \left \langle\psi_i, k\nabla \phi_j\cdot \hat{n} \right\rangle + \left(\psi_i, \dfrac{\partial \vec{\beta}}{\partial u_j} \cdot\nabla u_h\right) + \left(\psi_i, \vec{\beta} \cdot \nabla \phi_j\right) - \left(\psi_i, \dfrac{\partial f}{\partial u_j}\right)
+\end{split}
+\end{equation}
 
 - Note that even for this "simple" equation, the Jacobian entries are nontrivial: they depend on the partial derivatives of $k$, $\vec{\beta}$, and $f$, which may be difficult or time-consuming to compute analytically.
 
@@ -252,19 +272,20 @@ $\begin{aligned} J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u
 
 ### Chain Rule id=chain_rule
 
-- On the previous slide, the term $\frac{\partial f}{\partial u_j}$ was used, where $f$ was a nonlinear forcing function.
+- On the previous slide, the term $\dfrac{\partial f}{\partial u_j}$ was used, where $f$ was a nonlinear forcing function.
 
 - The chain rule allows us to write this term as
 
-  $\begin{aligned}
-    \frac{\partial f}{\partial u_j} &= \frac{\partial f}{\partial u_h} \frac{\partial u_h}{\partial u_j}
-    \\
-    &=\frac{\partial f}{\partial u_h} \phi_j\end{aligned}$
+\begin{equation}
+\dfrac{\partial f}{\partial u_j} = \dfrac{\partial f}{\partial u_h} \dfrac{\partial u_h}{\partial u_j}=\dfrac{\partial f}{\partial u_h} \phi_j
+\end{equation}
 
 - If a functional form of $f$ is known, e.g. $f(u) = \sin(u)$, this
   formula implies that its Jacobian contribution is given by
 
-   $\frac{\partial f}{\partial u_j} = \cos(u_h) \phi_j$
+\begin{equation}
+\dfrac{\partial f}{\partial u_j} = \cos(u_h) \phi_j
+\end{equation}
 
 ### Jacobian-Free Newton-Krylov id=JFNK
 
@@ -277,7 +298,9 @@ $\begin{aligned} J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u
 - $\mathbf{A}$ and $\vec{b}$ remain *fixed* during the iterative process.
 - The "linear residual" at step $k$ is defined as
 
-  $\vec{\rho}_k \equiv \mathbf{A}\vec{x}_k - \vec{b}$
+\begin{equation}
+\vec{\rho}_k \equiv \mathbf{A}\vec{x}_k - \vec{b}
+\end{equation}
 
 - MOOSE prints the norm of this vector, $\|\vec{\rho}_k\|$, at each iteration, if you set `print_linear_residuals = true` in the `Outputs` block.
 
@@ -285,7 +308,9 @@ $\begin{aligned} J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u
 
 - By iterate $k$, the Krylov method has constructed the subspace
 
-  $\mathcal{K}_k = \text{span}\{ \vec{b}, \mathbf{A}\vec{b}, \mathbf{A}^2\vec{b}, \ldots, \mathbf{A}^{k-1}\vec{b}\}$
+\begin{equation}
+\mathcal{K}_k = \text{span}\{ \vec{b}, \mathbf{A}\vec{b}, \mathbf{A}^2\vec{b}, \ldots, \mathbf{A}^{k-1}\vec{b}\}
+\end{equation}
 
 - Different Krylov methods produce the $\vec{x}_k$ iterates in different ways:
 - Conjugate Gradients: $\vec{\rho}_k$ orthogonal to $\mathcal{K}_k$.
@@ -296,7 +321,10 @@ $\begin{aligned} J_{ij}(u_h) &= \left(\nabla\psi_i, \frac{\partial k}{\partial u
 
 
 - This action can be approximated by:
-    $\mathbf{J}\vec{v} \approx \frac{\vec{R}(\vec{u} + \epsilon\vec{v}) - \vec{R}(\vec{u})}{\epsilon}$
+
+\begin{equation}
+\mathbf{J}\vec{v} \approx \dfrac{\vec{R}(\vec{u} + \epsilon\vec{v}) - \vec{R}(\vec{u})}{\epsilon}
+\end{equation}
 
 - This form has many advantages:
     - No need to do analytic derivatives to form $\mathbf{J}$

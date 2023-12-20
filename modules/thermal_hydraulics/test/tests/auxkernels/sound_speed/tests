@@ -1,7 +1,11 @@
 [Tests]
+  # see relap-7#636
+  issues = '#26336'
+  design = 'SoundSpeedAux.md'
   [test]
     type = 'CSVDiff'
     input = '1phase.i'
     csvdiff = '1phase_out.csv'
+    requirement = 'The system shall be able to compute the local sound of speed in the fluid in a 1D single phase channel.'
   []
 []

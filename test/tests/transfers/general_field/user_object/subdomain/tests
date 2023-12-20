@@ -46,7 +46,7 @@
     []
   []
   [errors]
-    requirement = 'The system shall error if'
+    requirement = 'The system shall report an error if'
     [from_block_and_extrapolation]
       type = RunException
       input = 'main.i'

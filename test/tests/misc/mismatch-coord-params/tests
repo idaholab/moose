@@ -2,7 +2,7 @@
   issues = '#21975'
   design = 'Mesh/index.md'
   [bad_params]
-    requirement = 'The system shall error if the user provides inconsistent parameter values to the mesh and problem for the parameters related to'
+    requirement = 'The system shall report an error if the user provides inconsistent parameter values to the mesh and problem for the parameters related to'
     [block]
       type = RunException
       input = mismatch.i

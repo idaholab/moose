@@ -84,7 +84,7 @@
   [exceptions_dirichlet_bcs]
     issues = '#18086'
     design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
-    requirement = 'The system shall error out if'
+    requirement = 'The system shall report an error if'
     [missing_info_dirichlet_velocity]
       type = RunException
       input = 'dirichlet_bcs_mdot.i'
@@ -143,7 +143,7 @@
   [exceptions_flux_bcs]
     issues = '#19543'
     design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
-    requirement = 'The system shall error out if'
+    requirement = 'The system shall report an error if'
     [mass_mdot_needs_area]
       type = RunException
       input = 'flux_bcs_velocity.i'

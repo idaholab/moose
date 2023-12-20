@@ -24,7 +24,7 @@
     input = 'scalar-transport.i'
     cli_args = "UserObjects/rc/velocity_interp_method='average'"
     expect_err = 'Rhie Chow coefficients may not be specified for average velocity interpolation'
-    requirement = 'The system shall error out if both average and Rhie Chow velocity interpolation parameters are provided.'
+    requirement = 'The system shall report an error if both average and Rhie Chow velocity interpolation parameters are provided.'
     issues = '#20294'
   []
   [RC_yet_a_not_provided]
@@ -32,11 +32,11 @@
     input = 'scalar-transport.i'
     cli_args = "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad'"
     expect_err = 'No INSFVKernels detected for the velocity variables*'
-    requirement = 'The system shall error out if Rhie Chow velocity interpolation is requested but the a coefficients are not provided and cannot be computed from the momemtum equation.'
+    requirement = 'The system shall report an error if Rhie Chow velocity interpolation is requested but the a coefficients are not provided and cannot be computed from the momemtum equation.'
     issues = '#20294'
   []
   [bad_a_components]
-    requirement = 'The system shall error out if the Rhie Chow a coefficients are provided in a manner inconsistent with the dimension of the problem '
+    requirement = 'The system shall report an error if the Rhie Chow a coefficients are provided in a manner inconsistent with the dimension of the problem '
     issues = '#20294'
     [vu]
       type = RunException

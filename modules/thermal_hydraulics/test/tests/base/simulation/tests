@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#19688
+  issues = '#19682 #19846'
+  design = 'base/Simulation.md'
   [loop_identification]
     type = 'RunApp'
     input = 'loop_identification.i'
@@ -17,6 +20,7 @@
 \s+hx:secondary
 \s+inlet
 \s+outlet"
+    requirement = 'The system shall be able to output the component loops to console.'
   []
 
   [err.no_smp]
@@ -24,5 +28,6 @@
     input = 'err.no_smp.i'
     expect_err = "Single matrix preconditioning with full coupling is required to run\. Please, check that your input file has the following preconditioning block\:"
     deleted = "#190"
+    requirement = 'The system shall report an error if single matrix preconditioning is not in use in a thermal hydraulics simulation.'
   []
 []

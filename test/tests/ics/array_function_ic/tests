@@ -12,6 +12,6 @@
     expect_err = 'Number of functions does not agree with the number of array variable components'
     input = 'array_function_ic_test.i'
     cli_args = "ICs/vic/function='1 2 3'"
-    requirement = 'The system shall error if the wrong number of components are provided in a functionalized initial condition for array variables.'
+    requirement = 'The system shall report an error if the wrong number of components are provided in a functionalized initial condition for array variables.'
   []
 []

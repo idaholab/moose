@@ -1,8 +1,12 @@
 [Tests]
+  #  relap-7#636
+  issues = '#26336'
+  design = 'ElbowPipe1Phase.md'
   [phy:position]
     type = 'Exodiff'
     input = 'phy.position.i'
     exodiff = 'phy.position_out.e'
     custom_cmp = 'phy.position.exodiff'
+    requirement = 'The system shall be able to model flow through a 1D elbow pipe.'
   []
 []

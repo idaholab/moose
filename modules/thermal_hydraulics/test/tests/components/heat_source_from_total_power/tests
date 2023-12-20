@@ -74,7 +74,7 @@
     cli_args = "Components/hgen/hs=reactor Components/hgen/regions='fuel' "
                "Components/hgen/power=reactor"
     expect_err = "hgen: The component 'reactor' is not of type 'HeatStructureInterface'"
-    requirement = "The system shall error if the heat structure to apply a heat source on, computed "
+    requirement = "The system shall report an error if the heat structure to apply a heat source on, computed "
                   "from the component power norm and shape, is not of the expected heat structure "
                   "interface type."
   []
@@ -83,7 +83,7 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf' Components/hgen/power=reactor"
     expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
-    requirement = "The system shall error if the specified subdomain to apply a heat source on, "
+    requirement = "The system shall report an error if the specified subdomain to apply a heat source on, "
                   "computed from the component power norm and shape, does not exist."
   []
   [err:wrong_power_comp]
@@ -91,7 +91,7 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='fuel' Components/hgen/power=hs"
     expect_err = "hgen: The component 'hs' is not of type 'TotalPowerBase'"
-    requirement = "The system shall error if the heat structure to apply a heat source on, computed "
+    requirement = "The system shall report an error if the heat structure to apply a heat source on, computed "
                   "from the component power norm and shape, is not of the expected type."
   []
 []

@@ -12,7 +12,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if the transferred vector to a sub-application"
+    requirement = "The system shall report an error if the transferred vector to a sub-application"
     [invalid_name]
       type = RunException
       input = parent.i

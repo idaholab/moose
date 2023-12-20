@@ -1,5 +1,8 @@
 [Tests]
   # physics
+  # relap-7#729
+  issues = '#26336'
+  design = 'HeatSourceVolumetric1Phase.md'
   [phy:conservation_1phase]
     type = CSVDiff
     input = 'phy.conservation.1phase.i'
@@ -7,6 +10,7 @@
     abs_zero = 1e-9
     # because output has execute_on = 'final'
     recover = false
+    requirement = 'The system shall be able to specify a volumetric heat source in a component and still prove conservation of energy.'
   []
 
   # Error checking
@@ -15,6 +19,7 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=asdf"
     expect_err = "hs: The component 'asdf' does not exist"
+    requirement = 'The system shall report an error if the component specified to a volumetric heat source does not exist.'
   []
 
   [err:not_a_flow_channel]
@@ -22,5 +27,6 @@
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=total_power"
     expect_err = "hs: The component 'total_power' is not of type 'FlowChannel1Phase'"
+    requirement = "The system shall report an error if the component specified to a volumetric heat is not of the supported flow channel type."
   []
 []

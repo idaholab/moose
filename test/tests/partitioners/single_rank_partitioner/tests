@@ -16,6 +16,6 @@
     expect_err = 'Cannot be larger than'
     min_parallel = 1
     max_parallel = 1
-    requirement = 'The system shall error if an out of range rank is given to SingleRankPartitioner'
+    requirement = 'The system shall report an error if an out of range rank is given to SingleRankPartitioner'
   [../]
 []

@@ -27,7 +27,7 @@
   []
 
   [error]
-    requirement = "The system shall error if the residual calculation contribution is assigned to "
+    requirement = "The system shall report an error if the residual calculation contribution is assigned to "
                   "the incorrect variable for"
 
     [test_soln_var_err]

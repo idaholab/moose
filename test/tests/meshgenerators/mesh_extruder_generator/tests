@@ -76,6 +76,6 @@
     input = extrude_remap_layer1.i
     cli_args = 'Mesh/extrude/existing_subdomains="1 2 800"'
     expect_err = "The block ID '800' was not found in the mesh"
-    requirement = "The system shall error if the existing subdomain does not exist in the mesh"
+    requirement = "The system shall report an error if the existing subdomain does not exist in the mesh"
   []
 []

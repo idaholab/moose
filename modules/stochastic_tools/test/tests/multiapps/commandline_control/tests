@@ -29,7 +29,7 @@
     input = parent_wrong_multiapp_type.i
     expect_err = "The MultiApp must construct its sub-apps in initial setup but not during its creation"
 
-    requirement = "The system shall error when sub-apps are constructed too early thus unable to be changed by samplers."
+    requirement = "The system shall report an error when sub-apps are constructed too early thus unable to be changed by samplers."
   []
 
   [wrong_num_params]
@@ -37,7 +37,7 @@
     input = parent_wrong_num_params.i
     expect_err = "The number of columns \(2\) must match the number of parameters \(3\)"
 
-    requirement = "The system shall error when the number of samples differs from the number of "
+    requirement = "The system shall report an error when the number of samples differs from the number of "
                   "command line parameters."
   []
 []

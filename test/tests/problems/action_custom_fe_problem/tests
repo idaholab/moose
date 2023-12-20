@@ -25,7 +25,7 @@
     expect_err = 'TestProblem input block requires Problem/type to be MooseTestProblem'
     cli_args = 'Problem/coord_type=RZ Problem/type=FEProblem'
 
-    requirement = 'The system shall error out when Problem block type is not specified.'
+    requirement = 'The system shall report an error when Problem block type is not specified.'
   [../]
 
   [./with_problem_block_with_type]

@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19679'
+  design = 'SumAux.md'
   [sum]
     type = 'CSVDiff'
     input = 'sum.i'
     csvdiff = 'sum_out.csv'
+    requirement = 'The system shall be able to compute the sum of two fields.'
   []
 []

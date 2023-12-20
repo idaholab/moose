@@ -13,7 +13,7 @@
                "Adaptivity/Markers/temp_marker/lower_bound=0 "
                "Adaptivity/Markers/temp_marker/upper_bound=1e5 "
                "Adaptivity/Markers/temp_marker/variable=pressure"
-    requirement = "The system shall error if it tries to require quadrature point computations on variable that were deliberately set not to perform quadrature point calculations."
+    requirement = "The system shall report an error if it tries to require quadrature point computations on variable that were deliberately set not to perform quadrature point calculations."
     expect_err = "Qp-calculations should not be requested"
     allow_test_objects = true
   []

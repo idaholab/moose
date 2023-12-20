@@ -2,20 +2,20 @@
   issues = '#19451'
   design = 'Transfers/index.md'
   [need_multi_app]
-    requirement = "The system shall error if the user does not provide sufficient information to determine the originator and destination of transfer information."
+    requirement = "The system shall report an error if the user does not provide sufficient information to determine the originator and destination of transfer information."
     type = RunException
     input = from_sub.i
     expect_err = "The deprecated 'direction' parameter is meant to be used in conjunction with the 'multi_app' parameter"
   []
   [mixing_parameters]
-    requirement = 'The system shall error if the user provides a mix of non-deprecated and deprecated parameters.'
+    requirement = 'The system shall report an error if the user provides a mix of non-deprecated and deprecated parameters.'
     type = RunException
     input = from_sub.i
     cli_args = "Transfers/from_sub/from_multi_app='sub' Transfers/from_sub/multi_app='sub'"
     expect_err = "The deprecated 'direction' parameter is not meant to be used in conjunction with the 'from_multi_app' or 'to_multi_app' parameters"
   []
   [bad_spelling]
-    requirement = 'The system shall error if the user provides nonsensical direction parameters.'
+    requirement = 'The system shall report an error if the user provides nonsensical direction parameters.'
     type = RunException
     input = from_sub.i
     # from_multi_app is mispelled

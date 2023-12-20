@@ -55,7 +55,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if performing a transfer of data using the finite element solution if:"
+    requirement = "The system shall report an error if performing a transfer of data using the finite element solution if:"
 
     [missed_point]
       type = 'RunException'

@@ -23,7 +23,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if the SOBOL sampling method is setup with input sampling matrices"
+    requirement = "The system shall report an error if the SOBOL sampling method is setup with input sampling matrices"
 
     [row_mismatch]
       type = RunException

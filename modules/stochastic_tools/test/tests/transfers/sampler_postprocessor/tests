@@ -18,7 +18,7 @@
     cli_args = Transfers/data/from_postprocessor=wrong
     expect_err = "Unknown postprocesssor name 'wrong' on sub-application 'sub'"
 
-    requirement = "The system shall error if the supplied name is invalid when attempting to
+    requirement = "The system shall report an error if the supplied name is invalid when attempting to
         "
                   "          transfer a single value from a sub-application."
 

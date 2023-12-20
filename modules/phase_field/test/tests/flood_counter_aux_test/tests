@@ -97,7 +97,7 @@
     cli_args = 'AuxVariables/v/family=LAGRANGE AuxVariables/v/order=FIRST'
     input = 'boundary_intersection.i'
     issues = '#23246'
-    requirement = "The system shall error out if a nodal variable is specified as the target for the "
+    requirement = "The system shall report an error if a nodal variable is specified as the target for the "
                   "intersection status."
     design = 'FeatureFloodCount.md FeatureFloodCountAux.md'
   []

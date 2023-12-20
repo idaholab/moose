@@ -3,7 +3,7 @@
   issues = '#2411'
 
   [errors]
-    requirement = "The system shall error if an object restricted to subdomains is created without "
+    requirement = "The system shall report an error if an object restricted to subdomains is created without "
                   "valid data"
 
     [fe_problem_null]

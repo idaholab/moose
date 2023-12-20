@@ -90,7 +90,7 @@
       type = RunException
       input = 'czm_multiple_action_and_materials.i'
       expect_err = 'All blocks of the CohesiveZoneAction should have the same strain formulation'
-      detail = "The system shall error out when different strains are provided in different blocks "
+      detail = "The system shall report an error when different strains are provided in different blocks "
                "of the CohesiveZoneAction"
       cli_args = "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_012/strain=FINITE "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_23/strain=SMALL"
@@ -102,7 +102,7 @@
       type = RunException
       input = 'czm_multiple_action_and_materials.i'
       expect_err = 'The boundary restrictions in the CohesiveZoneAction actions must be non-overlapping.'
-      detail = "The system shall error out when overlapping boundaries are provided in different "
+      detail = "The system shall report an error when overlapping boundaries are provided in different "
                "blocks of the CohesiveZoneAction"
       cli_args = "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_012/boundary='Block0_Block1' "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_23/boundary='Block0_Block1'"
