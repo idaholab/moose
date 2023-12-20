@@ -1,0 +1,19 @@
+[Tests]
+  [solute_tracer_transport]
+    type = RunApp
+    input = solute_tracer_transport.i
+    check_input = true
+    requirement = 'The system shall be able to model a solute transportation problem in porous media.'
+    issues = '#26270'
+    design = 'porous_flow/solute_tracer_transport.md'
+  []
+
+  [solute_tracer_transport_2D]
+    type = RunApp
+    input = solute_tracer_transport_2D.i
+    check_input = true
+    requirement = 'The system shall be able to model a 2D solute transportation problem in porous media.'
+    issues = '#26270'
+    design = 'porous_flow/solute_tracer_transport.md'
+  []
+[]
