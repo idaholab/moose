@@ -43,13 +43,14 @@ TEST(ValueCacheTest, kNN)
   cache.insert({4.2, 2.7, 1.6}, {1, 2});
   cache.insert({3.1, 1.2, 0.1}, {3, 4});
 
-  EXPECT_ANY_THROW(cache.kNearestNeighbors({0, 0, 0}, 3));
+  auto nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
+  EXPECT_EQ(nearest_neighbors.size(), 2);
 
   cache.insert({5.8, 1.9, 3.6}, {5, 6});
   cache.insert({7.1, 2.2, 4.1}, {7, 8});
   cache.insert({2.8, 2.1, 0.6}, {9, 10});
 
-  auto nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
+  nearest_neighbors = cache.kNearestNeighbors({0, 0, 0}, 3);
 
   // First nearest neighbor
   auto [key, value, distance] = nearest_neighbors[0];
