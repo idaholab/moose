@@ -437,6 +437,13 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
 }
 
 void
+NonlinearSystemBase::setupDM()
+{
+  if (haveFieldSplitPreconditioner())
+    Moose::PetscSupport::petscSetupDM(*this, _decomposition_split);
+}
+
+void
 NonlinearSystemBase::setDecomposition(const std::vector<std::string> & splits)
 {
   /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.

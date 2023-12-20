@@ -684,6 +684,11 @@ public:
   unsigned int _current_nl_its;
   bool _compute_initial_residual_before_preset_bcs;
 
+  /**
+   * Setup the PETSc DM object (when appropriate)
+   */
+  void setupDM();
+
 protected:
   /**
    * Compute the residual for a given tag

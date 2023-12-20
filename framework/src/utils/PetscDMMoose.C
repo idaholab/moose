@@ -34,17 +34,18 @@
 
 template <typename I1, typename I2>
 void
-checkSize(const I1 child_split_size_sum, const I2 size_expected_by_parent)
+checkSize(const std::string & split_name, const I1 split_size, const I2 size_expected_by_parent)
 {
-  if (libMesh::cast_int<libMesh::numeric_index_type>(child_split_size_sum) !=
+  if (libMesh::cast_int<libMesh::numeric_index_type>(split_size) !=
       libMesh::cast_int<libMesh::numeric_index_type>(size_expected_by_parent))
-    mooseError(
-        "Child split size sum, ",
-        libMesh::cast_int<libMesh::numeric_index_type>(child_split_size_sum),
-        ", and the size expected by the parent, ",
-        libMesh::cast_int<libMesh::numeric_index_type>(size_expected_by_parent),
-        ", do not match. Make sure that you have non-overlapping complete sets for variables and "
-        "blocks as well as consistency in sides/unsides, contacts/uncontacts, etc.");
+    mooseError("Split '",
+               split_name,
+               "' has size ",
+               libMesh::cast_int<libMesh::numeric_index_type>(split_size),
+               " but the parent split expected size ",
+               libMesh::cast_int<libMesh::numeric_index_type>(size_expected_by_parent),
+               ". Make sure that you have non-overlapping complete sets for variables and "
+               "blocks as well as consistency in sides/unsides, contacts/uncontacts, etc.");
 }
 
 struct DM_Moose
@@ -96,23 +97,27 @@ struct DM_Moose
   IS _embedding;
   PetscBool _print_embedding;
 
+  /// The name of this DM
+  std::string * _name;
+
   /**
    * Check whether the size of the child matches the size we expect
    */
-  void checkChildSize(DM child, PetscInt child_size);
+  void checkChildSize(DM child, PetscInt child_size, const std::string & child_name);
 };
 
 void
-DM_Moose::checkChildSize(DM child, const PetscInt child_size)
+DM_Moose::checkChildSize(DM child, const PetscInt child_size, const std::string & child_name)
 {
   for (const auto & split : *_splits)
     if (split.second._dm == child)
     {
+      mooseAssert(split.first == child_name, "These should match");
       PetscInt parent_expected_size;
       auto ierr = ISGetLocalSize(split.second._rembedding, &parent_expected_size);
       if (ierr)
         mooseError("Unable to get size");
-      checkSize(child_size, parent_expected_size);
+      checkSize(child_name, child_size, parent_expected_size);
       return;
     }
 
@@ -283,6 +288,31 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
             "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_nl = &nl;
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+DMMooseSetName(DM dm, const std::string & dm_name)
+{
+  PetscErrorCode ierr;
+  PetscBool ismoose;
+
+  PetscFunctionBegin;
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+  CHKERRQ(ierr);
+  if (!ismoose)
+    LIBMESH_SETERRQ2(((PetscObject)dm)->comm,
+                     PETSC_ERR_ARG_WRONG,
+                     "Got DM oftype %s, not of type %s",
+                     ((PetscObject)dm)->type_name,
+                     DMMOOSE);
+  if (dm->setupcalled)
+    SETERRQ(((PetscObject)dm)->comm,
+            PETSC_ERR_ARG_WRONGSTATE,
+            "Cannot reset the MOOSE DM name after DM has been set up.");
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
+  *dmm->_name = dm_name;
   PetscFunctionReturn(0);
 }
 
@@ -1015,7 +1045,7 @@ DMCreateFieldDecomposition_Moose(
     DM_Moose::SplitInfo & dinfo = (*dmm->_splits)[dname];
     if (!dinfo._dm)
     {
-      ierr = DMCreateMoose(((PetscObject)dm)->comm, *dmm->_nl, &dinfo._dm);
+      ierr = DMCreateMoose(((PetscObject)dm)->comm, *dmm->_nl, dname, &dinfo._dm);
       CHKERRQ(ierr);
       ierr = PetscObjectSetOptionsPrefix((PetscObject)dinfo._dm, ((PetscObject)dm)->prefix);
       CHKERRQ(ierr);
@@ -1113,9 +1143,11 @@ DMCreateFieldDecomposition_Moose(
   mooseAssert(islist, "What does it even mean if this is NULL?");
 
   if (dmm->_parent)
-    dmm->_parent->checkChildSize(dm, split_size_sum);
+    dmm->_parent->checkChildSize(dm, split_size_sum, *dmm->_name);
   else
-    checkSize(split_size_sum, dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m());
+    checkSize(*dmm->_name,
+              split_size_sum,
+              dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m());
 
   PetscFunctionReturn(0);
 }
@@ -2390,6 +2422,7 @@ DMDestroy_Moose(DM dm)
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
+  delete dmm->_name;
   if (dmm->_vars)
     delete dmm->_vars;
   delete dmm->_var_ids;
@@ -2438,7 +2471,7 @@ DMDestroy_Moose(DM dm)
 }
 
 PetscErrorCode
-DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, DM * dm)
+DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, const std::string & dm_name, DM * dm)
 {
   PetscErrorCode ierr;
 
@@ -2448,6 +2481,8 @@ DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, DM * dm)
   ierr = DMSetType(*dm, DMMOOSE);
   CHKERRQ(ierr);
   ierr = DMMooseSetNonlinearSystem(*dm, nl);
+  CHKERRQ(ierr);
+  ierr = DMMooseSetName(*dm, dm_name);
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -2470,6 +2505,7 @@ DMCreate_Moose(DM dm)
 #endif
   dm->data = dmm;
 
+  dmm->_name = new (std::string);
   dmm->_var_ids = new (std::map<std::string, unsigned int>);
   dmm->_block_ids = new (std::map<std::string, subdomain_id_type>);
   dmm->_var_names = new (std::map<unsigned int, std::string>);

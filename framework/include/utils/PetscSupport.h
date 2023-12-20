@@ -77,7 +77,10 @@ setLinearSolverDefaults(FEProblemBase & problem, LinearSolver<T> & linear_solver
  */
 void petscSetDefaults(FEProblemBase & problem);
 
-void petscSetupDM(NonlinearSystemBase & nl);
+/**
+ * Setup the PETSc DM object
+ */
+void petscSetupDM(NonlinearSystemBase & nl, const std::string & dm_name);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 
