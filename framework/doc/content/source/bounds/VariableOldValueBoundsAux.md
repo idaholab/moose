@@ -1,6 +1,6 @@
 # VariableOldValueBoundsAux
 
-!syntax description /AuxKernels/VariableOldValueBoundsAux
+!syntax description /Bounds/VariableOldValueBoundsAux
 
 ## Description
 
@@ -14,10 +14,10 @@ PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`. A warning 
 
 ## Example Syntax
 
-!listing test/tests/auxkernels/bounds/old_value_bounds.i block=Bounds
+!listing test/tests/bounds/old_value_bounds.i block=Bounds
 
-!syntax parameters /AuxKernels/VariableOldValueBoundsAux
+!syntax parameters /Bounds/VariableOldValueBoundsAux
 
-!syntax inputs /AuxKernels/VariableOldValueBoundsAux
+!syntax inputs /Bounds/VariableOldValueBoundsAux
 
-!syntax children /AuxKernels/VariableOldValueBoundsAux
+!syntax children /Bounds/VariableOldValueBoundsAux

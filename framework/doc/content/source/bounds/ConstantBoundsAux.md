@@ -1,6 +1,6 @@
 # ConstantBoundsAux
 
-!syntax description /AuxKernels/ConstantBoundsAux
+!syntax description /Bounds/ConstantBoundsAux
 
 ## Description
 
@@ -33,10 +33,10 @@ algorithms is summarized below:
 
 ## Example Syntax
 
-!listing test/tests/auxkernels/bounds/constant_bounds.i block=Bounds
+!listing test/tests/bounds/constant_bounds.i block=Bounds
 
-!syntax parameters /AuxKernels/ConstantBoundsAux
+!syntax parameters /Bounds/ConstantBoundsAux
 
-!syntax inputs /AuxKernels/ConstantBoundsAux
+!syntax inputs /Bounds/ConstantBoundsAux
 
-!syntax children /AuxKernels/ConstantBoundsAux
+!syntax children /Bounds/ConstantBoundsAux
