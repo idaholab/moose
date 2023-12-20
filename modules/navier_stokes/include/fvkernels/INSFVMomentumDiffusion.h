@@ -55,4 +55,7 @@ protected:
 
   /// dimension
   const unsigned int _dim;
+
+  /// Switch to enable viscosity limiting
+  const bool _limit_viscosity;
 };
