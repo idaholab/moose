@@ -22,6 +22,7 @@ BoundsAuxBase::validParams()
       type_options,
       "Type of bound. 'upper' refers to the upper bound. 'lower' refers to the lower value.");
   params.addRequiredParam<NonlinearVariableName>("bounded_variable", "The variable to be bounded");
+  params.registerBase("Bounds");
   return params;
 }
 
