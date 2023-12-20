@@ -30,6 +30,7 @@ SubdomainsDivision::SubdomainsDivision(const InputParameters & parameters)
   : MeshDivision(parameters), BlockRestrictable(this)
 {
   SubdomainsDivision::initialize();
+  _mesh_fully_indexed = true;
 }
 
 void

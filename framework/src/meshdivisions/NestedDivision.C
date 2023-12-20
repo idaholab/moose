@@ -45,6 +45,16 @@ NestedDivision::initialize()
       mooseError("Nested division '", _divisions[i]->name(), "' has zero bins");
   }
   setNumDivisions(tot_divs);
+
+  // If any division does not cover the entire mesh, nested will have the same holes
+  // in its coverage of the mesh
+  _mesh_fully_indexed = true;
+  for (const auto division : _divisions)
+    if (!division->coversEntireMesh())
+    {
+      _mesh_fully_indexed = false;
+      break;
+    }
 }
 
 unsigned int

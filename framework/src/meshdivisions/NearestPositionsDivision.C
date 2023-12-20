@@ -32,6 +32,7 @@ NearestPositionsDivision::NearestPositionsDivision(const InputParameters & param
     _nearest_positions_obj(&_fe_problem->getPositionsObject(getParam<PositionsName>("positions")))
 {
   NearestPositionsDivision::initialize();
+  _mesh_fully_indexed = true;
 }
 
 void

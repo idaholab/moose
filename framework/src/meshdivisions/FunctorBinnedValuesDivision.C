@@ -54,6 +54,12 @@ void
 FunctorBinnedValuesDivision::initialize()
 {
   setNumDivisions(_nbins);
+
+  // We could alternatively check every point in the mesh but it seems expensive
+  // the functor values can also change so this check would need to be done regularly
+  _mesh_fully_indexed = true;
+  if (!_oob_is_edge_bins)
+    _mesh_fully_indexed = false;
 }
 
 unsigned int

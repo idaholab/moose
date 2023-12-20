@@ -54,6 +54,8 @@ public:
   virtual unsigned int divisionIndex(const Elem & elem) const = 0;
   /// Return the number of divisions
   unsigned int getNumDivisions() const { return _num_divs; }
+  /// Returns whether the entire mesh is covered by the division of the mesh, whether every point and element has a valid division index
+  bool coversEntireMesh() const { return _mesh_fully_indexed; }
 
   /// By default, meshChanged will cause a re-initialization of the necessary data members
   virtual void meshChanged() override { initialize(); }
@@ -70,6 +72,9 @@ protected:
 
   /// Mesh that is being divided
   const MooseMesh & _mesh;
+
+  /// Whether the mesh is fully covered / indexed, all elements and points have a valid index
+  bool _mesh_fully_indexed;
 
 private:
   /// Number of divisions in the division
