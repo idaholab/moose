@@ -16,7 +16,7 @@ outside of the header, is numeric and can be converted to a C++ double. Addition
 assumed that the first row or column defines the number of columns for the entire file, if the
 number of columns differs from the first row an error will be produced.
 
-Within MOOSE this utility is utilized by the [CSVReader](/CSVReader.md), which is part of
+Within MOOSE this utility is utilized by the [CSVReaderVectorPostprocessor](/CSVReaderVectorPostprocessor.md), which is part of
 the [VectorPostprocessors] system. This object will be used to explain the use of the utility.
 
 Using the DelimitedFileReader is very simple and requires three steps. First, include the
@@ -30,7 +30,7 @@ is instantiated and read method is called, as shown in the unit test snippet bel
 This class is required to include the filename upon construction. Optionally, a second argument
 providing a pointer to a [libMesh] Communicator object may be provided. This argument should be
 used when the reader is used within a MooseObject. For example, as shown in [csv_reader_ctor],
-the CSVReader object passes a Communicator object to the reader. If not provided the reader will
+the `CSVReaderVectorPostprocessor` object passes a Communicator object to the reader. If not provided the reader will
 read the data on all processors. If provided it will only read on single processor and broadcast
 the data to the others.
 
@@ -63,8 +63,8 @@ The set methods must be called prior to the read method.
   character(s) will be ignored and all characters on a line that follow the character(s) will also
   be ignored.
 
-  !listing framework/src/vectorpostprocessors/CSVReader.C
-           start=CSVReader::
+  !listing framework/src/vectorpostprocessors/CSVReaderVectorPostprocessor.C
+           start=CSVReaderVectorPostprocessor::
            end=&_communicator
            include-end=True id=csv_reader_ctor
            caption=Construction of DelimitedFileReader object within a MooseObject initialization list.

@@ -13,11 +13,11 @@
 #include "GeneralVectorPostprocessor.h"
 #include "DelimitedFileReader.h"
 
-class CSVReader : public GeneralVectorPostprocessor
+class CSVReaderVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
-  CSVReader(const InputParameters & parameters);
+  CSVReaderVectorPostprocessor(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void execute() override {}
 

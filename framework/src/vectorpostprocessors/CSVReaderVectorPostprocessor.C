@@ -11,13 +11,14 @@
 #include <fstream>
 
 // MOOSE includes
-#include "CSVReader.h"
+#include "CSVReaderVectorPostprocessor.h"
 #include "MooseUtils.h"
 
-registerMooseObject("MooseApp", CSVReader);
+registerMooseObject("MooseApp", CSVReaderVectorPostprocessor);
+registerMooseObjectRenamed("MooseApp", CSVReader, "06/30/2024 24:00", CSVReaderVectorPostprocessor);
 
 InputParameters
-CSVReader::validParams()
+CSVReaderVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -51,7 +52,8 @@ CSVReader::validParams()
   return params;
 }
 
-CSVReader::CSVReader(const InputParameters & params) : GeneralVectorPostprocessor(params)
+CSVReaderVectorPostprocessor::CSVReaderVectorPostprocessor(const InputParameters & params)
+  : GeneralVectorPostprocessor(params)
 {
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader csv_reader(getParam<FileName>("csv_file"), &_communicator);
