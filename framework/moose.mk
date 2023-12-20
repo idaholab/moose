@@ -231,6 +231,7 @@ ifeq ($(MOOSE_UNITY),true)
 
 # Top level source directories in MOOSE 
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*')
+allsrcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 # This folder does not build with unity
 moose_non_unity := %/utils_nonunity
@@ -244,7 +245,7 @@ endif
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 
 unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
-non_unity_srcsubdirs := $(filter $(moose_non_unity), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(moose_non_unity), $(allsrcsubdirs))
 
 define unity_dir_rule
 $(1):
