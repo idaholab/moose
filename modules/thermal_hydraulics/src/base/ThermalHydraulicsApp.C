@@ -9,7 +9,7 @@
 
 #include "ThermalHydraulicsApp.h"
 #include "THMSyntax.h"
-#include "HeatConductionApp.h"
+#include "HeatTransferApp.h"
 #include "FluidPropertiesApp.h"
 #include "NavierStokesApp.h"
 #include "RayTracingApp.h"
@@ -88,7 +88,7 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"ThermalHydraulicsApp"});
   Registry::registerActionsTo(af, {"ThermalHydraulicsApp"});
 
-  HeatConductionApp::registerAll(f, af, s);
+  HeatTransferApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   NavierStokesApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
@@ -121,6 +121,14 @@ void
 ThermalHydraulicsApp::registerApps()
 {
   registerApp(ThermalHydraulicsApp);
+
+  HeatTransferApp::registerApps();
+  FluidPropertiesApp::registerApps();
+  NavierStokesApp::registerApps();
+  RayTracingApp::registerApps();
+  RdgApp::registerApps();
+  SolidPropertiesApp::registerApps();
+  MiscApp::registerApps();
 }
 
 const std::string &

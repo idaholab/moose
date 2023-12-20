@@ -36,6 +36,8 @@ void
 HeatTransferApp::registerApps()
 {
   registerApp(HeatTransferApp);
+
+  RayTracingApp::registerApps();
 }
 
 static void

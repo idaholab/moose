@@ -56,6 +56,8 @@ void
 XFEMApp::registerApps()
 {
   registerApp(XFEMApp);
+
+  TensorMechanicsApp::registerApps();
 }
 
 void
