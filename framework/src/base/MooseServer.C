@@ -54,9 +54,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   std::string parse_file_path = document_path;
   pcrecpp::RE("(.*://)(.*)").Replace("\\2", &parse_file_path);
 
-  // create new parser tree for the application
-  auto front_parser = std::make_unique<Parser>();
-
   // copy parent application parameters and modify to set up input check
   InputParameters app_params = _moose_app.parameters();
   app_params.set<std::vector<std::string>>("input_file") = {parse_file_path};
@@ -67,7 +64,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   app_params.set<bool>("error_deprecated") = true;
   app_params.set<std::string>("color") = "off";
   app_params.set<bool>("disable_perf_graph_live") = true;
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(front_parser);
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::make_unique<Parser>();
 
   app_params.remove("language_server");
 

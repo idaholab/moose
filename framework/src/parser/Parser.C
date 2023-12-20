@@ -259,6 +259,17 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   }
 }
 
+hit::Node *
+Parser::root()
+{
+  // normal input file is provided, front parser is set to parse input file
+  if (_root)
+    return _root.get();
+  // no valid input file is provided, front parser is skipped
+  else
+    return nullptr;
+}
+
 void
 Parser::parse(const std::vector<std::string> & input_filenames,
               const std::optional<std::string> & input_text)

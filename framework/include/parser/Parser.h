@@ -117,17 +117,11 @@ public:
   void extractParams(const std::string & prefix, InputParameters & p);
 
   /**
-   * Get the root pointer from front parser
+   *  @return The root pointer from front parser
+   *
+   * If the front parser doesn't exist, this will return nullptr
    */
-  hit::Node * root()
-  {
-    // normal input file is provided, front parser is set to parse input file
-    if (_root)
-      return _root.get();
-    // no valid input file is provided, front parser is skipped
-    else
-      return nullptr;
-  };
+  hit::Node * root();
 
   /*
    * Get extracted variables from front parser
