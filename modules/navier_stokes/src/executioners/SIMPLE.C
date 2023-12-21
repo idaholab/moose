@@ -1321,7 +1321,7 @@ SIMPLE::execute()
       // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
 
-      // Update resdiual index
+      // Update residual index
       residual_index = momentum_residual.size();
 
       // Execute all objects tagged as nonlinear

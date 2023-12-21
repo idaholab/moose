@@ -119,7 +119,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [FVKernels]
-
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
@@ -255,7 +254,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     non_equilibrium_treatment = ${non_equilibrium_treatment}
     max_mixing_length = ${max_mixing_length}
   []
-
 []
 
 [FVBCs]
@@ -263,13 +261,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_x
-    function = '${bulk_u}'
+    functor = '${bulk_u}'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_y
-    function = 0
+    functor = 0
   []
   [inlet_TKE]
     type = INSFVInletIntensityTKEBC
@@ -290,7 +288,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0
+    functor = 0
   []
   [walls-u]
     type = FVDirichletBC
@@ -377,4 +375,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
 [Outputs]
   exodus = true
+  [console]
+    type = Console
+    outlier_variable_norms = false
+  []
 []

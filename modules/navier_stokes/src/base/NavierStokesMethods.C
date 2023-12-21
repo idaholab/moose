@@ -140,16 +140,16 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
 
   wall_bounded_map.clear();
 
-  for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
+  for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
   {
     if (block_ids.find(elem->subdomain_id()) != block_ids.end())
-      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+      for (const auto i_side : elem->side_index_range())
       {
-        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-        for (const BoundaryName & name : wall_boundary_name)
+        const auto & side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const auto & name : wall_boundary_name)
         {
-          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-          for (BoundaryID side_id : side_bnds)
+          const auto wall_id = subproblem.mesh().getBoundaryID(name);
+          for (const auto side_id : side_bnds)
             if (side_id == wall_id)
               wall_bounded_map[elem] = true;
         }
@@ -168,19 +168,19 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
 
   dist_map.clear();
 
-  for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
+  for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
     if (block_ids.find(elem->subdomain_id()) != block_ids.end())
-      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+      for (const auto i_side : elem->side_index_range())
       {
-        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-        for (const BoundaryName & name : wall_boundary_name)
+        const auto & side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const auto & name : wall_boundary_name)
         {
-          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-          for (BoundaryID side_id : side_bnds)
+          const auto wall_id = subproblem.mesh().getBoundaryID(name);
+          for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
               const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
-              Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
+              const Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
               dist_map[elem].push_back(dist);
             }
         }
@@ -198,15 +198,15 @@ getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
 
   face_info_map.clear();
 
-  for (const auto & elem : fe_problem.mesh().getMesh().element_ptr_range())
+  for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
     if (block_ids.find(elem->subdomain_id()) != block_ids.end())
-      for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
+      for (const auto i_side : elem->side_index_range())
       {
-        const std::vector<BoundaryID> side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
-        for (const BoundaryName & name : wall_boundary_name)
+        const auto & side_bnds = subproblem.mesh().getBoundaryIDs(elem, i_side);
+        for (const auto & name : wall_boundary_name)
         {
-          const BoundaryID wall_id = subproblem.mesh().getBoundaryID(name);
-          for (BoundaryID side_id : side_bnds)
+          const auto wall_id = subproblem.mesh().getBoundaryID(name);
+          for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
               const FaceInfo * fi = subproblem.mesh().faceInfo(elem, i_side);
