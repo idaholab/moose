@@ -92,6 +92,9 @@ public:
   const std::string & getComment() const { return _row_comment; }
   ///@}
 
+  /// Set the file name, used to change the file to read from
+  void setFileName(const std::string & new_file) { _filename = new_file; }
+
   /**
    * Return the column/row names.
    */
@@ -134,7 +137,7 @@ public:
 
 protected:
   /// The supplied filename.
-  const std::string _filename;
+  std::string _filename;
 
   /// Flag indicating if the file contains a header.
   HeaderFlag _header_flag;
