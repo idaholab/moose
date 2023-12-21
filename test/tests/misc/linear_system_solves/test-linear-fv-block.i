@@ -18,7 +18,6 @@
 [Problem]
   linear_sys_names = 'u_sys'
   error_on_jacobian_nonzero_reallocation = true
-  solve = false
 []
 
 [Variables]

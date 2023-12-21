@@ -443,7 +443,8 @@ public:
 
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
-  virtual void solveLinearSystem(const unsigned int linear_sys_num);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num,
+                                 const PetscOptions * po = nullptr);
 
   ///@{
   /**
@@ -2269,24 +2270,6 @@ protected:
   /// the absolute non linear divergence tolerance
   Real _nl_abs_div_tol = -1;
 
-  /// The nonlinear system names
-  const std::vector<NonlinearSystemName> _nl_sys_names;
-
-  /// The number of nonlinear systems
-  const std::size_t _num_nl_sys;
-
-  /// The nonlinear systems
-  std::vector<std::shared_ptr<NonlinearSystemBase>> _nl;
-
-  /// Map from nonlinear system name to number
-  std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
-
-  /// Map from nonlinear variable name to nonlinear system number
-  std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
-
-  /// The current nonlinear system that we are solving
-  NonlinearSystemBase * _current_nl_sys;
-
   /// The linear system names
   const std::vector<LinearSystemName> _linear_sys_names;
 
@@ -2304,6 +2287,27 @@ protected:
 
   /// The current linear system that we are solving
   LinearSystem * _current_linear_sys;
+
+  /// Boolean to check if we have the default nonlinear system
+  const bool _using_default_nl;
+
+  /// The nonlinear system names
+  const std::vector<NonlinearSystemName> _nl_sys_names;
+
+  /// The number of nonlinear systems
+  const std::size_t _num_nl_sys;
+
+  /// The nonlinear systems
+  std::vector<std::shared_ptr<NonlinearSystemBase>> _nl;
+
+  /// Map from nonlinear system name to number
+  std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
+
+  /// Map from nonlinear variable name to nonlinear system number
+  std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
+
+  /// The current nonlinear system that we are solving
+  NonlinearSystemBase * _current_nl_sys;
 
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;

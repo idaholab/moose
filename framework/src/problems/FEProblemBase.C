@@ -341,14 +341,15 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
-    _num_nl_sys(_nl_sys_names.size()),
-    _nl(_num_nl_sys, nullptr),
-    _current_nl_sys(nullptr),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
     _current_linear_sys(nullptr),
+    _using_default_nl(isParamSetByUser("nl_sys_names")),
+    _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
+    _num_nl_sys(_nl_sys_names.size()),
+    _nl(_num_nl_sys, nullptr),
+    _current_nl_sys(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
     _mesh_divisions(/*threaded=*/true),
@@ -6079,7 +6080,7 @@ FEProblemBase::resetState()
 }
 
 void
-FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num)
+FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num, const PetscOptions * /*po*/)
 {
   TIME_SECTION("solve", 1, "Solving", false);
 

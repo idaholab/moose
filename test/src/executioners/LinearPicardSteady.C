@@ -150,6 +150,7 @@ LinearPicardSteady::newSolve()
   LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
 
   sys.solve();
+  // _problem.solveLinearSystem(0);
 
   lisystem.matrix->print();
   lisystem.rhs->print();
