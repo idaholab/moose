@@ -11,6 +11,10 @@
 
 #include "FVElementalKernel.h"
 
+/**
+ * Computes a 'mass matrix', which will just be a diagonal matrix for the finite volume method,
+ * meant for use in preconditioning schemes which require one
+ */
 class FVMass : public FVElementalKernel
 {
 public:

@@ -11,6 +11,9 @@
 
 #include "Reaction.h"
 
+/**
+ * Computes a finite element mass matrix meant for use in preconditioning schemes which require one
+ */
 class MassKernel : public Reaction
 {
 public:
