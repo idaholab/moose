@@ -83,6 +83,15 @@ InteractionIntegralTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("eigenstrain_gradient",
                                         "Material defining gradient of eigenstrain tensor");
   params.addParam<MaterialPropertyName>("body_force", "Material defining body force");
+  params.addCoupledVar("additional_eigenstrain_00",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 00 or XX).");
+  params.addCoupledVar("additional_eigenstrain_01",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 01 or XY).");
+  params.addCoupledVar("additional_eigenstrain_11",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 11 or YY).");
   params.addClassDescription(
       "Computes the interaction integral, which is used to compute various "
       "fracture mechanics parameters at a crack tip, including KI, KII, KIII, "
@@ -123,6 +132,12 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
         hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
             ? &getGenericMaterialProperty<RankTwoTensor, is_ad>("total_deigenstrain_dT")
             : nullptr),
+    _has_additional_eigenstrain(isCoupled("additional_eigenstrain_00") &&
+                                isCoupled("additional_eigenstrain_01") &&
+                                isCoupled("additional_eigenstrain_11")),
+    _additional_eigenstrain_gradient_00(coupledGradient("additional_eigenstrain_00")),
+    _additional_eigenstrain_gradient_01(coupledGradient("additional_eigenstrain_01")),
+    _additional_eigenstrain_gradient_11(coupledGradient("additional_eigenstrain_11")),
     _q_function_type(getParam<MooseEnum>("q_function_type").template getEnum<QMethod>()),
     _position_type(getParam<MooseEnum>("position_type").template getEnum<PositionType>()),
     _sif_mode(getParam<MooseEnum>("sif_mode").template getEnum<SifMethod>()),
@@ -290,7 +305,7 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
     term4 = scalar_q * sigma_alpha * grad_temp_cf(0);
   }
 
-  Real term4a = 0.0; // Gradient of arbitrary eigenstrain
+  Real term4a = 0.0; // Gradient of arbitrary eigenstrain material contribution
   if (_eigenstrain_gradient)
   {
     // Thermal strain gradient term in Nakamura and Parks, IJSS, 1992:
@@ -302,6 +317,33 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
     RankTwoTensor eigenstrain_grad_in_crack_dir =
         crack_dir * MetaPhysicL::raw_value((*_eigenstrain_gradient)[_qp]);
     term4a = scalar_q * aux_stress.doubleContraction(eigenstrain_grad_in_crack_dir);
+  }
+
+  // Gradient of arbitrary eigenstrain variable contribution
+  Real term4b = 0.0;
+  // Term4b (eigen strain term) = q * aux_stress * d{eigen_strain}_x
+  if (_has_additional_eigenstrain)
+  {
+    GenericRankThreeTensor<is_ad> partial_arbitrary_strain_tensor;
+
+    for (const auto i : make_range(3))
+    {
+      partial_arbitrary_strain_tensor(0, 0, i) = _additional_eigenstrain_gradient_00[_qp](i);
+      partial_arbitrary_strain_tensor(1, 1, i) = _additional_eigenstrain_gradient_11[_qp](i);
+
+      partial_arbitrary_strain_tensor(0, 1, i) = partial_arbitrary_strain_tensor(1, 0, i) =
+          _additional_eigenstrain_gradient_01[_qp](i);
+
+      partial_arbitrary_strain_tensor(0, 2, i) = partial_arbitrary_strain_tensor(2, 0, i) =
+          partial_arbitrary_strain_tensor(2, 1, i) = partial_arbitrary_strain_tensor(1, 2, i) = 0.0;
+    }
+
+    const RealVectorValue & crack_dir =
+        _crack_front_definition->getCrackDirection(crack_front_point_index);
+    RankTwoTensor eigenstrain_grad_in_crack_dir =
+        crack_dir * MetaPhysicL::raw_value(partial_arbitrary_strain_tensor);
+
+    term4b = scalar_q * aux_stress.doubleContraction(eigenstrain_grad_in_crack_dir);
   }
 
   Real term5 = 0.0; // Body force
@@ -375,7 +417,7 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
         2.0;
   }
 
-  Real eq = term1 + term2 + term3 + term4 + term4a + term5 + term6 + term7;
+  Real eq = term1 + term2 + term3 + term4 + term4a + term4b + term5 + term6 + term7;
 
   if (getBlockCoordSystem() == Moose::COORD_RZ)
   {

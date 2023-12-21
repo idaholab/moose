@@ -74,6 +74,15 @@ DomainIntegralAction::validParams()
       "functionally_graded_youngs_modulus",
       "Spatially varying elasticity modulus variable. This input is required when "
       "using the functionally graded material capability.");
+  params.addCoupledVar("additional_eigenstrain_00",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 00 or XX).");
+  params.addCoupledVar("additional_eigenstrain_01",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 01 or XY).");
+  params.addCoupledVar("additional_eigenstrain_11",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 11 or YY).");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -716,6 +725,17 @@ DomainIntegralAction::act()
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
       else
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
+
+      if (isParamValid("additional_eigenstrain_00") && isParamValid("additional_eigenstrain_01") &&
+          isParamValid("additional_eigenstrain_11"))
+      {
+        params.set<CoupledName>("additional_eigenstrain_00") =
+            getParam<CoupledName>("additional_eigenstrain_00");
+        params.set<CoupledName>("additional_eigenstrain_01") =
+            getParam<CoupledName>("additional_eigenstrain_01");
+        params.set<CoupledName>("additional_eigenstrain_11") =
+            getParam<CoupledName>("additional_eigenstrain_11");
+      }
 
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
