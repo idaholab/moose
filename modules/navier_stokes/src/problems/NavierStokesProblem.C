@@ -78,6 +78,8 @@ NavierStokesProblem::~NavierStokesProblem()
   if (_Q_scale)
     // We're destructing so don't check for errors which can throw
     MatDestroy(&_Q_scale);
+  if (_L)
+    MatDestroy(&_L);
 }
 
 KSP
