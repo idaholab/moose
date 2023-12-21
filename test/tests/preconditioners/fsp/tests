@@ -54,4 +54,10 @@
     type = RunException
     expect_err = 'consistency in sides/unsides'
   []
+  [unside_by_var]
+    requirement = 'The system shall be able to selectively remove degrees of freedom from a field spit by variable by boundary.'
+    input = 'unside-by-var.i'
+    exodiff = 'unside-by-var_out.e'
+    type = Exodiff
+  []
 []
