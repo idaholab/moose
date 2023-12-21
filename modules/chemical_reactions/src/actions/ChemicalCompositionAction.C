@@ -15,6 +15,7 @@
 #include "MooseUtils.h"
 #include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
+#include "BlockRestrictable.h"
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
@@ -34,6 +35,7 @@ InputParameters
 ChemicalCompositionAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params += BlockRestrictable::validParams();
 
   ThermochimicaUtils::addClassDescription(params,
                                           "Sets up the thermodynamic model and variables for the "
@@ -62,17 +64,19 @@ ChemicalCompositionAction::validParams()
       "execute_on", exec_enum, "When to execute the ThermochimicaData UO");
   params.addParam<bool>("is_fv", false, "Should the variables set up by action be of FV type");
 
-  params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
+  params.addParam<std::vector<std::string>>("output_phases", {}, "List of phases to be output");
   params.addParam<std::vector<std::string>>(
-      "output_species", "List species for which concentration in the phases is needed");
+      "output_species", {}, "List species for which concentration in the phases is needed");
   MooseEnum mUnit_op("moles mole_fraction", "moles");
   params.addParam<MooseEnum>(
       "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
   params.addParam<std::vector<std::string>>(
       "output_element_potentials",
+      {},
       "List of chemical elements for which chemical potentials are requested");
   params.addParam<std::vector<std::string>>(
       "output_vapor_pressures",
+      {},
       "List of gas phase species for which vapor pressures are requested");
   params.addParam<std::vector<std::string>>(
       "output_element_phases",
