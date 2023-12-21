@@ -8,6 +8,17 @@
     issues = "#10049"
     requirement = "The system shall be able to solve a curl-curl problem using NEDELEC_ONE elements."
   [../]
+  [vector_fe_errors]
+    type = CSVDiff
+    input = vector_kernel.i
+    csvdiff = vector_kernel_out.csv
+    cli_args = 'Postprocessors/active="L2Error HCurlSemiError HCurlError" '
+               'Outputs/exodus=false Outputs/csv=true'
+    design = 'ElementVectorL2Error.md ElementHCurlSemiError.md ElementHCurlError.md'
+    issues = '#26394'
+    requirement = 'The system shall be able to estimate the L2 and H(curl) errors for a curl-curl '
+                  'problem solved using Nedelec elements of the first kind.'
+  []
   [./coupled_scalar_vector]
     type = Exodiff
     input = 'coupled_scalar_vector.i'
