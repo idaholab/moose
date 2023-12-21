@@ -2,11 +2,12 @@
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
   [channel_ERCOFTAC]
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel, '
     [result]
       type = 'Exodiff'
       input = 'channel_ERCOFTAC.i'
       exodiff = 'channel_ERCOFTAC_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence for standard channel.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -14,7 +15,7 @@
       type = 'Exodiff'
       input = 'channel_ERCOFTAC.i'
       exodiff = 'channel_ERCOFTAC_short.e'
-      requirement = 'The system shall be able to run problems with turbulence for a standard channel.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=channel_ERCOFTAC_short'
     []

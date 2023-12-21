@@ -2,11 +2,12 @@
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
   [BFS_ERCOFTAC]
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a backward facing step, '
     [result]
       type = 'Exodiff'
       input = 'BFS_ERCOFTAC.i'
       exodiff = 'BFS_ERCOFTAC_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence for a backward facing step.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -14,7 +15,7 @@
       type = 'Exodiff'
       input = 'BFS_ERCOFTAC.i'
       exodiff = 'BFS_ERCOFTAC_short.e'
-      requirement = 'The system shall be able to run problems with turbulence for a backward facing step.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=BFS_ERCOFTAC_short'
     []

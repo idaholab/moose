@@ -122,6 +122,7 @@ linearized_model = false
     variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
+    mu_interp_method = average
   []
   [u_viscosity_turbulent]
     type = INSFVMomentumDiffusion
@@ -131,6 +132,7 @@ linearized_model = false
     complete_expansion = true
     u = vel_x
     v = vel_y
+    mu_interp_method = average
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -156,6 +158,7 @@ linearized_model = false
     variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
+    mu_interp_method = average
   []
   [v_viscosity_turbulent]
     type = INSFVMomentumDiffusion
@@ -165,6 +168,7 @@ linearized_model = false
     complete_expansion = true
     u = vel_x
     v = vel_y
+    mu_interp_method = average
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -193,6 +197,7 @@ linearized_model = false
     variable = TKE
     coeff = 'mu_t'
     scaling_coef = ${sigma_k}
+    coeff_interp_method = average
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
@@ -225,6 +230,7 @@ linearized_model = false
     variable = TKED
     coeff = ${mu}
     walls = ${walls}
+    coeff_interp_method = average
   []
   [TKED_diffusion_turbulent]
     type = INSFVTurbulentDiffusion
@@ -232,6 +238,7 @@ linearized_model = false
     coeff = 'mu_t'
     scaling_coef = ${sigma_eps}
     walls = ${walls}
+    coeff_interp_method = average
   []
   [TKED_source_sink]
     type = INSFVTKEDSourceSink

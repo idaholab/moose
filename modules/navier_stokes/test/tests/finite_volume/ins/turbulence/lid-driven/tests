@@ -2,11 +2,12 @@
   design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
   issues = '#9007'
   [lid_driven_turb_std_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall.i'
       exodiff = 'lid-driven-turb-std-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with standard wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -14,17 +15,18 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall.i'
       exodiff = 'lid_driven_turb_std_wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with standard wall functions.'
+      detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid_driven_turb_std_wall_short'
       abs_zero = 1e-6
     []
   []
   [lid_driven_turb_std_wall_bulk]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions using bulk wall treatment for the turbulent viscosity, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall.i'
       exodiff = 'bulk_treatment.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with standard wall functions using bulk wall treatment for the turbulent viscosity.'
+      detail = ' and reach converged results with segregated solvers.'
       cli_args = 'bulk_wall_treatment=true mu=1e-3 Outputs/file_base=bulk_treatment'
       abs_zero = 1e-6
       heavy = ture
@@ -33,17 +35,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall.i'
       exodiff = 'bulk_treatment_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with standard wall functions using bulk wall treatment for turbulent viscosity.'
+      detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 bulk_wall_treatment=true mu=1e-3 Outputs/file_base=bulk_treatment_short'
       abs_zero = 1e-6
     []
   []
   [lid_driven_turb_non_eq_wall]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-non-eq-wall.i'
       exodiff = 'lid-driven-turb-non-eq-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with non-equilibrium wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -51,17 +55,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-non-eq-wall.i'
       exodiff = 'lid-driven-turb-non-eq-wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with non-equilibrium wall functions.'
+      detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-wall_short'
       abs_zero = 1e-6
     []
   []
   [lid_driven_turb_linear_wall]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linear wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-linear-wall.i'
       exodiff = 'lid-driven-turb-linear-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with linear wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -69,17 +75,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-linear-wall.i'
       exodiff = 'lid-driven-turb-linear-wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with linear wall functions.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-linear-wall_short'
     []
   []
   [lid_driven_turb_inc_wall]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with incremental wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-inc-wall.i'
       exodiff = 'lid-driven-turb-inc-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with incremental wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -87,17 +95,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-inc-wall.i'
       exodiff = 'lid-driven-turb-inc-wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with incremental wall functions.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-inc-wall_short'
     []
   []
   [lid_driven_turb_no_wall_log_first_layer]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment and the first cell in the logarithmic regime, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-no-wall.i'
       exodiff = 'no_wall_log_layer.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with no wall treatment with the first cell on the logarithmic regime.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       cli_args = 'lid_velocity=10.0 Executioner/num_iterations=2000 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer'
       heavy = true
@@ -106,17 +116,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-no-wall.i'
       exodiff = 'no_wall_log_layer_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with no wall treatment with the first cell on the logarithmic regime.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer_short'
     []
   []
   [lid_driven_turb_no_wall]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-no-wall.i'
       exodiff = 'lid-driven-turb-no-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with no wall treatment.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -124,17 +136,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-no-wall.i'
       exodiff = 'lid-driven-turb-no-wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with no wall treatment.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-no-wall_short'
     []
   []
   [lid_driven_turb_non_eq_bulk]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium bulk treatment, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-non-eq-bulk.i'
       exodiff = 'lid-driven-turb-non-eq-bulk_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with non-equilibrium bulk treatment.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -142,17 +156,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-non-eq-bulk.i'
       exodiff = 'lid-driven-turb-non-eq-bulk_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with non-equilibrium bulk treatment.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-bulk_short'
     []
   []
   [lid_driven_turb_energy]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with transported energy, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-energy.i'
       exodiff = 'lid-driven-turb-energy_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with transported energy.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -160,17 +176,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-energy.i'
       exodiff = 'lid-driven-turb-energy_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with transported energy.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy_short'
     []
   []
   [lid_driven_turb_energy_wall]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'lid-driven-turb-energy-wall_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with temperature wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -178,17 +196,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'lid-driven-turb-energy-wall_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with temperature wall functions.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy-wall_short'
     []
   []
   [lid_driven_turb_energy_wall_linear]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linearized temperature wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'linear_temperature_wall_function.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with linearized temperature wall functions.'
+      detail = 'and reach converged results with segregated solvers.'
       cli_args = 'FVBCs/T_hot/linearized_yplus=true FVBCs/T_cold/linearized_yplus=true Outputs/file_base=linear_temperature_wall_function'
       abs_zero = 1e-6
       heavy = true
@@ -197,17 +217,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'linear_temperature_wall_function_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with linearized temperature wall functions.'
+      detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 FVBCs/T_hot/linearized_yplus=true FVBCs/T_cold/linearized_yplus=true Outputs/file_base=linear_temperature_wall_function_short'
       abs_zero = 1e-6
     []
   []
   [lid_driven_turb_energy_wall_log]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions in the log-layer regime, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'temperature_wall_function_log.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with temperature wall functions in the log-layer regime.'
+      detail = 'and reach converged results with segregated solvers.'
       cli_args = 'lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=temperature_wall_function_log'
       abs_zero = 1e-6
       heavy = true
@@ -216,17 +238,19 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-energy-wall.i'
       exodiff = 'temperature_wall_function_log_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with temperature wall functions in the log-layer regime.'
+      detail = 'and pass debugging checks.'
       cli_args = 'Executioner/num_iterations=10 lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=temperature_wall_function_log_short'
       abs_zero = 1e-6
     []
   []
   [lid_driven_turb_capped]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with capped production, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-capped.i'
       exodiff = 'lid-driven-turb-capped_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with capped production.'
+      detail = 'and reach converged results with segregated solvers.'
       abs_zero = 1e-6
       heavy = true
     []
@@ -234,27 +258,31 @@
       type = 'Exodiff'
       input = 'lid-driven-turb-capped.i'
       exodiff = 'lid-driven-turb-capped_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with capped production.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-capped_short'
     []
   []
   [lid_driven_turb_std_wall_nonlinear]
+
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-nonlinear.i'
       exodiff = 'lid-driven-turb-std-wall-nonlinear_out.e'
-      requirement = 'The system shall be able to solve flow problems with turbulence in enclosures with standard wall functions.'
+      detail = 'and reach converged results with monolithic nonlinear solvers.'
       abs_zero = 1e-6
       heavy = true
+      min_parallel = 4
     []
     [run]
       type = 'Exodiff'
       input = 'lid-driven-turb-std-wall-nonlinear.i'
       exodiff = 'lid-driven-turb-std-wall-nonlinear_short.e'
-      requirement = 'The system shall be able to run problems with turbulence in enclosures with standard wall functions.'
+      detail = 'and pass debugging checks.'
       abs_zero = 1e-6
-      cli_args = 'Executioner/num_steps=5 Outputs/file_base=lid-driven-turb-std-wall-nonlinear_short'
+      cli_args = 'Executioner/num_steps=3 Outputs/file_base=lid-driven-turb-std-wall-nonlinear_short'
+      min_parallel = 4
     []
   []
 []
