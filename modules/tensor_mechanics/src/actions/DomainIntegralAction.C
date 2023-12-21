@@ -83,6 +83,9 @@ DomainIntegralAction::validParams()
   params.addCoupledVar("additional_eigenstrain_11",
                        "Optional additional eigenstrain variable that will be accounted for in the "
                        "interaction integral (component 11 or YY).");
+  params.addCoupledVar("additional_eigenstrain_22",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 22 or ZZ).");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -727,7 +730,7 @@ DomainIntegralAction::act()
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
 
       if (isParamValid("additional_eigenstrain_00") && isParamValid("additional_eigenstrain_01") &&
-          isParamValid("additional_eigenstrain_11"))
+          isParamValid("additional_eigenstrain_11") && isParamValid("additional_eigenstrain_22"))
       {
         params.set<CoupledName>("additional_eigenstrain_00") =
             getParam<CoupledName>("additional_eigenstrain_00");
@@ -735,6 +738,8 @@ DomainIntegralAction::act()
             getParam<CoupledName>("additional_eigenstrain_01");
         params.set<CoupledName>("additional_eigenstrain_11") =
             getParam<CoupledName>("additional_eigenstrain_11");
+        params.set<CoupledName>("additional_eigenstrain_22") =
+            getParam<CoupledName>("additional_eigenstrain_22");
       }
 
       params.set<UserObjectName>("crack_front_definition") = uo_name;
@@ -906,7 +911,9 @@ DomainIntegralAction::act()
 
     for (auto ime : integral_moose_enums)
     {
-      if (ime == "JIntegral" || ime == "CIntegral" || ime == "KFromJIntegral")
+      if (ime == "JIntegral" || ime == "CIntegral" || ime == "KFromJIntegral" ||
+          ime == "InteractionIntegralKI" || ime == "InteractionIntegralKII" ||
+          ime == "InteractionIntegralKIII" || ime == "InteractionIntegralT")
         have_j_integral = true;
 
       if (ime == "CIntegral")

@@ -128,11 +128,13 @@ protected:
   /// Whether the user chooses to add other eigenstrain influence (e.g. irradiation-induced)
   const bool _has_additional_eigenstrain;
   /// Gradient used to add contribution to the interaction integral (XX)
-  const VariableGradient & _additional_eigenstrain_gradient_00;
+  const VariableGradient * _additional_eigenstrain_gradient_00;
   /// Gradient used to add contribution to the interaction integral (XY)
-  const VariableGradient & _additional_eigenstrain_gradient_01;
+  const VariableGradient * _additional_eigenstrain_gradient_01;
   /// Gradient used to add contribution to the interaction integral (YY)
-  const VariableGradient & _additional_eigenstrain_gradient_11;
+  const VariableGradient * _additional_eigenstrain_gradient_11;
+  /// Gradient used to add contribution to the interaction integral (ZZ)
+  const VariableGradient * _additional_eigenstrain_gradient_22;
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;
   /// Vector of shape function values for the current element
