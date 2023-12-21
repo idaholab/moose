@@ -8,24 +8,30 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "ParsedReporterBase.h"
 
 /**
- * Reporter containing operation between vectors from another Reporter
+ * Reporter containing row sum of a vector of vectors from another Reporter
  */
-class ParsedVectors : public ParsedReporterBase
+class ParsedVectorVectorRealReductionReporter : public ParsedReporterBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedVectors(const InputParameters & parameters);
+  ParsedVectorVectorRealReductionReporter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override;
 
 private:
-  std::vector<const std::vector<Real> *> _reporter_data;
-  /// output vector
-  std::vector<double> & _output_reporter;
+  // initial value of element-wise reduction
+  const Real _initial_value;
+
+  // reporter vector of vector w/ data
+  const ReporterName _vec_of_vec_name;
+
+  /// output containing reduction of vector of vector into a vector
+  std::vector<Real> & _output_reporter;
 };

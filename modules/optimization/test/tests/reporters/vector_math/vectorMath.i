@@ -21,32 +21,32 @@
     outputs=none
   []
   [vecvec_sum]
-    type = VectorOfVectorRowSum
+    type = ParsedVectorVectorRealReductionReporter
     name = sum
-    reporter_vector_of_vectors= 'dataFromVofV/v_of_v'
+    reporter_name= 'dataFromVofV/v_of_v'
     initial_value = 0
-    expression = 'vi+vplus'
+    expression = 'reduction_value+indexed_value'
   []
   [vecvec_sqsum]
-    type = VectorOfVectorRowSum
+    type = ParsedVectorVectorRealReductionReporter
     name = sqsum
-    reporter_vector_of_vectors= 'dataFromVofV/v_of_v'
+    reporter_name= 'dataFromVofV/v_of_v'
     initial_value = 0
-    expression = 'vi+vplus*vplus'
+    expression = 'reduction_value+indexed_value*indexed_value'
   []
   [vecvec_multiply]
-    type = VectorOfVectorRowSum
+    type = ParsedVectorVectorRealReductionReporter
     name = multiply
-    reporter_vector_of_vectors= 'dataFromVofV/v_of_v'
+    reporter_name= 'dataFromVofV/v_of_v'
     initial_value = 1
-    expression = 'vi*vplus'
+    expression = 'reduction_value*indexed_value'
   []
   [vecvec_max]
-    type = VectorOfVectorRowSum
+    type = ParsedVectorVectorRealReductionReporter
     name = max
-    reporter_vector_of_vectors= 'dataFromVofV/v_of_v'
+    reporter_name= 'dataFromVofV/v_of_v'
     initial_value = -100000
-    expression = 'max(vi,vplus)'
+    expression = 'max(reduction_value,indexed_value)'
   []
 
   [vecs]
@@ -83,32 +83,32 @@
     outputs=none
   []
   [vector_sum]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = sum
     reporter_name= vec_d/vec_d
     initial_value = 0
-    expression = 'vi+vplus'
+    expression = 'reduction_value+indexed_value'
   []
   [vector_sqsum]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = sqsum
     reporter_name= vec_d/vec_d
     initial_value = 0
-    expression = 'vi+vplus*vplus'
+    expression = 'reduction_value+indexed_value*indexed_value'
   []
   [vector_multiply]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = multiply
     reporter_name= vec_d/vec_d
     initial_value = 1
-    expression = 'vi*vplus'
+    expression = 'reduction_value*indexed_value'
   []
   [vector_max]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = max
     reporter_name= vec_d/vec_d
     initial_value = -100000
-    expression = 'max(vi,vplus)'
+    expression = 'max(reduction_value,indexed_value)'
   []
 []
 

@@ -13,31 +13,26 @@
 #include "FunctionParserUtils.h"
 
 /**
- * Reporter performing a reduction on a vector using a parsed function
+ * Reporter containing operation between vectors from another Reporter
  */
-class VectorSum : public GeneralReporter, public FunctionParserUtils<false>
+class ParsedReporterBase : public GeneralReporter, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
-  VectorSum(const InputParameters & parameters);
+  ParsedReporterBase(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
-  virtual void finalize() override;
+  virtual void finalize() override {}
 
-private:
+protected:
   /// whether time is part of the parsed expression
   const bool _use_t;
 
-  // initial value of element-wise reduction
-  const Real _initial_value;
-
-  /// Vector being operated on
-  const std::vector<Real> & _vector;
-
-  /// output vector
-  Real & _output_reporter;
+  /// Get symbols to corresponding reporter names
+  /// need symbols because reporter names have a "/" and that will not feed into fparser
+  const std::vector<std::string> _reporter_symbols;
 
   /// function parser object
   SymFunctionPtr _func_F;

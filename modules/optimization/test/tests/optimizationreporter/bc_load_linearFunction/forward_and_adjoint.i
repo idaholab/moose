@@ -140,11 +140,11 @@
     real_vector_values = '0 0; 0' # Dummy
   []
   [vector_sqsum]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = sqsum
     reporter_name= 'measure_data/misfit_values'
     initial_value = 0
-    expression = 'vi+vplus*vplus'
+    expression = 'reduction_value+indexed_value*indexed_value'
     outputs=none
   []
   [obj_sum]

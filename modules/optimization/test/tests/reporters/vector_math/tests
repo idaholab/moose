@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'VectorOfVectorRowSum.md VectorSum.md ParsedVectors.md ParsedScalars.md'
+  design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md ParsedVectors.md ParsedScalars.md'
   [vectorMath]
     type = CSVDiff
     input = vectorMath.i
@@ -14,8 +14,8 @@
     input = vectorMath.i
     cli_args = "Reporters/dataFromVofV/vector_of_vectors='101 201; 102 202; 103'"
     allow_test_objects = true
-    expect_err = "Every vector in 'reporter_vector_of_vectors=dataFromVofV/v_of_v' must be the same size."
-    requirement = "The system shall throw an error when the vectors being operated on are not the same size."
+    expect_err = "Every vector in 'reporter_name=dataFromVofV/v_of_v' must be the same size."
+    requirement = "The system shall throw an error when the vectors being reduced are not the same size."
   []
   [errorDotProduct]
     type = RunException

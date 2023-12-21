@@ -9,39 +9,29 @@
 
 #pragma once
 
-#include "GeneralReporter.h"
-#include "FunctionParserUtils.h"
-#include "ReporterName.h"
+#include "ParsedReporterBase.h"
 
 /**
- * Reporter containing row sum of a vector of vectors from another Reporter
+ * Reporter performing a reduction on a vector using a parsed function
  */
-class VectorOfVectorRowSum : public GeneralReporter, public FunctionParserUtils<false>
+class ParsedVectorRealReductionReporter : public ParsedReporterBase
 {
 public:
   static InputParameters validParams();
 
-  VectorOfVectorRowSum(const InputParameters & parameters);
+  ParsedVectorRealReductionReporter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override;
 
 private:
-  /// whether time is part of the parsed expression
-  const bool _use_t;
-
   // initial value of element-wise reduction
   const Real _initial_value;
 
-  // reporter vector of vector w/ data
-  const ReporterName _vec_of_vec_name;
-
   /// Vector being operated on
-  std::vector<Real> & _output_reporter;
+  const std::vector<Real> & _reporter_data;
 
-  /// function parser object
-  SymFunctionPtr _func_F;
-
-  usingFunctionParserUtilsMembers(false);
+  /// output containing reduction of vector into a scalar
+  Real & _output_reporter;
 };

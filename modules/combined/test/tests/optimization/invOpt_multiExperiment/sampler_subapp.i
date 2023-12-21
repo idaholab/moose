@@ -50,18 +50,18 @@
     parallel_type = ROOT
   []
   [grad_sum]
-    type = VectorOfVectorRowSum
+    type = ParsedVectorVectorRealReductionReporter
     name = row_sum
-    reporter_vector_of_vectors= "storage/fromForward:grad_f:grad_f"
+    reporter_name= "storage/fromForward:grad_f:grad_f"
     initial_value = 0
-    expression = 'vi+vplus'
+    expression = 'reduction_value+indexed_value'
   []
   [obj_sum]
-    type = VectorSum
+    type = ParsedVectorRealReductionReporter
     name = value
     reporter_name= "storage/fromForward:obj_pp:value"
     initial_value = 0
-    expression = 'vi+vplus'
+    expression = 'reduction_value+indexed_value'
     outputs=none
   []
 []
