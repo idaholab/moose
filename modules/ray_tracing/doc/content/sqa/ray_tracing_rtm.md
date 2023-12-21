@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template module=Ray Tracing category=ray_tracing stp_filename=ray_tracing_stp.md
+!template load file=sqa/module_rtm.md.template module=Ray Tracing category=ray_tracing
 
 !template! item key=system-purpose
 !include ray_tracing_srs.md start=system-purpose-begin end=system-purpose-finish

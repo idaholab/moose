@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=xfem module=XFEM stp_filename=xfem_stp.md
+!template load file=sqa/module_rtm.md.template category=xfem module=XFEM
 
 !template! item key=system-purpose
 !include xfem_srs.md start=system-purpose-begin end=system-purpose-finish

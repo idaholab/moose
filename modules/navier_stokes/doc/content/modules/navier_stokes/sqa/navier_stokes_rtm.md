@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=navier_stokes module=Navier Stokes stp_filename=navier_stokes_stp.md
+!template load file=sqa/module_rtm.md.template category=navier_stokes module=Navier Stokes
 
 !template! item key=system-purpose
 !include navier_stokes_srs.md start=system-purpose-begin end=system-purpose-finish

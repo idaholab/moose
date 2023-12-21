@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template module=Thermal Hydraulics category=thermal_hydraulics stp_filename=thermal_hydraulics_stp.md
+!template load file=sqa/module_rtm.md.template module=Thermal Hydraulics category=thermal_hydraulics
 
 !template! item key=system-purpose
 !include thermal_hydraulics_srs.md start=system-purpose-begin end=system-purpose-finish
