@@ -71,6 +71,13 @@ finite elements for velocity and pressure.'
     requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves, using a steady executioner with a Reynolds number of unity, and commuting operators in the style of Olshanskii.'
     custom_cmp = 'fsp.cmp'
   []
+  [steady_lid_driven_fsp_stokes]
+    type = 'Exodiff'
+    input = 'steady_vector_fsp_stokes.i'
+    exodiff = 'steady_vector_fsp_stokes_exo.e'
+    issues = '#24548'
+    requirement = 'The system shall be able to efficiently precondition Taylor-Hood finite elements using a Schur complement field split with the preconditioner for the Schur complement formed from the pressure mass matrix.'
+  []
   [ad_lid_driven]
     type = 'Exodiff'
     input = 'ad_lid_driven.i'

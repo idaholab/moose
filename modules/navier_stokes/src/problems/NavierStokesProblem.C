@@ -211,7 +211,7 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   LIBMESH_CHKERR2(this->comm(), ierr);
   if (!_Q_scale)
   {
-    if (_commute_lsc)
+    if (_commute_lsc || _pressure_mass_matrix_as_pre)
     {
       mooseAssert(our_parent_Q, "This should be non-null");
       ierr =
@@ -230,7 +230,7 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   else
   {
     mooseAssert(our_parent_Q, "This should be non-null");
-    if (_commute_lsc)
+    if (_commute_lsc || _pressure_mass_matrix_as_pre)
     {
       ierr =
           MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, MAT_REUSE_MATRIX, &_Q_scale);
