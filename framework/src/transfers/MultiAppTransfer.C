@@ -490,7 +490,7 @@ MultiAppTransfer::getFromBoundingBoxes()
 
     // Translate the bounding box to the from domain's position. We may have rotations so we must
     // be careful in constructing the new min and max (first and second)
-    const auto from_global_num = _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+    const auto from_global_num = getGlobalSourceAppIndex(i);
     transformBoundingBox(bbox, *_from_transforms[from_global_num]);
 
     // Cast the bounding box into a pair of points (so it can be put through
@@ -550,8 +550,7 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     {
       // Translate the bounding box to the from domain's position. We may have rotations so we must
       // be careful in constructing the new min and max (first and second)
-      const auto from_global_num =
-          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+      const auto from_global_num = getGlobalSourceAppIndex(i);
       transformBoundingBox(bbox, *_from_transforms[from_global_num]);
     }
 
@@ -629,4 +628,28 @@ MultiAppTransfer::getPointInTargetAppFrame(const Point & p,
   }
   else
     return to_transform->mapBack(p);
+}
+
+unsigned int
+MultiAppTransfer::getGlobalSourceAppIndex(unsigned int i_from) const
+{
+  mooseAssert(_current_direction == TO_MULTIAPP || i_from < _from_local2global_map.size(),
+              "Out of bounds local from-app index");
+  return _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+}
+
+unsigned int
+MultiAppTransfer::getGlobalTargetAppIndex(unsigned int i_to) const
+{
+  mooseAssert(_current_direction == FROM_MULTIAPP || i_to < _to_local2global_map.size(),
+              "Out of bounds local to-app index");
+  return _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+}
+
+unsigned int
+MultiAppTransfer::getLocalSourceAppIndex(unsigned int i_from) const
+{
+  return _current_direction == TO_MULTIAPP
+             ? 0
+             : _from_local2global_map[i_from] - _from_local2global_map[0];
 }

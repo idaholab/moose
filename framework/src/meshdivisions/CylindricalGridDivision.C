@@ -132,6 +132,13 @@ CylindricalGridDivision::initialize()
           min_center_dist,
           "), closer than the radial extent of each grid. Mesh division is ill-defined");
   }
+
+  // We could alternatively check every point in the mesh but it seems expensive
+  // A bounding box check could also suffice but the cylinders would need to be excessively large to
+  // enclose the entire mesh
+  _mesh_fully_indexed = true;
+  if (!_outside_grid_counts_as_border || _center_positions)
+    _mesh_fully_indexed = false;
 }
 
 unsigned int

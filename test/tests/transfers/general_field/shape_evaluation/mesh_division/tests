@@ -1,0 +1,47 @@
+[Tests]
+  issues = '#25901'
+  design = 'MeshDivisions/index.md MultiAppGeneralFieldTransfer.md'
+  [mesh_div]
+    requirement = 'The system shall be able to leverage mesh divisions during variable shape evaluation transfers'
+    [restriction_source]
+      type = Exodiff
+      input = 'main.i'
+      exodiff = "restriction_source.e restriction_source_sub0_out.e"
+      cli_args = "Outputs/file_base=restriction_source "
+                 "Transfers/to_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/from_mesh_division=middle "
+                 "Transfers/to_sub_elem/from_mesh_division=middle "
+                 "Transfers/from_sub/from_mesh_division=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_division=middle_sub"
+      detail = 'to restrict the source domain for the transfered field,'
+    []
+    [restriction_target]
+      type = Exodiff
+      input = 'main.i'
+      exodiff = "restriction_target.e restriction_target_sub0_out.e"
+      cli_args = "Outputs/file_base=restriction_target "
+                 "Transfers/to_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/to_mesh_division=middle_sub "
+                 "Transfers/to_sub_elem/to_mesh_division=middle_sub "
+                 "Transfers/from_sub/to_mesh_division=middle "
+                 "Transfers/from_sub_elem/to_mesh_division=middle"
+      detail = 'to restrict the target domain for the transfered field,'
+    []
+    [matching_subapps]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp.e matching_subapp_sub0_out.e matching_subapp_sub1_out.e "
+                "matching_subapp_sub2_out.e matching_subapp_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/bbox_factor=20 "
+                 "Transfers/from_sub_elem/bbox_factor=20 "
+      detail = 'and to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions.'
+    []
+  []
+[]

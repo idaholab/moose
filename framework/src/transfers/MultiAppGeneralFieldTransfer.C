@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "MeshDivision.h"
 #include "Positions.h"
 #include "MultiAppPositions.h" // remove after use_nearest_app deprecation
 #include "MooseAppCoordTransform.h"
@@ -73,6 +74,22 @@ MultiAppGeneralFieldTransfer::validParams()
                              "Whether elemental variable boundary restriction is considered by "
                              "element side or element nodes");
 
+  // Mesh division restriction
+  params.addParam<MeshDivisionName>("from_mesh_division",
+                                    "Mesh division object on the origin application");
+  params.addParam<MeshDivisionName>("to_mesh_division",
+                                    "Mesh division object on the target application");
+  MooseEnum mesh_division_uses("spatial_restriction matching_division matching_subapp_index none",
+                               "none");
+  params.addParam<MooseEnum>("from_mesh_division_usage",
+                             mesh_division_uses,
+                             "How to use the source mesh division in the transfer. See object "
+                             "documentation for description of each option");
+  params.addParam<MooseEnum>("to_mesh_division_usage",
+                             mesh_division_uses,
+                             "How to use the target mesh division in the transfer. See object "
+                             "documentation for description of each option");
+
   // Array and vector variables
   params.addParam<std::vector<unsigned int>>("source_variable_components",
                                              std::vector<unsigned int>(),
@@ -92,6 +109,11 @@ MultiAppGeneralFieldTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
+  params.addParam<bool>("use_bounding_boxes",
+                        true,
+                        "When set to false, bounding boxes will not be used to restrict the source "
+                        "of the transfer. Either source applications must be set using the "
+                        "from_mesh_division parameter, or a greedy search must be used.");
   params.addParam<bool>(
       "use_nearest_app",
       false,
@@ -114,11 +136,13 @@ MultiAppGeneralFieldTransfer::validParams()
                         "source values for any target point");
 
   params.addParamNamesToGroup(
-      "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
+      "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction "
+      "from_mesh_division from_mesh_division_usage to_mesh_division to_mesh_division_usage",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search use_nearest_app use_nearest_position "
-                              "search_value_conflicts",
-                              "Search algorithm");
+  params.addParamNamesToGroup(
+      "greedy_search use_bounding_boxes use_nearest_app use_nearest_position "
+      "search_value_conflicts",
+      "Search algorithm");
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
@@ -129,12 +153,15 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   : MultiAppConservativeTransfer(parameters),
     _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
     _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
+    _use_bounding_boxes(getParam<bool>("use_bounding_boxes")),
     _use_nearest_app(getParam<bool>("use_nearest_app")),
     _nearest_positions_obj(
         isParamValid("use_nearest_position")
             ? &_fe_problem.getPositionsObject(getParam<PositionsName>("use_nearest_position"))
             : nullptr),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
+    _from_mesh_division_behavior(getParam<MooseEnum>("from_mesh_division_usage")),
+    _to_mesh_division_behavior(getParam<MooseEnum>("to_mesh_division_usage")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
@@ -179,8 +206,14 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
       (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
     if (!isParamSetByUser("bbox_factor") && !isParamSetByUser("fixed_bounding_box_size"))
       mooseWarning(
-          "Extrapolation (nearest-source options, outside-app source) parameters have been passed, "
-          "but no subapp bounding box expansion parameters have been passed.");
+          "Extrapolation (nearest-source options, outside-app source) parameters have "
+          "been passed, but no subapp bounding box expansion parameters have been passed.");
+
+  if (!_use_bounding_boxes &&
+      (isParamValid("fixed_bounding_box_size") || isParamSetByUser("bbox_factor")))
+    paramError("use_bounding_boxes",
+               "Cannot pass additional bounding box parameters (sizes, expansion, etc) if we are "
+               "not using bounding boxes");
 }
 
 void
@@ -190,7 +223,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
 
   // Use IDs for block and boundary restriction
   // Loop over all source problems
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
     if (isParamValid("from_blocks"))
@@ -210,10 +243,56 @@ MultiAppGeneralFieldTransfer::initialSetup()
       if (_from_boundaries.size() != boundary_names.size())
         paramError("from_boundaries", "Some boundaries were not found in the mesh");
     }
+
+    if (isParamValid("from_mesh_division"))
+    {
+      const auto & mesh_div_name = getParam<MeshDivisionName>("from_mesh_division");
+      _from_mesh_divisions.push_back(&_from_problems[i_from]->getMeshDivision(mesh_div_name));
+      // Check that the behavior set makes sense
+      if (_from_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION)
+      {
+        if (_from_mesh_divisions[i_from]->coversEntireMesh())
+          mooseInfo("'from_mesh_division_usage' is set to use a spatial restriction but the "
+                    "'from_mesh_division' for source app of global index " +
+                    std::to_string(getGlobalSourceAppIndex(i_from)) +
+                    " covers the entire mesh. Do not expect any restriction from a mesh "
+                    "division that covers the entire mesh");
+      }
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX &&
+               !isParamValid("to_mesh_division"))
+        paramError("to_mesh_division_usage",
+                   "Source mesh division cannot match target mesh division if no target mesh "
+                   "division is specified");
+      else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      {
+        if (!hasToMultiApp())
+          paramError("from_mesh_division_usage",
+                     "Cannot match source mesh division index to target subapp index if there is "
+                     "only one target: the parent app (not a subapp)");
+        else if (getToMultiApp()->numGlobalApps() !=
+                 _from_mesh_divisions[i_from]->getNumDivisions())
+          mooseWarning("Attempting to match target subapp index with the number of source mesh "
+                       "divisions, which is " +
+                       std::to_string(_from_mesh_divisions[i_from]->getNumDivisions()) +
+                       " while there are " + std::to_string(getToMultiApp()->numGlobalApps()) +
+                       " target subapps");
+        if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
+          // We do not support it because it would require sending the point + target app index +
+          // target app division index, and we only send the Point + one number
+          paramError("from_mesh_division_usage",
+                     "We do not support using target subapp index for source division behavior and "
+                     "matching the division index for the target mesh division behavior.");
+      }
+      else if (_from_mesh_division_behavior == "none")
+        paramError("from_mesh_division_usage", "User must specify a 'from_mesh_division_usage'");
+    }
+    else if (_from_mesh_division_behavior != "none")
+      paramError("from_mesh_division",
+                 "'from_mesh_division' must be specified if the usage method is specified");
   }
 
   // Loop over all target problems
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
     if (isParamValid("to_blocks"))
@@ -233,10 +312,63 @@ MultiAppGeneralFieldTransfer::initialSetup()
       if (_to_boundaries.size() != boundary_names.size())
         paramError("to_boundaries", "Some boundaries were not found in the mesh");
     }
+
+    if (isParamValid("to_mesh_division"))
+    {
+      const auto & mesh_div_name = getParam<MeshDivisionName>("to_mesh_division");
+      _to_mesh_divisions.push_back(&_to_problems[i_to]->getMeshDivision(mesh_div_name));
+      // Check that the behavior set makes sense
+      if (_to_mesh_division_behavior == MeshDivisionTransferUse::RESTRICTION)
+      {
+        if (_to_mesh_divisions[i_to]->coversEntireMesh())
+          mooseInfo("'to_mesh_division_usage' is set to use a spatial restriction but the "
+                    "'to_mesh_division' for target application of global index " +
+                    std::to_string(getGlobalSourceAppIndex(i_to)) +
+                    " covers the entire mesh. Do not expect any restriction from a mesh "
+                    "division that covers the entire mesh");
+      }
+      else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
+      {
+        if (!isParamValid("from_mesh_division"))
+          paramError("to_mesh_division_usage",
+                     "Target mesh division cannot match source mesh division if no source mesh "
+                     "division is specified");
+        else if ((*_from_mesh_divisions.begin())->getNumDivisions() !=
+                 _to_mesh_divisions[i_to]->getNumDivisions())
+          mooseWarning("Source and target mesh divisions do not have the same number of bins. If "
+                       "this is what you expect, please reach out to a MOOSE or app developer to "
+                       "ensure appropriate use");
+      }
+      else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      {
+        if (!hasFromMultiApp())
+          paramError(
+              "to_mesh_division_usage",
+              "Cannot match target mesh division index to source subapp index if there is only one "
+              "source: the parent app (not a subapp)");
+        else if (getFromMultiApp()->numGlobalApps() != _to_mesh_divisions[i_to]->getNumDivisions())
+          mooseWarning("Attempting to match source subapp index with the number of target mesh "
+                       "divisions, which is " +
+                       std::to_string(_to_mesh_divisions[i_to]->getNumDivisions()) +
+                       " while there are " + std::to_string(getFromMultiApp()->numGlobalApps()) +
+                       " source subapps");
+        if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX)
+          paramError(
+              "from_mesh_division_usage",
+              "We do not support using source subapp index for the target division behavior and "
+              "matching the division index for the source mesh division behavior.");
+      }
+      else if (_to_mesh_division_behavior == "none")
+        paramError("to_mesh_division_usage", "User must specify a 'to_mesh_division_usage'");
+    }
+    else if (_to_mesh_division_behavior != "none")
+      paramError("to_mesh_division",
+                 "'to_mesh_division' must be specified if usage method '" +
+                     Moose::stringify(_to_mesh_division_behavior) + "' is specified");
   }
 
   // Check if components are set correctly if using an array variable
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     for (const auto var_index : make_range(_from_var_names.size()))
     {
@@ -252,7 +384,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
                    "Component passed is larger than size of variable");
     }
   }
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     for (const auto var_index : make_range(_to_var_names.size()))
     {
@@ -273,9 +405,9 @@ MultiAppGeneralFieldTransfer::initialSetup()
   if (_to_problems.size())
   {
     _to_variables.resize(_to_var_names.size());
-    for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
-      _to_variables[i_to] = &_to_problems[0]->getVariable(
-          0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    for (const auto i_var : index_range(_to_var_names))
+      _to_variables[i_var] = &_to_problems[0]->getVariable(
+          0, _to_var_names[i_var], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
   }
 }
 
@@ -286,7 +418,7 @@ MultiAppGeneralFieldTransfer::getAppInfo()
 
   // Create the point locators to locate evaluation points in the origin mesh(es)
   _from_point_locators.resize(_from_problems.size());
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : index_range(_from_problems))
   {
     const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
     _from_point_locators[i_from] =
@@ -300,32 +432,42 @@ MultiAppGeneralFieldTransfer::execute()
 {
   getAppInfo();
 
+  // Set up bounding boxes, etc
+  prepareToTransfer();
+
   // loop over the vector of variables and make the transfer one by one
-  for (unsigned int i = 0; i < _var_size; ++i)
+  for (const auto i : make_range(_var_size))
     transferVariable(i);
 
   postExecute();
 }
 
 void
-MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+MultiAppGeneralFieldTransfer::prepareToTransfer()
 {
-  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
-
   // Get the bounding boxes for the "from" domains.
-  // Clean up _bboxes
-  _bboxes.clear();
+  // Clean up _from_bboxes from the previous transfer execution
+  _from_bboxes.clear();
 
   // NOTE: This ignores the app's bounding box inflation and padding
-  _bboxes = getRestrictedFromBoundingBoxes();
+  _from_bboxes = getRestrictedFromBoundingBoxes();
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
-  extendBoundingBoxes(_bbox_factor, _bboxes);
+  extendBoundingBoxes(_bbox_factor, _from_bboxes);
 
   // Figure out how many "from" domains each processor owns.
   _froms_per_proc.clear();
   _froms_per_proc = getFromsPerProc();
+
+  // Get the index for the first source app every processor owns
+  _global_app_start_per_proc = getGlobalStartAppPerProc();
+}
+
+void
+MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+{
+  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 
   // Find outgoing target points
   // We need to know what points we need to send which processors
@@ -341,15 +483,16 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
-  auto gather_functor = [this](processor_id_type /*pid*/,
-                               const std::vector<Point> & incoming_points,
-                               std::vector<std::pair<Real, Real>> & outgoing_vals)
+  auto gather_functor =
+      [this](processor_id_type /*pid*/,
+             const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
+             std::vector<std::pair<Real, Real>> & outgoing_vals)
   {
     outgoing_vals.resize(
-        incoming_points.size(),
+        incoming_locations.size(),
         {GeneralFieldTransfer::BetterOutOfMeshValue, GeneralFieldTransfer::BetterOutOfMeshValue});
     // Evaluate interpolation values for these incoming points
-    evaluateInterpValues(incoming_points, outgoing_vals);
+    evaluateInterpValues(incoming_locations, outgoing_vals);
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
@@ -359,7 +502,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Copy data out to incoming_vals_ids
   auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches, &distance_caches](
                             processor_id_type pid,
-                            const std::vector<Point> & my_outgoing_points,
+                            const std::vector<std::pair<Point, unsigned int>> & my_outgoing_points,
                             const std::vector<std::pair<Real, Real>> & incoming_vals)
   {
     auto & pointInfoVec = _processor_to_pointInfoVec[pid];
@@ -393,31 +536,89 @@ void
 MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
                                                    std::set<processor_id_type> & processors)
 {
-  // Check which processors include this point
-  // One point might have more than one points
+  // Check which processors have apps that may include or be near this point
+  // A point may be close enough to several problems, hosted on several processes
   bool found = false;
-  unsigned int from0 = 0;
-  // Find which bboxes might have the nearest node to this point.
-  Real nearest_max_distance = std::numeric_limits<Real>::max();
-  for (const auto & bbox : _bboxes)
+
+  // Additional process-restriction techniques we could use (TODOs):
+  // - nearest_positions/_app could use its own heuristic
+  // - from_mesh_divisions could be polled for which divisions they possess on each
+  //   process, depending on the behavior chosen. This could limit potential senders.
+  //   This should be done ahead of this function call, for all points at once
+
+  // Select the method for determining the apps receiving points/sending values
+  if (_use_bounding_boxes)
   {
-    Real distance = bboxMaxDistance(point, bbox);
-    if (distance < nearest_max_distance)
-      nearest_max_distance = distance;
-  }
-  for (processor_id_type i_proc = 0; i_proc < n_processors();
-       from0 += _froms_per_proc[i_proc], ++i_proc)
-    for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+    // We examine all bounding boxes and find the maximum distance within a bounding box
+    // from the point. This creates a sphere around the point of interest. Any app with a bounding
+    // box that intersects this sphere (with a bboxMinDistance < nearest_max_distance) will be
+    // considered a potential source.
+    // NOTE: This is a heuristic. We could try others
+    // NOTE: from_bboxes are in the reference space, as is the point
+    Real nearest_max_distance = std::numeric_limits<Real>::max();
+    for (const auto & bbox : _from_bboxes)
     {
-      Real distance = bboxMinDistance(point, _bboxes[i_from]);
-      // We will not break here because we want to send a point to all possible source domains
-      if (_greedy_search || distance <= nearest_max_distance ||
-          _bboxes[i_from].contains_point(point))
-      {
-        processors.insert(i_proc);
-        found = true;
-      }
+      Real distance = bboxMaxDistance(point, bbox);
+      if (distance < nearest_max_distance)
+        nearest_max_distance = distance;
     }
+
+    unsigned int from0 = 0;
+    for (processor_id_type i_proc = 0; i_proc < n_processors();
+         from0 += _froms_per_proc[i_proc], ++i_proc)
+      for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+      {
+        Real distance = bboxMinDistance(point, _from_bboxes[i_from]);
+        // We will not break here because we want to send a point to all possible source domains
+        if (_greedy_search || distance <= nearest_max_distance ||
+            _from_bboxes[i_from].contains_point(point))
+        {
+          processors.insert(i_proc);
+          found = true;
+        }
+      }
+  }
+  // Greedy search will contact every single processor. It's not scalable, but if there's valid data
+  // on any subapp on any process, it will find it
+  else if (_greedy_search)
+  {
+    found = true;
+    for (const auto i_proc : make_range(n_processors()))
+      processors.insert(i_proc);
+  }
+  // Since we indicated that we only wanted values from a subapp with the same global index as the
+  // target mesh division, we might as well only communicate with the process that owns this app
+  else if (!_to_mesh_divisions.empty() &&
+           _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+  {
+    // The target point could have a different index in each target mesh division. So on paper, we
+    // would need to check all of them.
+    auto saved_target_div = MooseMeshDivision::INVALID_DIVISION_INDEX;
+    for (const auto i_to : index_range(_to_meshes))
+    {
+      const auto target_div = _to_mesh_divisions[i_to]->divisionIndex(
+          _to_transforms[getGlobalTargetAppIndex(i_to)]->mapBack(point));
+      // If it's the same division index, do not redo the search
+      if (target_div == saved_target_div)
+        continue;
+      else
+        saved_target_div = target_div;
+
+      // Look for the processors owning a source-app with an index equal to the target mesh division
+      for (const auto i_proc : make_range(n_processors()))
+        for (const auto i_from : make_range(_froms_per_proc[i_proc]))
+          if (target_div == _global_app_start_per_proc[i_proc] + i_from)
+          {
+            processors.insert(i_proc);
+            found = true;
+          }
+    }
+  }
+  else
+    mooseError("No algorithm were selected to find which processes may send value data "
+               "for a each target point. Please either specify using bounding boxes, "
+               "greedy search, or to_mesh_division-based parameters");
+
   // Error out if we could not find this point when ask us to do so
   if (!found && _error_on_miss)
     mooseError("Cannot locate point ", point, " \n ", "mismatched meshes are used");
@@ -430,20 +631,37 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
                                                      ProcessorToPointVec & outgoing_points)
 {
   std::set<processor_id_type> processors;
-  // Try to find which processors
+  // Find which processors will receive point data so they can send back value data
+  // The list can be larger than needed, depending on the heuristic / algorithm used to make
+  // the call on whether a processor (and the apps it runs) should be involved
   processors.clear();
   locatePointReceivers(point, processors);
 
-  // We need to send these data to these processors
-  for (auto pid : processors)
+  // We need to send this location data to these processors so they can send back values
+  for (const auto pid : processors)
   {
-    outgoing_points[pid].push_back(point);
-    // Store point information
+    // Select which from_mesh_division the source data must come from for this point
+    unsigned int required_source_division = 0;
+    if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      required_source_division = getGlobalTargetAppIndex(problem_id);
+    else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+             _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+             _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX)
+      required_source_division = _to_mesh_divisions[problem_id]->divisionIndex(
+          _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(point));
+
+    // Skip if we already know we don't want the point
+    if (required_source_division == MooseMeshDivision::INVALID_DIVISION_INDEX)
+      continue;
+
+    // Store outgoing information for every source process
+    outgoing_points[pid].push_back(std::pair<Point, unsigned int>(point, required_source_division));
+
+    // Store point information locally for processing received data
     // We can use these information when insert values to solution vector
     PointInfo pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
-    pointinfo.offset = 0;
     _processor_to_pointInfoVec[pid].push_back(pointinfo);
   }
 }
@@ -460,7 +678,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
   _processor_to_pointInfoVec.clear();
 
   // Loop over all problems
-  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  for (const auto i_to : index_range(_to_problems))
   {
     const auto global_i_to = getGlobalTargetAppIndex(i_to);
 
@@ -491,7 +709,21 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
                                 GeneralFieldTransfer::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
+      // Defining only boundary values will not be enough to describe the variable, disallow it
+      if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
+        mooseError("Higher order discontinuous elemental variables are not supported for "
+                   "target-boundary "
+                   "restricted transfers");
+
+      // Not implemented as the target mesh division could similarly be cutting elements in an
+      // arbitrary way with not enough requested points to describe the target variable
+      if (!_to_mesh_divisions.empty() && !_to_mesh_divisions[i_to]->coversEntireMesh())
+        mooseError("Higher order variable support not implemented for target mesh division "
+                   "unless the mesh is fully covered / indexed in the mesh division. This must be "
+                   "set programmatically in the MeshDivision object used.");
+
       // We dont look at boundary restriction, not supported for higher order target variables
+      // Same for mesh divisions
       const auto & to_begin = _to_blocks.empty()
                                   ? to_mesh.active_local_elements_begin()
                                   : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
@@ -505,7 +737,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
       request_gather.project(to_elem_range);
 
       dof_id_type point_id = 0;
-      for (Point p : f.points_requested())
+      for (const Point & p : f.points_requested())
         // using the point number as a "dof_object_id" will serve to identify the point if we ever
         // rework interp/distance_cache into the dof_id_to_value maps
         this->cacheOutgoingPointInfo(
@@ -531,6 +763,13 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, node))
           continue;
 
+        // Skip if the node does not meet the target mesh division behavior
+        // We cannot know from which app the data will come from so we cannot know
+        // the source mesh division index and the source app global index
+        if (!_to_mesh_divisions.empty() && _to_mesh_divisions[i_to]->divisionIndex(*node) ==
+                                               MooseMeshDivision::INVALID_DIVISION_INDEX)
+          continue;
+
         // Cache point information
         // We will use this information later for setting values back to solution vectors
         cacheOutgoingPointInfo(
@@ -539,7 +778,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
     }
     else // Elemental, constant monomial
     {
-      for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      for (const auto & elem :
+           as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
@@ -551,6 +791,11 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
 
         // Skip if the element does not have a side on the boundary
         if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, elem))
+          continue;
+
+        // Skip if the element is not indexed within the mesh division
+        if (!_to_mesh_divisions.empty() && _to_mesh_divisions[i_to]->divisionIndex(*elem) ==
+                                               MooseMeshDivision::INVALID_DIVISION_INDEX)
           continue;
 
         // Cache point information
@@ -574,8 +819,8 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
     local_start += _froms_per_proc[i_proc];
 
   // Extract the local bounding boxes.
-  for (unsigned int i_from = 0; i_from < _froms_per_proc[processor_id()]; ++i_from)
-    local_bboxes[i_from] = _bboxes[local_start + i_from];
+  for (const auto i_from : make_range(_froms_per_proc[processor_id()]))
+    local_bboxes[i_from] = _from_bboxes[local_start + i_from];
 }
 
 void
@@ -583,7 +828,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const unsigned int var_index,
     std::vector<PointInfo> & pointInfoVec,
-    const std::vector<Point> & point_requests,
+    const std::vector<std::pair<Point, unsigned int>> & point_requests,
     const std::vector<std::pair<Real, Real>> & incoming_vals,
     DofobjectToInterpValVec & dofobject_to_valsvec,
     InterpCaches & interp_caches,
@@ -593,7 +838,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
               "Number of dof objects does not equal to the number of incoming values");
 
   dof_id_type val_offset = 0;
-  for (auto & pointinfo : pointInfoVec)
+  for (const auto & pointinfo : pointInfoVec)
   {
     // Retrieve target information from cached point infos
     const auto problem_id = pointinfo.problem_id;
@@ -602,23 +847,17 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     auto & fe_type = _to_variables[var_index]->feType();
     bool is_nodal = _to_variables[var_index]->isNodal();
 
-    // In the higher order elemental variable case, we receive point values, not nodal or elemental
-    // We use an InterpCache to store the values
-    // The distance_cache is necessary to choose between multiple origin problems sending values
-    // This code could be unified with the lower order order case by using the dofobject_to_valsvec
+    // In the higher order elemental variable case, we receive point values, not nodal or
+    // elemental. We use an InterpCache to store the values. The distance_cache is necessary to
+    // choose between multiple origin problems sending values. This code could be unified with the
+    // lower order order case by using the dofobject_to_valsvec
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      // Defining only boundary values will not be enough to describe the variable, disallow it
-      if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
-        mooseError(
-            "Higher order discontinuous elemental variables are not supported for target-boundary "
-            "restricted transfers");
-
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
       InterpCache & distance_cache = distance_caches[problem_id];
-      Point p =
-          _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(point_requests[val_offset]);
+      Point p = _to_transforms[getGlobalTargetAppIndex(problem_id)]->mapBack(
+          point_requests[val_offset].first);
       const Number val = incoming_vals[val_offset].first;
 
       // Initialize distance to be able to compare
@@ -697,7 +936,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         {
           // Keep track of distance and value
           const Point p =
-              getPointInTargetAppFrame(point_requests[val_offset],
+              getPointInTargetAppFrame(point_requests[val_offset].first,
                                        problem_id,
                                        "Registration of received equi-distant value conflict");
           registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
@@ -856,7 +1095,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     // with the received information
     bool target_found = false;
     bool conflict_real = false;
-    for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+    for (const auto i_to : index_range(_to_problems))
     {
       // Extract variable info
       auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
@@ -1092,10 +1331,10 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & interp_caches)
 {
-  // Get the variable name, with the accomodation for array/vector names
+  // Get the variable name, with the accommodation for array/vector names
   const auto & var_name = getToVarName(var_index);
 
-  for (unsigned int problem_id = 0; problem_id < _to_problems.size(); ++problem_id)
+  for (const auto problem_id : index_range(_to_problems))
   {
     auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
@@ -1147,9 +1386,9 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     }
     else
     {
-      for (auto & val_pair : dofobject_to_val)
+      for (const auto & val_pair : dofobject_to_val)
       {
-        auto dof_object_id = val_pair.first;
+        const auto dof_object_id = val_pair.first;
 
         const DofObject * dof_object = nullptr;
         if (is_nodal)
@@ -1157,18 +1396,28 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         else
           dof_object = to_mesh.elem_ptr(dof_object_id);
 
-        auto dof = dof_object->dof_number(sys_num, var_num, 0);
-
-        auto val = val_pair.second.interp;
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = val_pair.second.interp;
 
         // This will happen if meshes are mismatched
         if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         {
+          const auto target_location =
+              hasToMultiApp()
+                  ? " on target app " + std::to_string(getGlobalTargetAppIndex(problem_id))
+                  : " on parent app ";
           if (is_nodal)
-            mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
+            mooseError("No source value could be found for node ",
+                       dof_object_id,
+                       target_location,
+                       "could not be located. Node details:\n",
+                       _to_meshes[problem_id]->nodePtr(dof_object_id)->get_info());
           else
-            mooseError(
-                "Element ", dof_object_id, " for app ", problem_id, " could not be located ");
+            mooseError("No source value could be found for element ",
+                       dof_object_id,
+                       target_location,
+                       "could not be located. Element details:\n",
+                       _to_meshes[problem_id]->elemPtr(dof_object_id)->get_info());
         }
 
         // We should not put garbage into our solution vector
@@ -1195,9 +1444,11 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 bool
 MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
                                                       const std::vector<BoundingBox> & local_bboxes,
-                                                      const Point & pt) const
+                                                      const Point & pt,
+                                                      const unsigned int only_from_mesh_div,
+                                                      Real & distance) const
 {
-  if (!local_bboxes[i_from].contains_point(pt))
+  if (_use_bounding_boxes && !local_bboxes[i_from].contains_point(pt))
     return false;
   else
   {
@@ -1205,14 +1456,43 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
     const auto from_global_num = getGlobalSourceAppIndex(i_from);
     const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
 
-    // Check block restriction
+    // Check point against source block restriction
     if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, transformed_pt))
       return false;
 
-    // Check boundary restriction. Passing the block restriction will speed up the search
+    // Check point against source boundary restriction. Block restriction will speed up the search
     if (!_from_boundaries.empty() &&
         !onBoundaries(_from_boundaries, _from_blocks, *_from_meshes[i_from], pl, transformed_pt))
       return false;
+
+    // Check point against the source mesh division
+    if ((!_from_mesh_divisions.empty() || !_to_mesh_divisions.empty()) &&
+        !acceptPointMeshDivision(transformed_pt, i_from, only_from_mesh_div))
+      return false;
+
+    // Get nearest position (often a subapp position) for the target point
+    // We want values from the child app that is closest to the same position as the target
+    Point nearest_position_source;
+    if (_nearest_positions_obj)
+    {
+      const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+      // The search for the nearest position is done in the reference frame
+      const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
+      nearest_position_source = _nearest_positions_obj->getNearestPosition(
+          (*_from_transforms[from_global_num])(Point(0, 0, 0)), initial);
+
+      if (!_skip_coordinate_collapsing &&
+          _from_transforms[from_global_num]->hasNonTranslationTransformation())
+        mooseError("Rotation and scaling currently unsupported with nearest positions transfer.");
+
+      // Source (usually app position) is not closest to the same positions as the target, dont
+      // send values
+      if (nearest_position != nearest_position_source)
+        return false;
+
+      // Set the distance as the distance from the nearest position to the target point
+      distance = (pt - nearest_position_source).norm();
+    }
 
     // Check that the app actually contains the origin point
     // We dont need to check if we already found it in a block or a boundary
@@ -1299,13 +1579,13 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
   std::vector<BoundaryID> vec_to_fill;
   std::vector<BoundaryID> vec_to_fill_temp;
   if (_elemental_boundary_restriction_on_sides)
-    for (auto side : make_range(elem->n_sides()))
+    for (const auto side : make_range(elem->n_sides()))
     {
       bnd_info.boundary_ids(elem, side, vec_to_fill_temp);
       vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
     }
   else
-    for (auto node_index : make_range(elem->n_nodes()))
+    for (const auto node_index : make_range(elem->n_nodes()))
     {
       bnd_info.boundary_ids(elem->node_ptr(node_index), vec_to_fill_temp);
       vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
@@ -1342,6 +1622,36 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
 }
 
 bool
+MultiAppGeneralFieldTransfer::acceptPointMeshDivision(
+    const Point & pt, const unsigned int i_local, const unsigned int only_from_this_mesh_div) const
+{
+  // This routine can also be called to examine if the to_mesh_division index matches the current
+  // source subapp index
+  unsigned int source_mesh_div = MooseMeshDivision::INVALID_DIVISION_INDEX - 1;
+  if (!_from_mesh_divisions.empty())
+    source_mesh_div = _from_mesh_divisions[i_local]->divisionIndex(pt);
+
+  // If the point is not indexed in the source division
+  if (!_from_mesh_divisions.empty() && source_mesh_div == MooseMeshDivision::INVALID_DIVISION_INDEX)
+    return false;
+  // If the point is not the at the same index in the target and the origin meshes, reject
+  else if ((_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+            _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX) &&
+           source_mesh_div != only_from_this_mesh_div)
+    return false;
+  // If the point is at a certain division index that is not the same as the index of the subapp
+  // we wanted the information to be from for that point, reject
+  else if (_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+           source_mesh_div != only_from_this_mesh_div)
+    return false;
+  else if (_to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX &&
+           only_from_this_mesh_div != getGlobalSourceAppIndex(i_local))
+    return false;
+  else
+    return true;
+}
+
+bool
 MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Point & pt) const
 {
   mooseAssert(_nearest_positions_obj, "Should not be here without a positions object");
@@ -1353,7 +1663,7 @@ MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Po
 }
 
 Real
-MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox)
+MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox) const
 {
   std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
@@ -1377,7 +1687,7 @@ MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox
 }
 
 Real
-MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox & bbox)
+MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox & bbox) const
 {
   std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
@@ -1401,7 +1711,7 @@ MultiAppGeneralFieldTransfer::bboxMinDistance(const Point & p, const BoundingBox
 }
 
 std::vector<BoundingBox>
-MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
+MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes() const
 {
   std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
   const Real min_r = std::numeric_limits<Real>::lowest();
@@ -1414,13 +1724,13 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     bool at_least_one = false;
     const auto & from_mesh = _from_problems[j]->mesh(_displaced_source_mesh);
 
-    for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
-                                from_mesh.getMesh().local_elements_end()))
+    for (const auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
+                                      from_mesh.getMesh().local_elements_end()))
     {
       if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, elem))
         continue;
 
-      for (auto & node : elem->node_ref_range())
+      for (const auto & node : elem->node_ref_range())
       {
         if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, &node))
           continue;
@@ -1472,7 +1782,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
   // TODO move up
   // Check for a user-set fixed bounding box size and modify the sizes as appropriate
   if (_fixed_bbox_size != std::vector<Real>(3, 0))
-    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    for (const auto i : make_range(LIBMESH_DIM))
       if (!MooseUtils::absoluteFuzzyEqual(_fixed_bbox_size[i], 0))
         for (const auto j : make_range(bboxes.size()))
         {
@@ -1482,6 +1792,16 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
         }
 
   return bboxes;
+}
+
+std::vector<unsigned int>
+MultiAppGeneralFieldTransfer::getGlobalStartAppPerProc() const
+{
+  std::vector<unsigned int> global_app_start_per_proc(1, -1);
+  if (_from_local2global_map.size())
+    global_app_start_per_proc[0] = _from_local2global_map[0];
+  _communicator.allgather(global_app_start_per_proc, true);
+  return global_app_start_per_proc;
 }
 
 VariableName
@@ -1511,10 +1831,10 @@ MultiAppGeneralFieldTransfer::getMaxToProblemsBBoxDimensions() const
                          std::numeric_limits<Real>::min(),
                          std::numeric_limits<Real>::min()};
 
-  for (auto & to_mesh : _to_meshes)
+  for (const auto & to_mesh : _to_meshes)
   {
     const auto bbox = to_mesh->getInflatedProcessorBoundingBox();
-    for (auto dim : make_range(LIBMESH_DIM))
+    for (const auto dim : make_range(LIBMESH_DIM))
       max_dimension(dim) = std::max(
           max_dimension(dim), std::max(std::abs(bbox.first(dim)), std::abs(bbox.second(dim))));
   }

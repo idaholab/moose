@@ -337,6 +337,7 @@ ElementGroupCentroidPositions::initialize()
 
   // Fill the 1D position vector
   unrollMultiDPositions();
+  _initialized = true;
 }
 
 unsigned int

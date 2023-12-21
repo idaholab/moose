@@ -1,0 +1,163 @@
+[Tests]
+  issues = '#25901'
+  design = 'MeshDivisions/index.md MultiAppGeneralFieldTransfer.md'
+  [mesh_div]
+    requirement = 'The system shall be able to leverage mesh divisions during nearest-location based transfers'
+    [restriction_source]
+      type = Exodiff
+      input = 'main.i'
+      exodiff = "restriction_source.e restriction_source_sub0_out.e restriction_source_sub1_out.e "
+                "restriction_source_sub2_out.e restriction_source_sub3_out.e"
+      cli_args = "Outputs/file_base=restriction_source "
+                 "Transfers/to_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/from_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/from_mesh_division=middle "
+                 "Transfers/to_sub_elem/from_mesh_division=middle "
+                 "Transfers/from_sub/from_mesh_division=middle_sub "
+                 "Transfers/from_sub_elem/from_mesh_division=middle_sub"
+      detail = 'to restrict the source domain for the transfered field,'
+      # See #26289. Issue with the search value conflict
+      max_parallel = 7
+    []
+    [restriction_target]
+      type = Exodiff
+      input = 'main.i'
+      exodiff = "restriction_target.e restriction_target_sub0_out.e restriction_target_sub1_out.e "
+                "restriction_target_sub2_out.e restriction_target_sub3_out.e"
+      cli_args = "Outputs/file_base=restriction_target "
+                 "Transfers/to_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/from_sub_elem/to_mesh_division_usage=spatial_restriction "
+                 "Transfers/to_sub/to_mesh_division=middle_sub "
+                 "Transfers/to_sub_elem/to_mesh_division=middle_sub "
+                 "Transfers/from_sub/to_mesh_division=middle "
+                 "Transfers/from_sub_elem/to_mesh_division=middle"
+      detail = 'to restrict the target domain for the transfered field,'
+    []
+    [matching_division_from_target_division]
+      type = Exodiff
+      input = 'main_match_division.i'
+      exodiff = "matching_division_target.e  matching_division_target_sub0_out.e  "
+                "matching_division_target_sub1_out.e  matching_division_target_sub2_out.e  "
+                "matching_division_target_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_division_target"
+      # We grow the bounding-box factor for reproducibility in parallel
+      detail = 'to distribute field data restricted to divisions of the source mesh to matching divisions of the target mesh,'
+    []
+    [matching_subapps]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp.e matching_subapp_sub0_out.e matching_subapp_sub1_out.e "
+                "matching_subapp_sub2_out.e matching_subapp_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/bbox_factor=20 "
+                 "Transfers/from_sub_elem/bbox_factor=20 "
+      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions,'
+    []
+    [matching_subapps_nobbox]
+      type = Exodiff
+      input = 'main_match_subapps.i'
+      exodiff = "matching_subapp_nobbox.e matching_subapp_nobbox_sub0_out.e "
+                "matching_subapp_nobbox_sub1_out.e matching_subapp_nobbox_sub2_out.e "
+                "matching_subapp_nobbox_sub3_out.e"
+      cli_args = "Outputs/file_base=matching_subapp_nobbox  Transfers/to_sub/bbox_factor=20 "
+                 "Transfers/to_sub_elem/bbox_factor=20 Transfers/from_sub/use_bounding_boxes=false "
+                 "Transfers/from_sub_elem/use_bounding_boxes=false "
+      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions, with a custom algorithm for finding source applications.'
+    []
+  []
+
+  [warnings]
+    requirement = "The system shall emit a warning if"
+    [mismatch_num_divisions]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/to_sub/to_mesh_division_usage=matching_division "
+                 "Transfers/to_sub/from_mesh_division_usage=matching_division "
+                 "Transfers/to_sub/to_mesh_division=middle_sub "
+                 "Transfers/to_sub/from_mesh_division=middle MeshDivisions/middle/nx=30"
+      expect_err = "Source and target mesh divisions do not have the same number of bins"
+      detail = "the mesh divisions that we asked to match do not have the same number of bins,"
+    []
+    [mismatch_source_division_and_target_subapps]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/to_sub/from_mesh_division_usage=matching_subapp_index "
+                 "Transfers/to_sub/from_mesh_division=middle "
+                 "Transfers/to_sub/to_mesh_division=middle_sub MeshDivisions/middle/nx=1"
+      expect_err = "Attempting to match target subapp index with the number of source mesh "
+                   "divisions, which is 2 while there are 4 target subapps"
+      detail = "the number of bins in the source mesh division and the number of target subapps to "
+               "match are not equal "
+    []
+    [mismatch_target_division_and_source_subapps]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/from_sub/to_mesh_division_usage=matching_subapp_index "
+                 "Transfers/from_sub/to_mesh_division=middle MultiApps/sub/cli_args='' "
+                 "MultiApps/sub/positions='0 0 0'"
+      expect_err = "Attempting to match source subapp index with the number of target mesh "
+                   "divisions, which is 4 while there are 1 source subapp"
+      detail = "the number of bins in the target mesh division and the number of source subapps to "
+               "match are not equal."
+    []
+  []
+
+  [errors_bad_params]
+    requirement = 'The system shall error if the user passes parameters for'
+    [missing_from_division]
+      type = RunException
+      input = 'main.i'
+      cli_args = 'Transfers/to_sub/from_mesh_division_usage="spatial_restriction"'
+      expect_err = "\'from_mesh_division\' must be specified if the usage method is specified"
+      detail = 'the technique used with source mesh divisions without specifying the source mesh division,'
+    []
+    [missing_to_division]
+      type = RunException
+      input = 'main.i'
+      cli_args = 'Transfers/to_sub/to_mesh_division_usage="spatial_restriction"'
+      expect_err = "'to_mesh_division' must be specified if usage method 'spatial_restriction' is "
+                   "specified"
+      detail = 'the technique used with target mesh divisions without specifying the target mesh division,'
+    []
+    [missing_source_selection_algo]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/to_sub/use_bounding_boxes=false"
+      expect_err = "No algorithm were selected to find which processes may send value data"
+      detail = "no algorithm has been selected for selecting the processes sending data,"
+    []
+    [parent_app_not_a_subapp_source]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/to_sub/to_mesh_division_usage=matching_subapp_index "
+                 "Transfers/to_sub/to_mesh_division=middle_sub"
+      expect_err = "Cannot match target mesh division index to source subapp index"
+      detail = "the target mesh division is asked to match the source app number, but the source app "
+               "is the parent app not a subapp,"
+    []
+    [parent_app_not_a_subapp_target]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/from_sub/from_mesh_division_usage=matching_subapp_index "
+                 "Transfers/from_sub/from_mesh_division=middle_sub"
+      expect_err = "Cannot match source mesh division index to target subapp index"
+      detail = "the source mesh division is asked to match the target app number, but the target app "
+               "is the parent app not a subapp,"
+    []
+    [incompatible_modes]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/to_sub/to_mesh_division_usage=matching_division "
+                 "Transfers/to_sub/from_mesh_division_usage=matching_subapp_index "
+                 "Transfers/to_sub/from_mesh_division=middle "
+                 "Transfers/to_sub/to_mesh_division=middle_sub "
+      expect_err = "We do not support using target subapp index for source division behavior and "
+                   "matching the division index"
+      detail = 'the techniques for the target and source mesh divisions are incompatible.'
+    []
+  []
+[]

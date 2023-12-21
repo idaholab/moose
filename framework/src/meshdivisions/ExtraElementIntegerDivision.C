@@ -35,6 +35,7 @@ ExtraElementIntegerDivision::ExtraElementIntegerDivision(const InputParameters &
   _extra_id = _mesh.getMesh().get_elem_integer_index(_extra_id_name);
 
   ExtraElementIntegerDivision::initialize();
+  _mesh_fully_indexed = true;
 }
 
 void

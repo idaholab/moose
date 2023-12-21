@@ -23,6 +23,14 @@ An alternative option to distribute a division object would be to use a [Positio
 object within the definition of the object, for example the center of a [CylindricalGridDivision.md].
 This has not been implemented yet. Please reach out to a MOOSE developer if this is of interest.
 
+## Indexing the entire mesh or not
+
+Each `MeshDivision` object can keep track of whether the entire mesh is indexed by the `MeshDivision`.
+This can be expensive to check at any point, because the mesh could deform or because the bins
+of the `MeshDivision` for the divisions change. Each `MeshDivision` object should either perform
+a rigorous check before considering that the entire mesh is indexed, or make a conservative assumption
+that the entire mesh is not indexed in the division.
+
 ## Postprocessing with MeshDivisions
 
 For now, the mesh divisions can only be output using a [MeshDivisionAux.md].

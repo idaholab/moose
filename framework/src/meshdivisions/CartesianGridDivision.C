@@ -107,6 +107,24 @@ CartesianGridDivision::initialize()
           min_center_dist,
           "), closer than the extent of each grid. Mesh division is ill-defined");
   }
+
+  // Examine mesh bounding box to see if the mesh may not be fully contained
+  _mesh_fully_indexed = true;
+  if (!_outside_grid_counts_as_border)
+    for (auto i : make_range(LIBMESH_DIM))
+    {
+      if (_center_positions)
+      {
+        _mesh_fully_indexed = false;
+        break;
+      }
+      else if (_bottom_left(i) > _mesh.getInflatedProcessorBoundingBox(0).first(i) ||
+               _top_right(i) < _mesh.getInflatedProcessorBoundingBox(0).second(i))
+      {
+        _mesh_fully_indexed = false;
+        break;
+      }
+    }
 }
 
 unsigned int
