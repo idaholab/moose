@@ -16,10 +16,10 @@ SalineMoltenSaltFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Molten salt fluid properties using Saline");
-  params.addRequiredParam<std::string>(
-      "comp_name", "The name of the components in the salt (e.g., 'LiF-NaF-KF')");
-  params.addRequiredParam<std::string>(
-      "comp_val", "The mole fraction of each salt component (e.g., '0.5-0.1-0.4)");
+  params.addRequiredParam<std::vector<std::string>>("comp_name",
+                                                    "The name of the components in the salt");
+  params.addRequiredParam<std::vector<Real>>("comp_val",
+                                             "The mole fraction of each salt component");
   params.addRequiredParam<std::string>(
       "prop_def",
       "Definition of a fluid property file, which must be a file path to the "
@@ -36,21 +36,20 @@ SalineMoltenSaltFluidProperties::SalineMoltenSaltFluidProperties(const InputPara
   bool success = _tp.initialize(&_d);
   if (!success)
     mooseError("The initialization of the Saline interface has failed");
-  const auto & name = getParam<std::string>("comp_name");
-  const auto & comp = getParam<std::string>("comp_val");
-  std::vector<std::string> nameList;
-  MooseUtils::tokenize<std::string>(name, nameList, 1, "-");
-  std::vector<Real> valList;
-  MooseUtils::tokenizeAndConvert<Real>(comp, valList, "-");
+  const auto & name = getParam<std::vector<std::string>>("comp_name");
+  const auto & comp = getParam<std::vector<Real>>("comp_val");
+
+  // Verify mole fractions
   Real mole_sum = 0.0;
-  for (const auto val : valList)
+  for (const auto val : comp)
     mole_sum += val;
   if (std::abs(mole_sum - 1.0) > 1e-6)
     mooseError("Mole fractions of defined salt compound do not sum to 1.0.");
-  success = _tp.setComposition(nameList, valList);
+
+  success = _tp.setComposition(name, comp);
   if (!success)
     mooseError("The composition set has failed");
-  _fluid_name = name;
+  _fluid_name = MooseUtils::join(name, "-");
 #else
   mooseError("Saline was not made available during the build and can not be used. Make sure you "
              "have the contrib/saline submodule checked out.");

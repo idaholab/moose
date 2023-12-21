@@ -24,8 +24,8 @@ protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("SalineMoltenSaltFluidProperties");
-    uo_pars.set<std::string>("comp_name") = "LiF-NaF-KF";
-    uo_pars.set<std::string>("comp_val") = "0.465-0.115-0.42";
+    uo_pars.set<std::vector<std::string>>("comp_name") = {"LiF", "NaF", "KF"};
+    uo_pars.set<std::vector<Real>>("comp_val") = {0.465, 0.115, 0.42};
     uo_pars.set<std::string>("prop_def") = "../test/tests/saline/saline_custom.prp";
     _fe_problem->addUserObject("SalineMoltenSaltFluidProperties", "fp", uo_pars);
     _fp = &_fe_problem->getUserObject<SalineMoltenSaltFluidProperties>("fp");
