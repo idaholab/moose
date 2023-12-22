@@ -1,15 +1,15 @@
 ##########################################################
 # Lid-driven cavity test
-# Reynolds: 50,000
+# Reynolds: 5,000
 # Author: Dr. Mauricio Tano
-# Last Update: Novomber, 2023
+# Last Update: November, 2023
 # Turbulent model using:
 # k-epsilon model
-# Bulk wall tretement + linear wall functions
-# SIMPLE Solve
+# No wall functions
+# Newton Solve
 ##########################################################
 
-### Thermophsyical Properties ###
+### Thermophysical Properties ###
 mu = 2e-5
 rho = 1.0
 
