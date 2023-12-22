@@ -110,18 +110,20 @@ INSFVTKEDSourceSink::computeQpResidual()
     if (_w_var)
       velocity(2) = (*_w_var)(elem_arg, state);
 
-    for (unsigned int i = 0; i < _dist[_current_elem].size(); i++)
+    const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem);
+    const auto & distance_vec = libmesh_map_find(_dist, _current_elem);
+
+    for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
-      const auto distance = _dist[_current_elem][i];
+      const auto distance = distance_vec[i];
 
       ADReal y_plus;
       if (_non_equilibrium_treatment)
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt(TKE) / mu;
       else
       {
-        const auto parallel_speed = (velocity - velocity * _face_infos[_current_elem][i]->normal() *
-                                                    _face_infos[_current_elem][i]->normal())
-                                        .norm();
+        const auto parallel_speed = NS::computeSpeed(
+            velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
 
         y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
       }
@@ -137,17 +139,17 @@ INSFVTKEDSourceSink::computeQpResidual()
 
       if (y_plus < 11.25)
       {
-        const auto fi = _face_infos[_current_elem][i];
+        const auto fi = face_info_vec[i];
         const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
         const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
         const Moose::FaceArg facearg = {
             fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
         const ADReal wall_mut = _mu_t(facearg, state);
-        destruction += 2.0 * TKE * wall_mut / Utility::pow<2>(_dist[_current_elem][i]) / tot_weight;
+        destruction += 2.0 * TKE * wall_mut / Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
         destruction += std::pow(_C_mu, 0.75) * rho * std::pow(TKE, 1.5) /
-                       (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
+                       (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 
     residual = _var(makeElemArg(_current_elem), state) - destruction;

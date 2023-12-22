@@ -70,7 +70,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi) const
     velocity(2) = (*_w_var)(current_argument, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
+  const auto parallel_speed = NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"

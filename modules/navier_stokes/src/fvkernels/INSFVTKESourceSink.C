@@ -107,19 +107,21 @@ INSFVTKESourceSink::computeQpResidual()
     if (_w_var)
       velocity(2) = (*_w_var)(elem_arg, state);
 
-    for (unsigned int i = 0; i < _dist[_current_elem].size(); i++)
+    const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem);
+    const auto & distance_vec = libmesh_map_find(_dist, _current_elem);
+
+    for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
-      const auto parallel_speed = (velocity - velocity * _face_infos[_current_elem][i]->normal() *
-                                                  _face_infos[_current_elem][i]->normal())
-                                      .norm();
-      const auto distance = _dist[_current_elem][i];
+      const auto parallel_speed = NS::computeSpeed(
+          velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
+      const auto distance = distance_vec[i];
 
       const auto y_plus =
           NS::findyPlus(_mu(elem_arg, state), rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(y_plus);
 
-      const ADReal velocity_grad_norm = parallel_speed / _dist[_current_elem][i];
+      const ADReal velocity_grad_norm = parallel_speed / distance;
 
       /// Do not erase!!
       // More complete expansion for velocity gradient. Leave commented for now.
@@ -146,18 +148,17 @@ INSFVTKESourceSink::computeQpResidual()
     {
       const auto y_plus = y_plus_vec[i];
 
-      const auto fi = _face_infos[_current_elem][i];
+      const auto fi = face_info_vec[i];
       const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
       const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
       const Moose::FaceArg facearg = {
           fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem};
       const ADReal wall_mut = _mu_t(facearg, state);
 
-      const auto destruction_visc =
-          2.0 * wall_mut / Utility::pow<2>(_dist[_current_elem][i]) / tot_weight;
+      const auto destruction_visc = 2.0 * wall_mut / Utility::pow<2>(distance_vec[i]) / tot_weight;
       const auto destruction_log = std::pow(_C_mu, 0.75) * rho *
                                    std::pow(_var(elem_arg, old_state), 0.5) /
-                                   (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
+                                   (NS::von_karman_constant * distance_vec[i]) / tot_weight;
 
       if (y_plus < 11.25)
         destruction += destruction_visc;
@@ -166,7 +167,7 @@ INSFVTKESourceSink::computeQpResidual()
 
       production += wall_mut * velocity_grad_norm_vec[i] * std::pow(_C_mu, 0.25) /
                     std::sqrt(_var(elem_arg, old_state) + 1e-10) /
-                    (NS::von_karman_constant * _dist[_current_elem][i]) / tot_weight;
+                    (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 
     residual = (destruction - production) * _var(elem_arg, state);
