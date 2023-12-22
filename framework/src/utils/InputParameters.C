@@ -85,17 +85,18 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
 
   if (!inserted_only)
   {
+    auto & metadata = _params[name];
     /**
      * "._set_by_add_param" and ".deprecated_params" are not populated until after
      * the default value has already been set in libMesh (first callback to this
      * method). Therefore if a variable is in/not in one of these sets, you can
      * be assured it was put there outside of the "addParam*()" calls.
      */
-    _params[name]._set_by_add_param = false;
+    metadata._set_by_add_param = false;
 
     // valid_params don't make sense for MooseEnums
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
-      _params[name]._valid = true;
+      metadata._valid = true;
   }
 }
 
@@ -220,8 +221,9 @@ InputParameters::addCoupledVar(const std::string & name, Real value, const std::
 {
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _params[name]._coupled_default.assign(1, value);
-  _params[name]._have_coupled_default = true;
+  auto & metadata = _params[name];
+  metadata._coupled_default.assign(1, value);
+  metadata._have_coupled_default = true;
 
   // Set the doc string for any associated deprecated coupled var
   setDeprecatedVarDocString(name, doc_string);
@@ -235,8 +237,9 @@ InputParameters::addCoupledVar(const std::string & name,
   // std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _params[name]._coupled_default = value;
-  _params[name]._have_coupled_default = true;
+  auto & metadata = _params[name];
+  metadata._coupled_default = value;
+  metadata._have_coupled_default = true;
 
   // Set the doc string for any associated deprecated coupled var
   setDeprecatedVarDocString(name, doc_string);
@@ -987,8 +990,9 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string & name,
                                              const std::string & doc_string)
 {
   InputParameters::set<MooseEnum>(name) = moose_enum; // valid parameter is set by set_attributes
-  _params[name]._required = true;
-  _params[name]._doc_string = doc_string;
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
 }
 
 template <>
@@ -999,8 +1003,9 @@ InputParameters::addRequiredParam<MultiMooseEnum>(const std::string & name,
 {
   InputParameters::set<MultiMooseEnum>(name) =
       moose_enum; // valid parameter is set by set_attributes
-  _params[name]._required = true;
-  _params[name]._doc_string = doc_string;
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
 }
 
 template <>
@@ -1012,8 +1017,9 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 {
   InputParameters::set<std::vector<MooseEnum>>(name) =
       moose_enums; // valid parameter is set by set_attributes
-  _params[name]._required = true;
-  _params[name]._doc_string = doc_string;
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
 }
 
 template <>

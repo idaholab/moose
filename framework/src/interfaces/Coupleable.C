@@ -342,7 +342,14 @@ Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp) con
     default_value_it = _default_value.find(var_name);
   }
 
-  return default_value_it->second[comp].get();
+  const auto & default_value_vec = default_value_it->second;
+  const auto n_default_vals = default_value_vec.size();
+  if (comp >= n_default_vals)
+    mooseError("Requested comp ",
+               comp,
+               " is equal to or greater than the number of default values ",
+               n_default_vals);
+  return default_value_vec[comp].get();
 }
 
 const VectorVariableValue *
