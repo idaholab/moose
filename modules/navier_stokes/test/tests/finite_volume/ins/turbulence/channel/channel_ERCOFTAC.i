@@ -129,7 +129,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     complete_expansion = true
     u = vel_x
     v = vel_y
-    limit_viscosity = true
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -159,7 +158,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     complete_expansion = true
     u = vel_x
     v = vel_y
-    limit_viscosity = true
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -346,6 +344,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [mu_t]
     type = MooseVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+    two_term_boundary_expansion = false
   []
 []
 

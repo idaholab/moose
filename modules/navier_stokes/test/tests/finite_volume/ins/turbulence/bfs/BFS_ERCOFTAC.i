@@ -33,12 +33,12 @@ k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / H}'
 
 ### Modeling parameters ###
-non_equilibrium_treatment = false
+non_equilibrium_treatment = true
 bulk_wall_treatment = false
 walls = 'bottom wall-side top'
 max_mixing_length = 1e10
 linearized_yplus_mu_t = false
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
   [gen]
@@ -320,6 +320,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [mu_t]
     type = MooseVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+    two_term_boundary_expansion = false
   []
 []
 

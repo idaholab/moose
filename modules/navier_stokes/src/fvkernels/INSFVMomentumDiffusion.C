@@ -32,12 +32,6 @@ INSFVMomentumDiffusion::validParams()
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the viscosity.");
 
-  params.addParam<bool>(
-      "limit_viscosity",
-      false,
-      "If the viscosity is negative (could happen when extrapolating to boundaries for example) "
-      "enabling this enforces non-negative viscosity.");
-
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<bool>(
       "complete_expansion",
@@ -58,8 +52,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
-    _dim(_subproblem.mesh().dimension()),
-    _limit_viscosity(getParam<bool>("limit_viscosity"))
+    _dim(_subproblem.mesh().dimension())
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
@@ -98,8 +91,15 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 
   // Protecting from negative viscosity at interpolation
   // to preserve convergence
-  if (_limit_viscosity && face_mu < 0.0)
-    face_mu = 0.0;
+  if (face_mu < 0.0)
+  {
+    mooseWarning("Negative face viscosity has been encountered. Value ",
+                 raw_value(face_mu),
+                 " at ",
+                 _face_info->faceCentroid(),
+                 " limiting it to 0!");
+    face_mu = 0;
+  }
 
   if (populate_a_coeffs)
   {

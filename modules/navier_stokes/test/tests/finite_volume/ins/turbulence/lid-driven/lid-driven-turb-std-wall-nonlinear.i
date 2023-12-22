@@ -303,12 +303,12 @@ linearized_model = false
 [Executioner]
   type = Transient
   end_time = 200
-  dt = 1
+  dt = 0.01
   steady_state_detection = true
   steady_state_tolerance = 1e-3
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'lu        NONZERO               0.7'
+  petsc_options_value = 'lu        NONZERO               0.5'
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
   nl_max_its = 50
