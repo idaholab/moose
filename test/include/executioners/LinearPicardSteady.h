@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executioner.h"
+#include "PetscSupport.h"
 #include "libmesh/solver_configuration.h"
 
 // Forward declarations
@@ -42,8 +43,7 @@ public:
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
-  void originalSolve();
-  void newSolve();
+  bool solveSystem(const unsigned int sys_number, const Moose::PetscSupport::PetscOptions * po);
 
   FEProblemBase & _problem;
 
@@ -52,7 +52,11 @@ protected:
   Real & _time;
 
 private:
-  const unsigned int _linear_sys_number;
+  const std::vector<LinearSystemName> & _linear_sys_names;
+  std::vector<unsigned int> _linear_sys_numbers;
+  std::vector<Moose::PetscSupport::PetscOptions> _petsc_options;
+
   bool _last_solve_converged;
-  unsigned int _number_of_iterations;
+  const unsigned int _number_of_iterations;
+  const bool _print_operators_and_vectors;
 };

@@ -2591,13 +2591,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         if (auto & disp_moose_mesh = _action_warehouse.displacedMesh();
             attach_geometric_rm_final && disp_moose_mesh)
         {
-          MeshBase & disp_mesh_base = disp_moose_mesh->getMesh();
-          const DofMap * disp_nl_dof_map = nullptr;
-          if ((_executioner && feProblem().getDisplacedProblem()->numNonlinearSystems()) &&
-              feProblem().getDisplacedProblem())
-            disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear(0).dofMap();
+          MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
+          const DofMap * disp_sys_dof_map = nullptr;
+          if (_executioner && feProblem().getDisplacedProblem())
+            disp_sys_dof_map =
+                feProblem().getDisplacedProblem()->numNonlinearSystems()
+                    ? &feProblem().getDisplacedProblem()->systemBaseNonlinear(0).dofMap()
+                    : &feProblem().getDisplacedProblem()->systemBaseLinear(0).dofMap();
           disp_mesh_base.add_ghosting_functor(
-              createRMFromTemplateAndInit(*rm, *disp_moose_mesh, disp_mesh_base, disp_nl_dof_map));
+              createRMFromTemplateAndInit(*rm, *disp_moose_mesh, disp_mesh_base, disp_sys_dof_map));
         }
         else if (_action_warehouse.displacedMesh())
           mooseError("The displaced mesh should not yet exist at the time that we are attaching "

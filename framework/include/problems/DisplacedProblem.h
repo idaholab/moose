@@ -432,11 +432,11 @@ DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num)
 inline const SystemBase &
 DisplacedProblem::systemBaseLinear(const unsigned int /*sys_num*/) const
 {
-  mooseError("Linear systems are not supported for displaced problems.");
+  mooseError("Linear systems are not supported for displaced problems yet.");
 }
 
 inline SystemBase &
 DisplacedProblem::systemBaseLinear(const unsigned int /*sys_num*/)
 {
-  mooseError("Linear systems are not supported for displaced problems.");
+  mooseError("Linear systems are not supported for displaced problems yet.");
 }

@@ -70,7 +70,10 @@
 
 [Executioner]
   type = LinearPicardSteady
-  linear_sys_to_solve = u_sys
+  linear_systems_to_solve = u_sys
+  print_operators_and_vectors = true
+  petsc_options_iname = "-pc_type -pc_hypre_type"
+  petsc_options_value = "hypre boomeramg"
 []
 
 [Outputs]

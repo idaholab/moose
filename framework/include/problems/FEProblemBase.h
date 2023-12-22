@@ -445,7 +445,7 @@ public:
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
   virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const PetscOptions * po = nullptr);
+                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
 
   ///@{
   /**

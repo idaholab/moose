@@ -26,12 +26,29 @@ InputParameters
 LinearPicardSteady::validParams()
 {
   InputParameters params = Executioner::validParams();
-  params.addRequiredParam<LinearSystemName>("linear_sys_to_solve",
-                                            "The first nonlinear system to solve");
+  params.addRequiredParam<std::vector<LinearSystemName>>(
+      "linear_systems_to_solve",
+      "The names of linear systems to solve in the order which they should be solved");
   params.addRangeCheckedParam<unsigned int>("number_of_iterations",
                                             1,
                                             "number_of_iterations>0",
                                             "The number of iterations between the two systems.");
+
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "petsc_options", {}, "Singleton PETSc options for each linear equation");
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "petsc_options_iname", {}, "Names of PETSc name/value pairs for each linear equation");
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "petsc_options_value",
+      {},
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for each "
+      "linear equation");
+
+  params.addParam<bool>(
+      "print_operators_and_vectors",
+      false,
+      "Print system matrix, right hand side and solution for the linear systems.");
+
   return params;
 }
 
@@ -40,9 +57,69 @@ LinearPicardSteady::LinearPicardSteady(const InputParameters & parameters)
     _problem(_fe_problem),
     _time_step(_problem.timeStep()),
     _time(_problem.time()),
-    _linear_sys_number(_problem.linearSysNum(getParam<LinearSystemName>("linear_sys_to_solve"))),
-    _number_of_iterations(getParam<unsigned int>("number_of_iterations"))
+    _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_systems_to_solve")),
+    _petsc_options(_linear_sys_names.size()),
+    _number_of_iterations(getParam<unsigned int>("number_of_iterations")),
+    _print_operators_and_vectors(getParam<bool>("print_operators_and_vectors"))
 {
+  const auto & raw_petsc_options = getParam<std::vector<std::vector<std::string>>>("petsc_options");
+  const auto & raw_petsc_options_iname =
+      getParam<std::vector<std::vector<std::string>>>("petsc_options_iname");
+  const auto & raw_petsc_options_value =
+      getParam<std::vector<std::vector<std::string>>>("petsc_options_value");
+
+  if (raw_petsc_options.size() > 1 && raw_petsc_options.size() != _linear_sys_numbers.size())
+    paramError("petsc_options", "Petsc options should be defined for every system separately!");
+
+  if (raw_petsc_options_iname.size() > 1 &&
+      raw_petsc_options_iname.size() != _linear_sys_numbers.size())
+    paramError("petsc_options_iname",
+               "Petsc option keys should be defined for every system separately!");
+
+  if (raw_petsc_options_value.size() != raw_petsc_options_iname.size())
+    paramError(
+        "petsc_options_value",
+        "Petsc option values should be defined for the same number of system as in the keys!");
+
+  for (const auto i : index_range(_linear_sys_names))
+  {
+    _linear_sys_numbers.push_back(_problem.linearSysNum(_linear_sys_names[i]));
+
+    MultiMooseEnum enum_singles = Moose::PetscSupport::getCommonPetscFlags();
+
+    if (raw_petsc_options.size() == 1)
+      enum_singles = raw_petsc_options[0];
+    else if (raw_petsc_options.size() > 1)
+      enum_singles = raw_petsc_options[i];
+
+    MultiMooseEnum enum_pair_keys = Moose::PetscSupport::getCommonPetscKeys();
+    if (raw_petsc_options_iname.size() == 1)
+      enum_pair_keys = raw_petsc_options_iname[0];
+    else if (raw_petsc_options_iname.size() > 1)
+      enum_pair_keys = raw_petsc_options_iname[i];
+
+    std::vector<std::string> enum_pair_values;
+    if (raw_petsc_options_value.size() == 1)
+      enum_pair_values = raw_petsc_options_value[0];
+    else if (raw_petsc_options_value.size() > 1)
+      enum_pair_values = raw_petsc_options_value[i];
+
+    if (enum_pair_keys.size() != enum_pair_values.size())
+      paramError("petsc_options_value",
+                 "The size of petsc option values for system " + _linear_sys_names[i] + " (" +
+                     std::to_string(enum_pair_keys.size()) +
+                     ") doesn ot match the size of the input arguments (" +
+                     std::to_string(enum_pair_values.size()) + ")!");
+
+    std::vector<std::pair<MooseEnumItem, std::string>> raw_iname_value_pairs;
+    for (const auto j : index_range(enum_pair_values))
+      raw_iname_value_pairs.push_back(std::make_pair(enum_pair_keys[j], enum_pair_values[j]));
+
+    Moose::PetscSupport::processPetscFlags(enum_singles, _petsc_options[i]);
+    Moose::PetscSupport::processPetscPairs(
+        raw_iname_value_pairs, _problem.mesh().dimension(), _petsc_options[i]);
+  }
+
   _time = 0;
 }
 
@@ -81,7 +158,11 @@ LinearPicardSteady::execute()
 
   for (unsigned int i = 0; i < _number_of_iterations; i++)
   {
-    newSolve();
+    for (const auto sys_number : _linear_sys_numbers)
+    {
+      const auto & options = _petsc_options[i];
+      solveSystem(sys_number, &options);
+    }
   }
 
   // need to keep _time in sync with _time_step to get correct output
@@ -100,59 +181,19 @@ LinearPicardSteady::execute()
   postExecute();
 }
 
-void
-LinearPicardSteady::originalSolve()
+bool
+LinearPicardSteady::solveSystem(const unsigned int sys_number,
+                                const Moose::PetscSupport::PetscOptions * po)
 {
-  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-  ElemInfoRange elem_info_range(_problem.mesh().ownedElemInfoBegin(),
-                                _problem.mesh().ownedElemInfoEnd());
+  _problem.solveLinearSystem(sys_number, po);
+  if (_print_operators_and_vectors)
+  {
+    auto & sys = _problem.getLinearSystem(sys_number);
+    LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
+    lisystem.matrix->print();
+    lisystem.rhs->print();
+    lisystem.solution->print();
+  }
 
-  using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-  FaceInfoRange face_info_range(_problem.mesh().ownedFaceInfoBegin(),
-                                _problem.mesh().ownedFaceInfoEnd());
-
-  ComputeLinearFVElementalThread elem_thread(
-      _problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
-  Threads::parallel_reduce(elem_info_range, elem_thread);
-
-  ComputeLinearFVFaceThread face_thread(
-      _problem, 0, Moose::FV::LinearFVComputationMode::FullSystem, {});
-  Threads::parallel_reduce(face_info_range, face_thread);
-
-  auto & sys = _problem.getLinearSystem(0);
-  LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
-
-  lisystem.matrix->close();
-  lisystem.rhs->close();
-
-  PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*lisystem.get_linear_solver());
-
-  KSPSetNormType(linear_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-
-  // LinearPicardSolverConfiguration solver_config;
-  // solver_config.real_valued_data["abs_tol"] = 1e-7;
-  // linear_solver.set_solver_configuration(solver_config);
-
-  linear_solver.solve(
-      *lisystem.matrix, *lisystem.matrix, *lisystem.solution, *lisystem.rhs, 1e-10, 500);
-  lisystem.update();
-
-  lisystem.matrix->print();
-  lisystem.rhs->print();
-  lisystem.solution->print();
-}
-
-void
-LinearPicardSteady::newSolve()
-{
-  auto & sys = _problem.getLinearSystem(0);
-  LinearImplicitSystem & lisystem = libMesh::cast_ref<LinearImplicitSystem &>(sys.system());
-
-  sys.solve();
-  // _problem.solveLinearSystem(0);
-
-  lisystem.matrix->print();
-  lisystem.rhs->print();
-  lisystem.solution->print();
+  return true;
 }

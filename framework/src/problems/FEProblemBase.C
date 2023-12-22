@@ -6093,19 +6093,16 @@ FEProblemBase::resetState()
 }
 
 void
-FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num, const PetscOptions * /*po*/)
+FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num, const Moose::PetscSupport::PetscOptions * po)
 {
   TIME_SECTION("solve", 1, "Solving", false);
 
   setCurrentLinearSystem(linear_sys_num);
 
+  const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
+
   // This prevents stale dof indices from lingering around and possibly leading to invalid reads
   // and writes. Dof indices may be made stale through operations like mesh adaptivity
-
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
-      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
-#else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
@@ -6116,10 +6113,9 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num, const PetscO
     SolverParams solver_params;
     solver_params._type = Moose::SolveType::ST_LINEAR;
     solver_params._line_search = Moose::LineSearchType::LS_NONE;
-    Moose::PetscSupport::petscSetOptions(_petsc_options, solver_params);
+    Moose::PetscSupport::petscSetOptions(options, solver_params);
     _is_petsc_options_inserted = true;
   }
-#endif
 
   if (_solve)
     _current_linear_sys->solve();
