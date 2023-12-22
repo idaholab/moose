@@ -319,6 +319,6 @@ linearized_model = false
   exodus = true
   csv = false
   perf_graph = false
-  print_nonlinear_residuals = false
+  print_nonlinear_residuals = true
   print_linear_residuals = true
 []
