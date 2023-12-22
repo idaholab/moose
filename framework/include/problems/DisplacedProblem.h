@@ -59,6 +59,9 @@ public:
   virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const override;
   virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) override;
 
+  virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseLinear(const unsigned int sys_num) override;
+
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
 
@@ -293,8 +296,8 @@ public:
   virtual void prepareFaceShapes(unsigned int var, const THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, const THREAD_ID tid) override;
 
-  Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) override;
-  const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const override;
+  Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
+  const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
@@ -424,4 +427,16 @@ DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num)
   mooseAssert(sys_num < _displaced_nl.size(),
               "System number greater than the number of nonlinear systems");
   return *_displaced_nl[sys_num];
+}
+
+inline const SystemBase &
+DisplacedProblem::systemBaseLinear(const unsigned int /*sys_num*/) const
+{
+  mooseError("Linear systems are not supported for displaced problems.");
+}
+
+inline SystemBase &
+DisplacedProblem::systemBaseLinear(const unsigned int /*sys_num*/)
+{
+  mooseError("Linear systems are not supported for displaced problems.");
 }

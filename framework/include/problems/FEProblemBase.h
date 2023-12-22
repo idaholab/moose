@@ -363,8 +363,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) override;
-  const Assembly & assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const override;
+  Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
+  const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -437,7 +437,8 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
   virtual void neighborSubdomainSetup(SubdomainID subdomain, const THREAD_ID tid);
 
-  virtual void newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
+  virtual void newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                                std::vector<std::shared_ptr<LinearSystem>> & linear_systems);
   virtual void initNullSpaceVectors(const InputParameters & parameters,
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
@@ -678,8 +679,8 @@ public:
   LinearSystem & currentLinearSystem();
   const LinearSystem & currentLinearSystem() const;
 
-  virtual const SystemBase & systemBaseLinear(unsigned int sys_num) const;
-  virtual SystemBase & systemBaseLinear(unsigned int sys_num);
+  virtual const SystemBase & systemBaseLinear(unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseLinear(unsigned int sys_num) override;
   ///@}
 
   /**
@@ -2873,21 +2874,21 @@ FEProblemBase::currentLinearSystem() const
 }
 
 inline Assembly &
-FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int sys_num)
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 inline const Assembly &
-FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int sys_num) const
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 inline const CouplingMatrix *

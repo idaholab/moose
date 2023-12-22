@@ -44,10 +44,13 @@ FixedPoint::FixedPoint(Executioner & ex)
 bool
 FixedPoint::solve()
 {
+  if (!_nl)
+    mooseError("Fixed point solve only works with nonlinear systems at this point!");
+
   // evaluate kernels on previous solution
-  _fp_problem.setCurrentNonlinearSystem(_nl.number());
-  _fp_problem.computeFullResidual(*_nl.currentSolution(), _nl.RHS());
-  Real initial_residual_norm = _nl.RHS().l2_norm();
+  _fp_problem.setCurrentNonlinearSystem(_nl->number());
+  _fp_problem.computeFullResidual(*_nl->currentSolution(), _nl->RHS());
+  Real initial_residual_norm = _nl->RHS().l2_norm();
   Real residual_norm = initial_residual_norm;
   _console << "Fixed point initial residual norm " << residual_norm << std::endl;
 
@@ -68,8 +71,8 @@ FixedPoint::solve()
     }
 
     _fp_problem.copySolution();
-    _fp_problem.computeFullResidual(*_nl.currentSolution(), _nl.RHS());
-    residual_norm = _nl.RHS().l2_norm();
+    _fp_problem.computeFullResidual(*_nl->currentSolution(), _nl->RHS());
+    residual_norm = _nl->RHS().l2_norm();
     _console << "Fixed point residual norm " << residual_norm << std::endl;
     if (residual_norm < _fp_abs_tol)
     {

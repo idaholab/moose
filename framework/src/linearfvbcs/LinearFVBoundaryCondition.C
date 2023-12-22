@@ -21,6 +21,10 @@ LinearFVBoundaryCondition::validParams()
   params += TaggingInterface::validParams();
   params += NonADFunctorInterface::validParams();
 
+  MultiMooseEnum vtags("rhs time", "rhs", true);
+  MultiMooseEnum & vector_tag_enum = params.set<MultiMooseEnum>("vector_tags", true);
+  vector_tag_enum = vtags;
+
   params.addRequiredParam<LinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.declareControllable("enable");

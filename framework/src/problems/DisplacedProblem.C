@@ -118,8 +118,8 @@ DisplacedProblem::createQRules(QuadratureType type,
                                const bool allow_negative_qweights)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    for (const auto nl_sys_num : index_range(_assembly[tid]))
-      _assembly[tid][nl_sys_num]->createQRules(
+    for (const auto sys_num : index_range(_assembly[tid]))
+      _assembly[tid][sys_num]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
 }
 
@@ -1293,21 +1293,21 @@ DisplacedProblem::determineLinearSystem(const std::string & var_name,
 }
 
 Assembly &
-DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
+DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int sys_num)
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 const Assembly &
-DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
+DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int sys_num) const
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid][nl_sys_num];
+  mooseAssert(sys_num < _assembly[tid].size(),
+              "System number larger than the assembly container size");
+  return *_assembly[tid][sys_num];
 }
 
 std::size_t

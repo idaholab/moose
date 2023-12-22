@@ -208,7 +208,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
-  _nl._compute_initial_residual_before_preset_bcs =
+  _nl->_compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");
 
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
@@ -222,10 +222,10 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
-  _nl.setDecomposition(_splitting);
+  _nl->setDecomposition(_splitting);
 
   if (getParam<bool>("residual_and_jacobian_together"))
-    _nl.residualAndJacobianTogether();
+    _nl->residualAndJacobianTogether();
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
@@ -245,11 +245,11 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
                                    : getMooseApp().defaultAutomaticScaling()) &&
                               (_problem.solverParams()._type != Moose::ST_JFNK));
 
-  _nl.computeScalingOnce(getParam<bool>("compute_scaling_once"));
-  _nl.autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
-  _nl.offDiagonalsInAutoScaling(getParam<bool>("off_diagonals_in_auto_scaling"));
+  _nl->computeScalingOnce(getParam<bool>("compute_scaling_once"));
+  _nl->autoScalingParam(getParam<Real>("resid_vs_jac_scaling_param"));
+  _nl->offDiagonalsInAutoScaling(getParam<bool>("off_diagonals_in_auto_scaling"));
   if (isParamValid("scaling_group_variables"))
-    _nl.scalingGroupVariables(
+    _nl->scalingGroupVariables(
         getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
   if (isParamValid("ignore_variables_for_autoscaling"))
   {
@@ -269,7 +269,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
             paramError("ignore_variables_for_autoscaling",
                        "Variables cannot be in a scaling grouping and also be ignored");
     }
-    _nl.ignoreVariablesForAutoscaling(
+    _nl->ignoreVariablesForAutoscaling(
         getParam<std::vector<std::string>>("ignore_variables_for_autoscaling"));
   }
 
@@ -279,14 +279,17 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 bool
 FEProblemSolve::solve()
 {
+  if (!_nl)
+    mooseError("FEProblem solve only works with nonlinear systems at this point!");
+
   // This loop is for nonlinear multigrids (developed by Alex)
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
-    _problem.solve(_nl.number());
+    _problem.solve(_nl->number());
 
     if (_problem.shouldSolve())
     {
-      if (_problem.converged(_nl.number()))
+      if (_problem.converged(_nl->number()))
         _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
       else
       {
@@ -300,5 +303,5 @@ FEProblemSolve::solve()
     if (grid_step != _num_grid_steps)
       _problem.uniformRefine();
   }
-  return _problem.converged(_nl.number());
+  return _problem.converged(_nl->number());
 }

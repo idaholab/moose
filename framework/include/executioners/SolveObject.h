@@ -46,8 +46,8 @@ protected:
   MooseMesh & _mesh;
   /// Displaced mesh
   MooseMesh * _displaced_mesh;
-  /// Reference to nonlinear system base for faster access
-  NonlinearSystemBase & _nl;
+  /// Pointer to nonlinear system base for faster access
+  NonlinearSystemBase * _nl;
   /// Reference to auxiliary system for faster access
   AuxiliarySystem & _aux;
   /// SolveObject wrapped by this solve object

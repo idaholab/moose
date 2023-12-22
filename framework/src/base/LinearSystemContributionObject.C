@@ -21,11 +21,15 @@ LinearSystemContributionObject::validParams()
   params += MeshChangedInterface::validParams();
   params += TaggingInterface::validParams();
 
+  MultiMooseEnum vtags("rhs time", "rhs", true);
+  MultiMooseEnum & vector_tag_enum = params.set<MultiMooseEnum>("vector_tags", true);
+  vector_tag_enum = vtags;
+
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this residual object operates on");
 
   params.declareControllable("enable");
-  params.set<bool>("_residual_object") = true;
+  params.set<bool>("_residual_object") = false;
   return params;
 }
 

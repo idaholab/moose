@@ -345,8 +345,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
     _current_linear_sys(nullptr),
-    _using_default_nl(isParamSetByUser("nl_sys_names")),
-    _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
+    _using_default_nl(!isParamSetByUser("nl_sys_names")),
+    _nl_sys_names((_using_default_nl && !_linear_sys_names.size())
+                      ? getParam<std::vector<NonlinearSystemName>>("nl_sys_names")
+                      : std::vector<NonlinearSystemName>()),
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
     _current_nl_sys(nullptr),
@@ -583,16 +585,19 @@ FEProblemBase::createTagSolutions()
 }
 
 void
-FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nls)
+FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                                std::vector<std::shared_ptr<LinearSystem>> & linear_systems)
 {
   unsigned int n_threads = libMesh::n_threads();
 
   _assembly.resize(n_threads);
   for (const auto i : make_range(n_threads))
   {
-    _assembly[i].resize(nls.size());
+    _assembly[i].resize(nls.size() + linear_systems.size());
     for (const auto j : index_range(nls))
       _assembly[i][j] = std::make_unique<Assembly>(*nls[j], i);
+    for (const auto j : index_range(linear_systems))
+      _assembly[i][nls.size() + j] = std::make_unique<Assembly>(*linear_systems[j], i);
   }
 }
 
@@ -849,7 +854,8 @@ FEProblemBase::initialSetup()
     }
     else
     {
-      if (_nl[0]->hasVarCopy() || _aux->hasVarCopy())
+      if ((_nl.size() && _nl[0]->hasVarCopy()) ||
+          (_linear_systems.size() && _linear_systems[0]->hasVarCopy()) || _aux->hasVarCopy())
         mooseError("Need Exodus reader to restart variables but the reader is not available\n"
                    "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
                    "Exodus mesh file and with use_for_exodus_restart equal to true");
@@ -5643,10 +5649,12 @@ FEProblemBase::createQRules(QuadratureType type,
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
-    order = _nl[0]->getMinQuadratureOrder();
-    for (const auto i : make_range(std::size_t(1), _nl.size()))
-      if (order < _nl[i]->getMinQuadratureOrder())
+    for (const auto i : make_range(_nl.size()))
+      if (i == 0 || order < _nl[i]->getMinQuadratureOrder())
         order = _nl[i]->getMinQuadratureOrder();
+    for (const auto i : make_range(_linear_systems.size()))
+      if (order == INVALID_ORDER || order < _linear_systems[i]->getMinQuadratureOrder())
+        order = _linear_systems[i]->getMinQuadratureOrder();
     if (order < _aux->getMinQuadratureOrder())
       order = _aux->getMinQuadratureOrder();
   }
@@ -5658,9 +5666,14 @@ FEProblemBase::createQRules(QuadratureType type,
     face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
     for (const auto i : index_range(_nl))
       _assembly[tid][i]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
+    for (const auto i : index_range(_linear_systems))
+      _assembly[tid][_nl.size() + i]->createQRules(
+          type, order, volume_order, face_order, block, allow_negative_qweights);
+  }
 
   if (_displaced_problem)
     _displaced_problem->createQRules(

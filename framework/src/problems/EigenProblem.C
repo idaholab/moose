@@ -85,7 +85,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
-  newAssemblyArray(_nl);
+  newAssemblyArray(_nl, _linear_systems);
 
   FEProblemBase::initNullSpaceVectors(parameters, _nl);
 
