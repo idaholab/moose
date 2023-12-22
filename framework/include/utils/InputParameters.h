@@ -1382,8 +1382,9 @@ InputParameters::addRequiredParam(const std::string & name, const std::string & 
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
-  _params[name]._required = true;
-  _params[name]._doc_string = doc_string;
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
 }
 
 template <typename T>
@@ -1404,7 +1405,8 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   checkConsistentType<T>(name);
 
   T & l_value = InputParameters::set<T>(name);
-  _params[name]._doc_string = doc_string;
+  auto & metadata = _params[name];
+  metadata._doc_string = doc_string;
 
   // Set the parameter now
   setParamHelper(name, l_value, value);
@@ -1412,7 +1414,7 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   /* Indicate the default value, as set via addParam, is being used. The parameter is removed from
      the list whenever
      it changes, see set_attributes */
-  _params[name]._set_by_add_param = true;
+  metadata._set_by_add_param = true;
 }
 
 template <typename T>
@@ -1504,9 +1506,10 @@ InputParameters::addDeprecatedCustomTypeParam(const std::string & name,
 {
   _show_deprecated_message = false;
   addParam<T>(name, doc_string);
-  _params[name]._custom_type = custom_type;
+  auto & metadata = _params[name];
+  metadata._custom_type = custom_type;
 
-  _params[name]._deprecation_message = deprecation_message;
+  metadata._deprecation_message = deprecation_message;
   _show_deprecated_message = true;
 }
 
@@ -1529,8 +1532,9 @@ InputParameters::addPrivateParam(const std::string & name, const T & value)
   checkConsistentType<T>(name);
 
   InputParameters::set<T>(name) = value;
-  _params[name]._is_private = true;
-  _params[name]._set_by_add_param = true;
+  auto & metadata = _params[name];
+  metadata._is_private = true;
+  metadata._set_by_add_param = true;
 }
 
 template <typename T>
@@ -1595,9 +1599,10 @@ InputParameters::suppressParameter(const std::string & name_in)
   if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: ", name);
 
-  _params[name]._required = false;
-  _params[name]._is_private = true;
-  _params[name]._controllable = false;
+  auto & metadata = _params[name];
+  metadata._required = false;
+  metadata._is_private = true;
+  metadata._controllable = false;
 }
 
 template <typename T>
