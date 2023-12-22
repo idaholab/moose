@@ -98,9 +98,9 @@ ADWallHTCGnielinskiAnnularMaterial::computeQpProperties()
   }
   else
   {
-    const ADReal cp_wall = _fp.cp_from_p_T(_p[_qp], _T[_qp]);
-    const ADReal mu_wall = _fp.mu_from_p_T(_p[_qp], _T[_qp]);
-    const ADReal k_wall = _fp.k_from_p_T(_p[_qp], _T[_qp]);
+    const ADReal cp_wall = _fp.cp_from_p_T(_p[_qp], _T_wall[_qp]);
+    const ADReal mu_wall = _fp.mu_from_p_T(_p[_qp], _T_wall[_qp]);
+    const ADReal k_wall = _fp.k_from_p_T(_p[_qp], _T_wall[_qp]);
     const ADReal Pr_wall = THM::Prandtl(cp_wall, mu_wall, k_wall);
     K = std::pow(Pr / Pr_wall, 0.11);
   }

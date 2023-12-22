@@ -2,7 +2,7 @@
   design = 'ADWallHTCGnielinskiAnnularMaterial.md'
   issues = '#26389'
   [test]
-    requirement = "The system shall compute the heat transfer coefficient using the Gnielinski correlation for annular flows"
+    requirement = "The system shall compute the heat transfer coefficient using the Gnielinski correlation for annular turbulent flows:"
 
     [gas_inner]
       type = 'CSVDiff'

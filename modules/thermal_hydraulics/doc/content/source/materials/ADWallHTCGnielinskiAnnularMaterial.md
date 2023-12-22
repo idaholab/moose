@@ -1,4 +1,4 @@
-# ADWallHeatTransferCoefficientGnielinskiMaterial
+# ADWallHTCGnielinskiAnnularMaterial
 
 The material computes the convective heat transfer coefficient using the Gnielinski correlation
 for turbulent flow in annular ducts [!citep](gnielinski2010).
@@ -13,7 +13,7 @@ The Nusselt number is calculated as follows:
 k_1 = 1.07 + \frac{900}{\text{Re}} - \frac{0.63}{1 + 10\text{Pr}} \,,
 
 !equation
-f_\text{ann} = 1.8 (\log_{10}\text{Re}^* - 1.5)^{-2} \,,
+f_\text{ann} = (1.8 \log_{10}\text{Re}^* - 1.5)^{-2} \,,
 
 !equation
 \text{Re}^* = \text{Re} \frac{(1 + a^2)\ln a + (1 - a^2)}{(1 - a)^2 \ln a} \,,
@@ -51,8 +51,8 @@ Lastly, the heat transfer coefficient is calculated as
 !equation
 h = \frac{\text{Nu} k}{D_h} \,.
 
-!syntax parameters /Materials/ADWallHeatTransferCoefficientGnielinskiMaterial
+!syntax parameters /Materials/ADWallHTCGnielinskiAnnularMaterial
 
-!syntax inputs /Materials/ADWallHeatTransferCoefficientGnielinskiMaterial
+!syntax inputs /Materials/ADWallHTCGnielinskiAnnularMaterial
 
-!syntax children /Materials/ADWallHeatTransferCoefficientGnielinskiMaterial
+!syntax children /Materials/ADWallHTCGnielinskiAnnularMaterial
