@@ -12,6 +12,7 @@
 #include "MathFVUtils.h"
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
+#include "INSFVVelocityVariable.h"
 
 class INSFVMomentumDiffusion : public INSFVFluxKernel
 {
@@ -41,4 +42,17 @@ protected:
 
   /// The a coefficient for the neighbor
   ADReal _an = 0;
+
+  /// x-velocity
+  const Moose::Functor<ADReal> * const _u_var;
+  /// y-velocity
+  const Moose::Functor<ADReal> * const _v_var;
+  /// z-velocity
+  const Moose::Functor<ADReal> * const _w_var;
+
+  /// Boolean parameter to include the complete momentum expansion
+  const bool _complete_expansion;
+
+  /// dimension
+  const unsigned int _dim;
 };

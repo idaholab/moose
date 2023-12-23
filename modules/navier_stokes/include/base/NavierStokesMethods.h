@@ -14,6 +14,8 @@
 #include "MooseUtils.h"
 #include "ADReal.h"
 #include "metaphysicl/raw_type.h"
+#include "FEProblemBase.h"
+#include "SubProblem.h"
 
 namespace NS
 {
@@ -99,10 +101,51 @@ Real prandtlPropertyDerivative(const Real & mu,
  */
 ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
+/**
+ * Finds the non-dimensional wall distance normalized with the friction velocity
+ * Implements a fixed-point iteration in the wall function to get this velocity
+ * @param mu the dynamic viscosity
+ * @param rho the density
+ * @param u the centroid velocity
+ * @param dist the element centroid distance to the wall
+ * @return the non-dimensional wall distance
+ */
+ADReal findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+
 using MooseUtils::isZero;
 
 /**
  * Compute the speed (velocity norm) given the supplied velocity
  */
 ADReal computeSpeed(const ADRealVectorValue & velocity);
+
+/**
+ * Map marking wall bounded elements
+ * The map passed in \p wall_bounded_map gets cleared and re-populated
+ */
+void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name,
+                            const FEProblemBase & fe_problem,
+                            const SubProblem & subproblem,
+                            const std::set<SubdomainID> & block_ids,
+                            std::map<const Elem *, bool> & wall_bounded_map);
+
+/**
+ * Map storing wall ditance for near-wall marked elements
+ * The map passed in \p dist_map gets cleared and re-populated
+ */
+void getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
+                     const FEProblemBase & fe_problem,
+                     const SubProblem & subproblem,
+                     const std::set<SubdomainID> & block_ids,
+                     std::map<const Elem *, std::vector<Real>> & dist_map);
+
+/**
+ * Map storing face arguments to wall bounded faces
+ * The map passed in \p face_info_map gets cleared and re-populated
+ */
+void getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
+                        const FEProblemBase & fe_problem,
+                        const SubProblem & subproblem,
+                        const std::set<SubdomainID> & block_ids,
+                        std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map);
 }

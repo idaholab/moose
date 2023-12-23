@@ -45,6 +45,8 @@ SIMPLE::validParams()
                                        "The nonlinear system for the solid energy equation.");
   params.addParam<std::vector<NonlinearSystemName>>(
       "passive_scalar_systems", "The nonlinear system(s) for the passive scalar equation(s).");
+  params.addParam<std::vector<NonlinearSystemName>>(
+      "turbulence_systems", "The nonlinear system(s) for the turbulence equation(s).");
   params.addParam<TagName>("pressure_gradient_tag",
                            "pressure_momentum_kernels",
                            "The name of the tags associated with the kernels in the momentum "
@@ -75,9 +77,16 @@ SIMPLE::validParams()
                                      "The relaxation which should be used for the passive scalar "
                                      "equations. (=1 for no relaxation, "
                                      "diagonal dominance will still be enforced)");
+  params.addParam<std::vector<Real>>(
+      "turbulence_equation_relaxation",
+      std::vector<Real>(),
+      "The relaxation which should be used for the turbulence equations "
+      "equations. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
 
   params.addParamNamesToGroup("pressure_variable_relaxation momentum_equation_relaxation "
-                              "energy_equation_relaxation passive_scalar_equation_relaxation",
+                              "energy_equation_relaxation passive_scalar_equation_relaxation "
+                              "turbulence_equation_relaxation",
                               "Relaxation");
 
   /*
@@ -129,14 +138,26 @@ SIMPLE::validParams()
 
   params.addParam<MultiMooseEnum>("passive_scalar_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
-                                  "Singleton PETSc options for the energy equation");
-  params.addParam<MultiMooseEnum>("passive_scalar_petsc_options_iname",
-                                  Moose::PetscSupport::getCommonPetscKeys(),
-                                  "Names of PETSc name/value pairs for the energy equation");
+                                  "Singleton PETSc options for the passive scalar equation(s)");
+  params.addParam<MultiMooseEnum>(
+      "passive_scalar_petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs for the passive scalar equation(s)");
   params.addParam<std::vector<std::string>>(
       "passive_scalar_petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
-      "energy equation");
+      "passive scalar equation(s)");
+
+  params.addParam<MultiMooseEnum>("turbulence_petsc_options",
+                                  Moose::PetscSupport::getCommonPetscFlags(),
+                                  "Singleton PETSc options for the turbulence equation(s)");
+  params.addParam<MultiMooseEnum>("turbulence_petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs for the turbulence equation(s)");
+  params.addParam<std::vector<std::string>>(
+      "turbulence_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "turbulence equation");
 
   params.addParamNamesToGroup(
       "momentum_petsc_options momentum_petsc_options_iname momentum_petsc_options_value "
@@ -144,7 +165,8 @@ SIMPLE::validParams()
       "energy_petsc_options energy_petsc_options_iname energy_petsc_options_value "
       "solid_energy_petsc_options solid_energy_petsc_options_iname "
       "solid_energy_petsc_options_value passive_scalar_petsc_options "
-      "passive_scalar_petsc_options_iname passive_scalar_petsc_options_value",
+      "passive_scalar_petsc_options_iname passive_scalar_petsc_options_value "
+      "turbulence_petsc_options turbulence_petsc_options_iname turbulence_petsc_options_value",
       "PETSc Control");
 
   /*
@@ -174,6 +196,10 @@ SIMPLE::validParams()
       "passive_scalar_absolute_tolerance",
       std::vector<Real>(),
       "The absolute tolerance(s) on the normalized residual(s) of the passive scalar equation(s).");
+  params.addParam<std::vector<Real>>(
+      "turbulence_absolute_tolerance",
+      std::vector<Real>(),
+      "The absolute tolerance(s) on the normalized residual(s) of the turbulence equation(s).");
   params.addRangeCheckedParam<unsigned int>("num_iterations",
                                             1000,
                                             "0<num_iterations",
@@ -187,7 +213,8 @@ SIMPLE::validParams()
 
   params.addParamNamesToGroup(
       "momentum_absolute_tolerance pressure_absolute_tolerance energy_absolute_tolerance "
-      "solid_energy_absolute_tolerance passive_scalar_absolute_tolerance num_iterations",
+      "solid_energy_absolute_tolerance passive_scalar_absolute_tolerance "
+      "turbulence_absolute_tolerance num_iterations",
       "Nonlinear Iteration");
   /*
    * Linear iteration tolerances for the different equations
@@ -263,13 +290,28 @@ SIMPLE::validParams()
   params.addParam<unsigned int>(
       "passive_scalar_l_max_its",
       10000,
-      "The maximum allowed iterations in the linear solver of the passive scalar equation.");
+      "The maximum allowed iterations in the linear solver of the turbulence equation.");
+  params.addRangeCheckedParam<Real>("turbulence_l_tol",
+                                    1e-5,
+                                    "0.0<=turbulence_l_tol & turbulence_l_tol<1.0",
+                                    "The relative tolerance on the normalized residual in the "
+                                    "linear solver of the turbulence equation(s).");
+  params.addRangeCheckedParam<Real>("turbulence_l_abs_tol",
+                                    1e-10,
+                                    "0.0<turbulence_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the turbulence equation(s).");
+  params.addParam<unsigned int>(
+      "turbulence_l_max_its",
+      10000,
+      "The maximum allowed iterations in the linear solver of the turbulence equation(s).");
 
   params.addParamNamesToGroup(
       "momentum_l_tol momentum_l_abs_tol momentum_l_max_its pressure_l_tol pressure_l_abs_tol "
       "pressure_l_max_its solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its "
       "energy_l_tol energy_l_abs_tol energy_l_max_its passive_scalar_l_tol "
-      "passive_scalar_l_abs_tol passive_scalar_l_max_its",
+      "passive_scalar_l_abs_tol passive_scalar_l_max_its turbulence_l_tol "
+      "turbulence_l_abs_tol turbulence_l_max_its",
       "Linear Iteration");
 
   /*
@@ -324,6 +366,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _has_energy_system(isParamValid("energy_system")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _has_passive_scalar_systems(isParamValid("passive_scalar_systems")),
+    _has_turbulence_systems(isParamValid("turbulence_systems")),
     _momentum_system_names(getParam<std::vector<NonlinearSystemName>>("momentum_systems")),
     _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
     _energy_sys_number(_has_energy_system
@@ -346,12 +389,14 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _passive_scalar_equation_relaxation(
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
+    _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
+    _turbulence_absolute_tolerance(getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _print_fields(getParam<bool>("print_fields")),
     _momentum_l_abs_tol(getParam<Real>("momentum_l_abs_tol")),
@@ -359,6 +404,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
     _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
+    _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value"))
 
@@ -399,6 +445,29 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
           _problem.nlSysNum(passive_scalar_system_names[system_i]));
       _passive_scalar_systems.push_back(
           &_problem.getNonlinearSystemBase(_passive_scalar_system_numbers[system_i]));
+    }
+  }
+
+  // We check for input errors with regards to the turbulence equations. At the same time, we
+  // set up the corresponding system numbers
+  if (_has_turbulence_systems)
+  {
+    const auto & turbulence_system_names =
+        getParam<std::vector<NonlinearSystemName>>("turbulence_systems");
+    if (turbulence_system_names.size() != _turbulence_equation_relaxation.size())
+      paramError("turbulence_equation_relaxation",
+                 "The number of equation relaxation parameters does not match the number of "
+                 "turbulence scalar equations!");
+    if (turbulence_system_names.size() != _turbulence_absolute_tolerance.size())
+      paramError("turbulence_absolute_tolerance",
+                 "The number of absolute tolerances does not match the number of "
+                 "turbulence equations!");
+
+    for (auto system_i : index_range(turbulence_system_names))
+    {
+      _turbulence_system_numbers.push_back(_problem.nlSysNum(turbulence_system_names[system_i]));
+      _turbulence_systems.push_back(
+          &_problem.getNonlinearSystemBase(_turbulence_system_numbers[system_i]));
     }
   }
 
@@ -518,6 +587,32 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
                                   "passive_scalar_absolute_tolerance"},
                                  false);
 
+  if (_has_turbulence_systems)
+  {
+    const auto & turbulence_petsc_options = getParam<MultiMooseEnum>("turbulence_petsc_options");
+    const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "turbulence_petsc_options_iname", "turbulence_petsc_options_value");
+    Moose::PetscSupport::processPetscFlags(turbulence_petsc_options, _turbulence_petsc_options);
+    Moose::PetscSupport::processPetscPairs(
+        turbulence_petsc_pair_options, _problem.mesh().dimension(), _turbulence_petsc_options);
+
+    _turbulence_linear_control.real_valued_data["rel_tol"] = getParam<Real>("turbulence_l_tol");
+    _turbulence_linear_control.real_valued_data["abs_tol"] = getParam<Real>("turbulence_l_abs_tol");
+    _turbulence_linear_control.int_valued_data["max_its"] =
+        getParam<unsigned int>("turbulence_l_max_its");
+  }
+  else
+    checkDependentParameterError("turbulence_system",
+                                 {"turbulence_petsc_options",
+                                  "turbulence_petsc_options_iname",
+                                  "turbulence_petsc_options_value",
+                                  "turbulence_l_tol",
+                                  "turbulence_l_abs_tol",
+                                  "turbulence_l_max_its",
+                                  "turbulence_equation_relaxation",
+                                  "turbulence_absolute_tolerance"},
+                                 false);
+
   _time = 0;
 }
 
@@ -585,6 +680,10 @@ SIMPLE::init()
 
   if (_has_passive_scalar_systems)
     for (const auto system : _passive_scalar_systems)
+      checkIntegrity(*system);
+
+  if (_has_turbulence_systems)
+    for (const auto system : _turbulence_systems)
       checkIntegrity(*system);
 
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
@@ -773,7 +872,7 @@ SIMPLE::findDoFID(const VariableName & var_name, const Point & point)
 }
 
 void
-SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
+SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, const Real relaxation_factor)
 {
   // We will need the latest and the second latest solution for the relaxation
   NumericVector<Number> & solution = *(system_in.system().current_local_solution.get());
@@ -794,6 +893,25 @@ SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_fac
 
   // We will overwrite the old solution here
   solution_old = solution;
+  system_in.setSolution(solution);
+  system_in.residualSetup();
+}
+
+void
+SIMPLE::limitSolutionUpdate(NonlinearSystemBase & system_in,
+                            const Real min_limit,
+                            const Real max_limit)
+{
+  // We will need the latest solution
+  NumericVector<Number> & solution = *(system_in.system().solution.get());
+  PetscVector<Number> & solution_vector = dynamic_cast<PetscVector<Number> &>(solution);
+  auto value = solution_vector.get_array();
+
+  for (auto i : make_range(solution_vector.local_size()))
+    value[i] = std::min(std::max(min_limit, value[i]), max_limit);
+
+  solution_vector.restore_array();
+
   system_in.setSolution(solution);
   system_in.residualSetup();
 }
@@ -1123,10 +1241,15 @@ SIMPLE::execute()
 
   if (_problem.shouldSolve())
   {
+
     // Initialize the quantities which matter in terms of the iteration
     unsigned int iteration_counter = 0;
+
+    // Assign residuals to general residual vector
     unsigned int no_systems =
         _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
+    if (_has_turbulence_systems)
+      no_systems += _turbulence_systems.size();
     std::vector<Real> ns_residuals(no_systems, 1.0);
     std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
     ns_abs_tols.push_back(_pressure_absolute_tolerance);
@@ -1136,10 +1259,16 @@ SIMPLE::execute()
       if (_has_solid_energy_system)
         ns_abs_tols.push_back(_solid_energy_absolute_tolerance);
     }
+    if (_has_turbulence_systems)
+      for (auto system_i : index_range(_turbulence_absolute_tolerance))
+        ns_abs_tols.push_back(_turbulence_absolute_tolerance[system_i]);
 
     // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(ns_residuals, ns_abs_tols))
     {
+      // Resdiual index
+      size_t residual_index = 0;
+
       // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
@@ -1152,6 +1281,11 @@ SIMPLE::execute()
         if (_has_solid_energy_system)
           _solid_energy_system->residualSetup();
       }
+
+      // If we solve for turbulence, we clear the caches there too
+      if (_has_turbulence_systems)
+        for (auto system_i : index_range(_turbulence_systems))
+          _turbulence_systems[system_i]->residualSetup();
 
       iteration_counter++;
 
@@ -1187,6 +1321,12 @@ SIMPLE::execute()
       // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
 
+      // Update residual index
+      residual_index = momentum_residual.size();
+
+      // Execute all objects tagged as nonlinear
+      _problem.execute(EXEC_NONLINEAR);
+
       // If we have an energy equation, solve it here. We assume the material properties in the
       // Navier-Stokes equations depend on temperature, therefore we can not solve for temperature
       // outside of the velocity-pressure loop
@@ -1195,22 +1335,49 @@ SIMPLE::execute()
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        ns_residuals[momentum_residual.size() + 1] =
-            solveAdvectedSystem(_energy_sys_number,
-                                *_energy_system,
-                                _energy_equation_relaxation,
-                                _energy_linear_control,
-                                _energy_l_abs_tol);
+        residual_index += 1;
+        ns_residuals[residual_index] = solveAdvectedSystem(_energy_sys_number,
+                                                           *_energy_system,
+                                                           _energy_equation_relaxation,
+                                                           _energy_linear_control,
+                                                           _energy_l_abs_tol);
 
         if (_has_solid_energy_system)
         {
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
           Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-          ns_residuals[momentum_residual.size() + 2] = solveSolidEnergySystem();
+          residual_index += 1;
+          ns_residuals[residual_index] = solveSolidEnergySystem();
         }
       }
 
+      // If we have an turbulence equations, we solve it here. We solve it inside the
+      // momentum-pressure loop because it affects the turbulent viscosity
+      if (_has_turbulence_systems)
+      {
+        Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
+
+        for (auto system_i : index_range(_turbulence_systems))
+        {
+          residual_index += 1;
+          ns_residuals[residual_index] =
+              solveAdvectedSystem(_turbulence_system_numbers[system_i],
+                                  *_turbulence_systems[system_i],
+                                  _turbulence_equation_relaxation[system_i],
+                                  _turbulence_linear_control,
+                                  _turbulence_l_abs_tol);
+
+          limitSolutionUpdate(*_turbulence_systems[system_i]);
+
+          // Relax the turbulence update for the next momentum predictor
+          relaxSolutionUpdate(*_turbulence_systems[system_i],
+                              _turbulence_equation_relaxation[system_i]);
+        }
+      }
+
+      // Printing residuals
+      residual_index = 0;
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
         _console << " Momentum equation:"
@@ -1221,13 +1388,30 @@ SIMPLE::execute()
                  << COLOR_GREEN << ns_residuals[system_i] << COLOR_DEFAULT << std::endl;
       _console << " Pressure equation: " << COLOR_GREEN << ns_residuals[momentum_residual.size()]
                << COLOR_DEFAULT << std::endl;
+      residual_index = momentum_residual.size();
+
       if (_has_energy_system)
       {
-        _console << " Energy equation: " << COLOR_GREEN
-                 << ns_residuals[momentum_residual.size() + 1] << COLOR_DEFAULT << std::endl;
+        residual_index += 1;
+        _console << " Energy equation: " << COLOR_GREEN << ns_residuals[residual_index]
+                 << COLOR_DEFAULT << std::endl;
         if (_has_solid_energy_system)
-          _console << " Solid energy equation: " << COLOR_GREEN
-                   << ns_residuals[momentum_residual.size() + 2] << COLOR_DEFAULT << std::endl;
+        {
+          residual_index += 1;
+          _console << " Solid energy equation: " << COLOR_GREEN << ns_residuals[residual_index]
+                   << COLOR_DEFAULT << std::endl;
+        }
+      }
+
+      if (_has_turbulence_systems)
+      {
+        _console << "Turbulence Iteration " << std::endl;
+        for (auto system_i : index_range(_turbulence_systems))
+        {
+          residual_index += 1;
+          _console << _turbulence_systems[system_i]->name() << " " << COLOR_GREEN
+                   << ns_residuals[residual_index] << COLOR_DEFAULT << std::endl;
+        }
       }
     }
 
