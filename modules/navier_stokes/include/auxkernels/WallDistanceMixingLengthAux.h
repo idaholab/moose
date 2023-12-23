@@ -24,7 +24,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  std::vector<BoundaryName> _wall_boundary_names;
+  const std::vector<BoundaryName> & _wall_boundary_names;
 
   const Moose::Functor<Real> & _von_karman_const;
   const Moose::Functor<Real> & _von_karman_const_0;

@@ -139,6 +139,18 @@ protected:
   void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
 
   /**
+   * Limit a solution to its minimum and maximum bounds:
+   * $u = min(max(u, min_limit), max_limit)$
+   *
+   * @param system_in The system whose solution shall be limited
+   * @param min_limit = 0.0 The minimum limit for the solution
+   * @param max_limit = 1e10 The maximum limit for the solution
+   */
+  void limitSolutionUpdate(NonlinearSystemBase & system_in,
+                           const Real min_limit = std::numeric_limits<Real>::epsilon(),
+                           const Real max_limit = 1e10);
+
+  /**
    * Implicitly constrain the system by adding a factor*(u-u_desired) to it at a desired dof
    * value. To make sure the conditioning of the matrix does not change significantly, factor
    * is chosen to be the diagonal component of the matrix coefficients for a given dof.
@@ -181,6 +193,9 @@ protected:
   /// Boolean for easy check if a passive scalar systems shall be solved or not
   const bool _has_passive_scalar_systems;
 
+  /// Boolean for easy check if turbulence systems shall be solved or not
+  const bool _has_turbulence_systems;
+
   /// The names of the momentum systems.
   const std::vector<NonlinearSystemName> _momentum_system_names;
 
@@ -199,6 +214,9 @@ protected:
   /// The number(s) of the system(s) corresponding to the passive scalar equation(s)
   std::vector<unsigned int> _passive_scalar_system_numbers;
 
+  /// The number(s) of the system(s) corresponding to the turbulence equation(s)
+  std::vector<unsigned int> _turbulence_system_numbers;
+
   /// Pointer(s) to the system(s) corresponding to the momentum equation(s)
   std::vector<NonlinearSystemBase *> _momentum_systems;
 
@@ -213,6 +231,9 @@ protected:
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<NonlinearSystemBase *> _passive_scalar_systems;
+
+  /// Pointer(s) to the system(s) corresponding to the turbulence equation(s)
+  std::vector<NonlinearSystemBase *> _turbulence_systems;
 
   /// Pointer to the segregated RhieChow interpolation object
   INSFVRhieChowInterpolatorSegregated * _rc_uo;
@@ -258,6 +279,9 @@ private:
   /// The user-defined relaxation parameter(s) for the passive scalar equation(s)
   const std::vector<Real> _passive_scalar_equation_relaxation;
 
+  /// The user-defined relaxation parameter(s) for the turbulence equation(s)
+  const std::vector<Real> _turbulence_equation_relaxation;
+
   /// The user-defined absolute tolerance for determining the convergence in momentum
   const Real _momentum_absolute_tolerance;
 
@@ -272,6 +296,9 @@ private:
 
   /// The user-defined absolute tolerance for determining the convergence in passive scalars
   const std::vector<Real> _passive_scalar_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in turbulence equations
+  const std::vector<Real> _turbulence_absolute_tolerance;
 
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;
@@ -293,6 +320,9 @@ private:
 
   /// Options which hold the petsc settings for the passive scalar equation(s)
   Moose::PetscSupport::PetscOptions _passive_scalar_petsc_options;
+
+  /// Options which hold the petsc settings for the turbulence equation(s)
+  Moose::PetscSupport::PetscOptions _turbulence_petsc_options;
 
   /// Options for the linear solver of the momentum equation
   SIMPLESolverConfiguration _momentum_linear_control;
@@ -325,9 +355,16 @@ private:
   /// Options for the linear solver of the passive scalar equation(s)
   SIMPLESolverConfiguration _passive_scalar_linear_control;
 
+  /// Options for the linear solver of the turbulence equation(s)
+  SIMPLESolverConfiguration _turbulence_linear_control;
+
   /// Absolute linear tolerance for the passive scalar equation(s). We need to store this, because
   /// it needs to be scaled with a representative flux.
   const Real _passive_scalar_l_abs_tol;
+
+  /// Absolute linear tolerance for the turbulence equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _turbulence_l_abs_tol;
 
   /// If the pressure needs to be pinned
   const bool _pin_pressure;
