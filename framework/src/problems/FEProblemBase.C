@@ -2518,14 +2518,11 @@ FEProblemBase::determineNonlinearSystem(const std::string & var_name,
 }
 
 void
-FEProblemBase::addKernel(const std::string & kernel_name,
-                         const std::string & name,
-                         InputParameters & parameters)
+FEProblemBase::setKernelParamsAndLog(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters & parameters,
+                                     const unsigned int nl_sys_num)
 {
-  parallel_object_only();
-
-  const auto nl_sys_num =
-      determineNonlinearSystem(parameters.varName("variable", name), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2549,7 +2546,32 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   }
 
   logAdd("Kernel", name, kernel_name);
+}
+
+void
+FEProblemBase::addKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setKernelParamsAndLog(kernel_name, name, parameters, nl_sys_num);
+
   _nl[nl_sys_num]->addKernel(kernel_name, name, parameters);
+}
+
+void
+FEProblemBase::addHybridizedKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setKernelParamsAndLog(kernel_name, name, parameters, nl_sys_num);
+
+  _nl[nl_sys_num]->addHybridizedKernel(kernel_name, name, parameters);
 }
 
 void

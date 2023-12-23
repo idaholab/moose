@@ -42,6 +42,7 @@ class DiracKernelBase;
 class NodalKernelBase;
 class Split;
 class KernelBase;
+class HybridizedKernel;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
@@ -145,6 +146,16 @@ public:
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters);
+
+  /**
+   * Adds a hybridized kernel
+   * @param kernel_name The type of the hybridized kernel
+   * @param name The name of the hybridized kernel
+   * @param parameters Hybridized kernel parameters
+   */
+  virtual void addHybridizedKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -849,6 +860,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
+  MooseObjectTagWarehouse<HybridizedKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
