@@ -9,9 +9,6 @@
 
 #include "HexagonalLatticeTest.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-
 TEST_F(HexagonalLatticeTest, rings_and_pins)
 {
   Real bp = 10.0, pp = 0.1, pd = 0.04, wd = 0.01, wp = 50.0;
@@ -19,10 +16,10 @@ TEST_F(HexagonalLatticeTest, rings_and_pins)
   HexagonalLatticeUtils hl1(bp, pp, pd, wd, wp, nr, a);
 
   // Test number of rings given number of pins
-  EXPECT_EQ(hl1.rings(1), 1);
-  EXPECT_EQ(hl1.rings(7), 2);
-  EXPECT_EQ(hl1.rings(19), 3);
-  EXPECT_EQ(hl1.rings(37), 4);
+  EXPECT_EQ(hl1.rings(1), (unsigned int)1);
+  EXPECT_EQ(hl1.rings(7), (unsigned int)2);
+  EXPECT_EQ(hl1.rings(19), (unsigned int)3);
+  EXPECT_EQ(hl1.rings(37), (unsigned int)4);
 
   try
   {
@@ -38,19 +35,19 @@ TEST_F(HexagonalLatticeTest, rings_and_pins)
   }
 
   // Test number of pins in given ring
-  EXPECT_EQ(hl1.pins(1), 1);
-  EXPECT_EQ(hl1.pins(2), 6);
-  EXPECT_EQ(hl1.pins(3), 12);
+  EXPECT_EQ(hl1.pins(1), (unsigned int)1);
+  EXPECT_EQ(hl1.pins(2), (unsigned int)6);
+  EXPECT_EQ(hl1.pins(3), (unsigned int)12);
 
   // Test first and last pins in given ring
-  EXPECT_EQ(hl1.firstPinInRing(1), 0);
-  EXPECT_EQ(hl1.lastPinInRing(1), 0);
+  EXPECT_EQ(hl1.firstPinInRing(1), (unsigned int)0);
+  EXPECT_EQ(hl1.lastPinInRing(1), (unsigned int)0);
 
-  EXPECT_EQ(hl1.firstPinInRing(2), 1);
-  EXPECT_EQ(hl1.lastPinInRing(2), 6);
+  EXPECT_EQ(hl1.firstPinInRing(2), (unsigned int)1);
+  EXPECT_EQ(hl1.lastPinInRing(2), (unsigned int)6);
 
-  EXPECT_EQ(hl1.firstPinInRing(3), 7);
-  EXPECT_EQ(hl1.lastPinInRing(3), 18);
+  EXPECT_EQ(hl1.firstPinInRing(3), (unsigned int)7);
+  EXPECT_EQ(hl1.lastPinInRing(3), (unsigned int)18);
 }
 
 TEST_F(HexagonalLatticeTest, variation_with_rings)
@@ -68,191 +65,191 @@ TEST_F(HexagonalLatticeTest, variation_with_rings)
   nr = 4;
   HexagonalLatticeUtils hl4(bp, pp, pd, wd, wp, nr, a);
 
-  EXPECT_EQ(hl1.nPins(), 1);
-  EXPECT_EQ(hl1.nInteriorPins(), 1);
-  EXPECT_EQ(hl1.nEdgePins(), 0);
-  EXPECT_EQ(hl1.nCornerPins(), 0);
-  EXPECT_EQ(hl1.nChannels(), 6);
-  EXPECT_EQ(hl1.nInteriorChannels(), 0);
-  EXPECT_EQ(hl1.nEdgeChannels(), 0);
-  EXPECT_EQ(hl1.nCornerChannels(), 6);
+  EXPECT_EQ(hl1.nPins(), (unsigned int)1);
+  EXPECT_EQ(hl1.nInteriorPins(), (unsigned int)1);
+  EXPECT_EQ(hl1.nEdgePins(), (unsigned int)0);
+  EXPECT_EQ(hl1.nCornerPins(), (unsigned int)0);
+  EXPECT_EQ(hl1.nChannels(), (unsigned int)6);
+  EXPECT_EQ(hl1.nInteriorChannels(), (unsigned int)0);
+  EXPECT_EQ(hl1.nEdgeChannels(), (unsigned int)0);
+  EXPECT_EQ(hl1.nCornerChannels(), (unsigned int)6);
 
-  EXPECT_EQ(hl2.nPins(), 7);
-  EXPECT_EQ(hl2.nInteriorPins(), 1);
-  EXPECT_EQ(hl2.nEdgePins(), 0);
-  EXPECT_EQ(hl2.nCornerPins(), 6);
-  EXPECT_EQ(hl2.nChannels(), 18);
-  EXPECT_EQ(hl2.nInteriorChannels(), 6);
-  EXPECT_EQ(hl2.nEdgeChannels(), 6);
-  EXPECT_EQ(hl2.nCornerChannels(), 6);
+  EXPECT_EQ(hl2.nPins(), (unsigned int)7);
+  EXPECT_EQ(hl2.nInteriorPins(), (unsigned int)1);
+  EXPECT_EQ(hl2.nEdgePins(), (unsigned int)0);
+  EXPECT_EQ(hl2.nCornerPins(), (unsigned int)6);
+  EXPECT_EQ(hl2.nChannels(), (unsigned int)18);
+  EXPECT_EQ(hl2.nInteriorChannels(), (unsigned int)6);
+  EXPECT_EQ(hl2.nEdgeChannels(), (unsigned int)6);
+  EXPECT_EQ(hl2.nCornerChannels(), (unsigned int)6);
 
-  EXPECT_EQ(hl3.nPins(), 19);
-  EXPECT_EQ(hl3.nInteriorPins(), 7);
-  EXPECT_EQ(hl3.nEdgePins(), 6);
-  EXPECT_EQ(hl3.nCornerPins(), 6);
-  EXPECT_EQ(hl3.nChannels(), 42);
-  EXPECT_EQ(hl3.nInteriorChannels(), 24);
-  EXPECT_EQ(hl3.nEdgeChannels(), 12);
-  EXPECT_EQ(hl3.nCornerChannels(), 6);
+  EXPECT_EQ(hl3.nPins(), (unsigned int)19);
+  EXPECT_EQ(hl3.nInteriorPins(), (unsigned int)7);
+  EXPECT_EQ(hl3.nEdgePins(), (unsigned int)6);
+  EXPECT_EQ(hl3.nCornerPins(), (unsigned int)6);
+  EXPECT_EQ(hl3.nChannels(), (unsigned int)42);
+  EXPECT_EQ(hl3.nInteriorChannels(), (unsigned int)24);
+  EXPECT_EQ(hl3.nEdgeChannels(), (unsigned int)12);
+  EXPECT_EQ(hl3.nCornerChannels(), (unsigned int)6);
 
-  EXPECT_EQ(hl4.nPins(), 37);
-  EXPECT_EQ(hl4.nInteriorPins(), 19);
-  EXPECT_EQ(hl4.nEdgePins(), 12);
-  EXPECT_EQ(hl4.nCornerPins(), 6);
-  EXPECT_EQ(hl4.nChannels(), 78);
-  EXPECT_EQ(hl4.nInteriorChannels(), 54);
-  EXPECT_EQ(hl4.nEdgeChannels(), 18);
-  EXPECT_EQ(hl4.nCornerChannels(), 6);
+  EXPECT_EQ(hl4.nPins(), (unsigned int)37);
+  EXPECT_EQ(hl4.nInteriorPins(), (unsigned int)19);
+  EXPECT_EQ(hl4.nEdgePins(), (unsigned int)12);
+  EXPECT_EQ(hl4.nCornerPins(), (unsigned int)6);
+  EXPECT_EQ(hl4.nChannels(), (unsigned int)78);
+  EXPECT_EQ(hl4.nInteriorChannels(), (unsigned int)54);
+  EXPECT_EQ(hl4.nEdgeChannels(), (unsigned int)18);
+  EXPECT_EQ(hl4.nCornerChannels(), (unsigned int)6);
 
   auto interior_pins2 = hl2.interiorChannelPinIndices();
-  EXPECT_EQ(interior_pins2[0][0], 0);
-  EXPECT_EQ(interior_pins2[0][1], 1);
-  EXPECT_EQ(interior_pins2[0][2], 2);
-  EXPECT_EQ(interior_pins2[1][0], 0);
-  EXPECT_EQ(interior_pins2[1][1], 2);
-  EXPECT_EQ(interior_pins2[1][2], 3);
-  EXPECT_EQ(interior_pins2[2][0], 0);
-  EXPECT_EQ(interior_pins2[2][1], 3);
-  EXPECT_EQ(interior_pins2[2][2], 4);
-  EXPECT_EQ(interior_pins2[3][0], 0);
-  EXPECT_EQ(interior_pins2[3][1], 4);
-  EXPECT_EQ(interior_pins2[3][2], 5);
-  EXPECT_EQ(interior_pins2[4][0], 0);
-  EXPECT_EQ(interior_pins2[4][1], 5);
-  EXPECT_EQ(interior_pins2[4][2], 6);
-  EXPECT_EQ(interior_pins2[5][0], 0);
-  EXPECT_EQ(interior_pins2[5][1], 6);
-  EXPECT_EQ(interior_pins2[5][2], 1);
+  EXPECT_EQ(interior_pins2[0][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[0][1], (unsigned int)1);
+  EXPECT_EQ(interior_pins2[0][2], (unsigned int)2);
+  EXPECT_EQ(interior_pins2[1][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[1][1], (unsigned int)2);
+  EXPECT_EQ(interior_pins2[1][2], (unsigned int)3);
+  EXPECT_EQ(interior_pins2[2][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[2][1], (unsigned int)3);
+  EXPECT_EQ(interior_pins2[2][2], (unsigned int)4);
+  EXPECT_EQ(interior_pins2[3][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[3][1], (unsigned int)4);
+  EXPECT_EQ(interior_pins2[3][2], (unsigned int)5);
+  EXPECT_EQ(interior_pins2[4][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[4][1], (unsigned int)5);
+  EXPECT_EQ(interior_pins2[4][2], (unsigned int)6);
+  EXPECT_EQ(interior_pins2[5][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins2[5][1], (unsigned int)6);
+  EXPECT_EQ(interior_pins2[5][2], (unsigned int)1);
 
   auto edge_pins2 = hl2.edgeChannelPinIndices();
-  EXPECT_EQ(edge_pins2[0][0], 1);
-  EXPECT_EQ(edge_pins2[0][1], 2);
-  EXPECT_EQ(edge_pins2[1][0], 2);
-  EXPECT_EQ(edge_pins2[1][1], 3);
-  EXPECT_EQ(edge_pins2[2][0], 3);
-  EXPECT_EQ(edge_pins2[2][1], 4);
-  EXPECT_EQ(edge_pins2[3][0], 4);
-  EXPECT_EQ(edge_pins2[3][1], 5);
-  EXPECT_EQ(edge_pins2[4][0], 5);
-  EXPECT_EQ(edge_pins2[4][1], 6);
-  EXPECT_EQ(edge_pins2[5][0], 6);
-  EXPECT_EQ(edge_pins2[5][1], 1);
+  EXPECT_EQ(edge_pins2[0][0], (unsigned int)1);
+  EXPECT_EQ(edge_pins2[0][1], (unsigned int)2);
+  EXPECT_EQ(edge_pins2[1][0], (unsigned int)2);
+  EXPECT_EQ(edge_pins2[1][1], (unsigned int)3);
+  EXPECT_EQ(edge_pins2[2][0], (unsigned int)3);
+  EXPECT_EQ(edge_pins2[2][1], (unsigned int)4);
+  EXPECT_EQ(edge_pins2[3][0], (unsigned int)4);
+  EXPECT_EQ(edge_pins2[3][1], (unsigned int)5);
+  EXPECT_EQ(edge_pins2[4][0], (unsigned int)5);
+  EXPECT_EQ(edge_pins2[4][1], (unsigned int)6);
+  EXPECT_EQ(edge_pins2[5][0], (unsigned int)6);
+  EXPECT_EQ(edge_pins2[5][1], (unsigned int)1);
 
   auto corner_pins2 = hl2.cornerChannelPinIndices();
-  EXPECT_EQ(corner_pins2[0][0], 1);
-  EXPECT_EQ(corner_pins2[1][0], 2);
-  EXPECT_EQ(corner_pins2[2][0], 3);
-  EXPECT_EQ(corner_pins2[3][0], 4);
-  EXPECT_EQ(corner_pins2[4][0], 5);
-  EXPECT_EQ(corner_pins2[5][0], 6);
+  EXPECT_EQ(corner_pins2[0][0], (unsigned int)1);
+  EXPECT_EQ(corner_pins2[1][0], (unsigned int)2);
+  EXPECT_EQ(corner_pins2[2][0], (unsigned int)3);
+  EXPECT_EQ(corner_pins2[3][0], (unsigned int)4);
+  EXPECT_EQ(corner_pins2[4][0], (unsigned int)5);
+  EXPECT_EQ(corner_pins2[5][0], (unsigned int)6);
 
   auto interior_pins3 = hl3.interiorChannelPinIndices();
-  EXPECT_EQ(interior_pins3[0][0], 0);
-  EXPECT_EQ(interior_pins3[0][1], 1);
-  EXPECT_EQ(interior_pins3[0][2], 2);
-  EXPECT_EQ(interior_pins3[1][0], 0);
-  EXPECT_EQ(interior_pins3[1][1], 2);
-  EXPECT_EQ(interior_pins3[1][2], 3);
-  EXPECT_EQ(interior_pins3[2][0], 0);
-  EXPECT_EQ(interior_pins3[2][1], 3);
-  EXPECT_EQ(interior_pins3[2][2], 4);
-  EXPECT_EQ(interior_pins3[3][0], 0);
-  EXPECT_EQ(interior_pins3[3][1], 4);
-  EXPECT_EQ(interior_pins3[3][2], 5);
-  EXPECT_EQ(interior_pins3[4][0], 0);
-  EXPECT_EQ(interior_pins3[4][1], 5);
-  EXPECT_EQ(interior_pins3[4][2], 6);
-  EXPECT_EQ(interior_pins3[5][0], 0);
-  EXPECT_EQ(interior_pins3[5][1], 6);
-  EXPECT_EQ(interior_pins3[5][2], 1);
-  EXPECT_EQ(interior_pins3[6][0], 1);
-  EXPECT_EQ(interior_pins3[6][1], 7);
-  EXPECT_EQ(interior_pins3[6][2], 8);
-  EXPECT_EQ(interior_pins3[7][0], 8);
-  EXPECT_EQ(interior_pins3[7][1], 2);
-  EXPECT_EQ(interior_pins3[7][2], 1);
-  EXPECT_EQ(interior_pins3[8][0], 2);
-  EXPECT_EQ(interior_pins3[8][1], 8);
-  EXPECT_EQ(interior_pins3[8][2], 9);
-  EXPECT_EQ(interior_pins3[9][0], 2);
-  EXPECT_EQ(interior_pins3[9][1], 9);
-  EXPECT_EQ(interior_pins3[9][2], 10);
-  EXPECT_EQ(interior_pins3[10][0], 10);
-  EXPECT_EQ(interior_pins3[10][1], 3);
-  EXPECT_EQ(interior_pins3[10][2], 2);
-  EXPECT_EQ(interior_pins3[11][0], 3);
-  EXPECT_EQ(interior_pins3[11][1], 10);
-  EXPECT_EQ(interior_pins3[11][2], 11);
-  EXPECT_EQ(interior_pins3[12][0], 3);
-  EXPECT_EQ(interior_pins3[12][1], 11);
-  EXPECT_EQ(interior_pins3[12][2], 12);
-  EXPECT_EQ(interior_pins3[13][0], 12);
-  EXPECT_EQ(interior_pins3[13][1], 4);
-  EXPECT_EQ(interior_pins3[13][2], 3);
-  EXPECT_EQ(interior_pins3[14][0], 4);
-  EXPECT_EQ(interior_pins3[14][1], 12);
-  EXPECT_EQ(interior_pins3[14][2], 13);
-  EXPECT_EQ(interior_pins3[15][0], 4);
-  EXPECT_EQ(interior_pins3[15][1], 13);
-  EXPECT_EQ(interior_pins3[15][2], 14);
-  EXPECT_EQ(interior_pins3[16][0], 14);
-  EXPECT_EQ(interior_pins3[16][1], 5);
-  EXPECT_EQ(interior_pins3[16][2], 4);
-  EXPECT_EQ(interior_pins3[17][0], 5);
-  EXPECT_EQ(interior_pins3[17][1], 14);
-  EXPECT_EQ(interior_pins3[17][2], 15);
-  EXPECT_EQ(interior_pins3[18][0], 5);
-  EXPECT_EQ(interior_pins3[18][1], 15);
-  EXPECT_EQ(interior_pins3[18][2], 16);
-  EXPECT_EQ(interior_pins3[19][0], 16);
-  EXPECT_EQ(interior_pins3[19][1], 6);
-  EXPECT_EQ(interior_pins3[19][2], 5);
-  EXPECT_EQ(interior_pins3[20][0], 6);
-  EXPECT_EQ(interior_pins3[20][1], 16);
-  EXPECT_EQ(interior_pins3[20][2], 17);
-  EXPECT_EQ(interior_pins3[21][0], 6);
-  EXPECT_EQ(interior_pins3[21][1], 17);
-  EXPECT_EQ(interior_pins3[21][2], 18);
-  EXPECT_EQ(interior_pins3[22][0], 18);
-  EXPECT_EQ(interior_pins3[22][1], 1);
-  EXPECT_EQ(interior_pins3[22][2], 6);
-  EXPECT_EQ(interior_pins3[23][0], 1);
-  EXPECT_EQ(interior_pins3[23][1], 18);
-  EXPECT_EQ(interior_pins3[23][2], 7);
+  EXPECT_EQ(interior_pins3[0][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[0][1], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[0][2], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[1][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[1][1], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[1][2], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[2][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[2][1], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[2][2], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[3][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[3][1], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[3][2], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[4][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[4][1], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[4][2], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[5][0], (unsigned int)0);
+  EXPECT_EQ(interior_pins3[5][1], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[5][2], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[6][0], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[6][1], (unsigned int)7);
+  EXPECT_EQ(interior_pins3[6][2], (unsigned int)8);
+  EXPECT_EQ(interior_pins3[7][0], (unsigned int)8);
+  EXPECT_EQ(interior_pins3[7][1], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[7][2], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[8][0], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[8][1], (unsigned int)8);
+  EXPECT_EQ(interior_pins3[8][2], (unsigned int)9);
+  EXPECT_EQ(interior_pins3[9][0], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[9][1], (unsigned int)9);
+  EXPECT_EQ(interior_pins3[9][2], (unsigned int)10);
+  EXPECT_EQ(interior_pins3[10][0], (unsigned int)10);
+  EXPECT_EQ(interior_pins3[10][1], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[10][2], (unsigned int)2);
+  EXPECT_EQ(interior_pins3[11][0], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[11][1], (unsigned int)10);
+  EXPECT_EQ(interior_pins3[11][2], (unsigned int)11);
+  EXPECT_EQ(interior_pins3[12][0], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[12][1], (unsigned int)11);
+  EXPECT_EQ(interior_pins3[12][2], (unsigned int)12);
+  EXPECT_EQ(interior_pins3[13][0], (unsigned int)12);
+  EXPECT_EQ(interior_pins3[13][1], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[13][2], (unsigned int)3);
+  EXPECT_EQ(interior_pins3[14][0], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[14][1], (unsigned int)12);
+  EXPECT_EQ(interior_pins3[14][2], (unsigned int)13);
+  EXPECT_EQ(interior_pins3[15][0], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[15][1], (unsigned int)13);
+  EXPECT_EQ(interior_pins3[15][2], (unsigned int)14);
+  EXPECT_EQ(interior_pins3[16][0], (unsigned int)14);
+  EXPECT_EQ(interior_pins3[16][1], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[16][2], (unsigned int)4);
+  EXPECT_EQ(interior_pins3[17][0], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[17][1], (unsigned int)14);
+  EXPECT_EQ(interior_pins3[17][2], (unsigned int)15);
+  EXPECT_EQ(interior_pins3[18][0], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[18][1], (unsigned int)15);
+  EXPECT_EQ(interior_pins3[18][2], (unsigned int)16);
+  EXPECT_EQ(interior_pins3[19][0], (unsigned int)16);
+  EXPECT_EQ(interior_pins3[19][1], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[19][2], (unsigned int)5);
+  EXPECT_EQ(interior_pins3[20][0], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[20][1], (unsigned int)16);
+  EXPECT_EQ(interior_pins3[20][2], (unsigned int)17);
+  EXPECT_EQ(interior_pins3[21][0], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[21][1], (unsigned int)17);
+  EXPECT_EQ(interior_pins3[21][2], (unsigned int)18);
+  EXPECT_EQ(interior_pins3[22][0], (unsigned int)18);
+  EXPECT_EQ(interior_pins3[22][1], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[22][2], (unsigned int)6);
+  EXPECT_EQ(interior_pins3[23][0], (unsigned int)1);
+  EXPECT_EQ(interior_pins3[23][1], (unsigned int)18);
+  EXPECT_EQ(interior_pins3[23][2], (unsigned int)7);
 
   auto edge_pins3 = hl3.edgeChannelPinIndices();
-  EXPECT_EQ(edge_pins3[0][0], 7);
-  EXPECT_EQ(edge_pins3[0][1], 8);
-  EXPECT_EQ(edge_pins3[1][0], 8);
-  EXPECT_EQ(edge_pins3[1][1], 9);
-  EXPECT_EQ(edge_pins3[2][0], 9);
-  EXPECT_EQ(edge_pins3[2][1], 10);
-  EXPECT_EQ(edge_pins3[3][0], 10);
-  EXPECT_EQ(edge_pins3[3][1], 11);
-  EXPECT_EQ(edge_pins3[4][0], 11);
-  EXPECT_EQ(edge_pins3[4][1], 12);
-  EXPECT_EQ(edge_pins3[5][0], 12);
-  EXPECT_EQ(edge_pins3[5][1], 13);
-  EXPECT_EQ(edge_pins3[6][0], 13);
-  EXPECT_EQ(edge_pins3[6][1], 14);
-  EXPECT_EQ(edge_pins3[7][0], 14);
-  EXPECT_EQ(edge_pins3[7][1], 15);
-  EXPECT_EQ(edge_pins3[8][0], 15);
-  EXPECT_EQ(edge_pins3[8][1], 16);
-  EXPECT_EQ(edge_pins3[9][0], 16);
-  EXPECT_EQ(edge_pins3[9][1], 17);
-  EXPECT_EQ(edge_pins3[10][0], 17);
-  EXPECT_EQ(edge_pins3[10][1], 18);
-  EXPECT_EQ(edge_pins3[11][0], 18);
-  EXPECT_EQ(edge_pins3[11][1], 7);
+  EXPECT_EQ(edge_pins3[0][0], (unsigned int)7);
+  EXPECT_EQ(edge_pins3[0][1], (unsigned int)8);
+  EXPECT_EQ(edge_pins3[1][0], (unsigned int)8);
+  EXPECT_EQ(edge_pins3[1][1], (unsigned int)9);
+  EXPECT_EQ(edge_pins3[2][0], (unsigned int)9);
+  EXPECT_EQ(edge_pins3[2][1], (unsigned int)10);
+  EXPECT_EQ(edge_pins3[3][0], (unsigned int)10);
+  EXPECT_EQ(edge_pins3[3][1], (unsigned int)11);
+  EXPECT_EQ(edge_pins3[4][0], (unsigned int)11);
+  EXPECT_EQ(edge_pins3[4][1], (unsigned int)12);
+  EXPECT_EQ(edge_pins3[5][0], (unsigned int)12);
+  EXPECT_EQ(edge_pins3[5][1], (unsigned int)13);
+  EXPECT_EQ(edge_pins3[6][0], (unsigned int)13);
+  EXPECT_EQ(edge_pins3[6][1], (unsigned int)14);
+  EXPECT_EQ(edge_pins3[7][0], (unsigned int)14);
+  EXPECT_EQ(edge_pins3[7][1], (unsigned int)15);
+  EXPECT_EQ(edge_pins3[8][0], (unsigned int)15);
+  EXPECT_EQ(edge_pins3[8][1], (unsigned int)16);
+  EXPECT_EQ(edge_pins3[9][0], (unsigned int)16);
+  EXPECT_EQ(edge_pins3[9][1], (unsigned int)17);
+  EXPECT_EQ(edge_pins3[10][0], (unsigned int)17);
+  EXPECT_EQ(edge_pins3[10][1], (unsigned int)18);
+  EXPECT_EQ(edge_pins3[11][0], (unsigned int)18);
+  EXPECT_EQ(edge_pins3[11][1], (unsigned int)7);
 
   auto corner_pins3 = hl3.cornerChannelPinIndices();
-  EXPECT_EQ(corner_pins3[0][0], 7);
-  EXPECT_EQ(corner_pins3[1][0], 9);
-  EXPECT_EQ(corner_pins3[2][0], 11);
-  EXPECT_EQ(corner_pins3[3][0], 13);
-  EXPECT_EQ(corner_pins3[4][0], 15);
-  EXPECT_EQ(corner_pins3[5][0], 17);
+  EXPECT_EQ(corner_pins3[0][0], (unsigned int)7);
+  EXPECT_EQ(corner_pins3[1][0], (unsigned int)9);
+  EXPECT_EQ(corner_pins3[2][0], (unsigned int)11);
+  EXPECT_EQ(corner_pins3[3][0], (unsigned int)13);
+  EXPECT_EQ(corner_pins3[4][0], (unsigned int)15);
+  EXPECT_EQ(corner_pins3[5][0], (unsigned int)17);
 }
 
 TEST_F(HexagonalLatticeTest, pin_bundle_spacing)
@@ -446,7 +443,7 @@ TEST_F(HexagonalLatticeTest, pin_centers)
   EXPECT_DOUBLE_EQ(centers2[5](0), cos60 * p);
   EXPECT_DOUBLE_EQ(centers2[5](1), -sin60 * p);
   EXPECT_DOUBLE_EQ(centers2[6](0), p);
-  EXPECT_DOUBLE_EQ(centers2[6](1), 0);
+  EXPECT_DOUBLE_EQ(centers2[6](1), (unsigned int)0);
 
   for (const auto i : make_range(hl16.nPins()))
     EXPECT_DOUBLE_EQ(centers2[i](2), 0.0);
@@ -466,23 +463,23 @@ TEST_F(HexagonalLatticeTest, pin_centers)
   EXPECT_DOUBLE_EQ(centers3[5](0), cos60 * p);
   EXPECT_DOUBLE_EQ(centers3[5](1), -sin60 * p);
   EXPECT_DOUBLE_EQ(centers3[6](0), p);
-  EXPECT_DOUBLE_EQ(centers3[6](1), 0);
+  EXPECT_DOUBLE_EQ(centers3[6](1), (unsigned int)0);
 
   EXPECT_DOUBLE_EQ(centers3[7](0), p);
   EXPECT_DOUBLE_EQ(centers3[7](1), 2 * p * sin60);
-  EXPECT_DOUBLE_EQ(centers3[8](0), 0);
+  EXPECT_DOUBLE_EQ(centers3[8](0), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers3[8](1), 2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers3[9](0), -p);
   EXPECT_DOUBLE_EQ(centers3[9](1), 2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers3[10](0), -p - p * cos60);
   EXPECT_DOUBLE_EQ(centers3[10](1), p * sin60);
   EXPECT_DOUBLE_EQ(centers3[11](0), -2 * p);
-  EXPECT_DOUBLE_EQ(centers3[11](1), 0);
+  EXPECT_DOUBLE_EQ(centers3[11](1), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers3[12](0), -p - p * cos60);
   EXPECT_DOUBLE_EQ(centers3[12](1), -p * sin60);
   EXPECT_DOUBLE_EQ(centers3[13](0), -p);
   EXPECT_DOUBLE_EQ(centers3[13](1), -2 * p * sin60);
-  EXPECT_DOUBLE_EQ(centers3[14](0), 0);
+  EXPECT_DOUBLE_EQ(centers3[14](0), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers3[14](1), -2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers3[15](0), p);
   EXPECT_DOUBLE_EQ(centers3[15](1), -2 * p * sin60);
@@ -511,23 +508,23 @@ TEST_F(HexagonalLatticeTest, pin_centers)
   EXPECT_DOUBLE_EQ(centers4[5](0), cos60 * p);
   EXPECT_DOUBLE_EQ(centers4[5](1), -sin60 * p);
   EXPECT_DOUBLE_EQ(centers4[6](0), p);
-  EXPECT_DOUBLE_EQ(centers4[6](1), 0);
+  EXPECT_DOUBLE_EQ(centers4[6](1), (unsigned int)0);
 
   EXPECT_DOUBLE_EQ(centers4[7](0), p);
   EXPECT_DOUBLE_EQ(centers4[7](1), 2 * p * sin60);
-  EXPECT_DOUBLE_EQ(centers4[8](0), 0);
+  EXPECT_DOUBLE_EQ(centers4[8](0), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers4[8](1), 2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers4[9](0), -p);
   EXPECT_DOUBLE_EQ(centers4[9](1), 2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers4[10](0), -p - p * cos60);
   EXPECT_DOUBLE_EQ(centers4[10](1), p * sin60);
   EXPECT_DOUBLE_EQ(centers4[11](0), -2 * p);
-  EXPECT_DOUBLE_EQ(centers4[11](1), 0);
+  EXPECT_DOUBLE_EQ(centers4[11](1), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers4[12](0), -p - p * cos60);
   EXPECT_DOUBLE_EQ(centers4[12](1), -p * sin60);
   EXPECT_DOUBLE_EQ(centers4[13](0), -p);
   EXPECT_DOUBLE_EQ(centers4[13](1), -2 * p * sin60);
-  EXPECT_DOUBLE_EQ(centers4[14](0), 0);
+  EXPECT_DOUBLE_EQ(centers4[14](0), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers4[14](1), -2 * p * sin60);
   EXPECT_DOUBLE_EQ(centers4[15](0), p);
   EXPECT_DOUBLE_EQ(centers4[15](1), -2 * p * sin60);
@@ -551,7 +548,7 @@ TEST_F(HexagonalLatticeTest, pin_centers)
   EXPECT_DOUBLE_EQ(centers4[24](0), -2 * p - p * cos60);
   EXPECT_DOUBLE_EQ(centers4[24](1), p * sin60);
   EXPECT_DOUBLE_EQ(centers4[25](0), -3 * p);
-  EXPECT_DOUBLE_EQ(centers4[25](1), 0);
+  EXPECT_DOUBLE_EQ(centers4[25](1), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers4[26](0), -2 * p - p * cos60);
   EXPECT_DOUBLE_EQ(centers4[26](1), -p * sin60);
   EXPECT_DOUBLE_EQ(centers4[27](0), -2 * p);
@@ -569,7 +566,7 @@ TEST_F(HexagonalLatticeTest, pin_centers)
   EXPECT_DOUBLE_EQ(centers4[33](0), 2 * p + p * cos60);
   EXPECT_DOUBLE_EQ(centers4[33](1), -p * sin60);
   EXPECT_DOUBLE_EQ(centers4[34](0), 3 * p);
-  EXPECT_DOUBLE_EQ(centers4[34](1), 0);
+  EXPECT_DOUBLE_EQ(centers4[34](1), (unsigned int)0);
   EXPECT_DOUBLE_EQ(centers4[35](0), 2 * p + p * cos60);
   EXPECT_DOUBLE_EQ(centers4[35](1), p * sin60);
   EXPECT_DOUBLE_EQ(centers4[36](0), 2 * p);
@@ -593,12 +590,12 @@ TEST_F(HexagonalLatticeTest, channel_index_shifted)
   Point pt4(0.46, -0.27, 3.5);
   Point pt5(0.37, 0.6, 3.5);
 
-  EXPECT_EQ(hl.channelIndex(pt0), 0);
-  EXPECT_EQ(hl.channelIndex(pt1), 1);
-  EXPECT_EQ(hl.channelIndex(pt2), 2);
-  EXPECT_EQ(hl.channelIndex(pt3), 3);
-  EXPECT_EQ(hl.channelIndex(pt4), 4);
-  EXPECT_EQ(hl.channelIndex(pt5), 5);
+  EXPECT_EQ(hl.channelIndex(pt0), (unsigned int)0);
+  EXPECT_EQ(hl.channelIndex(pt1), (unsigned int)1);
+  EXPECT_EQ(hl.channelIndex(pt2), (unsigned int)2);
+  EXPECT_EQ(hl.channelIndex(pt3), (unsigned int)3);
+  EXPECT_EQ(hl.channelIndex(pt4), (unsigned int)4);
+  EXPECT_EQ(hl.channelIndex(pt5), (unsigned int)5);
 
   Point pt6(0.36, 1.06, -7.0);
   Point pt7(0.11, 0.98, -7.0);
@@ -619,24 +616,24 @@ TEST_F(HexagonalLatticeTest, channel_index_shifted)
   Point pt22(0.78, 0.38, -7.0);
   Point pt23(0.74, 0.84, -7.0);
 
-  EXPECT_EQ(hl.channelIndex(pt6), 6);
-  EXPECT_EQ(hl.channelIndex(pt7), 7);
-  EXPECT_EQ(hl.channelIndex(pt8), 8);
-  EXPECT_EQ(hl.channelIndex(pt9), 9);
-  EXPECT_EQ(hl.channelIndex(pt10), 10);
-  EXPECT_EQ(hl.channelIndex(pt11), 11);
-  EXPECT_EQ(hl.channelIndex(pt12), 12);
-  EXPECT_EQ(hl.channelIndex(pt13), 13);
-  EXPECT_EQ(hl.channelIndex(pt14), 14);
-  EXPECT_EQ(hl.channelIndex(pt15), 15);
-  EXPECT_EQ(hl.channelIndex(pt16), 16);
-  EXPECT_EQ(hl.channelIndex(pt17), 17);
-  EXPECT_EQ(hl.channelIndex(pt18), 18);
-  EXPECT_EQ(hl.channelIndex(pt19), 19);
-  EXPECT_EQ(hl.channelIndex(pt20), 20);
-  EXPECT_EQ(hl.channelIndex(pt21), 21);
-  EXPECT_EQ(hl.channelIndex(pt22), 22);
-  EXPECT_EQ(hl.channelIndex(pt23), 23);
+  EXPECT_EQ(hl.channelIndex(pt6), (unsigned int)6);
+  EXPECT_EQ(hl.channelIndex(pt7), (unsigned int)7);
+  EXPECT_EQ(hl.channelIndex(pt8), (unsigned int)8);
+  EXPECT_EQ(hl.channelIndex(pt9), (unsigned int)9);
+  EXPECT_EQ(hl.channelIndex(pt10), (unsigned int)10);
+  EXPECT_EQ(hl.channelIndex(pt11), (unsigned int)11);
+  EXPECT_EQ(hl.channelIndex(pt12), (unsigned int)12);
+  EXPECT_EQ(hl.channelIndex(pt13), (unsigned int)13);
+  EXPECT_EQ(hl.channelIndex(pt14), (unsigned int)14);
+  EXPECT_EQ(hl.channelIndex(pt15), (unsigned int)15);
+  EXPECT_EQ(hl.channelIndex(pt16), (unsigned int)16);
+  EXPECT_EQ(hl.channelIndex(pt17), (unsigned int)17);
+  EXPECT_EQ(hl.channelIndex(pt18), (unsigned int)18);
+  EXPECT_EQ(hl.channelIndex(pt19), (unsigned int)19);
+  EXPECT_EQ(hl.channelIndex(pt20), (unsigned int)20);
+  EXPECT_EQ(hl.channelIndex(pt21), (unsigned int)21);
+  EXPECT_EQ(hl.channelIndex(pt22), (unsigned int)22);
+  EXPECT_EQ(hl.channelIndex(pt23), (unsigned int)23);
 
   Point pt24(0.31, 1.44, -0.1);
   Point pt25(-0.38, 1.61, -0.1);
@@ -651,18 +648,18 @@ TEST_F(HexagonalLatticeTest, channel_index_shifted)
   Point pt34(1.51, 0.37, -0.1);
   Point pt35(1.16, 1.42, -0.1);
 
-  EXPECT_EQ(hl.channelIndex(pt24), 24);
-  EXPECT_EQ(hl.channelIndex(pt25), 25);
-  // EXPECT_EQ(hl.channelIndex(pt26), 26);
-  EXPECT_EQ(hl.channelIndex(pt27), 27);
-  EXPECT_EQ(hl.channelIndex(pt28), 28);
-  EXPECT_EQ(hl.channelIndex(pt29), 29);
-  EXPECT_EQ(hl.channelIndex(pt30), 30);
-  EXPECT_EQ(hl.channelIndex(pt31), 31);
-  EXPECT_EQ(hl.channelIndex(pt32), 32);
-  EXPECT_EQ(hl.channelIndex(pt33), 33);
-  EXPECT_EQ(hl.channelIndex(pt34), 34);
-  EXPECT_EQ(hl.channelIndex(pt35), 35);
+  EXPECT_EQ(hl.channelIndex(pt24), (unsigned int)24);
+  EXPECT_EQ(hl.channelIndex(pt25), (unsigned int)25);
+  // EXPECT_EQ(hl.channelIndex(pt26), (unsigned int)26);
+  EXPECT_EQ(hl.channelIndex(pt27), (unsigned int)27);
+  EXPECT_EQ(hl.channelIndex(pt28), (unsigned int)28);
+  EXPECT_EQ(hl.channelIndex(pt29), (unsigned int)29);
+  EXPECT_EQ(hl.channelIndex(pt30), (unsigned int)30);
+  EXPECT_EQ(hl.channelIndex(pt31), (unsigned int)31);
+  EXPECT_EQ(hl.channelIndex(pt32), (unsigned int)32);
+  EXPECT_EQ(hl.channelIndex(pt33), (unsigned int)33);
+  EXPECT_EQ(hl.channelIndex(pt34), (unsigned int)34);
+  EXPECT_EQ(hl.channelIndex(pt35), (unsigned int)35);
 
   Point pt36(1.05, 1.75, 1.2);
   Point pt37(-1.02, 1.72, 1.2);
@@ -671,12 +668,12 @@ TEST_F(HexagonalLatticeTest, channel_index_shifted)
   Point pt40(0.89, -1.79, 1.2);
   Point pt41(1.98, 0.12, 1.2);
 
-  EXPECT_EQ(hl.channelIndex(pt36), 36);
-  EXPECT_EQ(hl.channelIndex(pt37), 37);
-  EXPECT_EQ(hl.channelIndex(pt38), 38);
-  EXPECT_EQ(hl.channelIndex(pt39), 39);
-  EXPECT_EQ(hl.channelIndex(pt40), 40);
-  EXPECT_EQ(hl.channelIndex(pt41), 41);
+  EXPECT_EQ(hl.channelIndex(pt36), (unsigned int)36);
+  EXPECT_EQ(hl.channelIndex(pt37), (unsigned int)37);
+  EXPECT_EQ(hl.channelIndex(pt38), (unsigned int)38);
+  EXPECT_EQ(hl.channelIndex(pt39), (unsigned int)39);
+  EXPECT_EQ(hl.channelIndex(pt40), (unsigned int)40);
+  EXPECT_EQ(hl.channelIndex(pt41), (unsigned int)41);
 }
 
 TEST_F(HexagonalLatticeTest, channel_index)
@@ -697,16 +694,16 @@ TEST_F(HexagonalLatticeTest, channel_index)
   EXPECT_EQ(hl.channelType(pt3), channel_type::interior);
   EXPECT_EQ(hl.channelType(pt4), channel_type::interior);
   EXPECT_EQ(hl.channelType(pt5), channel_type::interior);
-  EXPECT_EQ(hl.channelIndex(pt0), 0);
-  EXPECT_EQ(hl.channelIndex(pt1), 1);
-  EXPECT_EQ(hl.channelIndex(pt2), 2);
-  EXPECT_EQ(hl.channelIndex(pt3), 3);
-  EXPECT_EQ(hl.channelIndex(pt4), 4);
-  EXPECT_EQ(hl.channelIndex(pt5), 5);
+  EXPECT_EQ(hl.channelIndex(pt0), (unsigned int)0);
+  EXPECT_EQ(hl.channelIndex(pt1), (unsigned int)1);
+  EXPECT_EQ(hl.channelIndex(pt2), (unsigned int)2);
+  EXPECT_EQ(hl.channelIndex(pt3), (unsigned int)3);
+  EXPECT_EQ(hl.channelIndex(pt4), (unsigned int)4);
+  EXPECT_EQ(hl.channelIndex(pt5), (unsigned int)5);
 
   // check that a point exactly on the edge falls into one channel
   pt0 = {0.5 * 0.8 * 0.5, 0.5 * 0.8 * std::sqrt(3.0) / 2.0, 0.0};
-  EXPECT_EQ(hl.channelIndex(pt0), 0);
+  EXPECT_EQ(hl.channelIndex(pt0), (unsigned int)0);
 
   Point pt6(0.36, 1.06, 0.0);
   Point pt7(0.11, 0.98, 0.0);
@@ -745,24 +742,24 @@ TEST_F(HexagonalLatticeTest, channel_index)
   EXPECT_EQ(hl.channelType(pt21), channel_type::interior);
   EXPECT_EQ(hl.channelType(pt22), channel_type::interior);
   EXPECT_EQ(hl.channelType(pt23), channel_type::interior);
-  EXPECT_EQ(hl.channelIndex(pt6), 6);
-  EXPECT_EQ(hl.channelIndex(pt7), 7);
-  EXPECT_EQ(hl.channelIndex(pt8), 8);
-  EXPECT_EQ(hl.channelIndex(pt9), 9);
-  EXPECT_EQ(hl.channelIndex(pt10), 10);
-  EXPECT_EQ(hl.channelIndex(pt11), 11);
-  EXPECT_EQ(hl.channelIndex(pt12), 12);
-  EXPECT_EQ(hl.channelIndex(pt13), 13);
-  EXPECT_EQ(hl.channelIndex(pt14), 14);
-  EXPECT_EQ(hl.channelIndex(pt15), 15);
-  EXPECT_EQ(hl.channelIndex(pt16), 16);
-  EXPECT_EQ(hl.channelIndex(pt17), 17);
-  EXPECT_EQ(hl.channelIndex(pt18), 18);
-  EXPECT_EQ(hl.channelIndex(pt19), 19);
-  EXPECT_EQ(hl.channelIndex(pt20), 20);
-  EXPECT_EQ(hl.channelIndex(pt21), 21);
-  EXPECT_EQ(hl.channelIndex(pt22), 22);
-  EXPECT_EQ(hl.channelIndex(pt23), 23);
+  EXPECT_EQ(hl.channelIndex(pt6), (unsigned int)6);
+  EXPECT_EQ(hl.channelIndex(pt7), (unsigned int)7);
+  EXPECT_EQ(hl.channelIndex(pt8), (unsigned int)8);
+  EXPECT_EQ(hl.channelIndex(pt9), (unsigned int)9);
+  EXPECT_EQ(hl.channelIndex(pt10), (unsigned int)10);
+  EXPECT_EQ(hl.channelIndex(pt11), (unsigned int)11);
+  EXPECT_EQ(hl.channelIndex(pt12), (unsigned int)12);
+  EXPECT_EQ(hl.channelIndex(pt13), (unsigned int)13);
+  EXPECT_EQ(hl.channelIndex(pt14), (unsigned int)14);
+  EXPECT_EQ(hl.channelIndex(pt15), (unsigned int)15);
+  EXPECT_EQ(hl.channelIndex(pt16), (unsigned int)16);
+  EXPECT_EQ(hl.channelIndex(pt17), (unsigned int)17);
+  EXPECT_EQ(hl.channelIndex(pt18), (unsigned int)18);
+  EXPECT_EQ(hl.channelIndex(pt19), (unsigned int)19);
+  EXPECT_EQ(hl.channelIndex(pt20), (unsigned int)20);
+  EXPECT_EQ(hl.channelIndex(pt21), (unsigned int)21);
+  EXPECT_EQ(hl.channelIndex(pt22), (unsigned int)22);
+  EXPECT_EQ(hl.channelIndex(pt23), (unsigned int)23);
 
   Point pt24(0.31, 1.44, 0.0);
   Point pt25(-0.38, 1.61, 0.0);
@@ -789,18 +786,18 @@ TEST_F(HexagonalLatticeTest, channel_index)
   EXPECT_EQ(hl.channelType(pt33), channel_type::edge);
   EXPECT_EQ(hl.channelType(pt34), channel_type::edge);
   EXPECT_EQ(hl.channelType(pt35), channel_type::edge);
-  EXPECT_EQ(hl.channelIndex(pt24), 24);
-  EXPECT_EQ(hl.channelIndex(pt25), 25);
-  // EXPECT_EQ(hl.channelIndex(pt26), 26);
-  EXPECT_EQ(hl.channelIndex(pt27), 27);
-  EXPECT_EQ(hl.channelIndex(pt28), 28);
-  EXPECT_EQ(hl.channelIndex(pt29), 29);
-  EXPECT_EQ(hl.channelIndex(pt30), 30);
-  EXPECT_EQ(hl.channelIndex(pt31), 31);
-  EXPECT_EQ(hl.channelIndex(pt32), 32);
-  EXPECT_EQ(hl.channelIndex(pt33), 33);
-  EXPECT_EQ(hl.channelIndex(pt34), 34);
-  EXPECT_EQ(hl.channelIndex(pt35), 35);
+  EXPECT_EQ(hl.channelIndex(pt24), (unsigned int)24);
+  EXPECT_EQ(hl.channelIndex(pt25), (unsigned int)25);
+  // EXPECT_EQ(hl.channelIndex(pt26), (unsigned int)26);
+  EXPECT_EQ(hl.channelIndex(pt27), (unsigned int)27);
+  EXPECT_EQ(hl.channelIndex(pt28), (unsigned int)28);
+  EXPECT_EQ(hl.channelIndex(pt29), (unsigned int)29);
+  EXPECT_EQ(hl.channelIndex(pt30), (unsigned int)30);
+  EXPECT_EQ(hl.channelIndex(pt31), (unsigned int)31);
+  EXPECT_EQ(hl.channelIndex(pt32), (unsigned int)32);
+  EXPECT_EQ(hl.channelIndex(pt33), (unsigned int)33);
+  EXPECT_EQ(hl.channelIndex(pt34), (unsigned int)34);
+  EXPECT_EQ(hl.channelIndex(pt35), (unsigned int)35);
 
   Point pt36(1.05, 1.75, 0.0);
   Point pt37(-1.02, 1.72, 0.0);
@@ -815,12 +812,12 @@ TEST_F(HexagonalLatticeTest, channel_index)
   EXPECT_EQ(hl.channelType(pt39), channel_type::corner);
   EXPECT_EQ(hl.channelType(pt40), channel_type::corner);
   EXPECT_EQ(hl.channelType(pt41), channel_type::corner);
-  EXPECT_EQ(hl.channelIndex(pt36), 36);
-  EXPECT_EQ(hl.channelIndex(pt37), 37);
-  EXPECT_EQ(hl.channelIndex(pt38), 38);
-  EXPECT_EQ(hl.channelIndex(pt39), 39);
-  EXPECT_EQ(hl.channelIndex(pt40), 40);
-  EXPECT_EQ(hl.channelIndex(pt41), 41);
+  EXPECT_EQ(hl.channelIndex(pt36), (unsigned int)36);
+  EXPECT_EQ(hl.channelIndex(pt37), (unsigned int)37);
+  EXPECT_EQ(hl.channelIndex(pt38), (unsigned int)38);
+  EXPECT_EQ(hl.channelIndex(pt39), (unsigned int)39);
+  EXPECT_EQ(hl.channelIndex(pt40), (unsigned int)40);
+  EXPECT_EQ(hl.channelIndex(pt41), (unsigned int)41);
 }
 
 TEST_F(HexagonalLatticeTest, gaps1)
@@ -831,7 +828,7 @@ TEST_F(HexagonalLatticeTest, gaps1)
   const auto & gi = hl.gapIndices();
   const auto & lg = hl.localToGlobalGaps();
 
-  EXPECT_EQ(hl.nInteriorGaps(), 0);
+  EXPECT_EQ(hl.nInteriorGaps(), (unsigned int)0);
 
   int i = 0;
   EXPECT_EQ(gi[i].first, 0);
@@ -883,7 +880,7 @@ TEST_F(HexagonalLatticeTest, gaps2)
   const auto & gi = hl.gapIndices();
   const auto & lg = hl.localToGlobalGaps();
 
-  EXPECT_EQ(hl.nInteriorGaps(), 12);
+  EXPECT_EQ(hl.nInteriorGaps(), (unsigned int)12);
 
   int i = 0;
   EXPECT_EQ(gi[i].first, 0);
@@ -1042,7 +1039,7 @@ TEST_F(HexagonalLatticeTest, gaps3)
   const auto & gi = hl.gapIndices();
   const auto & lg = hl.localToGlobalGaps();
 
-  EXPECT_EQ(hl.nInteriorGaps(), 42);
+  EXPECT_EQ(hl.nInteriorGaps(), (unsigned int)42);
 
   int i = 0;
   EXPECT_EQ(gi[i].first, 0);
@@ -1406,37 +1403,37 @@ TEST_F(HexagonalLatticeTest, closest_gap)
   HexagonalLatticeUtils hl(bp, pp, pd, wd, wp, nr, a);
 
   Point pt1(0.23, 0.27, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt1), 0);
+  EXPECT_EQ(hl.gapIndex(pt1), (unsigned int)0);
 
   Point pt2(-0.5, 0.29, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt2), 11);
+  EXPECT_EQ(hl.gapIndex(pt2), (unsigned int)11);
 
   Point pt3(1.14, 0.275, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt3), 29);
+  EXPECT_EQ(hl.gapIndex(pt3), (unsigned int)29);
 
   Point pt4(-0.77, 1.015, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt4), 13);
+  EXPECT_EQ(hl.gapIndex(pt4), (unsigned int)13);
 
   Point pt5(-0.84, 0.445, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt5), 16);
+  EXPECT_EQ(hl.gapIndex(pt5), (unsigned int)16);
 
   Point pt6(-0.47, 1.55, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt6), 32);
+  EXPECT_EQ(hl.gapIndex(pt6), (unsigned int)32);
 
   Point pt7(-0.069, 1.94, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt7), 43);
+  EXPECT_EQ(hl.gapIndex(pt7), (unsigned int)43);
 
   Point pt8(-1.22, 1.79, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt8), 45);
+  EXPECT_EQ(hl.gapIndex(pt8), (unsigned int)45);
 
   Point pt10(-0.26, -1.61, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt10), 37);
+  EXPECT_EQ(hl.gapIndex(pt10), (unsigned int)37);
 
   Point pt11(2.23, 0.03, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt11), 57);
+  EXPECT_EQ(hl.gapIndex(pt11), (unsigned int)57);
 
   Point pt12(-1.77, -0.70, 0.0);
-  EXPECT_EQ(hl.gapIndex(pt12), 49);
+  EXPECT_EQ(hl.gapIndex(pt12), (unsigned int)49);
 }
 
 TEST_F(HexagonalLatticeTest, normals1)
@@ -1766,7 +1763,7 @@ TEST_F(HexagonalLatticeTest, pin_corners)
   EXPECT_DOUBLE_EQ(pin0[2](0), -side * sin60);
   EXPECT_DOUBLE_EQ(pin0[2](1), -side * cos60);
 
-  EXPECT_DOUBLE_EQ(pin0[3](0), 0);
+  EXPECT_DOUBLE_EQ(pin0[3](0), (unsigned int)0);
   EXPECT_DOUBLE_EQ(pin0[3](1), -side);
 
   EXPECT_DOUBLE_EQ(pin0[4](0), side * sin60);
@@ -1801,31 +1798,31 @@ TEST_F(HexagonalLatticeTest, pin_corners)
 
   // check for bin indexing
   Point p(0.07, 0.195, 0.0);
-  EXPECT_EQ(hl.pinIndex(p), 0);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)0);
 
   p = {0.02, 0.42, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 0);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)0);
 
   p = {0.74, 0.46, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 1);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)1);
 
   p = {-0.206, 0.668, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 2);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)2);
 
   p = {-0.99, 0.313, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 3);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)3);
 
   p = {-0.257, -0.67, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 4);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)4);
 
   p = {0.67, -0.79, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 5);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)5);
 
   p = {0.43, 0.0206, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 6);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)6);
 
   p = {0.85, 0.51, 0.0};
-  EXPECT_EQ(hl.pinIndex(p), 7);
+  EXPECT_EQ(hl.pinIndex(p), (unsigned int)7);
 }
 
 TEST_F(HexagonalLatticeTest, constructor)
@@ -1840,5 +1837,3 @@ TEST_F(HexagonalLatticeTest, constructor)
   EXPECT_DOUBLE_EQ(hl.wireDiameter(), 0.05);
   EXPECT_DOUBLE_EQ(hl.wirePitch(), 50.0);
 }
-
-#pragma GCC diagnostic pop
