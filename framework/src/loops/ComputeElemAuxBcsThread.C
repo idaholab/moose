@@ -79,7 +79,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         }
         _fe_problem.setCurrentSubdomainID(elem, _tid);
         _fe_problem.prepare(elem, _tid);
-        _fe_problem.reinitElemFace(elem, side, boundary_id, _tid);
+        _fe_problem.reinitElemFace(elem, side, _tid);
 
         const Elem * lower_d_elem = _fe_problem.mesh().getLowerDElem(elem, side);
         _fe_problem.setCurrentLowerDElem(lower_d_elem, _tid);
