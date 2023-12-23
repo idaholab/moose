@@ -15,13 +15,13 @@ const Real HexagonalLatticeUtils::COS60 = 0.5;
 const Real HexagonalLatticeUtils::SIN60 = std::sqrt(3.0) / 2.0;
 const unsigned int HexagonalLatticeUtils::NUM_SIDES = 6;
 
-HexagonalLatticeUtils::HexagonalLatticeUtils(const Real & bundle_inner_flat_to_flat,
-                                             const Real & pin_pitch,
-                                             const Real & pin_diameter,
-                                             const Real & wire_diameter,
-                                             const Real & wire_pitch,
-                                             const unsigned int & n_rings,
-                                             const unsigned int & axis)
+HexagonalLatticeUtils::HexagonalLatticeUtils(const Real bundle_inner_flat_to_flat,
+                                             const Real pin_pitch,
+                                             const Real pin_diameter,
+                                             const Real wire_diameter,
+                                             const Real wire_pitch,
+                                             const unsigned int n_rings,
+                                             const unsigned int axis)
   : _bundle_pitch(bundle_inner_flat_to_flat),
     _pin_pitch(pin_pitch),
     _pin_diameter(pin_diameter),

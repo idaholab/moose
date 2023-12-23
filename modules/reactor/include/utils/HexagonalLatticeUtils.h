@@ -38,13 +38,13 @@ enum ChannelTypeEnum
 class HexagonalLatticeUtils
 {
 public:
-  HexagonalLatticeUtils(const Real & bundle_inner_flat_to_flat,
-                        const Real & pin_pitch,
-                        const Real & pin_diameter,
-                        const Real & wire_diameter,
-                        const Real & wire_pitch,
-                        const unsigned int & n_rings,
-                        const unsigned int & axis);
+  HexagonalLatticeUtils(const Real bundle_inner_flat_to_flat,
+                        const Real pin_pitch,
+                        const Real pin_diameter,
+                        const Real wire_diameter,
+                        const Real wire_pitch,
+                        const unsigned int n_rings,
+                        const unsigned int axis);
 
   /**
    * Distance from a point and a gap
@@ -594,25 +594,25 @@ protected:
   unsigned int globalGapIndex(const std::pair<int, int> & local_gap) const;
 
   /// Bundle pitch (distance across bundle measured flat-to-flat on the inside of the duct)
-  const Real & _bundle_pitch;
+  const Real _bundle_pitch;
 
   /// Pin pitch
-  const Real & _pin_pitch;
+  const Real _pin_pitch;
 
   /// Pin diameter
-  const Real & _pin_diameter;
+  const Real _pin_diameter;
 
   /// Wire diameter
-  const Real & _wire_diameter;
+  const Real _wire_diameter;
 
   /// Wire pitch
-  const Real & _wire_pitch;
+  const Real _wire_pitch;
 
   /// Total number of rings of pins
-  const unsigned int & _n_rings;
+  const unsigned int _n_rings;
 
   /// Vertical axis of the bundle along which the pins are aligned
-  const unsigned int & _axis;
+  const unsigned int _axis;
 
   /// Side length of duct
   const Real _bundle_side_length;
