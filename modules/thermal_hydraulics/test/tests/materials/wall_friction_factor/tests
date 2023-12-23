@@ -1,6 +1,6 @@
 [Tests]
-  # idaholab/sockeye#19802
-  issues = '#26336'
+  # idaholab/sockeye#123
+  issues = '#26411'
   design = 'WallFrictionChurchillMaterial.md'
   [churchill]
     type = 'CSVDiff'

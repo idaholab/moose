@@ -1,6 +1,6 @@
 [Tests]
-  # sockeye #19808
-  issues = '#19808'
+  # sockeye #129
+  issues = '#26411'
   design = 'FunctionElementLoopIntegralUserObject.md'
   [test]
     type = CSVDiff

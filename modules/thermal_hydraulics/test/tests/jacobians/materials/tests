@@ -45,8 +45,8 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
-    # idaholab/sockeye#19719
-    issues = '#26336'
+    # idaholab/sockeye#41
+    issues = '#26411'
     design = 'DynamicViscosityMaterial.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobiain when computing the dynamic viscosity and its derivatives with regards to the nonlinear conserved variables.'
   []
@@ -139,8 +139,8 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
-    # idaholab/sockeye#19719
-    issues = '#26336'
+    # idaholab/sockeye#41
+    issues = '#26411'
     design = 'ReynoldsNumberMaterial.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing the Reynolds number and its derivatives with regards to the nonlinear conserved variables.'
   []
@@ -178,8 +178,8 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
-    # idaholab/sockeye#19719
-    issues = '#26336'
+    # idaholab/sockeye#41
+    issues = '#26411'
     design = 'WallFrictionFunctionMaterial.md'
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when computing a wall friction coefficient from functions and its derivatives with regards to the nonlinear conserved variables.'
   []

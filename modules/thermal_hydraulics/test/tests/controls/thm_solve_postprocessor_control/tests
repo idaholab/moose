@@ -1,7 +1,7 @@
 [Tests]
   design = 'THMSolvePostprocessorControl.md'
-  # sockeye#19746
-  issues = '#26336'
+  # sockeye#67
+  issues = '#26411'
   [test]
     type = 'CSVDiff'
     input = 'test.i'

@@ -1,6 +1,6 @@
 [Tests]
-  # idaholab/sockeye#19731
-  issues = '#26336'
+  # idaholab/sockeye#53
+  issues = '#26411'
   design = 'HeatRateRadiationRZ.md'
   [test]
     type = 'CSVDiff'

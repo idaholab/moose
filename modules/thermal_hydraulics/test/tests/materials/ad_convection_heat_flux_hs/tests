@@ -1,6 +1,6 @@
 [Tests]
-  # idaholab/sockeye#19845
-  issues = '#26336'
+  # idaholab/sockeye#166
+  issues = '#26411'
   design = 'ADConvectionHeatFluxHSMaterial.md'
   [test]
     type = 'CSVDiff'

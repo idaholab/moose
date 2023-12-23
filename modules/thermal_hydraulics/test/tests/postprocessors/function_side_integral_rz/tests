@@ -4,8 +4,8 @@
     input = 'function_side_integral_rz.i'
     csvdiff = 'function_side_integral_rz.csv'
     recover = false
-    # sockeye#19731
-    issues = '#26336'
+    # sockeye#53
+    issues = '#26411'
     design = 'FunctionSideIntegralRZ.md'
     requirement = 'The system shall be able to integrate the values of a function on a side, assuming cylindrical coordinates in a Cartesian frame of reference.'
   []

@@ -1,6 +1,6 @@
 [Tests]
-  # also idaholab/sockeye#19778
-  issues = '#19769'
+  # also idaholab/sockeye#99
+  issues = '#26411'
   [cubic_nonad]
     type = 'CSVDiff'
     input = 'smooth_transition.i'
