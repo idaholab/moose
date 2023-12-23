@@ -42,7 +42,7 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
 {
   // build reporters argument
   std::string symbol_str;
-  for (std::size_t i = 0; i < _reporter_symbols.size(); ++i)
+  for (const auto i : index_range(_reporter_symbols))
     symbol_str += (i == 0 ? "" : ",") + _reporter_symbols[i];
 
   // add time if required

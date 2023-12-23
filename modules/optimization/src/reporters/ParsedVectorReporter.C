@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParsedVectors.h"
+#include "ParsedVectorReporter.h"
 
-registerMooseObject("OptimizationApp", ParsedVectors);
+registerMooseObject("OptimizationApp", ParsedVectorReporter);
 
 InputParameters
-ParsedVectors::validParams()
+ParsedVectorReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription("Apply parsed functions to vector entries held in reporters.");
@@ -20,7 +20,7 @@ ParsedVectors::validParams()
   return params;
 }
 
-ParsedVectors::ParsedVectors(const InputParameters & parameters)
+ParsedVectorReporter::ParsedVectorReporter(const InputParameters & parameters)
   : ParsedReporterBase(parameters),
     _output_reporter(declareValueByName<std::vector<Real>>(getParam<std::string>("name"),
                                                            REPORTER_MODE_REPLICATED))
@@ -42,13 +42,12 @@ ParsedVectors::ParsedVectors(const InputParameters & parameters)
 }
 
 void
-ParsedVectors::finalize()
+ParsedVectorReporter::finalize()
 {
   // check vector sizes of reporters
-  const std::size_t n_rep(_reporter_data.size());
   const std::size_t entries(_reporter_data[0]->size());
-  for (std::size_t j = 0; j < n_rep; ++j)
-    if (entries != _reporter_data[j]->size())
+  for (const auto rep_index : index_range(_reporter_data))
+    if (entries != _reporter_data[rep_index]->size())
     {
       const std::vector<ReporterName> reporter_names(
           getParam<std::vector<ReporterName>>("reporter_names"));
@@ -58,19 +57,19 @@ ParsedVectors::finalize()
                  " = ",
                  entries,
                  "\nsize of ",
-                 reporter_names[j].getCombinedName(),
+                 reporter_names[rep_index].getCombinedName(),
                  " = ",
-                 _reporter_data[j]->size());
+                 _reporter_data[rep_index]->size());
     }
 
   _output_reporter.resize(entries, 0.0);
   for (std::size_t i = 0; i < entries; ++i)
   {
-    for (std::size_t j = 0; j < n_rep; ++j)
-      _func_params[j] = _reporter_data[j]->at(i);
+    for (const auto rep_index : index_range(_reporter_data))
+      _func_params[rep_index] = _reporter_data[rep_index]->at(i);
 
     if (_use_t)
-      _func_params[n_rep] = _t;
+      _func_params[_reporter_data.size()] = _t;
 
     _output_reporter[i] = evaluate(_func_F);
   }

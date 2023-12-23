@@ -148,7 +148,7 @@
     outputs=none
   []
   [obj_sum]
-    type = ParsedScalars
+    type = ParsedScalarReporter
     name = value
     reporter_names = 'vector_sqsum/sqsum'
     reporter_symbols = 'a'

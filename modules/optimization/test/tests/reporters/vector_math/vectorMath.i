@@ -58,7 +58,7 @@
     outputs=none
   []
   [vectorOperation]
-    type = ParsedVectors
+    type = ParsedVectorReporter
     name = inner
     reporter_names = 'vecs/vec_a vecs/vec_b vecs/vec_c'
     reporter_symbols = 'a b c'
@@ -67,7 +67,7 @@
     expression = '(a+b)*c+constant1+constant2'
   []
   [scalarOperation]
-    type = ParsedScalars
+    type = ParsedScalarReporter
     name = inner
     reporter_names = 'vecs/a vecs/b vecs/c'
     reporter_symbols = 'a b c'

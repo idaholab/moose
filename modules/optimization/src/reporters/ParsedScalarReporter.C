@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParsedScalars.h"
+#include "ParsedScalarReporter.h"
 
-registerMooseObject("OptimizationApp", ParsedScalars);
+registerMooseObject("OptimizationApp", ParsedScalarReporter);
 
 InputParameters
-ParsedScalars::validParams()
+ParsedScalarReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
   params.addRequiredParam<std::vector<ReporterName>>("reporter_names", "Reporter names ");
@@ -20,7 +20,7 @@ ParsedScalars::validParams()
   return params;
 }
 
-ParsedScalars::ParsedScalars(const InputParameters & parameters)
+ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
   : ParsedReporterBase(parameters),
     _output_reporter(
         declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_REPLICATED))
@@ -41,16 +41,13 @@ ParsedScalars::ParsedScalars(const InputParameters & parameters)
 }
 
 void
-ParsedScalars::finalize()
+ParsedScalarReporter::finalize()
 {
-  // check vector sizes of reporters
-  const std::size_t n_rep(_reporter_data.size());
-
-  for (std::size_t j = 0; j < n_rep; ++j)
-    _func_params[j] = *(_reporter_data[j]);
+  for (const auto i : index_range(_reporter_data))
+    _func_params[i] = *(_reporter_data[i]);
 
   if (_use_t)
-    _func_params[n_rep] = _t;
+    _func_params[_reporter_data.size()] = _t;
 
   _output_reporter = evaluate(_func_F);
 }

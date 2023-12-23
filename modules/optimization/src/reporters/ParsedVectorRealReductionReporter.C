@@ -16,13 +16,16 @@ ParsedVectorRealReductionReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription(
-      "Use a parsed function to iterate through a vector and reduce it scalar.");
+      "Use a parsed function to iterate through a vector and reduce it to a scalar.");
   params.addRequiredParam<ReporterName>("reporter_name", "Reporter name with vector to reduce.");
   params.addRequiredParam<Real>("initial_value", "Value to intialize the reduction with.");
+
   // reporter_symbols are the two symbols for reduction value and current value for the reduction
   // operation, these symbols are enforced in the constructor with a mooseError
   params.set<std::vector<std::string>>("reporter_symbols") = {"reduction_value", "indexed_value"};
-  // This reporter is for postprocessing optimization results and shold be exectuted at the end of
+  params.suppressParameter<std::vector<std::string>>("reporter_symbols");
+
+  // This reporter is for postprocessing optimization results and should be exectuted at the end of
   // execution
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
   return params;
@@ -51,7 +54,7 @@ void
 ParsedVectorRealReductionReporter::finalize()
 {
   Real reduction = _initial_value;
-  for (std::size_t i = 0; i < _reporter_data.size(); ++i)
+  for (const auto i : index_range(_reporter_data))
   {
     _func_params[0] = reduction;
     _func_params[1] = _reporter_data[i];

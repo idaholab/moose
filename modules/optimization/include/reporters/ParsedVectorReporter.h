@@ -13,12 +13,12 @@
 /**
  * Reporter containing operation between vectors from another Reporter
  */
-class ParsedVectors : public ParsedReporterBase
+class ParsedVectorReporter : public ParsedReporterBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedVectors(const InputParameters & parameters);
+  ParsedVectorReporter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}

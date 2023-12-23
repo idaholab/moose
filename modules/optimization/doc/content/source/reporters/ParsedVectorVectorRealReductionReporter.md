@@ -12,7 +12,7 @@ Different intial conditions and [parsed function expressions](MooseParsedFunctio
 
 ## Optimization use case
 
-`ParsedVectorVectorRealReductionReporter` and [ParsedVectorRealReporter.md] were created to process data cloned into a `StochasticReporter` from a `SamplerReporterTransfer` as shown in [sampler].
+`ParsedVectorVectorRealReductionReporter` and [ParsedVectorRealReductionReporter.md] were created to process data cloned into a `StochasticReporter` from a `SamplerReporterTransfer` as shown in [sampler].
 In this case, a `ParsedVectorVectorRealReductionReporter` is needed to sum each sampler's parameter gradient vector returned to the `StochasticReporter` as a vector of vectors.
 This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the sampler system.
 The scalar reporter computed by `ParsedVectorVectorRealReductionReporter` is then be transferred as the objective value into [GeneralOptimization.md].

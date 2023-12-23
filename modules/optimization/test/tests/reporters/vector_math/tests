@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md ParsedVectors.md ParsedScalars.md'
+  design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md ParsedVectorReporter.md ParsedScalarReporter.md'
   [vectorMath]
     type = CSVDiff
     input = vectorMath.i
