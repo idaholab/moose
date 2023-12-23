@@ -78,6 +78,7 @@
 #include "FVScalarLagrangeMultiplierInterface.h"
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
+#include "HybridizedKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -465,6 +466,21 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
     _has_save_in = true;
   if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
     _has_diag_save_in = true;
+}
+
+void
+NonlinearSystemBase::addHybridizedKernel(const std::string & kernel_name,
+                                         const std::string & name,
+                                         InputParameters & parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // Create the kernel object via the factory and add to warehouse
+    auto kernel = _factory.create<HybridizedKernel>(kernel_name, name, parameters, tid);
+    _kernels.addObject(kernel, tid);
+    _hybridized_kernels.addObject(kernel, tid);
+    postAddResidualObject(*kernel);
+  }
 }
 
 void

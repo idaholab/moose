@@ -770,6 +770,9 @@ public:
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters);
+  virtual void addHybridizedKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
   virtual void addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters);
@@ -2324,6 +2327,11 @@ protected:
 private:
   /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
+
+  void setKernelParamsAndLog(const std::string & kernel_name,
+                             const std::string & name,
+                             InputParameters & params,
+                             unsigned int nl_sys_num);
 
 protected:
   bool _initialized;

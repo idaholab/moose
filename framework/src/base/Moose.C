@@ -443,6 +443,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
+  registerSyntaxTask("AddHybridizedKernelAction", "HybridizedKernels/*", "add_kernel");
+
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 
   registerSyntaxTask("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
