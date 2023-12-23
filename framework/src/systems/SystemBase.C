@@ -353,10 +353,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElemFace(const Elem * /*elem*/,
-                           unsigned int /*side*/,
-                           BoundaryID /*bnd_id*/,
-                           THREAD_ID tid)
+SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID tid)
 {
   const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
@@ -364,10 +361,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/,
 }
 
 void
-SystemBase::reinitNeighborFace(const Elem * /*elem*/,
-                               unsigned int /*side*/,
-                               BoundaryID /*bnd_id*/,
-                               THREAD_ID tid)
+SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID tid)
 {
   const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)

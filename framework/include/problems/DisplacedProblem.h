@@ -211,10 +211,7 @@ public:
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
                               const THREAD_ID tid) override;
-  virtual void reinitElemFace(const Elem * elem,
-                              unsigned int side,
-                              BoundaryID bnd_id,
-                              const THREAD_ID tid) override;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void reinitNode(const Node * node, const THREAD_ID tid) override;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) override;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) override;

@@ -1994,20 +1994,17 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
 }
 
 void
-FEProblemBase::reinitElemFace(const Elem * elem,
-                              unsigned int side,
-                              BoundaryID bnd_id,
-                              const THREAD_ID tid)
+FEProblemBase::reinitElemFace(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   for (const auto i : index_range(_solver_systems))
   {
     _assembly[tid][i]->reinit(elem, side);
-    _solver_systems[i]->reinitElemFace(elem, side, bnd_id, tid);
+    _solver_systems[i]->reinitElemFace(elem, side, tid);
   }
-  _aux->reinitElemFace(elem, side, bnd_id, tid);
+  _aux->reinitElemFace(elem, side, tid);
 
   if (_displaced_problem && _reinit_displaced_face)
-    _displaced_problem->reinitElemFace(_displaced_mesh->elemPtr(elem->id()), side, bnd_id, tid);
+    _displaced_problem->reinitElemFace(_displaced_mesh->elemPtr(elem->id()), side, tid);
 }
 
 void
@@ -2115,14 +2112,13 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
   }
   _aux->prepareNeighbor(tid);
 
-  BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
   for (auto & nl : _nl)
   {
-    nl->reinitElemFace(elem, side, bnd_id, tid);
-    nl->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+    nl->reinitElemFace(elem, side, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
   }
-  _aux->reinitElemFace(elem, side, bnd_id, tid);
-  _aux->reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+  _aux->reinitElemFace(elem, side, tid);
+  _aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 
   if (_displaced_problem && _reinit_displaced_neighbor)
   {
@@ -2195,8 +2191,8 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
-    nl->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
-  _aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
+    nl->reinitNeighborFace(neighbor, neighbor_side, tid);
+  _aux->reinitNeighborFace(neighbor, neighbor_side, tid);
 }
 
 void
@@ -8472,39 +8468,31 @@ FEProblemBase::automaticScaling(bool automatic_scaling)
 void
 FEProblemBase::reinitElemFaceRef(const Elem * elem,
                                  unsigned int side,
-                                 BoundaryID bnd_id,
                                  Real tolerance,
                                  const std::vector<Point> * const pts,
                                  const std::vector<Real> * const weights,
                                  const THREAD_ID tid)
 {
-  SubProblem::reinitElemFaceRef(elem, side, bnd_id, tolerance, pts, weights, tid);
+  SubProblem::reinitElemFaceRef(elem, side, tolerance, pts, weights, tid);
 
   if (_displaced_problem)
     _displaced_problem->reinitElemFaceRef(
-        _displaced_mesh->elemPtr(elem->id()), side, bnd_id, tolerance, pts, weights, tid);
+        _displaced_mesh->elemPtr(elem->id()), side, tolerance, pts, weights, tid);
 }
 
 void
 FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                      unsigned int neighbor_side,
-                                     BoundaryID bnd_id,
                                      Real tolerance,
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights,
                                      const THREAD_ID tid)
 {
-  SubProblem::reinitNeighborFaceRef(
-      neighbor_elem, neighbor_side, bnd_id, tolerance, pts, weights, tid);
+  SubProblem::reinitNeighborFaceRef(neighbor_elem, neighbor_side, tolerance, pts, weights, tid);
 
   if (_displaced_problem)
-    _displaced_problem->reinitNeighborFaceRef(_displaced_mesh->elemPtr(neighbor_elem->id()),
-                                              neighbor_side,
-                                              bnd_id,
-                                              tolerance,
-                                              pts,
-                                              weights,
-                                              tid);
+    _displaced_problem->reinitNeighborFaceRef(
+        _displaced_mesh->elemPtr(neighbor_elem->id()), neighbor_side, tolerance, pts, weights, tid);
 }
 
 void

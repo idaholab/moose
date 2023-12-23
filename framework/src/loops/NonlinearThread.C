@@ -159,7 +159,7 @@ NonlinearThread::onBoundary(const Elem * elem,
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+    _fe_problem.reinitElemFace(elem, side, _tid);
 
     // Needed to use lower-dimensional variables on Materials
     if (lower_d_elem)

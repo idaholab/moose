@@ -347,10 +347,7 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
-                                unsigned int /*side*/,
-                                BoundaryID /*bnd_id*/,
-                                THREAD_ID tid)
+AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, THREAD_ID tid)
 {
   for (auto * var : _nodal_vars[tid])
     var->computeElemValuesFace();
