@@ -14,7 +14,7 @@
  * This is a base class used to set an upper and/or lower bound of a variable
  * for the PETSc's variational inequalities solver
  */
-class BoundsAuxBase : public AuxKernel
+class BoundsBase : public AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ public:
     LOWER
   };
 
-  BoundsAuxBase(const InputParameters & parameters);
+  BoundsBase(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

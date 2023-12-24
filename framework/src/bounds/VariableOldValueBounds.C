@@ -7,25 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VariableOldValueBoundsAux.h"
+#include "VariableOldValueBounds.h"
 
-registerMooseObject("MooseApp", VariableOldValueBoundsAux);
+registerMooseObject("MooseApp", VariableOldValueBounds);
+registerMooseObjectRenamed("MooseApp",
+                           VariableOldValueBoundsAux,
+                           "06/30/2024 24:00",
+                           VariableOldValueBounds);
 
 InputParameters
-VariableOldValueBoundsAux::validParams()
+VariableOldValueBounds::validParams()
 {
-  InputParameters params = BoundsAuxBase::validParams();
+  InputParameters params = BoundsBase::validParams();
   params.addClassDescription("Uses the old variable values as the bounds for the new solve.");
   return params;
 }
 
-VariableOldValueBoundsAux::VariableOldValueBoundsAux(const InputParameters & parameters)
-  : BoundsAuxBase(parameters)
+VariableOldValueBounds::VariableOldValueBounds(const InputParameters & parameters)
+  : BoundsBase(parameters)
 {
 }
 
 Real
-VariableOldValueBoundsAux::getBound()
+VariableOldValueBounds::getBound()
 {
   if (_fe_var && isNodal())
     return _fe_var->getNodalValueOld(*_current_node);

@@ -7,21 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ConstantBoundsAux.h"
+#include "ConstantBounds.h"
 
-registerMooseObject("MooseApp", ConstantBoundsAux);
+registerMooseObject("MooseApp", ConstantBounds);
+registerMooseObjectRenamed("MooseApp", ConstantBoundsAux, "06/30/2024 24:00", ConstantBounds);
 
 InputParameters
-ConstantBoundsAux::validParams()
+ConstantBounds::validParams()
 {
-  InputParameters params = BoundsAuxBase::validParams();
+  InputParameters params = BoundsBase::validParams();
   params.addClassDescription(
       "Provides constant bound of a variable for the PETSc's variational inequalities solver");
   params.addRequiredParam<Real>("bound_value", "The value of bound for the variable");
   return params;
 }
 
-ConstantBoundsAux::ConstantBoundsAux(const InputParameters & parameters)
-  : BoundsAuxBase(parameters), _bound_value(getParam<Real>("bound_value"))
+ConstantBounds::ConstantBounds(const InputParameters & parameters)
+  : BoundsBase(parameters), _bound_value(getParam<Real>("bound_value"))
 {
 }

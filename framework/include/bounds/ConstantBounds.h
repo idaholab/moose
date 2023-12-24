@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "BoundsAuxBase.h"
+#include "BoundsBase.h"
 
 /**
  * Provides constant bound of a variable
  * for the PETSc's variational inequalities solver
  */
-class ConstantBoundsAux : public BoundsAuxBase
+class ConstantBounds : public BoundsBase
 {
 public:
   static InputParameters validParams();
 
-  ConstantBoundsAux(const InputParameters & parameters);
+  ConstantBounds(const InputParameters & parameters);
 
 protected:
   virtual Real getBound() override { return _bound_value; }

@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BoundsAuxBase.h"
+#include "BoundsBase.h"
 #include "SystemBase.h"
 #include "PetscSupport.h"
 #include "AuxiliarySystem.h"
 
 InputParameters
-BoundsAuxBase::validParams()
+BoundsBase::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   MooseEnum type_options("upper=0 lower=1", "upper");
@@ -26,7 +26,7 @@ BoundsAuxBase::validParams()
   return params;
 }
 
-BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
+BoundsBase::BoundsBase(const InputParameters & parameters)
   : AuxKernel(parameters),
     _type((BoundType)(int)parameters.get<MooseEnum>("bound_type")),
     _bounded_vector(_type == 0 ? _nl_sys.getVector("upper_bound")
@@ -37,8 +37,8 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
                                 : &_subproblem.getStandardVariable(_tid, _bounded_var_name))
 {
   if (!Moose::PetscSupport::isSNESVI(*dynamic_cast<FEProblemBase *>(&_subproblem)))
-    mooseDoOnce(mooseWarning(
-        "A variational inequalities solver must be used in conjunction with BoundsAux"));
+    mooseDoOnce(
+        mooseWarning("A variational inequalities solver must be used in conjunction with Bounds"));
 
   // Check that the bounded variable is of a supported type
   if (!_bounded_var.isNodal() && (_bounded_var.feType().order != CONSTANT))
@@ -55,7 +55,7 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
 }
 
 Real
-BoundsAuxBase::computeValue()
+BoundsBase::computeValue()
 {
   dof_id_type dof = getDoFIndex();
 
@@ -69,7 +69,7 @@ BoundsAuxBase::computeValue()
 }
 
 dof_id_type
-BoundsAuxBase::getDoFIndex() const
+BoundsBase::getDoFIndex() const
 {
   if (isNodal())
   {

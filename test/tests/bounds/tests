@@ -4,7 +4,7 @@
     input = 'constant_bounds.i'
     exodiff = 'constant_bounds_out.e'
     scale_refine = 3
-    design = 'ConstantBoundsAux.md'
+    design = 'ConstantBounds.md'
     issues = '#951 #14946'
     requirement = "The system shall include the ability to compute a nodal field variable with a constant upper and lower bounds."
   []
@@ -13,7 +13,7 @@
     input = 'old_value_bounds.i'
     exodiff = 'old_value_bounds_out.e'
     scale_refine = 3
-    design = 'ConstantBoundsAux.md'
+    design = 'ConstantBounds.md'
     issues = '#951 #14946'
     requirement = "The system shall include the ability to compute a field variable with a lower bound given by variable's old value."
   []
@@ -22,7 +22,7 @@
     input = 'constant_bounds_elem.i'
     exodiff = 'constant_bounds_elem_out.e'
     scale_refine = 3
-    design = 'ConstantBoundsAux.md'
+    design = 'ConstantBounds.md'
     issues = '#951 #14946'
     requirement = "The system shall include the ability to compute a constant monomial field variable with constant upper and lower bounds."
   []
@@ -31,7 +31,7 @@
     input = 'constant_bounds_fv.i'
     exodiff = 'constant_bounds_fv_out.e'
     scale_refine = 3
-    design = 'ConstantBoundsAux.md'
+    design = 'ConstantBounds.md'
     issues = '#951 #14946'
     requirement = "The system shall be able to impose constant upper and lower bounds on a finite volume variable."
   []
@@ -39,11 +39,11 @@
   [exceptions]
     requirement = "The system shall"
     issues = '#14946'
-    design = 'ConstantBoundsAux.md'
+    design = 'ConstantBounds.md'
     [solver]
       type = 'RunApp'
       input = 'constant_bounds.i'
-      expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
+      expect_out = "A variational inequalities solver must be used in conjunction with Bounds"
       allow_warnings = true
       cli_args = "Executioner/petsc_options_iname='' Executioner/petsc_options_value=''"
       detail = 'emit a warning if a variational inequalities (VI) solver is not found when the bounds system is used.'

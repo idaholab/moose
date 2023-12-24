@@ -1,12 +1,12 @@
-# ConstantBoundsAux
+# ConstantBounds
 
-!syntax description /Bounds/ConstantBoundsAux
+!syntax description /Bounds/ConstantBounds
 
 ## Description
 
-`ConstantBoundsAux` is used for setting bounds on a nonlinear variable specified
-through the parameter `bounded_variable`. The bound type of `upper` or `lower` is set with `bound_type` parameter. The `bound_value` is used to specify the value of a bound. `ConstantBoundsAux` expects a `variable` parameter to be set (as do all `AuxKernels`). This can be a dummy
-`AuxVariable`; the `ConstantBoundsAux` actually operates on `NumericVectors` held by the
+`ConstantBounds` is used for setting bounds on a nonlinear variable specified
+through the parameter `bounded_variable`. The bound type of `upper` or `lower` is set with `bound_type` parameter. The `bound_value` is used to specify the value of a bound. `ConstantBounds` expects a `variable` parameter to be set (as do all `AuxKernels`). This can be a dummy
+`AuxVariable`; the `ConstantBounds` actually operates on `NumericVectors` held by the
 nonlinear system and does nothing but return 0 for the value of the specified
 `variable`.
 
@@ -27,16 +27,16 @@ required to solve a constrained PDE defined by
 [this input file](/upper-and-lower-bound.i) with the various constraint
 algorithms is summarized below:
 
-- `vinewtonrsls` and `ConstantBoundsAux`:                      22
-- `vinewtonssls` and `ConstantBoundsAux`:                      53
+- `vinewtonrsls` and `ConstantBounds`:                      22
+- `vinewtonssls` and `ConstantBounds`:                      53
 - `UpperBoundNodalKernel` and `LowerBoundNodalKernel`: 25
 
 ## Example Syntax
 
 !listing test/tests/bounds/constant_bounds.i block=Bounds
 
-!syntax parameters /Bounds/ConstantBoundsAux
+!syntax parameters /Bounds/ConstantBounds
 
-!syntax inputs /Bounds/ConstantBoundsAux
+!syntax inputs /Bounds/ConstantBounds
 
-!syntax children /Bounds/ConstantBoundsAux
+!syntax children /Bounds/ConstantBounds

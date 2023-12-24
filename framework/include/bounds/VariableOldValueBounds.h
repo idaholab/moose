@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "BoundsAuxBase.h"
+#include "BoundsBase.h"
 
 /**
  * Provides a bound of a variable using its old value.
  */
-class VariableOldValueBoundsAux : public BoundsAuxBase
+class VariableOldValueBounds : public BoundsBase
 {
 public:
   static InputParameters validParams();
 
-  VariableOldValueBoundsAux(const InputParameters & parameters);
+  VariableOldValueBounds(const InputParameters & parameters);
 
 protected:
   virtual Real getBound() override;

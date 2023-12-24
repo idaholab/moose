@@ -75,28 +75,28 @@
 
 [Bounds]
   [u_upper_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = u
     bound_type = upper
     bound_value = 1
   []
   [u_lower_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = u
     bound_type = lower
     bound_value = 0
   []
   [v_upper_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = v
     bound_type = upper
     bound_value = 3
   []
   [v_lower_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = v
     bound_type = lower
