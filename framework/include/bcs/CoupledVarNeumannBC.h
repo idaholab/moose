@@ -9,25 +9,26 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "GenericIntegratedBC.h"
 
 /**
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class CoupledVarNeumannBC : public IntegratedBC
+template <bool is_ad>
+class CoupledVarNeumannBCTempl : public GenericIntegratedBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CoupledVarNeumannBC(const InputParameters & parameters);
+  CoupledVarNeumannBCTempl(const InputParameters & parameters);
 
 protected:
-  Real computeQpResidual() override;
-  Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// Variable providing the value of grad(u) on the boundary.
-  const VariableValue & _coupled_var;
+  const GenericVariableValue<is_ad> & _coupled_var;
 
   /// The identifying number of the coupled variable
   const unsigned int _coupled_num;
@@ -36,5 +37,10 @@ protected:
   const Real _coef;
 
   /// Scale factor
-  const VariableValue & _scale_factor;
+  const GenericVariableValue<is_ad> & _scale_factor;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef CoupledVarNeumannBCTempl<false> CoupledVarNeumannBC;
+typedef CoupledVarNeumannBCTempl<true> ADCoupledVarNeumannBC;

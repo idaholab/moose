@@ -10,11 +10,13 @@
 #include "CoupledVarNeumannBC.h"
 
 registerMooseObject("MooseApp", CoupledVarNeumannBC);
+registerMooseObject("MooseApp", ADCoupledVarNeumannBC);
 
+template <bool is_ad>
 InputParameters
-CoupledVarNeumannBC::validParams()
+CoupledVarNeumannBCTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the gradient on the boundary.");
   params.addCoupledVar("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addParam<Real>(
@@ -24,27 +26,44 @@ CoupledVarNeumannBC::validParams()
                              "where $v$ is a variable.");
   return params;
 }
-
-CoupledVarNeumannBC::CoupledVarNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    _coupled_var(coupledValue("v")),
+template <bool is_ad>
+CoupledVarNeumannBCTempl<is_ad>::CoupledVarNeumannBCTempl(const InputParameters & parameters)
+  : GenericIntegratedBC<is_ad>(parameters),
+    _coupled_var(this->template coupledGenericValue<is_ad>("v")),
     _coupled_num(coupled("v")),
-    _coef(getParam<Real>("coef")),
-    _scale_factor(coupledValue("scale_factor"))
+    _coef(this->template getParam<Real>("coef")),
+    _scale_factor(this->template coupledGenericValue<is_ad>("scale_factor"))
 {
 }
 
-Real
-CoupledVarNeumannBC::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CoupledVarNeumannBCTempl<is_ad>::computeQpResidual()
 {
   return -_scale_factor[_qp] * _coef * _test[_i][_qp] * _coupled_var[_qp];
 }
 
+template <>
 Real
-CoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int jvar)
+CoupledVarNeumannBCTempl<false>::computeQpOffDiagJacobian(const unsigned int jvar)
 {
   if (jvar == _coupled_num)
     return -_scale_factor[_qp] * _coef * _test[_i][_qp] * _phi[_j][_qp];
   else
     return 0;
 }
+
+template <bool is_ad>
+Real
+CoupledVarNeumannBCTempl<is_ad>::computeQpOffDiagJacobian(const unsigned int /*jvar*/)
+{
+  // For the AD version, we do not need this implementation since AD will
+  // automatically compute derivatives. In other words, this function will
+  // never be called for the AD version. But we can not eliminate this function
+  // for the AD because C++ does not support an optional function declaration based
+  // on a template parameter.
+  return 0;
+}
+
+template class CoupledVarNeumannBCTempl<false>;
+template class CoupledVarNeumannBCTempl<true>;
