@@ -44,8 +44,8 @@ The following objects are created:
 - One per variable, with a total of `op_num`
 
   - [LinearizedInterfaceAux](/LinearizedInterfaceAux.md)
-  - [ConstantBoundsAux](/ConstantBoundsAux.md) (for upper bound)
-  - [ConstantBoundsAux](/ConstantBoundsAux.md) (for lower bound)
+  - [ConstantBounds](/ConstantBounds.md) (for upper bound)
+  - [ConstantBounds](/ConstantBounds.md) (for lower bound)
 
 
 ## Example Input File Syntax

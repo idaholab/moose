@@ -178,14 +178,14 @@
 
 [Bounds]
   [./c_upper_bound]
-    type = ConstantBoundsAux
+    type = ConstantBounds
     variable = bounds_dummy
     bounded_variable = c
     bound_type = upper
     bound_value = 1.0
   [../]
   [./c_lower_bound]
-    type = VariableOldValueBoundsAux
+    type = VariableOldValueBounds
     variable = bounds_dummy
     bounded_variable = c
     bound_type = lower
