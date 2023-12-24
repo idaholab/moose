@@ -175,9 +175,17 @@
       type = RunException
       input = 'errors.i'
       cli_args = 'UserObjects/study/set_distance_negative=true'
-      expect_err = 'Starting max distance is <= 0'
+      expect_err = 'Starting max distance is < 0'
       allow_test_objects = true
       detail = 'setting a ray\'s starting maximum distance to a negative value'
+    []
+    [set_distance_zero]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_distance_zero=true'
+      expect_err = 'Starting max distance is 0'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance to zero'
     []
     [set_start_inactive]
       type = RunException
@@ -192,6 +200,17 @@
       expect_err = 'Starting element is not active'
       allow_test_objects = true
       detail = 'setting the starting element for a ray to an inactive element'
+    []
+    [set_distance_non_zero_direction_zero]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/allow_static_rays=true
+                  UserObjects/study/set_distance_non_zero=true
+                  UserObjects/study/set_zero_direction=true'
+
+      expect_err = 'Starting max distance is non-zero but direction is the zero vector'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance to non zero positive value with a zero direction'
     []
   []
 []

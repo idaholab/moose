@@ -91,7 +91,10 @@ RayTracingStudy::validParams()
                         "Whether or not to verify the trace intersections in devel and dbg modes. "
                         "Trace intersections are not verified regardless of this parameter in "
                         "optimized modes (opt, oprof).");
-
+  params.addParam<bool>("allow_static_rays",
+                        false,
+                        "Wether or not you would like to allow rays to a have a 0 velocity vector "
+                        "and or 0 max distance");
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
 
@@ -142,7 +145,7 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 #ifndef NDEBUG
     _verify_trace_intersections(getParam<bool>("verify_trace_intersections")),
 #endif
-
+    _allow_static_rays(getParam<bool>("allow_static_rays")),
     _threaded_elem_side_builders(libMesh::n_threads()),
 
     _registered_ray_map(

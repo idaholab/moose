@@ -1101,166 +1101,171 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     debugRay("Top of ray tracing loop current elem info\n", _current_elem->get_info());
 
     traceAssert(_current_ray == &ray, "Current ray mismatch");
-
-    // Copy over in case we need to use it
-    _last_intersected_extrema = _intersected_extrema;
-    // Invalidate all intersections as we're tracing again
-    _exits_elem = false;
-    _intersection_point = RayTracingCommon::invalid_point;
-    _intersected_side = RayTracingCommon::invalid_side;
-    _intersected_extrema.invalidate();
-    _intersection_distance = RayTracingCommon::invalid_distance;
-
-    // If we haven't hit a vertex or an edge, do the normal exit algorithm first.
-    // In the case of a Ray that previously moved through point neighbors due to
-    // being at a vertex/edge, this will be true because we do not communicate the
-    // vertex/edge intersection. The previous processor already set us up for
-    // the best intersection because it already computed it and chose to
-    // send it our way as such.
-    if (!_last_intersected_extrema.atExtrema())
+    // if we have a ray that isn't moving then we can skip all of the intersection steps
+    if (ray->maxDistance() != 0 && !ray->direction().absolute_fuzzy_equals(Point(0, 0, 0)))
     {
-      traceAssert(_current_elem->processor_id() == _pid, "Trace elem not on processor");
-      debugRay("Didn't hit vertex or edge: doing normal exits elem check");
 
-      if (_backface_culling)
-        _current_normals = _study.getElemNormals(_current_elem, _tid);
+      // Copy over in case we need to use it
+      _last_intersected_extrema = _intersected_extrema;
+      // Invalidate all intersections as we're tracing again
+      _exits_elem = false;
+      _intersection_point = RayTracingCommon::invalid_point;
+      _intersected_side = RayTracingCommon::invalid_side;
+      _intersected_extrema.invalidate();
+      _intersection_distance = RayTracingCommon::invalid_distance;
 
-      const auto exits_elem_result = exitsElem(_current_elem,
-                                               _current_elem_type,
-                                               _incoming_side,
-                                               _intersection_point,
-                                               _intersected_side,
-                                               _intersected_extrema,
-                                               _intersection_distance,
-                                               _current_normals);
-
-      if (exits_elem_result != NO_EXIT)
+      // If we haven't hit a vertex or an edge, do the normal exit algorithm first.
+      // In the case of a Ray that previously moved through point neighbors due to
+      // being at a vertex/edge, this will be true because we do not communicate the
+      // vertex/edge intersection. The previous processor already set us up for
+      // the best intersection because it already computed it and chose to
+      // send it our way as such.
+      if (!_last_intersected_extrema.atExtrema())
       {
-        storeExitsElemResult(exits_elem_result);
-        _exits_elem = true;
-        ray->setCurrentPoint(_intersection_point);
+        traceAssert(_current_elem->processor_id() == _pid, "Trace elem not on processor");
+        debugRay("Didn't hit vertex or edge: doing normal exits elem check");
+
+        if (_backface_culling)
+          _current_normals = _study.getElemNormals(_current_elem, _tid);
+
+        const auto exits_elem_result = exitsElem(_current_elem,
+                                                 _current_elem_type,
+                                                 _incoming_side,
+                                                 _intersection_point,
+                                                 _intersected_side,
+                                                 _intersected_extrema,
+                                                 _intersection_distance,
+                                                 _current_normals);
+
+        if (exits_elem_result != NO_EXIT)
+        {
+          storeExitsElemResult(exits_elem_result);
+          _exits_elem = true;
+          ray->setCurrentPoint(_intersection_point);
+        }
       }
-    }
-    else
-    {
-      debugRay("Will not do normal exits elem check because at a vertex/edge");
-    }
-
-    // At this point, we either did a regular exit check and it failed, or we hit a vertex/edge
-    // on the previous intersection and didn't bother to do a regular exit check on
-    // _current_elem
-    if (!_exits_elem)
-    {
-      debugRay("Moving through neighbors");
-
-      // The element we want moveThroughNeighbors() to try last. That is - if all others fail,
-      // this is the last resort. If we have a last intersection that tells us we're going
-      // through a vertex or edge, we probably won't go back to that elem. If we don't, it means
-      // that we failed the exitsElem() check on _current_elem and probably won't return to it
-      // either.
-      const Elem * move_through_neighbors_last = nullptr;
-
-      // Get the neighbors
-      const std::vector<NeighborInfo> * neighbors = nullptr;
-      // If we have previous vertex/edge information, use it
-      if (_last_intersected_extrema.atExtrema())
-      {
-        traceAssert(_last_elem, "Should be valid");
-        move_through_neighbors_last = _last_elem;
-        neighbors = &getNeighbors(_last_elem, _last_intersected_extrema, _incoming_point);
-      }
-      // Without previous vertex/edge information, let's try to find some. We could just do
-      // a pure point neighbor check at the current point, but we'd rather be able to cache
-      // this information so that someone else can use it - this requires the more unique
-      // identifier of which vertex/edge we are at.
       else
       {
-        debugRay("  Searching for vertex/edge hit with incoming side ",
-                 _incoming_side,
-                 " on elem ",
-                 _current_elem->id(),
-                 " at ",
-                 _incoming_point);
+        debugRay("Will not do normal exits elem check because at a vertex/edge");
+      }
 
-        move_through_neighbors_last = _current_elem;
+      // At this point, we either did a regular exit check and it failed, or we hit a vertex/edge
+      // on the previous intersection and didn't bother to do a regular exit check on
+      // _current_elem
+      if (!_exits_elem)
+      {
+        debugRay("Moving through neighbors");
 
-        // If we have side info: check for vertices on said side, otherwise, check everywhere
-        const auto at_v = _incoming_side != RayTracingCommon::invalid_side
-                              ? atVertexOnSide(_current_elem, _incoming_point, _incoming_side)
-                              : atVertex(_current_elem, _incoming_point);
+        // The element we want moveThroughNeighbors() to try last. That is - if all others fail,
+        // this is the last resort. If we have a last intersection that tells us we're going
+        // through a vertex or edge, we probably won't go back to that elem. If we don't, it means
+        // that we failed the exitsElem() check on _current_elem and probably won't return to it
+        // either.
+        const Elem * move_through_neighbors_last = nullptr;
 
-        if (at_v != RayTracingCommon::invalid_vertex)
-          neighbors = &getVertexNeighbors(_current_elem, at_v);
-        // If still nothing and in 3D, check if we're on an edge
-        // TODO: Handle 2D with a similar check for if we're on a side
-        else if (_dim == 3)
+        // Get the neighbors
+        const std::vector<NeighborInfo> * neighbors = nullptr;
+        // If we have previous vertex/edge information, use it
+        if (_last_intersected_extrema.atExtrema())
         {
-          ElemExtrema extrema;
-          if (_incoming_side != RayTracingCommon::invalid_side)
-            withinEdgeOnSide(_current_elem, _incoming_point, _incoming_side, extrema);
-          else
-            withinEdge(_current_elem, _incoming_point, extrema);
+          traceAssert(_last_elem, "Should be valid");
+          move_through_neighbors_last = _last_elem;
+          neighbors = &getNeighbors(_last_elem, _last_intersected_extrema, _incoming_point);
+        }
+        // Without previous vertex/edge information, let's try to find some. We could just do
+        // a pure point neighbor check at the current point, but we'd rather be able to cache
+        // this information so that someone else can use it - this requires the more unique
+        // identifier of which vertex/edge we are at.
+        else
+        {
+          debugRay("  Searching for vertex/edge hit with incoming side ",
+                   _incoming_side,
+                   " on elem ",
+                   _current_elem->id(),
+                   " at ",
+                   _incoming_point);
 
-          if (extrema.atEdge())
-            neighbors = &getEdgeNeighbors(_current_elem, extrema, _incoming_point);
+          move_through_neighbors_last = _current_elem;
+
+          // If we have side info: check for vertices on said side, otherwise, check everywhere
+          const auto at_v = _incoming_side != RayTracingCommon::invalid_side
+                                ? atVertexOnSide(_current_elem, _incoming_point, _incoming_side)
+                                : atVertex(_current_elem, _incoming_point);
+
+          if (at_v != RayTracingCommon::invalid_vertex)
+            neighbors = &getVertexNeighbors(_current_elem, at_v);
+          // If still nothing and in 3D, check if we're on an edge
+          // TODO: Handle 2D with a similar check for if we're on a side
+          else if (_dim == 3)
+          {
+            ElemExtrema extrema;
+            if (_incoming_side != RayTracingCommon::invalid_side)
+              withinEdgeOnSide(_current_elem, _incoming_point, _incoming_side, extrema);
+            else
+              withinEdge(_current_elem, _incoming_point, extrema);
+
+            if (extrema.atEdge())
+              neighbors = &getEdgeNeighbors(_current_elem, extrema, _incoming_point);
+          }
+
+          // If we still haven't found anything - let's try a last-ditch effort
+          if (!neighbors || neighbors->empty())
+            neighbors = &getPointNeighbors(_current_elem, _incoming_point);
+
+          // Couldn't find anything
+          if (neighbors->empty())
+          {
+            failTrace(
+                "Could not find neighbors to move through", _study.tolerateFailure(), __LINE__);
+            return;
+          }
         }
 
-        // If we still haven't found anything - let's try a last-ditch effort
-        if (!neighbors || neighbors->empty())
-          neighbors = &getPointNeighbors(_current_elem, _incoming_point);
+        // Move through a neighbor
+        const Elem * best_neighbor = nullptr;
+        auto best_neighbor_side = RayTracingCommon::invalid_side;
+        const auto exits_elem_result = moveThroughNeighbors(
+            *neighbors, move_through_neighbors_last, best_neighbor, best_neighbor_side);
 
-        // Couldn't find anything
-        if (neighbors->empty())
+        // If we didn't find anything... we're out of luck
+        if (exits_elem_result == NO_EXIT)
         {
-          failTrace("Could not find neighbors to move through", _study.tolerateFailure(), __LINE__);
+          failTrace("Could not find intersection after trying to move through point neighbors",
+                    _study.tolerateFailure(),
+                    __LINE__);
           return;
         }
+
+        // At this point, we've successfully made it through an element and also started
+        // through another element, so set that
+        _exits_elem = true;
+        _last_elem = _current_elem;
+        _current_elem = best_neighbor;
+        _incoming_side = best_neighbor_side;
+        ray->setCurrentElem(best_neighbor);
+        ray->setCurrentIncomingSide(best_neighbor_side);
+        ray->setCurrentPoint(_intersection_point);
+
+        // Don't own this element - return exits trace for this Ray on this proc
+        if (best_neighbor->processor_id() != _pid)
+        {
+          // We've already computed the next intersection but said intersection is
+          // on an elem on another processor. Therefore, the next proc will re-trace
+          // this Ray on the perfect elem that we've picked (best_neighbor)
+          ray->setCurrentPoint(_incoming_point);
+          _intersection_distance = RayTracingCommon::invalid_distance;
+
+          continueTraceOffProcessor(ray);
+          return;
+        }
+
+        // Subdomain changed
+        if (_current_elem->subdomain_id() != _current_subdomain_id)
+          onSubdomainChanged(ray, /* same_ray = */ true);
+
+        // Do own this element - tally the result as we're the ones tracing it
+        storeExitsElemResult(exits_elem_result);
       }
-
-      // Move through a neighbor
-      const Elem * best_neighbor = nullptr;
-      auto best_neighbor_side = RayTracingCommon::invalid_side;
-      const auto exits_elem_result = moveThroughNeighbors(
-          *neighbors, move_through_neighbors_last, best_neighbor, best_neighbor_side);
-
-      // If we didn't find anything... we're out of luck
-      if (exits_elem_result == NO_EXIT)
-      {
-        failTrace("Could not find intersection after trying to move through point neighbors",
-                  _study.tolerateFailure(),
-                  __LINE__);
-        return;
-      }
-
-      // At this point, we've successfully made it through an element and also started
-      // through another element, so set that
-      _exits_elem = true;
-      _last_elem = _current_elem;
-      _current_elem = best_neighbor;
-      _incoming_side = best_neighbor_side;
-      ray->setCurrentElem(best_neighbor);
-      ray->setCurrentIncomingSide(best_neighbor_side);
-      ray->setCurrentPoint(_intersection_point);
-
-      // Don't own this element - return exits trace for this Ray on this proc
-      if (best_neighbor->processor_id() != _pid)
-      {
-        // We've already computed the next intersection but said intersection is
-        // on an elem on another processor. Therefore, the next proc will re-trace
-        // this Ray on the perfect elem that we've picked (best_neighbor)
-        ray->setCurrentPoint(_incoming_point);
-        _intersection_distance = RayTracingCommon::invalid_distance;
-
-        continueTraceOffProcessor(ray);
-        return;
-      }
-
-      // Subdomain changed
-      if (_current_elem->subdomain_id() != _current_subdomain_id)
-        onSubdomainChanged(ray, /* same_ray = */ true);
-
-      // Do own this element - tally the result as we're the ones tracing it
-      storeExitsElemResult(exits_elem_result);
     }
 
     debugRay("Done with trace");

@@ -62,9 +62,12 @@ TestRay::validParams()
                         "Test setting a Ray's max distance before its start point");
   params.addParam<bool>(
       "set_distance_negative", false, "Test setting a Ray's max distance to a negative value");
+  params.addParam<bool>("set_distance_zero", false, "Test setting a Ray's max distance to 0");
   params.addParam<bool>(
       "set_start_inactive", false, "Tests setting a Ray's starting element to an inactive element");
-
+  params.addParam<bool>("set_distance_non_zero",
+                        false,
+                        "Test setting a rays maximum distance to a non-zero positive value");
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
@@ -145,5 +148,9 @@ TestRay::generateRays()
       ray->setStartingEndPoint(Point(1e6, 1e6, 1e6));
     if (getParam<bool>("set_distance_negative"))
       ray->setStartingMaxDistance(-1);
+    if (getParam<bool>("set_distance_zero"))
+      ray->setStartingMaxDistance(0);
+    if (getParam<bool>("set_distance_non_zero"))
+      ray->setStartingMaxDistance(1);
   }
 }

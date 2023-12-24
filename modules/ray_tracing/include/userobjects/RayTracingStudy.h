@@ -691,6 +691,11 @@ public:
     return _threaded_elem_side_builders[tid](elem, s);
   }
 
+  /**
+   * Public getter method which tells you wether or not rays are allowed to be static
+   */
+  bool allowStaticRays() const { return _allow_static_rays; }
+
 protected:
   /**
    * Subclasses should override this to determine how to generate Rays.
@@ -895,6 +900,8 @@ protected:
 #ifndef NDEBUG
   const bool _verify_trace_intersections;
 #endif
+  /// wether or not we would like to allow rays to have 0 max distance and/or a 0 direction vector
+  const bool _allow_static_rays;
 
 private:
   /**

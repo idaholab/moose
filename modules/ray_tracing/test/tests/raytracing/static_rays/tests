@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#26416'
+  design = 'RayTracingStudy.md Ray.md'
+  [zero_maxdist_and_direction]
+    type = 'Exodiff'
+    input = 'static_rays.i'
+    exodiff = 'static_rays_rays.e
+    static_rays_rays.e-s0001
+    static_rays_rays.e-s0002
+    static_rays_rays.e-s0003
+    static_rays_rays.e-s0004
+    static_rays_rays.e-s0005
+    static_rays_rays.e-s0006
+    static_rays_rays.e-s0007
+    static_rays_rays.e-s0008
+    static_rays_rays.e-s0009'
+    allow_test_objects = true
+    requirement = 'Give rays the ability to have a 0 maximum distance and a 0 direction vector'
+  []
+[]
