@@ -1,4 +1,4 @@
-# INSFVkEpsilonViscosityMaterial
+# INSFVkEpsilonViscosityFunctorMaterial
 
 This is the material class used to compute the dynamic turbulent viscosity
 
@@ -13,8 +13,8 @@ where:
 - $k$ is the turbulent kinetic energy,
 - $\epsilon$ is the turbulent kinetic energy dissipation rate.
 
-!syntax parameters /Materials/INSFVkEpsilonViscosityMaterial
+!syntax parameters /FunctorMaterials/INSFVkEpsilonViscosityFunctorMaterial
 
-!syntax inputs /Materials/INSFVkEpsilonViscosityMaterial
+!syntax inputs /FunctorMaterials/INSFVkEpsilonViscosityFunctorMaterial
 
-!syntax children /Materials/INSFVkEpsilonViscosityMaterial
+!syntax children /FunctorMaterials/INSFVkEpsilonViscosityFunctorMaterial

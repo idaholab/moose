@@ -20,11 +20,11 @@
  * This is common for flows in pipes. Designed to work with both
  * INSFV and PINSFV friction loss kernels.
  */
-class ExponentialFrictionMaterial : public FunctorMaterial
+class ExponentialFrictionFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
-  ExponentialFrictionMaterial(const InputParameters & parameters);
+  ExponentialFrictionFunctorMaterial(const InputParameters & parameters);
 
 private:
   /// Functor for the Reynolds number

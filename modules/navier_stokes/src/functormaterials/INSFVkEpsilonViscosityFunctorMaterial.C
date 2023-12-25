@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVkEpsilonViscosityMaterial.h"
+#include "INSFVkEpsilonViscosityFunctorMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSFVkEpsilonViscosityMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           INSFVkEpsilonViscosityMaterial,
+                           "02/01/2025 00:00",
+                           INSFVkEpsilonViscosityFunctorMaterial);
+registerMooseObject("NavierStokesApp", INSFVkEpsilonViscosityFunctorMaterial);
 
 InputParameters
-INSFVkEpsilonViscosityMaterial::validParams()
+INSFVkEpsilonViscosityFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes the turbulent dynamic viscosity given k and epsilon.");
@@ -26,7 +30,8 @@ INSFVkEpsilonViscosityMaterial::validParams()
   return params;
 }
 
-INSFVkEpsilonViscosityMaterial::INSFVkEpsilonViscosityMaterial(const InputParameters & parameters)
+INSFVkEpsilonViscosityFunctorMaterial::INSFVkEpsilonViscosityFunctorMaterial(
+    const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _rho(getFunctor<ADReal>(NS::density)),
     _k(getFunctor<ADReal>(NS::TKE)),

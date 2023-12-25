@@ -14,12 +14,12 @@
 /**
  * This is the material class used to compute the viscosity of the kEpsilon model
  */
-class INSFVkEpsilonViscosityMaterial : public FunctorMaterial
+class INSFVkEpsilonViscosityFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  INSFVkEpsilonViscosityMaterial(const InputParameters & parameters);
+  INSFVkEpsilonViscosityFunctorMaterial(const InputParameters & parameters);
 
 protected:
   /// The density

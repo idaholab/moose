@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExponentialFrictionMaterial.h"
+#include "ExponentialFrictionFunctorMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", ExponentialFrictionMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           ExponentialFrictionMaterial,
+                           "02/01/2025 00:00",
+                           ExponentialFrictionFunctorMaterial);
+registerMooseObject("NavierStokesApp", ExponentialFrictionFunctorMaterial);
 
 InputParameters
-ExponentialFrictionMaterial::validParams()
+ExponentialFrictionFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a Reynolds number-exponential friction factor.");
@@ -32,7 +36,8 @@ ExponentialFrictionMaterial::validParams()
   return params;
 }
 
-ExponentialFrictionMaterial::ExponentialFrictionMaterial(const InputParameters & parameters)
+ExponentialFrictionFunctorMaterial::ExponentialFrictionFunctorMaterial(
+    const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _Re(getFunctor<ADReal>(NS::Reynolds)),
     _speed(isParamValid(NS::speed) ? &getFunctor<ADReal>(NS::speed) : nullptr),
