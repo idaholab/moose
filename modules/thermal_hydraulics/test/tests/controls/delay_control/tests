@@ -14,6 +14,6 @@
     input = 'test.i'
     cli_args = 'ControlLogic/delay_ctrl/tau=-1'
     expect_err = "Negative values of 'tau' are not allowed\."
-    requirement = 'The system shall error if the delay for the action of a control is set by the user to be negative.'
+    requirement = 'The system shall report an error if the delay for the action of a control is set by the user to be negative.'
   []
 []

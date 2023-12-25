@@ -6,6 +6,6 @@
     type = 'RunException'
     input = 'err.no_connected_components.i'
     expect_err = "shaft: No components are connected to the shaft."
-    requirement = 'The system shall error if a shaft is created with no connected components.'
+    requirement = 'The system shall report an error if a shaft is created with no connected components.'
   []
 []

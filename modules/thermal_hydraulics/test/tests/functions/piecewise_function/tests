@@ -15,7 +15,7 @@
     expect_err =
       "The number of entries in the parameter 'axis_coordinates' must"
       " equal the number of entries in the parameter 'functions' minus one"
-    requirement = "The system shall error if the the user passes an inconsistent number of functions to piece together and number of points of connections between the functions."
+    requirement = "The system shall report an error if the the user passes an inconsistent number of functions to piece together and number of points of connections between the functions."
   []
 
   [error_points_nonascending_order]
@@ -23,7 +23,7 @@
     input = 'piecewise_function.i'
     cli_args = "Functions/function_piecewise/axis_coordinates='5 3'"
     expect_err = "The entries in the parameter 'axis_coordinates' must be in ascending order"
-    requirement = "The system shall error if the the user passes points of connections between functions to piece together that are not in increasing order."
+    requirement = "The system shall report an error if the the user passes points of connections between functions to piece together that are not in increasing order."
   []
 
   # Tests that PiecewiseFunction throws an error when it references itself
@@ -32,6 +32,6 @@
     input = 'piecewise_function.i'
     cli_args = "Functions/function_piecewise/functions='function_left function_piecewise function_end'"
     expect_err = "This function cannot use its own name in the 'functions' parameter"
-    requirement = "The system shall error if the user references a function to piece functions together in the list of function pieced together, hence creating an infinite recursion."
+    requirement = "The system shall report an error if the user references a function to piece functions together in the list of function pieced together, hence creating an infinite recursion."
   []
 []

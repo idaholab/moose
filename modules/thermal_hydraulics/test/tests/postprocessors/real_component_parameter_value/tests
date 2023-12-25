@@ -5,6 +5,6 @@
     type = 'RunException'
     input = 'non_existent_par_name.i'
     expect_err = "Either component 'inlet' does not exist or parameter 'p' does not exist in that component."
-    requirement = "The system shall error if a component parameter is selected for output but that parameter or that component does not exist."
+    requirement = "The system shall report an error if a component parameter is selected for output but that parameter or that component does not exist."
   []
 []

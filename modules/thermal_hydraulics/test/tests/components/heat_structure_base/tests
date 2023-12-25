@@ -49,7 +49,7 @@
   []
 
   [errors]
-    requirement = 'The system shall error if '
+    requirement = 'The system shall report an error if '
     [err:missing_axial_regions_parameter]
       type = RunException
       input = 'axial_regions.i'

@@ -70,7 +70,7 @@
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p "
                  "initial_T initial_vel_x initial_vel_y initial_vel_z"
-    requirement = "The system shall error if no initial conditions were set in a parallel junction."
+    requirement = "The system shall report an error if no initial conditions were set in a parallel junction."
   []
 
   [err.non_parallel_channels]
@@ -79,7 +79,7 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use VolumeJunction1Phase "
                  "component instead."
-    requirement = "The system shall error if a parallel junction is set to connect non-parallel flow channels."
+    requirement = "The system shall report an error if a parallel junction is set to connect non-parallel flow channels."
   []
 
   # jacobian test
