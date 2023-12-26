@@ -40,9 +40,9 @@ FlipSidesetGenerator::generate()
 
   // Throw an error if the sideset doesn't exist
   if (sideset_id == libMesh::BoundaryInfo::invalid_id)
-    mooseError("sideset doesn't exist in mesh");
+    mooseError("sideset '" + _sideset_name + "' doesn't exist in mesh");
 
-  // get sideset map
+  // get a copy of sideset map to avoid changing the sideset map while looping on it
   std::multimap<const Elem *, std::pair<unsigned short int, boundary_id_type>> sideset_map =
       boundary_info.get_sideset_map();
 

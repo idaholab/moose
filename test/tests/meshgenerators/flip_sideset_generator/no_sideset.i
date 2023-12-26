@@ -8,7 +8,7 @@
     [flip]
         type = FlipSidesetGenerator
         input = gmg
-        boundary = 'side'
+        boundary = 'bad_side'
     []
 []
 [Outputs]
