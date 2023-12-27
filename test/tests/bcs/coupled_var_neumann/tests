@@ -35,14 +35,14 @@
       type = Exodiff
       input = 'ad_coupled_var_neumann_nl.i'
       exodiff = 'coupled_var_neumann_nl_out.e'
-      detail = 'generate accurate results using AD'
+      detail = 'generate accurate results using automatic differentiation'
     []
     [ADjac]
       type = PetscJacobianTester
       run_sim = True
       input = 'ad_coupled_var_neumann_nl.i'
       difference_tol = 1e-6
-      detail = 'generate a perfect Jacobian using AD'
+      detail = 'generate a perfect Jacobian using automatic differentiation'
     []
   []
 []

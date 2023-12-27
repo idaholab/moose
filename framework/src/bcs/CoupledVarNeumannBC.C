@@ -57,11 +57,11 @@ template <bool is_ad>
 Real
 CoupledVarNeumannBCTempl<is_ad>::computeQpOffDiagJacobian(const unsigned int /*jvar*/)
 {
-  // For the AD version, we do not need this implementation since AD will
-  // automatically compute derivatives. In other words, this function will
-  // never be called for the AD version. But we can not eliminate this function
-  // for the AD because C++ does not support an optional function declaration based
-  // on a template parameter.
+  mooseAssert(false,
+              "For the AD version, we do not need this implementation since AD will automatically "
+              "compute derivatives. In other words, this function will never be called for the AD "
+              "version. But we can not eliminate this function for the AD because C++ does not "
+              "support an optional function declaration based on a template parameter.");
   return 0;
 }
 
