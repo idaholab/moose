@@ -128,7 +128,9 @@ A = A_0 - 2 \pi M \gamma t,
 \end{equation}
 where $A_0$ is the initial radius of the circular grain.
 
-This case can be easily implemented using MOOSE, and the change in the area with time is outputted using a Postprocessor:
+This case can be easily implemented using MOOSE, and the change in the area with
+time is outputted using a Postprocessor, as shown in the below input which
+leverages data from [!citep](schonfelder1997molecular).
 
 !listing modules/phase_field/test/tests/grain_growth/test.i
 
