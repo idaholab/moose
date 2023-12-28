@@ -58,9 +58,9 @@
     type = GBEvolution
     T = 450 # Constant temperature of the simulation (for mobility calculation)
     wGB = 100 # Width of the diffuse GB
-    GBmob0 = 2.5e-6 # m^4(Js) for copper from Schoenfelder1997
-    Q = 0.23 # eV for copper from Schoenfelder1997
-    GBenergy = 0.708 # J/m^2 from Schoenfelder1997
+    GBmob0 = 2.5e-6 # m^4(Js) for copper from schonfelder1997molecular bibtex entry
+    Q = 0.23 # eV for copper from schonfelder1997molecular bibtex entry
+    GBenergy = 0.708 # J/m^2 from schonfelder1997molecular bibtex entry
   []
 []
 
