@@ -277,7 +277,7 @@ MeshDiagnosticsGenerator::checkElementVolumes(const std::unique_ptr<MeshBase> & 
     {
       if (num_tiny_elems < _num_outputs)
         _console << "Element with volume below threshold detected : \n"
-                 << elem->get_info() << std::endl;
+                 << "id " << elem->id() << " near point " << elem->vertex_average() << std::endl;
       else if (num_tiny_elems == _num_outputs)
         _console << "Maximum output reached, log is silenced" << std::endl;
       num_tiny_elems++;
@@ -392,7 +392,8 @@ MeshDiagnosticsGenerator::checkElementOverlap(const std::unique_ptr<MeshBase> & 
       {
         num_elem_overlaps++;
         if (num_elem_overlaps < _num_outputs)
-          _console << "Element overlap detected with element : " << elem->get_info() << std::endl;
+          _console << "Element overlap detected with element : " << elem->id() << " near point "
+                   << elem->vertex_average() << std::endl;
         else if (num_elem_overlaps == _num_outputs)
           _console << "Maximum output reached, log is silenced" << std::endl;
       }
@@ -1209,7 +1210,8 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
       if (msg.find("negative Jacobian") != std::string::npos)
       {
         if (num_negative_elem_qp_jacobians < _num_outputs)
-          _console << "Negative Jacobian found in element\n" << elem->get_info() << std::endl;
+          _console << "Negative Jacobian found in element " << elem->id() << " near point "
+                   << elem->vertex_average() << std::endl;
         else if (num_negative_elem_qp_jacobians == _num_outputs)
           _console << "Maximum log output reached, silencing output" << std::endl;
       }
@@ -1264,8 +1266,8 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
         {
           num_negative_side_qp_jacobians++;
           if (num_negative_side_qp_jacobians < _num_outputs)
-            _console << "Negative Jacobian found in side " << side << " of element\n"
-                     << elem->get_info() << std::endl;
+            _console << "Negative Jacobian found in side " << side << " of element" << elem->id()
+                     << " near point " << elem->vertex_average() << std::endl;
           else if (num_negative_side_qp_jacobians == _num_outputs)
             _console << "Maximum log output reached, silencing output" << std::endl;
         }
