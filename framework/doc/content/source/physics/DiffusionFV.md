@@ -1,6 +1,6 @@
 # DiffusionFV
 
-!syntax description /Physics/DiffusionFV
+!syntax description /Physics/DiffusionFV/DiffusionFV
 
 See the [DiffusionPhysicsBase.md] documentation for the diffusion equation solved.
 
@@ -30,8 +30,8 @@ The Neumann boundary conditions are created using:
 We could use a [Functor](syntax/Functors/index.md) object to cover every need, but the specialized objects
 are a few per cent faster, depending on the case.
 
-!syntax parameters /Physics/DiffusionFV
+!syntax parameters /Physics/DiffusionFV/DiffusionFV
 
-!syntax inputs /Physics/DiffusionFV
+!syntax inputs /Physics/DiffusionFV/DiffusionFV
 
-!syntax children /Physics/DiffusionFV
+!syntax children /Physics/DiffusionFV/DiffusionFV

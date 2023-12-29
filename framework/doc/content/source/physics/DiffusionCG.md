@@ -1,6 +1,6 @@
 # DiffusionCG
 
-!syntax description /Physics/DiffusionCG
+!syntax description /Physics/DiffusionCG/DiffusionCG
 
 See the [DiffusionPhysicsBase.md] documentation for the diffusion equation solved.
 
@@ -42,8 +42,8 @@ conditions using the [!param](/Physics/DiffusionCG/automatic_differentiation). T
 obeyed if the AD/non-AD object exists for the requested diffusivity / source / boundary value functor etc.
 
 
-!syntax parameters /Physics/DiffusionCG
+!syntax parameters /Physics/DiffusionCG/DiffusionCG
 
-!syntax inputs /Physics/DiffusionCG
+!syntax inputs /Physics/DiffusionCG/DiffusionCG
 
-!syntax children /Physics/DiffusionCG
+!syntax children /Physics/DiffusionCG/DiffusionCG
