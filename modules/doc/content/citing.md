@@ -347,16 +347,21 @@ journal = {Earthquake Engineering and Structural Dynamics},
 
 ### Electromagnetics Module
 
-The following PhD dissertation documents the initial development, function, verification, and validation
+This paper documents the initial development, function, verification, and validation
 of the electromagnetics module.
 
 ```
-@phdthesis{icenhour2023electromagnetics,
-  author = {Icenhour, Casey T.},
-  title = {Development and Validation of Open Source Software for Electromagnetics Simulation and Multiphysics Coupling},
-  school = {North Carolina State University},
-  year = {2023},
-  url = {https://www.lib.ncsu.edu/resolver/1840.20/40985}
+@article{ICENHOUR2024101621,
+title = {The MOOSE electromagnetics module},
+journal = {SoftwareX},
+volume = {25},
+pages = {101621},
+year = {2024},
+issn = {2352-7110},
+doi = {https://doi.org/10.1016/j.softx.2023.101621},
+url = {https://www.sciencedirect.com/science/article/pii/S2352711023003175},
+author = {Casey T. Icenhour and Alexander D. Lindsay and Cody J. Permann and Richard C. Martineau and David L. Green and Steven C. Shannon},
+keywords = {Electromagnetics, Simulation, Multiphysics, MOOSE}
 }
 ```
 
