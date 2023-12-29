@@ -9,7 +9,7 @@
     zmax = 4
   [../]
   [./subdomain_id]
-    type = ElementSubdomainIDGenerator
+    type = SubdomainPerElementGenerator
     input = msh
     subdomain_ids = '0 1 2 3'
   []
