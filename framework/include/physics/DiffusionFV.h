@@ -12,7 +12,7 @@
 #include "DiffusionPhysicsBase.h"
 
 /**
- * Creates all the objects needed to solve the heat conduction equations with a cell-centered finite
+ * Creates all the objects needed to solve a diffusion equation with a cell-centered finite
  * volume discretization
  */
 class DiffusionFV : public DiffusionPhysicsBase

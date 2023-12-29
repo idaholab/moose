@@ -43,6 +43,11 @@ DiffusionPhysicsBase::validParams()
                               "boundary_values",
                               "Boundary conditions");
 
+  // Preconditioning is implemented so let's use it by default
+  MooseEnum pc_options("default none", "default");
+  params.addParam<MooseEnum>(
+      "preconditioning", pc_options, "Which preconditioning to use for this Physics");
+
   return params;
 }
 
@@ -69,10 +74,10 @@ DiffusionPhysicsBase::addPreconditioning()
   {
     // We only pass petsc options as that's all that's needed to set up the preconditioner
     Moose::PetscSupport::PetscOptions & po = _problem->getPetscOptions();
-    const std::pair<MooseEnumItem, std::string> option_pair1 =
-        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("pc_type"), "hypre");
-    const std::pair<MooseEnumItem, std::string> option_pair2 =
-        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("pc_hypre_type"), "boomeramg");
+    const auto option_pair1 =
+        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_type"), "hypre");
+    const auto option_pair2 =
+        std::make_pair<MooseEnumItem, std::string>(MooseEnumItem("-pc_hypre_type"), "boomeramg");
     processPetscPairs({option_pair1, option_pair2}, _problem->mesh().dimension(), po);
   }
 }
