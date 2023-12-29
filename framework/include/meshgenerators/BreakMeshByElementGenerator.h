@@ -16,12 +16,12 @@
  * A mesh generator to split a mesh by breaking all element-element interfaces in the
  * specified subdomains
  */
-class ExplodeMeshGenerator : public MeshGenerator
+class BreakMeshByElementGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  ExplodeMeshGenerator(const InputParameters & parameters);
+  BreakMeshByElementGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
