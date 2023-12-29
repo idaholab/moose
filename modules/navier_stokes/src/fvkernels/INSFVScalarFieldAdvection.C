@@ -61,10 +61,10 @@ INSFVScalarFieldAdvection::computeQpResidual()
     ADRealVectorValue velocity_slip_vel_vec;
     if (_dim == 1)
       velocity_slip_vel_vec = ADRealVectorValue((*_u_slip)(face_arg, state), 0.0, 0.0);
-    if (_dim == 2)
+    else if (_dim == 2)
       velocity_slip_vel_vec =
           ADRealVectorValue((*_u_slip)(face_arg, state), (*_v_slip)(face_arg, state), 0.0);
-    if (_dim == 3)
+    else if (_dim == 3)
       velocity_slip_vel_vec = ADRealVectorValue(
           (*_u_slip)(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
     advection_velocity += velocity_slip_vel_vec;

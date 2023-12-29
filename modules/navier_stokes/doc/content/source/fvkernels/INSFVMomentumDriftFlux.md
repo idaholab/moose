@@ -22,7 +22,7 @@ due to the particles being transported in the flow field.
 
 !alert note
 If the mixture model is used to capture more than one dispersed phase,
-a different `INSFVMomentumDriftFlux` kernel shoould be added for each
+a different `INSFVMomentumDriftFlux` kernel should be added for each
 of the transported phases with the corresponding slip velocity for
 each phase.
 

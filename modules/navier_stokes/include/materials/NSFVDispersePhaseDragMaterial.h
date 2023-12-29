@@ -12,7 +12,7 @@
 #include "FunctorMaterial.h"
 
 /**
- * This is the material class used to compute phase averaged properties of mixtures
+ * This is the material class used to compute phase-averaged drag properties of mixtures
  */
 class NSFVDispersePhaseDragMaterial : public FunctorMaterial
 {

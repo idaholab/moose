@@ -1,6 +1,6 @@
 # NSFVDispersePhaseDragMaterial
 
-This material computes the linear drag coefficient for a disperesed
+This material computes the linear drag coefficient for a dispersed
 phase based on the particle Reynolds number $Re_d$.
 The particle Reynolds number is defined as follows:
 
@@ -13,9 +13,9 @@ where:
 - $\rho_d$ is the density of the dispersed phase particles,
 - $d_d$ is the characteristic diameter of the dispersed phase particles,
 - $\bm{u}_m$ is the mixture velocity,
-- $\mu_m$ is the mixture density.
+- $\mu_m$ is the mixture viscosity.
 
-Base on this Reynolds number, the linear drag coefficient for the
+Based on this Reynolds number, the linear drag coefficient for the
 dispersed phase is computed as follows:
 
 \begin{equation}

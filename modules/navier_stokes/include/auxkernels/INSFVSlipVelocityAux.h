@@ -48,7 +48,7 @@ protected:
   // Gravity acceleration vector
   RealVectorValue _gravity;
 
-  /// Froce Scale factor
+  /// Force Scale factor
   const Real & _force_scale;
 
   /// Force optional function value
@@ -66,6 +66,6 @@ protected:
   /// Particle diameter in the dispersed phase
   const Moose::Functor<ADReal> & _particle_diameter;
 
-  /// index x|y|z
+  /// index of the velocity component x|y|z
   unsigned int _index;
 };

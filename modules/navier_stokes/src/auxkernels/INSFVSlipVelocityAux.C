@@ -26,7 +26,7 @@ INSFVSlipVelocityAux::validParams()
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Mixture Density");
   params.addParam<RealVectorValue>(
-      "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
+      "gravity", "Gravity acceleration vector");
   params.addClassDescription("Object for advecting momentum with slip velocity, e.g. rho*u");
   params.addParam<Real>("force_value", 0.0, "Coefficient to multiply by the body force term");
   params.addParam<FunctionName>("force_function", "1", "A function that describes the body force");

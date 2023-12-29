@@ -16,7 +16,7 @@ InputParameters
 NSFVDispersePhaseDragMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription("Computes drag coefficient for dispersed pahse.");
+  params.addClassDescription("Computes drag coefficient for dispersed phase.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");

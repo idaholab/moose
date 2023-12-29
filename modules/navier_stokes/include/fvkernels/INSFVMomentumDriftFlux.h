@@ -46,7 +46,7 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * const _w_slip;
 
-  /// The face interpolation method for the viscosity
+  /// The face interpolation method for the density
   const Moose::FV::InterpMethod _density_interp_method;
 
   /// The a coefficient for the element
