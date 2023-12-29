@@ -285,6 +285,7 @@ share/
 /modules/heat_transfer/heat_transfer.yaml
 /modules/tensor_mechanics/tensor_mechanics.yaml
 /modules/richards/richards.yaml
+/modules/solid_mechanics/solid_mechanics.yaml
 /modules/level_set/level_set.yaml
 /modules/combined/combined.yaml
 /modules/fluid_properties/fluid_properties.yaml
