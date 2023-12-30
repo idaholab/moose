@@ -17,4 +17,13 @@
     requirement = "The system shall automatically create the correct preconditioning object when performing a Newton solve."
     prereq = manual
   []
+  [petsc_pre_description]
+    type = 'Exodiff'
+    input = 'ad_coupled_convection.i'
+    exodiff = 'ad_coupled_convection_out.e'
+    prereq = auto
+    requirement = 'The system shall output the PETSc preconditioner type requested in the executioner options.'
+    cli_args = "Executioner/petsc_options_iname='-pc_type' Executioner/petsc_options_value='lu'"
+    expect_out = 'PETSc Preconditioner:\s+lu'
+  []
 []
