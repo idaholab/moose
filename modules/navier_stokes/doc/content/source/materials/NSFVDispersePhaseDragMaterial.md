@@ -16,7 +16,7 @@ where:
 - $\mu_m$ is the mixture viscosity.
 
 Based on this Reynolds number, the linear drag coefficient for the
-dispersed phase is computed as follows:
+dispersed phase is computed as follows [!cite](schiller1933drag):
 
 \begin{equation}
   f_{drag} =

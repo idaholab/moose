@@ -16,7 +16,7 @@ where:
 - $\rho_m$ is the density of the mixture,
 - $\bm{a}$ is the acceleration vector.
 
-The particle relaxation time is modeled as follows:
+The particle relaxation time is modeled as follows [!cite](bilicki1990dragmodel):
 
 \begin{equation}
   \tau_d = \frac{\rho_d d_d^2}{18 \mu_m} \,,

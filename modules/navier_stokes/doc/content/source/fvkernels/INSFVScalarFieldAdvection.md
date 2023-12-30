@@ -18,6 +18,7 @@ where:
 - $\bm{v}_{slip,d}$ is the slip velocity of the transported phase
 
 When adding the slip velocity, the net advection term that is added is the following
+$\bm{v}_{d} = \bm{v} + \bm{v}_{slip,d}$, where $\bm{v}$ is the mixture velocity.
 
 !syntax parameters /FVKernels/INSFVScalarFieldAdvection
 
