@@ -12,15 +12,14 @@
 #include "INSFVMomentumAdvection.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 
-/**
- * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
- * physics
+/*
+ * Adds momentum kernel coming from the slip velocity in two-phase mixture model
  */
-class INSFVMomentumAdvectionSlip : public INSFVMomentumAdvection
+class WCNSFV2PMomentumAdvectionSlip : public INSFVMomentumAdvection
 {
 public:
   static InputParameters validParams();
-  INSFVMomentumAdvectionSlip(const InputParameters & params);
+  WCNSFV2PMomentumAdvectionSlip(const InputParameters & params);
 
   using INSFVMomentumAdvection::computeResidual;
   void computeResidual(const FaceInfo & fi) override;

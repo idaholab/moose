@@ -13,11 +13,14 @@
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
 
-class INSFVMomentumDriftFlux : public INSFVFluxKernel
+/*
+ * Adds drift flux kernel coming for two-phase mixture model
+ */
+class WCNSFV2PMomentumDriftFlux : public INSFVFluxKernel
 {
 public:
   static InputParameters validParams();
-  INSFVMomentumDriftFlux(const InputParameters & params);
+  WCNSFV2PMomentumDriftFlux(const InputParameters & params);
   using INSFVFluxKernel::gatherRCData;
   void gatherRCData(const FaceInfo & fi) override final;
 

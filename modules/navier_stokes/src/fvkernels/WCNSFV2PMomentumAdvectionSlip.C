@@ -7,19 +7,21 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMomentumAdvectionSlip.h"
+#include "WCNSFV2PMomentumAdvectionSlip.h"
 #include "NS.h"
 #include "FVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "SystemBase.h"
 #include "NSFVUtils.h"
 
-registerMooseObject("NavierStokesApp", INSFVMomentumAdvectionSlip);
+registerMooseObject("NavierStokesApp", WCNSFV2PMomentumAdvectionSlip);
 
 InputParameters
-INSFVMomentumAdvectionSlip::validParams()
+WCNSFV2PMomentumAdvectionSlip::validParams()
 {
   InputParameters params = INSFVMomentumAdvection::validParams();
+  params.addClassDescription(
+      "Computes the slip velocity advection kernel for two-phase mixture model.");
   params.addRequiredParam<MooseFunctorName>("u_slip", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The velocity in the z direction.");
@@ -28,7 +30,7 @@ INSFVMomentumAdvectionSlip::validParams()
   return params;
 }
 
-INSFVMomentumAdvectionSlip::INSFVMomentumAdvectionSlip(const InputParameters & params)
+WCNSFV2PMomentumAdvectionSlip::WCNSFV2PMomentumAdvectionSlip(const InputParameters & params)
   : INSFVMomentumAdvection(params),
     _rho_d(getFunctor<ADReal>("rho_d")),
     _dim(_subproblem.mesh().dimension()),
@@ -46,7 +48,7 @@ INSFVMomentumAdvectionSlip::INSFVMomentumAdvectionSlip(const InputParameters & p
 }
 
 void
-INSFVMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
+WCNSFV2PMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
 {
   mooseAssert(!skipForBoundary(fi),
               "We shouldn't get in here if we're supposed to skip for a boundary");
@@ -193,7 +195,7 @@ INSFVMomentumAdvectionSlip::computeResidualsAndADataSlip(const FaceInfo & fi)
 }
 
 void
-INSFVMomentumAdvectionSlip::computeResidual(const FaceInfo & fi)
+WCNSFV2PMomentumAdvectionSlip::computeResidual(const FaceInfo & fi)
 {
   if (skipForBoundary(fi))
     return;

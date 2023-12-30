@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVInterfaceTransfer.h"
+#include "NSFVMixturePhaseInterface.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVInterfaceTransfer);
+registerMooseObject("NavierStokesApp", NSFVMixturePhaseInterface);
 
 InputParameters
-NSFVInterfaceTransfer::validParams()
+NSFVMixturePhaseInterface::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements a phase-to-phase volumetric exchange ");
@@ -23,7 +23,7 @@ NSFVInterfaceTransfer::validParams()
   return params;
 }
 
-NSFVInterfaceTransfer::NSFVInterfaceTransfer(const InputParameters & parameters)
+NSFVMixturePhaseInterface::NSFVMixturePhaseInterface(const InputParameters & parameters)
   : FVElementalKernel(parameters),
     _alpha(getFunctor<ADReal>(NS::alpha)),
     _phase_coupled(getFunctor<ADReal>("phase_coupled"))
@@ -31,7 +31,7 @@ NSFVInterfaceTransfer::NSFVInterfaceTransfer(const InputParameters & parameters)
 }
 
 ADReal
-NSFVInterfaceTransfer::computeQpResidual()
+NSFVMixturePhaseInterface::computeQpResidual()
 {
   auto elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();

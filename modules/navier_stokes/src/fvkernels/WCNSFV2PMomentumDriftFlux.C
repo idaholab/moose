@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMomentumDriftFlux.h"
+#include "WCNSFV2PMomentumDriftFlux.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "NS.h"
 #include "SystemBase.h"
 #include "RelationshipManager.h"
 #include "Factory.h"
 
-registerMooseObject("NavierStokesApp", INSFVMomentumDriftFlux);
+registerMooseObject("NavierStokesApp", WCNSFV2PMomentumDriftFlux);
 
 InputParameters
-INSFVMomentumDriftFlux::validParams()
+WCNSFV2PMomentumDriftFlux::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
   params.addClassDescription("Implements the drift momentum flux source.");
@@ -36,7 +36,7 @@ INSFVMomentumDriftFlux::validParams()
   return params;
 }
 
-INSFVMomentumDriftFlux::INSFVMomentumDriftFlux(const InputParameters & params)
+WCNSFV2PMomentumDriftFlux::WCNSFV2PMomentumDriftFlux(const InputParameters & params)
   : INSFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _rho_d(getFunctor<ADReal>("rho_d")),
@@ -56,7 +56,7 @@ INSFVMomentumDriftFlux::INSFVMomentumDriftFlux(const InputParameters & params)
 }
 
 ADReal
-INSFVMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
+WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 {
   _normal = _face_info->normal();
   const auto state = determineState();
@@ -119,7 +119,7 @@ INSFVMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 }
 
 void
-INSFVMomentumDriftFlux::gatherRCData(const FaceInfo & fi)
+WCNSFV2PMomentumDriftFlux::gatherRCData(const FaceInfo & fi)
 {
   if (skipForBoundary(fi))
     return;
@@ -139,7 +139,7 @@ INSFVMomentumDriftFlux::gatherRCData(const FaceInfo & fi)
 }
 
 ADReal
-INSFVMomentumDriftFlux::computeSegregatedContribution()
+WCNSFV2PMomentumDriftFlux::computeSegregatedContribution()
 {
   return computeStrongResidual(false);
 }

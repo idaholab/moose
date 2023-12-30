@@ -1,4 +1,4 @@
-# NSFVInterfaceTransfer
+# NSFVMixturePhaseInterface
 
 This terms models the volumetric exchange between two phases.
 The term added reads as follows:
@@ -18,8 +18,8 @@ The kernel simultaneously adds to the residual of phases 1 and 2 if the transpor
 of both phases are included in the model. So, there is no need to add a separate
 kernel for each phase.
 
-!syntax parameters /FVKernels/NSFVInterfaceTransfer
+!syntax parameters /FVKernels/NSFVMixturePhaseInterface
 
-!syntax inputs /FVKernels/NSFVInterfaceTransfer
+!syntax inputs /FVKernels/NSFVMixturePhaseInterface
 
-!syntax children /FVKernels/NSFVInterfaceTransfer
+!syntax children /FVKernels/NSFVMixturePhaseInterface

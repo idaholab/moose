@@ -142,7 +142,7 @@ g = -9.81
     coeff = 1e-3
   []
   # [phase_2_src]
-  #   type = NSFVInterfaceTransfer
+  #   type = NSFVMixturePhaseInterface
   #   variable = phase_2
   #   phase_coupled = phase_1
   #   alpha = 0.01
@@ -220,7 +220,7 @@ g = -9.81
     y = vel_y
   []
   [populate_u_slip]
-    type = INSFVSlipVelocityAux
+    type = WCNSFV2PSlipVelocityAux
     variable = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -232,7 +232,7 @@ g = -9.81
     linear_coef_name = 'Darcy_coefficient'
   []
   [populate_v_slip]
-    type = INSFVSlipVelocityAux
+    type = WCNSFV2PSlipVelocityAux
     variable = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

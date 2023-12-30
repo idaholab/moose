@@ -14,14 +14,14 @@
 class INSFVVelocityVariable;
 
 /*
- * Computes the value of the eddy viscosity for the mixing length model.
+ * Computes the value of slip velocity for the two phase mixture model
  */
-class INSFVSlipVelocityAux : public AuxKernel
+class WCNSFV2PSlipVelocityAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  INSFVSlipVelocityAux(const InputParameters & parameters);
+  WCNSFV2PSlipVelocityAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();

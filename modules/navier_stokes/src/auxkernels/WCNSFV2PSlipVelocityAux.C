@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVSlipVelocityAux.h"
+#include "WCNSFV2PSlipVelocityAux.h"
 #include "INSFVVelocityVariable.h"
 #include "Function.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSFVSlipVelocityAux);
+registerMooseObject("NavierStokesApp", WCNSFV2PSlipVelocityAux);
 
 InputParameters
-INSFVSlipVelocityAux::validParams()
+WCNSFV2PSlipVelocityAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Computes the turbulent viscosity for the mixing length model.");
+  params.addClassDescription("Computes the slip velocity for two-phase mixture model.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -26,7 +26,7 @@ INSFVSlipVelocityAux::validParams()
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Mixture Density");
   params.addParam<RealVectorValue>(
-      "gravity", "Gravity acceleration vector");
+      "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
   params.addClassDescription("Object for advecting momentum with slip velocity, e.g. rho*u");
   params.addParam<Real>("force_value", 0.0, "Coefficient to multiply by the body force term");
   params.addParam<FunctionName>("force_function", "1", "A function that describes the body force");
@@ -47,7 +47,7 @@ INSFVSlipVelocityAux::validParams()
   return params;
 }
 
-INSFVSlipVelocityAux::INSFVSlipVelocityAux(const InputParameters & params)
+WCNSFV2PSlipVelocityAux::WCNSFV2PSlipVelocityAux(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
@@ -84,7 +84,7 @@ INSFVSlipVelocityAux::INSFVSlipVelocityAux(const InputParameters & params)
 }
 
 Real
-INSFVSlipVelocityAux::computeValue()
+WCNSFV2PSlipVelocityAux::computeValue()
 {
   constexpr Real offset = 1e-15;
   const auto elem_arg = makeElemArg(_current_elem);
@@ -109,22 +109,22 @@ INSFVSlipVelocityAux::computeValue()
   }
 
   // Adding advection term
+  const auto u_velocity = (*_u_var)(elem_arg, state);
   ADRealVectorValue u_grad = _u_var->gradient(elem_arg, state);
-  term_advection(0) += (*_u_var)(elem_arg, state) * u_grad(0);
+  term_advection(0) += u_velocity * u_grad(0);
   if (_dim > 1)
   {
+    const auto v_velocity = (*_v_var)(elem_arg, state);
     ADRealVectorValue v_grad = _v_var->gradient(elem_arg, state);
-    term_advection(0) += (*_v_var)(elem_arg, state) * u_grad(1);
-    term_advection(1) +=
-        (*_u_var)(elem_arg, state) * v_grad(0) + (*_v_var)(elem_arg, state) * v_grad(1);
+    term_advection(0) += v_velocity * u_grad(1);
+    term_advection(1) += u_velocity * v_grad(0) + v_velocity * v_grad(1);
     if (_dim > 2)
     {
+      const auto w_velocity = (*_w_var)(elem_arg, state);
       ADRealVectorValue w_grad = _w_var->gradient(elem_arg, state);
-      term_advection(0) += (*_w_var)(elem_arg, state) * u_grad(2);
-      term_advection(1) += (*_w_var)(elem_arg, state) * v_grad(2);
-      term_advection(2) += (*_u_var)(elem_arg, state) * w_grad(0) +
-                           (*_v_var)(elem_arg, state) * w_grad(1) +
-                           (*_w_var)(elem_arg, state) * w_grad(2);
+      term_advection(0) += w_velocity * u_grad(2);
+      term_advection(1) += w_velocity * v_grad(2);
+      term_advection(2) += u_velocity * w_grad(0) + v_velocity * w_grad(1) + w_velocity * w_grad(2);
     }
   }
 

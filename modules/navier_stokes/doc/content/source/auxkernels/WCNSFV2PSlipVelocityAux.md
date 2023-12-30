@@ -1,4 +1,4 @@
-# INSFVSlipVelocityAux
+# WCNSFV2PSlipVelocityAux
 
 This kernel computes the slip velocity between a dispersed phase and
 a mixture phase.
@@ -39,8 +39,8 @@ where:
 - $\bm{f}$ is the volumetric force,
 - $\bm{u}_m$ is the mixture velocity.
 
-!syntax parameters /AuxKernels/INSFVSlipVelocityAux
+!syntax parameters /AuxKernels/WCNSFV2PSlipVelocityAux
 
-!syntax inputs /AuxKernels/INSFVSlipVelocityAux
+!syntax inputs /AuxKernels/WCNSFV2PSlipVelocityAux
 
-!syntax children /AuxKernels/INSFVSlipVelocityAux
+!syntax children /AuxKernels/WCNSFV2PSlipVelocityAux

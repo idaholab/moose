@@ -15,12 +15,12 @@
  * Implements a heat transfer term with an ambient medium, proportional to the
  * difference between the fluid and ambient temperature.
  */
-class NSFVInterfaceTransfer : public FVElementalKernel
+class NSFVMixturePhaseInterface : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
 
-  NSFVInterfaceTransfer(const InputParameters & parameters);
+  NSFVMixturePhaseInterface(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;

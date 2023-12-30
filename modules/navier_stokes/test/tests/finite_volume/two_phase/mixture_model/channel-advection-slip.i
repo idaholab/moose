@@ -73,7 +73,7 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
   []
   [u_advection_slip]
-    type = INSFVMomentumAdvectionSlip
+    type = WCNSFV2PMomentumAdvectionSlip
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
@@ -88,6 +88,7 @@ velocity_interp_method = 'rc'
     type = INSFVMomentumDiffusion
     variable = vel_x
     mu = 'mu_mixture'
+    limit_interpolation = true
     momentum_component = 'x'
   []
   [u_pressure]
@@ -106,7 +107,7 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
   []
   [v_advection_slip]
-    type = INSFVMomentumAdvectionSlip
+    type = WCNSFV2PMomentumAdvectionSlip
     variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
@@ -121,6 +122,7 @@ velocity_interp_method = 'rc'
     type = INSFVMomentumDiffusion
     variable = vel_y
     mu = 'mu_mixture'
+    limit_interpolation = true
     momentum_component = 'y'
   []
   [v_pressure]
@@ -139,7 +141,7 @@ velocity_interp_method = 'rc'
     advected_interp_method = 'upwind'
   []
   [phase_2_src]
-    type = NSFVInterfaceTransfer
+    type = NSFVMixturePhaseInterface
     variable = phase_2
     phase_coupled = phase_1
     alpha = 0.1
@@ -214,7 +216,7 @@ velocity_interp_method = 'rc'
 
 [AuxKernels]
   [populate_u_slip]
-    type = INSFVSlipVelocityAux
+    type = WCNSFV2PSlipVelocityAux
     variable = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -226,7 +228,7 @@ velocity_interp_method = 'rc'
     linear_coef_name = 'Darcy_coefficient'
   []
   [populate_v_slip]
-    type = INSFVSlipVelocityAux
+    type = WCNSFV2PSlipVelocityAux
     variable = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'
