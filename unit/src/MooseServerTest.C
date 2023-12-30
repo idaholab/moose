@@ -1052,7 +1052,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(48u, completions_array.size());
+  EXPECT_EQ(49u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1096,6 +1096,7 @@ label: MultiApps                        text: [MultiApps]\n  \n[]               
 label: NodalKernels                     text: [NodalKernels]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: NodalNormals                     text: [NodalNormals]\n  \n[]                     desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: Outputs                          text: [Outputs]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
+label: Physics                          text: [Physics]\n  \n[]                          desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: Positions                        text: [Positions]\n  \n[]                        desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: Postprocessors                   text: [Postprocessors]\n  \n[]                   desc: application named block                  pos: [42.0]-[42.0] kind: 22
 label: Preconditioning                  text: [Preconditioning]\n  \n[]                  desc: application named block                  pos: [42.0]-[42.0] kind: 22
