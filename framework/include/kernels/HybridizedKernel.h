@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KernelBase.h"
-#include "MooseVariableInterface.h"
 
 class HybridizedKernel : public KernelBase
 {
@@ -24,13 +23,17 @@ public:
   virtual void computeOffDiagJacobian(unsigned int) override final;
   virtual void computeOffDiagJacobianScalar(unsigned int) override final;
 
-  virtual void computeResidualAndJacobian() override;
+  virtual void computeResidualAndJacobian() override final;
 
   /**
    * Here we compute the updates to the primal variables (solution and gradient) now that we have
    * the update to our dual (Lagrange multiplier) variable
    */
-  virtual void computePostLinearSolve();
+  void computePostLinearSolve();
+
+  virtual void initialSetup() override;
+
+  static const std::string lm_increment_vector_name;
 
 protected:
   /**
@@ -39,6 +42,12 @@ protected:
    * Jacobian for the the global Lagrange multiplier degrees of freedom
    */
   virtual void assemble(bool computing_global_data) = 0;
+
+  /**
+   * The (ghosted) increment of the Lagrange multiplier vector. This will be used post-linear solve
+   * (pre linesearch) to update the primal solution which resides in the auxiliary system
+   */
+  const NumericVector<Number> * _lm_increment;
 };
 
 inline HybridizedKernel::HybridizedKernel(const InputParameters & parameters)
@@ -80,4 +89,11 @@ inline void
 HybridizedKernel::computePostLinearSolve()
 {
   assemble(false);
+}
+
+inline void
+HybridizedKernel::initialSetup()
+{
+  KernelBase::initialSetup();
+  _lm_increment = &_sys.getVector(lm_increment_vector_name);
 }

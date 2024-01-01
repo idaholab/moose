@@ -28,3 +28,5 @@ HybridizedKernel::validParams()
   params.suppressParameter<std::vector<AuxVariableName>>("diag_save_in");
   return params;
 }
+
+const std::string HybridizedKernel::lm_increment_vector_name = "hybrid_lm_increment";

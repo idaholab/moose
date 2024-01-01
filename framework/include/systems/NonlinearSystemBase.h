@@ -844,7 +844,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectTagWarehouse<HybridizedKernel> _hybridized_kernels;
+  MooseObjectWarehouse<HybridizedKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
