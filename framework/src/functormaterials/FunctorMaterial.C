@@ -25,6 +25,10 @@ FunctorMaterial::validParams()
   // Do not allow functor materials in the regular Materials block
   params.registerBase("FunctorMaterial");
 
+  // Remove MaterialBase parameters that are not used
+  params.suppressParameter<bool>("compute");
+  params.suppressParameter<MaterialPropertyName>("declare_suffix");
+
   return params;
 }
 
