@@ -10,9 +10,11 @@
 #pragma once
 
 #include "ParallelSolutionStorage.h"
-#include <slepcsvd.h>
+#include "MooseTypes.h"
 #include "libmesh/petsc_vector.h"
-#include <MooseTypes.h>
+#include "libmesh/libmesh_config.h"
+
+#include <slepcsvd.h>
 
 namespace StochasticTools
 {
@@ -54,11 +56,13 @@ private:
                                      const dof_id_type num_modes_compute,
                                      const Real energy) const;
 
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
   /// The container where the snapshots are stored
   const ParallelSolutionStorage * const _parallel_storage;
   /// Additional options for the singular value solver
   const std::string & _extra_slepc_options;
   /// The communicator for parallel routines
   const Parallel::Communicator & _communicator;
+#endif
 };
 }
