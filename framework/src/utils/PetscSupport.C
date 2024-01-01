@@ -815,7 +815,7 @@ processPetscPairs(const std::vector<std::pair<MooseEnumItem, std::string>> & pet
   }
 #endif
   // Set Preconditioner description
-  po.pc_description = pc_description;
+  po.pc_description += pc_description;
 
   // Turn off default options_left warnings added in 3.19.3 pre-release for all PETSc builds
   // (PETSc commit: 59f199a7), unless the user has set a preference.
