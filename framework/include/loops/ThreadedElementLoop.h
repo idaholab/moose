@@ -13,6 +13,7 @@
 #include "FEProblemBase.h"
 #include "ThreadedElementLoopBase.h"
 #include "ConsoleUtils.h"
+#include "SwapBackSentinel.h"
 
 // Forward declarations
 class SystemBase;
@@ -54,7 +55,17 @@ public:
 
   virtual void neighborSubdomainChanged() override;
 
+  static void prepareFace(FEProblemBase & fe_problem,
+                          THREAD_ID tid,
+                          const Elem * elem,
+                          unsigned int side,
+                          BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
+                          const Elem * lower_d_elem = nullptr);
+
 protected:
+  void prepareElement(const Elem * elem);
+  void clearVarsAndMaterials();
+
   FEProblemBase & _fe_problem;
 
   /**
@@ -175,4 +186,45 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(
   for (auto shared_ptr : objs_ptrs)
     regular_ptrs.push_back(shared_ptr.get());
   printExecutionOrdering<T>(regular_ptrs, print_header, line_prefix);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::prepareElement(const Elem * const elem)
+{
+  _fe_problem.prepare(elem, this->_tid);
+  _fe_problem.reinitElem(elem, this->_tid);
+  _fe_problem.reinitMaterials(this->_subdomain, this->_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::prepareFace(FEProblemBase & fe_problem,
+                                            const THREAD_ID tid,
+                                            const Elem * const elem,
+                                            const unsigned int side,
+                                            const BoundaryID bnd_id,
+                                            const Elem * const lower_d_elem)
+{
+  fe_problem.reinitElemFace(elem, side, tid);
+
+  // Needed to use lower-dimensional variables on Materials
+  if (lower_d_elem)
+    fe_problem.reinitLowerDElem(lower_d_elem, tid);
+
+  // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(fe_problem, &FEProblem::swapBackMaterialsFace, tid);
+
+  fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
+  if (bnd_id != Moose::INVALID_BOUNDARY_ID)
+    fe_problem.reinitMaterialsBoundary(bnd_id, tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::clearVarsAndMaterials()
+{
+  _fe_problem.clearActiveElementalMooseVariables(this->_tid);
+  _fe_problem.clearActiveMaterialProperties(this->_tid);
 }
