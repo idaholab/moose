@@ -26,9 +26,6 @@ class GenericIntegratedBC<true> : public ADIntegratedBC
 public:
   static InputParameters validParams() { return ADIntegratedBC::validParams(); };
   GenericIntegratedBC(const InputParameters & parameters) : ADIntegratedBC(parameters) {}
-
-protected:
-  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 };
 
 #define usingGenericIntegratedBCMembers                                                            \
