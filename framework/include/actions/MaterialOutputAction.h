@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Action.h"
 #include "MaterialData.h"
+#include "FEProblemBase.h"
 
 class MooseObjectAction;
 class MaterialBase;
@@ -47,6 +48,14 @@ protected:
    */
   template <typename T>
   bool hasADProperty(const std::string & property_name);
+
+  /**
+   * Helper method for testing if the functor material property exists
+   * @tparam T The functor property type (e.g., REAL)
+   * @param property_name The name of the property to test
+   */
+  template <typename T>
+  bool hasFunctorProperty(const std::string & property_name);
 
   /**
    * A function to be overriden by derived actions to handle a set of material property types
@@ -88,6 +97,25 @@ private:
                                                 const MaterialBase & material,
                                                 bool get_names_only);
 
+  /**
+   * Template method for creating the necessary objects for the various functor material property
+   * types
+   * @tparam T The type of material property that automatic output is being performed
+   * @param property_name The name of the functor material property to output
+   * @param material A pointer to the MaterialBase object containing the property of interest
+   * @param get_names_only A bool used to indicate that only the variable names should be returned
+   *
+   * @return A vector of names that can be used as AuxVariable names
+   *
+   * By default this function produces an mooseError, you must create a specialization for any type
+   * that you wish to have the automatic output capability. Also, you need to add a test for this
+   * type within the act() method.
+   */
+  template <typename T>
+  std::vector<std::string> functorMaterialOutputHelper(const std::string & property_name,
+                                                       const MaterialBase & material,
+                                                       bool get_names_only);
+
   /// Pointer the MaterialData object storing the block restricted materials
   const MaterialData * _block_material_data;
 
@@ -120,6 +148,15 @@ MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/
 }
 
 template <typename T>
+std::vector<std::string>
+MaterialOutputAction::functorMaterialOutputHelper(const std::string & /*property_name*/,
+                                                  const MaterialBase & /*material*/,
+                                                  bool /*get_names_only*/)
+{
+  mooseError("Unknown type, you must create a specialization of functorMaterialOutputHelper");
+}
+
+template <typename T>
 bool
 MaterialOutputAction::hasProperty(const std::string & property_name)
 {
@@ -139,4 +176,11 @@ MaterialOutputAction::hasADProperty(const std::string & property_name)
     return true;
   else
     return false;
+}
+
+template <typename T>
+bool
+MaterialOutputAction::hasFunctorProperty(const std::string & property_name)
+{
+  return _problem->hasFunctorWithType<T>(property_name, 0);
 }
