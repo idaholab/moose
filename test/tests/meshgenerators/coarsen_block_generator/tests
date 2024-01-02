@@ -1,0 +1,59 @@
+[Tests]
+  issues = '#'
+  design = 'meshgenerators/CoarsenBlockGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to coarsen'
+
+    [single_block]
+      type = 'Exodiff'
+      input = 'coarsen_quad.i'
+      exodiff = 'coarsen_quad_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'elements within a non-uniformly refined meshed,'
+    []
+    [multiple_block]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "--mesh-only"
+      detail = 'multiple blocks within a multi-domain mesh,'
+    []
+    [multiple_levels]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "--mesh-only"
+      detail = 'multiple blocks at multiple levels of coarsening within a multi-domain mesh.'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall report an error if "
+    [invalid_block]
+      type = RunException
+      input = coarsen_quad.i
+      cli_args = 'Mesh/coarsen/block="missing"'
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = "attempting to coarsen a block that does not exist in the mesh, and "
+    []
+    [wrong_size_inputs]
+      type = RunException
+      input = coarsen_quad.i
+      cli_args = 'Mesh/coarsen/coarsening="1 2" --mesh-only'
+      expect_err = "The blocks and coarsening parameter vectors should be the same size"
+      detail = "if specifying a vector of coarsening levels that does not match the vector of "
+               "subdomains to coarsen,"
+    []
+    [wrong_start_id]
+      type = RunException
+      input = coarsen_quad_multi.i
+      cli_args = 'Mesh/coarsen/coarsening="1 2" --mesh-only'
+      expect_err = "The starting element must be in the block set to be coarsened the most"
+      detail = "the coarsening starting element is not in the block to coarsen the most."
+    []
+  []
+[]
