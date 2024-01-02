@@ -7,7 +7,7 @@ mechanical contact in explicit dynamics. Surrogate balance-momentum equations ar
 solved at each node on the secondary surface using density and wave speed
 material properties and the velocities of the two surfaces in contact.
 
-For relevant, general equations, see [!citep](heinstein2000contact), in particular,
+For relevant equations, see [!citep](heinstein2000contact), in particular,
 Equations (15), (21), (26) and (29).
 
 !syntax parameters /Constraints/ExplicitDynamicsContactConstraint

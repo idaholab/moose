@@ -1275,6 +1275,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     BoundaryID secondary_boundary = pen_loc._secondary_boundary;
     BoundaryID primary_boundary = pen_loc._primary_boundary;
 
+    bool has_writable_variables(false);
+
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
       const auto & constraints =
@@ -1356,6 +1358,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
               if (nfc->hasWritableCoupledVariables())
               {
                 Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+                has_writable_variables = true;
                 for (auto * var : nfc->getWritableCoupledVariables())
                 {
                   if (var->isNodalDefined())
@@ -1367,8 +1370,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         }
       }
     }
-    const bool has_explicit_contact(true);
-    if (has_explicit_contact)
+    _communicator.max(has_writable_variables);
+
+    if (has_writable_variables)
     {
       _fe_problem.getAuxiliarySystem().solution().close();
       _fe_problem.getAuxiliarySystem().system().update();

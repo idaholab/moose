@@ -61,7 +61,8 @@ ExplicitDynamicsContactAction::validParams()
       "model", ExplicitDynamicsContactAction::getModelEnum(), "The contact model to use");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
-  params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
+  params.addClassDescription("Sets up all objects needed for mechanical contact enforcement in "
+                             "explicit dynamics simulations.");
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");

@@ -48,6 +48,7 @@
     type = MeshCollectionGenerator
     inputs = ' block_one_id block_two_id'
   []
+  allow_renumbering = false
 []
 
 [Variables]

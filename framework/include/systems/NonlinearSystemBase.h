@@ -983,7 +983,4 @@ private:
 
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
-
-  /// Mutex for auxiliary variables
-  static Threads::spin_mutex writable_variable_mutex;
 };
