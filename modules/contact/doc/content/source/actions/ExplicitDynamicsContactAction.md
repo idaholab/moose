@@ -1,6 +1,6 @@
-# Contact Action
+# ExplicitDynamicsContact Action
 
-!syntax description /Contact/ExplicitDynamicsContactAction
+!syntax description /ExplicitDynamicsContact/ExplicitDynamicsContactAction
 
 ## Description
 
