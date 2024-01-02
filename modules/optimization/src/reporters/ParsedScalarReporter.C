@@ -36,8 +36,9 @@ ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
         _reporter_symbols.size());
 
   _reporter_data.resize(reporter_names.size());
-  for (unsigned int i = 0; i < reporter_names.size(); i++)
-    _reporter_data[i] = &getReporterValueByName<Real>(reporter_names[i], REPORTER_MODE_REPLICATED);
+  for (const auto rep_index : index_range(_reporter_data))
+    _reporter_data[rep_index] =
+        &getReporterValueByName<Real>(reporter_names[rep_index], REPORTER_MODE_REPLICATED);
 }
 
 void

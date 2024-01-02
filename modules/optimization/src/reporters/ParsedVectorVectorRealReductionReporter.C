@@ -75,10 +75,10 @@ ParsedVectorVectorRealReductionReporter::finalize()
 
   _output_reporter.clear();
   _output_reporter.resize(nrows, _initial_value);
-  for (std::size_t i_row = 0; i_row < nrows; ++i_row)
+  for (const auto i_row : make_range(nrows))
   {
     Real reduction = _initial_value;
-    for (std::size_t j_col = 0; j_col < ncols; ++j_col)
+    for (const auto j_col : make_range(ncols))
     {
       _func_params[0] = reduction;
       _func_params[1] = vector_vector->at(j_col)[i_row];
