@@ -86,6 +86,16 @@ DomainIntegralAction::validParams()
   params.addCoupledVar("additional_eigenstrain_22",
                        "Optional additional eigenstrain variable that will be accounted for in the "
                        "interaction integral (component 22 or ZZ).");
+  params.addCoupledVar("additional_eigenstrain_02",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 02 or XZ).");
+  params.addCoupledVar("additional_eigenstrain_12",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 12 or XZ).");
+  params.addParamNamesToGroup(
+      "additional_eigenstrain_00 additional_eigenstrain_01 additional_eigenstrain_11 "
+      "additional_eigenstrain_22 additional_eigenstrain_02 additional_eigenstrain_12",
+      "Generic eigenstrains for the computation of the interaction integral.");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",

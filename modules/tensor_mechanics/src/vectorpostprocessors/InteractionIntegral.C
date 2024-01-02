@@ -95,6 +95,16 @@ InteractionIntegralTempl<is_ad>::validParams()
   params.addCoupledVar("additional_eigenstrain_22",
                        "Optional additional eigenstrain variable that will be accounted for in the "
                        "interaction integral (component 22 or ZZ).");
+  params.addCoupledVar("additional_eigenstrain_02",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 02 or XZ).");
+  params.addCoupledVar("additional_eigenstrain_12",
+                       "Optional additional eigenstrain variable that will be accounted for in the "
+                       "interaction integral (component 12 or XZ).");
+  params.addParamNamesToGroup(
+      "additional_eigenstrain_00 additional_eigenstrain_01 additional_eigenstrain_11 "
+      "additional_eigenstrain_22 additional_eigenstrain_02 additional_eigenstrain_12",
+      "Generic eigenstrains for the computation of the interaction integral.");
   params.addClassDescription(
       "Computes the interaction integral, which is used to compute various "
       "fracture mechanics parameters at a crack tip, including KI, KII, KIII, "
@@ -135,17 +145,25 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
         hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
             ? &getGenericMaterialProperty<RankTwoTensor, is_ad>("total_deigenstrain_dT")
             : nullptr),
-    _has_additional_eigenstrain(isCoupled("additional_eigenstrain_00") &&
-                                isCoupled("additional_eigenstrain_01") &&
-                                isCoupled("additional_eigenstrain_11")),
-    _additional_eigenstrain_gradient_00(
-        _has_additional_eigenstrain ? &coupledGradient("additional_eigenstrain_00") : nullptr),
-    _additional_eigenstrain_gradient_01(
-        _has_additional_eigenstrain ? &coupledGradient("additional_eigenstrain_01") : nullptr),
-    _additional_eigenstrain_gradient_11(
-        _has_additional_eigenstrain ? &coupledGradient("additional_eigenstrain_11") : nullptr),
-    _additional_eigenstrain_gradient_22(
-        _has_additional_eigenstrain ? &coupledGradient("additional_eigenstrain_22") : nullptr),
+    _has_additional_eigenstrain(false),
+    _additional_eigenstrain_gradient_00(isCoupled("additional_eigenstrain_00")
+                                            ? &coupledGradient("additional_eigenstrain_00")
+                                            : nullptr),
+    _additional_eigenstrain_gradient_01(isCoupled("additional_eigenstrain_01")
+                                            ? &coupledGradient("additional_eigenstrain_01")
+                                            : nullptr),
+    _additional_eigenstrain_gradient_11(isCoupled("additional_eigenstrain_11")
+                                            ? &coupledGradient("additional_eigenstrain_11")
+                                            : nullptr),
+    _additional_eigenstrain_gradient_22(isCoupled("additional_eigenstrain_22")
+                                            ? &coupledGradient("additional_eigenstrain_22")
+                                            : nullptr),
+    _additional_eigenstrain_gradient_02(isCoupled("additional_eigenstrain_02")
+                                            ? &coupledGradient("additional_eigenstrain_02")
+                                            : nullptr),
+    _additional_eigenstrain_gradient_12(isCoupled("additional_eigenstrain_12")
+                                            ? &coupledGradient("additional_eigenstrain_12")
+                                            : nullptr),
     _q_function_type(getParam<MooseEnum>("q_function_type").template getEnum<QMethod>()),
     _position_type(getParam<MooseEnum>("position_type").template getEnum<PositionType>()),
     _sif_mode(getParam<MooseEnum>("sif_mode").template getEnum<SifMethod>()),
@@ -205,6 +223,21 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
   }
   if (isParamValid("body_force"))
     _body_force = &getMaterialProperty<RealVectorValue>("body_force");
+
+  _has_additional_eigenstrain = _additional_eigenstrain_gradient_00 &&
+                                _additional_eigenstrain_gradient_01 &&
+                                _additional_eigenstrain_gradient_11;
+
+  if (_mesh.dimension() == 3 && _has_additional_eigenstrain)
+    if (!(_additional_eigenstrain_gradient_22 && _additional_eigenstrain_gradient_12 &&
+          _additional_eigenstrain_gradient_02))
+      paramError("additional_eigenstrain_gradient_12",
+                 "If additional eigenstrains are provided for the computation of the interaction "
+                 "integral in three dimensions, make sure the six components are provided.");
+
+  if (_has_additional_eigenstrain)
+    mooseInfo("A generic eigenstrain provided by the user will be considered in the interaction "
+              "integral (via domain integral action).");
 }
 
 template <bool is_ad>
@@ -353,14 +386,37 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
         I_xy.mixedProductJkI((*_additional_eigenstrain_gradient_01)[_qp]);
     const auto eigenstrain_gradient_y =
         I_y.mixedProductJkI((*_additional_eigenstrain_gradient_11)[_qp]);
-    const auto eigenstrain_gradient_z =
-        I_z.mixedProductJkI((*_additional_eigenstrain_gradient_22)[_qp]);
+
+    GenericRankThreeTensor<is_ad> eigenstrain_gradient_z;
+    if (_additional_eigenstrain_gradient_22)
+      eigenstrain_gradient_z = I_z.mixedProductJkI((*_additional_eigenstrain_gradient_22)[_qp]);
 
     RankTwoTensor eigenstrain_grad_in_crack_dir =
         crack_dir * (MetaPhysicL::raw_value(eigenstrain_gradient_x) +
                      MetaPhysicL::raw_value(eigenstrain_gradient_xy) +
                      MetaPhysicL::raw_value(eigenstrain_gradient_y) +
                      MetaPhysicL::raw_value(eigenstrain_gradient_z));
+
+    GenericRankThreeTensor<is_ad> eigenstrain_gradient_xz;
+    GenericRankThreeTensor<is_ad> eigenstrain_gradient_yz;
+    // Add terms for three dimensions
+    if (_mesh.dimension() == 3)
+    {
+      // Add influence of xz and yz.
+      RankTwoTensor I_xz(RankTwoTensor::initNone);
+      I_xz(0, 2) = I_xz(2, 0) = 1.0;
+      eigenstrain_gradient_xz = I_xz.mixedProductJkI((*_additional_eigenstrain_gradient_02)[_qp]);
+      RankTwoTensor I_yz(RankTwoTensor::initNone);
+      I_yz(1, 2) = I_yz(2, 1) = 1.0;
+      eigenstrain_gradient_yz = I_yz.mixedProductJkI((*_additional_eigenstrain_gradient_12)[_qp]);
+
+      eigenstrain_grad_in_crack_dir = crack_dir * (MetaPhysicL::raw_value(eigenstrain_gradient_xz) +
+                                                   MetaPhysicL::raw_value(eigenstrain_gradient_yz) +
+                                                   MetaPhysicL::raw_value(eigenstrain_gradient_x) +
+                                                   MetaPhysicL::raw_value(eigenstrain_gradient_xy) +
+                                                   MetaPhysicL::raw_value(eigenstrain_gradient_y) +
+                                                   MetaPhysicL::raw_value(eigenstrain_gradient_z));
+    }
 
     term4b = scalar_q * aux_stress.doubleContraction(eigenstrain_grad_in_crack_dir);
   }

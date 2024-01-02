@@ -29,7 +29,7 @@ design = 'syntax/DomainIntegral/index.md'
     csvdiff = 'interaction_integral_2d_thermal_generic_out.csv'
     requirement = 'The domain integral action shall compute the stress intensity factor using the interaction integral approach for '
                   'a problem dominated by thermal strains using an approach that integrates eigenstrain gradients in a general manner.'
-    issues = '#999999'
+    issues = '#26452'
   [../]
   [./test_ii_arb_eig_grad]
     type = 'CSVDiff'
