@@ -49,6 +49,13 @@ public:
   virtual void postElement(const Elem * /*elem*/) override;
   virtual void post() override;
 
+  static void prepareFace(FEProblemBase & fe_problem,
+                          THREAD_ID tid,
+                          const Elem * elem,
+                          unsigned int side,
+                          BoundaryID bnd_id = Moose::INVALID_BOUNDARY_ID,
+                          const Elem * lower_d_elem = nullptr);
+
 protected:
   ///@{
   /// Base class version just calls compute on each object for the element
