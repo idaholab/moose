@@ -7,6 +7,7 @@
 `InterpolatedStatefulMaterial` reconstitutes the old state of a material property from the old state of the AuxVariables holding the projected components of the material property.
 
 Variants include:
+
 - `InterpolatedStatefulMaterialReal`
 - `InterpolatedStatefulMaterialRealVectorValue`
 - `InterpolatedStatefulMaterialRankTwoTensor`
