@@ -396,3 +396,26 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
 
   _boundaries_exec_printed.insert(bid);
 }
+
+void
+NonlinearThread::prepareFace(FEProblemBase & fe_problem,
+                             const THREAD_ID tid,
+                             const Elem * const elem,
+                             const unsigned int side,
+                             const BoundaryID bnd_id,
+                             const Elem * const lower_d_elem)
+{
+  fe_problem.reinitElemFace(elem, side, tid);
+
+  // Needed to use lower-dimensional variables on Materials
+  if (lower_d_elem)
+    fe_problem.reinitLowerDElem(lower_d_elem, tid);
+
+  // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(fe_problem, &FEProblem::swapBackMaterialsFace, tid);
+
+  fe_problem.reinitMaterialsFace(elem->subdomain_id(), tid);
+  if (bnd_id != Moose::INVALID_BOUNDARY_ID)
+    fe_problem.reinitMaterialsBoundary(bnd_id, tid);
+}
