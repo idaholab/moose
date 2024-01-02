@@ -252,6 +252,16 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
 }
 
 void
+ComputeUserObjectsThread::onExternalSide(const Elem * elem, unsigned int side)
+{
+  // We are not inititalizing any materials here because objects that perform calculations should
+  // run onBoundary. onExternalSide should be used for mesh updates (e.g. adding/removing
+  // boundaries). Note that _current_elem / _current_side are not getting updated either.
+  for (auto & uo : _domain_objs)
+    uo->executeOnExternalSide(elem, side);
+}
+
+void
 ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   // Pointer to the neighbor we are currently working on.
