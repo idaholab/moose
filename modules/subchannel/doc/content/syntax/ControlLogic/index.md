@@ -1,0 +1,1 @@
+See THM [documentation](https://mooseframework.inl.gov/syntax/ControlLogic/index.html) for control logic description.
