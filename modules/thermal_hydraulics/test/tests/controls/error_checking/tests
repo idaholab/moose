@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'syntax/ControlLogic/index.md'
   [non_existent_control_data]
     type = 'RunException'
     input = 'non_existent_control_data.i'
     expect_err = "Control data 'wrong' was requested, but was not declared by any active control object."
+    requirement = "The system shall report an error if non-existent control data is requested in a control logic object."
   []
 []

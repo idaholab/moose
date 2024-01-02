@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'syntax/Adaptivity/index.md'
   [single_block]
     type = 'Exodiff'
     input = 'single_block.i'
@@ -6,6 +9,7 @@
     abs_zero = 1e-7
     recover = false
     mesh_mode = 'replicated'
+    requirement = 'The system shall be able to use adaptive mesh refinement in a 1D single phase compressible flow simulation.'
   []
 
   [multiple_blocks]
@@ -14,6 +18,8 @@
     exodiff = 'multiple_blocks_out.e-s005'
     recover = false
     method = 'opt'
-    skip = '#709'
+    # relap7 #709
+    skip = '#26336'
+    requirement = 'The system shall be able to use adaptive mesh refinement in a 1D single phase compressible flow simulation with multiple subdomains.'
   []
 []

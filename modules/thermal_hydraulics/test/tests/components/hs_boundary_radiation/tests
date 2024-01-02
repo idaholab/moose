@@ -1,15 +1,19 @@
 [Tests]
+  issues = '#19778'
+  design = 'HSBoundaryRadiation.md'
   [energy_conservation_cylindrical]
     type = 'CSVDiff'
     input = 'cylindrical.i'
     csvdiff = 'cylindrical_out.csv'
     abs_zero = 1e-6
+    requirement = 'The system shall be able to apply a radiative heat flux boundary condition on the boundary of a cylindrical heat structure and show conservation of energy.'
   []
   [energy_conservation_plate]
     type = 'CSVDiff'
     input = 'plate.i'
     csvdiff = 'plate_out.csv'
     abs_zero = 2e-6
+    requirement = 'The system shall be able to apply a radiative heat flux boundary condition on the boundary of a plate heat structure and show conservation of energy.'
   []
   [energy_conservation_from_file_3d]
     type = 'CSVDiff'
@@ -18,5 +22,6 @@
     abs_zero = 1e-6
     # because output has execute_on = 'final'
     recover = false
+    requirement = 'The system shall be able to apply a radiative heat flux boundary condition on the boundary of a heat structure created from a 3D mesh file and show conservation of energy.'
   []
 []

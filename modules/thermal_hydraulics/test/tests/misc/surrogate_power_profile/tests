@@ -1,9 +1,13 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'SolutionUserObject.md'
   [power_profile]
     type = 'Exodiff'
     input = 'power_profile.i'
     exodiff = 'power_profile.e'
     recover = false
+    requirement = 'The system shall be able to generate a power profile in an Exodus file to be read from a 1D flow simulation.'
   []
 
   [surrogate_power_profile]
@@ -12,5 +16,6 @@
     exodiff = 'surrogate_power_profile_out.e'
     prereq = 'power_profile'
     recover = false
+    requirement = 'The system shall be able to read a power profile from an Exodus file to apply on components in a 1D single phase compressible flow simulation.'
   []
 []

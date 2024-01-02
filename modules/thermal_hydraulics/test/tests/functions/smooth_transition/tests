@@ -1,13 +1,17 @@
 [Tests]
+  issues = '#19679'
+  design = 'CosineTransitionFunction.md CubicTransitionFunction.md'
   [space_weighted]
     type = 'Exodiff'
     input = 'space.i'
     exodiff = 'space_weighted.e'
+    requirement = 'The system shall be able to use a cosine shape to smoothly transition between two functions of space.'
   []
   [time_weighted]
     type = 'CSVDiff'
     input = 'time.i'
     csvdiff = 'time_weighted.csv'
+    requirement = 'The system shall be able to use a cosine shape to smoothly transition between two functions of time.'
   []
 
   [space_cubic]
@@ -19,6 +23,7 @@
       Functions/transition_fn/function2_derivative_end_point=0
       Outputs/file_base=space_cubic'
     exodiff = 'space_cubic.e'
+    requirement = 'The system shall be able to use a cubic polynomial shape to smoothly transition between two functions of space.'
   []
   [time_cubic]
     type = 'CSVDiff'
@@ -29,5 +34,6 @@
       Functions/transition_fn/function2_derivative_end_point=0
       Outputs/file_base=time_cubic'
     csvdiff = 'time_cubic.csv'
+    requirement = 'The system shall be able to use a cubic polynomial shape to smoothly transition between two functions of time.'
   []
 []

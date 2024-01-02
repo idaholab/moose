@@ -1,8 +1,12 @@
 [Tests]
+  # idaholab/sockeye#53
+  issues = '#26411'
+  design = 'HeatRateRadiationRZ.md'
   [test]
     type = 'CSVDiff'
     input = 'heat_rate_radiation_rz.i'
     csvdiff = 'heat_rate_radiation_rz.csv'
     recover = false
+    requirement = 'The system shall be able to compute a radiative heat flux on a boundary, using cylindrical coordinates in a Cartesian frame of reference.'
   []
 []

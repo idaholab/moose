@@ -1,8 +1,12 @@
 [Tests]
+  # idaholab/sockeye#53
+  issues = '#26411'
+  design = 'HeatRateConvectionRZ.md'
   [test]
     type = 'CSVDiff'
     input = 'heat_rate_convection_rz.i'
     csvdiff = 'heat_rate_convection_rz.csv'
     recover = false
+    requirement = 'The system shall be able to compute the convective heat flux rate on a boundary in a single phase simulation, using cylindical coordinates in a Cartesian frame of reference.'
   []
 []

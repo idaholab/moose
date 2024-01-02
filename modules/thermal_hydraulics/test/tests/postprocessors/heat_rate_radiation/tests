@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#19897'
+  design = 'HeatRateRadiation.md'
   [test]
     type = 'CSVDiff'
     input = 'heat_rate_radiation.i'
     csvdiff = 'heat_rate_radiation.csv'
     recover = false
+    requirement = 'The system shall be able to compute a radiative heat flux on a boundary.'
   []
 []

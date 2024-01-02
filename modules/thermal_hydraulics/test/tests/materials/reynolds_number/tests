@@ -1,7 +1,11 @@
 [Tests]
+  # idaholab/sockeye#41
+  issues = '#26411'
+  design = 'ReynoldsNumberMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = "The system shall be able to compute the Reynolds number as a material property."
   []
 []

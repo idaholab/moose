@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#19829'
+  design = 'modules/thermal_hydraulics/index.md'
   [1phase]
     type = 'CSVDiff'
     input = 'mms_1phase.i'
@@ -6,5 +8,6 @@
     allow_test_objects = true
     recover = false
     max_parallel = 1
+    requirement = 'The system shall be able to compute the convergence order of its 1D single phase compressible flow discretization.'
   []
 []

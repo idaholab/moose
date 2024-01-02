@@ -1,8 +1,12 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'AverageWallTemperature3EqnMaterial.md'
   [average_wall_temperature_3eqn]
     type = 'CSVDiff'
     input = 'average_wall_temperature_3eqn.i'
     csvdiff = 'average_wall_temperature_3eqn_out.csv'
+    requirement = 'The system shall be able to compute the average wall temperature and store it as a material property.'
   []
 
   [alt_def]
@@ -10,6 +14,7 @@
     input = 'average_wall_temperature_3eqn.i'
     cli_args = "Outputs/file_base=alt_def_out Materials/const_materials/prop_values='0 0' AuxKernels/P_hf1_auxkernel/value=0.5e-5 AuxKernels/P_hf2_auxkernel/value=0.5e-5"
     csvdiff = 'alt_def_out.csv'
+    requirement = 'The system shall be able to compute the average wall temperature and store it as a material property even with null wall heat transfer coefficients,'
   []
 
   [err.n_hw_sources]
@@ -17,6 +22,7 @@
     input = 'average_wall_temperature_3eqn.i'
     cli_args = "Materials/T_wall_avg_material/Hw_sources='Hw1' Materials/T_wall_avg_material/P_hf_sources='P_hf1 P_hf2'"
     expect_err = "T_wall_avg_material: The number of wall heat transfer coefficient values must equal the number of wall temperature values"
+    requirement = "The system shall report an error if the number of wall heat transfer coefficients does not match the number of wall temperatures when computing average wall temperatures as material properties."
   []
 
   [err.n_phf_sources]
@@ -24,5 +30,6 @@
     input = 'average_wall_temperature_3eqn.i'
     cli_args = "Materials/T_wall_avg_material/Hw_sources='Hw1 Hw2' Materials/T_wall_avg_material/P_hf_sources='P_hf1'"
     expect_err = "T_wall_avg_material: The number of heated perimeter values must equal the number of wall temperature values"
+    requirement = "The system shall report an error if the number of wall heated perimeters does not match the number of wall temperatures when computing average wall temperatures as material properties."
   []
 []

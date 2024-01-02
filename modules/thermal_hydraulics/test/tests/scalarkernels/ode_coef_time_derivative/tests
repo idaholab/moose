@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19747'
+  design = 'ODECoefTimeDerivative.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to add a time derivative to a scalar ordinary differential equation.'
   []
 []

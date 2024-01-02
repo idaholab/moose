@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#19808'
+  design = 'HeatRateConvection1Phase.md'
   [test]
     type = 'CSVDiff'
     input = 'heat_rate_convection_1phase.i'
     csvdiff = 'heat_rate_convection_1phase_out.csv'
     recover = false
+    requirement = 'The system shall be able to compute the convective heat flux rate on a boundary in a single phase simulation.'
   []
 []

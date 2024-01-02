@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'modules/thermal_hydraulics/index.md'
   [sod_shock_tube_erk2_heavy]
     type = 'Exodiff'
     input = 'sod_shock_tube.i'
@@ -13,6 +16,7 @@
     recover = false
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation.'
   []
   [sod_shock_tube_erk2_light]
     type = 'Exodiff'
@@ -26,6 +30,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation for a few time steps.'
   []
   [non_x_direction_1phase]
     type = 'Exodiff'
@@ -43,6 +48,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation when the shock tube is not aligned with the X axis.'
   []
   [sod_shock_tube_be]
     type = 'Exodiff'
@@ -59,5 +65,6 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg implicit pipe free_boundary'
+    requirement = 'The system shall be able to solve the Sod shock wave problem using a 1D single phase compressible flow formulation using a first order time integration scheme and a Newton nonlinear solver.'
   []
 []

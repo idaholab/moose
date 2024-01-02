@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#19679'
+  design = 'ConvectionHeatTransferRZBC.md'
   [test]
     type = 'PetscJacobianTester'
     input = 'convection_heat_transfer_rz_bc.i'
@@ -7,5 +9,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    requirement = "The system shall be able to compute numerically accurate Jacobians when specifying a cylindrical convective heat transfer boundary condition in a cartesian frame of reference."
   []
 []

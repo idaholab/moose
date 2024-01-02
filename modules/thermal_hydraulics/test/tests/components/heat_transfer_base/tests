@@ -1,7 +1,11 @@
 [Tests]
+  # relap #636
+  issues = '#26336'
+  design = 'HeatTransferFromHeatFlux1Phase.md HeatTransferFromSpecifiedTemperature1Phase.md'
   [err:mixed_heat_modes]
     type = 'RunException'
     input = 'err.mixed_heat_modes.i'
     expect_err = "Heat sources for a flow channel must be all of temperature type or all of heat flux type"
+    requirement = 'The system shall report an error if heat sources in a flow channel are a mix of specified temperatures and specified heat fluxes.'
   []
 []
