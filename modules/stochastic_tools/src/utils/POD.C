@@ -14,6 +14,15 @@
 namespace StochasticTools
 {
 
+#if PETSC_VERSION_LESS_THAN(3, 14, 0)
+
+POD::POD(const ParallelSolutionStorage * const, const std::string &, const Parallel::Communicator &)
+{
+  mooseError("PETSc-3.14.0 or higher is required for using StochasticTools::POD.");
+}
+
+#else
+
 POD::POD(const ParallelSolutionStorage * const parallel_storage,
          const std::string & extra_slepc_options,
          const Parallel::Communicator & comm)
@@ -21,10 +30,9 @@ POD::POD(const ParallelSolutionStorage * const parallel_storage,
     _extra_slepc_options(extra_slepc_options),
     _communicator(comm)
 {
-#if PETSC_VERSION_LESS_THAN(3, 14, 0)
-  mooseError("PETSc-3.14.0 or higher is required for using StochasticTools::POD.");
-#endif
 }
+
+#endif
 
 void
 POD::computePOD(const VariableName & vname,
@@ -167,12 +175,12 @@ POD::computePOD(const VariableName & vname,
   SVDDestroy(&svd);
 #else
   // These variables would otherwise be unused
-  (void)vname;
-  (void)left_basis_functions;
-  (void)right_basis_functions;
-  (void)singular_values;
-  (void)num_modes;
-  (void)energy;
+  libmesh_ignore(vname);
+  libmesh_ignore(left_basis_functions);
+  libmesh_ignore(right_basis_functions);
+  libmesh_ignore(singular_values);
+  libmesh_ignore(num_modes);
+  libmesh_ignore(energy);
 #endif
 }
 
