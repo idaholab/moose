@@ -1,0 +1,1 @@
+See THM [documentation](https://mooseframework.inl.gov/syntax/Components/index.html) for components description.

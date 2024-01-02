@@ -1,0 +1,1 @@
+See THM [documentation](https://mooseframework.inl.gov/syntax/Modules/SolidProperties/index.html) for solid properties system description.
