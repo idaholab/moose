@@ -112,8 +112,7 @@ PropertyReadFile::initialize()
     _current_file_index++;
   }
   else if (_current_file_index == _prop_file_names.size())
-    mooseDoOnce(
-        mooseInfo("Last file specified has been read. The file will no longer be updated."));
+    mooseInfo("Last file specified has been read. The file will no longer be updated.");
 }
 
 void
