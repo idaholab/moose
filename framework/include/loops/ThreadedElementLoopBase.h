@@ -113,6 +113,14 @@ public:
   virtual void onInternalSide(const Elem * elem, unsigned int side);
 
   /**
+   * Called when iterating over external sides (no side neighbor)
+   *
+   * @param elem - Element we are on
+   * @param side - local side number of the element 'elem'
+   */
+  virtual void onExternalSide(const Elem * elem, unsigned int side);
+
+  /**
    * Called when doing interface assembling
    *
    * @param elem - Element we are on
@@ -290,6 +298,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
 
             postInternalSide(elem, side);
           }
+          else
+            onExternalSide(elem, side);
         } // sides
 
         postElement(elem);
@@ -376,6 +386,12 @@ ThreadedElementLoopBase<RangeType>::postInternalSide(const Elem * /*elem*/, unsi
 template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
+{
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::onExternalSide(const Elem * /*elem*/, unsigned int /*side*/)
 {
 }
 
