@@ -1,0 +1,1 @@
+See THM [documentation](https://mooseframework.inl.gov/syntax/CoupledHeatTransfers/index.html) for coupled heat transfers description.
