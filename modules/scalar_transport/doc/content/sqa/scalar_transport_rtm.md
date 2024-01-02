@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=scalar_transport module=Scalar Transport stp_filename=scalar_transport_stp.md
+!template load file=sqa/module_rtm.md.template category=scalar_transport module=Scalar Transport
 
 !template! item key=system-purpose
 !include scalar_transport_srs.md start=system-purpose-begin end=system-purpose-finish

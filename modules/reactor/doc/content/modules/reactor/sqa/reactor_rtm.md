@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=reactor module=Reactor stp_filename=reactor_stp.md
+!template load file=sqa/module_rtm.md.template category=reactor module=Reactor
 
 !template! item key=system-purpose
 !include reactor_srs.md start=system-purpose-begin end=system-purpose-finish

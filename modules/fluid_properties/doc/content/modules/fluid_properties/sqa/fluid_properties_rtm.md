@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=fluid_properties module=Fluid Properties stp_filename=fluid_properties_stp.md
+!template load file=sqa/module_rtm.md.template category=fluid_properties module=Fluid Properties
 
 !template! item key=system-purpose
 !include fluid_properties_srs.md start=system-purpose-begin end=system-purpose-finish

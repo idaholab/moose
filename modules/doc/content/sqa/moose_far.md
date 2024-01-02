@@ -1,4 +1,4 @@
-!template load file=sqa/app_far.md.template app=MOOSE category=_empty_
+!template load file=sqa/app_far.md.template app=MOOSE category=moose
 
 !template item key=introduction
 MOOSE itself is comprised of the framework and a set of physics modules. As such, the [!ac](FAR)
