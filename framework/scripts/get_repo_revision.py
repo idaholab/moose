@@ -166,7 +166,7 @@ class VersionInfo:
         the Makefile can't be opened or the installable dirs aren't present an attempt to determine
         the default "tests" location is made (either test/tests or just tests).
         """
-        if installable_dirs is not None:
+        if installable_dirs:
             dirs = installable_dirs.split()
             return ' '.join(sorted([re.sub(r'.*->','',dir) for dir in dirs]))
         if os.path.exists("./test/tests"):
