@@ -340,7 +340,8 @@ $(app_HEADER): curr_app    := $(APPLICATION_NAME)
 $(app_HEADER): all_header_dir := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
+	$(shell INSTALLABLE_DIRS="$(INSTALLABLE_DIRS)" \
+	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
 	@ln -sf $@ $(all_header_dir)
 
 #
