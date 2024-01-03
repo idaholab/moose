@@ -14,11 +14,9 @@
 
 #include "CauchyStressFromNEML2UO.h"
 
-#ifdef NEML2_ENABLED
 #include "NEML2Utils.h"
-#endif // NEML2_ENABLED
 
-registerMooseObject("BlackBearApp", CauchyStressFromNEML2UO);
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2UO);
 
 InputParameters
 CauchyStressFromNEML2UO::validParams()
@@ -42,23 +40,16 @@ CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
   : NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>(
         params, "mechanical_strain", "temperature")
 {
+  NEML2Utils::checkLibraryAvailability(*this);
 #ifdef NEML2_ENABLED
   validateModel();
 #endif // NEML2_ENABLED
 }
 
-#ifdef NEML2_ENABLED
-
-void
-CauchyStressFromNEML2UO::timestepSetup()
-{
-  if (_t_step > 0)
-    advanceStep();
-}
-
 void
 CauchyStressFromNEML2UO::batchCompute()
 {
+#ifdef NEML2_ENABLED
   try
   {
     // Allocate the input and output
@@ -77,7 +68,7 @@ CauchyStressFromNEML2UO::batchCompute()
 
       solve();
 
-      // Fill the NEML2 output back into the Blackbear output data
+      // Fill the NEML2 output back into the MOOSE output data
       for (const neml2::TorchSize i : index_range(_output_data))
       {
         std::get<0>(_output_data[i]) =
@@ -100,6 +91,15 @@ CauchyStressFromNEML2UO::batchCompute()
                    "\nIt is possible that this error is related to NEML2.",
                    NEML2Utils::NEML2_help_message);
   }
+#endif // NEML2_ENABLED
+}
+
+#ifdef NEML2_ENABLED
+void
+CauchyStressFromNEML2UO::timestepSetup()
+{
+  if (_t_step > 0)
+    advanceStep();
 }
 
 void

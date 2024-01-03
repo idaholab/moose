@@ -19,6 +19,9 @@ public:
   TensorMechanicsApp(const InputParameters & parameters);
   virtual ~TensorMechanicsApp();
 
+  virtual void setupOptions() override;
+  virtual void runInputFile() override;
+
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
   static void registerObjects(Factory & factory);

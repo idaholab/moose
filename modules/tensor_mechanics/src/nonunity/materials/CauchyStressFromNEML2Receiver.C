@@ -16,7 +16,7 @@
 
 #include "NEML2Utils.h"
 
-registerMooseObject("BlackBearApp", CauchyStressFromNEML2Receiver);
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2Receiver);
 
 InputParameters
 CauchyStressFromNEML2Receiver::validParams()
@@ -35,7 +35,7 @@ CauchyStressFromNEML2Receiver::CauchyStressFromNEML2Receiver(const InputParamete
     _neml2_uo(getUserObject<CauchyStressFromNEML2UO>("neml2_uo")),
     _output(_neml2_uo.getOutputData())
 {
-  NEML2Utils::requireNEML2(*this);
+  NEML2Utils::checkLibraryAvailability(*this);
 }
 
 void

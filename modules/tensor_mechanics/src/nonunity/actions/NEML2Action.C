@@ -18,16 +18,14 @@
 #include "NEML2Utils.h"
 
 #ifdef NEML2_ENABLED
-
 #include "neml2/misc/utils.h"
 #include "neml2/misc/parser_utils.h"
 #include "neml2/base/HITParser.h"
-
 #endif
 
-registerMooseAction("BlackBearApp", NEML2Action, "parse_neml2");
-registerMooseAction("BlackBearApp", NEML2Action, "add_material");
-registerMooseAction("BlackBearApp", NEML2Action, "add_user_object");
+registerMooseAction("TensorMechanicsApp", NEML2Action, "parse_neml2");
+registerMooseAction("TensorMechanicsApp", NEML2Action, "add_material");
+registerMooseAction("TensorMechanicsApp", NEML2Action, "add_user_object");
 
 InputParameters
 NEML2Action::validParams()
@@ -65,16 +63,17 @@ NEML2Action::validParams()
 }
 
 NEML2Action::NEML2Action(const InputParameters & params)
-  : Action(params)
-#ifdef NEML2_ENABLED
-    ,
+  : Action(params),
     _fname(getParam<FileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
-    _mode(getParam<MooseEnum>("mode")),
+    _mode(getParam<MooseEnum>("mode"))
+#ifdef NEML2_ENABLED
+    ,
     _device(getParam<std::string>("device"))
 #endif
 {
+  NEML2Utils::checkLibraryAvailability(*this);
 }
 
 void

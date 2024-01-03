@@ -32,7 +32,6 @@ public:
 
   virtual void act() override;
 
-#ifdef NEML2_ENABLED
 protected:
   /// Name of the NEML2 input file
   FileName _fname;
@@ -47,6 +46,7 @@ protected:
   const MooseEnum _mode;
 
   /// The device on which to evaluate the NEML2 model
+#ifdef NEML2_ENABLED
   const torch::Device _device;
 #endif
 };

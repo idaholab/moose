@@ -17,7 +17,7 @@
 #include "NonlinearSystem.h"
 #include "libmesh/nonlinear_solver.h"
 
-registerMooseObject("BlackBearApp", CauchyStressFromNEML2);
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2);
 
 InputParameters
 CauchyStressFromNEML2::validParams()
@@ -29,8 +29,6 @@ CauchyStressFromNEML2::validParams()
   return params;
 }
 
-#ifdef NEML2_ENABLED
-
 CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
   : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters),
     // Inputs to the constitutive model
@@ -38,6 +36,9 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
     _temperature(nullptr),
     _temperature_old(nullptr)
 {
+  NEML2Utils::checkLibraryAvailability(*this);
+
+#ifdef NEML2_ENABLED
   validateModel();
 
   // Get the old mechanical strain if the NEML2 model need it
@@ -64,8 +65,10 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
       _state_vars_old[var.on("old_state")] =
           &getMaterialPropertyOld<std::vector<Real>>(Moose::stringify(var));
     }
+#endif
 }
 
+#ifdef NEML2_ENABLED
 void
 CauchyStressFromNEML2::initialSetup()
 {
@@ -202,13 +205,6 @@ CauchyStressFromNEML2::solve()
   auto res = model().value_and_dvalue(_in.to(device()));
   _out = std::get<0>(res).to(torch::kCPU);
   _dout_din = std::get<1>(res).to(torch::kCPU);
-}
-
-#else
-
-CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
-  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
-{
 }
 
 #endif

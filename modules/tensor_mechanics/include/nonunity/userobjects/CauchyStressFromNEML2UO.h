@@ -50,11 +50,9 @@ public:
 
   CauchyStressFromNEML2UO(const InputParameters & params);
 
-#ifndef NEML2_ENABLED
-  virtual void batchCompute() override {}
-#else
-  virtual void timestepSetup() override;
   virtual void batchCompute() override;
+#ifdef NEML2_ENABLED
+  virtual void timestepSetup() override;
 
 protected:
   /// Advance state and forces in time

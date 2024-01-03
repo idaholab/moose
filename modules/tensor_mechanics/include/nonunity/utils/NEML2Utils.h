@@ -26,6 +26,7 @@
 #endif
 
 class MooseObject;
+class Action;
 
 #ifdef NEML2_ENABLED
 
@@ -44,7 +45,8 @@ namespace NEML2Utils
 /**
  * Helper for producing a useful error when NEML2 is not available
  */
-void requireNEML2(const MooseObject & object);
+void checkLibraryAvailability(MooseObject & self);
+void checkLibraryAvailability(Action & self);
 
 #ifdef NEML2_ENABLED
 

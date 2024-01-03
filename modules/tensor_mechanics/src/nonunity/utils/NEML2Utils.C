@@ -54,10 +54,6 @@ operator<<(std::ostream & os, const Model & model)
 
 namespace NEML2Utils
 {
-void
-requireNEML2(const MooseObject &)
-{
-}
 
 template <>
 neml2::BatchTensor
@@ -126,17 +122,46 @@ toMOOSE(const neml2::BatchTensor & t)
 
 } // namespace NEML2Utils
 
-#else
+#endif
 
 #include "MooseObject.h"
+#include "Action.h"
 
 namespace NEML2Utils
 {
-void
-requireNEML2(const MooseObject & object)
-{
-  object.mooseError("This object requires Blackbear to be compiled with NEML2 support");
-}
-} // namespace NEML2Utils
 
+static const std::string message1 =
+    "To use this object, you need to have the `NEML2` library installed. Refer to the "
+    "documentation for guidance on how to enable it.";
+static const std::string message2 =
+    " To build this library MOOSE must be configured with LIBTORCH support.";
+
+void
+checkLibraryAvailability(MooseObject & self)
+{
+#ifndef NEML2_ENABLED
+#ifdef LIBTORCH_ENABLED
+  self.paramError("type", message1);
+#else
+  self.paramError("type", message1 + message2);
 #endif
+#else
+  libmesh_ignore(self);
+#endif
+}
+
+void
+checkLibraryAvailability(Action & self)
+{
+#ifndef NEML2_ENABLED
+#ifdef LIBTORCH_ENABLED
+  mooseError(self.parameters().blockLocation() + ": " + message1);
+#else
+  mooseError(self.parameters().blockLocation() + ": " + message1 + message2);
+#endif
+#else
+  libmesh_ignore(self);
+#endif
+}
+
+} // namespace NEML2Utils

@@ -99,11 +99,10 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
     _device(params.get<std::string>("device"))
 #endif
 {
+  NEML2Utils::checkLibraryAvailability(*this);
 #ifdef NEML2_ENABLED
   // Send the model to the compute device
   _model.to(_device);
-#else
-  NEML2Utils::requireNEML2(*this);
 #endif
 }
 

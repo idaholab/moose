@@ -56,6 +56,7 @@ protected:
 
   /// Perform the material update
   virtual void solve();
+#endif
 
   // @{ Variables and properties computed by MOOSE
   /// The old mechanical strain
@@ -68,6 +69,7 @@ protected:
   const VariableValue * _temperature_old;
   // @}
 
+#ifdef NEML2_ENABLED
   /// The input vector of the material model
   neml2::LabeledVector _in;
 
