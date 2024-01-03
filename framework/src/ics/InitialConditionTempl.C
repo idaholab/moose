@@ -156,7 +156,7 @@ InitialConditionTempl<T>::compute()
       continue;
     }
 
-    if (_cont == DISCONTINUOUS)
+    if (_cont == DISCONTINUOUS || _cont == H_CURL || _cont == H_DIV)
       libmesh_assert(_nc == 0);
     else if (_cont == C_ZERO)
       setCZeroVertices();
