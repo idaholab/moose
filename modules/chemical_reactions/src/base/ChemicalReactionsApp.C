@@ -29,6 +29,10 @@ registerKnownLabel("ChemicalReactionsApp");
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
+#ifdef THERMOCHIMICA_ENABLED
+  registerCapability("thermochimica");
+#endif
+
   ChemicalReactionsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
