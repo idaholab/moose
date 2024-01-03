@@ -402,6 +402,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
+  // Thermochimica::resetThermoAll();
+
 #endif
 }
 
@@ -463,6 +465,11 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_user_object")
   {
+    std::string uo_name = _uo_name;
+
+    if (isParamSetByUser("block") && !isParamSetByUser("uo_name"))
+      uo_name = _uo_name + "_" + Moose::stringify(getParam<std::vector<SubdomainName>>("block"));
+
     const auto uo_type = _is_fv ? "ThermochimicaElementData" : "ThermochimicaNodalData";
 
     auto uo_params = _factory.getValidParams(uo_type);
@@ -504,7 +511,7 @@ ChemicalCompositionAction::act()
 
     uo_params.applyParameters(parameters());
 
-    _problem->addUserObject(uo_type, _uo_name, uo_params);
+    _problem->addUserObject(uo_type, uo_name, uo_params);
   }
 
 #endif

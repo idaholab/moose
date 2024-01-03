@@ -17,12 +17,22 @@
 []
 
 [ChemicalComposition]
-  thermofile = Kaye_NobleMetals.dat
-  tunit = K
-  punit = atm
-  munit = moles
-  temperature = 2250
-  output_species_unit = mole_fraction
+  [Master]
+    [all]
+      thermofile = Kaye_NobleMetals.dat
+      tunit = K
+      punit = atm
+      munit = moles
+    []
+  []
+  [thermo]
+    thermofile = Kaye_NobleMetals.dat
+    tunit = K
+    punit = atm
+    munit = moles
+    temperature = 2250
+    output_species_unit = mole_fraction
+  []
 []
 
 [ICs]
