@@ -10,18 +10,9 @@
 #pragma once
 
 #include "KernelBase.h"
+#include "HybridizedInterface.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
-
-#include <Eigen/Dense>
-
-#ifdef LIBMESH_USE_COMPLEX_NUMBERS
-typedef Eigen::MatrixXcd EigenMatrix;
-typedef Eigen::VectorXcd EigenVector;
-#else
-typedef Eigen::MatrixXd EigenMatrix;
-typedef Eigen::VectorXd EigenVector;
-#endif
 
 template <typename>
 class MooseObjectWarehouse;
@@ -30,7 +21,7 @@ class HybridizedIntegratedBC;
 /**
  * A kernel for mixed dual finite element formulations
  */
-class HybridizedKernel : public KernelBase
+class HybridizedKernel : public KernelBase, public HybridizedInterface
 {
 public:
   static InputParameters validParams();
@@ -65,6 +56,11 @@ protected:
    */
   virtual void onInternalSide() = 0;
 
+  /**
+   * Whether we are currently computing global data
+   */
+  bool computingGlobalData() const { return _computing_global_data; }
+
   /// The auxiliary system
   SystemBase & _aux_sys;
 
@@ -92,16 +88,9 @@ protected:
   /// face normals
   const MooseArray<Point> & _normals;
 
-  /// Lagrange multiplier matrix and RHS after eliminating vector and scalar dofs
-  DenseMatrix<Number> _K_libmesh;
-  DenseVector<Number> _F_libmesh;
-
-  /// Matrix data structures for on-diagonal coupling
-  EigenMatrix _MixedMat, _MixedMatInv, _LMMat;
-  /// Vector data structures
-  EigenVector _MixedVec, _LMVec;
-  /// Matrix data structures for off-diagonal coupling
-  EigenMatrix _MixedLM, _LMMixed;
+  // These data members should be set in the derived class
+  std::vector<dof_id_type> _mixed_dof_indices;
+  std::vector<dof_id_type> _lm_dof_indices;
 
   /// The current neighbor
   const Elem * _neigh;
@@ -115,7 +104,7 @@ private:
   /*
    * Add-in data from the hybridized integrated bc
    */
-  void addBCData(HybridizedIntegratedBC & hibc);
+  void addBCData(const HybridizedIntegratedBC & hibc);
 
 #ifndef NDEBUG
   /// The current side index
@@ -127,6 +116,18 @@ private:
 
   /// The warehouse holding the hybridized integrated boundary conditions
   MooseObjectWarehouse<HybridizedIntegratedBC> & _hibc_warehouse;
+
+  /// Lagrange multiplier matrix and RHS after eliminating vector and scalar dofs
+  DenseMatrix<Number> _K_libmesh;
+  DenseVector<Number> _F_libmesh;
+
+  /// Mixed matrix inverse
+  EigenMatrix _MixedMatInv;
+
+  // local degree of freedom increment values
+  std::vector<Number> _lm_increment_dof_values;
+  std::vector<Number> _mixed_increment_dof_values;
+  EigenVector _LMIncrement, _MixedIncrement;
 };
 
 inline void

@@ -56,9 +56,14 @@ HybridizedKernel::HybridizedKernel(const InputParameters & parameters)
 }
 
 void
-HybridizedKernel::addBCData(HybridizedIntegratedBC & /*hibc*/)
+HybridizedKernel::addBCData(const HybridizedIntegratedBC & hibc)
 {
-  mooseError("not implemented");
+  _MixedMat += hibc._MixedMat;
+  _LMMat += hibc._LMMat;
+  _MixedLM += hibc._MixedLM;
+  _LMMixed += hibc._LMMixed;
+  _MixedVec += hibc._MixedVec;
+  _LMVec += hibc._LMVec;
 }
 
 void
@@ -113,5 +118,51 @@ HybridizedKernel::assemble()
       libmesh_assert(_current_side == side);
       onInternalSide();
     }
+  }
+
+  _MixedMatInv = _MixedMat.inverse();
+  libmesh_assert(_lm_size == _lm_dof_indices.size());
+  if (_computing_global_data)
+  {
+    _K_libmesh.resize(_lm_size, _lm_size);
+    _F_libmesh.resize(_lm_size);
+    const auto LMProductMat = -_LMMixed * _MixedMatInv;
+    _LMMat += LMProductMat * _MixedLM;
+    _LMVec += LMProductMat * _MixedVec;
+    libmesh_assert(cast_int<std::size_t>(_LMMat.rows()) == _lm_size);
+    libmesh_assert(cast_int<std::size_t>(_LMMat.cols()) == _lm_size);
+    libmesh_assert(cast_int<std::size_t>(_LMVec.size()) == _lm_size);
+
+    for (const auto i : make_range(_lm_size))
+    {
+      for (const auto j : make_range(_lm_size))
+        _K_libmesh(i, j) = _LMMat(i, j);
+      _F_libmesh(i) = _LMVec(i);
+    }
+
+    // We were performing our finite element assembly for the implicit solve step of our
+    // example. Add our local element vectors/matrices into the global system
+    addResiduals(_assembly, _F_libmesh, _lm_dof_indices, /*scaling_factor=*/1);
+    addJacobian(_assembly, _K_libmesh, _lm_dof_indices, _lm_dof_indices, /*scaling_factor=*/1);
+  }
+  else
+  {
+    //
+    // We are doing our finite element assembly for the second time. We now know the Lagrange
+    // multiplier solution. With that and the local element matrices and vectors we can compute
+    // the vector and scalar solutions
+    //
+    _lm_increment->get(_lm_dof_indices, _lm_increment_dof_values);
+    _LMIncrement.resize(_lm_size);
+    for (const auto i : index_range(_lm_dof_indices))
+      _LMIncrement(i) = _lm_increment_dof_values[i];
+
+    _MixedIncrement = _MixedMatInv * (-_MixedVec - _MixedLM * _LMIncrement);
+    libmesh_assert(_mixed_dof_indices.size() == _mixed_size);
+    _mixed_increment_dof_values.resize(_mixed_size);
+    for (const auto i : index_range(_mixed_increment_dof_values))
+      _mixed_increment_dof_values[i] = _MixedIncrement(i);
+
+    _aux_sys.solution().add_vector(_mixed_increment_dof_values, _mixed_dof_indices);
   }
 }

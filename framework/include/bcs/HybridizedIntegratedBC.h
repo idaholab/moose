@@ -10,21 +10,12 @@
 #pragma once
 
 #include "IntegratedBCBase.h"
-
-#include <Eigen/Dense>
-
-#ifdef LIBMESH_USE_COMPLEX_NUMBERS
-typedef Eigen::MatrixXcd EigenMatrix;
-typedef Eigen::VectorXcd EigenVector;
-#else
-typedef Eigen::MatrixXd EigenMatrix;
-typedef Eigen::VectorXd EigenVector;
-#endif
+#include "HybridizedInterface.h"
 
 /**
  * A kernel for mixed dual finite element formulations
  */
-class HybridizedIntegratedBC : public IntegratedBCBase
+class HybridizedIntegratedBC : public IntegratedBCBase, public HybridizedInterface
 {
 public:
   static InputParameters validParams();
@@ -38,33 +29,31 @@ public:
   virtual void computeResidualAndJacobian() override final;
 
 protected:
-  void createIdentityResidual(const QBase & quadrature,
-                              const std::vector<Real> & JxW_local,
-                              const std::vector<std::vector<Real>> & phi,
-                              const std::vector<Number> & sol,
+  void createIdentityResidual(const MooseArray<std::vector<Real>> & phi,
+                              const MooseArray<Number> & sol,
                               const std::size_t n_dofs,
                               const unsigned int i_offset);
 
-  void createIdentityJacobian(const QBase & quadrature,
-                              const std::vector<Real> & JxW_local,
-                              const std::vector<std::vector<Real>> & phi,
+  void createIdentityJacobian(const MooseArray<std::vector<Real>> & phi,
                               const std::size_t n_dofs,
                               const unsigned int ij_offset);
 
-  /// Matrix data structures for on-diagonal coupling
-  EigenMatrix _MixedMat, _MixedMatInv, _LMMat;
-  /// Vector data structures
-  EigenVector _MixedVec, _LMVec;
-  /// Matrix data structures for off-diagonal coupling
-  EigenMatrix _MixedLM, _LMMixed;
+  /// normals at quadrature points
+  const MooseArray<Point> & _normals;
+
+  /// The auxiliary system
+  SystemBase & _aux_sys;
+
+  /// The current neighbor
+  const Elem * _neigh = nullptr;
 
 private:
+  friend class HybridizedKernel;
+
   /**
    * Local finite element assembly
    */
   virtual void assemble() = 0;
-
-  friend class HybridizedKernel;
 };
 
 inline void
@@ -98,27 +87,23 @@ HybridizedIntegratedBC::computeResidualAndJacobian()
 }
 
 inline void
-HybridizedIntegratedBC::createIdentityResidual(const QBase & quadrature,
-                                               const std::vector<Real> & JxW_local,
-                                               const std::vector<std::vector<Real>> & phi,
-                                               const std::vector<Number> & sol,
+HybridizedIntegratedBC::createIdentityResidual(const MooseArray<std::vector<Real>> & phi,
+                                               const MooseArray<Number> & sol,
                                                const std::size_t n_dofs,
                                                const unsigned int i_offset)
 {
-  for (const auto qp : make_range(quadrature.n_points()))
+  for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : make_range(n_dofs))
-      _LMVec(i_offset + i) -= JxW_local[qp] * phi[i][qp] * sol[qp];
+      _LMVec(i_offset + i) -= _JxW[qp] * phi[i][qp] * sol[qp];
 }
 
 inline void
-HybridizedIntegratedBC::createIdentityJacobian(const QBase & quadrature,
-                                               const std::vector<Real> & JxW_local,
-                                               const std::vector<std::vector<Real>> & phi,
+HybridizedIntegratedBC::createIdentityJacobian(const MooseArray<std::vector<Real>> & phi,
                                                const std::size_t n_dofs,
                                                const unsigned int ij_offset)
 {
-  for (const auto qp : make_range(quadrature.n_points()))
+  for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : make_range(n_dofs))
       for (const auto j : make_range(n_dofs))
-        _LMMat(ij_offset + i, ij_offset + j) -= JxW_local[qp] * phi[i][qp] * phi[j][qp];
+        _LMMat(ij_offset + i, ij_offset + j) -= _JxW[qp] * phi[i][qp] * phi[j][qp];
 }

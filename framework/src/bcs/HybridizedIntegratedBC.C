@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HybridizedIntegratedBC.h"
+#include "AuxiliarySystem.h"
 
 InputParameters
 HybridizedIntegratedBC::validParams()
@@ -19,6 +20,8 @@ HybridizedIntegratedBC::validParams()
 }
 
 HybridizedIntegratedBC::HybridizedIntegratedBC(const InputParameters & parameters)
-  : IntegratedBCBase(parameters)
+  : IntegratedBCBase(parameters),
+    _normals(_assembly.normals()),
+    _aux_sys(_fe_problem.getAuxiliarySystem())
 {
 }
