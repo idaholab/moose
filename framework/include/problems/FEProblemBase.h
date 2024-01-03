@@ -685,6 +685,9 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
+  virtual void addHybridizedIntegratedBC(const std::string & kernel_name,
+                                         const std::string & name,
+                                         InputParameters & parameters);
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
@@ -2172,10 +2175,11 @@ private:
   /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
 
-  void setKernelParamsAndLog(const std::string & kernel_name,
-                             const std::string & name,
-                             InputParameters & params,
-                             unsigned int nl_sys_num);
+  void setResidualObjectParamsAndLog(const std::string & ro_name,
+                                     const std::string & name,
+                                     InputParameters & params,
+                                     unsigned int nl_sys_num,
+                                     const std::string & base_name);
 
 protected:
   bool _initialized;

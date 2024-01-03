@@ -17,6 +17,7 @@
 #include "NonlinearSystem.h"
 #include "NonlinearThread.h"
 #include "AuxiliarySystem.h"
+#include "HybridizedIntegratedBC.h"
 
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
@@ -28,6 +29,7 @@ HybridizedKernel::validParams()
   params.registerBase("HybridizedKernel");
   params.suppressParameter<std::vector<AuxVariableName>>("save_in");
   params.suppressParameter<std::vector<AuxVariableName>>("diag_save_in");
+  params.addPrivateParam<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse");
   return params;
 }
 
@@ -47,8 +49,16 @@ HybridizedKernel::HybridizedKernel(const InputParameters & parameters)
 #ifndef NDEBUG
     _current_side(_assembly.side()),
 #endif
-    _computing_global_data(true)
+    _computing_global_data(true),
+    _hibc_warehouse(
+        *getCheckedPointerParam<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse"))
 {
+}
+
+void
+HybridizedKernel::addBCData(HybridizedIntegratedBC & /*hibc*/)
+{
+  mooseError("not implemented");
 }
 
 void
@@ -63,26 +73,38 @@ HybridizedKernel::assemble()
 
     const auto & boundary_ids = _mesh.getBoundaryIDs(_current_elem, side);
     for (const auto bnd_id : boundary_ids)
-    {
-      _fe_problem.setCurrentBoundaryID(bnd_id, _tid);
-      if (fe_face_reinitd)
-        // Only need to compute boundary materials; face materials have already been computed on the
-        // current face
-        _fe_problem.reinitMaterialsBoundary(_current_bnd_id, _tid);
-      else
+      if (_hibc_warehouse.hasActiveBoundaryObjects(bnd_id, _tid))
       {
-        // Do the whole shebang:
-        // - reinit FE objects on the face
-        // - compute variable values on the face
-        // - compute material values, including values from face and boundary materials
-        NonlinearThread::prepareFace(_fe_problem, _tid, _current_elem, side, _current_bnd_id);
-        fe_face_reinitd = true;
-      }
-      libmesh_assert(_current_side == side);
-      onBoundary();
-    }
+        _fe_problem.setCurrentBoundaryID(bnd_id, _tid);
 
-    if (_neigh = _current_elem->neighbor_ptr(side); _neigh)
+        if (!fe_face_reinitd)
+        {
+          // Do the whole shebang:
+          // - reinit FE objects on the face
+          // - compute variable values on the face
+          // - compute material values, including values from face and boundary materials
+          NonlinearThread::prepareFace(_fe_problem, _tid, _current_elem, side, _current_bnd_id);
+          fe_face_reinitd = true;
+        }
+        else
+          // Only need to compute boundary materials; face materials have already been computed on
+          // the current face
+          _fe_problem.reinitMaterialsBoundary(_current_bnd_id, _tid);
+
+        libmesh_assert(_current_side == side);
+        const auto & bcs = _hibc_warehouse.getActiveBoundaryObjects(bnd_id, _tid);
+        for (const auto & bc : bcs)
+        {
+          mooseAssert(bc->shouldApply(),
+                      "I don't think anyone uses the shouldApply feature for integrated boundary "
+                      "conditions");
+          bc->assemble();
+          addBCData(*bc);
+        }
+      }
+
+    if (_neigh = _current_elem->neighbor_ptr(side);
+        _neigh && this->hasBlocks(_neigh->subdomain_id()))
     {
       if (!fe_face_reinitd)
         NonlinearThread::prepareFace(
