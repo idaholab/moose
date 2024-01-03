@@ -32,6 +32,8 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
 
+#include "nlohmann/json.h"
+
 // C++ includes
 #include <list>
 #include <map>
@@ -39,6 +41,7 @@
 #include <unordered_set>
 #include <typeindex>
 #include <filesystem>
+#include <variant>
 
 // Forward declarations
 class Executioner;
@@ -342,6 +345,15 @@ public:
    **/
   Parser & parser();
 
+  /// A capability can have a bool, int, or string value
+  typedef std::variant<bool, int, std::string> CapabilityType;
+
+  /// register a new capability
+  void registerCapability(const std::string & capability, const CapabilityType & value = true);
+
+  /// create a JSON dump of the capabilities registry
+  std::string dumpCapabilities() const;
+
 private:
   /**
    * Internal function used to recursively create the executor objects.
@@ -354,6 +366,13 @@ private:
   void recursivelyCreateExecutors(const std::string & current_executor_name,
                                   std::list<std::string> & possible_roots,
                                   std::list<std::string> & current_branch);
+
+  /**
+   * Capability registry. The capabilities registered here can be dumped using the
+   * --show-capabilities command line option. Capabilities are used by the test harness
+   * to conditionally enable/disable tests that rely on optional capabilities.
+   */
+  std::map<std::string, CapabilityType> _capability_registry;
 
 public:
   /**
