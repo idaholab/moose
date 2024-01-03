@@ -109,8 +109,7 @@ If the parameter [!param](/Samplers/ParallelSubsetSimulation/use_absolute_value)
  value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) will be maximized. 
 As such, a least-squares fit optimization can be achieved by passing the negative of the sum-squared error
 into the value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) with
- `[!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) = true`. Without 
-`[!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) = true`
+ [!param](/Samplers/ParallelSubsetSimulation/use_absolute_value) set to `True`. Otherwise
 the value of [!param](/Samplers/ParallelSubsetSimulation/output_reporter) will be maximized after its absolute value is taken.
 
 ## Example Input Syntax
