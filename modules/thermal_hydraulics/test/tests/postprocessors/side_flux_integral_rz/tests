@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#19861'
+  design = 'ADSideFluxIntegralRZ.md'
   [test]
     type = 'CSVDiff'
     input = 'side_flux_integral_rz.i'
     csvdiff = 'side_flux_integral_rz_out.csv'
     recover = false
+    requirement = "The system shall be able to compute a diffusive flux on a boundary, using cylindrical coordinates in a Cartesian frame of reference."
   []
 []

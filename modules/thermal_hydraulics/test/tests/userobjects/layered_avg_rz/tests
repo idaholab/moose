@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#26336'
+  design = 'LayeredAverageRZ.md'
   [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
+    requirement = "The system shall be able to compute layered averages along a boundary, using cylindrical coordinates in a Cartesian frame of reference."
   []
 []

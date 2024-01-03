@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19706'
+  design = 'PostprocessorSourceScalarKernel.md'
   [postprocessor_source]
     type = 'CSVDiff'
     input = 'postprocessor_source.i'
     csvdiff = 'postprocessor_source_out.csv'
+    requirement = 'The system shall be able to add source term in an ordinary differential equation, computed from a postprocessor.'
   []
 []

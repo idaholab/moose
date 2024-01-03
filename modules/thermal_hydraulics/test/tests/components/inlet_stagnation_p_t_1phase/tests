@@ -1,15 +1,20 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'InletStagnationPressureTemperature1Phase.md'
   # physics
   [phy:stagnation_p_T_steady_3eqn]
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_steady_3eqn.i'
     exodiff = 'phy.stagnation_p_T_steady_3eqn_out.e'
+    requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in steady state from the stagnation pressure and temperature.'
   []
 
   [phy:stagnation_p_T_transient_3eqn]
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_transient_3eqn.i'
     exodiff = 'phy.stagnation_p_T_transient_3eqn_out.e'
+    requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in a transient from the stagnation pressure and temperature.'
   []
 
   [phy:p0T0_3eqn]
@@ -19,17 +24,22 @@
     max_time = 500
     max_parallel = 11 # https://github.com/idaholab/moose/issues/24537
     group = 'inlet_p0_T0 outlet pipe 1phase'
+    requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in a longer transient from the stagnation pressure and temperature.'
   []
 
   [clg:ctrl_p0_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_p0_3eqn.i'
     csvdiff = 'clg.ctrl_p0_3eqn_out.csv'
+    issues = '#19720'
+    requirement = 'The system shall be able to control the stagnation pressure in a 1D single phase flow inlet specified using the stagnation pressure and temperature.'
   []
 
   [clg:ctrl_T0_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_T0_3eqn.i'
     csvdiff = 'clg.ctrl_T0_3eqn_out.csv'
+    issues = '#19720'
+    requirement = 'The system shall be able to control the stagnation temperature in a 1D single phase flow inlet specified using the stagnation pressure and temperature.'
   []
 []

@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'CopyPostprocessorValueControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to use postprocessor values to dynamically control input parameters in a simulation.'
   []
 []

@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#19757'
+  design = 'AddIterationCountPostprocessorsAction.md'
   [count_iterations]
     type = 'CSVDiff'
     input = 'count_iterations.i'
     csvdiff = 'count_iterations_out.csv'
+    requirement = 'The system shall be able to automatically count the number of solve iterations as a debugging feature.'
   []
 []

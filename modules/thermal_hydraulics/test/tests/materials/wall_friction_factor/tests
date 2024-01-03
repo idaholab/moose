@@ -1,14 +1,19 @@
 [Tests]
+  # idaholab/sockeye#123
+  issues = '#26411'
+  design = 'WallFrictionChurchillMaterial.md'
   [churchill]
     type = 'CSVDiff'
     input = 'churchill.i'
     csvdiff = 'churchill_out.csv'
     recover = false
+    requirement = 'The system shall be able to compute the wall friction factor using the Churchill correlation.'
   []
   [churchill_ad]
     type = 'CSVDiff'
     input = 'churchill_ad.i'
     csvdiff = 'churchill_ad_out.csv'
     recover = false
+    requirement = 'The system shall be able to compute the wall friction factor using the Churchill correlation with automatic differentiation.'
   []
 []

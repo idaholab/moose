@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#19809'
+  design = 'ADFlowJunctionFlux1Phase.md'
   [test]
     type = 'CSVDiff'
     input = 'flow_junction_flux_1phase.i'
     csvdiff = 'flow_junction_flux_1phase_out.csv'
     recover = false
     abs_zero = 2e-8
+    requirement = 'The system shall be able to compute a component of the flux vector at a junction in 1D single phase compressible flow simulations.'
   []
 []

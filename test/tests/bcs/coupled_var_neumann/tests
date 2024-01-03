@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#13502'
+  issues = '#13502 #26413'
   design = 'bcs/CoupledVarNeumannBC.md'
   [./test]
     type = 'Exodiff'
@@ -30,6 +30,19 @@
       input = 'coupled_var_neumann_nl.i'
       difference_tol = 1e-6
       detail = 'generate a perfect Jacobian'
+    []
+    [ADexo]
+      type = Exodiff
+      input = 'ad_coupled_var_neumann_nl.i'
+      exodiff = 'coupled_var_neumann_nl_out.e'
+      detail = 'generate accurate results using automatic differentiation'
+    []
+    [ADjac]
+      type = PetscJacobianTester
+      run_sim = True
+      input = 'ad_coupled_var_neumann_nl.i'
+      difference_tol = 1e-6
+      detail = 'generate a perfect Jacobian using automatic differentiation'
     []
   []
 []

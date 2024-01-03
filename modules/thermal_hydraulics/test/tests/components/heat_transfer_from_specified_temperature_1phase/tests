@@ -1,9 +1,13 @@
 [Tests]
+  # relap7 #636
+  issues = '#26336'
+  design = 'HeatTransferFromSpecifiedTemperature1Phase.md'
   [phy.energy_walltemperature_ss_1phase]
     type = 'CSVDiff'
     input = 'phy.energy_walltemperature_ss_1phase.i'
     csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
     abs_zero = 1e-9
+    requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature.'
   []
 
   # controls
@@ -11,17 +15,20 @@
     type = 'CSVDiff'
     input = 'clg.Hw.i'
     csvdiff = 'clg.Hw_out.csv'
+    requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature, and dynamically controlling the wall heat transfer coefficient.'
   []
 
   [clg:T_wall]
     type = 'CSVDiff'
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
+    requirement = 'The system shall be able to solve for heat transfer with a specified wall temperature, and dynamically controlling the wall temperature.'
   []
 
   [err:no_phf]
     type = RunException
     input = 'err.no_phf.i'
     expect_err = "hx\: Invalid side \'START\'\. This side does not have unit perimeter\. You probably want to use \'INNER\' or \'OUTER\' side instead\."
+    requirement = 'The system shall report an error if an invalid side is specified for setting a heat structure on a flow channel component.'
   []
 []

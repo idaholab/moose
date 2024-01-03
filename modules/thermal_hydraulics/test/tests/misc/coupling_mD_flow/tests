@@ -1,8 +1,12 @@
 [Tests]
+  # refs thm #74
+  issues = '#26336'
+  design = 'non_overlapping_coupling.md'
   [coupling_mD_nonoverlapping]
     type = Exodiff
     input = 'parent_non_overlapping.i'
     exodiff = 'parent_non_overlapping_out.e'
     recover = false
+    requirement = 'The system shall be able to couple two 1D single phase compressible flow simulations using non overlapping coupling set up using multiple applications.'
   []
 []

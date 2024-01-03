@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'modules/thermal_hydraulics/index.md'
   [sedov_blast_wave]
     type = 'Exodiff'
     input = 'sedov_blast_wave.i'
@@ -8,5 +11,6 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe solid_wall free_boundary'
+    requirement = 'The system shall be able to solve the Sedov blast wave problem using a 1D single phase compressible flow formulation.'
   []
 []

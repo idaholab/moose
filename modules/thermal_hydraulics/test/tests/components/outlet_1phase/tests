@@ -1,18 +1,23 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336 #19722'
+  design = 'Outlet1Phase.md'
   [phy:solidwall_outlet_3eqn]
     type = 'Exodiff'
     input = 'phy.solidwall_outlet_3eqn.i'
     exodiff = 'phy.solidwall_outlet_3eqn.e'
     custom_cmp = 'phy.solidwall_outlet_3eqn.exodiff'
     group = 'solid_wall outlet pipe 1phase'
-    # see #530 why
+    # see relap7#530 why
     max_threads = 1
+    requirement = 'The system shall be able to model an outlet connected to a sealed pipe with 1D single phase compressible flow.'
   []
 
   [clg:ctrl_p_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_p_3eqn.i'
     csvdiff = 'clg.ctrl_p_3eqn_out.csv'
+    requirement = 'The system shall be able to control the pressure at a pressure outlet dynamically during a 1D single phase flow simulation.'
   []
 
   [jacobian]
@@ -22,5 +27,6 @@
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
+    requirement = 'The system shall be able to compute numerically accurate Jacobians for 1D single phase flow with a pressure outlet.'
   []
 []

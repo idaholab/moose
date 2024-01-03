@@ -1,4 +1,7 @@
 [Tests]
+  # idaholab/relap-7#259
+  issues = '#19775 #26336'
+  design = 'JunctionOneToOne1Phase.md'
   [phy:no_junction_equivalency_1phase_normal]
     type = 'CSVDiff'
     input = 'junction_one_to_one_1phase.i'
@@ -8,6 +11,7 @@
       Postprocessors/rhouA_right/boundary=right_channel:in
       Postprocessors/rhouA_right/execute_on='initial timestep_end'"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
+    requirement = "The system shall be able to connect flow in two flow channel components using a junction."
   []
 
   [phy:no_junction_equivalency_1phase_flipped]
@@ -30,12 +34,14 @@
       Postprocessors/rhoEA_right/boundary=right_channel:out"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
     prereq = 'phy:no_junction_equivalency_1phase_normal'
+    requirement = "The system shall be able to connect flow in two flow channel components using a junction, even if one is flipped in the opposite direction of the other."
   []
 
   [phy:unequal_area_1phase]
     type = 'Exodiff'
     input = 'constriction_1phase.i'
     exodiff = 'constriction_1phase_out.e'
+    requirement = "The system shall be able to connect flow in two flow channel components of different flow areas using a junction."
   []
 
   [phy:no_junction_1phase_check]
@@ -43,5 +49,6 @@
     input = 'no_junction_1phase.i'
     check_input = true
     recover = false
+    requirement = "The system shall be able to solve for flow in two connected pipes and in a single pipe of equivalent length and produce the same results."
   []
 []

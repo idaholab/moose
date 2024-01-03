@@ -1,5 +1,4 @@
 [Mesh]
-  file = mesh_pointer.e
 []
 
 [Variables]

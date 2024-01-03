@@ -1,12 +1,13 @@
 [Tests]
-  # Tests the function valus of PiecewiseFunction
+  issues = '#19765'
+  design = 'PiecewiseFunction.md'
   [function_values]
     type = 'CSVDiff'
     input = 'piecewise_function.i'
     csvdiff = 'piecewise_function_out.csv'
+    requirement = 'The system shall be able to piece together several functions  in a given axis, directly from the input file.'
   []
 
-  # Tests that PiecewiseFunction throws an error when an inconsistent number of points is given
   [error_inconsistent_number_of_points]
     type = 'RunException'
     input = 'piecewise_function.i'
@@ -14,14 +15,15 @@
     expect_err =
       "The number of entries in the parameter 'axis_coordinates' must"
       " equal the number of entries in the parameter 'functions' minus one"
+    requirement = "The system shall report an error if the the user passes an inconsistent number of functions to piece together and number of points of connections between the functions."
   []
 
-  # Tests that PiecewiseFunction throws an error when an points are not given in ascending order
   [error_points_nonascending_order]
     type = 'RunException'
     input = 'piecewise_function.i'
     cli_args = "Functions/function_piecewise/axis_coordinates='5 3'"
     expect_err = "The entries in the parameter 'axis_coordinates' must be in ascending order"
+    requirement = "The system shall report an error if the the user passes points of connections between functions to piece together that are not in increasing order."
   []
 
   # Tests that PiecewiseFunction throws an error when it references itself
@@ -30,5 +32,6 @@
     input = 'piecewise_function.i'
     cli_args = "Functions/function_piecewise/functions='function_left function_piecewise function_end'"
     expect_err = "This function cannot use its own name in the 'functions' parameter"
+    requirement = "The system shall report an error if the user references a function to piece functions together in the list of function pieced together, hence creating an infinite recursion."
   []
 []

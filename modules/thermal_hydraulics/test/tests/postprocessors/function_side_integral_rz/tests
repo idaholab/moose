@@ -4,6 +4,10 @@
     input = 'function_side_integral_rz.i'
     csvdiff = 'function_side_integral_rz.csv'
     recover = false
+    # sockeye#53
+    issues = '#26411'
+    design = 'FunctionSideIntegralRZ.md'
+    requirement = 'The system shall be able to integrate the values of a function on a side, assuming cylindrical coordinates in a Cartesian frame of reference.'
   []
 
   [err:rz_domain]
@@ -12,7 +16,8 @@
     expect_err = 'el_int: This is a THM-specific object can be applied only on subdomains with '
       'Cartesian coordinate system\. If your domain has RZ cooridnate system associated with it, '
       'you need to use the object without the RZ suffix to obtain the desired result\.'
-    issues = '#215'
+    # THM/relap7 #215
+    issues = '#26336'
     design = 'RZSymmetry.md'
     requirement = 'The system should error out when users set boundary-restricted RZ-symmtrical THM-specific objects on RZ-subdomains.'
   []

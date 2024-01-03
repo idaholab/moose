@@ -1,4 +1,7 @@
 [Tests]
+  # relap-7#636
+  issues = '#26336'
+  design = 'modules/thermal_hydraulics/index.md'
   # minmod limiter
   [square_wave_minmod]
     type = 'Exodiff'
@@ -9,6 +12,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a minmod flux limiter.'
   []
 
   # no limiter
@@ -21,6 +25,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with no flux limiter.'
   []
 
   # MC limiter
@@ -33,6 +38,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a MC flux limiter.'
   []
 
   # superbee limiter
@@ -45,5 +51,6 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a Superbee flux limiter.'
   []
 []

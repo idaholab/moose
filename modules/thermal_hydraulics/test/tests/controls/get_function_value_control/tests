@@ -1,7 +1,11 @@
 [Tests]
+  # relap-7#639
+  issues = '#26336'
+  design = 'GetFunctionValueControl.md'
   [test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = 'The system shall be able to use the value of a function to define a control data, to be used in control logic.'
   []
 []
