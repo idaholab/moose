@@ -23,6 +23,10 @@ typedef Eigen::MatrixXd EigenMatrix;
 typedef Eigen::VectorXd EigenVector;
 #endif
 
+template <typename>
+class MooseObjectWarehouse;
+class HybridizedIntegratedBC;
+
 /**
  * A kernel for mixed dual finite element formulations
  */
@@ -57,27 +61,9 @@ protected:
   virtual void onElement() = 0;
 
   /**
-   * Perform finite element assembly on external boundaries
-   */
-  virtual void onBoundary() = 0;
-
-  /**
    * Perform finite element assembly on internal sides
    */
   virtual void onInternalSide() = 0;
-
-  void createIdentityResidual(const QBase & quadrature,
-                              const std::vector<Real> & JxW_local,
-                              const std::vector<std::vector<Real>> & phi,
-                              const std::vector<Number> & sol,
-                              const std::size_t n_dofs,
-                              const unsigned int i_offset);
-
-  void createIdentityJacobian(const QBase & quadrature,
-                              const std::vector<Real> & JxW_local,
-                              const std::vector<std::vector<Real>> & phi,
-                              const std::size_t n_dofs,
-                              const unsigned int ij_offset);
 
   /// The auxiliary system
   SystemBase & _aux_sys;
@@ -126,6 +112,11 @@ private:
    */
   void assemble();
 
+  /*
+   * Add-in data from the hybridized integrated bc
+   */
+  void addBCData(HybridizedIntegratedBC & hibc);
+
 #ifndef NDEBUG
   /// The current side index
   const unsigned int & _current_side;
@@ -133,6 +124,9 @@ private:
 
   /// Whether we are assembling the Lagrange multiplier residual and Jacobian
   bool _computing_global_data;
+
+  /// The warehouse holding the hybridized integrated boundary conditions
+  MooseObjectWarehouse<HybridizedIntegratedBC> & _hibc_warehouse;
 };
 
 inline void
@@ -178,30 +172,4 @@ HybridizedKernel::initialSetup()
 {
   KernelBase::initialSetup();
   _lm_increment = &_sys.getVector(lm_increment_vector_name);
-}
-
-inline void
-HybridizedKernel::createIdentityResidual(const QBase & quadrature,
-                                         const std::vector<Real> & JxW_local,
-                                         const std::vector<std::vector<Real>> & phi,
-                                         const std::vector<Number> & sol,
-                                         const std::size_t n_dofs,
-                                         const unsigned int i_offset)
-{
-  for (const auto qp : make_range(quadrature.n_points()))
-    for (const auto i : make_range(n_dofs))
-      _LMVec(i_offset + i) -= JxW_local[qp] * phi[i][qp] * sol[qp];
-}
-
-inline void
-HybridizedKernel::createIdentityJacobian(const QBase & quadrature,
-                                         const std::vector<Real> & JxW_local,
-                                         const std::vector<std::vector<Real>> & phi,
-                                         const std::size_t n_dofs,
-                                         const unsigned int ij_offset)
-{
-  for (const auto qp : make_range(quadrature.n_points()))
-    for (const auto i : make_range(n_dofs))
-      for (const auto j : make_range(n_dofs))
-        _LMMat(ij_offset + i, ij_offset + j) -= JxW_local[qp] * phi[i][qp] * phi[j][qp];
 }

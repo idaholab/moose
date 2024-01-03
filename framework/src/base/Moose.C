@@ -444,6 +444,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
   registerSyntaxTask("AddHybridizedKernelAction", "HybridizedKernels/*", "add_kernel");
+  registerSyntaxTask("AddHybridizedBCAction", "HybridizedBCs/*", "add_bc");
 
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 

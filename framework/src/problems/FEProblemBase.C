@@ -2539,10 +2539,11 @@ FEProblemBase::determineSolverSystem(const std::string & var_name,
 }
 
 void
-FEProblemBase::setKernelParamsAndLog(const std::string & kernel_name,
-                                     const std::string & name,
-                                     InputParameters & parameters,
-                                     const unsigned int nl_sys_num)
+FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
+                                             const std::string & name,
+                                             InputParameters & parameters,
+                                             const unsigned int nl_sys_num,
+                                             const std::string & base_name)
 {
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2566,7 +2567,7 @@ FEProblemBase::setKernelParamsAndLog(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("Kernel", name, kernel_name);
+  logAdd(base_name, name, ro_name);
 }
 
 void
@@ -2579,7 +2580,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   if (!isSolverSystemNonlinear(nl_sys_num))
     mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
                "supported at the moment!");
-  setKernelParamsAndLog(kernel_name, name, parameters, nl_sys_num);
+  setResidualObjectParamsAndLog(kernel_name, name, parameters, nl_sys_num, "Kernel");
 
   _nl[nl_sys_num]->addKernel(kernel_name, name, parameters);
 }
@@ -2592,7 +2593,7 @@ FEProblemBase::addHybridizedKernel(const std::string & kernel_name,
   parallel_object_only();
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
-  setKernelParamsAndLog(kernel_name, name, parameters, nl_sys_num);
+  setResidualObjectParamsAndLog(kernel_name, name, parameters, nl_sys_num, "HybridizedKernel");
 
   _nl[nl_sys_num]->addHybridizedKernel(kernel_name, name, parameters);
 }
@@ -2679,31 +2680,21 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     mooseError(
         "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
         "supported at the moment!");
-
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
-    _reinit_displaced_face = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow Materials to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this Material.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  }
-
-  logAdd("BoundaryCondition", name, bc_name);
+  setResidualObjectParamsAndLog(bc_name, name, parameters, nl_sys_num, "BoundaryCondition");
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
+}
+
+void
+FEProblemBase::addHybridizedIntegratedBC(const std::string & bc_name,
+                                         const std::string & name,
+                                         InputParameters & parameters)
+{
+  parallel_object_only();
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName("variable", name), true).second;
+  setResidualObjectParamsAndLog(bc_name, name, parameters, nl_sys_num, "BoundaryCondition");
+
+  _nl[nl_sys_num]->addHybridizedIntegratedBC(bc_name, name, parameters);
 }
 
 void

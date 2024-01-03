@@ -43,6 +43,7 @@ class NodalKernelBase;
 class Split;
 class KernelBase;
 class HybridizedKernel;
+class HybridizedIntegratedBC;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
@@ -144,6 +145,16 @@ public:
   virtual void addHybridizedKernel(const std::string & kernel_name,
                                    const std::string & name,
                                    InputParameters & parameters);
+
+  /**
+   * Adds a hybridized bc
+   * @param bc_name The type of the hybridized bc
+   * @param name The name of the hybridized bc
+   * @param parameters Hybridized bc parameters
+   */
+  virtual void addHybridizedIntegratedBC(const std::string & bc_name,
+                                         const std::string & name,
+                                         InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -857,6 +868,7 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  MooseObjectWarehouse<HybridizedIntegratedBC> _hybridized_ibcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
