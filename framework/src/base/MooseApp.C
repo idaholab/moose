@@ -171,6 +171,8 @@ MooseApp::validParams()
       "syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>(
       "show_docs", "--docs", "Print url/path to the documentation website");
+  params.addCommandLineParam<bool>(
+      "show_capabilities", "--show-capabilities", "Dumps the capability registry in JSON format.");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    "Check the input file (i.e. requires -i <filename>) and quit");
@@ -680,6 +682,130 @@ MooseApp::MooseApp(InputParameters parameters)
                     name(),
                     " to remove this deprecation warning.");
 
+  // register capabilities
+  if (_trap_fpe)
+    registerCapability("trap_fpe");
+#ifdef LIBTORCH_ENABLED
+  registerCapability("libtorch");
+#endif
+#ifdef HAVE_GPERFTOOLS
+  registerCapability("gperftools");
+#endif
+#ifdef MOOSE_HAVE_LIBPNG
+  registerCapability("libpng");
+#endif
+#ifdef CUDA_SUPPORTED
+  registerCapability("cuda");
+#endif
+  registerCapability("ad_size", MOOSE_AD_MAX_DOFS_PER_ELEM);
+  registerCapability("method", QUOTE(METHOD));
+#ifdef WASP_ENABLED
+  registerCapability("wasp");
+#endif
+
+  // PETSc capabilities
+  registerCapability(
+      "petsc",
+      QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
+          LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR));
+#ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
+  registerCapability("petsc_release");
+#endif
+#ifdef LIBMESH_PETSC_USE_DEBUG
+  registerCapability("petsc_debug");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_SUPERLU_DIST
+  registerCapability("superlu");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_MUMPS
+  registerCapability("mumps");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_STRUMPACK
+  registerCapability("strumpack");
+#endif
+#if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
+  registerCapability("parmetis");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_CHACO
+  registerCapability("chaco");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_PARTY
+  registerCapability("party");
+#endif
+#ifdef LIBMESH_PETSC_HAVE_PTSCOTCH
+  registerCapability("ptscotch");
+#endif
+
+#ifdef LIBMESH_HAVE_SLEPC
+  registerCapability(
+      "slepc",
+      QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
+          LIBMESH_DETECTED_SLEPC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR));
+#endif
+#ifdef LIBMESH_HAVE_EXODUS_API
+  registerCapability("exodus",
+                     QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
+                         LIBMESH_DETECTED_EXODUS_VERSION_MINOR));
+#endif
+#ifdef LIBMESH_HAVE_VTK
+  registerCapability(
+      "vtk",
+      QUOTE(LIBMESH_DETECTED_VTK_VERSION_MAJOR) "." QUOTE(
+          LIBMESH_DETECTED_VTK_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_VTK_VERSION_SUBMINOR));
+#endif
+#ifdef LIBMESH_HAVE_CURL
+  registerCapability("curl");
+#endif
+
+// libmesh stuff
+#ifdef LIBMESH_ENABLE_AMR
+  registerCapability("amr");
+#endif
+#ifdef LIBMESH_HAVE_NANOFLANN
+  registerCapability("nanoflann");
+#endif
+#ifdef LIBMESH_HAVE_FPARSER
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  registerCapability("fparser", "jit");
+#else
+  registerCapability("fparser", "byte_code");
+#endif
+#endif
+#ifdef LIBMESH_HAVE_DLOPEN
+  registerCapability("dlopen");
+#endif
+
+#ifdef LIBMESH_USING_THREADS
+  registerCapability("threads");
+#endif
+#ifdef LIBMESH_HAVE_OPENMP
+  registerCapability("openmp");
+#endif
+#ifdef LIBMESH_HAVE_TBB_API
+  registerCapability("tbb");
+#endif
+
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+  registerCapability("unique_id");
+#endif
+
+// compiler
+#if defined(__clang__)
+  registerCapability("compiler", "clang");
+#elif defined(__GNUC__) || defined(__GNUG__)
+  registerCapability("compiler", "gcc");
+#elif defined(_MSC_VER)
+  registerCapability("compiler", "msvc");
+#endif
+
+// OS related
+#ifdef __APPLE__
+  registerCapability("apple");
+#endif
+#ifdef __WIN32__
+  registerCapability("win32");
+#endif
+
   Moose::out << std::flush;
 }
 
@@ -985,7 +1111,15 @@ MooseApp::setupOptions()
     _early_exit_param = "--show-type";
     _ready_to_exit = true;
   }
-  else if (getInputFileNames().size())
+  else if (getParam<bool>("show_capabilities"))
+  {
+    _perf_graph.disableLivePrint();
+    Moose::perf_log.disable_logging();
+
+    Moose::out << "**START JSON DATA**\n" << dumpCapabilities() << "\n**END JSON DATA**\n";
+    _ready_to_exit = true;
+  }
+  else if (!getInputFileNames().empty())
   {
     if (isParamSetByUser("recover"))
     {
@@ -1423,6 +1557,32 @@ MooseApp::parser()
 {
   mooseAssert(_parser, "Not set");
   return *_parser;
+}
+
+void
+MooseApp::registerCapability(const std::string & capability, const CapabilityType & value)
+{
+  auto it_pair = _capability_registry.lower_bound(capability);
+  if (it_pair == _capability_registry.end() || it_pair->first != capability)
+    it_pair = _capability_registry.emplace_hint(it_pair, capability, value);
+  else
+    mooseWarning("Capability '", capability, "' was already registered.");
+}
+
+std::string
+MooseApp::dumpCapabilities() const
+{
+  nlohmann::json root;
+  for (const auto & [capability, value] : _capability_registry)
+    if (std::holds_alternative<bool>(value))
+      root[capability] = std::get<bool>(value);
+    else if (std::holds_alternative<int>(value))
+      root[capability] = std::get<int>(value);
+    else if (std::holds_alternative<std::string>(value))
+      root[capability] = std::get<std::string>(value);
+    else
+      mooseError("Unknown type in capabilities registry");
+  return root.dump(2);
 }
 
 void
