@@ -347,7 +347,7 @@ $(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
 	        HEADER_FILE="$(moose_revision_header)" \
 					APPLICATION_NAME="MOOSE" \
-					INSTALLABLE_DIRS="$(INSTALLABLE_DIRS)" \
+					INSTALLABLE_DIRS= \
 	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
   # make sure the header generation step didn't fail
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \

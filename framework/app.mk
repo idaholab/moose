@@ -335,13 +335,16 @@ ifeq (x$(app_HEADER_deps),x)
 endif
 
 # Target-specific Variable Values (See GNU-make manual)
-$(app_HEADER): all_header_dir := $(all_header_dir)
+$(app_HEADER): curr_dir              := $(APPLICATION_DIR)
+$(app_HEADER): curr_app              := $(APPLICATION_NAME)
+$(app_HEADER): curr_installable_dirs := $(INSTALLABLE_DIRS)
+$(app_HEADER): all_header_dir        := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
-	$(shell REPO_LOCATION="$(APPLICATION_DIR)" \
+	$(shell REPO_LOCATION="$(curr_dir)" \
 	        HEADER_FILE="$@" \
-					APPLICATION_NAME="$(APPLICATION_NAME)" \
-					INSTALLABLE_DIRS="$(INSTALLABLE_DIRS)" \
+					APPLICATION_NAME="$(curr_app)" \
+					INSTALLABLE_DIRS="$(curr_installable_dirs)" \
 	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
 	@ln -sf $@ $(all_header_dir)
 
