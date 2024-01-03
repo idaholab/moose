@@ -105,6 +105,14 @@ chains, the `AdaptiveMonteCarloDecision` class
 is used for decision-making. Please refer to [AdaptiveMonteCarloDecision](AdaptiveMonteCarloDecision.md)
 for more details.
 
+If the parameter `use_absolute_value = true`, the absolute value of `output_reporter` will be maximized. 
+As such, a least-squares fit optimization can be achieved by passing the negative of the sum-squared error
+into the value of `output_reporter` with `use_absolute_value = true`. Without `use_absolute_value = true`
+the value of `output_reporter` will be maximized after its absolute value is taken.
+
+As the PSS algorithm is iterative, an `Executioner` block with type `Transient` is required for proper 
+operation.
+
 ## Example Input Syntax
 
 The input file for using the PSS algorithm is somewhat similar to the other sampler
