@@ -124,18 +124,21 @@ if [[ "$kind" == "app" ]]; then
     cp $MOOSE_DIR/.clang-format $dir/
     cp $MOOSE_DIR/.gitignore $dir/
 
+    # add application-specific generated resource file to end of gitignore file
+    echo "$dstnamelow.yaml" >> $dir/.gitignore
+
     dir="$PWD/$dir"
     (cd $dir && git init && git add * .clang-format .gitignore && git commit -m "Initial files" && git branch -m main)
 
     echo "MOOSE app created in '$dir'"
     echo ""
-    echo "To store your changes on github:"
-    echo "    1. log in to your account"
-    echo "    2. Create a new repository named $dstnamelow"
-    echo "    3. in this terminal run the following commands:"
+    echo "To store your changes on GitHub:"
+    echo "    1. Log in to your GitHub account"
+    echo "    2. Create a new repository named '$dstnamelow'"
+    echo "    3. In this terminal window, run the following commands:"
     echo "         cd $dir"
     echo "         git remote add origin https://github.com/YourGitHubUserName/$dstnamelow"
-    echo '         git commit -m "initial commit"'
+    echo '         git commit -m "Initial code commit"'
     echo "         git push -u origin main"
     echo ""
     echo "To automatically enforce MOOSE C++ code style in your commits, run:"
@@ -143,6 +146,20 @@ if [[ "$kind" == "app" ]]; then
     echo "    cd $dir"
     echo "    ./scripts/install-format-hook.sh"
     echo ""
+    echo "To enable software quality assurance (SQA) documentation using MooseDocs, perform the"
+    echo "following steps after adding your git repository remote:"
+    echo ""
+    echo "    1. Navigate to $dir/doc"
+    echo "    2. Run './moosedocs.py init sqa --app '$dstnamespace' --category $dstnamelow'"
+    echo "    3. Commit the initial SQA changes using the following commands:"
+    echo "         git add $dir/doc"
+    echo '         git commit -m "Initial SQA changes"'
+    echo "         git push origin main"
+    echo "    4. Add new SQA content to the forms in $dir/doc/content/sqa"
+    echo ""
+    echo "For general assistance in MOOSE-based application SQA, please contact the MOOSE"
+    echo "framework development team. For further info on the MooseDocs code documentation"
+    echo "system, please visit https://mooseframework.inl.gov."
 fi
 
 if [[ "$kind" == "module" ]]; then

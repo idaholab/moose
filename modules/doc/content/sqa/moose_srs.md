@@ -1,4 +1,4 @@
-!template load file=sqa/app_srs.md.template app=MOOSE category=_empty_
+!template load file=sqa/app_srs.md.template app=MOOSE category=moose
 
 !template item key=system-purpose
 !include system_purpose.md

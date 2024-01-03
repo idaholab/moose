@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=stochastic_tools module=Stochastic Tools stp_filename=stochastic_tools_stp.md
+!template load file=sqa/module_rtm.md.template category=stochastic_tools module=Stochastic Tools
 
 !template item key=system-purpose
 !include stochastic_tools_srs.md start=system-purpose-begin end=system-purpose-finish

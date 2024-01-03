@@ -1,4 +1,4 @@
-!template load file=sqa/app_sdd.md.template app=MOOSE category=_empty_
+!template load file=sqa/app_sdd.md.template app=MOOSE category=moose
 
 !template item key=introduction
 !include framework_sdd.md start=introduction-begin end=introduction-finish

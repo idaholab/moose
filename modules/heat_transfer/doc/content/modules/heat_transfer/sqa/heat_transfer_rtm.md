@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template category=heat_transfer module=Heat Transfer stp_filename=heat_transfer_stp.md
+!template load file=sqa/module_rtm.md.template category=heat_transfer module=Heat Transfer
 
 !template! item key=system-purpose
 !include heat_transfer_srs.md start=system-purpose-begin end=system-purpose-finish

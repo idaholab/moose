@@ -1,4 +1,4 @@
-!template load file=sqa/app_rtm.md.template app=MOOSE category=_empty_ stp_filename=moose_stp.md
+!template load file=sqa/app_rtm.md.template app=MOOSE category=moose
 
 !template item key=system-purpose
 !include system_purpose.md

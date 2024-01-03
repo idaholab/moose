@@ -33,7 +33,7 @@ git submodule foreach 'git clean -xfd'
 ```
 
 All tests must pass in accordance with the type of test being performed. This list
-can be found in the [Software Test Plan](sqa/{{stp_filename}}).
+can be found in the [Software Test Plan](sqa/{{category}}_stp.md).
 !template-end!
 
 !template! item key=functional-requirements
