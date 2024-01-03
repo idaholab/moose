@@ -3905,9 +3905,6 @@ NonlinearSystemBase::assembleScalingVector()
     for (const auto dof : dof_indices)
       scaling_vector.set(dof, scalar_var->scalingFactor());
   }
-  for (const auto & i :
-       make_range(scaling_vector.first_local_index(), scaling_vector.last_local_index()))
-    std::cout << "scaling factors " << i << ": " << scaling_vector(i) << std::endl;
 
   // Parallel assemble
   scaling_vector.close();
