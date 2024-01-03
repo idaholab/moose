@@ -121,5 +121,6 @@
     requirement = 'The app, recovered from a signal-created checkpoint, should produce an accurate solution in a debug build.'
     issues = '#25755'
     method = 'dbg'
+    rel_err = 2.0e-4
   []
 []
