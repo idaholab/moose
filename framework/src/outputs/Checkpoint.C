@@ -47,6 +47,11 @@ Checkpoint::validParams()
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
 
+  // Since it makes the most sense to write checkpoints at the end of time steps,
+  // change the default value of execute_on to TIMESTEP_END
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum = {EXEC_TIMESTEP_END};
+
   return params;
 }
 
@@ -56,6 +61,42 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
+  // Prevent the checkpoint from executing at any time other than INITIAL,
+  // TIMESTEP_END, and FINAL
+  const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+
+  // Create a vector containing all valid values of execute_on
+  std::vector<ExecFlagEnum> valid_execute_on_values(7);
+  {
+    ExecFlagEnum valid_execute_on_value = execute_on;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_values[0] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_values[1] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[2] = valid_execute_on_value;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_TIMESTEP_END;
+    valid_execute_on_values[3] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[4] = valid_execute_on_value;
+    valid_execute_on_value.clear();
+    valid_execute_on_value += EXEC_FINAL;
+    valid_execute_on_values[5] = valid_execute_on_value;
+    valid_execute_on_value += EXEC_INITIAL;
+    valid_execute_on_values[6] = valid_execute_on_value;
+  }
+
+  // Check if the value of execute_on is valid
+  auto it = std::find(valid_execute_on_values.begin(), valid_execute_on_values.end(), execute_on);
+  const bool is_valid_value = (it != valid_execute_on_values.end());
+  if (!is_valid_value)
+    paramError("execute_on",
+               "The checkpoint system may only be used with execute_on values ",
+               "INITIAL, TIMESTEP_END, and FINAL, not '",
+               execute_on,
+               "'.");
 }
 
 std::string
@@ -105,14 +146,21 @@ Checkpoint::outputStep(const ExecFlagType & type)
 bool
 Checkpoint::shouldOutput()
 {
+  const bool parent_should_output = FileOutput::shouldOutput();
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
   bool should_output =
-      (onInterval() || _current_execute_flag == EXEC_FINAL) ? FileOutput::shouldOutput() : false;
+      (onInterval() || _current_execute_flag == EXEC_FINAL) ? parent_should_output : false;
 
-  // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
-  // as the autosave and that checkpoint isn't on its interval, then output.
-  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output))
+  // If this is either a auto-created checkpoint, or if its an existing
+  // checkpoint acting as the autosave and that checkpoint isn't on its
+  // interval, then output.
+  // parent_should_output ensures that we output only when _execute_on contains
+  // _current_execute_flag (see Output::shouldOutput), ensuring that we wait
+  // until the end of the timestep to write, preventing the output of an
+  // unconverged solution.
+  if (parent_should_output &&
+      (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output)))
   {
     // If this is a pure system-created autosave through AutoCheckpointAction,
     // then sync across processes and only output one time per signal received.

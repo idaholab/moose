@@ -1,5 +1,5 @@
 [Tests]
-  [./quiet_nan_scalar]
+  [quiet_nan_scalar]
     type = 'RunException'
     input = 'nan_interface.i'
     cli_args = 'FluidProperties/fp/emit_on_nan=warning'
@@ -11,8 +11,8 @@
     expect_err = "fp: A NaN was produced."
     design = '/NaNInterface.md'
     issues = '#12234 #12350'
-  [../]
-  [./quiet_nan_vector]
+  []
+  [quiet_nan_vector]
     type = 'RunException'
     input = 'nan_interface.i'
     cli_args = 'FluidProperties/fp/emit_on_nan=warning Kernels/test_kernel/test_vector_version=true'
@@ -24,8 +24,8 @@
     expect_err = "fp: A NaN was produced."
     design = '/NaNInterface.md'
     issues = '#12234 #12350'
-  [../]
-  [./signaling_nan_dbg]
+  []
+  [signaling_nan_dbg]
     type = 'RunException'
     input = 'nan_interface.i'
     allow_test_objects = True
@@ -36,8 +36,8 @@
     expect_err = "fp: A NaN was produced."
     design = '/NaNInterface.md'
     issues = '#12234 #12350'
-  [../]
-  [./signaling_nan_opt]
+  []
+  [signaling_nan_opt]
     type = 'RunApp'
     input = 'nan_interface.i'
     allow_test_objects = True
@@ -47,5 +47,11 @@
     requirement = 'The system should not report an error when a NaN is produced by a computation in OPT mode, by default'
     design = '/NaNInterface.md'
     issues = '#12234 #12350'
-  [../]
+
+    # Make sure this test does not run in --recover mode because the default
+    # value of execute_on for checkpoint is TIMESTEP_END. This test will fail
+    # with a nan before it solves a timestep and writes a checkpoint, causing
+    # the test to fail in --recover mode.
+    recover = False
+  []
 []
