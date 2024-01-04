@@ -35,7 +35,7 @@ nu=1.1
     family = SIDE_HIERARCHIC
   []
   [p]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
   []
   [lm]
     family = SCALAR
@@ -44,16 +44,16 @@ nu=1.1
 
 [AuxVariables]
   [vel_x]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
   []
   [vel_y]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
   []
   [grad_vel_x]
-    family = L2_HIERARCHIC_VEC
+    family = L2_LAGRANGE_VEC
   []
   [grad_vel_y]
-    family = L2_HIERARCHIC_VEC
+    family = L2_LAGRANGE_VEC
   []
 []
 
