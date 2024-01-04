@@ -89,6 +89,8 @@ class Tester(MooseObject):
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
+        params.addParam('capabilities',      [], "A test that only runs if all listed capabilities are supported by the executable")
+
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed are set")
         params.addParam('env_vars_not_set', [], "A test that only runs if all the environment variables listed are not set")
@@ -525,6 +527,7 @@ class Tester(MooseObject):
         """
         reasons = {}
         checks = options._checks
+        capabilities = options._capabilities
 
         tag_match = False
         for t in self.tags:
@@ -647,6 +650,11 @@ class Tester(MooseObject):
         (libtorch_status, libtorch_version) = util.checkLibtorchVersion(checks, self.specs)
         if not libtorch_status:
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
+
+        # Check for supported capabilities
+        (capabilities_present, reason) = util.checkCapabilities(capabilities, self.specs)
+        if not capabilities_present:
+            reasons['missing_capabilities'] = reason
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
