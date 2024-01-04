@@ -344,6 +344,9 @@ class TestHarness:
         # executable is available after initalize
         checks['installation_type'] = util.checkInstalled(self.executable, app_name)
 
+        # get the capabilities of the executable
+        self.options._capabilities = util.getCapabilities(self.executable)
+
         os.chdir(self._orig_cwd)
 
     """
@@ -372,7 +375,7 @@ class TestHarness:
         try:
             testroot_params = {}
             for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
-                # Prune submdule paths when searching for tests
+                # Prune submodule paths when searching for tests
 
                 dir_name = os.path.basename(dirpath)
                 if (search_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
@@ -454,7 +457,7 @@ class TestHarness:
             print('\nExiting due to keyboard interrupt...')
 
     # Create and return list of tester objects. A tester is created by providing
-    # abspath to basename (dirpath), and the test file in queustion (file)
+    # abspath to basename (dirpath), and the test file in question (file)
     def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
