@@ -2,10 +2,31 @@
   design = 'VectorConstantIC.md'
   issues = '#13309'
   [vector_function_ic]
-    type = 'Exodiff'
-    input = 'vector_function_ic.i'
-    exodiff = 'vector_function_ic_out.e'
-    requirement = 'The system shall allow vector-valued initial conditions be set using a vector function.'
+    requirement = 'The system shall allow vector-valued initial conditions be set '
+                  'using a vector function for the following element families: '
+    [lagrange]
+      type = 'Exodiff'
+      input = 'vector_function_ic.i'
+      exodiff = 'vector_function_ic_lagrange.e'
+      cli_args = 'Outputs/file_base=vector_function_ic_lagrange'
+      detail = 'vector Lagrange, '
+    []
+    [nedelec]
+      type = 'Exodiff'
+      input = 'vector_function_ic.i'
+      exodiff = 'vector_function_ic_nedelec.e'
+      cli_args = 'Mesh/elem_type=HEX20 Variables/A/family=NEDELEC_ONE '
+                 'Outputs/file_base=vector_function_ic_nedelec'
+      detail = 'Nedelec, '
+    []
+    [raviart]
+      type = 'Exodiff'
+      input = 'vector_function_ic.i'
+      exodiff = 'vector_function_ic_raviart.e'
+      cli_args = 'Mesh/elem_type=HEX27 Variables/A/family=RAVIART_THOMAS '
+                 'Outputs/file_base=vector_function_ic_raviart'
+      detail = 'and Raviart-Thomas.'
+    []
   []
   [vector_function_ic_comp]
     type = 'Exodiff'
