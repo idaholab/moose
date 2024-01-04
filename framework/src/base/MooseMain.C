@@ -49,7 +49,16 @@ createMooseApp(const std::string & default_app_name, int argc, char * argv[])
   if (input_filenames.size())
     parser->parse();
 
-  // Create an instance of the application and store it in a smart pointer for easy cleanup
-  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(parser));
+  // Check whether the application name given in [Applications] block is registered or not
+  auto app_type = parser->getAppType();
+
+  std::cout << "main_app: " << app_type << std::endl;
+
+  if (!app_type.empty())
+    if (!AppFactory::instance().isRegistered(app_type))
+      mooseError("'", app_type, "' is not a registered application name.\n");
+}
+// Create an instance of the application and store it in a smart pointer for easy cleanup
+return AppFactory::createAppShared(default_app_name, argc, argv, std::move(parser));
 }
 }

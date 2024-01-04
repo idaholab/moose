@@ -92,6 +92,18 @@ private:
   const CompileParamWalker::ParamMap & _map;
 };
 
+class FindAppWalker : public hit::Walker
+{
+public:
+  void walk(const std::string & /*fullpath*/,
+            const std::string & /*nodepath*/,
+            hit::Node * section) override;
+  std::string getApp() { return _app_type; };
+
+private:
+  std::string _app_type;
+};
+
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
@@ -138,6 +150,11 @@ public:
    */
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
+  /*
+   * Get extracted app type from parser
+   */
+  std::string & getAppType() { return _app_type; }
+
   /**
    * @return The file name of the last input
    */
@@ -147,6 +164,9 @@ public:
    * @return The path of the last input
    */
   std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
+
+  /// The app types extracted from [Applications] block
+  std::string _app_type;
 
 private:
   /// The root node, which owns the whole tree

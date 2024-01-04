@@ -265,6 +265,15 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
   }
 }
 
+void
+FindAppWalker ::walk(const std::string & /*fullpath*/,
+                     const std::string & /*nodepath*/,
+                     hit::Node * n)
+{
+  if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
+    _app_type = n->param<std::string>();
+}
+
 const std::string &
 Parser::getLastInputFileName() const
 {
@@ -348,6 +357,10 @@ Parser::parse()
   // of surprising and disconnected from what caused them.
   BadActiveWalker bw;
   _root->walk(&bw, hit::NodeType::Section);
+
+  FindAppWalker fw;
+  _root->walk(&fw, hit::NodeType::Field);
+  _app_type = fw.getApp();
 
   for (auto & msg : bw.errors)
     errmsg += msg + "\n";

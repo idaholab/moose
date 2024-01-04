@@ -1107,8 +1107,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
   const auto & input_file = _input_files[input_index];
 
-  // create new parser tree for the application and parse
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::make_shared<Parser>(input_file);
+  // create new parser tree for the application
+  auto front_parser = std::make_unique<Parser>();
+  std::vector<std::string> multiapp_input{input_file};
+
+  if (!multiapp_input.empty())
+  {
+    front_parser->parse(multiapp_input);
+    std::cout << "parsed_name: " << front_parser->getAppType() << std::endl;
+  }
+
+  app_params.set<std::shared_ptr<Parser>>("_parser") = front_parser;
 
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
