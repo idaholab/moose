@@ -6,7 +6,7 @@
     input = 'incremental_slip.i'
     exodiff = 'incremental_slip_out.e'
     abs_zero = 5e-09
-    superlu = true
+    capabilities = 'superlu'
     requirement = 'The system shall be able to output the incremental slip components to an auxiliary variable.'
   []
 []
