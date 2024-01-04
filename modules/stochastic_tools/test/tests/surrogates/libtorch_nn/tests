@@ -9,7 +9,7 @@
     allow_test_objects = true
     cli_args = "Trainers/train/read_from_file=false"
     csvdiff = 'train_and_evaluate_out_results_0002.csv'
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [train]
     requirement = 'The system shall be able to train a libtorch-based neural network.'
@@ -18,7 +18,7 @@
     check_files = 'train_out_train.rd/data mynet.pt'
     cli_args = "Trainers/train/read_from_file=false"
     allow_test_objects = true
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [evaluate]
     requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network.'
@@ -27,7 +27,7 @@
     allow_test_objects = true
     csvdiff = 'evaluate_out_results_0002.csv'
     prereq = train
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [retrain]
     requirement = 'The system shall be able to retrain a pretrained and saved libtorch-based neural network.'
@@ -37,7 +37,7 @@
     cli_args = "Trainers/train/read_from_file=true"
     csvdiff = 'retrain_out_results_0002.csv'
     prereq = evaluate
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [train-with-rel-tol]
     requirement = 'The system shall be able to train a libtorch-based neural network using a relative tolerance instead of fixed epoch number.'
@@ -46,7 +46,7 @@
     check_files = 'train_out_train.rd/data mynet.pt'
     cli_args = "Trainers/train/read_from_file=false Trainers/train/rel_loss_tol=0.1"
     allow_test_objects = true
-    libtorch = true
+    capabilities = 'libtorch'
     prereq = retrain
   []
   [train-standardized]
@@ -57,7 +57,7 @@
     cli_args = "Trainers/train/read_from_file=false Trainers/train/standardize_input=true "
                "Trainers/train/standardize_output=true Outputs/file_base=standardized"
     allow_test_objects = true
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [evaluate-standardized]
     requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network with standardized input and output parameters.'
@@ -68,6 +68,6 @@
     cli_args = "Surrogates/surr/filename='standardized_train.rd' "
                "Outputs/file_base=evaluate_standardized"
     prereq = train-standardized
-    libtorch = true
+    capabilities = 'libtorch'
   []
 []
