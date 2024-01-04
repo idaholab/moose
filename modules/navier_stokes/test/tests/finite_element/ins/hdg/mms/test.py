@@ -12,7 +12,7 @@ def run_spatial(*args, **kwargs):
 
 class TestLidLagrange(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('lid.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
+        df1 = run_spatial('lid.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -29,7 +29,7 @@ class TestLidHierarchic(unittest.TestCase):
                           "AuxVariables/vel_y/family=L2_HIERARCHIC",
                           "AuxVariables/grad_vel_x/family=L2_HIERARCHIC_VEC",
                           "AuxVariables/grad_vel_y/family=L2_HIERARCHIC_VEC",
-                          y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
+                          y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -40,7 +40,7 @@ class TestLidHierarchic(unittest.TestCase):
 
 class TestChannelLagrange(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('channel.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
+        df1 = run_spatial('channel.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -57,7 +57,7 @@ class TestChannelHierarchic(unittest.TestCase):
                           "AuxVariables/vel_y/family=L2_HIERARCHIC",
                           "AuxVariables/grad_vel_x/family=L2_HIERARCHIC_VEC",
                           "AuxVariables/grad_vel_y/family=L2_HIERARCHIC_VEC",
-                          y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
+                          y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
