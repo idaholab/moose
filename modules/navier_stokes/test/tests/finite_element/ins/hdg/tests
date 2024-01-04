@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#26405'
+  design = 'NavierStokesHybridizedKernel.md'
+  [lid]
+    type = Exodiff
+    input = lid.i
+    exodiff = lid_out.e
+    requirement = 'The system shall be able to solve a lid-driven cavity problem using a hybridized discontinuous Galerkin discretization.'
+  []
+  [channel]
+    type = Exodiff
+    input = channel.i
+    exodiff = channel_out.e
+    requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
+  []
+[]
