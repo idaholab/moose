@@ -133,7 +133,9 @@ private:
 inline void
 HybridizedKernel::computeResidual()
 {
-  mooseError("Hybridized kernels only implement computeResidualAndJacobian");
+  // Would be nice to error for this but at the time of writing we still do a usually unnecessary
+  // initial residual evaluation
+  computeResidualAndJacobian();
 }
 
 inline void
