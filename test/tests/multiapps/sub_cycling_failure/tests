@@ -23,10 +23,8 @@
       max_time = 60
       min_parallel = 2
       prereq = 'group/test_failure'
-      superlu = true
+      capabilities = 'superlu !clang'
       allow_warnings = true
-      compiler = 'INTEL GCC' # 6855
-
       detail = "support the failure and the ability to limit the number of processors for the sub-application."
     []
   []

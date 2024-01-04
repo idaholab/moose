@@ -74,7 +74,7 @@
                   Executioner/type=Eigenvalue'
       expect_err = 'is not supported for an eigenvalue solve.'
       allow_test_objects = true
-      slepc = true
+      capabilities = 'slepc'
       detail = 'when the study is set to execute with residual kernels and an eigenvalue executioner,'
     []
     [error_if_tracing]
