@@ -347,23 +347,7 @@ journal = {Earthquake Engineering and Structural Dynamics},
 
 ### Electromagnetics Module
 
-This paper documents the initial development, function, verification, and validation
-of the electromagnetics module.
-
-```
-@article{ICENHOUR2024101621,
-title = {The MOOSE electromagnetics module},
-journal = {SoftwareX},
-volume = {25},
-pages = {101621},
-year = {2024},
-issn = {2352-7110},
-doi = {https://doi.org/10.1016/j.softx.2023.101621},
-url = {https://www.sciencedirect.com/science/article/pii/S2352711023003175},
-author = {Casey T. Icenhour and Alexander D. Lindsay and Cody J. Permann and Richard C. Martineau and David L. Green and Steven C. Shannon},
-keywords = {Electromagnetics, Simulation, Multiphysics, MOOSE}
-}
-```
+!include modules/electromagnetics/index.md start=em-citation-start end=em-citation-end
 
 ### Stochastic Tools Module
 
