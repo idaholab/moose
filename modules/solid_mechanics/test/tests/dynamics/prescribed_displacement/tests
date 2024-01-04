@@ -5,7 +5,6 @@
     exodiff = '3D_QStatic_1_Ramped_Displacement_out.e'
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetDisplacement class shall accurately prescribe the"
                   " displacement at the given boundary."
@@ -18,7 +17,6 @@
     exodiff = '3D_QStatic_1_Ramped_Displacement_out.e'
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetDisplacement class shall accurately prescribe the"
                   " displacement at the given boundary using the velocity and"
@@ -33,7 +31,6 @@
     exodiff = '3D_QStatic_1_Ramped_Displacement_with_gravity_out.e'
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
-    compiler = 'GCC CLANG'
 
     requirement = "The mechanics system shall accurately conduct a static analysis in"
                   " a small number of time steps to equilibrate the system under gravity"
