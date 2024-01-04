@@ -607,6 +607,103 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+def getCapabilities(exe):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    output = runCommand("%s --show-capabilities" % exe)
+    try:
+        output = output.split('**START JSON DATA**\n')[1]
+        output = output.split('**END JSON DATA**\n')[0]
+        results = json.loads(output)
+    except IndexError:
+        print(f'{exe} --show-capabilities, produced an error during execution')
+        sys.exit(1)
+    except json.decoder.JSONDecodeError:
+        print(f'{exe} --show-capabilities, produced invalid JSON output')
+        sys.exit(1)
+    return results
+
+def checkCapabilities(supported, test):
+    """
+    Get capabilities JSON and compare it to the required capabilities
+    """
+    from operator import lt, gt, le, ge, ne, eq
+    ops = {
+        '<': lt,
+        '>': gt,
+        '<=': le,
+        '>=': ge,
+        '!=': ne,
+        '==': eq,
+        '=': eq
+    }
+
+    # compare
+    reasons = []
+    all_supported = True
+    for capability in test['capabilities']:
+        negate = False
+        condition = capability
+
+        # split by operator
+        match = re.search(r'(.[^><=!]*)(=|!=|==|>=|<=|<|>)(.+)', capability)
+        if match is not None:
+            capability, op, value = match.groups()
+        else:
+            op = None
+
+        # check for negation
+        if capability[0] == '!':
+            capability = capability[1:]
+            negate = True
+
+        # simple existence non-false check (boolean)
+        if capability in supported:
+            if isinstance(supported[capability], bool) and supported[capability] == negate:
+                all_supported = False
+                if negate:
+                    reasons.append(capability + ' not supported')
+                else:
+                    reasons.append(capability + ' supported')
+                continue
+        else:
+            if not negate:
+                all_supported = False
+                reasons.append(capability + ' not supported')
+                continue
+
+        # if there is no operator we're done here
+        if not op:
+            continue
+
+        # int comparison
+        if isinstance(supported[capability], int) and not ops[op](supported[capability], int(value)):
+                all_supported = False
+                reasons.append(condition + ' not fulfilled')
+
+        # string comparison
+        if isinstance(supported[capability], str):
+            if value == '':
+                raise Exception("Empty value in condition '%s'." % condition)
+            # check for version number
+            match1 = re.search(r'^(\d+|\d[\d.]*\d)$', supported[capability])
+            match2 = re.search(r'^(\d+|\d[\d.]*\d)$', value)
+            if match1 and match2:
+                # version number comparison logic
+                values1 = [int(i) for i in supported[capability].split('.')]
+                values2 = [int(i) for i in value.split('.')]
+                if not ops[op](values1, values2):
+                    all_supported = False
+                    reasons.append(condition + ' version not matched')
+            else:
+                # simple string comparison
+                if not ops[op](supported[capability], value):
+                    all_supported = False
+                    reasons.append(condition + ' not fulfilled')
+
+    return (all_supported, ', '.join(reasons))
+
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])
