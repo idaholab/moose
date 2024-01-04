@@ -1,0 +1,33 @@
+[Tests]
+  issues = ''
+  design = 'GeneralOptimization.md'
+  [gen_opt_point_loads]
+    requirement = "The system shall be able to invert for point loads using the general optimization reporter with"
+    [no_measurement_transfer]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      absent_out = 'type: ilu'
+      cli_args = 'Outputs/file_base=main_out -ksp_view'
+      csvdiff = 'main_out_OptimizationReporter_0001.csv main_out.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 1e-6
+      # steady solve
+      recover = false
+      detail = 'the measurement data defined on the forward_and_adjoint app; '
+    []
+    [measurement_transfer]
+      type = CSVDiff
+      input = main_auto_adjoint_transfer_data.i
+      absent_out = 'type: ilu'
+      cli_args = 'Outputs/file_base=main_transfer_data_out -ksp_view'
+      csvdiff = 'main_transfer_data_out_OptimizationReporter_0001.csv main_transfer_data_out.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 1e-6
+      # steady solve
+      recover = false
+      detail = 'the measurement data defined main app and transferred to the forward_and_adjoint app;'
+    []
+  []
+[]

@@ -9,6 +9,7 @@
 
 #include "GeneralReporter.h"
 #include "OptimizationData.h"
+#include <complex>
 
 registerMooseObject("OptimizationApp", OptimizationData);
 
@@ -49,7 +50,8 @@ OptimizationDataTempl<T>::validParams()
       "ordering of these weight reporter names corresponds to the ordering used in variable.");
   params.addParam<std::vector<VariableName>>(
       "variable", "Vector of variable names to sample at measurement points.");
-
+  params.addParam<ReporterValueName>("objective_name",
+                                     "Preferred name of reporter value defining the objective.");
   params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
                               "Input Measurement Data");
   params.addParamNamesToGroup("measurement_file file_xcoord file_ycoord file_zcoord file_time "
@@ -74,7 +76,12 @@ OptimizationDataTempl<T>::OptimizationDataTempl(const InputParameters & paramete
     _simulation_values(this->template declareValueByName<std::vector<Real>>(
         "simulation_values", REPORTER_MODE_REPLICATED)),
     _misfit_values(this->template declareValueByName<std::vector<Real>>("misfit_values",
-                                                                        REPORTER_MODE_REPLICATED))
+                                                                        REPORTER_MODE_REPLICATED)),
+    _objective_val(this->isParamSetByUser("objective_name")
+                       ? this->template declareValueByName<Real>(
+                             this->template getParam<ReporterValueName>("objective_name"),
+                             REPORTER_MODE_REPLICATED)
+                       : this->template declareUnusedValue<Real>())
 {
   // read in data
   if (this->isParamValid("measurement_file") && this->isParamValid("measurement_points"))
@@ -129,6 +136,7 @@ void
 OptimizationDataTempl<T>::execute()
 {
   computeMisfit();
+  _objective_val = computeMisfitNorm();
 }
 
 template <typename T>
@@ -313,6 +321,19 @@ OptimizationDataTempl<T>::errorCheckDataSize()
                " does not match number of entries in value data (",
                std::to_string(nvals),
                ").");
+}
+
+template <typename T>
+Real
+OptimizationDataTempl<T>::computeMisfitNorm()
+{
+  Real val = 0.0;
+  for (auto & misfit : _misfit_values)
+    val += misfit * misfit;
+
+  // There is no Tikhonov regularization. OptimizationData does not have access to the parameter
+  // vector.
+  return val * 0.5;
 }
 
 template class OptimizationDataTempl<GeneralReporter>;

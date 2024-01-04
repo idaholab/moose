@@ -41,6 +41,8 @@ public:
 
   void computeMisfit();
 
+  Real computeMisfitNorm();
+
 protected:
   ///@{
   /// x,y,z,t and value measurement data
@@ -54,6 +56,9 @@ protected:
   std::vector<Real> & _simulation_values;
   /// difference between simulation and measurement values at measurement xyzt
   std::vector<Real> & _misfit_values;
+
+  /// Reporter that will hold the objective value
+  Real & _objective_val;
 
 private:
   /// parse measurement data from csv file
