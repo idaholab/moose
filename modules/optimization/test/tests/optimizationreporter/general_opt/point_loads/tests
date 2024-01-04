@@ -1,6 +1,6 @@
 [Tests]
-  issues = ''
-  design = 'GeneralOptimization.md'
+  issues = '#26476'
+  design = 'GeneralOptimization.md OptimizationData.md'
   [gen_opt_point_loads]
     requirement = "The system shall be able to invert for point loads using the general optimization reporter with"
     [no_measurement_transfer]
