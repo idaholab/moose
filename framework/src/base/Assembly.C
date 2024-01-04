@@ -448,17 +448,21 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
 }
 
 void
-Assembly::buildVectorFE(FEType type) const
+Assembly::buildVectorFE(const FEType type) const
 {
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = std::make_unique<VectorFEShapeData>();
 
   // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
-    min_dim = 0;
-  else
+  if (type.family == NEDELEC_ONE || type.family == RAVIART_THOMAS ||
+      type.family == L2_RAVIART_THOMAS)
     min_dim = 2;
+  else
+    min_dim = 0;
+
+  const auto div_it = _need_div.find(type);
+  const bool need_div = (div_it != _need_div.end()) && div_it->second;
 
   // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
   // current mesh
@@ -471,27 +475,28 @@ Assembly::buildVectorFE(FEType type) const
     _vector_fe[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe[dim][type]->get_curl_phi();
-    if (type.family == RAVIART_THOMAS)
+    if (need_div)
       _vector_fe[dim][type]->get_div_phi();
-    // Pre-request xyz.  We have always computed xyz, but due to
-    // recent optimizations in libmesh, we now need to explicity
-    // request it, since apps (Yak) may rely on it being computed.
     _vector_fe[dim][type]->get_xyz();
   }
 }
 
 void
-Assembly::buildVectorFaceFE(FEType type) const
+Assembly::buildVectorFaceFE(const FEType type) const
 {
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = std::make_unique<VectorFEShapeData>();
 
   // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
-    min_dim = 0;
-  else
+  if (type.family == NEDELEC_ONE || type.family == RAVIART_THOMAS ||
+      type.family == L2_RAVIART_THOMAS)
     min_dim = 2;
+  else
+    min_dim = 0;
+
+  const auto div_it = _need_face_div.find(type);
+  const bool need_div = (div_it != _need_face_div.end()) && div_it->second;
 
   // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
   // current mesh
@@ -504,23 +509,27 @@ Assembly::buildVectorFaceFE(FEType type) const
     _vector_fe_face[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face[dim][type]->get_curl_phi();
-    if (type.family == RAVIART_THOMAS)
+    if (need_div)
       _vector_fe_face[dim][type]->get_div_phi();
   }
 }
 
 void
-Assembly::buildVectorNeighborFE(FEType type) const
+Assembly::buildVectorNeighborFE(const FEType type) const
 {
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
   // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
-    min_dim = 0;
-  else
+  if (type.family == NEDELEC_ONE || type.family == RAVIART_THOMAS ||
+      type.family == L2_RAVIART_THOMAS)
     min_dim = 2;
+  else
+    min_dim = 0;
+
+  const auto div_it = _need_neighbor_div.find(type);
+  const bool need_div = (div_it != _need_neighbor_div.end()) && div_it->second;
 
   // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
   // current mesh
@@ -533,23 +542,27 @@ Assembly::buildVectorNeighborFE(FEType type) const
     _vector_fe_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_neighbor[dim][type]->get_curl_phi();
-    if (type.family == RAVIART_THOMAS)
+    if (need_div)
       _vector_fe_neighbor[dim][type]->get_div_phi();
   }
 }
 
 void
-Assembly::buildVectorFaceNeighborFE(FEType type) const
+Assembly::buildVectorFaceNeighborFE(const FEType type) const
 {
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = std::make_unique<VectorFEShapeData>();
 
   // Note that NEDELEC_ONE and RAVIART_THOMAS elements can only be built for dimension > 2
   unsigned int min_dim;
-  if (type.family == LAGRANGE_VEC || type.family == MONOMIAL_VEC)
-    min_dim = 0;
-  else
+  if (type.family == NEDELEC_ONE || type.family == RAVIART_THOMAS ||
+      type.family == L2_RAVIART_THOMAS)
     min_dim = 2;
+  else
+    min_dim = 0;
+
+  const auto div_it = _need_face_neighbor_div.find(type);
+  const bool need_div = (div_it != _need_face_neighbor_div.end()) && div_it->second;
 
   // Build an FE object for this type for each dimension from the min_dim up to the dimension of the
   // current mesh
@@ -563,7 +576,7 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
     _vector_fe_face_neighbor[dim][type]->get_dphi();
     if (type.family == NEDELEC_ONE)
       _vector_fe_face_neighbor[dim][type]->get_curl_phi();
-    if (type.family == RAVIART_THOMAS)
+    if (need_div)
       _vector_fe_face_neighbor[dim][type]->get_div_phi();
   }
 }
@@ -1298,7 +1311,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
-    if (_need_div.find(fe_type) != _need_div.end())
+    if (_need_face_div.find(fe_type) != _need_face_div.end())
       fesd._div_phi.shallowCopy(
           const_cast<std::vector<std::vector<Real>> &>(fe_face.get_div_phi()));
   }
@@ -1601,7 +1614,7 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
-    if (_need_div.find(fe_type) != _need_div.end())
+    if (_need_face_neighbor_div.find(fe_type) != _need_face_neighbor_div.end())
       fesd._div_phi.shallowCopy(
           const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
@@ -1660,7 +1673,7 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_neighbor.get_curl_phi()));
-    if (_need_div.find(fe_type) != _need_div.end())
+    if (_need_neighbor_div.find(fe_type) != _need_neighbor_div.end())
       fesd._div_phi.shallowCopy(
           const_cast<std::vector<std::vector<Real>> &>(fe_neighbor.get_div_phi()));
   }
@@ -2075,7 +2088,7 @@ Assembly::reinitElemFaceRef(const Elem * elem,
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
-    if (_need_div.find(fe_type) != _need_div.end())
+    if (_need_face_div.find(fe_type) != _need_face_div.end())
       fesd._div_phi.shallowCopy(
           const_cast<std::vector<std::vector<Real>> &>(fe_face.get_div_phi()));
   }
@@ -2243,7 +2256,7 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
     if (_need_curl.find(fe_type) != _need_curl.end())
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
-    if (_need_div.find(fe_type) != _need_div.end())
+    if (_need_face_neighbor_div.find(fe_type) != _need_face_neighbor_div.end())
       fesd._div_phi.shallowCopy(
           const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor.get_div_phi()));
   }
@@ -4761,7 +4774,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
 Assembly::feDivPhiFace<VectorValue<Real>>(FEType type) const
 {
-  _need_div[type] = true;
+  _need_face_div[type] = true;
   buildVectorFaceFE(type);
   return _vector_fe_shape_data_face[type]->_div_phi;
 }
@@ -4770,7 +4783,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
 Assembly::feDivPhiNeighbor<VectorValue<Real>>(FEType type) const
 {
-  _need_div[type] = true;
+  _need_neighbor_div[type] = true;
   buildVectorNeighborFE(type);
   return _vector_fe_shape_data_neighbor[type]->_div_phi;
 }
@@ -4779,7 +4792,7 @@ template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiDivergence &
 Assembly::feDivPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 {
-  _need_div[type] = true;
+  _need_face_neighbor_div[type] = true;
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_div_phi;
 }
