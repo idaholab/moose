@@ -175,14 +175,14 @@ From: {{ APPTAINER_FROM }}
         local BINARY_NAME=$1
         local TEST_DIR=$2
         local TEMP_TEST_LOC=${TEMP_LOC}/${TEST_DIR}
-        mkdir $TEMP_TEST_LOC
-        cd $TEMP_TEST_LOC
-        ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
-        cd ${BINARY_NAME}/${TEST_DIR}
-        ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        local return_flag=$?
+        mkdir $TEMP_TEST_LOC &&                                 \
+          cd $TEMP_TEST_LOC &&                                  \
+          ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR &&   \
+          cd ${BINARY_NAME}/${TEST_DIR} &&                      \
+          {BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
+        return_code=$?
         rm -rf $TEMP_TEST_LOC
-        return $?
+        return $return_code
     }
 
     return_flag=0
