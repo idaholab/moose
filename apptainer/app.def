@@ -158,6 +158,8 @@ From: {{ APPTAINER_FROM }}
     rm -rf $TEMP_LOC
 
 %test
+    set -x
+
     # Load jinja vars
     export BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD or "opt" }}
