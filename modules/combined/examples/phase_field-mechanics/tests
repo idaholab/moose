@@ -3,7 +3,7 @@
     type = RunApp
     input = 'Conserved.i'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
   [../]
   [./EBSD_reconstruction_grain_growth_mech]
     type = RunApp
@@ -24,26 +24,26 @@
     # it takes to run.
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
   [../]
   [./grain_texture]
     type = RunApp
     input = 'grain_texture.i'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
   [./poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
-    method = '!DBG'
+    capabilities = 'method!=dbg'
     check_input = True
   [../]
 []

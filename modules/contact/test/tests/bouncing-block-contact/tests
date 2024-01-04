@@ -112,7 +112,7 @@
                'lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -223,8 +223,7 @@
     exodiff = 'mixed-weighted-gap-swapped_out.e'
     requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
                   'inactive nodes.'
-    method = "!dbg"
     valgrind = 'heavy'
-    min_ad_size = '100'
+    capabilities = 'ad_size>=100 method!=dbg'
   []
 []

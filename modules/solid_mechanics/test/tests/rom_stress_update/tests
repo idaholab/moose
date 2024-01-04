@@ -9,7 +9,6 @@
       csvdiff = '3tile_strain_out.csv'
       cli_args = 'Materials/rom_stress_prediction/finite_difference_width=1e-2'
       detail = 'and evolve over time with an good finite difference width.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
     [3tile_strain_small_fd]
@@ -18,7 +17,6 @@
       csvdiff = '3tile_strain_small_fd_out.csv'
       cli_args = 'Outputs/file_base=3tile_strain_small_fd_out Materials/rom_stress_prediction/finite_difference_width=1e-20'
       detail = 'and evolve over time with an poor finite difference width with more nonlinear iterations than with a good finite difference width.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
 
@@ -27,7 +25,6 @@
       input = '3d.i'
       csvdiff = '3d_out.csv'
       detail = 'in 3D.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
 
@@ -46,7 +43,6 @@
       input = '2drz.i'
       csvdiff = '2drz_out.csv'
       detail = 'in 2DRz.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
 
@@ -55,14 +51,12 @@
       input = '2drz_json.i'
       csvdiff = '2drz_json_out.csv'
       detail = 'in 2DRz with a model loaded from a JSON data file.'
-      petsc_version = '>=3.9.0'
     []
 
     [nonad_verification]
       type = 'CSVDiff'
       input = 'nonad_verification.i'
       csvdiff = 'nonad_verification_out.csv'
-      petsc_version = '>=3.9.0'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters not using AD.'
@@ -73,7 +67,6 @@
       csvdiff = 'nonad_verification_heavy_out.csv'
       heavy = true
       max_time = 500
-      petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=nonad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true
@@ -150,7 +143,6 @@
       input = '3tile.i'
       csvdiff = '3tile_out.csv'
       detail = 'for a variety of overlapping tiles and two overlapping partitions.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
 
@@ -159,7 +151,6 @@
       input = '3tile_json.i'
       csvdiff = '3tile_json_out.csv'
       detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file.'
-      petsc_version = '>=3.9.0'
     []
 
     [3tile_json_relative]
@@ -168,7 +159,6 @@
       csvdiff = '3tile_json_out.csv'
       cli_args = 'Materials/rom_stress_prediction/model=gold/3tile_json_export.json'
       detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file relative to the input.'
-      petsc_version = '>=3.9.0'
       # skip test if test is being run out-of-tree. Issue Ref: #25279
       installation_type = in_tree
     []
@@ -178,7 +168,6 @@
       input = '3tile.i'
       jsondiff = '3tile_json_export.json'
       detail = 'for a variety of overlapping tiles and two overlapping partitions, and be able to export the model data to a JSON file.'
-      petsc_version = '>=3.9.0'
       cli_args = 'Materials/rom_stress_prediction/export_model=3tile_json_export.json'
       allow_test_objects = true
       # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -195,7 +184,6 @@
       csvdiff = '3d_out.csv'
       cli_args = 'Outputs/file_base=3d_out'
       detail = 'in 3D.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
     [3d_MPA]
@@ -226,7 +214,6 @@
       csvdiff = '2drz_out.csv'
       cli_args = 'Outputs/file_base=2drz_out'
       detail = 'in 2DRz.'
-      petsc_version = '>=3.9.0'
       allow_test_objects = true
     []
     [2drz-jac]
@@ -246,7 +233,6 @@
       type = 'CSVDiff'
       input = 'ad_verification.i'
       csvdiff = 'ad_verification_out.csv'
-      petsc_version = '>=3.9.0'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters using AD.'
@@ -257,7 +243,6 @@
       csvdiff = 'ad_verification_heavy_out.csv'
       heavy = true
       max_time = 500
-      petsc_version = '>=3.9.0'
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=ad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true

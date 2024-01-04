@@ -9,7 +9,7 @@
       type = 'Exodiff'
       input = 'block_weighted_partitioner.i'
       exodiff = 'block_weighted_partitioner_out.e'
-      petsc_version = '>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      capabilities = 'petsc>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
@@ -25,7 +25,7 @@
       input = 'block_weighted_partitioner.i'
       exodiff = 'block_weighted_partitioner_out_distributed.e'
       cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
-      petsc_version = '>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      capabilities = 'petsc>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
@@ -43,7 +43,7 @@
       type = RunException
       input = 'block_weighted_partitioner.i'
       cli_args = 'Mesh/Partitioner/block=1337'
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
       expect_err = 'Number of weights 3 does not match with the number of blocks 1'
 
       detail = 'the input blocks do not match the size of the input weights'
@@ -52,7 +52,7 @@
       type = RunException
       input = 'block_weighted_partitioner.i'
       cli_args = 'Mesh/Partitioner/block="1 2 1337"'
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
       expect_err = 'The block 1337 was not found on the mesh'
       min_parallel = 2
       max_parallel = 2

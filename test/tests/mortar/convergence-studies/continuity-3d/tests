@@ -9,9 +9,8 @@
                   'of 2 and 1 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a zeroth order basis for the Lagrange multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'mumps method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -23,9 +22,8 @@
                   'of 2 and 2 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a first order basis for the Lagrange multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'mumps method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -38,9 +36,8 @@
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a first order dual basis for the Lagrange '
                   'multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'mumps method!=dbg'
     heavy = True
     min_parallel = 2
   []
@@ -53,12 +50,10 @@
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a zeroth order basis for the Lagrange '
                   'multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'ad_size>=100 mumps method!=dbg'
     heavy = True
     min_parallel = 2
-    min_ad_size = 100
   []
   [p2p1]
     type = PythonUnitTest
@@ -68,12 +63,10 @@
                   'of 3 and 2 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a first order basis for the Lagrange multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'ad_size>=100 mumps method!=dbg'
     heavy = True
     min_parallel = 2
-    min_ad_size = 100
   []
   [p2p2]
     type = PythonUnitTest
@@ -84,11 +77,9 @@
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a second order basis for the Lagrange '
                   'multiplier.'
-    method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
-    mumps = 'TRUE'
+    capabilities = 'ad_size>=100 mumps method!=dbg'
     heavy = True
     min_parallel = 2
-    min_ad_size = 100
   []
 []

@@ -11,7 +11,7 @@
                 Outputs/file_base='torch_script_read'"
     requirement = "The system shall be able to read a neural network from a torchscript file and use "
                   "it to control a transient process."
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [run-with-torch-parameters]
     type = JSONDiff
@@ -27,7 +27,7 @@
                 Reporters/T_reporter/outputs='json_out'"
     requirement = "The system shall be able to read a neural network from a parameter file and use "
                   "it to control a transient process."
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [run-without-nn]
     type = CSVDiff
@@ -36,7 +36,7 @@
     cli_args = "Outputs/file_base='run_wo_nn'"
     requirement = "The system shall be able to run with a libtorch controller without having a "
                   "neural net initialized in it."
-    libtorch = true
+    capabilities = 'libtorch'
   []
   [invalid-torchscript-error]
     type = RunException
@@ -48,6 +48,6 @@
     expect_err = "This parameter should not be defined when filename is defined!"
     requirement = "The system shall forbid specifying parameters when reading a "
                   "neural network from a torchscript file."
-    libtorch = true
+    capabilities = 'libtorch'
   []
 []

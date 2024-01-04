@@ -165,7 +165,7 @@
     rel_err = 1.0e-4
     min_parallel = 4
     heavy = true
-    min_ad_size = '200'
+    capabilities = 'ad_size>=200'
     requirement = 'The contact module shall be able to solve frictional contact between a '
                   'semicircular tool and flexible base material.'
   []
@@ -175,7 +175,7 @@
     input = 'ironing_penalty.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-4
-    min_ad_size = '200'
+    capabilities = 'ad_size>=200'
     cli_args = 'Executioner/end_time=0.15'
     requirement = "The contact module shall be able to solve frictional contact between a "
                   "semicircular tool and flexible base material using a penalty approach to mortar "
@@ -187,7 +187,7 @@
     input = 'ironing_penalty_action.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-4
-    min_ad_size = '200'
+    capabilities = 'ad_size>=200'
     cli_args = 'Executioner/end_time=0.15'
     requirement = "The contact module shall be able to solve frictional contact between a "
                   "semicircular tool and flexible base material using a penalty approach to mortar "
@@ -219,7 +219,7 @@
               'frictional_bouncing_block_edge_dropping_friction_0023.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true "
                "UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 "

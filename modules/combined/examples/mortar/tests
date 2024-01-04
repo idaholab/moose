@@ -8,7 +8,7 @@
     # input we can run on something much smaller...
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
     requirement = 'The system shall be able to solve an eigenstrain problem using mortar to enforce periodic equal gradient constraints'
   [../]
   [./mortar_gradient]

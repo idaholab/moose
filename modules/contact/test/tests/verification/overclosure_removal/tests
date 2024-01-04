@@ -7,7 +7,7 @@
     exodiff = 'overclosure_exodus.e'
     rel_err = 1e-5
     abs_zero = 1e-6
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce eliminating initial
                    overclosure between the primary and secondary surfaces."
   [../]

@@ -8,7 +8,6 @@
     type = Exodiff
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=false '
                'Materials/stress/type=ComputeLinearElasticStress'
     requirement = 'The ComputeRSphericalSmallStrain class, called through the QuasiStatic SolidMechanics Physics '
@@ -22,7 +21,6 @@
     type = Exodiff
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/incremental=true '
                'Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'smallStrain_1DSphere'
@@ -38,7 +36,6 @@
     type = Exodiff
     input = 'finiteStrain_1DSphere_hollow.i'
     exodiff = 'finiteStrain_1DSphere_hollow_out.e'
-    compiler = 'CLANG GCC'
     issues = '#6256 #7555 #18876'
     requirement = 'The ComputeRSphericalFiniteStrain class, called through the QuasiStatic SolidMechanics Physics '
                   'action, shall find the finite incremental strain displacement of a thick walled '

@@ -223,7 +223,7 @@
       input = 3d-rc-no-slip.i
       exodiff = 3d-rc-no-slip_out.e
       detail = 'three-dimensional tetrahedral elements'
-      mumps = true
+      capabilities = 'mumps'
       heavy = true
     []
   []

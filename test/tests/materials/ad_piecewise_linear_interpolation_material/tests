@@ -71,7 +71,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
     requirement = 'ADPiecewiseLinearInterpolationMaterial shall calculate perfect Jacobians'
     issues = "#5658"
   [../]

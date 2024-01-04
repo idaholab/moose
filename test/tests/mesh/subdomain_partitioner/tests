@@ -9,7 +9,7 @@
     dof_id_bytes = 8
     min_parallel = 4
     max_parallel = 4
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
 
     requirement = 'The system shall provide a parallel partition based on mesh subdomains'
   []

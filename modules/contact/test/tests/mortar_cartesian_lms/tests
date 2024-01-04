@@ -8,7 +8,7 @@
     rel_err = 5.0e-4
     min_parallel = 4
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     valgrind = 'heavy'
     installation_type = in_tree
     requirement = 'The contact module shall be able to solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
@@ -19,7 +19,7 @@
     input = 'frictionless-mortar-3d.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '150'
+    capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
@@ -29,7 +29,7 @@
     input = 'frictionless-mortar-3d-friction.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '150'
+    capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
     requirement = 'Contact module shall solve a three-dimensional frictional problem with Cartesian Lagrange multipliers.'
   []
@@ -39,7 +39,7 @@
     input = 'two_block_1st_order_constraint_lm_xy_friction.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers.'
   []
   [cylinder_friction_cartesian]
@@ -49,7 +49,7 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-4
     max_parallel = 4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50 method=opt'
     method = 'opt'
     requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.'
   []
@@ -58,7 +58,7 @@
     exodiff = 'two_block_1st_order_constraint_lm_xy_friction_vcp_out.e'
     input = 'two_block_1st_order_constraint_lm_xy_friction_vcp.i'
     rel_err = 5.0e-4
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers using VCP.'
     # This test is causing sporadic test failures (see issue #24986)
@@ -72,8 +72,7 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-4
     max_parallel = 4
-    min_ad_size = '50'
-    method = 'opt'
+    capabilities = 'ad_size>=50 method=opt'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers using VCP.'
   []

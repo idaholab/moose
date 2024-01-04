@@ -6,7 +6,7 @@
     type = 'CSVDiff'
     input = 'ipm.i'
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
-    slepc = true
+    capabilities = 'slepc'
     requirement = "Eigenvalue system should support standard eigenvalue problems"
   [../]
 
@@ -14,7 +14,7 @@
     type = 'CSVDiff'
     input = 'gipm.i'
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
-    slepc = true
+    capabilities = 'slepc'
     requirement = "Eigenvalue system should support generalized eigenvalue problems"
   [../]
 
@@ -22,7 +22,7 @@
     type = 'CSVDiff'
     input = 'gipm_ibc.i'
     csvdiff = 'gipm_ibc_out_eigenvalues_0001.csv'
-    slepc = true
+    capabilities = 'slepc'
     requirement = "Eigenvalue system should support IntegratedBC"
   [../]
 
@@ -31,7 +31,7 @@
     input = 'gipm.i'
     cli_args = 'BCs/homogeneous/value=1'
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
-    slepc = true
+    capabilities = 'slepc'
     requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
   [../]
 
@@ -40,7 +40,7 @@
     input = 'gipm.i'
     cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
     expect_err = 'Invalid NodalBC for eigenvalue problems, please use homogeneous \(array\) Dirichlet.'
-    slepc = true
+    capabilities = 'slepc'
     requirement = "Eigenvalue system should use homogeneous boundary conditions only"
   [../]
 
@@ -49,7 +49,7 @@
     input = 'gipm.i'
     cli_args = 'Executioner/solve_type=NEWTON'
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
-    slepc = false
+    capabilities = '!slepc'
     requirement = "Eigenvalue system requires SLEPc installed"
   [../]
 
@@ -58,7 +58,7 @@
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=NONLINEAR_POWER Executioner/matrix_free=true Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
   [../]
 
@@ -67,7 +67,7 @@
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=NEWTON Executioner/matrix_free=true Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"
   [../]
 
@@ -84,7 +84,7 @@
     type = 'CSVDiff'
     input = 'ne_deficient_b.i'
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to solve a deficient eigenvalue problem"
   [../]
 
@@ -92,7 +92,7 @@
     type = 'CSVDiff'
     input = 'ane.i'
     csvdiff = 'ane_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a nonlinear eigenvalue problem"
   [../]
 
@@ -100,7 +100,7 @@
     type = 'CSVDiff'
     input = 'ne_coupled.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to compute a coupled nonlinear eigenvalue problem"
   [../]
 
@@ -108,7 +108,7 @@
     type = 'CSVDiff'
     input = 'scalar.i'
     csvdiff = 'scalar_out_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to handle scalar kernels"
   [../]
 
@@ -116,7 +116,7 @@
     type = 'CSVDiff'
     input = 'dg_krylovschur.i'
     csvdiff = 'dg_krylovschur_out_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
 
@@ -124,7 +124,7 @@
     type = 'CSVDiff'
     input = 'ne_coupled_picard.i'
     csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
-    slepc_version = '>=3.12.0'
+    capabilities = 'slepc>=3.12.0'
     issues = "#15513"
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent."
   []
@@ -134,7 +134,7 @@
     input = 'ne_coupled_picard.i'
     exodiff = 'ne_coupled_picard_out.e ne_coupled_picard_out_sub0.e'
     prereq = 'eigen_as_parent'
-    slepc_version = '>=3.12.0'
+    capabilities = 'slepc>=3.12.0'
     issues = "#15513"
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent and output eigen vectors as an exodus file."
   []
@@ -143,7 +143,7 @@
     type = 'CSVDiff'
     input = 'ne_coupled_picard_subT.i'
     csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
-    slepc_version = '>=3.12.0'
+    capabilities = 'slepc>=3.12.0'
     issues = "#15513"
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app."
   []
@@ -152,7 +152,7 @@
     type = 'Exodiff'
     input = 'ne_coupled_picard_subT.i'
     exodiff = 'ne_coupled_picard_subT_out.e ne_coupled_picard_subT_out_sub0.e'
-    slepc_version = '>=3.12.0'
+    capabilities = 'slepc>=3.12.0'
     issues = "#15513"
     prereq = 'eigen_as_sub'
     requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app and output eigen vectors as an exodus file."
@@ -162,7 +162,7 @@
     type = 'Exodiff'
     input = 'ne_coupled_scaled.i'
     exodiff = 'ne_coupled_scaled_out.e'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     # This is used to make sure eigenvector prescaling work properly. Without "prescaling", the initial
     # residual will be around "e-01".
     expect_out = '\s*Nonlinear\s+Newton\s+iteration\s+starts\s+\.+\s+\-+\s+0\s+Nonlinear\s+\|R\|\s+=\s+\d+\.\d+e-0[34]'
@@ -176,7 +176,7 @@
     type = 'CSVDiff'
     input = 'ne-coupled-scaling.i'
     csvdiff = 'ne-coupled-scaling_out_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     absent_out = '[1-9]+[0-9]* of 162 singular values'
     expect_out = '0 of 162 singular values'
     issues = '#15048'
@@ -187,7 +187,7 @@
     type = 'CSVDiff'
     input = 'ne-coupled-resid-scaling.i'
     csvdiff = 'ne-coupled-resid-scaling_out_eigenvalues_0001.csv'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     absent_out = '[1-9]+[0-9]* of 162 singular values'
     expect_out = '0 of 162 singular values'
     issues = '#15048'
