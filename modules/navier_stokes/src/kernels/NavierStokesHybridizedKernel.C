@@ -12,6 +12,8 @@
 #include "MooseVariableScalar.h"
 #include "Function.h"
 
+registerMooseObject("NavierStokesApp", NavierStokesHybridizedKernel);
+
 InputParameters
 NavierStokesHybridizedKernel::validParams()
 {

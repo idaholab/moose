@@ -113,7 +113,13 @@ NavierStokesHybridizedInterface::NavierStokesHybridizedInterface(
     _scalar_phi_face(_u_var.phiFace()),
     _lm_phi_face(_u_face_var.phiFace()),
     // material properties
-    _nu(mpi->getMaterialProperty<Real>("nu"))
+    _nu(mpi->getMaterialProperty<Real>("nu")),
+    // initialize local number of dofs
+    _vector_n_dofs(0),
+    _scalar_n_dofs(0),
+    _lm_n_dofs(0),
+    _p_n_dofs(0),
+    _global_lm_n_dofs(_enclosure_lm_var ? 1 : 0)
 {
   if (mesh.dimension() > 2)
     mooseError("3D not yet implemented");

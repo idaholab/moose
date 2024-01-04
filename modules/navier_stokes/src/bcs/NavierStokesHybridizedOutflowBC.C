@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "NavierStokesHybridizedKernel.h"
 
+registerMooseObject("NavierStokesApp", NavierStokesHybridizedOutflowBC);
+
 InputParameters
 NavierStokesHybridizedOutflowBC::validParams()
 {
