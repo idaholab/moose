@@ -4,7 +4,7 @@
     input = 'contact_initial_adaptivity.i'
     exodiff = 'contact_initial_adaptivity_out.e'
     abs_zero = 1e-10
-    superlu = true
+    capabilities = 'superlu'
     issues = '#6799'
     requirement = "Contact shall be enforced on new nodes created due to mesh refinement"
     design = 'Constraints/index.md'

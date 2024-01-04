@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'line_material_real_sampler.i'
     csvdiff = 'out_mat_0001.csv'
-    compiler = '!INTEL'
     mesh_mode = 'REPLICATED'
 
     requirement = 'The system shall support the ability to sample a scalar material along an arbitrary line through the mesh domain.'

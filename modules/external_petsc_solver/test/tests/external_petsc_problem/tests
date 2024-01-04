@@ -10,7 +10,7 @@
     cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its"'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     library_mode = 'DYNAMIC'
   []
 
@@ -21,7 +21,7 @@
     cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true'
     allow_warnings = true
     prereq = 'external_petsc'
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     library_mode = 'DYNAMIC'
     requirement = "The system shall be able to couple the PETSc external solver with subcycling."
   []
@@ -32,7 +32,7 @@
     exodiff = 'moose_as_parent_multistep_out.e moose_as_parent_multistep_out_sub_app0.e'
     cli_args = 'sub_app:Outputs/hide="pid" sub_app:Executioner/dtmin=0.05 Outputs/hide="picard_its" Outputs/file_base=moose_as_parent_multistep_out MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true -ts_dt 0.05'
     allow_warnings = true
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     library_mode = 'DYNAMIC'
     requirement = "The system shall be able to couple with the PETSc external solver with multistep subcycling."
   []
@@ -44,7 +44,7 @@
     cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" Outputs/file_base=moose_as_parent_small_dt_out -ts_dt 0.1'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     library_mode = 'DYNAMIC'
     requirement = "The system shall handle the simulation correctly when dt in the external petsc solver is smaller than parent app."
   []
@@ -57,7 +57,7 @@
     allow_warnings = true
     prereq = 'external_petsc_subcycling'
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     library_mode = 'DYNAMIC'
     requirement = "The system shall handle the simulation correctly when dt in the external petsc solver is larger than parent app."
   []
@@ -69,7 +69,7 @@
     cli_args = 'Mesh/allow_renumbering=false Outputs/hide="pid"'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     rel_err = 1e-5 # distributed mesh causes small diffs
     executable_pattern = 'external_petsc_solver*'
     requirement = "The system shall be able to run the PETSc external solver as parent."
@@ -82,7 +82,7 @@
     cli_args = 'Outputs/hide="pid" MultiApps/sub_app/sub_cycling=true'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     rel_err = 1e-5 # distributed mesh causes small diffs
     prereq = 'petsc_as_parent'
 
@@ -97,7 +97,7 @@
     cli_args = 'Outputs/hide="pid" MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.5'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     rel_err = 1e-5 # distributed mesh causes small diffs
     prereq = 'petsc_as_parent_sub_cycling'
 
@@ -112,7 +112,7 @@
     cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_parent_multistep_out MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.05'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     prereq = 'petsc_as_parent'
 
     executable_pattern = 'external_petsc_solver*'
@@ -126,7 +126,7 @@
     cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_parent_small_dt_out sub_app:Executioner/dt=0.05'
     allow_warnings = true
     issues = "#12595"
-    petsc_version = '>=3.8.0'
+    capabilities = 'petsc>=3.8.0'
     rel_err = 5e-5
 
     executable_pattern = 'external_petsc_solver*'

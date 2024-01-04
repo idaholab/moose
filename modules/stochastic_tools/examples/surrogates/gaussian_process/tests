@@ -16,7 +16,7 @@
       input = gaussian_process_uniform_1D_tuned.i
       csvdiff = 'gaussian_process_uniform_1D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
       detail = "and tuned hyperparameters."
     []
   []
@@ -36,7 +36,7 @@
       csvdiff = 'gaussian_process_uniform_2D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
       method = opt
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
       detail = "and tuned hyperparameters."
     []
   []
@@ -49,7 +49,7 @@
       heavy = true
       allow_test_objects = true
       method = opt
-      petsc_version = '>=3.10.0'
+      capabilities = 'petsc>=3.10.0'
       detail = "by first training a GP surrogate "
     []
     [test]

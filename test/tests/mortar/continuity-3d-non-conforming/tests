@@ -14,7 +14,7 @@
   []
   [continuity_sphere_hex20]
     type = 'Exodiff'
-    min_ad_size = 200
+    capabilities = 'ad_size>=200'
     input = 'continuity_sphere_hex.i'
     exodiff = 'continuity_sphere_hex20_out.e'
     cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
@@ -28,7 +28,7 @@
   []
   [continuity_sphere_hex27]
     type = 'Exodiff'
-    min_ad_size = 200
+    capabilities = 'ad_size>=200'
     # Since this test is run through recipe "augmented sparsity" no need to designate it as heavy. Should take about 7 seconds in opt.
     # heavy = True
     input = 'continuity_sphere_hex.i'
@@ -44,7 +44,7 @@
   []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
-    min_ad_size = 200
+    capabilities = 'ad_size>=200'
     input = 'continuity_sphere_hex.i'
     exodiff = 'mortar_segment_mesh.e'
     cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND '
@@ -66,7 +66,7 @@
   []
   [continuity_tet10]
     type = 'Exodiff'
-    min_ad_size = 100
+    capabilities = 'ad_size>=100'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet10_out.e'
     cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 '
@@ -80,7 +80,7 @@
   []
   [continuity_tet14]
     type = 'Exodiff'
-    min_ad_size = 100
+    capabilities = 'ad_size>=100'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet14_out.e'
     cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
