@@ -1,0 +1,143 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "INSFVTFSourceSink.h"
+#include "NS.h"
+#include "NonlinearSystemBase.h"
+#include "NavierStokesMethods.h"
+#include "libmesh/nonlinear_solver.h"
+
+registerMooseObject("NavierStokesApp", INSFVTFSourceSink);
+
+InputParameters
+INSFVTFSourceSink::validParams()
+{
+  InputParameters params = FVElementalKernel::validParams();
+  params.addClassDescription("Elemental kernel to compute the production and destruction "
+                             " terms of turbulent kinetic energy dissipation (TKED).");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>(NS::TKE, "Coupled turbulent kinetic energy.");
+  params.addRequiredParam<MooseFunctorName>(NS::TKED,
+                                            "Coupled turbulent kinetic energy dissipation rate.");
+  params.addRequiredParam<MooseFunctorName>(NS::TV2, "Coupled turbulent wall normal fluctuations.");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu_t, "Turbulent viscosity.");
+
+  params.addParam<Real>("C1", 1.4, "First relaxation function coefficient.");
+  params.addParam<Real>("C2", 0.3, "Second relaxation function coefficient.");
+  params.addParam<Real>("n", 6.0, "Model parameter.");
+
+  params.set<unsigned short>("ghost_layers") = 2;
+  return params;
+}
+
+INSFVTFSourceSink::INSFVTFSourceSink(const InputParameters & params)
+  : FVElementalKernel(params),
+    _dim(_subproblem.mesh().dimension()),
+    _u_var(getFunctor<ADReal>("u")),
+    _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
+    _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
+    _k(getFunctor<ADReal>(NS::TKE)),
+    _epsilon(getFunctor<ADReal>(NS::TKED)),
+    _v2(getFunctor<ADReal>(NS::TV2)),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _mu(getFunctor<ADReal>(NS::mu)),
+    _mu_t(getFunctor<ADReal>(NS::mu_t)),
+    _C1(getParam<Real>("C1")),
+    _C2(getParam<Real>("C2")),
+    _n(getParam<Real>("n"))
+{
+}
+
+ADReal
+INSFVTFSourceSink::computeQpResidual()
+{
+  ADReal residual = 0.0;
+  ADReal production = 0.0;
+  ADReal destruction = 0.0;
+  const auto elem_arg = makeElemArg(_current_elem);
+  const auto state = determineState();
+  const auto mu = _mu(elem_arg, state);
+  const auto rho = _rho(elem_arg, state);
+  const auto TKE = _k(elem_arg, state);
+  const auto TKED = _epsilon(elem_arg, state);
+  const auto V2 = _v2(elem_arg, state);
+
+  const auto & grad_u = _u_var.gradient(elem_arg, state);
+  const auto Sij_xx = 2.0 * grad_u(0);
+  ADReal Sij_xy = 0.0;
+  ADReal Sij_xz = 0.0;
+  ADReal Sij_yy = 0.0;
+  ADReal Sij_yz = 0.0;
+  ADReal Sij_zz = 0.0;
+
+  const auto grad_xx = grad_u(0);
+  ADReal grad_xy = 0.0;
+  ADReal grad_xz = 0.0;
+  ADReal grad_yx = 0.0;
+  ADReal grad_yy = 0.0;
+  ADReal grad_yz = 0.0;
+  ADReal grad_zx = 0.0;
+  ADReal grad_zy = 0.0;
+  ADReal grad_zz = 0.0;
+
+  auto trace = Sij_xx / 3.0;
+
+  if (_dim >= 2)
+  {
+    const auto & grad_v = (*_v_var).gradient(elem_arg, state);
+    Sij_xy = grad_u(1) + grad_v(0);
+    Sij_yy = 2.0 * grad_v(1);
+
+    grad_xy = grad_u(1);
+    grad_yx = grad_v(0);
+    grad_yy = grad_v(1);
+
+    trace += Sij_yy / 3.0;
+
+    if (_dim >= 3)
+    {
+      const auto & grad_w = (*_w_var).gradient(elem_arg, state);
+
+      Sij_xz = grad_u(2) + grad_w(0);
+      Sij_yz = grad_v(2) + grad_w(1);
+      Sij_zz = 2.0 * grad_w(2);
+
+      grad_xz = grad_u(2);
+      grad_yz = grad_v(2);
+      grad_zx = grad_w(0);
+      grad_zy = grad_w(1);
+      grad_zz = grad_w(2);
+
+      trace += Sij_zz / 3.0;
+    }
+  }
+
+  const auto symmetric_strain_tensor_sq_norm =
+      (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
+      (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
+      (Sij_zz - trace) * grad_zz;
+
+  production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+
+  const auto production_function = _C2 * production / (TKE + 1e-15);
+
+  const auto time_scale =
+      std::max(TKE / std::max(TKED, 1e-15), 6 * std::sqrt(mu / rho / std::max(TKED, 1e-15)));
+
+  const auto fluctuation_function =
+      ((_C1 - _n) * V2 / std::max(TKE, 1e-15) - 2. / 3. * (_C1 - 1)) / time_scale;
+
+  const auto implicit_term = _var(elem_arg, state);
+
+  return production_function - fluctuation_function - implicit_term;
+}

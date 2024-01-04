@@ -46,6 +46,9 @@ INSFVTKEDSourceSink::validParams()
   params.addParam<Real>("C2_eps", 1.92, "Second epsilon coefficient");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
+  params.addParam<bool>(
+      "v2f_formulation", false, "Boolean to limit the timescale for v2f formulation.");
+
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -66,7 +69,8 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _non_equilibrium_treatment(getParam<bool>("non_equilibrium_treatment")),
     _C1_eps(getParam<Real>("C1_eps")),
     _C2_eps(getParam<Real>("C2_eps")),
-    _C_mu(getParam<Real>("C_mu"))
+    _C_mu(getParam<Real>("C_mu")),
+    _v2f_formulation(getParam<bool>("v2f_formulation"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -215,7 +219,10 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     production = _C1_eps * rho * production_k;
 
-    const auto time_scale = _k(elem_arg, old_state) / (_var(elem_arg, old_state) + 1e-15) + 1e-15;
+    auto time_scale = _k(elem_arg, old_state) / (_var(elem_arg, old_state) + 1e-15) + 1e-15;
+    if (_v2f_formulation)
+      time_scale = std::max(time_scale,
+                            6 * std::sqrt(mu / rho / std::max(_var(elem_arg, old_state), 1e-15)));
 
     destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
 

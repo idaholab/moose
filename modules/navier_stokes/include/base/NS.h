@@ -160,6 +160,8 @@ static const std::string mass_flux = "mass_flux";
 // Turbulence variables
 static const std::string TKE = "k";
 static const std::string TKED = "epsilon";
+static const std::string TV2 = "v2";
+static const std::string TF = "f";
 
 // Turbulence constants
 static constexpr Real von_karman_constant = 0.4187;
