@@ -32,7 +32,7 @@ tensor components) to perform an elemental projection of the property component.
 #### Nodal basis functions
 
 A [ProjectedStatefulMaterialNodalPatchRecovery](/ProjectedStatefulMaterialNodalPatchRecovery.md)
-user object of the appropriate type will be created for each material property. To prepare data
+user object of the appropriate type will be created for each material property to prepare data
 required for nodal patch recovery of each scalar material property component (e.g. vector or
 tensor components).
 
