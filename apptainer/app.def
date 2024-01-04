@@ -181,7 +181,7 @@ From: {{ APPTAINER_FROM }}
           cd $TEMP_TEST_LOC &&                                  \
           ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR &&   \
           cd ${BINARY_NAME}/${TEST_DIR} &&                      \
-          {BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
+          ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
         return_code=$?
         rm -rf $TEMP_TEST_LOC
         return $return_code
