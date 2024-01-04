@@ -10,13 +10,30 @@ def run_spatial(*args, **kwargs):
         kwargs['executable'] = "../../../../../../../combined/"
         return mms.run_spatial(*args, **kwargs)
 
-class TestCavity(unittest.TestCase):
+class TestCavityLagrange(unittest.TestCase):
     def test(self):
         df1 = run_spatial('lid.i', 7, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
-        fig.save('lid.png')
+        fig.save('lagrange.png')
+        for key,value in fig.label_to_slope.items():
+            print("%s, %f" % (key, value))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
+
+class TestCavityHierarchic(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial('lid.i', 7, "--error", "--error-unused",
+                          "Variables/p/family=L2_HIERARCHIC",
+                          "AuxVariables/vel_x/family=L2_HIERARCHIC",
+                          "AuxVariables/vel_y/family=L2_HIERARCHIC",
+                          "AuxVariables/grad_vel_x/family=L2_HIERARCHIC_VEC",
+                          "AuxVariables/grad_vel_y/family=L2_HIERARCHIC_VEC",
+                          y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
+        fig.save('hierarchic.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
