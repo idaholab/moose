@@ -25,6 +25,7 @@ public:
   virtual void finalize() override;
 
 private:
+  /// input reporter vectors
   std::vector<const std::vector<Real> *> _reporter_data;
   /// output vector
   std::vector<double> & _output_reporter;

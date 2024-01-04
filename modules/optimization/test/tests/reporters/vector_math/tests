@@ -15,7 +15,7 @@
     cli_args = "Reporters/dataFromVofV/vector_of_vectors='101 201; 102 202; 103'"
     allow_test_objects = true
     expect_err = "Every vector in 'reporter_name=dataFromVofV/v_of_v' must be the same size."
-    requirement = "The system shall throw an error when the vectors being reduced are not the same size."
+    requirement = "The system shall throw a reasonable error when reducing a vectors of vectors into a single vector and the input vectors contained in the vector of vectors do not have the same size."
   []
   [errorDotProduct]
     type = RunException
@@ -23,6 +23,6 @@
     cli_args = "Reporters/vectorOperation/reporter_names='vecs/vec_a vecs/vec_b vec_d/vec_d'"
     allow_test_objects = true
     expect_err = "All vectors being operated on must be the same size."
-    requirement = "The system shall throw an error when the vectors being operated on are not the same size."
+    requirement = "The system shall throw a reasonable error when the vectors being combined into a single vector using arithmetic operations are not the same size."
   []
 []

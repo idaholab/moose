@@ -15,8 +15,8 @@ InputParameters
 ParsedScalarReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
-  params.addRequiredParam<std::vector<ReporterName>>("reporter_names", "Reporter names ");
-  params.addClassDescription("Apply parsed functions to scalar entries held in reporters.");
+  params.addRequiredParam<std::vector<ReporterName>>("reporter_names", "The input reporter names");
+  params.addClassDescription("Applies parsed functions to scalar entries held in reporters.");
   return params;
 }
 
@@ -29,10 +29,11 @@ ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
   const std::vector<ReporterName> reporter_names(
       getParam<std::vector<ReporterName>>("reporter_names"));
   if (reporter_names.size() != _reporter_symbols.size())
-    mooseError(
-        "reporter_names and reporter_symbols must be the same size: \n number of reporter_names=",
+    paramError(
+        "reporter_names",
+        "reporter_names and reporter_symbols must be the same size:  Number of reporter_names=",
         reporter_names.size(),
-        "\n number of reporter_symbols=",
+        ";  Number of reporter_symbols=",
         _reporter_symbols.size());
 
   _reporter_data.resize(reporter_names.size());
