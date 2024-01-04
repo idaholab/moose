@@ -13,6 +13,7 @@
       detail = "that distributes samples in parallel and"
       python = 3
       required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree # see #26480
     []
     [plot]
       type = CheckFiles
@@ -24,6 +25,7 @@
       python = 3
       required_python_packages = 'pandas matplotlib'
       detail = "demonstrates efficient parallel scaling of memory use."
+      installation_type = in_tree # see #26480
     []
   []
 []
