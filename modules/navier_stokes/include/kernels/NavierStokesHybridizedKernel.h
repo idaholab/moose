@@ -23,6 +23,8 @@ public:
 
   NavierStokesHybridizedKernel(const InputParameters & parameters);
 
+  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+
 protected:
   virtual void onElement() override;
   virtual void onInternalSide() override;

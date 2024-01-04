@@ -29,6 +29,8 @@ public:
 
   NavierStokesHybridizedVelocityDirichletBC(const InputParameters & parameters);
 
+  virtual const MooseVariableBase & variable() const override { return _u_face_var; }
+
 protected:
   virtual void assemble() override;
 
