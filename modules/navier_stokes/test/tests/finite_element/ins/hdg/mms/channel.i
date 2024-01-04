@@ -9,7 +9,6 @@ nu=1.1
   face_u = face_vel_x
   face_v = face_vel_y
   pressure = p
-  enclosure_lm = lm
   nu = ${nu}
 []
 
@@ -17,8 +16,8 @@ nu=1.1
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = -1
-    xmax = 1
+    xmin = 0
+    xmax = 2
     ymin = -1
     ymax = 1
     nx = 2
@@ -36,9 +35,6 @@ nu=1.1
   []
   [p]
     family = L2_LAGRANGE
-  []
-  [lm]
-    family = SCALAR
   []
 []
 
@@ -69,40 +65,44 @@ nu=1.1
 [HybridizedBCs]
   [exact]
     type = NavierStokesHybridizedVelocityDirichletBC
-    boundary = 'left right bottom top'
+    boundary = 'left bottom top'
     dirichlet_u = 'exact_u'
     dirichlet_v = 'exact_v'
+  []
+  [right]
+    type = NavierStokesHybridizedOutflowBC
+    boundary = 'right'
   []
 []
 
 [Functions]
   [exact_u]
     type = ParsedFunction
-    expression = 'sin(y)*cos((1/2)*x*pi)'
+    expression = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [forcing_u]
     type = ParsedFunction
-    expression = 'nu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*nu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
+    expression = '(1/2)*pi^2*nu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 1/2*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi) + (1/2)*pi*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)'
     symbol_names = 'nu'
     symbol_values = '${nu}'
   []
   [exact_v]
     type = ParsedFunction
-    expression = 'sin(x)*cos((1/2)*y*pi)'
+    expression = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [forcing_v]
     type = ParsedFunction
-    expression = 'nu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*nu*sin(x)*cos((1/2)*y*pi) - pi*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y) + sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi)'
+    expression = '(5/16)*pi^2*nu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - pi*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     symbol_names = 'nu'
     symbol_values = '${nu}'
   []
   [exact_p]
     type = ParsedFunction
-    expression = 'sin(x)*sin(y)'
+    expression = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
   []
   [forcing_p]
     type = ParsedFunction
-    expression = '-1/2*pi*sin(x)*sin((1/2)*y*pi) - 1/2*pi*sin(y)*sin((1/2)*x*pi)'
+    expression = '-1/2*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
   []
 []
 
