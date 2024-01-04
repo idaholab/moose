@@ -1643,6 +1643,19 @@ Coupleable::coupledArrayGradientOlder(const std::string & var_name, unsigned int
   return var->gradSlnOlderNeighbor();
 }
 
+const ArrayVariableGradient &
+Coupleable::coupledArrayGradientDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * const var = getArrayVar(var_name, comp);
+  if (!var)
+    return _default_array_gradient;
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
+
+  if (!_coupleable_neighbor)
+    return var->gradSlnDot();
+  return var->gradSlnNeighborDot();
+}
+
 const VectorVariableCurl &
 Coupleable::coupledCurl(const std::string & var_name, unsigned int comp) const
 {

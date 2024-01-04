@@ -819,6 +819,16 @@ protected:
                                                                   unsigned int comp = 0) const;
 
   /**
+   * Retun a gradient of a coupled array variable's time derivative
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ArrayVariableGradient containing the gradient of the time derivative
+   * the coupled array variable
+   */
+  virtual const ArrayVariableGradient & coupledArrayGradientDot(const std::string & var_name,
+                                                                unsigned int comp = 0) const;
+
+  /**
    * Returns curl of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables

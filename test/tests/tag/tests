@@ -209,6 +209,14 @@
     exodiff = 'tag-array-grad_out.e'
     abs_zero = 1e-08
   []
+  [array_grad_dot]
+    type = 'Exodiff'
+    input = 'coupled_array_grad_dot.i'
+    issues = '#26385'
+    requirement = 'The system shall be able to populate auxiliary array variable values using the components of gradient of time derivative of coupled array variable.'
+    exodiff = 'coupled_array_grad_dot_out.e'
+    abs_zero = 1e-08
+  []
   [multiple_component_tag_interface]
     type = 'Exodiff'
     input = 2d_diffusion_tag_vector.i
