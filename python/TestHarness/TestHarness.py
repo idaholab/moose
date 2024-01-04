@@ -388,6 +388,9 @@ class TestHarness:
         # executable is available after initalize
         checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
 
+        # get the capabilities of the executable
+        self.options._capabilities = util.getCapabilities(self.executable)
+
         os.chdir(self._orig_cwd)
 
     """
@@ -504,7 +507,7 @@ class TestHarness:
             print('\nExiting due to keyboard interrupt...')
 
     # Create and return list of tester objects. A tester is created by providing
-    # abspath to basename (dirpath), and the test file in queustion (file)
+    # abspath to basename (dirpath), and the test file in question (file)
     def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
