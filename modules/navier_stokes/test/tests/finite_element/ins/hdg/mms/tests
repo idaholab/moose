@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#26405'
+  design = 'NavierStokesHybridizedKernel.md'
+  [lid]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestCavity
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a hybridized discontinuous Galerkin scheme and produce second order convergence for all variables.'
+    method = '!dbg'
+    min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+    valgrind = 'none'
+  []
+[]
