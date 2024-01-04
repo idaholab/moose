@@ -26,7 +26,7 @@ InputParameters
 HybridizedKernel::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("HybridizedKernel");
+  params.registerBase("Kernel");
   params.suppressParameter<std::vector<AuxVariableName>>("save_in");
   params.suppressParameter<std::vector<AuxVariableName>>("diag_save_in");
   params.addPrivateParam<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse");
@@ -53,6 +53,8 @@ HybridizedKernel::HybridizedKernel(const InputParameters & parameters)
     _hibc_warehouse(
         *getCheckedPointerParam<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse"))
 {
+  // This class handles residuals and Jacobians for multiple variables
+  _fe_problem.setKernelCoverageCheck(false);
 }
 
 void

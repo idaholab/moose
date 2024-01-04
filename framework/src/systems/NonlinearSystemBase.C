@@ -474,6 +474,9 @@ NonlinearSystemBase::addHybridizedKernel(const std::string & kernel_name,
                                          const std::string & name,
                                          InputParameters & parameters)
 {
+  // The hybridized objects require that the residual and Jacobian be computed together
+  residualAndJacobianTogether();
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<MooseObjectWarehouse<HybridizedIntegratedBC> *>("hibc_warehouse") =
