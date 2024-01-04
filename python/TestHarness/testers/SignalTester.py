@@ -55,7 +55,7 @@ class SignalTester(RunApp):
             os.kill(pid,signal.SIGUSR1)
             break
 
-    def runCommand(self, cmd, cwd, timer, options):
+    def runCommand(self, timer, options):
         """
         Helper method for running external (sub)processes as part of the tester's execution.  This
         uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
@@ -63,49 +63,9 @@ class SignalTester(RunApp):
         in the tester's output and exit_code fields.
         """
 
-        cmd = self.getCommand(options).split(" ")
-        cwd = self.getTestDir()
-
-        # Verify that the working directory is available right before we execute.
-        if not os.path.exists(cwd):
-            # Timers must be used since they are directly indexed in the Job class
-            timer.start()
-            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
-            timer.stop()
+        exit_code = super().spawnSubprocessFromOptions(timer, options)
+        if exit_code: # Something went wrong
             return
 
-        self.process = None
-        try:
-            f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
-            e = SpooledTemporaryFile(max_size=100000)  # 100K character buffer
-
-            # On Windows, there is an issue with path translation when the command is passed in
-            # as a list.
-            if platform.system() == "Windows":
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
-            else:
-                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=False, preexec_fn=os.setsid, cwd=cwd)
-        except:
-            print("Error in launching a new task", cmd)
-            raise
-
-        self.process = process
-        self.outfile = f
-        self.errfile = e
-
-
-        timer.start()
-        self.send_signal(process.pid)
-        process.wait()
-        timer.stop()
-
-        self.exit_code = process.poll()
-        self.outfile.flush()
-        self.errfile.flush()
-
-        # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile, self)
-        self.outfile.close()
-        self.errfile.close()
+        self.send_signal(self.process.pid)
+        super().finishAndCleanupSubprocess(timer)

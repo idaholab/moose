@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, re, os, sys, pkgutil, shutil
+import platform, re, os, sys, pkgutil, shutil, shlex
 import mooseutils
 from TestHarness import util
 from TestHarness.StatusSystem import StatusSystem
@@ -39,6 +39,7 @@ class Tester(MooseObject):
         params.addParam('success_message', 'OK', "The successful message")
 
         params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+        params.addParam('use_shell',          False, "Whether to use the shell as the executing program. This has the effect of prepending '/bin/sh -c ' to the command to be run.")
         params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -308,15 +309,19 @@ class Tester(MooseObject):
         """ return the executable command that will be executed by the tester """
         return ''
 
-    def runCommand(self, cmd, cwd, timer, options):
+    def spawnSubprocessFromOptions(self, timer, options):
         """
-        Helper method for running external (sub)processes as part of the tester's execution.  This
-        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
-        be the same timer passed to the run method.  Results from running the subprocess is stored
-        in the tester's output and exit_code fields.
+        Spawns a subprocess based on given options, sets output and error files,
+        and starts timer.
         """
-
         cmd = self.getCommand(options)
+
+        use_shell = self.specs["use_shell"]
+
+        if not use_shell:
+            # Split command into list of args to be passed to Popen
+            cmd = shlex.split(cmd)
+
         cwd = self.getTestDir()
 
         # Verify that the working directory is available right before we execute.
@@ -325,7 +330,7 @@ class Tester(MooseObject):
             timer.start()
             self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
             timer.stop()
-            return
+            return 1
 
         self.process = None
         try:
@@ -334,12 +339,14 @@ class Tester(MooseObject):
 
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
+            # shell is set to False to avoid getting wrong PID to parent sh
+            # process on some systems instead of to child MOOSE app process
             if platform.system() == "Windows":
                 process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                                           shell=use_shell, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
             else:
                 process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
-                                           shell=True, preexec_fn=os.setsid, cwd=cwd)
+                                           shell=use_shell, preexec_fn=os.setsid, cwd=cwd)
         except:
             print("Error in launching a new task", cmd)
             raise
@@ -349,10 +356,18 @@ class Tester(MooseObject):
         self.errfile = e
 
         timer.start()
-        process.wait()
+        return 0
+
+    def finishAndCleanupSubprocess(self, timer):
+        """
+        Waits for the current subproccess to finish, stops the timer, and
+        cleans up.
+        """
+        self.process.wait()
+
         timer.stop()
 
-        self.exit_code = process.poll()
+        self.exit_code = self.process.poll()
         self.outfile.flush()
         self.errfile.flush()
 
@@ -360,6 +375,20 @@ class Tester(MooseObject):
         self.joined_out = util.readOutput(self.outfile, self.errfile, self)
         self.outfile.close()
         self.errfile.close()
+
+    def runCommand(self, timer, options):
+        """
+        Helper method for running external (sub)processes as part of the tester's execution.  This
+        uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
+        be the same timer passed to the run method.  Results from running the subprocess is stored
+        in the tester's output and exit_code fields.
+        """
+
+        exit_code = self.spawnSubprocessFromOptions(timer, options)
+        if exit_code: # Something went wrong
+            return
+
+        self.finishAndCleanupSubprocess(timer)
 
     def killCommand(self):
         """
@@ -388,10 +417,7 @@ class Tester(MooseObject):
         if needed. The run method is responsible to call the start+stop methods on timer to record
         the time taken to run the actual test.  start+stop can be called multiple times.
         """
-        cmd = self.getCommand(options)
-        cwd = self.getTestDir()
-
-        self.runCommand(cmd, cwd, timer, options)
+        self.runCommand(timer, options)
 
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """

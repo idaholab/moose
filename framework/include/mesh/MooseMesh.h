@@ -1749,7 +1749,7 @@ private:
   /// A parallel mesh generator such as DistributedRectilinearMeshGenerator
   /// already make everything ready. We do not need to gather all boundaries to
   /// every single processor. In general, we should avoid using ghostGhostedBoundaries
-  /// when posssible since it is not scalable
+  /// when possible since it is not scalable
   bool _need_ghost_ghosted_boundaries;
 
   /// Unique element integer IDs for each subdomain and each extra element integers

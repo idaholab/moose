@@ -195,9 +195,9 @@ computeFaceInfoFaceCoord(FaceInfo & fi,
  * Crate a new set of element-wise IDs by finding unique combinations of existing extra ID values
  *
  * This function finds the unique combinations by recursively calling itself for extra ID inputs. In
- * the recursive calling, the new unique combitnations is determined by combining the extra ID value
+ * the recursive calling, the new unique combinations is determined by combining the extra ID value
  * of current level and the unique combination determined in the previous level in recursion. In the
- * lowest level of recursion, the base combination is set by the unqiue ID values of the
+ * lowest level of recursion, the base combination is set by the unique ID values of the
  * corresponding extra ID.
  *
  * @param mesh input mesh

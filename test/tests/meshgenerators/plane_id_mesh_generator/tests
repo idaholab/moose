@@ -27,4 +27,49 @@
     requirement = 'The system shall support the generation of plane IDs for 3D extruded mesh'
     recover = false
   []
+  [errors]
+    requirement = "The system shall report an error if"
+    [coordinates_in_bad_order]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_coordinates='10 5 15'"
+      expect_err = 'Plane coordinates must be in increasing order'
+      detail = 'the user provides coordinates that are not in increasing order for the ID planes,'
+    []
+    [out_of_mesh_plane]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_axis=z"
+      expect_err = 'Plane axis must be contained in the mesh'
+      detail = 'the user provides a plane axis that is going outside the mesh,'
+    []
+    [non_matching_size_inputs]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_coordinates='10 5 15 20'"
+      expect_err = 'Sizes of \'plane_coordinates\' and \'num_ids_per_plane\' disagree'
+      detail = 'the user provides non-matching inputs for the number of planes and the ids to set between planes,'
+    []
+    [not_enough_planes]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_coordinates=2 Mesh/plane_id_gen/num_ids_per_plane=''"
+      expect_err = 'Size of \'plane_coordinates\' should be at least two'
+      detail = 'the user does not provide enough planes,'
+    []
+    [elements_being_cut]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_coordinates='0 2 15'"
+      expect_err = 'is cut by the planes'
+      detail = 'the planes cut the elements despite the allowed tolerance,'
+    []
+    [elements_out_of_planes]
+      type = RunException
+      input = 'plane_id_grid2d.i'
+      cli_args = "Mesh/plane_id_gen/plane_coordinates='6 10 15'"
+      expect_err = 'The planes do not cover element at'
+      detail = 'some elements are outside the regions between the planes specified.'
+    []
+  []
 []
