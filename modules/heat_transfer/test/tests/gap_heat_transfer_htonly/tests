@@ -44,7 +44,6 @@
     exodiff = 'gap_heat_transfer_htonly_rz_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
-    compiler = 'CLANG GCC'
     requirement = "Thermal contact shall solve cylindrical and plate heat transfer for a constant "
                   "conductivity gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -56,7 +55,6 @@
     exodiff = 'gap_heat_transfer_htonly_zr_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
-    compiler = 'CLANG GCC'
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
                   "gap in 2D axisymmetric coordinates where the axial axis is along the x-direction"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -69,7 +67,6 @@
     input = 'gap_heat_transfer_htonly_rspherical.i'
     exodiff = 'gap_heat_transfer_htonly_rspherical_out.e'
     custom_cmp = 'gap_heat_transfer_htonly_rspherical.exodiff'
-    compiler = 'CLANG GCC'
     requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
                   "gap in 1D spherically symmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -79,7 +76,7 @@
     type = Exodiff
     input = 'cyl3D.i'
     exodiff = 'cyl3D_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -89,7 +86,7 @@
     type = Exodiff
     input = 'cyl2D.i'
     exodiff = 'cyl2D_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
                   "gap in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -99,7 +96,7 @@
     type = Exodiff
     input = 'sphere3D.i'
     exodiff = 'sphere3D_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -109,7 +106,7 @@
     type = Exodiff
     input = 'sphere2DRZ.i'
     exodiff = 'sphere2DRZ_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
                   "gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -119,7 +116,7 @@
     type = Exodiff
     input = 'cyl2D_xz.i'
     exodiff = 'cyl2D_xz_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
                   "gap in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -129,7 +126,7 @@
     type = Exodiff
     input = 'cyl2D_yz.i'
     exodiff = 'cyl2D_yz_out.e'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
                   "gap in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -140,7 +137,7 @@
     input = 'planar_xy.i'
     exodiff = 'planar_xy_out.e'
     custom_cmp = 'planar.cmp'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
                   "in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -151,7 +148,7 @@
     input = 'planar_xz.i'
     exodiff = 'planar_xz_out.e'
     custom_cmp = 'planar.cmp'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
                   "in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -162,7 +159,7 @@
     input = 'planar_yz.i'
     exodiff = 'planar_yz_out.e'
     custom_cmp = 'planar.cmp'
-    superlu = true
+    capabilities = 'superlu'
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
                   "in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'

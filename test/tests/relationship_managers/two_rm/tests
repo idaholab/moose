@@ -10,7 +10,6 @@
       type = 'Exodiff'
       input = 'two_rm.i'
       exodiff = 'two_rm_out.e'
-      petsc_version = '>3.8'
       mesh_mode = 'REPLICATED'
       dof_id_bytes = 4 # Metis gives different partitions with 64-bit dof indices
 
@@ -26,7 +25,6 @@
       exodiff = 'two_rm_dist_out.e'
       cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=two_rm_dist_out'
 
-      petsc_version = '>3.8'
       mesh_mode = 'DISTRIBUTED'
 
       min_parallel = 3
