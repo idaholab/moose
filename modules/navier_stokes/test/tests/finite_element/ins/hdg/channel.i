@@ -1,4 +1,4 @@
-nu=4e-3
+nu=1
 
 [GlobalParams]
   variable = face_vel_x
@@ -9,7 +9,6 @@ nu=4e-3
   face_u = face_vel_x
   face_v = face_vel_y
   pressure = p
-  enclosure_lm = lm
   nu = ${nu}
 []
 
@@ -17,12 +16,12 @@ nu=4e-3
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = -1
-    xmax = 1
+    xmin = 0
+    xmax = 10
     ymin = -1
     ymax = 1
-    nx = 16
-    ny = 16
+    nx = 40
+    ny = 8
     elem_type = TRI6
   []
 []
@@ -36,9 +35,6 @@ nu=4e-3
   []
   [p]
     family = L2_LAGRANGE
-  []
-  [lm]
-    family = SCALAR
   []
 []
 
@@ -66,12 +62,16 @@ nu=4e-3
 [HybridizedBCs]
   [walls]
     type = NavierStokesHybridizedVelocityDirichletBC
-    boundary = 'left right bottom'
+    boundary = 'bottom top'
   []
-  [lid]
+  [inlet]
     type = NavierStokesHybridizedVelocityDirichletBC
-    boundary = 'top'
+    boundary = 'left'
     dirichlet_u = '1'
+  []
+  [outlet]
+    type = NavierStokesHybridizedOutflowBC
+    boundary = 'right'
   []
 []
 
