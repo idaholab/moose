@@ -30,7 +30,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # See #25819
     dof_id_bytes = 8
     # Set to >=9.0 once #21449 is resolved
@@ -52,7 +52,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # See #25819
     dof_id_bytes = 8
     # Set to >=9.0 once #21449 is resolved
@@ -73,7 +73,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0'
     # See #25819
     dof_id_bytes = 8
     # Set to >=9.0 once #21449 is resolved
