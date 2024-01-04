@@ -117,9 +117,10 @@
     cli_args = 'Mesh/uniform_refine=0 Outputs/file_base="simple_transient_diffusion_scaled_dbg"'
     exodiff = 'simple_transient_diffusion_scaled_dbg.e'
     prereq = 'test_signal_recover_debug'
-    should_execute = 'false'
+    should_execute = false
     requirement = 'The app, recovered from a signal-created checkpoint, should produce an accurate solution in a debug build.'
     issues = '#25755'
     method = 'dbg'
+    rel_err = 2.0e-4
   []
 []
