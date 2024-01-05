@@ -1,7 +1,7 @@
 [Tests]
   # relap-7#736
   issues = '#26336'
-  requirement = 'ShaftConnectedMotorUserObject.md'
+  design = 'ShaftConnectedMotorUserObject.md'
   [test]
     type = 'PetscJacobianTester'
     input = 'shaft_connected_motor.i'

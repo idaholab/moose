@@ -1,7 +1,7 @@
 [Tests]
   # idaholab/sockeye#56
   issues = '#26411'
-  requirement = 'ADMaterialFunctionProductMaterial.md'
+  design = 'ADMaterialFunctionProductMaterial.md'
   [test]
     type = 'CSVDiff'
     input = 'ad_material_function_product.i'

@@ -49,12 +49,14 @@
 /modules/contact @bwspenc @lindsayad @recuero
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
+/modules/doc/content/sqa_reports.yml @GiudGiud
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @lindsayad
 /modules/fluid_properties @joshuahansel @GiudGiud
 /modules/fsi @lindsayad
-/modules/functional_expansion_tools @lindsayad
+/modules/functional_expansion_tools @lindsayad @GiudGiud
 /modules/heat_conduction @lindsayad
+/modules/heat_transfer @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud @grmnptr
 /modules/optimization @zachmprince @dschwen
 /modules/phase_field @dschwen
