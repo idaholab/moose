@@ -144,7 +144,7 @@ class Tester(MooseObject):
         # Bool if test can run
         self._runnable = None
 
-        # Set up common paramaters
+        # Set up common parameters
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
 
@@ -422,7 +422,7 @@ class Tester(MooseObject):
 
     def finishAndCleanupSubprocess(self, timer):
         """
-        Waits for the current subproccess to finish, stops the timer, and
+        Waits for the current subprocess to finish, stops the timer, and
         cleans up.
         """
         self.process.wait()

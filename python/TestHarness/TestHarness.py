@@ -341,7 +341,7 @@ class TestHarness:
 
         self.initialize(argv, app_name)
 
-        # executable is available after initalize
+        # executable is available after initialize
         checks['installation_type'] = util.checkInstalled(self.executable, app_name)
 
         # get the capabilities of the executable
@@ -857,8 +857,8 @@ class TestHarness:
                             if job.isSilent():
                                 continue
 
-                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                            f.write(formated_results + '\n')
+                            formatted_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formatted_results + '\n')
 
             # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
             if ((self.options.ok_files and self.num_passed)
@@ -882,10 +882,10 @@ class TestHarness:
 
                         output += "\n\nTEST OUTPUT:" + job.getOutput()
                         output_file = job.getOutputFile()
-                        formated_results = util.formatResult(job, self.options, result=output, color=False)
+                        formatted_results = util.formatResult(job, self.options, result=output, color=False)
                         if output_file:
                             with open(output_file, 'w') as f:
-                                f.write(formated_results)
+                                f.write(formatted_results)
 
         except IOError:
             print('Permission error while writing results to disc')
@@ -973,7 +973,7 @@ class TestHarness:
                     self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', _input_file_name)
 
                 except ValueError:
-                    # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
+                    # This is a hidden file, controlled by the TestHarness. So we probably shouldn't error
                     # and exit. Perhaps a warning instead, and create a new file? Down the road, when
                     # we use this file for PBS etc, this should probably result in an exception.
                     print(('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage)))
