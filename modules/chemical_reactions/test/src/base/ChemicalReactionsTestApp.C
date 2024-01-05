@@ -47,7 +47,7 @@ ChemicalReactionsTestApp::registerAll(Factory & f,
 void
 ChemicalReactionsTestApp::registerApps()
 {
-  registerApp(ChemicalReactionsApp);
+  ChemicalReactionsApp::registerApps();
   registerApp(ChemicalReactionsTestApp);
 }
 
