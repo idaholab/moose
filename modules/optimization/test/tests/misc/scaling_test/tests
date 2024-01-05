@@ -1,7 +1,6 @@
 [Tests]
   issues = '#25646'
   design = 'SteadyAndAdjoint.md'
-
   [scaling_factor_for_adjoint_variables]
     type = 'RunException'
     input = scaling_test.i

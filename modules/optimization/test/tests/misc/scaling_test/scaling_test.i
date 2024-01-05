@@ -21,11 +21,11 @@
 
 [Variables]
   [T]
-    scaling=10
+    scaling = 10
   []
   [lam_T]
     nl_sys = adjoint
-    scaling=1e3
+    scaling = 1e3
   []
 []
 
@@ -43,19 +43,17 @@
 []
 
 [BCs]
-  [conv_BC_front]
-    type = ADConvectiveHeatFluxBC
+  [dir_BC_front]
+    type = NeumannBC
     variable = T
     boundary = front
-    T_infinity = 355
-    heat_transfer_coefficient = 90000
+    value = 2
   []
-  [conv_BC_back]
-    type = ADConvectiveHeatFluxBC
+  [dir_BC_back]
+    type = DirichletBC
     variable = T
     boundary = back
-    T_infinity = 325
-    heat_transfer_coefficient = 40000
+    value = 300
   []
 []
 
@@ -76,18 +74,12 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu mumps'
 
-  # automatic_scaling = true
-  # scaling_group_variables = 'u_x u_y u_z'
-  # off_diagonals_in_auto_scaling = true
-  # compute_scaling_once = false
-
   line_search = 'none'
 
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-30
   nl_max_its = 10
 
-  # l_tol = 1e-4
   l_max_its = 10
 []
 
@@ -122,7 +114,6 @@
     y_coord_name = measure_data/y
     z_coord_name = measure_data/z
     value_name = measure_data/u
-    # weight_name = misfit/weighted_temperature
   []
 []
 ##--------- Outputs ------------------#
