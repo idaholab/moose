@@ -57,7 +57,7 @@ class AppFactory
 public:
   /**
    * Get the instance of the AppFactory
-   * @return Pointer to the AppFactory instance
+   * @return Reference to the AppFactory instance
    */
   static AppFactory & instance();
 
