@@ -57,7 +57,7 @@ protected:
    */
   virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
 
-  VectorMooseVariable & _var;
+  const VectorMooseVariable & _var;
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;

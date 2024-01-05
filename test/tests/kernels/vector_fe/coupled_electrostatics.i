@@ -4,6 +4,8 @@
 # div(u) = f, of the standard Poisson problem div(grad(p)) = -f.
 # Manufactured solution: p = cos(k*x)*sin(k*y)*cos(k*z).
 
+k = asin(1)
+
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -36,6 +38,16 @@
   []
 []
 
+[Functions]
+  [f]
+    type = ParsedVectorFunction
+    expression_x =  ${k}*sin(${k}*x)*sin(${k}*y)*cos(${k}*z)
+    expression_y = -${k}*cos(${k}*x)*cos(${k}*y)*cos(${k}*z)
+    expression_z =  ${k}*cos(${k}*x)*sin(${k}*y)*sin(${k}*z)
+    div = ${Mesh/gmg/dim}*${k}^2*cos(${k}*x)*sin(${k}*y)*cos(${k}*z)
+  []
+[]
+
 [Kernels]
   [coefficient]
     type = VectorFunctionReaction
@@ -55,7 +67,7 @@
   [forcing]
     type = BodyForce
     variable = p
-    function = f
+    function = ${Functions/f/div}
   []
   [mean_zero_p]
     type = ScalarLagrangeMultiplier
@@ -68,7 +80,7 @@
   [constraint]
     type = AverageValueConstraint
     variable = lambda
-    pp_name = pp
+    pp_name = PP
     value = 0.0
   []
 []
@@ -77,34 +89,33 @@
   [sides]
     type = VectorDivPenaltyDirichletBC
     variable = u
-    function = s
+    function = f
     penalty = 1e8
     boundary = 'top bottom left right front back'
   []
 []
 
-[Functions]
-  [f]
-    type = ParsedFunction
-    expression = ${Mesh/gmg/dim}*k*k*cos(k*x)*sin(k*y)*cos(k*z)
-    symbol_names = k
-    symbol_values = 1.570796326794897 # pi/2
-  []
-  [s]
-    type = ParsedVectorFunction
-    expression_x =  k*sin(k*x)*sin(k*y)*cos(k*z)
-    expression_y = -k*cos(k*x)*cos(k*y)*cos(k*z)
-    expression_z =  k*cos(k*x)*sin(k*y)*sin(k*z)
-    symbol_names = k
-    symbol_values = 1.570796326794897 # pi/2
-  []
-[]
-
 [Postprocessors]
-  [pp]
+  active = PP
+  [PP]
     type = ElementIntegralVariablePostprocessor
     variable = p
     execute_on = linear
+  []
+  [L2Error]
+    type = ElementVectorL2Error
+    variable = u
+    function = f
+  []
+  [HDivSemiError]
+    type = ElementHDivSemiError
+    variable = u
+    function = f
+  []
+  [HDivError]
+    type = ElementHDivError
+    variable = u
+    function = f
   []
 []
 
@@ -117,9 +128,9 @@
 
 [Executioner]
   type = Steady
-  solve_type = NEWTON
-  petsc_options_iname = -pc_type
-  petsc_options_value = jacobi
+  solve_type = LINEAR
+  petsc_options_iname = '-pc_type -ksp_rtol -ksp_norm_type'
+  petsc_options_value = '  jacobi     1e-12 preconditioned'
 []
 
 [Outputs]

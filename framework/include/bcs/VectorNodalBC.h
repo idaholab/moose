@@ -32,7 +32,7 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
-  VectorMooseVariable & _var;
+  const VectorMooseVariable & _var;
 
   /// current node being processed
   const Node * const & _current_node;

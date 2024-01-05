@@ -11,63 +11,78 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorFEWave
     variable = u
-    x_forcing_func = 'x_ffn'
-    y_forcing_func = 'y_ffn'
-  [../]
+    x_forcing_func = x_ffn
+    y_forcing_func = y_ffn
+  []
 []
 
 [BCs]
-  [./bnd]
+  [bnd]
     type = VectorCurlPenaltyDirichletBC
     boundary = 'left right top bottom'
     penalty = 1e10
-    function_x = 'x_sln'
-    function_y = 'y_sln'
+    function = sln
     variable = u
-  [../]
+  []
 []
 
 [Functions]
-  [./x_ffn]
+  [x_ffn]
     type = ParsedFunction
     expression = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
-  [../]
-  [./y_ffn]
+  []
+  [y_ffn]
     type = ParsedFunction
     expression = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
-  [../]
-  [./x_sln]
-    type = ParsedFunction
-    expression = 'cos(pi*x)*sin(pi*y)'
-  [../]
-  [./y_sln]
-    type = ParsedFunction
-    expression = '-sin(pi*x)*cos(pi*y)'
-  [../]
+  []
+  [sln]
+    type = ParsedVectorFunction
+    expression_x =  cos(pi*x)*sin(pi*y)
+    expression_y = -sin(pi*x)*cos(pi*y)
+    curl_z =  -2*pi*cos(pi*x)*cos(pi*y)
+  []
+[]
+
+[Postprocessors]
+  active = ''
+  [L2Error]
+    type = ElementVectorL2Error
+    variable = u
+    function = sln
+  []
+  [HCurlSemiError]
+    type = ElementHCurlSemiError
+    variable = u
+    function = sln
+  []
+  [HCurlError]
+    type = ElementHCurlError
+    variable = u
+    function = sln
+  []
 []
 
 [Preconditioning]
-  [./pre]
+  [pre]
     type = SMP
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'LINEAR'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
+  solve_type = LINEAR
+  petsc_options_iname = -pc_type
+  petsc_options_value = lu
 []
 
 [Outputs]
