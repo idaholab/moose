@@ -23,7 +23,7 @@ class RunApp(Tester):
         params.addParam('expect_out',         "A regular expression or literal string that must occur in the output in order for the test to be considered passing (see match_literal).")
         params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
         params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
-        params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
+        params.addParam('should_crash', False, "Indicates that the test is expected to crash or otherwise terminate early")
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
@@ -38,7 +38,7 @@ class RunApp(Tester):
         params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
         params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
         params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
-        params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
+        params.addParam('redirect_output',  False, "Redirect stdout to files. Necessary when expecting an error when using parallel options")
 
         params.addParam('allow_warnings',   True, "Whether or not warnings are allowed.  If this is False then a warning will be treated as an error.  Can be globally overridden by setting 'allow_warnings = False' in the testroot file.");
         params.addParam('allow_unused',   False, "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.");
@@ -374,7 +374,7 @@ class RunApp(Tester):
         For testers that are RunApp types, they will call this method (processResults).
 
         Other tester types (like exodiff) will call testFileOutput. This is to prevent
-        derived testers from having a successfull status set, before actually running
+        derived testers from having a successful status set, before actually running
         the derived processResults method.
 
         # TODO: because RunParallel is now setting every successful status message,
