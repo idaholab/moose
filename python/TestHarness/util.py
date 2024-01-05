@@ -661,6 +661,10 @@ def checkCapabilities(supported, test):
 
         # simple existence non-false check (boolean)
         if capability in supported:
+            if negate and op is None:
+                all_supported = False
+                reasons.append(capability + ' supported')
+
             if isinstance(supported[capability], bool) and supported[capability] == negate:
                 all_supported = False
                 if negate:
@@ -675,11 +679,15 @@ def checkCapabilities(supported, test):
                 continue
 
         # if there is no operator we're done here
-        if not op:
+        if op is None:
             continue
 
         # int comparison
-        if isinstance(supported[capability], int) and not ops[op](supported[capability], int(value)):
+        if isinstance(supported[capability], int):
+            match = re.search(r'^\d+$', value)
+            if match is None:
+                raise Exception("Expected integer value in '%s'." % condition)
+            if ops[op](supported[capability], int(value)) == negate:
                 all_supported = False
                 reasons.append(condition + ' not fulfilled')
 
@@ -694,12 +702,12 @@ def checkCapabilities(supported, test):
                 # version number comparison logic
                 values1 = [int(i) for i in supported[capability].split('.')]
                 values2 = [int(i) for i in value.split('.')]
-                if not ops[op](values1, values2):
+                if ops[op](values1, values2) == negate:
                     all_supported = False
                     reasons.append(condition + ' version not matched')
             else:
                 # simple string comparison
-                if not ops[op](supported[capability], value):
+                if ops[op](supported[capability], value) == negate:
                     all_supported = False
                     reasons.append(condition + ' not fulfilled')
 
