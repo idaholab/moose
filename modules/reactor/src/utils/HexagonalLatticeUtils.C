@@ -211,7 +211,7 @@ HexagonalLatticeUtils::channelSpecificSurfaceArea(
   }
 }
 
-const Real &
+Real
 HexagonalLatticeUtils::channelHydraulicDiameter(const channel_type::ChannelTypeEnum & channel) const
 {
   switch (channel)
@@ -524,7 +524,7 @@ HexagonalLatticeUtils::computeChannelPinIndices()
 
 const std::vector<Point>
 HexagonalLatticeUtils::interiorChannelCornerCoordinates(
-    const unsigned int & interior_channel_id) const
+    const unsigned int interior_channel_id) const
 {
   std::vector<Point> corners;
   auto pin_indices = _interior_channel_pin_indices[interior_channel_id];
@@ -535,7 +535,7 @@ HexagonalLatticeUtils::interiorChannelCornerCoordinates(
 }
 
 const std::vector<Point>
-HexagonalLatticeUtils::edgeChannelCornerCoordinates(const unsigned int & edge_channel_id) const
+HexagonalLatticeUtils::edgeChannelCornerCoordinates(const unsigned int edge_channel_id) const
 {
   std::vector<Point> corners;
 
@@ -559,7 +559,7 @@ HexagonalLatticeUtils::edgeChannelCornerCoordinates(const unsigned int & edge_ch
 }
 
 const std::vector<Point>
-HexagonalLatticeUtils::cornerChannelCornerCoordinates(const unsigned int & corner_channel_id) const
+HexagonalLatticeUtils::cornerChannelCornerCoordinates(const unsigned int corner_channel_id) const
 {
   std::vector<Point> corners;
 
@@ -840,7 +840,7 @@ HexagonalLatticeUtils::globalGapIndex(const std::pair<int, int> & local_gap) con
 }
 
 Real
-HexagonalLatticeUtils::distanceFromGap(const Point & pt, const unsigned int & gap_index) const
+HexagonalLatticeUtils::distanceFromGap(const Point & pt, const unsigned int gap_index) const
 {
   auto p = _gap_points[gap_index];
   return geom_utils::projectedDistanceFromLine(pt, p[0], p[1], _axis);
@@ -890,7 +890,7 @@ HexagonalLatticeUtils::gapIndexAndDistance(const Point & point,
 }
 
 unsigned int
-HexagonalLatticeUtils::firstPinInRing(const unsigned int & ring) const
+HexagonalLatticeUtils::firstPinInRing(const unsigned int ring) const
 {
   mooseAssert(ring > 0, "Ring indexing starts at 1");
   if (ring == 1)
@@ -900,7 +900,7 @@ HexagonalLatticeUtils::firstPinInRing(const unsigned int & ring) const
 }
 
 unsigned int
-HexagonalLatticeUtils::lastPinInRing(const unsigned int & ring) const
+HexagonalLatticeUtils::lastPinInRing(const unsigned int ring) const
 {
   mooseAssert(ring > 0, "Ring indexing starts at 1");
   if (ring == 1)
@@ -910,7 +910,7 @@ HexagonalLatticeUtils::lastPinInRing(const unsigned int & ring) const
 }
 
 bool
-HexagonalLatticeUtils::lastGapInRing(const unsigned int & gap_index) const
+HexagonalLatticeUtils::lastGapInRing(const unsigned int gap_index) const
 {
   if (gap_index >= _n_interior_gaps)
     return false;

@@ -36,7 +36,7 @@ Point unitVector(const Point & pt, const std::string & name);
  * @param[in] axis axis expressed as vector
  * @return rotated point
  */
-Point rotatePointAboutAxis(const Point & p, const Real & angle, const Point & axis);
+Point rotatePointAboutAxis(const Point & p, const Real angle, const Point & axis);
 
 /**
  * Get the minimum distance from a point to another set of points, in the plane
@@ -48,7 +48,7 @@ Point rotatePointAboutAxis(const Point & p, const Real & angle, const Point & ax
  */
 Real minDistanceToPoints(const Point & pt,
                          const std::vector<Point> & candidates,
-                         const unsigned int & axis);
+                         const unsigned int axis);
 
 /**
  * Get the corner coordinates of a regular 2-D polygon, assuming a face of the polygon
@@ -59,7 +59,7 @@ Real minDistanceToPoints(const Point & pt,
  * @return corner coordinates
  */
 std::vector<Point>
-polygonCorners(const unsigned int & num_sides, const Real & radius, const unsigned int & axis);
+polygonCorners(const unsigned int num_sides, const Real radius, const unsigned int axis);
 
 /**
  * Get the indices of the plane perpendicular to the specified axis.
@@ -69,7 +69,7 @@ polygonCorners(const unsigned int & num_sides, const Real & radius, const unsign
  * @param[in] axis axis perpendicular to the projection plane
  * @return indices of coordinates on plane
  */
-std::pair<unsigned int, unsigned int> projectedIndices(const unsigned int & axis);
+std::pair<unsigned int, unsigned int> projectedIndices(const unsigned int axis);
 
 /**
  * Given two coordinates, construct a point in the 2-D plane perpendicular to the
@@ -79,7 +79,7 @@ std::pair<unsigned int, unsigned int> projectedIndices(const unsigned int & axis
  * @param[in] axis axis perpendicular to the projection plane
  * @return point
  */
-Point projectPoint(const Real & x0, const Real & x1, const unsigned int & axis);
+Point projectPoint(const Real x0, const Real x1, const unsigned int axis);
 
 /**
  * Get the unit normal vector between two points (which are first projected onto
@@ -90,7 +90,7 @@ Point projectPoint(const Real & x0, const Real & x1, const unsigned int & axis);
  * @param[in] axis project points onto plane perpendicular to this axis
  * @return unit normal
  */
-Point projectedUnitNormal(Point pt1, Point pt2, const unsigned int & axis);
+Point projectedUnitNormal(Point pt1, Point pt2, const unsigned int axis);
 
 /**
  * Compute the distance from a 3-D line, provided in terms of two points on the line
@@ -111,7 +111,7 @@ Real distanceFromLine(const Point & pt, const Point & line0, const Point & line1
  * @param[in] axis axis index (0 = x, 1 = y, 2 = z) perpendicular to the projection plane
  * @return distance from line
  */
-Real projectedDistanceFromLine(Point pt, Point line0, Point line1, const unsigned int & axis);
+Real projectedDistanceFromLine(Point pt, Point line0, Point line1, const unsigned int axis);
 
 /**
  * If positive, point is on the positive side of the half space (and vice versa). Because
@@ -123,7 +123,7 @@ Real projectedDistanceFromLine(Point pt, Point line0, Point line1, const unsigne
  * @param[in] axis axis perpendicular to plane onto which point and line are first projected
  * @return half space of line
  */
-Real projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int & axis);
+Real projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int axis);
 
 /**
  * Whether a point is in 2-D a polygon in the plane perpendicular to the specified
@@ -134,7 +134,7 @@ Real projectedLineHalfSpace(Point pt1, Point pt2, Point pt3, const unsigned int 
  * @return whether point is inside the polygon
  */
 bool
-pointInPolygon(const Point & point, const std::vector<Point> & corners, const unsigned int & axis);
+pointInPolygon(const Point & point, const std::vector<Point> & corners, const unsigned int axis);
 
 /**
  * Whether a point is on the edge of a 2-D polygon in the plane perpendicular to
@@ -144,13 +144,12 @@ pointInPolygon(const Point & point, const std::vector<Point> & corners, const un
  * @param[in] axis axis perpendicular to the plane of the polygon
  * @return whether point is on edge of polygon
  */
-bool
-pointOnEdge(const Point & point, const std::vector<Point> & corners, const unsigned int & axis);
+bool pointOnEdge(const Point & point, const std::vector<Point> & corners, const unsigned int axis);
 
 /**
  * Get corner points of a bounding box, with side length re-scaled
  * @param[in] box bounding box to start from
  * @param[in] factor by which to multiply the bounding box side
  */
-std::vector<Point> boxCorners(const BoundingBox & box, const Real & factor);
+std::vector<Point> boxCorners(const BoundingBox & box, const Real factor);
 } // end of namespace geom_utils

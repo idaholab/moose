@@ -35,12 +35,6 @@ HexagonalGridDivision::validParams()
       "inner flat-to-flat distance");
   params.addRequiredRangeCheckedParam<Real>("pin_pitch", "pin_pitch>0", "Distance between pins");
 
-  // Most of the infrastructure already exists to use another axis, it's just not disabled because
-  // not tested.
-  MooseEnum z_axis("X Y Z", "Z");
-  params.addParam<MooseEnum>("z_axis", z_axis, "Axial direction for the lattice");
-  params.suppressParameter<MooseEnum>("z_axis");
-
   params.addRequiredParam<Real>("z_min", "Minimal axial extent of the lattice");
   params.addRequiredParam<Real>("z_max", "Maximum axial extent of the lattice");
   params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr>0", "Number of hexagonal rings");
@@ -62,10 +56,7 @@ HexagonalGridDivision::HexagonalGridDivision(const InputParameters & parameters)
             : nullptr),
     _lattice_flat_to_flat(getParam<Real>("lattice_flat_to_flat")),
     _pin_pitch(getParam<Real>("pin_pitch")),
-    _z_axis(getParam<MooseEnum>("z_axis") == "x"   ? Point(1, 0, 0)
-            : getParam<MooseEnum>("z_axis") == "y" ? Point(0, 1, 0)
-                                                   : Point(0, 0, 1)),
-    _z_axis_index(getParam<MooseEnum>("z_axis")),
+    _z_axis_index(MooseEnum("X Y Z", "Z")),
     _min_z(getParam<Real>("z_min")),
     _max_z(getParam<Real>("z_max")),
     _nr(getParam<unsigned int>("nr")),
@@ -97,7 +88,7 @@ HexagonalGridDivision::initialize()
   // Check that the grid is well-defined
   if (_center_positions)
   {
-    Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
+    const Real min_center_dist = _center_positions->getMinDistanceBetweenPositions();
     // Note that if the positions are not aligned on a hexagonal lattice themselves,
     // this bound is not sufficiently strict. The simplest example would be non-coplanar
     // points, which can be a great distance away axially but be on the same axis
@@ -107,7 +98,7 @@ HexagonalGridDivision::initialize()
           min_center_dist,
           "), closer than the extent of each grid (",
           _lattice_flat_to_flat,
-          "). Mesh division is ill - defined ");
+          "). Mesh division is ill-defined ");
   }
 }
 
