@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "Capabilities.h"
 
 InputParameters
 ChemicalReactionsApp::validParams()
@@ -29,10 +30,6 @@ registerKnownLabel("ChemicalReactionsApp");
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
-#ifdef THERMOCHIMICA_ENABLED
-  registerCapability("thermochimica");
-#endif
-
   ChemicalReactionsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
@@ -62,6 +59,10 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 ChemicalReactionsApp::registerApps()
 {
+#ifdef THERMOCHIMICA_ENABLED
+  Capabilities::add("thermochimica");
+#endif
+
   registerApp(ChemicalReactionsApp);
 }
 

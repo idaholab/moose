@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidMechanicsTestApp.h"
-#include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -22,7 +21,8 @@ SolidMechanicsTestApp::validParams()
 
 registerKnownLabel("SolidMechanicsTestApp");
 
-SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
+SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters)
+  : SolidMechanicsApp(parameters)
 {
   SolidMechanicsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -31,9 +31,11 @@ SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : Moose
 SolidMechanicsTestApp::~SolidMechanicsTestApp() {}
 
 void
-SolidMechanicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+SolidMechanicsTestApp::registerAll(Factory & f,
+                                   ActionFactory & af,
+                                   Syntax & /*s*/,
+                                   bool use_test_objs)
 {
-  SolidMechanicsApp::registerAll(f, af, s);
   if (use_test_objs)
   {
     Registry::registerObjectsTo(f, {"SolidMechanicsTestApp"});
@@ -43,7 +45,7 @@ SolidMechanicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, 
 void
 SolidMechanicsTestApp::registerApps()
 {
-  registerApp(SolidMechanicsApp);
+  SolidMechanicsApp::registerApps();
   registerApp(SolidMechanicsTestApp);
 }
 
