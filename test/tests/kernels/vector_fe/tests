@@ -1,13 +1,14 @@
 [Tests]
   design = 'syntax/Variables/index.md'
-  [./vector_fe]
+  [vector_fe]
     type = Exodiff
     input = 'vector_kernel.i'
     exodiff = 'vector_kernel_out.e'
     abs_zero = 1e-8
     issues = "#10049"
-    requirement = "The system shall be able to solve a curl-curl problem using NEDELEC_ONE elements."
-  [../]
+    requirement = "The system shall be able to solve a curl-curl problem "
+                  "using Nedelec elements of the first kind."
+  []
   [vector_fe_errors]
     type = CSVDiff
     input = vector_kernel.i
@@ -19,7 +20,7 @@
     requirement = 'The system shall be able to estimate the L2 and H(curl) errors for a curl-curl '
                   'problem solved using Nedelec elements of the first kind.'
   []
-  [./coupled_scalar_vector]
+  [coupled_scalar_vector]
     type = Exodiff
     input = 'coupled_scalar_vector.i'
     exodiff = 'coupled_scalar_vector_out.e'
@@ -27,15 +28,15 @@
     rel_err = 3e-5
     issues = "#10049"
     requirement = "The system shall be able to couple a vector variable into a standard kernel."
-  [../]
-  [./coupled_scalar_default_vector_source]
+  []
+  [coupled_scalar_default_vector_source]
     type = Exodiff
     input = 'coupled_scalar_default_vector_value.i'
     exodiff = 'coupled_scalar_default_vector_value_out.e'
     issues = '#10049'
     requirement = "The system shall be able to assign a default value for a vector variable from the source file."
-  [../]
-  [./coupled_scalar_default_vector_input_and_warn]
+  []
+  [coupled_scalar_default_vector_input_and_warn]
     type = Exodiff
     input = 'coupled_scalar_default_vector_value.i'
     exodiff = 'coupled_scalar_default_vector_value_alt_out.e'
@@ -45,8 +46,8 @@
     issues = '#10049'
     requirement = "The system shall warn when assigning a default value with number of components less than LIBMESH_DIM, "
                   "and it shall be able to assign the default value from the input file."
-  [../]
-  [./coupled_scalar_default_vector_jacobian]
+  []
+  [coupled_scalar_default_vector_jacobian]
     type = PetscJacobianTester
     input = 'coupled_scalar_default_vector_value.i'
     ratio_tol = 1e-7
@@ -54,45 +55,50 @@
     run_sim = True
     cli_args = 'Mesh/nx=3 Mesh/ny=3 Outputs/exodus=false'
     issues = '#10049'
-    requirement = "The system shall be able to assign a default value for a vector variable from the input file and still have the correct jacobian."
-  [../]
-  [./lagrange_vec]
+    requirement = "The system shall be able to assign a default value for a "
+                  "vector variable from the input file and still have the correct jacobian."
+  []
+  [lagrange_vec]
     type = Exodiff
     input = 'lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-8
     issues = "#10049"
-    requirement = "The system shall be able to solve multi-dimensional problems with LAGRANGE_VEC variables."
-  [../]
-  [./lagrange_vec_1d]
+    requirement = "The system shall be able to solve multi-dimensional "
+                  "problems with vector Lagrange variables."
+  []
+  [lagrange_vec_1d]
     type = Exodiff
     input = 'lagrange_vec_1d.i'
     exodiff = 'lagrange_vec_1d_out.e'
     abs_zero = 1e-8
     issues = "#10049"
-    requirement = "The system shall be able to solve one-dimensional problems with LAGRANGE_VEC variables."
-  [../]
-  [./lagrange_vec_1d_jac]
+    requirement = "The system shall be able to solve one-dimensional "
+                  "problems with vector Lagrange variables."
+  []
+  [lagrange_vec_1d_jac]
     type = PetscJacobianTester
     input = 'lagrange_vec_1d.i'
     ratio_tol = 1e-7
     difference_tol = 1e-6
     issues = "#10049"
     cli_args = 'Outputs/exodus=false Mesh/nx=3'
-    requirement = "The system shall be able to solve one-dimensional problems with LAGRANGE_VEC variables and produce the correct Jacobian."
-  [../]
-  [./ad_lagrange_vec]
+    requirement = "The system shall be able to solve one-dimensional "
+                  "problems with vector Lagrange variables and produce the correct Jacobian."
+  []
+  [ad_lagrange_vec]
     type = Exodiff
     input = 'ad_lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-7
     design = "ADVectorFunctionDirichletBC.md"
     issues = "#5658"
-    requirement = "The system shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and reproduce the hand-coded result."
+    requirement = "The system shall be able to solve multi-d vector Lagrange "
+                  "problems with automatic differentiation and reproduce the hand-coded result."
     prereq = 'lagrange_vec'
     cli_args = 'Outputs/file_base=lagrange_vec_out'
-  [../]
-  [./ad_lagrange_vec_jacobian]
+  []
+  [ad_lagrange_vec_jacobian]
     type = PetscJacobianTester
     input = 'ad_lagrange_vec.i'
     ratio_tol = 1e-7
@@ -100,10 +106,11 @@
     run_sim = True
     design = "ADVectorFunctionDirichletBC.md"
     issues = "#5658"
-    requirement = "The system shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and have a perfect Jacobian."
+    requirement = "The system shall be able to solve multi-d vector Lagrange "
+                  "problems with automatic differentiation and have a perfect Jacobian."
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
-  [../]
-  [./jacobian]
+  []
+  [jacobian]
     type = PetscJacobianTester
     input = 'coupled_scalar_vector_jacobian.i'
     recover = false
@@ -112,9 +119,10 @@
     difference_tol = 5e-6
     design = "syntax/Variables/index.md "
     issues = "#10049"
-    requirement = "The system shall be able to couple a vector variable into a standard kernel and produced the correct Jacobian."
-  [../]
-  [./coupled_gradient_dot_em_gauge]
+    requirement = "The system shall be able to couple a vector variable into a "
+                  "standard kernel and produce the correct Jacobian."
+  []
+  [coupled_gradient_dot_em_gauge]
     type = Exodiff
     input = 'electromagnetic_coulomb_gauge.i'
     exodiff = 'electromagnetic_coulomb_gauge_out.e'
@@ -122,9 +130,10 @@
     rel_err = 3e-5
     design = "syntax/Variables/index.md  VectorBodyForce.md"
     issues = "#10861"
-    requirement = "The system shall be able to couple a standard variable into a vector kernel. Additionally, The system shall be able to calculate time derivatives of variable gradients."
-  [../]
-  [./coupled_gradient_dot_jacobian]
+    requirement = "The system shall be able to couple a standard variable into a vector kernel. "
+                  "Additionally, the system shall be able to calculate time derivatives of variable gradients."
+  []
+  [coupled_gradient_dot_jacobian]
     type = PetscJacobianTester
     input = 'electromagnetic_coulomb_gauge.i'
     recover = false
@@ -134,16 +143,19 @@
     cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false Executioner/num_steps=1'
     design = "syntax/Variables/index.md VectorBodyForce.md"
     issues = "#10861"
-    requirement = "The system shall be able to compute the correct Jacobian when coupling a standard variable into a vector kernel and taking time derivatives of variable gradients."
-  [../]
-  [./coupled_vector_gradient]
+    requirement = "The system shall be able to compute the correct Jacobian when coupling a "
+                  "standard variable into a vector kernel and taking time derivatives of variable gradients."
+  []
+  [coupled_vector_gradient]
     type = Exodiff
     input = 'coupled_vector_gradient.i'
     exodiff = 'coupled_vector_gradient_out.e'
     design = "syntax/Variables/index.md VectorDiffusion.md VectorDirichletBC.md VectorFunctionDirichletBC.md"
     issues = "#11150"
-    requirement = "The system shall be able to assign dirichlet boundary conditions for LAGRANGE_VEC variables; obtain coupled vector variable gradients; and correctly initialize both volume and face curl shape functions when the curl of a variable is requested."
-  [../]
+    requirement = "The system shall be able to assign Dirichlet boundary conditions for vector Lagrange variables; "
+                  "obtain coupled vector variable gradients; and correctly initialize both volume and face curl "
+                  "shape functions when the curl of a variable is requested."
+  []
   [comp_error]
     type = RunException
     input = 'lagrange_vec.i'
@@ -151,7 +163,8 @@
     expect_err = "The 'function' and 'function_x' parameters cannot both be set."
     design = "VectorBodyForce.md"
     issues = "#13309"
-    requirement = "The system shall report an error if the 'function' and 'function_x' parameters are both set when defining a vector function Dirichlet boundary condition."
+    requirement = "The system shall report an error if the 'function' and 'function_x' "
+                  "parameters are both set when defining a vector function Dirichlet boundary condition."
   []
   [ad_comp_error]
     type = RunException
@@ -160,7 +173,8 @@
     expect_err = "The 'function' and 'function_x' parameters cannot both be set."
     design = "ADVectorFunctionDirichletBC.md"
     issues = "#13309"
-    requirement = "The system shall report an error if the 'function' and 'function_x' parameters are both set within the ADVectorFunctionDirichletBC object."
+    requirement = "The system shall report an error if the 'function' and 'function_x' "
+                  "parameters are both set within the ADVectorFunctionDirichletBC object."
   []
   [coupled_electrostatics]
     design = 'DivField.md GradField.md VectorDivPenaltyDirichletBC.md'
