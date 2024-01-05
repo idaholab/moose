@@ -1464,7 +1464,7 @@ void
 SystemBase::addScalingVector()
 {
   addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
-  _subproblem.hasScalingVector();
+  _subproblem.hasScalingVector(number());
 }
 
 bool
