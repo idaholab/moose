@@ -9,7 +9,6 @@
 
 #include "GeneralReporter.h"
 #include "OptimizationData.h"
-#include <complex>
 
 registerMooseObject("OptimizationApp", OptimizationData);
 
