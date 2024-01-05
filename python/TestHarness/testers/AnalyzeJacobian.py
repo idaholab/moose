@@ -29,11 +29,11 @@ class AnalyzeJacobian(FileTester):
         FileTester.__init__(self, name, params)
 
     def getOutputFiles(self, options):
-        # analizejacobian.py outputs files prefixed with the input file name
+        # analyzejacobian.py outputs files prefixed with the input file name
         return [self.specs['input']]
 
     def prepare(self, options):
-        # We do not know what file(s) analizejacobian.py produces
+        # We do not know what file(s) analyzejacobian.py produces
         return
 
     # Check if numpy is available
