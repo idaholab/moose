@@ -617,8 +617,7 @@ def getCapabilities(exe):
         output = output.split('**END JSON DATA**\n')[0]
         results = json.loads(output)
     except IndexError:
-        print(f'{exe} --show-capabilities, produced an error during execution')
-        sys.exit(1)
+        return {}
     except json.decoder.JSONDecodeError:
         print(f'{exe} --show-capabilities, produced invalid JSON output')
         sys.exit(1)
