@@ -55,4 +55,5 @@
 
 [Outputs]
   csv = true
+  file_base = main_out
 []

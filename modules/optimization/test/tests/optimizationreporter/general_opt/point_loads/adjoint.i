@@ -57,7 +57,8 @@
 [Reporters]
   [misfit]
     type = OptimizationData
-    !include measure_data.i
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
   []
 []
 #---------------------------------------------------

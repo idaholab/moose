@@ -102,7 +102,8 @@
     type = OptimizationData
     variable = temperature
     objective_name = misfit_norm
-    !include measure_data.i
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
   []
 []
 #---------------------------------------------------

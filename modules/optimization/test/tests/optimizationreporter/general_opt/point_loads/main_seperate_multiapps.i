@@ -1,3 +1,9 @@
+measurement_points = '0.5 0.28 0
+   0.5 0.6 0
+   0.5 0.8 0
+   0.5 1.1 0'
+measurement_values = '293 304 315 320'
+
 [Optimization]
 []
 
@@ -7,7 +13,15 @@
   parameter_names = 'parameter_results'
   num_values = '3'
 []
-
+[Reporters]
+  [main]
+    # We need to have an OptimizationData on the main app to allow the
+    # transferring of the correct information when doing Hessian based optimization.
+    type = OptimizationData
+    measurement_points = ${measurement_points}
+    measurement_values = ${measurement_values}
+  []
+[]
 [Executioner]
   type = Optimize
   tao_solver = taonls
@@ -21,16 +35,19 @@
     type = FullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
+    cli_args = 'measurement_points="${measurement_points}";measurement_values="${measurement_values}"'
   []
   [adjoint]
     type = FullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
+    cli_args = 'measurement_points="${measurement_points}";measurement_values="${measurement_values}"'
   []
   [homogeneousForward]
     type = FullSolveMultiApp
     input_files = forward_homogeneous.i
     execute_on = "HOMOGENEOUS_FORWARD"
+    cli_args = 'measurement_points="${measurement_points}";measurement_values="${measurement_values}"'
   []
 []
 
@@ -45,7 +62,7 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-      # Note: We are transferring the misfit values into main misfit
+    # Note: We are transferring the misfit values into main misfit
     from_reporters = 'measure_data/misfit_norm measure_data/misfit_values'
     to_reporters = 'OptimizationReporter/misfit_norm main/misfit_values'
   []
@@ -89,14 +106,9 @@
   [optInfo]
     type = OptimizationInfo
   []
-  [main]
-    # We need to have an OptimizationData on the main app to allow the
-    # transferring of the correct information.
-    type = OptimizationData
-    !include measure_data.i
-  []
 []
 
 [Outputs]
   csv = true
+  file_base = main_out
 []

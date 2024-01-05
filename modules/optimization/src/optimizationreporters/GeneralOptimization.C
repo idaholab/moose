@@ -68,6 +68,16 @@ GeneralOptimization::GeneralOptimization(const InputParameters & parameters)
 Real
 GeneralOptimization::computeObjective()
 {
+  Real val = 0;
+  if (_tikhonov_coeff > 0.0)
+  {
+    Real param_norm_sqr = 0;
+    for (const auto & data : _parameters)
+      for (const auto & val : *data)
+        param_norm_sqr += val * val;
+    // We multiply by 0.5 to maintain  backwards compatibility.
+    val += 0.5 * _tikhonov_coeff * param_norm_sqr;
+  }
   return _objective_val;
 }
 
