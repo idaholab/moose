@@ -190,22 +190,17 @@ From: {{ APPTAINER_FROM }}
     return_flag=0
 
 {%- if BINARY_NAME == 'moose' %}
-    # Run framework tests
-    if ! run_tests moose_test tests; then
-        return_flag=$?
-    fi
+    run_tests moose_test tests || return_flag=$?
 {%- endif %}
 
     # Copy and run each subset of tests
     for TEST_DIR in ${TEST_DIRS}; do
-        if ! run_tests ${BINARY_NAME} ${TEST_DIR}; then
-            return_flag=$?
-        fi
+        run_tests ${BINARY_NAME} ${TEST_DIR} || return_flag=$?
     done
 
     rm -rf $TEMP_LOC
 
-    if [ "$return_flag" != 0 ]; then
+    if [ $return_flag != 0 ]; then
         exit $return_flag
     fi
 
