@@ -139,7 +139,7 @@ class Tester(MooseObject, OutputInterface):
         # Bool if test can run
         self._runnable = None
 
-        # Set up common paramaters
+        # Set up common parameters
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
 
