@@ -651,7 +651,9 @@ def checkCapabilities(supported, test):
         if match is not None:
             capability, op, value = match.groups()
         else:
-            op = None
+            op, value = None, ''
+        capability = capability.lower()
+        value = value.lower()
 
         # check for negation
         if capability[0] == '!':
