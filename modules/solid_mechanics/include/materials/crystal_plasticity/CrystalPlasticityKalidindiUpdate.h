@@ -34,6 +34,7 @@ protected:
    * stress, plastic deformation gradient, slip system resistances, etc.
    */
   virtual void initQpStatefulProperties() override;
+  virtual void setMaterialVectorSize() override;
 
   /**
    * Sets the value of the current and previous substep iteration slip system

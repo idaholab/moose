@@ -73,6 +73,13 @@ CrystalPlasticityKalidindiUpdate::initQpStatefulProperties()
 }
 
 void
+CrystalPlasticityKalidindiUpdate::setMaterialVectorSize()
+{
+  CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
+
+}
+
+void
 CrystalPlasticityKalidindiUpdate::setInitialConstitutiveVariableValues()
 {
   // Would also set old dislocation densities here if included in this model

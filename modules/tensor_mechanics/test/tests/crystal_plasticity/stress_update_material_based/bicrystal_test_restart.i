@@ -3,34 +3,11 @@
 []
 
 [Mesh]
-  [copper]
-    type = GeneratedMeshGenerator
-    dim = 3
-    elem_type = HEX8
-  []
-  [copper_id]
-    type = SubdomainIDGenerator
-    input = copper
-    subdomain_id = 0
-  []
-  [brass]
-    type = GeneratedMeshGenerator
-    dim = 3
-    zmax = 2
-    zmin = 1
-    elem_type = HEX8
-  []
-  [brass_id]
-    type = SubdomainIDGenerator
-    input = brass
-    subdomain_id = 1
-  []
-  [sticher]
-    type = StitchedMeshGenerator
-    inputs = 'copper_id brass_id'
-    stitch_boundaries_pairs = 'front back'
-    prevent_boundary_ids_overlap = false
-  []
+  file = bicrystal_test_out_cp/LATEST
+[]
+
+[Problem]
+  restart_file_base = bicrystal_test_out_cp/LATEST
 []
 
 [AuxVariables]
@@ -68,7 +45,7 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic]
+[Modules/TensorMechanics/Master]
   [copper]
     strain = FINITE
     incremental = true

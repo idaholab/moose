@@ -3,14 +3,11 @@
 []
 
 [Mesh]
-  [cube]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 1
-    ny = 1
-    nz = 2
-    elem_type = HEX8
-  []
+  file = only_twinning_fcc_out_cp/LATEST
+[]
+
+[Problem]
+  restart_file_base = only_twinning_fcc_out_cp/LATEST
 []
 
 [AuxVariables]
@@ -88,7 +85,7 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic/all]
+[Modules/TensorMechanics/Master/all]
   strain = FINITE
   add_variables = true
 []

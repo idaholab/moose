@@ -119,14 +119,21 @@ CrystalPlasticityStressUpdateBase::CrystalPlasticityStressUpdateBase(
 void
 CrystalPlasticityStressUpdateBase::initQpStatefulProperties()
 {
-  _tau[_qp].resize(_number_slip_systems);
-
-  _flow_direction[_qp].resize(_number_slip_systems);
+  setMaterialVectorSize();
   for (const auto i : make_range(_number_slip_systems))
   {
     _flow_direction[_qp][i].zero();
     _tau[_qp][i] = 0.0;
   }
+}
+
+void
+CrystalPlasticityStressUpdateBase::setMaterialVectorSize()
+{
+
+  _tau[_qp].resize(_number_slip_systems);
+
+  _flow_direction[_qp].resize(_number_slip_systems);
 
   _slip_resistance[_qp].resize(_number_slip_systems);
   _slip_increment[_qp].resize(_number_slip_systems);
