@@ -385,7 +385,7 @@ class TestHarness:
 
         self.initialize(argv, self.app_name)
 
-        # executable is available after initalize
+        # executable is available after initialize
         checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
 
         # get the capabilities of the executable
@@ -843,8 +843,8 @@ class TestHarness:
                             if job.isSilent():
                                 continue
 
-                            formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                            f.write(formated_results + '\n')
+                            formatted_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
+                            f.write(formatted_results + '\n')
 
         except IOError:
             print('Permission error while writing results to disc')
