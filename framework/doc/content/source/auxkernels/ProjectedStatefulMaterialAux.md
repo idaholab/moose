@@ -3,6 +3,7 @@
 This AuxKernel simply returns the value of a given material property (or component of the property value) at a quadrature point with the purpose of projecting the property onto an elemental basis function (e.g. first order monomial).
 
 Variants include:
+
 - `ProjectedStatefulMaterialRealAux`
 - `ProjectedStatefulMaterialRealVectorValueAux`
 - `ProjectedStatefulMaterialRankTwoTensorAux`
