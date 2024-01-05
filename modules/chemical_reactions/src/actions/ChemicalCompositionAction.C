@@ -22,9 +22,6 @@
 #include "checkUnits.h"
 #endif
 
-std::string ChemicalCompositionAction::_database_file = "";
-bool ChemicalCompositionAction::_database_parsed = false;
-
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_ic");
@@ -120,28 +117,14 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  " characters: ",
                  thermo_file);
 
-    if (!_database_parsed)
-    {
-      Thermochimica::setThermoFilename(thermo_file);
+    Thermochimica::setThermoFilename(thermo_file);
 
-      // Read in thermodynamics model, only once
-      Thermochimica::parseThermoFile();
+    // Read in thermodynamics model for setting up variables
+    Thermochimica::parseThermoFile();
 
-      const auto idbg = Thermochimica::checkInfoThermo();
-      if (idbg != 0)
-        paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
-      else
-      {
-        _database_file = thermo_file;
-        _database_parsed = true;
-      }
-    }
-    else if (_database_parsed && thermo_file != _database_file)
-      paramError("thermofile",
-                 "Thermodynamic database ",
-                 _database_file,
-                 " already parsed. Cannot parse database ",
-                 thermo_file);
+    const auto idbg = Thermochimica::checkInfoThermo();
+    if (idbg != 0)
+      paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
   }
 
   // Set thermochimica units
@@ -402,7 +385,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
-  // Thermochimica::resetThermoAll();
+  Thermochimica::resetThermoAll();
 
 #endif
 }
@@ -508,6 +491,8 @@ ChemicalCompositionAction::act()
                   _element_phases.end());
 
     uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
+
+    uo_params.set<FileName>("thermofile") = getParam<FileName>("thermofile");
 
     uo_params.applyParameters(parameters());
 

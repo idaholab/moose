@@ -62,6 +62,8 @@ ThermochimicaDataBase<is_nodal>::validParams()
     params.set<bool>("unique_node_execute") = true;
 
   params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
+  params.addParam<FileName>("thermofile",
+                            "Thermodynamic file to be used for Thermochimica calculations");
   return params;
 }
 
@@ -191,6 +193,31 @@ ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & p
     _socket = sockets[0];
     // clean exit upon SIGTERM (mainly for Civet code coverage)
     signal(SIGTERM, ThermochimicaDataBase_handler);
+
+#ifdef THERMOCHIMICA_ENABLED
+    // Initialize database in Thermochimica
+    if (isParamValid("thermofile"))
+    {
+      const auto thermo_file = this->template getParam<FileName>("thermofile");
+
+      if (thermo_file.length() > 1024)
+        this->paramError("thermofile",
+                         "Path exceeds Thermochimica's maximal permissible length of 1024 with ",
+                         thermo_file.length(),
+                         " characters: ",
+                         thermo_file);
+
+      Thermochimica::setThermoFilename(thermo_file);
+
+      // Read in thermodynamics model, only once
+      Thermochimica::parseThermoFile();
+
+      const auto idbg = Thermochimica::checkInfoThermo();
+      if (idbg != 0)
+        this->paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
+    }
+#endif
+
     while (true)
       server();
   }

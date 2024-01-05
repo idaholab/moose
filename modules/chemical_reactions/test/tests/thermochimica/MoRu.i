@@ -17,14 +17,6 @@
 []
 
 [ChemicalComposition]
-  [Master]
-    [all]
-      thermofile = Kaye_NobleMetals.dat
-      tunit = K
-      punit = atm
-      munit = moles
-    []
-  []
   [thermo]
     thermofile = Kaye_NobleMetals.dat
     tunit = K

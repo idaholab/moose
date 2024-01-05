@@ -18,7 +18,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to use reinitialization to speed up a nodal thermochimica solve'
-    cli_args = 'ChemicalComposition/reinitialization_type=time'
+    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -30,7 +30,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#25877'
     requirement = 'The system shall be able to set up an elemental thermochemistry solve using an action'
-    cli_args = 'ChemicalComposition/is_fv=true Outputs/file_base=MoRu_FV_out'
+    cli_args = 'ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -42,7 +42,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#25877'
     requirement = 'The system shall be able to use reinitialization to speed up an elemental thermochimica solve'
-    cli_args = 'ChemicalComposition/reinitialization_type=time ChemicalComposition/is_fv=true Outputs/file_base=MoRu_FV_out'
+    cli_args = 'ChemicalComposition/thermo/reinitialization_type=time ChemicalComposition/thermo/is_fv=true Outputs/file_base=MoRu_FV_out'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
@@ -88,7 +88,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
     requirement = 'The system shall be able to use pairs as MQMQA phase species'
-    cli_args = 'ChemicalComposition/output_species_unit=moles Outputs/exodus=true'
+    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/exodus=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
@@ -102,7 +102,7 @@
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
     requirement = 'The system shall be able to output moles of pairs for MQMQA phase species'
-    cli_args = 'ChemicalComposition/output_species_unit=moles Outputs/csv=true'
+    cli_args = 'ChemicalComposition/thermo/output_species_unit=moles Outputs/csv=true'
 
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
@@ -232,7 +232,7 @@
     type = RunException
     input = MoRu.i
     expect_err = "Thermochimica data file cannot be parsed. 6"
-    cli_args = "ChemicalComposition/thermofile='SomeRandomFile.dat'"
+    cli_args = "ChemicalComposition/thermo/thermofile='SomeRandomFile.dat'"
     issues = '#24552'
     requirement = 'The system shall throw an error if the wrong datafile is specified'
     design = ChemicalCompositionAction.md

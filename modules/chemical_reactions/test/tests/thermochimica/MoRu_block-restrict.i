@@ -10,7 +10,6 @@
   []
 []
 
-
 [GlobalParams]
   elements = 'Mo Ru'
   output_phases = 'BCCN HCPN'
@@ -18,13 +17,15 @@
 []
 
 [ChemicalComposition]
-  block = '0'
-  thermofile = Kaye_NobleMetals.dat
-  tunit = K
-  punit = atm
-  munit = moles
-  temperature = 2250
-  output_species_unit = mole_fraction
+  [thermo]
+    block = '0'
+    thermofile = Kaye_NobleMetals.dat
+    tunit = K
+    punit = atm
+    munit = moles
+    temperature = 2250
+    output_species_unit = mole_fraction
+  []
 []
 
 [ICs]
