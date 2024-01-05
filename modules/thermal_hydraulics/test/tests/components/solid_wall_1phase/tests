@@ -1,7 +1,7 @@
 [Tests]
   # relap7 #636
   issues = '#26336'
-  requirement = 'SolidWall1Phase.md'
+  design = 'SolidWall1Phase.md'
   # physics
   [phy:3eqn]
     type = 'Exodiff'
