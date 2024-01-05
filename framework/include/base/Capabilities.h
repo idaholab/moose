@@ -11,6 +11,7 @@
 
 #include <variant>
 #include <string>
+#include <map>
 
 /**
  * This singleton class holds a registry for capabilities supported by the current app.
@@ -33,6 +34,9 @@ public:
   /// create a JSON dump of the capabilities registry
   static std::string dump();
 
+  /// check if the given required capabilities are fulfilled, returns a bool and a reason
+  static std::pair<bool, std::string> check(const std::string & requested_capabilities);
+
   ///@{ Don't allow creation through copy/move construction or assignment
   Capabilities(Capabilities const &) = delete;
   Capabilities & operator=(Capabilities const &) = delete;
@@ -42,6 +46,7 @@ protected:
   static Capabilities & instance();
   void addInternal(const std::string & raw_capability, CapabilityType value);
   std::string dumpInternal() const;
+  std::pair<bool, std::string> checkInternal(const std::string & requested_capabilities) const;
 
   /**
    * Capability registry. The capabilities registered here can be dumped using the
