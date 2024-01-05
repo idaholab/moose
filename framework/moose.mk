@@ -344,8 +344,11 @@ endif
 
 $(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
-	  $(moose_revision_header) MOOSE)
+	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
+	        HEADER_FILE="$(moose_revision_header)" \
+					APPLICATION_NAME="MOOSE" \
+					INSTALLABLE_DIRS= \
+	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
   # make sure the header generation step didn't fail
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
 	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \

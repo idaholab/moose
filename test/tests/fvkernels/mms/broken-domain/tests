@@ -9,5 +9,6 @@
     valgrind = none
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
     issues = '#16756'
+    installation_type = in_tree # see #26480
   []
 []
