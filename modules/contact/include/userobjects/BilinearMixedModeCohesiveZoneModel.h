@@ -70,11 +70,10 @@ protected:
   virtual ADReal normalizeRealQuantity(const std::unordered_map<const DofObject *, ADReal> & map,
                                        const Node * const node);
 
-  /// Strength for normal cohesive zone model
-  const Real _czm_normal_strength;
-
-  /// Strength for tangential cohesive zone model
-  const Real _czm_tangential_strength;
+  /// Normalize real vector mortar quantities (remove mortar integral scaling)
+  virtual ADRealVectorValue
+  normalizeVectorQuantity(const std::unordered_map<const DofObject *, ADRealVectorValue> & map,
+                          const Node * const node);
 
   /// The stress tensor on the interface
   // const ADMaterialProperty<RankTwoTensor> & _stress;
@@ -93,7 +92,7 @@ protected:
 
   /// *** Kinematics/displacement jump quantities ***
   /// Map from degree of freedom to rotation matrix
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_rotation_matrix;
+  std::unordered_map<const DofObject *, RankTwoTensor> _dof_to_rotation_matrix;
 
   /// Map from degree of freedom to local displacement jump
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_interface_displacement_jump;

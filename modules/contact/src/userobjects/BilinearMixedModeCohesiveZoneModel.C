@@ -29,16 +29,8 @@ BilinearMixedModeCohesiveZoneModel::validParams()
   InputParameters params = PenaltySimpleCohesiveZoneModel::validParams();
 
   params.addClassDescription("Computes the bilinear mixed mode cohesive zone model.");
-  params.addRequiredParam<Real>("czm_normal_stiffness",
-                                "The normal stiffness that determines the traction that initiates "
-                                "the cohesive zone traction.");
-  params.addRequiredParam<Real>("czm_normal_strength",
-                                "The normal strength that determines the traction-separation law.");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.addRequiredParam<Real>(
-      "czm_tangential_strength",
-      "The tangential strength that determines the traction-separation law.");
 
   // Input parameters for bilinear mixed mode traction.
   params.addParam<MaterialPropertyName>("GI_c",
@@ -69,7 +61,6 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "use_bilinear_mixed_mode_traction penalty_stiffness",
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.
-
   return params;
 }
 
@@ -79,9 +70,6 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
     PenaltySimpleCohesiveZoneModel(parameters),
-    _czm_normal_strength(getParam<Real>("czm_normal_strength")),
-    _czm_tangential_strength(getParam<Real>("czm_tangential_strength")),
-    // _stress(getADMaterialProperty<RankTwoTensor>("stress")),
     _ndisp(coupledComponents("displacements")),
     _use_bilinear_mixed_mode_traction(getParam<bool>("use_bilinear_mixed_mode_traction")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
@@ -146,7 +134,7 @@ BilinearMixedModeCohesiveZoneModel::computeQpIPropertiesLocal()
 {
   // Get the _dof_to_weighted_gap map
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
-  // _F_interpolation.zero();
+
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
   _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
@@ -167,6 +155,13 @@ BilinearMixedModeCohesiveZoneModel::normalizeRankTwoTensorQuantity(
 ADReal
 BilinearMixedModeCohesiveZoneModel::normalizeRealQuantity(
     const std::unordered_map<const DofObject *, ADReal> & map, const Node * const node)
+{
+  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
+}
+
+ADRealVectorValue
+BilinearMixedModeCohesiveZoneModel::normalizeVectorQuantity(
+    const std::unordered_map<const DofObject *, ADRealVectorValue> & map, const Node * const node)
 {
   return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
 }
@@ -192,7 +187,6 @@ BilinearMixedModeCohesiveZoneModel::timestepSetup()
 
   for (auto & map_pr : _dof_to_interface_R)
     map_pr.second = 0.0;
-  // End of CZM properties
 
   // save off tangential traction from the last timestep
   for (auto & map_pr : _dof_to_damage)
@@ -255,17 +249,6 @@ BilinearMixedModeCohesiveZoneModel::initialize()
 void
 BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
 {
-  _czm_interpolated_traction_x.resize(_qrule_msm->n_points());
-  _czm_interpolated_traction_y.resize(_qrule_msm->n_points());
-  _czm_interpolated_traction_z.resize(_qrule_msm->n_points());
-
-  for (const auto qp : make_range(_qrule_msm->n_points()))
-  {
-    _czm_interpolated_traction_x[qp] = 0.0;
-    _czm_interpolated_traction_y[qp] = 0.0;
-    _czm_interpolated_traction_z[qp] = 0.0;
-  }
-
   // Compute rotation matrix from secondary surface
   // Rotation matrices and local interface displacement jump.
   for (const auto i : make_range(_test->size()))
@@ -277,7 +260,7 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
     if (return_boolean)
       return;
 
-    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<true>(
+    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<false>(
         _normals[i], _subproblem.mesh().dimension());
 
     // TODO: It is not clear to me how the previous CZM implementation accounts for a proper mixity
@@ -285,9 +268,9 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
     // locally with the normal vector. Since the normal vector is used for computing neighbor
     // distances, it seems that shearing may be neglected.
 
-    if (_dof_to_weighted_gap.find(node) != _dof_to_weighted_gap.end())
+    if (_dof_to_weighted_displacements.find(node) != _dof_to_weighted_displacements.end())
       _dof_to_interface_displacement_jump[node] =
-          (-1.0 * adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) * _normals[i]);
+          (libmesh_map_find(_dof_to_weighted_displacements, node));
   }
 }
 
@@ -319,9 +302,10 @@ BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
   _dof_to_interface_R[node] = dof_to_interface_F_node * Uinv;
 
   // Transform interface jump according to two rotation matrices
+  const auto global_interface_displacement = _dof_to_interface_displacement_jump[node];
   _dof_to_interface_displacement_jump[node] =
       (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
-      _dof_to_interface_displacement_jump[node];
+      global_interface_displacement;
 }
 
 void
@@ -332,15 +316,15 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   if (return_boolean)
     return;
 
-  computeModeMixity(node);                // Done
-  computeCriticalDisplacementJump(node);  // Done
-  computeFinalDisplacementJump(node);     // Done
-  computeEffectiveDisplacementJump(node); // Done
-  computeDamage(node);                    // Done
+  computeModeMixity(node);
+  computeCriticalDisplacementJump(node);
+  computeFinalDisplacementJump(node);
+  computeEffectiveDisplacementJump(node);
+  computeDamage(node);
 
   // Split displacement jump into active and inactive parts
   const auto interface_displacement_jump =
-      libmesh_map_find(_dof_to_interface_displacement_jump, node);
+      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
 
   const ADRealVectorValue delta_active(std::max(interface_displacement_jump(0), 0.0),
                                        interface_displacement_jump(1),
@@ -356,7 +340,6 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
 void
 BilinearMixedModeCohesiveZoneModel::computeGlobalTraction(const Node * const node)
 {
-
   // First call does not have maps available
   const bool return_boolean = _dof_to_czm_traction.find(node) == _dof_to_czm_traction.end();
   if (return_boolean)
@@ -372,9 +355,9 @@ void
 BilinearMixedModeCohesiveZoneModel::computeModeMixity(const Node * const node)
 {
   const auto interface_displacement_jump =
-      libmesh_map_find(_dof_to_interface_displacement_jump, node);
+      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
 
-  if (std::abs(libmesh_map_find(_dof_to_interface_displacement_jump, node)(0)) > _epsilon_tolerance)
+  if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
     const auto delta_s = std::sqrt(interface_displacement_jump(1) * interface_displacement_jump(1) +
                                    interface_displacement_jump(2) * interface_displacement_jump(2) +
@@ -390,7 +373,8 @@ void
 BilinearMixedModeCohesiveZoneModel::computeCriticalDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      libmesh_map_find(_dof_to_interface_displacement_jump, node);
+      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
+
   const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
   const auto delta_normal_knot =
@@ -414,7 +398,7 @@ void
 BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      libmesh_map_find(_dof_to_interface_displacement_jump, node);
+      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
 
   const auto mixity_ratio = libmesh_map_find(_dof_to_mode_mixity_ratio, node);
 
@@ -452,7 +436,7 @@ void
 BilinearMixedModeCohesiveZoneModel::computeEffectiveDisplacementJump(const Node * const node)
 {
   const auto interface_displacement_jump =
-      libmesh_map_find(_dof_to_interface_displacement_jump, node);
+      normalizeVectorQuantity(_dof_to_interface_displacement_jump, node);
 
   const auto delta_normal_pos =
       MathUtils::regularizedHeavyside(interface_displacement_jump(0), _regularization_alpha) *
@@ -493,6 +477,17 @@ BilinearMixedModeCohesiveZoneModel::reinit()
 {
   // Normal contact pressure with penalty
   PenaltySimpleCohesiveZoneModel::reinit();
+
+  _czm_interpolated_traction_x.resize(_qrule_msm->n_points());
+  _czm_interpolated_traction_y.resize(_qrule_msm->n_points());
+  _czm_interpolated_traction_z.resize(_qrule_msm->n_points());
+
+  for (const auto qp : make_range(_qrule_msm->n_points()))
+  {
+    _czm_interpolated_traction_x[qp] = 0.0;
+    _czm_interpolated_traction_y[qp] = 0.0;
+    _czm_interpolated_traction_z[qp] = 0.0;
+  }
 
   // iterate over nodes
   for (const auto i : make_range(_test->size()))
