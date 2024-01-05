@@ -16,6 +16,7 @@
       test_case = TestOutflow
       required_python_packages = 'pandas matplotlib'
       method = '!dbg'
+      installation_type = in_tree # see #26480
       detail = 'a weighted averaging advection interpolation, and'
     []
     [minmod]
@@ -24,6 +25,7 @@
       test_case = TestOutflowMinMod
       required_python_packages = 'pandas matplotlib'
       method = '!dbg'
+      installation_type = in_tree # see #26480
       detail = 'a min-mod advection interpolation scheme.'
       min_parallel = 2 # Test geometric and algebraic ghosting
     []
@@ -36,6 +38,7 @@
     requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
     required_python_packages = 'pandas matplotlib'
     method = '!dbg'
+    installation_type = in_tree # see #26480
   []
   [UpwindLimiter]
     type = PythonUnitTest
@@ -45,6 +48,7 @@
     requirement = 'The system shall display first order convergence with an upwind limiter.'
     method = '!dbg'
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [CentralDifferenceLimiter]
     type = PythonUnitTest
@@ -54,6 +58,7 @@
     requirement = 'The system shall display second order convergence with a central-differencing limiter.'
     method = '!dbg'
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [VanLeerLimiter]
     type = PythonUnitTest
@@ -63,6 +68,7 @@
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
     method = '!dbg'
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [MinModLimiter]
     type = PythonUnitTest
@@ -72,6 +78,7 @@
     requirement = 'The system shall display second order convergence with a min-mod limiter.'
     method = '!dbg'
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [SOULimiter]
     type = PythonUnitTest
@@ -81,6 +88,7 @@
     requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
     method = '!dbg'
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [QUICKLimiter]
     type = PythonUnitTest
@@ -90,6 +98,7 @@
     requirement = 'The system shall display second order convergence with a QUICK limiter.'
     heavy = true
     issues = '#14549'
+    installation_type = in_tree # see #26480
   []
   [kt]
     requirement = 'The system shall provide a Kurganov-Tadmor scheme for evaluating convective intercell fluxes'
@@ -101,6 +110,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'with central difference interpolation of face values and resulting second order convergence'
       method = '!dbg'
+      installation_type = in_tree # see #26480
     []
     [KTLimitedUpwind]
       type = PythonUnitTest
@@ -109,6 +119,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'with upwind interpolation of face values and resulting first order convergence'
       method = '!dbg'
+      installation_type = in_tree # see #26480
     []
     [KTLimitedVanLeer]
       type = PythonUnitTest
@@ -117,6 +128,7 @@
       required_python_packages = 'pandas matplotlib'
       detail = 'with central difference interpolation with Van-Leer limiting of face values and resulting two and a half order convergence' # I don't actually know where this additional half order is coming from
       method = '!dbg'
+      installation_type = in_tree # see #26480
     []
   []
 []

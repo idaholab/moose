@@ -137,14 +137,19 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_POST_POST_INSTALL is defined %}
     {{ SECTION_POST_POST_INSTALL }}
 {%- endif %}
-    # Fix permissions for installed application
-    chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
 {%- if BINARY_NAME == 'moose' %}
+    # Also build and install moose_test-opt
+    cd ${APPLICATION_DIR}/test
+    make -j ${MOOSE_JOBS}
+    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=1
     # Create moose-opt symlink to combined-opt
     cd /opt/moose/bin
     ln -s combined-opt moose-opt
 {%- endif %}
+
+    # Fix permissions for installed application
+    chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
 {%- if SECTION_POST_END is defined %}
     {{ SECTION_POST_END }}
@@ -153,34 +158,51 @@ From: {{ APPTAINER_FROM }}
     rm -rf $TEMP_LOC
 
 %test
+    set -x
+
     # Load jinja vars
-{%- if BINARY_NAME == 'moose' %}
-    BINARY_NAME=combined
-{%- else %}
-    BINARY_NAME={{ BINARY_NAME }}
-{%- endif %}
+    export BINARY_NAME={{ BINARY_NAME }}
     export METHOD={{ METHOD or "opt" }}
     TEST_DIRS="{{ TEST_DIRS or "tests" }}"
     # Temp location for copying and running in
-    TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
+    export TEMP_LOC=$(mktemp -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "/usr/bin/rm -rf $TEMP_LOC" EXIT HUP INT TERM
 {%- if SECTION_TEST_BEGIN is defined %}
     {{ SECTION_TEST_BEGIN }}
 {%- endif %}
 
+    function run_tests()
+    {
+        local BINARY_NAME=$1
+        local TEST_DIR=$2
+        local TEMP_TEST_LOC=${TEMP_LOC}/${TEST_DIR}
+        mkdir $TEMP_TEST_LOC &&                                 \
+          cd $TEMP_TEST_LOC &&                                  \
+          ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR &&   \
+          cd ${BINARY_NAME}/${TEST_DIR} &&                      \
+          ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
+        return_code=$?
+        rm -rf $TEMP_TEST_LOC
+        return $return_code
+    }
+
+    return_flag=0
+
+{%- if BINARY_NAME == 'moose' %}
+    run_tests moose_test tests || return_flag=$?
+{%- endif %}
+
     # Copy and run each subset of tests
     for TEST_DIR in ${TEST_DIRS}; do
-        TEMP_TEST_LOC=${TEMP_LOC}/${TEST_DIR}
-        mkdir $TEMP_TEST_LOC
-        cd $TEMP_TEST_LOC
-        ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
-        cd ${BINARY_NAME}/${TEST_DIR}
-        ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        rm -rf $TEMP_TEST_LOC
+        run_tests ${BINARY_NAME} ${TEST_DIR} || return_flag=$?
     done
 
     rm -rf $TEMP_LOC
+
+    if [ $return_flag != 0 ]; then
+        exit $return_flag
+    fi
 
 {%- if SECTION_TEST_END is defined %}
     {{ SECTION_TEST_END }}

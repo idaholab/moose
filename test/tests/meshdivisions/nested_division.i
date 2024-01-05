@@ -1,7 +1,7 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = '../../../modules/reactor/test/tests/meshgenerators/reporting_id/depletion_id/depletion_id_in.e'
+    file = '../positions/depletion_id_in.e'
     exodus_extra_element_integers = 'material_id pin_id assembly_id'
   []
   # To keep VPP output consistently ordered

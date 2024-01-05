@@ -1571,6 +1571,8 @@ MooseApp::copyInputs() const
     if (dir_to_copy.back() != '/')
       dir_to_copy += '/';
 
+    // This binary name is the actual binary. That is, if we called a symlink it'll
+    // be the name of what the symlink points to
     auto binname = appBinaryName();
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
@@ -1580,8 +1582,11 @@ MooseApp::copyInputs() const
                                        dir_to_copy,
                                        "Rerun binary with " + _pars.getSyntax("show_inputs")[0] +
                                            " to get a list of installable directories.");
-    auto dst_dir = binname + "/" + dir_to_copy;
-    auto cmdname = Moose::getExecutableName();
+
+    // Use the command line here because if we have a symlink to another binary,
+    // we want to dump into a directory that is named after the symlink not the true binary
+    auto dst_dir = _command_line->getExecutableNameBase() + "/" + dir_to_copy;
+    auto cmdname = _command_line->getExecutableName();
     if (cmdname.find_first_of("/") != std::string::npos)
       cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
 
