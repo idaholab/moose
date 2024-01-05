@@ -11,6 +11,10 @@
 
 #include "PhysicsBase.h"
 
+#define registerDiffusionPhysicsBaseTasks(derived_name)                                            \
+  registerPhysicsBaseTasks(derived_name);                                                          \
+  registerMooseAction("MooseApp", derived_name, "add_preconditioning")
+
 /**
  * Base class to host all common parameters and attributes of Physics actions to solve the diffusion
  * equation
