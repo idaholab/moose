@@ -54,11 +54,13 @@ PropertyReadFile::validParams()
   params.addParam<bool>(
       "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
 
-  // Set an execution schedules to what makes sense currently
+  // Set an execution schedule to what makes sense currently
   // We do not allow INITIAL because we read the file at construction
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.removeAvailableFlags(EXEC_INITIAL, EXEC_FINAL, EXEC_LINEAR, EXEC_NONLINEAR);
   params.setDocString("execute_on", exec_enum.getDocString());
+  // we must read the files as early as possible
+  params.set<bool>("force_preaux") = true;
 
   return params;
 }
@@ -81,7 +83,8 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     _nprop(getParam<unsigned int>("nprop")),
     _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
                                      : getParam<unsigned int>("nvoronoi")),
-    _nblock(getParam<unsigned int>("nblock"))
+    _nblock(getParam<unsigned int>("nblock")),
+    _initialize_called_once(declareRestartableData<bool>("initialize_called", false))
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
     paramError("rand_seed",
@@ -96,20 +99,23 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   _bounding_box = MooseUtils::buildBoundingBox(mesh_min, mesh_max);
 
   readData();
-  _current_file_index++;
-  if (_prop_file_names.size() > 1 && _app.isRestarting())
-    mooseError("Multiple files not supported with restart/recover");
 }
 
 void
 PropertyReadFile::initialize()
 {
+  // Since we read at construction, no need to re-read the file on first initialize
+  if (!_initialize_called_once)
+  {
+    _initialize_called_once = true;
+    return;
+  }
+
   // Set then read new file, only if we have not reached the last file
   if (_current_file_index < _prop_file_names.size())
   {
     _reader.setFileName(_prop_file_names[_current_file_index]);
     readData();
-    _current_file_index++;
   }
   else if (_current_file_index == _prop_file_names.size())
     mooseInfo("Last file specified has been read. The file will no longer be updated.");
@@ -182,6 +188,8 @@ PropertyReadFile::readData()
 
   if (_read_type == ReadTypeEnum::VORONOI || _read_type == ReadTypeEnum::GRAIN)
     initVoronoiCenterPoints();
+
+  _current_file_index++;
 }
 
 void

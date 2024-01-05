@@ -13,7 +13,7 @@ It can assume CSV data
 - is sorted by element-id, in which case, when the function is evaluated at a point, it will locate the element containing it then return the value for that element in the CSV file
 - is sorted by node-id, in which case, when the function is evaluated at a point, it will locate the node at that point then return the value for that node in the CSV file
 - is sorted by blocks, in which case, when the function is evaluated at a point, it will locate the element containing it then return the value for that element's block in the CSV file
-- defines an interpolation grid (voronoi [!param](/Functions/PiecewiseConstantFromCSV/read_type)), in which case the function will locate the closest point in that interpolation grid, then return the value for that point in the CSV file
+- defines an interpolation grid, with the voronoi [!param](/Functions/PiecewiseConstantFromCSV/read_type), in which case the function will locate the closest point in that interpolation grid, then return the value for that point in the CSV file
 
 
 For the latter case, the first columns of the CSV data must define the coordinates of each point forming the interpolation grid. The number of columns used to define these coordinates

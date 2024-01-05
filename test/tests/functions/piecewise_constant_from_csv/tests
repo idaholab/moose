@@ -61,8 +61,6 @@
       exodiff = 'piecewise_constant_elem_multiple.e'
       cli_args = 'Outputs/file_base=piecewise_constant_elem_multiple'
       detail = 'with multiple CSV files read on every execution of the user object.'
-      # Cannot figure it out so it will error
-      recover = false
     []
   []
   [errors]

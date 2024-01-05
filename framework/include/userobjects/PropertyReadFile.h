@@ -155,4 +155,7 @@ private:
   const unsigned int _nvoronoi;
   /// Number of blocks (for reading a CSV file with properties ordered by blocks)
   const unsigned int _nblock;
+
+  /// To keep track of initialization to avoid reading the files twice
+  bool & _initialize_called_once;
 };
