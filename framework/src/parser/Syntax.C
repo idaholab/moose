@@ -53,7 +53,7 @@ Syntax::appendTaskName(const std::string & task,
   if (!deprecated)
     _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
   else
-    _deprecated_moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
+    _deprecated_list_moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
 }
 
 void
@@ -319,12 +319,19 @@ Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task
     if (task == task_it.second)
       return true;
 
-  iters = _deprecated_moose_systems_to_tasks.equal_range(base);
+  iters = _deprecated_list_moose_systems_to_tasks.equal_range(base);
   for (const auto & task_it : as_range(iters))
     if (task == task_it.second)
     {
-      mooseDeprecated("Adding '" + base + "' though task '" + task +
-                      "' is deprecated. The syntax you are using is deprecated.");
+      std::string object_tasks = "";
+      for (const auto & other_task : as_range(_moose_systems_to_tasks.equal_range(base)))
+        object_tasks += (object_tasks == "" ? "" : " ") + other_task.second;
+
+      mooseDeprecated(
+          "Adding objects from system '" + base + "' through task '" + task +
+          "' is deprecated. This object should only be added from task(s): " + object_tasks +
+          ". This is likely caused by adding objects in a block they no longer belong to. For "
+          "example, FunctorMaterials should no longer be added in the [Materials] block.");
       return true;
     }
 

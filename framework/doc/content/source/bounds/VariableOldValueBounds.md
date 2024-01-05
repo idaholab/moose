@@ -10,7 +10,7 @@ nonlinear system and does nothing but return 0 for the value of the specified
 `variable`.
 
 Note that in order for these bounds to have an effect, the user has to specify the
-PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`. A warning will be generated if neither options are specified. MOOSE users can also specify bound with a constant using [`ConstantBounds`](/ConstantBounds.md).
+PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`. A warning will be generated if neither option is specified. MOOSE users can also specify bound with a constant using [`ConstantBounds`](/ConstantBounds.md).
 
 ## Example Syntax
 

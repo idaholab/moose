@@ -211,9 +211,10 @@ protected:
   /// The list of Moose system objects to tasks.  This map indicates which tasks are allowed to build certain MooseObjects.
   std::multimap<std::string, std::string> _moose_systems_to_tasks;
 
-  /// The list of deprecated Moose system objects to tasks. If an item is in this map, the task is still allowed to build
+  /// A list of Moose system objects to tasks that are deprecated for these systems.
+  /// If an item is in this map, the task is still allowed to build
   /// the object from the MOOSE system, but it is deprecated to do so.
-  std::multimap<std::string, std::string> _deprecated_moose_systems_to_tasks;
+  std::multimap<std::string, std::string> _deprecated_list_moose_systems_to_tasks;
 
   /// The dependency resolver
   DependencyResolver<std::string> _tasks;
