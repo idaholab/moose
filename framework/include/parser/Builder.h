@@ -62,7 +62,7 @@ public:
     YAML
   };
 
-  Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
+  Builder(MooseApp & app, ActionWarehouse & action_wh, std::shared_ptr<Parser> parser);
   virtual ~Builder();
 
   /**
@@ -114,9 +114,10 @@ public:
    */
   std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
 
-  hit::Node * root() { return _parser.root(); };
-
-  // void setRootNode(hit::Node * root) { _root = root; }
+  /**
+   * @return The root node in the parser
+   */
+  hit::Node * root();
 
 protected:
   /**
@@ -257,8 +258,8 @@ protected:
   ActionFactory & _action_factory;
   /// Reference to an object that defines input file syntax
   Syntax & _syntax;
-  /// Reference to front parser
-  Parser & _parser;
+  /// The front parser
+  const std::shared_ptr<Parser> _parser;
 
   /// Object for holding the syntax parse tree
   std::unique_ptr<SyntaxTree> _syntax_formatter;

@@ -362,7 +362,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(parameters.get<std::shared_ptr<Parser>>("_parser")),
-    _builder(*this, _action_warehouse, *_parser),
+    _builder(*this, _action_warehouse, _parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),

@@ -116,7 +116,7 @@ findSimilar(std::string param, std::vector<std::string> options)
   return candidates;
 }
 
-Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
+Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, std::shared_ptr<Parser> parser)
   : ConsoleStreamInterface(app),
     _app(app),
     _factory(app.getFactory()),
@@ -129,8 +129,9 @@ Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
     _current_params(nullptr),
     _current_error_stream(nullptr)
 {
-  _extracted_vars = _parser.getExtractedVars();
-  _input_filenames = _parser.getInputFileNames();
+  mooseAssert(_parser, "Parser is not set");
+  _extracted_vars = _parser->getExtractedVars();
+  _input_filenames = _parser->getInputFileNames();
 }
 
 Builder::~Builder() {}
@@ -406,6 +407,13 @@ Builder::hitCLIFilter(std::string appname, const std::vector<std::string> & argv
   }
   return hit_text;
 }
+
+hit::Node *
+Builder::root()
+{
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->root();
+};
 
 void
 Builder::build()

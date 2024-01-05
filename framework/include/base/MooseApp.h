@@ -1146,7 +1146,7 @@ protected:
   OutputWarehouse _output_warehouse;
 
   /// Parser for parsing the input file
-  std::shared_ptr<Parser> _parser;
+  const std::shared_ptr<Parser> _parser;
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
