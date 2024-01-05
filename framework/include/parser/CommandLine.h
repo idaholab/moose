@@ -110,6 +110,11 @@ public:
   std::string getExecutableName() const;
 
   /**
+   * Get the exectuable name base (the name without the -[opt,oprof,devel,dbg])
+   */
+  std::string getExecutableNameBase() const;
+
+  /**
    * Print the usage info for this command line
    */
   void printUsage() const;
