@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#21885'
+  design = 'VectorOfVectorRowSum.md VectorDotProduct.md VectorSum.md'
+  [sampler_opt]
+    requirement = "The system shall be able to find an optimal value to a linear combination of forward problems run using the sampler system."
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out.csv
+    max_threads = 1
+    recover = false
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+[]
