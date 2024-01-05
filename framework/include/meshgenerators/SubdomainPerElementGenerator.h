@@ -14,12 +14,12 @@
 /**
  * MeshGenerator for assigning subdomain IDs of all elements
  */
-class ElementSubdomainIDGenerator : public MeshGenerator
+class SubdomainPerElementGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  ElementSubdomainIDGenerator(const InputParameters & parameters);
+  SubdomainPerElementGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
