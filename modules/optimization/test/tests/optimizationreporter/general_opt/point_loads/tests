@@ -27,7 +27,20 @@
       abs_zero = 1e-6
       # steady solve
       recover = false
-      detail = 'the measurement data defined main app and transferred to the forward_and_adjoint app;'
+      detail = 'the measurement data defined on the main app and transferred to the forward_and_adjoint app;'
+    []
+    [seperate_multiapps]
+      type = CSVDiff
+      input = main_seperate_multiapps.i
+      absent_out = 'type: ilu'
+      cli_args = 'Outputs/file_base=main_seperate_multiapps_out -ksp_view'
+      csvdiff = 'main_seperate_multiapps_out_OptimizationReporter_0001.csv main_seperate_multiapps_out.csv'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 1e-6
+      # steady solve
+      recover = false
+      detail = 'the measurment data defined on the seperate subapps;'
     []
   []
 []
