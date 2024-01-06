@@ -29,6 +29,14 @@ to the element centroid.
 
 An example of a MOOSE object using the `PropertyReadFile` is the [PiecewiseConstantFromCSV.md] function.
 
+If specifying multiple files to the [!param](/UserObjects/PropertyReadFile/prop_file_name)
+parameter, a new file will be read every time the object is initialized, which happens right before
+user objects are executed. The [!param](/UserObjects/PropertyReadFile/execute_on) parameter should be used to control the frequency of these executions. The user object will always read the first file at construction time, and, as an exception, will not read a new file on its first execution.
+If all data files have been read, the last file specified is used.
+
+!alert note
+When using multiple files, please note the data from the files is not concatenated. Every time a new file is read, the old data is removed from consideration.
+
 ## Example input syntax
 
 In this example input file, the `PropertyReadFile` user object is used to load data from a CSV file

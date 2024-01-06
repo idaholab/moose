@@ -1,14 +1,14 @@
 [Tests]
   [./csv_reader_in_transfer]
-    # A user was looking for an example of how to use CSVReader with MultiAppUserObjectTransfer,
-    # this provide an example. It is an error because the CSVReader will need to override the
+    # A user was looking for an example of how to use CSVReaderVectorPostprocessor with MultiAppUserObjectTransfer,
+    # this provide an example. It is an error because the CSVReaderVectorPostprocessor will need to override the
     # spatialValue method.
     type = RunException
     input = parent.i
     expect_err = 'data does not satisfy the Spatial UserObject interface!'
 
     issues = '#9860'
-    design = 'CSVReader.md'
-    requirement = 'The system shall issue an error if the CSVReader is used in a UserObjectTransfer because the former does not have any notion of "spatial" information.'
+    design = 'CSVReaderVectorPostprocessor.md'
+    requirement = 'The system shall issue an error if the CSVReaderVectorPostprocessor is used in a UserObjectTransfer because the former does not have any notion of "spatial" information.'
   [../]
 []
