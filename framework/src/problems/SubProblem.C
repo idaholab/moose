@@ -1113,11 +1113,10 @@ SubProblem::automaticScaling() const
 }
 
 void
-SubProblem::hasScalingVector()
+SubProblem::hasScalingVector(const unsigned int nl_sys_num)
 {
   for (const THREAD_ID tid : make_range(libMesh::n_threads()))
-    for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-      assembly(tid, nl_sys_num).hasScalingVector();
+    assembly(tid, nl_sys_num).hasScalingVector();
 }
 
 void

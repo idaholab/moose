@@ -108,10 +108,15 @@ AdjointSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
                                     const NumericVector<Number> & /*solution*/,
                                     NumericVector<Number> & rhs)
 {
+  if (_nl_adjoint.hasVector("scaling_factors"))
+    mooseWarning("Scaling factors are given to adjoint variables by the user. It is not necessary "
+                 "to scale a adjoint system therefore the scaling factors will not be used.");
+
   _problem.computeJacobian(*_nl_forward.currentSolution(), matrix, _forward_sys_num);
 
   _problem.setCurrentNonlinearSystem(_adjoint_sys_num);
   _problem.computeResidualTag(*_nl_adjoint.currentSolution(), rhs, _nl_adjoint.nonTimeVectorTag());
+
   rhs.scale(-1.0);
 }
 
