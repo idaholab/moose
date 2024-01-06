@@ -5,11 +5,18 @@ if [ "$(echo $SKIP_DOCS | tr '[:lower:]' '[:upper:]')" == "TRUE" ]; then
     export MOOSE_SKIP_DOCS=True
 fi
 ./configure --prefix=${PREFIX}/moose ${MOOSE_OPTIONS:-''}
-cd modules/combined
-
 CORES=${MOOSE_JOBS:-2}
+
+# moose_test-opt
+cd test
 make -j $CORES
 make install -j $CORES
+
+# combined-opt
+cd ../modules/combined
+make -j $CORES
+make install -j $CORES
+
 cd ${PREFIX}/moose/bin
 ln -s combined-opt moose-opt
 ln -s combined-opt moose

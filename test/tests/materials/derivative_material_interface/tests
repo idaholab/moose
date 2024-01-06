@@ -223,7 +223,6 @@
       type = CSVDiff
       input = 'ad_material_chaining.i'
       csvdiff = 'ad_material_chaining_out.csv'
-
       detail = 'involving chain rules of material properties defined by function expressions, and'
     []
   []
