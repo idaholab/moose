@@ -10,6 +10,7 @@
 #pragma once
 
 #include "AddFunctionAction.h"
+#include "CommonChemicalCompositionAction.h"
 
 /**
  * The ChemicalCompositionAction sets up user objects, aux kernels, and aux variables
@@ -52,6 +53,10 @@ public:
 
 protected:
   void readCSV();
+
+  InputParameters _combined_params;
+
+  const CommonChemicalCompositionAction * _common_action;
 
   /// Element names
   std::vector<std::string> _elements;

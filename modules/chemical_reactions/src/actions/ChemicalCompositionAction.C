@@ -12,10 +12,10 @@
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
-#include "MooseUtils.h"
 #include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
 #include "BlockRestrictable.h"
+#include "InputParameterWarehouse.h"
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
@@ -49,17 +49,17 @@ ChemicalCompositionAction::validParams()
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
   MooseEnum tUnit("K C F R");
-  params.addRequiredParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
+  params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
   MooseEnum pUnit("atm psi bar Pa kPa");
-  params.addRequiredParam<MooseEnum>("punit", pUnit, "Pressure Unit");
+  params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
   MooseEnum mUnit(
       "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
-  params.addRequiredParam<MooseEnum>("munit", mUnit, "Mass Unit");
+  params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>(
       "execute_on", exec_enum, "When to execute the ThermochimicaData UO");
-  params.addParam<bool>("is_fv", false, "Should the variables set up by action be of FV type");
+  params.addParam<bool>("is_fv", "Should the variables set up by action be of FV type");
 
   params.addParam<std::vector<std::string>>("output_phases", {}, "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -86,7 +86,10 @@ ChemicalCompositionAction::validParams()
 
 ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & params)
   : Action(params),
-    _elements(getParam<std::vector<std::string>>("elements")),
+    _combined_params(emptyInputParameters()),
+    _common_action(_awh.getActions<CommonChemicalCompositionAction>().empty()
+                       ? nullptr
+                       : *_awh.getActions<CommonChemicalCompositionAction>().begin()),
     _tunit(getParam<MooseEnum>("tunit")),
     _punit(getParam<MooseEnum>("punit")),
     _munit(getParam<MooseEnum>("munit")),
@@ -100,6 +103,18 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _reinit(getParam<MooseEnum>("reinitialization_type")),
     _uo_name(getParam<std::string>("uo_name"))
 {
+  // const auto & parameters = _app.getInputParameterWarehouse().getInputParameters();
+  // InputParameters & pars(*(parameters.find(uniqueActionName())->second.get()));
+  // pars.applyParameters(_common_action->parameters());
+  _combined_params = params;
+  _combined_params.applyParameters(_common_action->parameters());
+
+  if (isParamValid("elements"))
+    params.set<> getParam<std::vector<std::string>>("elements");
+  else if (isParamValid("elements"))
+  {
+  }
+
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
   std::replace(_munit.begin(), _munit.end(), '_', ' ');
