@@ -96,8 +96,8 @@
   type = Transient
   solve_type = NEWTON
   line_search = none
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
   end_time = 5
   dt = 0.5
   [Predictor]

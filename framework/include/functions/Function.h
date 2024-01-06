@@ -101,7 +101,16 @@ public:
    * \param p The Point in space (x,y,z)
    * \return A vector of the curl of the function evaluated at the time and location
    */
-  virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
+  virtual RealVectorValue curl(Real t, const Point & p) const;
+
+  /**
+   * Override this to evaluate the divergence of the vector function at a point (t,x,y,z),
+   * by default this returns zero, you must override it.
+   * \param t The time
+   * \param p The Point in space (x,y,z)
+   * \return A scalar of the divergence of the function evaluated at the time and location
+   */
+  virtual Real div(Real t, const Point & p) const;
 
   using Moose::FunctorBase<Real>::gradient;
   /**

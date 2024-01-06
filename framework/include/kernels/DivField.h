@@ -26,7 +26,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
   /// coupled vector variable
-  VectorMooseVariable & _u_var;
+  const VectorMooseVariable & _u_var;
   unsigned int _u_var_num;
 
   /// div of the coupled vector variable

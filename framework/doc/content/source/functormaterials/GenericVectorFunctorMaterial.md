@@ -11,7 +11,7 @@ for testing, for initial survey of a problem or simply because the material
 properties do not vary much over the domain explored by the simulation.
 
 The non-functor equivalents of this material are [GenericConstantVectorMaterial.md] for
-constant values and `GenericFunctionVectorMaterial.md` for functions.
+constant values and [GenericFunctionVectorMaterial.md] for functions.
 
 By default this class caches function evaluations
 and clears the cache at the beginning of every time step. Cache clearing behavior can be

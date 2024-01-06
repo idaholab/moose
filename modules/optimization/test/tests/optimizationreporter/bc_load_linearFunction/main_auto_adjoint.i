@@ -7,14 +7,10 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
   parameter_names = 'left right'
   num_values = '2 1'
-  measurement_file = 'measurementData.csv'
-  file_xcoord = 'coordx'
-  file_ycoord ='y'
-  file_zcoord = 'z'
-  file_value = 'measured_value'
+  objective_name = obj_value
 []
 
 [Executioner]
@@ -37,28 +33,18 @@
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
-                      OptimizationReporter/left
+    from_reporters = 'OptimizationReporter/left
                       OptimizationReporter/right'
-    to_reporters = 'measure_data/measurement_xcoord
-                    measure_data/measurement_ycoord
-                    measure_data/measurement_zcoord
-                    measure_data/measurement_time
-                    measure_data/measurement_values
-                    params/left
+    to_reporters = 'params/left
                     params/right'
   []
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values
+    from_reporters = 'obj_sum/value
                       grad_bc_left/inner_product
                       grad_bc_right/inner_product'
-    to_reporters = 'OptimizationReporter/simulation_values
+    to_reporters = 'OptimizationReporter/obj_value
                     OptimizationReporter/grad_left
                     OptimizationReporter/grad_right'
   []

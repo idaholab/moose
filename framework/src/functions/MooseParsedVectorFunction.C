@@ -18,7 +18,7 @@ MooseParsedVectorFunction::validParams()
   InputParameters params = Function::validParams();
   params += MooseParsedFunctionBase::validParams();
   params.addClassDescription(
-      "Return a vector component values based on string functions for each component.");
+      "Returns a vector function based on string descriptions for each component.");
   params.addDeprecatedParam<std::string>(
       "value_x", "x-component of function.", "value_x is deprecated, use expression_x");
   params.addDeprecatedParam<std::string>(
@@ -31,6 +31,7 @@ MooseParsedVectorFunction::validParams()
   params.addParam<std::string>("curl_x", "0", "x-component of curl of function.");
   params.addParam<std::string>("curl_y", "0", "y-component of curl of function.");
   params.addParam<std::string>("curl_z", "0", "z-component of curl of function.");
+  params.addParam<std::string>("div", "0", "divergence of function.");
   return params;
 }
 
@@ -43,7 +44,8 @@ MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & par
                                  getRenamedParam<std::string>("value_z", "expression_z") + "}")),
     _curl_value(verifyFunction(std::string("{") + getParam<std::string>("curl_x") + "}{" +
                                getParam<std::string>("curl_y") + "}{" +
-                               getParam<std::string>("curl_z") + "}"))
+                               getParam<std::string>("curl_z") + "}")),
+    _div_value(verifyFunction(getParam<std::string>("div")))
 {
 }
 
@@ -54,9 +56,15 @@ MooseParsedVectorFunction::vectorValue(Real t, const Point & p) const
 }
 
 RealVectorValue
-MooseParsedVectorFunction::vectorCurl(Real t, const Point & p) const
+MooseParsedVectorFunction::curl(Real t, const Point & p) const
 {
   return _curl_function_ptr->evaluate<RealVectorValue>(t, p);
+}
+
+Real
+MooseParsedVectorFunction::div(Real t, const Point & p) const
+{
+  return _div_function_ptr->evaluate<Real>(t, p);
 }
 
 RealGradient
@@ -79,4 +87,8 @@ MooseParsedVectorFunction::initialSetup()
   if (!_curl_function_ptr)
     _curl_function_ptr = std::make_unique<MooseParsedFunctionWrapper>(
         _pfb_feproblem, _curl_value, _vars, _vals, tid);
+
+  if (!_div_function_ptr)
+    _div_function_ptr =
+        std::make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _div_value, _vars, _vals, tid);
 }
