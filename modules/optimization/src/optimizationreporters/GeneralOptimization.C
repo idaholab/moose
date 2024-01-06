@@ -78,7 +78,7 @@ GeneralOptimization::computeObjective()
     // We multiply by 0.5 to maintain  backwards compatibility.
     val += 0.5 * _tikhonov_coeff * param_norm_sqr;
   }
-  return _objective_val;
+  return _objective_val + val;
 }
 
 dof_id_type
