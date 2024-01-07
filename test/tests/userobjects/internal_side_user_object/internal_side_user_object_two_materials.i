@@ -12,7 +12,7 @@
   []
   [./subdomain_id]
     input = gen
-    type = ElementSubdomainIDGenerator
+    type = SubdomainPerElementGenerator
     subdomain_ids = '0 1
                      1 1'
   [../]

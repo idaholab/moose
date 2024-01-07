@@ -109,7 +109,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
-
   if (getParam<bool>("fv") && getParam<bool>("eigen"))
     paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
   if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
@@ -187,12 +186,13 @@ void
 MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
-  if (_subproblem.haveADObjects() &&
+  if ((_var_kind == Moose::VAR_NONLINEAR) && _subproblem.haveADObjects() &&
       (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
                                                        _scaling_factor.end(),
                                                        [](const Real element) {
                                                          return !MooseUtils::absoluteFuzzyEqual(
                                                              element, 1.);
                                                        }) != _scaling_factor.end())))
+
     _sys.addScalingVector();
 }

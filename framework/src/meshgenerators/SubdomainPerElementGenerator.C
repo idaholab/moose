@@ -7,15 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementSubdomainIDGenerator.h"
+#include "SubdomainPerElementGenerator.h"
 #include "CastUniquePointer.h"
 
 #include "libmesh/elem.h"
 
-registerMooseObject("MooseApp", ElementSubdomainIDGenerator);
+registerMooseObject("MooseApp", SubdomainPerElementGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           ElementSubdomainIDGenerator,
+                           "05/18/2024 24:00",
+                           SubdomainPerElementGenerator);
 
 InputParameters
-ElementSubdomainIDGenerator::validParams()
+SubdomainPerElementGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -28,13 +32,13 @@ ElementSubdomainIDGenerator::validParams()
   return params;
 }
 
-ElementSubdomainIDGenerator::ElementSubdomainIDGenerator(const InputParameters & parameters)
+SubdomainPerElementGenerator::SubdomainPerElementGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 
 std::unique_ptr<MeshBase>
-ElementSubdomainIDGenerator::generate()
+SubdomainPerElementGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 

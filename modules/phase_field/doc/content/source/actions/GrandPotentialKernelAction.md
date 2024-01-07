@@ -92,7 +92,7 @@ The coupling between concentration and chemical potential is generated using the
 - [`MatReaction`](/MatReaction.md) (multiple kernels: one that corresponds with each order parameter)
 - ['BodyForce'](/BodyForce.md) (multiple kernels: one that corresponds with each order parameter)
 
-The materials associated with strict mass conservation can be created automatically using GrandPotentialSinteringMaterial (/GrandPotentialSinteringMaterial.md)
+The materials associated with strict mass conservation can be created automatically using [GrandPotentialSinteringMaterial.md]
 
 ## Example Input File Syntax
 

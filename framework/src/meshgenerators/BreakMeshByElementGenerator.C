@@ -7,16 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExplodeMeshGenerator.h"
+#include "BreakMeshByElementGenerator.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/partitioner.h"
 
-registerMooseObject("MooseApp", ExplodeMeshGenerator);
+registerMooseObject("MooseApp", BreakMeshByElementGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           ExplodeMeshGenerator,
+                           "05/18/2024 24:00",
+                           BreakMeshByElementGenerator);
 
 InputParameters
-ExplodeMeshGenerator::validParams()
+BreakMeshByElementGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Break all element-element interfaces in the specified subdomains.");
@@ -27,7 +31,7 @@ ExplodeMeshGenerator::validParams()
   return params;
 }
 
-ExplodeMeshGenerator::ExplodeMeshGenerator(const InputParameters & parameters)
+BreakMeshByElementGenerator::BreakMeshByElementGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _subdomains(getParam<std::vector<SubdomainID>>("subdomains")),
@@ -36,7 +40,7 @@ ExplodeMeshGenerator::ExplodeMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-ExplodeMeshGenerator::generate()
+BreakMeshByElementGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
@@ -60,8 +64,8 @@ ExplodeMeshGenerator::generate()
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
-ExplodeMeshGenerator::NodeToElemMapType
-ExplodeMeshGenerator::buildSubdomainRestrictedNodeToElemMap(
+BreakMeshByElementGenerator::NodeToElemMapType
+BreakMeshByElementGenerator::buildSubdomainRestrictedNodeToElemMap(
     std::unique_ptr<MeshBase> & mesh, const std::vector<SubdomainID> & subdomains) const
 {
   NodeToElemMapType node_to_elem_map;
@@ -97,8 +101,8 @@ ExplodeMeshGenerator::buildSubdomainRestrictedNodeToElemMap(
 }
 
 void
-ExplodeMeshGenerator::duplicateNodes(std::unique_ptr<MeshBase> & mesh,
-                                     const NodeToElemMapType & node_to_elem_map) const
+BreakMeshByElementGenerator::duplicateNodes(std::unique_ptr<MeshBase> & mesh,
+                                            const NodeToElemMapType & node_to_elem_map) const
 {
   for (const auto & [node_id, connected_elem_ids] : node_to_elem_map)
     for (auto & connected_elem_id : connected_elem_ids)
@@ -107,9 +111,9 @@ ExplodeMeshGenerator::duplicateNodes(std::unique_ptr<MeshBase> & mesh,
 }
 
 void
-ExplodeMeshGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
-                                    Elem * elem,
-                                    const Node * node) const
+BreakMeshByElementGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
+                                           Elem * elem,
+                                           const Node * node) const
 {
   std::unique_ptr<Node> new_node = Node::build(*node, Node::invalid_id);
   new_node->processor_id() = elem->processor_id();
@@ -129,8 +133,8 @@ ExplodeMeshGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
 }
 
 void
-ExplodeMeshGenerator::createInterface(MeshBase & mesh,
-                                      const NodeToElemMapType & node_to_elem_map) const
+BreakMeshByElementGenerator::createInterface(MeshBase & mesh,
+                                             const NodeToElemMapType & node_to_elem_map) const
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto & existing_boundary_ids = boundary_info.get_boundary_ids();
