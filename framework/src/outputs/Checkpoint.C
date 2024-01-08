@@ -46,15 +46,14 @@ Checkpoint::validParams()
       "suffix",
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
+  // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
+  params.addParam<Real>("wall_time_interval", 600,
+                        "The target wall time interval (in seconds) at which to output");
 
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum = {EXEC_TIMESTEP_END};
-
-  // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
-  const Real old_wall_time_inverval = params.get<Real>("wall_time_interval");
-  params.set<Real>("wall_time_interval") = std::min(old_wall_time_inverval, 600.0);
 
   return params;
 }
