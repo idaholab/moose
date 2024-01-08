@@ -58,7 +58,7 @@ To view 1-D data, do the following:
 - Select the begin and end points for the line: in the Properties pane, you'll
   see "Point1" and "Point2" which are points in 3-D space that define the line
   to be sampled. As a note, this could also be used to plot a line through a
-  multi-D mesh. If you have only your 1-D meshes, and they are colinear, then
+  multi-D mesh. If you have only your 1-D meshes, and they are collinear, then
   the default points will be the ones you want. In general, it selects points to
   get the smallest bounding box. This is the reason for the optional first step.
 - Change the sampling resolution: in the Properties pane, there is a box "Resolution",

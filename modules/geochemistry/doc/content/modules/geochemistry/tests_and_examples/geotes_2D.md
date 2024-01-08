@@ -71,7 +71,7 @@ The PorousFlow simulation provides `temperature`, `pf_rate_H2O`, `pf_rate_Na`, `
 
 !listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[rate_H2O_per_1l_auxk] end=[rate_Na_per_1l]
 
-This input file provides the PorousFlow simulation with updated mass-fractions (after `QuartzLike` dissolution has occured to increase the SiO$_{2}$(aq) concentration, for instance).  These are based on the "transported" mole numbers at each node, which are the mole numbers of the transported species in the original basis (mole numbers of H$_{2}$O, Na$^{+}$, Cl$^{-}$ and free moles of SiO$_{2}$(aq) in this case).  These are recorded into `AuxVariables` using, for example:
+This input file provides the PorousFlow simulation with updated mass-fractions (after `QuartzLike` dissolution has occurred to increase the SiO$_{2}$(aq) concentration, for instance).  These are based on the "transported" mole numbers at each node, which are the mole numbers of the transported species in the original basis (mole numbers of H$_{2}$O, Na$^{+}$, Cl$^{-}$ and free moles of SiO$_{2}$(aq) in this case).  These are recorded into `AuxVariables` using, for example:
 
 !listing modules/combined/examples/geochem-porous_flow/geotes_2D/aquifer_geochemistry.i start=[transported_H2O_auxk] end=[transported_Na]
 

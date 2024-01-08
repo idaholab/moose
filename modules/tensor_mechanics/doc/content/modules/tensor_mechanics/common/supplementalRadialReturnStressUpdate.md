@@ -13,7 +13,7 @@ strain required to return the stress state to the yield surface. This approach
 is given the name Radial Return because the yield surface used is the
 [von Mises yield surface](https://en.wikipedia.org/wiki/Von_Mises_yield_criterion):
 in the
-[devitoric stress space](https://en.wikipedia.org/wiki/Cauchy_stress_tensor#Stress_deviator_tensor),
+[deviatoric stress space](https://en.wikipedia.org/wiki/Cauchy_stress_tensor#Stress_deviator_tensor),
 this yield surface has the shape of a circle, and the scalar inelastic strain is
 assumed to always be directed at the circle center.
 

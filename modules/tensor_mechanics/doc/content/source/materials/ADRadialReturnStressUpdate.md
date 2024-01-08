@@ -1,4 +1,4 @@
-# Radial Return Stress Update with automatic differentaiation
+# Radial Return Stress Update with automatic differentiation
 
 Base class which calculates the effective inelastic strain increment required to
 return the isotropic stress state to a J2 yield surface.  This class is intended

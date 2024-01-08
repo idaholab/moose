@@ -1,12 +1,12 @@
 # Example 20 : UserObjects
 
-The problem is time-dependent diffusion with Dirichlet boundary conditions of 0 on the left and 1 on the right. The diffusion coefficient being calculated bu the `Material` is dependent on the average value of a variable on each block. Thus, as the concentration diffuses, the diffusion coefficient increases, but the coefficient is different for each block (based on the average of the variable on that block).
+The problem is time-dependent diffusion with Dirichlet boundary conditions of 0 on the left and 1 on the right. The diffusion coefficient being calculated by the `Material` is dependent on the average value of a variable on each block. Thus, as the concentration diffuses, the diffusion coefficient increases, but the coefficient is different for each block (based on the average of the variable on that block).
 
 To achieve this, we need 3 objects working together :
 
 -  `BlockAverageValue` : A `UserObject` that computes the average value of a variable on each block of the domain and provides `averageValue()` for retrieving the average value on a particular block.
 -  `BlockAverageDiffusionMaterial` : A `Material` that computes "diffusivity" based on the average value of a variable as computes by a `BlockAverageValue` `UserObject`.
--  `ExampleDiffusion` : The same `Kernel` we have seen before that uses a "diffusivity" material property. The main purpose of this class is to provide the `averageValue` method that acepts a `SubdomainID`, which is simply an integer value specifying whcih block of the mesh to perform the average value calculation.
+-  `ExampleDiffusion` : The same `Kernel` we have seen before that uses a "diffusivity" material property. The main purpose of this class is to provide the `averageValue` method that accepts a `SubdomainID`, which is simply an integer value specifying which block of the mesh to perform the average value calculation.
 
 [](---)
 
@@ -32,7 +32,7 @@ The second step is to create the Material object that will utilize the block ave
 
 ## Create ExampleDiffusion Kernel
 
-In order to utilize the "diffusivity" material property a Kernel that uses a material property as a coefficient is required. This is accomplished by creating a new Kernel, in this case a Kernel that inherits from the MOOSE `Diffusion` Kernel. This newly created Kernel simply ;ultiplies the `Diffusion` Kernel `computeQpResidual()` and `computeQpJacobian()` methods with a material propety. The complete code for this custom is supplied in the links below, agian the comments in the source detail the behavior of the class.
+In order to utilize the "diffusivity" material property a Kernel that uses a material property as a coefficient is required. This is accomplished by creating a new Kernel, in this case a Kernel that inherits from the MOOSE `Diffusion` Kernel. This newly created Kernel simply multiplies the `Diffusion` Kernel `computeQpResidual()` and `computeQpJacobian()` methods with a material property. The complete code for this custom is supplied in the links below, again the comments in the source detail the behavior of the class.
 
 [ExampleDiffusion.h](https://github.com/idaholab/moose/blob/devel/examples/ex20_user_objects/include/kernels/ExampleDiffusion.h)
 

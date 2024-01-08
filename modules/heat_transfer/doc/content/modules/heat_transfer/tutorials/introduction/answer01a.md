@@ -21,5 +21,5 @@ time unit should be in seconds to be consistent with the SI base units that the
 Watt is based on.
 
 !alert note
-MOOSE provides a system to convert quanities between units right in the input
+MOOSE provides a system to convert quantities between units right in the input
 file. A list of supported units can be found [here](utils/Units.md).

@@ -7,7 +7,7 @@ any PDE.
 \frac{\partial c}{\partial t} = \dots + \zeta(t,\vec r)
 \end{equation}
 
-The challenge in finite element solves, which recompute the resildual and Jacobian
+The challenge in finite element solves, which recompute the residual and Jacobian
 terms multiple times per timestep, is to have the same noise field throughout a
 given timestep. Ideally the noise field should also be independent of the parallelization
 of the simulation.

@@ -177,7 +177,7 @@ In Form II formulation, the force states have the following expressions:
 \end{equation}
 where $N_{\mathbf{X}$ and $N_{\mathbf{\xi}}$ are the total number of material points in the material point horizon and the intersect of the material point horizon and a bond-associated horizon.
 
-It should be noted that the First Piola-Kirchhoff stress tensor $\mathbf{P}$ and shape tensor $\mathbf{K}$ are all bond-associated quatities.
+It should be noted that the First Piola-Kirchhoff stress tensor $\mathbf{P}$ and shape tensor $\mathbf{K}$ are all bond-associated quantities.
 
 # Peridynamic Heat Conduction Models
 

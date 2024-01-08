@@ -170,7 +170,7 @@ sub@script@ not sub @script@
 `mono` ` not mono`
 
 Yo, dawg I heard you like formatting, so I created =underline
-formatted text that contains text with ~stikethrough that
+formatted text that contains text with ~strikethrough that
 contains +bold formatting with *emphasis that has some^superscript
 text with a@subscript@^*+~=, I hope you like it.
 

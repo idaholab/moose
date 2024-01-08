@@ -9,7 +9,7 @@ mesh surface according to the user defined rotation function.  The boundary cond
 applied to the displaced mesh.  The rotation function can be given in either radians or in angles,
 and an axis of rotation can be specified with the `axis_origin` and `axis_direction` parameters. By default,
 the function defines the rotation, but if the `angular_velocity` parameter is set, it allows for
-the function to define an angular velocity instead of a total rotationa angle.
+the function to define an angular velocity instead of a total rotation angle.
 
 The rotating displacement value at the current node is calculated according to
 [eq:rotating_displacement]:

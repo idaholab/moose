@@ -76,7 +76,7 @@ contains nodes in the buffer layer is not recommended.
 
 This treatment is enabled by setting parameter
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_incremental`.
-The method uses the same equilibrium wall treatement than the Newton solve.
+The method uses the same equilibrium wall treatment than the Newton solve.
 However, the main difference is that, instead of computing $u_{\tau}$ for the
 near wall cells, a fixed point iteration is performed in the wall functions
 to find $y^+$.
@@ -93,7 +93,7 @@ not recommended.
 
 This treatment is enabled by setting parameter
 [!param](/FVBCs/INSFVTurbulentViscosityWallFunction/wall_treatment) to `eq_linearized`.
-The treatement uses a linearized version of the wall function, in which
+The treatment uses a linearized version of the wall function, in which
 a linear Taylor approximation is used for the natural logarithm.
 This approximation results in a quadratic equation that is solved directly for $u_{\tau}$.
 Then, $y^+$ is computed from $u_{\tau}$.
@@ -102,7 +102,7 @@ Then, $y^+$ is computed from $u_{\tau}$.
 `eq_linearized` will work fast as there is no nonlinear solve at
 the near-wall region. However, the method may introduce significant
 near-wall errors. The method is designed to be used in conjunction
-with porous media treatement and not necessairly for free flow.
+with porous media treatment and not necessarily for free flow.
 
 ## Non-equilibrium wall functions
 
@@ -137,7 +137,7 @@ For the buffer layer, a linear blending method is used that defines the turbulen
 \end{equation}
 
 !alert note
-`neq` should mainly be used for dettached flow or other cases for which equilibrium wall
+`neq` should mainly be used for detached flow or other cases for which equilibrium wall
 functions are not valid. One should try to use equilibrium wall functions when possible.
 
 !syntax parameters /FVBCs/INSFVTurbulentViscosityWallFunction

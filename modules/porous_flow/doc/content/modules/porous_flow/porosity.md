@@ -132,7 +132,7 @@ following requirements:
 - As $x\rightarrow 0$, $\phi\rightarrow B$, which is necessary for
   continuity at $x=0$.
 - As $x\rightarrow\infty$, $\phi\rightarrow 0$, which is
-  physically desireable.
+  physically desirable.
 - The expression is monotonically decreasing, which is both
   physically desirable and computationally desirable (otherwise there
   may be non-unique solutions in a PorousFlow simulation).

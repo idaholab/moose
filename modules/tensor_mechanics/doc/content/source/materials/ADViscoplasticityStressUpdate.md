@@ -116,7 +116,7 @@ By taking the derivative of [eq:strain_rate] with respect to the gauge stress, t
   \label{eq:norton}
 \end{equation}
 providing a clear link between traditional power law creep solves; by replacing $\Sigma_{eq}$
-utilized in tradiation power law creep equations with a gauge stress, the exact strain dissipation
+utilized in traditional power law creep equations with a gauge stress, the exact strain dissipation
 is captured due to the act of homogenization.
 
 Using the LPS model, the gauge stress is calculated by minimizing the residual,

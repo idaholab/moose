@@ -26,7 +26,7 @@ For a core with heterogeneous assemblies, [!param](/Mesh/CoreMeshGenerator/deple
 All pins in the core have separate depletion ID values by setting [!param](/Mesh/CoreMeshGenerator/depletion_id_type) to `pin`.
 By setting that option to `pin_type`, unique ID values are assigned to individual pin types in assemblies.
 However, pins in different assemblies have different depletion IDs even if they have the same type.
-For a core with homogenized assemblies (no explicit pins), [!param](/Mesh/CoreMeshGenerator/depletion_id_type) can be either `assembly` and `assembly_type`, which assign unique ID values to indvidial assemblies or to individual assembly types, respectively.
+For a core with homogenized assemblies (no explicit pins), [!param](/Mesh/CoreMeshGenerator/depletion_id_type) can be either `assembly` and `assembly_type`, which assign unique ID values to individual assemblies or to individual assembly types, respectively.
 
 ## Exterior Boundary ID Information
 

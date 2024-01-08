@@ -3,7 +3,7 @@
 ## Description
 
 This kernel implements a diffusion term for the fluid energy equation. The thermal conductivity
-is isotropic for this kernel. For anistropic diffusion, use the [PINSFVEnergyAnisotropicDiffusion.md] kernel.
+is isotropic for this kernel. For anisotropic diffusion, use the [PINSFVEnergyAnisotropicDiffusion.md] kernel.
 
 
 \begin{equation}

@@ -36,7 +36,7 @@ Input files and results for both of these methods are found below.
 
 ## Method 1
 
-Here, the microbe is considered as a primary species.  The aqueous solution as described by Bethke contains a number of ionic species: the important thing here is the existance of `Biomass1` in the `basis_species` list:
+Here, the microbe is considered as a primary species.  The aqueous solution as described by Bethke contains a number of ionic species: the important thing here is the existence of `Biomass1` in the `basis_species` list:
 
 !listing modules/geochemistry/test/tests/kinetics/bio_sulfate_1.i block=definition
 
@@ -79,7 +79,7 @@ Here, the microbe is considered as a kinetic species that is generated via [sulf
     },
 ```
 
-If this entry did not appear in the database, it could be manually entered, but the equilibrium constants would have to be derived from those already in the database (or from experimental measurements).  This is easily done by using the [GeochemicalModelInterogator](GeochemicalModelInterrogator.md):
+If this entry did not appear in the database, it could be manually entered, but the equilibrium constants would have to be derived from those already in the database (or from experimental measurements).  This is easily done by using the [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md):
 
 !listing modules/geochemistry/test/tests/kinetics/bio_sulfate_0.i block=GeochemicalModelInterrogator
 

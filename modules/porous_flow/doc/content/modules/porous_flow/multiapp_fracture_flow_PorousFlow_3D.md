@@ -63,7 +63,7 @@ The page on [mathematics and physical interpretation](multiapp_fracture_flow_equ
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=porosity
 
-The insitu fracture permeability is assumed to be $10^{-11}\,$m$^{2}$.  It is assumed that this is $r a_{0}^{2}/12$, where $r=0.012$ is a factor capturing the roughness of the fracture surfaces.  It is also assumed that when the fracture dilates, this becomes $ra^{2}/12$.  Because of the multplication by $a$ (see [here](multiapp_fracture_flow_equations.md)), the value of permeability used in the simulations is $ra^{3}/12$:
+The insitu fracture permeability is assumed to be $10^{-11}\,$m$^{2}$.  It is assumed that this is $r a_{0}^{2}/12$, where $r=0.012$ is a factor capturing the roughness of the fracture surfaces.  It is also assumed that when the fracture dilates, this becomes $ra^{2}/12$.  Because of the multiplication by $a$ (see [here](multiapp_fracture_flow_equations.md)), the value of permeability used in the simulations is $ra^{3}/12$:
 
 \begin{equation}
 \label{eqn.frac.perm}
@@ -154,7 +154,7 @@ Typically 3-5 fracture time-steps are taken in a single matrix step in this mode
 
 The pressure at the injection point rises from its insitu value of around 9.4$\,$MPa to around 12.2$\,$MPa: an increase of 3$\,$MPa, which results in a fracture aperture of around 3$\,$mm according to [eqn.frac.open].  This results in permeability increasing by a factor of around 27000.
 
-Some results are shown in [fracture_only_aperture_changing_P_out], [fracture_only_aperture_changing_T_out] and [fracture_only_aperture_changing_T_2hrs].  Production commences around 1.75 hours after injection starts.  These simulations were run using different mesh sizes (by choosing `Mesh/uniform_refine` appropriately) to illustrate the impact of different meshes in this problem.  A straightfoward analysis of simulation error as a function of mesh size is not possible, because each simulation also uses a different time-step size.  Nevertheless, some observations are:
+Some results are shown in [fracture_only_aperture_changing_P_out], [fracture_only_aperture_changing_T_out] and [fracture_only_aperture_changing_T_2hrs].  Production commences around 1.75 hours after injection starts.  These simulations were run using different mesh sizes (by choosing `Mesh/uniform_refine` appropriately) to illustrate the impact of different meshes in this problem.  A straightforward analysis of simulation error as a function of mesh size is not possible, because each simulation also uses a different time-step size.  Nevertheless, some observations are:
 
 - There is an interesting increase of temperature around the production well in the finer-resolution cases.  The reason for this is that a thin layer of insitu hot fluid is "squashed" against the fracture ends as the cold fluid invades the fracture (the thin layer is not resolved in the low-resolution cases).  This is also clearly seen in [orbit_T].  The hot fluid cannot escape, and it becomes pressurized, leading to an increase in temperature.  Eventually the porepressure increases to 10.6$\,$MPa and the production well activates (indicated by the dot in the figures), withdrawing the hot fluid, and the near-well area cools.  In regions where there is no production well, the high temperature eventually diffuses.  If the production well were in the middle of a fracture, this interesting phenomenon wouldn't be seen.
 - As mesh resolution is increased, the results appear to be converging to an "infinite-resolution" case.  Given the likely uncertainties in parameter values and the physics of aperture dilation, a mesh with element side-lengths of 10$\,$m is likely to be perfectly adequate for this type of problem.
@@ -179,7 +179,7 @@ Some animations are shown in [orbit_T] and [orbit_aperture].  One month is simul
 !media porous_flow/examples/multiapp_flow/fracture_only_aperture_changing_T.mp4
 	style=width:60%;margin:auto;padding-top:2.5%;
 	id=orbit_T
-	caption=Temperature in the fracture for the case where there is no matrix, during the first month of simulation.  The cold injectate invades most of the fracture network: hot pockets of fluid only remain at the tops of some fractures, due to buoyancy.  Time is indicated by the green bar: most of the temerature changes occur within the first few hours
+	caption=Temperature in the fracture for the case where there is no matrix, during the first month of simulation.  The cold injectate invades most of the fracture network: hot pockets of fluid only remain at the tops of some fractures, due to buoyancy.  Time is indicated by the green bar: most of the temperature changes occur within the first few hours
 
 !media porous_flow/examples/multiapp_flow/fracture_only_aperture_changing_aperture.mp4
 	style=width:60%;margin:auto;padding-top:2.5%;

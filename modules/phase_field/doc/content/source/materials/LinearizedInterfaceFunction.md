@@ -5,7 +5,7 @@
 ## Overview
 
 !media /phase_field/linearized_interface_function.png style=width:49%;margin-left:1%;float:right;
-       caption=Figure 1: Example of order parmeter values ($\phi_1$, $\phi_2$) and the linear preconditioning transformed variables ($\psi_1$, $\psi_2$),
+       caption=Figure 1: Example of order parameter values ($\phi_1$, $\phi_2$) and the linear preconditioning transformed variables ($\psi_1$, $\psi_2$),
 
 This material defines the linearized interface substitution defined in [!cite](glasner2001nonlinear). This substitution converts the profile from a nonlinear shape to a linear shape, as shown in Fig. 1, requiring fewer elements across the interface to accurately resolve.
 

@@ -69,7 +69,7 @@ where $F(T)$ is the integral of $C_p$ with respect to temperature evaluated
 at $T$ and $401088.7$ J/kg/K is a constant representing $-F(T_{ref})+h(T_{ref})$
 selected in order to match the Fink and Leibowitz correlation at 371 K.
 This approach, rather than simply using the Fink and Leibowitz correlation outright,
-is used to ensure exact compatibility with thermodynamic definitions and the paricular
+is used to ensure exact compatibility with thermodynamic definitions and the particular
 fit for $C_p$ selected in this class.
 Computing $h$ based on an integral of $C_p$ matches the Fink
 and Leibowitz correlations to within 0.2% over the entire range for which

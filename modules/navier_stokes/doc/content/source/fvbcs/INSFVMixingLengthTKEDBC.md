@@ -13,7 +13,7 @@ where:
 
 - $C_{\mu} = 0.09$ is a closure parameter,
 - $k$ is the turbulent kinetic energy,
-- $L$ is a characterisitc length, e.g., the diameter of a pipe, diameter of an inlet jet, or the side length of the lid-driven cavity.
+- $L$ is a characteristic length, e.g., the diameter of a pipe, diameter of an inlet jet, or the side length of the lid-driven cavity.
 
 !syntax parameters /FVBCs/INSFVMixingLengthTKEDBC
 

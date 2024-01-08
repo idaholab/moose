@@ -48,7 +48,7 @@ The final block to create is the `Materials`.  This is always the most complicat
   suite.  There are over 300 tests so you're very likely to find what
   you need.  Don't expect the files to always correspond to
   physically-sensible models (sometimes they're deliberately
-  unsensible to test obscure aspects of PorousFlow) but at least they
+  insensible to test obscure aspects of PorousFlow) but at least they
   are guaranteed to run!
 
 - You can ask on the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).

@@ -12,7 +12,7 @@ test function $\psi$ and using Green's identity gives:
   \int_{\Omega}  \psi \nabla \cdot (\vec{v} \phi) d \Omega = - \int_{\Omega}  \nabla \psi  \cdot (\vec{v} \phi) d \Omega
   +  \int_{\partial \Omega}  \psi  \phi \vec{n} \cdot \vec{v}  d S.
 \end{equation}
-The boundary $\partial \Omega$ can be divided into two parts, inflow and outflow satsifying:
+The boundary $\partial \Omega$ can be divided into two parts, inflow and outflow satisfying:
 \begin{equation}
 \begin{aligned}
 \partial \Omega^-:&\vec{n} \cdot \vec{v} < 0 \\

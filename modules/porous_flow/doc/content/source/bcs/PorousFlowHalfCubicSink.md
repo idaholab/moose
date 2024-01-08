@@ -23,7 +23,7 @@ J.m$^{-1}$.s$^{-1}$ (for heat). The parameters $g_{\mathrm{max}}$, $v_{\mathrm{c
 This sink is often used in groundwater modelling of evapotranspiration, where:
 
 - $v_{\mathrm{center}} = 0$, since evapotranspiration is maximum when the groundwater table is at or above the topography;
-- $v_{\mathrm{cutoff}} = -10^{4}d$, where $d$ is the root depth at which there is no evapotransipiration from the groundwater system;
+- $v_{\mathrm{cutoff}} = -10^{4}d$, where $d$ is the root depth at which there is no evapotranspiration from the groundwater system;
 - $g_{\mathrm{max}}$ is the value of the pan evaporation, in kg.m$^{-2}$.s$^{-1}$.
 
 If $f>0$ then the boundary condition will act as a sink, while if $f<0$ the boundary condition acts as a source.  If applied to a fluid-component equation, the function $f$ has units kg.m$^{-2}$.s$^{-1}$.  If applied to the heat equation, the function $f$ has units J.m$^{-2}$.s$^{-1}$.  These units are potentially modified if the extra building blocks enumerated below are used.

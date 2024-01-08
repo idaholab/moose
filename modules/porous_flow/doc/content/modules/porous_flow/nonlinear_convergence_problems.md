@@ -59,7 +59,7 @@ In multiphase problems if one phase completely disappears, MOOSE
   permeability is zero.  However, numerical imprecision can lead to
   phase disappearance.
  - A nonzero residual saturation can be used.  This means that for
-  $dt\rightarrow 0$ the Jacobian matrix will typicaly be nonsingular.  Then in most cases the problematic node will
+  $dt\rightarrow 0$ the Jacobian matrix will typically be nonsingular.  Then in most cases the problematic node will
   fill with a little amount of the phase in the next time step.
  - A "shifted" van Genuchten capillary suction curve may be used (using the `s_scale` parameter)
   in difficult multiphase problems.
@@ -126,4 +126,4 @@ PorousFlow allows the use of other variables, not just porepressures, but mixtur
 
 ## Component disappearance
 
-Similar remarks may be made about component disappearance.  Often times it is useful to explicitly write the equations to determine where the zeroes (and noninvertability) are occuring.
+Similar remarks may be made about component disappearance.  Often times it is useful to explicitly write the equations to determine where the zeroes (and noninvertibility) are occurring.

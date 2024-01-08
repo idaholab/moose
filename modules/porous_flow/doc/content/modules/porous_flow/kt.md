@@ -9,7 +9,7 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
-Kuzmin and Turek [!citep](KuzminTurek2004) describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".   Basic features of KT's approach are detailed in [a worked example](kt_worked.md) and the results are compared with full upwinding, RDG and no stabilization in the [numerical diffusion page](numerical_diffusion.md).
+Kuzmin and Turek [!citep](KuzminTurek2004) describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviated to "KT".   Basic features of KT's approach are detailed in [a worked example](kt_worked.md) and the results are compared with full upwinding, RDG and no stabilization in the [numerical diffusion page](numerical_diffusion.md).
 
 This page is for users who want to use KT stabilization in PorousFlow simulations.
 

@@ -37,7 +37,7 @@ initial conditions specified in the `Variables` block:
 
 We can also use the initial condition when running steady-state problems (i.e. with the `Steady`
 Executioner); this effectively functions as an initial guess for the solver - usually not
-necesary, but occasionally useful.  For steady cases, the IC is specified in exactly the same way
+necessary, but occasionally useful.  For steady cases, the IC is specified in exactly the same way
 - see e.g. [examples/ex07_ics/steady.i].
 
 # Results

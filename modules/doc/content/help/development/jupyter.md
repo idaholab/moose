@@ -29,7 +29,7 @@ In the directory in which the notebook files are to be stored execute
 jupyter-notebook
 ```
 
-A browser window sould open with a list of notebooks (`*.ipynb` files) and a few UI elements.
+A browser window should open with a list of notebooks (`*.ipynb` files) and a few UI elements.
 
 ## Starting a new notebook
 
@@ -61,7 +61,7 @@ f
 ```
 
 The lone `f` on the second line causes the expression to be printed in `Out [3]:`. We can now build a few symbolic
-deriuvatives of the expression `f` with respect to `c` and `eta`
+derivatives of the expression `f` with respect to `c` and `eta`
 
 ```python
 (diff(f, c), diff(f,eta))

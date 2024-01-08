@@ -112,7 +112,7 @@ Not all the species listed in the database are used in most geochemical models, 
 
 To eliminate useless information, the Reader expects the user to supply the following information.
 
-1. A list of basis components relevant to their problem.  These components must be chosen from the "basis species" in the database, the sorbing sites and the decoupled redox states that are in disequilibrium (if any).  In the Geochemists Workbench [!citep](bethke_2007), the basis is specified implicitly through the user providing [swap](swap.md) information, initial pH, initial free concentration, initial bulk concentration, a basis component involved in charge balance, etc.  However, for unambigious clarity, `geochemistry` demands that the user specify the basis components, before specifying swaps, initial conditions, etc.
+1. A list of basis components relevant to their problem.  These components must be chosen from the "basis species" in the database, the sorbing sites and the decoupled redox states that are in disequilibrium (if any).  In the Geochemists Workbench [!citep](bethke_2007), the basis is specified implicitly through the user providing [swap](swap.md) information, initial pH, initial free concentration, initial bulk concentration, a basis component involved in charge balance, etc.  However, for unambiguous clarity, `geochemistry` demands that the user specify the basis components, before specifying swaps, initial conditions, etc.
 
 2. A list of species whose dynamics are governed by [kinetic rate laws](theory/index.md).  These can include:
 
@@ -122,7 +122,7 @@ To eliminate useless information, the Reader expects the user to supply the foll
 
 3. A list of minerals to ignore throughout the entire computation.  This can be "ignore all minerals".  Since the reader will eliminate any knowledge of these minerals, they will never precipitate, can never be given an initial condition, will never appear in the basis after swapping, and will never be involved in surface complexation.
 
-4. A list of minerals to include in the computation, so they have the possibility to appear at least some spatial location at some time.  This takes precidence over the list of minerals to ignore.  For instance `ignore_mineral = all` and `include_mineral = Fe(OH)3(ppd)` means that Fe(OH)$_{3}$(ppd) will be included, but no other minerals will be included.
+4. A list of minerals to include in the computation, so they have the possibility to appear at least some spatial location at some time.  This takes precedence over the list of minerals to ignore.  For instance `ignore_mineral = all` and `include_mineral = Fe(OH)3(ppd)` means that Fe(OH)$_{3}$(ppd) will be included, but no other minerals will be included.
 
 5. A list of gases whose fugacity will be fixed, at least for some time at some spatial location.
 

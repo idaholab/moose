@@ -1,6 +1,6 @@
 # Theory behind the geochemistry module
 
-The `geochemistry` module is designed to solve reactive transport in geochemical systems.  The `geochemistry` module's functionality is a subset of that described in the authoratative, pedagogical textbook [!cite](bethke_2007).  In order of help users understand the concepts of geochemical modelling, the `geochemistry` theory documentation uses notation and ideas drawn from this textbook, so readers will undoubtably find the textbook invaluable.
+The `geochemistry` module is designed to solve reactive transport in geochemical systems.  The `geochemistry` module's functionality is a subset of that described in the authoritative, pedagogical textbook [!cite](bethke_2007).  In order of help users understand the concepts of geochemical modelling, the `geochemistry` theory documentation uses notation and ideas drawn from this textbook, so readers will undoubtably find the textbook invaluable.
 
 ## Reactions in the geochemistry module
 
@@ -213,7 +213,7 @@ The geochemical system is fully defined when the mole numbers of all species, ga
 then an estimate of the ionic strength and stoichiometric ionic strength, may be performed to obtain:
 
 8. the activity of water, $a_{w}$;
-9. the activity all aqueous basis species, $a_{i} = \gamma_{i} m_{i}$ (recall that the mineral activites are all unity);
+9. the activity all aqueous basis species, $a_{i} = \gamma_{i} m_{i}$ (recall that the mineral activities are all unity);
 10. the activity coefficient for all secondary species, $\gamma_{j}$;
 
 and the following can be calculated:
@@ -274,7 +274,7 @@ The external sources, $q$, are determined by the reaction path (see above).
 The previous section defined $1 + N_{i} + N_{p} + N_{\bar{k}}$ ODEs and, in the case of surface complexation, $N_{p}$ algebraic equations to solve.  In contrast to [!cite](bethke_2007), in the geochemistry module these are solved in a fully-implicit fashion using a Newton-Raphson procedure to ensure unconditional stability.  Within each time-step the following iterative scheme is used:
 
 1. Temperature-dependent quantities such as the Debye-Huckel quantities are calculated.
-2. All quantities, such as $n_{w}$, $m_{i}$, $m_{p}$ and $n_{\bar{k}}$ are initialsed from their previous time-step values.  At the first timestep, the initialization methods described in [!cite](bethke_2007) are used.
+2. All quantities, such as $n_{w}$, $m_{i}$, $m_{p}$ and $n_{\bar{k}}$ are initialised from their previous time-step values.  At the first timestep, the initialization methods described in [!cite](bethke_2007) are used.
 3. Any known basis activities (such as pH) are prescribed and fixed.
 4. The ionic strength, stoichiometric ionic strength, water activity and activity coefficients are [computed](theory/activity_coefficients.md).
 5. The basis activities are computed, using $a_{i} = \gamma_{i}m_{i}$.
@@ -423,7 +423,7 @@ This type of model is more complicated to construct than usual MOOSE models, and
 
 ## Computational aspects
 
-`Geochemistry` simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node, and, optionally, populate a huge number of AuxVariables with useful information.  On the other hand, ignoring transport, they are almost embarrasingly parallel, so may be solved efficiently using a large number of processors.  Solver choice can significantly impact compute time.  A [separate page](compute_efficiencies.md) describes
+`Geochemistry` simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node, and, optionally, populate a huge number of AuxVariables with useful information.  On the other hand, ignoring transport, they are almost embarrassingly parallel, so may be solved efficiently using a large number of processors.  Solver choice can significantly impact compute time.  A [separate page](compute_efficiencies.md) describes
 
 - memory usage for pure geochemistry simulations
 - compute time for pure geochemistry simulations, and scaling with number of processors

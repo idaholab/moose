@@ -32,7 +32,7 @@ where $|\bm{i}| = \sum_{d=1}^D i_d$. See [!cite](gerstner1998numerical) for more
 
 ### Tensor Grid
 
-A tensor grid is created created by taking a Cartesian product of the points and a Kroenecker product of the weights from each dimensions' full order quadrature set. The resulting number of points is $N_q^D$, where $D$ is the number of dimensions. Currently, only Gauss quadrature types are used with tensor grid. [tensor-npts] shows the number of points several different $D$ and $N_q$. [tensor-grid] shows the points of a tensor grid of Gauss-Legendre quadrature with $D=2$ and $N_q=7$.
+A tensor grid is created created by taking a Cartesian product of the points and a Kronecker product of the weights from each dimensions' full order quadrature set. The resulting number of points is $N_q^D$, where $D$ is the number of dimensions. Currently, only Gauss quadrature types are used with tensor grid. [tensor-npts] shows the number of points several different $D$ and $N_q$. [tensor-grid] shows the points of a tensor grid of Gauss-Legendre quadrature with $D=2$ and $N_q=7$.
 
 !table id=tensor-npts caption=Resulting number of grid points for tensor grid
 | $N_q$ | $D=2$ | $D=5$ | $D=8$ |

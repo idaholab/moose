@@ -35,7 +35,7 @@ H(c1, c2) = G(c1, c2, 1-c1-c2)
 ```
 
 Use the `<<` io operator to output functions or terms. Or use explicit or implicit casts from
-`EBFunction` to `std::string` to pass a function to the FParse Parse method. FParser variables are
+`EBFunction` to `std::string` to pass a function to the FParser Parse method. FParser variables are
 built using the `args()` method.
 
 ```cpp

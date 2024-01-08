@@ -9,7 +9,7 @@ and `std_limit` parameters, respectively.
 
 Error type can be either 'relative' or 'absolute' and be set via `err_type` parameter.
 
-Multiple files can be specified in `cvsdiff` parameter.
+Multiple files can be specified in `csvdiff` parameter.
 
 For inspecting the values, users can add `-v` flag when running the `run_tests` scripts and they
 can check the results that will come out in a table like this:

@@ -1,6 +1,6 @@
 # Algorithm Extension
 
-The algorithm extension provides a means to display psuedo-code similar to the [latex algorithmicx package](https://ctan.math.illinois.edu/macros/latex/contrib/algorithmicx/algorithmicx.pdf). Algorithms are similar to [tables](extensions/table.md) in that users can assign captions, ids, and provide [shortcuts](extensions/autolink.md) to the algorithm.
+The algorithm extension provides a means to display pseudo-code similar to the [latex algorithmicx package](https://ctan.math.illinois.edu/macros/latex/contrib/algorithmicx/algorithmicx.pdf). Algorithms are similar to [tables](extensions/table.md) in that users can assign captions, ids, and provide [shortcuts](extensions/autolink.md) to the algorithm.
 
 !devel settings caption=Configuration options for the algorithm extension.
                 module=MooseDocs.extensions.algorithm
@@ -32,7 +32,7 @@ The algorithm command by itself is not very informative. Users should use the fo
 [!state text=$l(v) \leftarrow \infty$]
 [!for!end]
 [!state text=$l(u) \leftarrow 0$]
-[!while!begin condition=$changed$ comment=Intial is $changed \leftarrow \text{True}$]
+[!while!begin condition=$changed$ comment=Initial is $changed \leftarrow \text{True}$]
 [!for!begin condition=$i \leftarrow 1, n$]
 [!state text=$min \leftarrow l(v_i)$]
 [!for!begin condition=$j \leftarrow 1, n$]

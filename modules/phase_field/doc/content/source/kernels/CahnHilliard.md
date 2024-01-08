@@ -15,7 +15,7 @@ of the strong form term
 \end{equation}
 
 where $f(c_i)$ is the local free energy density of the system which depends on an arbitrary
-number of concnetration variables $c_j$. It uses the relation
+number of concentration variables $c_j$. It uses the relation
 
 \begin{equation}
 \nabla \frac{\partial f}{\partial c_i} = \sum_j\nabla c_j\frac{\partial^2 f}{\partial c_i c_j},

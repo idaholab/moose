@@ -28,7 +28,7 @@ where $\Delta_k$ is a perturbation of parameter $x_k$ and $\vec{\Delta_k}$ is a 
 !equation
 \sigma_d = \sqrt{\frac{1}{N-1}\sum_{i=1}^{N}\left(EE_{i,d} - \mu_d\right)^2} .
 
-The $\mu^{*}$ statistic is typically preferred over $\mu$ because it is agnostic to negative effects that could cancel out positive ones when sampling. These statistics can be interperated as the effect of the parameters on the response in the folloing ways:
+The $\mu^{*}$ statistic is typically preferred over $\mu$ because it is agnostic to negative effects that could cancel out positive ones when sampling. These statistics can be interpreted as the effect of the parameters on the response in the following ways:
 
 1. $\mu^{*} \approx 0, \sigma \approx 0$: parameter has no influential impact on the response.
 1. $\mu^{*} >> 0$: parameter has a significant impact on the response.
@@ -95,7 +95,7 @@ The resulting output is a [json file](JSONOutput.md) with the statistics and the
 
 !listing reporters/morris/gold/morris_main_out.json language=json
 
-We see that for each vector we have three quantities: `mu` for $\mu$, `mu_star` for $\mu^{*}$, `sigma` for $\sigma$. Each has a pair contianing a vector and a vector of vectors of the response value type. The first is the computed value for each parameter. The second has an entry for these values for each confidence point.
+We see that for each vector we have three quantities: `mu` for $\mu$, `mu_star` for $\mu^{*}$, `sigma` for $\sigma$. Each has a pair containing a vector and a vector of vectors of the response value type. The first is the computed value for each parameter. The second has an entry for these values for each confidence point.
 
 !syntax parameters /Reporters/MorrisReporter
 

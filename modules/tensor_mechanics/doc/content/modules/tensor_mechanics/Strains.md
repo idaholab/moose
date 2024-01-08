@@ -106,7 +106,7 @@ a practical issue for very large strains, for which hyperelastic models are
 more appropriate. This can be demonstrated with the closed loop loading cycle
 illustrated in [closed_loop_cycle_loading]. Since the initial and final
 configurations are the same, with elastic material, one would expect that the
-stress would return to zero in the final underformed state. With this
+stress would return to zero in the final undeformed state. With this
 incremental formulation, however, a residual stress remains, and the magnitude
 of that residual stress increases with the magnitude of the loading cycle.
 This occurs because the integral of the rate-of-deformation over the full

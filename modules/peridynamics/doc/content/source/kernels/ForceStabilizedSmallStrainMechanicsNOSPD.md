@@ -25,7 +25,7 @@ with
 \end{equation}
 where $E$ is young's modulus, $\Delta x$ is grid spacing for regular gird structure or average grid spacing for irregular grid structure, and $\mathbf{u}$ is the solution vector.
 
-We don't distinguish Cauchy stress with the first Piola-Kichhoff stress under infinitesimal strain assumptions. The stress retrieved from `ComputeLinearElasticStress` is directly used in the force state calculation.
+We don't distinguish Cauchy stress with the first Piola-Kirchhoff stress under infinitesimal strain assumptions. The stress retrieved from `ComputeLinearElasticStress` is directly used in the force state calculation.
 
 !syntax parameters /Kernels/ForceStabilizedSmallStrainMechanicsNOSPD
 

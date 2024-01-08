@@ -58,7 +58,7 @@ Here $a$, $b$, $c$ and $d$ are functions of temperature, and are tabulated in [c
 
 ### Neutral species: version 2
 
-Alternativfely, the activity coefficients for $z=0$ are computed using
+Alternatively, the activity coefficients for $z=0$ are computed using
 \begin{equation}
 \log_{10}\gamma = \dot{B}I \ .
 \end{equation}

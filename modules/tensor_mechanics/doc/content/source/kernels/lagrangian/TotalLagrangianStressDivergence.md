@@ -64,7 +64,7 @@ The constitutive model needs to provide the first Piola-Kirchhoff stress and the
 that stress with respect to the deformation gradient.
 However, the [material system](tensor_mechanics/NewMaterialSystem.md)
 provides a common interface to define the constitutive model with any stress and strain
-measures that are convient, translating the user-defined stress and Jacobian to the correct
+measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.
 
 The kernel is compatible with the [$\bar{\boldsymbol{F}}$ modification](/tensor_mechanics/Stabilization.md) of the

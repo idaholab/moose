@@ -21,7 +21,7 @@ The GB mobility can be defined in terms of the temperature $T$ using an Arrheniu
 \begin{equation}
   M_{GB} = M_0 \exp\left( -\frac{Q}{k_b T} \right),
 \end{equation}
-where $M_0$ is the mobility prefactor, $Q$ is the activation energy, and $k_b$ is the Boltzman constant.
+where $M_0$ is the mobility prefactor, $Q$ is the activation energy, and $k_b$ is the Boltzmann constant.
 
 ## Example Input File Syntax
 

@@ -64,7 +64,7 @@ The tag.gz files should be placed in the "release" directory.
 
 PLN-4005 details the necessary steps for performing the release which includes performing a final
 review of MOOSE or a MOOSE-based application. This review +must+ be performed by the Project Lead and
-is intended to ensure that all requirements are complete, accurate, and are satisifed and that all
+is intended to ensure that all requirements are complete, accurate, and are satisfied and that all
 [!ac](SQA) documentation is correct and complete.
 
 !---

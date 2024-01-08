@@ -142,7 +142,7 @@ relationship is used:
 S_{\mathrm{water}} = \left( 1 + (\alpha (p_{\mathrm{gas}} - p_{\mathrm{water}})^{1/(1-m)} \right)^{-m} \ ,
 \end{equation}
 with $\alpha = 1.1\,$Pa$^{-1}$, and $m=0.5$.  The water relative
-permeaility is assumed to be Corey type with exponent $1$, and the gas
+permeability is assumed to be Corey type with exponent $1$, and the gas
 phase has exponent $2$ (that is $\kappa_{\mathrm{rel,gas}} =
 S_{\mathrm{gas}}^{2}$, with $S_{\mathrm{gas}} = 1 -
 S_{\mathrm{water}}$).
@@ -165,7 +165,7 @@ that the fluid-component masses at the nodes respond correctly to the
 flux.  [s08_fig] demonstrates that MOOSE produces the
 expected result.
 
-!media sinks/s08.png style=width:50%;margin-left:10px caption=Results of Test 5, illustrating that in a 2-phase system MOOSE correctly applies a sink flux of a particular fluid component proportional to the component's mass fraction and the relative permeaility of the gas phase. id=s08_fig
+!media sinks/s08.png style=width:50%;margin-left:10px caption=Results of Test 5, illustrating that in a 2-phase system MOOSE correctly applies a sink flux of a particular fluid component proportional to the component's mass fraction and the relative permeability of the gas phase. id=s08_fig
 
 
 ## Piecewise-linear sink
@@ -365,7 +365,7 @@ may be used in order to compare with the standard fully-upwinded
 Kernels.  These Kernels do not employ any upwinding
 whatsoever, so less numerical
 diffusion is expected.  This is demonstrated in [s09_fig].  Two additional points may also be
-nocied: (1) the lack of upwinding has produced a "bump" in the
+noticed: (1) the lack of upwinding has produced a "bump" in the
 mass-fraction profile near the concentrated side; (2) the lack of upwinding
 means the temperature profile moves slightly slower than it should.
 These two affects reduce as the mesh density is increased, however.

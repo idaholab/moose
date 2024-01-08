@@ -606,7 +606,7 @@ A [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) is used to model ET:
 
 !listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[evapotranspiration] end=[]
 
-This block requires some explanation, but the reader is strongly encourated to read the PorousFlow documentation on the [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) and [PorousFlow boundary conditions in general](boundaries.md) for further information.
+This block requires some explanation, but the reader is strongly encouraged to read the PorousFlow documentation on the [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) and [PorousFlow boundary conditions in general](boundaries.md) for further information.
 
 It is assumed that:
 
@@ -710,7 +710,7 @@ It is vital that readers understand that a [PorousFlowPeacemanBorehole](PorousFl
 
 ### Results
 
-The borehole extracts very little groundwater --- only a paltry 7.6$\,$litre/day --- which is not suprising given its small diameter and the "tightness" of the aquifer.  The porepressure in the proximity of the river is only reduced by around 0.2$\,$Pa, as shown in [groundwater_ex02_abstraction_fig].  This reduces the baseflow from 11.09$\,$litre/m/day to 11.07$\,$litre/m/day.
+The borehole extracts very little groundwater --- only a paltry 7.6$\,$litre/day --- which is not surprising given its small diameter and the "tightness" of the aquifer.  The porepressure in the proximity of the river is only reduced by around 0.2$\,$Pa, as shown in [groundwater_ex02_abstraction_fig].  This reduces the baseflow from 11.09$\,$litre/m/day to 11.07$\,$litre/m/day.
 
 !media groundwater_ex02_abstraction_peaceman.png caption=The porepressure change due to groundwater abstraction.  id=groundwater_ex02_abstraction_fig
 
@@ -722,7 +722,7 @@ It is a *mistake* to use a [PorousFlowPolyLineSink](PorousFlowPolyLineSink.md) t
 
 !listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[polyline_sink_borehole] end=[]
 
-If the `fluxes` parameters were chosen sufficiently large, this would fix the porepressure at finite-element nodes surrounding the borehole to the value of 0$\,$Pa.  Since the finite-element mesh has a resolution of around $20\mathrm{m}\times 20\mathrm{m} \times 10\mathrm{m}$, this could correspond to a collosal borehole with cross-sectional size $20\mathrm{m} \times 10\mathrm{m}$ (and length of 400$\,$m from the width of the model)!
+If the `fluxes` parameters were chosen sufficiently large, this would fix the porepressure at finite-element nodes surrounding the borehole to the value of 0$\,$Pa.  Since the finite-element mesh has a resolution of around $20\mathrm{m}\times 20\mathrm{m} \times 10\mathrm{m}$, this could correspond to a colossal borehole with cross-sectional size $20\mathrm{m} \times 10\mathrm{m}$ (and length of 400$\,$m from the width of the model)!
 
 In this case, the water extracted by the borehole is around 640$\,$litre/day, and the river becomes leaky with 4.5$\,$litre/m/day of river water entering the groundwater system (and flowing to the borehole).  The porepressure change is much larger, as shown in [groundwater_ex02_abstraction_error_fig].
 

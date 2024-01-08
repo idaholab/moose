@@ -41,7 +41,7 @@ As you gain experience with PorousFlow, you will realise that this simulation co
 
 ## Boundary conditions
 
-The most important (potential) problem lies with the boundary conditions.  Physically they are saying "add or remove fluid to keep the porepressure or tracer concentration fixed".  In more complex simulations this can be completely disasterous.  There may not be the correct fluid component and fluid phase present to remove, and this causes extremely poor nonlinear convergence.  It is really important to understand this fully.
+The most important (potential) problem lies with the boundary conditions.  Physically they are saying "add or remove fluid to keep the porepressure or tracer concentration fixed".  In more complex simulations this can be completely disastrous.  There may not be the correct fluid component and fluid phase present to remove, and this causes extremely poor nonlinear convergence.  It is really important to understand this fully.
 
 [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) associates the variable $\chi^{\kappa}$ with the mass-balance equation for $\chi^{\kappa}$, and the variable $P$ with the mass-balance equation for the final mass fraction ($1-\sum_{\kappa}\chi^{\kappa}$).  (This is not obvious unless you read the documentation or the code.  In simulations that don't use `Actions` it will be obvious because you will have to write the input-file `Kernels` block yourself.)  Hence the BCs that have `variable = porepressure`:
 

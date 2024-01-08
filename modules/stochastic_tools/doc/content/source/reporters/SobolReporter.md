@@ -36,7 +36,7 @@ the parameter correlations.
 
 !listing reporters/sobol/gold/sobol_out.json
 
-### Sobol Statstics on Reporter Data
+### Sobol Statistics on Reporter Data
 
 Along with VectorPostprocessor data, the SobolReporter can compute indices on reporter data,
 which includes vector-type quantities of interest. Below shows the syntax required for

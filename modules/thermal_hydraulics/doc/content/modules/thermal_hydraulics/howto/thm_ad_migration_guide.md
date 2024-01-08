@@ -79,7 +79,7 @@ If you are using `[Postprocessors]` block in your input file, use [pps-type] to 
 
 If you are using `[VectorPostprocessors]` block in your input file, use [vpps-type] to convert the types of vector postprocessors to AD.
 
-!table id=vpps-type caption=Corresponding types of non-AD and AD vetcor postprocessors.
+!table id=vpps-type caption=Corresponding types of non-AD and AD vector postprocessors.
 | non-AD type | AD type |
 | :- | :- |
 | Sampler1DReal | ADSampler1DReal |

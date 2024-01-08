@@ -98,7 +98,7 @@ Do not use `sudo` when running Peacock.
 ## Input File Tab
 
 !style! halign=left
-The "Input File" tab (showm below) allows you to create and edit input files. You can automaticaly load an input file by passing it as an argument on the command-line, or you can use the "Open" button on the Input File tab.
+The "Input File" tab (shown below) allows you to create and edit input files. You can automatically load an input file by passing it as an argument on the command-line, or you can use the "Open" button on the Input File tab.
 !style-end!
 
 !media large_media/peacock/input_file_with_text_no_alpha.png
@@ -162,13 +162,13 @@ Below the Parameter Table is the Block Comment box. Any text entered into this b
 ### Apply/Add Button
 
 !style! halign=left
-The button in the bottom left will either show "Apply" or "Add" depending on wheter you are editing or adding an item. Click this button to save your changes.
+The button in the bottom left will either show "Apply" or "Add" depending on whether you are editing or adding an item. Click this button to save your changes.
 !style-end!
 
 ### New Parameter Button
 
 !style! halign=left
-The "New Parameter" button will add a new row to the Parameter Table. You can fill in the Name and Value cells of this new row to add a new parameter. You should not need to add new parameters often: this button exists for the rares cases in which Peacock does not know about a valid parameter for this object. This can occur in certain circumstances involving custom Actions.
+The "New Parameter" button will add a new row to the Parameter Table. You can fill in the Name and Value cells of this new row to add a new parameter. You should not need to add new parameters often: this button exists for the rare cases in which Peacock does not know about a valid parameter for this object. This can occur in certain circumstances involving custom Actions.
 !style-end!
 
 ### Cancel Button

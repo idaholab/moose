@@ -148,7 +148,7 @@ There are a lot of ways to control the solution when using the `Steady` class (o
 ### Results id=result-demo
 
 In [#execute],
-some ways in which to execute and visualize the results of an input file were discussed. These methods should be reviewed to find a preferred means of interacting with the application. As a reminder, the [`pressure_diffusion.i`](#input-demo) file can be exectued from the terminal by entering the following:
+some ways in which to execute and visualize the results of an input file were discussed. These methods should be reviewed to find a preferred means of interacting with the application. As a reminder, the [`pressure_diffusion.i`](#input-demo) file can be executed from the terminal by entering the following:
 
 !listing language=bash
 cd ~/projects/babbler/problems

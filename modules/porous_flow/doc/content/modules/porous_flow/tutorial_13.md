@@ -86,7 +86,7 @@ and
 
 ### Dolomite
 
-The initial condition for dolomite is $10^{-7}\,$m$^{3}$(precipitate)/m$^{3}$(porous material).  This is implemented in the Auxillary system by
+The initial condition for dolomite is $10^{-7}\,$m$^{3}$(precipitate)/m$^{3}$(porous material).  This is implemented in the Auxiliary system by
 
 !listing modules/porous_flow/examples/tutorial/13.i start=[AuxVariables] end=[GlobalParams]
 

@@ -22,7 +22,7 @@ where the $+$ and $-$ indices indicate the primary and neighbor side of the boun
 
  - $T_{\mathrm{bulk}}$ is the bulk temperature of the gap, either defined by a material property or variable: `Tbulk_mat` or `Tbulk_var`
 
- - $\epsilon^{\pm}_{\mathrm{eff}}$ is the effective emmissivity: `emissivity_eff_primary`/`emissivity_eff_neighbor`
+ - $\epsilon^{\pm}_{\mathrm{eff}}$ is the effective emissivity: `emissivity_eff_primary`/`emissivity_eff_neighbor`
 
 \begin{equation}
   \epsilon^{\pm}_{\mathrm{eff}} = \sigma\epsilon^{\pm}\frac{1-\rho^{\mp}}{1-\rho^{+}\rho^{-}}

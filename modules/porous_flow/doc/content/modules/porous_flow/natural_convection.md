@@ -69,7 +69,7 @@ were implemented. The former enables the time step to be increased if the soluti
 
 !listing modules/porous_flow/examples/natural_convection/natural_convection.i block=Executioner
 
-### Auxilary kernels and variables (optional)
+### Auxiliary kernels and variables (optional)
 
 This section is optional since these kernels and variables do not affect the calculation of the desired variable. In this example, we want to output the fluid density at the end of the simulation thus we will add an auxkernel and an auxvariable for it. It can be noticed that the term `execute_on = TIMESTEP_END` indicates this kernel will be activated to calculate the fluid density at the end of each time step only, thus this calculation does not affect the performance of other tasks.
 

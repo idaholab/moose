@@ -7,7 +7,7 @@ energy contribution for the anisotropic interface energy case. Its weak form is
 \begin{equation}
 \left(\nabla (L \psi), \frac{1}{2} \frac {\partial \kappa} {\partial \nabla \eta_{\alpha i}} \sum (\nabla \eta_{\beta j})^2  \right),
 \end{equation}
-where $\kappa$ (`kappa_name`) is the gradient energy coefficent, $\eta_{\alpha i}$ the non-conserved
+where $\kappa$ (`kappa_name`) is the gradient energy coefficient, $\eta_{\alpha i}$ the non-conserved
 non-linear order parameter variable the kernel is acting on, $L$ (`mob_name`) is
 the scalar (isotropic) mobility associated with the order parameter, and $\psi$
 is the test function.

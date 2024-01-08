@@ -40,7 +40,7 @@ constrained optimization the `taoalmm` algorithm needs to be used. When the
 generated and only in an OptimizationReporter does the user need to provide
 the type and number of constraints.
 
-To aid in the computation of the objective, gradient, and Hessian, this execuationer includes additional execution flags that MOOSE objects (like [MultiApps](MultiApps/index.md)) can be evaluated on. Having `execute_on = forward` will execute the object(s) just before `computeObjective` is called and `execute_on = adjoint` will execute the object()s just before `computeGradient` is called.  Having `execute_on = homogeneous_forward` will execute the object(s) during the matrix-free Hessian computation, before calling `adjoint` and `computeGradient`.
+To aid in the computation of the objective, gradient, and Hessian, this executioner includes additional execution flags that MOOSE objects (like [MultiApps](MultiApps/index.md)) can be evaluated on. Having `execute_on = forward` will execute the object(s) just before `computeObjective` is called and `execute_on = adjoint` will execute the object()s just before `computeGradient` is called.  Having `execute_on = homogeneous_forward` will execute the object(s) during the matrix-free Hessian computation, before calling `adjoint` and `computeGradient`.
 
 The form function's parameters are represented as a vector of values and is tied to reporter values within the [OptimizationReporter](OptimizationReporter/index.md).
 

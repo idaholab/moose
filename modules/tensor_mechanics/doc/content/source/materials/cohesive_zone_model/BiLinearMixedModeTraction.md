@@ -112,11 +112,11 @@ where $\mu$ is the viscosity parameter representing the relaxation time of the v
 
 ### Lag separation state
 
-It is typically useful to improve convergence by lagging the separation state. When `lag_seperation_state = true`, the $\delta_3$, $\delta_m^{max}$, $\delta_m^0$ and $\delta_m^f$ will be replaced by their old values from previous time step.
+It is typically useful to improve convergence by lagging the separation state. When `lag_separation_state = true`, the $\delta_3$, $\delta_m^{max}$, $\delta_m^0$ and $\delta_m^f$ will be replaced by their old values from previous time step.
 
-### Use Regularized Heavyside Function
+### Use Regularized Heaviside Function
 
-The step (heavyside) function $\frac{\langle-\delta_3\rangle}{-\delta_3}$ in [traction] usually makes convergence bad. In the code, we replaced it with the regularized heavside function which provides a C0 continuity. The regularization parameter can be set by `alpha` parameter.
+The step (Heaviside) function $\frac{\langle-\delta_3\rangle}{-\delta_3}$ in [traction] usually makes convergence bad. In the code, we replaced it with the regularized Heaviside function which provides a C0 continuity. The regularization parameter can be set by `alpha` parameter.
 
 ## Examples
 

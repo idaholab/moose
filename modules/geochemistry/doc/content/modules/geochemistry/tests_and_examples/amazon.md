@@ -80,7 +80,7 @@ Identical results are produced by the `geochemistry` module and the [Geochemists
 
 ### Minerals
 
-Both the `geochemistry` module and the GWB software predict indentical saturation indices for minerals.  They predict the saturation indices of the equilibrium solution in [table:molalities_etc] are greater than 0 for the minerals: nontronite, hematitie, kaolinite, beidellite, pyrophyllite, gibbsite, paragonite and quartz (see Figure 6.3 of [!cite](bethke_2007)).
+Both the `geochemistry` module and the GWB software predict identical saturation indices for minerals.  They predict the saturation indices of the equilibrium solution in [table:molalities_etc] are greater than 0 for the minerals: nontronite, hematite, kaolinite, beidellite, pyrophyllite, gibbsite, paragonite and quartz (see Figure 6.3 of [!cite](bethke_2007)).
 
 ## Fixing mineral volumes
 

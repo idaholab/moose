@@ -51,7 +51,7 @@ gdb --args ./yourapp-dbg -i inputfile.i
 
 (On Linux this will generally work, without the need for `sudo`)
 
-Once this is done, your executable will be loaded but won't start running.  This is an opportune time to set breakpoints.  We usually recommmend setting a breakpoint on `MPI_Abort` using the `b` command:
+Once this is done, your executable will be loaded but won't start running.  This is an opportune time to set breakpoints.  We usually recommend setting a breakpoint on `MPI_Abort` using the `b` command:
 
 ```
 b MPI_Abort
@@ -121,7 +121,7 @@ mpiexec -n 4 ./yourapp-dbg -i inputfile.i --start-in-debugger='sudo lldb'
 
 (If you are on Linux - most-likely you will want to put `gdb` where `sudo lldb` is)
 
-If everything is setup correctly you should see 4 XTerm windows show up with `lldb` command-line prompts.  Those debugger prompts are already attached to your running executable, but the executable is paused.  This is an opportune time to set breakpoints, but you have to do it in each terminal seperately.  For instance, you might want to go through each one and do:
+If everything is setup correctly you should see 4 XTerm windows show up with `lldb` command-line prompts.  Those debugger prompts are already attached to your running executable, but the executable is paused.  This is an opportune time to set breakpoints, but you have to do it in each terminal separately.  For instance, you might want to go through each one and do:
 
 ```
 b MPI_Abort
@@ -133,7 +133,7 @@ Once you are ready to *continue* - you do just that.  Use the `c` command (type 
 
 ##### Passing debugger commands on the command line
 
-`lldb` accepts debugger commands through the `-o` command line option that are executed as soon as the execuatble is loaded up and ready. This can be used to set breakpoints and immediately resume the execution of the app.
+`lldb` accepts debugger commands through the `-o` command line option that are executed as soon as the executable is loaded up and ready. This can be used to set breakpoints and immediately resume the execution of the app.
 
 ```bash
 mpirun -n 4 ./yourapp-dbg -i inputfile.i --start-in-debugger "sudo lldb -o 'break set -E C++' -o cont"

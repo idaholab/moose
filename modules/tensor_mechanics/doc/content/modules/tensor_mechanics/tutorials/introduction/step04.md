@@ -122,7 +122,7 @@ the `[Outputs]` block.
 
 > Let's see if we can extract the x deflection of the left cantilever. It should
 > be a positive value and the scalar we can extract is the maximum `disp_x`
-> value in the simualtion cell (the left cantilever has positive displacements
+> value in the simulation cell (the left cantilever has positive displacements
 > as it bends right in the positive x direction, while the right cantilever has
 > negative displacements as it bends left in the negative x direction). So we
 > need a postprocessor object that gives us an extreme value of a given
@@ -135,7 +135,7 @@ the `[Outputs]` block.
 
 [Volumetric locking](tensor_mechanics/VolumetricLocking.md) can occur in
 mechanics simulations of near incompressible materials if the elements (and
-associated shape functions) cannot accomodate the incompressibility constraint.
+associated shape functions) cannot accommodate the incompressibility constraint.
 
 > Keep the postprocessing modifications from the previous question, set the
 > [!param](/Materials/ComputeIsotropicElasticityTensor/poissons_ratio) of the

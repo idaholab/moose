@@ -13,7 +13,7 @@
 - An "instance" is a variable of one of these new data types
 
   - Also known as an "object"
-  - Analogy: You can use one "blue print" to build many buidings. You can use one "class" to build many "objects"
+  - Analogy: You can use one "blue print" to build many buildings. You can use one "class" to build many "objects"
 
 [](---)
 
@@ -79,7 +79,7 @@ void Point::setX(float x) { _x = x; }
 void Point::setY(float y) { _y = y; }
 ```
 
-This data is safely encapsuled so we can change the implementation without affecting users of this type.
+This data is safely encapsulated so we can change the implementation without affecting users of this type.
 
 [](---)
 
@@ -158,7 +158,7 @@ c = a + b;
 
 ## Operator Overloading
 
-Inside our Point class, we define new member functions with the special oprator keyword:
+Inside our Point class, we define new member functions with the special operator keyword:
 
 ```cpp
 Point Point::operator+(const Point & p)

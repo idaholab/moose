@@ -2,7 +2,7 @@
 
 For a detailed discussion on preconditioning in MOOSE, see [syntax/Preconditioning/index.md].
 
-To summarize, an accurate and complete preconditioning matrix can be important for an efficient Preconditioned Jacobian-Free Newton-Krylove (PJFNK) solve. It's absolutely essential for `solve_type = NEWTON`. MOOSE has ultiple options for buiding the preconditioning matrix :
+To summarize, an accurate and complete preconditioning matrix can be important for an efficient Preconditioned Jacobian-Free Newton-Krylov (PJFNK) solve. It's absolutely essential for `solve_type = NEWTON`. MOOSE has multiple options for building the preconditioning matrix :
 
 - (Default) Block Diagonal Preconditioning
 - Single Matrix Preconditioner (SMP)
@@ -11,11 +11,11 @@ To summarize, an accurate and complete preconditioning matrix can be important f
 
 Block diagonal preconditioning uses kernels' and integrated boundary conditions' `computeQpJacobian` methods to build a block diagonal matrix. It will +not account for variable coupling+. This is the default if a user does not specify a `[Preconditioning]` block in their input file.
 
-The Single Matrix Preconditioner builds its matrix using kernels' and integrated BCs' `computeQpJacobian` +and+ `computeQpOffDiagJacobian` methods, the latter of which is responsible for the contributions of coupled variables. A good, simple example of a `computeQpOffDiagJacobian` method is in [CoupledForce](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C). `CoupledForce` contributes a waek-form residual equal to
+The Single Matrix Preconditioner builds its matrix using kernels' and integrated BCs' `computeQpJacobian` +and+ `computeQpOffDiagJacobian` methods, the latter of which is responsible for the contributions of coupled variables. A good, simple example of a `computeQpOffDiagJacobian` method is in [CoupledForce](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C). `CoupledForce` contributes a weak-form residual equal to
 
 $R_i = -\psi_i v$
 
-To determine the corresponding off-diagonal Jacobian contribution, one must take the deriative:
+To determine the corresponding off-diagonal Jacobian contribution, one must take the derivative:
 
 $\frac{\partial R_i}{\partial v_j} = -\psi_i \frac{\partial v}{\partial v_j} = -\psi_i \phi_j$
 

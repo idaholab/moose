@@ -111,7 +111,7 @@ For more information see [the Splitting documentation under the Mesh System](/sp
 
 ## Command-Line Input File Overrides
 
-Any input file parameters can be overriden/set from the command-line.  This is incredibly handy for scripting and parameter studies.  The way it works is that you use a "directory" type of syntax.  Let's say that you have this `[Kernels]` block in your input file:
+Any input file parameters can be overridden/set from the command-line.  This is incredibly handy for scripting and parameter studies.  The way it works is that you use a "directory" type of syntax.  Let's say that you have this `[Kernels]` block in your input file:
 
 ```conf
 [Kernels]

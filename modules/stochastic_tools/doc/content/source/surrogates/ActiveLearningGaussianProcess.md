@@ -4,7 +4,7 @@
 
 ## Description
 
-The theory behind Gaussian Process (GP) is described in [GaussianProcessTrainer](GaussianProcessTrainer.md). `ActiveLearningGaussianProcess` is slightly similar to the `GaussianProcessTrainer` class in that it trains a GP model. However, a key feature of `ActiveLearningGaussianProcess` is that it permits re-training the GP model on-the-fly during the active learning process. This means that the input the inputs and output data set sizes will be dynamic and re-training the GP can be performed several times as dictated by the learning (or acquistion) function during active learning.
+The theory behind Gaussian Process (GP) is described in [GaussianProcessTrainer](GaussianProcessTrainer.md). `ActiveLearningGaussianProcess` is slightly similar to the `GaussianProcessTrainer` class in that it trains a GP model. However, a key feature of `ActiveLearningGaussianProcess` is that it permits re-training the GP model on-the-fly during the active learning process. This means that the input the inputs and output data set sizes will be dynamic and re-training the GP can be performed several times as dictated by the learning (or acquisition) function during active learning.
 
 Just like the `GaussianProcessTrainer` class, the GP model during active learning can be trained using either of the following options:
 
@@ -14,7 +14,7 @@ Just like the `GaussianProcessTrainer` class, the GP model during active learnin
 
 - +Adaptive moment estimation (Adam)+
 
-  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
+  Relies on the pseudocode provided in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
 
 ## Interaction between `ActiveLearningMonteCarloSampler`, `ActiveLearningGaussianProcess`, and `ActiveLearningGPDecision`
 

@@ -39,7 +39,7 @@ For anisothermal simulations, the energy equation reads
 where the final term is only used if coupling with mechanics is also desired.  To simulate this DE, `PorousFlowBasicTHM` uses the following kernels:
 
 - [PorousFlowEnergyTimeDerivative](/PorousFlowEnergyTimeDerivative.md) if the simulation is of Transient type
-- [PorousFlowFullySaturatedHeatAdvection](/PorousFlowFullySaturatedHeatAdvection.md) with `multiply_by_density=true` (irrespective of the setting of this flag in the `PorousflowBasicTHM` Action)
+- [PorousFlowFullySaturatedHeatAdvection](/PorousFlowFullySaturatedHeatAdvection.md) with `multiply_by_density=true` (irrespective of the setting of this flag in the `PorousFlowBasicTHM` Action)
 - [PorousFlowHeatConduction](/PorousFlowHeatConduction.md)
 - [PorousFlowHeatVolumetricExpansion](/PorousFlowHeatVolumetricExpansion.md) if coupling with temperature and mechanics is desired, and if the simulation is of Transient type
 

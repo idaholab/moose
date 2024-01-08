@@ -6,7 +6,7 @@
 
 This object accepts functions describing boundary values for pressure, fluid
 temperature, and superficial velocity. The superficial velocity functions can
-also be used to supply superficial momentum information insteady by setting
+also be used to supply superficial momentum information instead by setting
 `velocity_function_includes_rho = true`. If no function is provided for a
 quantity, the boundary value of that quantity will be determined by
 extrapolating from the neighboring boundary cell centroid using cell centroid

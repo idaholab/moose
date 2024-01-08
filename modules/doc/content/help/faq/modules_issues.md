@@ -67,7 +67,7 @@ source /opt/moose/Modules/__MODULES__/init/bash
 
 These three commands will start a new command interpreter without any of your default environment. This is important because for most errors we end up solving, it was due to *something* in the users environment.
 
-Do note, if *this* ends up solving your issue, then there is *something* in one of possibly many bash profiles getting in the way. At this point, you will want to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) and ask for help tracking this down. Keep in mind, depending on the situation you may be asked to contact the administrators of the machine in which you are operating on (HPC clusters for example are beyound our control).
+Do note, if *this* ends up solving your issue, then there is *something* in one of possibly many bash profiles getting in the way. At this point, you will want to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) and ask for help tracking this down. Keep in mind, depending on the situation you may be asked to contact the administrators of the machine in which you are operating on (HPC clusters for example are beyond our control).
 !alert-end!
 
 !alert note

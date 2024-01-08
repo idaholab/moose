@@ -20,7 +20,7 @@ conjunction with IterationAdaptiveDT this causes the time step to be cut to
 
 Between nucleation event onsets the timestep is limited based on the user
 supplied upper bound on the probability $p_{2nuc}$  (`p2nucleus`) to have
-_more than two_ nueceation events to occur during a single timestep.
+_more than two_ nucleation events to occur during a single timestep.
 This probability is calculated as
 
 \begin{equation}

@@ -282,7 +282,7 @@ Newton iterations. This material declares a material property (`_p`) which is wh
 iterating on the material properties containing `f` and `f'` from `RecomputeMaterial`. The
 `_discrete` member is a reference to a `Material` object retrieved with `getMaterial`.
 
-!listing NewtonMaterial.C start=MOOSEDOCS_START include-start=Falseg
+!listing NewtonMaterial.C start=MOOSEDOCS_START include-start=False
 
 To create and use a "Discrete" `Material` use the following to guide the process.
 

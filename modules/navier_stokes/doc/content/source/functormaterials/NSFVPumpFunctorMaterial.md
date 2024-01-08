@@ -13,10 +13,10 @@ where:
 - $\rho$ is the fluid density
 - $|\vec{g}|$ is the norm of the gravity vector
 - $A_r$ is the rated area of the pump (typically taken as the area of the upstream volume leading to the pump)
-- $V_r$ is the rated volume of the pump (we recommed taking this one as the area of the block leading to the pump)
+- $V_r$ is the rated volume of the pump (we recommend taking this one as the area of the block leading to the pump)
 - $h(Q)$ is the pressure head of the pump in units of {\it length} as a function of the flow rate with units of {\it volume / time}
 
-The scaling of the pressure head of the pump is performed via the non-dimmensional rotation speed of the pump defined as follows:
+The scaling of the pressure head of the pump is performed via the non-dimensional rotation speed of the pump defined as follows:
 
 \begin{equation}
   \omega_s = \frac{\omega Q^{\frac{1}{2}}}{\left( g h \right)^{\frac{3}{4}}} ,

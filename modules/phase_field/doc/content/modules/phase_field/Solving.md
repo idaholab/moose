@@ -54,7 +54,7 @@ and is the only method that works well with the split Cahn-Hilliard equations. I
 
 The incomplete factorization method (ILU) allows specifying a fill factor using `-pc_factor_levels`
 increasing this can improve the preconditioner. This is the default preconditioner and works well for
-elliptic problems such as the pahse field equations.
+elliptic problems such as the phase field equations.
 
 ### BoomerAMG
 

@@ -2,7 +2,7 @@
 
 !template! item key=system-scope
 !! system-scope-begin
-The [!ac](MOOSE) Phase Field module provides an extensible set of capabilities for solving for microstructual evolution of multi-phase and multi-componeht systems using conserved and non-conserved order parameters. It provides a set of C++ classes that define interfaces for MOOSE `Kernel` objects that implement various common phase field formulations including polycrystalline grain growth models. These models support one-, two-, and three-dimensional simulation domains.
+The [!ac](MOOSE) Phase Field module provides an extensible set of capabilities for solving for microstructural evolution of multi-phase and multi-component systems using conserved and non-conserved order parameters. It provides a set of C++ classes that define interfaces for MOOSE `Kernel` objects that implement various common phase field formulations including polycrystalline grain growth models. These models support one-, two-, and three-dimensional simulation domains.
 
 For modeling nucleation events the module includes a discrete nucleation system that supports nucleation based on order parameter pinning and artificial driving force insertion which enable nucleation events in conserved and non-conserved order parameter fields. Support is provided for physics informed timestepping and mesh refinement.
 
