@@ -73,7 +73,7 @@ TestPICRayStudy::generateRays()
     {
       rays[i] = acquireReplicatedRay();
       rays[i]->setStart(_start_points[i]);
-      rays[i]->setStartingDirection(_start_directions[i].unit());
+      rays[i]->setStartingDirection(_start_directions[i]);
       rays[i]->setStartingMaxDistance(maxDistance(*rays[i]));
     }
 

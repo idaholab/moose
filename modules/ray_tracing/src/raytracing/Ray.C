@@ -275,6 +275,13 @@ Ray::setStartingDirection(const Point & starting_direction)
         "\n\nYou must first clear the starting info using Ray::clearStartingInfo().");
   if (!_study.allowStaticRays() && starting_direction.absolute_fuzzy_equals(Point(0, 0, 0)))
     errorWhenInitializing("Starting direction in Ray::setStartingDirection() is the zero vector.");
+  // if (starting_direction.absolute_fuzzy_equals(Point(0, 0, 0)) && _max_distance != 0)
+  //   errorWhenInitializing("Starting max distance is non-zero but direction is the zero vector in
+  //   "
+  //                         "Ray::setStartingDirection().");
+  if (!starting_direction.absolute_fuzzy_equals(Point(0, 0, 0)) && _max_distance == 0)
+    errorWhenInitializing("Starting max distance is zero but direction is non-zero in "
+                          "Ray::setStartingDirection().");
   if (_study.allowStaticRays() && starting_direction.absolute_fuzzy_equals(Point(0, 0, 0)))
   {
     _direction = starting_direction;
@@ -320,6 +327,9 @@ Ray::setStartingMaxDistance(const Real starting_max_distance)
     errorWhenInitializing("Starting max distance is 0 in Ray::setStartingMaxDistance().");
   if (starting_max_distance != 0 && _direction.absolute_fuzzy_equals(Point(0, 0, 0)))
     errorWhenInitializing("Starting max distance is non-zero but direction is the zero vector in "
+                          "Ray::setStartingMaxDistance().");
+  if (starting_max_distance == 0 && !_direction.absolute_fuzzy_equals(Point(0, 0, 0)))
+    errorWhenInitializing("Starting max distance is zero but direction is non-zero in "
                           "Ray::setStartingMaxDistance().");
   if (_end_set)
     errorWhenInitializing(

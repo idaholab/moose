@@ -201,14 +201,36 @@
       allow_test_objects = true
       detail = 'setting the starting element for a ray to an inactive element'
     []
-    [set_distance_non_zero_direction_zero]
+    [set_direction_non_zero_after_zero_distance]
       type = RunException
       input = 'errors.i'
       cli_args = 'UserObjects/study/allow_static_rays=true
-                  UserObjects/study/set_distance_non_zero=true
-                  UserObjects/study/set_zero_direction=true'
+                  UserObjects/study/set_distance_zero=true
+                  UserObjects/study/set_non_zero_direction_after_distance=true'
+
+      expect_err = 'Starting max distance is zero but direction is non-zero'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance to non zero positive value with a zero direction'
+    []
+    [set_distance_non_zero_after_zero_direction]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/allow_static_rays=true
+                  UserObjects/study/set_zero_direction=true
+                  UserObjects/study/set_distance_non_zero=true'
 
       expect_err = 'Starting max distance is non-zero but direction is the zero vector'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance to non zero positive value with a zero direction'
+    []
+    [set_distance_zero_after_non_zero_direction]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/allow_static_rays=true
+                  UserObjects/study/set_non_zero_direction_before_distance=true
+                  UserObjects/study/set_distance_zero=true'
+
+      expect_err = 'Starting max distance is zero but direction is non-zero'
       allow_test_objects = true
       detail = 'setting a ray\'s starting maximum distance to non zero positive value with a zero direction'
     []

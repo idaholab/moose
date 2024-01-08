@@ -1104,7 +1104,6 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     // if we have a ray that isn't moving then we can skip all of the intersection steps
     if (ray->maxDistance() != 0 && !ray->direction().absolute_fuzzy_equals(Point(0, 0, 0)))
     {
-
       // Copy over in case we need to use it
       _last_intersected_extrema = _intersected_extrema;
       // Invalidate all intersections as we're tracing again
