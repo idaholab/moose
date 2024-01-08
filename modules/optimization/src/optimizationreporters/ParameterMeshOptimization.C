@@ -19,7 +19,7 @@ registerMooseObject("OptimizationApp", ParameterMeshOptimization);
 InputParameters
 ParameterMeshOptimization::validParams()
 {
-  InputParameters params = OptimizationDataTempl<OptimizationReporterBase>::validParams();
+  InputParameters params = GeneralOptimization::validParams();
 
   params.addClassDescription(
       "Computes objective function, gradient and contains reporters for communicating between "
@@ -75,8 +75,59 @@ ParameterMeshOptimization::validParams()
 }
 
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
-  : OptimizationDataTempl<OptimizationReporterBase>(parameters)
+  : GeneralOptimization(parameters)
 {
+}
+
+std::vector<Real>
+ParameterMeshOptimization::parseData(const std::vector<unsigned int> & exodus_timestep,
+                                     const ParameterMesh & pmesh,
+                                     Real constantDataFromInput,
+                                     const std::string & meshVarName,
+                                     unsigned int ntimes) const
+{
+  unsigned int numberOfControllableParameters = pmesh.size() * ntimes;
+  std::vector<Real> parsedData;
+  // read from mesh
+  if (!meshVarName.empty())
+  {
+    for (auto const & step : exodus_timestep)
+    {
+      std::vector<Real> data = pmesh.getParameterValues(meshVarName, step);
+      parsedData.insert(parsedData.end(), data.begin(), data.end());
+    }
+    if (parsedData.size() != numberOfControllableParameters)
+      mooseError("Number of parameters assigned by ",
+                 meshVarName,
+                 " is not equal to the number of parameters on the mesh.  Mesh contains ",
+                 numberOfControllableParameters,
+                 " parameters and ",
+                 meshVarName,
+                 " assigned ",
+                 parsedData.size(),
+                 " parameters.");
+  }
+  else // read in constant or default values
+    parsedData.resize(parsedData.size() + numberOfControllableParameters, constantDataFromInput);
+
+  return parsedData;
+}
+
+// function only used for test objects
+void
+ParameterMeshOptimization::setSimulationValuesForTesting(std::vector<Real> & /*data*/)
+{
+  // _simulation_values.clear();
+  // _simulation_values = data;
+}
+
+void
+ParameterMeshOptimization::setICsandBounds()
+{
+  if ((isParamValid("num_values_name") || isParamValid("num_values")))
+    paramError("num_values_name or num_values should not be used with ParameterMeshOptimization. "
+               "Instead the number of dofs is set by the parameter meshes.");
+
   _nvalues.resize(_nparams, 0);
   // Fill the mesh information
   const auto & meshes = getParam<std::vector<FileName>>("parameter_meshes");
@@ -223,69 +274,4 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
     // resize gradient vector to be filled later
     _gradients[i]->resize(_nvalues[i]);
   }
-}
-std::vector<Real>
-ParameterMeshOptimization::parseData(const std::vector<unsigned int> & exodus_timestep,
-                                     const ParameterMesh & pmesh,
-                                     Real constantDataFromInput,
-                                     const std::string & meshVarName,
-                                     unsigned int ntimes) const
-{
-  unsigned int numberOfControllableParameters = pmesh.size() * ntimes;
-  std::vector<Real> parsedData;
-  // read from mesh
-  if (!meshVarName.empty())
-  {
-    for (auto const & step : exodus_timestep)
-    {
-      std::vector<Real> data = pmesh.getParameterValues(meshVarName, step);
-      parsedData.insert(parsedData.end(), data.begin(), data.end());
-    }
-    if (parsedData.size() != numberOfControllableParameters)
-      mooseError("Number of parameters assigned by ",
-                 meshVarName,
-                 " is not equal to the number of parameters on the mesh.  Mesh contains ",
-                 numberOfControllableParameters,
-                 " parameters and ",
-                 meshVarName,
-                 " assigned ",
-                 parsedData.size(),
-                 " parameters.");
-  }
-  else // read in constant or default values
-    parsedData.resize(parsedData.size() + numberOfControllableParameters, constantDataFromInput);
-
-  return parsedData;
-}
-
-Real
-ParameterMeshOptimization::computeObjective()
-{
-  // This will only be executed if measurement_values are available on the main app
-  for (const auto i : index_range(_measurement_values))
-    _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
-
-  Real val = 0.0;
-  for (auto & misfit : _misfit_values)
-    val += misfit * misfit;
-
-  if (_tikhonov_coeff > 0.0)
-  {
-    Real param_norm_sqr = 0;
-    for (const auto & data : _parameters)
-      for (const auto & val : *data)
-        param_norm_sqr += val * val;
-
-    val += _tikhonov_coeff * param_norm_sqr;
-  }
-
-  return val * 0.5;
-}
-
-// function only used for test objects
-void
-ParameterMeshOptimization::setSimulationValuesForTesting(std::vector<Real> & data)
-{
-  _simulation_values.clear();
-  _simulation_values = data;
 }

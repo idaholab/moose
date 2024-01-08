@@ -11,20 +11,22 @@
 
 #include "OptimizationData.h"
 #include "OptimizationReporterBase.h"
+#include "GeneralOptimization.h"
 
 class ParameterMesh;
 
 /**
  * Mesh-based parameter optimization
  */
-class ParameterMeshOptimization : public OptimizationDataTempl<OptimizationReporterBase>
+class ParameterMeshOptimization : public GeneralOptimization
 {
 
 public:
   static InputParameters validParams();
   ParameterMeshOptimization(const InputParameters & parameters);
 
-  virtual Real computeObjective() override;
+protected:
+  virtual void setICsandBounds() override;
 
 private:
   /**

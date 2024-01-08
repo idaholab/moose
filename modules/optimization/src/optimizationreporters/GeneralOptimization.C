@@ -60,9 +60,6 @@ GeneralOptimization::GeneralOptimization(const InputParameters & parameters)
                   getParam<ReporterValueName>("num_values_name"), REPORTER_MODE_REPLICATED)
             : nullptr)
 {
-  // Check that one and only one set of parameters are given.
-  if (!(isParamValid("num_values_name") ^ isParamValid("num_values")))
-    paramError("Need to supply one and only one of num_values_name or num_values.");
 }
 
 Real
@@ -97,6 +94,12 @@ GeneralOptimization::getNumParams() const
 void
 GeneralOptimization::setICsandBounds()
 {
+  // Check that one and only one set of parameters are given.
+  // Set here because some derived reporters use a different method of
+  // determining numbers of dofs
+  if (!(isParamValid("num_values_name") ^ isParamValid("num_values")))
+    paramError("Need to supply one and only one of num_values_name or num_values.");
+
   if (_num_values_reporter)
     _nvalues = *_num_values_reporter;
   else
