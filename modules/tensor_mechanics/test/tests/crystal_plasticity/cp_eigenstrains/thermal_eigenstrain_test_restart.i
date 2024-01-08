@@ -1,3 +1,8 @@
+[Problem]
+  type = FEProblem
+  restart_file_base = thermal_eigenstrain_test_out_cp/LATEST
+[]
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
@@ -39,7 +44,7 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic/all]
+[Modules/TensorMechanics/Master/all]
   strain = FINITE
   add_variables = true
   generate_output = stress_zz
@@ -210,7 +215,7 @@
 
   dt = 0.1
   dtmin = 1e-4
-  end_time = 10
+  end_time = 20
 []
 
 [Outputs]
@@ -219,5 +224,5 @@
     type = Console
     max_rows = 5
   []
-  checkpoint = true
+  #checkpoint = true
 []
