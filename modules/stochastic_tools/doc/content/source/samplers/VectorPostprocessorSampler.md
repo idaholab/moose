@@ -7,7 +7,7 @@ The sampler generates samples from [vector-postprocessor](VectorPostprocessors/i
 
 ## Example Input Syntax
 
-In the example below, a vectorpostprocessor (`[csv]`) are formed using [CSVReader](/CSVReader.md):
+In the example below, a vectorpostprocessor (`[csv]`) are formed using [CSVReaderVectorPostprocessor](/CSVReaderVectorPostprocessor.md):
 
 !listing modules/stochastic_tools/test/tests/samplers/vectorpostprocessor/vectorpostprocessor.i block=VectorPostprocessors
 

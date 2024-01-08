@@ -16,7 +16,7 @@
 
 [VectorPostprocessors]
   [./csv_data]
-    type = CSVReader
+    type = CSVReaderVectorPostprocessor
     csv_file = fit_data_0.csv
     header = true
     outputs = none
