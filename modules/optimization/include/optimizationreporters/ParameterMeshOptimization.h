@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "OptimizationData.h"
-#include "OptimizationReporterBase.h"
 #include "GeneralOptimization.h"
 
 class ParameterMesh;
