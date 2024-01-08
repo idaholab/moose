@@ -413,7 +413,7 @@ Builder::root()
 {
   mooseAssert(_parser, "Parser is not set");
   return _parser->root();
-};
+}
 
 void
 Builder::build()
