@@ -83,6 +83,7 @@
     file_time = t
     file_value = u
     variable = u
+    objective_name = objective_value
     execute_on = timestep_end
     outputs = csv
   []
