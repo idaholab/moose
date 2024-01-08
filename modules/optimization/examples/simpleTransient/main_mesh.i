@@ -3,9 +3,16 @@
 
 [OptimizationReporter]
   type = ParameterMeshOptimization
+  objective_name = objective_value
   parameter_names = 'source'
   parameter_meshes = source_mesh_in.e
   num_parameter_times = 11
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+  []
 []
 
 [MultiApps]
@@ -31,13 +38,13 @@
   [from_forward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measured_data/misfit_values measured_data/simulation_values'
-    to_reporters = 'OptimizationReporter/misfit_values OptimizationReporter/simulation_values'
+    from_reporters = 'measured_data/misfit_values measured_data/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   [to_adjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/source OptimizationReporter/misfit_values'
+    from_reporters = 'OptimizationReporter/source main/misfit_values'
     to_reporters = 'src_values/values measured_data/misfit_values'
   []
   [from_adjoint]
