@@ -34,6 +34,8 @@ public:
   // Getters for analysis output
   Real getModeMixityRatio(const Node * const node) const;
   Real getCohesiveDamage(const Node * const node) const;
+  Real getLocalDisplacementNormal(const Node * const node) const;
+  Real getLocalDisplacementTangential(const Node * const node) const;
 
 protected:
   virtual void computeQpPropertiesLocal() override;

@@ -39,7 +39,9 @@ protected:
   enum class CohesiveQuantityEnum
   {
     MODE_MIXITY_RATIO,
-    COHESIVE_DAMAGE
+    COHESIVE_DAMAGE,
+    LOCAL_NORMAL_JUMP,
+    LOCAL_TANGENTIAL_JUMP
   };
 
   virtual Real computeValue() override;

@@ -333,7 +333,7 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
 
   // This traction vector is local at this point.
   _dof_to_czm_traction[node] =
-      (1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active +
+      -(1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active -
       _penalty_stiffness_czm * delta_inactive;
 }
 
@@ -569,6 +569,30 @@ BilinearMixedModeCohesiveZoneModel::getCohesiveDamage(const Node * const node) c
 
   if (it != _dof_to_damage.end())
     return MetaPhysicL::raw_value(it->second.first);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getLocalDisplacementNormal(const Node * const node) const
+{
+  const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second(0) / it2->second.second);
+  else
+    return 0.0;
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangential(const Node * const node) const
+{
+  const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second(1) / it2->second.second);
   else
     return 0.0;
 }

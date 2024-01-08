@@ -14,8 +14,8 @@
 
 registerMooseObject("ContactApp", CohesiveZoneMortarUserObjectAux);
 
-const MooseEnum
-    CohesiveZoneMortarUserObjectAux::_cohesive_zone_quantities("mode_mixity_ratio cohesive_damage");
+const MooseEnum CohesiveZoneMortarUserObjectAux::_cohesive_zone_quantities(
+    "mode_mixity_ratio cohesive_damage local_normal_jump local_tangential_jump");
 
 InputParameters
 CohesiveZoneMortarUserObjectAux::validParams()
@@ -47,8 +47,16 @@ CohesiveZoneMortarUserObjectAux::CohesiveZoneMortarUserObjectAux(const InputPara
                 _cohesive_zone_uo,
                 [&]() { return _cohesive_zone_uo->getModeMixityRatio(_current_node); }}},
               {CohesiveQuantityEnum::COHESIVE_DAMAGE,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getCohesiveDamage(_current_node); }}},
+              {CohesiveQuantityEnum::LOCAL_NORMAL_JUMP,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getLocalDisplacementNormal(_current_node); }}},
+              {CohesiveQuantityEnum::LOCAL_TANGENTIAL_JUMP,
                {"BilinearMixedModeCohesiveZoneModel", _cohesive_zone_uo, [&]() {
-                  return _cohesive_zone_uo->getCohesiveDamage(_current_node);
+                  return _cohesive_zone_uo->getLocalDisplacementTangential(_current_node);
                 }}}})
 {
   if (!isNodal())
