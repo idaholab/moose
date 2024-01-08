@@ -62,7 +62,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  interval = 2
+  time_step_interval = 2
   exodus = true
   hide = c
 []

@@ -41,11 +41,21 @@ Output::validParams()
 
   // Output intervals and timing
   params.addParam<unsigned int>(
-      "interval", 1, "The interval at which time steps are output to the solution file");
+      "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
+  params.addDeprecatedParam<unsigned int>("interval", "The interval (number of time steps) at which output occurs", "Deprecated, use time_step_interval");
+  params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<Real>(
-      "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
-  params.addParam<std::vector<Real>>(
-      "sync_times", {}, "Times at which the output and solution is forced to occur");
+      "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
+  params.addDeprecatedParam<Real>("minimum_time_interval", "The minimum simulation time between output steps", "Deprecated, use min_simulation_time_interval");
+  params.deprecateParam("minimum_time_interval", "min_simulation_time_interval", "02/01/2025");
+  params.addParam<Real>("simulation_time_interval",
+                        std::numeric_limits<Real>::max(),
+                        "The target simulation time interval (in seconds) at which to output");
+  params.addParam<Real>("wall_time_interval",
+                        std::numeric_limits<Real>::max(),
+                        "The target wall time interval (in seconds) at which to output");
+  params.addParam<std::vector<Real>>("sync_times",
+                                     "Times at which the output and solution is forced to occur");
   params.addParam<TimesName>(
       "sync_times_object",
       "Times object providing the times at which the output and solution is forced to occur");
@@ -74,8 +84,8 @@ Output::validParams()
 
   // 'Timing' group
   params.addParamNamesToGroup(
-      "time_tolerance interval sync_times sync_times_object sync_only start_time end_time "
-      "start_step end_step minimum_time_interval",
+      "time_tolerance time_step_interval sync_times sync_times_object sync_only start_time end_time "
+      "start_step end_step min_simulation_time_interval simulation_time_interval wall_time_interval",
       "Timing and frequency of output");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
@@ -119,8 +129,10 @@ Output::Output(const InputParameters & parameters)
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
     _num(0),
-    _interval(getParam<unsigned int>("interval")),
-    _minimum_time_interval(getParam<Real>("minimum_time_interval")),
+    _time_step_interval(getParam<unsigned int>("time_step_interval")),
+    _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
+    _simulation_time_interval(getParam<Real>("simulation_time_interval")),
+    _wall_time_interval(getParam<Real>("wall_time_interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _sync_times_object(isParamValid("sync_times_object")
@@ -140,8 +152,9 @@ Output::Output(const InputParameters & parameters)
     _allow_output(true),
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters),
-    _last_output_time(
-        declareRestartableData<Real>("last_output_time", std::numeric_limits<Real>::lowest()))
+    _last_output_simulation_time(
+        declareRestartableData<Real>("last_output_simulation_time", std::numeric_limits<Real>::lowest())),
+    _last_output_wall_time(std::chrono::steady_clock::now())
 {
   if (_use_displaced)
   {
@@ -215,18 +228,26 @@ Output::outputStep(const ExecFlagType & type)
   if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
-  // Return if the current output is not on the desired interval
-  if (type != EXEC_FINAL && !onInterval())
+  // Return if the current output is not on the desired interval and there is
+  // no signal to process
+  const bool on_interval_or_exec_final = (onInterval() || (type == EXEC_FINAL));
+  // Sync across processes and only output one time per signal received.
+  comm().max(Moose::interrupt_signal_number);
+  const bool signal_received = Moose::interrupt_signal_number;
+  if (!(on_interval_or_exec_final || signal_received))
     return;
 
   // set current type
   _current_execute_flag = type;
 
-  // Call the output method
+  // Check whether we should output, then do it.
   if (shouldOutput())
   {
     // store current simulation time
-    _last_output_time = _time;
+    _last_output_simulation_time = _time;
+
+    // store current wall time of output
+    _last_output_wall_time = std::chrono::steady_clock::now();
 
     TIME_SECTION("outputStep", 2, "Outputting Step");
     output();
@@ -252,7 +273,7 @@ Output::onInterval()
   // Return true if the current step on the current output interval and within the output time range
   // and within the output step range
   if (_time >= _start_time && _time <= _end_time && _t_step >= _start_step &&
-      _t_step <= _end_step && (_t_step % _interval) == 0)
+      _t_step <= _end_step && (_t_step % _time_step_interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true
@@ -272,9 +293,16 @@ Output::onInterval()
   if (_sync_times.find(_time) != _sync_times.end())
     output = true;
 
-  // check if enough time has passed between outputs
-  if (_time > _last_output_time && _last_output_time + _minimum_time_interval > _time + _t_tol)
-    return false;
+  // check if enough simulation time has passed between outputs
+  if (_time > _last_output_simulation_time && _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
+    output = false;
+
+  // check if enough wall time has passed between outputs
+  const auto now = std::chrono::steady_clock::now();
+  _wall_time_since_last_output =
+      std::chrono::duration_cast<std::chrono::seconds>(now - _last_output_wall_time).count();
+  if (_wall_time_since_last_output >= _wall_time_interval)
+    output = true;
 
   // Return the output status
   return output;

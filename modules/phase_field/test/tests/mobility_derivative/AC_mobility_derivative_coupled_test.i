@@ -114,7 +114,7 @@
 []
 
 [Outputs]
-  interval = 5
+  time_step_interval = 5
   print_linear_residuals = false
   exodus = true
 []

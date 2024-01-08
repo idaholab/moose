@@ -65,6 +65,6 @@
 [Outputs]
   [./out]
     type = CSV
-    interval = 10
+    time_step_interval = 10
   [../]
 []

@@ -321,11 +321,11 @@
   [./exodus]
     type = Exodus
     execute_on = 'initial timestep_end final'
-    interval = 1
+    time_step_interval = 1
   [../]
   [./csv]
     type = CSV
     execute_on = 'initial timestep_end final'
-    interval = 1
+    time_step_interval = 1
   [../]
 []

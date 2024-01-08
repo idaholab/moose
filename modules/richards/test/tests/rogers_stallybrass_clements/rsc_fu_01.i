@@ -202,7 +202,7 @@
 
 [Outputs]
   file_base = rsc_fu_01
-  interval = 100000
+  time_step_interval = 100000
   execute_on = 'initial timestep_end final'
   exodus = true
 []

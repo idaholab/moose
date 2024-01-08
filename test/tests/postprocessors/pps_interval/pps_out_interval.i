@@ -129,10 +129,15 @@
 
 [Outputs]
   file_base = pps_out_interval
-  interval = 2
+  time_step_interval = 2
   exodus = true
   [./console]
     type = Console
-    interval = 1
+    time_step_interval = 1
   [../]
+[]
+
+[Debug]
+  show_parser = true
+  show_actions = true
 []

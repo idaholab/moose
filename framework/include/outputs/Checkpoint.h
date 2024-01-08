@@ -21,12 +21,13 @@
  * SYSTEM_CREATED: This type of checkpoint is created automatically by the
  *   system for the purpose of writing checkpoints at regularly scheduled
  *   walltime intervals or when sent a signal.
- * USER_AND_SYSTEM_CREATED: Checkpoint is requested by the user, and modified
- *   by the system to also output at walltime intervals or when sent a signal.
+ * USER_AND_SYSTEM_CREATED: Checkpoint is requested by the user in the input
+ *   file, and modified by the system to also output at walltime intervals or
+ *   when sent a signal.
  */
 enum CheckpointType : unsigned short
 {
-  USER_CREATED,
+  NONE,
   SYSTEM_CREATED,
   USER_AND_SYSTEM_CREATED
 };

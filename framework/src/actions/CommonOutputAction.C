@@ -85,7 +85,9 @@ CommonOutputAction::validParams()
                                             "strings.  This is helpful in outputting only a subset "
                                             "of outputs when using MultiApps.");
   params.addParam<unsigned int>(
-      "interval", 1, "The interval at which timesteps are output to the solution file.");
+      "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
+  params.addDeprecatedParam<unsigned int>("interval", "The interval (number of time steps) at which output occurs", "Deprecated, use time_step_interval");
+  params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<std::vector<Real>>("sync_times",
                                      std::vector<Real>(),
                                      "Times at which the output and solution is forced to occur");

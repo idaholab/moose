@@ -133,6 +133,6 @@
 []
 
 [Outputs]
-  interval = 5
+  time_step_interval = 5
   exodus = true
 []

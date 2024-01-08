@@ -36,7 +36,7 @@ Checkpoint::validParams()
   // Controls whether the checkpoint will actually run. Should only ever be changed by the
   // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
   // is received.
-  params.addPrivateParam<CheckpointType>("checkpoint_type", USER_CREATED);
+  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::NONE);
 
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
@@ -51,6 +51,10 @@ Checkpoint::validParams()
   // change the default value of execute_on to TIMESTEP_END
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum = {EXEC_TIMESTEP_END};
+
+  // For checkpoints, set the wall time output interval to defualt of 10 minutes (600 s)
+  const Real old_wall_time_inverval = params.get<Real>("wall_time_interval");
+  params.set<Real>("wall_time_interval") = std::min(old_wall_time_inverval, 600.0);
 
   return params;
 }
@@ -119,61 +123,48 @@ Checkpoint::directory() const
 void
 Checkpoint::outputStep(const ExecFlagType & type)
 {
-  // Output is not allowed
-  if (!_allow_output && type != EXEC_FORCED)
-    return;
-
-  // If recovering disable output of initial condition, it was already output
-  if (type == EXEC_INITIAL && _app.isRecovering())
-    return;
-
-  // store current simulation time
-  _last_output_time = _time;
-
-  // set current type
-  _current_execute_flag = type;
-
-  // Check whether we should output, then do it.
-  if (shouldOutput())
-  {
-    TIME_SECTION("outputStep", 2, "Outputting Checkpoint");
-    output();
-  }
-
-  _current_execute_flag = EXEC_NONE;
+  FileOutput::outputStep(type);
 }
 
 bool
 Checkpoint::shouldOutput()
 {
-  const bool parent_should_output = FileOutput::shouldOutput();
-  // Check if the checkpoint should "normally" output, i.e. if it was created
-  // through checkpoint=true
-  bool should_output =
-      (onInterval() || _current_execute_flag == EXEC_FINAL) ? parent_should_output : false;
-
-  // If this is either a auto-created checkpoint, or if its an existing
-  // checkpoint acting as the autosave and that checkpoint isn't on its
-  // interval, then output.
-  // parent_should_output ensures that we output only when _execute_on contains
+  // should_output_parent ensures that we output only when _execute_on contains
   // _current_execute_flag (see Output::shouldOutput), ensuring that we wait
   // until the end of the timestep to write, preventing the output of an
   // unconverged solution.
-  if (parent_should_output && (_checkpoint_type == SYSTEM_CREATED ||
-                               (_checkpoint_type == USER_AND_SYSTEM_CREATED && !should_output)))
+  const bool should_output_parent = FileOutput::shouldOutput();
+  if (!should_output_parent)
+    return false; // No point in continuing
+
+  // Check for signal
+  // Reading checkpoint on time step 0 is not supported
+  const bool should_output_signal = (Moose::interrupt_signal_number != 0) && (timeStep() > 0);
+  if (should_output_signal)
   {
-    // If this is a pure system-created autosave through AutoCheckpointAction,
-    // then sync across processes and only output one time per signal received.
-    comm().max(Moose::interrupt_signal_number);
-    // Reading checkpoint on time step 0 is not supported
-    should_output = (Moose::interrupt_signal_number != 0) && (timeStep() > 0);
-    if (should_output)
-    {
-      _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
-      // Reset signal number since we output
-      Moose::interrupt_signal_number = 0;
-    }
+    _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
+    // Reset signal number since we output
+    Moose::interrupt_signal_number = 0;
+    return true;
   }
+
+  // Check if enough wall time has elapsed to output
+  const bool should_output_wall_time = _wall_time_since_last_output >= _wall_time_interval;
+  if (should_output_wall_time)
+    return true;
+
+  // At this point, we have checked all automatic checkpoint options. If none
+  // of those triggered, then the only way a checkpoint will still be written
+  // is if the user defined it. If the checkpoint is purely system-created,
+  // go ahead and return false (circumvents default time_step_interval = 1 for
+  // auto checkpoints).
+  if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
+    return false;
+
+  // Check if the checkpoint should "normally" output, i.e. if it was created
+  // through the input file
+  const bool should_output = (onInterval() || _current_execute_flag == EXEC_FINAL);
+
   return should_output;
 }
 

@@ -211,5 +211,5 @@
     sync_times = '0.1 0.5 1'
     sync_only = true
   []
-  interval = 10
+  time_step_interval = 10
 []

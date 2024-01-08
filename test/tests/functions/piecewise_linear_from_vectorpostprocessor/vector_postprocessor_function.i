@@ -162,7 +162,7 @@
   []
 []
 [Outputs]
-  interval = 1
+  time_step_interval = 1
   csv = false
   exodus = true
   file_base = out

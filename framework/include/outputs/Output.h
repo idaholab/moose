@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <chrono>
+
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
@@ -213,10 +215,16 @@ protected:
   unsigned int _num;
 
   /// The output time step interval
-  const unsigned int _interval;
+  const unsigned int _time_step_interval;
 
   /// Minimum simulation time between outputs
-  const Real _minimum_time_interval;
+  const Real _min_simulation_time_interval;
+
+  /// Target simulation time between outputs
+  const Real _simulation_time_interval;
+
+  /// Target wall time between outputs in seconds
+  const Real _wall_time_interval;
 
   /// Sync times for this outputter
   std::set<Real> _sync_times;
@@ -255,7 +263,13 @@ protected:
   OutputOnWarehouse _advanced_execute_on;
 
   /// last simulation time an output has occured
-  Real & _last_output_time;
+  Real & _last_output_simulation_time;
+
+  /// last wall time an output has occured
+  std::chrono::time_point<std::chrono::steady_clock> _last_output_wall_time;
+
+  /// time in seconds since last output
+  Real _wall_time_since_last_output;
 
   friend class OutputWarehouse;
 };
