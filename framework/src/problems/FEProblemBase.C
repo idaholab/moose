@@ -346,7 +346,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _linear_systems(_num_linear_sys, nullptr),
     _current_linear_sys(nullptr),
     _using_default_nl(!isParamSetByUser("nl_sys_names")),
-    _nl_sys_names((_using_default_nl && !_linear_sys_names.size())
+    _nl_sys_names(!_using_default_nl || (_using_default_nl && !_linear_sys_names.size())
                       ? getParam<std::vector<NonlinearSystemName>>("nl_sys_names")
                       : std::vector<NonlinearSystemName>()),
     _num_nl_sys(_nl_sys_names.size()),
@@ -6425,7 +6425,12 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
   // matrix tags
   {
-    selectMatrixTagsFromSystem(*_current_nl_sys, getMatrixTags(), _fe_matrix_tags);
+    // selectMatrixTagsFromSystem(*_current_nl_sys, getMatrixTags(), _fe_matrix_tags);
+    _fe_matrix_tags.clear();
+
+    auto & tags = getMatrixTags();
+    for (auto & tag : tags)
+      _fe_matrix_tags.insert(tag.second);
   }
 
   try

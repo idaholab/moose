@@ -46,8 +46,6 @@ FEProblem::FEProblem(const InputParameters & parameters)
     // backwards compatibility for AD for objects that depend on initializing derivatives during
     // construction
     setCurrentNonlinearSystem(0);
-
-    initNullSpaceVectors(parameters, _nl);
   }
 
   if (_num_linear_sys)
@@ -58,9 +56,12 @@ FEProblem::FEProblem(const InputParameters & parameters)
     setCurrentLinearSystem(0);
   }
 
+  _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
+
   newAssemblyArray(_nl, _linear_systems);
 
-  _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
+  if (_num_nl_sys)
+    initNullSpaceVectors(parameters, _nl);
 
   es().parameters.set<FEProblem *>("_fe_problem") = this;
 
