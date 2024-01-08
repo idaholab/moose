@@ -76,7 +76,6 @@ void
 CrystalPlasticityKalidindiUpdate::setMaterialVectorSize()
 {
   CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
-
 }
 
 void
