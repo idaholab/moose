@@ -6,6 +6,7 @@
       recover = false
       issues = '#25528'
       design = 'FlipSidesetGenerator.md'
+      mesh_mode = 'replicated'
       requirement = 'This system allows the sideset to be flipped for 2D mesh'
     []
 
@@ -16,6 +17,7 @@
       recover = false
       requirement = 'This system allows the sideset to be flipped for 3D mesh'
       design = 'FlipSidesetGenerator.md'
+      mesh_mode = 'replicated'
       issues = '#25528'
     []
     [no_sideset_exception]
@@ -25,6 +27,7 @@
       expect_err = "sideset 'bad_side' doesn't exist in mesh"
       requirement = "The system shall error if sideset doesn't exist"
       design = 'FlipSidesetGenerator.md'
+      mesh_mode = 'replicated'
       issues = '#25528'
     []
     [no_neighbor_exception]
@@ -34,6 +37,7 @@
       expect_err = "elem 0 doesn't have a neighbor through side 1 therefore it can't be flipped"
       requirement = "The system shall error if sideset is not viable for flipping"
       design = 'FlipSidesetGenerator.md'
+      mesh_mode = 'replicated'
       issues = '#25528'
     []
 []
