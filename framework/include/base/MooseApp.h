@@ -220,17 +220,14 @@ public:
   Syntax & syntax() { return _syntax; }
 
   /**
-   * Set the input file name.
+   * @return the input file names set in the Parser
    */
-  void setInputFileName(const std::string & input_file_name);
+  const std::vector<std::string> & getInputFileNames() const;
 
   /**
-   * Returns the input file name that was set with setInputFileName
+   * @return The last input filename set (if any)
    */
-  std::string getInputFileName() const
-  {
-    return _input_filenames.empty() ? "" : _input_filenames.back();
-  }
+  const std::string & getLastInputFileName() const;
 
   /**
    * Override the selection of the output file base name.

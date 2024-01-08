@@ -621,8 +621,8 @@ Console::outputInput()
     return;
 
   std::ostringstream oss;
-  oss << "--- " << _app.getInputFileName()
-      << " ------------------------------------------------------";
+  for (const auto & filename : _app.getInputFileNames())
+    oss << "--- " << filename << "\n";
   _app.actionWarehouse().printInputFile(oss);
   _console << oss.str() << std::endl;
 }

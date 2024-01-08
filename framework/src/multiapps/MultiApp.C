@@ -1103,26 +1103,20 @@ MultiApp::createApp(unsigned int i, Real start_time)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
   }
 
-  std::string input_file = "";
-  if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
-    input_file = _input_files[0];
-  else
-    input_file = _input_files[_first_local_app + i];
+  // If only one input file was provided, use it for all the solves
+  const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
+  const auto & input_file = _input_files[input_index];
 
-  // create new parser tree for the application
+  // create new parser tree for the application and parse
   auto front_parser = std::make_unique<Parser>();
-  std::vector<std::string> multiapp_input{input_file};
-
-  if (!input_file.empty())
-    front_parser->parse(multiapp_input);
-
+  if (!input_file.empty()) // why would this ever be empty?!
+    front_parser->parse({input_file});
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(front_parser);
 
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);
-  app->setInputFileName(input_file);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());

@@ -991,7 +991,7 @@ MooseApp::setupOptions()
       else if (isUltimateMaster())
       {
         // if this app is a master, we use the first input file name as the default file base
-        std::string base = getInputFileName();
+        std::string base = getLastInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
@@ -1032,11 +1032,18 @@ MooseApp::setupOptions()
   Moose::out << std::flush;
 }
 
-void
-MooseApp::setInputFileName(const std::string & input_filename)
+const std::vector<std::string> &
+MooseApp::getInputFileNames() const
 {
-  // for now we only permit single input to be set for multiapps
-  _input_filenames = {input_filename};
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->getInputFileNames();
+}
+
+const std::string &
+MooseApp::getLastInputFileName() const
+{
+  static const std::string empty = "";
+  return getInputFileNames().empty() ? empty : getInputFileNames().back();
 }
 
 std::string

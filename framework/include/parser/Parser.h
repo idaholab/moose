@@ -126,12 +126,12 @@ public:
   /*
    * Get extracted variables from front parser
    */
-  std::set<std::string> & getExtractedVars() { return _extracted_vars; }
+  const std::set<std::string> & getExtractedVars() const { return _extracted_vars; }
 
   /*
    * Get input file names from parser
    */
-  std::vector<std::string> & getInputFileNames() { return _input_filenames; }
+  const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
 protected:
   std::unique_ptr<hit::Node> _root = nullptr;
