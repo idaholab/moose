@@ -1,16 +1,11 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Action.h"
 #include "FEProblem.h"
@@ -31,7 +26,7 @@ InputParameters
 NEML2Action::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Parse and set up NEML2 objects");
+  NEML2Utils::addClassDescription(params, "Parse and set up NEML2 objects");
   params.addRequiredParam<FileName>("input",
                                     "Path to the NEML2 input file containing the NEML2 model(s)");
   params.addRequiredParam<std::string>(
@@ -62,24 +57,30 @@ NEML2Action::validParams()
   return params;
 }
 
+#ifndef NEML2_ENABLED
+
+NEML2Action::NEML2Action(const InputParameters & params) : Action(params) {}
+
+void
+NEML2Action::act()
+{
+}
+
+#else
+
 NEML2Action::NEML2Action(const InputParameters & params)
   : Action(params),
     _fname(getParam<FileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
-    _mode(getParam<MooseEnum>("mode"))
-#ifdef NEML2_ENABLED
-    ,
+    _mode(getParam<MooseEnum>("mode")),
     _device(getParam<std::string>("device"))
-#endif
 {
-  NEML2Utils::checkLibraryAvailability(*this);
 }
 
 void
 NEML2Action::act()
 {
-#ifdef NEML2_ENABLED
   if (_current_task == "parse_neml2")
   {
     neml2::HITParser parser;
@@ -143,9 +144,6 @@ NEML2Action::act()
     else
       mooseError("Unsupported mode of constitutive update: ", _mode);
   }
-#else
-  paramError(
-      "input",
-      "The action for NEML2 cannot be used because Blackbear was not compiled with NEML2 support");
-#endif
 }
+
+#endif // NEML2_ENABLED

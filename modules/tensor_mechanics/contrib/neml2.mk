@@ -8,8 +8,8 @@
 #
 # There are 2 influential env vars.
 #
-# ENABLE_NEML2:  If true, BlackBear will attempt to compile with NEML2 at
-#                the NEML2_DIR. If false, BlackBear will not be compiled with
+# ENABLE_NEML2:  If true, MOOSE will attempt to compile with NEML2 at
+#                the NEML2_DIR. If false, MOOSE will not be compiled with
 #                NEML2 (even if the NEML2 submodule is init'ed or a valid
 #                NEML2_DIR is supplied). This variable defaults to true.
 # NEML2_DIR:     The path to a valid NEML2 checkout. This variable defaults to
@@ -18,11 +18,15 @@
 #                will terminate with an error message if ENABLE_NEML2 is true
 #                AND a NEML2 checkout cannot be found.
 
-NEML2_DIR ?= $(BLACKBEAR_DIR)/contrib/neml2
+NEML2_DIR ?= $(MOOSE_DIR)/modules/tensor_mechanics/contrib/neml2
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 _ENABLE_NEML2_DEFAULT = false
 else
+ifneq ($(ENABLE_LIBTORCH),true)
+_ENABLE_NEML2_DEFAULT = false
+else
 _ENABLE_NEML2_DEFAULT = true
+endif
 endif
 
 ifdef ENABLE_NEML2
@@ -35,15 +39,15 @@ endif
 ifneq ($(ENABLE_NEML2),true)
 
 ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
-$(info Not compiling BlackBear with NEML2 because ENABLE_NEML2 is set to false.)
+$(info Not compiling MOOSE with NEML2 because ENABLE_NEML2 is set to false.)
 else
-$(info Not compiling BlackBear with NEML2 because NEML2_DIR is not a valid NEML2 checkout.)
+$(info Not compiling MOOSE with NEML2 because NEML2_DIR is not a valid NEML2 checkout and/or libtorch is not enabled.)
 endif
 
 else
 
 ifneq ($(ENABLE_LIBTORCH),true)
-$(error Attempting to compile Blackbear with NEML2, but libTorch is not enabled. \
+$(error Attempting to compile MOOSE with NEML2, but libTorch is not enabled. \
   To enable libTorch, configure MOOSE with the --with-libtorch option. \
   To disable NEML2, set ENABLE_NEML2 to false)
 endif
@@ -51,13 +55,13 @@ endif
 ifeq ($(wildcard $(NEML2_DIR)/CMakeLists.txt),)
 ENABLE_NEML2 = false
 ifeq ($(_ENABLE_NEML2_SET_BY_USER),true)
-$(error Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
-  To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
+$(error Not compiling MOOSE with NEML2 because a valid NEML2 checkout cannot be found.  \
+  To use the default NEML2 that comes with MOOSE, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
 	To disable NEML2, set ENABLE_NEML2 to false.)
 else
-$(info Not compiling BlackBear with NEML2 because a valid NEML2 checkout cannot be found.  \
-  To use the default NEML2 that comes with BlackBear, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
+$(info Not compiling MOOSE with NEML2 because a valid NEML2 checkout cannot be found.  \
+  To use the default NEML2 that comes with MOOSE, run `unset NEML2_DIR` and `git submodule update --init contrib/neml2`. \
 	To use a custom NEML2, set the environment variable NEML2_DIR to an appropriate path. \
 	To suppress this warning, set ENABLE_NEML2 to false.)
 endif
@@ -67,18 +71,18 @@ endif
 
 
 ###############################################################################
-# At this point, we have everything needed to compile BlackBear with NEML2
+# At this point, we have everything needed to compile MOOSE with NEML2
 ###############################################################################
 ifeq ($(ENABLE_NEML2),true)
 
-$(info Compiling BlackBear with NEML2.)
+$(info Compiling MOOSE with NEML2.)
 
 NEML2_INCLUDE        := $(NEML2_DIR)/include
 NEML2_SRC            := $(shell find $(NEML2_DIR)/src -name "*.cxx")
 NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))
 NEML2_LIB            := $(NEML2_DIR)/libNEML2-$(METHOD).la
 
-$(APPLICATION_DIR)/lib/libblackbear-$(METHOD).la: $(NEML2_LIB)
+$(APPLICATION_DIR)/lib/libtensor_mechanics-$(METHOD).la: $(NEML2_LIB)
 
 $(NEML2_LIB): $(NEML2_OBJ)
 	@echo "Linking Library "$@"..."

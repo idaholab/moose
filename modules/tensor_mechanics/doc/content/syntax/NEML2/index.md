@@ -1,6 +1,6 @@
 # NEML2 syntax
 
-The `NEML2` block is used to construct a set of material and userobjects so that BlackBear can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
+The `NEML2` block is used to construct a set of material and userobjects so that MOOSE can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
 
 | Object                        | Type       | Operation mode | Description                                                                                  |
 | ----------------------------- | ---------- | -------------- | :------------------------------------------------------------------------------------------- |
@@ -12,7 +12,7 @@ The `NEML2` block is used to construct a set of material and userobjects so that
 
 !listing test/tests/neml2/fem.i block=NEML2
 
-The field `input` specifies the relative path to the NEML2 input file. The field `model` tells BlackBear which material model to import from the NEML2 input file. The field `device` specifies where to evaluate the NEML2 model, e.g., CPU or CUDA. The parameter `mode` determines the mode of operation for NEML2, and it is important to understand the differences between the modes in order to use NEML2 most efficiently. Each mode is discussed below in detail.
+The field `input` specifies the relative path to the NEML2 input file. The field `model` tells MOOSE which material model to import from the NEML2 input file. The field `device` specifies where to evaluate the NEML2 model, e.g., CPU or CUDA. The parameter `mode` determines the mode of operation for NEML2, and it is important to understand the differences between the modes in order to use NEML2 most efficiently. Each mode is discussed below in detail.
 
 ## Operation Mode: PARSE_ONLY
 
@@ -20,7 +20,7 @@ In this mode, the NEML2 input file is parsed, and all the objects specified in t
 
 ## Operation Mode: ELEMENT
 
-In this mode, a regular MOOSE material object [`CauchyStressFromNEML2`](CauchyStressFromNEML2.md) is constructed to perform the constitutive update. On each element, the material
+In this mode, a regular MOOSE material object [`CauchyStressFromNEML2`](CauchyStressFromNEML2.md optional=True) is constructed to perform the constitutive update. On each element, the material
 
 1. loops through all the quadrature points and gathers all the necessary input variables into a batched input vector with batch size equal to the number of quadrature points;
 2. calls the NEML2 material model to compute the batched output given the batched input;
@@ -28,10 +28,10 @@ In this mode, a regular MOOSE material object [`CauchyStressFromNEML2`](CauchySt
 
 ## Operation Mode: ALL
 
-In this mode, a userobject [`CauchyStressFromNEML2UO`](CauchyStressFromNEML2UO.md) and a regular MOOSE material object [`CauchyStressFromNEML2Receiver`](CauchyStressFromNEML2Receiver.md) are created. During each residual evaluation,
+In this mode, a userobject [`CauchyStressFromNEML2UO`](CauchyStressFromNEML2UO.md optional=True) and a regular MOOSE material object [`CauchyStressFromNEML2Receiver`](CauchyStressFromNEML2Receiver.md optional=True) are created. During each residual evaluation,
 
 1. The userobject gathers all input variables from all quadrature points into a batched input vector with batch size equal to the total number of quadrature points on the mesh.
-2. The userobject calls the NEML2 materal model to compute the batched output given the batched input.
+2. The userobject calls the NEML2 material model to compute the batched output given the batched input.
 3. The material object retrieves the batched output from the userobject and assigns the output variables to the corresponding MOOSE material properties.
 
 ## Efficiency Considerations
@@ -89,10 +89,10 @@ Parameters:
 
 ## Inspect NEML2 information
 
-BlackBear also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--parse-neml2-only` command-line argument, i.e.
+The MOOSE tensor-mechanics module also provides a command-line option to inspect the NEML2 material model _without_ running the entire simulation. This is achieved using the `--parse-neml2-only` command-line argument, i.e.
 
 ```bash
-blackbear-opt -i input.i --parse-neml2-only
+tensor_mechanics-opt -i input.i --parse-neml2-only
 ```
 
 !syntax parameters /NEML2/NEML2Action

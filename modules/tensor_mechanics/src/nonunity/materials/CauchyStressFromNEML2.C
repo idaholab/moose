@@ -1,33 +1,38 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CauchyStressFromNEML2.h"
 #include "NEML2Utils.h"
 #include "NonlinearSystem.h"
 #include "libmesh/nonlinear_solver.h"
 
-registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2);
-
 InputParameters
 CauchyStressFromNEML2::validParams()
 {
   InputParameters params =
       NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>::validParams();
-  params.addClassDescription("Perform the objective stress update using a NEML2 material model");
+  NEML2Utils::addClassDescription(
+      params, "Perform the objective stress update using a NEML2 material model");
   params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }
+
+#ifndef NEML2_ENABLED
+CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
+  : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
+{
+}
+#endif
+
+registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2);
+
+#ifdef NEML2_ENABLED
 
 CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
   : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters),
@@ -36,9 +41,6 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
     _temperature(nullptr),
     _temperature_old(nullptr)
 {
-  NEML2Utils::checkLibraryAvailability(*this);
-
-#ifdef NEML2_ENABLED
   validateModel();
 
   // Get the old mechanical strain if the NEML2 model need it
@@ -65,10 +67,8 @@ CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
       _state_vars_old[var.on("old_state")] =
           &getMaterialPropertyOld<std::vector<Real>>(Moose::stringify(var));
     }
-#endif
 }
 
-#ifdef NEML2_ENABLED
 void
 CauchyStressFromNEML2::initialSetup()
 {
@@ -207,4 +207,4 @@ CauchyStressFromNEML2::solve()
   _dout_din = std::get<1>(res).to(torch::kCPU);
 }
 
-#endif
+#endif // NEML2_ENABLED

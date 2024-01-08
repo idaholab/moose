@@ -5,15 +5,16 @@
     type = RunException
     input = 'fem.i'
     cli_args = 'neml2_input=error'
-    requirement = 'BlackBear shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
+    requirement = 'The system shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
     expect_err = 'To debug NEML2 related issues'
     collections = 'SYSTEM'
     required_submodule = 'contrib/neml2'
+    libtorch = true
     valgrind = none
   []
   [neml2]
     collections = 'SYSTEM'
-    requirement = 'BlackBear shall be capable of interfacing with the NEML2 library to perform constitutive update '
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform constitutive update '
     [elasticity]
       type = Exodiff
       input = 'fem.i'
@@ -21,6 +22,7 @@
       exodiff = 'elasticity.e'
       detail = 'to solve an elasticity problem;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_perfect]
@@ -30,6 +32,7 @@
       exodiff = 'viscoplasticity_perfect.e'
       detail = 'to solve a perfect viscoplasticity problem;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_isoharden]
@@ -39,6 +42,7 @@
       exodiff = 'viscoplasticity_isoharden.e'
       detail = 'to solve a viscoplasticity problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_kinharden]
@@ -48,6 +52,7 @@
       exodiff = 'viscoplasticity_kinharden.e'
       detail = 'to solve a viscoplasticity problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_isokinharden]
@@ -57,6 +62,7 @@
       exodiff = 'viscoplasticity_isokinharden.e'
       detail = 'to solve a viscoplasticity problem with both isotropic and kinematic hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_chaboche]
@@ -66,6 +72,7 @@
       exodiff = 'viscoplasticity_chaboche.e'
       detail = 'to solve a viscoplasticity problem with non-associative Chaboche hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [viscoplasticity_radial_return]
@@ -75,6 +82,7 @@
       exodiff = 'viscoplasticity_radial_return.e'
       detail = 'to solve a viscoplasticity problem using radial return;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [rate_independent_plasticity_perfect]
@@ -84,6 +92,7 @@
       exodiff = 'rate_independent_plasticity_perfect.e'
       detail = 'to solve a rate-independent problem with perfect plasticity;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [rate_independent_plasticity_isoharden]
@@ -93,6 +102,7 @@
       exodiff = 'rate_independent_plasticity_isoharden.e'
       detail = 'to solve a rate-independent problem with isotropic hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [rate_independent_plasticity_kinharden]
@@ -102,6 +112,7 @@
       exodiff = 'rate_independent_plasticity_kinharden.e'
       detail = 'to solve a rate-independent problem with kinematic hardening;'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [rate_independent_plasticity_isokinharden]
@@ -111,6 +122,7 @@
       exodiff = 'rate_independent_plasticity_isokinharden.e'
       detail = 'to solve a rate-independent problem with both isotropic and kinematic hardening.'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       valgrind = heavy
     []
     [batched]
@@ -121,6 +133,7 @@
       exodiff = 'viscoplasticity_isokinharden.e'
       detail = 'in a batched fashion.'
       required_submodule = 'contrib/neml2'
+      libtorch = true
       recover = false
       valgrind = heavy
     []

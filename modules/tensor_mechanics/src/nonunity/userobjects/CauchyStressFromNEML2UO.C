@@ -1,19 +1,13 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CauchyStressFromNEML2UO.h"
-
 #include "NEML2Utils.h"
 
 registerMooseObject("TensorMechanicsApp", CauchyStressFromNEML2UO);
@@ -22,9 +16,11 @@ InputParameters
 CauchyStressFromNEML2UO::validParams()
 {
   auto params = NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>::validParams();
-  params.addClassDescription("Gather input variables required for an objective stress integration "
-                             "from all quadrature points. The batched input vector is sent through "
-                             "a NEML2 material model to perform the constitutive update.");
+  NEML2Utils::addClassDescription(
+      params,
+      "Gather input variables required for an objective stress integration "
+      "from all quadrature points. The batched input vector is sent through "
+      "a NEML2 material model to perform the constitutive update.");
   params.addCoupledVar("temperature", "The temperature");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
@@ -36,20 +32,27 @@ CauchyStressFromNEML2UO::validParams()
   return params;
 }
 
+#ifndef NEML2_ENABLED
+
 CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
   : NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>(
         params, "mechanical_strain", "temperature")
 {
-  NEML2Utils::checkLibraryAvailability(*this);
-#ifdef NEML2_ENABLED
+  NEML2Utils::libraryNotEnabledError(params);
+}
+
+#else
+
+CauchyStressFromNEML2UO::CauchyStressFromNEML2UO(const InputParameters & params)
+  : NEML2SolidMechanicsInterface<CauchyStressFromNEML2UOParent>(
+        params, "mechanical_strain", "temperature")
+{
   validateModel();
-#endif // NEML2_ENABLED
 }
 
 void
 CauchyStressFromNEML2UO::batchCompute()
 {
-#ifdef NEML2_ENABLED
   try
   {
     // Allocate the input and output
@@ -91,10 +94,8 @@ CauchyStressFromNEML2UO::batchCompute()
                    "\nIt is possible that this error is related to NEML2.",
                    NEML2Utils::NEML2_help_message);
   }
-#endif // NEML2_ENABLED
 }
 
-#ifdef NEML2_ENABLED
 void
 CauchyStressFromNEML2UO::timestepSetup()
 {

@@ -1,16 +1,11 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -24,6 +19,8 @@
 #include "MaterialProperty.h"
 
 #endif
+
+#include "InputParameters.h"
 
 class MooseObject;
 class Action;
@@ -42,11 +39,6 @@ std::ostream & operator<<(std::ostream &, const Model &);
 
 namespace NEML2Utils
 {
-/**
- * Helper for producing a useful error when NEML2 is not available
- */
-void checkLibraryAvailability(MooseObject & self);
-void checkLibraryAvailability(Action & self);
 
 #ifdef NEML2_ENABLED
 
@@ -94,6 +86,15 @@ void homogenizeBatchedTupleInner(const std::vector<std::tuple<Args...>> & from,
 template <typename T>
 T toMOOSE(const neml2::BatchTensor &);
 
+// @{ Template specializations
+template <>
+SymmetricRankTwoTensor toMOOSE(const neml2::BatchTensor & t);
+template <>
+std::vector<Real> toMOOSE(const neml2::BatchTensor & t);
+template <>
+SymmetricRankFourTensor toMOOSE(const neml2::BatchTensor & t);
+// @}
+
 /**
  * Convert a MOOSE data structure to its NEML2 counterpart and copy the values into a NEML2
  * LabeledVector
@@ -117,7 +118,7 @@ void setBatched(neml2::LabeledVector & v,
 static std::string NEML2_help_message = R""""(
 ==============================================================================
 To debug NEML2 related issues:
-1. Build and run BlackBear in dbg mode.
+1. Build and run MOOSE in dbg mode.
 2. Re-run the simulation using the dbg executable, and often times
    NEML2 will provide a more helpful error message.
 3. If the error message is not helpful, or if there is still not error message,
@@ -200,6 +201,16 @@ setBatched(neml2::LabeledVector & v,
     setBatched<I + 1>(v, indices, t...);
 }
 
-#endif
+#endif // NEML2_ENABLED
+
+/**
+ * Augment class description if NEML2 is not enabled
+ */
+void addClassDescription(InputParameters & params, const std::string & desc);
+
+/**
+ * Error message if NEML2 is not enabled
+ */
+void libraryNotEnabledError(const InputParameters & params);
 
 } // namespace NEML2Utils

@@ -1,28 +1,22 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
 #ifdef NEML2_ENABLED
 #include "neml2/models/Model.h"
 #include "neml2/misc/parser_utils.h"
-#else
-#include "NEML2Utils.h"
-#endif
-
 #include "Material.h"
 #include "UserObject.h"
+#endif
+
+#include "NEML2Utils.h"
 
 /**
  * Interface class to provide common input parameters, members, and methods for MOOSEObjects that
@@ -38,6 +32,7 @@ public:
   NEML2ModelInterface(const InputParameters & params, P &&... args);
 
 #ifdef NEML2_ENABLED
+
 protected:
   /**
    * Validate the NEML2 material model. This method should throw a moose error with the first
@@ -66,7 +61,8 @@ private:
 
   /// The device on which to evaluate the NEML2 model
   const torch::Device _device;
-#endif
+
+#endif // NEML2_ENABLED
 };
 
 template <class T>
@@ -89,24 +85,29 @@ NEML2ModelInterface<T>::validParams()
   return params;
 }
 
+#ifndef NEML2_ENABLED
+
 template <class T>
 template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...)
-#ifdef NEML2_ENABLED
-    ,
-    _model(neml2::Factory::get_object<neml2::Model>("Models", params.get<std::string>("model"))),
-    _device(params.get<std::string>("device"))
-#endif
 {
-  NEML2Utils::checkLibraryAvailability(*this);
-#ifdef NEML2_ENABLED
-  // Send the model to the compute device
-  _model.to(_device);
-#endif
+  NEML2Utils::libraryNotEnabledError(params);
 }
 
-#ifdef NEML2_ENABLED
+#else
+
+template <class T>
+template <typename... P>
+NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
+  : T(params, args...),
+    _model(neml2::Factory::get_object<neml2::Model>("Models", params.get<std::string>("model"))),
+    _device(params.get<std::string>("device"))
+{
+  // Send the model to the compute device
+  _model.to(_device);
+}
+
 template <class T>
 void
 NEML2ModelInterface<T>::validateModel() const
@@ -136,4 +137,5 @@ NEML2ModelInterface<T>::getLabeledAxisAccessor(const std::string & raw_str) cons
 {
   return neml2::utils::parse<neml2::LabeledAxisAccessor>(raw_str);
 }
-#endif
+
+#endif // NEML2_ENABLED

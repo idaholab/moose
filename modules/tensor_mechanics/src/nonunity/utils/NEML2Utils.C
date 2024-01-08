@@ -1,16 +1,11 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Utils.h"
 
@@ -52,8 +47,12 @@ operator<<(std::ostream & os, const Model & model)
 }
 } // namespace neml2
 
+#endif // NEML2_ENABLED
+
 namespace NEML2Utils
 {
+
+#ifdef NEML2_ENABLED
 
 template <>
 neml2::BatchTensor
@@ -120,47 +119,37 @@ toMOOSE(const neml2::BatchTensor & t)
   return symsymr4t;
 }
 
-} // namespace NEML2Utils
+#endif // NEML2_ENABLED
 
-#endif
-
-#include "MooseObject.h"
-#include "Action.h"
-
-namespace NEML2Utils
-{
-
-static const std::string message1 =
+static const std::string message_all =
     "To use this object, you need to have the `NEML2` library installed. Refer to the "
     "documentation for guidance on how to enable it.";
-static const std::string message2 =
-    " To build this library MOOSE must be configured with LIBTORCH support.";
+#ifdef LIBTORCH_ENABLED
+static const std::string message = message_all;
+#else
+static const std::string message =
+    message_all + " To build this library MOOSE must be configured with `LIBTORCH` support!";
+#endif
 
 void
-checkLibraryAvailability(MooseObject & self)
+addClassDescription(InputParameters & params, const std::string & desc)
 {
-#ifndef NEML2_ENABLED
-#ifdef LIBTORCH_ENABLED
-  self.paramError("type", message1);
+#ifdef NEML2_ENABLED
+  params.addClassDescription(desc);
 #else
-  self.paramError("type", message1 + message2);
-#endif
-#else
-  libmesh_ignore(self);
+  params.addClassDescription(message + " (Original description: " + desc + ")");
 #endif
 }
 
 void
-checkLibraryAvailability(Action & self)
+libraryNotEnabledError(const InputParameters & params)
 {
 #ifndef NEML2_ENABLED
-#ifdef LIBTORCH_ENABLED
-  mooseError(self.parameters().blockLocation() + ": " + message1);
+  mooseError(params.blockLocation() + ": " + message);
 #else
-  mooseError(self.parameters().blockLocation() + ": " + message1 + message2);
-#endif
-#else
-  libmesh_ignore(self);
+  libmesh_ignore(params);
+  static_assert(
+      "Only place libraryNotEnabledError() in a branch that is compiled if NEML2 is not enabled!");
 #endif
 }
 

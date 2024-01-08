@@ -1,16 +1,11 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/*                       BlackBear                              */
-/*                                                              */
-/*           (c) 2017 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -50,8 +45,13 @@ public:
 
   CauchyStressFromNEML2UO(const InputParameters & params);
 
+#ifndef NEML2_ENABLED
+
+  virtual void batchCompute() override {}
+
+#else
+
   virtual void batchCompute() override;
-#ifdef NEML2_ENABLED
   virtual void timestepSetup() override;
 
 protected:
@@ -75,5 +75,6 @@ protected:
 
   /// The derivative of the output vector w.r.t. the input vector
   neml2::LabeledMatrix _dout_din;
-#endif
+
+#endif // NEML2_ENABLED
 };
