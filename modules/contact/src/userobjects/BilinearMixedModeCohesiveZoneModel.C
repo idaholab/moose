@@ -485,19 +485,19 @@ BilinearMixedModeCohesiveZoneModel::finalize()
   Moose::Mortar::Contact::communicateR2T(
       _dof_to_F_neighbor, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
-  Moose::Mortar::Contact::communicateSingleADReal(
+  Moose::Mortar::Contact::communicateADReal(
       _dof_to_normal_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
-  Moose::Mortar::Contact::communicateSingleADReal(
+  Moose::Mortar::Contact::communicateADReal(
       _dof_to_shear_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
-  Moose::Mortar::Contact::communicateSingleADReal(
+  Moose::Mortar::Contact::communicateADReal(
       _dof_to_GI_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
-  Moose::Mortar::Contact::communicateSingleADReal(
+  Moose::Mortar::Contact::communicateADReal(
       _dof_to_GII_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
-  Moose::Mortar::Contact::communicateADRealVector(
+  Moose::Mortar::Contact::communicateADReal(
       _dof_to_weighted_displacements, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
