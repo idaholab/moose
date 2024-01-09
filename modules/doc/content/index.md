@@ -9,7 +9,15 @@ Multiphysics Object-Oriented Simulation Environment
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
+<!-- disable while conference banner is in place
 !media large_media/gallery/twist_white.webm quicktime=large_media/gallery/twist_white.mp4 style=width:100%; controls=False autoplay=True loop=True
+ -->
+
+!media large_media/organization_logos/23-50052_webbanner_R1-03.jpg dark_src=large_media/organization_logos/23-50052_webbanner_R1-03_dark.jpg style=width:100%;display:block;
+
+!style! halign=center
+*Conference registration link coming soon!*
+!style-end!
 
 !row!
 !col! small=12 medium=4 large=4 icon=computer
