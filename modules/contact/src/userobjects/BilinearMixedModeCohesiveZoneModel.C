@@ -534,6 +534,9 @@ BilinearMixedModeCohesiveZoneModel::finalize()
 
   Moose::Mortar::Contact::communicateSingleADReal(
       _dof_to_GII_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+
+  Moose::Mortar::Contact::communicateADRealVector(
+      _dof_to_weighted_displacements, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
 const ADVariableValue &
@@ -553,7 +556,6 @@ BilinearMixedModeCohesiveZoneModel::czmGlobalTraction(const unsigned int i) cons
 Real
 BilinearMixedModeCohesiveZoneModel::getModeMixityRatio(const Node * const node) const
 {
-
   const auto it = _dof_to_mode_mixity_ratio.find(_subproblem.mesh().nodePtr(node->id()));
 
   if (it != _dof_to_mode_mixity_ratio.end())
