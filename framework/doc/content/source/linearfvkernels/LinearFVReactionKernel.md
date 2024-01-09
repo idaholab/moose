@@ -11,6 +11,8 @@ the field quantity ($u(\vec{r})$) in the following form:
 \int\limits_V c(\vec{r})u(\vec{r})d\vec{r} \approx c(\vec{r}_C)u(\vec{r}_C) V_C~,
 
 where $\vec{r}_C$ and $V_C$ denote the cell centroid and volume, respectively.
+This means that the diagonal entry of the system matrix corresponding to cell
+$C$ will be increased by $c(\vec{r}_C) V_C$.
 The reaction coefficient parameter ([!param](/LinearFVKernels/LinearFVReactionKernel/coeff))
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
