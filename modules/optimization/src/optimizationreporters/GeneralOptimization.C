@@ -65,6 +65,7 @@ GeneralOptimization::GeneralOptimization(const InputParameters & parameters)
 Real
 GeneralOptimization::computeObjective()
 {
+  // TODO: Check that _objective_val was transferred into.
   Real val = 0;
   if (_tikhonov_coeff > 0.0)
   {

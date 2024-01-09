@@ -100,6 +100,8 @@
                           0 0 0 0
                           0 0 0 0
                           0 0 0 0'
+    objective_name = objective_value
+    outputs = none
   []
 []
 

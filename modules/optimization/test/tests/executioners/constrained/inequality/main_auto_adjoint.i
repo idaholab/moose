@@ -5,7 +5,8 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'left'
   num_values = '2'
   initial_condition = '10 10'
@@ -14,9 +15,14 @@
 
   inequality_names = 'ineq'
 
-  measurement_points = '0.2 0.2 0'
-  measurement_values = '207'
-  file_value = 'measured_value'
+[]
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_points = '0.2 0.2 0'
+    measurement_values = '207'
+    file_value = 'measured_value'
+  []
 []
 
 [Executioner]
@@ -44,11 +50,11 @@
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/left'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -60,11 +66,11 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values
+    from_reporters = 'measure_data/objective_value
                       grad_bc_left/inner_product
                       ineq/ineq
                       gradient_c/gradient_c'
-    to_reporters = 'OptimizationReporter/simulation_values
+    to_reporters = 'OptimizationReporter/objective_value
                     OptimizationReporter/grad_left
                     OptimizationReporter/ineq
                     OptimizationReporter/grad_ineq'

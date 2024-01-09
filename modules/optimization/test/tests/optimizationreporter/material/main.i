@@ -11,17 +11,24 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'p1'
   num_values = '1'
   initial_condition = '7'
   lower_bounds = '0'
   upper_bounds = '10'
-  measurement_points = '0.2 0.2 0
-            0.8 0.6 0
-            0.2 1.4 0
-            0.8 1.8 0'
-  measurement_values = '226 254 214 146'
+[]
+
+[Reporters]
+  [main]
+    type = OptimizationData
+    measurement_points = '0.2 0.2 0
+              0.8 0.6 0
+              0.2 1.4 0
+              0.8 1.8 0'
+    measurement_values = '226 254 214 146'
+  []
 []
 
 [Executioner]
@@ -51,11 +58,11 @@
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/p1'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -74,18 +81,18 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    from_reporters = 'measure_data/misfit_values measure_data/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
 
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/misfit_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/misfit_values
                       OptimizationReporter/p1'
     to_reporters = 'misfit/measurement_xcoord
                     misfit/measurement_ycoord
