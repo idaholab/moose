@@ -22,7 +22,6 @@
   objective_name = objective_value
   parameter_names = 'left right'
   num_values = '2 1'
-  outputs = CSV
 []
 [Reporters]
   [main]
@@ -33,7 +32,6 @@
     file_value = 'weightedMeasurement'
     file_variable_weights = 'weight'
     measurement_file = 'measurementData.csv'
-    outputs = CSV
   []
 []
 

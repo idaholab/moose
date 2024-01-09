@@ -121,6 +121,12 @@ OptimizationReporterTest::initialSetup()
 void
 OptimizationReporterTest::execute()
 {
-  //  Not needed anymore. OptimizationReporter does not compute the objective
-  //  itself. Instead it gets transferred from a system.
+  // Tests that parameters can be changed correctly
+  std::vector<Real> valuesToSetOnOptRepParams(
+      getParam<std::vector<Real>>("values_to_set_parameters_to"));
+  size_t i = 0;
+  for (auto & val : valuesToSetOnOptRepParams)
+    _optSolverParameters->set(i++, val);
+
+  _optReporter->updateParameters(*_optSolverParameters.get());
 }

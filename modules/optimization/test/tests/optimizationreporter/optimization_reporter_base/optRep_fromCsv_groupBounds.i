@@ -23,11 +23,7 @@
   initial_condition = '1; 3; 7'
   upper_bounds = '110; 210; 310'
   lower_bounds = '-1; -2; -3'
-  measurement_file = 'measurementData.csv'
-  file_xcoord = 'coordx'
-  file_ycoord = 'y'
-  file_zcoord = 'z'
-  file_value = 'measured_value'
+
   outputs = out
 []
 
