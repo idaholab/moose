@@ -8,6 +8,7 @@ Upcoming MOOSE related training:
 - [BISON Fuels Performance (2024 January 18-19, MIT)](more_detail/BISON_2024_01_18-19_MIT.md)
 - [MOOSE Training (2024 April 2-4, Oregon State University)](more_detail/MOOSE_2024_04_02-04_OSU.md)
 - [MOOSE Training (2024 October 15-17, University of Illinois Urbana-Champaign)](more_detail/MOOSE_2024_10_15-17_UIUC.md)
+- [MOOSE Training (2024 TBD, EIL, Idaho Falls)](more_detail/MOOSE_TBD_EIL.md)
 
 Past Training:
 
