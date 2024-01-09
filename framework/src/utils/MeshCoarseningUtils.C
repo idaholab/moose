@@ -8,16 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCoarseningUtils.h"
+#include "libmesh/enum_elem_type.h"
 
 namespace MeshCoarseningUtils
 {
 bool
-getFineElementFromInteriorNode(const Node * const interior_node,
-                               const Node * const reference_node,
-                               const Elem * const elem,
+getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
+                               const libMesh::Node * const reference_node,
+                               const libMesh::Elem * const elem,
                                const Real /*non_conformality_tol*/,
-                               std::vector<const Node *> & tentative_coarse_nodes,
-                               std::set<const Elem *> & fine_elements)
+                               std::vector<const libMesh::Node *> & tentative_coarse_nodes,
+                               std::set<const libMesh::Elem *> & fine_elements)
 {
   mooseAssert(elem, "Should have an elem");
   mooseAssert(interior_node, "Should have an interior node");
@@ -25,9 +26,6 @@ getFineElementFromInteriorNode(const Node * const interior_node,
   const auto elem_type = elem->type();
 
   // Add point neighbors of interior node to list of potentially refined elements
-  // This should be the way to do this, it hits a mysterious "unimplemented virtual"
-  // elem->find_point_neighbors(*interior_node, fine_elements);
-  // bool found_point_neighbor = false;
   for (const auto neigh : elem->neighbor_ptr_range())
   {
     if (!neigh || neigh == libMesh::remote_elem)
@@ -51,7 +49,7 @@ getFineElementFromInteriorNode(const Node * const interior_node,
     }
   }
 
-  if (elem_type == QUAD4 || elem_type == QUAD8 || elem_type == QUAD9)
+  if (elem_type == libMesh::QUAD4 || elem_type == libMesh::QUAD8 || elem_type == libMesh::QUAD9)
   {
     // We need 4 elements around the interior node
     if (fine_elements.size() != 4)
@@ -72,7 +70,8 @@ getFineElementFromInteriorNode(const Node * const interior_node,
     }
 
     // Re-order nodes so that they will form a decent quad
-    Point axis = (elem->vertex_average() - *interior_node).cross(*interior_node - *reference_node);
+    libMesh::Point axis =
+        (elem->vertex_average() - *interior_node).cross(*interior_node - *reference_node);
     reorderNodes(tentative_coarse_nodes, interior_node, reference_node, axis);
     return true;
   }
@@ -85,10 +84,10 @@ getFineElementFromInteriorNode(const Node * const interior_node,
 }
 
 void
-reorderNodes(std::vector<const Node *> & nodes,
-             const Point * origin,
-             const Point * clock_start,
-             Point & axis)
+reorderNodes(std::vector<const libMesh::Node *> & nodes,
+             const libMesh::Point * origin,
+             const libMesh::Point * clock_start,
+             libMesh::Point & axis)
 {
   mooseAssert(axis.norm() != 0, "Invalid rotation axis when ordering nodes");
   mooseAssert(origin != clock_start, "Invalid starting direction when ordering nodes");
@@ -118,7 +117,7 @@ reorderNodes(std::vector<const Node *> & nodes,
             [](auto & left, auto & right) { return left.second < right.second; });
 
   // Re-sort the nodes based on their angle
-  std::vector<const Node *> new_nodes(nodes.size());
+  std::vector<const libMesh::Node *> new_nodes(nodes.size());
   for (const auto & old_index : index_range(nodes))
     new_nodes[old_index] = nodes[nodes_angles[old_index].first];
   for (const auto & index : index_range(nodes))

@@ -22,12 +22,12 @@ namespace MeshCoarseningUtils
  * @param tentative_coarse_nodes nodes to be used to form the coarse element
  * @param fine_elements fine elements that are inside the coarse element
  */
-bool getFineElementFromInteriorNode(const Node * const interior_node,
-                                    const Node * const reference_node,
-                                    const Elem * const elem,
+bool getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
+                                    const libMesh::Node * const reference_node,
+                                    const libMesh::Elem * const elem,
                                     const Real non_conformality_tol,
-                                    std::vector<const Node *> & tentative_coarse_nodes,
-                                    std::set<const Elem *> & fine_elements);
+                                    std::vector<const libMesh::Node *> & tentative_coarse_nodes,
+                                    std::set<const libMesh::Elem *> & fine_elements);
 
 /**
  * Utility routine to re-order a vector of nodes so that they form a valid quad
@@ -36,8 +36,8 @@ bool getFineElementFromInteriorNode(const Node * const interior_node,
  * @param clock_start the start of the clock
  * @param axis the rotation axis
  */
-void reorderNodes(std::vector<const Node *> & nodes,
-                  const Point * origin,
-                  const Point * clock_start,
-                  Point & axis);
+void reorderNodes(std::vector<const libMesh::Node *> & nodes,
+                  const libMesh::Point * origin,
+                  const libMesh::Point * clock_start,
+                  libMesh::Point & axis);
 }

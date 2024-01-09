@@ -28,6 +28,7 @@ CoarsenBlockGenerator::validParams()
       "coarsening",
       "Minimum amount of times to coarsen each block, corresponding to their index in 'block'");
   params.addRequiredParam<unsigned int>("start_elem_id", "Which element to start the coarsening from");
+  params.addParam<bool>("verbose", false, "Whether to make the mesh generator output details of its actions on the console");
   return params;
 }
 
@@ -36,7 +37,8 @@ CoarsenBlockGenerator::CoarsenBlockGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _block(getParam<std::vector<SubdomainName>>("block")),
     _coarsening(getParam<std::vector<unsigned int>>("coarsening")),
-    _start_elem_id(getParam<unsigned int>("start_elem_id"))
+    _start_elem_id(getParam<unsigned int>("start_elem_id")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (_block.size() != _coarsening.size())
     paramError("coarsening", "The blocks and coarsening parameter vectors should be the same size");
@@ -74,12 +76,10 @@ CoarsenBlockGenerator::generate()
   if (mesh->allow_renumbering())
     mooseWarning("Mesh renumbering is turned on. The starting element id could have changed! To be sure you are specifying the correct starting element, please use the mesh generator mesh output on mesh generator: " + getParam<MeshGeneratorName>("input"), " and check visually that the id is correct.");
 
-  // Check that the starting element choice: in the block with the most coarsening need
+  // Check that the starting element choice: in the block with the most coarsening requested
   auto start_elem = mesh->elem_ptr(_start_elem_id);
   mooseAssert(start_elem, "Should have a non-null starting elem pointer");
-  unsigned int max_c = 0;
-  std::for_each(
-      _coarsening.begin(), _coarsening.end(), [&max_c](unsigned int c) { max_c = std::max(max_c, c); });
+  unsigned int max_c = *std::max_element(_coarsening.begin(), _coarsening.end());
   for (const auto i : index_range(block_ids))
     if (block_ids[i] == start_elem->subdomain_id() && _coarsening[i] != max_c)
       mooseError("The starting element must be in the block set to be coarsened the most.\n"
@@ -112,23 +112,30 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
 
   // We wont be modifying the starting mesh for simplicity, we will make a copy and return that
   std::unique_ptr<MeshBase> mesh_return;
-  unsigned int max_num_coarsened = 0;
+  int max_num_coarsened = -1;
+
+  // TODO: we need to locate a new start element! The old one would have disappeared due to
+  // coarsening
 
   // Try every node as the 'center' point of a coarsened element
   for (const auto & start_node_index : mesh->elem_ptr(_start_elem_id)->node_index_range())
   {
+    if (_verbose)
+      _console << "Step " << coarse_step + 1 << " coarsening attempt #" << start_node_index << std::endl;
+
     // Make a copy of the mesh in case the initial node choice was bad
     auto mesh_copy = mesh->clone();
+    // TODO:delete! we need point neighbors
+    mesh_copy->prepare_for_use();
 
     // We will only have a single starting element for now. If there are non-connected components,
     // we will need to have a starting element-node pair in every component.
     auto start_elem = mesh_copy->elem_ptr(_start_elem_id);
     mooseAssert(start_elem, "Should have a real elem pointer");
+    if (!start_elem->active())
+      mooseError("Starting element must be active");
 
     auto start_node = start_elem->node_ptr(start_node_index);
-    // just take any another node for now FIXME
-    const auto ref_node = start_elem->node_ptr(start_node_index == 0 ? 1 : start_node_index - 1);
-    mooseAssert(ref_node, "Should have a real node pointer");
     mooseAssert(start_node, "Should have a real node pointer");
 
     // This set will keep track of all the 'fine elem' + 'coarse element interior node' pairs
@@ -147,7 +154,11 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       Node * interior_node = candidate_pairs.begin()->second;
       mooseAssert(current_elem, "Null candidate element pointer");
       mooseAssert(interior_node, "Null candidate node pointer");
-      std::cout << candidate_pairs.size() << std::endl;
+      const auto current_node_index = current_elem->get_node_index(interior_node);
+      // just take any another node for now FIXME
+      const auto ref_node = current_elem->node_ptr(current_node_index == 0 ? 1 : current_node_index - 1);
+      mooseAssert(ref_node, "Should have a real node pointer");
+      _console << "Current number of candidates for coarsening " << candidate_pairs.size() << std::endl;
       std::cout << "Examining elem " << current_elem->id() << " and node " << interior_node->id() << std::endl;
       candidate_pairs.erase(candidate_pairs.begin());
 
@@ -156,7 +167,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       // Mid-edge nodes could be an option too for making coarse elements.
       // For a first implementation, we wont try to use them as near the edge we would need
       // a special treatment.
-      if (!current_elem->is_vertex(start_node_index))
+      if (!current_elem->is_vertex(current_node_index))
       {
         std::cout << "Dismissing not a vertex " << std::endl;
         continue;
@@ -231,7 +242,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
           }
           if (found)
             break;
-      }
+        }
         mooseAssert(fine_el, "We should have found a fine element for the next candidate");
 
         // Get the element(s) on the other side of the coarse face
@@ -259,19 +270,25 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         // We cannot use the neighbor pointer from the fine element, or else wont be able to
         // deal with non-conformal meshes that are disjoint at this location
         // Instead we offset a little and use a point locator
-        Point offset_point = fine_el->side_ptr(fine_side_index)->vertex_average() + TOLERANCE * (fine_el->side_ptr(fine_side_index)->vertex_average() - fine_el->vertex_average());
+        Point offset_point = fine_el->side_ptr(fine_side_index)->vertex_average() + 100 * TOLERANCE * (fine_el->side_ptr(fine_side_index)->vertex_average() - fine_el->vertex_average());
         auto pl = mesh_copy->sub_point_locator();
         pl->enable_out_of_mesh_mode();
-        Elem * neighbor_fine_elem = const_cast<Elem *>((*pl)(offset_point));
+        auto neighbor_fine_elem = mesh_copy->elem_ptr((*pl)(offset_point)->id());
         pl->disable_out_of_mesh_mode();
-
+        
         // We're at a boundary
         if (!neighbor_fine_elem)
+        {
+          std::cout << "Dismissing next candidate due to boundary " << std::endl;
           continue;
+        }
 
-        // Point locator finding the fine elements
+        // Point locator finding a fine element inside
         if (fine_elements.find(neighbor_fine_elem) != fine_elements.end())
+        {
+          std::cout << "Dismissing next candidate due to being a fine element" << std::endl;
           continue;
+        }
 
         // Note: these checks are not enough, because the starting mesh might not have elements
         // properly labeled with their refinement level
@@ -305,6 +322,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
               break;
             }
         }
+        std::cout << "Currently at " << candidate_pairs.size() << std::endl;
       }
       // we just added an element. If we delete, we have to prepare for use first
       // preparing all the time will be expensive.
@@ -312,7 +330,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
       // the coarsening of other elements wont detect the already coarsened elements
       // If we do not delete the fine elements, we will also be finding them for coarsening over
       // and over again
-      // mesh_copy->prepare_for_use();
+      mesh_copy->prepare_for_use();
 
       // Delete the elements used to build the coarse element
       for (auto & fine_elem : fine_elements)
@@ -320,7 +338,28 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         {
           // std::cout << fine_elem->get_info() << std::endl;
           mesh_copy->delete_elem(fine_elem);
+
+          // Clean up the list of candidates from any deleted elements
+          // candidate_pairs.erase(std::remove_if(candidate_pairs.begin(), candidate_pairs.end(),
+          //                        [fine_elem](std::pair<Elem *, Node *> p){ return p.first == fine_elem; }),
+          //                      candidate_pairs.end());
+          // for (auto candidate : candidate_pairs)
+          //   if (candidate.first == fine_elem)
+          //     candidate_pairs.erase(candidate);
+          for (auto i = candidate_pairs.begin(); i != candidate_pairs.end();)
+          {
+              if (i->first == fine_elem)
+              {
+                i = candidate_pairs.erase(i);
+                continue;
+              }
+              ++i;
+          }
         }
+
+      //TODO downselect which operations are necessary
+      mesh_copy->contract();
+      mesh_copy->prepare_for_use();
     }
 
     // We pick the configuration (eg starting node) for which we managed to coarsen the most
@@ -328,13 +367,15 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
     // Maybe we should examine for non-conformality here to make a decision?
     // It's expensive to do so in a global mesh-wide check though, maybe if we baked that check
     // into the coarsening work it would be more reasonable.
-    if (coarse_elems.size() > max_num_coarsened)
+    if (int(coarse_elems.size()) > max_num_coarsened)
     {
       mesh_return = std::move(mesh_copy);
       max_num_coarsened = coarse_elems.size();
     }
   }
-
+  if (_verbose)
+    _console << "Step " << coarse_step + 1 << " coarsened "
+             << max_num_coarsened << " elements." << std::endl;
   coarse_step++;
   return recursive_coarsen(block_ids, mesh_return, coarsening, max, coarse_step);
 }

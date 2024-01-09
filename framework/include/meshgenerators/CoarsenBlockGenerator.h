@@ -37,6 +37,9 @@ private:
   /// The ID of the element to start the coarsening from
   const unsigned int _start_elem_id;
 
+  /// Whether the mesh generator should be verbose to the console
+  const bool _verbose;
+
   /**
    * The actual function coarsening the blocks. This is done recursively in order
    * to minimize the number of coarsening iterations to as little as possible.
