@@ -284,17 +284,22 @@ Parser::parse(const std::vector<std::string> & input_filenames,
   if (_input_filenames.size() > 1)
     mooseInfo("Merging inputs ", Moose::stringify(_input_filenames));
 
+  // We don't (currently) want this option to propagate to other objects that need
+  // the input paths. At least, we didn't in the past. So we're going to retain that
+  // behavior for now by only changing it from the read here. In the future, we'll
+  // probably want to make this more consistent.
+  auto filenames = _input_filenames;
   std::string use_rel_paths_str =
       std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
-    for (auto & input_filename : _input_filenames)
+    for (auto & input_filename : filenames)
       input_filename = MooseUtils::realpath(input_filename);
 
   CompileParamWalker::ParamMap override_map;
   CompileParamWalker cpw(override_map);
   OverrideParamWalker opw(override_map);
 
-  for (auto & input_filename : _input_filenames)
+  for (auto & input_filename : filenames)
   {
     // Parse the input text string if provided, otherwise read file from disk
     std::string input;
