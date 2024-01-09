@@ -36,7 +36,6 @@ public:
 protected:
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
-  virtual void applyTractionSeparationLaw(const Node * const /*node*/);
 
   // Compute CZM kinematics.
   virtual void prepareJumpKinematicQuantities() {}
@@ -47,9 +46,6 @@ protected:
 
   /// Compute global traction for mortar application
   virtual void computeGlobalTraction(const Node * const /*node*/) {}
-
-  /// Penalty for normal cohesive zone model
-  const Real _czm_normal_stiffness;
 
   /// The normal penalty factor
   const Real _penalty;

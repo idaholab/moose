@@ -42,7 +42,6 @@ protected:
   virtual void computeQpIPropertiesLocal() override;
 
   virtual bool constrainedByOwner() const override { return false; }
-  virtual void applyTractionSeparationLaw(const Node * const /*node*/) override {}
 
   // Compute CZM kinematics.
   virtual void prepareJumpKinematicQuantities() override;

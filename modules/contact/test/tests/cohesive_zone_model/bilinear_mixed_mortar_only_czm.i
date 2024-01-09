@@ -91,6 +91,7 @@
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
         generate_output = 'vonmises_stress'
+        block = '1 2'
       []
     []
   []
@@ -143,11 +144,13 @@
   []
   [stress]
     type = ADComputeFiniteStrainElasticStress
+    block = '1 2'
   []
   [elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    block = '1 2'
   []
   # [czm]
   #   type = BiLinearMixedModeTraction
@@ -173,13 +176,15 @@
 [Executioner]
   type = Transient
 
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
   line_search = none
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   automatic_scaling = true
+  compute_scaling_once = false
+  off_diagonals_in_auto_scaling = true
 
   l_max_its = 2
   l_tol = 1e-14
@@ -208,15 +213,12 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.1 # with 2.0 works
+    friction_coefficient = 0.0 # with 2.0 works
     secondary_variable = disp_x
     penalty = 0e6
-    czm_normal_stiffness = 1e4
-    penalty_friction = 1e4
+    penalty_friction = 0e4
     use_physical_gap = true
     # unused
-    czm_normal_strength = 1e3
-    czm_tangential_strength = 1e3
     use_bilinear_mixed_mode_traction = true
 
     # bilinear stuff
@@ -255,30 +257,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = czm_uo
-  []
-  [t_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
-  []
-  [t_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
   []
   [c_x]
     type = MortarGenericTraction

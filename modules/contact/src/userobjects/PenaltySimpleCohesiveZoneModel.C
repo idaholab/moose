@@ -38,17 +38,6 @@ PenaltySimpleCohesiveZoneModel::validParams()
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
-  // Cohesive Zone Model parameters
-  params.addRequiredParam<Real>("czm_normal_stiffness",
-                                "The normal stiffness that determines the traction that initiates "
-                                "the cohesive zone traction.");
-  params.addRequiredParam<Real>("czm_normal_strength",
-                                "The normal strength that determines the traction-separation law.");
-  params.addRequiredCoupledVar("displacements",
-                               "The string of displacements suitable for the problem statement");
-  params.addRequiredParam<Real>(
-      "czm_tangential_strength",
-      "The tangential strength that determines the traction-separation law.");
 
   // Input parameters for bilinear mixed mode traction.
   params.addParam<MaterialPropertyName>("GI_c",
@@ -62,21 +51,14 @@ PenaltySimpleCohesiveZoneModel::validParams()
   params.addParam<Real>("viscosity", 0.0, "Viscosity for damage model.");
   params.addParam<MooseEnum>(
       "mixed_mode_criterion", criterion, "Option for mixed mode propagation criterion.");
-
-  params.addParam<bool>(
-      "lag_displacement_jump",
-      false,
-      "Whether to use old displacement jumps to compute the effective displacement jump.");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
-  params.addParam<bool>(
-      "use_bilinear_mixed_mode_traction", false, "Whether to bilinear mixed mode traction.");
   params.addRangeCheckedParam<Real>(
       "penalty_stiffness", "penalty_stiffness > 0.0", "Penalty stiffness for CZM.");
   params.addParamNamesToGroup(
       "GI_c GII_c normal_strength shear_strength power_law_parameter viscosity "
-      "mixed_mode_criterion lag_displacement_jump regularization_alpha "
-      "use_bilinear_mixed_mode_traction penalty_stiffness",
+      "mixed_mode_criterion regularization_alpha "
+      "penalty_stiffness",
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.
 
@@ -100,7 +82,6 @@ PenaltySimpleCohesiveZoneModel::PenaltySimpleCohesiveZoneModel(const InputParame
   : WeightedGapUserObject(parameters),
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
-    _czm_normal_stiffness(getParam<Real>("czm_normal_stiffness")),
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
@@ -200,8 +181,6 @@ PenaltySimpleCohesiveZoneModel::reinit()
     // Build final traction vector
     computeGlobalTraction(node);
 
-    // End of CZM bilinear computations
-
     // Compute mechanical contact until end of method.
     const auto penalty_friction = findValue(
         _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
@@ -277,8 +256,6 @@ PenaltySimpleCohesiveZoneModel::reinit()
       tangential_traction.setZero();
     }
 
-    applyTractionSeparationLaw(node);
-
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.
     const auto & test_i = (*_test)[i];
@@ -286,35 +263,8 @@ PenaltySimpleCohesiveZoneModel::reinit()
     {
       _frictional_contact_traction_one[qp] += test_i[qp] * tangential_traction(0);
       _frictional_contact_traction_two[qp] += test_i[qp] * tangential_traction(1);
-
-      _contact_pressure[qp] += test_i[qp] * _dof_to_czm_normal_traction[node];
     }
   }
-}
-
-void
-PenaltySimpleCohesiveZoneModel::applyTractionSeparationLaw(const Node * const node)
-{
-  // Jump corresponding to maximum force generated in CZM
-  const Real peak_displacement_jump = 0.2;
-
-  // Jump corresponding to separation in CZM
-  const Real separation_displacement_jump = 0.5;
-
-  // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
-  auto gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node)) /
-             libmesh_map_find(_dof_to_weighted_gap, node).second;
-
-  if (gap < peak_displacement_jump && gap >= 0)
-    _dof_to_czm_normal_traction[node] = _czm_normal_stiffness * gap;
-  else if (gap >= peak_displacement_jump && gap <= separation_displacement_jump)
-    _dof_to_czm_normal_traction[node] =
-        _czm_normal_stiffness * (separation_displacement_jump - gap) * peak_displacement_jump /
-        (separation_displacement_jump - peak_displacement_jump);
-  else if (gap > separation_displacement_jump)
-    _dof_to_czm_normal_traction[node] = 0.0;
-  else
-    _dof_to_czm_normal_traction[node] = _dof_to_normal_pressure[node];
 }
 
 void

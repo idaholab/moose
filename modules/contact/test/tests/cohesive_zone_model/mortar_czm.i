@@ -77,6 +77,7 @@
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
+        block = '1 2'
       []
     []
   []
@@ -117,41 +118,21 @@
 []
 
 [AuxVariables]
-  # [mode_mixity_ratio]
-  #   order = CONSTANT
-  #   family = MONOMIAL
-  # []
-  # [damage]
-  #   order = CONSTANT
-  #   family = MONOMIAL
-  # []
 []
 
 [AuxKernels]
-  # [mode_mixity_ratio]
-  #   type = MaterialRealAux
-  #   variable = mode_mixity_ratio
-  #   property = mode_mixity_ratio
-  #   execute_on = timestep_end
-  #   boundary = interface
-  # []
-  # [damage]
-  #   type = MaterialRealAux
-  #   variable = damage
-  #   property = damage
-  #   execute_on = timestep_end
-  #   boundary = interface
-  # []
 []
 
 [Materials]
   [stress]
     type = ADComputeFiniteStrainElasticStress
+    block = '1 2'
   []
   [elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    block = '1 2'
   []
   [normal_strength]
     type = GenericFunctionMaterial
@@ -207,11 +188,8 @@
     secondary_variable = disp_x
 
     penalty = 0e6
-    czm_normal_stiffness = 1e4
     penalty_friction = 1e4
     use_physical_gap = true
-    czm_normal_strength = 1e3
-    czm_tangential_strength = 1e3
 
     use_bilinear_mixed_mode_traction = true
     correct_edge_dropping = true
@@ -252,32 +230,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = czm_uo
-    correct_edge_dropping = true
-  []
-  [t_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'top_bottom'
-    secondary_boundary = 'bottom_top'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
-    correct_edge_dropping = true
-  []
-  [t_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'top_bottom'
-    secondary_boundary = 'bottom_top'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
     correct_edge_dropping = true
   []
   [c_x]

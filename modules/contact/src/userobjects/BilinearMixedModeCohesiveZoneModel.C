@@ -172,22 +172,6 @@ BilinearMixedModeCohesiveZoneModel::timestepSetup()
   // instead we call it explicitly here
   PenaltySimpleCohesiveZoneModel::timestepSetup();
 
-  // Beginning of CZM properties
-  for (auto & map_pr : _dof_to_czm_normal_traction)
-    map_pr.second = {0.0};
-
-  for (auto & map_pr : _dof_to_rotation_matrix)
-    map_pr.second.setToIdentity();
-
-  for (auto & map_pr : _dof_to_interface_displacement_jump)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_interface_F)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_interface_R)
-    map_pr.second = 0.0;
-
   // save off tangential traction from the last timestep
   for (auto & map_pr : _dof_to_damage)
   {
@@ -207,43 +191,24 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   PenaltySimpleCohesiveZoneModel::initialize();
 
   // Avoid accumulating interpolation over the time step
-  for (auto & map_pr : _dof_to_F)
-    map_pr.second.zero();
+  _dof_to_F.clear();
+  _dof_to_F_neighbor.clear();
+  _dof_to_mode_mixity_ratio.clear();
+  _dof_to_normal_strength.clear();
+  _dof_to_shear_strength.clear();
+  _dof_to_GI_c.clear();
+  _dof_to_GII_c.clear();
+  _dof_to_delta_initial.clear();
+  _dof_to_delta_final.clear();
+  _dof_to_delta_medium.clear();
+  _dof_to_czm_traction.clear();
+  _dof_to_interface_displacement_jump.clear();
+  _dof_to_czm_normal_traction.clear();
+  _dof_to_interface_F.clear();
+  _dof_to_interface_R.clear();
 
-  for (auto & map_pr : _dof_to_F_neighbor)
-    map_pr.second.zero();
-
-  for (auto & map_pr : _dof_to_mode_mixity_ratio)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_normal_strength)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_shear_strength)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_GI_c)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_GII_c)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_delta_initial)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_delta_final)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_delta_medium)
-    map_pr.second = 0.0;
-
-  for (auto & map_pr : _dof_to_czm_traction)
-    map_pr.second = {0.0, 0.0, 0.0};
-
-  _normal_strength_interpolation = 0.0;
-  _shear_strength_interpolation = 0.0;
-  _GI_c_interpolation = 0.0;
-  _GII_c_interpolation = 0.0;
+  for (auto & map_pr : _dof_to_rotation_matrix)
+    map_pr.second.setToIdentity();
 }
 
 void
