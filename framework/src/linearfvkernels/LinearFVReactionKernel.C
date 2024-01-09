@@ -17,6 +17,9 @@ InputParameters
 LinearFVReactionKernel::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
+  params.addClassDescription(
+      "Represents the matrix and right hand side contributions of a reaction "
+      "term ($c u$) in a partial differential equation.");
   params.addParam<MooseFunctorName>("coeff", 1.0, "The reaction coefficient.");
   return params;
 }

@@ -17,6 +17,9 @@ InputParameters
 LinearFVSourceKernel::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
+  params.addClassDescription(
+      "Represents the matrix and right hand side contributions of a "
+      "solution-independent source term in a partial differential equation.");
   params.addParam<MooseFunctorName>("source_density", 1.0, "The source density.");
   return params;
 }

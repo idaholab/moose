@@ -18,6 +18,9 @@ InputParameters
 LinearFVDiffusionKernel::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
+  params.addClassDescription("Represents the matrix and right hand side contributions of a "
+                             "diffusion ($-\nabla \cdot D \nabla u$) "
+                             "term in a partial differential equation.");
   params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The reaction coefficient.");
   return params;
 }
