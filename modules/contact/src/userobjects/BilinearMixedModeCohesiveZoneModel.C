@@ -200,7 +200,7 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   _dof_to_GII_c.clear();
   _dof_to_delta_initial.clear();
   _dof_to_delta_final.clear();
-  _dof_to_delta_medium.clear();
+  _dof_to_delta_max.clear();
   _dof_to_czm_traction.clear();
   _dof_to_interface_displacement_jump.clear();
   _dof_to_czm_normal_traction.clear();
@@ -228,11 +228,8 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
     _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotationTempl<false>(
         _normals[i], _subproblem.mesh().dimension());
 
-    // TODO: It is not clear to me how the previous CZM implementation accounts for a proper mixity
-    // ratio. It computes the jump distance in the current undisplaced mesh and always projects
-    // locally with the normal vector. Since the normal vector is used for computing neighbor
-    // distances, it seems that shearing may be neglected.
-
+    // Every time we used quantities from a map we "denormalize" it from the mortar integral.
+    // See normalizing member functions.
     if (_dof_to_weighted_displacements.find(node) != _dof_to_weighted_displacements.end())
       _dof_to_interface_displacement_jump[node] =
           (libmesh_map_find(_dof_to_weighted_displacements, node));
@@ -407,25 +404,25 @@ BilinearMixedModeCohesiveZoneModel::computeEffectiveDisplacementJump(const Node 
       MathUtils::regularizedHeavyside(interface_displacement_jump(0), _regularization_alpha) *
       interface_displacement_jump(0);
 
-  _dof_to_delta_medium[node] = std::sqrt(Utility::pow<2>(interface_displacement_jump(1)) +
-                                         Utility::pow<2>(interface_displacement_jump(2)) +
-                                         Utility::pow<2>(delta_normal_pos) + _epsilon_tolerance);
+  _dof_to_delta_max[node] = std::sqrt(Utility::pow<2>(interface_displacement_jump(1)) +
+                                      Utility::pow<2>(interface_displacement_jump(2)) +
+                                      Utility::pow<2>(delta_normal_pos) + _epsilon_tolerance);
 }
 
 void
 BilinearMixedModeCohesiveZoneModel::computeDamage(const Node * const node)
 {
-  const auto delta_medium = libmesh_map_find(_dof_to_delta_medium, node);
+  const auto delta_max = libmesh_map_find(_dof_to_delta_max, node);
   const auto delta_initial = libmesh_map_find(_dof_to_delta_initial, node);
   const auto delta_final = libmesh_map_find(_dof_to_delta_final, node);
 
-  if (delta_medium < delta_initial)
+  if (delta_max < delta_initial)
     _dof_to_damage[node].first = 0;
-  else if (delta_medium > delta_final)
+  else if (delta_max > delta_final)
     _dof_to_damage[node].first = 1.0;
   else
     _dof_to_damage[node].first =
-        delta_final * (delta_medium - delta_initial) / delta_medium / (delta_final - delta_initial);
+        delta_final * (delta_max - delta_initial) / delta_max / (delta_final - delta_initial);
 
   if (_dof_to_damage[node].first < _dof_to_damage[node].second)
     // Irreversibility

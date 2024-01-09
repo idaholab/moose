@@ -183,7 +183,7 @@ protected:
   // The parameters in the damage evolution law: Maps node to damage
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_initial;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_final;
-  std::unordered_map<const DofObject *, ADReal> _dof_to_delta_medium;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_delta_max;
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
   // @}
 

@@ -1,6 +1,7 @@
 [Tests]
   issues = '#26283'
-  design = 'userobjects/PenaltySimpleCohesiveZoneModel.md userobjects/BilinearMixedModeCohesiveZoneModel.md'
+  design = 'userobjects/PenaltySimpleCohesiveZoneModel.md '
+           'userobjects/BilinearMixedModeCohesiveZoneModel.md'
   [only_czm]
     type = Exodiff
     input = bilinear_mixed_mortar_only_czm.i
@@ -38,5 +39,28 @@
                   'zone modeling with a mortar formulation and output analysis information to the '
                   'Exodus mesh.'
     map = false
+  []
+  [bilinear_mixed]
+    type = CSVDiff
+    input = bilinear_mixed.i
+    csvdiff = bilinear_mixed_out.csv
+    requirement = 'The system shall be able to apply a cohesive zone model based on interface '
+                  'objects.'
+    rel_err = 1.0e-5
+    abs_zero = 0.001
+    heavy = true
+    method = 'opt'
+  []
+  [bilinear_mixed_compare]
+    type = CSVDiff
+    input = bilinear_mixed_compare.i
+    csvdiff = bilinear_mixed_compare_out.csv
+    requirement = 'The system shall be able to apply a mortar cohesive zone model and yield results '
+                  'similar to those of interface objects.'
+    # This test compares different formulations
+    rel_err = 0.035
+    abs_zero = 0.001
+    heavy = true
+    method = 'opt'
   []
 []
