@@ -6,5 +6,5 @@ minimum_python: 3.7
 mpich: 4.0.2
 petsc_alt: 3.11.4
 petsc: 3.20.3
-moose_dev: 2024.01.05
+moose_dev: 2024.01.09
 moose_tools: 2023.12.20
