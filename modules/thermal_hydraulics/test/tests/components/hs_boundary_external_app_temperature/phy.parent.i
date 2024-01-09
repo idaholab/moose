@@ -79,11 +79,11 @@
 
 [Transfers]
   [T_to_thm]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = thm
     source_variable = T
     variable = T_ext
-    target_boundary = 'hs:outer'
+    to_boundaries = 'hs:outer'
   []
 []
 

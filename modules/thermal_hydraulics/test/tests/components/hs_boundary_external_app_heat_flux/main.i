@@ -120,6 +120,7 @@ power = 1000.0
     to_multi_app = sub
     source_user_object = layered_average_heat_flux
     variable = q_ext
+    error_on_miss = true
   []
   [perimeter_transfer]
     type = MultiAppPostprocessorTransfer

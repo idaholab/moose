@@ -98,13 +98,13 @@ htc = 100
 
 [Transfers]
   [T_to_child]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = thm
     source_variable = T
     variable = T_ext
   []
   [htc_to_child]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = thm
     source_variable = htc_ext
     variable = htc_ext
