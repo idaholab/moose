@@ -15,10 +15,11 @@
   [main]
     type = OptimizationData
     measurement_points = '0.2 0.2 0
-                          0.8 0.6 0
-                          0.2 1.4 0
-                          0.8 1.8 0'
-    measurement_values = '226 254 214 146'
+    0.8 0.6 0
+    0.2 1.4 0
+    0.8 1.8 0'
+    measurement_values = '270 339 321 221'
+
   []
 []
 

@@ -17,16 +17,13 @@
 
 [OptimizationReporter]
   type = ParameterMeshOptimization
+  objective_name = objective_value
   parameter_names = 'parameter1 parameter2'
   parameter_meshes = 'parameter_mesh_boundsIC_out.e parameter_mesh_boundsIC_out.e'
   parameter_families = 'LAGRANGE MONOMIAL'
   parameter_orders = 'FIRST CONSTANT'
   num_parameter_times = 1
-  measurement_points = '0.1 0.2 0.3
-                        0.4 0.5 0.6
-                        0.7 0.8 0.9
-                        1.0 1.1 1.2'
-  measurement_values = '11 12 13 14'
+
   outputs = outjson
 []
 
