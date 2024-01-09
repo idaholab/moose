@@ -33,8 +33,7 @@
 
 [UserObjects]
   [optReporterTester]
-    type = GeneralOptimization
-    objective_name = objective_valueTest
+    type = OptimizationReporterTest
     values_to_set_parameters_to = '10 20 30 40 50 60 70 80 90 100 110 120'
     expected_lower_bounds = '-1 -2 -3 -4 -5 -6 -7 -7 -7 -7 -7 -7'
     expected_upper_bounds = '101 101 103 103 103 103 107 108 109 110 111 112'
