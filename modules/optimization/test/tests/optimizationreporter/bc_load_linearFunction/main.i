@@ -18,15 +18,23 @@
 []
 
 [OptimizationReporter]
-  type = OptimizationReporter
+  type = GeneralOptimization
+  objective_name = objective_value
   parameter_names = 'left right'
   num_values = '2 1'
-  measurement_file = 'measurementData.csv'
-  file_xcoord = 'coordx'
-  file_ycoord ='y'
-  file_zcoord = 'z'
-  file_value = 'weightedMeasurement'
-  file_variable_weights = 'weight'
+  outputs = CSV
+[]
+[Reporters]
+  [main]
+    type = OptimizationData
+    file_xcoord = 'coordx'
+    file_ycoord = 'y'
+    file_zcoord = 'z'
+    file_value = 'weightedMeasurement'
+    file_variable_weights = 'weight'
+    measurement_file = 'measurementData.csv'
+    outputs = CSV
+  []
 []
 
 [Executioner]
@@ -62,12 +70,12 @@
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
-                      OptimizationReporter/weight
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
+                      main/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
@@ -82,18 +90,18 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    from_reporters = 'measure_data/misfit_values measure_data/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/misfit_values
-                      OptimizationReporter/weight
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/misfit_values
+                      main/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'misfit/measurement_xcoord
@@ -118,12 +126,12 @@
   [toHomogeneousForward]
     type = MultiAppReporterTransfer
     to_multi_app = homogeneousForward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
-                      OptimizationReporter/weight
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
+                      main/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
@@ -139,7 +147,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = homogeneousForward
     from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    to_reporters = 'main/misfit_values'
   []
 []
 
@@ -154,3 +162,4 @@
   csv = true
   console = false
 []
+

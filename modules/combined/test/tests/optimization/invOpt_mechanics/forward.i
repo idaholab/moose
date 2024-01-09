@@ -11,7 +11,7 @@
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = false
-    displacements ='disp_x disp_y'
+    displacements = 'disp_x disp_y'
   []
 []
 
@@ -80,7 +80,8 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
+    objective_name = objective_value
     variable = disp_y
   []
   [params]

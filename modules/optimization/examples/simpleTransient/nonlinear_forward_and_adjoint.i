@@ -107,6 +107,7 @@
     file_value = u
     variable = u
     execute_on = timestep_end
+    objective_name = objective_value
     outputs = none
   []
 []
