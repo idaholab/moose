@@ -64,18 +64,11 @@ void
 CrystalPlasticityKalidindiUpdate::initQpStatefulProperties()
 {
   CrystalPlasticityStressUpdateBase::initQpStatefulProperties();
-
   for (const auto i : make_range(_number_slip_systems))
   {
     _slip_resistance[_qp][i] = _gss_initial;
     _slip_increment[_qp][i] = 0.0;
   }
-}
-
-void
-CrystalPlasticityKalidindiUpdate::setMaterialVectorSize()
-{
-  CrystalPlasticityStressUpdateBase::setMaterialVectorSize();
 }
 
 void
