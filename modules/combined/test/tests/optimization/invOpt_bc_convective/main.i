@@ -114,7 +114,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = forward
     from_reporters = 'measure_data/misfit_values measure_data/objective_value'
-    to_reporters = 'main/misfit_values OptimizationReport/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
