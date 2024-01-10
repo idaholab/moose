@@ -38,7 +38,7 @@ CappedWeakInclinedPlaneStressUpdate::CappedWeakInclinedPlaneStressUpdate(
   else
     _n_input /= _n_input.norm();
 
-  _rot_n_to_z = RotationMatrix::rotVecToZTempl<false>(_n_input);
+  _rot_n_to_z = RotationMatrix::rotVecToZ(_n_input);
   _rot_z_to_n = _rot_n_to_z.transpose();
 }
 
@@ -68,7 +68,7 @@ CappedWeakInclinedPlaneStressUpdate::initializeReturnProcess()
   CappedWeakPlaneStressUpdate::initializeReturnProcess();
   if (_perform_finite_strain_rotations)
   {
-    _rot_n_to_z = RotationMatrix::rotVecToZTempl<false>(_n[_qp]);
+    _rot_n_to_z = RotationMatrix::rotVecToZ(_n[_qp]);
     _rot_z_to_n = _rot_n_to_z.transpose();
   }
 }

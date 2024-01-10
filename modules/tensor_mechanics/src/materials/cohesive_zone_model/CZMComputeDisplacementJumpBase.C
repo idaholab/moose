@@ -99,8 +99,8 @@ template <bool is_ad>
 void
 CZMComputeDisplacementJumpBase<is_ad>::computeRotationMatrices()
 {
-  _czm_total_rotation[_qp] = CohesiveZoneModelTools::computeReferenceRotationTempl<is_ad>(
-      _normals[_qp], _mesh.dimension());
+  _czm_total_rotation[_qp] =
+      CohesiveZoneModelTools::computeReferenceRotation<is_ad>(_normals[_qp], _mesh.dimension());
 }
 
 template class CZMComputeDisplacementJumpBase<false>;

@@ -17,17 +17,17 @@
 
 namespace CohesiveZoneModelTools
 {
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealVectorValue<is_ad>
-computedVnormdVTempl(const GenericRealVectorValue<is_ad> & V)
+computedVnormdV(const GenericRealVectorValue<is_ad> & V)
 {
   return V / V.norm();
 }
 
 /// compute the derivative of the rotation matrix, R=FU^-1, using Chen and Wheeler 1993
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRankFourTensor<is_ad>
-computedRdFTempl(const GenericRankTwoTensor<is_ad> & R, const GenericRankTwoTensor<is_ad> & U)
+computedRdF(const GenericRankTwoTensor<is_ad> & R, const GenericRankTwoTensor<is_ad> & U)
 {
   const auto Uhat = U.trace() * RankTwoTensor::Identity() - U;
   unsigned int k, l, m, n, p, q;
@@ -56,19 +56,19 @@ RankFourTensor computedFinversedF(const RankTwoTensor & F_inv);
 
 /// compute the area ratio betweeen the deformed and undeformed configuration, and its derivatives w.r.t. the deformation gradient, F
 ///@{
-template <bool is_ad>
+template <bool is_ad = false>
 GenericReal<is_ad>
-computeAreaRatioTempl(const RankTwoTensor & FinvT, const Real & J, const RealVectorValue & N)
+computeAreaRatio(const RankTwoTensor & FinvT, const Real & J, const RealVectorValue & N)
 {
   return J * (FinvT * N).norm();
 }
 
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRankTwoTensor<is_ad>
-computeDAreaRatioDFTempl(const GenericRankTwoTensor<is_ad> & FinvT,
-                         const GenericRealVectorValue<is_ad> & N,
-                         const GenericReal<is_ad> & J,
-                         const GenericRankFourTensor<is_ad> & DFinv_DF)
+computeDAreaRatioDF(const GenericRankTwoTensor<is_ad> & FinvT,
+                    const GenericRealVectorValue<is_ad> & N,
+                    const GenericReal<is_ad> & J,
+                    const GenericRankFourTensor<is_ad> & DFinv_DF)
 {
   const auto Fitr_N = FinvT * N;
   const auto Fitr_N_norm = Fitr_N.norm();
@@ -89,38 +89,37 @@ computeDAreaRatioDFTempl(const GenericRankTwoTensor<is_ad> & FinvT,
 ///@}
 
 /// compute the normal componets of a vector
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealVectorValue<is_ad>
-computeNormalComponentsTempl(const GenericRealVectorValue<is_ad> & normal,
-                             const GenericRealVectorValue<is_ad> & vector)
+computeNormalComponents(const GenericRealVectorValue<is_ad> & normal,
+                        const GenericRealVectorValue<is_ad> & vector)
 {
   return (normal * vector) * normal;
 }
 
 /// compute the tangent componets of a vector
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealVectorValue<is_ad>
-computeTangentComponentsTempl(const GenericRealVectorValue<is_ad> & normal,
-                              const GenericRealVectorValue<is_ad> & vector)
+computeTangentComponents(const GenericRealVectorValue<is_ad> & normal,
+                         const GenericRealVectorValue<is_ad> & vector)
 {
-  return vector - computeNormalComponentsTempl<is_ad>(normal, vector);
+  return vector - computeNormalComponents<is_ad>(normal, vector);
 }
 
 /// compute the czm reference rotation based on the normal in the undeformed configuration and the mesh dimension
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRankTwoTensor<is_ad>
-computeReferenceRotationTempl(const GenericRealVectorValue<is_ad> & normal,
-                              const unsigned int mesh_dimension)
+computeReferenceRotation(const GenericRealVectorValue<is_ad> & normal,
+                         const unsigned int mesh_dimension)
 {
   GenericRankTwoTensor<is_ad> rot;
   switch (mesh_dimension)
   {
     case 3:
-      rot =
-          RotationMatrix::rotVec1ToVec2Templ<is_ad>(GenericRealVectorValue<false>(1, 0, 0), normal);
+      rot = RotationMatrix::rotVec1ToVec2<is_ad>(GenericRealVectorValue<false>(1, 0, 0), normal);
       break;
     case 2:
-      rot = RotationMatrix::rotVec2DToXTempl<is_ad>(normal).transpose();
+      rot = RotationMatrix::rotVec2DToX<is_ad>(normal).transpose();
       break;
     case 1:
       rot = RankTwoTensor::Identity();

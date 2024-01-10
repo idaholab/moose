@@ -19,9 +19,9 @@
 namespace RotationMatrix
 {
 /// provides a rotation matrix that will rotate the vector vec to the z axis (the "2" direction)
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealTensorValue<is_ad>
-rotVecToZTempl(GenericRealVectorValue<is_ad> vec)
+rotVecToZ(GenericRealVectorValue<is_ad> vec)
 // provides a rotation matrix that will rotate the vector vec to the z axis (the "2" direction)
 {
   // ensure that vec is normalised
@@ -60,20 +60,20 @@ rotVecToZTempl(GenericRealVectorValue<is_ad> vec)
 }
 
 /// provides a rotation matrix that will rotate the vector vec1 to vec2
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealTensorValue<is_ad>
-rotVec1ToVec2Templ(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
+rotVec1ToVec2(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
 // provides a rotation matrix that will rotate the vector vec1 to the vector vec2
 {
-  GenericRealTensorValue<is_ad> rot1_to_z = rotVecToZTempl<is_ad>(vec1);
-  GenericRealTensorValue<is_ad> rot2_to_z = rotVecToZTempl<is_ad>(vec2);
+  GenericRealTensorValue<is_ad> rot1_to_z = rotVecToZ<is_ad>(vec1);
+  GenericRealTensorValue<is_ad> rot2_to_z = rotVecToZ<is_ad>(vec2);
   return rot2_to_z.transpose() * rot1_to_z;
 }
 
 /// provides a rotation matrix that will rotate the vector vec1 to the [1,0,0], assuming vec1[2]==0
-template <bool is_ad>
+template <bool is_ad = false>
 GenericRealTensorValue<is_ad>
-rotVec2DToXTempl(const GenericRealVectorValue<is_ad> & vec)
+rotVec2DToX(const GenericRealVectorValue<is_ad> & vec)
 // provides a rotation matrix that will rotate the vector `vec` to the [1,0,0], assuming vec[2]==0
 {
   const GenericReal<is_ad> theta = std::atan2(vec(1), vec(0));

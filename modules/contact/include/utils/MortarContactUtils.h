@@ -266,11 +266,11 @@ communicateR2T(std::unordered_map<const DofObject *, ADRankTwoTensor> & dof_map_
 
 template <typename T>
 void
-communicateADReal(std::unordered_map<const DofObject *, T> & dof_to_adreal,
-                  const MooseMesh & mesh,
-                  const bool nodal,
-                  const Parallel::Communicator & communicator,
-                  const bool send_data_back)
+communicateRealObject(std::unordered_map<const DofObject *, T> & dof_to_adreal,
+                      const MooseMesh & mesh,
+                      const bool nodal,
+                      const Parallel::Communicator & communicator,
+                      const bool send_data_back)
 {
   libmesh_parallel_only(communicator);
   const auto our_proc_id = communicator.rank();

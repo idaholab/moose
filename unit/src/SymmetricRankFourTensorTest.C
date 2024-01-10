@@ -270,7 +270,7 @@ TEST_F(SymmetricRankFourTensorTest, isSymmetric)
 
 TEST_F(SymmetricRankFourTensorTest, rotate)
 {
-  auto R = RotationMatrix::rotVecToZTempl<false>(RealVectorValue(2, -5, 1));
+  auto R = RotationMatrix::rotVecToZ(RealVectorValue(2, -5, 1));
 
   auto A = _s3;
   A.rotate(R);

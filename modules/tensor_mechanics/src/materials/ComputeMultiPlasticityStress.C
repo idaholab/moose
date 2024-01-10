@@ -320,7 +320,7 @@ ComputeMultiPlasticityStress::preReturnMap()
   if (_n_supplied)
   {
     // this is a rotation matrix that will rotate _n to the "z" axis
-    _rot = RotationMatrix::rotVecToZTempl<false>(_n[_qp]);
+    _rot = RotationMatrix::rotVecToZ(_n[_qp]);
 
     // rotate the tensors to this frame
     _my_elasticity_tensor.rotate(_rot);
