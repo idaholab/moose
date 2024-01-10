@@ -924,11 +924,8 @@ MooseApp::setupOptions()
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (isParamValid("input_file"))
+  else if (getInputFileNames().size())
   {
-    if (getInputFileNames().empty())
-      mooseError("No input files specified. Add -i <inputfile> to your command line.");
-
     if (isParamValid("recover"))
     {
       // We need to set the flag manually here since the recover parameter is a string type (takes
@@ -994,7 +991,11 @@ MooseApp::setupOptions()
       // default file base for multiapps is set by MultiApp
     }
   }
-
+  else if (isParamValid("input_file"))
+  {
+    mooseAssert(getInputFileNames().empty(), "Should be empty");
+    mooseError("No input files specified. Add -i <inputfile> to your command line.");
+  }
   else if (isParamValid("language_server"))
   {
     _perf_graph.disableLivePrint();
