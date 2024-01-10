@@ -283,7 +283,8 @@ Parser::parse()
   _root.reset();
 
   if (_input_text)
-    mooseAssert(getInputFileNames().size() == 1, "Should have only one filename with text provided");
+    mooseAssert(getInputFileNames().size() == 1,
+                "Should have only one filename with text provided");
 
   if (getInputFileNames().size() > 1)
     mooseInfo("Merging inputs ", Moose::stringify(getInputFileNames()));
