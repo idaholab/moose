@@ -79,7 +79,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = forward
     from_reporters = 'measure_data/misfit_values measure_data/objective_value'
-    to_reporters = 'main/misfit_values OptimizationReport/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
@@ -107,11 +107,11 @@
   [toHomogeneousForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = homogeneousForward
-    from_reporters = 'OptimizationReporter/measurement_xcoord
-                      OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/measurement_time
-                      OptimizationReporter/measurement_values
+    from_reporters = 'main/measurement_xcoord
+                      main/measurement_ycoord
+                      main/measurement_zcoord
+                      main/measurement_time
+                      main/measurement_values
                       OptimizationReporter/fy_right'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
@@ -124,7 +124,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = homogeneousForward
     from_reporters = 'measure_data/simulation_values'
-    to_reporters = 'main/misfit_value'
+    to_reporters = 'main/misfit_values'
   []
 []
 

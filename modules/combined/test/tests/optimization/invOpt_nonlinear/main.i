@@ -24,9 +24,9 @@
   [main]
     type = OptimizationData
     measurement_points = '0.2 0.2 0
-0.8 0.6 0
-0.2 1.4 0
-0.8 1.8 0'
+                          0.8 0.6 0
+                          0.2 1.4 0
+                          0.8 1.8 0'
     measurement_values = '1.98404 1.91076 1.56488 1.23863'
   []
 []
@@ -83,8 +83,8 @@
   [SimulatedDataFromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'measure_data/misfit_values measure_data/objective_value'
-    to_reporters = 'main/misfit_values OptimizationReport/objective_value'
+    from_reporters = 'measurement_locations/misfit_values measurement_locations/objective_value'
+    to_reporters = 'main/misfit_values OptimizationReporter/objective_value'
   []
   ### RUN THE HOMOGENEOUS_FORWARD WITH CURRENT NONLINEAR STATE, PARAMETER_STEP,
   ### AND EXTRACT SIMULATED DATA AT MEASURMENT POINTS
@@ -115,7 +115,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = homogeneous_forward
     from_reporters = 'measurement_locations/simulation_values'
-    to_reporters = 'main/simulation_values'
+    to_reporters = 'main/misfit_values'
   []
   ### RUN THE ADJOINT WITH CURRENT NONLINEAR STATE, WITH MISFIT AS EXCITATION,
   ### AND EXTRACT GRADIENT
