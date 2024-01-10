@@ -23,7 +23,23 @@
       input = 'coarsen_quad_multi.i'
       cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
                  "double_nonuniform.e"
-      detail = 'for a mesh coarsening test with a twice-refined elements.'
+      detail = 'for a mesh coarsening test with a twice-refined elements,'
+    []
+    [external_refined]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=eg Mesh/refine_side/boundaries=top "
+                 "Mesh/refine_side/refinement='1' --mesh-only external_uniform.e"
+      detail = 'for a mesh coarsening test with an external boundary refined,'
+    []
+    [internal_refined]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine_side Mesh/refine_side/type=RefineSidesetGenerator "
+                 "Mesh/refine_side/input=add_internal Mesh/refine_side/boundaries=middle "
+                 "Mesh/refine_side/refinement='1' --mesh-only internal_uniform.e"
+      detail = 'for a mesh coarsening test with an external boundary refined,'
     []
   []
 
@@ -61,7 +77,25 @@
       recover = false
       cli_args = "Mesh/input/file=double_nonuniform.e Mesh/coarsen/coarsening='0 1 2' "
                  "Mesh/coarsen/starting_point='2.5 3 0' --mesh-only"
-      detail = 'multiple blocks at multiple levels of coarsening within a multi-domain mesh.'
+      detail = 'multiple blocks at multiple levels of coarsening within a multi-domain mesh,'
+    []
+    [external_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=external_uniform.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='2 5 0' --mesh-only"
+      detail = 'elements near a refined external boundary,'
+    []
+    [internal_boundary_single]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=internal_uniform.e Mesh/coarsen/coarsening='1 1 1' "
+                 "Mesh/coarsen/starting_point='3 5 0' --mesh-only"
+      detail = 'elements near a refined internal boundary.'
     []
   []
 

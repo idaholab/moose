@@ -10,9 +10,16 @@
     subdomain_id = '0 1 1
                     1 2 0'
   []
+  [add_internal]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = eg
+    paired_block = 0
+    primary_block = 2
+    new_boundary = middle
+  []
   [refine]
     type = RefineBlockGenerator
-    input = eg
+    input = add_internal
     block = '0 1 2'
     refinement = '0 1 1'
     enable_neighbor_refinement = false
