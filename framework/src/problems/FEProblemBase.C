@@ -1499,6 +1499,11 @@ FEProblemBase::prepare(const Elem * elem, const THREAD_ID tid)
     if (_has_nonlocal_coupling && currentlyComputingJacobian())
       _assembly[tid][i]->prepareNonlocal();
   }
+  for (const auto i : index_range(_linear_systems))
+  {
+    _assembly[tid][_nl.size() + i]->reinit(elem);
+    _linear_systems[i]->prepare(tid);
+  }
   _aux->prepare(tid);
 
   if (_displaced_problem &&

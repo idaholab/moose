@@ -19,8 +19,7 @@ LinearFVAdvectionKernel::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
-                             "advection ($\nabla \cdot (\vec{v} \nabla u)$) "
-                             "term in a partial differential equation.");
+                             "advection term in a partial differential equation.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params += Moose::FV::advectedInterpolationParameter();
   return params;

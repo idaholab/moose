@@ -22,7 +22,7 @@
   [reaction]
     type = LinearFVReactionKernel
     variable = u
-    coeff = 5.0
+    coeff = coeff_func
   []
   [source]
     type = LinearFVSourceKernel
@@ -34,15 +34,15 @@
 [Functions]
   [coeff_func]
     type = ParsedFunction
-    expression = '1+x'
+    expression = '1+sin(x)'
   []
   [source_func]
     type = ParsedFunction
-    expression = '1-x*x'
+    expression = '(1+sin(x))*(1+cos(x))'
   []
   [analytic_solution]
     type = ParsedFunction
-    expression = '1-x'
+    expression = '1+cos(x)'
   []
 []
 

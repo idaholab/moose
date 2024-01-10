@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 2
+    nx = 16
   []
 []
 
@@ -36,13 +36,13 @@
     type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "left"
-    functor = 1.0
+    functor = analytic_solution
   []
   [right_dir]
     type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "right"
-    functor = 2.0
+    functor = analytic_solution
   []
 []
 

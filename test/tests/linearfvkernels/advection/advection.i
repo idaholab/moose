@@ -37,13 +37,13 @@
     type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "left"
-    functor = 0.5
+    functor = analytic_solution
   []
   [right_dir]
     type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "right"
-    functor = 1.0
+    functor = analytic_solution
   []
 []
 

@@ -87,6 +87,11 @@ public:
   bool isArray() const override;
   bool isVector() const override;
 
+  void computeCellGradients() { _needs_cell_gradients = true; }
+  bool needsCellGradients() const { return _needs_cell_gradients; }
+
+  std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() { return _grad_cache; }
+
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
@@ -595,6 +600,8 @@ private:
 protected:
   usingMooseVariableBaseMembers;
 
+  bool _needs_cell_gradients;
+
   /// A cache for storing gradients on elements
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
 
@@ -613,16 +620,14 @@ typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemPointArg & elem_point,
                                             const StateArg & state) const
 {
-  return (*this)(elem_point.makeElem(), state) +
-         (elem_point.point - elem_point.elem->vertex_average()) *
-             this->gradient(elem_point.makeElem(), state);
+  return getElemValue(elem_point.elem, state);
 }
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  return (*this)(ElemPointArg{elem_qp.elem, elem_qp.point, false}, state);
+  return getElemValue(elem_qp.elem, state);
 }
 
 template <typename OutputType>
