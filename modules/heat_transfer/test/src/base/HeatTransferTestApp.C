@@ -13,8 +13,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "RayTracingTestApp.h"
-
 InputParameters
 HeatTransferTestApp::validParams()
 {
@@ -48,8 +46,6 @@ HeatTransferTestApp::registerApps()
 {
   registerApp(HeatTransferApp);
   registerApp(HeatTransferTestApp);
-
-  RayTracingTestApp::registerApps();
 }
 
 void

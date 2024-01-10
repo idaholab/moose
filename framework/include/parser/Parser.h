@@ -165,7 +165,7 @@ public:
    */
   std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
 
-  /// The app types extracted from [Applications] block
+  /// The app types extracted from [Application] block
   std::string _app_type;
 
 private:

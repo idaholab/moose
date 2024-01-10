@@ -38,8 +38,8 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  dt = 1
+  num_steps = 10
+  dt = 0.01
 
   solve_type = 'PJFNK'
 
@@ -51,6 +51,17 @@
   exodus = true
 []
 
-[Application]
-  type = MooseTestApp
+[MultiApps]
+  [sub]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    execute_on = timestep_end
+    positions = '1 1 0'
+    input_files = application_block_sub.i
+    output_in_position = true
+    move_time = 0.05
+    move_positions = '2 2 0'
+    move_apps = 0
+  []
 []
+

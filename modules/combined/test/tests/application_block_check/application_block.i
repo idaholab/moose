@@ -15,5 +15,4 @@
 []
 
 [Application]
-  type = ContactApp
 []

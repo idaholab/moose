@@ -151,10 +151,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return ss.str();
 }
 
-Parser::Parser(const std::vector<std::string> & input_filenames)
-  : _root(nullptr), _input_filenames(input_filenames), _input_text()
-{
-}
+Parser::Parser() : _sections_read(false), _app_type(std::string()) {}
 
 Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
   : _root(nullptr), _input_filenames({input_filename}), _input_text(input_text)

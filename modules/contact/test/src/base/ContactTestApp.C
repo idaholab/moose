@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ContactTestApp.h"
-#include "TensorMechanicsTestApp.h"
 #include "ContactApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -47,8 +46,6 @@ ContactTestApp::registerApps()
 {
   registerApp(ContactApp);
   registerApp(ContactTestApp);
-
-  TensorMechanicsTestApp::registerApps();
 }
 
 void

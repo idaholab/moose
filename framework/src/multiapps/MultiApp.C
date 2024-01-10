@@ -1114,7 +1114,20 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (!multiapp_input.empty())
   {
     front_parser->parse(multiapp_input);
-    std::cout << "parsed_name: " << front_parser->getAppType() << std::endl;
+    auto app_type = front_parser->getAppType();
+    if (app_type.empty() && _app_type.empty())
+      mooseWarning("The application type is not specify for ",
+                   full_name,
+                   ". Please use [Application] block to specify the application type.");
+    if (!app_type.empty() && app_type != _app_type)
+      mooseError("In the ",
+                 full_name,
+                 ", '",
+                 app_type,
+                 "' is not a registered application. The registered application is named: '",
+                 _app_type,
+                 "'. Please double check the [Application] block to make sure the correct "
+                 "application is provided. \n");
   }
 
   app_params.set<std::shared_ptr<Parser>>("_parser") = front_parser;
