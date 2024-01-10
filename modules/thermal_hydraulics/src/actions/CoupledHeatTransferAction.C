@@ -265,10 +265,10 @@ CoupledHeatTransferAction::addTransfers()
   }
 
   // Transfers from the flow channel application. Note that
-  // MultiAppGeneralFieldNearestLocationTransfer seems like it should be a more appropriate
-  // choice than MultiAppGeneralFieldUserObjectTransfer, but it has been noted that for
-  // large meshes, MultiAppGeneralFieldNearestLocationTransfer is slower than
-  // MultiAppGeneralFieldUserObjectTransfer.
+  // Note that MultiAppGeneralFieldNearestLocationTransfer should be more optimal
+  // choice in parallel calculations, while MultiAppGeneralFieldUserObjectTransfer should
+  // be more optimal in serial calculations. If these transfers prove to be a significant time
+  // burden, we may want to provide an option to switch these transfer classes.
   for (unsigned int k = 0; k < _n_phases; k++)
   {
     {
