@@ -9,7 +9,7 @@ to work with previously uniformly refined meshes, though the heuristic can still
 
 The user has to provide the ids of the blocks to be modified, as well as the corresponding levels of coarsening for each block. These must match up to the order of the aforementioned block id list, e.g. if the blocks you wish to modify are '0 2 1 4', with 1 coarsening for block 0, 2 for block 2, 3 for block 1, and 4 for block 4, then the coarsening list will need to look like '1 2 3 4'.
 
-The user provides the location of starting point for the coarsening algorithm with the [!param](/Mesh/CoarsenBlockGenerator/start) parameter. The element containing that point is found, then the algorithm attempts to coarsen by selecting each node of that element as the interior node of a coarse element containing that element. Once this element is coarsened, the neighbors of the coarse element
+The user provides the location of starting point for the coarsening algorithm with the [!param](/Mesh/CoarsenBlockGenerator/starting_point) parameter. The element containing that point is found, then the algorithm attempts to coarsen by selecting each node of that element as the interior node of a coarse element containing that element. Once this element is coarsened, the neighbors of the coarse element
 are considered as targets for the next round of coarsening, until all elements are coarsened once for that round of coarsening. If
 the user has specified more than one round of coarsening, the algorithm is iterated.
 

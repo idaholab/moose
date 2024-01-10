@@ -8,7 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCoarseningUtils.h"
+#include "Conversion.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/remote_elem.h"
 
 namespace MeshCoarseningUtils
 {
@@ -16,7 +18,7 @@ bool
 getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
                                const libMesh::Node * const reference_node,
                                const libMesh::Elem * const elem,
-                               const Real /*non_conformality_tol*/,
+                               const libMesh::Real /*non_conformality_tol*/,
                                std::vector<const libMesh::Node *> & tentative_coarse_nodes,
                                std::set<const libMesh::Elem *> & fine_elements)
 {
@@ -101,7 +103,7 @@ reorderNodes(std::vector<const libMesh::Node *> & nodes,
   start_clock /= start_clock.norm();
   axis /= axis.norm();
 
-  std::vector<std::pair<unsigned int, Real>> nodes_angles(nodes.size());
+  std::vector<std::pair<unsigned int, libMesh::Real>> nodes_angles(nodes.size());
   for (const auto angle_i : index_range(nodes))
   {
     mooseAssert(nodes[angle_i], "Nodes cant be nullptr");

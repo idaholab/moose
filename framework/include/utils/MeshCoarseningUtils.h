@@ -25,7 +25,7 @@ namespace MeshCoarseningUtils
 bool getFineElementFromInteriorNode(const libMesh::Node * const interior_node,
                                     const libMesh::Node * const reference_node,
                                     const libMesh::Elem * const elem,
-                                    const Real non_conformality_tol,
+                                    const libMesh::Real non_conformality_tol,
                                     std::vector<const libMesh::Node *> & tentative_coarse_nodes,
                                     std::set<const libMesh::Elem *> & fine_elements);
 

@@ -55,6 +55,8 @@ CoarsenBlockGenerator::CoarsenBlockGenerator(const InputParameters & parameters)
 {
   if (_block.size() != _coarsening.size())
     paramError("coarsening", "The blocks and coarsening parameter vectors should be the same size");
+  if (processor_id() > 0)
+    mooseError("This mesh generator only supports serial execution");
 }
 
 std::unique_ptr<MeshBase>
