@@ -34,8 +34,8 @@ private:
   /// The amount of times to coarsen each block, corresponding to their index in 'block'
   const std::vector<unsigned int> _coarsening;
 
-  /// The ID of the element to start the coarsening from
-  const unsigned int _start_elem_id;
+  /// The location on the mesh to start the coarsening from
+  const Point _starting_point;
 
   /// Whether the mesh generator should be verbose to the console
   const bool _verbose;
