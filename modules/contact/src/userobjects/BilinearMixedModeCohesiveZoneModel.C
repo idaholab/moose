@@ -61,6 +61,11 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "use_bilinear_mixed_mode_traction penalty_stiffness",
       "Bilinear mixed mode traction");
   // End of input parameters for bilinear mixed mode traction.
+
+  // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
+  params.suppressParameter<Real>("max_penalty_multiplier");
+  params.suppressParameter<Real>("penalty_multiplier");
+  params.suppressParameter<Real>("penetration_tolerance");
   return params;
 }
 
