@@ -34,4 +34,7 @@ private:
 
   /// output containing reduction of vector of vector into a vector
   std::vector<Real> & _output_reporter;
+
+  /// Vector being operated on
+  const std::vector<std::vector<Real>> & _reporter_data;
 };
