@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 
 std::string
 FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
@@ -151,9 +152,15 @@ UnitsConversionEvaler::eval(hit::Field * n,
   return ss.str();
 }
 
-Parser::Parser() : _sections_read(false) {}
+Parser::Parser(const std::vector<std::string> & input_filenames)
+  : _root(nullptr), _input_filenames(convertFileNames(input_filenames)), _input_text()
+{
+}
 
-Parser::~Parser() {}
+Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
+  : _root(nullptr), _input_filenames(convertFileNames({input_filename})), _input_text(input_text)
+{
+}
 
 void
 DupParamWalker ::walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n)
@@ -271,41 +278,30 @@ Parser::root()
 }
 
 void
-Parser::parse(const std::vector<std::string> & input_filenames,
-              const std::optional<std::string> & input_text)
+Parser::parse()
 {
-  // Check that if the input_text string is provided, then there is only one filename to match
-  if (input_text.has_value() && input_filenames.size() != 1)
-    mooseError("If 'input_text' is provided, then 'input_filenames' must hold only one filename");
+  _root.reset();
 
-  // Save the filename
-  _input_filenames = input_filenames;
+  if (_input_text)
+    mooseAssert(_inputs.size() == 1, "Should have only one filename with text provided");
 
-  if (_input_filenames.size() > 1)
-    mooseInfo("Merging inputs ", Moose::stringify(_input_filenames));
-
-  // We don't (currently) want this option to propagate to other objects that need
-  // the input paths. At least, we didn't in the past. So we're going to retain that
-  // behavior for now by only changing it from the read here. In the future, we'll
-  // probably want to make this more consistent.
-  auto filenames = _input_filenames;
-  std::string use_rel_paths_str =
-      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
-  if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
-    for (auto & input_filename : filenames)
-      input_filename = MooseUtils::realpath(input_filename);
+  if (getInputFileNames().size() > 1)
+    mooseInfo("Merging inputs ", Moose::stringify(getInputFileNames()));
 
   CompileParamWalker::ParamMap override_map;
   CompileParamWalker cpw(override_map);
   OverrideParamWalker opw(override_map);
 
-  for (auto & input_filename : filenames)
+  std::string errmsg;
+  std::vector<std::string> dw_errmsg;
+
+  for (const auto & input_filename : getInputFileNames())
   {
     // Parse the input text string if provided, otherwise read file from disk
     std::string input;
     std::string errmsg;
-    if (input_text.has_value())
-      input = input_text.value();
+    if (_input_text)
+      input = _input_text.value();
     else
     {
       MooseUtils::checkFileReadable(input_filename, true);
@@ -330,7 +326,7 @@ Parser::parse(const std::vector<std::string> & input_filenames,
       for (auto & msg : dw.errors)
         errmsg += msg + "\n";
 
-      _dw_errmsg.push_back(errmsg);
+      dw_errmsg.push_back(errmsg);
       _root->walk(&cpw, hit::NodeType::Field);
     }
     catch (hit::ParseError & err)
@@ -349,13 +345,29 @@ Parser::parse(const std::vector<std::string> & input_filenames,
   _root->walk(&bw, hit::NodeType::Section);
 
   for (auto & msg : bw.errors)
-    _errmsg += msg + "\n";
+    errmsg += msg + "\n";
 
   // Print parse errors related to bad active early
-  if (_errmsg.size() > 0)
-    mooseError(_errmsg);
+  if (errmsg.size() > 0)
+    mooseError(errmsg);
 
-  for (auto & msg : _dw_errmsg)
+  for (auto & msg : dw_errmsg)
     if (msg.size() > 0)
       mooseError(msg);
+}
+
+std::vector<std::string>
+Parser::convertFileNames(const std::vector<std::string> & filenames)
+{
+  // Whether or not to use real filepaths (from env)
+  const std::string use_rel_paths_str =
+      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
+  const auto use_real_paths = use_rel_paths_str == "0" || use_rel_paths_str == "false";
+
+  std::vector<std::string> converted_filenames;
+  for (const auto & filename : filenames)
+    converted_filenames.push_back(
+        use_real_paths ? std::filesystem::absolute(std::filesystem::path(filename)).string()
+                       : filename);
+  return converted_filenames;
 }

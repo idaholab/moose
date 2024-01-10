@@ -21,30 +21,35 @@
 
 namespace Moose
 {
-std::shared_ptr<MooseApp>
-createMooseApp(const std::string & default_app_name, int argc, char * argv[])
+void
+addMainCommandLineParams(InputParameters & params)
 {
-  // Construct front parser
-  auto front_parser = std::make_unique<Parser>();
-
-  auto command_line = std::make_shared<CommandLine>(argc, argv);
-  auto input_param = emptyInputParameters();
-
-  input_param.addCommandLineParam<std::vector<std::string>>(
+  params.addCommandLineParam<std::vector<std::string>>(
       "input_file",
       "-i <input_files>",
       "Specify one or multiple input files. Multiple files get merged into a single simulation "
       "input.");
+}
 
-  command_line->addCommandLineOptionsFromParams(input_param);
+std::shared_ptr<MooseApp>
+createMooseApp(const std::string & default_app_name, int argc, char * argv[])
+{
+  auto command_line = std::make_shared<CommandLine>(argc, argv);
 
-  std::vector<std::string> input_filename;
-  command_line->search("input_file", input_filename);
+  {
+    auto input_param = emptyInputParameters();
+    addMainCommandLineParams(input_param);
+    command_line->addCommandLineOptionsFromParams(input_param);
+  }
 
-  if (!input_filename.empty())
-    front_parser->parse(input_filename);
+  std::vector<std::string> input_filenames;
+  command_line->search("input_file", input_filenames);
+
+  auto parser = std::make_unique<Parser>(input_filenames);
+  if (input_filenames.size())
+    parser->parse();
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(front_parser));
+  return AppFactory::createAppShared(default_app_name, argc, argv, std::move(parser));
 }
 }

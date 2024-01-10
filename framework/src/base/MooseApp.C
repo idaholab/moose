@@ -53,6 +53,7 @@
 #include "MooseServer.h"
 #include "RestartableDataWriter.h"
 #include "StringInputStream.h"
+#include "MooseMain.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -96,13 +97,12 @@ MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 
+  // Parameters that main also expects that we won't use (-i)
+  Moose::addMainCommandLineParams(params);
+
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
-  params.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input_files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
+
   params.addCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only [mesh_file_name]",
@@ -329,7 +329,6 @@ MooseApp::validParams()
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
-  params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
 
@@ -925,11 +924,10 @@ MooseApp::setupOptions()
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (!_input_filenames.empty() ||
-           isParamValid("input_file")) // They already specified an input filename
+  else if (isParamValid("input_file"))
   {
-    if (_input_filenames.empty())
-      _input_filenames = getParam<std::vector<std::string>>("input_file");
+    if (getInputFileNames().empty())
+      mooseError("No input files specified. Add -i <inputfile> to your command line.");
 
     if (isParamValid("recover"))
     {
@@ -946,18 +944,13 @@ MooseApp::setupOptions()
         _restart_recover_base = recover_following_arg;
     }
 
-    // Pass list of input files and optional text string if provided to parser
-    if (!isParamValid("_input_text"))
-    {
-      if (_input_filenames.empty())
-        mooseError("No input files specified. Add -i <inputfile> to your command line.");
-      _builder.build();
-    }
-    else
-    {
-      _parser->parse(_input_filenames, getParam<std::string>("_input_text"));
-      _builder.build();
-    }
+    // In the event that we've parsed once before already in MooseMain, we
+    // won't need to parse again
+    if (!_parser->root())
+      _parser->parse();
+
+    _builder.build();
+
     if (isParamValid("mesh_only"))
     {
       _syntax.registerTaskName("mesh_only", true);

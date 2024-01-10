@@ -1099,9 +1099,6 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
 
-  /// Input file names used
-  std::vector<std::string> _input_filenames;
-
   /// The output file basename
   std::string _output_file_base;
 

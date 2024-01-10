@@ -99,15 +99,24 @@ private:
 class Parser
 {
 public:
-  Parser();
-  virtual ~Parser();
+  /**
+   * Constructor given a list of input files, given in \p input_filenames
+   */
+  Parser(const std::vector<std::string> & input_filenames);
+  /**
+   * Constructor for a single input file, given in \p input_filename
+   *
+   * Optionally, \p input_text can be provided if you wish to parse contents
+   * from this text instead of reading \p input_filename. This is currently used
+   * within the language server for parsing contents of a file that have not
+   * necessary been saved to disk yet.
+   */
+  Parser(const std::string & input_filename, const std::optional<std::string> & input_text = {});
 
   /**
-   * Parse an input file (or text string if provided) consisting of hit syntax and setup objects
-   * in the MOOSE derived application
+   * Parses the inputs
    */
-  void parse(const std::vector<std::string> & input_filenames,
-             const std::optional<std::string> & input_text = std::nullopt);
+  void parse();
 
   /**
    * This function attempts to extract values from the input file based on the contents of
@@ -124,30 +133,22 @@ public:
   hit::Node * root();
 
   /*
-   * Get extracted variables from front parser
-   */
-  const std::set<std::string> & getExtractedVars() const { return _extracted_vars; }
-
-  /*
    * Get input file names from parser
    */
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
-protected:
-  std::unique_ptr<hit::Node> _root = nullptr;
-  std::unique_ptr<hit::Node> _cli_root = nullptr;
-
-  /// The input file names that are used for parameter extraction
-  std::vector<std::string> _input_filenames;
-
-  /// The set of all variables extracted from the input file
-  std::set<std::string> _extracted_vars;
-
-  /// Boolean to indicate whether parsing has started (sections have been extracted)
-  bool _sections_read;
-
 private:
-  std::string _errmsg;
+  /**
+   * Internal helper for setting \p _input_filenames in the constructor, potentially converting them
+   * to absolute paths
+   */
+  static std::vector<std::string> convertFileNames(const std::vector<std::string> & filenames);
 
-  std::vector<std::string> _dw_errmsg;
+  /// The root node, which owns the whole tree
+  std::unique_ptr<hit::Node> _root;
+
+  /// The input file names
+  const std::vector<std::string> _input_filenames;
+  /// The optional input text (to augment reading a single input with the MooseServer)
+  const std::optional<std::string> _input_text;
 };

@@ -12,6 +12,8 @@
 #include "MooseInit.h"
 #include "MooseApp.h"
 
+class InputParameters;
+
 namespace Moose
 {
 
@@ -20,6 +22,12 @@ namespace Moose
  */
 std::shared_ptr<MooseApp>
 createMooseApp(const std::string & default_app_name, int argc, char * argv[]);
+
+/**
+ * Adds the command line parameters needed from within \p main, which
+ * will also need to be added to MooseApp so that they show up in --help
+ */
+void addMainCommandLineParams(InputParameters & params);
 
 /**
  * Initialize, create and run a MooseApp

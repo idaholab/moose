@@ -1108,10 +1108,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   const auto & input_file = _input_files[input_index];
 
   // create new parser tree for the application and parse
-  auto front_parser = std::make_unique<Parser>();
-  if (!input_file.empty()) // why would this ever be empty?!
-    front_parser->parse({input_file});
-  app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(front_parser);
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::make_shared<Parser>(input_file);
 
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];

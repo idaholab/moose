@@ -130,8 +130,6 @@ Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, std::shared_ptr<Pa
     _current_error_stream(nullptr)
 {
   mooseAssert(_parser, "Parser is not set");
-  _extracted_vars = _parser->getExtractedVars();
-  _input_filenames = _parser->getInputFileNames();
 }
 
 Builder::~Builder() {}
@@ -197,15 +195,17 @@ UnusedWalker::walk(const std::string & fullpath, const std::string & nodename, h
 std::string
 Builder::getPrimaryFileName(bool stripLeadingPath) const
 {
+  const auto & input_filenames = _parser->getInputFileNames();
+
   if (!stripLeadingPath)
-    return _input_filenames.back();
+    return input_filenames.back();
 
   std::string filename;
-  size_t pos = _input_filenames.back().find_last_of('/');
+  size_t pos = input_filenames.back().find_last_of('/');
   if (pos != std::string::npos)
-    filename = _input_filenames.back().substr(pos + 1);
+    filename = input_filenames.back().substr(pos + 1);
   else
-    filename = _input_filenames.back();
+    filename = input_filenames.back();
 
   return filename;
 }

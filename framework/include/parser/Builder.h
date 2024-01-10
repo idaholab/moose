@@ -264,9 +264,6 @@ protected:
   /// Object for holding the syntax parse tree
   std::unique_ptr<SyntaxTree> _syntax_formatter;
 
-  /// The input file names that are used for parameter extraction
-  std::vector<std::string> _input_filenames;
-
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
 

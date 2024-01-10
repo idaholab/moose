@@ -73,8 +73,6 @@ AppFactory::createAppShared(const std::string & default_app_type,
 {
   mooseDeprecated("Please update your main.C to adapt new main function in MOOSE framework, "
                   "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
-  // Construct front parser
-  auto parser = std::make_unique<Parser>();
 
   auto command_line = std::make_shared<CommandLine>(argc, argv);
   auto which_app_param = emptyInputParameters();
@@ -87,11 +85,12 @@ AppFactory::createAppShared(const std::string & default_app_type,
 
   command_line->addCommandLineOptionsFromParams(which_app_param);
 
-  std::vector<std::string> input_filename;
-  command_line->search("input_file", input_filename);
+  std::vector<std::string> input_filenames;
+  command_line->search("input_file", input_filenames);
 
-  if (!input_filename.empty())
-    parser->parse(input_filename);
+  auto parser = std::make_unique<Parser>(input_filenames);
+  if (input_filenames.size())
+    parser->parse();
 
   MooseApp::addAppParam(which_app_param);
   command_line->addCommandLineOptionsFromParams(which_app_param);
