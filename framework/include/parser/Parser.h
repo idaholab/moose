@@ -138,12 +138,6 @@ public:
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
 
 private:
-  /**
-   * Internal helper for setting \p _input_filenames in the constructor, potentially converting them
-   * to absolute paths
-   */
-  static std::vector<std::string> convertFileNames(const std::vector<std::string> & filenames);
-
   /// The root node, which owns the whole tree
   std::unique_ptr<hit::Node> _root;
 

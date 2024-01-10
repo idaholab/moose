@@ -21,8 +21,6 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/libmesh_config.h" // LIBMESH_HAVE_HDF5
 
-#include <filesystem>
-
 registerMooseObject("MooseApp", Exodus);
 
 InputParameters
@@ -504,9 +502,7 @@ Exodus::filename()
     output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
-  // Return the filename; here we get the relative path because the exodus writer currently
-  // doesn't handle long file paths and _file_base is typically an absolute path
-  return std::filesystem::proximate(std::filesystem::path(output.str())).string();
+  return output.str();
 }
 
 void

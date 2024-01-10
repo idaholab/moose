@@ -152,12 +152,12 @@ UnitsConversionEvaler::eval(hit::Field * n,
 }
 
 Parser::Parser(const std::vector<std::string> & input_filenames)
-  : _root(nullptr), _input_filenames(convertFileNames(input_filenames)), _input_text()
+  : _root(nullptr), _input_filenames(input_filenames), _input_text()
 {
 }
 
 Parser::Parser(const std::string & input_filename, const std::optional<std::string> & input_text)
-  : _root(nullptr), _input_filenames(convertFileNames({input_filename})), _input_text(input_text)
+  : _root(nullptr), _input_filenames({input_filename}), _input_text(input_text)
 {
 }
 
@@ -295,23 +295,31 @@ Parser::parse()
   std::string errmsg;
   std::vector<std::string> dw_errmsg;
 
+  // Whether or not to use real filepaths (from env)
+  const std::string use_rel_paths_str =
+      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
+  const auto use_real_paths = use_rel_paths_str == "0" || use_rel_paths_str == "false";
+
   for (const auto & input_filename : getInputFileNames())
   {
+    const auto corrected_filename =
+        use_real_paths ? MooseUtils::realpath(input_filename) : input_filename;
+
     // Parse the input text string if provided, otherwise read file from disk
     std::string input;
     std::string errmsg;
-    if (_input_text)
+    if (_input_text.has_value())
       input = _input_text.value();
     else
     {
-      MooseUtils::checkFileReadable(input_filename, true);
-      std::ifstream f(input_filename);
+      MooseUtils::checkFileReadable(corrected_filename, true);
+      std::ifstream f(corrected_filename);
       input = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
     }
 
     try
     {
-      std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
+      std::unique_ptr<hit::Node> root(hit::parse(corrected_filename, input));
       hit::explode(root.get());
       DupParamWalker dw;
       root->walk(&dw, hit::NodeType::Field);
@@ -354,18 +362,4 @@ Parser::parse()
   for (auto & msg : dw_errmsg)
     if (msg.size() > 0)
       mooseError(msg);
-}
-
-std::vector<std::string>
-Parser::convertFileNames(const std::vector<std::string> & filenames)
-{
-  // Whether or not to use real filepaths (from env)
-  const std::string use_rel_paths_str =
-      std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
-  const auto use_real_paths = use_rel_paths_str == "0" || use_rel_paths_str == "false";
-
-  std::vector<std::string> converted_filenames;
-  for (const auto & filename : filenames)
-    converted_filenames.push_back(use_real_paths ? MooseUtils::realpath(filename) : filename);
-  return converted_filenames;
 }
