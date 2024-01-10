@@ -37,6 +37,10 @@ private:
   /// The location on the mesh to start the coarsening from
   const Point _starting_point;
 
+  /// Maximum volume ratio between a neighbor and an element to consider the neighbor as a
+  /// candidate for coarsening after coarsening the element
+  const Real _max_vol_ratio;
+
   /// Whether the mesh generator should be verbose to the console
   const bool _verbose;
 

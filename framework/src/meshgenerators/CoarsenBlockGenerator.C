@@ -31,6 +31,12 @@ CoarsenBlockGenerator::validParams()
       "Minimum amount of times to coarsen each block, corresponding to their index in 'block'");
   params.addRequiredParam<Point>("starting_point",
                                  "A point inside the element to start the coarsening from");
+
+  // This is a heuristic to be able to coarsen inside blocks that are not uniformly refined
+  params.addParam<Real>("maximum_volume_ratio",
+                        2,
+                        "Maximum allowed volume ratio between two fine elements to propagate "
+                        "the coarsening front through a side");
   params.addParam<bool>(
       "verbose",
       false,
@@ -44,6 +50,7 @@ CoarsenBlockGenerator::CoarsenBlockGenerator(const InputParameters & parameters)
     _block(getParam<std::vector<SubdomainName>>("block")),
     _coarsening(getParam<std::vector<unsigned int>>("coarsening")),
     _starting_point(getParam<Point>("starting_point")),
+    _max_vol_ratio(getParam<Real>("maximum_volume_ratio")),
     _verbose(getParam<bool>("verbose"))
 {
   if (_block.size() != _coarsening.size())
@@ -262,6 +269,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
             break;
         }
         mooseAssert(fine_el, "We should have found a fine element for the next candidate");
+        const Real fine_el_volume = fine_el->volume();
 
         // Get the element(s) on the other side of the coarse face
         // We can tentatively support three cases:
@@ -325,11 +333,12 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         // avoid attempting to coarsen again an element we've already coarsened
         if (coarse_elems.find(neighbor_fine_elem) == coarse_elems.end())
         {
-          // dont add candidates in blocks that have been coarsened enough and
-          // dont add candidates if it's too early to coarsen then (will be coarsened on next step)
+          // dont add a candidate if it's too early to coarsen it (will be coarsened on next step)
+          // dont add a candidate if they are close to the size of a coarsened element already
           for (const auto i : index_range(block_ids))
             if (block_ids[i] == neighbor_fine_elem->subdomain_id() &&
-                coarsening[i] > max - coarse_step - 1)
+                coarsening[i] > max - coarse_step - 1 &&
+                neighbor_fine_elem->volume() < _max_vol_ratio * fine_el_volume)
             {
               candidate_pairs.insert(std::make_pair(neighbor_fine_elem, neighbor_interior_node));
               break;
