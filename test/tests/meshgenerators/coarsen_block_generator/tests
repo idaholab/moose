@@ -2,9 +2,34 @@
   issues = '#'
   design = 'meshgenerators/CoarsenBlockGenerator.md'
 
-  [generate]
-    requirement = 'The system shall support the ability to coarsen'
+  [meshes]
+    requirement = 'The system shall be able to generate the mesh'
+    [multiple_block_uniform]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='1 1 1' --mesh-only "
+                 "single_uniform.e"
+      detail = 'for a mesh coarsening test with a uniformly refined mesh,'
+    []
+    [multiple_block_nonuniform]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 1' --mesh-only "
+                 "single_nonuniform.e"
+      detail = 'for a mesh coarsening test with a non-uniformly refined mesh,'
+    []
+    [multiple_levels]
+      type = RunApp
+      input = 'coarsen_quad_multi.i'
+      cli_args = "Mesh/final_generator=refine Mesh/refine/refinement='0 1 2' --mesh-only "
+                 "double_nonuniform.e"
+      detail = 'for a mesh coarsening test with a twice-refined elements.'
+    []
+  []
 
+  [coarsen]
+    requirement = 'The system shall support the ability to coarsen'
+    prereq = 'meshes'
     [single_block]
       type = 'Exodiff'
       input = 'coarsen_quad.i'
@@ -13,20 +38,29 @@
       recover = false
       detail = 'elements within a non-uniformly refined meshed,'
     []
-    [multiple_block]
+    [multiple_block_uniform]
       type = 'Exodiff'
       input = 'coarsen_quad_multi.i'
       exodiff = 'coarsen_quad_multi_in.e'
       recover = false
-      cli_args = "--mesh-only"
+      cli_args = "Mesh/input/file=single_uniform.e Mesh/coarsen/coarsening='1 1 1' --mesh-only"
       detail = 'multiple blocks within a multi-domain mesh,'
+    []
+    [multiple_block_nonuniform]
+      type = 'Exodiff'
+      input = 'coarsen_quad_multi.i'
+      exodiff = 'coarsen_quad_multi_in.e'
+      recover = false
+      cli_args = "Mesh/input/file=single_nonuniform.e Mesh/coarsen/coarsening='0 1 1' --mesh-only"
+      detail = 'multiple blocks, both refined and unrefined, within a multi-domain mesh,'
     []
     [multiple_levels]
       type = 'Exodiff'
       input = 'coarsen_quad_multi.i'
       exodiff = 'coarsen_quad_multi_in.e'
       recover = false
-      cli_args = "--mesh-only"
+      cli_args = "Mesh/input/file=double_nonuniform.e Mesh/coarsen/coarsening='0 1 2' "
+                 "Mesh/coarsen/starting_point='2.5 3 0' --mesh-only"
       detail = 'multiple blocks at multiple levels of coarsening within a multi-domain mesh.'
     []
   []
@@ -48,10 +82,10 @@
       detail = "if specifying a vector of coarsening levels that does not match the vector of "
                "subdomains to coarsen,"
     []
-    [wrong_start_id]
+    [wrong_starting_point]
       type = RunException
       input = coarsen_quad_multi.i
-      cli_args = 'Mesh/coarsen/coarsening="1 2" --mesh-only'
+      cli_args = 'Mesh/coarsen/coarsening="2 1 0" --mesh-only'
       expect_err = "The starting element must be in the block set to be coarsened the most"
       detail = "the coarsening starting element is not in the block to coarsen the most."
     []
