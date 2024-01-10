@@ -27,6 +27,7 @@ CauchyStressFromNEML2::validParams()
 CauchyStressFromNEML2::CauchyStressFromNEML2(const InputParameters & parameters)
   : NEML2SolidMechanicsInterface<ComputeLagrangianObjectiveStress>(parameters)
 {
+  NEML2Utils::libraryNotEnabledError(parameters);
 }
 #endif
 

@@ -77,6 +77,9 @@ ifeq ($(ENABLE_NEML2),true)
 
 $(info Compiling MOOSE with NEML2.)
 
+app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
+app_non_unity_dirs += $(shell find $(APPLICATION_DIR)/test/src/neml2 -type d -not -path '*/.libs*' 2> /dev/null)
+
 NEML2_INCLUDE        := $(NEML2_DIR)/include
 NEML2_SRC            := $(shell find $(NEML2_DIR)/src -name "*.cxx")
 NEML2_OBJ            := $(patsubst %.cxx,%.$(obj-suffix),$(NEML2_SRC))

@@ -24,7 +24,7 @@ CauchyStressFromNEML2UO::validParams()
   params.addCoupledVar("temperature", "The temperature");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
-  // want to execute this userobject only at execute_on = LINEAR (i.e. during residual evaluation).
+  // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR};
   params.set<ExecFlagEnum>("execute_on") = execute_options;

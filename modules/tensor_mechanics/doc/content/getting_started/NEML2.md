@@ -7,8 +7,8 @@ In addition to the MOOSE native material models, MOOSE can also seamlessly inter
 NEML2 stands for the New Engineering Material model Library, version 2.
 
 NEML2 is an offshoot of [NEML](https://github.com/Argonne-National-Laboratory/neml),
-an earlier constitutive modeling code developed at Argonne National Laboratory that
-can be used through the MOOSE based [BlackBear](https://github.com/idaholab/blackbear) application.
+an earlier constitutive modeling code developed at Argonne National Laboratory (which
+can be used through the MOOSE based [BlackBear](https://github.com/idaholab/blackbear) application).
 Like NEML, NEML2 provides a flexible, modular way to build constitutive models from smaller blocks.
 Unlike NEML, NEML2 vectorizes the constitutive update to efficiently run on GPUs.  NEML2 is
 built on top of [libTorch](https://pytorch.org/cppdocs/) to provide GPU support, but this also

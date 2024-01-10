@@ -32,10 +32,10 @@ protected:
 protected:
   virtual void computeQpSmallStress() override;
 
-  /// The NEML2 userobject that actually performs the batched computation
+  /// The NEML2 user object that actually performs the batched computation
   const CauchyStressFromNEML2UO & _neml2_uo;
 
-  /// The output from the NEML2 userobject
+  /// The output from the NEML2 user object
   const CauchyStressFromNEML2UO::OutputVector & _output;
 
 #endif // NEML2_ENABLED

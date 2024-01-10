@@ -36,7 +36,7 @@ protected:
   /// Name of the NEML2 material model to import from the NEML2 input file
   std::string _mname;
 
-  /// Whether to print additional information about the NEML2 mateiral model
+  /// Whether to print additional information about the NEML2 material model
   const bool _verbose;
 
   /// The operation mode

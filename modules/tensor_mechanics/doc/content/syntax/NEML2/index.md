@@ -1,6 +1,6 @@
 # NEML2 syntax
 
-The `NEML2` block is used to construct a set of material and userobjects so that MOOSE can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
+The `NEML2` block is used to construct a set of material and user objects so that MOOSE can "outsource" the material update to NEML2. Different objects get created depending on the operation mode (explained below). They are summarized in the following table for convenience:
 
 | Object                        | Type       | Operation mode | Description                                                                                  |
 | ----------------------------- | ---------- | -------------- | :------------------------------------------------------------------------------------------- |
@@ -12,7 +12,7 @@ The `NEML2` block is used to construct a set of material and userobjects so that
 
 !listing test/tests/neml2/fem.i block=NEML2
 
-The field `input` specifies the relative path to the NEML2 input file. The field `model` tells MOOSE which material model to import from the NEML2 input file. The field `device` specifies where to evaluate the NEML2 model, e.g., CPU or CUDA. The parameter `mode` determines the mode of operation for NEML2, and it is important to understand the differences between the modes in order to use NEML2 most efficiently. Each mode is discussed below in detail.
+The field [!param](/NEML2/NEML2Action/input) specifies the relative path to the NEML2 input file. The field [!param](/NEML2/NEML2Action/model) tells MOOSE which material model to import from the NEML2 input file. The field [!param](/NEML2/NEML2Action/device) specifies where to evaluate the NEML2 model, e.g., CPU or CUDA. The parameter [!param](/NEML2/NEML2Action/mode) determines the mode of operation for NEML2, and it is important to understand the differences between the modes in order to use NEML2 most efficiently. Each mode is discussed below in detail.
 
 ## Operation Mode: PARSE_ONLY
 
@@ -28,11 +28,11 @@ In this mode, a regular MOOSE material object [`CauchyStressFromNEML2`](CauchySt
 
 ## Operation Mode: ALL
 
-In this mode, a userobject [`CauchyStressFromNEML2UO`](CauchyStressFromNEML2UO.md optional=True) and a regular MOOSE material object [`CauchyStressFromNEML2Receiver`](CauchyStressFromNEML2Receiver.md optional=True) are created. During each residual evaluation,
+In this mode, a user object [`CauchyStressFromNEML2UO`](CauchyStressFromNEML2UO.md optional=True) and a regular MOOSE material object [`CauchyStressFromNEML2Receiver`](CauchyStressFromNEML2Receiver.md optional=True) are created. During each residual evaluation,
 
-1. The userobject gathers all input variables from all quadrature points into a batched input vector with batch size equal to the total number of quadrature points on the mesh.
-2. The userobject calls the NEML2 material model to compute the batched output given the batched input.
-3. The material object retrieves the batched output from the userobject and assigns the output variables to the corresponding MOOSE material properties.
+1. The user object gathers all input variables from all quadrature points into a batched input vector with batch size equal to the total number of quadrature points on the mesh.
+2. The user object calls the NEML2 material model to compute the batched output given the batched input.
+3. The material object retrieves the batched output from the user object and assigns the output variables to the corresponding MOOSE material properties.
 
 ## Efficiency Considerations
 

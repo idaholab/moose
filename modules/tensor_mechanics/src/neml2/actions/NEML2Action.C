@@ -59,7 +59,10 @@ NEML2Action::validParams()
 
 #ifndef NEML2_ENABLED
 
-NEML2Action::NEML2Action(const InputParameters & params) : Action(params) {}
+NEML2Action::NEML2Action(const InputParameters & parameters) : Action(parameters)
+{
+  NEML2Utils::libraryNotEnabledError(parameters);
+}
 
 void
 NEML2Action::act()
@@ -68,8 +71,8 @@ NEML2Action::act()
 
 #else
 
-NEML2Action::NEML2Action(const InputParameters & params)
-  : Action(params),
+NEML2Action::NEML2Action(const InputParameters & parameters)
+  : Action(parameters),
     _fname(getParam<FileName>("input")),
     _mname(getParam<std::string>("model")),
     _verbose(getParam<bool>("verbose")),
@@ -81,6 +84,7 @@ NEML2Action::NEML2Action(const InputParameters & params)
 void
 NEML2Action::act()
 {
+  const auto mode_name = std::string(_mode);
   if (_current_task == "parse_neml2")
   {
     neml2::HITParser parser;
@@ -110,7 +114,7 @@ NEML2Action::act()
       auto type = "CauchyStressFromNEML2UO";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
-      _problem->addUserObject(type, "_neml2_uo_" + _mode, params);
+      _problem->addUserObject(type, "_neml2_uo_" + mode_name, params);
     }
     else if (_mode == "PARSE_ONLY")
     {
@@ -127,15 +131,15 @@ NEML2Action::act()
       auto type = "CauchyStressFromNEML2";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
-      _problem->addMaterial(type, "_neml2_stress_" + _mode, params);
+      _problem->addMaterial(type, "_neml2_stress_" + mode_name, params);
     }
     else if (_mode == "ALL")
     {
       auto type = "CauchyStressFromNEML2Receiver";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
-      params.set<UserObjectName>("neml2_uo") = "_neml2_uo_" + _mode;
-      _problem->addMaterial(type, "_neml2_stress_" + _mode, params);
+      params.set<UserObjectName>("neml2_uo") = "_neml2_uo_" + mode_name;
+      _problem->addMaterial(type, "_neml2_stress_" + mode_name, params);
     }
     else if (_mode == "PARSE_ONLY")
     {

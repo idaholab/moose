@@ -1,5 +1,6 @@
 [Tests]
-  issues = '#333'
+  # The original issue is idaholab/blackbear#333
+  issues = '#26450'
   design = 'CauchyStressFromNEML2.md CauchyStressFromNEML2UO.md CauchyStressFromNEML2Receiver.md'
   [neml2_error]
     type = RunException
@@ -11,6 +12,15 @@
     required_submodule = 'contrib/neml2'
     libtorch = true
     valgrind = none
+  []
+  [no_neml2]
+    type = RunException
+    input = 'fem.i'
+    cli_args = 'neml2_input=elasticity'
+    requirement = 'The system shall throw an error upon instantiation of NEML2 interface objects if NEML2 is not available.'
+    expect_err = 'To use this object, you need to have the `NEML2` library installed'
+    collections = 'SYSTEM'
+    libtorch = false
   []
   [neml2]
     collections = 'SYSTEM'

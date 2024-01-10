@@ -34,7 +34,7 @@ typedef BatchMaterial<BatchMaterialUtils::TupleStd,
     CauchyStressFromNEML2UOParent;
 
 /**
- * This userobject gathers input variables required for an objective stress integration from all
+ * This user object gathers input variables required for an objective stress integration from all
  * quadrature points. The batched input vector is sent through a NEML2 material model to perform the
  * constitutive update.
  */

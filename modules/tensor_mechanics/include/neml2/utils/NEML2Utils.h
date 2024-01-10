@@ -121,7 +121,7 @@ To debug NEML2 related issues:
 1. Build and run MOOSE in dbg mode.
 2. Re-run the simulation using the dbg executable, and often times
    NEML2 will provide a more helpful error message.
-3. If the error message is not helpful, or if there is still not error message,
+3. If the error message is not helpful, or if there is still no error message,
    run the simulation through a debugger: See
    https://mooseframework.inl.gov/application_development/debugging.html
 4. If the issue is due to a NEML2 bug, feel free to report it at
