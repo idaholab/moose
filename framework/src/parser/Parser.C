@@ -31,7 +31,6 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
-#include <filesystem>
 
 std::string
 FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
@@ -367,8 +366,6 @@ Parser::convertFileNames(const std::vector<std::string> & filenames)
 
   std::vector<std::string> converted_filenames;
   for (const auto & filename : filenames)
-    converted_filenames.push_back(
-        use_real_paths ? std::filesystem::absolute(std::filesystem::path(filename)).string()
-                       : filename);
+    converted_filenames.push_back(use_real_paths ? MooseUtils::realpath(filename) : filename);
   return converted_filenames;
 }
