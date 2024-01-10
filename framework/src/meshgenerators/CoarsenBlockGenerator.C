@@ -208,6 +208,12 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
         if (elem && elem->type() != elem_type)
           continue;
 
+      // We do not coarsen across subdomains for now
+      const auto common_subdomain_id = current_elem->subdomain_id();
+      for (auto elem : fine_elements_const)
+        if (elem && elem->subdomain_id() != common_subdomain_id)
+          continue;
+
       // Check the coarse element nodes gathered
       for (const auto & check_node : tentative_coarse_nodes)
         if (check_node == nullptr)
@@ -220,6 +226,7 @@ CoarsenBlockGenerator::recursive_coarsen(const std::vector<subdomain_id_type> & 
 
       // Form a parent, of a low order type as we only have the extreme vertex nodes
       std::unique_ptr<Elem> parent = Elem::build(Elem::first_order_equivalent_type(elem_type));
+      parent->subdomain_id() = common_subdomain_id;
       auto parent_ptr = mesh_copy->add_elem(parent.release());
       coarse_elems.insert(parent_ptr);
 
