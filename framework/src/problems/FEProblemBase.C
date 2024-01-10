@@ -3836,7 +3836,15 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       std::tie(var_in_linear, sys_num) =
           determineLinearSystem(parameters.varName(var_param_name, object_name));
   }
-  sys_num = (!var_in_nl && !var_in_nl) ? 0 : sys_num;
+  else
+  {
+    var_in_nl = _nl.size();
+    if (!var_in_nl)
+      var_in_linear = _linear_systems.size();
+  }
+
+  mooseAssert(var_in_nl || var_in_linear,
+              "The variable shoulb in either a nonlinear or a linear system!");
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
@@ -7726,7 +7734,7 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; ++i)
-    for (const auto nl_sys_num : index_range(_assembly[i]))
+    for (const auto nl_sys_num : index_range(_nl))
     {
       _assembly[i][nl_sys_num]->setXFEM(_xfem);
       if (_displaced_problem)
