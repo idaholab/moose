@@ -13,17 +13,17 @@
 
 TEST(CapabilitiesTest, boolTest)
 {
-  Capabilities::add("unittest_bool");
+  Moose::Capabilities::add("unittest_bool");
 
-  EXPECT_TRUE(Capabilities::check("unittest_bool").first);
-  EXPECT_FALSE(Capabilities::check("!unittest_bool").first);
-  EXPECT_FALSE(Capabilities::check("unittest_doesnotexist").first);
-  EXPECT_TRUE(Capabilities::check("!unittest_doesnotexist").first);
+  EXPECT_TRUE(Moose::Capabilities::check("unittest_bool").first);
+  EXPECT_FALSE(Moose::Capabilities::check("!unittest_bool").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_doesnotexist").first);
+  EXPECT_TRUE(Moose::Capabilities::check("!unittest_doesnotexist").first);
 }
 
 TEST(CapabilitiesTest, intTest)
 {
-  Capabilities::add("unittest_int", 78);
+  Moose::Capabilities::add("unittest_int", 78);
 
   const std::vector<std::string> is_true = {
       "", "=78", "==78", "<=78", ">=78", "<=79", ">=77", "<79", ">77", "!=77", "!=79"};
@@ -31,31 +31,31 @@ TEST(CapabilitiesTest, intTest)
 
   for (const auto & c : is_true)
   {
-    EXPECT_TRUE(Capabilities::check("unittest_int" + c).first);
-    EXPECT_FALSE(Capabilities::check("!unittest_int" + c).first);
+    EXPECT_TRUE(Moose::Capabilities::check("unittest_int" + c).first);
+    EXPECT_FALSE(Moose::Capabilities::check("!unittest_int" + c).first);
   }
   for (const auto & c : is_false)
   {
-    EXPECT_FALSE(Capabilities::check("unittest_int" + c).first);
-    EXPECT_TRUE(Capabilities::check("!unittest_int" + c).first);
+    EXPECT_FALSE(Moose::Capabilities::check("unittest_int" + c).first);
+    EXPECT_TRUE(Moose::Capabilities::check("!unittest_int" + c).first);
   }
 }
 
 TEST(CapabilitiesTest, stringTest)
 {
-  Capabilities::add("unittest_string", "CLanG");
+  Moose::Capabilities::add("unittest_string", "CLanG");
 
-  EXPECT_TRUE(Capabilities::check("unittest_string").first);
-  EXPECT_FALSE(Capabilities::check("!unittest_string").first);
+  EXPECT_TRUE(Moose::Capabilities::check("unittest_string").first);
+  EXPECT_FALSE(Moose::Capabilities::check("!unittest_string").first);
 
-  EXPECT_TRUE(Capabilities::check("unittest_string=clang").first);
-  EXPECT_TRUE(Capabilities::check("unittest_string=CLANG").first);
-  EXPECT_FALSE(Capabilities::check("unittest_string=gcc").first);
+  EXPECT_TRUE(Moose::Capabilities::check("unittest_string=clang").first);
+  EXPECT_TRUE(Moose::Capabilities::check("unittest_string=CLANG").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_string=gcc").first);
 }
 
 TEST(CapabilitiesTest, versionTest)
 {
-  Capabilities::add("unittest_version", "3.2.1");
+  Moose::Capabilities::add("unittest_version", "3.2.1");
 
   const std::vector<std::string> is_true = {"",
                                             ">2.1",
@@ -78,24 +78,25 @@ TEST(CapabilitiesTest, versionTest)
 
   for (const auto & c : is_true)
   {
-    EXPECT_TRUE(Capabilities::check("unittest_version" + c).first);
-    EXPECT_FALSE(Capabilities::check("!unittest_version" + c).first);
+    EXPECT_TRUE(Moose::Capabilities::check("unittest_version" + c).first);
+    EXPECT_FALSE(Moose::Capabilities::check("!unittest_version" + c).first);
   }
   for (const auto & c : is_false)
   {
-    EXPECT_FALSE(Capabilities::check("unittest_version" + c).first);
-    EXPECT_TRUE(Capabilities::check("!unittest_version" + c).first);
+    EXPECT_FALSE(Moose::Capabilities::check("unittest_version" + c).first);
+    EXPECT_TRUE(Moose::Capabilities::check("!unittest_version" + c).first);
   }
 }
 
 TEST(CapabilitiesTest, multipleTest)
 {
-  Capabilities::add("unittest2_bool");
-  Capabilities::add("unittest2_int", 78);
-  Capabilities::add("unittest2_string", "CLanG");
-  Capabilities::add("unittest2_version", "3.2.1");
+  Moose::Capabilities::add("unittest2_bool");
+  Moose::Capabilities::add("unittest2_int", 78);
+  Moose::Capabilities::add("unittest2_string", "CLanG");
+  Moose::Capabilities::add("unittest2_version", "3.2.1");
 
-  EXPECT_TRUE(Capabilities::check("!unittest_doesnotexist unittest2_version<4.2.2 "
-                                  "unittest2_int<100 unittest2_int>50 unittest2_string!=Popel")
-                  .first);
+  EXPECT_TRUE(
+      Moose::Capabilities::check("!unittest_doesnotexist unittest2_version<4.2.2 "
+                                 "unittest2_int<100 unittest2_int>50 unittest2_string!=Popel")
+          .first);
 }

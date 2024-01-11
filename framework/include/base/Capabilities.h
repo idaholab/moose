@@ -13,6 +13,9 @@
 #include <string>
 #include <map>
 
+namespace Moose
+{
+
 /**
  * This singleton class holds a registry for capabilities supported by the current app.
  * A capability can refer to an optional library or optional functionality. Capabilities
@@ -60,3 +63,5 @@ private:
   // Private constructor for singleton pattern
   Capabilities() {}
 };
+
+} // namespace Moose

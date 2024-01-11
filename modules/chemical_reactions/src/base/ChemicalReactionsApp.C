@@ -60,7 +60,7 @@ void
 ChemicalReactionsApp::registerApps()
 {
 #ifdef THERMOCHIMICA_ENABLED
-  Capabilities::add("thermochimica");
+  Moose::Capabilities::add("thermochimica");
 #endif
 
   registerApp(ChemicalReactionsApp);
