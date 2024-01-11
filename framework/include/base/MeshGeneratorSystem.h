@@ -206,9 +206,6 @@ private:
   /// The final mesh generator name to use
   std::string _final_generator_name;
 
-  /// Whether or not we're generating in data-driven mode
-  bool _data_driven;
-
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
 

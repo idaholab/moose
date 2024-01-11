@@ -242,8 +242,8 @@ MeshGenerator::generateInternal(const bool data_only)
   libmesh_parallel_only(comm());
   mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
 
-  if (data_only && !hasGenerateData())
-    mooseError("This generator does not support data-only generation");
+  if (data_only)
+    mooseAssert(hasGenerateData(), "Does not support data-only generation");
 
   if (hasGenerateData())
     generateData();

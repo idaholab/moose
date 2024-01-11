@@ -22,9 +22,9 @@ MeshGeneratorMesh::validParams()
 
   params.addParam<std::string>("final_generator",
                                "The name of the mesh generator output to use for the final Mesh");
-  params.addParam<bool>("data_driven",
-                        "Set to use data-driven generation (data only generation for all "
-                        "generators except the last)");
+  params.addParam<std::string>("data_driven_generator",
+                               "Set to make all dependencies of this mesh generator run in data "
+                               "driven mode, where a mesh is not generated");
 
   params.addClassDescription("Mesh generated using mesh generators");
   return params;
