@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#25994'
+  [dup_check]
+      requirement = 'The system shall support parameter duplication check for multiple input files, which are later merged into one.'
+      type = 'RunException'
+      input = 'input_a.i input_b.i'
+      expect_err = "parameter 'Postprocessors/test_pp/type' supplied multiple times"
+  []
+[]

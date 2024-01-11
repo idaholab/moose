@@ -53,6 +53,7 @@
 #include "MooseServer.h"
 #include "RestartableDataWriter.h"
 #include "StringInputStream.h"
+#include "MooseMain.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -96,13 +97,12 @@ MooseApp::validParams()
 {
   InputParameters params = emptyInputParameters();
 
+  // Parameters that main also expects that we won't use (-i)
+  Moose::addMainCommandLineParams(params);
+
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
-  params.addCommandLineParam<std::vector<std::string>>(
-      "input_file",
-      "-i <input_files>",
-      "Specify one or multiple input files. Multiple files get merged into a single simulation "
-      "input.");
+
   params.addCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only [mesh_file_name]",
@@ -329,8 +329,8 @@ MooseApp::validParams()
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
-  params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
+  params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -360,7 +360,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(*this, _action_warehouse),
+    _parser(parameters.get<std::shared_ptr<Parser>>("_parser")),
+    _builder(*this, _action_warehouse, _parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
@@ -754,22 +755,17 @@ MooseApp::setupOptions()
 
   else if (getParam<bool>("display_version"))
   {
-    Moose::perf_log.disable_logging();
     Moose::out << getPrintableVersion() << std::endl;
     _ready_to_exit = true;
     return;
   }
   else if (getParam<bool>("help"))
   {
-    Moose::perf_log.disable_logging();
-
     _command_line->printUsage();
     _ready_to_exit = true;
   }
   else if (isParamValid("dump"))
   {
-    Moose::perf_log.disable_logging();
-
     // Get command line argument following --dump on command line
     std::string following_arg = getParam<std::string>("dump");
 
@@ -783,7 +779,7 @@ MooseApp::setupOptions()
 
     {
       TIME_SECTION("dump", 1, "Building Syntax Tree");
-      _parser.buildJsonSyntaxTree(tree);
+      _builder.buildJsonSyntaxTree(tree);
     }
 
     // Turn off live printing so that it doesn't mess with the dump
@@ -865,9 +861,8 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
-    _parser.buildJsonSyntaxTree(tree);
+    _builder.buildJsonSyntaxTree(tree);
     SONDefinitionFormatter formatter;
     Moose::out << "%-START-SON-DEFINITION-%\n"
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
@@ -877,9 +872,7 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
-
-    _parser.initSyntaxFormatter(Parser::YAML, true);
+    _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
 
     // Get command line argument following --yaml on command line
     std::string yaml_following_arg = getParam<std::string>("yaml");
@@ -888,17 +881,15 @@ MooseApp::setupOptions()
     // a dash, call buildFullTree() with an empty string, otherwise
     // pass the argument following --yaml.
     if (yaml_following_arg.empty() || (yaml_following_arg.find('-') == 0))
-      _parser.buildFullTree("");
+      _builder.buildFullTree("");
     else
-      _parser.buildFullTree(yaml_following_arg);
+      _builder.buildFullTree(yaml_following_arg);
 
     _ready_to_exit = true;
   }
   else if (isParamValid("json"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::perf_log.disable_logging();
 
     // Get command line argument following --json on command line
     std::string json_following_arg = getParam<std::string>("json");
@@ -910,7 +901,7 @@ MooseApp::setupOptions()
       search = json_following_arg;
 
     JsonSyntaxTree tree(search);
-    _parser.buildJsonSyntaxTree(tree);
+    _builder.buildJsonSyntaxTree(tree);
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
@@ -918,8 +909,6 @@ MooseApp::setupOptions()
   else if (getParam<bool>("syntax"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::perf_log.disable_logging();
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     Moose::out << "**START SYNTAX DATA**\n";
@@ -932,16 +921,11 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
 
-    Moose::perf_log.disable_logging();
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (!_input_filenames.empty() ||
-           isParamValid("input_file")) // They already specified an input filename
+  else if (getInputFileNames().size())
   {
-    if (_input_filenames.empty())
-      _input_filenames = getParam<std::vector<std::string>>("input_file");
-
     if (isParamValid("recover"))
     {
       // We need to set the flag manually here since the recover parameter is a string type (takes
@@ -957,11 +941,12 @@ MooseApp::setupOptions()
         _restart_recover_base = recover_following_arg;
     }
 
-    // Pass list of input files and optional text string if provided to parser
-    if (!isParamValid("_input_text"))
-      _parser.parse(_input_filenames);
-    else
-      _parser.parse(_input_filenames, getParam<std::string>("_input_text"));
+    // In the event that we've parsed once before already in MooseMain, we
+    // won't need to parse again
+    if (!_parser->root())
+      _parser->parse();
+
+    _builder.build();
 
     if (isParamValid("mesh_only"))
     {
@@ -996,7 +981,7 @@ MooseApp::setupOptions()
       else if (isUltimateMaster())
       {
         // if this app is a master, we use the first input file name as the default file base
-        std::string base = getInputFileName();
+        std::string base = getLastInputFileName();
         size_t pos = base.find_last_of('.');
         _output_file_base = base.substr(0, pos);
         // Note: we did not append "_out" in the file base here because we do not want to
@@ -1006,12 +991,14 @@ MooseApp::setupOptions()
       // default file base for multiapps is set by MultiApp
     }
   }
-
+  else if (isParamValid("input_file"))
+  {
+    mooseAssert(getInputFileNames().empty(), "Should be empty");
+    mooseError("No input files specified. Add -i <inputfile> to your command line.");
+  }
   else if (isParamValid("language_server"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::perf_log.disable_logging();
 
     // Reset output to the buffer what was cached before it was turned it off
     if (!Moose::out.rdbuf() && _output_buffer_cache)
@@ -1027,24 +1014,30 @@ MooseApp::setupOptions()
 
   else /* The catch-all case for bad options or missing options, etc. */
   {
-    Moose::perf_log.disable_logging();
-
     if (_check_input)
       mooseError("You specified --check-input, but did not provide an input file. Add -i "
                  "<inputfile> to your command line.");
 
     _command_line->printUsage();
+
     _ready_to_exit = true;
   }
 
   Moose::out << std::flush;
 }
 
-void
-MooseApp::setInputFileName(const std::string & input_filename)
+const std::vector<std::string> &
+MooseApp::getInputFileNames() const
 {
-  // for now we only permit single input to be set for multiapps
-  _input_filenames = {input_filename};
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->getInputFileNames();
+}
+
+const std::string &
+MooseApp::getLastInputFileName() const
+{
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->getLastInputFileName();
 }
 
 std::string
@@ -1103,7 +1096,7 @@ MooseApp::errorCheck()
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
 
-  _parser.errorCheck(*_comm, warn, err);
+  _builder.errorCheck(*_comm, warn, err);
 
   auto apps = feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
@@ -1325,6 +1318,13 @@ MooseApp::addExecutorParams(const std::string & type,
                             const InputParameters & params)
 {
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
+}
+
+Moose::Builder &
+MooseApp::parser()
+{
+  mooseDeprecated("MooseApp::parser() is deprecated, use MooseApp::builder() instead.");
+  return _builder;
 }
 
 void
@@ -1732,7 +1732,7 @@ MooseApp::setStartTime(Real time)
 std::string
 MooseApp::getFileName(bool stripLeadingPath) const
 {
-  return _parser.getPrimaryFileName(stripLeadingPath);
+  return _builder.getPrimaryFileName(stripLeadingPath);
 }
 
 OutputWarehouse &

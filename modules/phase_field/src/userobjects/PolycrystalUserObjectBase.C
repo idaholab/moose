@@ -529,7 +529,7 @@ PolycrystalUserObjectBase::assignOpsToGrains()
 {
   mooseAssert(_is_primary, "This routine should only be called on the primary rank");
 
-  Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
+  TIME_SECTION("assignOpsToGrains", 2, "Assigning OPs to grains");
 
   // Use a simple backtracking coloring algorithm
   if (_coloring_algorithm == "bt")
@@ -571,8 +571,6 @@ PolycrystalUserObjectBase::assignOpsToGrains()
   mooseAssert(_grain_to_op.empty(), "grain_to_op data structure should be empty here");
   for (MooseIndex(_grain_idx_to_op) i = 0; i < _grain_idx_to_op.size(); ++i)
     _grain_to_op.emplace_hint(_grain_to_op.end(), _feature_sets[i]._id, _grain_idx_to_op[i]);
-
-  Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
 }
 
 bool

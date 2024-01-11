@@ -502,7 +502,6 @@ Exodus::filename()
     output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
-  // Return the filename
   return output.str();
 }
 

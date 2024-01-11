@@ -56,14 +56,15 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 
   // copy parent application parameters and modify to set up input check
   InputParameters app_params = _moose_app.parameters();
-  app_params.set<std::vector<std::string>>("input_file") = {parse_file_path};
-  app_params.set<std::string>("_input_text") = document_text;
   app_params.set<bool>("check_input") = true;
   app_params.set<bool>("error_unused") = true;
   app_params.set<bool>("error") = true;
   app_params.set<bool>("error_deprecated") = true;
   app_params.set<std::string>("color") = "off";
   app_params.set<bool>("disable_perf_graph_live") = true;
+  app_params.set<std::shared_ptr<Parser>>("_parser") =
+      std::make_shared<Parser>(parse_file_path, document_text);
+
   app_params.remove("language_server");
 
   // turn output off so input check application does not affect messages
@@ -74,8 +75,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
       _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
-  bool cached_logging_enabled = Moose::perf_log.logging_enabled();
-  Moose::perf_log.disable_logging();
   bool cached_throw_on_error = Moose::_throw_on_error;
   Moose::_throw_on_error = true;
 
@@ -146,8 +145,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   }
 
   // reset behaviors of performance logging and error exception throwing
-  if (cached_logging_enabled)
-    Moose::perf_log.enable_logging();
   Moose::_throw_on_error = cached_throw_on_error;
 
   // turn output back on since it was turned off and input check is done
@@ -177,12 +174,11 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
                                            int character)
 {
   // add only root level blocks to completion list when parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!rootIsValid())
     return addSubblocksToList(completionItems, "/", line, character);
 
   // find hit node for zero based request line and column number from input
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = getRoot().getNodeView();
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
@@ -278,7 +274,7 @@ MooseServer::getAllValidParameters(InputParameters & valid_params,
                                    std::set<std::string> & obj_act_tasks)
 {
   // gather global parameters then action parameters then object parameters
-  valid_params = Parser::validParams();
+  valid_params += Moose::Builder::validParams();
   getActionParameters(valid_params, object_path, obj_act_tasks);
   getObjectParameters(valid_params, object_type, obj_act_tasks);
 }
@@ -680,7 +676,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
     if (input_path_iter != _type_to_input_paths.end())
     {
-      wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+      wasp::HITNodeView view_root = getRoot().getNodeView();
 
       // walk over all syntax paths that are associated with parameter type
       for (const auto & input_path : input_path_iter->second)
@@ -750,12 +746,11 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & definitionLocat
   Factory & factory = _check_app->getFactory();
 
   // return without any definition locations added when parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!rootIsValid())
     return true;
 
   // find hit node for zero based request line and column number from input
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = getRoot().getNodeView();
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
@@ -871,7 +866,7 @@ MooseServer::getInputLookupDefinitionNodes(SortedLocationNodes & location_nodes,
     return;
 
   // get root node from input to use in input lookups with associated paths
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = getRoot().getNodeView();
 
   // walk over all syntax paths that are associated with parameter type
   for (const auto & input_path : input_path_iter->second)
@@ -937,12 +932,12 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
                                                bool /* insert_spaces */)
 {
   // return without adding any formatting text edits if parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!rootIsValid())
     return true;
+  auto & root = getRoot();
 
   // get input root node line and column range to represent entire document
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = root.getNodeView();
   int document_start_line = view_root.line() - 1;
   int document_start_char = view_root.column() - 1;
   int document_last_line = view_root.last_line() - 1;
@@ -960,8 +955,8 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   };
 
   // clear legacy markers and blank lines, use tab size to render, and trim
-  format_document(static_cast<hit::Section *>(_check_app->parser()._root.get()));
-  std::string document_format = _check_app->parser()._root->render(0, std::string(tab_size, ' '));
+  format_document(static_cast<hit::Section *>(&root));
+  std::string document_format = root.render(0, std::string(tab_size, ' '));
   document_format = MooseUtils::trim(document_format);
 
   // add formatted text with whole line and column range to formatting list
@@ -981,11 +976,10 @@ bool
 MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 {
   // return prior to starting document symbol tree when parser root is null
-  if (!_check_app || !_check_app->parser()._root ||
-      _check_app->parser()._root->getNodeView().is_null())
+  if (!rootIsValid())
     return true;
 
-  wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
+  wasp::HITNodeView view_root = getRoot().getNodeView();
 
   bool pass = true;
 
@@ -1148,4 +1142,18 @@ MooseServer::getDocumentSymbolKind(wasp::HITNodeView symbol_node)
     return wasp::lsp::m_symbol_kind_string;
   else
     return wasp::lsp::m_symbol_kind_property;
+}
+
+bool
+MooseServer::rootIsValid() const
+{
+  return _check_app && _check_app->builder().root() &&
+         !_check_app->builder().root()->getNodeView().is_null();
+}
+
+hit::Node &
+MooseServer::getRoot()
+{
+  mooseAssert(rootIsValid(), "Not valid");
+  return *_check_app->builder().root();
 }

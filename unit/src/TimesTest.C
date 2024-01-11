@@ -12,12 +12,13 @@
 #include "SimulationTimes.h"
 #include "AppFactory.h"
 #include "Executioner.h"
+#include "MooseMain.h"
 
 TEST(Times, getUninitialized)
 {
   // Create a minimal app that can create objects
   const char * argv[2] = {"foo", "\0"};
-  const auto & app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  const auto & app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   const auto & factory = &app->getFactory();
   app->parameters().set<bool>("minimal") = true;
   app->run();
@@ -50,7 +51,7 @@ TEST(Times, getters)
 {
   // Create a minimal app that can create objects
   const char * argv[2] = {"foo", "\0"};
-  const auto & app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  const auto & app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   const auto & factory = &app->getFactory();
   app->parameters().set<bool>("minimal") = true;
   app->run();

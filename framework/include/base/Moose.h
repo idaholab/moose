@@ -167,6 +167,8 @@ extern bool show_multiple;
 /**
  * Perflog to be used by applications.
  * If the application prints this in the end they will get performance info.
+ *
+ * This is no longer instantiated in the framework and will be removed in the future.
  */
 extern PerfLog perf_log;
 

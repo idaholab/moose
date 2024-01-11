@@ -12,6 +12,7 @@
 #include "MooseServer.h"
 #include "MooseApp.h"
 #include "Moose.h"
+#include "MooseMain.h"
 #include "AppFactory.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
@@ -279,7 +280,8 @@ protected:
   // create moose_unit_app and moose_server to persist for reuse between tests
   static void SetUpTestCase()
   {
-    moose_unit_app = AppFactory::createAppShared("MooseUnitApp", 0, nullptr);
+    moose_unit_app = Moose::createMooseApp("MooseUnitApp", 0, nullptr);
+
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
   }
 
@@ -445,10 +447,6 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
 
   EXPECT_TRUE(didopen_errors.str().empty());
 
-  // force enabling performance logs to check reset by moose_server after call
-
-  Moose::perf_log.enable_logging();
-
   // handle the built didopen notification with the moose_server
 
   wasp::DataObject diagnostics_notification;
@@ -457,10 +455,6 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
       moose_server->handleDidOpenNotification(didopen_notification, diagnostics_notification));
 
   EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check behavior of performance logs was reset properly by the moose_server
-
-  EXPECT_TRUE(Moose::perf_log.logging_enabled());
 
   // check set of messages built from the moose_server diagnostics notification
 
@@ -678,10 +672,6 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 
   EXPECT_TRUE(didchange_errors.str().empty());
 
-  // force stopping performance logs to check reset by moose_server after call
-
-  Moose::perf_log.disable_logging();
-
   // handle the built didchange notification with the moose_server
 
   wasp::DataObject diagnostics_notification;
@@ -690,10 +680,6 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
       moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
 
   EXPECT_TRUE(moose_server->getErrors().empty());
-
-  // check behavior of performance logs was reset properly by the moose_server
-
-  EXPECT_FALSE(Moose::perf_log.logging_enabled());
 
   // check set of messages built from the moose_server diagnostics notification
 

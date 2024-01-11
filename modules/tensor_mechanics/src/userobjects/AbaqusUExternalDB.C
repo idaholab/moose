@@ -39,7 +39,7 @@ AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
     _aqSTEP(0),
     _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag())
 {
-  AbaqusUtils::setInputFile(_app.getInputFileName());
+  AbaqusUtils::setInputFile(_app.getLastInputFileName());
   AbaqusUtils::setCommunicator(&_communicator);
 }
 
