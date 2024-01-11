@@ -14,6 +14,9 @@
 
 #include <vector>
 
+namespace Moose
+{
+
 Capabilities &
 Capabilities::instance()
 {
@@ -184,3 +187,5 @@ Capabilities::checkInternal(const std::string & requested_capabilities) const
 
   return {true, ""};
 }
+
+} // namespace Moose
