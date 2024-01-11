@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#26476 #21885 #24101 #25689'
+  issues = '#26476 #21885 #24101'
   design = 'GeneralOptimization.md OptimizationData.md ReporterPointSource.md'
   [gen_opt_point_loads]
     requirement = "The system shall be able to invert for point loads using the general optimization reporter with"
@@ -25,6 +25,7 @@
       abs_zero = 10
       # steady solve
       recover = false
+      issues = '#25689'
       detail = 'the measurement data defined on the main app and transferred to the forward_and_adjoint app;'
     []
     [seperate_multiapps]
