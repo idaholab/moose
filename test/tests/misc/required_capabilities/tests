@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#26470'
+  design = Capabilities.md
+  [not_supported]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities doesnotexist'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\ndoesnotexist not supported\nCAPABILITIES_MISMATCH_END'
+    requirement = 'The system shall not start a simulation if a requested capability is not supported.'
+  []
+  [not_absent]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities !petsc'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc supported\nCAPABILITIES_MISMATCH_END'
+    requirement = 'The system shall not start a simulation if an excluded capability is supported.'
+  []
+  [supported]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities petsc'
+    expect_out = 'Solve Converged!'
+    requirement = 'The system shall start a simulation if a requested capability is supported.'
+  []
+  [version_mismatch]
+    type = RunApp
+    input = input.i
+    cli_args = "--required-capabilities petsc<1.0.3"
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc<1.0.3 version not matched\nCAPABILITIES_MISMATCH_END'
+    requirement = 'The system shall not start a simulation if a requested capability has the wrong version.'
+  []
+[]

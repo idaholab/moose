@@ -163,6 +163,11 @@ MooseApp::validParams()
                                    "--show-capabilities",
                                    false,
                                    "Dumps the capability registry in JSON format.");
+  params.addCommandLineParam<std::string>(
+      "required_capabilities",
+      "--required-capabilities",
+      "A list of conditions that is checked against the registered capabilities (see "
+      "--show-capabilities). The executable will terminate early if the conditions are not met.");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    false,
@@ -241,7 +246,7 @@ MooseApp::validParams()
                                    false,
                                    "When true the simulation will only run half of "
                                    "its specified transient (ie half the "
-                                   "timesteps) with checkpoints enabled. "
+                                   "time steps) with checkpoints enabled. "
                                    "This is useful for testing recovery and restart "
                                    "and should only be used in the test harness.");
 
@@ -297,7 +302,7 @@ MooseApp::validParams()
       "timpi_sync",
       "--timpi-sync <sync type>",
       "nbx",
-      "Changes the sync type used in spare parallel communitations within the TIMPI library "
+      "Changes the sync type used in sparse parallel communications within the TIMPI library "
       "(advanced option).");
 
   // Options for debugging
@@ -1099,7 +1104,6 @@ MooseApp::setupOptions()
   else if (getParam<bool>("show_capabilities"))
   {
     _perf_graph.disableLivePrint();
-    Moose::perf_log.disable_logging();
 
     Moose::out << "**START JSON DATA**\n" << Moose::Capabilities::dump() << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
@@ -1127,6 +1131,21 @@ MooseApp::setupOptions()
       _parser->parse();
 
     _builder.build();
+
+    if (isParamValid("required_capabilities"))
+    {
+      _perf_graph.disableLivePrint();
+
+      auto [fulfilled, reason] =
+          Moose::Capabilities::check(getParam<std::string>("required_capabilities"));
+      if (!fulfilled)
+      {
+        Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
+                   << reason << "\nCAPABILITIES_MISMATCH_END" << std::endl;
+        _ready_to_exit = true;
+        return;
+      }
+    }
 
     if (isParamValid("mesh_only"))
     {
@@ -1411,7 +1430,7 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
   if (!backup)
-    mooseError("MooseApp::resore(): Provided backup is not initialized");
+    mooseError("MooseApp::restore(): Provided backup is not initialized");
 
   auto header = std::move(backup->header);
   mooseAssert(header, "Header not available");
