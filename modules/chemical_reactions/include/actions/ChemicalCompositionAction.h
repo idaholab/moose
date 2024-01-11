@@ -45,9 +45,15 @@ public:
     return _tokenized_phase_elements;
   }
 
-  const MooseEnum & outputSpeciesUnit() const { return _output_mass_unit; }
+  const MooseEnum & outputSpeciesUnit() const
+  {
+    return _combined_params.get<MooseEnum>("output_species_unit");
+  }
 
-  const MooseEnum & reinitializationType() const { return _reinit; }
+  const MooseEnum & reinitializationType() const
+  {
+    return _combined_params.get<MooseEnum>("reinitialization_type");
+  }
 
   virtual void act();
 
@@ -82,23 +88,23 @@ protected:
   // /// List of species tracked by Thermochimica
   // std::vector<std::string> _species;
 
-  /// Mass unit for output species
-  MooseEnum _output_mass_unit;
+  // /// Mass unit for output species
+  // MooseEnum _output_mass_unit;
 
-  /// List of element chemical potentials to be extracted from Thermochimica
-  std::vector<std::string> _element_potentials;
+  // /// List of element chemical potentials to be extracted from Thermochimica
+  // std::vector<std::string> _element_potentials;
 
-  /// List of gas phase species to extract vapor pressures from Thermochimica
-  std::vector<std::string> _vapor_pressures;
+  // /// List of gas phase species to extract vapor pressures from Thermochimica
+  // std::vector<std::string> _vapor_pressures;
 
-  /// List of elements in specific phases to extract the molar amount of the element in that phase
-  std::vector<std::string> _element_phases;
+  // /// List of elements in specific phases to extract the molar amount of the element in that phase
+  // std::vector<std::string> _element_phases;
 
-  /// Flag for whether Thermochimica should use the reinit feature or not
-  MooseEnum _reinit;
+  // /// Flag for whether Thermochimica should use the reinit feature or not
+  // MooseEnum _reinit;
 
-  /// Name of the ThermochimicaNodalData UO to be set up
-  std::string _uo_name;
+  // /// Name of the ThermochimicaNodalData UO to be set up
+  // std::string _uo_name;
 
   /// Atomic numbers of the selected elements
   std::vector<unsigned int> _element_ids;
