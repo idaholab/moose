@@ -31,6 +31,12 @@ Capabilities::add(const std::string & capability, CapabilityType value)
   instance().addInternal(capability, value);
 }
 
+void
+Capabilities::add(const std::string & capability, const char * value)
+{
+  instance().addInternal(capability, std::string(value));
+}
+
 std::string
 Capabilities::dump()
 {
