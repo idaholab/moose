@@ -268,7 +268,8 @@ BadActiveWalker ::walk(const std::string & /*fullpath*/,
 const std::string &
 Parser::getLastInputFileName() const
 {
-  mooseAssert(_input_filenames.size(), "Not set");
+  if (_input_filenames.empty())
+    mooseError("Parser::getLastInputFileName(): No inputs are set");
   return _input_filenames.back();
 }
 
