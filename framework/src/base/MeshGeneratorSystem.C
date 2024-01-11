@@ -330,7 +330,7 @@ MeshGeneratorSystem::executeMeshGenerators()
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
   std::set<const MeshGenerator *> data_only_generators;
   if (moose_mesh->parameters().get<bool>("_mesh_generator_mesh") &&
-      moose_mesh->isParamValid("data_driven"))
+      moose_mesh->isParamValid("data_driven_generator"))
   {
     mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
                 "Assumption for mesh type is now invalid");
