@@ -18,7 +18,10 @@ other targeted, advanced workshop presentations.
        id=training-webinar
        caption=MOOSE training workshop webinar given on June 9--10, 2020.
 
-- [MOOSE Training Workshop](workshop/index.md alternative=missing_config.md)
+These are examples of trainings:
+
+- [MOOSE User Training Workshop](user_workshop/index.md alternative=missing_config.md)
+- [MOOSE User-Developer Training Workshop](workshop/index.md alternative=missing_config.md)
 - [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
 - [MOOSE Verification Workshop](tutorial03_verification/presentation/index.md alternative=missing_config.md)
 
@@ -85,7 +88,9 @@ for some of the individual physics modules as listed below.
 - [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
 - [Heat Transfer](modules/heat_transfer/tutorials/introduction/index.md)
 - [Level Set](modules/level_set/level_set_examples.md)
+- [Navier Stokes](modules/navier_stokes/intro_slides/slides/index.md)
 - [Porous Flow](modules/porous_flow/porous_flow_examples.md)
+- [Reactor](tutorial04_meshing/index.md)
 - [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)
 - [Stochastic Tools](modules/stochastic_tools/examples/index.md)
 - [Tensor Mechanics](modules/tensor_mechanics/examples_index.md)
