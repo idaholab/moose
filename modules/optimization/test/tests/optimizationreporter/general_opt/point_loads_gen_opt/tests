@@ -25,7 +25,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      issues = '#25689'
+      issues = '#25689 #26476 #21885 #24101'
       detail = "the measurement data defined on the main app and transferred to the"
       "forward_and_adjoint app while maintaining the correct preconditioning on the adjoint system;"
     []
