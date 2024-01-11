@@ -683,131 +683,136 @@ MooseApp::MooseApp(InputParameters parameters)
                     name(),
                     " to remove this deprecation warning.");
 
+  registerCapabilities();
+  Moose::out << std::flush;
+}
+
+void
+MooseApp::registerCapabilities()
+{
   // register capabilities
   if (_trap_fpe)
-    Capabilities::add("trap_fpe");
+    Moose::Capabilities::add("trap_fpe");
 #ifdef LIBTORCH_ENABLED
-  Capabilities::add("libtorch");
+  Moose::Capabilities::add("libtorch");
 #endif
 #ifdef HAVE_GPERFTOOLS
-  Capabilities::add("gperftools");
+  Moose::Capabilities::add("gperftools");
 #endif
 #ifdef MOOSE_HAVE_LIBPNG
-  Capabilities::add("libpng");
+  Moose::Capabilities::add("libpng");
 #endif
 #ifdef CUDA_SUPPORTED
-  Capabilities::add("cuda");
+  Moose::Capabilities::add("cuda");
 #endif
-  Capabilities::add("ad_size", MOOSE_AD_MAX_DOFS_PER_ELEM);
-  Capabilities::add("method", QUOTE(METHOD));
+  Moose::Capabilities::add("ad_size", MOOSE_AD_MAX_DOFS_PER_ELEM);
+  Moose::Capabilities::add("method", QUOTE(METHOD));
 #ifdef WASP_ENABLED
-  Capabilities::add("wasp");
+  Moose::Capabilities::add("wasp");
 #endif
 
   // PETSc capabilities
-  Capabilities::add(
+  Moose::Capabilities::add(
       "petsc",
       QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR));
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
-  Capabilities::add("petsc_release");
+  Moose::Capabilities::add("petsc_release");
 #endif
 #ifdef LIBMESH_PETSC_USE_DEBUG
-  Capabilities::add("petsc_debug");
+  Moose::Capabilities::add("petsc_debug");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_SUPERLU_DIST
-  Capabilities::add("superlu");
+  Moose::Capabilities::add("superlu");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_MUMPS
-  Capabilities::add("mumps");
+  Moose::Capabilities::add("mumps");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_STRUMPACK
-  Capabilities::add("strumpack");
+  Moose::Capabilities::add("strumpack");
 #endif
 #if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
-  Capabilities::add("parmetis");
+  Moose::Capabilities::add("parmetis");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_CHACO
-  Capabilities::add("chaco");
+  Moose::Capabilities::add("chaco");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_PARTY
-  Capabilities::add("party");
+  Moose::Capabilities::add("party");
 #endif
 #ifdef LIBMESH_PETSC_HAVE_PTSCOTCH
-  Capabilities::add("ptscotch");
+  Moose::Capabilities::add("ptscotch");
 #endif
 
 #ifdef LIBMESH_HAVE_SLEPC
-  Capabilities::add(
+  Moose::Capabilities::add(
       "slepc",
       QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_SLEPC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR));
 #endif
 #ifdef LIBMESH_HAVE_EXODUS_API
-  Capabilities::add("exodus",
-                    QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
-                        LIBMESH_DETECTED_EXODUS_VERSION_MINOR));
+  Moose::Capabilities::add("exodus",
+                           QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
+                               LIBMESH_DETECTED_EXODUS_VERSION_MINOR));
 #endif
 #ifdef LIBMESH_HAVE_VTK
-  Capabilities::add(
+  Moose::Capabilities::add(
       "vtk",
       QUOTE(LIBMESH_DETECTED_VTK_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_VTK_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_VTK_VERSION_SUBMINOR));
 #endif
 #ifdef LIBMESH_HAVE_CURL
-  Capabilities::add("curl");
+  Moose::Capabilities::add("curl");
 #endif
 
 // libmesh stuff
 #ifdef LIBMESH_ENABLE_AMR
-  Capabilities::add("amr");
+  Moose::Capabilities::add("amr");
 #endif
 #ifdef LIBMESH_HAVE_NANOFLANN
-  Capabilities::add("nanoflann");
+  Moose::Capabilities::add("nanoflann");
 #endif
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  Capabilities::add("fparser", "jit");
+  Moose::Capabilities::add("fparser", "jit");
 #else
-  Capabilities::add("fparser", "byte_code");
+  Moose::Capabilities::add("fparser", "byte_code");
 #endif
 #endif
 #ifdef LIBMESH_HAVE_DLOPEN
-  Capabilities::add("dlopen");
+  Moose::Capabilities::add("dlopen");
 #endif
 
 #ifdef LIBMESH_USING_THREADS
-  Capabilities::add("threads");
+  Moose::Capabilities::add("threads");
 #endif
 #ifdef LIBMESH_HAVE_OPENMP
-  Capabilities::add("openmp");
+  Moose::Capabilities::add("openmp");
 #endif
 #ifdef LIBMESH_HAVE_TBB_API
-  Capabilities::add("tbb");
+  Moose::Capabilities::add("tbb");
 #endif
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-  Capabilities::add("unique_id");
+  Moose::Capabilities::add("unique_id");
 #endif
 
 // compiler
 #if defined(__clang__)
-  Capabilities::add("compiler", "clang");
+  Moose::Capabilities::add("compiler", "clang");
 #elif defined(__GNUC__) || defined(__GNUG__)
-  Capabilities::add("compiler", "gcc");
+  Moose::Capabilities::add("compiler", "gcc");
 #elif defined(_MSC_VER)
-  Capabilities::add("compiler", "msvc");
+  Moose::Capabilities::add("compiler", "msvc");
 #endif
 
 // OS related
 #ifdef __APPLE__
-  Capabilities::add("apple");
+  Moose::Capabilities::add("apple");
 #endif
 #ifdef __WIN32__
-  Capabilities::add("win32");
+  Moose::Capabilities::add("win32");
 #endif
-
-  Moose::out << std::flush;
 }
 
 MooseApp::~MooseApp()
@@ -1117,7 +1122,7 @@ MooseApp::setupOptions()
     _perf_graph.disableLivePrint();
     Moose::perf_log.disable_logging();
 
-    Moose::out << "**START JSON DATA**\n" << Capabilities::dump() << "\n**END JSON DATA**\n";
+    Moose::out << "**START JSON DATA**\n" << Moose::Capabilities::dump() << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
   else if (!getInputFileNames().empty())
