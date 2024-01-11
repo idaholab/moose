@@ -49,6 +49,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 
 namespace Moose
 {
@@ -193,21 +194,10 @@ UnusedWalker::walk(const std::string & fullpath, const std::string & nodename, h
 }
 
 std::string
-Builder::getPrimaryFileName(bool stripLeadingPath) const
+Builder::getPrimaryFileName(bool strip_leading_path) const
 {
-  const auto & input_filenames = _parser->getInputFileNames();
-
-  if (!stripLeadingPath)
-    return input_filenames.back();
-
-  std::string filename;
-  size_t pos = input_filenames.back().find_last_of('/');
-  if (pos != std::string::npos)
-    filename = input_filenames.back().substr(pos + 1);
-  else
-    filename = input_filenames.back();
-
-  return filename;
+  const auto path = _parser->getLastInputFilePath();
+  return (strip_leading_path ? path.filename() : std::filesystem::absolute(path)).string();
 }
 
 void

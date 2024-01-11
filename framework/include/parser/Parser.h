@@ -20,6 +20,7 @@
 #include <string>
 #include <iomanip>
 #include <optional>
+#include <filesystem>
 
 // Forward declarations
 class ActionWarehouse;
@@ -132,10 +133,20 @@ public:
    */
   hit::Node * root();
 
-  /*
-   * Get input file names from parser
+  /**
+   * @return The names of the inputs
    */
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
+
+  /**
+   * @return The file name of the last input
+   */
+  const std::string & getLastInputFileName() const;
+
+  /**
+   * @return The path of the last input
+   */
+  std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
 
 private:
   /// The root node, which owns the whole tree

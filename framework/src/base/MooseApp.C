@@ -1036,8 +1036,8 @@ MooseApp::getInputFileNames() const
 const std::string &
 MooseApp::getLastInputFileName() const
 {
-  static const std::string empty = "";
-  return getInputFileNames().empty() ? empty : getInputFileNames().back();
+  mooseAssert(_parser, "Parser is not set");
+  return _parser->getLastInputFileName();
 }
 
 std::string

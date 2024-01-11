@@ -276,6 +276,13 @@ Parser::root()
     return nullptr;
 }
 
+const std::string &
+Parser::getLastInputFileName() const
+{
+  mooseAssert(_input_filenames.size(), "Not set");
+  return _input_filenames.back();
+}
+
 void
 Parser::parse()
 {
