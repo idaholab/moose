@@ -41,6 +41,7 @@ class TestHarnessTester(unittest.TestCase):
         Test for bad json output
         """
         out = self.mocked_output('**START JSON DATA**\n{badjson}**END JSON DATA**\n', True)
+        print(out)
         self.assertRegex(out, r'.*?produced invalid JSON output')
 
     def testBadIndex(self):
