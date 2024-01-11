@@ -69,7 +69,7 @@ public:
 
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
 
-  void generateData() override;
+  void generateData() override{};
 
 protected:
   /**

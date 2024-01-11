@@ -98,7 +98,7 @@
     element_connectivity = '0 1 2 3'
     elem_type = "QUAD4"
   []
-  data_driven = true
+  data_driven_generator = elem_gen
 []
 
 [Problem]
@@ -114,5 +114,9 @@
 []
 
 [Outputs]
-  json = true
+  [out]
+    type = JSON
+    execute_on = FINAL
+    execute_system_information_on = none
+  []
 []

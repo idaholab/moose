@@ -25,7 +25,7 @@ public:
 
   Elem * getElemType(const std::string & type);
 
-  void generateData() override;
+  void generateData() override{};
 
 protected:
   /// Mesh that possibly comes from another generator

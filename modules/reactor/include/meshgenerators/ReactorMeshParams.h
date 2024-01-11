@@ -24,7 +24,7 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  void generateData() override;
+  void generateData() override{};
 
 protected:
   /// The number of dimension in the mesh

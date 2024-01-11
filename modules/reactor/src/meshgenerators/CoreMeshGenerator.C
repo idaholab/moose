@@ -618,14 +618,13 @@ CoreMeshGenerator::generate()
   // Must be called to free the ReactorMeshParams mesh
   freeReactorMeshParams();
 
-  // If mesh generation is requested and bypass_mesh is true, return a null mesh. RGMB
-  // mesh should not be the final mesh generator with this option specified
+  // If mesh generation is requested and bypass_mesh is true, return a null mesh. generate()
+  // should not be called with this option specified
   if (getReactorParam<bool>(RGMB::bypass_meshgen))
   {
     auto null_mesh = nullptr;
     return null_mesh;
   }
-
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/names in case they were merged
   // when stitching assemblies into the core. This is also where we set region_id extra

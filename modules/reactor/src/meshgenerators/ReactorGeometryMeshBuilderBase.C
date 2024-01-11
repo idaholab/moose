@@ -318,8 +318,3 @@ ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
   for (Elem * const elem : input_mesh.active_element_ptr_range())
     elem->set_extra_integer(depl_id_index, depl_ids.at(elem->id()));
 }
-
-void
-ReactorGeometryMeshBuilderBase::generateData()
-{
-}

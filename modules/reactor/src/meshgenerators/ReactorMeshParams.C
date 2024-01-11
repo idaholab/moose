@@ -82,10 +82,12 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty("name_id_map", _name_id_map);
 
-  // Option to bypass mesh generation depends on value of Mesh/data_driven
+  // Option to bypass mesh generation depends on existence of Mesh/data_driven_generator parameter
   const auto & moose_mesh = _app.actionWarehouse().getMesh();
-  const auto data_driven = moose_mesh->parameters().get<bool>("data_driven");
-  this->declareMeshProperty(RGMB::bypass_meshgen, data_driven);
+  const auto data_driven_generator =
+      moose_mesh->parameters().get<std::string>("data_driven_generator");
+  const bool bypass_meshgen = (data_driven_generator != "");
+  this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
 
   if (isParamValid("top_boundary_id"))
   {
@@ -114,11 +116,13 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 ReactorMeshParams::generate()
 {
+  // If mesh generation is requested and bypass_mesh is true, return a null mesh. generate()
+  // mesh should not be called with this option specified
+  if (getMeshProperty<bool>(RGMB::bypass_meshgen))
+  {
+    auto null_mesh = nullptr;
+    return null_mesh;
+  }
   auto mesh = buildMeshBaseObject();
   return dynamic_pointer_cast<MeshBase>(mesh);
-}
-
-void
-ReactorMeshParams::generateData()
-{
 }

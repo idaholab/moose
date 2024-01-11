@@ -94,8 +94,3 @@ ElementGenerator::generate()
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
-
-void
-ElementGenerator::generateData()
-{
-}
