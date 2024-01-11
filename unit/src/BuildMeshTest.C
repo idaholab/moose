@@ -1,8 +1,18 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "gtest/gtest.h"
 
 #include "BuildMeshTest.h"
 #include "Registry.h"
 #include "MooseApp.h"
+#include "MooseMain.h"
 #include "MooseMesh.h"
 #include "MooseUnitApp.h"
 #include "AppFactory.h"
@@ -39,7 +49,7 @@ void
 BuildMeshTest::SetUp()
 {
   const char * argv[2] = {"foo", "\0"};
-  _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  _app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
   std::string mesh_gen_type = "BuildMeshBaseTypesGenerator";

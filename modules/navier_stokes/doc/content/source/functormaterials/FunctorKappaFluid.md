@@ -1,6 +1,6 @@
 # FunctorKappaFluid
 
-!syntax description /Materials/FunctorKappaFluid
+!syntax description /FunctorMaterials/FunctorKappaFluid
 
 ## Description
 
@@ -16,8 +16,8 @@ but for low Reynolds numbers more sophisticated models should be used [!cite](be
 Because thermal dispersion acts to increase the diffusive effects, neglecting thermal dispersion is
 (thermally) conservative in the sense that peak temperatures are usually higher [!cite](becker).
 
-!syntax parameters /Materials/FunctorKappaFluid
+!syntax parameters /FunctorMaterials/FunctorKappaFluid
 
-!syntax inputs /Materials/FunctorKappaFluid
+!syntax inputs /FunctorMaterials/FunctorKappaFluid
 
-!syntax children /Materials/FunctorKappaFluid
+!syntax children /FunctorMaterials/FunctorKappaFluid

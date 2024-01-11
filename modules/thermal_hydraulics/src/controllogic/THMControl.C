@@ -16,6 +16,7 @@ THMControl::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.suppressParameter<ExecFlagEnum>("execute_on");
+  params.registerBase("THMControl");
   return params;
 }
 

@@ -22,6 +22,9 @@ FunctorMaterial::validParams()
   // Default is no-caching. Same default as not passing a clearance schedule when adding a functor
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
+  // Do not allow functor materials in the regular Materials block
+  params.registerBase("FunctorMaterial");
+
   return params;
 }
 

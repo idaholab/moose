@@ -177,7 +177,7 @@ velocity_interp_method = 'average'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const]
     type = ADGenericFunctorMaterial
     prop_names = 'k cp'

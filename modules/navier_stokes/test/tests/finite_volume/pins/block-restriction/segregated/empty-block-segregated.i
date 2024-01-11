@@ -370,7 +370,7 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants_fluid]
     type = ADGenericFunctorMaterial
     prop_names = 'alpha_b cp k_fluid'

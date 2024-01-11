@@ -136,7 +136,7 @@ ny = 5
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [porosity]
     type = ADGenericFunctorMaterial
     prop_names = 'porosity'
@@ -150,7 +150,7 @@ ny = 5
 
   # Material definitions needed for the diode
   [diode]
-    type = NSFVFrictionFlowDiodeMaterial
+    type = NSFVFrictionFlowDiodeFunctorMaterial
     # Friction only in X direction
     direction = '-1 0 0'
     additional_linear_resistance = '20000 0 0'
@@ -201,7 +201,7 @@ ny = 5
   [time_based]
     type = BoolFunctionControl
     function = time_function
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 
@@ -210,7 +210,7 @@ ny = 5
   [pdrop_based]
     type = BoolFunctionControl
     function = pdrop_positive
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 
@@ -221,7 +221,7 @@ ny = 5
   [flow_based]
     type = BoolFunctionControl
     function = velocity_big_enough
-    parameter = 'Materials/diode/turn_on_diode'
+    parameter = 'FunctorMaterials/diode/turn_on_diode'
     execute_on = timestep_begin
   []
 []

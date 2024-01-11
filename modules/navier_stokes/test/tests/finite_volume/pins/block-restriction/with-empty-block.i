@@ -361,7 +361,7 @@ Q = 200
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants_fluid]
     type = ADGenericFunctorMaterial
     prop_names = 'alpha_b cp k_fluid'

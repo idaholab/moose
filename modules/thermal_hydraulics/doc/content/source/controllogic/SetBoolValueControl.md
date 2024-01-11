@@ -1,6 +1,6 @@
 # SetBoolValueControl
 
-!syntax description /Controls/SetBoolValueControl
+!syntax description /ControlLogic/SetBoolValueControl
 
 !alert note
 [ControlData.md] is only defined by the thermal hydraulics module control logic.
@@ -12,8 +12,8 @@ using the `state` [ControlData.md] of the `threshold_ctrl` ControlLogic.
 
 !listing test/tests/controls/set_bool_value_control/test.i block=ControlLogic
 
-!syntax parameters /Controls/SetBoolValueControl
+!syntax parameters /ControlLogic/SetBoolValueControl
 
-!syntax inputs /Controls/SetBoolValueControl
+!syntax inputs /ControlLogic/SetBoolValueControl
 
-!syntax children /Controls/SetBoolValueControl
+!syntax children /ControlLogic/SetBoolValueControl

@@ -6,7 +6,7 @@
     type = RunApp
     cli_args = '--registry-hit'
     expect_out = "label =.*?type =.*?name =.*?class =.*?file =.*?"
-    input = 'IGNORED'
+    input = ''
     input_switch = ''
     method = '!DBG'
 
@@ -18,7 +18,7 @@
     type = RunApp
     cli_args = '--registry'
     expect_out = "MooseApp\s+object\s+FileMesh\s+FileMesh.*?FileMesh.C"
-    input = 'IGNORED'
+    input = ''
     input_switch = ''
     method = '!DBG'
 

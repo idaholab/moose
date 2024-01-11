@@ -23,6 +23,7 @@
 #include "MooseTypes.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "libmesh/elem.h"
+#include "MooseMain.h"
 
 #include <memory>
 
@@ -37,7 +38,7 @@ TEST(ContainerFunctors, Test)
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
 
   constexpr auto nx = 2;
-  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  auto app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 

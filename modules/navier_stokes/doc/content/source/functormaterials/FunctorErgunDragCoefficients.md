@@ -1,6 +1,6 @@
 # FunctorErgunDragCoefficients
 
-!syntax description /Materials/FunctorErgunDragCoefficients
+!syntax description /FunctorMaterials/FunctorErgunDragCoefficients
 
 This class implements the Darcy and Forchheimer coefficients for the Ergun drag
 force model which is discussed in detail in
@@ -26,8 +26,8 @@ $3.5$, to make the 1.75 factor from the
 [Ergun wikipedia page](https://en.wikipedia.org/wiki/Ergun_equation) more
 recognizable.
 
-!syntax parameters /Materials/FunctorErgunDragCoefficients
+!syntax parameters /FunctorMaterials/FunctorErgunDragCoefficients
 
-!syntax inputs /Materials/FunctorErgunDragCoefficients
+!syntax inputs /FunctorMaterials/FunctorErgunDragCoefficients
 
-!syntax children /Materials/FunctorErgunDragCoefficients
+!syntax children /FunctorMaterials/FunctorErgunDragCoefficients

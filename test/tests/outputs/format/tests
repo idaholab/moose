@@ -27,7 +27,7 @@
 
   [yaml_dump_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = 'START YAML DATA.*END YAML DATA'
     cli_args = '--yaml'
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
@@ -39,7 +39,7 @@
 
   [no_double_executioner_output]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzz zzzzz'
@@ -229,7 +229,7 @@
 
   [definition_input_choices_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'outputs\'{.*?\'value\'{.*?InputChoices=\[ "all" "none" PATH:"../../../../Outputs/["*"]/decl" \].*?}.*?}\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -243,7 +243,7 @@
 
   [definition_childatleastone_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'BoundaryMarker_type\'{.*?ChildAtLeastOne=\[ "../../../GlobalParams/next_to/value" "next_to" \].*?} % end block BoundaryMarker_type\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -257,7 +257,7 @@
 
   [definition_valenum_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -271,7 +271,7 @@
 
   [definition_active_parameter_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -285,7 +285,7 @@
 
   [definition_normal_sub_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'Indicators\'{.*?InputTmpl=MooseBlock.*?InputName="Indicators".*?InputType=normal_sub.*?InputDefault="Indicators"'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -299,7 +299,7 @@
 
   [definition_type_sub_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'CircleMarker_type\'{.*?InputType=type_sub.*?InputDefault="insert_name_here".*?} % end block CircleMarker_type'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -313,7 +313,7 @@
 
   [definition_default_type_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?}.*?} % end block BoxMarker_type'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -327,7 +327,7 @@
 
   [definition_minvalinc_inputdefault_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -341,7 +341,7 @@
 
   [definition_default_types_child_parameter_promotion_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'Mesh\'{.*?InputName="Mesh".*?\'ghosting_patch_size\'{.*?InputName="ghosting_patch_size".*?}.*?} % end block Mesh\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -355,7 +355,7 @@
 
   [definition_default_subblock_types_child_parameter_promotion_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'AuxVariables\'{.*?InputName="AuxVariables".*?\'["*"]\'{.*?InputName="["*"]".*?\'block\'{.*?InputName="block".*?}.*?} % end block ["*"].*?} % end block AuxVariables\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -369,7 +369,7 @@
 
   [definition_mesh_file_parameter_requirement_removal_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     absent_out = '\'Mesh\'{.*?ChildAtLeastOne=\[ "../GlobalParams/file/value" "file" \].*?} % end block Mesh\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -383,7 +383,7 @@
 
   [definition_boolean_type_valenum_choices_test]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '\'enable\'{.*?\'value\'{.*?ValEnums=\[ true false 1 0 on off \].*?}.*?}\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
@@ -397,7 +397,7 @@
 
   [definition_scraping_markers]
     type = 'RunApp'
-    input = 'IGNORED'
+    input = ''
     expect_out = '%-START-SON-DEFINITION-%.*?%-END-SON-DEFINITION-%'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump

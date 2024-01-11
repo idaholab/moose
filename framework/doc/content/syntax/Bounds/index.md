@@ -27,7 +27,7 @@ while the manual page for `vinewtonrsls` can be found
 In the following example, a lower and an upper bound are applied to two variables `u` and `v`
 using the same auxiliary variable `bounds_dummy` and four `Bounds` objects.
 
-!listing test/tests/auxkernels/bounds/constant_bounds.i block=Variables AuxVariables Bounds
+!listing test/tests/bounds/constant_bounds.i block=Variables AuxVariables Bounds
 
 !syntax list /Bounds objects=True actions=False subsystems=False
 
