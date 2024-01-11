@@ -127,11 +127,11 @@ public:
   void extractParams(const std::string & prefix, InputParameters & p);
 
   /**
-   *  @return The root pointer from front parser
+   * @return The root HIT node, if any
    *
-   * If the front parser doesn't exist, this will return nullptr
+   * If this is null, it means that we haven't parsed yet
    */
-  hit::Node * root();
+  hit::Node * root() { return _root.get(); }
 
   /**
    * @return The names of the inputs
