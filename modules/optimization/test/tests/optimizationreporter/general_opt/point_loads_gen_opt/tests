@@ -26,7 +26,8 @@
       # steady solve
       recover = false
       issues = '#25689'
-      detail = 'the measurement data defined on the main app and transferred to the forward_and_adjoint app;'
+      detail = "the measurement data defined on the main app and transferred to the"
+      "forward_and_adjoint app while maintaining the correct preconditioning on the adjoint system;"
     []
     [seperate_multiapps]
       type = CSVDiff

@@ -73,8 +73,8 @@ GeneralOptimization::computeObjective()
   {
     Real param_norm_sqr = 0;
     for (const auto & data : _parameters)
-      for (const auto & val : *data)
-        param_norm_sqr += val * val;
+      for (const auto & param_val : *data)
+        param_norm_sqr += param_val * param_val;
     // We multiply by 0.5 to maintain  backwards compatibility.
     val += 0.5 * _tikhonov_coeff * param_norm_sqr;
   }
