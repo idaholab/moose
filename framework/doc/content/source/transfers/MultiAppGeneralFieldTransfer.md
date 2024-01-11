@@ -88,6 +88,7 @@ can naturally be outside the bounding box of the source applications. In order t
 the `Transfer`'s [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/bbox_factor) and
 [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/fixed_bounding_box_size) may be
 used to inflate the bounding boxes.
+Note that the center of the bounding box is taken to be the center of the origin mesh's bounding box.
 
 !alert note
 [!param](/MultiApps/TransientMultiApp/bounding_box_inflation) and

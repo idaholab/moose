@@ -89,7 +89,7 @@
 
 [Transfers]
   [K_to_s]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = child
     source_variable = K_prime
     variable = K_prime

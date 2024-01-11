@@ -78,6 +78,13 @@ CoupledHeatTransferAction::validParams()
 
   params.addRequiredParam<std::string>("multi_app", "The name of the multi-app.");
 
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "fixed_bounding_box_size",
+      "fixed_bounding_box_size >= 0",
+      "The 'fixed_bounding_box_size' value to use for each MultiAppGeneralFieldUserObjectTransfer. "
+      "If this parameter is not provided, a greedy search will be used instead of bounding boxes, "
+      "which may be slower.");
+
   params.addParam<std::vector<Point>>(
       "positions", "Sub-app positions. Each set of 3 values represents a Point.");
   params.addParam<FileName>(
@@ -234,49 +241,86 @@ CoupledHeatTransferAction::addTransfers()
 
   const bool skip_coordinate_collapsing = getParam<bool>("skip_coordinate_collapsing");
 
+  const bool use_bounding_boxes = isParamValid("fixed_bounding_box_size");
+  std::vector<Real> fixed_bounding_box_size;
+  if (use_bounding_boxes)
+    fixed_bounding_box_size = getParam<std::vector<Real>>("fixed_bounding_box_size");
+
   {
-    const std::string class_name = "MultiAppUserObjectTransfer";
+    const std::string class_name = "MultiAppGeneralFieldUserObjectTransfer";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<MultiAppName>("to_multi_app") = _multi_app_name;
-    params.set<UserObjectName>("user_object") = {_T_wall_user_object_name};
+    params.set<UserObjectName>("source_user_object") = {_T_wall_user_object_name};
     params.set<std::vector<AuxVariableName>>("variable") = {_T_wall_var_name};
     params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
+    params.set<bool>("error_on_miss") = true;
+    if (use_bounding_boxes)
+      params.set<std::vector<Real>>("fixed_bounding_box_size") = fixed_bounding_box_size;
+    else
+    {
+      params.set<bool>("use_bounding_boxes") = false;
+      params.set<bool>("greedy_search") = true;
+    }
     _problem->addTransfer(class_name, name() + "_T_solid_transfer", params);
   }
 
   // Transfers from the flow channel application. Note that
-  // MultiAppNearestNodeTransfer seems like it should be a more appropriate
-  // choice than MultiAppUserObjectTransfer, but it has been noted that for
-  // large meshes, MultiAppNearestNodeTransfer is slower than
-  // MultiAppUserObjectTransfer.
+  // Note that MultiAppGeneralFieldNearestLocationTransfer should be more optimal
+  // choice in parallel calculations, while MultiAppGeneralFieldUserObjectTransfer should
+  // be more optimal in serial calculations. If these transfers prove to be a significant time
+  // burden, we may want to provide an option to switch these transfer classes.
   for (unsigned int k = 0; k < _n_phases; k++)
   {
     {
-      const std::string class_name = "MultiAppUserObjectTransfer";
+      const std::string class_name = "MultiAppGeneralFieldUserObjectTransfer";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
-      params.set<UserObjectName>("user_object") = _T_fluid_user_object_names[k];
+      params.set<UserObjectName>("source_user_object") = _T_fluid_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_T_fluid_var_names[k]};
       params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
+      params.set<bool>("error_on_miss") = true;
+      if (use_bounding_boxes)
+        params.set<std::vector<Real>>("fixed_bounding_box_size") = fixed_bounding_box_size;
+      else
+      {
+        params.set<bool>("use_bounding_boxes") = false;
+        params.set<bool>("greedy_search") = true;
+      }
       _problem->addTransfer(class_name, name() + "_T_fluid_transfer" + std::to_string(k), params);
     }
     {
-      const std::string class_name = "MultiAppUserObjectTransfer";
+      const std::string class_name = "MultiAppGeneralFieldUserObjectTransfer";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
-      params.set<UserObjectName>("user_object") = _htc_user_object_names[k];
+      params.set<UserObjectName>("source_user_object") = _htc_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_htc_var_names[k]};
       params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
+      params.set<bool>("error_on_miss") = true;
+      if (use_bounding_boxes)
+        params.set<std::vector<Real>>("fixed_bounding_box_size") = fixed_bounding_box_size;
+      else
+      {
+        params.set<bool>("use_bounding_boxes") = false;
+        params.set<bool>("greedy_search") = true;
+      }
       _problem->addTransfer(class_name, name() + "_htc_transfer" + std::to_string(k), params);
     }
     if (_n_phases > 1)
     {
-      const std::string class_name = "MultiAppUserObjectTransfer";
+      const std::string class_name = "MultiAppGeneralFieldUserObjectTransfer";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
-      params.set<UserObjectName>("user_object") = _kappa_user_object_names[k];
+      params.set<UserObjectName>("source_user_object") = _kappa_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_kappa_var_names[k]};
       params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
+      params.set<bool>("error_on_miss") = true;
+      if (use_bounding_boxes)
+        params.set<std::vector<Real>>("fixed_bounding_box_size") = fixed_bounding_box_size;
+      else
+      {
+        params.set<bool>("use_bounding_boxes") = false;
+        params.set<bool>("greedy_search") = true;
+      }
       _problem->addTransfer(class_name, name() + "_kappa_transfer" + std::to_string(k), params);
     }
   }
