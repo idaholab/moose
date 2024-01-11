@@ -330,8 +330,6 @@ OptimizationDataTempl<T>::computeMisfitNorm()
   for (auto & misfit : _misfit_values)
     val += misfit * misfit;
 
-  // There is no Tikhonov regularization. OptimizationData does not have access to the parameter
-  // vector.
   return val * 0.5;
 }
 
