@@ -1,0 +1,9 @@
+Content:
+    workshop:
+        root_dir: !include tutorials/shield_multiphysics/doc/config.yml Content user_workshop root_dir
+        content:
+            - user_workshop/**
+
+Executioner: !include tutorials/shield_multiphysics/doc/config.yml Executioner
+Renderer: !include tutorials/shield_multiphysics/doc/config.yml Renderer
+Extensions: !include tutorials/shield_multiphysics/doc/config.yml Extensions
