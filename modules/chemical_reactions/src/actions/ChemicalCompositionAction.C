@@ -38,9 +38,9 @@ ChemicalCompositionAction::validParams()
                                           "Sets up the thermodynamic model and variables for the "
                                           "thermochemistry solve using Thermochimica.");
 
-  params.addRequiredParam<std::vector<std::string>>("elements",
-                                                    "List of chemical elements (or ALL)");
-  params.addRequiredCoupledVar("temperature", "Name of temperature variable");
+  // Required variables
+  params.addParam<std::vector<std::string>>("elements", "List of chemical elements (or ALL)");
+  params.addCoupledVar("temperature", "Name of temperature variable");
   params.addCoupledVar("pressure", "Name of pressure variable");
   MooseEnum reinit_type("none time nodal", "nodal");
   params.addParam<MooseEnum>(
@@ -89,35 +89,82 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _combined_params(emptyInputParameters()),
     _common_action(_awh.getActions<CommonChemicalCompositionAction>().empty()
                        ? nullptr
-                       : *_awh.getActions<CommonChemicalCompositionAction>().begin()),
-    _tunit(getParam<MooseEnum>("tunit")),
-    _punit(getParam<MooseEnum>("punit")),
-    _munit(getParam<MooseEnum>("munit")),
-    _is_fv(getParam<bool>("is_fv")),
-    _phases(getParam<std::vector<std::string>>("output_phases")),
-    _species(getParam<std::vector<std::string>>("output_species")),
-    _output_mass_unit(getParam<MooseEnum>("output_species_unit")),
-    _element_potentials(getParam<std::vector<std::string>>("output_element_potentials")),
-    _vapor_pressures(getParam<std::vector<std::string>>("output_vapor_pressures")),
-    _element_phases(getParam<std::vector<std::string>>("output_element_phases")),
-    _reinit(getParam<MooseEnum>("reinitialization_type")),
-    _uo_name(getParam<std::string>("uo_name"))
+                       : *_awh.getActions<CommonChemicalCompositionAction>().begin())
 {
-  // const auto & parameters = _app.getInputParameterWarehouse().getInputParameters();
-  // InputParameters & pars(*(parameters.find(uniqueActionName())->second.get()));
-  // pars.applyParameters(_common_action->parameters());
-  _combined_params = params;
+  _combined_params += params;
   _combined_params.applyParameters(_common_action->parameters());
 
   if (isParamValid("elements"))
-    params.set<> getParam<std::vector<std::string>>("elements");
-  else if (isParamValid("elements"))
+    _combined_params.set<std::vector<std::string>>("elements") =
+        getParam<std::vector<std::string>>("elements");
+  else if ((_combined_params.get<std::vector<std::string>>("elements"))[0] != "ALL")
+    paramWarning("elements", "Using common elements set for ChemicalComposition action");
+  else
+    paramWarning("elements", "Elements not set. Using option 'ALL'");
+
+  if (isParamValid("temperature"))
+    _combined_params.set<std::vector<VariableName>>("temperature") =
+        getParam<std::vector<VariableName>>("temperature");
+  else if (_combined_params.isParamValid("temperature"))
   {
   }
+  else
+    paramError("temperature",
+               "Temperature variable must be specified for this object to be constructed");
+
+  if (isParamValid("pressure"))
+    _combined_params.set<std::vector<VariableName>>("pressure") =
+        getParam<std::vector<VariableName>>("pressure");
+  else if (_combined_params.isParamValid("pressure"))
+  {
+  }
+  else
+    paramWarning("pressure", "Pressure variable not specified. Using default values");
+
+  if (isParamValid("tunit"))
+    _combined_params.set<MooseEnum>("tunit") = getParam<MooseEnum>("tunit");
+  else
+    paramWarning("tunit",
+                 "Temperature unit not set. Using common parameter value '",
+                 Moose::stringify(_combined_params.get<std::string>("tunit")),
+                 "'.");
+
+  if (isParamValid("punit"))
+    _combined_params.set<MooseEnum>("punit") = getParam<MooseEnum>("punit");
+  else
+    paramWarning("punit",
+                 "Temperature unit not set. Using common parameter value '",
+                 Moose::stringify(_combined_params.get<std::string>("punit")),
+                 "'.");
+
+  if (isParamValid("munit"))
+    _combined_params.set<MooseEnum>("munit") = getParam<MooseEnum>("munit");
+  else
+    paramWarning("munit",
+                 "Temperature unit not set. Using common parameter value '",
+                 Moose::stringify(_combined_params.get<std::string>("munit")),
+                 "'.");
+
+  if (isParamValid("is_fv"))
+    _combined_params.set<bool>("is_fv") = getParam<bool>("is_fv");
+
+  if (isParamValid("reinitialization_type"))
+    _combined_params.set<MooseEnum>("reinitialization_type") =
+        getParam<bool>("reinitialization_type");
+
+  if (isParamValid("initial_values"))
+    _combined_params.set<FileName>("initial_values") = getParam<FileName>("initial_values");
+
+  if (isParamValid("reinit_type"))
+    _combined_params.set<MooseEnum>("reinit_type") = getParam<bool>("reinit_type");
+
+  if (isParamValid("execute_on"))
+    _combined_params.set<MooseEnum>("execute_on") = getParam<bool>("execute_on");
+
+  if (isParamValid("output_species_unit"))
+    _combined_params.set<MooseEnum>("output_species_unit") = getParam<bool>("output_species_unit");
 
   ThermochimicaUtils::checkLibraryAvailability(*this);
-
-  std::replace(_munit.begin(), _munit.end(), '_', ' ');
 
 #ifdef THERMOCHIMICA_ENABLED
   // Initialize database in Thermochimica
@@ -143,24 +190,29 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   }
 
   // Set thermochimica units
-  Thermochimica::checkTemperature(_tunit);
-  Thermochimica::setUnitTemperature(_tunit);
+  auto tunit = Moose::stringify(_combined_params.get<MooseEnum>("tunit"));
+  Thermochimica::checkTemperature(tunit);
+  Thermochimica::setUnitTemperature(tunit);
   int idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
     paramError("tunit", "Cannot set temperature unit in Thermochimica", idbg);
 
-  Thermochimica::checkPressure(_punit);
-  Thermochimica::setUnitPressure(_punit);
+  auto punit = Moose::stringify(_combined_params.get<MooseEnum>("punit"));
+  Thermochimica::checkPressure(punit);
+  Thermochimica::setUnitPressure(punit);
   idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
     paramError("punit", "Cannot set pressure unit in Thermochimica", idbg);
 
-  Thermochimica::checkMass(_munit);
-  Thermochimica::setUnitMass(_munit);
+  auto munit = Moose::stringify(_combined_params.get<MooseEnum>("munit"));
+  std::replace(munit.begin(), munit.end(), '_', ' ');
+  Thermochimica::checkMass(munit);
+  Thermochimica::setUnitMass(munit);
   idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
     paramError("munit", "Cannot set mass unit in Thermochimica", idbg);
 
+  _elements = _combined_params.get<std::vector<std::string>>("elements");
   if (_elements.size() == 1 && _elements[0] == "ALL")
   {
     _elements.resize(Thermochimica::getNumberElementsDatabase());
@@ -194,6 +246,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   if (isParamValid("output_phases"))
   {
+    _phases = getParam<std::vector<std::string>>("output_phases");
     if (_phases.size() == 1 && _phases[0] == "ALL")
     {
       auto [soln_phases, stoich_phases] = Thermochimica::getNumberPhasesSystem();
@@ -213,9 +266,10 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   if (isParamValid("output_species"))
   {
-    auto phases = Thermochimica::getPhaseNamesSystem();
+    auto species = _combined_params.get<std::vector<std::string>>("output_species");
+    auto db_phases = Thermochimica::getPhaseNamesSystem();
     auto n_db_species = Thermochimica::getNumberSpeciesSystem();
-    auto species = Thermochimica::getSpeciesSystem();
+    auto db_species = Thermochimica::getSpeciesSystem();
     for (auto i : index_range(n_db_species))
       if (Thermochimica::isPhaseMQM(i))
       {
@@ -224,43 +278,43 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         n_db_species[i] = pairs;
       }
 
-    if (_species.size() == 1 && _species[0] == "ALL")
+    if (species.size() == 1 && species[0] == "ALL")
     {
       if (!n_db_species.empty())
-        _species.resize(n_db_species.back());
+        species.resize(n_db_species.back());
       else
         mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Thermochimica "
                   "returned no possible species.");
 
-      _species.clear();
+      species.clear();
       _tokenized_species.clear();
-      for (const auto i : index_range(species))
+      for (const auto i : index_range(db_species))
         for (const auto j : index_range(species[i]))
         {
-          _species.push_back(phases[i] + ":" + species[i][j]);
-          _tokenized_species.push_back(std::make_pair(phases[i], species[i][j]));
+          species.push_back(db_phases[i] + ":" + db_species[i][j]);
+          _tokenized_species.push_back(std::make_pair(db_phases[i], db_species[i][j]));
         }
       mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Using: ",
-                Moose::stringify(_species));
+                Moose::stringify(species));
     }
     else
-      for (const auto i : index_range(_species))
+      for (const auto i : index_range(species))
       {
-        _tokenized_species.resize(_species.size());
+        _tokenized_species.resize(species.size());
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(_species[i], tokens, 1, ":");
+        MooseUtils::tokenize(species[i], tokens, 1, ":");
         if (tokens.size() == 1)
-          paramError("output_species", "No ':' separator found in variable '", _species[i], "'");
+          paramError("output_species", "No ':' separator found in variable '", species[i], "'");
 
-        auto phase_index = std::find(phases.begin(), phases.end(), tokens[0]);
-        if (phase_index == phases.end())
+        auto phase_index = std::find(db_phases.begin(), db_phases.end(), tokens[0]);
+        if (phase_index == db_phases.end())
           paramError("output_species",
                      "Phase '",
                      tokens[0],
                      "' of output species '",
-                     _species[i],
+                     species[i],
                      "' not found in the simulation.");
-        auto sp = species[std::distance(phases.begin(), phase_index)];
+        auto sp = db_species[std::distance(db_phases.begin(), phase_index)];
         if (std::find(sp.begin(), sp.end(), tokens[1]) == sp.end())
           paramError(
               "output_species", "Species '", tokens[1], "' was not found in the simulation.");
@@ -419,7 +473,7 @@ ChemicalCompositionAction::act()
         FEType(Utility::string_to_enum<Order>(_problem->mesh().hasSecondOrderElements() ? "SECOND"
                                                                                         : "FIRST"),
                Utility::string_to_enum<FEFamily>("LAGRANGE")),
-        /* is_fv = */ _is_fv,
+        /* is_fv = */ _combined_params.get<bool>("is_fv"),
         /* is_array = */ false);
     auto params = _factory.getValidParams(aux_var_type);
 
@@ -429,8 +483,8 @@ ChemicalCompositionAction::act()
     for (const auto i : index_range(_phases))
       _problem->addAuxVariable(aux_var_type, _phases[i], params);
 
-    for (const auto i : index_range(_species))
-      _problem->addAuxVariable(aux_var_type, _species[i], params);
+    for (const auto i : index_range(_tokenized_species))
+      _problem->addAuxVariable(aux_var_type, Moose::stringify(_tokenized_species[i]), params);
 
     for (const auto i : index_range(_element_potentials))
       _problem->addAuxVariable(aux_var_type, _element_potentials[i], params);

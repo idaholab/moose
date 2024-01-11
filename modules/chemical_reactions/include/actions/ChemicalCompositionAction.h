@@ -64,23 +64,23 @@ protected:
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
 
-  /// Temperature unit
-  std::string _tunit;
+  // /// Temperature unit
+  // std::string _tunit;
 
-  /// Pressure unit
-  std::string _punit;
+  // /// Pressure unit
+  // std::string _punit;
 
-  /// Mass/amount unit
-  std::string _munit;
+  // /// Mass/amount unit
+  // std::string _munit;
 
-  /// Are the variables FV type
-  bool _is_fv;
+  // /// Are the variables FV type
+  // bool _is_fv;
 
   /// List of phases tracked by Thermochimica
   std::vector<std::string> _phases;
 
-  /// List of species tracked by Thermochimica
-  std::vector<std::string> _species;
+  // /// List of species tracked by Thermochimica
+  // std::vector<std::string> _species;
 
   /// Mass unit for output species
   MooseEnum _output_mass_unit;

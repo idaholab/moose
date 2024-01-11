@@ -21,6 +21,7 @@ CommonChemicalCompositionAction::validParams()
   params.set<MooseEnum>("tunit") = "K";
   params.set<MooseEnum>("punit") = "atm";
   params.set<MooseEnum>("munit") = "moles";
+  params.set<MooseEnum>("output_species_unit") = "moles";
   params.set<bool>("is_fv") = false;
   params.addClassDescription("Store common ChemicalComposition action parameters");
   return params;
