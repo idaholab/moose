@@ -30,6 +30,7 @@ public:
 
   /// register a new capability
   static void add(const std::string & capability, CapabilityType value = true);
+  static void add(const std::string & capability, const char * value);
 
   /// create a JSON dump of the capabilities registry
   static std::string dump();
