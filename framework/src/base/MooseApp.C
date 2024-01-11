@@ -174,6 +174,11 @@ MooseApp::validParams()
       "show_docs", "--docs", "Print url/path to the documentation website");
   params.addCommandLineParam<bool>(
       "show_capabilities", "--show-capabilities", "Dumps the capability registry in JSON format.");
+  params.addCommandLineParam<std::string>(
+      "required_capabilities",
+      "--required-capabilities",
+      "A list of conditions that is checked against the registered capabilities (see "
+      "--show-capabilities). The executable will terminate early if the conditions are not met.");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    "Check the input file (i.e. requires -i <filename>) and quit");
@@ -1120,7 +1125,6 @@ MooseApp::setupOptions()
   else if (getParam<bool>("show_capabilities"))
   {
     _perf_graph.disableLivePrint();
-    Moose::perf_log.disable_logging();
 
     Moose::out << "**START JSON DATA**\n" << Moose::Capabilities::dump() << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
@@ -1143,6 +1147,21 @@ MooseApp::setupOptions()
       _parser->parse();
 
     _builder.build();
+
+    if (isParamSetByUser("required_capabilities"))
+    {
+      _perf_graph.disableLivePrint();
+
+      auto [fulfilled, reason] =
+          Moose::Capabilities::check(getParam<std::string>("required_capabilities"));
+      if (!fulfilled)
+      {
+        Moose::out << "\nCAPABILITIES_MISMATCH_BEGIN\n"
+                   << reason << "\nCAPABILITIES_MISMATCH_END" << std::endl;
+        _ready_to_exit = true;
+        return;
+      }
+    }
 
     if (isParamSetByUser("mesh_only"))
     {
@@ -1467,7 +1486,7 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
   if (!backup)
-    mooseError("MooseApp::resore(): Provided backup is not initialized");
+    mooseError("MooseApp::restore(): Provided backup is not initialized");
 
   auto header = std::move(backup->header);
   mooseAssert(header, "Header not available");
