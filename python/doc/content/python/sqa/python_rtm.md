@@ -20,6 +20,10 @@
 !include framework_rtm.md start=pre-test-begin end=pre-test-finish replace=['framework_stp.md', 'python_stp.md']
 !template-end!
 
+!template! item key=log-revisions
+There are currently no known log revisions required for the {{project}} project.
+!template-end!
+
 !template item key=functional-requirements
 !sqa requirements collections=FUNCTIONAL category=python
 

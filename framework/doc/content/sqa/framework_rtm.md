@@ -38,6 +38,10 @@ can be found in the [Software Test Plan](sqa/framework_stp.md).
 !! pre-test-finish
 !template-end!
 
+!template! item key=log-revisions
+There are currently no known log revisions required for the {{project}}.
+!template-end!
+
 !template item key=functional-requirements
 !sqa requirements collections=FUNCTIONAL category=framework
 

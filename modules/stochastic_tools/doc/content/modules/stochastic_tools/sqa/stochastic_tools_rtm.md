@@ -7,3 +7,7 @@
 !template! item key=system-scope
 !include stochastic_tools_srs.md start=system-scope-begin end=system-scope-finish
 !template-end!
+
+!template! item key=log-revisions
+There are currently no known log revisions required for the {{module}} module.
+!template-end!
