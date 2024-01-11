@@ -12,5 +12,11 @@
     nx_generator = nx
     ny_generator = ny
   []
-  data_driven = true
+  [transform]
+    type = TransformGenerator
+    input = mesh
+    transform = translate
+    vector_value = '10 5 0'
+  []
+  data_driven_generator = mesh
 []

@@ -1,6 +1,6 @@
 [Tests]
-  design = 'meshgenerators/GeneratedMeshGenerator.md'
-  issues = '#11640'
+  design = 'TO DO'
+  issues = 'TO DO'
 
   [test]
     type = 'Exodiff'
@@ -8,7 +8,8 @@
     cli_args = '--mesh-only'
     exodiff = 'data_driven_in.e'
     exodiff_opts = '-pedantic'
+    recover = false
 
-    requirement = 'The system shall be able to use libmesh mesh generation tools.'
+    requirement = 'TO DO'
   []
 []
