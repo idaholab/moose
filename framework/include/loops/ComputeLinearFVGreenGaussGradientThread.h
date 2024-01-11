@@ -38,6 +38,9 @@ protected:
   void onBoundaryFace(const FaceInfo & face_info);
 
   FEProblemBase & _fe_problem;
+
+  const unsigned int _dim;
+
   const unsigned int _linear_system_number;
 
   const libMesh::LinearImplicitSystem & _linear_system;
