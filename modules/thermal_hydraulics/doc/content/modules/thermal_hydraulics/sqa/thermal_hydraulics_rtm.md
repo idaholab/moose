@@ -9,11 +9,6 @@
 !template-end!
 
 !template! item key=log-revisions
-The following known log revisions exist for the {{module}} module:
-
-!table
-| MOOSE Commit | Incorrect Referenced Issue | Correct Referenced Issue |
-| - | - | - |
-| [48db61](https://github.com/idaholab/moose/commit/48db61307ed87b58a96e944215f13378138cf7bc) | idaholab/sockeye#19845 | [idaholab/moose#19845](https://github.com/idaholab/moose/pull/19845) |
-
+The changelog for all code residing in the MOOSE repository is located in the
+[MOOSE RTM](moose_rtm.md#log-revisions).
 !template-end!

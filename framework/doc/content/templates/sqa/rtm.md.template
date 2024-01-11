@@ -98,9 +98,9 @@ any need to be noted by the development team, they will be noted here.
 
 !template! field key=log-revisions
 If errors are found in issue references related to the changelog (e.g., commit history), these
-should be noted here. The commit in which the errant issue reference occurs should be noted, and the
-correct issue should be listed alongside each entry. Relevant links to all items are required.
-An example of this might include:
+should be noted here. The commit in which the incorrect issue reference occurs should be listed, and
+the correct issue should be added alongside each entry. Relevant links to all items are required.
+An example of this is shown below:
 
 !table
 | MOOSE Commit | Incorrect Referenced Issue | Correct Referenced Issue |

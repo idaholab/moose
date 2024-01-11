@@ -21,7 +21,8 @@
 !template-end!
 
 !template! item key=log-revisions
-There are currently no known log revisions required for the {{project}} project.
+The changelog for all code residing in the MOOSE repository is located in the
+[MOOSE RTM](moose_rtm.md#log-revisions).
 !template-end!
 
 !template item key=functional-requirements

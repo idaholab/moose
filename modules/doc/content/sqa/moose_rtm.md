@@ -7,7 +7,13 @@
 !include system_scope.md
 
 !template! item key=log-revisions
-There are currently no known log revisions required for the {{app}} application.
+The following known log revisions exist for the {{module}} module:
+
+!table
+| MOOSE Commit | Incorrect Referenced Issue | Correct Referenced Issue |
+| - | - | - |
+| [48db61](https://github.com/idaholab/moose/commit/48db61307ed87b58a96e944215f13378138cf7bc) | idaholab/sockeye#19845 | [idaholab/moose#19845](https://github.com/idaholab/moose/pull/19845) |
+
 !template-end!
 
 !template item key=functional-requirements
