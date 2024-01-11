@@ -336,7 +336,7 @@ Ny = 5
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     rho = rho_mixture
@@ -344,14 +344,14 @@ Ny = 5
     temperature = 'T'
   []
   [eff_cp]
-    type = NSFVMixtureMaterial
+    type = NSFVMixtureFunctorMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'
     phase_1_fraction = fl
   []
   [mushy_zone_resistance]
-    type = INSFVMushyPorousFrictionMaterial
+    type = INSFVMushyPorousFrictionFunctorMaterial
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'

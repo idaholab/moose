@@ -14,7 +14,7 @@
 #include "Control.h"
 #include "THMControl.h"
 
-registerMooseAction("ThermalHydraulicsApp", THMAddControlAction, "add_control");
+registerMooseAction("ThermalHydraulicsApp", THMAddControlAction, "THM:add_control_logic");
 
 InputParameters
 THMAddControlAction::validParams()

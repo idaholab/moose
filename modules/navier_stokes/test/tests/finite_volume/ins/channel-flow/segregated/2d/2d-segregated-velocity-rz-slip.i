@@ -185,7 +185,7 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [darcy]
     type = ADGenericFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'

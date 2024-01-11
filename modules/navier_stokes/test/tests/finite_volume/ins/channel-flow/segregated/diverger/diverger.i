@@ -173,7 +173,7 @@ pressure_tag = "pressure_grad"
     value = 0
   []
 []
-[Materials]
+[FunctorMaterials]
   [mu]
     type = ADGenericFunctorMaterial #defines mu artificially for numerical convergence
     prop_names = 'mu rho cp' #it converges to the real mu eventually.

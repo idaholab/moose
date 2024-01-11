@@ -287,7 +287,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [fluid_props_to_mat_props]
     type = GeneralFunctorFluidProps
     fp = fp

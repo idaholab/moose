@@ -86,7 +86,7 @@ head = ${fparse height * density * gravity}
   nl_rel_tol = 1e-8
 []
 
-[Materials]
+[FunctorMaterials]
   [props]
     type = ADGenericFunctorMaterial
     prop_names = 'rho'

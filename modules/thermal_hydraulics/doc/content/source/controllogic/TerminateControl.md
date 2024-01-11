@@ -1,6 +1,6 @@
 # TerminateControl
 
-!syntax description /Controls/TerminateControl
+!syntax description /ControlLogic/TerminateControl
 
 The boolean that determines when to terminate is a [ControlData.md]. This is only used in the
 THM control logic to keep track of states of control objects.
@@ -18,8 +18,8 @@ stop the simulation and prints `Threshold exceeded`.
 
 !listing test/tests/controls/terminate/terminate.i block=Postprocessors ControlLogic
 
-!syntax parameters /Controls/TerminateControl
+!syntax parameters /ControlLogic/TerminateControl
 
-!syntax inputs /Controls/TerminateControl
+!syntax inputs /ControlLogic/TerminateControl
 
-!syntax children /Controls/TerminateControl
+!syntax children /ControlLogic/TerminateControl

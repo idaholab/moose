@@ -179,7 +179,7 @@ rho = 1.0
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [pump_force]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = 'pump_force'

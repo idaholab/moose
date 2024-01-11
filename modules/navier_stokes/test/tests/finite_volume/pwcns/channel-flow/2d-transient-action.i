@@ -118,7 +118,7 @@ top_side_temperature = 150
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'h_cv'

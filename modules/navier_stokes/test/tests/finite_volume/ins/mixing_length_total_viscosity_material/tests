@@ -1,6 +1,6 @@
 [Tests]
   issues = '#18666 #19472'
-  design = 'rans_theory.md MixingLengthTurbulentViscosityMaterial.md NSFVAction.md'
+  design = 'rans_theory.md MixingLengthTurbulentViscosityFunctorMaterial.md NSFVAction.md'
   [capped_mixing_length]
     requirement = 'The system shall be able to calculate the material property comprising the total turbulent viscosity, based on the capped mixing length model when performing'
     [transient]

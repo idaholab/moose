@@ -158,7 +158,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp alpha'

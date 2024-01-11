@@ -244,7 +244,7 @@ inlet_v = 0.001
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k'
