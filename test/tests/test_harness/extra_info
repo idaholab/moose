@@ -7,7 +7,7 @@
     petsc_version = '3.7.5'
     petsc_version_release = true
     petsc_debug = true
-    capabilities = 'slepc>=3.7.4'
+    slepc_version = '>=3.7.4'
     exodus_version = '>=8.0'
     library_mode = 'DYNAMIC'
     mesh_mode = 'distributed'
@@ -18,7 +18,7 @@
     dof_id_bytes = 4
     curl = true
     threading = openmp
-    capabilities = 'superlu'
+    superlu = true
     slepc = true
     unique_id = true
     cxx11 = true
