@@ -10,7 +10,7 @@
     # Too large for debug and valgrind
     method = '!DBG'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & dof_id_bytes=8'
+    petsc_version = '>=3.12.0'
     valgrind = none
   []
 []
