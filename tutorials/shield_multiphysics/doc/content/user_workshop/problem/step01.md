@@ -7,7 +7,7 @@ First, we consider the steady-state diffusion equation on the domain $\Omega$: f
 !equation
 -\nabla \cdot \nabla u = 0 \in \Omega,
 
-where $u = 400$ on the left, $u = 200$ on the right and with
+where $u = 300$ on the left, $u = 200$ on the right and with
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
 The weak form of this equation, in inner-product notation, is given by:
@@ -63,15 +63,16 @@ If building a local executable
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/step01_diffusion
 make -j 12 # use number of processors for your system
-cd problems
+cd inputs
 ../moose-opt -i mesh.i --mesh-only
 ../moose-opt -i step1.i
 ```
 
-If using a prebuilt MOOSE
+If using the conda MOOSE executable:
 
 ```bash
 conda activate moose
+cd ~/projects/moose/tutorials/shield_multiphysics/step01_diffusion/inputs
 moose-opt -i mesh.i --mesh-only
 moose-opt -i step1.i
 ```
@@ -80,4 +81,4 @@ moose-opt -i step1.i
 
 ## Step 1: Result
 
-!media shield_multiphysics/results/step01.png style=width:70%;
+!media shield_multiphysics/results/step01.png style=width:70%;margin-left:auto;margin-right:auto
