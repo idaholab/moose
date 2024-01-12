@@ -385,7 +385,7 @@ private:
                                   std::list<std::string> & current_branch);
 
   /**
-   * Register all base MooseApp capabilities to teh Moose::Capabilities registry.
+   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
    * Apps and Modules may register additional capabilities in their registerAll
    * function.
    */

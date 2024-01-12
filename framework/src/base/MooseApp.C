@@ -801,6 +801,7 @@ MooseApp::registerCapabilities()
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
   Moose::Capabilities::add("unique_id");
 #endif
+  Moose::Capabilities::add("dof_id_bytes", sizeof(dof_id_type));
 
 // compiler
 #if defined(__clang__)

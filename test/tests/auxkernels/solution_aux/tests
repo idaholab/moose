@@ -198,7 +198,7 @@
       # This test reads a binary file that was written with 4-byte dof
       # ids.  At this time, it is only possible to read it back in with
       # a libmesh that also uses 4-byte dof ids.
-      dof_id_bytes = 4
+      capabilities = 'dof_id_bytes=4'
     []
   []
 

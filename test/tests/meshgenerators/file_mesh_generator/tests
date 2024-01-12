@@ -29,7 +29,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & dof_id_bytes=8'
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
@@ -64,7 +64,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & dof_id_bytes=8'
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
@@ -100,7 +100,7 @@
     recover = false
     exodus_version = '>=8.0'
     # See #24187
-    capabilities = 'petsc>=3.12.0 & dof_id_bytes=8'
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile ... and we can't add an
