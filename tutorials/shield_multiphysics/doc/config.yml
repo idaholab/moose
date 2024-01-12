@@ -1,0 +1,89 @@
+Content:
+    workshop:
+        root_dir: ${MOOSE_DIR}/tutorials/shield_multiphysics/doc/content
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - ../../../tutorials/tutorial02_multiapps/doc/content/getting_started/examples_and_tutorials/tutorial02_multiapps/images/coupling.png
+            - large_media/tutorials/darcy_thermo_mech/*
+            - large_media/testing/*
+            - large_media/tutorials/INL_Hex_Light_Presentation_Background_Thin.png
+            - large_media/contact/ironing_gallery.mp4
+            - large_media/gallery/dipole_antenna.mp4
+            - large_media/ray_tracing/cone_ray_study_u.png
+            - large_media/ray_tracing/cone_ray_study_rays.png
+            - large_media/optimization/fig_optCycle.png
+            - large_media/fsi/sloshing.gif
+            - contrib/**
+            - css/**
+            - js/**
+            - bib/**
+            - syntax/**
+            - source/base/MooseObject.md
+            - source/utils/InputParameters.md
+            - source/parser/Parser.md
+            - source/geomsearch/GeometricSearchData.md
+            - source/actions/Action.md
+            - source/relationshipmanagers/RelationshipManager.md
+            - source/outputs/Exodus.md
+            - source/meshgenerators/FileMeshGenerator.md
+            - source/meshgenerators/MeshDiagnosticsGenerator.md
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - application_usage/failed_solves.md
+            - getting_started/installation/index.md
+            - help/development/VSCode.md
+    chemical_reactions:
+        root_dir: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
+        content:
+            - bib/**
+    fet:
+        root_dir: ${MOOSE_DIR}/modules/functional_expansion_tools/doc/content
+        content:
+            - bib/**
+    reactor:
+        root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
+        content:
+            - modules/reactor/index.md
+
+Executioner:
+    type: MooseDocs.base.Serial
+
+Renderer:
+    type: MooseDocs.base.RevealRenderer
+    theme: simple
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.alert: default
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.bibtex:
+        duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
+    MooseDocs.extensions.katex:
+        macros:
+            \vec: "\\bar" # TODO: \vec doesn't render
+            \pf: "\\frac{\\partial #1}{\\partial #2}"
+    MooseDocs.extensions.style: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.layout: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.listing:
+        modal-link: False
+    MooseDocs.extensions.reveal:
+        translate: user_workshop/index.md
+        background_image: INL_Hex_Light_Presentation_Background_Thin.png
+    MooseDocs.extensions.datetime: default
