@@ -44,7 +44,7 @@ diffusivity.
 
 We introduce block restriction to differentiate between water and concrete.
 
-!listing step02_coef_diffusion/problems/step2.i
+!listing step02_coef_diffusion/inputs/step2.i
 
 !---
 
