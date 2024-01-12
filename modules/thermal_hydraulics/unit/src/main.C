@@ -18,7 +18,6 @@
 
 #include "ThermalHydraulicsApp.h"
 
-PerfLog Moose::perf_log("gtest");
 
 GTEST_API_ int
 main(int argc, char ** argv)

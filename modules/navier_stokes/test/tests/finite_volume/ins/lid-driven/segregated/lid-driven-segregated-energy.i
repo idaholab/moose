@@ -217,7 +217,7 @@ pressure_tag = "pressure_grad"
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'

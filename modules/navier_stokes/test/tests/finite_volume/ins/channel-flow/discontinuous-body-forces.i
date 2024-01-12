@@ -165,7 +165,7 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [friction_coefficient]
     type = ADGenericFunctorMaterial
     prop_names = 'friction_coefficient'

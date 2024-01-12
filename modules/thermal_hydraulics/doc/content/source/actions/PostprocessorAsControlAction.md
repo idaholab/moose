@@ -6,7 +6,7 @@ This conversion is performed for every postprocessor by every application that r
 `ThermalHydraulicsApp` syntax.
 
 This [Action](source/actions/Action.md) relies on creating a [CopyPostprocessorValueControl.md]
-with the postprocessor as the [!param](/Controls/CopyPostprocessorValueControl/postprocessor) parameter.
+with the postprocessor as the [!param](/ControlLogic/CopyPostprocessorValueControl/postprocessor) parameter.
 
 !syntax parameters /Postprocessors/PostprocessorAsControlAction
 

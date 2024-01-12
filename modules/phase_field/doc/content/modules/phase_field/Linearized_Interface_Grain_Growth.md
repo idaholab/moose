@@ -37,7 +37,7 @@ The MOOSE objects used in the linearized interface grain growth model are listed
 
 ## Bounded Solve
 
-When solving the linearized interface version of the grain growth model, [!cite](gong2018fast) and [!cite](chadwick2021development) found that the solve is unstable unless bounds are placed on the possible values for the transformed variables. Therefore, upper and lower bounds must be defined in the `[Bounds]` block for each variable using [ConstantBoundsAux](/ConstantBoundsAux.md). A typical bounds range is $\pm5$. For example:
+When solving the linearized interface version of the grain growth model, [!cite](gong2018fast) and [!cite](chadwick2021development) found that the solve is unstable unless bounds are placed on the possible values for the transformed variables. Therefore, upper and lower bounds must be defined in the `[Bounds]` block for each variable using [ConstantBounds](/ConstantBounds.md). A typical bounds range is $\pm5$. For example:
 
 !listing modules/phase_field/test/tests/grain_growth_w_linearized_interface/grain_growth_linearized_interface.i block=Bounds
 

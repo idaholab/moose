@@ -320,7 +320,7 @@ input_heat_flux = 40000.0
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [functor_constants]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k k_solid'

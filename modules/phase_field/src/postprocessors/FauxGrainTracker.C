@@ -154,7 +154,7 @@ FauxGrainTracker::initialize()
 void
 FauxGrainTracker::execute()
 {
-  Moose::perf_log.push("execute()", "FauxGrainTracker");
+  TIME_SECTION("execute", 2, "Executing grain tracker");
 
   for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
   {
@@ -213,14 +213,12 @@ FauxGrainTracker::execute()
   }
 
   _grain_count = std::max(_grain_count, _variables_used.size());
-
-  Moose::perf_log.pop("execute()", "FauxGrainTracker");
 }
 
 void
 FauxGrainTracker::finalize()
 {
-  Moose::perf_log.push("finalize()", "FauxGrainTracker");
+  TIME_SECTION("finalize", 2, "Finalizing grain tracker");
 
   _communicator.set_union(_variables_used);
   _communicator.set_union(_entity_id_to_var_num);
@@ -257,8 +255,6 @@ FauxGrainTracker::finalize()
       _centroid[var_num] = {grain_data[1], grain_data[2], grain_data[3]};
       _centroid[var_num] /= vol_count;
     }
-
-  Moose::perf_log.pop("finalize()", "FauxGrainTracker");
 }
 
 Real

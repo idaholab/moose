@@ -287,7 +287,8 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (parameters.get<std::string>("_moose_base") == "AuxKernel")
+    if (parameters.get<std::string>("_moose_base") == "AuxKernel" ||
+        parameters.get<std::string>("_moose_base") == "Bounds")
     {
       std::shared_ptr<AuxKernel> kernel =
           _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
@@ -329,6 +330,11 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
       else
         _elemental_array_aux_storage.addObject(kernel, tid);
     }
+    else
+      mooseAssert(false,
+                  "Attempting to add AuxKernel of type '" + kernel_name + "' and name '" + name +
+                      "' to the auxiliary system with invalid _moose_base: " +
+                      parameters.get<std::string>("_moose_base"));
   }
 }
 

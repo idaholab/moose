@@ -183,7 +183,7 @@ l = 4
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [rho]
     type = RhoFromPTFunctorMaterial
     fp = fp

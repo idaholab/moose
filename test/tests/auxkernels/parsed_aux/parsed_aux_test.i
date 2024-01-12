@@ -74,8 +74,8 @@
   []
 []
 
-[Bounds]
-  [u_bounds]
+[AuxKernels]
+  [set_parsed]
     type = ParsedAux
     variable = parsed
     coupled_variables = 'u v'

@@ -1,10 +1,10 @@
 # UnitTripControl
 
-!syntax description /Controls/UnitTripControl
+!syntax description /ControlLogic/UnitTripControl
 
 This object defines a control logic boolean `state` that is set to true if the
 condition is true, and false if the condition is false.
-Using the [!param](/Controls/UnitTripControl/latch) parameter, the `state` can always remain true
+Using the [!param](/ControlLogic/UnitTripControl/latch) parameter, the `state` can always remain true
 after a trip, or go back to false if the expression no longer evaluates to true.
 
 ## Example input syntax
@@ -14,8 +14,8 @@ when its value becomes larger than 0.6.
 
 !listing test/tests/controls/unit_trip_control/test.i block=Postprocessors ControlLogic
 
-!syntax parameters /Controls/UnitTripControl
+!syntax parameters /ControlLogic/UnitTripControl
 
-!syntax inputs /Controls/UnitTripControl
+!syntax inputs /ControlLogic/UnitTripControl
 
-!syntax children /Controls/UnitTripControl
+!syntax children /ControlLogic/UnitTripControl

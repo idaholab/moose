@@ -193,7 +193,7 @@ temp_ref = '${fparse hot_temp / 2.}'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'alpha_b cp k'

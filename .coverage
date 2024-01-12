@@ -51,7 +51,7 @@ require_total = 87
 require_total = 85
 
 [misc]
-require_total = 33
+require_total = 32
 
 [navier_stokes]
 require_total = 77

@@ -289,6 +289,18 @@ private:
   bool connectionWrite(wasp::DataObject & object) { return _connection->write(object, errors); }
 
   /**
+   * @return Whether or not the root is valid
+   *
+   * Will be true if the app is valid, the root is not nullptr, and the root node view is not null
+   */
+  bool rootIsValid() const;
+
+  /**
+   * @return The current root node
+   */
+  hit::Node & getRoot();
+
+  /**
    * @brief _moose_app - reference to parent application that owns this server
    */
   MooseApp & _moose_app;

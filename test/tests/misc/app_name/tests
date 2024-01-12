@@ -3,7 +3,7 @@
     type = 'RunApp'
     cli_args = '--type'
     expect_out = "MooseTestApp"
-    input = 'IGNORED'
+    input = ''
     input_switch = ''
     issues = '#11337'
     design = MooseApp.md

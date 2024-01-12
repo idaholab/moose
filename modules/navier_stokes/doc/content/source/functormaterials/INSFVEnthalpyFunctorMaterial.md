@@ -10,8 +10,8 @@ It defines the following functor material properties, for a variety of use cases
 - specific enthalpy $h$ or $c_p T$
 - time derivative of the specific enthalpy $\dfrac{dh}{dt} = c_p \dfrac{dT}{dt}$
 
-!syntax parameters /Materials/INSFVEnthalpyFunctorMaterial
+!syntax parameters /FunctorMaterials/INSFVEnthalpyFunctorMaterial
 
-!syntax inputs /Materials/INSFVEnthalpyFunctorMaterial
+!syntax inputs /FunctorMaterials/INSFVEnthalpyFunctorMaterial
 
-!syntax children /Materials/INSFVEnthalpyFunctorMaterial
+!syntax children /FunctorMaterials/INSFVEnthalpyFunctorMaterial

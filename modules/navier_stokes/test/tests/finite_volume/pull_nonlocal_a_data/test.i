@@ -121,7 +121,7 @@ rho = 1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [mu]
     type = ADGenericFunctorMaterial
     prop_names = 'mu'

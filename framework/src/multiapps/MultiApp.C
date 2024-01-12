@@ -30,6 +30,7 @@
 #include "Positions.h"
 #include "Transient.h"
 #include "Backup.h"
+#include "Parser.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -405,7 +406,7 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+  _app.builder().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
@@ -1101,17 +1102,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
     if (displaced_problem)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
   }
+
+  // If only one input file was provided, use it for all the solves
+  const auto input_index = _input_files.size() == 1 ? 0 : _first_local_app + i;
+  const auto & input_file = _input_files[input_index];
+
+  // create new parser tree for the application and parse
+  app_params.set<std::shared_ptr<Parser>>("_parser") = std::make_shared<Parser>(input_file);
+
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
-  std::string input_file = "";
-  if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
-    input_file = _input_files[0];
-  else
-    input_file = _input_files[_first_local_app + i];
-
   app->setGlobalTimeOffset(start_time);
-  app->setInputFileName(input_file);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
   app->setRecover(_app.isRecovering());

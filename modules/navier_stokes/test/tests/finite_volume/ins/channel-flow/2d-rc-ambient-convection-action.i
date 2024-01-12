@@ -63,7 +63,7 @@ alpha = 1
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [const_functor]
     type = ADGenericFunctorMaterial
     prop_names = 'cp k rho mu alpha'

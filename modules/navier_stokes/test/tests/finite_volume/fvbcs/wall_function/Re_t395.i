@@ -235,9 +235,9 @@ velocity_interp_method='rc'
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [total_viscosity]
-    type = MixingLengthTurbulentViscosityMaterial
+    type = MixingLengthTurbulentViscosityFunctorMaterial
     u = 'u'                             #computes total viscosity = mu_t + mu
     v = 'v'                             #property is called total_viscosity
     mixing_length = mixing_len

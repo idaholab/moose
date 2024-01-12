@@ -117,7 +117,7 @@ PropertyReadFile::initialize()
     _reader.setFileName(_prop_file_names[_current_file_index]);
     readData();
   }
-  else if (_current_file_index == _prop_file_names.size())
+  else if (_prop_file_names.size() > 1 && _current_file_index == _prop_file_names.size())
     mooseInfo("Last file specified has been read. The file will no longer be updated.");
 }
 
