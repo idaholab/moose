@@ -241,10 +241,10 @@ ComputeLinearElasticPFFractureStress::computeQpStress()
 
     if (_use_current_hist)
       hist_variable = _H[_qp];
-
+  }
     if (hist_variable < _barrier[_qp])
       hist_variable = _barrier[_qp];
-  }
+  
 
   // Elastic free energy density
   _E[_qp] =
