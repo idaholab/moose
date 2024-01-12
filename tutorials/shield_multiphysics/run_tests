@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+for dir in */
+do
+    LOC="${dir%/}"
+    if [[ "${LOC}" == step* ]]; then
+        echo "${LOC}/run_tests $@"
+        (cd ${LOC} && ./run_tests "$@")
+    fi
+done
