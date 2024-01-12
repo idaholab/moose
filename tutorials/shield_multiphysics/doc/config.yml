@@ -1,5 +1,5 @@
 Content:
-    workshop:
+    user_workshop:
         root_dir: ${MOOSE_DIR}/tutorials/shield_multiphysics/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
