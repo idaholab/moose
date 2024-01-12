@@ -441,6 +441,12 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 
   closeTaggedMatrices(matrix_tags);
 
+  _linear_implicit_system.matrix->close();
+  _linear_implicit_system.rhs->close();
+
+  _linear_implicit_system.matrix->print();
+  _linear_implicit_system.rhs->print();
+
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
   _app.solutionInvalidity().solutionInvalidAccumulation();

@@ -33,24 +33,25 @@
 []
 
 [LinearFVBCs]
-  [left_dir]
+  [inflow]
     type = LinearFVFunctorDirichletBC
     variable = u
     boundary = "left"
     functor = analytic_solution
   []
-  [right_dir]
-    type = LinearFVFunctorDirichletBC
+  [outflow]
+    type = LinearFVOutflowBC
     variable = u
     boundary = "right"
-    functor = analytic_solution
+    velocity = "0.5 0 0"
+    use_two_term_expansion = true
   []
 []
 
 [Functions]
   [source_func]
     type = ParsedFunction
-    expression = 'x'
+    expression = '0.5*x'
   []
   [analytic_solution]
     type = ParsedFunction
@@ -75,6 +76,10 @@
 [Outputs]
   [csv]
     type = CSV
+    execute_on = FINAL
+  []
+  [exo]
+    type = Exodus
     execute_on = FINAL
   []
 []

@@ -28,6 +28,8 @@
 #include "FaceArgInterface.h"
 #include "MooseLinearVariableFV.h"
 
+#include "libmesh/linear_implicit_system.h"
+
 // Forward declerations
 template <typename>
 class MooseVariableFE;
@@ -68,6 +70,8 @@ public:
   static InputParameters validParams();
 
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+
+  virtual bool needsExtrapolation() const { return false; }
 
   /**
    * Get a reference to the subproblem
@@ -141,6 +145,9 @@ public:
     _current_face_type = face_type;
   }
 
+  const FaceInfo * currentFaceInfo() const { return _current_face_info; }
+  FaceInfo::VarFaceNeighbors currentFaceType() const { return _current_face_type; }
+
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
@@ -171,6 +178,9 @@ protected:
 
   /// Reference to SystemBase
   SystemBase & _sys;
+
+  /// Reference to the libmesh linear system this object contributes to
+  libMesh::LinearImplicitSystem & _linear_system;
 
   /// Boolean to indicate if the boundary condition includes the material property multipliers ot not
   bool _includes_material_multiplier;

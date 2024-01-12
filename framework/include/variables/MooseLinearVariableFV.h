@@ -93,31 +93,26 @@ public:
   std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() { return _grad_cache; }
 
   /**
-   * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
-   * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
-   * \p adGradSln(const Elem * const) resulting in infinite recursion
-   * @param elem The element for which to retrieve the gradient
-   * @param state State argument which describes at what time / solution iteration  state we want to
-   * evaluate the variable
-   * @param correct_skewness Whether to perform skew corrections
-   * @return The gradient at the element centroid
+   * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
+   * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
+   * some approximation for the boundary face value using the adjacent cell centroid information. In
+   * the base implementation we only inspect the face information object for whether we should
+   * perform extrapolation. However, derived classes may allow discontinuities between + and - side
+   * face values, e.g. one side may have a Dirichlet condition and the other side may perform
+   * extrapolation to determine its value
+   * @param fi The face information object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @param state The state at which to determine whether the face is extrapolated or not
+   * @return Whether the potentially sided (as indicated by \p elem) \p fi is an extrapolated
+   * boundary face for this variable
    */
-  virtual const VectorValue<Real> & adGradSln(const Elem * const elem,
-                                              const StateArg & state,
-                                              const bool correct_skewness = false) const;
+  virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                          const Elem * elem,
+                                          const Moose::StateArg & state) const override;
 
-  /**
-   * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
-   * "Correcting" the face gradient involves weighting the gradient stencil more heavily on the
-   * solution values on the face-neighbor cells than a linear interpolation between cell center
-   * gradients does
-   * @param face The face for which to retrieve the gradient.
-   * @param state State argument which describes at what time / solution iteration  state we want to
-   * evaluate the variable
-   * @param correct_skewness Whether to perform skew corrections
-   */
-  virtual VectorValue<Real>
-  adGradSln(const FaceInfo & fi, const StateArg & state, const bool correct_skewness = false) const;
+  virtual const VectorValue<Real> & gradSln(const ElemInfo * const elem_info) const;
+
+  virtual VectorValue<Real> gradSln(const FaceInfo & fi) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -160,7 +155,7 @@ public:
    * Get the boundary condition object which corresponds to the given boundary ID
    * @param bd_id The boundary ID whose condition should be fetched
    */
-  LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id);
+  LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -605,6 +600,8 @@ protected:
   /// A cache for storing gradients on elements
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_cache;
 
+  mutable RealVectorValue _cell_gradient;
+
   friend void Moose::initDofIndices<>(MooseLinearVariableFV<OutputType> &, const Elem &);
 };
 
@@ -641,26 +638,28 @@ MooseLinearVariableFV<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
-                                                    const StateArg & state) const
+                                                    const StateArg & /*state*/) const
 {
-  return adGradSln(qp_arg.elem, state, false);
+  const auto & elem_info = &_mesh.elemInfo(qp_arg.elem->id());
+  return gradSln(elem_info);
 }
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg,
-                                                    const StateArg & state) const
+                                                    const StateArg & /*state*/) const
 {
-  return adGradSln(elem_arg.elem, state, elem_arg.correct_skewness);
+  const auto & elem_info = &_mesh.elemInfo(elem_arg.elem->id());
+  return gradSln(elem_info);
 }
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const FaceArg & face,
-                                                    const StateArg & state) const
+                                                    const StateArg & /*state*/) const
 {
   mooseAssert(face.fi, "We must have a non-null face information");
-  return adGradSln(*face.fi, state, face.correct_skewness);
+  return gradSln(*face.fi);
 }
 
 template <>

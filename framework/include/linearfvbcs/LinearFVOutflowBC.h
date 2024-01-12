@@ -12,17 +12,19 @@
 #include "LinearFVBoundaryCondition.h"
 
 /**
- * Class implementing a Dirichlet boundary condition for linear finite
+ * Class implementing a outflow boundary condition for linear finite
  * volume variables
  */
-class LinearFVFunctorDirichletBC : public LinearFVBoundaryCondition
+class LinearFVOutflowBC : public LinearFVBoundaryCondition
 {
 public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVFunctorDirichletBC(const InputParameters & parameters);
+  LinearFVOutflowBC(const InputParameters & parameters);
+
+  virtual bool needsExtrapolation() const override { return _two_term_expansion; }
 
   static InputParameters validParams();
 
@@ -39,11 +41,7 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-
-  /// Compute the distance for the gradient approximation. We need this because
-  /// the sideset associated within this boundary condition might be within the mesh.
-  Real computeCellToFaceDistance() const;
-
-  /// The functor for this BC (can be value, function, etc)
-  const Moose::Functor<Real> & _functor;
+  RealVectorValue computeCellToFaceVector() const;
+  const bool _two_term_expansion;
+  const RealVectorValue _velocity;
 };
