@@ -9,14 +9,13 @@
       type = 'Exodiff'
       input = 'block_weighted_partitioner.i'
       exodiff = 'block_weighted_partitioner_out.e'
-      capabilities = 'petsc>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      # Parmetis generates different results when using 32 bit or 64 bit integers
+      capabilities = 'petsc>=3.18.0 parmetis dof_id_bytes=8'
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
       mesh_mode = REPLICATED
-      parmetis = true
-      # Parmetis generates different results when using 32 bit or 64 bit integers
-      dof_id_bytes = 8
       detail = 'when using ReplicatedMesh'
     []
 
@@ -25,13 +24,13 @@
       input = 'block_weighted_partitioner.i'
       exodiff = 'block_weighted_partitioner_out_distributed.e'
       cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
-      capabilities = 'petsc>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
+      # Parmetis generates different results when using 32 bit or 64 bit integers
+      capabilities = 'petsc>=3.18.0 parmetis dof_id_bytes=8'
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
       mesh_mode = DISTRIBUTED
-      parmetis = true
-      dof_id_bytes = 8
       detail = 'and when using DistributedMesh.'
     []
   []
@@ -45,7 +44,6 @@
       cli_args = 'Mesh/Partitioner/block=1337'
       capabilities = 'petsc>=3.10.0'
       expect_err = 'Number of weights 3 does not match with the number of blocks 1'
-
       detail = 'the input blocks do not match the size of the input weights'
     []
     [missing_block]
