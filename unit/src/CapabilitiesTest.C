@@ -13,10 +13,17 @@
 
 TEST(CapabilitiesTest, boolTest)
 {
-  Moose::Capabilities::add("unittest_bool");
+  Moose::Capabilities::add("unittest_bool", true);
+  Moose::Capabilities::add("unittest_bool2", false);
 
   EXPECT_TRUE(Moose::Capabilities::check("unittest_bool").first);
   EXPECT_FALSE(Moose::Capabilities::check("!unittest_bool").first);
+  EXPECT_TRUE(Moose::Capabilities::check("!unittest_bool2").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_bool2").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_bool2>10").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_bool2<=10").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_bool2<=1.0.0").first);
+  EXPECT_FALSE(Moose::Capabilities::check("unittest_bool2=>1.0.0").first);
   EXPECT_FALSE(Moose::Capabilities::check("unittest_doesnotexist").first);
   EXPECT_TRUE(Moose::Capabilities::check("!unittest_doesnotexist").first);
 }
@@ -90,7 +97,7 @@ TEST(CapabilitiesTest, versionTest)
 
 TEST(CapabilitiesTest, multipleTest)
 {
-  Moose::Capabilities::add("unittest2_bool");
+  Moose::Capabilities::add("unittest2_bool", true);
   Moose::Capabilities::add("unittest2_int", 78);
   Moose::Capabilities::add("unittest2_string", "CLanG");
   Moose::Capabilities::add("unittest2_version", "3.2.1");

@@ -32,7 +32,7 @@ public:
   typedef std::variant<bool, int, std::string> CapabilityType;
 
   /// register a new capability
-  static void add(const std::string & capability, CapabilityType value = true);
+  static void add(const std::string & capability, CapabilityType value);
   static void add(const std::string & capability, const char * value);
 
   /// create a JSON dump of the capabilities registry
