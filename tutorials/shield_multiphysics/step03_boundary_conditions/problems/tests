@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [step]
+    type = RunApp
+    input = 'step2.i'
+    requirement = "The shield multiphysics tutorial shall include a step demonstrating the use of "
+                  "various boundary conditions."
+  []
+[]
