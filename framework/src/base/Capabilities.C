@@ -144,14 +144,21 @@ Capabilities::checkInternal(const std::string & requested_capabilities) const
     if (it != _capability_registry.end())
     {
       // if no operator is found we can check for existence where it shouldn't exist
-      if (negate and op == ops.size())
-        return {false, capability + " supported"};
+      if (op == ops.size())
+      {
+        if (std::holds_alternative<bool>(it->second))
+          return {std::get<bool>(it->second) != negate,
+                  capability + (negate ? " supported" : " not supported")};
+
+        return {!negate, capability + (negate ? " supported" : " not supported")};
+      }
 
       if (std::holds_alternative<bool>(it->second) && std::get<bool>(it->second) == negate)
         return {false, capability + (negate ? " supported" : " not supported")};
     }
-    else if (!negate)
-      return {false, capability + " not supported"};
+    else
+      // capability is not registered at all
+      return {negate, capability + " not supported"};
 
     // if there is no operator we're done here
     if (op == ops.size())
