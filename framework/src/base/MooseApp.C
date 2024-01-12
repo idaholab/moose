@@ -697,23 +697,40 @@ MooseApp::registerCapabilities()
 {
   // register capabilities
   if (_trap_fpe)
-    Moose::Capabilities::add("trap_fpe");
+    Moose::Capabilities::add("trap_fpe", true);
+  else
+    Moose::Capabilities::add("trap_fpe", false);
+
 #ifdef LIBTORCH_ENABLED
-  Moose::Capabilities::add("libtorch");
+  Moose::Capabilities::add("libtorch", true);
+#else
+  Moose::Capabilities::add("libtorch", false);
 #endif
+
 #ifdef HAVE_GPERFTOOLS
-  Moose::Capabilities::add("gperftools");
+  Moose::Capabilities::add("gperftools", true);
+#else
+  Moose::Capabilities::add("gperftools", false);
 #endif
+
 #ifdef MOOSE_HAVE_LIBPNG
-  Moose::Capabilities::add("libpng");
+  Moose::Capabilities::add("libpng", true);
+#else
+  Moose::Capabilities::add("libpng", false);
 #endif
+
 #ifdef CUDA_SUPPORTED
-  Moose::Capabilities::add("cuda");
+  Moose::Capabilities::add("cuda", true);
+#else
+  Moose::Capabilities::add("cuda", false);
 #endif
   Moose::Capabilities::add("ad_size", MOOSE_AD_MAX_DOFS_PER_ELEM);
   Moose::Capabilities::add("method", QUOTE(METHOD));
+
 #ifdef WASP_ENABLED
-  Moose::Capabilities::add("wasp");
+  Moose::Capabilities::add("wasp", true);
+#else
+  Moose::Capabilities::add("wasp", false);
 #endif
 
   // PETSc capabilities
@@ -721,32 +738,59 @@ MooseApp::registerCapabilities()
       "petsc",
       QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR));
+
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
-  Moose::Capabilities::add("petsc_release");
+  Moose::Capabilities::add("petsc_release", true);
+#else
+  Moose::Capabilities::add("petsc_release", false);
 #endif
+
 #ifdef LIBMESH_PETSC_USE_DEBUG
-  Moose::Capabilities::add("petsc_debug");
+  Moose::Capabilities::add("petsc_debug", true);
+#else
+  Moose::Capabilities::add("petsc_debug", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_SUPERLU_DIST
-  Moose::Capabilities::add("superlu");
+  Moose::Capabilities::add("superlu", true);
+#else
+  Moose::Capabilities::add("superlu", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_MUMPS
-  Moose::Capabilities::add("mumps");
+  Moose::Capabilities::add("mumps", true);
+#else
+  Moose::Capabilities::add("mumps", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_STRUMPACK
-  Moose::Capabilities::add("strumpack");
+  Moose::Capabilities::add("strumpack", true);
+#else
+  Moose::Capabilities::add("strumpack", false);
 #endif
+
 #if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
-  Moose::Capabilities::add("parmetis");
+  Moose::Capabilities::add("parmetis", true);
+#else
+  Moose::Capabilities::add("parmetis", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_CHACO
-  Moose::Capabilities::add("chaco");
+  Moose::Capabilities::add("chaco", true);
+#else
+  Moose::Capabilities::add("chaco", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_PARTY
-  Moose::Capabilities::add("party");
+  Moose::Capabilities::add("party", true);
+#else
+  Moose::Capabilities::add("party", false);
 #endif
+
 #ifdef LIBMESH_PETSC_HAVE_PTSCOTCH
-  Moose::Capabilities::add("ptscotch");
+  Moose::Capabilities::add("ptscotch", true);
+#else
+  Moose::Capabilities::add("ptscotch", false);
 #endif
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -754,54 +798,87 @@ MooseApp::registerCapabilities()
       "slepc",
       QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_SLEPC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR));
+#else
+  Moose::Capabilities::add("slepc", false);
 #endif
+
 #ifdef LIBMESH_HAVE_EXODUS_API
   Moose::Capabilities::add("exodus",
                            QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
                                LIBMESH_DETECTED_EXODUS_VERSION_MINOR));
+#else
+  Moose::Capabilities::add("exodus", false);
 #endif
+
 #ifdef LIBMESH_HAVE_VTK
   Moose::Capabilities::add(
       "vtk",
       QUOTE(LIBMESH_DETECTED_VTK_VERSION_MAJOR) "." QUOTE(
           LIBMESH_DETECTED_VTK_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_VTK_VERSION_SUBMINOR));
+#else
+  Moose::Capabilities::add("vtk", false);
 #endif
+
 #ifdef LIBMESH_HAVE_CURL
-  Moose::Capabilities::add("curl");
+  Moose::Capabilities::add("curl", true);
+#else
+  Moose::Capabilities::add("curl", false);
 #endif
 
 // libmesh stuff
 #ifdef LIBMESH_ENABLE_AMR
-  Moose::Capabilities::add("amr");
+  Moose::Capabilities::add("amr", true);
+#else
+  Moose::Capabilities::add("amr", false);
 #endif
+
 #ifdef LIBMESH_HAVE_NANOFLANN
-  Moose::Capabilities::add("nanoflann");
+  Moose::Capabilities::add("nanoflann", true);
+#else
+  Moose::Capabilities::add("nanoflann", false);
 #endif
+
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
   Moose::Capabilities::add("fparser", "jit");
 #else
   Moose::Capabilities::add("fparser", "byte_code");
 #endif
+#else
+  Moose::Capabilities::add("fparser", false);
 #endif
+
 #ifdef LIBMESH_HAVE_DLOPEN
-  Moose::Capabilities::add("dlopen");
+  Moose::Capabilities::add("dlopen", true);
+#else
+  Moose::Capabilities::add("dlopen", false);
 #endif
 
 #ifdef LIBMESH_USING_THREADS
-  Moose::Capabilities::add("threads");
+  Moose::Capabilities::add("threads", true);
+#else
+  Moose::Capabilities::add("threads", false);
 #endif
+
 #ifdef LIBMESH_HAVE_OPENMP
-  Moose::Capabilities::add("openmp");
+  Moose::Capabilities::add("openmp", true);
+#else
+  Moose::Capabilities::add("openmp", false);
 #endif
+
 #ifdef LIBMESH_HAVE_TBB_API
-  Moose::Capabilities::add("tbb");
+  Moose::Capabilities::add("tbb", true);
+#else
+  Moose::Capabilities::add("tbb", false);
 #endif
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-  Moose::Capabilities::add("unique_id");
+  Moose::Capabilities::add("unique_id", true);
+#else
+  Moose::Capabilities::add("unique_id", false);
 #endif
-  Moose::Capabilities::add("dof_id_bytes", sizeof(dof_id_type));
+
+  Moose::Capabilities::add("dof_id_bytes", static_cast<int>(sizeof(dof_id_type)));
 
 // compiler
 #if defined(__clang__)
@@ -810,14 +887,19 @@ MooseApp::registerCapabilities()
   Moose::Capabilities::add("compiler", "gcc");
 #elif defined(_MSC_VER)
   Moose::Capabilities::add("compiler", "msvc");
+#else
+  Moose::Capabilities::add("compiler", false);
 #endif
 
 // OS related
 #ifdef __APPLE__
-  Moose::Capabilities::add("apple");
-#endif
-#ifdef __WIN32__
-  Moose::Capabilities::add("win32");
+  Moose::Capabilities::add("platform", "darwin");
+#elif __WIN32__
+  Moose::Capabilities::add("platform", "win32");
+#elif __linux__
+  Moose::Capabilities::add("platform", "linux");
+#elif __unix__ // all unices not caught above
+  Moose::Capabilities::add("platform", "unix");
 #endif
 }
 
