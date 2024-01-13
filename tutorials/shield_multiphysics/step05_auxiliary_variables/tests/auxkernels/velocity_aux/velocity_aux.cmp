@@ -1,0 +1,16 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	pressure    # min:               0 @ t1,n1	max:            2000 @ t1,n9
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	velocity_x  # min:               0 @ t1,b0,e1	max:    0.0021180451 @ t2,b0,e4
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
