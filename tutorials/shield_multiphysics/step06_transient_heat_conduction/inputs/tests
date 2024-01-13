@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [step]
+    type = RunApp
+    input = 'step6_transient.i'
+    requirement = "The shield multiphysics tutorial shall include a demonstration of solving the "
+                  "transient heat equation."
+  []
+[]

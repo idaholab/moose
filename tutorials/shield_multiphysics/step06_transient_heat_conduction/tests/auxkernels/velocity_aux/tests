@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'velocity_aux.i'
+    exodiff = 'velocity_aux_out.e'
+    requirement = "The Darcy-Thermomechanics tutorial shall include method for computing the velocity based pressure using Darcy equation."
+    custom_cmp = 'velocity_aux.cmp'
+  []
+[]
