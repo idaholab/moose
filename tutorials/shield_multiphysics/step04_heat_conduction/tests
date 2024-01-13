@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [step]
+    type = RunApp
+    input = 'step3.i'
+    requirement = "The shield multiphysics tutorial shall include a demonstration of creating "
+                  "material properties."
+  []
+  [stepb]
+    type = RunApp
+    input = 'step3b.i'
+    requirement = "The shield multiphysics tutorial shall include a demonstration of creating "
+                  "material properties with variable inputs based on a function."
+  []
+[]
