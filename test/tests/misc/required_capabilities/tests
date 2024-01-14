@@ -6,7 +6,7 @@
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported.*\nCAPABILITIES_MISMATCH_END'
     requirement = 'The system shall not start a simulation if a requested capability is registered as false.'
   []
   [negative_not_supported_registered]
@@ -22,7 +22,7 @@
     input = input.i
     chaco = false
     cli_args = '--required-capabilities chaco>10'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\nchaco not supported.*\nCAPABILITIES_MISMATCH_END'
     requirement = 'The system shall not start a simulation if a requested capability is not registered.'
   []
   [negative_false_compare_registered]
@@ -37,7 +37,7 @@
     type = RunApp
     input = input.i
     cli_args = '--required-capabilities doesnotexist'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\ndoesnotexist not supported\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\ndoesnotexist not supported.*\nCAPABILITIES_MISMATCH_END'
     requirement = 'The system shall not start a simulation if a requested capability is not supported.'
   []
   [negative_not_supported_not_registered]
@@ -51,7 +51,7 @@
     type = RunApp
     input = input.i
     cli_args = '--required-capabilities !petsc'
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc supported\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc supported.*\nCAPABILITIES_MISMATCH_END'
     requirement = 'The system shall not start a simulation if an excluded capability is supported.'
   []
   [supported]
@@ -65,7 +65,7 @@
     type = RunApp
     input = input.i
     cli_args = "--required-capabilities petsc<1.0.3"
-    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc<1.0.3 version not matched\nCAPABILITIES_MISMATCH_END'
+    expect_out = 'CAPABILITIES_MISMATCH_BEGIN\npetsc<1.0.3 version not matched.*\nCAPABILITIES_MISMATCH_END'
     requirement = 'The system shall not start a simulation if a requested capability has the wrong version.'
   []
   [negative_version_mismatch]
