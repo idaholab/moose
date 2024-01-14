@@ -668,9 +668,9 @@ def checkCapabilities(supported, test):
             if isinstance(supported[capability], bool) and supported[capability] == negate:
                 all_supported = False
                 if negate:
-                    reasons.append(capability + ' not supported')
-                else:
                     reasons.append(capability + ' supported')
+                else:
+                    reasons.append(capability + ' not supported')
                 continue
         else:
             if not negate:
