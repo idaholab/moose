@@ -695,212 +695,361 @@ MooseApp::MooseApp(InputParameters parameters)
 void
 MooseApp::registerCapabilities()
 {
+  // helper lambdas
+  auto haveCapability = [](const std::string & capability, const std::string & doc)
+  { Moose::Capabilities::add(capability, true, doc + " is available."); };
+
+  auto missingCapability =
+      [](const std::string & capability, const std::string & doc, const std::string & help = "")
+  { Moose::Capabilities::add(capability, false, doc + " is not available. " + help); };
+
+  auto haveCapabilityVersion =
+      [](const std::string & capability, const std::string & doc, const std::string & version)
+  {
+    Moose::Capabilities::add(capability, version, doc + " version " + version + " is available.");
+  };
+
+  auto petscMissingCapability = [](const std::string & capability, const std::string & doc)
+  {
+    Moose::Capabilities::add(
+        capability, false, doc + " is not available. Check your PETSc configure options.");
+  };
+
+  auto libmeshMissingCapability =
+      [](const std::string & capability, const std::string & doc, const std::string & config_option)
+  {
+    Moose::Capabilities::add(capability,
+                             false,
+                             doc + " is not available. It is controlled by the `" + config_option +
+                                 "` libMesh configure option.");
+  };
+
   // register capabilities
   if (_trap_fpe)
-    Moose::Capabilities::add("trap_fpe", true);
+    Moose::Capabilities::add("trap_fpe",
+                             true,
+                             "Trapping floating point exceptions is enabled (in debug mode this "
+                             "can be disabled using the --no-trap-fpe option).");
   else
-    Moose::Capabilities::add("trap_fpe", false);
+    Moose::Capabilities::add("trap_fpe",
+                             false,
+                             "Trapping floating point exceptions is not enabled (enable them using "
+                             "the --trap-fpe option or by running a debug mode executable).");
 
+  {
+    const auto doc = "LibTorch machine learning and parallel tensor algebra library";
 #ifdef LIBTORCH_ENABLED
-  Moose::Capabilities::add("libtorch", true);
+    haveCapability("libtorch", doc);
 #else
-  Moose::Capabilities::add("libtorch", false);
+    missingCapability("libtorch",
+                      doc,
+                      "Check "
+                      "https://mooseframework.inl.gov/moose/getting_started/installation/"
+                      "install_libtorch.html for "
+                      "instructions on how to configure and build moose with libTorch.");
 #endif
+  }
 
+  {
+    const auto doc = "gperftools code performance analysis and profiling library";
 #ifdef HAVE_GPERFTOOLS
-  Moose::Capabilities::add("gperftools", true);
+    haveCapability("gperftools", doc);
 #else
-  Moose::Capabilities::add("gperftools", false);
+    missingCapability("gperftools",
+                      doc,
+                      "Check https://mooseframework.inl.gov/application_development/profiling.html "
+                      "for instructions on profiling MOOSE based applications.");
 #endif
+  }
 
+  {
+    const auto doc = "libPNG portable network graphics format library";
 #ifdef MOOSE_HAVE_LIBPNG
-  Moose::Capabilities::add("libpng", true);
+    haveCapability("libpng", doc);
 #else
-  Moose::Capabilities::add("libpng", false);
+    missingCapability("libpng",
+                      doc,
+                      "Install libpng through conda or your distribution and check that it gets "
+                      "detected through pkg-config, then reconfigure and rebuild MOOSE.");
 #endif
+  }
 
+  {
+    const auto doc = "NVIDIA GPU parallel computing platform";
 #ifdef CUDA_SUPPORTED
-  Moose::Capabilities::add("cuda", true);
+    haveCapability("cuda", doc);
 #else
-  Moose::Capabilities::add("cuda", false);
+    missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
 #endif
-  Moose::Capabilities::add("ad_size", MOOSE_AD_MAX_DOFS_PER_ELEM);
-  Moose::Capabilities::add("method", QUOTE(METHOD));
+  }
 
-#ifdef WASP_ENABLED
-  Moose::Capabilities::add("wasp", true);
-#else
-  Moose::Capabilities::add("wasp", false);
-#endif
-
-  // PETSc capabilities
   Moose::Capabilities::add(
-      "petsc",
-      QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
-          LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR));
+      "ad_size",
+      MOOSE_AD_MAX_DOFS_PER_ELEM,
+      "MOOSE was configured and built with a dual number backing store size of " +
+          Moose::stringify(MOOSE_AD_MAX_DOFS_PER_ELEM) +
+          ". Complex simulations with many variables or contact problems may require larger "
+          "values. Reconfigure MOOSE with the --with-derivative-size=<n> option in the root of the "
+          "repository.");
+  {
+    const std::string method = QUOTE(METHOD);
+    Moose::Capabilities::add(
+        "method", method, "The executable was built with METHOD=\"" + method + "\"");
+  }
+
+  {
+    const auto doc = "Workbench Analysis Sequence Processors (WASP) parser library";
+#ifdef WASP_ENABLED
+    haveCapability("wasp", doc);
+#else
+    missingCapability("wasp", doc, " Unable to parse input files.");
+#endif
+  }
+
+  {
+    const std::string version = QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
+        LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR);
+    Moose::Capabilities::add("petsc", version, "Using PETSc version " + version + ".");
+  }
 
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_RELEASE
-  Moose::Capabilities::add("petsc_release", true);
+  Moose::Capabilities::add("petsc_release", true, "Using a release version of PETSc.");
 #else
-  Moose::Capabilities::add("petsc_release", false);
+  Moose::Capabilities::add("petsc_release", false, "Not using a release version of PETSc.");
 #endif
 
 #ifdef LIBMESH_PETSC_USE_DEBUG
-  Moose::Capabilities::add("petsc_debug", true);
+  Moose::Capabilities::add("petsc_debug", true, "PETSc was built with debugging options.");
 #else
-  Moose::Capabilities::add("petsc_debug", false);
+  Moose::Capabilities::add("petsc_debug", false, "PETSc was built without debugging options.");
 #endif
 
+  {
+    const auto doc = "SuperLU direct solver";
 #ifdef LIBMESH_PETSC_HAVE_SUPERLU_DIST
-  Moose::Capabilities::add("superlu", true);
+    haveCapability("superlu", doc);
 #else
-  Moose::Capabilities::add("superlu", false);
+    petscMissingCapability("superlu", doc);
 #endif
+  }
 
+  {
+    const auto doc = "MUltifrontal Massively Parallel sparse direct Solver (MUMPS)";
 #ifdef LIBMESH_PETSC_HAVE_MUMPS
-  Moose::Capabilities::add("mumps", true);
+    haveCapability("mumps", doc);
 #else
-  Moose::Capabilities::add("mumps", false);
+    petscMissingCapability("mumps", doc);
 #endif
+  }
 
+  {
+    const auto doc = "STRUMPACK - STRUctured Matrix PACKage solver library";
 #ifdef LIBMESH_PETSC_HAVE_STRUMPACK
-  Moose::Capabilities::add("strumpack", true);
+    haveCapability("strumpack", doc);
 #else
-  Moose::Capabilities::add("strumpack", false);
+    petscMissingCapability("strumpack", doc);
 #endif
+  }
 
+  {
+    const auto doc = "Parmetis partitioning library";
 #if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
-  Moose::Capabilities::add("parmetis", true);
+    haveCapability("parmetis", doc);
 #else
-  Moose::Capabilities::add("parmetis", false);
+    petscMissingCapability("parmetis", doc);
 #endif
+  }
 
+  {
+    const auto doc = "Chaco graph partitioning library";
 #ifdef LIBMESH_PETSC_HAVE_CHACO
-  Moose::Capabilities::add("chaco", true);
+    haveCapability("chaco", doc);
 #else
-  Moose::Capabilities::add("chaco", false);
+    petscMissingCapability("chaco", doc);
 #endif
+  }
 
+  {
+    const auto doc = "Party matrix or graph partitioning library";
 #ifdef LIBMESH_PETSC_HAVE_PARTY
-  Moose::Capabilities::add("party", true);
+    haveCapability("party", doc);
 #else
-  Moose::Capabilities::add("party", false);
+    petscMissingCapability("party", doc);
 #endif
+  }
 
+  {
+    const auto doc = "PT-Scotch graph partitioning library";
 #ifdef LIBMESH_PETSC_HAVE_PTSCOTCH
-  Moose::Capabilities::add("ptscotch", true);
+    haveCapability("ptscotch", doc);
 #else
-  Moose::Capabilities::add("ptscotch", false);
+    petscMissingCapability("ptscotch", doc);
 #endif
+  }
 
+  {
+    const auto doc = "Scalable Library for Eigenvalue Problem Computations (SLEPc)";
 #ifdef LIBMESH_HAVE_SLEPC
-  Moose::Capabilities::add(
-      "slepc",
-      QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
-          LIBMESH_DETECTED_SLEPC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR));
+    const auto version = QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
+        LIBMESH_DETECTED_SLEPC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR);
+    haveCapabilityVersion("slepc", doc, version);
 #else
-  Moose::Capabilities::add("slepc", false);
+    petscMissingCapability("slepc", doc);
 #endif
+  }
 
+  {
+    const auto doc = "Exodus mesh file format library";
 #ifdef LIBMESH_HAVE_EXODUS_API
-  Moose::Capabilities::add("exodus",
-                           QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
-                               LIBMESH_DETECTED_EXODUS_VERSION_MINOR));
+    const std::string version = QUOTE(LIBMESH_DETECTED_EXODUS_VERSION_MAJOR) "." QUOTE(
+        LIBMESH_DETECTED_EXODUS_VERSION_MINOR);
+    haveCapabilityVersion("exodus", doc, version);
 #else
-  Moose::Capabilities::add("exodus", false);
+    libmeshMissingCapability("exodus", doc, "--disable-exodus");
 #endif
+  }
 
+  {
+    const auto doc = "Visualization Toolkit (VTK)";
 #ifdef LIBMESH_HAVE_VTK
-  Moose::Capabilities::add(
-      "vtk",
-      QUOTE(LIBMESH_DETECTED_VTK_VERSION_MAJOR) "." QUOTE(
-          LIBMESH_DETECTED_VTK_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_VTK_VERSION_SUBMINOR));
+    const std::string version = QUOTE(LIBMESH_DETECTED_VTK_VERSION_MAJOR) "." QUOTE(
+        LIBMESH_DETECTED_VTK_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_VTK_VERSION_SUBMINOR);
+    haveCapabilityVersion("vtk", doc, version);
 #else
-  Moose::Capabilities::add("vtk", false);
+    libmeshMissingCapability("vtk", doc, "--disable-vtk and --enable-vtk-required");
 #endif
+  }
 
+  {
+    const auto doc = "libcurl - the multiprotocol file transfer library";
 #ifdef LIBMESH_HAVE_CURL
-  Moose::Capabilities::add("curl", true);
+    haveCapability("curl", doc);
 #else
-  Moose::Capabilities::add("curl", false);
+    libmeshMissingCapability("curl", doc, "--enable-curl");
 #endif
+  }
 
-// libmesh stuff
+  {
+    const auto doc = "Tecplot post-processing tools API";
+#ifdef LIBMESH_HAVE_TECPLOT_API
+    haveCapability("tecplot", doc);
+#else
+    libmeshMissingCapability("tecplot", doc, "--enable-tecplot");
+#endif
+  }
+
+  // libmesh stuff
+  {
+    const auto doc = "Adaptive mesh refinement";
 #ifdef LIBMESH_ENABLE_AMR
-  Moose::Capabilities::add("amr", true);
+    haveCapability("amr", doc);
 #else
-  Moose::Capabilities::add("amr", false);
+    libmeshMissingCapability("amr", doc, "--disable-amr");
 #endif
+  }
 
+  {
+    const auto doc = "nanoflann library for Nearest Neighbor (NN) search with KD-trees";
 #ifdef LIBMESH_HAVE_NANOFLANN
-  Moose::Capabilities::add("nanoflann", true);
+    haveCapability("nanoflann", doc);
 #else
-  Moose::Capabilities::add("nanoflann", false);
+    libmeshMissingCapability("nanoflann", doc, "--disable-nanoflann");
 #endif
+  }
 
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  Moose::Capabilities::add("fparser", "jit");
+  Moose::Capabilities::add(
+      "fparser", "jit", "FParser enabled with just in time compilation support.");
 #else
-  Moose::Capabilities::add("fparser", "byte_code");
+  Moose::Capabilities::add("fparser", "byte_code", "FParser enabled.");
 #endif
 #else
-  Moose::Capabilities::add("fparser", false);
+  Moose::Capabilities::add(
+      "fparser",
+      false,
+      "FParser is disabled, libMesh was likely configured with --disable-fparser.");
 #endif
 
 #ifdef LIBMESH_HAVE_DLOPEN
-  Moose::Capabilities::add("dlopen", true);
+  Moose::Capabilities::add(
+      "dlopen", true, "The dlopen() system call is available to dynamically load libraries.");
 #else
-  Moose::Capabilities::add("dlopen", false);
+  Moose::Capabilities::add("dlopen",
+                           false,
+                           "The dlopen() system call is not available. Dynamic library loading is "
+                           "not supported on this system.");
 #endif
 
+  {
+    const auto doc = "LibMesh support for threaded execution";
 #ifdef LIBMESH_USING_THREADS
-  Moose::Capabilities::add("threads", true);
+    haveCapability("threads", doc);
 #else
-  Moose::Capabilities::add("threads", false);
+    libmeshMissingCapability("threads", doc, "--with-thread-model=tbb,pthread,openmp,auto,none");
 #endif
+  }
 
+  {
+    const auto doc = "OpenMP multi-platform shared-memory parallel programming API";
 #ifdef LIBMESH_HAVE_OPENMP
-  Moose::Capabilities::add("openmp", true);
+    haveCapability("openmp", doc);
 #else
-  Moose::Capabilities::add("openmp", false);
+    libmeshMissingCapability("openmp", doc, "--with-thread-model=tbb,pthread,openmp,auto,none");
 #endif
-
+  }
+  {
+    const auto doc = "oneAPI Threading Building Blocks (TBB) API";
 #ifdef LIBMESH_HAVE_TBB_API
-  Moose::Capabilities::add("tbb", true);
+    haveCapability("tbb", doc);
 #else
-  Moose::Capabilities::add("tbb", false);
+    libmeshMissingCapability("tbb", doc, "--with-thread-model=tbb,pthread,openmp,auto,none");
 #endif
+  }
 
+  {
+    const auto doc = "libMesh unique ID support";
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
-  Moose::Capabilities::add("unique_id", true);
+    haveCapability("unique_id", doc);
 #else
-  Moose::Capabilities::add("unique_id", false);
+    libmeshMissingCapability("unique_id", doc, "--enable-unique-id");
 #endif
+  }
 
-  Moose::Capabilities::add("dof_id_bytes", static_cast<int>(sizeof(dof_id_type)));
+  Moose::Capabilities::add("dof_id_bytes",
+                           static_cast<int>(sizeof(dof_id_type)),
+                           "Degree of freedom (DOF) identifiers use " +
+                               Moose::stringify(sizeof(dof_id_type)) +
+                               " bytes for storage. This is controlled by the "
+                               "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.");
 
-// compiler
+  // compiler
+  {
+    const auto doc = "Compiler used to build the MOOSE framework.";
 #if defined(__clang__)
-  Moose::Capabilities::add("compiler", "clang");
+    Moose::Capabilities::add("compiler", "clang", doc);
 #elif defined(__GNUC__) || defined(__GNUG__)
-  Moose::Capabilities::add("compiler", "gcc");
+    Moose::Capabilities::add("compiler", "gcc", doc);
 #elif defined(_MSC_VER)
-  Moose::Capabilities::add("compiler", "msvc");
+    Moose::Capabilities::add("compiler", "msvc", doc);
 #else
-  Moose::Capabilities::add("compiler", false);
+    Moose::Capabilities::add("compiler", false, "Unknown compiler");
 #endif
+  }
 
-// OS related
+  // OS related
+  {
+    const auto doc = "Operating system this executable is running on.";
 #ifdef __APPLE__
-  Moose::Capabilities::add("platform", "darwin");
+    Moose::Capabilities::add("platform", "darwin", doc);
 #elif __WIN32__
-  Moose::Capabilities::add("platform", "win32");
+    Moose::Capabilities::add("platform", "win32", doc);
 #elif __linux__
-  Moose::Capabilities::add("platform", "linux");
+    Moose::Capabilities::add("platform", "linux", doc);
 #elif __unix__ // all unices not caught above
-  Moose::Capabilities::add("platform", "unix");
+    Moose::Capabilities::add("platform", "unix", doc);
 #endif
+  }
 }
 
 MooseApp::~MooseApp()
