@@ -29,15 +29,15 @@ Capabilities::instance()
 }
 
 void
-Capabilities::add(const std::string & capability, CapabilityType value)
+Capabilities::add(const std::string & capability, CapabilityType value, const std::string & doc)
 {
-  instance().addInternal(capability, value);
+  instance().addInternal(capability, value, doc);
 }
 
 void
-Capabilities::add(const std::string & capability, const char * value)
+Capabilities::add(const std::string & capability, const char * value, const char * doc)
 {
-  instance().addInternal(capability, std::string(value));
+  instance().addInternal(capability, std::string(value), std::string(doc));
 }
 
 std::string
@@ -53,7 +53,9 @@ Capabilities::check(const std::string & requested_capabilities)
 }
 
 void
-Capabilities::addInternal(const std::string & raw_capability, CapabilityType value)
+Capabilities::addInternal(const std::string & raw_capability,
+                          CapabilityType value,
+                          const std::string & doc)
 {
   const auto capability = MooseUtils::toLower(raw_capability);
   if (std::holds_alternative<std::string>(value))
@@ -61,8 +63,8 @@ Capabilities::addInternal(const std::string & raw_capability, CapabilityType val
 
   auto it_pair = _capability_registry.lower_bound(capability);
   if (it_pair == _capability_registry.end() || it_pair->first != capability ||
-      it_pair->second == value)
-    it_pair = _capability_registry.emplace_hint(it_pair, capability, value);
+      it_pair->second.first == value)
+    it_pair = _capability_registry.emplace_hint(it_pair, capability, std::make_pair(value, doc));
   else
     mooseWarning("Capability '", capability, "' was already registered with a different value.");
 }
@@ -71,7 +73,9 @@ std::string
 Capabilities::dumpInternal() const
 {
   nlohmann::json root;
-  for (const auto & [capability, value] : _capability_registry)
+  for (const auto & [capability, value_doc] : _capability_registry)
+  {
+    const auto & value = value_doc.first;
     if (std::holds_alternative<bool>(value))
       root[capability] = std::get<bool>(value);
     else if (std::holds_alternative<int>(value))
@@ -80,6 +84,7 @@ Capabilities::dumpInternal() const
       root[capability] = std::get<std::string>(value);
     else
       mooseError("Unknown type in capabilities registry");
+  }
   return root.dump(2);
 }
 
@@ -126,68 +131,73 @@ Capabilities::checkInternal(const std::string & requested_capabilities) const
     for (; op < ops.size(); ++op)
       if (pos = condition.find(ops[op]); pos != std::string::npos)
         break;
-    std::string capability, value;
+    std::string capability, test_value;
     if (op == ops.size())
     {
       // no operator
       capability = condition.substr(negate);
-      value = "";
+      test_value = "";
     }
     else
     {
       capability = condition.substr(negate, pos - negate);
-      value = condition.substr(pos + ops[op].size());
+      test_value = condition.substr(pos + ops[op].size());
     }
 
     // simple existence non-false check (boolean)
     const auto it = _capability_registry.find(capability);
-    if (it != _capability_registry.end())
-    {
-      // if no operator is found we can check for existence where it shouldn't exist
-      if (op == ops.size())
-      {
-        if (std::holds_alternative<bool>(it->second))
-          return {std::get<bool>(it->second) != negate,
-                  capability + (negate ? " supported" : " not supported")};
-
-        return {!negate, capability + (negate ? " supported" : " not supported")};
-      }
-
-      if (std::holds_alternative<bool>(it->second) && std::get<bool>(it->second) == negate)
-        return {false, capability + (negate ? " supported" : " not supported")};
-    }
-    else
+    if (it == _capability_registry.end())
       // capability is not registered at all
-      return {negate, capability + " not supported"};
+      return {negate,
+              capability +
+                  " not supported | This input is likely needs to be run with a different MOOSE "
+                  "application, or requires dynamically linking another module or "
+                  "application. Please also make sure your applications are up to date."};
+
+    // capability is registered by the app
+    const auto & [app_value, doc] = it->second;
+
+    // if no operator is found we can check for existence where it shouldn't exist
+    if (op == ops.size())
+    {
+      if (std::holds_alternative<bool>(app_value))
+        return {std::get<bool>(app_value) != negate,
+                capability + (negate ? " supported" : " not supported") + " | " + doc};
+
+      return {!negate, capability + (negate ? " supported" : " not supported") + " | " + doc};
+    }
+
+    if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == negate)
+      return {false, capability + (negate ? " supported" : " not supported") + " | " + doc};
 
     // if there is no operator we're done here
     if (op == ops.size())
       continue;
 
     // int comparison
-    if (std::holds_alternative<int>(it->second) &&
-        comp(op, std::get<int>(it->second), std::stoi(value)) == negate)
-      return {false, condition + " not fulfilled"};
+    if (std::holds_alternative<int>(app_value) &&
+        comp(op, std::get<int>(app_value), std::stoi(test_value)) == negate)
+      return {false, condition + " not fulfilled" + " | " + doc};
 
     // string comparison
-    if (std::holds_alternative<std::string>(it->second))
+    if (std::holds_alternative<std::string>(app_value))
     {
       // error
-      if (value.empty())
+      if (test_value.empty())
         return {false, condition + " broken"};
 
       // check for version number
       std::vector<int> version1, version2;
-      if (MooseUtils::tokenizeAndConvert(std::get<std::string>(it->second), version1, ".") &&
-          MooseUtils::tokenizeAndConvert(value, version2, "."))
+      if (MooseUtils::tokenizeAndConvert(std::get<std::string>(app_value), version1, ".") &&
+          MooseUtils::tokenizeAndConvert(test_value, version2, "."))
       {
         if (comp(op, version1, version2) == negate)
-          return {false, condition + " version not matched"};
+          return {false, condition + " version not matched | " + doc};
       }
       else
       {
-        if (comp(op, std::get<std::string>(it->second), value) == negate)
-          return {false, condition + " not fulfilled"};
+        if (comp(op, std::get<std::string>(app_value), test_value) == negate)
+          return {false, condition + " not fulfilled | " + doc};
       }
     }
   }

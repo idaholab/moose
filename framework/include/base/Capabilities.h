@@ -32,8 +32,8 @@ public:
   typedef std::variant<bool, int, std::string> CapabilityType;
 
   /// register a new capability
-  static void add(const std::string & capability, CapabilityType value);
-  static void add(const std::string & capability, const char * value);
+  static void add(const std::string & capability, CapabilityType value, const std::string & doc);
+  static void add(const std::string & capability, const char * value, const char * doc);
 
   /// create a JSON dump of the capabilities registry
   static std::string dump();
@@ -48,7 +48,8 @@ public:
 
 protected:
   static Capabilities & instance();
-  void addInternal(const std::string & raw_capability, CapabilityType value);
+  void
+  addInternal(const std::string & raw_capability, CapabilityType value, const std::string & doc);
   std::string dumpInternal() const;
   std::pair<bool, std::string> checkInternal(const std::string & requested_capabilities) const;
 
@@ -57,7 +58,7 @@ protected:
    * --show-capabilities command line option. Capabilities are used by the test harness
    * to conditionally enable/disable tests that rely on optional capabilities.
    */
-  std::map<std::string, CapabilityType> _capability_registry;
+  std::map<std::string, std::pair<CapabilityType, std::string>> _capability_registry;
 
 private:
   // Private constructor for singleton pattern
