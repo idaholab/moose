@@ -29,13 +29,13 @@ Once the build is complete you should end up with a "debug executable" that look
 
 Many different debuggers exist: `lldb`, `gdb`, `ddd`, and Totalview are just a few.  While a command-line debugger (like `lldb` or `gdb`) might seem daunting at first, they are an invaluable tool for quick debugging and debugging in complicated scenarios such as when you're running on a cluster.  Learning one should be essential to any computational scientist.
 
-For debugging MOOSE-based applications we recommend `lldb` if you're using the clang compiler (default on Mac OSX) and `gdb` for the `gcc` compiler (default on Linux).
+For debugging MOOSE-based applications we recommend `lldb` if you're using the clang compiler (default on macOS) and `gdb` for the `gcc` compiler (default on Linux).
 
 ### LLDB and GDB
 
 `lldb` and `gdb` are very similar.  They work on the "command-line" taking text input and moving through your program as it executes.
 
-With our MOOSE package on Mac OSX you actually need to run lldb using `sudo` so it has the elevated privileges it needs to attach to your program.  To invoke `lldb` with a MOOSE-based application on Mac OSX you would do:
+With our MOOSE package on macOS you actually need to run lldb using `sudo` so it has the elevated privileges it needs to attach to your program.  To invoke `lldb` with a MOOSE-based application on macOS you would do:
 
 ```bash
 sudo lldb -- ./yourapp-dbg -i inputfile.i
@@ -75,11 +75,11 @@ You can learn about the full set of commands by using `help` or looking at any n
 
 Firstly, if you don't have to debug in parallel *DON'T*!  Only do parallel debugging when you have a problem that can only be reproduced when running in parallel.  If your problem will show up in serial, it is MUCH easier to debug in serial.  If it takes a long time for your problem to run so you are wanting to run it in parallel: don't do that... instead, try to make your problem smaller so that you can debug it in serial.
 
-With all of that said: if you actually do need to debug in parallel, MOOSE has a couple of command-line arguments to help.  However, before we get there, we need to do a bit of setup on Mac OSX:
+With all of that said: if you actually do need to debug in parallel, MOOSE has a couple of command-line arguments to help.  However, before we get there, we need to do a bit of setup on macOS:
 
-### Mac OSX Parallel Debugging Setup
+### macOS Parallel Debugging Setup
 
-As noted above, when running `lldb` on Mac OSX we need to run with `sudo` to give it permission to attach to our running program.  `sudo` will ask for your password, but unfortunately when doing parallel debugging there is no way to enter that password.  Therefore, we need to make it so that you can run `lldb` with `sudo` without a password.
+As noted above, when running `lldb` on macOS we need to run with `sudo` to give it permission to attach to our running program.  `sudo` will ask for your password, but unfortunately when doing parallel debugging there is no way to enter that password.  Therefore, we need to make it so that you can run `lldb` with `sudo` without a password.
 
 First thing is to get the full path to where `lldb` is using the command-line:
 
@@ -87,7 +87,7 @@ First thing is to get the full path to where `lldb` is using the command-line:
 which lldb
 ```
 
-If you are using our package on OSX this should return something like `/opt/moose/llvm-5.0.1/bin/lldb`.  Make note of this location (copy it, or set that Terminal aside) because you'll need it in the next step.
+If you are using our package on macOS this should return something like `/opt/moose/llvm-5.0.1/bin/lldb`.  Make note of this location (copy it, or set that Terminal aside) because you'll need it in the next step.
 
 To set `lldb` to be able to run with `sudo` without a password we need to modify the `sudoers` file.  To do that issue this command in a terminal (preferably a new one so you can still see the path to `lldb` in the first one):
 

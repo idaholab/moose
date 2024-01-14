@@ -56,7 +56,7 @@ Multi-physics Object Oriented Simulation Environment
 - User code agnostic of dimension, parallelism, shape functions, etc.
 - Operating Systems:
 
-  - Mac OSX
+  - macOS
   - Linux
   - Windows (WSL)
 
