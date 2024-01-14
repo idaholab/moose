@@ -61,7 +61,6 @@
     measurement_values = ${measurement_values}
   []
 []
-#---------------------------------------------------
 
 [BCs]
   [left]

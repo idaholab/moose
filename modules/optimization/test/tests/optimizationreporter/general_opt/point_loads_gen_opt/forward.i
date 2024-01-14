@@ -106,7 +106,6 @@
     measurement_values = ${measurement_values}
   []
 []
-#---------------------------------------------------
 
 [Outputs]
   console = false
