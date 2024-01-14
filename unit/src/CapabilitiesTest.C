@@ -13,8 +13,8 @@
 
 TEST(CapabilitiesTest, boolTest)
 {
-  Moose::Capabilities::add("unittest_bool", true);
-  Moose::Capabilities::add("unittest_bool2", false);
+  Moose::Capabilities::add("unittest_bool", true, "Boolean test capability");
+  Moose::Capabilities::add("unittest_bool2", false, "Boolean test capability 2");
 
   EXPECT_TRUE(Moose::Capabilities::check("unittest_bool").first);
   EXPECT_FALSE(Moose::Capabilities::check("!unittest_bool").first);
@@ -30,7 +30,7 @@ TEST(CapabilitiesTest, boolTest)
 
 TEST(CapabilitiesTest, intTest)
 {
-  Moose::Capabilities::add("unittest_int", 78);
+  Moose::Capabilities::add("unittest_int", 78, "Integer test capability");
 
   const std::vector<std::string> is_true = {
       "", "=78", "==78", "<=78", ">=78", "<=79", ">=77", "<79", ">77", "!=77", "!=79"};
@@ -50,7 +50,7 @@ TEST(CapabilitiesTest, intTest)
 
 TEST(CapabilitiesTest, stringTest)
 {
-  Moose::Capabilities::add("unittest_string", "CLanG");
+  Moose::Capabilities::add("unittest_string", "CLanG", "String test capability");
 
   EXPECT_TRUE(Moose::Capabilities::check("unittest_string").first);
   EXPECT_FALSE(Moose::Capabilities::check("!unittest_string").first);
@@ -62,7 +62,7 @@ TEST(CapabilitiesTest, stringTest)
 
 TEST(CapabilitiesTest, versionTest)
 {
-  Moose::Capabilities::add("unittest_version", "3.2.1");
+  Moose::Capabilities::add("unittest_version", "3.2.1", "Version number test capability");
 
   const std::vector<std::string> is_true = {"",
                                             ">2.1",
@@ -97,10 +97,10 @@ TEST(CapabilitiesTest, versionTest)
 
 TEST(CapabilitiesTest, multipleTest)
 {
-  Moose::Capabilities::add("unittest2_bool", true);
-  Moose::Capabilities::add("unittest2_int", 78);
-  Moose::Capabilities::add("unittest2_string", "CLanG");
-  Moose::Capabilities::add("unittest2_version", "3.2.1");
+  Moose::Capabilities::add("unittest2_bool", true, "Multiple capability test bool");
+  Moose::Capabilities::add("unittest2_int", 78, "Multiple capability test int");
+  Moose::Capabilities::add("unittest2_string", "CLanG", "Multiple capability test string");
+  Moose::Capabilities::add("unittest2_version", "3.2.1", "Multiple capability test version number");
 
   EXPECT_TRUE(
       Moose::Capabilities::check("!unittest_doesnotexist unittest2_version<4.2.2 "
