@@ -153,15 +153,14 @@ MooseApp::validParams()
   params.addCommandLineParam<std::string>(
       "yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<std::string>(
-      "json", "--json", "Dumps input file syntax in JSON format.");
-  params.addCommandLineParam<bool>(
-      "syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
+      "json", "--json [search_string]", "Dumps input file syntax in JSON format.");
+  params.addCommandLineParam<std::string>(
+      "syntax", "--syntax [file_name]", "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>(
       "show_docs", "--docs", false, "print url/path to the documentation website");
-  params.addCommandLineParam<bool>("show_capabilities",
-                                   "--show-capabilities",
-                                   false,
-                                   "Dumps the capability registry in JSON format.");
+  params.addCommandLineParam<std::string>("show_capabilities",
+                                          "--show-capabilities [file_name]",
+                                          "Dumps the capability registry in JSON format.");
   params.addCommandLineParam<std::string>(
       "required_capabilities",
       "--required-capabilities",
@@ -185,10 +184,9 @@ MooseApp::validParams()
                                           "Runs the inputs in the current directory copied to a "
                                           "user-writable location by \"--copy-inputs\"");
 
-  params.addCommandLineParam<bool>(
+  params.addCommandLineParam<std::string>(
       "list_constructed_objects",
-      "--list-constructed-objects",
-      false,
+      "--list-constructed-objects [file_name]",
       "List all moose object type names constructed by the master app factory.");
 
   params.addCommandLineParam<unsigned int>(
@@ -1150,15 +1148,15 @@ MooseApp::setupOptions()
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
-  else if (getParam<bool>("syntax"))
+  else if (isParamValid("syntax"))
   {
     _perf_graph.disableLivePrint();
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
-    Moose::out << "**START SYNTAX DATA**\n";
+    std::stringstream ss;
     for (const auto & it : syntax)
-      Moose::out << it.first << "\n";
-    Moose::out << "**END SYNTAX DATA**\n" << std::endl;
+      ss << it.first << "\n";
+    outputMachineReadableData("syntax", "**START SYNTAX DATA**\n", "**END SYNTAX DATA**", ss.str());
     _ready_to_exit = true;
   }
   else if (getParam<bool>("apptype"))
@@ -1168,11 +1166,13 @@ MooseApp::setupOptions()
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
-  else if (getParam<bool>("show_capabilities"))
+  else if (isParamValid("show_capabilities"))
   {
     _perf_graph.disableLivePrint();
-
-    Moose::out << "**START JSON DATA**\n" << Moose::Capabilities::dump() << "\n**END JSON DATA**\n";
+    outputMachineReadableData("show_capabilities",
+                              "**START JSON DATA**\n",
+                              "\n**END JSON DATA**",
+                              Moose::Capabilities::dump());
     _ready_to_exit = true;
   }
   else if (!getInputFileNames().empty())
@@ -1344,15 +1344,15 @@ MooseApp::runInputFile()
 
   if (isParamValid("mesh_only") || isParamValid("split_mesh"))
     _ready_to_exit = true;
-  else if (getParam<bool>("list_constructed_objects"))
+  else if (isParamValid("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects
     _ready_to_exit = true;
-    std::vector<std::string> obj_list = _factory.getConstructedObjects();
-    Moose::out << "**START OBJECT DATA**\n";
-    for (const auto & name : obj_list)
-      Moose::out << name << "\n";
-    Moose::out << "**END OBJECT DATA**\n" << std::endl;
+    std::stringstream ss;
+    for (const auto & obj : _factory.getConstructedObjects())
+      ss << obj << '\n';
+    outputMachineReadableData(
+        "list_constructed_objects", "**START OBJECT DATA**\n", "\n**END OBJECT DATA**", ss.str());
   }
 }
 
@@ -3087,4 +3087,29 @@ MooseApp::constructingMeshGenerators() const
 {
   return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
          _mesh_generator_system.appendingMeshGenerators();
+}
+
+void
+MooseApp::outputMachineReadableData(const std::string & param,
+                                    const std::string & start_marker,
+                                    const std::string & end_marker,
+                                    const std::string & data) const
+{
+  const auto filename = getParam<std::string>(param);
+  if (filename.empty() || filename[0] == '-')
+    // no filename given, write to screen, with markers
+    Moose::out << start_marker << data << end_marker << std::endl;
+  else
+  {
+    // write to file
+    std::ofstream out(filename.c_str());
+    if (out.is_open())
+    {
+      std::ofstream out(filename.c_str());
+      out << data << std::flush;
+      out.close();
+    }
+    else
+      mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
+  }
 }

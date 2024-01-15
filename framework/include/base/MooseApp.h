@@ -1092,6 +1092,15 @@ protected:
    */
   void errorCheck();
 
+  /**
+   * Outputs machine readable data (JSON, YAML, etc.) either to the screen (if no filename was
+   * provided as an argument to the parameter param) or to a file (if a filename was provided).
+   */
+  void outputMachineReadableData(const std::string & param,
+                                 const std::string & start_marker,
+                                 const std::string & end_marker,
+                                 const std::string & data) const;
+
   /// The name of this object
   const std::string _name;
 
