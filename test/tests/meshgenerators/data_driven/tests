@@ -26,7 +26,7 @@
     [parent_unsupported]
       type = RunException
       input = 'data_driven.i'
-      detail = 'the specified data-driven generator does not exist'
+      detail = 'the parent generators do not support data-driven mode'
       cli_args = 'Mesh/ny/type=GeneratedMeshGenerator
                   Mesh/ny/dim=2'
       expect_err = "The generator \'mesh\' cannot be used in data-driven mode because the parent GeneratedMeshGenerator \"ny\" does not support data\-driven generation"
@@ -34,7 +34,7 @@
     [parent_save_with_name]
       type = RunException
       input = 'data_driven.i'
-      detail = 'the specified data-driven generator does not exist'
+      detail = 'a generator that is supposed to be data-only is also set to be output'
       cli_args = 'Mesh/ny/save_with_name=altabird'
       expect_err = "The generator \'mesh\' cannot be used in data-driven mode because the parent TestDataDrivenGenerator \"ny\" has \'save_with_name\' set"
     []
