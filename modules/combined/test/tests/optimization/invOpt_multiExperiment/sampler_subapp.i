@@ -7,7 +7,6 @@
     type = InputMatrix
     #omega;
     matrix = '2; 3; 5'
-    min_procs_per_row = 1
     execute_on = 'PRE_MULTIAPP_SETUP'
   []
 []
@@ -18,8 +17,7 @@
     input_files = forward.i
     sampler = omega_sampler
     ignore_solve_not_converge = true
-    mode = normal    #This is the only mode that works.  batch-reset will only transfer data to first sample
-    min_procs_per_app = 1
+    mode = normal #This is the only mode that works.  batch-reset will only transfer data to first sample
   []
 []
 
@@ -52,17 +50,16 @@
   [grad_sum]
     type = ParsedVectorVectorRealReductionReporter
     name = row_sum
-    reporter_name= "storage/fromForward:grad_f:grad_f"
+    reporter_name = "storage/fromForward:grad_f:grad_f"
     initial_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [obj_sum]
     type = ParsedVectorRealReductionReporter
     name = value
-    reporter_name= "storage/fromForward:obj_pp:value"
+    reporter_name = "storage/fromForward:obj_pp:value"
     initial_value = 0
     expression = 'reduction_value+indexed_value'
-    outputs=none
   []
 []
 

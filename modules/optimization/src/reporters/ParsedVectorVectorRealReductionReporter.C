@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedVectorVectorRealReductionReporter.h"
+#include <cstddef>
 
 registerMooseObject("OptimizationApp", ParsedVectorVectorRealReductionReporter);
 
@@ -37,8 +38,10 @@ ParsedVectorVectorRealReductionReporter::ParsedVectorVectorRealReductionReporter
   : ParsedReporterBase(parameters),
     _initial_value(getParam<Real>("initial_value")),
     _vec_of_vec_name(getParam<ReporterName>("reporter_name")),
-    _output_reporter(declareValueByName<std::vector<Real>>(getParam<std::string>("name"),
-                                                           REPORTER_MODE_REPLICATED))
+    _output_reporter(
+        declareValueByName<std::vector<Real>>(getParam<std::string>("name"), REPORTER_MODE_ROOT)),
+    _reporter_data(getReporterValueByName<std::vector<std::vector<Real>>>(
+        getParam<ReporterName>("reporter_name")))
 {
   // parse function
   std::string function = getParam<std::string>("expression");
@@ -53,15 +56,12 @@ ParsedVectorVectorRealReductionReporter::ParsedVectorVectorRealReductionReporter
 void
 ParsedVectorVectorRealReductionReporter::finalize()
 {
-  // Reporter is gotten in finalize instead of intial_setup because it needs to work for
-  // StochasticReporter which is cloned into by SamplerReporterTransfer
-  const std::vector<std::vector<Real>> * vector_vector =
-      &getReporterValueByName<std::vector<std::vector<Real>>>(_vec_of_vec_name,
-                                                              REPORTER_MODE_REPLICATED);
-  std::size_t nrows(vector_vector->at(0).size());
-  std::size_t ncols(vector_vector->size());
+  std::size_t ncols = _reporter_data.size();
+  std::size_t nrows = 0;
+  if (!_reporter_data.empty())
+    nrows = _reporter_data[0].size();
 
-  for (auto & reporter_vector : *vector_vector)
+  for (auto & reporter_vector : _reporter_data)
   {
     if (reporter_vector.size() != nrows)
       mooseError("Every vector in 'reporter_name=",
@@ -81,7 +81,7 @@ ParsedVectorVectorRealReductionReporter::finalize()
     for (const auto j_col : make_range(ncols))
     {
       _func_params[0] = reduction;
-      _func_params[1] = vector_vector->at(j_col)[i_row];
+      _func_params[1] = _reporter_data[j_col][i_row];
 
       if (_use_t)
         _func_params[2] = _t;
