@@ -2,6 +2,9 @@ cp_multiplier = 1e-6
 cp_water_multiplier = 1e-1
 step_multiplier = 5
 
+# this is in lieu of a turbulence model for simplicity
+mu_multiplier = 1e3
+
 mult = 2
 nx = '${fparse 40 * mult}'
 ny = '${fparse 32 * mult}'
@@ -92,7 +95,7 @@ ny = '${fparse 32 * mult}'
   #   refinement = '1'
   #   block = 'water'
   # []
-  second_order = true
+  # second_order = true
 []
 
 [Variables]
@@ -109,7 +112,7 @@ ny = '${fparse 32 * mult}'
   [velocity]
     family = LAGRANGE_VEC
     block = 'water'
-    order = SECOND
+    # order = SECOND
   []
   [p]
     block = 'water'
@@ -117,7 +120,7 @@ ny = '${fparse 32 * mult}'
   [T_water]
     initial_condition = 300
     block = 'water'
-    order = SECOND
+    # order = SECOND
   []
 []
 
@@ -147,10 +150,10 @@ ny = '${fparse 32 * mult}'
     variable = p
     block = 'water'
   []
-  [mass_pspg]
-    type = INSADMassPSPG
-    variable = p
-  []
+  # [mass_pspg]
+  #   type = INSADMassPSPG
+  #   variable = p
+  # []
 
   # # Fluid flow: momentum
   [momentum_time]
@@ -231,7 +234,7 @@ ny = '${fparse 32 * mult}'
     type = ADGenericConstantMaterial
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall'
-    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} 7.98e-4 30'
+    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse mu_multiplier * 7.98e-4} 30'
   []
   [boussinesq_params]
     type = ADGenericConstantMaterial

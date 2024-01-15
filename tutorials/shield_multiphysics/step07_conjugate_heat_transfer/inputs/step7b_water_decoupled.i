@@ -1,6 +1,9 @@
 cp_multiplier = 1e-6
 cp_water_multiplier = 1e-1
 
+# this is in lieu of a turbulence model for simplicity
+mu_multiplier = 1e3
+
 [Mesh]
   [fmg]
     type = FileMeshGenerator
@@ -39,7 +42,7 @@ cp_water_multiplier = 1e-1
   #   refinement = '1'
   #   block = 'water'
   # []
-  second_order = true
+  # second_order = true
 []
 
 [AuxVariables]
@@ -57,7 +60,7 @@ cp_water_multiplier = 1e-1
   [velocity]
     family = LAGRANGE_VEC
     block = 'water'
-    order = SECOND
+    # order = SECOND
   []
   [p]
     block = 'water'
@@ -65,7 +68,7 @@ cp_water_multiplier = 1e-1
   [T_water]
     initial_condition = 300
     block = 'water'
-    order = SECOND
+    # order = SECOND
   []
 []
 
@@ -180,7 +183,7 @@ cp_water_multiplier = 1e-1
     type = ADGenericConstantMaterial
     block = 'water'
     prop_names = 'rho    k     cp      mu alpha_wall'
-    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} 7.98e-4 30'
+    prop_values = '955.7 0.6 ${fparse cp_water_multiplier * 4181} ${fparse 7.98e-4 * mu_multiplier} 30'
   []
   [boussinesq_params]
     type = ADGenericConstantMaterial
