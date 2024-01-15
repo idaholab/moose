@@ -34,6 +34,7 @@
 #include "ComputeNodalKernelBCJacobiansThread.h"
 #include "ComputeLinearFVElementalThread.h"
 #include "ComputeLinearFVFaceThread.h"
+#include "ComputeLinearFVGreenGaussGradientThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "DirichletBCBase.h"
@@ -425,6 +426,8 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
+    ComputeLinearFVGreenGaussGradientThread(_fe_problem, _fe_problem.linearSysNum(name()));
+
     ComputeLinearFVElementalThread elem_thread(_fe_problem,
                                                _fe_problem.linearSysNum(name()),
                                                Moose::FV::LinearFVComputationMode::FullSystem,
@@ -444,8 +447,8 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
   _linear_implicit_system.matrix->close();
   _linear_implicit_system.rhs->close();
 
-  _linear_implicit_system.matrix->print();
-  _linear_implicit_system.rhs->print();
+  // _linear_implicit_system.matrix->print();
+  // _linear_implicit_system.rhs->print();
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters

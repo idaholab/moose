@@ -1053,6 +1053,9 @@ FEProblemBase::initialSetup()
   for (auto & nl : _nl)
     nl->setSolution(*(nl->system().current_local_solution.get()));
 
+  for (auto & sys : _linear_systems)
+    sys->setSolution(*(sys->system().current_local_solution.get()));
+
   // Update the nearest node searches (has to be called after the problem is all set up)
   // We do this here because this sets up the Element's DoFs to ghost
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
@@ -3333,6 +3336,12 @@ FEProblemBase::projectSolution()
   {
     nl->solution().close();
     nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
+  }
+
+  for (auto & sys : _linear_systems)
+  {
+    sys->solution().close();
+    sys->solution().localize(*sys->system().current_local_solution, sys->dofMap().get_send_list());
   }
 
   _aux->solution().close();
@@ -6255,6 +6264,8 @@ FEProblemBase::outputStep(ExecFlagType type)
 
   for (auto & nl : _nl)
     nl->update();
+  for (auto & sys : _linear_systems)
+    sys->update();
   _aux->update();
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
@@ -7904,6 +7915,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // MOOSE-system specific data. libmesh system data has already been updated
   for (auto & nl : _nl)
     nl->update(/*update_libmesh_system=*/false);
+  for (auto & sys : _linear_systems)
+    sys->update(/*update_libmesh_system=*/false);
   _aux->update(/*update_libmesh_system=*/false);
 }
 

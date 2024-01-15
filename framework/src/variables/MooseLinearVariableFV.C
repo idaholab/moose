@@ -182,9 +182,7 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
 
   const auto face_type = fi->faceType(std::make_pair(this->number(), this->sys().number()));
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
     return Moose::FV::interpolate(*this, face, state);
-  }
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
   {
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
@@ -203,9 +201,7 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
     return boundary_value;
   }
   else
-  {
     mooseError("We should never get here!");
-  }
 }
 
 template <typename OutputType>

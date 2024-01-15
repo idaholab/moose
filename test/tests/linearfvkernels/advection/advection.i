@@ -71,6 +71,7 @@
 [Executioner]
   type = LinearPicardSteady
   linear_systems_to_solve = u_sys
+  number_of_iterations = 1
 []
 
 [Outputs]

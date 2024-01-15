@@ -31,6 +31,7 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
     _two_term_expansion(getParam<bool>("use_two_term_expansion")),
     _velocity(getParam<RealVectorValue>("velocity"))
 {
+  _var->computeCellGradients();
 }
 
 Real
@@ -92,7 +93,7 @@ LinearFVOutflowBC::computeBoundaryValueRHSContribution() const
       gradient = raw_value(Moose::FV::greenGaussGradient(elem_arg, state_arg, *_var, false, _mesh));
     }
 
-    contribution = -gradient * computeCellToFaceVector();
+    contribution = gradient * computeCellToFaceVector();
   }
 
   return contribution;

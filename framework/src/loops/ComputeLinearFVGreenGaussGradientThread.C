@@ -12,15 +12,12 @@
 #include "LinearFVBoundaryCondition.h"
 
 ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread(
-    FEProblemBase & fe_problem,
-    const unsigned int linear_system_num,
-    MooseLinearVariableFV<Real> * var)
+    FEProblemBase & fe_problem, const unsigned int linear_system_num)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _linear_system_number(linear_system_num),
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _var(var)
+        _fe_problem.getLinearSystem(_linear_system_number).system()))
 {
 }
 
@@ -30,8 +27,7 @@ ComputeLinearFVGreenGaussGradientThread::ComputeLinearFVGreenGaussGradientThread
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
     _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system),
-    _var(x._var)
+    _linear_system(x._linear_system)
 {
 }
 
@@ -41,26 +37,37 @@ ComputeLinearFVGreenGaussGradientThread::operator()(const FaceInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  // Iterate over all the elements in the range
-  for (const auto & face_info : range)
+  for (const auto & variable :
+       _fe_problem.getLinearSystem(_linear_system_number).getVariables(_tid))
   {
-    const auto current_face_type =
-        face_info->faceType(std::make_pair(_var->number(), _var->sys().number()));
+    _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
 
-    if (current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-      onInternalFace(*face_info);
-    else if (current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-             current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      onBoundaryFace(*face_info);
+    mooseAssert(_current_var,
+                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
+                "the linear system?");
+
+    // Iterate over all the elements in the range
+    for (const auto & face_info : range)
+    {
+      const auto current_face_type =
+          face_info->faceType(std::make_pair(_current_var->number(), _linear_system.number()));
+
+      if (current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+        onInternalFace(*face_info);
+      else if (current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+               current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+        onBoundaryFace(*face_info);
+    }
   }
 }
 
 void
 ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_info)
 {
-  const auto dof_id_elem = face_info.elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+  const auto dof_id_elem =
+      face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
   const auto dof_id_neighbor =
-      face_info.neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
 
   const auto & solution = *_linear_system.solution;
   const auto face_value = Moose::FV::linearInterpolation(
@@ -69,7 +76,7 @@ ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_in
   const auto contribution =
       face_info.normal() * face_info.faceArea() * face_info.faceCoord() * face_value;
 
-  const auto & grad_container = _var->gradientContainer();
+  const auto & grad_container = _current_var->gradientContainer();
   for (const auto i : make_range(_dim))
   {
     grad_container[i]->add(dof_id_elem, contribution(i));
@@ -80,26 +87,29 @@ ComputeLinearFVGreenGaussGradientThread::onInternalFace(const FaceInfo & face_in
 void
 ComputeLinearFVGreenGaussGradientThread::onBoundaryFace(const FaceInfo & face_info)
 {
-  if (auto * bc_pointer = _var->getBoundaryCondition(*face_info.boundaryIDs().begin()))
+  if (auto * bc_pointer = _current_var->getBoundaryCondition(*face_info.boundaryIDs().begin()))
   {
-    const auto face_type = face_info.faceType(std::make_pair(_var->number(), _var->sys().number()));
+    const auto face_type =
+        face_info.faceType(std::make_pair(_current_var->number(), _linear_system.number()));
     bc_pointer->setCurrentFaceInfo(&face_info, face_type);
 
     dof_id_type dof_id;
     if (face_info.neighborInfo())
     {
       if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
-        dof_id = face_info.elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        dof_id =
+            face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
       else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-        dof_id = face_info.neighborInfo()->dofIndices()[_var->sys().number()][_var->number()];
+        dof_id =
+            face_info.neighborInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
     }
     else
-      dof_id = face_info.elemInfo()->dofIndices()[_var->sys().number()][_var->number()];
+      dof_id = face_info.elemInfo()->dofIndices()[_linear_system.number()][_current_var->number()];
 
     const auto contribution = face_info.normal() * face_info.faceArea() * face_info.faceCoord() *
                               bc_pointer->computeBoundaryValue();
 
-    const auto & grad_container = _var->gradientContainer();
+    const auto & grad_container = _current_var->gradientContainer();
     for (const auto i : make_range(_dim))
       grad_container[i]->add(dof_id, contribution(i));
   }

@@ -23,8 +23,7 @@ class ComputeLinearFVGreenGaussGradientThread
 {
 public:
   ComputeLinearFVGreenGaussGradientThread(FEProblemBase & fe_problem,
-                                          const unsigned int linear_system_num,
-                                          MooseLinearVariableFV<Real> * var);
+                                          const unsigned int linear_system_num);
 
   // Splitting Constructor
   ComputeLinearFVGreenGaussGradientThread(ComputeLinearFVGreenGaussGradientThread & x,
@@ -48,6 +47,6 @@ protected:
   // Thread ID
   THREAD_ID _tid;
 
-  /// Pointer to the linear finite volume variable
-  MooseLinearVariableFV<Real> * _var;
+  /// Pointer to the current variable
+  MooseLinearVariableFV<Real> * _current_var;
 };
