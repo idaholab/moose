@@ -15,7 +15,7 @@ Upcoming MOOSE related training:
 Upcoming MOOSE related Conferences:
 !style-end!
 
-- [MOOSE Conference (2024 March 10-14, Idaho Falls)](more_detail/generic_moose_conference.md)
+- [MOOSE Conference (2025 March 10-14, Idaho Falls)](https://mooseframework.inl.gov/conference)
 
 #### Past Training:
 
