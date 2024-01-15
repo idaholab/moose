@@ -48,6 +48,7 @@ TestMeshGenerator::validParams()
   params.addParam<bool>("request_sub_input", false, "Request the mesh in 'input' for a sub");
   params.addParam<bool>("missing_get", false, "Tests getting a missing meshgenerator from the app");
   params.addParam<std::string>("add_sub_input", "Adds this input as an input to a sub generator");
+  params.addParam<bool>("generated_nullptr", false, "Tests returning nullptr from generate");
 
   return params;
 }
@@ -138,5 +139,7 @@ TestMeshGenerator::generate()
   }
   if (getParam<bool>("declare_mesh_prop_outside_construct"))
     static_cast<void>(declareMeshProperty<bool>("foo"));
+  if (getParam<bool>("generated_nullptr"))
+    return nullptr;
   return std::move(*_return_mesh);
 }
