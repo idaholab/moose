@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [default]
+    type = 'Exodiff'
+    input = 'corrosion.i'
+    exodiff = 'corrosion_out.e-s005'
+    requirement = "The Darcy-Thermomechanics tutorial shall include an object for altering the phase variable."
+  []
+  [temp_dep]
+    type = 'Exodiff'
+    input = 'corrosion.i'
+    cli_args = 'AuxKernels/corrosion/temperature=350 Outputs/file_base=corrosion_temp_dep'
+    exodiff = 'corrosion_temp_dep.e-s005'
+    requirement = "The Darcy-Thermomechanics tutorial shall include an object for altering the phase variable with a temperture dependence."
+  []
+[]
