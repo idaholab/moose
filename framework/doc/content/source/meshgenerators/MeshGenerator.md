@@ -160,3 +160,30 @@ Take the simple example:
 !listing test/tests/meshgenerators/output_intermediate_mesh/output_intermediate_mesh.i block=Mesh
 
 The above will result in an intermediate mesh file 'left_in.e' in addition to the final mesh file 'output_intermediate_mesh_in.e' when ran in mesh only mode.
+
+## Using data-driven generation
+
+The system optionally supports the capability to do "data-driven" generation. With data-driven generation, a `generateData()` method is overriden on each generator and
+said generator is set to support this generation by calling
+
+```
+MeshGenerator::setHasGenerateData(params);
+```
+
+within the parameters of the generator.
+
+The parameter [!param](/Mesh/MeshGeneratorMesh/data_driven_generator) is then set in the top
+level `Mesh` block, in which you set the name of the generator that will consume data-driven
+generators. When this is set, all parents of the generator described in the parameter will
+generate only by calling `generateData()`, and not `generate()`. Thus, they will simply
+generate metadata and not an actual mesh. The generator that is set in
+[!param](/Mesh/MeshGeneratorMesh/data_driven_generator) will call `generate()`, and all
+other dependents will as well.
+
+Note that all generators that have this method enabled will always call `generateData()`
+during generation, and will only call `generate()` afterwards if they are not the parent
+to a generator that is data-driven.
+
+This is an advanced method that requires a heavy understanding of all generators that
+exist in the generation tree, and thus it is not enabled by default. To enable it, the
+parameter `allow_data_driven_mesh_generation` on your application can be set to true.
