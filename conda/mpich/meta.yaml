@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 15 %}
+{% set build = 16 %}
 {% set version = "4.0.2" %}
 
 # permanent
@@ -82,7 +82,7 @@ requirements:
     # TODO: Try to remove when this version settles down among other conda-forge packages
     - {{ pin_compatible('openssl', upper_bound='3.2') }} # [osx]
   run_constrained:
-    - python <{{3.11}}
+    - python <{{3.12}}
 
 test:
   commands:
