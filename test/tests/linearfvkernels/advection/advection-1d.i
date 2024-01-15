@@ -23,7 +23,7 @@
     type = LinearFVAdvectionKernel
     variable = u
     velocity = "0.5 0 0"
-    advected_interp_method = average
+    advected_interp_method = upwind
   []
   [source]
     type = LinearFVSourceKernel
@@ -44,7 +44,7 @@
     variable = u
     boundary = "right"
     velocity = "0.5 0 0"
-    use_two_term_expansion = true
+    use_two_term_expansion = false
   []
 []
 
@@ -60,10 +60,14 @@
 []
 
 [Postprocessors]
-  [l2error]
+  [error]
     type = ElementL2FunctorError
     approximate = u
     exact = analytic_solution
+    execute_on = FINAL
+  []
+  [h]
+    type = AverageElementSize
     execute_on = FINAL
   []
 []
@@ -77,10 +81,6 @@
 [Outputs]
   [csv]
     type = CSV
-    execute_on = FINAL
-  []
-  [exo]
-    type = Exodus
     execute_on = FINAL
   []
 []

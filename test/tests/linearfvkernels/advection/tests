@@ -1,0 +1,18 @@
+[Tests]
+  design = 'LinearFVAdvectionKernel.md LinearFVOutflowBC.md'
+  issues = '#25722'
+  [mms-advection-1d-upwind]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvection1DUpwind
+    requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a one-dimensional domain.'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [mms-advection-1d-linear]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvection1DLinear
+    requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a one-dimensional domain.'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]

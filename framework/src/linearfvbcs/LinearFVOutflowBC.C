@@ -31,7 +31,8 @@ LinearFVOutflowBC::LinearFVOutflowBC(const InputParameters & parameters)
     _two_term_expansion(getParam<bool>("use_two_term_expansion")),
     _velocity(getParam<RealVectorValue>("velocity"))
 {
-  _var->computeCellGradients();
+  if (_two_term_expansion)
+    _var->computeCellGradients();
 }
 
 Real
