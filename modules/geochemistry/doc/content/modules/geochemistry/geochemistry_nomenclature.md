@@ -96,7 +96,7 @@ $\mathrm{SI} = \log_{10}(Q/K)$, where $Q$ is the activity product and $K$ is the
 
 ### Redox reaction
 
-This involves the transfer of electrons.  For instance $\mathrm{Fe}^{2+} + 0.25\mathrm{O}_{2} + \mathrm{H}^{+} \rightleftharpoons \mathrm{Fe}^{3+} + 0.5\mathrm{H}_{2}\mathrm{O}$, where an electron is transferred between Fe$^{2+}$ and Fe$^{3+}$.  Fe$^{2+}$ has lost an electron: it is oxidised.  The electron donor and electron receptor are called a *redox couple*.  Often these reactions are split into *half reactions* that show the release/gain of an electron, eg $\mathrm{Fe}^{2+} \rightarrow \mathrm{Fe}^{3+} + \mathrm{e}^{-}$.
+This involves the transfer of electrons. For instance $\mathrm{Fe}^{2+} + 0.25\mathrm{O}_{2} + \mathrm{H}^{+} \rightleftharpoons \mathrm{Fe}^{3+} + 0.5\mathrm{H}_{2}\mathrm{O}$, where charge is transferred between $\mathrm{Fe}^{2+}$ and $\mathrm{O}_{2}$. $\mathrm{Fe}^{2+}$ has lost an electron: it is oxidised. Often these reactions are split into *half reactions* that show the release/gain of an electron, e.g. $\mathrm{Fe}^{2+} \rightarrow \mathrm{Fe}^{3+} + \mathrm{e}^{-}$. A *redox couple* is a reduced species and its corresponding oxidised form, e.g. $\mathrm{Fe}^{2+}$ / $\mathrm{Fe}^{3+}$.
 
 ### Nernst potential
 
